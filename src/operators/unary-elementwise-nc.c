@@ -110,8 +110,8 @@ static enum xnn_status create_unary_elementwise_nc(
   }
 
   init_unary_elementwise_nc(
-    channels, input_stride, output_stride,
-    flags, params, params_size,
+    channels, input_stride, output_stride, flags,
+    params, params_size,
     operator_type, unary_elementwise_config, rminmax_config, unary_elementwise_op);
 
   *unary_elementwise_op_out = unary_elementwise_op;
@@ -224,7 +224,7 @@ static enum xnn_status setup_unary_elementwise_nc(
       break;
   }
 
-  if ((input == output && is_copy_operator(expected_operator_type))) {
+  if (input == output && is_copy_operator(expected_operator_type)) {
     unary_elementwise_op->state = xnn_run_state_skip;
     return xnn_status_success;
   }
@@ -253,15 +253,9 @@ enum xnn_status xnn_create_abs_nc_f16(
     xnn_operator_t* abs_op_out)
 {
   const struct xnn_unary_elementwise_config* f16_abs_config = xnn_init_f16_abs_config();
-  if (f16_abs_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_abs_nc_f16));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f16_abs_params params;
-  if (f16_abs_config->init.f16_abs != NULL) {
+  if XNN_LIKELY(f16_abs_config != NULL && f16_abs_config->init.f16_abs != NULL) {
     f16_abs_config->init.f16_abs(&params);
   }
 
@@ -280,15 +274,9 @@ enum xnn_status xnn_create_abs_nc_f32(
     xnn_operator_t* abs_op_out)
 {
   const struct xnn_unary_elementwise_config* f32_abs_config = xnn_init_f32_abs_config();
-  if (f32_abs_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_abs_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f32_abs_params params;
-  if (f32_abs_config->init.f32_abs != NULL) {
+  if XNN_LIKELY(f32_abs_config != NULL && f32_abs_config->init.f32_abs != NULL) {
     f32_abs_config->init.f32_abs(&params);
   }
 
@@ -321,15 +309,9 @@ enum xnn_status xnn_create_bankers_rounding_nc_f32(
     xnn_operator_t* rounding_op_out)
 {
   const struct xnn_unary_elementwise_config* f32_rndne_config = xnn_init_f32_rndne_config();
-  if (f32_rndne_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_bankers_rounding_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f32_rnd_params params;
-  if (f32_rndne_config->init.f32_rnd != NULL) {
+  if XNN_LIKELY(f32_rndne_config != NULL && f32_rndne_config->init.f32_rnd != NULL) {
     f32_rndne_config->init.f32_rnd(&params);
   }
 
@@ -362,15 +344,9 @@ enum xnn_status xnn_create_ceiling_nc_f32(
     xnn_operator_t* ceiling_op_out)
 {
   const struct xnn_unary_elementwise_config* f32_rndu_config = xnn_init_f32_rndu_config();
-  if (f32_rndu_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_ceiling_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f32_rnd_params params;
-  if (f32_rndu_config->init.f32_rnd != NULL) {
+  if XNN_LIKELY(f32_rndu_config != NULL && f32_rndu_config->init.f32_rnd != NULL) {
     f32_rndu_config->init.f32_rnd(&params);
   }
 
@@ -422,16 +398,12 @@ enum xnn_status xnn_create_clamp_nc_f16(
   }
 
   const struct xnn_unary_elementwise_config* f16_clamp_config = xnn_init_f16_clamp_config();
-  if (f16_clamp_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f16));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f16_minmax_params params;
-  assert(f16_clamp_config->init.f16_minmax != NULL);
-  f16_clamp_config->init.f16_minmax(&params, output_min_as_half, output_max_as_half);
+  if XNN_LIKELY(f16_clamp_config != NULL) {
+    assert(f16_clamp_config->init.f16_minmax != NULL);
+    f16_clamp_config->init.f16_minmax(&params, output_min_as_half, output_max_as_half);
+  }
 
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
@@ -472,12 +444,6 @@ enum xnn_status xnn_create_clamp_nc_f32(
 
   const struct xnn_unary_elementwise_config* f32_clamp_config = xnn_init_f32_clamp_config();
   const struct xnn_unary_elementwise_config* f32_relu_config = xnn_init_f32_relu_config();
-  if (f32_clamp_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
   const bool relu_activation = (output_max == INFINITY) && (output_min == 0.0f);
   const struct xnn_unary_elementwise_config* unary_elementwise_config = f32_clamp_config;
@@ -486,8 +452,10 @@ enum xnn_status xnn_create_clamp_nc_f32(
   }
 
   union xnn_f32_minmax_params params;
-  assert(f32_clamp_config->init.f32_minmax != NULL);
-  f32_clamp_config->init.f32_minmax(&params, output_min, output_max);
+  if XNN_LIKELY(f32_clamp_config != NULL) {
+    assert(f32_clamp_config->init.f32_minmax != NULL);
+    f32_clamp_config->init.f32_minmax(&params, output_min, output_max);
+  }
 
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
@@ -513,12 +481,7 @@ enum xnn_status xnn_create_clamp_nc_s8(
   }
 
   const struct xnn_unary_elementwise_config* s8_clamp_config = xnn_init_s8_clamp_config();
-  if (s8_clamp_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_clamp_nc_s8));
-    return xnn_status_unsupported_hardware;
-  }
+  assert(s8_clamp_config != NULL);
 
   union xnn_s8_minmax_params params;
   assert(s8_clamp_config->init.s8_minmax != NULL);
@@ -548,12 +511,7 @@ enum xnn_status xnn_create_clamp_nc_u8(
   }
 
   const struct xnn_unary_elementwise_config* u8_clamp_config = xnn_init_u8_clamp_config();
-  if (u8_clamp_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_clamp_nc_u8));
-    return xnn_status_unsupported_hardware;
-  }
+  assert(u8_clamp_config != NULL);
 
   union xnn_u8_minmax_params params;
   assert(u8_clamp_config->init.u8_minmax != NULL);
@@ -574,15 +532,9 @@ enum xnn_status xnn_create_convert_nc_f16_f32(
   xnn_operator_t* convert_op_out)
 {
   const struct xnn_unary_elementwise_config* f16_to_f32_cvt_config = xnn_init_f16_to_f32_cvt_config();
-  if (f16_to_f32_cvt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_f16_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f16_f32_cvt_params params;
-  if (f16_to_f32_cvt_config->init.f16_f32_cvt != NULL) {
+  if (f16_to_f32_cvt_config != NULL && f16_to_f32_cvt_config->init.f16_f32_cvt != NULL) {
     f16_to_f32_cvt_config->init.f16_f32_cvt(&params);
   }
 
@@ -601,15 +553,9 @@ enum xnn_status xnn_create_convert_nc_f32_f16(
   xnn_operator_t* convert_op_out)
 {
   const struct xnn_unary_elementwise_config* f32_to_f16_cvt_config = xnn_init_f32_to_f16_cvt_config();
-  if (f32_to_f16_cvt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_f16));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f32_f16_cvt_params params;
-  if (f32_to_f16_cvt_config->init.f32_f16_cvt != NULL) {
+  if XNN_LIKELY(f32_to_f16_cvt_config != NULL && f32_to_f16_cvt_config->init.f32_f16_cvt != NULL) {
     f32_to_f16_cvt_config->init.f32_f16_cvt(&params);
   }
 
@@ -646,16 +592,12 @@ enum xnn_status xnn_create_convert_nc_f32_qs8(
   }
 
   const struct xnn_unary_elementwise_config* f32_to_qs8_cvt_config = xnn_init_f32_to_qs8_cvt_config();
-  if (f32_to_qs8_cvt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qs8));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f32_qs8_cvt_params params;
-  assert(f32_to_qs8_cvt_config->init.f32_qs8_cvt != NULL);
-  f32_to_qs8_cvt_config->init.f32_qs8_cvt(&params, 1.0f / output_scale, output_zero_point, output_min, output_max);
+  if XNN_LIKELY(f32_to_qs8_cvt_config != NULL) {
+    assert(f32_to_qs8_cvt_config->init.f32_qs8_cvt != NULL);
+    f32_to_qs8_cvt_config->init.f32_qs8_cvt(&params, 1.0f / output_scale, output_zero_point, output_min, output_max);
+  }
 
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
@@ -717,16 +659,12 @@ enum xnn_status xnn_create_convert_nc_f32_qu8(
   }
 
   const struct xnn_unary_elementwise_config* f32_to_qu8_cvt_config = xnn_init_f32_to_qu8_cvt_config();
-  if (f32_to_qu8_cvt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qu8));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f32_qu8_cvt_params params;
-  assert(f32_to_qu8_cvt_config->init.f32_qu8_cvt != NULL);
-  f32_to_qu8_cvt_config->init.f32_qu8_cvt(&params, 1.0f / output_scale, output_zero_point, output_min, output_max);
+  if XNN_LIKELY(f32_to_qu8_cvt_config != NULL) {
+    assert(f32_to_qu8_cvt_config->init.f32_qu8_cvt != NULL);
+    f32_to_qu8_cvt_config->init.f32_qu8_cvt(&params, 1.0f / output_scale, output_zero_point, output_min, output_max);
+  }
 
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
@@ -769,12 +707,7 @@ enum xnn_status xnn_create_convert_nc_qs8(
   }
 
   const struct xnn_unary_elementwise_config* qs8_cvt_config = xnn_init_qs8_cvt_config();
-  if (qs8_cvt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs8));
-    return xnn_status_unsupported_hardware;
-  }
+  assert(qs8_cvt_config != NULL);
 
   union xnn_qs8_cvt_params params;
   assert(qs8_cvt_config->init.qs8_cvt != NULL);
@@ -804,16 +737,12 @@ enum xnn_status xnn_create_convert_nc_qs8_f32(
   }
 
   const struct xnn_unary_elementwise_config* qs8_to_f32_cvt_config = xnn_init_qs8_to_f32_cvt_config();
-  if (qs8_to_f32_cvt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs8_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_qs8_f32_cvt_params params;
-  assert(qs8_to_f32_cvt_config->init.qs8_f32_cvt != NULL);
-  qs8_to_f32_cvt_config->init.qs8_f32_cvt(&params, input_scale, input_zero_point);
+  if XNN_LIKELY(qs8_to_f32_cvt_config != NULL) {
+    assert(qs8_to_f32_cvt_config->init.qs8_f32_cvt != NULL);
+    qs8_to_f32_cvt_config->init.qs8_f32_cvt(&params, input_scale, input_zero_point);
+  }
 
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
@@ -854,21 +783,16 @@ enum xnn_status xnn_create_convert_nc_qs16_qs8(
     return xnn_status_invalid_parameter;
   }
 
-  const struct xnn_unary_elementwise_config* qs16_qs8_cvt_config = xnn_init_qs16_to_qs8_cvt_config();
-  if (qs16_qs8_cvt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs16_qs8));
-    return xnn_status_unsupported_hardware;
-  }
+  const struct xnn_unary_elementwise_config* qs16_to_qs8_cvt_config = xnn_init_qs16_to_qs8_cvt_config();
+  assert(qs16_to_qs8_cvt_config != NULL);
 
   union xnn_qs16_qs8_cvt_params params;
-  assert(qs16_qs8_cvt_config->init.qs16_qs8_cvt != NULL);
-  qs16_qs8_cvt_config->init.qs16_qs8_cvt(&params, input_output_scale, output_zero_point);
+  assert(qs16_to_qs8_cvt_config->init.qs16_qs8_cvt != NULL);
+  qs16_to_qs8_cvt_config->init.qs16_qs8_cvt(&params, input_output_scale, output_zero_point);
 
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
-    qs16_qs8_cvt_config, /*rminmax_config=*/NULL,
+    qs16_to_qs8_cvt_config, /*rminmax_config=*/NULL,
     &params, sizeof(params),
     xnn_operator_type_convert_nc_qs16_qs8, convert_op_out);
 }
@@ -907,12 +831,7 @@ enum xnn_status xnn_create_convert_nc_qu8(
   }
 
   const struct xnn_unary_elementwise_config* qu8_cvt_config = xnn_init_qu8_cvt_config();
-  if (qu8_cvt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_qu8));
-    return xnn_status_unsupported_hardware;
-  }
+  assert(qu8_cvt_config != NULL);
 
   union xnn_qu8_cvt_params params;
   assert(qu8_cvt_config->init.qu8_cvt != NULL);
@@ -942,16 +861,12 @@ enum xnn_status xnn_create_convert_nc_qu8_f32(
   }
 
   const struct xnn_unary_elementwise_config* qu8_to_f32_cvt_config = xnn_init_qu8_to_f32_cvt_config();
-  if (qu8_to_f32_cvt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_qu8_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_qu8_f32_cvt_params params;
-  assert(qu8_to_f32_cvt_config->init.qu8_f32_cvt != NULL);
-  qu8_to_f32_cvt_config->init.qu8_f32_cvt(&params, input_scale, input_zero_point);
+  if XNN_LIKELY(qu8_to_f32_cvt_config != NULL) {
+    assert(qu8_to_f32_cvt_config->init.qu8_f32_cvt != NULL);
+    qu8_to_f32_cvt_config->init.qu8_f32_cvt(&params, input_scale, input_zero_point);
+  }
 
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,    
@@ -1020,17 +935,13 @@ enum xnn_status xnn_create_elu_nc_f16(
   }
 
   const struct xnn_unary_elementwise_config* f16_elu_config = xnn_init_f16_elu_config();
-  if (f16_elu_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_elu_nc_f16));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f16_elu_params params;
-  assert(f16_elu_config->init.f16_elu != NULL);
-  f16_elu_config->init.f16_elu(&params,
-    UINT16_C(0x3C00)  /* prescale = 1.0h */, alpha_as_half, UINT16_C(0x3C00)  /* beta = 1.0h */);
+  if XNN_LIKELY(f16_elu_config != NULL) {
+    assert(f16_elu_config->init.f16_elu != NULL);
+    f16_elu_config->init.f16_elu(&params,
+      UINT16_C(0x3C00)  /* prescale = 1.0h */, alpha_as_half, UINT16_C(0x3C00)  /* beta = 1.0h */);
+  }
 
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,    
@@ -1055,16 +966,12 @@ enum xnn_status xnn_create_elu_nc_f32(
   }
 
   const struct xnn_unary_elementwise_config* f32_elu_config = xnn_init_f32_elu_config();
-  if (f32_elu_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_elu_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f32_elu_params params;
-  assert(f32_elu_config->init.f32_elu != NULL);
-  f32_elu_config->init.f32_elu(&params, 1.0f /* prescale */, alpha, 1.0f /* beta */);
+  if XNN_LIKELY(f32_elu_config != NULL) {
+    assert(f32_elu_config->init.f32_elu != NULL);
+    f32_elu_config->init.f32_elu(&params, 1.0f /* prescale */, alpha, 1.0f /* beta */);
+  }
 
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
@@ -1095,15 +1002,9 @@ enum xnn_status xnn_create_floor_nc_f32(
     xnn_operator_t* floor_op_out)
 {
   const struct xnn_unary_elementwise_config* f32_rndd_config = xnn_init_f32_rndd_config();
-  if (f32_rndd_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_floor_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f32_rnd_params params;
-  if (f32_rndd_config->init.f32_rnd != NULL) {
+  if XNN_LIKELY(f32_rndd_config != NULL && f32_rndd_config->init.f32_rnd != NULL) {
     f32_rndd_config->init.f32_rnd(&params);
   }
 
@@ -1122,15 +1023,9 @@ enum xnn_status xnn_create_hardswish_nc_f16(
     xnn_operator_t* hardswish_op_out)
 {
   const struct xnn_unary_elementwise_config* f16_hswish_config = xnn_init_f16_hswish_config();
-  if (f16_hswish_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_hardswish_nc_f16));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f16_hswish_params params;
-  if (f16_hswish_config->init.f16_hswish != NULL) {
+  if XNN_LIKELY(f16_hswish_config != NULL && f16_hswish_config->init.f16_hswish != NULL) {
     f16_hswish_config->init.f16_hswish(&params);
   }
 
@@ -1149,15 +1044,9 @@ enum xnn_status xnn_create_hardswish_nc_f32(
     xnn_operator_t* hardswish_op_out)
 {
   const struct xnn_unary_elementwise_config* f32_hswish_config = xnn_init_f32_hswish_config();
-  if (f32_hswish_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_hardswish_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f32_hswish_params params;
-  if (f32_hswish_config->init.f32_hswish != NULL) {
+  if XNN_LIKELY(f32_hswish_config != NULL && f32_hswish_config->init.f32_hswish != NULL) {
     f32_hswish_config->init.f32_hswish(&params);
   }
 
@@ -1181,22 +1070,18 @@ enum xnn_status xnn_create_leaky_relu_nc_f16(
   if (!isfinite(negative_slope)) {
     xnn_log_error(
       "failed to create %s operator with %f negative slope: finite number expected",
-      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_f32),
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_f16),
       negative_slope);
     return xnn_status_invalid_parameter;
   }
 
   const struct xnn_unary_elementwise_config* f16_lrelu_config = xnn_init_f16_lrelu_config();
-  if (f16_lrelu_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_f16));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f16_lrelu_params params;
-  assert(f16_lrelu_config->init.f16_lrelu != NULL);
-  f16_lrelu_config->init.f16_lrelu(&params, negative_slope_as_half);
+  if XNN_LIKELY(f16_lrelu_config != NULL) {
+    assert(f16_lrelu_config->init.f16_lrelu != NULL);
+    f16_lrelu_config->init.f16_lrelu(&params, negative_slope_as_half);
+  }
 
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
@@ -1222,16 +1107,12 @@ enum xnn_status xnn_create_leaky_relu_nc_f32(
   }
 
   const struct xnn_unary_elementwise_config* f32_lrelu_config = xnn_init_f32_lrelu_config();
-  if (f32_lrelu_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f32_lrelu_params params;
-  assert(f32_lrelu_config->init.f32_lrelu != NULL);
-  f32_lrelu_config->init.f32_lrelu(&params, negative_slope);
+  if XNN_LIKELY(f32_lrelu_config != NULL) {
+    assert(f32_lrelu_config->init.f32_lrelu != NULL);
+    f32_lrelu_config->init.f32_lrelu(&params, negative_slope);
+  }
 
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
@@ -1298,12 +1179,7 @@ enum xnn_status xnn_create_leaky_relu_nc_qs8(
   }
 
   const struct xnn_unary_elementwise_config* qs8_lrelu_config = xnn_init_qs8_lrelu_config();
-  if (qs8_lrelu_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_qs8));
-    return xnn_status_unsupported_hardware;
-  }
+  assert(qs8_lrelu_config != NULL);
 
   union xnn_qs8_lrelu_params params;
   assert(qs8_lrelu_config->init.qs8_lrelu != NULL);
@@ -1374,12 +1250,7 @@ enum xnn_status xnn_create_leaky_relu_nc_qu8(
   }
 
   const struct xnn_unary_elementwise_config* qu8_lrelu_config = xnn_init_qu8_lrelu_config();
-  if (qu8_lrelu_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_qu8));
-    return xnn_status_unsupported_hardware;
-  }
+  assert(qu8_lrelu_config != NULL);
 
   union xnn_qu8_lrelu_params params;
   assert(qu8_lrelu_config->init.qu8_lrelu != NULL);
@@ -1400,15 +1271,9 @@ enum xnn_status xnn_create_negate_nc_f16(
     xnn_operator_t* negate_op_out)
 {
   const struct xnn_unary_elementwise_config* f16_neg_config = xnn_init_f16_neg_config();
-  if (f16_neg_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_negate_nc_f16));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f16_neg_params params;
-  if (f16_neg_config->init.f16_neg != NULL) {
+  if XNN_LIKELY(f16_neg_config != NULL && f16_neg_config->init.f16_neg != NULL) {
     f16_neg_config->init.f16_neg(&params);
   }
 
@@ -1427,15 +1292,9 @@ enum xnn_status xnn_create_negate_nc_f32(
     xnn_operator_t* negate_op_out)
 {
   const struct xnn_unary_elementwise_config* f32_neg_config = xnn_init_f32_neg_config();
-  if (f32_neg_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_negate_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f32_neg_params params;
-  if (f32_neg_config->init.f32_neg != NULL) {
+  if XNN_LIKELY(f32_neg_config != NULL && f32_neg_config->init.f32_neg != NULL) {
     f32_neg_config->init.f32_neg(&params);
   }
 
@@ -1454,15 +1313,9 @@ enum xnn_status xnn_create_sigmoid_nc_f16(
     xnn_operator_t* sigmoid_op_out)
 {
   const struct xnn_unary_elementwise_config* f16_sigmoid_config = xnn_init_f16_sigmoid_config();
-  if (f16_sigmoid_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_f16));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f16_sigmoid_params params;
-  if (f16_sigmoid_config->init.f16_sigmoid != NULL) {
+  if XNN_LIKELY(f16_sigmoid_config != NULL && f16_sigmoid_config->init.f16_sigmoid != NULL) {
     f16_sigmoid_config->init.f16_sigmoid(&params);
   }
 
@@ -1481,15 +1334,9 @@ enum xnn_status xnn_create_sigmoid_nc_f32(
     xnn_operator_t* sigmoid_op_out)
 {
   const struct xnn_unary_elementwise_config* f32_sigmoid_config = xnn_init_f32_sigmoid_config();
-  if (f32_sigmoid_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f32_sigmoid_params params;
-  if (f32_sigmoid_config->init.f32_sigmoid != NULL) {
+  if XNN_LIKELY(f32_sigmoid_config != NULL && f32_sigmoid_config->init.f32_sigmoid != NULL) {
     f32_sigmoid_config->init.f32_sigmoid(&params);
   }
 
@@ -1522,15 +1369,9 @@ enum xnn_status xnn_create_square_nc_f32(
     xnn_operator_t* square_op_out)
 {
   const struct xnn_unary_elementwise_config* f32_sqr_config = xnn_init_f32_sqr_config();
-  if (f32_sqr_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_square_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f32_default_params params;
-  if (f32_sqr_config->init.f32_default != NULL) {
+  if XNN_LIKELY(f32_sqr_config != NULL && f32_sqr_config->init.f32_default != NULL) {
     f32_sqr_config->init.f32_default(&params);
   }
 
@@ -1563,15 +1404,9 @@ enum xnn_status xnn_create_square_root_nc_f32(
     xnn_operator_t* sqrt_op_out)
 {
   const struct xnn_unary_elementwise_config* f32_sqrt_config = xnn_init_f32_sqrt_config();
-  if (f32_sqrt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_square_root_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f32_sqrt_params params;
-  if (f32_sqrt_config->init.f32_sqrt != NULL) {
+  if XNN_LIKELY(f32_sqrt_config != NULL && f32_sqrt_config->init.f32_sqrt != NULL) {
     f32_sqrt_config->init.f32_sqrt(&params);
   }
 
@@ -1590,15 +1425,9 @@ enum xnn_status xnn_create_tanh_nc_f16(
     xnn_operator_t* tanh_op_out)
 {
   const struct xnn_unary_elementwise_config* f16_tanh_config = xnn_init_f16_tanh_config();
-  if (f16_tanh_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_tanh_nc_f16));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f16_tanh_params params;
-  if (f16_tanh_config->init.f16_tanh != NULL) {
+  if XNN_LIKELY(f16_tanh_config != NULL && f16_tanh_config->init.f16_tanh != NULL) {
     f16_tanh_config->init.f16_tanh(&params);
   }
 
@@ -1617,15 +1446,9 @@ enum xnn_status xnn_create_tanh_nc_f32(
     xnn_operator_t* tanh_op_out)
 {
   const struct xnn_unary_elementwise_config* f32_tanh_config = xnn_init_f32_tanh_config();
-  if (f32_tanh_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_tanh_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f32_tanh_params params;
-  if (f32_tanh_config->init.f32_tanh != NULL) {
+  if XNN_LIKELY(f32_tanh_config != NULL && f32_tanh_config->init.f32_tanh != NULL) {
     f32_tanh_config->init.f32_tanh(&params);
   }
 
@@ -1658,15 +1481,9 @@ enum xnn_status xnn_create_truncation_nc_f32(
     xnn_operator_t* truncation_op_out)
 {
   const struct xnn_unary_elementwise_config* f32_rndz_config = xnn_init_f32_rndz_config();
-  if (f32_rndz_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_truncation_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
   union xnn_f32_rnd_params params;
-  if (f32_rndz_config->init.f32_rnd != NULL) {
+  if XNN_LIKELY(f32_rndz_config != NULL && f32_rndz_config->init.f32_rnd != NULL) {
     f32_rndz_config->init.f32_rnd(&params);
   }
 
@@ -1715,7 +1532,7 @@ enum xnn_status xnn_reshape_bankers_rounding_nc_f16(
     batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
-    NULL, 0,
+    /*params=*/NULL, /*params_size=*/0,
     threadpool);
 }
 
@@ -1743,7 +1560,7 @@ enum xnn_status xnn_reshape_ceiling_nc_f16(
     batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
-    NULL, 0,
+    /*params=*/NULL, /*params_size=*/0,
     threadpool);
 }
 
@@ -1997,7 +1814,7 @@ enum xnn_status xnn_reshape_copy_nc_x8(
     batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    NULL, 0,
+    /*params=*/NULL, /*params_size=*/0,
     threadpool);
 }
 
@@ -2011,7 +1828,7 @@ enum xnn_status xnn_reshape_copy_nc_x16(
     batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_UINT16_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_UINT16_T,
-    NULL, 0,
+    /*params=*/NULL, /*params_size=*/0,
     threadpool);
 }
 
@@ -2025,7 +1842,7 @@ enum xnn_status xnn_reshape_copy_nc_x32(
     batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_UINT32_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_UINT32_T,
-    NULL, 0,
+    /*params=*/NULL, /*params_size=*/0,
     threadpool);
 }
 
@@ -2067,7 +1884,7 @@ enum xnn_status xnn_reshape_floor_nc_f16(
     batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
-    NULL, 0,
+    /*params=*/NULL, /*params_size=*/0,
     threadpool);
 }
 
@@ -2235,7 +2052,7 @@ enum xnn_status xnn_reshape_square_nc_f16(
     batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
-    NULL, 0,
+    /*params=*/NULL, /*params_size=*/0,
     threadpool);
 }
 
@@ -2263,7 +2080,7 @@ enum xnn_status xnn_reshape_square_root_nc_f16(
     batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
-    NULL, 0,
+    /*params=*/NULL, /*params_size=*/0,
     threadpool);
 }
 
@@ -2319,7 +2136,7 @@ enum xnn_status xnn_reshape_truncation_nc_f16(
     batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
-    NULL, 0,
+    /*params=*/NULL, /*params_size=*/0,
     threadpool);
 }
 
@@ -2487,7 +2304,7 @@ enum xnn_status xnn_setup_convert_nc_f32_qd8(
 
   convert_op->context.f32_qd8_convert.x = input;
   convert_op->context.f32_qd8_convert.y = output;
-  convert_op->context.f32_qd8_convert.quantization_params = (struct xnn_qd8_quantization_params*)  quantization_params;
+  convert_op->context.f32_qd8_convert.quantization_params = (struct xnn_qd8_quantization_params*) quantization_params;
   convert_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
@@ -2863,26 +2680,20 @@ static enum xnn_status run_unary_elementwise_nc(
   memset(&unary_elementwise_op, 0, sizeof(unary_elementwise_op));
 
   init_unary_elementwise_nc(
-    channels, input_stride, output_stride,
-    flags, /*params=*/NULL, /*params_size=*/0,
+    channels, input_stride, output_stride, flags,
+    /*params=*/NULL, /*params_size=*/0,
     operator_type, unary_elementwise_config, /*rminmax_config=*/NULL, &unary_elementwise_op);
 
   enum xnn_status status = reshape_unary_elementwise_nc(
     &unary_elementwise_op, operator_type,
-    batch_size,
-    log2_input_size,
-    log2_output_size,
+    batch_size, log2_input_size, log2_output_size,
     params, params_size,
     threadpool);
-
   if (status != xnn_status_success){
     return status;
   }
 
-  status = setup_unary_elementwise_nc(
-    &unary_elementwise_op, operator_type,
-    input, output);
-
+  status = setup_unary_elementwise_nc(&unary_elementwise_op, operator_type, input, output);
   if (status != xnn_status_success){
     return status;
   }
@@ -2901,25 +2712,17 @@ enum xnn_status xnn_run_abs_nc_f32(
     pthreadpool_t threadpool)
 {
   const struct xnn_unary_elementwise_config* f32_abs_config = xnn_init_f32_abs_config();
-  if (f32_abs_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_abs_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_f32_abs_params params;
-  if (f32_abs_config->init.f32_abs != NULL) {
+  if XNN_LIKELY(f32_abs_config != NULL && f32_abs_config->init.f32_abs != NULL) {
     f32_abs_config->init.f32_abs(&params);
   }
 
   return run_unary_elementwise_nc(
     xnn_operator_type_abs_nc_f32,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    f32_abs_config,
-    &params, sizeof(params),
+    f32_abs_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,
@@ -2937,29 +2740,23 @@ enum xnn_status xnn_run_bankers_rounding_nc_f32(
     pthreadpool_t threadpool)
 {
   const struct xnn_unary_elementwise_config* f32_rndne_config = xnn_init_f32_rndne_config();
-  if (f32_rndne_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_bankers_rounding_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_f32_rnd_params params;
-  if (f32_rndne_config->init.f32_rnd != NULL) {
+  if XNN_LIKELY(f32_rndne_config != NULL && f32_rndne_config->init.f32_rnd != NULL) {
     f32_rndne_config->init.f32_rnd(&params);
   }
 
   return run_unary_elementwise_nc(
-      xnn_operator_type_bankers_rounding_nc_f32,
-      channels,
-      input_stride, output_stride,
-      batch_size,
-      input, output,
-      f32_rndne_config,
-      &params, sizeof(params),
-      /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
-      /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
-      flags,
-      threadpool);
+    xnn_operator_type_bankers_rounding_nc_f32,
+    channels,
+    input_stride, output_stride,
+    batch_size,
+    input, output,
+    f32_rndne_config, &params, sizeof(params),
+    /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    flags,
+    threadpool);
 }
 
 enum xnn_status xnn_run_ceiling_nc_f32(
@@ -2973,25 +2770,17 @@ enum xnn_status xnn_run_ceiling_nc_f32(
   pthreadpool_t threadpool)
 {
   const struct xnn_unary_elementwise_config* f32_rndu_config = xnn_init_f32_rndu_config();
-  if (f32_rndu_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_ceiling_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_f32_rnd_params params;
-  if (f32_rndu_config->init.f32_rnd != NULL) {
+  if XNN_LIKELY(f32_rndu_config != NULL && f32_rndu_config->init.f32_rnd != NULL) {
     f32_rndu_config->init.f32_rnd(&params);
   }
 
   return run_unary_elementwise_nc(
     xnn_operator_type_ceiling_nc_f32,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    f32_rndu_config,
-    &params, sizeof(params),
+    f32_rndu_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,
@@ -3030,33 +2819,27 @@ enum xnn_status xnn_run_clamp_nc_f32(
       xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
+
   const struct xnn_unary_elementwise_config* f32_clamp_config = xnn_init_f32_clamp_config();
   const struct xnn_unary_elementwise_config* f32_relu_config = xnn_init_f32_relu_config();
-  if (f32_clamp_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
 
-  const bool relu_activation = (output_max == INFINITY) && (output_min == 0.0f);
   const struct xnn_unary_elementwise_config* config = f32_clamp_config;
+  const bool relu_activation = (output_max == INFINITY) && (output_min == 0.0f);
   if (relu_activation && f32_relu_config->ukernel != NULL) {
     config = f32_relu_config;
   }
 
   union xnn_f32_minmax_params params;
-  assert(f32_clamp_config->init.f32_minmax != NULL);
-  f32_clamp_config->init.f32_minmax(&params, output_min, output_max);
+  if XNN_LIKELY(f32_clamp_config != NULL) {
+    assert(f32_clamp_config->init.f32_minmax != NULL);
+    f32_clamp_config->init.f32_minmax(&params, output_min, output_max);
+  }
 
   return run_unary_elementwise_nc(
     xnn_operator_type_clamp_nc_f32,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    config,
-    &params, sizeof(params),
+    config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,
@@ -3074,25 +2857,17 @@ enum xnn_status xnn_run_convert_nc_f16_f32(
     pthreadpool_t threadpool)
 {
   const struct xnn_unary_elementwise_config* f16_to_f32_cvt_config = xnn_init_f16_to_f32_cvt_config();
-  if (f16_to_f32_cvt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_f16_f32));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_f16_f32_cvt_params params;
-  if (f16_to_f32_cvt_config->init.f16_f32_cvt != NULL) {
+  if XNN_LIKELY(f16_to_f32_cvt_config != NULL && f16_to_f32_cvt_config->init.f16_f32_cvt != NULL) {
     f16_to_f32_cvt_config->init.f16_f32_cvt(&params);
   }
 
   return run_unary_elementwise_nc(
     xnn_operator_type_convert_nc_f16_f32,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    f16_to_f32_cvt_config,
-    &params, sizeof(params),
+    f16_to_f32_cvt_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,
@@ -3110,25 +2885,17 @@ enum xnn_status xnn_run_convert_nc_f32_f16(
     pthreadpool_t threadpool)
 {
   const struct xnn_unary_elementwise_config* f32_to_f16_cvt_config = xnn_init_f32_to_f16_cvt_config();
-  if (f32_to_f16_cvt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_f16));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_f32_f16_cvt_params params;
-  if (f32_to_f16_cvt_config->init.f32_f16_cvt != NULL) {
+  if XNN_LIKELY(f32_to_f16_cvt_config != NULL && f32_to_f16_cvt_config->init.f32_f16_cvt != NULL) {
     f32_to_f16_cvt_config->init.f32_f16_cvt(&params);
   }
 
   return run_unary_elementwise_nc(
     xnn_operator_type_convert_nc_f32_f16,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    f32_to_f16_cvt_config,
-    &params, sizeof(params),
+    f32_to_f16_cvt_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
     flags,
@@ -3153,24 +2920,20 @@ enum xnn_status xnn_run_convert_nc_f32_qs8(
       xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qs8), output_scale);
     return xnn_status_invalid_parameter;
   }
+
   const struct xnn_unary_elementwise_config* f32_to_qs8_cvt_config = xnn_init_f32_to_qs8_cvt_config();
-  if (f32_to_qs8_cvt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qs8));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_f32_qs8_cvt_params params;
-  assert(f32_to_qs8_cvt_config->init.f32_qs8_cvt != NULL);
-  f32_to_qs8_cvt_config->init.f32_qs8_cvt(&params, 1.0f / output_scale, output_zero_point, INT8_MIN, INT8_MAX);
+  if XNN_LIKELY(f32_to_qs8_cvt_config != NULL) {
+    assert(f32_to_qs8_cvt_config->init.f32_qs8_cvt != NULL);
+    f32_to_qs8_cvt_config->init.f32_qs8_cvt(&params, 1.0f / output_scale, output_zero_point, INT8_MIN, INT8_MAX);
+  }
+
   return run_unary_elementwise_nc(
     xnn_operator_type_convert_nc_f32_qs8,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    f32_to_qs8_cvt_config,
-    &params, sizeof(params),
+    f32_to_qs8_cvt_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_INT8_T,
     flags,
@@ -3195,24 +2958,20 @@ enum xnn_status xnn_run_convert_nc_f32_qu8(
       xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qu8), output_scale);
     return xnn_status_invalid_parameter;
   }
+
   const struct xnn_unary_elementwise_config* f32_to_qu8_cvt_config = xnn_init_f32_to_qu8_cvt_config();
-  if (f32_to_qu8_cvt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qu8));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_f32_qu8_cvt_params params;
-  assert(f32_to_qu8_cvt_config->init.f32_qu8_cvt != NULL);
-  f32_to_qu8_cvt_config->init.f32_qu8_cvt(&params, 1.0f / output_scale, output_zero_point, 0, UINT8_MAX);
+  if XNN_LIKELY(f32_to_qu8_cvt_config != NULL) {
+    assert(f32_to_qu8_cvt_config->init.f32_qu8_cvt != NULL);
+    f32_to_qu8_cvt_config->init.f32_qu8_cvt(&params, 1.0f / output_scale, output_zero_point, 0, UINT8_MAX);
+  }
+
   return run_unary_elementwise_nc(
     xnn_operator_type_convert_nc_f32_qu8,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    f32_to_qu8_cvt_config,
-    &params, sizeof(params),
+    f32_to_qu8_cvt_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     flags,
@@ -3237,24 +2996,20 @@ enum xnn_status xnn_run_convert_nc_qs8_f32(
       xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs8_f32), input_scale);
     return xnn_status_invalid_parameter;
   }
+
   const struct xnn_unary_elementwise_config* qs8_to_f32_cvt_config = xnn_init_qs8_to_f32_cvt_config();
-  if (qs8_to_f32_cvt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs8_f32));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_qs8_f32_cvt_params params;
-  assert(qs8_to_f32_cvt_config->init.qs8_f32_cvt != NULL);
-  qs8_to_f32_cvt_config->init.qs8_f32_cvt(&params, input_scale, input_zero_point);
+  if XNN_LIKELY(qs8_to_f32_cvt_config != NULL) {
+    assert(qs8_to_f32_cvt_config->init.qs8_f32_cvt != NULL);
+    qs8_to_f32_cvt_config->init.qs8_f32_cvt(&params, input_scale, input_zero_point);
+  }
+
   return run_unary_elementwise_nc(
     xnn_operator_type_convert_nc_qs8_f32,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    qs8_to_f32_cvt_config,
-    &params, sizeof(params),
+    qs8_to_f32_cvt_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,
@@ -3295,24 +3050,19 @@ enum xnn_status xnn_run_convert_nc_qs16_qs8(
       xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs16_qs8), input_output_scale);
     return xnn_status_invalid_parameter;
   }
+
   const struct xnn_unary_elementwise_config* qs16_to_qs8_cvt_config = xnn_init_qs16_to_qs8_cvt_config();
-  if (qs16_to_qs8_cvt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs16_qs8));
-    return xnn_status_unsupported_hardware;
-  }
+  assert(qs16_to_qs8_cvt_config != NULL);
+
   union xnn_qs16_qs8_cvt_params params;
   assert(qs16_to_qs8_cvt_config->init.qs16_qs8_cvt != NULL);
   qs16_to_qs8_cvt_config->init.qs16_qs8_cvt(&params, input_output_scale, output_zero_point);
+
   return run_unary_elementwise_nc(
     xnn_operator_type_convert_nc_qs16_qs8,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    qs16_to_qs8_cvt_config,
-    &params, sizeof(params),
+    qs16_to_qs8_cvt_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_INT16_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_INT8_T,
     flags,
@@ -3337,24 +3087,20 @@ enum xnn_status xnn_run_convert_nc_qu8_f32(
       xnn_operator_type_to_string(xnn_operator_type_convert_nc_qu8_f32), input_scale);
     return xnn_status_invalid_parameter;
   }
+
   const struct xnn_unary_elementwise_config* qu8_to_f32_cvt_config = xnn_init_qu8_to_f32_cvt_config();
-  if (qu8_to_f32_cvt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_qu8_f32));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_qu8_f32_cvt_params params;
-  assert(qu8_to_f32_cvt_config->init.qu8_f32_cvt != NULL);
-  qu8_to_f32_cvt_config->init.qu8_f32_cvt(&params, input_scale, input_zero_point);
+  if XNN_LIKELY(qu8_to_f32_cvt_config != NULL) {
+    assert(qu8_to_f32_cvt_config->init.qu8_f32_cvt != NULL);
+    qu8_to_f32_cvt_config->init.qu8_f32_cvt(&params, input_scale, input_zero_point);
+  }
+
   return run_unary_elementwise_nc(
     xnn_operator_type_convert_nc_qu8_f32,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    qu8_to_f32_cvt_config,
-    &params, sizeof(params),
+    qu8_to_f32_cvt_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,
@@ -3373,12 +3119,9 @@ enum xnn_status xnn_run_copy_nc_x32(
 {
   return run_unary_elementwise_nc(
     xnn_operator_type_copy_nc_x32,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    xnn_init_xx_copy_config(),
-    NULL, 0,
+    xnn_init_xx_copy_config(), NULL, 0,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_UINT32_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_UINT32_T,
     flags,
@@ -3402,24 +3145,20 @@ enum xnn_status xnn_run_elu_nc_f32(
       xnn_operator_type_to_string(xnn_operator_type_elu_nc_f32), alpha);
     return xnn_status_invalid_parameter;
   }
+
   const struct xnn_unary_elementwise_config* f32_elu_config = xnn_init_f32_elu_config();
-  if (f32_elu_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_elu_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_f32_elu_params params;
-  assert(f32_elu_config->init.f32_elu != NULL);
-  f32_elu_config->init.f32_elu(&params, 1.0f /* prescale */, alpha, 1.0f /* beta */);
+  if XNN_LIKELY(f32_elu_config != NULL) {
+    assert(f32_elu_config->init.f32_elu != NULL);
+    f32_elu_config->init.f32_elu(&params, /*prescale=*/1.0f, alpha, /*beta=*/1.0f);
+  }
+
   return run_unary_elementwise_nc(
     xnn_operator_type_elu_nc_f32,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    f32_elu_config,
-    &params, sizeof(params),
+    f32_elu_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,
@@ -3437,24 +3176,17 @@ enum xnn_status xnn_run_floor_nc_f32(
   pthreadpool_t threadpool)
 {
   const struct xnn_unary_elementwise_config* f32_rndd_config = xnn_init_f32_rndd_config();
-  if (f32_rndd_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_floor_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_f32_rnd_params params;
-  if (f32_rndd_config->init.f32_rnd != NULL) {
+  if XNN_LIKELY(f32_rndd_config != NULL && f32_rndd_config->init.f32_rnd != NULL) {
     f32_rndd_config->init.f32_rnd(&params);
   }
+
   return run_unary_elementwise_nc(
     xnn_operator_type_floor_nc_f32,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    f32_rndd_config,
-    &params, sizeof(params),
+    f32_rndd_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,
@@ -3472,24 +3204,17 @@ enum xnn_status xnn_run_hardswish_nc_f32(
     pthreadpool_t threadpool)
 {
   const struct xnn_unary_elementwise_config* f32_hswish_config = xnn_init_f32_hswish_config();
-  if (f32_hswish_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_hardswish_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_f32_hswish_params params;
-  if (f32_hswish_config->init.f32_hswish != NULL) {
+  if XNN_LIKELY(f32_hswish_config != NULL && f32_hswish_config->init.f32_hswish != NULL) {
     f32_hswish_config->init.f32_hswish(&params);
   }
+
   return run_unary_elementwise_nc(
     xnn_operator_type_hardswish_nc_f32,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    f32_hswish_config,
-    &params, sizeof(params),
+    f32_hswish_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,
@@ -3514,24 +3239,20 @@ enum xnn_status xnn_run_leaky_relu_nc_f32(
       negative_slope);
     return xnn_status_invalid_parameter;
   }
+
   const struct xnn_unary_elementwise_config* f32_lrelu_config = xnn_init_f32_lrelu_config();
-  if (f32_lrelu_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_f32_lrelu_params params;
-  assert(f32_lrelu_config->init.f32_lrelu != NULL);
-  f32_lrelu_config->init.f32_lrelu(&params, negative_slope);
+  if XNN_LIKELY(f32_lrelu_config != NULL) {
+    assert(f32_lrelu_config->init.f32_lrelu != NULL);
+    f32_lrelu_config->init.f32_lrelu(&params, negative_slope);
+  }
+
   return run_unary_elementwise_nc(
     xnn_operator_type_leaky_relu_nc_f32,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    f32_lrelu_config,
-    &params, sizeof(params),
+    f32_lrelu_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,
@@ -3549,24 +3270,17 @@ enum xnn_status xnn_run_negate_nc_f32(
   pthreadpool_t threadpool)
 {
   const struct xnn_unary_elementwise_config* f32_neg_config = xnn_init_f32_neg_config();
-  if (f32_neg_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_negate_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_f32_neg_params params;
-  if (f32_neg_config->init.f32_neg != NULL) {
+  if XNN_LIKELY(f32_neg_config != NULL && f32_neg_config->init.f32_neg != NULL) {
     f32_neg_config->init.f32_neg(&params);
   }
+
   return run_unary_elementwise_nc(
     xnn_operator_type_negate_nc_f32,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    f32_neg_config,
-    &params, sizeof(params),
+    f32_neg_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,
@@ -3584,24 +3298,17 @@ enum xnn_status xnn_run_sigmoid_nc_f32(
   pthreadpool_t threadpool)
 {
   const struct xnn_unary_elementwise_config* f32_sigmoid_config = xnn_init_f32_sigmoid_config();
-  if (f32_sigmoid_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_f32_sigmoid_params params;
-  if (f32_sigmoid_config->init.f32_sigmoid != NULL) {
+  if XNN_LIKELY(f32_sigmoid_config != NULL && f32_sigmoid_config->init.f32_sigmoid != NULL) {
     f32_sigmoid_config->init.f32_sigmoid(&params);
   }
+
   return run_unary_elementwise_nc(
     xnn_operator_type_sigmoid_nc_f32,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    f32_sigmoid_config,
-    &params, sizeof(params),
+    f32_sigmoid_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,
@@ -3619,24 +3326,17 @@ enum xnn_status xnn_run_square_nc_f32(
   pthreadpool_t threadpool)
 {
   const struct xnn_unary_elementwise_config* f32_sqr_config = xnn_init_f32_sqr_config();
-  if (f32_sqr_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_square_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_f32_default_params params;
-  if (f32_sqr_config->init.f32_default != NULL) {
+  if XNN_LIKELY(f32_sqr_config != NULL && f32_sqr_config->init.f32_default != NULL) {
     f32_sqr_config->init.f32_default(&params);
   }
+
   return run_unary_elementwise_nc(
     xnn_operator_type_square_nc_f32,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    f32_sqr_config,
-    &params, sizeof(params),
+    f32_sqr_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,
@@ -3654,24 +3354,17 @@ enum xnn_status xnn_run_square_root_nc_f32(
   pthreadpool_t threadpool)
 {
   const struct xnn_unary_elementwise_config* f32_sqrt_config = xnn_init_f32_sqrt_config();
-  if (f32_sqrt_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_square_root_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_f32_sqrt_params params;
-  if (f32_sqrt_config->init.f32_sqrt != NULL) {
+  if XNN_LIKELY(f32_sqrt_config != NULL && f32_sqrt_config->init.f32_sqrt != NULL) {
     f32_sqrt_config->init.f32_sqrt(&params);
   }
+
   return run_unary_elementwise_nc(
     xnn_operator_type_square_root_nc_f32,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    f32_sqrt_config,
-    &params, sizeof(params),
+    f32_sqrt_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,
@@ -3689,24 +3382,17 @@ enum xnn_status xnn_run_tanh_nc_f32(
   pthreadpool_t threadpool)
 {
   const struct xnn_unary_elementwise_config* f32_tanh_config = xnn_init_f32_tanh_config();
-  if (f32_tanh_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_tanh_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_f32_tanh_params params;
-  if (f32_tanh_config->init.f32_tanh != NULL) {
+  if XNN_LIKELY(f32_tanh_config != NULL && f32_tanh_config->init.f32_tanh != NULL) {
     f32_tanh_config->init.f32_tanh(&params);
   }
+
   return run_unary_elementwise_nc(
     xnn_operator_type_tanh_nc_f32,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    f32_tanh_config,
-    &params, sizeof(params),
+    f32_tanh_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,
@@ -3724,24 +3410,17 @@ enum xnn_status xnn_run_truncation_nc_f32(
   pthreadpool_t threadpool)
 {
   const struct xnn_unary_elementwise_config* f32_rndz_config = xnn_init_f32_rndz_config();
-  if (f32_rndz_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_truncation_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
+
   union xnn_f32_rnd_params params;
-  if (f32_rndz_config->init.f32_rnd != NULL) {
+  if XNN_LIKELY(f32_rndz_config != NULL && f32_rndz_config->init.f32_rnd != NULL) {
     f32_rndz_config->init.f32_rnd(&params);
   }
+
   return run_unary_elementwise_nc(
     xnn_operator_type_truncation_nc_f32,
-    channels,
-    input_stride, output_stride,
-    batch_size,
+    channels, input_stride, output_stride, batch_size,
     input, output,
-    f32_rndz_config,
-    &params, sizeof(params),
+    f32_rndz_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,
