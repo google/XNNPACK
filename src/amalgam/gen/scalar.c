@@ -16093,6 +16093,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x2__scalar(
   const int8_t* a0 = a;
   float* c0 = c;
 
+
   do {
     const int32_t vksum0 = unaligned_indexed_load_s32(w, 0);
     const int32_t vksum1 = unaligned_indexed_load_s32(w, 1);
@@ -16181,6 +16182,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4__scalar(
 
   const int8_t* a0 = a;
   float* c0 = c;
+
 
   do {
     const int32_t vksum0 = ((const int32_t*) w)[0];
@@ -16308,6 +16310,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x2__scalar(
     a1 = a0;
     c1 = c0;
   }
+
 
   do {
     const int32_t vksum0 = unaligned_indexed_load_s32(w, 0);
@@ -16439,6 +16442,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4__scalar(
     a3 = a2;
     c3 = c2;
   }
+
 
   do {
     const int32_t vksum0 = ((const int32_t*) w)[0];
@@ -19194,6 +19198,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic(
   const int8_t* a0 = a;
   int8_t* c0 = c;
 
+
   do {
     int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
     int32_t vacc0x1 = unaligned_indexed_load_s32(w, 1);
@@ -19274,6 +19279,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x2__scalar_imagic(
 
   const int8_t* a0 = a;
   int8_t* c0 = c;
+
 
   do {
     int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
@@ -19358,6 +19364,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x4__scalar_lrintf(
 
   const int8_t* a0 = a;
   int8_t* c0 = c;
+
 
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
@@ -19471,6 +19478,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_2x2__scalar_fmagic(
     c1 = c0;
   }
 
+
   do {
     int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
     int32_t vacc0x1 = unaligned_indexed_load_s32(w, 1);
@@ -19579,6 +19587,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_2x2__scalar_imagic(
     a1 = a0;
     c1 = c0;
   }
+
 
   do {
     int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
@@ -19699,6 +19708,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_3x4__scalar_lrintf(
     a2 = a1;
     c2 = c1;
   }
+
 
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
@@ -22646,6 +22656,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic(
   const int8_t* a0 = a;
   int8_t* c0 = c;
 
+
   do {
     int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
     int32_t vacc0x1 = unaligned_indexed_load_s32(w, 1);
@@ -22728,6 +22739,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x2__scalar_imagic(
 
   const int8_t* a0 = a;
   int8_t* c0 = c;
+
 
   do {
     int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
@@ -22814,6 +22826,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4__scalar_lrintf(
 
   const int8_t* a0 = a;
   int8_t* c0 = c;
+
 
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
@@ -22931,6 +22944,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x2__scalar_fmagic(
     c1 = c0;
   }
 
+
   do {
     int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
     int32_t vacc0x1 = unaligned_indexed_load_s32(w, 1);
@@ -23041,6 +23055,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x2__scalar_imagic(
     a1 = a0;
     c1 = c0;
   }
+
 
   do {
     int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
@@ -23163,6 +23178,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x4__scalar_lrintf(
     a2 = a1;
     c2 = c1;
   }
+
 
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
@@ -27671,6 +27687,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic(
   uint8_t* c0 = c;
 
   const int32_t vb_zero_point = params->fp32_scalar_fmagic.kernel_zero_point;
+
   do {
     int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
     int32_t vacc0x1 = unaligned_indexed_load_s32(w, 1);
@@ -27753,6 +27770,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x2__scalar_imagic(
   uint8_t* c0 = c;
 
   const int32_t vb_zero_point = params->fp32_scalar_imagic.kernel_zero_point;
+
   do {
     int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
     int32_t vacc0x1 = unaligned_indexed_load_s32(w, 1);
@@ -27838,6 +27856,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x4__scalar_lrintf(
   uint8_t* c0 = c;
 
   const int32_t vb_zero_point = params->fp32_scalar_lrintf.kernel_zero_point;
+
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
     int32_t vacc0x1 = ((const int32_t*) w)[1];
@@ -27951,6 +27970,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_2x2__scalar_fmagic(
   }
 
   const int32_t vb_zero_point = params->fp32_scalar_fmagic.kernel_zero_point;
+
   do {
     int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
     int32_t vacc0x1 = unaligned_indexed_load_s32(w, 1);
@@ -28061,6 +28081,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_2x2__scalar_imagic(
   }
 
   const int32_t vb_zero_point = params->fp32_scalar_imagic.kernel_zero_point;
+
   do {
     int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
     int32_t vacc0x1 = unaligned_indexed_load_s32(w, 1);
@@ -28182,6 +28203,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x4__scalar_lrintf(
   }
 
   const int32_t vb_zero_point = params->fp32_scalar_lrintf.kernel_zero_point;
+
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
     int32_t vacc0x1 = ((const int32_t*) w)[1];

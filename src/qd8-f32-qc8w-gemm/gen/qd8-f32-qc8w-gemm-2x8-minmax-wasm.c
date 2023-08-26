@@ -12,7 +12,6 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
 
-
 void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x8__wasm(
     size_t mr,
     size_t nc,
@@ -39,6 +38,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x8__wasm(
     a1 = a0;
     c1 = c0;
   }
+
 
   do {
     const int32_t vksum0 = ((const int32_t*) w)[0];
@@ -70,7 +70,118 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x8__wasm(
     w = (const int32_t*) w + 8;
 
     size_t k = kc;
-    do {
+    for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
+      const int32_t va00 = (int32_t) a0[0];
+      const int32_t va01 = (int32_t) a0[1];
+      const int32_t va02 = (int32_t) a0[2];
+      const int32_t va03 = (int32_t) a0[3];
+      a0 += 4;
+      const int32_t va10 = (int32_t) a1[0];
+      const int32_t va11 = (int32_t) a1[1];
+      const int32_t va12 = (int32_t) a1[2];
+      const int32_t va13 = (int32_t) a1[3];
+      a1 += 4;
+
+      const int32_t vb00 = (int32_t) ((const int8_t*) w)[0];
+      const int32_t vb10 = (int32_t) ((const int8_t*) w)[1];
+      const int32_t vb20 = (int32_t) ((const int8_t*) w)[2];
+      const int32_t vb30 = (int32_t) ((const int8_t*) w)[3];
+      const int32_t vb40 = (int32_t) ((const int8_t*) w)[4];
+      const int32_t vb50 = (int32_t) ((const int8_t*) w)[5];
+      const int32_t vb60 = (int32_t) ((const int8_t*) w)[6];
+      const int32_t vb70 = (int32_t) ((const int8_t*) w)[7];
+      const int32_t vb01 = (int32_t) ((const int8_t*) w)[8];
+      const int32_t vb11 = (int32_t) ((const int8_t*) w)[9];
+      const int32_t vb21 = (int32_t) ((const int8_t*) w)[10];
+      const int32_t vb31 = (int32_t) ((const int8_t*) w)[11];
+      const int32_t vb41 = (int32_t) ((const int8_t*) w)[12];
+      const int32_t vb51 = (int32_t) ((const int8_t*) w)[13];
+      const int32_t vb61 = (int32_t) ((const int8_t*) w)[14];
+      const int32_t vb71 = (int32_t) ((const int8_t*) w)[15];
+      const int32_t vb02 = (int32_t) ((const int8_t*) w)[16];
+      const int32_t vb12 = (int32_t) ((const int8_t*) w)[17];
+      const int32_t vb22 = (int32_t) ((const int8_t*) w)[18];
+      const int32_t vb32 = (int32_t) ((const int8_t*) w)[19];
+      const int32_t vb42 = (int32_t) ((const int8_t*) w)[20];
+      const int32_t vb52 = (int32_t) ((const int8_t*) w)[21];
+      const int32_t vb62 = (int32_t) ((const int8_t*) w)[22];
+      const int32_t vb72 = (int32_t) ((const int8_t*) w)[23];
+      const int32_t vb03 = (int32_t) ((const int8_t*) w)[24];
+      const int32_t vb13 = (int32_t) ((const int8_t*) w)[25];
+      const int32_t vb23 = (int32_t) ((const int8_t*) w)[26];
+      const int32_t vb33 = (int32_t) ((const int8_t*) w)[27];
+      const int32_t vb43 = (int32_t) ((const int8_t*) w)[28];
+      const int32_t vb53 = (int32_t) ((const int8_t*) w)[29];
+      const int32_t vb63 = (int32_t) ((const int8_t*) w)[30];
+      const int32_t vb73 = (int32_t) ((const int8_t*) w)[31];
+      w = (const int8_t*) w + 32;
+
+      vacc0x0 += va00 * vb00;
+      vacc0x1 += va00 * vb10;
+      vacc0x2 += va00 * vb20;
+      vacc0x3 += va00 * vb30;
+      vacc0x4 += va00 * vb40;
+      vacc0x5 += va00 * vb50;
+      vacc0x6 += va00 * vb60;
+      vacc0x7 += va00 * vb70;
+      vacc1x0 += va10 * vb00;
+      vacc1x1 += va10 * vb10;
+      vacc1x2 += va10 * vb20;
+      vacc1x3 += va10 * vb30;
+      vacc1x4 += va10 * vb40;
+      vacc1x5 += va10 * vb50;
+      vacc1x6 += va10 * vb60;
+      vacc1x7 += va10 * vb70;
+      vacc0x0 += va01 * vb01;
+      vacc0x1 += va01 * vb11;
+      vacc0x2 += va01 * vb21;
+      vacc0x3 += va01 * vb31;
+      vacc0x4 += va01 * vb41;
+      vacc0x5 += va01 * vb51;
+      vacc0x6 += va01 * vb61;
+      vacc0x7 += va01 * vb71;
+      vacc1x0 += va11 * vb01;
+      vacc1x1 += va11 * vb11;
+      vacc1x2 += va11 * vb21;
+      vacc1x3 += va11 * vb31;
+      vacc1x4 += va11 * vb41;
+      vacc1x5 += va11 * vb51;
+      vacc1x6 += va11 * vb61;
+      vacc1x7 += va11 * vb71;
+      vacc0x0 += va02 * vb02;
+      vacc0x1 += va02 * vb12;
+      vacc0x2 += va02 * vb22;
+      vacc0x3 += va02 * vb32;
+      vacc0x4 += va02 * vb42;
+      vacc0x5 += va02 * vb52;
+      vacc0x6 += va02 * vb62;
+      vacc0x7 += va02 * vb72;
+      vacc1x0 += va12 * vb02;
+      vacc1x1 += va12 * vb12;
+      vacc1x2 += va12 * vb22;
+      vacc1x3 += va12 * vb32;
+      vacc1x4 += va12 * vb42;
+      vacc1x5 += va12 * vb52;
+      vacc1x6 += va12 * vb62;
+      vacc1x7 += va12 * vb72;
+      vacc0x0 += va03 * vb03;
+      vacc0x1 += va03 * vb13;
+      vacc0x2 += va03 * vb23;
+      vacc0x3 += va03 * vb33;
+      vacc0x4 += va03 * vb43;
+      vacc0x5 += va03 * vb53;
+      vacc0x6 += va03 * vb63;
+      vacc0x7 += va03 * vb73;
+      vacc1x0 += va13 * vb03;
+      vacc1x1 += va13 * vb13;
+      vacc1x2 += va13 * vb23;
+      vacc1x3 += va13 * vb33;
+      vacc1x4 += va13 * vb43;
+      vacc1x5 += va13 * vb53;
+      vacc1x6 += va13 * vb63;
+      vacc1x7 += va13 * vb73;
+    }
+    if XNN_UNLIKELY(k != 0) {
       const int32_t va0 = (int32_t) *a0++;
       const int32_t va1 = (int32_t) *a1++;
 
@@ -100,9 +211,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x8__wasm(
       vacc1x5 += va1 * vb5;
       vacc1x6 += va1 * vb6;
       vacc1x7 += va1 * vb7;
-
-      k -= sizeof(int8_t);
-    } while (k != 0);
+    }
 
     float vout0x0 = (float) vacc0x0;
     float vout0x1 = (float) vacc0x1;

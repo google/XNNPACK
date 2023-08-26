@@ -15,7 +15,7 @@ $if VARIANT == "LRINTF":
 $if NR % 4 != 0:
   #include <xnnpack/unaligned.h>
 
-
+$KBLOCK = 4 if WASM else 2 if DATATYPE == "QC4" else 1
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QU8": "qu8", "QD8": "qd8_f32_qc8w", "QC4": "qd8_f32_qc4w"}[DATATYPE]
 $VARIANT_SPEC = "_" + VARIANT.lower() if VARIANT else ""
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
@@ -72,6 +72,9 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
     const int32_t vb_zero_point = params->${PARAMS_STRUCT}.kernel_zero_point;
   $elif DATATYPE == "QC4":
     const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
+    assert(vminus_kernel_zero_point >= -15);
+    assert(vminus_kernel_zero_point <= 0);
+
   do {
     $if DATATYPE in ["QD8", "QC4"]:
       $if NR % 4 != 0:
@@ -96,36 +99,57 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
     w = (const int32_t*) w + ${NR};
 
     size_t k = kc;
-    $if DATATYPE == "QC4":
-      for (; k >= 2 * sizeof(float); k -= 2 * sizeof(float)) {
+    $if KBLOCK > 1:
+      for (; k >= ${KBLOCK} * sizeof(int8_t); k -= ${KBLOCK} * sizeof(int8_t)) {
         $for M in range(MR):
-          const int32_t va${M}0 = (int32_t) *a${M}++;
-          const int32_t va${M}1 = (int32_t) *a${M}++;
+          $for K in range(KBLOCK):
+            $if DATATYPE == "QU8":
+              const int32_t va${M}${K} = (int32_t) (uint32_t) a${M}[${K}];
+            $else:
+              const int32_t va${M}${K} = (int32_t) a${M}[${K}];
+          a${M} += ${KBLOCK};
 
-        $for N in range(NR):
-          const uint32_t vbi${N} = (uint32_t) ((const uint8_t*) w)[${N}];
-        $for N in range(NR):
-          const int32_t vb${N}0 = (int32_t) (vbi${N} & 0xF) + vminus_kernel_zero_point;
-        $for N in range(NR):
-          const int32_t vb${N}1 = (int32_t) (vbi${N} >> 4) + vminus_kernel_zero_point;
-        w = (const int8_t*) w + ${NR};
+        $if DATATYPE == "QU8":
+          $for K in range(KBLOCK):
+            $for N in range(NR):
+              const int32_t vb${N}${K} = (int32_t) (uint32_t) ((const uint8_t*) w)[${N + K * NR}] - vb_zero_point;
+          w = (const ${XINT8_T}*) w + ${NR * KBLOCK};
+        $elif DATATYPE == "QC4":
+          $for K in range(0, KBLOCK, 2):
+            $for N in range(NR):
+              const uint32_t vbi${N}${K} = (uint32_t) ((const uint8_t*) w)[${N + K * NR // 2}];
+          $for K in range(0, KBLOCK, 2):
+            $for N in range(NR):
+              const int32_t vb${N}${K + 0} = (int32_t) (vbi${N}${K} & 0xF) + vminus_kernel_zero_point;
+            $for N in range(NR):
+              const int32_t vb${N}${K + 1} = (int32_t) (vbi${N}${K} >> 4) + vminus_kernel_zero_point;
+          w = (const ${XINT8_T}*) w + ${NR * KBLOCK // 2};
+        $else:
+          $for K in range(KBLOCK):
+            $for N in range(NR):
+              const int32_t vb${N}${K} = (int32_t) ((const int8_t*) w)[${N + K * NR}];
+          w = (const ${XINT8_T}*) w + ${NR * KBLOCK};
 
-        $for M in range(MR):
-          $for N in range(NR):
-            vacc${M}x${N} += va${M}0 * vb${N}0;
-        $for M in range(MR):
-          $for N in range(NR):
-            vacc${M}x${N} += va${M}1 * vb${N}1;
+        $for K in range(KBLOCK):
+          $for M in range(MR):
+            $for N in range(NR):
+              vacc${M}x${N} += va${M}${K} * vb${N}${K};
       }
       if XNN_UNLIKELY(k != 0) {
         $for M in range(MR):
-          const int32_t va${M} = (int32_t) *a${M}++;
+          $if DATATYPE == "QU8":
+            const int32_t va${M} = (int32_t) (uint32_t) *a${M}++;
+          $else:
+            const int32_t va${M} = (int32_t) *a${M}++;
 
         $for N in range(NR):
-          const uint32_t vbi${N} = (uint32_t) ((const uint8_t*) w)[${N}];
-        $for N in range(NR):
-          const int32_t vb${N} = (int32_t) vbi${N} + vminus_kernel_zero_point;
-        w = (const int8_t*) w + ${NR};
+          $if DATATYPE == "QU8":
+            const int32_t vb${N} = (int32_t) (uint32_t) ((const uint8_t*) w)[${N}] - vb_zero_point;
+          $elif DATATYPE == "QC4":
+            const int32_t vb${N} = (int32_t) ((const int8_t*) w)[${N}] + vminus_kernel_zero_point;
+          $else:
+            const int32_t vb${N} = (int32_t) ((const int8_t*) w)[${N}];
+        w = (const ${XINT8_T}*) w + ${NR};
 
         $for M in range(MR):
           $for N in range(NR):

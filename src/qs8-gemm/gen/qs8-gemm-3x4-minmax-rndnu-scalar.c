@@ -12,7 +12,6 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
 
-
 void xnn_qs8_gemm_minmax_rndnu_ukernel_3x4__scalar(
     size_t mr,
     size_t nc,
@@ -44,6 +43,7 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_3x4__scalar(
     a2 = a1;
     c2 = c1;
   }
+
 
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];

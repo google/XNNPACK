@@ -13,7 +13,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/unaligned.h>
 
-
 void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x2__wasm(
     size_t mr,
     size_t nc,
@@ -35,6 +34,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x2__wasm(
   const int8_t* a0 = a;
   float* c0 = c;
 
+
   do {
     const int32_t vksum0 = unaligned_indexed_load_s32(w, 0);
     const int32_t vksum1 = unaligned_indexed_load_s32(w, 1);
@@ -44,7 +44,33 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x2__wasm(
     w = (const int32_t*) w + 2;
 
     size_t k = kc;
-    do {
+    for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
+      const int32_t va00 = (int32_t) a0[0];
+      const int32_t va01 = (int32_t) a0[1];
+      const int32_t va02 = (int32_t) a0[2];
+      const int32_t va03 = (int32_t) a0[3];
+      a0 += 4;
+
+      const int32_t vb00 = (int32_t) ((const int8_t*) w)[0];
+      const int32_t vb10 = (int32_t) ((const int8_t*) w)[1];
+      const int32_t vb01 = (int32_t) ((const int8_t*) w)[2];
+      const int32_t vb11 = (int32_t) ((const int8_t*) w)[3];
+      const int32_t vb02 = (int32_t) ((const int8_t*) w)[4];
+      const int32_t vb12 = (int32_t) ((const int8_t*) w)[5];
+      const int32_t vb03 = (int32_t) ((const int8_t*) w)[6];
+      const int32_t vb13 = (int32_t) ((const int8_t*) w)[7];
+      w = (const int8_t*) w + 8;
+
+      vacc0x0 += va00 * vb00;
+      vacc0x1 += va00 * vb10;
+      vacc0x0 += va01 * vb01;
+      vacc0x1 += va01 * vb11;
+      vacc0x0 += va02 * vb02;
+      vacc0x1 += va02 * vb12;
+      vacc0x0 += va03 * vb03;
+      vacc0x1 += va03 * vb13;
+    }
+    if XNN_UNLIKELY(k != 0) {
       const int32_t va0 = (int32_t) *a0++;
 
       const int32_t vb0 = (int32_t) ((const int8_t*) w)[0];
@@ -53,9 +79,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x2__wasm(
 
       vacc0x0 += va0 * vb0;
       vacc0x1 += va0 * vb1;
-
-      k -= sizeof(int8_t);
-    } while (k != 0);
+    }
 
     float vout0x0 = (float) vacc0x0;
     float vout0x1 = (float) vacc0x1;

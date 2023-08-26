@@ -12,7 +12,6 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
 
-
 void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4__scalar(
     size_t mr,
     size_t nc,
@@ -51,6 +50,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4__scalar(
     a3 = a2;
     c3 = c2;
   }
+
 
   do {
     const int32_t vksum0 = ((const int32_t*) w)[0];

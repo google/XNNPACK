@@ -12,7 +12,6 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
 
-
 void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8__scalar(
     size_t mr,
     size_t nc,
@@ -35,6 +34,9 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8__scalar(
   float* c0 = c;
 
   const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
+  assert(vminus_kernel_zero_point >= -15);
+  assert(vminus_kernel_zero_point <= 0);
+
   do {
     const int32_t vksum0 = ((const int32_t*) w)[0];
     const int32_t vksum1 = ((const int32_t*) w)[1];
@@ -56,34 +58,35 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8__scalar(
     w = (const int32_t*) w + 8;
 
     size_t k = kc;
-    for (; k >= 2 * sizeof(float); k -= 2 * sizeof(float)) {
-      const int32_t va00 = (int32_t) *a0++;
-      const int32_t va01 = (int32_t) *a0++;
+    for (; k >= 2 * sizeof(int8_t); k -= 2 * sizeof(int8_t)) {
+      const int32_t va00 = (int32_t) a0[0];
+      const int32_t va01 = (int32_t) a0[1];
+      a0 += 2;
 
-      const uint32_t vbi0 = (uint32_t) ((const uint8_t*) w)[0];
-      const uint32_t vbi1 = (uint32_t) ((const uint8_t*) w)[1];
-      const uint32_t vbi2 = (uint32_t) ((const uint8_t*) w)[2];
-      const uint32_t vbi3 = (uint32_t) ((const uint8_t*) w)[3];
-      const uint32_t vbi4 = (uint32_t) ((const uint8_t*) w)[4];
-      const uint32_t vbi5 = (uint32_t) ((const uint8_t*) w)[5];
-      const uint32_t vbi6 = (uint32_t) ((const uint8_t*) w)[6];
-      const uint32_t vbi7 = (uint32_t) ((const uint8_t*) w)[7];
-      const int32_t vb00 = (int32_t) (vbi0 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb10 = (int32_t) (vbi1 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb20 = (int32_t) (vbi2 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb30 = (int32_t) (vbi3 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb40 = (int32_t) (vbi4 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb50 = (int32_t) (vbi5 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb60 = (int32_t) (vbi6 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb70 = (int32_t) (vbi7 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb01 = (int32_t) (vbi0 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb11 = (int32_t) (vbi1 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb21 = (int32_t) (vbi2 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb31 = (int32_t) (vbi3 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb41 = (int32_t) (vbi4 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb51 = (int32_t) (vbi5 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb61 = (int32_t) (vbi6 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb71 = (int32_t) (vbi7 >> 4) + vminus_kernel_zero_point;
+      const uint32_t vbi00 = (uint32_t) ((const uint8_t*) w)[0];
+      const uint32_t vbi10 = (uint32_t) ((const uint8_t*) w)[1];
+      const uint32_t vbi20 = (uint32_t) ((const uint8_t*) w)[2];
+      const uint32_t vbi30 = (uint32_t) ((const uint8_t*) w)[3];
+      const uint32_t vbi40 = (uint32_t) ((const uint8_t*) w)[4];
+      const uint32_t vbi50 = (uint32_t) ((const uint8_t*) w)[5];
+      const uint32_t vbi60 = (uint32_t) ((const uint8_t*) w)[6];
+      const uint32_t vbi70 = (uint32_t) ((const uint8_t*) w)[7];
+      const int32_t vb00 = (int32_t) (vbi00 & 0xF) + vminus_kernel_zero_point;
+      const int32_t vb10 = (int32_t) (vbi10 & 0xF) + vminus_kernel_zero_point;
+      const int32_t vb20 = (int32_t) (vbi20 & 0xF) + vminus_kernel_zero_point;
+      const int32_t vb30 = (int32_t) (vbi30 & 0xF) + vminus_kernel_zero_point;
+      const int32_t vb40 = (int32_t) (vbi40 & 0xF) + vminus_kernel_zero_point;
+      const int32_t vb50 = (int32_t) (vbi50 & 0xF) + vminus_kernel_zero_point;
+      const int32_t vb60 = (int32_t) (vbi60 & 0xF) + vminus_kernel_zero_point;
+      const int32_t vb70 = (int32_t) (vbi70 & 0xF) + vminus_kernel_zero_point;
+      const int32_t vb01 = (int32_t) (vbi00 >> 4) + vminus_kernel_zero_point;
+      const int32_t vb11 = (int32_t) (vbi10 >> 4) + vminus_kernel_zero_point;
+      const int32_t vb21 = (int32_t) (vbi20 >> 4) + vminus_kernel_zero_point;
+      const int32_t vb31 = (int32_t) (vbi30 >> 4) + vminus_kernel_zero_point;
+      const int32_t vb41 = (int32_t) (vbi40 >> 4) + vminus_kernel_zero_point;
+      const int32_t vb51 = (int32_t) (vbi50 >> 4) + vminus_kernel_zero_point;
+      const int32_t vb61 = (int32_t) (vbi60 >> 4) + vminus_kernel_zero_point;
+      const int32_t vb71 = (int32_t) (vbi70 >> 4) + vminus_kernel_zero_point;
       w = (const int8_t*) w + 8;
 
       vacc0x0 += va00 * vb00;
@@ -106,22 +109,14 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8__scalar(
     if XNN_UNLIKELY(k != 0) {
       const int32_t va0 = (int32_t) *a0++;
 
-      const uint32_t vbi0 = (uint32_t) ((const uint8_t*) w)[0];
-      const uint32_t vbi1 = (uint32_t) ((const uint8_t*) w)[1];
-      const uint32_t vbi2 = (uint32_t) ((const uint8_t*) w)[2];
-      const uint32_t vbi3 = (uint32_t) ((const uint8_t*) w)[3];
-      const uint32_t vbi4 = (uint32_t) ((const uint8_t*) w)[4];
-      const uint32_t vbi5 = (uint32_t) ((const uint8_t*) w)[5];
-      const uint32_t vbi6 = (uint32_t) ((const uint8_t*) w)[6];
-      const uint32_t vbi7 = (uint32_t) ((const uint8_t*) w)[7];
-      const int32_t vb0 = (int32_t) vbi0 + vminus_kernel_zero_point;
-      const int32_t vb1 = (int32_t) vbi1 + vminus_kernel_zero_point;
-      const int32_t vb2 = (int32_t) vbi2 + vminus_kernel_zero_point;
-      const int32_t vb3 = (int32_t) vbi3 + vminus_kernel_zero_point;
-      const int32_t vb4 = (int32_t) vbi4 + vminus_kernel_zero_point;
-      const int32_t vb5 = (int32_t) vbi5 + vminus_kernel_zero_point;
-      const int32_t vb6 = (int32_t) vbi6 + vminus_kernel_zero_point;
-      const int32_t vb7 = (int32_t) vbi7 + vminus_kernel_zero_point;
+      const int32_t vb0 = (int32_t) ((const int8_t*) w)[0] + vminus_kernel_zero_point;
+      const int32_t vb1 = (int32_t) ((const int8_t*) w)[1] + vminus_kernel_zero_point;
+      const int32_t vb2 = (int32_t) ((const int8_t*) w)[2] + vminus_kernel_zero_point;
+      const int32_t vb3 = (int32_t) ((const int8_t*) w)[3] + vminus_kernel_zero_point;
+      const int32_t vb4 = (int32_t) ((const int8_t*) w)[4] + vminus_kernel_zero_point;
+      const int32_t vb5 = (int32_t) ((const int8_t*) w)[5] + vminus_kernel_zero_point;
+      const int32_t vb6 = (int32_t) ((const int8_t*) w)[6] + vminus_kernel_zero_point;
+      const int32_t vb7 = (int32_t) ((const int8_t*) w)[7] + vminus_kernel_zero_point;
       w = (const int8_t*) w + 8;
 
       vacc0x0 += va0 * vb0;

@@ -12,7 +12,6 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
 
-
 void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x4__scalar_imagic(
     size_t mr,
     size_t nc,
@@ -38,6 +37,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x4__scalar_imagic(
     a1 = a0;
     c1 = c0;
   }
+
 
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
