@@ -535,12 +535,12 @@ void GemmMicrokernelTester::Test(
 
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), std::ref(f32rng));
-    for (int i = 0; i < m(); ++i) {
+    for (size_t i = 0; i < m(); ++i) {
       const float* input_ptr = &input[i * k()];
       const auto minmax = std::minmax_element(input_ptr, input_ptr + k());
       quantization_params[i] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second);
       const float inv_scale = 1.f / quantization_params[i].inv_scale;
-      for (int j = 0; j < k(); ++j) {
+      for (size_t j = 0; j < k(); ++j) {
         float scaled_input = input_ptr[j] * inv_scale;
         scaled_input = std::min<float>(scaled_input, float(std::numeric_limits<int8_t>::max()
                                                            - quantization_params[i].zero_point));
