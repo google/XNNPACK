@@ -91,11 +91,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
           int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M+1}x${ABC[N:N+4]})));
     $else:
       $for N in range(0, NR, 4):
-        int32x4_t vbias${ABC[N:N+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
+        const uint64x2x2_t vbias01x${ABC[N:N+4]} = vld2q_dup_u64(w); w = (const int32_t*) w + 4;
       $for M in range(0, MR, 2):
         $for N in range(0, NR, 4):
-          int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vbias${ABC[N:N+4]}), vreinterpretq_u64_s32(vbias${ABC[N:N+4]})));
-          int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vbias${ABC[N:N+4]}), vreinterpretq_u64_s32(vbias${ABC[N:N+4]})));
+          int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vreinterpretq_s32_u64(vbias01x${ABC[N:N+4]}.val[0]);
+          int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vreinterpretq_s32_u64(vbias01x${ABC[N:N+4]}.val[1]);
 
     // Inner accumulation loop along the ${NR} columns.
     size_t k = kc;

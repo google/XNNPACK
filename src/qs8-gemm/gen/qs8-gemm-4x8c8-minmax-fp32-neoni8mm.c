@@ -63,16 +63,16 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_4x8c8__neoni8mm(
   do {
     // Initialize accumulators with bias. 8 bias values are loaded from the
     // weight matrix, at the start of the group of 8 columns.
-    int32x4_t vbias0123 = vld1q_s32(w); w = (const int32_t*) w + 4;
-    int32x4_t vbias4567 = vld1q_s32(w); w = (const int32_t*) w + 4;
-    int32x4_t vacc01x01 = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vbias0123), vreinterpretq_u64_s32(vbias0123)));
-    int32x4_t vacc01x23 = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vbias0123), vreinterpretq_u64_s32(vbias0123)));
-    int32x4_t vacc01x45 = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vbias4567), vreinterpretq_u64_s32(vbias4567)));
-    int32x4_t vacc01x67 = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vbias4567), vreinterpretq_u64_s32(vbias4567)));
-    int32x4_t vacc23x01 = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vbias0123), vreinterpretq_u64_s32(vbias0123)));
-    int32x4_t vacc23x23 = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vbias0123), vreinterpretq_u64_s32(vbias0123)));
-    int32x4_t vacc23x45 = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vbias4567), vreinterpretq_u64_s32(vbias4567)));
-    int32x4_t vacc23x67 = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vbias4567), vreinterpretq_u64_s32(vbias4567)));
+    const uint64x2x2_t vbias01x0123 = vld2q_dup_u64(w); w = (const int32_t*) w + 4;
+    const uint64x2x2_t vbias01x4567 = vld2q_dup_u64(w); w = (const int32_t*) w + 4;
+    int32x4_t vacc01x01 = vreinterpretq_s32_u64(vbias01x0123.val[0]);
+    int32x4_t vacc01x23 = vreinterpretq_s32_u64(vbias01x0123.val[1]);
+    int32x4_t vacc01x45 = vreinterpretq_s32_u64(vbias01x4567.val[0]);
+    int32x4_t vacc01x67 = vreinterpretq_s32_u64(vbias01x4567.val[1]);
+    int32x4_t vacc23x01 = vreinterpretq_s32_u64(vbias01x0123.val[0]);
+    int32x4_t vacc23x23 = vreinterpretq_s32_u64(vbias01x0123.val[1]);
+    int32x4_t vacc23x45 = vreinterpretq_s32_u64(vbias01x4567.val[0]);
+    int32x4_t vacc23x67 = vreinterpretq_s32_u64(vbias01x4567.val[1]);
 
     // Inner accumulation loop along the 8 columns.
     size_t k = kc;
