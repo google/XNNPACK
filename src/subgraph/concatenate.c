@@ -50,34 +50,25 @@ static enum xnn_status create_concatenate2_operator(
   assert(input2_id != XNN_INVALID_VALUE_ID);
   assert(input2_id < num_values);
 
-  assert(node->num_outputs == 1);
-  const uint32_t output_id = node->outputs[0];
-  assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_values);
-
   const size_t axis = node->params.concatenate.axis;
-  size_t batch_size = 1, channels_1 = 1, channels_2 = 1;
-  for (size_t i = 0; i < axis; i++) {
-    batch_size *= values[output_id].shape.dim[i];
-  }
+  opdata->axis = axis;
+  size_t input1_channels = 1, input2_channels = 1;
 
   for (size_t i = axis; i < values[input1_id].shape.num_dims; i++) {
-    channels_1 *= values[input1_id].shape.dim[i];
-    channels_2 *= values[input2_id].shape.dim[i];
+    input1_channels *= values[input1_id].shape.dim[i];
+    input2_channels *= values[input2_id].shape.dim[i];
   }
-  const size_t output_stride = channels_1 + channels_2;
+  const size_t output_stride = input1_channels + input2_channels;
 
   enum xnn_status status;
-  status = create_concatenate_operator_helper(node, channels_1, channels_1, output_stride, opdata, 0);
+  status = create_concatenate_operator_helper(node, input1_channels, input1_channels, output_stride, opdata, 0);
   if (status != xnn_status_success) {
     return status;
   }
-  status = create_concatenate_operator_helper(node, channels_2, channels_2, output_stride, opdata, 1);
+  status = create_concatenate_operator_helper(node, input2_channels, input2_channels, output_stride, opdata, 1);
   if (status != xnn_status_success) {
     return status;
   }
-
-  opdata->batch_size = batch_size;
 
   return status;
 }
@@ -101,39 +92,30 @@ static enum xnn_status create_concatenate3_operator(
   assert(input3_id != XNN_INVALID_VALUE_ID);
   assert(input3_id < num_values);
 
-  assert(node->num_outputs == 1);
-  const uint32_t output_id = node->outputs[0];
-  assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_values);
-
   const size_t axis = node->params.concatenate.axis;
-  size_t batch_size = 1, channels_1 = 1, channels_2 = 1, channels_3 = 1;
-  for (size_t i = 0; i < axis; i++) {
-    batch_size *= values[output_id].shape.dim[i];
-  }
+  opdata->axis = axis;
+  size_t input1_channels = 1, input2_channels = 1, input3_channels = 1;
 
   for (size_t i = axis; i < values[input1_id].shape.num_dims; i++) {
-    channels_1 *= values[input1_id].shape.dim[i];
-    channels_2 *= values[input2_id].shape.dim[i];
-    channels_3 *= values[input3_id].shape.dim[i];
+    input1_channels *= values[input1_id].shape.dim[i];
+    input2_channels *= values[input2_id].shape.dim[i];
+    input3_channels *= values[input3_id].shape.dim[i];
   }
-  const size_t output_stride = channels_1 + channels_2 + channels_3;
+  const size_t output_stride = input1_channels + input2_channels + input3_channels;
 
   enum xnn_status status;
-  status = create_concatenate_operator_helper(node, channels_1, channels_1, output_stride, opdata, 0);
+  status = create_concatenate_operator_helper(node, input1_channels, input1_channels, output_stride, opdata, 0);
   if (status != xnn_status_success) {
     return status;
   }
-  status = create_concatenate_operator_helper(node, channels_2, channels_2, output_stride, opdata, 1);
+  status = create_concatenate_operator_helper(node, input2_channels, input2_channels, output_stride, opdata, 1);
   if (status != xnn_status_success) {
     return status;
   }
-  status = create_concatenate_operator_helper(node, channels_3, channels_3, output_stride, opdata, 2);
+  status = create_concatenate_operator_helper(node, input3_channels, input3_channels, output_stride, opdata, 2);
   if (status != xnn_status_success) {
     return status;
   }
-
-  opdata->batch_size = batch_size;
 
   return status;
 }
@@ -160,44 +142,35 @@ static enum xnn_status create_concatenate4_operator(
   assert(input4_id != XNN_INVALID_VALUE_ID);
   assert(input4_id < num_values);
 
-  assert(node->num_outputs == 1);
-  const uint32_t output_id = node->outputs[0];
-  assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_values);
-
   const size_t axis = node->params.concatenate.axis;
-  size_t batch_size = 1, channels_1 = 1, channels_2 = 1, channels_3 = 1, channels_4 = 1;
-  for (size_t i = 0; i < axis; i++) {
-    batch_size *= values[output_id].shape.dim[i];
-  }
+  opdata->axis = axis;
+  size_t input1_channels = 1, input2_channels = 1, input3_channels = 1, input4_channels = 1;
 
   for (size_t i = axis; i < values[input1_id].shape.num_dims; i++) {
-    channels_1 *= values[input1_id].shape.dim[i];
-    channels_2 *= values[input2_id].shape.dim[i];
-    channels_3 *= values[input3_id].shape.dim[i];
-    channels_4 *= values[input4_id].shape.dim[i];
+    input1_channels *= values[input1_id].shape.dim[i];
+    input2_channels *= values[input2_id].shape.dim[i];
+    input3_channels *= values[input3_id].shape.dim[i];
+    input4_channels *= values[input4_id].shape.dim[i];
   }
-  const size_t output_stride = channels_1 + channels_2 + channels_3 + channels_4;
+  const size_t output_stride = input1_channels + input2_channels + input3_channels + input4_channels;
 
   enum xnn_status status;
-  status = create_concatenate_operator_helper(node, channels_1, channels_1, output_stride, opdata, 0);
+  status = create_concatenate_operator_helper(node, input1_channels, input1_channels, output_stride, opdata, 0);
   if (status != xnn_status_success) {
     return status;
   }
-  status = create_concatenate_operator_helper(node, channels_2, channels_2, output_stride, opdata, 1);
+  status = create_concatenate_operator_helper(node, input2_channels, input2_channels, output_stride, opdata, 1);
   if (status != xnn_status_success) {
     return status;
   }
-  status = create_concatenate_operator_helper(node, channels_3, channels_3, output_stride, opdata, 2);
+  status = create_concatenate_operator_helper(node, input3_channels, input3_channels, output_stride, opdata, 2);
   if (status != xnn_status_success) {
     return status;
   }
-  status = create_concatenate_operator_helper(node, channels_4, channels_4, output_stride, opdata, 3);
+  status = create_concatenate_operator_helper(node, input4_channels, input4_channels, output_stride, opdata, 3);
   if (status != xnn_status_success) {
     return status;
   }
-
-  opdata->batch_size = batch_size;
 
   return status;
 }
@@ -236,6 +209,14 @@ static enum xnn_status reshape_concatenate2_operator(
 {
   enum xnn_status status;
 
+  assert(opdata->num_outputs == 1);
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_values);
+
+  opdata->batch_size = xnn_shape_multiply_batch_dims(
+    &values[output_id].shape, values[output_id].shape.num_dims - opdata->axis);
+
   status = reshape_concatenate_operator_helper(opdata, 0, threadpool);
   if (status != xnn_status_success) {
     return status;
@@ -250,6 +231,14 @@ static enum xnn_status reshape_concatenate3_operator(
   pthreadpool_t threadpool)
 {
   enum xnn_status status;
+
+  assert(opdata->num_outputs == 1);
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_values);
+
+  opdata->batch_size = xnn_shape_multiply_batch_dims(
+    &values[output_id].shape, values[output_id].shape.num_dims - opdata->axis);
 
   status = reshape_concatenate_operator_helper(opdata, 0, threadpool);
   if (status != xnn_status_success) {
@@ -269,6 +258,14 @@ static enum xnn_status reshape_concatenate4_operator(
   pthreadpool_t threadpool)
 {
   enum xnn_status status;
+
+  assert(opdata->num_outputs == 1);
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_values);
+
+  opdata->batch_size = xnn_shape_multiply_batch_dims(
+    &values[output_id].shape, values[output_id].shape.num_dims - opdata->axis);
 
   status = reshape_concatenate_operator_helper(opdata, 0, threadpool);
   if (status != xnn_status_success) {

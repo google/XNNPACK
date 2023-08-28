@@ -403,7 +403,12 @@ struct xnn_operator_data {
   size_t output_channels;
   struct xnn_shape shape1;
   struct xnn_shape shape2;
-  size_t num_reduction_axes;
+  union {
+    // Used for reduction/mean.
+    size_t num_reduction_axes;
+    // Use for concatenate.
+    size_t axis;
+  };
   size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
   size_t pre_paddings[XNN_MAX_TENSOR_DIMS];
   size_t post_paddings[XNN_MAX_TENSOR_DIMS];
