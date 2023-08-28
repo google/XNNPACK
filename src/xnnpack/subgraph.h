@@ -405,16 +405,23 @@ struct xnn_operator_data {
   struct xnn_shape shape2;
   union {
     // Used for reduction/mean.
-    size_t num_reduction_axes;
-    // Use for concatenate.
+    struct {
+      size_t num_reduction_axes;
+      size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
+    };
+    // Used for concatenate.
     size_t axis;
+    // Used for static constant pad.
+    struct {
+      size_t post_paddings[XNN_MAX_TENSOR_DIMS];
+      size_t pre_paddings[XNN_MAX_TENSOR_DIMS];
+    };
+    // Used for static slice.
+    struct {
+      size_t offsets[XNN_MAX_TENSOR_DIMS];
+      size_t sizes[XNN_MAX_TENSOR_DIMS];
+    };
   };
-  size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
-  size_t pre_paddings[XNN_MAX_TENSOR_DIMS];
-  size_t post_paddings[XNN_MAX_TENSOR_DIMS];
-  // TODO(zhin): merge this with pre_paddings/post_paddings to reduce size of this struct.
-  size_t offsets[XNN_MAX_TENSOR_DIMS];
-  size_t sizes[XNN_MAX_TENSOR_DIMS];
   uint32_t adjustment_height;
   uint32_t adjustment_width;
   uint32_t num_inputs;
