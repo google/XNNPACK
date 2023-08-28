@@ -214,8 +214,7 @@ static enum xnn_status reshape_concatenate2_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  opdata->batch_size = xnn_shape_multiply_batch_dims(
-    &values[output_id].shape, values[output_id].shape.num_dims - opdata->axis);
+  opdata->batch_size = xnn_shape_multiply_leading_dims(&values[output_id].shape, opdata->axis);
 
   status = reshape_concatenate_operator_helper(opdata, 0, threadpool);
   if (status != xnn_status_success) {
@@ -237,8 +236,7 @@ static enum xnn_status reshape_concatenate3_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  opdata->batch_size = xnn_shape_multiply_batch_dims(
-    &values[output_id].shape, values[output_id].shape.num_dims - opdata->axis);
+  opdata->batch_size = xnn_shape_multiply_leading_dims(&values[output_id].shape, opdata->axis);
 
   status = reshape_concatenate_operator_helper(opdata, 0, threadpool);
   if (status != xnn_status_success) {
@@ -264,8 +262,7 @@ static enum xnn_status reshape_concatenate4_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  opdata->batch_size = xnn_shape_multiply_batch_dims(
-    &values[output_id].shape, values[output_id].shape.num_dims - opdata->axis);
+  opdata->batch_size = xnn_shape_multiply_leading_dims(&values[output_id].shape, opdata->axis);
 
   status = reshape_concatenate_operator_helper(opdata, 0, threadpool);
   if (status != xnn_status_success) {

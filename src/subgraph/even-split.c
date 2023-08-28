@@ -13,23 +13,6 @@
 #include <xnnpack/subgraph.h>
 #include <xnnpack/subgraph-validation.h>
 
-static size_t calculate_batch_size(const struct xnn_value* input, size_t axis)
-{
-  size_t batch_size = 1;
-  for (size_t i = 0; i < axis; i++) {
-    batch_size *= input->shape.dim[i];
-  }
-  return batch_size;
-}
-
-static size_t calculate_input_stride(const struct xnn_value* input, size_t axis)
-{
-  size_t input_stride = 1;
-  for (size_t i = axis; i < input->shape.num_dims; i++) {
-    input_stride *= input->shape.dim[i];
-  }
-  return input_stride;
-}
 
 static enum xnn_status create_even_split_operator_helper(
     const uint32_t output_id,
@@ -89,8 +72,8 @@ static enum xnn_status create_even_split2_operator(
   }
 
   const size_t axis = node->params.even_split.axis;
-  const size_t batch_size = calculate_batch_size(&values[input_id], axis);
-  const size_t input_stride = calculate_input_stride(&values[input_id], axis);
+  opdata->axis = axis;
+  const size_t input_stride = xnn_shape_multiply_trailing_dims(&values[input_id].shape, axis);
   assert(input_stride % 2 == 0);
   const size_t channels = input_stride / 2;
   const size_t output_stride = channels;
@@ -104,8 +87,6 @@ static enum xnn_status create_even_split2_operator(
   if (status != xnn_status_success) {
     return status;
   }
-
-  opdata->batch_size = batch_size;
 
   return status;
 }
@@ -138,8 +119,8 @@ static enum xnn_status create_even_split3_operator(
   }
 
   const size_t axis = node->params.even_split.axis;
-  const size_t batch_size = calculate_batch_size(&values[input_id], axis);
-  const size_t input_stride = calculate_input_stride(&values[input_id], axis);
+  opdata->axis = axis;
+  const size_t input_stride = xnn_shape_multiply_trailing_dims(&values[input_id].shape, axis);
   assert(input_stride % 3 == 0);
   const size_t channels = input_stride / 3;
   const size_t output_stride = channels;
@@ -157,8 +138,6 @@ static enum xnn_status create_even_split3_operator(
   if (status != xnn_status_success) {
     return status;
   }
-
-  opdata->batch_size = batch_size;
 
   return status;
 }
@@ -195,8 +174,8 @@ static enum xnn_status create_even_split4_operator(
   }
 
   const size_t axis = node->params.even_split.axis;
-  const size_t batch_size = calculate_batch_size(&values[input_id], axis);
-  const size_t input_stride = calculate_input_stride(&values[input_id], axis);
+  opdata->axis = axis;
+  const size_t input_stride = xnn_shape_multiply_trailing_dims(&values[input_id].shape, axis);
   assert(input_stride % 4 == 0);
   const size_t channels = input_stride / 4;
   const size_t output_stride = channels;
@@ -218,8 +197,6 @@ static enum xnn_status create_even_split4_operator(
   if (status != xnn_status_success) {
     return status;
   }
-
-  opdata->batch_size = batch_size;
 
   return status;
 }
@@ -263,6 +240,13 @@ static enum xnn_status reshape_even_split2_operator(
 {
   enum xnn_status status = xnn_status_success;
 
+  assert(opdata->num_inputs == 1);
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_values);
+
+  opdata->batch_size = xnn_shape_multiply_leading_dims(&values[input_id].shape, opdata->axis);
+
   status = reshape_even_split_operator_helper(values, num_values, opdata, 0, threadpool);
   if (status != xnn_status_success) {
     return status;
@@ -282,6 +266,13 @@ static enum xnn_status reshape_even_split3_operator(
   pthreadpool_t threadpool)
 {
   enum xnn_status status = xnn_status_success;
+
+  assert(opdata->num_inputs == 1);
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_values);
+
+  opdata->batch_size = xnn_shape_multiply_leading_dims(&values[input_id].shape, opdata->axis);
 
   status = reshape_even_split_operator_helper(values, num_values, opdata, 0, threadpool);
   if (status != xnn_status_success) {
@@ -306,6 +297,13 @@ static enum xnn_status reshape_even_split4_operator(
   pthreadpool_t threadpool)
 {
   enum xnn_status status = xnn_status_success;
+
+  assert(opdata->num_inputs == 1);
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_values);
+
+  opdata->batch_size = xnn_shape_multiply_leading_dims(&values[input_id].shape, opdata->axis);
 
   status = reshape_even_split_operator_helper(values, num_values, opdata, 0, threadpool);
   if (status != xnn_status_success) {

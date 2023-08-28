@@ -440,6 +440,28 @@ size_t xnn_shape_multiply_non_channel_dims(
   return batch_size;
 }
 
+size_t xnn_shape_multiply_leading_dims(
+  const struct xnn_shape shape[restrict XNN_MIN_ELEMENTS(1)],
+  size_t num_leading_dims)
+{
+  size_t batch_size = 1;
+  for (size_t i = 0; i < num_leading_dims; i++) {
+    batch_size *= shape->dim[i];
+  }
+  return batch_size;
+}
+
+size_t xnn_shape_multiply_trailing_dims(
+  const struct xnn_shape shape[1],
+  size_t start_dim)
+{
+  size_t product = 1;
+  for (size_t i = start_dim; i < shape->num_dims; i++) {
+    product *= shape->dim[i];
+  }
+  return product;
+}
+
 size_t xnn_tensor_get_size(const struct xnn_value* value)
 {
   assert(value->type == xnn_value_type_dense_tensor);

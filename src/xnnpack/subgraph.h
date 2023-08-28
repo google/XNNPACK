@@ -505,6 +505,16 @@ size_t xnn_shape_multiply_batch_dims(
 size_t xnn_shape_multiply_non_channel_dims(
   const struct xnn_shape shape[1]);
 
+// Product of n leading dimensions.
+size_t xnn_shape_multiply_leading_dims(
+  const struct xnn_shape shape[1],
+  size_t num_leading_dims);
+
+// Product of trailing dimensions starting from start_dim.
+size_t xnn_shape_multiply_trailing_dims(
+  const struct xnn_shape shape[1],
+  size_t start_dim);
+
 enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph, uint32_t flags);
 
 void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph);
