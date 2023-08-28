@@ -26,7 +26,7 @@ $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $OUT_T = XINT8_T if REQUANTIZATION else "float"
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
-void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}${VARIANT_SPEC}(
+void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}${VARIANT_SPEC}_u1(
     size_t mr,
     size_t nc,
     size_t kc,
