@@ -15,7 +15,7 @@
 #include <xnnpack/window.h>
 
 
-void xnn_s16_window_ukernel__scalar_x1(
+void xnn_s16_window_ukernel__scalar_u1(
     size_t rows,
     size_t channels,
     const int16_t* input,

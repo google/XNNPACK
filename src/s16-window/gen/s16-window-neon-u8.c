@@ -17,7 +17,7 @@
 #include <xnnpack/window.h>
 
 
-void xnn_s16_window_shift15_ukernel__neon_x8(
+void xnn_s16_window_ukernel__neon_u8(
     size_t rows,
     size_t channels,
     const int16_t* input,
@@ -30,8 +30,9 @@ void xnn_s16_window_shift15_ukernel__neon_x8(
   assert(input != NULL);
   assert(weights != NULL);
   assert(output != NULL);
-  assert(shift == 15);
+  assert(shift < 32);
 
+  const int32x4_t vshift = vdupq_n_s32(-(int32_t)shift);  // negative to shift right.
 
   do {
     const int16_t* w = weights;
@@ -41,7 +42,11 @@ void xnn_s16_window_shift15_ukernel__neon_x8(
     for (; c >= 8 * sizeof(int16_t); c -= 8 * sizeof(int16_t)) {
       const int16x8_t vi = vld1q_s16(input); input += 8;
       const int16x8_t vw = vld1q_s16(w); w += 8;
-      const int16x8_t vout = vqdmulhq_s16(vi, vw);
+      int32x4_t vacc_lo = vmull_s16(vget_low_s16(vi), vget_low_s16(vw));
+      int32x4_t vacc_hi = vmull_s16(vget_high_s16(vi), vget_high_s16(vw));
+      vacc_lo = vshlq_s32(vacc_lo, vshift);
+      vacc_hi = vshlq_s32(vacc_hi, vshift);
+      const int16x8_t vout = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
       vst1q_s16(output, vout); output += 8;
     }
 
@@ -50,10 +55,14 @@ void xnn_s16_window_shift15_ukernel__neon_x8(
     if XNN_UNLIKELY(c != 0) {
       const int16x8_t vi = vld1q_s16(input); input = (const int16_t*) ((uintptr_t) input + c);
       const int16x8_t vw = vld1q_s16(w);
-      int16x4_t vout = vqdmulh_s16(vget_low_s16(vi), vget_low_s16(vw));
+      int32x4_t vacc = vmull_s16(vget_low_s16(vi), vget_low_s16(vw));
+      vacc = vshlq_s32(vacc, vshift);
+      int16x4_t vout = vqmovn_s32(vacc);
       if (c & (4 * sizeof(int16_t))) {
         vst1_s16(output, vout); output += 4;
-        vout = vqdmulh_s16(vget_high_s16(vi), vget_high_s16(vw));
+        vacc = vmull_s16(vget_high_s16(vi), vget_high_s16(vw));
+        vacc = vshlq_s32(vacc, vshift);
+        vout = vqmovn_s32(vacc);
       }
       if (c & (2 * sizeof(int16_t))) {
         vst1_lane_u32((void*) output, vreinterpret_u32_s16(vout), 0); output += 2;

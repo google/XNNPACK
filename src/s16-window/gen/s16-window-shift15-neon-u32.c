@@ -17,7 +17,7 @@
 #include <xnnpack/window.h>
 
 
-void xnn_s16_window_ukernel__neon_x8(
+void xnn_s16_window_shift15_ukernel__neon_u32(
     size_t rows,
     size_t channels,
     const int16_t* input,
@@ -30,23 +30,39 @@ void xnn_s16_window_ukernel__neon_x8(
   assert(input != NULL);
   assert(weights != NULL);
   assert(output != NULL);
-  assert(shift < 32);
+  assert(shift == 15);
 
-  const int32x4_t vshift = vdupq_n_s32(-(int32_t)shift);  // negative to shift right.
 
   do {
     const int16_t* w = weights;
     size_t c = channels;
+    for (; c >= 32 * sizeof(int16_t); c -= 32 * sizeof(int16_t)) {
+      const int16x8_t vi0 = vld1q_s16(input); input += 8;
+      const int16x8_t vi1 = vld1q_s16(input); input += 8;
+      const int16x8_t vi2 = vld1q_s16(input); input += 8;
+      const int16x8_t vi3 = vld1q_s16(input); input += 8;
+
+      const int16x8_t vw0 = vld1q_s16(w); w += 8;
+      const int16x8_t vw1 = vld1q_s16(w); w += 8;
+      const int16x8_t vw2 = vld1q_s16(w); w += 8;
+      const int16x8_t vw3 = vld1q_s16(w); w += 8;
+
+      const int16x8_t vout0 = vqdmulhq_s16(vi0, vw0);
+      const int16x8_t vout1 = vqdmulhq_s16(vi1, vw1);
+      const int16x8_t vout2 = vqdmulhq_s16(vi2, vw2);
+      const int16x8_t vout3 = vqdmulhq_s16(vi3, vw3);
+
+      vst1q_s16(output, vout0); output += 8;
+      vst1q_s16(output, vout1); output += 8;
+      vst1q_s16(output, vout2); output += 8;
+      vst1q_s16(output, vout3); output += 8;
+    }
 
     // Remainder of full vectors
     for (; c >= 8 * sizeof(int16_t); c -= 8 * sizeof(int16_t)) {
       const int16x8_t vi = vld1q_s16(input); input += 8;
       const int16x8_t vw = vld1q_s16(w); w += 8;
-      int32x4_t vacc_lo = vmull_s16(vget_low_s16(vi), vget_low_s16(vw));
-      int32x4_t vacc_hi = vmull_s16(vget_high_s16(vi), vget_high_s16(vw));
-      vacc_lo = vshlq_s32(vacc_lo, vshift);
-      vacc_hi = vshlq_s32(vacc_hi, vshift);
-      const int16x8_t vout = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
+      const int16x8_t vout = vqdmulhq_s16(vi, vw);
       vst1q_s16(output, vout); output += 8;
     }
 
@@ -55,14 +71,10 @@ void xnn_s16_window_ukernel__neon_x8(
     if XNN_UNLIKELY(c != 0) {
       const int16x8_t vi = vld1q_s16(input); input = (const int16_t*) ((uintptr_t) input + c);
       const int16x8_t vw = vld1q_s16(w);
-      int32x4_t vacc = vmull_s16(vget_low_s16(vi), vget_low_s16(vw));
-      vacc = vshlq_s32(vacc, vshift);
-      int16x4_t vout = vqmovn_s32(vacc);
+      int16x4_t vout = vqdmulh_s16(vget_low_s16(vi), vget_low_s16(vw));
       if (c & (4 * sizeof(int16_t))) {
         vst1_s16(output, vout); output += 4;
-        vacc = vmull_s16(vget_high_s16(vi), vget_high_s16(vw));
-        vacc = vshlq_s32(vacc, vshift);
-        vout = vqmovn_s32(vacc);
+        vout = vqdmulh_s16(vget_high_s16(vi), vget_high_s16(vw));
       }
       if (c & (2 * sizeof(int16_t))) {
         vst1_lane_u32((void*) output, vreinterpret_u32_s16(vout), 0); output += 2;

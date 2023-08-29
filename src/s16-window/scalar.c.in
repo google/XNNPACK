@@ -12,7 +12,7 @@ $assert CHANNEL_TILE >= 1
 #include <xnnpack/window.h>
 
 
-void xnn_s16_window_ukernel__scalar_x${CHANNEL_TILE}(
+void xnn_s16_window_ukernel__scalar_u${CHANNEL_TILE}(
     size_t rows,
     size_t channels,
     const int16_t* input,

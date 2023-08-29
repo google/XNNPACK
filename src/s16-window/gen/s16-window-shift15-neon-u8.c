@@ -17,7 +17,7 @@
 #include <xnnpack/window.h>
 
 
-void xnn_s16_window_shift15_ukernel__neon_x16(
+void xnn_s16_window_shift15_ukernel__neon_u8(
     size_t rows,
     size_t channels,
     const int16_t* input,
@@ -36,19 +36,6 @@ void xnn_s16_window_shift15_ukernel__neon_x16(
   do {
     const int16_t* w = weights;
     size_t c = channels;
-    for (; c >= 16 * sizeof(int16_t); c -= 16 * sizeof(int16_t)) {
-      const int16x8_t vi0 = vld1q_s16(input); input += 8;
-      const int16x8_t vi1 = vld1q_s16(input); input += 8;
-
-      const int16x8_t vw0 = vld1q_s16(w); w += 8;
-      const int16x8_t vw1 = vld1q_s16(w); w += 8;
-
-      const int16x8_t vout0 = vqdmulhq_s16(vi0, vw0);
-      const int16x8_t vout1 = vqdmulhq_s16(vi1, vw1);
-
-      vst1q_s16(output, vout0); output += 8;
-      vst1q_s16(output, vout1); output += 8;
-    }
 
     // Remainder of full vectors
     for (; c >= 8 * sizeof(int16_t); c -= 8 * sizeof(int16_t)) {

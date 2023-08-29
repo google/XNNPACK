@@ -17,7 +17,7 @@
 #include <xnnpack/window.h>
 
 
-void xnn_s16_window_shift12_ukernel__neon_x8(
+void xnn_s16_window_shift12_ukernel__neon_u32(
     size_t rows,
     size_t channels,
     const int16_t* input,
@@ -36,6 +36,45 @@ void xnn_s16_window_shift12_ukernel__neon_x8(
   do {
     const int16_t* w = weights;
     size_t c = channels;
+    for (; c >= 32 * sizeof(int16_t); c -= 32 * sizeof(int16_t)) {
+      const int16x8_t vi0 = vld1q_s16(input); input += 8;
+      const int16x8_t vi1 = vld1q_s16(input); input += 8;
+      const int16x8_t vi2 = vld1q_s16(input); input += 8;
+      const int16x8_t vi3 = vld1q_s16(input); input += 8;
+
+      const int16x8_t vw0 = vld1q_s16(w); w += 8;
+      const int16x8_t vw1 = vld1q_s16(w); w += 8;
+      const int16x8_t vw2 = vld1q_s16(w); w += 8;
+      const int16x8_t vw3 = vld1q_s16(w); w += 8;
+
+      int32x4_t vacc0_lo = vmull_s16(vget_low_s16(vi0), vget_low_s16(vw0));
+      int32x4_t vacc0_hi = vmull_s16(vget_high_s16(vi0), vget_high_s16(vw0));
+      int32x4_t vacc1_lo = vmull_s16(vget_low_s16(vi1), vget_low_s16(vw1));
+      int32x4_t vacc1_hi = vmull_s16(vget_high_s16(vi1), vget_high_s16(vw1));
+      int32x4_t vacc2_lo = vmull_s16(vget_low_s16(vi2), vget_low_s16(vw2));
+      int32x4_t vacc2_hi = vmull_s16(vget_high_s16(vi2), vget_high_s16(vw2));
+      int32x4_t vacc3_lo = vmull_s16(vget_low_s16(vi3), vget_low_s16(vw3));
+      int32x4_t vacc3_hi = vmull_s16(vget_high_s16(vi3), vget_high_s16(vw3));
+
+      const int16x4_t vshift0_lo = vqshrn_n_s32(vacc0_lo, 12);
+      const int16x4_t vshift0_hi = vqshrn_n_s32(vacc0_hi, 12);
+      const int16x4_t vshift1_lo = vqshrn_n_s32(vacc1_lo, 12);
+      const int16x4_t vshift1_hi = vqshrn_n_s32(vacc1_hi, 12);
+      const int16x4_t vshift2_lo = vqshrn_n_s32(vacc2_lo, 12);
+      const int16x4_t vshift2_hi = vqshrn_n_s32(vacc2_hi, 12);
+      const int16x4_t vshift3_lo = vqshrn_n_s32(vacc3_lo, 12);
+      const int16x4_t vshift3_hi = vqshrn_n_s32(vacc3_hi, 12);
+
+      const int16x8_t vout0 = vcombine_s16(vshift0_lo, vshift0_hi);
+      const int16x8_t vout1 = vcombine_s16(vshift1_lo, vshift1_hi);
+      const int16x8_t vout2 = vcombine_s16(vshift2_lo, vshift2_hi);
+      const int16x8_t vout3 = vcombine_s16(vshift3_lo, vshift3_hi);
+
+      vst1q_s16(output, vout0); output += 8;
+      vst1q_s16(output, vout1); output += 8;
+      vst1q_s16(output, vout2); output += 8;
+      vst1q_s16(output, vout3); output += 8;
+    }
 
     // Remainder of full vectors
     for (; c >= 8 * sizeof(int16_t); c -= 8 * sizeof(int16_t)) {

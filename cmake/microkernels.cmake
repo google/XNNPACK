@@ -3421,18 +3421,18 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/s16-rmaxabs/gen/s16-rmaxabs-neon-x16.c
   src/s16-rmaxabs/gen/s16-rmaxabs-neon-x24.c
   src/s16-rmaxabs/gen/s16-rmaxabs-neon-x32.c
-  src/s16-window/gen/s16-window-neon-x8.c
-  src/s16-window/gen/s16-window-neon-x16.c
-  src/s16-window/gen/s16-window-neon-x24.c
-  src/s16-window/gen/s16-window-neon-x32.c
-  src/s16-window/gen/s16-window-shift12-neon-x8.c
-  src/s16-window/gen/s16-window-shift12-neon-x16.c
-  src/s16-window/gen/s16-window-shift12-neon-x24.c
-  src/s16-window/gen/s16-window-shift12-neon-x32.c
-  src/s16-window/gen/s16-window-shift15-neon-x8.c
-  src/s16-window/gen/s16-window-shift15-neon-x16.c
-  src/s16-window/gen/s16-window-shift15-neon-x24.c
-  src/s16-window/gen/s16-window-shift15-neon-x32.c
+  src/s16-window/gen/s16-window-neon-u8.c
+  src/s16-window/gen/s16-window-neon-u16.c
+  src/s16-window/gen/s16-window-neon-u24.c
+  src/s16-window/gen/s16-window-neon-u32.c
+  src/s16-window/gen/s16-window-shift12-neon-u8.c
+  src/s16-window/gen/s16-window-shift12-neon-u16.c
+  src/s16-window/gen/s16-window-shift12-neon-u24.c
+  src/s16-window/gen/s16-window-shift12-neon-u32.c
+  src/s16-window/gen/s16-window-shift15-neon-u8.c
+  src/s16-window/gen/s16-window-shift15-neon-u16.c
+  src/s16-window/gen/s16-window-shift15-neon-u24.c
+  src/s16-window/gen/s16-window-shift15-neon-u32.c
   src/u8-ibilinear/gen/u8-ibilinear-neon-c8.c
   src/u8-ibilinear/gen/u8-ibilinear-neon-c16.c
   src/u8-maxpool/u8-maxpool-9p8x-minmax-neon-c16.c
@@ -5826,10 +5826,10 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/s16-rmaxabs/gen/s16-rmaxabs-scalar-x2.c
   src/s16-rmaxabs/gen/s16-rmaxabs-scalar-x3.c
   src/s16-rmaxabs/gen/s16-rmaxabs-scalar-x4.c
-  src/s16-window/gen/s16-window-scalar-x1.c
-  src/s16-window/gen/s16-window-scalar-x2.c
-  src/s16-window/gen/s16-window-scalar-x3.c
-  src/s16-window/gen/s16-window-scalar-x4.c
+  src/s16-window/gen/s16-window-scalar-u1.c
+  src/s16-window/gen/s16-window-scalar-u2.c
+  src/s16-window/gen/s16-window-scalar-u3.c
+  src/s16-window/gen/s16-window-scalar-u4.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c1.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c2.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c4.c
