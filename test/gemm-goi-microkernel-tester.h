@@ -197,7 +197,10 @@ class GemmGoiMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_gemm_goi_minmax_ukernel_fn gemm_minmax, xnn_init_f32_minmax_params_fn init_params) const {
+  void Test(
+    xnn_f32_gemm_goi_minmax_ukernel_fn gemm_minmax,
+    xnn_init_f32_minmax_params_fn init_params) const
+  {
     ASSERT_LE(m(), mr());
     ASSERT_GE(a_stride(), k());
     ASSERT_GE(cm_stride(), n());
