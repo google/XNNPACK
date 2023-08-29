@@ -48,7 +48,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4__scalar(
     w = (const int32_t*) w + 4;
 
     size_t k = kc;
-    for (; k >= 2 * sizeof(float); k -= 2 * sizeof(float)) {
+    for (; k >= 2 * sizeof(int8_t); k -= 2 * sizeof(int8_t)) {
       const int32_t va00 = (int32_t) *a0++;
       const int32_t va01 = (int32_t) *a0++;
 

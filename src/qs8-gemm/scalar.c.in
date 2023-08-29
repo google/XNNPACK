@@ -97,7 +97,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
 
     size_t k = kc;
     $if DATATYPE == "QC4":
-      for (; k >= 2 * sizeof(float); k -= 2 * sizeof(float)) {
+      for (; k >= 2 * sizeof(${XINT8_T}); k -= 2 * sizeof(${XINT8_T})) {
         $for M in range(MR):
           const int32_t va${M}0 = (int32_t) *a${M}++;
           const int32_t va${M}1 = (int32_t) *a${M}++;
