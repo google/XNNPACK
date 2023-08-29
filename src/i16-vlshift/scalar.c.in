@@ -12,7 +12,7 @@ $assert BATCH_TILE >= 1
 #include <xnnpack/vlshift.h>
 
 
-void xnn_i16_vlshift_ukernel__scalar_x${BATCH_TILE}(
+void xnn_i16_vlshift_ukernel__scalar_u${BATCH_TILE}(
     size_t batch,
     const uint16_t* input,
     uint16_t* output,

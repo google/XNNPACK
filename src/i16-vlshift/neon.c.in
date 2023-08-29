@@ -16,7 +16,7 @@ $SIMD_TILE = BATCH_TILE // 8
 #include <xnnpack/vlshift.h>
 
 
-void xnn_i16_vlshift_ukernel__neon_x${BATCH_TILE}(
+void xnn_i16_vlshift_ukernel__neon_u${BATCH_TILE}(
     size_t batch,
     const uint16_t* input,
     uint16_t* output,

@@ -2546,10 +2546,10 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-vunary/gen/f32-vneg-neon-u8.c
   src/f32-vunary/gen/f32-vsqr-neon-u4.c
   src/f32-vunary/gen/f32-vsqr-neon-u8.c
-  src/i16-vlshift/gen/i16-vlshift-neon-x8.c
-  src/i16-vlshift/gen/i16-vlshift-neon-x16.c
-  src/i16-vlshift/gen/i16-vlshift-neon-x24.c
-  src/i16-vlshift/gen/i16-vlshift-neon-x32.c
+  src/i16-vlshift/gen/i16-vlshift-neon-u8.c
+  src/i16-vlshift/gen/i16-vlshift-neon-u16.c
+  src/i16-vlshift/gen/i16-vlshift-neon-u24.c
+  src/i16-vlshift/gen/i16-vlshift-neon-u32.c
   src/math/f16-f32-cvt-neon-int16.c
   src/math/f16-f32-cvt-neon-int32.c
   src/math/f32-expm1minus-neon-rr2-lut16-p3.c
@@ -5251,10 +5251,10 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-vunary/gen/f32-vsqr-scalar-u1.c
   src/f32-vunary/gen/f32-vsqr-scalar-u2.c
   src/f32-vunary/gen/f32-vsqr-scalar-u4.c
-  src/i16-vlshift/gen/i16-vlshift-scalar-x1.c
-  src/i16-vlshift/gen/i16-vlshift-scalar-x2.c
-  src/i16-vlshift/gen/i16-vlshift-scalar-x3.c
-  src/i16-vlshift/gen/i16-vlshift-scalar-x4.c
+  src/i16-vlshift/gen/i16-vlshift-scalar-u1.c
+  src/i16-vlshift/gen/i16-vlshift-scalar-u2.c
+  src/i16-vlshift/gen/i16-vlshift-scalar-u3.c
+  src/i16-vlshift/gen/i16-vlshift-scalar-u4.c
   src/math/f32-expm1minus-scalar-rr2-lut4-p4.c
   src/math/f32-expm1minus-scalar-rr2-lut8-p3.c
   src/math/f32-expm1minus-scalar-rr2-lut8-p4.c

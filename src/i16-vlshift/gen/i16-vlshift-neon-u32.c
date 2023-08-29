@@ -17,7 +17,7 @@
 #include <xnnpack/vlshift.h>
 
 
-void xnn_i16_vlshift_ukernel__neon_x32(
+void xnn_i16_vlshift_ukernel__neon_u32(
     size_t batch,
     const uint16_t* input,
     uint16_t* output,

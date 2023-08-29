@@ -17,7 +17,7 @@
 #include <xnnpack/vlshift.h>
 
 
-void xnn_i16_vlshift_ukernel__neon_x24(
+void xnn_i16_vlshift_ukernel__neon_u8(
     size_t batch,
     const uint16_t* input,
     uint16_t* output,
@@ -29,19 +29,6 @@ void xnn_i16_vlshift_ukernel__neon_x24(
   assert(shift < 16);
 
   const int16x8_t vshift = vdupq_n_s16((int16_t) shift);
-  for (; batch >= 24; batch -= 24) {
-    const uint16x8_t vi0 = vld1q_u16(input); input += 8;
-    const uint16x8_t vi1 = vld1q_u16(input); input += 8;
-    const uint16x8_t vi2 = vld1q_u16(input); input += 8;
-
-    const uint16x8_t vout0 = vshlq_u16(vi0, vshift);
-    const uint16x8_t vout1 = vshlq_u16(vi1, vshift);
-    const uint16x8_t vout2 = vshlq_u16(vi2, vshift);
-
-    vst1q_u16(output, vout0); output += 8;
-    vst1q_u16(output, vout1); output += 8;
-    vst1q_u16(output, vout2); output += 8;
-  }
 
   // Remainder of full vectors
   for (; batch >= 8; batch -= 8) {

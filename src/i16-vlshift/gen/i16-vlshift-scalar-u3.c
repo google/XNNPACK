@@ -15,7 +15,7 @@
 #include <xnnpack/vlshift.h>
 
 
-void xnn_i16_vlshift_ukernel__scalar_x1(
+void xnn_i16_vlshift_ukernel__scalar_u3(
     size_t batch,
     const uint16_t* input,
     uint16_t* output,
@@ -26,6 +26,21 @@ void xnn_i16_vlshift_ukernel__scalar_x1(
   assert(output != NULL);
   assert(shift < 16);
 
+  for (; batch >= 3; batch -= 3) {
+    const uint16_t vi0 = input[0];
+    const uint16_t vi1 = input[1];
+    const uint16_t vi2 = input[2];
+    input += 3;
+
+    const uint16_t vout0 = vi0 << shift;
+    const uint16_t vout1 = vi1 << shift;
+    const uint16_t vout2 = vi2 << shift;
+
+    output[0] = vout0;
+    output[1] = vout1;
+    output[2] = vout2;
+    output += 3;
+  }
  if XNN_UNLIKELY(batch != 0) {
    do {
      const uint16_t vi = *input++;

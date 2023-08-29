@@ -15,7 +15,7 @@
 #include <xnnpack/vlshift.h>
 
 
-void xnn_i16_vlshift_ukernel__scalar_x2(
+void xnn_i16_vlshift_ukernel__scalar_u2(
     size_t batch,
     const uint16_t* input,
     uint16_t* output,
