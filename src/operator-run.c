@@ -1026,31 +1026,6 @@ void xnn_compute_global_average_pooling_nwc_unipass(
     &context->params);
 }
 
-void xnn_compute_global_average_pooling_nwc_multipass(
-    const struct global_average_pooling_nwc_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index)
-{
-  const void* input =
-    (const void*) ((uintptr_t) context->input + batch_index * context->input_batch_stride);
-  void* output =
-    (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride);
-
-  // TODO(b/280869397): Change this to an assert after all operators using this have been migrated.
-  void* multipass_buffer =
-    context->multipass_buffer == NULL ? XNN_SIMD_ALLOCA(context->buffer_size) :
-    (void*) ((uintptr_t) context->multipass_buffer);
-
-  context->multipass_ukernel(
-    context->input_elements,
-    context->channels,
-    input,
-    context->input_pixel_stride,
-    context->zero,
-    multipass_buffer,
-    output,
-    &context->params);
-}
-
 void xnn_compute_global_average_pooling_nwc_multipass_with_thread(
     const struct global_average_pooling_nwc_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t thread_index,
@@ -1061,10 +1036,7 @@ void xnn_compute_global_average_pooling_nwc_multipass_with_thread(
   void* output =
     (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride);
 
-  // TODO(b/280869397): Change this to an assert after all operators using this have been migrated.
-  void* multipass_buffer =
-    context->multipass_buffer == NULL ? XNN_SIMD_ALLOCA(context->buffer_size) :
-    (void*) ((uintptr_t) context->multipass_buffer + thread_index * context->buffer_size);
+  assert(context->multipass_buffer != NULL);
 
   context->multipass_ukernel(
     context->input_elements,
@@ -1072,7 +1044,7 @@ void xnn_compute_global_average_pooling_nwc_multipass_with_thread(
     input,
     context->input_pixel_stride,
     context->zero,
-    multipass_buffer,
+    (void*) ((uintptr_t) context->multipass_buffer + thread_index * context->buffer_size),
     output,
     &context->params);
 }

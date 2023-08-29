@@ -2903,6 +2903,32 @@ TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_image_with_qmax) {
   }
 }
 
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_image_multithreaded) {
+  const struct xnn_gavgpool_config* gavgpool_config = xnn_init_qu8_gavgpool_config();
+  ASSERT_NE(gavgpool_config, nullptr);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(gavgpool_config->row_tile * 2);
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    AveragePoolingOperatorTester()
+      .batch_size(2)
+      .input_height(pooling_size.first)
+      .input_width(pooling_size.second)
+      .pooling_height(pooling_size.first)
+      .pooling_width(pooling_size.second)
+      .channels(channels)
+      .multithreaded(true)
+      .TestQU8();
+    AveragePoolingOperatorTester()
+      .batch_size(2)
+      .input_height(pooling_size.second)
+      .input_width(pooling_size.first)
+      .pooling_height(pooling_size.second)
+      .pooling_width(pooling_size.first)
+      .channels(channels)
+      .multithreaded(true)
+      .TestQU8();
+  }
+}
+
 /**************************** AVGPOOL path, setup ****************************/
 
 TEST(AVERAGE_POOLING_NHWC_QU8, setup_increasing_batch) {
@@ -5081,6 +5107,34 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_image_with_qmax) {
   }
 }
 
+TEST(AVERAGE_POOLING_NHWC_F16, batched_large_image_multithreaded) {
+  const struct xnn_gavgpool_config* gavgpool_config = xnn_init_f32_gavgpool_config();
+  ASSERT_NE(gavgpool_config, nullptr);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(gavgpool_config->row_tile * 2);
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    AveragePoolingOperatorTester()
+      .batch_size(2)
+      .input_height(pooling_size.first)
+      .input_width(pooling_size.second)
+      .pooling_height(pooling_size.first)
+      .pooling_width(pooling_size.second)
+      .channels(channels)
+      .qmax(128)
+      .multithreaded(true)
+      .TestF16();
+    AveragePoolingOperatorTester()
+      .batch_size(2)
+      .input_height(pooling_size.second)
+      .input_width(pooling_size.first)
+      .pooling_height(pooling_size.second)
+      .pooling_width(pooling_size.first)
+      .channels(channels)
+      .qmax(128)
+      .multithreaded(true)
+      .TestF16();
+  }
+}
+
 /**************************** AVGPOOL path, setup ****************************/
 
 TEST(AVERAGE_POOLING_NHWC_F16, setup_increasing_batch) {
@@ -7215,6 +7269,34 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_image_with_qmax) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .qmax(128)
+      .TestF32();
+  }
+}
+
+TEST(AVERAGE_POOLING_NHWC_F32, batched_large_image_multithreaded) {
+  const struct xnn_gavgpool_config* gavgpool_config = xnn_init_f32_gavgpool_config();
+  ASSERT_NE(gavgpool_config, nullptr);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(gavgpool_config->row_tile * 2);
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    AveragePoolingOperatorTester()
+      .batch_size(2)
+      .input_height(pooling_size.first)
+      .input_width(pooling_size.second)
+      .pooling_height(pooling_size.first)
+      .pooling_width(pooling_size.second)
+      .channels(channels)
+      .qmax(128)
+      .multithreaded(true)
+      .TestF32();
+    AveragePoolingOperatorTester()
+      .batch_size(2)
+      .input_height(pooling_size.second)
+      .input_width(pooling_size.first)
+      .pooling_height(pooling_size.second)
+      .pooling_width(pooling_size.first)
+      .channels(channels)
+      .qmax(128)
+      .multithreaded(true)
       .TestF32();
   }
 }
