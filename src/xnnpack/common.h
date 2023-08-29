@@ -334,14 +334,11 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   // For AVX512.
   #define XNN_MAX_SIMD_SIZE 64
-#elif XNN_ARCH_RISCV || XNN_ARCH_WASM
-  // Scalable vectors, assume masked loads and stores.
-  // Wasm without SIMD.
-  #define XNN_MAX_SIMD_SIZE 0
 #elif XNN_ARCH_HEXAGON
   #define XNN_MAX_SIMD_SIZE 128
 #else
-  // XNN_ARCH_ARM, XNN_ARCH_ARM64, XNN_ARCH_WASMSIMD, XNN_ARCH_WASMRELAXEDSIMD.
+  // XNN_ARCH_ARM, XNN_ARCH_ARM64, XNN_ARCH_WASM, XNN_ARCH_WASMSIMD, XNN_ARCH_WASMRELAXEDSIMD, XNN_ARCH_RISVC.
+  // Wasm/Scalar gavgpool microkernels can over-read by 4 buffers.
   #define XNN_MAX_SIMD_SIZE 16
 #endif
 

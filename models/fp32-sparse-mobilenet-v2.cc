@@ -436,7 +436,8 @@ ExecutionPlan FP32SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
   std::shuffle(w169.begin(), w169.end(), rng);
   std::generate(w170.begin(), w170.end(), std::ref(f32rng));
 
-  ExecutionPlan operators;
+  size_t max_workspace_size = 0;
+  Operators operators;
   xnn_status status;
 
   xnn_operator_t op0 = nullptr;
@@ -2504,6 +2505,8 @@ ExecutionPlan FP32SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  Workspace workspace(max_workspace_size);
+
   status = xnn_setup_convolution2d_nchw_f32(
     op0,
     /*input=*/v0.data(), /*output=*/v1.data());
@@ -3018,7 +3021,7 @@ ExecutionPlan FP32SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
 
   XNN_PRAGMA_CLANG("clang diagnostic push")
   XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wpessimizing-move\"")
-  return operators;
+  return ExecutionPlan{operators, workspace};
   XNN_PRAGMA_CLANG("clang diagnostic pop")
 }
 

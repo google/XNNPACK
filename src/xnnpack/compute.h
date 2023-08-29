@@ -18,6 +18,7 @@
 enum xnn_parallelization_type {
   xnn_parallelization_type_invalid = 0,
   xnn_parallelization_type_1d,
+  xnn_parallelization_type_1d_with_thread,
   xnn_parallelization_type_1d_tile_1d,
   xnn_parallelization_type_2d,
   xnn_parallelization_type_2d_tile_1d,
@@ -45,6 +46,7 @@ struct compute_parameters {
   enum xnn_parallelization_type type;
   union {
     pthreadpool_task_1d_t task_1d;
+    pthreadpool_task_1d_with_thread_t task_1d_with_thread;
     pthreadpool_task_1d_tile_1d_t task_1d_tile_1d;
     pthreadpool_task_2d_t task_2d;
     pthreadpool_task_2d_tile_1d_t task_2d_tile_1d;
@@ -957,6 +959,7 @@ struct global_average_pooling_nwc_context {
     xnn_gavgpool_multipass_ukernel_fn multipass_ukernel;
   };
   size_t buffer_size;
+  void* multipass_buffer;
 };
 
 #ifndef __cplusplus
@@ -966,6 +969,10 @@ struct global_average_pooling_nwc_context {
 
   XNN_PRIVATE void xnn_compute_global_average_pooling_nwc_multipass(
       const struct global_average_pooling_nwc_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index);
+  XNN_PRIVATE void xnn_compute_global_average_pooling_nwc_multipass_with_thread(
+      const struct global_average_pooling_nwc_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t thread_index,
       size_t batch_index);
 #endif
 

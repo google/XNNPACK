@@ -15,12 +15,16 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <memory>
 #include <random>
 #include <vector>
 
 #include <fp16/fp16.h>
+#include <pthreadpool.h>
 
 #include <xnnpack.h>
+#include <xnnpack/aligned-allocator.h>
+#include <xnnpack/common.h>
 
 
 class GlobalAveragePoolingOperatorTester {
@@ -143,6 +147,20 @@ class GlobalAveragePoolingOperatorTester {
     return this->qmax_;
   }
 
+  inline GlobalAveragePoolingOperatorTester& multithreaded(size_t multithreaded) {
+    this->multithreaded_ = multithreaded;
+    return *this;
+  }
+
+  inline size_t multithreaded() const {
+    return this->multithreaded_;
+  }
+
+  size_t num_threads() const {
+    // Do not spin up excessive number of threads for tests.
+    return multithreaded() ? 5 : 1;
+  }
+
   inline GlobalAveragePoolingOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -162,6 +180,16 @@ class GlobalAveragePoolingOperatorTester {
     std::vector<uint8_t> output(batch_size() * output_stride());
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
+      if (multithreaded()) {
+        const pthreadpool_t threadpool = pthreadpool_create(num_threads());
+        if (pthreadpool_get_threads_count(threadpool) <= 1) {
+          GTEST_SKIP();
+        } else {
+          auto_threadpool.reset(threadpool);
+        }
+      }
+
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
@@ -198,19 +226,26 @@ class GlobalAveragePoolingOperatorTester {
       // Smart pointer to automatically delete global_average_pooling_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
 
+      size_t workspace_size = 0;
+      size_t workspace_alignment = 0;
       ASSERT_EQ(xnn_status_success,
         xnn_reshape_global_average_pooling_nwc_qu8(
           global_average_pooling_op,
           batch_size(), width(),
-          nullptr /* thread pool */));
+          &workspace_size, &workspace_alignment,
+          auto_threadpool.get()));
+
+      ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_global_average_pooling_nwc_qu8(
           global_average_pooling_op,
+          workspace.data(),
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(global_average_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(global_average_pooling_op, auto_threadpool.get()));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -235,6 +270,16 @@ class GlobalAveragePoolingOperatorTester {
     std::vector<int8_t> output(batch_size() * output_stride());
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
+      if (multithreaded()) {
+        const pthreadpool_t threadpool = pthreadpool_create(num_threads());
+        if (pthreadpool_get_threads_count(threadpool) <= 1) {
+          GTEST_SKIP();
+        } else {
+          auto_threadpool.reset(threadpool);
+        }
+      }
+
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
@@ -271,19 +316,26 @@ class GlobalAveragePoolingOperatorTester {
       // Smart pointer to automatically delete global_average_pooling_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
 
+      size_t workspace_size = 0;
+      size_t workspace_alignment = 0;
       ASSERT_EQ(xnn_status_success,
         xnn_reshape_global_average_pooling_nwc_qs8(
           global_average_pooling_op,
           batch_size(), width(),
-          nullptr /* thread pool */));
+          &workspace_size, &workspace_alignment,
+          auto_threadpool.get()));
+
+      ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_global_average_pooling_nwc_qs8(
           global_average_pooling_op,
+          workspace.data(),
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(global_average_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(global_average_pooling_op, auto_threadpool.get()));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -307,6 +359,16 @@ class GlobalAveragePoolingOperatorTester {
     std::vector<uint16_t> output(batch_size() * output_stride());
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
+      if (multithreaded()) {
+        const pthreadpool_t threadpool = pthreadpool_create(num_threads());
+        if (pthreadpool_get_threads_count(threadpool) <= 1) {
+          GTEST_SKIP();
+        } else {
+          auto_threadpool.reset(threadpool);
+        }
+      }
+
       std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
@@ -352,19 +414,26 @@ class GlobalAveragePoolingOperatorTester {
       // Smart pointer to automatically delete global_average_pooling_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
 
+      size_t workspace_size = 0;
+      size_t workspace_alignment = 0;
       ASSERT_EQ(xnn_status_success,
         xnn_reshape_global_average_pooling_nwc_f16(
           global_average_pooling_op,
           batch_size(), width(),
-          nullptr /* thread pool */));
+          &workspace_size, &workspace_alignment,
+          auto_threadpool.get()));
+
+      ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_global_average_pooling_nwc_f16(
           global_average_pooling_op,
+          workspace.data(),
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(global_average_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(global_average_pooling_op, auto_threadpool.get()));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -388,6 +457,16 @@ class GlobalAveragePoolingOperatorTester {
     std::vector<float> output(batch_size() * output_stride());
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
+      if (multithreaded()) {
+        const pthreadpool_t threadpool = pthreadpool_create(num_threads());
+        if (pthreadpool_get_threads_count(threadpool) <= 1) {
+          GTEST_SKIP();
+        } else {
+          auto_threadpool.reset(threadpool);
+        }
+      }
+
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(output.begin(), output.end(), std::nanf(""));
 
@@ -435,19 +514,26 @@ class GlobalAveragePoolingOperatorTester {
       // Smart pointer to automatically delete global_average_pooling_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
 
+      size_t workspace_size = 0;
+      size_t workspace_alignment = 0;
       ASSERT_EQ(xnn_status_success,
         xnn_reshape_global_average_pooling_nwc_f32(
           global_average_pooling_op,
           batch_size(), width(),
-          nullptr /* thread pool */));
+          &workspace_size, &workspace_alignment,
+          auto_threadpool.get()));
+
+      ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_global_average_pooling_nwc_f32(
           global_average_pooling_op,
+          workspace.data(),
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(global_average_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(global_average_pooling_op, auto_threadpool.get()));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -471,6 +557,16 @@ class GlobalAveragePoolingOperatorTester {
     std::vector<uint16_t> output(batch_size() * channels());
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
+      if (multithreaded()) {
+        const pthreadpool_t threadpool = pthreadpool_create(num_threads());
+        if (pthreadpool_get_threads_count(threadpool) <= 1) {
+          GTEST_SKIP();
+        } else {
+          auto_threadpool.reset(threadpool);
+        }
+      }
+
       std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
@@ -518,7 +614,7 @@ class GlobalAveragePoolingOperatorTester {
         xnn_reshape_global_average_pooling_ncw_f16(
           global_average_pooling_op,
           batch_size(), width(),
-          nullptr /* thread pool */));
+          auto_threadpool.get()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_global_average_pooling_ncw_f16(
@@ -526,7 +622,7 @@ class GlobalAveragePoolingOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(global_average_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(global_average_pooling_op, auto_threadpool.get()));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -550,6 +646,16 @@ class GlobalAveragePoolingOperatorTester {
     std::vector<float> output(batch_size() * channels());
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
+      if (multithreaded()) {
+        const pthreadpool_t threadpool = pthreadpool_create(num_threads());
+        if (pthreadpool_get_threads_count(threadpool) <= 1) {
+          GTEST_SKIP();
+        } else {
+          auto_threadpool.reset(threadpool);
+        }
+      }
+
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(output.begin(), output.end(), std::nanf(""));
 
@@ -599,7 +705,7 @@ class GlobalAveragePoolingOperatorTester {
         xnn_reshape_global_average_pooling_ncw_f32(
           global_average_pooling_op,
           batch_size(), width(),
-          nullptr /* thread pool */));
+          auto_threadpool.get()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_global_average_pooling_ncw_f32(
@@ -607,7 +713,7 @@ class GlobalAveragePoolingOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(global_average_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(global_average_pooling_op, auto_threadpool.get()));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -634,5 +740,6 @@ class GlobalAveragePoolingOperatorTester {
   uint8_t output_zero_point_{133};
   uint8_t qmin_{0};
   uint8_t qmax_{255};
+  bool multithreaded_{false};
   size_t iterations_{1};
 };

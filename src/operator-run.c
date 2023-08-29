@@ -1035,7 +1035,36 @@ void xnn_compute_global_average_pooling_nwc_multipass(
   void* output =
     (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride);
 
-  void* multipass_buffer = XNN_SIMD_ALLOCA(context->buffer_size);
+  // TODO(b/280869397): Change this to an assert after all operators using this have been migrated.
+  void* multipass_buffer =
+    context->multipass_buffer == NULL ? XNN_SIMD_ALLOCA(context->buffer_size) :
+    (void*) ((uintptr_t) context->multipass_buffer);
+
+  context->multipass_ukernel(
+    context->input_elements,
+    context->channels,
+    input,
+    context->input_pixel_stride,
+    context->zero,
+    multipass_buffer,
+    output,
+    &context->params);
+}
+
+void xnn_compute_global_average_pooling_nwc_multipass_with_thread(
+    const struct global_average_pooling_nwc_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t thread_index,
+    size_t batch_index)
+{
+  const void* input =
+    (const void*) ((uintptr_t) context->input + batch_index * context->input_batch_stride);
+  void* output =
+    (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride);
+
+  // TODO(b/280869397): Change this to an assert after all operators using this have been migrated.
+  void* multipass_buffer =
+    context->multipass_buffer == NULL ? XNN_SIMD_ALLOCA(context->buffer_size) :
+    (void*) ((uintptr_t) context->multipass_buffer + thread_index * context->buffer_size);
 
   context->multipass_ukernel(
     context->input_elements,
@@ -2333,6 +2362,15 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_1d(
             threadpool,
             op->compute[i].task_1d,
+            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            op->compute[i].range[0],
+            flags);
+        break;
+      case xnn_parallelization_type_1d_with_thread:
+        assert(op->compute[i].range[0] != 0);
+        pthreadpool_parallelize_1d_with_thread(
+            threadpool,
+            op->compute[i].task_1d_with_thread,
             (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
             op->compute[i].range[0],
             flags);

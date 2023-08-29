@@ -163,6 +163,7 @@ static enum xnn_status reshape_global_average_pooling_operator(
         opdata->operator_objects[0],
         batch_size,
         input_width,
+        &opdata->workspace_size, &opdata->workspace_alignment,
         threadpool);
       break;
     case xnn_operator_type_global_average_pooling_nwc_f16:
@@ -170,6 +171,7 @@ static enum xnn_status reshape_global_average_pooling_operator(
         opdata->operator_objects[0],
         batch_size,
         input_width,
+        &opdata->workspace_size, &opdata->workspace_alignment,
         threadpool);
       break;
     case xnn_operator_type_global_average_pooling_nwc_qs8:
@@ -177,6 +179,7 @@ static enum xnn_status reshape_global_average_pooling_operator(
         opdata->operator_objects[0],
         batch_size,
         input_width,
+        &opdata->workspace_size, &opdata->workspace_alignment,
         threadpool);
       break;
     case xnn_operator_type_global_average_pooling_nwc_qu8:
@@ -184,6 +187,7 @@ static enum xnn_status reshape_global_average_pooling_operator(
         opdata->operator_objects[0],
         batch_size,
         input_width,
+        &opdata->workspace_size, &opdata->workspace_alignment,
         threadpool);
       break;
     default:
@@ -229,24 +233,28 @@ static enum xnn_status setup_global_average_pooling_operator(
     case xnn_operator_type_global_average_pooling_nwc_f32:
       return xnn_setup_global_average_pooling_nwc_f32(
         opdata->operator_objects[0],
+        opdata->workspace,
         input_data,
         output_data);
       break;
     case xnn_operator_type_global_average_pooling_nwc_f16:
       return xnn_setup_global_average_pooling_nwc_f16(
         opdata->operator_objects[0],
+        opdata->workspace,
         input_data,
         output_data);
       break;
     case xnn_operator_type_global_average_pooling_nwc_qs8:
       return xnn_setup_global_average_pooling_nwc_qs8(
         opdata->operator_objects[0],
+        opdata->workspace,
         input_data,
         output_data);
       break;
     case xnn_operator_type_global_average_pooling_nwc_qu8:
       return xnn_setup_global_average_pooling_nwc_qu8(
         opdata->operator_objects[0],
+        opdata->workspace,
         input_data,
         output_data);
       break;

@@ -13,6 +13,7 @@
 #include <vector>
 
 #include <xnnpack.h>
+#include <xnnpack/aligned-allocator.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/subgraph.h>
@@ -134,9 +135,17 @@ TEST_F(GlobalSumPooling2DTestF32, matches_operator_api)
 
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
+  size_t workspace_size = 0;
+  size_t workspace_alignment = 0;
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_global_sum_pooling_nwc_f32(op, batch_size, input_width, /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_global_sum_pooling_nwc_f32(op, input.data(), operator_output.data()));
+    xnn_status_success, xnn_reshape_global_sum_pooling_nwc_f32(
+                          op, batch_size, input_width, &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+  ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_setup_global_sum_pooling_nwc_f32(op, workspace.data(), input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
       break;
     case 18:
       xnn_setup_global_average_pooling_nwc_f32(
-        op, NULL, NULL);
+        op, NULL, NULL, NULL);
       break;
     case 19:
       xnn_create_hardswish_nc_f32(

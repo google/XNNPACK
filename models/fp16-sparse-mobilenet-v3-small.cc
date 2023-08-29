@@ -13,6 +13,7 @@
 #include <random>
 
 #include <xnnpack/cache.h>
+#include <xnnpack/common.h>
 #include <xnnpack/models.h>
 
 #include <fp16/fp16.h>
@@ -524,8 +525,9 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
   std::generate(w206.begin(), w206.end(), std::ref(f16rng));
   std::generate(w207.begin(), w207.end(), std::ref(f16rng));
 
-  ExecutionPlan operators;
+  Operators operators;
   xnn_status status;
+  size_t max_workspace_size = 0;
 
   xnn_operator_t op0 = nullptr;
   status = xnn_create_convolution2d_nchw_f16(
@@ -3355,9 +3357,12 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     return ExecutionPlan();
   }
 
+  size_t op97_workspace_size = 0;
+  size_t op97_workspace_alignment = 0;
   status = xnn_reshape_global_average_pooling_nwc_f16(
     op97,
     /*batch_size=*/1, 1 /* width */,
+    &op97_workspace_size, &op97_workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #97" << std::endl;
@@ -3374,6 +3379,8 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     std::cerr << "failed to reshape operation #98" << std::endl;
     return ExecutionPlan();
   }
+
+  Workspace workspace(max_workspace_size);
 
   status = xnn_setup_convolution2d_nchw_f16(
     op0,
@@ -4153,6 +4160,7 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_global_average_pooling_nwc_f16(
     op97,
+    workspace.data(),
     /*input=*/v97.data(), /*output=*/v98.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #97" << std::endl;
@@ -4169,7 +4177,7 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
 
   XNN_PRAGMA_CLANG("clang diagnostic push")
   XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wpessimizing-move\"")
-  return operators;
+  return ExecutionPlan{operators, workspace};
   XNN_PRAGMA_CLANG("clang diagnostic pop")
 }
 

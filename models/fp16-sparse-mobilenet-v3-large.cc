@@ -602,8 +602,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   std::generate(w240.begin(), w240.end(), std::ref(f16rng));
   std::generate(w241.begin(), w241.end(), std::ref(f16rng));
 
-  ExecutionPlan operators;
+  Operators operators;
   xnn_status status;
+  size_t max_workspace_size = 0;
 
   xnn_operator_t op0 = nullptr;
   status = xnn_create_convolution2d_nchw_f16(
@@ -3868,9 +3869,12 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     return ExecutionPlan();
   }
 
+  size_t op111_workspace_size = 0;
+  size_t op111_workspace_alignment = 0;
   status = xnn_reshape_global_average_pooling_nwc_f16(
     op111,
     /*batch_size=*/1, 1 /* width */,
+    &op111_workspace_size, &op111_workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #111" << std::endl;
@@ -3887,6 +3891,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     std::cerr << "failed to reshape operation #112" << std::endl;
     return ExecutionPlan();
   }
+
+  Workspace workspace(max_workspace_size);
 
   status = xnn_setup_convolution2d_nchw_f16(
     op0,
@@ -4778,6 +4784,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_global_average_pooling_nwc_f16(
     op111,
+    workspace.data(),
     /*input=*/v111.data(), /*output=*/v112.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #111" << std::endl;
@@ -4794,7 +4801,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   XNN_PRAGMA_CLANG("clang diagnostic push")
   XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wpessimizing-move\"")
-  return operators;
+  return ExecutionPlan{operators, workspace};
   XNN_PRAGMA_CLANG("clang diagnostic pop")
 }
 

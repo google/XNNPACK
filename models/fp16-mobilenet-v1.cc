@@ -199,7 +199,7 @@ ExecutionPlan FP16MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
   std::generate(w84.begin(), w84.end(), std::ref(f16rng));
   std::generate(w85.begin(), w85.end(), std::ref(f16rng));
 
-  ExecutionPlan operators;
+  Operators operators;
   xnn_status status;
   xnn_code_cache* code_cache_ptr = nullptr;
 #if XNN_PLATFORM_JIT
@@ -213,6 +213,7 @@ ExecutionPlan FP16MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     code_cache_ptr = &code_cache;
   }
 #endif  // XNN_PLATFORM_JIT
+  size_t max_workspace_size = 0;
 
   xnn_operator_t op0 = nullptr;
   status = xnn_create_convolution2d_nhwc_f16(
@@ -1202,10 +1203,14 @@ ExecutionPlan FP16MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op27_workspace_size = 0;
+  size_t op27_workspace_alignment = 0;
   status = xnn_reshape_global_average_pooling_nwc_f16(
     op27,
     /*batch_size=*/1, 49 /* width */,
+    &op27_workspace_size, &op27_workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op27_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #27" << std::endl;
     return ExecutionPlan();
@@ -1221,6 +1226,8 @@ ExecutionPlan FP16MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     std::cerr << "failed to reshape operation #28" << std::endl;
     return ExecutionPlan();
   }
+
+  Workspace workspace(max_workspace_size);
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op0,
@@ -1440,6 +1447,7 @@ ExecutionPlan FP16MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_global_average_pooling_nwc_f16(
     op27,
+    workspace.data(),
     /*input=*/v27.data(), /*output=*/v28.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #27" << std::endl;
@@ -1456,7 +1464,7 @@ ExecutionPlan FP16MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   XNN_PRAGMA_CLANG("clang diagnostic push")
   XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wpessimizing-move\"")
-  return operators;
+  return ExecutionPlan{operators, workspace};
   XNN_PRAGMA_CLANG("clang diagnostic pop")
 }
 

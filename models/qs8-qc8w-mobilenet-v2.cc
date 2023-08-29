@@ -474,8 +474,9 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   std::generate(s169.begin(), s169.end(), std::ref(srng));
   std::generate(w170.begin(), w170.end(), std::ref(i32rng));
 
-  ExecutionPlan operators;
+  Operators operators;
   xnn_status status;
+  size_t max_workspace_size = 0;
 
   xnn_operator_t op0 = nullptr;
   status = xnn_create_convolution2d_nhwc_qs8_qc8w(
@@ -2648,10 +2649,14 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op62_workspace_size = 0;
+  size_t op62_workspace_alignment = 0;
   status = xnn_reshape_global_average_pooling_nwc_qs8(
     op62,
     /*batch_size=*/1, 49 /* width */,
+    &op62_workspace_size, &op62_workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op62_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #62" << std::endl;
     return ExecutionPlan();
@@ -2667,6 +2672,8 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     std::cerr << "failed to reshape operation #63" << std::endl;
     return ExecutionPlan();
   }
+
+  Workspace workspace(max_workspace_size);
 
   status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op0,
@@ -3166,6 +3173,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
 
   status = xnn_setup_global_average_pooling_nwc_qs8(
     op62,
+    workspace.data(),
     /*input=*/v62.data(), /*output=*/v63.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #62" << std::endl;
@@ -3182,7 +3190,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
 
   XNN_PRAGMA_CLANG("clang diagnostic push")
   XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wpessimizing-move\"")
-  return operators;
+  return ExecutionPlan{operators, workspace};
   XNN_PRAGMA_CLANG("clang diagnostic pop")
 }
 

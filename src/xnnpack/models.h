@@ -6,13 +6,38 @@
 #pragma once
 
 #include <xnnpack.h>
+#include <xnnpack/aligned-allocator.h>
+#include <xnnpack/common.h>
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 namespace models {
 
-typedef std::vector<std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>> ExecutionPlan;
+typedef std::vector<std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>> Operators;
+typedef std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> Workspace;
+
+// Helper class for holding a list of operators and associated workspace.
+// Workspace needs to live as long as the operators.
+class ExecutionPlan {
+ public:
+  ExecutionPlan() = default;
+  // Takes ownership of operators and workspace.
+  ExecutionPlan(Operators& operators, Workspace& workspace)
+      : operators_(std::move(operators)), workspace_(std::move(workspace)) {}
+
+  bool empty() const {
+    return operators_.empty();
+  }
+  Operators::iterator begin() { return operators_.begin(); }
+  Operators::iterator end() { return operators_.end(); }
+
+ private:
+  Operators operators_;
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace_;
+};
+
 typedef ExecutionPlan (*ExecutionPlanFactory)(pthreadpool_t threadpool);
 
 ExecutionPlan FP32MobileNetV1(pthreadpool_t threadpool);
