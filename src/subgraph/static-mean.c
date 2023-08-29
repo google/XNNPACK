@@ -71,6 +71,8 @@ static enum xnn_status reshape_mean_operator(
         opdata->reduction_axes,
         input_value->shape.num_dims,
         input_value->shape.dim,
+        &opdata->workspace_size,
+        &opdata->workspace_alignment,
         threadpool);
     case xnn_operator_type_mean_nd_f32:
       return xnn_reshape_mean_nd_f32(
@@ -79,6 +81,8 @@ static enum xnn_status reshape_mean_operator(
         opdata->reduction_axes,
         input_value->shape.num_dims,
         input_value->shape.dim,
+        &opdata->workspace_size,
+        &opdata->workspace_alignment,
         threadpool);
     default:
       XNN_UNREACHABLE;
@@ -113,10 +117,12 @@ static enum xnn_status setup_mean_operator(
     case xnn_operator_type_mean_nd_f16:
       return xnn_setup_mean_nd_f16(
         opdata->operator_objects[0],
+        opdata->workspace,
         input_data, output_data);
     case xnn_operator_type_mean_nd_f32:
       return xnn_setup_mean_nd_f32(
         opdata->operator_objects[0],
+        opdata->workspace,
         input_data, output_data);
     default:
       XNN_UNREACHABLE;

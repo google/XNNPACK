@@ -91,6 +91,8 @@ static enum xnn_status reshape_average_pooling_operator(
         batch_size,
         input_height,
         input_width,
+        &opdata->workspace_size,
+        &opdata->workspace_alignment,
         /*output_height_out=*/NULL,
         /*output_width_out=*/NULL,
         threadpool);
@@ -100,6 +102,8 @@ static enum xnn_status reshape_average_pooling_operator(
         batch_size,
         input_height,
         input_width,
+        &opdata->workspace_size,
+        &opdata->workspace_alignment,
         /*output_height_out=*/NULL,
         /*output_width_out=*/NULL,
         threadpool);
@@ -134,11 +138,13 @@ static enum xnn_status setup_average_pooling_operator(
     case xnn_operator_type_average_pooling_nhwc_f16:
       return xnn_setup_average_pooling2d_nhwc_f16(
         opdata->operator_objects[0],
+        opdata->workspace,
         input_data,
         output_data);
     case xnn_operator_type_average_pooling_nhwc_f32:
       return xnn_setup_average_pooling2d_nhwc_f32(
         opdata->operator_objects[0],
+        opdata->workspace,
         input_data,
         output_data);
     default:

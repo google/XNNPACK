@@ -15,6 +15,8 @@
 #include <gtest/gtest.h>
 
 #include <xnnpack.h>
+#include <xnnpack/aligned-allocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator-utils.h>
 #include <xnnpack/operator.h>
@@ -160,12 +162,19 @@ TEST_F(AveragePoolingTestF32, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
+  size_t workspace_size = 0;
+  size_t workspace_alignment = 0;
   ASSERT_EQ(
     xnn_status_success,
     xnn_reshape_average_pooling2d_nhwc_f32(
-      op, batch_size, input_height, input_width, /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+      op, batch_size, input_height, input_width,
+      &workspace_size, &workspace_alignment,
+      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
       /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_average_pooling2d_nhwc_f32(op, input.data(), operator_output.data()));
+  ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  ASSERT_EQ(xnn_status_success, xnn_setup_average_pooling2d_nhwc_f32(op, workspace.data(), input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

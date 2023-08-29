@@ -15,6 +15,8 @@
 #include <vector>     // For std::vector.
 
 #include <xnnpack.h>
+#include <xnnpack/aligned-allocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/subgraph.h>
@@ -139,15 +141,18 @@ TEST_F(MeanTestF32, matches_operator_api)
 
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
+  size_t workspace_size = 0;
+  size_t workspace_alignment = 0;
   ASSERT_EQ(xnn_status_success,
     xnn_reshape_mean_nd_f32(op,
       reduction_axes.size(), reduction_axes.data(),
       input_shape.size(), input_shape.data(),
+      &workspace_size, &workspace_alignment,
       /*threadpool=*/nullptr));
+  ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
-  ASSERT_EQ(xnn_status_success,
-    xnn_setup_mean_nd_f32(op,
-      input.data(), operator_output.data()));
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  ASSERT_EQ(xnn_status_success, xnn_setup_mean_nd_f32(op, workspace.data(), input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
