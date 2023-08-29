@@ -26,7 +26,7 @@ class Generator : public MacroAssembler {
   void perform_post_operations(size_t max_mr, size_t num_post_operations, const xnn_post_operation* post_operations);
 };
 
-// void xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a75_prfm(
+// void xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a75_prfm(
 //     size_t mr,                         (x0) - unused.  mr = 1
 //     size_t nc,                         x1
 //     size_t kc,                         x2 / x0

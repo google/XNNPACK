@@ -10,7 +10,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qs8_igemm_minmax_rndnu_ukernel_2x8c8__asm_aarch64_neon_mlal(
+# void xnn_qs8_igemm_minmax_rndnu_ukernel_2x8c8__asm_aarch64_neon_mlal_prfm(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
