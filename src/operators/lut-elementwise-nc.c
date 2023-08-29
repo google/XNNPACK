@@ -345,7 +345,7 @@ static enum xnn_status reshape_lut_elementwise_nc(
     xnn_operator_t lut_elementwise_op,
     enum xnn_operator_type expected_operator_type,
     size_t batch_size,
-    size_t num_threads)
+    pthreadpool_t threadpool)
 {
   if (lut_elementwise_op->type != expected_operator_type) {
     xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
@@ -375,7 +375,6 @@ static enum xnn_status reshape_lut_elementwise_nc(
   const size_t input_stride = lut_elementwise_op->input_pixel_stride;
   const size_t output_stride = lut_elementwise_op->output_pixel_stride;
   if (is_continugous(lut_elementwise_op)) {
-    const size_t block_size = 1024;
     lut_elementwise_op->context.lut_contiguous = (struct lut_contiguous_context) {
       .x_stride = input_stride * sizeof(uint8_t),
       .t = lut_elementwise_op->lookup_table,
@@ -384,10 +383,20 @@ static enum xnn_status reshape_lut_elementwise_nc(
     };
 
     const size_t range = batch_size * channels * sizeof(uint8_t);
+    #if XNN_TEST_MODE
+      const size_t tile = lut_config->tile_size;
+    #else
+      size_t tile = range;
+      if (pthreadpool_get_threads_count(threadpool) > 1) {
+        const size_t block_size = 1024;
+        tile = block_size * sizeof(uint8_t);
+      }
+    #endif
+
     lut_elementwise_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
     lut_elementwise_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_lut_contiguous;
     lut_elementwise_op->compute[0].range[0] = range;
-    lut_elementwise_op->compute[0].tile[0] = (num_threads == 1) ? range : block_size * sizeof(uint8_t);
+    lut_elementwise_op->compute[0].tile[0] = tile;
   } else {
     lut_elementwise_op->context.lut_strided = (struct lut_strided_context) {
       .n = channels * sizeof(uint8_t),
@@ -413,7 +422,7 @@ enum xnn_status xnn_reshape_elu_nc_qs8(
   return reshape_lut_elementwise_nc(
     elu_op, xnn_operator_type_elu_nc_qs8,
     batch_size,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_sigmoid_nc_qs8(
@@ -424,7 +433,7 @@ enum xnn_status xnn_reshape_sigmoid_nc_qs8(
   return reshape_lut_elementwise_nc(
     sigmoid_op, xnn_operator_type_sigmoid_nc_qs8,
     batch_size,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_sigmoid_nc_qu8(
@@ -435,7 +444,7 @@ enum xnn_status xnn_reshape_sigmoid_nc_qu8(
   return reshape_lut_elementwise_nc(
     sigmoid_op, xnn_operator_type_sigmoid_nc_qu8,
     batch_size,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_tanh_nc_qs8(
@@ -446,7 +455,7 @@ enum xnn_status xnn_reshape_tanh_nc_qs8(
   return reshape_lut_elementwise_nc(
     tanh_op, xnn_operator_type_tanh_nc_qs8,
     batch_size,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_tanh_nc_qu8(
@@ -457,7 +466,7 @@ enum xnn_status xnn_reshape_tanh_nc_qu8(
   return reshape_lut_elementwise_nc(
     tanh_op, xnn_operator_type_tanh_nc_qu8,
     batch_size,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 static enum xnn_status setup_lut_elementwise_nc(

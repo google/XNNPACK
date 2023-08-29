@@ -870,7 +870,7 @@ static enum xnn_status reshape_fully_connected_nc(
   uint32_t log2_output_element_size,
   const void* params,
   size_t params_size,
-  size_t num_threads)
+  pthreadpool_t threadpool)
 {
   if (fully_connected_op->type != expected_operator_type) {
     xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
@@ -938,6 +938,7 @@ static enum xnn_status reshape_fully_connected_nc(
     const size_t nc = nr;
   #else
     size_t nc = output_channels;
+    const size_t num_threads = pthreadpool_get_threads_count(threadpool);
     if (num_threads > 1) {
       const size_t num_other_tiles = divide_round_up(batch_size, mr);
       const size_t target_tiles_per_thread = 5;
@@ -997,7 +998,7 @@ enum xnn_status xnn_reshape_fully_connected_nc_f16(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
     &fully_connected_op->params.f16_minmax,
     sizeof(fully_connected_op->params.f16_minmax),
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_f32(
@@ -1016,7 +1017,7 @@ enum xnn_status xnn_reshape_fully_connected_nc_f32(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &fully_connected_op->params.f32_minmax,
     sizeof(fully_connected_op->params.f32_minmax),
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_f32_qc4w(
@@ -1036,7 +1037,7 @@ enum xnn_status xnn_reshape_fully_connected_nc_f32_qc4w(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &fully_connected_op->params.f32_qc4w_minmax,
     sizeof(fully_connected_op->params.f32_qc4w_minmax),
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_f32_qc8w(
@@ -1055,7 +1056,7 @@ enum xnn_status xnn_reshape_fully_connected_nc_f32_qc8w(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &fully_connected_op->params.f32_minmax,
     sizeof(fully_connected_op->params.f32_minmax),
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qc8w(
@@ -1074,7 +1075,7 @@ enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qc8w(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &fully_connected_op->params.f32_minmax,
     sizeof(fully_connected_op->params.f32_minmax),
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qs8(
@@ -1093,7 +1094,7 @@ enum xnn_status xnn_reshape_fully_connected_nc_qs8(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     &fully_connected_op->params.qs8_conv_minmax,
     sizeof(fully_connected_op->params.qs8_conv_minmax),
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qu8(
@@ -1112,7 +1113,7 @@ enum xnn_status xnn_reshape_fully_connected_nc_qu8(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     &fully_connected_op->params.qu8_conv_minmax,
     sizeof(fully_connected_op->params.qu8_conv_minmax),
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 static enum xnn_status setup_fully_connected_nc(

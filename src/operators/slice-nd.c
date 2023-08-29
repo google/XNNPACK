@@ -103,7 +103,7 @@ static enum xnn_status reshape_slice_nd(
     const size_t* offsets,
     const size_t* sizes,
     uint32_t log2_element_size,
-    size_t num_threads)
+    pthreadpool_t threadpool)
 {
   if (slice_op->type != expected_operator_type) {
     xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
@@ -254,7 +254,7 @@ enum xnn_status xnn_reshape_slice_nd_x8(
     slice_op, xnn_operator_type_slice_nd_x8,
     num_dims, input_shape, offsets, sizes,
     0 /* log2(element size) */,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_slice_nd_x16(
@@ -269,7 +269,7 @@ enum xnn_status xnn_reshape_slice_nd_x16(
     slice_op, xnn_operator_type_slice_nd_x16,
     num_dims, input_shape, offsets, sizes,
     1 /* log2(element size) */,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_slice_nd_x32(
@@ -284,7 +284,7 @@ enum xnn_status xnn_reshape_slice_nd_x32(
     slice_op, xnn_operator_type_slice_nd_x32,
     num_dims, input_shape, offsets, sizes,
     2 /* log2(element size) */,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 static enum xnn_status setup_slice_nd(
@@ -393,7 +393,7 @@ static enum xnn_status xnn_run_slice_nd(
     &slice_op, operator_type,
     num_dims, input_shape, offsets, sizes,
     log2_element_size,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 
   if (status != xnn_status_success){
     return status;

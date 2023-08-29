@@ -418,7 +418,7 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
   size_t params_size,
   size_t* output_height_out,
   size_t* output_width_out,
-  size_t num_threads)
+  pthreadpool_t threadpool)
 {
   if (max_pooling_op->type != expected_operator_type) {
     xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
@@ -572,7 +572,7 @@ enum xnn_status xnn_reshape_max_pooling2d_nhwc_s8(
     max_pooling_op->maxpool_config,
     &max_pooling_op->params.s8_minmax, sizeof(max_pooling_op->params.s8_minmax),
     output_height_out, output_width_out,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_max_pooling2d_nhwc_u8(
@@ -592,7 +592,7 @@ enum xnn_status xnn_reshape_max_pooling2d_nhwc_u8(
     max_pooling_op->maxpool_config,
     &max_pooling_op->params.u8_minmax, sizeof(max_pooling_op->params.u8_minmax),
     output_height_out, output_width_out,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_max_pooling2d_nhwc_f16(
@@ -612,7 +612,7 @@ enum xnn_status xnn_reshape_max_pooling2d_nhwc_f16(
     max_pooling_op->maxpool_config,
     &max_pooling_op->params.f16_minmax, sizeof(max_pooling_op->params.f16_minmax),
     output_height_out, output_width_out,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_max_pooling2d_nhwc_f32(
@@ -632,7 +632,7 @@ enum xnn_status xnn_reshape_max_pooling2d_nhwc_f32(
     max_pooling_op->maxpool_config,
     &max_pooling_op->params.f32_minmax, sizeof(max_pooling_op->params.f32_minmax),
     output_height_out, output_width_out,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 static enum xnn_status setup_max_pooling2d_nhwc(

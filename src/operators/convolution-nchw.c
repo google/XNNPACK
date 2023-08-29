@@ -947,7 +947,7 @@ static enum xnn_status reshape_convolution2d_nchw(
   void* chw_params,
   size_t* output_height_out,
   size_t* output_width_out,
-  size_t num_threads)
+  pthreadpool_t threadpool)
 {
   if (convolution_op->type != expected_operator_type) {
     xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
@@ -1004,6 +1004,9 @@ static enum xnn_status reshape_convolution2d_nchw(
 
   const size_t input_batch_stride = (input_height * input_width * convolution_op->input_pixel_stride) << log2_input_element_size;
   const size_t output_batch_stride = (output_height * output_width * convolution_op->output_pixel_stride) << log2_output_element_size;
+  #if !XNN_TEST_MODE
+    const size_t num_threads = pthreadpool_get_threads_count(threadpool);
+  #endif
   switch (convolution_op->ukernel.type) {
     case xnn_microkernel_type_spmm:
     {
@@ -1186,7 +1189,7 @@ enum xnn_status xnn_reshape_convolution2d_nchw_f16(
     &convolution_op->params.f16_minmax,
     &convolution_op->params.f16_chw,
     output_height_out, output_width_out,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_convolution2d_nchw_f32(
@@ -1209,7 +1212,7 @@ enum xnn_status xnn_reshape_convolution2d_nchw_f32(
     &convolution_op->params.f32_minmax,
     &convolution_op->params.f32_chw,
     output_height_out, output_width_out,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 static enum xnn_status setup_convolution2d_nchw(

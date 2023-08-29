@@ -183,7 +183,7 @@ static enum xnn_status reshape_prelu_nc(
     enum xnn_operator_type expected_operator_type,
     size_t batch_size,
     uint32_t log2_element_size,
-    size_t num_threads)
+    pthreadpool_t threadpool)
 {
   if (prelu_op->type != expected_operator_type) {
     xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
@@ -225,6 +225,7 @@ static enum xnn_status reshape_prelu_nc(
     const size_t batch_tile = prelu->row_tile;
   #else
     size_t batch_tile = batch_size;
+    const size_t num_threads = pthreadpool_get_threads_count(threadpool);
     if (num_threads > 1) {
       const size_t target_tiles_per_thread = 5;
       const size_t max_batch_tile = divide_round_up(batch_size, num_threads * target_tiles_per_thread);
@@ -252,7 +253,7 @@ enum xnn_status xnn_reshape_prelu_nc_f16(
     prelu_op, xnn_operator_type_prelu_nc_f16,
     batch_size,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_prelu_nc_f32(
@@ -264,7 +265,7 @@ enum xnn_status xnn_reshape_prelu_nc_f32(
     prelu_op, xnn_operator_type_prelu_nc_f32,
     batch_size,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 static enum xnn_status setup_prelu_nc(

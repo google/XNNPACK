@@ -195,7 +195,7 @@ static enum xnn_status reshape_resize_bilinear2d_nhwc(
     xnn_indirection_init_resize_bilinear2d_hwc_fn indirection_init,
     size_t* workspace_size,
     size_t* workspace_alignment,
-    size_t num_threads)
+    pthreadpool_t threadpool)
 {
   if (resize_op->type != expected_operator_type) {
     xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
@@ -248,8 +248,11 @@ static enum xnn_status reshape_resize_bilinear2d_nhwc(
   const size_t input_pixel_stride_in_bytes = resize_op->input_pixel_stride << log2_data_element_size;
   const size_t indirection_buffer_size = sizeof(void*) * (output_height * output_width * 4);
   const size_t packed_weights_size = (output_height * output_width * 2) << log2_weight_element_size;
-  size_t resize_bilinear_compute_index = 0;
 
+  #if !XNN_TEST_MODE
+    const size_t num_threads = pthreadpool_get_threads_count(threadpool);
+  #endif
+  size_t resize_bilinear_compute_index = 0;
   if (enable_transient_indirection) {
     *workspace_size = indirection_buffer_size + packed_weights_size;
     *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
@@ -395,7 +398,7 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc_f16(
     /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_HALF,
     (xnn_indirection_init_resize_bilinear2d_hwc_fn) xnn_indirection_init_resize_bilinear2d_hwc_f16,
     workspace_size, workspace_alignment,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_resize_bilinear2d_nhwc_f32(
@@ -421,7 +424,7 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc_f32(
     /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     (xnn_indirection_init_resize_bilinear2d_hwc_fn) xnn_indirection_init_resize_bilinear2d_hwc_f32,
     workspace_size, workspace_alignment,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_resize_bilinear2d_nhwc_s8(
@@ -447,7 +450,7 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc_s8(
     /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_INT16_T,
     (xnn_indirection_init_resize_bilinear2d_hwc_fn) xnn_indirection_init_resize_bilinear2d_hwc_q11,
     workspace_size, workspace_alignment,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_resize_bilinear2d_nhwc_u8(
@@ -473,7 +476,7 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc_u8(
     /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_INT16_T,
     (xnn_indirection_init_resize_bilinear2d_hwc_fn) xnn_indirection_init_resize_bilinear2d_hwc_q11,
     workspace_size, workspace_alignment,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 static enum xnn_status setup_resize_bilinear2d_nhwc(

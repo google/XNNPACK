@@ -2127,7 +2127,7 @@ static enum xnn_status reshape_convolution2d_nhwc(
   size_t* output_width_out,
   size_t* workspace_size,
   size_t* workspace_alignment,
-  size_t num_threads)
+  pthreadpool_t threadpool)
 {
   if (convolution_op->type != expected_operator_type) {
     xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
@@ -2201,6 +2201,7 @@ static enum xnn_status reshape_convolution2d_nhwc(
     *output_width_out = convolution_op->output_width;
   }
 
+  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
   switch (convolution_op->ukernel.type) {
     case xnn_microkernel_type_gemm:
       return reshape_gemm(
@@ -2248,7 +2249,7 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_qu8(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     output_height_out, output_width_out,
     workspace_size, workspace_alignment,
-    /*num_threads=*/pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_convolution2d_nhwc_qs8(
@@ -2272,7 +2273,7 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_qs8(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     output_height_out, output_width_out,
     workspace_size, workspace_alignment,
-    /*num_threads=*/pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_convolution2d_nhwc_qs8_qc8w(
@@ -2296,7 +2297,7 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     output_height_out, output_width_out,
     workspace_size, workspace_alignment,
-    /*num_threads=*/pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_convolution2d_nhwc_f16(
@@ -2320,7 +2321,7 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_f16(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
     output_height_out, output_width_out,
     workspace_size, workspace_alignment,
-    /*num_threads=*/pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_convolution2d_nhwc_f32(
@@ -2344,7 +2345,7 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_f32(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     output_height_out, output_width_out,
     workspace_size, workspace_alignment,
-    /*num_threads=*/pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 static enum xnn_status setup_gemm(xnn_operator_t convolution_op)

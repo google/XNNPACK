@@ -153,7 +153,7 @@ static enum xnn_status reshape_resize_bilinear2d_nchw(
     uint32_t log2_data_element_size,
     uint32_t log2_weight_element_size,
     xnn_indirection_init_resize_bilinear2d_chw_fn indirection_init,
-    size_t num_threads)
+    pthreadpool_t threadpool)
 {
   if (resize_op->type != expected_operator_type) {
     xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
@@ -271,6 +271,7 @@ static enum xnn_status reshape_resize_bilinear2d_nchw(
     const size_t output_channel_tile = ibilinear_chw->channel_tile;
   #else
     size_t output_channel_tile = resize_op->channels;
+    const size_t num_threads = pthreadpool_get_threads_count(threadpool);
     if (num_threads > 1) {
       const size_t target_tiles_per_thread = 4;
       const size_t max_channel_tile = divide_round_up(output_channel_tile, num_threads * target_tiles_per_thread);
@@ -312,7 +313,7 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nchw_f16(
     /*log2_data_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_HALF,
     (xnn_indirection_init_resize_bilinear2d_chw_fn) xnn_indirection_init_resize_bilinear2d_chw_f16,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_resize_bilinear2d_nchw_f32(
@@ -335,7 +336,7 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nchw_f32(
     /*log2_data_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     (xnn_indirection_init_resize_bilinear2d_chw_fn) xnn_indirection_init_resize_bilinear2d_chw_f32,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 static enum xnn_status setup_resize_bilinear2d_nchw(

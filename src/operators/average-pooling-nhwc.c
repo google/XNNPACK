@@ -682,7 +682,7 @@ static enum xnn_status reshape_average_pooling2d(
   size_t global_params_size,
   size_t* output_height_out,
   size_t* output_width_out,
-  size_t num_threads,
+  pthreadpool_t threadpool,
   bool is_pixelwise)
 {
   assert(!is_pixelwise || pavgpool != NULL && indirection_init_pavgpool2d != NULL);
@@ -754,6 +754,7 @@ static enum xnn_status reshape_average_pooling2d(
   const size_t output_width = average_pooling_op->output_width;
   const size_t padded_input_width = average_pooling_op->padding_left + input_width + average_pooling_op->padding_right;
   const size_t padded_input_height = average_pooling_op->padding_top + input_height + average_pooling_op->padding_bottom;
+  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
   if (padded_input_width == average_pooling_op->kernel_width && padded_input_height == average_pooling_op->kernel_height) {
     // Global average pooling
     const size_t input_elements = input_height * input_width;
@@ -982,7 +983,7 @@ enum xnn_status xnn_reshape_average_pooling2d_nhwc_qu8(
     &average_pooling_op->params.qu8_gavgpool,
     sizeof(average_pooling_op->params.qu8_gavgpool),
     output_height_out, output_width_out,
-    pthreadpool_get_threads_count(threadpool),
+    threadpool,
     false /* pixelwise not supported */);
 }
 
@@ -1030,7 +1031,7 @@ enum xnn_status xnn_reshape_average_pooling2d_nhwc_f16(
     pooling_params, pooling_params_size,
     &average_pooling_op->params.f16_scaleminmax, sizeof(average_pooling_op->params.f16_scaleminmax),
     output_height_out, output_width_out,
-    pthreadpool_get_threads_count(threadpool),
+    threadpool,
     is_pixelwise);
 }
 
@@ -1078,7 +1079,7 @@ enum xnn_status xnn_reshape_average_pooling2d_nhwc_f32(
     pooling_params, pooling_params_size,
     &average_pooling_op->params.f32_scaleminmax, sizeof(average_pooling_op->params.f32_scaleminmax),
     output_height_out, output_width_out,
-    pthreadpool_get_threads_count(threadpool),
+    threadpool,
     is_pixelwise);
 }
 

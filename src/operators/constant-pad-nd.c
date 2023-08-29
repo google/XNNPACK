@@ -125,7 +125,7 @@ static enum xnn_status reshape_constant_pad_nd(
     const size_t* pre_paddings,
     const size_t* post_paddings,
     uint32_t log2_element_size,
-    size_t num_threads)
+    pthreadpool_t threadpool)
 {
   if (constant_pad_op->type != expected_operator_type) {
     xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
@@ -238,7 +238,7 @@ enum xnn_status xnn_reshape_constant_pad_nd_x8(
     constant_pad_op, xnn_operator_type_constant_pad_nd_x8,
     num_dims, input_shape, pre_padding, post_padding,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_constant_pad_nd_x16(
@@ -253,7 +253,7 @@ enum xnn_status xnn_reshape_constant_pad_nd_x16(
     constant_pad_op, xnn_operator_type_constant_pad_nd_x16,
     num_dims, input_shape, pre_padding, post_padding,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT16_T,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_constant_pad_nd_x32(
@@ -268,7 +268,7 @@ enum xnn_status xnn_reshape_constant_pad_nd_x32(
     constant_pad_op, xnn_operator_type_constant_pad_nd_x32,
     num_dims, input_shape, pre_padding, post_padding,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT32_T,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 static enum xnn_status setup_constant_pad_nd(
@@ -384,7 +384,7 @@ enum xnn_status run_constant_pad_nd(
     &constant_pad_op, operator_type,
     num_dims, input_shape, pre_paddings, post_paddings,
     log2_element_size,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 
   if (status != xnn_status_success) {
     return status;

@@ -253,7 +253,7 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
     size_t params_size,
     const void* params2,
     size_t params2_size,
-    size_t num_threads)
+    pthreadpool_t threadpool)
 {
   if (dynamic_fully_connected_op->type != expected_operator_type) {
     xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
@@ -373,7 +373,6 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
     dynamic_fully_connected_op->compute[0].tile[0] = nr;
   }
 
-
   dynamic_fully_connected_op->context.gemm = (struct gemm_context){
     .k_scaled = input_channels << log2_input_element_size,
     .w_stride = bias_element_size + (round_up_po2(input_channels, kr * sr) << log2_input_element_size),
@@ -394,6 +393,7 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
     const size_t nc = nr;
   #else
     size_t nc = output_channels;
+    const size_t num_threads = pthreadpool_get_threads_count(threadpool);
     if (num_threads > 1) {
       const size_t num_other_tiles = divide_round_up(batch_size, mr);
       const size_t target_tiles_per_thread = 5;
@@ -447,7 +447,7 @@ enum xnn_status xnn_reshape_dynamic_fully_connected_nc_f16(
     sizeof(dynamic_fully_connected_op->params.f16_minmax),
     &dynamic_fully_connected_op->params.f16_minmax,
     sizeof(dynamic_fully_connected_op->params.f16_minmax),
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_dynamic_fully_connected_nc_f32(
@@ -473,7 +473,7 @@ enum xnn_status xnn_reshape_dynamic_fully_connected_nc_f32(
     sizeof(dynamic_fully_connected_op->params.f32_minmax),
     &dynamic_fully_connected_op->params2.f32_minmax,
     sizeof(dynamic_fully_connected_op->params2.f32_minmax),
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 static enum xnn_status setup_dynamic_fully_connected_nc(

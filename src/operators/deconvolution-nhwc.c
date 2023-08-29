@@ -1131,7 +1131,7 @@ static enum xnn_status reshape_deconvolution2d_nhwc(
   size_t params_size,
   size_t* output_height_out,
   size_t* output_width_out,
-  size_t num_threads)
+  pthreadpool_t threadpool)
 {
   deconvolution_op->state = xnn_run_state_invalid;
 
@@ -1193,6 +1193,7 @@ static enum xnn_status reshape_deconvolution2d_nhwc(
     *output_width_out = deconvolution_op->output_width;
   }
 
+  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
   switch (deconvolution_op->ukernel.type) {
     case xnn_microkernel_type_igemm:
       return reshape_conv_path(
@@ -1253,7 +1254,7 @@ enum xnn_status xnn_reshape_deconvolution2d_nhwc_qs8(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     &deconvolution_op->params.qs8_conv_minmax, sizeof(deconvolution_op->params.qs8_conv_minmax),
     output_height_out, output_width_out,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_deconvolution2d_nhwc_qu8(
@@ -1284,7 +1285,7 @@ enum xnn_status xnn_reshape_deconvolution2d_nhwc_qu8(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     &deconvolution_op->params.qu8_conv_minmax, sizeof(deconvolution_op->params.qu8_conv_minmax),
     output_height_out, output_width_out,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_deconvolution2d_nhwc_f16(
@@ -1315,7 +1316,7 @@ enum xnn_status xnn_reshape_deconvolution2d_nhwc_f16(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
     &deconvolution_op->params.f16_minmax, sizeof(deconvolution_op->params.f16_minmax),
     output_height_out, output_width_out,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 enum xnn_status xnn_reshape_deconvolution2d_nhwc_f32(
@@ -1346,7 +1347,7 @@ enum xnn_status xnn_reshape_deconvolution2d_nhwc_f32(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &deconvolution_op->params.f32_minmax, sizeof(deconvolution_op->params.f32_minmax),
     output_height_out, output_width_out,
-    pthreadpool_get_threads_count(threadpool));
+    threadpool);
 }
 
 static enum xnn_status setup_conv_path(
