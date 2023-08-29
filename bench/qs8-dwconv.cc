@@ -167,7 +167,7 @@ static void DWConvBenchmark(benchmark::State& state,
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  state.counters["FLOPS"] = benchmark::Counter(
+  state.counters["OPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 * output_size * channels * kernel_size,
     benchmark::Counter::kIsRate);
 
@@ -332,7 +332,7 @@ static void DWConvBenchmark(benchmark::State& state,
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  state.counters["FLOPS"] = benchmark::Counter(
+  state.counters["OPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 * output_size * channels * kernel_size,
     benchmark::Counter::kIsRate);
 

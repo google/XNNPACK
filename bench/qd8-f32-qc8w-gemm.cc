@@ -99,7 +99,7 @@ void GEMMBenchmark(benchmark::State& state,
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  state.counters["FLOPS"] = benchmark::Counter(
+  state.counters["OPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 * mc * nc * kc, benchmark::Counter::kIsRate);
 }
 
