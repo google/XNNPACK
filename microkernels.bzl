@@ -5864,7 +5864,7 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/u32-vlog/gen/u32-vlog-scalar-x2.c",
     "src/u32-vlog/gen/u32-vlog-scalar-x3.c",
     "src/u32-vlog/gen/u32-vlog-scalar-x4.c",
-    "src/u64-u32-vsqrtshift/u64-u32-vsqrtshift-scalar-cvtu32-sqrt-cvtu32f64-x1.c",
+    "src/u64-u32-vsqrtshift/u64-u32-vsqrtshift-scalar-cvtu32-sqrt-cvtu32f64-u1.c",
     "src/x8-lut/gen/x8-lut-scalar-u1.c",
     "src/x8-lut/gen/x8-lut-scalar-u2.c",
     "src/x8-lut/gen/x8-lut-scalar-u4.c",
@@ -9836,7 +9836,6 @@ AARCH64_JIT_MICROKERNEL_SRCS = [
 ]
 
 WASM32_JIT_MICROKERNEL_SRCS = [
-    "src/f32-vrelu/f32-vrelu-ukernel-jit-wasm32-shr.cc",
 ]
 
 WASMRELAXEDSIMD32_JIT_MICROKERNEL_SRCS = [

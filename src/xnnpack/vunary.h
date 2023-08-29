@@ -801,14 +801,6 @@ DECLARE_F32_VRELU_UKERNEL_FUNCTION(xnn_f32_vrelu_ukernel__wasm32_shr_u1)
 DECLARE_F32_VRELU_UKERNEL_FUNCTION(xnn_f32_vrelu_ukernel__wasm32_shr_u2)
 DECLARE_F32_VRELU_UKERNEL_FUNCTION(xnn_f32_vrelu_ukernel__wasm32_shr_u4)
 
-#define DECLARE_GENERATE_F32_VRELU_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL xnn_status_t fn_name(                         \
-      struct xnn_code_buffer* bf,                            \
-      size_t k_unroll,                                       \
-      int use_locals);
-
-DECLARE_GENERATE_F32_VRELU_UKERNEL_FUNCTION(xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr)
-
 #define DECLARE_F32_VRND_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                       \
       size_t n,                                    \
@@ -1760,7 +1752,7 @@ DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(xnn_u8_vclamp_ukernel__wasmsimd_u64)
       uint32_t* y,                                           \
       uint32_t shift);
 
-DECLARE_U64_U32_VSQRTSHIFT_UKERNEL_FUNCTION(xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_x1)
+DECLARE_U64_U32_VSQRTSHIFT_UKERNEL_FUNCTION(xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_u1)
 
 
 #define DECLARE_XX_VUNARY_UKERNEL_FUNCTION(fn_name) \

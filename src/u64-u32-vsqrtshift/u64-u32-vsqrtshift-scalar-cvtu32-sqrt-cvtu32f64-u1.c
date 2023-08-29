@@ -12,7 +12,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_x1(
+void xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_u1(
     size_t batch,
     const uint64_t* input,
     uint32_t* output,

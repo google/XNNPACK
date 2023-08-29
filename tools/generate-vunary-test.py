@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"(?:xnn_|xnn_generate_)(s8|u8|f16|f32|u32|u64)(_(s8|u8|f16|f32|u32|u64))*_v(abs|clamp|elu|hswish|lrelu|neg|relu|rndd|rndne|rndu|rndz|sigmoid|sqr|sqrt|sqrtshift|tanh)_(fact_)?ukernel__(.+)_[xu](\d+)(v)?", name)
+  match = re.fullmatch(r"(?:xnn_|xnn_generate_)(s8|u8|f16|f32|u32|u64)(_(s8|u8|f16|f32|u32|u64))*_v(abs|clamp|elu|hswish|lrelu|neg|relu|rndd|rndne|rndu|rndz|sigmoid|sqr|sqrt|sqrtshift|tanh)_(fact_)?ukernel__(.+)_u(\d+)(v)?", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
@@ -204,7 +204,7 @@ $if OP_TYPE == "SquareRootShift":
 """
 
 
-def generate_test_cases(ukernel, op_type, init_fn, batch_tile, vector_tile, isa, k_unroll, use_local):
+def generate_test_cases(ukernel, op_type, init_fn, batch_tile, vector_tile, isa):
   """Generates all tests cases for a Vector Unary Operation micro-kernel.
 
   Args:
@@ -217,8 +217,6 @@ def generate_test_cases(ukernel, op_type, init_fn, batch_tile, vector_tile, isa,
                  elements.
     isa: instruction set required to run the micro-kernel. Generated unit test
          will skip execution if the host processor doesn't support this ISA.
-    k_unroll: The number of iterations to unroll. For WASM JIT kernels only.
-    use_local: Whether codegen should use local variables or not. For WASM JIT kernels only.
 
   Returns:
     Code for the test case.
@@ -230,10 +228,6 @@ def generate_test_cases(ukernel, op_type, init_fn, batch_tile, vector_tile, isa,
     test_args.append("VUnaryMicrokernelTester::OpType::" + op_type)
   if init_fn is not None:
     test_args.append(init_fn)
-  if k_unroll is not None and use_local is not None:
-    test_args.append(str(k_unroll))
-    test_args.append(str(use_local))
-    test_name = test_name + "_x" + str(k_unroll) + "_" + ["no_local", "with_local"][use_local]
   batch_scale = ""
   if vector_tile:
     ctype = {"f16": "uint16_t", "f32": "float"}[datatype]
@@ -283,15 +277,10 @@ def main(args):
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       init_fn = ukernel_spec.get("init")
-      k_unroll = ukernel_spec.get("k_unroll")
-      use_local = ukernel_spec.get("use_local")
-      if k_unroll:
-        op_type, batch_tile, vector_tile, arch, isa = split_ukernel_name(name + "_x" + str(k_unroll))
-      else:
-        op_type, batch_tile, vector_tile, arch, isa = split_ukernel_name(name)
+      op_type, batch_tile, vector_tile, arch, isa = split_ukernel_name(name)
 
       test_case = generate_test_cases(
-        name, op_type, init_fn, batch_tile, vector_tile, isa, k_unroll, use_local)
+        name, op_type, init_fn, batch_tile, vector_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     txt_changed = True

@@ -57,8 +57,8 @@ static void u64_u32_vsqrtshift(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-BENCHMARK_CAPTURE(u64_u32_vsqrtshift, scalar_cvtu32_sqrt_cvtu32f64_x1,
-                  xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_x1)
+BENCHMARK_CAPTURE(u64_u32_vsqrtshift, scalar_cvtu32_sqrt_cvtu32f64_u1,
+                  xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_u1)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<uint64_t, uint32_t>)
   ->UseRealTime();
 
