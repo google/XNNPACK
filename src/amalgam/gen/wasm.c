@@ -6102,7 +6102,7 @@ void xnn_f32_vtanh_ukernel__wasm_expm1minus_rr1_p6h5ts_div_u4(
   }
 }
 
-void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4__wasm(
+void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4__wasm_u1(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -6223,7 +6223,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4__wasm(
   } while (nc != 0);
 }
 
-void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4__wasm(
+void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4__wasm_u1(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -7256,7 +7256,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_9p2c__wasm_fmagic(
   } while (--output_width != 0);
 }
 
-void xnn_qs8_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic(
+void xnn_qs8_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic_u1(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -7363,7 +7363,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic(
   } while (nc != 0);
 }
 
-void xnn_qs8_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
+void xnn_qs8_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic_u1(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -8916,7 +8916,7 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_9p2c__wasm_fmagic(
   } while (--output_width != 0);
 }
 
-void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic_u1(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -9027,7 +9027,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic(
   } while (nc != 0);
 }
 
-void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic_u1(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -10456,7 +10456,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_9p2c__wasm_fmagic(
   } while (--output_width != 0);
 }
 
-void xnn_qu8_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic(
+void xnn_qu8_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic_u1(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -10564,7 +10564,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic(
   } while (nc != 0);
 }
 
-void xnn_qu8_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
+void xnn_qu8_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic_u1(
     size_t mr,
     size_t nc,
     size_t kc,
