@@ -9166,6 +9166,7 @@ xnnpack_unit_test(
         "test/qs8-igemm-minmax-rndnu.cc",
         "test/qs8-igemm-minmax-rndnu-2.cc",
         "test/qs8-igemm-minmax-rndnu-3.cc",
+        "test/qs8-igemm-minmax-rndnu-4.cc",
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [

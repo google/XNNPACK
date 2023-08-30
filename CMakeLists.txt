@@ -2690,7 +2690,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qs8-igemm-jit-rndnu-test PRIVATE jit gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME qs8-igemm-jit-rndnu-test COMMAND qs8-igemm-jit-rndnu-test)
 
-  ADD_EXECUTABLE(qs8-igemm-minmax-rndnu-test test/qs8-igemm-minmax-rndnu.cc test/qs8-igemm-minmax-rndnu-2.cc test/qs8-igemm-minmax-rndnu-3.cc)
+  ADD_EXECUTABLE(qs8-igemm-minmax-rndnu-test test/qs8-igemm-minmax-rndnu.cc test/qs8-igemm-minmax-rndnu-2.cc test/qs8-igemm-minmax-rndnu-3.cc test/qs8-igemm-minmax-rndnu-4.cc)
   TARGET_INCLUDE_DIRECTORIES(qs8-igemm-minmax-rndnu-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(qs8-igemm-minmax-rndnu-test PRIVATE pthreadpool gtest gtest_main)
   TARGET_LINK_LIBRARIES(qs8-igemm-minmax-rndnu-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)

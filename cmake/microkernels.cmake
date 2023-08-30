@@ -4484,6 +4484,22 @@ SET(ALL_NEONI8MM_MICROKERNEL_SRCS
   src/qs8-gemm/gen/qs8-gemm-8x8c8-minmax-rndnu-neoni8mm.c
   src/qs8-gemm/gen/qs8-gemm-8x16c8-minmax-fp32-neoni8mm.c
   src/qs8-gemm/gen/qs8-gemm-8x16c8-minmax-rndnu-neoni8mm.c
+  src/qs8-igemm/gen/qs8-igemm-2x8c8-minmax-fp32-neoni8mm.c
+  src/qs8-igemm/gen/qs8-igemm-2x8c8-minmax-rndnu-neoni8mm.c
+  src/qs8-igemm/gen/qs8-igemm-2x16c8-minmax-fp32-neoni8mm.c
+  src/qs8-igemm/gen/qs8-igemm-2x16c8-minmax-rndnu-neoni8mm.c
+  src/qs8-igemm/gen/qs8-igemm-4x8c8-minmax-fp32-neoni8mm.c
+  src/qs8-igemm/gen/qs8-igemm-4x8c8-minmax-rndnu-neoni8mm.c
+  src/qs8-igemm/gen/qs8-igemm-4x16c8-minmax-fp32-neoni8mm.c
+  src/qs8-igemm/gen/qs8-igemm-4x16c8-minmax-rndnu-neoni8mm.c
+  src/qs8-igemm/gen/qs8-igemm-6x8c8-minmax-fp32-neoni8mm.c
+  src/qs8-igemm/gen/qs8-igemm-6x8c8-minmax-rndnu-neoni8mm.c
+  src/qs8-igemm/gen/qs8-igemm-6x16c8-minmax-fp32-neoni8mm.c
+  src/qs8-igemm/gen/qs8-igemm-6x16c8-minmax-rndnu-neoni8mm.c
+  src/qs8-igemm/gen/qs8-igemm-8x8c8-minmax-fp32-neoni8mm.c
+  src/qs8-igemm/gen/qs8-igemm-8x8c8-minmax-rndnu-neoni8mm.c
+  src/qs8-igemm/gen/qs8-igemm-8x16c8-minmax-fp32-neoni8mm.c
+  src/qs8-igemm/gen/qs8-igemm-8x16c8-minmax-rndnu-neoni8mm.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-neoni8mm.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x16c8-minmax-fp32-neoni8mm.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-neoni8mm.c
@@ -4491,7 +4507,15 @@ SET(ALL_NEONI8MM_MICROKERNEL_SRCS
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x8c8-minmax-fp32-neoni8mm.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x16c8-minmax-fp32-neoni8mm.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x8c8-minmax-fp32-neoni8mm.c
-  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x16c8-minmax-fp32-neoni8mm.c)
+  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x16c8-minmax-fp32-neoni8mm.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8-minmax-fp32-neoni8mm.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x16c8-minmax-fp32-neoni8mm.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8c8-minmax-fp32-neoni8mm.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x16c8-minmax-fp32-neoni8mm.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x8c8-minmax-fp32-neoni8mm.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x16c8-minmax-fp32-neoni8mm.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x8c8-minmax-fp32-neoni8mm.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x16c8-minmax-fp32-neoni8mm.c)
 
 SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neonv8-u8.c
