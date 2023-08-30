@@ -52,8 +52,6 @@ static void GEMMBenchmark(benchmark::State& state,
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
   auto i8rng = std::bind(
     std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()), std::ref(rng));
-  auto w8rng = std::bind(
-    std::uniform_int_distribution<int32_t>(-std::numeric_limits<char>::max(), std::numeric_limits<char>::max()), std::ref(rng));
 
   std::vector<int8_t> a(mc * kc + XNN_EXTRA_BYTES / sizeof(int8_t));
   std::generate(a.begin(), a.end(), std::ref(i8rng));
@@ -69,7 +67,7 @@ static void GEMMBenchmark(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), w_size + c_elements * sizeof(int8_t));
 
   std::vector<char, AlignedAllocator<char, 64>> w(w_size * num_buffers);
-  std::generate(w.begin(), w.end(), std::ref(w8rng));
+  std::fill(w.begin(), w.end(), 0);
 
   const xnn_qs8_packing_params packing_params = { 127 };
   if (extended_weights) {
