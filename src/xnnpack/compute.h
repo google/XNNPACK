@@ -21,6 +21,7 @@ enum xnn_parallelization_type {
   xnn_parallelization_type_1d_with_thread,
   xnn_parallelization_type_1d_tile_1d,
   xnn_parallelization_type_2d,
+  xnn_parallelization_type_2d_with_thread,
   xnn_parallelization_type_2d_tile_1d,
   xnn_parallelization_type_2d_tile_2d,
   xnn_parallelization_type_3d,
@@ -49,6 +50,7 @@ struct compute_parameters {
     pthreadpool_task_1d_with_thread_t task_1d_with_thread;
     pthreadpool_task_1d_tile_1d_t task_1d_tile_1d;
     pthreadpool_task_2d_t task_2d;
+    pthreadpool_task_2d_with_thread_t task_2d_with_thread;
     pthreadpool_task_2d_tile_1d_t task_2d_tile_1d;
     pthreadpool_task_2d_tile_2d_t task_2d_tile_2d;
     pthreadpool_task_3d_t task_3d;
@@ -894,8 +896,9 @@ struct average_pooling_context {
       size_t batch_index,
       size_t output_y);
 
-  XNN_PRIVATE void xnn_compute_average_pooling_multipass(
+  XNN_PRIVATE void xnn_compute_average_pooling_multipass_with_thread(
       const struct average_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t thread_index,
       size_t batch_index,
       size_t output_y);
 #endif
@@ -935,8 +938,9 @@ struct pixelwise_average_pooling_context {
       size_t batch_index,
       size_t output_y);
 
-  XNN_PRIVATE void xnn_compute_pixelwise_average_pooling_multipass(
+  XNN_PRIVATE void xnn_compute_pixelwise_average_pooling_multipass_with_thread(
       const struct pixelwise_average_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t thread_index,
       size_t batch_index,
       size_t output_y);
 #endif

@@ -747,9 +747,6 @@ static enum xnn_status reshape_average_pooling2d(
     *output_width_out = average_pooling_op->output_width;
   }
 
-  *workspace_size = 0;
-  *workspace_alignment = 1;
-
   const size_t output_height = average_pooling_op->output_height;
   const size_t output_width = average_pooling_op->output_width;
   const size_t padded_input_width = average_pooling_op->padding_left + input_width + average_pooling_op->padding_right;
@@ -891,15 +888,25 @@ static enum xnn_status reshape_average_pooling2d(
       };
       memcpy(&average_pooling_op->context.pixelwise_average_pooling.params, params, params_size);
       if (pooling_size <= primary_tile) {
+        *workspace_size = 0;
+        *workspace_alignment = 1;
         average_pooling_op->context.pixelwise_average_pooling.unipass_ukernel = pavgpool->unipass;
+        average_pooling_op->compute[0].type = xnn_parallelization_type_2d;
         average_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_pixelwise_average_pooling_unipass;
       } else {
-        average_pooling_op->context.pixelwise_average_pooling.buffer_size =
-          (channels + (XNN_MULTIPASS_EXTRA_BYTES >> log2_data_element_size)) << log2_accumulator_element_size;
+        const size_t buffer_size = round_up_po2(
+          (channels + (XNN_MULTIPASS_EXTRA_BYTES >> log2_data_element_size)) << log2_accumulator_element_size,
+          XNN_ALLOCATION_ALIGNMENT);
+        *workspace_size = num_threads * buffer_size;
+        *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
+        average_pooling_op->context.pixelwise_average_pooling.buffer_size = buffer_size;
         average_pooling_op->context.pixelwise_average_pooling.multipass_ukernel = pavgpool->multipass;
-        average_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_pixelwise_average_pooling_multipass;
+        average_pooling_op->compute[0].type = xnn_parallelization_type_2d_with_thread;
+        average_pooling_op->compute[0].task_2d_with_thread =
+          (pthreadpool_task_2d_with_thread_t) xnn_compute_pixelwise_average_pooling_multipass_with_thread;
       }
     } else {
+      // Not pixelwise.
       average_pooling_op->ukernel.subtype = xnn_microkernel_type_average_pooling;
       const uint32_t incremental_tile = avgpool->incremental_tile;
       const size_t multipass_adjustment =
@@ -920,16 +927,24 @@ static enum xnn_status reshape_average_pooling2d(
       };
       memcpy(&average_pooling_op->context.average_pooling.params, params, params_size);
       if (pooling_size <= primary_tile) {
+        *workspace_size = 0;
+        *workspace_alignment = 1;
+        average_pooling_op->compute[0].type = xnn_parallelization_type_2d;
         average_pooling_op->context.average_pooling.unipass_ukernel = avgpool->unipass;
         average_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_average_pooling_unipass;
       } else {
-        average_pooling_op->context.average_pooling.buffer_size =
-          (channels + (XNN_MULTIPASS_EXTRA_BYTES >> log2_data_element_size)) << log2_accumulator_element_size;
+        const size_t buffer_size = round_up_po2(
+            ((channels + (XNN_MULTIPASS_EXTRA_BYTES >> log2_data_element_size)) << log2_accumulator_element_size) * 4,
+            XNN_ALLOCATION_ALIGNMENT);
+        *workspace_size = num_threads * buffer_size;
+        *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
+        average_pooling_op->context.average_pooling.buffer_size = buffer_size;
         average_pooling_op->context.average_pooling.multipass_ukernel = avgpool->multipass;
-        average_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_average_pooling_multipass;
+        average_pooling_op->compute[0].type = xnn_parallelization_type_2d_with_thread;
+        average_pooling_op->compute[0].task_2d_with_thread =
+          (pthreadpool_task_2d_with_thread_t) xnn_compute_average_pooling_multipass_with_thread;
       }
     }
-    average_pooling_op->compute[0].type = xnn_parallelization_type_2d;
     average_pooling_op->compute[0].range[0] = batch_size;
     average_pooling_op->compute[0].range[1] = output_height;
   }

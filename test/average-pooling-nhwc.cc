@@ -55,6 +55,20 @@ TEST(AVERAGE_POOLING_NHWC_QU8, small_pool) {
   }
 }
 
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_multithreaded) {
+  const struct xnn_avgpool_config* avgpool_config = xnn_init_qu8_avgpool_config();
+  ASSERT_NE(avgpool_config, nullptr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(avgpool_config->primary_tile);
+  AveragePoolingOperatorTester()
+    .input_height(pooling_size.first + 3)
+    .input_width(pooling_size.second + 2)
+    .pooling_height(pooling_size.first)
+    .pooling_width(pooling_size.second)
+    .channels(15)
+    .multithreaded(true)
+    .TestQU8();
+}
+
 TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_with_stride) {
   const struct xnn_avgpool_config* avgpool_config = xnn_init_qu8_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
@@ -209,6 +223,21 @@ TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_with_tf_same_padding) {
       }
     }
   }
+}
+
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_with_tf_same_padding_multithreaded) {
+  const struct xnn_avgpool_config* avgpool_config = xnn_init_qu8_avgpool_config();
+  ASSERT_NE(avgpool_config, nullptr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(avgpool_config->primary_tile);
+  AveragePoolingOperatorTester()
+    .input_height(pooling_size.first + 3)
+    .input_width(pooling_size.second + 2)
+    .padding_tf_same(true)
+    .pooling_height(pooling_size.first)
+    .pooling_width(pooling_size.second)
+    .channels(15)
+    .multithreaded(true)
+    .TestQU8();
 }
 
 TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_with_input_stride) {
@@ -841,6 +870,20 @@ TEST(AVERAGE_POOLING_NHWC_QU8, large_pool) {
       .channels(channels)
       .TestQU8();
   }
+}
+
+TEST(AVERAGE_POOLING_NHWC_QU8, large_pool_multithreaded) {
+  const struct xnn_avgpool_config* avgpool_config = xnn_init_qu8_avgpool_config();
+  ASSERT_NE(avgpool_config, nullptr);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(avgpool_config->primary_tile * 2);
+  AveragePoolingOperatorTester()
+    .input_height(pooling_size.first + 3)
+    .input_width(pooling_size.second + 2)
+    .pooling_height(pooling_size.first)
+    .pooling_width(pooling_size.second)
+    .channels(15)
+    .multithreaded(true)
+    .TestQU8();
 }
 
 TEST(AVERAGE_POOLING_NHWC_QU8, large_pool_with_stride) {
@@ -3069,6 +3112,22 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_pool) {
   }
 }
 
+TEST(AVERAGE_POOLING_NHWC_F16, small_pool_multithreaded) {
+  const struct xnn_avgpool_config* avgpool_config = xnn_init_f16_avgpool_config();
+  if (avgpool_config == nullptr) {
+    GTEST_SKIP();  // F16 unsupported.
+  }
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(avgpool_config->primary_tile);
+  AveragePoolingOperatorTester()
+    .input_height(pooling_size.first + 3)
+    .input_width(pooling_size.second + 2)
+    .pooling_height(pooling_size.first)
+    .pooling_width(pooling_size.second)
+    .channels(15)
+    .multithreaded(true)
+    .TestF16();
+}
+
 TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_stride) {
   const struct xnn_avgpool_config* avgpool_config = xnn_init_f16_avgpool_config();
   if (avgpool_config == nullptr) {
@@ -3232,6 +3291,24 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_tf_same_padding) {
     }
   }
 }
+
+TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_tf_same_padding_multithreaded) {
+  const struct xnn_avgpool_config* avgpool_config = xnn_init_f16_avgpool_config();
+  if (avgpool_config == nullptr) {
+    GTEST_SKIP();  // F16 unsupported.
+  }
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(avgpool_config->primary_tile);
+  AveragePoolingOperatorTester()
+    .input_height(pooling_size.first + 3)
+    .input_width(pooling_size.second + 2)
+    .padding_tf_same(true)
+    .pooling_height(pooling_size.first)
+    .pooling_width(pooling_size.second)
+    .channels(15)
+    .multithreaded(true)
+    .TestF16();
+}
+
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_input_stride) {
   const struct xnn_avgpool_config* avgpool_config = xnn_init_f16_avgpool_config();
@@ -3675,6 +3752,22 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_pool) {
       .channels(channels)
       .TestF16();
   }
+}
+
+TEST(AVERAGE_POOLING_NHWC_F16, large_pool_multithreaded) {
+  const struct xnn_avgpool_config* avgpool_config = xnn_init_f16_avgpool_config();
+  if (avgpool_config == nullptr) {
+    GTEST_SKIP();  // F16 unsupported.
+  }
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(avgpool_config->primary_tile * 2);
+  AveragePoolingOperatorTester()
+    .input_height(pooling_size.first + 3)
+    .input_width(pooling_size.second + 2)
+    .pooling_height(pooling_size.first)
+    .pooling_width(pooling_size.second)
+    .channels(15)
+    .multithreaded(true)
+    .TestF16();
 }
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_stride) {
@@ -5273,6 +5366,20 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_pool) {
   }
 }
 
+TEST(AVERAGE_POOLING_NHWC_F32, small_pool_multithreaded) {
+  const struct xnn_avgpool_config* avgpool_config = xnn_init_f32_avgpool_config();
+  ASSERT_NE(avgpool_config, nullptr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(avgpool_config->primary_tile);
+  AveragePoolingOperatorTester()
+    .input_height(pooling_size.first + 3)
+    .input_width(pooling_size.second + 2)
+    .pooling_height(pooling_size.first)
+    .pooling_width(pooling_size.second)
+    .channels(15)
+    .multithreaded(true)
+    .TestF32();
+}
+
 TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_stride) {
   const struct xnn_avgpool_config* avgpool_config = xnn_init_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
@@ -5427,6 +5534,21 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_tf_same_padding) {
       }
     }
   }
+}
+
+TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_tf_same_padding_multithreaded) {
+  const struct xnn_avgpool_config* avgpool_config = xnn_init_f32_avgpool_config();
+  ASSERT_NE(avgpool_config, nullptr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(avgpool_config->primary_tile);
+  AveragePoolingOperatorTester()
+    .input_height(pooling_size.first + 3)
+    .input_width(pooling_size.second + 2)
+    .padding_tf_same(true)
+    .pooling_height(pooling_size.first)
+    .pooling_width(pooling_size.second)
+    .channels(15)
+    .multithreaded(true)
+    .TestF32();
 }
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_input_stride) {
@@ -5843,6 +5965,20 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_pool) {
       .channels(channels)
       .TestF32();
   }
+}
+
+TEST(AVERAGE_POOLING_NHWC_F32, large_pool_multithreaded) {
+  const struct xnn_avgpool_config* avgpool_config = xnn_init_f32_avgpool_config();
+  ASSERT_NE(avgpool_config, nullptr);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(avgpool_config->primary_tile * 2);
+  AveragePoolingOperatorTester()
+    .input_height(pooling_size.first + 3)
+    .input_width(pooling_size.second + 2)
+    .pooling_height(pooling_size.first)
+    .pooling_width(pooling_size.second)
+    .channels(15)
+    .multithreaded(true)
+    .TestF32();
 }
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_stride) {
