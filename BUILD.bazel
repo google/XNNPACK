@@ -5581,6 +5581,19 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qd8_f32_qc4w_gemm_bench",
+    srcs = [
+        "bench/gemm.h",
+        "bench/qd8-f32-qc4w-gemm.cc",
+    ],
+    copts = xnnpack_optional_ruy_copts(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":allocator",
+        ":math",
+    ] + xnnpack_optional_ruy_deps(),
+)
+
+xnnpack_benchmark(
     name = "qs8_dwconv_bench",
     srcs = [
         "bench/dwconv.h",
