@@ -1464,8 +1464,7 @@ struct floating_point_softmax_context {
 struct rope_context {
   size_t scaled_channels;
   size_t batch_stride;
-  size_t head_stride;
-  size_t sequence_stride;
+  size_t token_stride;
   const void* input;
   const void* weights;
   void* output;
@@ -1479,7 +1478,6 @@ struct rope_context {
   XNN_PRIVATE void xnn_compute_rope(
       const struct rope_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
-      size_t head_index,
       size_t sequence_index);
 #endif
 

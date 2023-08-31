@@ -1404,12 +1404,14 @@ enum xnn_status xnn_define_prelu(
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
 /// @param max_tokens - maximum possible number of tokens (maximum sequence length) of the input/output tensors.
-/// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
-///                   with [batch, tokens, heads, channels] dimensions.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a 3+-dimensional tensor defined in the
+///                   @a subgraph with the dimensions [*, tokens, channels], where * denotes 0 or more dimensions
+///                   jointly treated as batch size.
 /// @param weights_id - Value ID for the weights tensor. The weights tensor must be a 2D tensor defined in the
 ///                     @a subgraph with [max_tokens, channels] dimensions.
-/// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
-///                    with [batch, tokens, heads, channels] dimensions.
+/// @param output_id - Value ID for the output tensor. The output tensor must be a 3+-dimensional tensor defined in the
+///                    @a subgraph with [*, tokens, channels] dimensions, where * denotes 0 or more dimensions jointly
+///                    treated as batch size. These batch size dimensions must be the same as in input.
 /// @param flags - binary features of the RoPE Node. No supported flags are currently defined.
 enum xnn_status xnn_define_rope(
   xnn_subgraph_t subgraph,
@@ -2738,20 +2740,19 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f32(
   const float* input,
   float* output);
 
-enum xnn_status xnn_create_rope_nthc_f32(
+enum xnn_status xnn_create_rope_ntc_f32(
   size_t max_tokens,
   uint32_t flags,
   xnn_operator_t* rope_op_out);
 
-enum xnn_status xnn_reshape_rope_nthc_f32(
+enum xnn_status xnn_reshape_rope_ntc_f32(
   xnn_operator_t rope_op,
   size_t batch_size,
   size_t tokens,
-  size_t heads,
   size_t channels,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_setup_rope_nthc_f32(
+enum xnn_status xnn_setup_rope_ntc_f32(
   xnn_operator_t rope_op,
   const float* input,
   const float* weights,

@@ -38,9 +38,9 @@ protected:
     heads = dim_dist(rng);
     channels = dim_dist(rng) * 2;  // ensure the number of channels is even
 
-    input = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + batch_size * tokens * heads * channels);
+    input = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + batch_size * heads * tokens * channels);
     weights = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + max_tokens * channels);
-    operator_output = std::vector<T>(batch_size * tokens * heads * channels);
+    operator_output = std::vector<T>(batch_size * heads * tokens * channels);
     subgraph_output = std::vector<T>(operator_output.size());
   }
 
@@ -72,7 +72,7 @@ TEST_F(RoPETestF32, define)
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
 
   uint32_t input_id = XNN_INVALID_NODE_ID;
-  const std::array<size_t, 4> input_dims{{batch_size, tokens, heads, channels}};
+  const std::array<size_t, 4> input_dims{{batch_size, heads, tokens, channels}};
   ASSERT_EQ(xnn_status_success,
     xnn_define_tensor_value(subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(),
                             /*data=*/nullptr, /*external_id=*/0, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
@@ -85,7 +85,7 @@ TEST_F(RoPETestF32, define)
                             weights.data(), /*external_id=*/1, /*flags=*/0, &weights_id));
 
   uint32_t output_id = XNN_INVALID_NODE_ID;
-  const std::array<size_t, 4> output_dims{{batch_size, tokens, heads, channels}};
+  const std::array<size_t, 4> output_dims{{batch_size, heads, tokens, channels}};
   ASSERT_EQ(
     xnn_status_success, xnn_define_tensor_value(
                           subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
@@ -119,7 +119,7 @@ TEST_F(RoPETestF32, matches_operator_api)
   std::fill(operator_output.begin(), operator_output.end(), nanf(""));
   std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
-  const xnn_status status = xnn_create_rope_nthc_f32(max_tokens, /*flags=*/0, &op);
+  const xnn_status status = xnn_create_rope_ntc_f32(max_tokens, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -129,12 +129,12 @@ TEST_F(RoPETestF32, matches_operator_api)
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   ASSERT_EQ(xnn_status_success,
-    xnn_reshape_rope_nthc_f32(op,
-      batch_size, tokens, heads, channels,
+    xnn_reshape_rope_ntc_f32(op,
+      batch_size * heads, tokens, channels,
       /*threadpool=*/nullptr));
 
   ASSERT_EQ(xnn_status_success,
-    xnn_setup_rope_nthc_f32(op,
+    xnn_setup_rope_ntc_f32(op,
       input.data(), weights.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
@@ -145,7 +145,7 @@ TEST_F(RoPETestF32, matches_operator_api)
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
 
   uint32_t input_id = XNN_INVALID_NODE_ID;
-  const std::array<size_t, 4> input_dims{{batch_size, tokens, heads, channels}};
+  const std::array<size_t, 4> input_dims{{batch_size, heads, tokens, channels}};
   ASSERT_EQ(xnn_status_success,
     xnn_define_tensor_value(subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(),
                             /*data=*/nullptr, /*external_id=*/0, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
@@ -158,7 +158,7 @@ TEST_F(RoPETestF32, matches_operator_api)
                             weights.data(), /*external_id=*/1, /*flags=*/0, &weights_id));
 
   uint32_t output_id = XNN_INVALID_NODE_ID;
-  const std::array<size_t, 4> output_dims{{batch_size, tokens, heads, channels}};
+  const std::array<size_t, 4> output_dims{{batch_size, heads, tokens, channels}};
   ASSERT_EQ(
     xnn_status_success, xnn_define_tensor_value(
                           subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(),
