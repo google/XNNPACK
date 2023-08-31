@@ -492,7 +492,7 @@ void GemmMicrokernelTester::Test(
 }
 
 void GemmMicrokernelTester::Test(
-  xnn_qd8_f32_qc8w_gemm_ukernel_fn gemm,
+  xnn_qd8_f32_qc8w_gemm_minmax_ukernel_fn gemm,
   xnn_init_f32_minmax_params_fn init_params) const
 {
   ASSERT_LE(m(), mr());
