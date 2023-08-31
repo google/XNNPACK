@@ -52,7 +52,7 @@ static void channel_shuffle_x8(benchmark::State& state, const char* net) {
   status = xnn_reshape_channel_shuffle_nc_x8(
     channel_shuffle_op,
     batch_size,
-    nullptr /* thread pool */);
+    /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape X8 Channel Shuffle operator");
     return;
@@ -67,7 +67,7 @@ static void channel_shuffle_x8(benchmark::State& state, const char* net) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(channel_shuffle_op, nullptr /* thread pool */);
+    status = xnn_run_operator(channel_shuffle_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run X8 Channel Shuffle operator");
       return;
@@ -127,7 +127,7 @@ static void channel_shuffle_x32(benchmark::State& state, const char* net) {
   status = xnn_reshape_channel_shuffle_nc_x32(
     channel_shuffle_op,
     batch_size,
-    nullptr /* thread pool */);
+    /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape X32 Channel Shuffle operator");
     return;
@@ -142,7 +142,7 @@ static void channel_shuffle_x32(benchmark::State& state, const char* net) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(channel_shuffle_op, nullptr /* thread pool */);
+    status = xnn_run_operator(channel_shuffle_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run X32 Channel Shuffle operator");
       return;

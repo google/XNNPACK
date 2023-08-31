@@ -69,7 +69,7 @@ void xnnpack_convert_f16_f32(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(convert_op, nullptr /* thread pool */);
+    status = xnn_run_operator(convert_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run F16->F32 Convert operator");
       return;
@@ -136,7 +136,7 @@ void xnnpack_convert_f32_f16(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(convert_op, nullptr /* thread pool */);
+    status = xnn_run_operator(convert_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run F32->F16 Convert operator");
       return;
@@ -205,7 +205,7 @@ void xnnpack_convert_f32_qs8(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(convert_op, nullptr /* thread pool */);
+    status = xnn_run_operator(convert_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run F32->QS8 Convert operator");
       return;
@@ -274,7 +274,7 @@ void xnnpack_convert_f32_qu8(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(convert_op, nullptr /* thread pool */);
+    status = xnn_run_operator(convert_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run F32->QU8 Convert operator");
       return;
@@ -345,7 +345,7 @@ void xnnpack_convert_qs8(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(convert_op, nullptr /* thread pool */);
+    status = xnn_run_operator(convert_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run QS8 Convert operator");
       return;
@@ -415,7 +415,7 @@ void xnnpack_convert_qs8_f32(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(convert_op, nullptr /* thread pool */);
+    status = xnn_run_operator(convert_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run QS8->F32 Convert operator");
       return;
@@ -486,7 +486,7 @@ void xnnpack_convert_qu8(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(convert_op, nullptr /* thread pool */);
+    status = xnn_run_operator(convert_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run QU8 Convert operator");
       return;
@@ -556,7 +556,7 @@ void xnnpack_convert_qu8_f32(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(convert_op, nullptr /* thread pool */);
+    status = xnn_run_operator(convert_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run QU8->F32 Convert operator");
       return;

@@ -128,7 +128,7 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
-    status = xnn_run_operator(deconvolution_operators[buffer_index], nullptr /* thread pool */);
+    status = xnn_run_operator(deconvolution_operators[buffer_index], /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run QINT8 Deconvolution operator");
       return;
@@ -256,7 +256,7 @@ void xnnpack_deconvolution_f32(benchmark::State& state, const char* net) {
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
-    status = xnn_run_operator(deconvolution_operators[buffer_index], nullptr /* thread pool */);
+    status = xnn_run_operator(deconvolution_operators[buffer_index], /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run FP32 Deconvolution operator");
       return;

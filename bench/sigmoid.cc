@@ -72,7 +72,7 @@ static void xnnpack_sigmoid_f16(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(sigmoid_op, nullptr /* thread pool */);
+    status = xnn_run_operator(sigmoid_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run Sigmoid operator");
       return;
@@ -138,7 +138,7 @@ static void xnnpack_sigmoid_f32(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(sigmoid_op, nullptr /* thread pool */);
+    status = xnn_run_operator(sigmoid_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run Sigmoid operator");
       return;
@@ -210,7 +210,7 @@ static void xnnpack_sigmoid_qs8(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(sigmoid_op, nullptr /* thread pool */);
+    status = xnn_run_operator(sigmoid_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run Sigmoid operator");
       return;
@@ -280,7 +280,7 @@ static void xnnpack_sigmoid_qu8(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(sigmoid_op, nullptr /* thread pool */);
+    status = xnn_run_operator(sigmoid_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run Sigmoid operator");
       return;

@@ -79,7 +79,7 @@ static void xnnpack_average_pooling_qu8(benchmark::State& state, const char* net
     batch_size, input_height, input_width,
     &workspace_size, &workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    nullptr /* thread pool */);
+    /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Average Pooling operator");
     return;
@@ -97,7 +97,7 @@ static void xnnpack_average_pooling_qu8(benchmark::State& state, const char* net
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(pooling_op, nullptr /* thread pool */);
+    status = xnn_run_operator(pooling_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run Average Pooling operator");
       return;
@@ -169,7 +169,7 @@ static void xnnpack_average_pooling_f32(benchmark::State& state, const char* net
     batch_size, input_height, input_width,
     &workspace_size, &workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    nullptr /* thread pool */);
+    /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Average Pooling operator");
     return;
@@ -187,7 +187,7 @@ static void xnnpack_average_pooling_f32(benchmark::State& state, const char* net
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(pooling_op, nullptr /* thread pool */);
+    status = xnn_run_operator(pooling_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run Average Pooling operator");
       return;

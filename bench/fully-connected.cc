@@ -66,7 +66,7 @@ void xnnpack_fully_connected_f32(benchmark::State& state, const char* net) {
     status = xnn_reshape_fully_connected_nc_f32(
       ops[i],
       batch_size,
-      nullptr /* thread pool */);
+      /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to setup FP32 Fully Connected operator");
       return;
@@ -89,7 +89,7 @@ void xnnpack_fully_connected_f32(benchmark::State& state, const char* net) {
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
-    status = xnn_run_operator(ops[buffer_index], nullptr /* thread pool */);
+    status = xnn_run_operator(ops[buffer_index], /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run FP32 Fully Connected operator");
       return;
@@ -166,7 +166,7 @@ void xnnpack_dynamic_fully_connected_f32(benchmark::State& state, const char* ne
       input_channels, output_channels,
       input_channels, output_channels,
       &workspace_size, &workspace_alignment,
-      nullptr /* thread pool */);
+      /*threadpool=*/nullptr);
 
     if (status != xnn_status_success) {
       state.SkipWithError("failed to reshape FP32 Dynamic Fully Connected operator");
@@ -198,7 +198,7 @@ void xnnpack_dynamic_fully_connected_f32(benchmark::State& state, const char* ne
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
-    status = xnn_run_operator(ops[buffer_index], nullptr /* thread pool */);
+    status = xnn_run_operator(ops[buffer_index], /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run FP32 Dynamic Fully Connected operator");
       return;

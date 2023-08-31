@@ -69,7 +69,7 @@ static void xnnpack_bankers_rounding_f16(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(bankers_rounding_op, nullptr /* thread pool */);
+    status = xnn_run_operator(bankers_rounding_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run Bankers' Rounding operator");
       return;
@@ -135,7 +135,7 @@ static void xnnpack_bankers_rounding_f32(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(bankers_rounding_op, nullptr /* thread pool */);
+    status = xnn_run_operator(bankers_rounding_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run Bankers' Rounding operator");
       return;

@@ -58,7 +58,7 @@ static void global_average_pooling_qu8(benchmark::State& state) {
     global_pooling_op,
     batch_size, input_height * input_width,
     &workspace_size, &workspace_alignment,
-    nullptr /* thread pool */);
+    /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Global Average Pooling operator");
   }
@@ -74,7 +74,7 @@ static void global_average_pooling_qu8(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    xnn_run_operator(global_pooling_op, nullptr /* thread pool */);
+    xnn_run_operator(global_pooling_op, /*threadpool=*/nullptr);
   }
 
   status = xnn_delete_operator(global_pooling_op);
@@ -131,7 +131,7 @@ static void global_average_pooling_qs8(benchmark::State& state) {
     global_pooling_op,
     batch_size, input_height * input_width,
     &workspace_size, &workspace_alignment,
-    nullptr /* thread pool */);
+    /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Global Average Pooling operator");
   }
@@ -146,7 +146,7 @@ static void global_average_pooling_qs8(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    xnn_run_operator(global_pooling_op, nullptr /* thread pool */);
+    xnn_run_operator(global_pooling_op, /*threadpool=*/nullptr);
   }
 
   status = xnn_delete_operator(global_pooling_op);
@@ -201,7 +201,7 @@ static void global_average_pooling_f16(benchmark::State& state) {
     global_pooling_op,
     batch_size, input_height * input_width,
     &workspace_size, &workspace_alignment,
-    nullptr /* thread pool */);
+    /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Global Average Pooling operator");
   }
@@ -216,7 +216,7 @@ static void global_average_pooling_f16(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    xnn_run_operator(global_pooling_op, nullptr /* thread pool */);
+    xnn_run_operator(global_pooling_op, /*threadpool=*/nullptr);
   }
 
   status = xnn_delete_operator(global_pooling_op);
@@ -270,7 +270,7 @@ static void global_average_pooling_f32(benchmark::State& state) {
     global_pooling_op,
     batch_size, input_height * input_width,
     &workspace_size, &workspace_alignment,
-    nullptr /* thread pool */);
+    /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Global Average Pooling operator");
   }
@@ -285,7 +285,7 @@ static void global_average_pooling_f32(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    xnn_run_operator(global_pooling_op, nullptr /* thread pool */);
+    xnn_run_operator(global_pooling_op, /*threadpool=*/nullptr);
   }
 
   status = xnn_delete_operator(global_pooling_op);

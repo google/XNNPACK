@@ -66,7 +66,7 @@ static void xnnpack_square_root_f32(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(sqrt_op, nullptr /* thread pool */);
+    status = xnn_run_operator(sqrt_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run Square Root operator");
       return;

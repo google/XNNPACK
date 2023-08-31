@@ -65,7 +65,7 @@ static void xnnpack_negate_f32(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(negate_op, nullptr /* thread pool */);
+    status = xnn_run_operator(negate_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run Negate operator");
       return;

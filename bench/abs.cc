@@ -69,7 +69,7 @@ static void xnnpack_abs_f16(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(abs_op, nullptr /* thread pool */);
+    status = xnn_run_operator(abs_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run Abs operator");
       return;
@@ -135,7 +135,7 @@ static void xnnpack_abs_f32(benchmark::State& state) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(abs_op, nullptr /* thread pool */);
+    status = xnn_run_operator(abs_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run Abs operator");
       return;

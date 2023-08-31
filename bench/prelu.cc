@@ -61,7 +61,7 @@ void xnnpack_prelu_f32(benchmark::State& state, const char* net) {
   status = xnn_reshape_prelu_nc_f32(
     prelu_op,
     batch_size * height * width,
-    nullptr /* thread pool */);
+    /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape FP32 PReLU operator");
     return;
@@ -76,7 +76,7 @@ void xnnpack_prelu_f32(benchmark::State& state, const char* net) {
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(prelu_op, nullptr /* thread pool */);
+    status = xnn_run_operator(prelu_op, /*threadpool=*/nullptr);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to run FP32 PReLU operator");
       return;
