@@ -170,6 +170,8 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
     size_t batch_size,
     size_t input_height,
     size_t input_width,
+    size_t* workspace_size,
+    size_t* workspace_alignment,
     pthreadpool_t threadpool)
 {
   if (argmax_pooling_op->type != xnn_operator_type_argmax_pooling_nhwc_f32) {
@@ -265,6 +267,7 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
     .input_batch_stride = input_height * input_width * argmax_pooling_op->input_pixel_stride * sizeof(float),
     .output_batch_stride = output_height * output_height_stride,
     .output_height_stride = output_height_stride,
+    .output_height = output_height,
     .output_width = output_width,
     .index_batch_stride = output_height * index_height_stride,
     .index_height_stride = index_height_stride,
@@ -272,19 +275,43 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
     .channels = channels,
     .input_increment = (pooling_height * step_width - multipass_adjustment) * sizeof(void*),
     .output_increment = output_width_stride - channels * sizeof(float),
-    .accumulation_buffer_size = (channels + XNN_MULTIPASS_EXTRA_BYTES / sizeof(float)) * sizeof(float),
-    .index_buffer_size = (channels + XNN_MULTIPASS_EXTRA_BYTES / sizeof(float)) * sizeof(uint32_t),
   };
-  argmax_pooling_op->compute[0].type = xnn_parallelization_type_2d;
   argmax_pooling_op->compute[0].range[0] = batch_size;
   argmax_pooling_op->compute[0].range[1] = output_height;
 
   if (pooling_size <= first_pass_tile_size) {
+    *workspace_size = 0;
+    *workspace_alignment = 1;
+    argmax_pooling_op->compute[0].type = xnn_parallelization_type_2d;
     argmax_pooling_op->context.argmax_pooling.unipass_ukernel = ukernel->up;
     argmax_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_argmax_pooling_unipass;
   } else {
+    const size_t accumulation_buffer_size =
+      round_up_po2((channels + XNN_MULTIPASS_EXTRA_BYTES / sizeof(float)) * sizeof(float), XNN_ALLOCATION_ALIGNMENT);
+    const size_t index_buffer_size =
+      round_up_po2((channels + XNN_MULTIPASS_EXTRA_BYTES / sizeof(float)) * sizeof(uint32_t), XNN_ALLOCATION_ALIGNMENT);
+    const size_t accumulation_and_index_buffer_size = accumulation_buffer_size + index_buffer_size;
+
+    argmax_pooling_op->context.argmax_pooling.accumulation_buffer_size = accumulation_buffer_size;
+    argmax_pooling_op->context.argmax_pooling.accumulation_and_index_buffer_size = accumulation_and_index_buffer_size;
+
+    const size_t num_threads = pthreadpool_get_threads_count(threadpool);
+    const bool use_threads_workspace = num_threads < batch_size * output_height;
+
+    if (use_threads_workspace) {
+      *workspace_size = num_threads * accumulation_and_index_buffer_size;
+      *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
+      argmax_pooling_op->compute[0].type = xnn_parallelization_type_2d_with_thread;
+      argmax_pooling_op->compute[0].task_2d_with_thread =
+        (pthreadpool_task_2d_with_thread_t) xnn_compute_argmax_pooling_multipass_with_thread;
+    } else {
+      *workspace_size = batch_size * output_height * accumulation_and_index_buffer_size;
+      *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
+      argmax_pooling_op->compute[0].type = xnn_parallelization_type_2d;
+      argmax_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_argmax_pooling_multipass;
+    }
+
     argmax_pooling_op->context.argmax_pooling.multipass_ukernel = ukernel->mp;
-    argmax_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_argmax_pooling_multipass;
   }
   argmax_pooling_op->state = xnn_run_state_needs_setup;
 
@@ -293,6 +320,7 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
 
 enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
     xnn_operator_t argmax_pooling_op,
+    void* workspace,
     const float* input,
     float* output,
     uint32_t* index)
@@ -323,6 +351,13 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   argmax_pooling_op->input = input;
   argmax_pooling_op->context.argmax_pooling.output = output;
   argmax_pooling_op->context.argmax_pooling.index = index;
+
+  if ((argmax_pooling_op->context.argmax_pooling.accumulation_buffer_size != 0) && workspace == NULL) {
+    xnn_log_error(
+        "failed to setup %s operator: workspace is NULL",
+        xnn_operator_type_to_string(argmax_pooling_op->type));
+  }
+  argmax_pooling_op->context.argmax_pooling.multipass_buffer = workspace;
 
   const size_t pooling_height = argmax_pooling_op->kernel_height;
   const size_t pooling_width = argmax_pooling_op->kernel_width;

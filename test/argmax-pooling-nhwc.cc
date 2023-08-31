@@ -545,6 +545,21 @@ TEST(ARGMAX_POOLING_NHWC_F32, small_batch_large_pool_with_output_stride) {
   }
 }
 
+TEST(ARGMAX_POOLING_NHWC_F32, small_batch_large_pool_multithreaded) {
+  const struct xnn_argmaxpool_config* argmaxpool_config = xnn_init_f32_argmaxpool_config();
+  ASSERT_NE(argmaxpool_config, nullptr);
+  const auto multipass = FindMultiPassMicroKernel(argmaxpool_config);
+  ArgmaxPoolingOperatorTester()
+    .batch_size(3)
+    .input_height(multipass.first_pass_tile_size + 2)
+    .input_width(3)
+    .pooling_height(multipass.first_pass_tile_size + 1)
+    .pooling_width(1)
+    .channels(15)
+    .multithreaded(true)
+    .TestF32();
+}
+
 TEST(ARGMAX_POOLING_NHWC_F32, setup_increasing_batch) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ArgmaxPoolingOperatorTester()

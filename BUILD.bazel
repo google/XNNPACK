@@ -9896,7 +9896,9 @@ xnnpack_unit_test(
         "test/argmax-pooling-nhwc.cc",
         "test/argmax-pooling-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + [
+        ":aligned_allocator",
+    ],
 )
 
 xnnpack_unit_test(
@@ -10703,6 +10705,8 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK_test_mode",
+        ":aligned_allocator",
+        ":common",
         ":node_type",
         ":operators_test_mode",
         ":subgraph_test_mode",

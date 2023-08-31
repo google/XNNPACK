@@ -1939,10 +1939,13 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  size_t* workspace_size,
+  size_t* workspace_alignment,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   xnn_operator_t argmax_pooling_op,
+  void* workspace,
   const float* input,
   float* output,
   uint32_t* index);

@@ -835,6 +835,7 @@ struct argmax_pooling_context {
   void* output;
   size_t output_batch_stride;
   size_t output_height_stride;
+  size_t output_height;
   size_t output_width;
   uint32_t* index;
   size_t index_batch_stride;
@@ -847,8 +848,11 @@ struct argmax_pooling_context {
     xnn_argmaxpool_unipass_ukernel_fn unipass_ukernel;
     xnn_argmaxpool_multipass_ukernel_fn multipass_ukernel;
   };
+  // Size of accumulation buffer, in bytes, per thread, only for multipass.
   size_t accumulation_buffer_size;
-  size_t index_buffer_size;
+  // Size of accumulation and index buffer, in bytes, only used for multipass.
+  size_t accumulation_and_index_buffer_size;
+  void* multipass_buffer;
 };
 
 #ifndef __cplusplus
@@ -857,8 +861,16 @@ struct argmax_pooling_context {
       size_t batch_index,
       size_t output_y);
 
+  // Workspace sized based on batch size * output height.
   XNN_PRIVATE void xnn_compute_argmax_pooling_multipass(
       const struct argmax_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index,
+      size_t output_y);
+
+  // Workspace sized based on number of threads.
+  XNN_PRIVATE void xnn_compute_argmax_pooling_multipass_with_thread(
+      const struct argmax_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t thread_index,
       size_t batch_index,
       size_t output_y);
 #endif
