@@ -510,7 +510,7 @@ class MaxPoolingOperatorTester {
           max_pooling_op,
           batch_size(), input_height(), input_width(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_max_pooling2d_nhwc_s8(
@@ -518,7 +518,7 @@ class MaxPoolingOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(max_pooling_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -599,7 +599,7 @@ class MaxPoolingOperatorTester {
           max_pooling_op,
           batch_size(), input_height(), input_width(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_max_pooling2d_nhwc_u8(
@@ -607,7 +607,7 @@ class MaxPoolingOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(max_pooling_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -714,7 +714,7 @@ class MaxPoolingOperatorTester {
           max_pooling_op,
           batch_size(), input_height(), input_width(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_max_pooling2d_nhwc_f16(
@@ -722,7 +722,7 @@ class MaxPoolingOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(max_pooling_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -818,7 +818,7 @@ class MaxPoolingOperatorTester {
           max_pooling_op,
           batch_size(), input_height(), input_width(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_max_pooling2d_nhwc_f32(
@@ -826,7 +826,7 @@ class MaxPoolingOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(max_pooling_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -911,7 +911,7 @@ class MaxPoolingOperatorTester {
           max_pooling_op,
           batch_size(), input_height(), input_width(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_max_pooling2d_nhwc_s8(
@@ -919,7 +919,7 @@ class MaxPoolingOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(max_pooling_op, /*threadpool=*/nullptr));
 
       // Verify results of the first run.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -970,14 +970,14 @@ class MaxPoolingOperatorTester {
           max_pooling_op,
           next_batch_size(), next_input_height(), next_input_width(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success,
         xnn_setup_max_pooling2d_nhwc_s8(
           max_pooling_op,
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(max_pooling_op, /*threadpool=*/nullptr));
 
       // Verify results of the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {
@@ -1061,7 +1061,7 @@ class MaxPoolingOperatorTester {
           max_pooling_op,
           batch_size(), input_height(), input_width(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_max_pooling2d_nhwc_u8(
@@ -1069,7 +1069,7 @@ class MaxPoolingOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(max_pooling_op, /*threadpool=*/nullptr));
 
       // Verify results of the first run.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -1120,14 +1120,14 @@ class MaxPoolingOperatorTester {
           max_pooling_op,
           next_batch_size(), next_input_height(), next_input_width(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success,
         xnn_setup_max_pooling2d_nhwc_u8(
           max_pooling_op,
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(max_pooling_op, /*threadpool=*/nullptr));
 
       // Verify results of the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {
@@ -1237,14 +1237,14 @@ class MaxPoolingOperatorTester {
           max_pooling_op,
           batch_size(), input_height(), input_width(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success,
         xnn_setup_max_pooling2d_nhwc_f16(
           max_pooling_op,
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(max_pooling_op, /*threadpool=*/nullptr));
 
       // Verify results of the first run.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -1297,14 +1297,14 @@ class MaxPoolingOperatorTester {
           max_pooling_op,
           next_batch_size(), next_input_height(), next_input_width(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success,
         xnn_setup_max_pooling2d_nhwc_f16(
           max_pooling_op,
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(max_pooling_op, /*threadpool=*/nullptr));
 
       // Verify results of the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {
@@ -1403,14 +1403,14 @@ class MaxPoolingOperatorTester {
           max_pooling_op,
           batch_size(), input_height(), input_width(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success,
         xnn_setup_max_pooling2d_nhwc_f32(
           max_pooling_op,
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(max_pooling_op, /*threadpool=*/nullptr));
 
       // Verify results of the first run.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -1461,14 +1461,14 @@ class MaxPoolingOperatorTester {
           max_pooling_op,
           next_batch_size(), next_input_height(), next_input_width(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success,
         xnn_setup_max_pooling2d_nhwc_f32(
           max_pooling_op,
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(max_pooling_op, /*threadpool=*/nullptr));
 
       // Verify results of the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {

@@ -327,7 +327,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_add_nd_qs8(
               binary_elementwise_op,
@@ -341,7 +341,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_multiply_nd_qs8(
               binary_elementwise_op,
@@ -355,7 +355,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_subtract_nd_qs8(
               binary_elementwise_op,
@@ -366,7 +366,7 @@ class BinaryElementwiseOperatorTester {
       }
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(binary_elementwise_op, nullptr /* thread pool */));
+        xnn_run_operator(binary_elementwise_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {
@@ -522,7 +522,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_add_nd_qu8(
               binary_elementwise_op,
@@ -536,7 +536,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_multiply_nd_qu8(
               binary_elementwise_op,
@@ -550,7 +550,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_subtract_nd_qu8(
               binary_elementwise_op,
@@ -561,7 +561,7 @@ class BinaryElementwiseOperatorTester {
       }
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(binary_elementwise_op, nullptr /* thread pool */));
+        xnn_run_operator(binary_elementwise_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {
@@ -723,7 +723,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_add_nd_f16(
               binary_elementwise_op,
@@ -737,7 +737,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_divide_nd_f16(
               binary_elementwise_op,
@@ -751,7 +751,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_maximum_nd_f16(
               binary_elementwise_op,
@@ -765,7 +765,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_minimum_nd_f16(
               binary_elementwise_op,
@@ -779,7 +779,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_multiply_nd_f16(
               binary_elementwise_op,
@@ -793,7 +793,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_squared_difference_nd_f16(
               binary_elementwise_op,
@@ -807,7 +807,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_subtract_nd_f16(
               binary_elementwise_op,
@@ -818,7 +818,7 @@ class BinaryElementwiseOperatorTester {
       }
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(binary_elementwise_op, nullptr /* thread pool */));
+        xnn_run_operator(binary_elementwise_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {
@@ -986,7 +986,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_add_nd_f32(
               binary_elementwise_op,
@@ -1000,7 +1000,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_divide_nd_f32(
               binary_elementwise_op,
@@ -1014,7 +1014,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_maximum_nd_f32(
               binary_elementwise_op,
@@ -1028,7 +1028,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_minimum_nd_f32(
               binary_elementwise_op,
@@ -1042,7 +1042,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_multiply_nd_f32(
               binary_elementwise_op,
@@ -1056,7 +1056,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_subtract_nd_f32(
               binary_elementwise_op,
@@ -1070,7 +1070,7 @@ class BinaryElementwiseOperatorTester {
               input1_shape().data(),
               num_input2_dims(),
               input2_shape().data(),
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           ASSERT_EQ(xnn_status_success,
             xnn_setup_squared_difference_nd_f32(
               binary_elementwise_op,
@@ -1081,7 +1081,7 @@ class BinaryElementwiseOperatorTester {
       }
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(binary_elementwise_op, nullptr /* thread pool */));
+        xnn_run_operator(binary_elementwise_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {
@@ -1213,7 +1213,7 @@ class BinaryElementwiseOperatorTester {
                     input1.data(), input2.data(), output.data(),
                     output_min, output_max,
                     0,
-                    nullptr /* thread pool */));
+                    /*threadpool=*/nullptr));
           break;
         case OperationType::Divide:
           ASSERT_EQ(xnn_status_success,
@@ -1223,7 +1223,7 @@ class BinaryElementwiseOperatorTester {
                     input1.data(), input2.data(), output.data(),
                     output_min, output_max,
                     0,
-                    nullptr /* thread pool */));
+                    /*threadpool=*/nullptr));
           break;
         case OperationType::Maximum:
           ASSERT_EQ(xnn_status_success,
@@ -1232,7 +1232,7 @@ class BinaryElementwiseOperatorTester {
                     num_input2_dims(), input2_shape().data(),
                     input1.data(), input2.data(), output.data(),
                     0,
-                    nullptr /* thread pool */));
+                    /*threadpool=*/nullptr));
           break;
         case OperationType::Minimum:
           ASSERT_EQ(xnn_status_success,
@@ -1241,7 +1241,7 @@ class BinaryElementwiseOperatorTester {
                     num_input2_dims(), input2_shape().data(),
                     input1.data(), input2.data(), output.data(),
                     0,
-                    nullptr /* thread pool */));
+                    /*threadpool=*/nullptr));
           break;
         case OperationType::Multiply:
           ASSERT_EQ(xnn_status_success,
@@ -1251,7 +1251,7 @@ class BinaryElementwiseOperatorTester {
                     input1.data(), input2.data(), output.data(),
                     output_min, output_max,
                     0,
-                    nullptr /* thread pool */));
+                    /*threadpool=*/nullptr));
           break;
         case OperationType::Subtract:
           ASSERT_EQ(xnn_status_success,
@@ -1261,7 +1261,7 @@ class BinaryElementwiseOperatorTester {
                     input1.data(), input2.data(), output.data(),
                     output_min, output_max,
                     0,
-                    nullptr /* thread pool */));
+                    /*threadpool=*/nullptr));
           break;
         case OperationType::SquaredDifference:
           ASSERT_EQ(xnn_status_success,
@@ -1270,7 +1270,7 @@ class BinaryElementwiseOperatorTester {
                     num_input2_dims(), input2_shape().data(),
                     input1.data(), input2.data(), output.data(),
                     0,
-                    nullptr /* thread pool */));
+                    /*threadpool=*/nullptr));
           break;
         default:
             FAIL() << "Unsupported operation type";
@@ -1391,7 +1391,7 @@ void TestRunQS8() const {
               output_zero_point(), output_scale(),
               static_cast<int8_t>(qmin()), static_cast<int8_t>(qmax()),
               0,
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           break;
         case OperationType::Multiply:
           ASSERT_EQ(xnn_status_success,
@@ -1402,7 +1402,7 @@ void TestRunQS8() const {
               output_zero_point(), output_scale(),
               static_cast<int8_t>(qmin()), static_cast<int8_t>(qmax()),
               0,
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           break;
         case OperationType::Subtract:
           ASSERT_EQ(xnn_status_success,
@@ -1413,7 +1413,7 @@ void TestRunQS8() const {
               output_zero_point(), output_scale(),
               static_cast<int8_t>(qmin()), static_cast<int8_t>(qmax()),
               0,
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           break;
         default:
           FAIL() << "Unsupported operation type";
@@ -1533,7 +1533,7 @@ void TestRunQS8() const {
               output_zero_point(), output_scale(),
               static_cast<uint8_t>(qmin()), static_cast<uint8_t>(qmax()),
               0,
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           break;
         case OperationType::Multiply:
           ASSERT_EQ(xnn_status_success,
@@ -1544,7 +1544,7 @@ void TestRunQS8() const {
               output_zero_point(), output_scale(),
               static_cast<uint8_t>(qmin()), static_cast<uint8_t>(qmax()),
               0,
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           break;
         case OperationType::Subtract:
           ASSERT_EQ(xnn_status_success,
@@ -1555,7 +1555,7 @@ void TestRunQS8() const {
               output_zero_point(), output_scale(),
               static_cast<uint8_t>(qmin()), static_cast<uint8_t>(qmax()),
               0,
-              nullptr /* thread pool */));
+              /*threadpool=*/nullptr));
           break;
         default:
           FAIL() << "Unsupported operation type";

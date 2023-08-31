@@ -330,7 +330,7 @@ class UnpoolingOperatorTester {
           unpooling_op,
           batch_size(), input_height(), input_width(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_unpooling2d_nhwc_x32(
@@ -338,7 +338,7 @@ class UnpoolingOperatorTester {
           input.data(), index.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(unpooling_op, nullptr /* thread pool */));
+        xnn_run_operator(unpooling_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -416,7 +416,7 @@ class UnpoolingOperatorTester {
           unpooling_op,
           batch_size(), input_height(), input_width(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_unpooling2d_nhwc_x32(
@@ -424,7 +424,7 @@ class UnpoolingOperatorTester {
           input.data(), index.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(unpooling_op, nullptr /* thread pool */));
+        xnn_run_operator(unpooling_op, /*threadpool=*/nullptr));
 
       // Verify results of the first run.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -468,7 +468,7 @@ class UnpoolingOperatorTester {
           unpooling_op,
           next_batch_size(), next_input_height(), next_input_width(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_unpooling2d_nhwc_x32(
@@ -476,7 +476,7 @@ class UnpoolingOperatorTester {
           input.data(), index.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(unpooling_op, nullptr /* thread pool */));
+        xnn_run_operator(unpooling_op, /*threadpool=*/nullptr));
 
       // Verify results of the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {

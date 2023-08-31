@@ -175,7 +175,7 @@ class GlobalSumPoolingOperatorTester {
           global_sum_pooling_op,
           batch_size(), width(),
           &workspace_size, &workspace_alignment,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
       std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
@@ -187,7 +187,7 @@ class GlobalSumPoolingOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(global_sum_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(global_sum_pooling_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -265,7 +265,7 @@ class GlobalSumPoolingOperatorTester {
           global_sum_pooling_op,
           batch_size(), width(),
           &workspace_size, &workspace_alignment,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
       std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
@@ -277,7 +277,7 @@ class GlobalSumPoolingOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(global_sum_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(global_sum_pooling_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

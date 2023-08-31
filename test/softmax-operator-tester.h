@@ -154,12 +154,12 @@ class SoftMaxOperatorTester {
       // Smart pointer to automatically delete softmax_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_softmax_op(softmax_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_softmax_nc_f16(softmax_op, batch_size(), nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_softmax_nc_f16(softmax_op, batch_size(), /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success, xnn_setup_softmax_nc_f16(softmax_op, input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(softmax_op, nullptr /* thread pool */));
+        xnn_run_operator(softmax_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -212,12 +212,12 @@ class SoftMaxOperatorTester {
       // Smart pointer to automatically delete softmax_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_softmax_op(softmax_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_softmax_nc_f32(softmax_op, batch_size(), nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_softmax_nc_f32(softmax_op, batch_size(), /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success, xnn_setup_softmax_nc_f32(softmax_op, input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(softmax_op, nullptr /* thread pool */));
+        xnn_run_operator(softmax_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -280,12 +280,12 @@ class SoftMaxOperatorTester {
       // Smart pointer to automatically delete softmax_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_softmax_op(softmax_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_softmax_nc_qu8(softmax_op, batch_size(), nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_softmax_nc_qu8(softmax_op, batch_size(), /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success, xnn_setup_softmax_nc_qu8(softmax_op, input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(softmax_op, nullptr /* thread pool */));
+        xnn_run_operator(softmax_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

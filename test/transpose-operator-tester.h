@@ -85,7 +85,7 @@ class TransposeOperatorTester {
               xnn_reshape_transpose_nd_x8(
                   transpose_op,
                   num_dims(), shape_.data(), perm_.data(),
-                  nullptr /* thread pool */));
+                  /*threadpool=*/nullptr));
 
     ASSERT_EQ(xnn_status_success,
               xnn_setup_transpose_nd_x8(
@@ -94,7 +94,7 @@ class TransposeOperatorTester {
 
     // Run operator.
     ASSERT_EQ(xnn_status_success,
-              xnn_run_operator(transpose_op, nullptr /* thread pool */));
+              xnn_run_operator(transpose_op, /*threadpool=*/nullptr));
 
     // Verify results.
     for (size_t i = 0; i < count; ++i) {
@@ -122,7 +122,7 @@ class TransposeOperatorTester {
                   input.data(), output.data(),
                   num_dims(), shape_.data(), perm_.data(),
                   0 /* flags */,
-                  nullptr /* thread pool */));
+                  /*threadpool=*/nullptr));
 
     // Verify results.
     for (size_t i = 0; i < count; ++i) {
@@ -157,7 +157,7 @@ class TransposeOperatorTester {
               xnn_reshape_transpose_nd_x16(
                   transpose_op,
                   num_dims(), shape_.data(), perm_.data(),
-                  nullptr /* thread pool */));
+                  /*threadpool=*/nullptr));
 
     ASSERT_EQ(xnn_status_success,
               xnn_setup_transpose_nd_x16(
@@ -166,7 +166,7 @@ class TransposeOperatorTester {
 
     // Run operator.
     ASSERT_EQ(xnn_status_success,
-              xnn_run_operator(transpose_op, nullptr /* thread pool */));
+              xnn_run_operator(transpose_op, /*threadpool=*/nullptr));
 
     // Verify results.
     for (size_t i = 0; i < count; ++i) {
@@ -194,7 +194,7 @@ class TransposeOperatorTester {
                   input.data(), output.data(),
                   num_dims(), shape_.data(), perm_.data(),
                   0 /* flags */,
-                  nullptr /* thread pool */));
+                  /*threadpool=*/nullptr));
 
     // Verify results.
     for (size_t i = 0; i < count; ++i) {
@@ -229,7 +229,7 @@ class TransposeOperatorTester {
               xnn_reshape_transpose_nd_x32(
                   transpose_op,
                   num_dims(), shape_.data(), perm_.data(),
-                  nullptr /* thread pool */));
+                  /*threadpool=*/nullptr));
 
     ASSERT_EQ(xnn_status_success,
               xnn_setup_transpose_nd_x32(
@@ -238,7 +238,7 @@ class TransposeOperatorTester {
 
     // Run operator.
     ASSERT_EQ(xnn_status_success,
-              xnn_run_operator(transpose_op, nullptr /* thread pool */));
+              xnn_run_operator(transpose_op, /*threadpool=*/nullptr));
 
     // Verify results.
     for (size_t i = 0; i < count; ++i) {
@@ -266,7 +266,7 @@ class TransposeOperatorTester {
                   input.data(), output.data(),
                   num_dims(), shape_.data(), perm_.data(),
                   0 /* flags */,
-                  nullptr /* thread pool */));
+                  /*threadpool=*/nullptr));
 
     // Verify results.
     for (size_t i = 0; i < count; ++i) {

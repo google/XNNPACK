@@ -168,7 +168,7 @@ class BatchMatMulOperatorTester {
           workspace.data(), lhs.data(), rhs.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(batch_matrix_multiply_op, nullptr /* thread pool */));
+        xnn_run_operator(batch_matrix_multiply_op, /*threadpool=*/nullptr));
 
       VerifyF32(output, output_ref);
     }

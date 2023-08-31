@@ -149,7 +149,7 @@ class SliceOperatorTester {
           slice_op,
           num_dims(),
           input_shape().data(), offsets().data(), sizes().data(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_slice_nd_x8(
@@ -157,7 +157,7 @@ class SliceOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(slice_op, nullptr /* thread pool */));
+        xnn_run_operator(slice_op, /*threadpool=*/nullptr));
 
       ASSERT_EQ(output, output_ref);
     }
@@ -210,7 +210,7 @@ class SliceOperatorTester {
           slice_op,
           num_dims(),
           input_shape().data(), offsets().data(), sizes().data(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_slice_nd_x16(
@@ -218,7 +218,7 @@ class SliceOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(slice_op, nullptr /* thread pool */));
+        xnn_run_operator(slice_op, /*threadpool=*/nullptr));
 
       ASSERT_EQ(output, output_ref);
     }
@@ -271,7 +271,7 @@ class SliceOperatorTester {
           slice_op,
           num_dims(),
           input_shape().data(), offsets().data(), sizes().data(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_slice_nd_x32(
@@ -279,7 +279,7 @@ class SliceOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(slice_op, nullptr /* thread pool */));
+        xnn_run_operator(slice_op, /*threadpool=*/nullptr));
 
       ASSERT_EQ(output, output_ref);
     }
@@ -323,7 +323,7 @@ void TestRunX32() const {
           input_shape().data(), offsets().data(), sizes().data(),
           input.data(), output.data(),
           0,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
       ASSERT_EQ(output, output_ref);
     }
   }

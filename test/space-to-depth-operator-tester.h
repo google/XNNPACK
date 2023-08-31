@@ -161,7 +161,7 @@ class SpaceToDepthOperatorTester {
                     space_to_depth_op,
                     batch_size(), input_height(), input_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, /*output_channels_out=*/nullptr,
-                    nullptr /* thread pool */));
+                    /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_setup_space_to_depth_nhwc_x8(
@@ -169,7 +169,7 @@ class SpaceToDepthOperatorTester {
                     input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(space_to_depth_op, nullptr /* thread pool */));
+        xnn_run_operator(space_to_depth_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -237,7 +237,7 @@ class SpaceToDepthOperatorTester {
                     space_to_depth_op,
                     batch_size(), input_height(), input_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, /*output_channels_out=*/nullptr,
-                    nullptr /* thread pool */));
+                    /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_setup_space_to_depth_nhwc_x16(
@@ -245,7 +245,7 @@ class SpaceToDepthOperatorTester {
                     input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(space_to_depth_op, nullptr /* thread pool */));
+        xnn_run_operator(space_to_depth_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -313,7 +313,7 @@ class SpaceToDepthOperatorTester {
                     space_to_depth_op,
                     batch_size(), input_height(), input_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, /*output_channels_out=*/nullptr,
-                    nullptr /* thread pool */));
+                    /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_setup_space_to_depth_nhwc_x32(
@@ -321,7 +321,7 @@ class SpaceToDepthOperatorTester {
                     input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(space_to_depth_op, nullptr /* thread pool */));
+        xnn_run_operator(space_to_depth_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

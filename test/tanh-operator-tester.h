@@ -258,7 +258,7 @@ class TanhOperatorTester {
           output_stride(),
           batch_size(),
           input.data(), output.data(),
-          0, nullptr /* thread pool */));
+          0, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

@@ -163,7 +163,7 @@ class DepthToSpaceOperatorTester {
                     depth_to_space_op,
                     batch_size(), input_height(), input_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, /*output_channels_out=*/nullptr,
-                    nullptr /* thread pool */));
+                    /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_setup_depth_to_space_nhwc_x8(
@@ -171,7 +171,7 @@ class DepthToSpaceOperatorTester {
                     input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(depth_to_space_op, nullptr /* thread pool */));
+        xnn_run_operator(depth_to_space_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -235,7 +235,7 @@ class DepthToSpaceOperatorTester {
                     depth_to_space_op,
                     batch_size(), input_height(), input_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, /*output_channels_out=*/nullptr,
-                    nullptr /* thread pool */));
+                    /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_setup_depth_to_space_nhwc_x16(
@@ -243,7 +243,7 @@ class DepthToSpaceOperatorTester {
                     input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(depth_to_space_op, nullptr /* thread pool */));
+        xnn_run_operator(depth_to_space_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -307,7 +307,7 @@ class DepthToSpaceOperatorTester {
                     depth_to_space_op,
                     batch_size(), input_height(), input_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, /*output_channels_out=*/nullptr,
-                    nullptr /* thread pool */));
+                    /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_setup_depth_to_space_nhwc_x32(
@@ -315,7 +315,7 @@ class DepthToSpaceOperatorTester {
                     input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(depth_to_space_op, nullptr /* thread pool */));
+        xnn_run_operator(depth_to_space_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -379,7 +379,7 @@ class DepthToSpaceOperatorTester {
                     depth_to_space_op,
                     batch_size(), input_height(), input_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, /*output_channels_out=*/nullptr,
-                    nullptr /* thread pool */));
+                    /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_setup_depth_to_space_nchw2nhwc_x16(
@@ -387,7 +387,7 @@ class DepthToSpaceOperatorTester {
                     input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(depth_to_space_op, nullptr /* thread pool */));
+        xnn_run_operator(depth_to_space_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -451,7 +451,7 @@ class DepthToSpaceOperatorTester {
                     depth_to_space_op,
                     batch_size(), input_height(), input_width(),
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, /*output_channels_out=*/nullptr,
-                    nullptr /* thread pool */));
+                    /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
                 xnn_setup_depth_to_space_nchw2nhwc_x32(
@@ -459,7 +459,7 @@ class DepthToSpaceOperatorTester {
                     input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(depth_to_space_op, nullptr /* thread pool */));
+        xnn_run_operator(depth_to_space_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

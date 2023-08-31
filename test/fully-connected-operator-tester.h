@@ -288,7 +288,7 @@ class FullyConnectedOperatorTester {
         xnn_reshape_fully_connected_nc_qd8_f32_qc8w(
           fully_connected_op,
           batch_size(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_fully_connected_nc_qd8_f32_qc8w(
@@ -297,7 +297,7 @@ class FullyConnectedOperatorTester {
           reinterpret_cast<const struct xnn_dynamic_quantization_params*>(quantization_params.data())));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(fully_connected_op, nullptr /* thread pool */));
+        xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
 
       // Verify results.
       VerifyF32(output, output_ref, output_max, output_min);
@@ -326,7 +326,7 @@ class FullyConnectedOperatorTester {
           xnn_reshape_fully_connected_nc_qd8_f32_qc8w(
             fully_connected_op2,
             batch_size(),
-            nullptr /* thread pool */));
+            /*threadpool=*/nullptr));
 
         std::vector<float> output2(output.size(), nanf(""));
         ASSERT_EQ(xnn_status_success,
@@ -338,7 +338,7 @@ class FullyConnectedOperatorTester {
 
         ASSERT_EQ(
             xnn_status_success,
-            xnn_run_operator(fully_connected_op2, nullptr /* thread pool */));
+            xnn_run_operator(fully_connected_op2, /*threadpool=*/nullptr));
 
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
 
@@ -460,7 +460,7 @@ class FullyConnectedOperatorTester {
         xnn_reshape_fully_connected_nc_qs8(
           fully_connected_op,
           batch_size(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_fully_connected_nc_qs8(
@@ -468,7 +468,7 @@ class FullyConnectedOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(fully_connected_op, nullptr /* thread pool */));
+        xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
 
       // Verify results.
       VerifyQS8(output, output_ref, double(output_zero_point));
@@ -499,7 +499,7 @@ class FullyConnectedOperatorTester {
                   xnn_reshape_fully_connected_nc_qs8(
                       fully_connected_op2,
                       batch_size(),
-                      nullptr /* thread pool */));
+                      /*threadpool=*/nullptr));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_fully_connected_nc_qs8(
@@ -508,7 +508,7 @@ class FullyConnectedOperatorTester {
 
         ASSERT_EQ(
             xnn_status_success,
-            xnn_run_operator(fully_connected_op2, nullptr /* thread pool */));
+            xnn_run_operator(fully_connected_op2, /*threadpool=*/nullptr));
 
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
 
@@ -646,7 +646,7 @@ class FullyConnectedOperatorTester {
         xnn_reshape_fully_connected_nc_qu8(
           fully_connected_op,
           batch_size(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_fully_connected_nc_qu8(
@@ -654,7 +654,7 @@ class FullyConnectedOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(fully_connected_op, nullptr /* thread pool */));
+        xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
 
       VerifyQU8(output, output_ref, double(output_zero_point));
 
@@ -681,14 +681,14 @@ class FullyConnectedOperatorTester {
 
         ASSERT_EQ(
           xnn_status_success,
-          xnn_reshape_fully_connected_nc_qu8(fully_connected_op2, batch_size(), nullptr /* thread pool */));
+          xnn_reshape_fully_connected_nc_qu8(fully_connected_op2, batch_size(), /*threadpool=*/nullptr));
 
         ASSERT_EQ(
           xnn_status_success, xnn_setup_fully_connected_nc_qu8(fully_connected_op2, input.data(), output2.data()));
 
         ASSERT_EQ(
             xnn_status_success,
-            xnn_run_operator(fully_connected_op2, nullptr /* thread pool */));
+            xnn_run_operator(fully_connected_op2, /*threadpool=*/nullptr));
 
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
 
@@ -833,7 +833,7 @@ class FullyConnectedOperatorTester {
         xnn_reshape_fully_connected_nc_f32(
           fully_connected_op,
           batch_size(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_fully_connected_nc_f32(
@@ -841,7 +841,7 @@ class FullyConnectedOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(fully_connected_op, nullptr /* thread pool */));
+        xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
 
       VerifyF32(output, output_ref, output_max, output_min);
 
@@ -884,7 +884,7 @@ class FullyConnectedOperatorTester {
                   xnn_reshape_fully_connected_nc_f32(
                       fully_connected_op2,
                       batch_size(),
-                      nullptr /* thread pool */));
+                      /*threadpool=*/nullptr));
 
         std::vector<float> output2(output.size(), nanf(""));
         ASSERT_EQ(xnn_status_success,
@@ -893,7 +893,7 @@ class FullyConnectedOperatorTester {
                       input.data(), output2.data()));
 
         ASSERT_EQ(xnn_status_success,
-                  xnn_run_operator(fully_connected_op2, nullptr /* thread pool */));
+                  xnn_run_operator(fully_connected_op2, /*threadpool=*/nullptr));
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
 
         VerifyF32(output, output_ref, output_max, output_min);
@@ -1049,7 +1049,7 @@ class FullyConnectedOperatorTester {
         xnn_reshape_fully_connected_nc_f32_qc4w(
           fully_connected_op,
           batch_size(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_fully_connected_nc_f32_qc4w(
@@ -1057,7 +1057,7 @@ class FullyConnectedOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(fully_connected_op, nullptr /* thread pool */));
+        xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
 
       VerifyF32(output, output_ref, output_max, output_min);
 
@@ -1102,7 +1102,7 @@ class FullyConnectedOperatorTester {
                   xnn_reshape_fully_connected_nc_f32_qc4w(
                       fully_connected_op2,
                       batch_size(),
-                      nullptr /* thread pool */));
+                      /*threadpool=*/nullptr));
 
         std::vector<float> output2(output.size(), nanf(""));
 
@@ -1112,7 +1112,7 @@ class FullyConnectedOperatorTester {
                       input.data(), output2.data()));
 
         ASSERT_EQ(xnn_status_success,
-                  xnn_run_operator(fully_connected_op2, nullptr /* thread pool */));
+                  xnn_run_operator(fully_connected_op2, /*threadpool=*/nullptr));
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
 
         VerifyF32(output, output_ref, output_max, output_min);
@@ -1262,7 +1262,7 @@ class FullyConnectedOperatorTester {
         xnn_reshape_fully_connected_nc_f32_qc8w(
           fully_connected_op,
           batch_size(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_fully_connected_nc_f32_qc8w(
@@ -1270,7 +1270,7 @@ class FullyConnectedOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(fully_connected_op, nullptr /* thread pool */));
+        xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
 
       VerifyF32(output, output_ref, output_max, output_min);
 
@@ -1316,7 +1316,7 @@ class FullyConnectedOperatorTester {
                   xnn_reshape_fully_connected_nc_f32_qc8w(
                       fully_connected_op2,
                       batch_size(),
-                      nullptr /* thread pool */));
+                      /*threadpool=*/nullptr));
 
         std::vector<float> output2(output.size(), nanf(""));
 
@@ -1326,7 +1326,7 @@ class FullyConnectedOperatorTester {
                       input.data(), output2.data()));
 
         ASSERT_EQ(xnn_status_success,
-                  xnn_run_operator(fully_connected_op2, nullptr /* thread pool */));
+                  xnn_run_operator(fully_connected_op2, /*threadpool=*/nullptr));
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
 
         VerifyF32(output, output_ref, output_max, output_min);
@@ -1459,7 +1459,7 @@ class FullyConnectedOperatorTester {
         xnn_reshape_fully_connected_nc_f16(
           fully_connected_op,
           batch_size(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_fully_connected_nc_f16(
@@ -1467,7 +1467,7 @@ class FullyConnectedOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(fully_connected_op, nullptr /* thread pool */));
+        xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
 
       // Verify results.
       VerifyF16(output, output_ref, output_max, output_min);
@@ -1495,7 +1495,7 @@ class FullyConnectedOperatorTester {
                   xnn_reshape_fully_connected_nc_f16(
                       fully_connected_op2,
                       batch_size(),
-                      nullptr /* thread pool */));
+                      /*threadpool=*/nullptr));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_fully_connected_nc_f16(
@@ -1503,7 +1503,7 @@ class FullyConnectedOperatorTester {
                       input.data(), output2.data()));
 
         ASSERT_EQ(xnn_status_success,
-                  xnn_run_operator(fully_connected_op2, nullptr /* thread pool */));
+                  xnn_run_operator(fully_connected_op2, /*threadpool=*/nullptr));
 
         // Verify results.
         VerifyF16(output2, output_ref, output_max, output_min);

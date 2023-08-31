@@ -178,7 +178,7 @@ class PReLUOperatorTester {
         xnn_reshape_prelu_nc_f16(
           prelu_op,
           batch_size(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_prelu_nc_f16(
@@ -186,7 +186,7 @@ class PReLUOperatorTester {
           x.data(), y.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(prelu_op, nullptr /* thread pool */));
+        xnn_run_operator(prelu_op, /*threadpool=*/nullptr));
 
       VerifyF16(y, y_ref);
 
@@ -209,14 +209,14 @@ class PReLUOperatorTester {
                   xnn_reshape_prelu_nc_f16(
                       prelu_op2,
                       batch_size(),
-                      nullptr /* thread pool */));
+                      /*threadpool=*/nullptr));
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_prelu_nc_f16(
                       prelu_op2,
                       x.data(), y2.data()));
 
         ASSERT_EQ(xnn_status_success,
-                  xnn_run_operator(prelu_op2, nullptr /* thread pool */));
+                  xnn_run_operator(prelu_op2, /*threadpool=*/nullptr));
 
         VerifyF16(y2, y_ref);
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
@@ -290,7 +290,7 @@ class PReLUOperatorTester {
         xnn_reshape_prelu_nc_f32(
           prelu_op,
           batch_size(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_prelu_nc_f32(
@@ -298,7 +298,7 @@ class PReLUOperatorTester {
           x.data(), y.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(prelu_op, nullptr /* thread pool */));
+        xnn_run_operator(prelu_op, /*threadpool=*/nullptr));
 
       VerifyF32(y, y_ref);
 
@@ -321,7 +321,7 @@ class PReLUOperatorTester {
                   xnn_reshape_prelu_nc_f32(
                       prelu_op2,
                       batch_size(),
-                      nullptr /* thread pool */));
+                      /*threadpool=*/nullptr));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_prelu_nc_f32(
@@ -329,7 +329,7 @@ class PReLUOperatorTester {
                       x.data(), y2.data()));
 
         ASSERT_EQ(xnn_status_success,
-                  xnn_run_operator(prelu_op2, nullptr /* thread pool */));
+                  xnn_run_operator(prelu_op2, /*threadpool=*/nullptr));
 
         VerifyF32(y, y_ref);
         VerifyWeightsCache(weights_cache, old_weights_cache_size);

@@ -126,7 +126,7 @@ class ChannelShuffleOperatorTester {
         xnn_reshape_channel_shuffle_nc_x8(
           channel_shuffle_op,
           batch_size(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_channel_shuffle_nc_x8(
@@ -134,7 +134,7 @@ class ChannelShuffleOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(channel_shuffle_op, nullptr /* thread pool */));
+        xnn_run_operator(channel_shuffle_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -178,7 +178,7 @@ class ChannelShuffleOperatorTester {
         xnn_reshape_channel_shuffle_nc_x32(
           channel_shuffle_op,
           batch_size(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_channel_shuffle_nc_x32(
@@ -186,7 +186,7 @@ class ChannelShuffleOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(channel_shuffle_op, nullptr /* thread pool */));
+        xnn_run_operator(channel_shuffle_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

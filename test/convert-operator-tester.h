@@ -588,7 +588,7 @@ class ConvertOperatorTester {
           batch_size(),
           input.data(), output.data(),
           0,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -630,7 +630,7 @@ class ConvertOperatorTester {
           batch_size(),
           input.data(), output.data(),
           0,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -681,7 +681,7 @@ class ConvertOperatorTester {
           input.data(), output.data(),
           output_scale(), int8_t(zero_point()),
           0,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -725,7 +725,7 @@ class ConvertOperatorTester {
           channels(), input_stride(), output_stride(), batch_size(),
           input.data(), output.data(),
           input_scale(), int8_t(zero_point()),
-          0, nullptr /* thread pool */));
+          0, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -777,7 +777,7 @@ class ConvertOperatorTester {
           channels(), input_stride(), output_stride(), batch_size(),
           input.data(), output.data(),
           input_scale(), 1.0f, int8_t(zero_point()),
-          0, nullptr /* thread pool */));
+          0, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -828,7 +828,7 @@ class ConvertOperatorTester {
           channels(), input_stride(), output_stride(),
           batch_size(), input.data(), output.data(),
           output_scale(), uint8_t(zero_point()),
-          0, nullptr /* thread pool */));
+          0, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -871,7 +871,7 @@ class ConvertOperatorTester {
           channels(), input_stride(), output_stride(),
           batch_size(), input.data(), output.data(),
           input_scale(), uint8_t(zero_point()),
-          0, nullptr /* thread pool */));
+          0, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

@@ -310,7 +310,7 @@ class ResizeBilinearOperatorTester {
           batch_size(), input_height(), input_width(),
           output_height(), output_width(),
           &workspace_size, &workspace_alignment,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
       std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
       std::iota(workspace.begin(), workspace.end(), 0);
       if (transient_indirection_buffer()) {
@@ -330,7 +330,7 @@ class ResizeBilinearOperatorTester {
       }
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(resize_bilinear_op, nullptr /* thread pool */));
+        xnn_run_operator(resize_bilinear_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -421,7 +421,7 @@ class ResizeBilinearOperatorTester {
           batch_size(), input_height(), input_width(),
           output_height(), output_width(),
           &workspace_size, &workspace_alignment,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
       std::iota(workspace.begin(), workspace.end(), 0);
@@ -442,7 +442,7 @@ class ResizeBilinearOperatorTester {
       }
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(resize_bilinear_op, nullptr /* thread pool */));
+        xnn_run_operator(resize_bilinear_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -533,7 +533,7 @@ class ResizeBilinearOperatorTester {
           batch_size(), input_height(), input_width(),
           output_height(), output_width(),
           &workspace_size, &workspace_alignment,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
       std::iota(workspace.begin(), workspace.end(), 0);
@@ -554,7 +554,7 @@ class ResizeBilinearOperatorTester {
       }
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(resize_bilinear_op, nullptr /* thread pool */));
+        xnn_run_operator(resize_bilinear_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -646,7 +646,7 @@ class ResizeBilinearOperatorTester {
           batch_size(), input_height(), input_width(),
           output_height(), output_width(),
           &workspace_size, &workspace_alignment,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
       std::iota(workspace.begin(), workspace.end(), 0);
@@ -667,7 +667,7 @@ class ResizeBilinearOperatorTester {
       }
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(resize_bilinear_op, nullptr /* thread pool */));
+        xnn_run_operator(resize_bilinear_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -752,7 +752,7 @@ class ResizeBilinearOperatorTester {
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
           output_height(), output_width(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_resize_bilinear2d_nchw_f16(
@@ -760,7 +760,7 @@ class ResizeBilinearOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(resize_bilinear_op, nullptr /* thread pool */));
+        xnn_run_operator(resize_bilinear_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -844,7 +844,7 @@ class ResizeBilinearOperatorTester {
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
           output_height(), output_width(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_resize_bilinear2d_nchw_f32(
@@ -852,7 +852,7 @@ class ResizeBilinearOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(resize_bilinear_op, nullptr /* thread pool */));
+        xnn_run_operator(resize_bilinear_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

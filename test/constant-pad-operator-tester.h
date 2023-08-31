@@ -188,7 +188,7 @@ class ConstantPadOperatorTester {
           pad_op,
           num_dims(),
           input_shape().data(), pre_paddings().data(), post_paddings().data(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_constant_pad_nd_x8(
@@ -196,7 +196,7 @@ class ConstantPadOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(pad_op, nullptr /* thread pool */));
+        xnn_run_operator(pad_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {
@@ -298,7 +298,7 @@ class ConstantPadOperatorTester {
           input_shape().data(), pre_paddings().data(), post_paddings().data(),
           input.data(), output.data(),
           &padding_value,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {
@@ -409,7 +409,7 @@ class ConstantPadOperatorTester {
           pad_op,
           num_dims(),
           input_shape().data(), pre_paddings().data(), post_paddings().data(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_constant_pad_nd_x16(
@@ -417,7 +417,7 @@ class ConstantPadOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(pad_op, nullptr /* thread pool */));
+        xnn_run_operator(pad_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {
@@ -518,7 +518,7 @@ class ConstantPadOperatorTester {
           input_shape().data(), pre_paddings().data(), post_paddings().data(),
           input.data(), output.data(),
           &padding_value,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {
@@ -629,7 +629,7 @@ class ConstantPadOperatorTester {
           pad_op,
           num_dims(),
           input_shape().data(), pre_paddings().data(), post_paddings().data(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_constant_pad_nd_x32(
@@ -637,7 +637,7 @@ class ConstantPadOperatorTester {
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(pad_op, nullptr /* thread pool */));
+        xnn_run_operator(pad_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {
@@ -738,7 +738,7 @@ class ConstantPadOperatorTester {
           input_shape().data(), pre_paddings().data(), post_paddings().data(),
           input.data(), output.data(),
           &padding_value,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {

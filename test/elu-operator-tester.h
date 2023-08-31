@@ -343,7 +343,7 @@ void TestRunF32() const {
           input.data(), output.data(),
           alpha(),
           0,
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

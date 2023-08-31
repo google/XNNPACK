@@ -393,7 +393,7 @@ class ArgmaxPoolingOperatorTester {
         xnn_reshape_argmax_pooling2d_nhwc_f32(
           argmax_pooling_op,
           batch_size(), input_height(), input_width(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_argmax_pooling2d_nhwc_f32(
@@ -401,7 +401,7 @@ class ArgmaxPoolingOperatorTester {
           input.data(), output.data(), index.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(argmax_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(argmax_pooling_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -489,7 +489,7 @@ class ArgmaxPoolingOperatorTester {
         xnn_reshape_argmax_pooling2d_nhwc_f32(
           argmax_pooling_op,
           batch_size(), input_height(), input_width(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_argmax_pooling2d_nhwc_f32(
@@ -497,7 +497,7 @@ class ArgmaxPoolingOperatorTester {
           input.data(), output.data(), index.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(argmax_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(argmax_pooling_op, /*threadpool=*/nullptr));
 
       // Verify results of the first run.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -553,7 +553,7 @@ class ArgmaxPoolingOperatorTester {
         xnn_reshape_argmax_pooling2d_nhwc_f32(
           argmax_pooling_op,
           next_batch_size(), next_input_height(), next_input_width(),
-          nullptr /* thread pool */));
+          /*threadpool=*/nullptr));
 
       // Setup and run Argmax Pooling operator the second time, and destroy the operator.
       ASSERT_EQ(xnn_status_success,
@@ -562,7 +562,7 @@ class ArgmaxPoolingOperatorTester {
           input.data(), output.data(), index.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(argmax_pooling_op, nullptr /* thread pool */));
+        xnn_run_operator(argmax_pooling_op, /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_delete_operator(argmax_pooling_op));
