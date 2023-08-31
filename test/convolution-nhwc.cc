@@ -596,6 +596,17 @@ TEST(CONVOLUTION_NHWC_QC8, depthwise_2x5) {
     .TestNHWCxQC8();
 }
 
+TEST(CONVOLUTION_NHWC_QC8, depthwise_2x5_multithreaded) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(2, 5)
+    .groups(27)
+    .iterations(3)
+    .multithreaded(true)
+    .TestNHWCxQC8();
+}
+
 TEST(CONVOLUTION_NHWC_QC8, depthwise_2x5s5x6) {
   ConvolutionOperatorTester()
     .input_size(15, 14)
@@ -1911,6 +1922,17 @@ TEST(CONVOLUTION_NHWC_QS8, depthwise_2x5) {
     .TestNHWCxQS8();
 }
 
+TEST(CONVOLUTION_NHWC_QS8, depthwise_2x5_multithreaded) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(2, 5)
+    .groups(27)
+    .multithreaded(true)
+    .iterations(3)
+    .TestNHWCxQS8();
+}
+
 TEST(CONVOLUTION_NHWC_QS8, depthwise_2x5s5x6) {
   ConvolutionOperatorTester()
     .input_size(15, 14)
@@ -3221,6 +3243,17 @@ TEST(CONVOLUTION_NHWC_QU8, depthwise_2x5) {
     .padding(1, 1)
     .kernel_size(2, 5)
     .groups(27)
+    .iterations(3)
+    .TestNHWCxQU8();
+}
+
+TEST(CONVOLUTION_NHWC_QU8, depthwise_2x5_multithreaded) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(2, 5)
+    .groups(27)
+    .multithreaded(true)
     .iterations(3)
     .TestNHWCxQU8();
 }
@@ -4877,6 +4910,17 @@ TEST(CONVOLUTION_NHWC_F32, depthwise_2x5) {
     .padding(1, 1)
     .kernel_size(2, 5)
     .groups(24)
+    .iterations(3)
+    .TestNHWCxF32();
+}
+
+TEST(CONVOLUTION_NHWC_F32, depthwise_2x5_multithreaded) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(2, 5)
+    .groups(24)
+    .multithreaded(true)
     .iterations(3)
     .TestNHWCxF32();
 }
@@ -7913,6 +7957,17 @@ TEST(CONVOLUTION_NHWC_F16, depthwise_2x5) {
     .padding(1, 1)
     .kernel_size(2, 5)
     .groups(24)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
+TEST(CONVOLUTION_NHWC_F16, depthwise_2x5_multithreaded) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(2, 5)
+    .groups(24)
+    .multithreaded(true)
     .iterations(3)
     .TestNHWCxF16();
 }

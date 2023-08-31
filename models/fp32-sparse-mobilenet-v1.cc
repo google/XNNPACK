@@ -14,6 +14,7 @@
 
 #include <xnnpack/cache.h>
 #include <xnnpack/common.h>
+#include <xnnpack/common.h>
 #include <xnnpack/models.h>
 
 namespace models {
@@ -1189,13 +1190,15 @@ ExecutionPlan FP32SparseMobileNetV1(float sparsity, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  size_t workspace_size, workspace_alignment;
+  size_t op28_workspace_size = 0;
+  size_t op28_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op28,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op28_workspace_size, &op28_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op28_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #28" << std::endl;
     return ExecutionPlan();
@@ -1429,7 +1432,8 @@ ExecutionPlan FP32SparseMobileNetV1(float sparsity, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op28,
-    /*workspace=*/nullptr, /*input=*/v28.data(), /*output=*/v29.data());
+    workspace.data(),
+    /*input=*/v28.data(), /*output=*/v29.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #28" << std::endl;
     return ExecutionPlan();

@@ -2660,13 +2660,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
   }
 #endif  // XNN_PLATFORM_JIT
 
-  size_t workspace_size, workspace_alignment;
+  size_t op0_workspace_size = 0;
+  size_t op0_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op0,
     /*batch_size=*/1, /*input_height=*/224, /*input_width=*/224,
+    &op0_workspace_size, &op0_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op0_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #0" << std::endl;
     return ExecutionPlan();
@@ -2681,23 +2683,29 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op2_workspace_size = 0;
+  size_t op2_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op2,
     /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
+    &op2_workspace_size, &op2_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op2_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #2" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op3_workspace_size = 0;
+  size_t op3_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op3,
     /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
+    &op3_workspace_size, &op3_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op3_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #3" << std::endl;
     return ExecutionPlan();
@@ -2716,67 +2724,85 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op5_workspace_size = 0;
+  size_t op5_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op5,
     /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
+    &op5_workspace_size, &op5_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op5_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #5" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op6_workspace_size = 0;
+  size_t op6_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op6,
     /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
+    &op6_workspace_size, &op6_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op6_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #6" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op7_workspace_size = 0;
+  size_t op7_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op7,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
+    &op7_workspace_size, &op7_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op7_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #7" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op8_workspace_size = 0;
+  size_t op8_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op8,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
+    &op8_workspace_size, &op8_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op8_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #8" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op9_workspace_size = 0;
+  size_t op9_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op9,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
+    &op9_workspace_size, &op9_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op9_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #9" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op10_workspace_size = 0;
+  size_t op10_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op10,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
+    &op10_workspace_size, &op10_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op10_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #10" << std::endl;
     return ExecutionPlan();
@@ -2795,23 +2821,29 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op12_workspace_size = 0;
+  size_t op12_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op12,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
+    &op12_workspace_size, &op12_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op12_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #12" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op13_workspace_size = 0;
+  size_t op13_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op13,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
+    &op13_workspace_size, &op13_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op13_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #13" << std::endl;
     return ExecutionPlan();
@@ -2830,23 +2862,29 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op15_workspace_size = 0;
+  size_t op15_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op15,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op15_workspace_size, &op15_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op15_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #15" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op16_workspace_size = 0;
+  size_t op16_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op16,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op16_workspace_size, &op16_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op16_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #16" << std::endl;
     return ExecutionPlan();
@@ -2865,34 +2903,43 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op18_workspace_size = 0;
+  size_t op18_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op18,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
+    &op18_workspace_size, &op18_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op18_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #18" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op19_workspace_size = 0;
+  size_t op19_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op19,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
+    &op19_workspace_size, &op19_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op19_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #19" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op20_workspace_size = 0;
+  size_t op20_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op20,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
+    &op20_workspace_size, &op20_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op20_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #20" << std::endl;
     return ExecutionPlan();
@@ -2911,23 +2958,29 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op22_workspace_size = 0;
+  size_t op22_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op22,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op22_workspace_size, &op22_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op22_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #22" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op23_workspace_size = 0;
+  size_t op23_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op23,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op23_workspace_size, &op23_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op23_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #23" << std::endl;
     return ExecutionPlan();
@@ -2946,12 +2999,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op25_workspace_size = 0;
+  size_t op25_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op25,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
+    &op25_workspace_size, &op25_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op25_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #25" << std::endl;
     return ExecutionPlan();
@@ -2970,23 +3026,29 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op27_workspace_size = 0;
+  size_t op27_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op27,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
+    &op27_workspace_size, &op27_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op27_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #27" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op28_workspace_size = 0;
+  size_t op28_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op28,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
+    &op28_workspace_size, &op28_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op28_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #28" << std::endl;
     return ExecutionPlan();
@@ -3005,23 +3067,29 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op30_workspace_size = 0;
+  size_t op30_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op30,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op30_workspace_size, &op30_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op30_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #30" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op31_workspace_size = 0;
+  size_t op31_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op31,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op31_workspace_size, &op31_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op31_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #31" << std::endl;
     return ExecutionPlan();
@@ -3040,12 +3108,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op33_workspace_size = 0;
+  size_t op33_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op33,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
+    &op33_workspace_size, &op33_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op33_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #33" << std::endl;
     return ExecutionPlan();
@@ -3064,12 +3135,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op35_workspace_size = 0;
+  size_t op35_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op35,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
+    &op35_workspace_size, &op35_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op35_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #35" << std::endl;
     return ExecutionPlan();
@@ -3084,12 +3158,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op37_workspace_size = 0;
+  size_t op37_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op37,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
+    &op37_workspace_size, &op37_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op37_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #37" << std::endl;
     return ExecutionPlan();
@@ -3104,23 +3181,29 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op39_workspace_size = 0;
+  size_t op39_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op39,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op39_workspace_size, &op39_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op39_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #39" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op40_workspace_size = 0;
+  size_t op40_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op40,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op40_workspace_size, &op40_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op40_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #40" << std::endl;
     return ExecutionPlan();
@@ -3135,12 +3218,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op42_workspace_size = 0;
+  size_t op42_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op42,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op42_workspace_size, &op42_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op42_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #42" << std::endl;
     return ExecutionPlan();
@@ -3155,12 +3241,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op44_workspace_size = 0;
+  size_t op44_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op44,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op44_workspace_size, &op44_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op44_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #44" << std::endl;
     return ExecutionPlan();
@@ -3179,12 +3268,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op46_workspace_size = 0;
+  size_t op46_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op46,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op46_workspace_size, &op46_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op46_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #46" << std::endl;
     return ExecutionPlan();
@@ -3199,12 +3291,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op48_workspace_size = 0;
+  size_t op48_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op48,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op48_workspace_size, &op48_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op48_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #48" << std::endl;
     return ExecutionPlan();
@@ -3219,12 +3314,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op50_workspace_size = 0;
+  size_t op50_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op50,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op50_workspace_size, &op50_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op50_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #50" << std::endl;
     return ExecutionPlan();
@@ -3243,12 +3341,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op52_workspace_size = 0;
+  size_t op52_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op52,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op52_workspace_size, &op52_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op52_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #52" << std::endl;
     return ExecutionPlan();
@@ -3263,12 +3364,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op54_workspace_size = 0;
+  size_t op54_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op54,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op54_workspace_size, &op54_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op54_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #54" << std::endl;
     return ExecutionPlan();
@@ -3283,12 +3387,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op56_workspace_size = 0;
+  size_t op56_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op56,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op56_workspace_size, &op56_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op56_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #56" << std::endl;
     return ExecutionPlan();
@@ -3307,12 +3414,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op58_workspace_size = 0;
+  size_t op58_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op58,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op58_workspace_size, &op58_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op58_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #58" << std::endl;
     return ExecutionPlan();
@@ -3327,12 +3437,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op60_workspace_size = 0;
+  size_t op60_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op60,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op60_workspace_size, &op60_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op60_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #60" << std::endl;
     return ExecutionPlan();
@@ -3360,23 +3473,29 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op63_workspace_size = 0;
+  size_t op63_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op63,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op63_workspace_size, &op63_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op63_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #63" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op64_workspace_size = 0;
+  size_t op64_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op64,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op64_workspace_size, &op64_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op64_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #64" << std::endl;
     return ExecutionPlan();
@@ -3395,23 +3514,29 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op66_workspace_size = 0;
+  size_t op66_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op66,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op66_workspace_size, &op66_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op66_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #66" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op67_workspace_size = 0;
+  size_t op67_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op67,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op67_workspace_size, &op67_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op67_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #67" << std::endl;
     return ExecutionPlan();
@@ -3426,12 +3551,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op69_workspace_size = 0;
+  size_t op69_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op69,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op69_workspace_size, &op69_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op69_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #69" << std::endl;
     return ExecutionPlan();
@@ -3459,23 +3587,29 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op72_workspace_size = 0;
+  size_t op72_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op72,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op72_workspace_size, &op72_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op72_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #72" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op73_workspace_size = 0;
+  size_t op73_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op73,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op73_workspace_size, &op73_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op73_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #73" << std::endl;
     return ExecutionPlan();
@@ -3494,12 +3628,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op75_workspace_size = 0;
+  size_t op75_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op75,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op75_workspace_size, &op75_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op75_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #75" << std::endl;
     return ExecutionPlan();
@@ -3518,12 +3655,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op77_workspace_size = 0;
+  size_t op77_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op77,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op77_workspace_size, &op77_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op77_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #77" << std::endl;
     return ExecutionPlan();
@@ -3538,12 +3678,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op79_workspace_size = 0;
+  size_t op79_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op79,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op79_workspace_size, &op79_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op79_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #79" << std::endl;
     return ExecutionPlan();
@@ -3571,23 +3714,29 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op82_workspace_size = 0;
+  size_t op82_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op82,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op82_workspace_size, &op82_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op82_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #82" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op83_workspace_size = 0;
+  size_t op83_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op83,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op83_workspace_size, &op83_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op83_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #83" << std::endl;
     return ExecutionPlan();
@@ -3606,23 +3755,29 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op85_workspace_size = 0;
+  size_t op85_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op85,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
+    &op85_workspace_size, &op85_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op85_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #85" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op86_workspace_size = 0;
+  size_t op86_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op86,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
+    &op86_workspace_size, &op86_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op86_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #86" << std::endl;
     return ExecutionPlan();
@@ -3637,12 +3792,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op88_workspace_size = 0;
+  size_t op88_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op88,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
+    &op88_workspace_size, &op88_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op88_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #88" << std::endl;
     return ExecutionPlan();
@@ -3670,23 +3828,29 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op91_workspace_size = 0;
+  size_t op91_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op91,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op91_workspace_size, &op91_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op91_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #91" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op92_workspace_size = 0;
+  size_t op92_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op92,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op92_workspace_size, &op92_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op92_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #92" << std::endl;
     return ExecutionPlan();
@@ -3705,12 +3869,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op94_workspace_size = 0;
+  size_t op94_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op94,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
+    &op94_workspace_size, &op94_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op94_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #94" << std::endl;
     return ExecutionPlan();
@@ -3729,12 +3896,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op96_workspace_size = 0;
+  size_t op96_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op96,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
+    &op96_workspace_size, &op96_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op96_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #96" << std::endl;
     return ExecutionPlan();
@@ -3749,12 +3919,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op98_workspace_size = 0;
+  size_t op98_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op98,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
+    &op98_workspace_size, &op98_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op98_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #98" << std::endl;
     return ExecutionPlan();
@@ -3782,23 +3955,29 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op101_workspace_size = 0;
+  size_t op101_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op101,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op101_workspace_size, &op101_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op101_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #101" << std::endl;
     return ExecutionPlan();
   }
 
+  size_t op102_workspace_size = 0;
+  size_t op102_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op102,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op102_workspace_size, &op102_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op102_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #102" << std::endl;
     return ExecutionPlan();
@@ -3817,12 +3996,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op104_workspace_size = 0;
+  size_t op104_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op104,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
+    &op104_workspace_size, &op104_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op104_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #104" << std::endl;
     return ExecutionPlan();
@@ -3841,12 +4023,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op106_workspace_size = 0;
+  size_t op106_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op106,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
+    &op106_workspace_size, &op106_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op106_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #106" << std::endl;
     return ExecutionPlan();
@@ -3874,12 +4059,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op109_workspace_size = 0;
+  size_t op109_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op109,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op109_workspace_size, &op109_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op109_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #109" << std::endl;
     return ExecutionPlan();
@@ -3907,12 +4095,15 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t op112_workspace_size = 0;
+  size_t op112_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op112,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op112_workspace_size, &op112_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op112_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #112" << std::endl;
     return ExecutionPlan();
@@ -3922,7 +4113,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op0,
-    /*workspace=*/nullptr, /*input=*/v0.data(), /*output=*/v1.data());
+    workspace.data(), /*input=*/v0.data(), /*output=*/v1.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #0" << std::endl;
     return ExecutionPlan();
@@ -3938,7 +4129,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op2,
-    /*workspace=*/nullptr, /*input=*/v2.data(), /*output=*/v3.data());
+    workspace.data(), /*input=*/v2.data(), /*output=*/v3.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #2" << std::endl;
     return ExecutionPlan();
@@ -3946,7 +4137,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op3,
-    /*workspace=*/nullptr, /*input=*/v3.data(), /*output=*/v4.data());
+    workspace.data(), /*input=*/v3.data(), /*output=*/v4.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #3" << std::endl;
     return ExecutionPlan();
@@ -3962,7 +4153,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op5,
-    /*workspace=*/nullptr, /*input=*/v5.data(), /*output=*/v6.data());
+    workspace.data(), /*input=*/v5.data(), /*output=*/v6.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #5" << std::endl;
     return ExecutionPlan();
@@ -3970,7 +4161,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op6,
-    /*workspace=*/nullptr, /*input=*/v6.data(), /*output=*/v7.data());
+    workspace.data(), /*input=*/v6.data(), /*output=*/v7.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #6" << std::endl;
     return ExecutionPlan();
@@ -3978,7 +4169,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op7,
-    /*workspace=*/nullptr, /*input=*/v7.data(), /*output=*/v8.data());
+    workspace.data(), /*input=*/v7.data(), /*output=*/v8.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #7" << std::endl;
     return ExecutionPlan();
@@ -3986,7 +4177,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op8,
-    /*workspace=*/nullptr, /*input=*/v8.data(), /*output=*/v9.data());
+    workspace.data(), /*input=*/v8.data(), /*output=*/v9.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #8" << std::endl;
     return ExecutionPlan();
@@ -3994,7 +4185,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op9,
-    /*workspace=*/nullptr, /*input=*/v9.data(), /*output=*/v10.data());
+    workspace.data(), /*input=*/v9.data(), /*output=*/v10.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #9" << std::endl;
     return ExecutionPlan();
@@ -4002,7 +4193,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op10,
-    /*workspace=*/nullptr, /*input=*/v10.data(), /*output=*/v11.data());
+    workspace.data(), /*input=*/v10.data(), /*output=*/v11.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #10" << std::endl;
     return ExecutionPlan();
@@ -4018,7 +4209,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op12,
-    /*workspace=*/nullptr, /*input=*/v12.data(), /*output=*/v13.data());
+    workspace.data(), /*input=*/v12.data(), /*output=*/v13.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #12" << std::endl;
     return ExecutionPlan();
@@ -4026,7 +4217,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op13,
-    /*workspace=*/nullptr, /*input=*/v13.data(), /*output=*/v14.data());
+    workspace.data(), /*input=*/v13.data(), /*output=*/v14.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #13" << std::endl;
     return ExecutionPlan();
@@ -4043,7 +4234,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op15,
-    /*workspace=*/nullptr, /*input=*/v15.data(), /*output=*/v16.data());
+    workspace.data(), /*input=*/v15.data(), /*output=*/v16.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #15" << std::endl;
     return ExecutionPlan();
@@ -4051,7 +4242,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op16,
-    /*workspace=*/nullptr, /*input=*/v16.data(), /*output=*/v17.data());
+    workspace.data(), /*input=*/v16.data(), /*output=*/v17.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #16" << std::endl;
     return ExecutionPlan();
@@ -4067,7 +4258,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op18,
-    /*workspace=*/nullptr, /*input=*/v18.data(), /*output=*/v19.data());
+    workspace.data(), /*input=*/v18.data(), /*output=*/v19.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #18" << std::endl;
     return ExecutionPlan();
@@ -4075,7 +4266,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op19,
-    /*workspace=*/nullptr, /*input=*/v19.data(), /*output=*/v20.data());
+    workspace.data(), /*input=*/v19.data(), /*output=*/v20.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #19" << std::endl;
     return ExecutionPlan();
@@ -4083,7 +4274,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op20,
-    /*workspace=*/nullptr, /*input=*/v20.data(), /*output=*/v21.data());
+    workspace.data(), /*input=*/v20.data(), /*output=*/v21.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #20" << std::endl;
     return ExecutionPlan();
@@ -4100,7 +4291,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op22,
-    /*workspace=*/nullptr, /*input=*/v22.data(), /*output=*/v23.data());
+    workspace.data(), /*input=*/v22.data(), /*output=*/v23.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #22" << std::endl;
     return ExecutionPlan();
@@ -4108,7 +4299,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op23,
-    /*workspace=*/nullptr, /*input=*/v23.data(), /*output=*/v24.data());
+    workspace.data(), /*input=*/v23.data(), /*output=*/v24.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #23" << std::endl;
     return ExecutionPlan();
@@ -4124,7 +4315,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op25,
-    /*workspace=*/nullptr, /*input=*/v25.data(), /*output=*/v26.data());
+    workspace.data(), /*input=*/v25.data(), /*output=*/v26.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #25" << std::endl;
     return ExecutionPlan();
@@ -4140,7 +4331,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op27,
-    /*workspace=*/nullptr, /*input=*/v27.data(), /*output=*/v28.data());
+    workspace.data(), /*input=*/v27.data(), /*output=*/v28.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #27" << std::endl;
     return ExecutionPlan();
@@ -4148,7 +4339,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op28,
-    /*workspace=*/nullptr, /*input=*/v28.data(), /*output=*/v29.data());
+    workspace.data(), /*input=*/v28.data(), /*output=*/v29.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #28" << std::endl;
     return ExecutionPlan();
@@ -4165,7 +4356,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op30,
-    /*workspace=*/nullptr, /*input=*/v30.data(), /*output=*/v31.data());
+    workspace.data(), /*input=*/v30.data(), /*output=*/v31.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #30" << std::endl;
     return ExecutionPlan();
@@ -4173,7 +4364,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op31,
-    /*workspace=*/nullptr, /*input=*/v31.data(), /*output=*/v32.data());
+    workspace.data(), /*input=*/v31.data(), /*output=*/v32.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #31" << std::endl;
     return ExecutionPlan();
@@ -4189,7 +4380,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op33,
-    /*workspace=*/nullptr, /*input=*/v33.data(), /*output=*/v34.data());
+    workspace.data(), /*input=*/v33.data(), /*output=*/v34.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #33" << std::endl;
     return ExecutionPlan();
@@ -4205,7 +4396,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op35,
-    /*workspace=*/nullptr, /*input=*/v35.data(), /*output=*/v36.data());
+    workspace.data(), /*input=*/v35.data(), /*output=*/v36.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #35" << std::endl;
     return ExecutionPlan();
@@ -4221,7 +4412,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op37,
-    /*workspace=*/nullptr, /*input=*/v37.data(), /*output=*/v38.data());
+    workspace.data(), /*input=*/v37.data(), /*output=*/v38.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #37" << std::endl;
     return ExecutionPlan();
@@ -4237,7 +4428,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op39,
-    /*workspace=*/nullptr, /*input=*/v39.data(), /*output=*/v40.data());
+    workspace.data(), /*input=*/v39.data(), /*output=*/v40.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #39" << std::endl;
     return ExecutionPlan();
@@ -4245,7 +4436,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op40,
-    /*workspace=*/nullptr, /*input=*/v40.data(), /*output=*/v41.data());
+    workspace.data(), /*input=*/v40.data(), /*output=*/v41.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #40" << std::endl;
     return ExecutionPlan();
@@ -4261,7 +4452,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op42,
-    /*workspace=*/nullptr, /*input=*/v42.data(), /*output=*/v43.data());
+    workspace.data(), /*input=*/v42.data(), /*output=*/v43.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #42" << std::endl;
     return ExecutionPlan();
@@ -4277,7 +4468,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op44,
-    /*workspace=*/nullptr, /*input=*/v44.data(), /*output=*/v45.data());
+    workspace.data(), /*input=*/v44.data(), /*output=*/v45.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #44" << std::endl;
     return ExecutionPlan();
@@ -4293,7 +4484,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op46,
-    /*workspace=*/nullptr, /*input=*/v46.data(), /*output=*/v47.data());
+    workspace.data(), /*input=*/v46.data(), /*output=*/v47.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #46" << std::endl;
     return ExecutionPlan();
@@ -4309,7 +4500,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op48,
-    /*workspace=*/nullptr, /*input=*/v48.data(), /*output=*/v49.data());
+    workspace.data(), /*input=*/v48.data(), /*output=*/v49.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #48" << std::endl;
     return ExecutionPlan();
@@ -4325,7 +4516,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op50,
-    /*workspace=*/nullptr, /*input=*/v50.data(), /*output=*/v51.data());
+    workspace.data(), /*input=*/v50.data(), /*output=*/v51.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #50" << std::endl;
     return ExecutionPlan();
@@ -4341,7 +4532,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op52,
-    /*workspace=*/nullptr, /*input=*/v52.data(), /*output=*/v53.data());
+    workspace.data(), /*input=*/v52.data(), /*output=*/v53.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #52" << std::endl;
     return ExecutionPlan();
@@ -4357,7 +4548,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op54,
-    /*workspace=*/nullptr, /*input=*/v54.data(), /*output=*/v55.data());
+    workspace.data(), /*input=*/v54.data(), /*output=*/v55.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #54" << std::endl;
     return ExecutionPlan();
@@ -4373,7 +4564,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op56,
-    /*workspace=*/nullptr, /*input=*/v56.data(), /*output=*/v57.data());
+    workspace.data(), /*input=*/v56.data(), /*output=*/v57.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #56" << std::endl;
     return ExecutionPlan();
@@ -4389,7 +4580,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op58,
-    /*workspace=*/nullptr, /*input=*/v58.data(), /*output=*/v59.data());
+    workspace.data(), /*input=*/v58.data(), /*output=*/v59.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #58" << std::endl;
     return ExecutionPlan();
@@ -4405,7 +4596,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op60,
-    /*workspace=*/nullptr, /*input=*/v60.data(), /*output=*/v61.data());
+    workspace.data(), /*input=*/v60.data(), /*output=*/v61.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #60" << std::endl;
     return ExecutionPlan();
@@ -4430,7 +4621,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op63,
-    /*workspace=*/nullptr, /*input=*/v63.data(), /*output=*/v64.data());
+    workspace.data(), /*input=*/v63.data(), /*output=*/v64.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #63" << std::endl;
     return ExecutionPlan();
@@ -4438,7 +4629,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op64,
-    /*workspace=*/nullptr, /*input=*/v64.data(), /*output=*/v65.data());
+    workspace.data(), /*input=*/v64.data(), /*output=*/v65.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #64" << std::endl;
     return ExecutionPlan();
@@ -4454,7 +4645,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op66,
-    /*workspace=*/nullptr, /*input=*/v66.data(), /*output=*/v67.data());
+    workspace.data(), /*input=*/v66.data(), /*output=*/v67.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #66" << std::endl;
     return ExecutionPlan();
@@ -4462,7 +4653,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op67,
-    /*workspace=*/nullptr, /*input=*/v67.data(), /*output=*/v68.data());
+    workspace.data(), /*input=*/v67.data(), /*output=*/v68.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #67" << std::endl;
     return ExecutionPlan();
@@ -4478,7 +4669,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op69,
-    /*workspace=*/nullptr, /*input=*/v69.data(), /*output=*/v70.data());
+    workspace.data(), /*input=*/v69.data(), /*output=*/v70.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #69" << std::endl;
     return ExecutionPlan();
@@ -4503,7 +4694,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op72,
-    /*workspace=*/nullptr, /*input=*/v72.data(), /*output=*/v73.data());
+    workspace.data(), /*input=*/v72.data(), /*output=*/v73.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #72" << std::endl;
     return ExecutionPlan();
@@ -4511,7 +4702,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op73,
-    /*workspace=*/nullptr, /*input=*/v73.data(), /*output=*/v74.data());
+    workspace.data(), /*input=*/v73.data(), /*output=*/v74.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #73" << std::endl;
     return ExecutionPlan();
@@ -4527,7 +4718,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op75,
-    /*workspace=*/nullptr, /*input=*/v75.data(), /*output=*/v76.data());
+    workspace.data(), /*input=*/v75.data(), /*output=*/v76.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #75" << std::endl;
     return ExecutionPlan();
@@ -4543,7 +4734,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op77,
-    /*workspace=*/nullptr, /*input=*/v77.data(), /*output=*/v78.data());
+    workspace.data(), /*input=*/v77.data(), /*output=*/v78.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #77" << std::endl;
     return ExecutionPlan();
@@ -4559,7 +4750,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op79,
-    /*workspace=*/nullptr, /*input=*/v79.data(), /*output=*/v80.data());
+    workspace.data(), /*input=*/v79.data(), /*output=*/v80.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #79" << std::endl;
     return ExecutionPlan();
@@ -4584,7 +4775,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op82,
-    /*workspace=*/nullptr, /*input=*/v82.data(), /*output=*/v83.data());
+    workspace.data(), /*input=*/v82.data(), /*output=*/v83.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #82" << std::endl;
     return ExecutionPlan();
@@ -4592,7 +4783,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op83,
-    /*workspace=*/nullptr, /*input=*/v83.data(), /*output=*/v84.data());
+    workspace.data(), /*input=*/v83.data(), /*output=*/v84.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #83" << std::endl;
     return ExecutionPlan();
@@ -4608,7 +4799,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op85,
-    /*workspace=*/nullptr, /*input=*/v85.data(), /*output=*/v86.data());
+    workspace.data(), /*input=*/v85.data(), /*output=*/v86.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #85" << std::endl;
     return ExecutionPlan();
@@ -4616,7 +4807,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op86,
-    /*workspace=*/nullptr, /*input=*/v86.data(), /*output=*/v87.data());
+    workspace.data(), /*input=*/v86.data(), /*output=*/v87.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #86" << std::endl;
     return ExecutionPlan();
@@ -4632,7 +4823,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op88,
-    /*workspace=*/nullptr, /*input=*/v88.data(), /*output=*/v89.data());
+    workspace.data(), /*input=*/v88.data(), /*output=*/v89.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #88" << std::endl;
     return ExecutionPlan();
@@ -4657,7 +4848,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op91,
-    /*workspace=*/nullptr, /*input=*/v91.data(), /*output=*/v92.data());
+    workspace.data(), /*input=*/v91.data(), /*output=*/v92.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #91" << std::endl;
     return ExecutionPlan();
@@ -4665,7 +4856,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op92,
-    /*workspace=*/nullptr, /*input=*/v92.data(), /*output=*/v93.data());
+    workspace.data(), /*input=*/v92.data(), /*output=*/v93.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #92" << std::endl;
     return ExecutionPlan();
@@ -4681,7 +4872,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op94,
-    /*workspace=*/nullptr, /*input=*/v94.data(), /*output=*/v95.data());
+    workspace.data(), /*input=*/v94.data(), /*output=*/v95.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #94" << std::endl;
     return ExecutionPlan();
@@ -4697,7 +4888,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op96,
-    /*workspace=*/nullptr, /*input=*/v96.data(), /*output=*/v97.data());
+    workspace.data(), /*input=*/v96.data(), /*output=*/v97.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #96" << std::endl;
     return ExecutionPlan();
@@ -4713,7 +4904,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op98,
-    /*workspace=*/nullptr, /*input=*/v98.data(), /*output=*/v99.data());
+    workspace.data(), /*input=*/v98.data(), /*output=*/v99.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #98" << std::endl;
     return ExecutionPlan();
@@ -4738,7 +4929,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op101,
-    /*workspace=*/nullptr, /*input=*/v101.data(), /*output=*/v102.data());
+    workspace.data(), /*input=*/v101.data(), /*output=*/v102.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #101" << std::endl;
     return ExecutionPlan();
@@ -4746,7 +4937,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op102,
-    /*workspace=*/nullptr, /*input=*/v102.data(), /*output=*/v103.data());
+    workspace.data(), /*input=*/v102.data(), /*output=*/v103.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #102" << std::endl;
     return ExecutionPlan();
@@ -4762,7 +4953,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op104,
-    /*workspace=*/nullptr, /*input=*/v104.data(), /*output=*/v105.data());
+    workspace.data(), /*input=*/v104.data(), /*output=*/v105.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #104" << std::endl;
     return ExecutionPlan();
@@ -4778,7 +4969,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op106,
-    /*workspace=*/nullptr, /*input=*/v106.data(), /*output=*/v107.data());
+    workspace.data(), /*input=*/v106.data(), /*output=*/v107.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #106" << std::endl;
     return ExecutionPlan();
@@ -4803,7 +4994,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op109,
-    /*workspace=*/nullptr, /*input=*/v109.data(), /*output=*/v110.data());
+    workspace.data(), /*input=*/v109.data(), /*output=*/v110.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #109" << std::endl;
     return ExecutionPlan();
@@ -4828,7 +5019,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op112,
-    /*workspace=*/nullptr, /*input=*/v112.data(), /*output=*/v113.data());
+    workspace.data(), /*input=*/v112.data(), /*output=*/v113.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #112" << std::endl;
     return ExecutionPlan();

@@ -13,6 +13,7 @@
 #include <random>
 
 #include <xnnpack/cache.h>
+#include <xnnpack/common.h>
 #include <xnnpack/models.h>
 
 #include <fp16/fp16.h>
@@ -2495,13 +2496,15 @@ ExecutionPlan FP16SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  size_t workspace_size, workspace_alignment;
+  size_t op63_workspace_size = 0;
+  size_t op63_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op63,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op63_workspace_size, &op63_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op63_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #63" << std::endl;
     return ExecutionPlan();
@@ -3015,7 +3018,8 @@ ExecutionPlan FP16SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op63,
-    /*workspace=*/nullptr, /*input=*/v63.data(), /*output=*/v64.data());
+    workspace.data(),
+    /*input=*/v63.data(), /*output=*/v64.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #63" << std::endl;
     return ExecutionPlan();

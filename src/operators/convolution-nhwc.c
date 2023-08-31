@@ -1943,14 +1943,16 @@ static enum xnn_status reshape_dwconv(
   const struct xnn_ukernel_dwconv dwconv_ukernel = convolution_op->ukernel.dwconv;
   const bool is_unipass = dwconv_ukernel.last_tile == 0;
   const size_t tile_size = dwconv_ukernel.tile_size;
+  size_t total_workspace_size = 0;
 
   // Micro-kernel will read (tile_size - kernel_size) elements after the end of indirection buffer.
   const size_t indirection_buffer_size =
-    sizeof(void*) * (tile_size - kernel_size + output_height * step_height);
+    round_up_po2(sizeof(void*) * (tile_size - kernel_size + output_height * step_height), XNN_ALLOCATION_ALIGNMENT);
+
   size_t dwconv_compute_index;
-  if (convolution_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER) {
-    *workspace_size = indirection_buffer_size;
-    *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
+  const bool is_transient_indirection_buffer = convolution_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
+  if (is_transient_indirection_buffer) {
+    total_workspace_size += indirection_buffer_size;
     dwconv_compute_index = 1;
 
     convolution_op->context.dwconv_indirection_init = (struct dwconv_indirection_init_context) {
@@ -1988,8 +1990,6 @@ static enum xnn_status reshape_dwconv(
       }
     #endif
   } else {
-    *workspace_size = 0;
-    *workspace_alignment = 1;
     dwconv_compute_index = 0;
 
     if (input_size_changed(convolution_op)) {
@@ -2042,6 +2042,7 @@ static enum xnn_status reshape_dwconv(
       .packed_weights = packed_weights(convolution_op),
       .output_batch_stride = (output_height * output_width * convolution_op->output_pixel_stride) << log2_output_element_size,
       .output_height_stride = (output_width * convolution_op->output_pixel_stride) << log2_output_element_size,
+      .output_height = output_height,
       .output_width = output_width,
       .groups = groups,
       .zero = convolution_op->zero_buffer,
@@ -2049,20 +2050,42 @@ static enum xnn_status reshape_dwconv(
   };
   memcpy(&convolution_op->context.dwconv.params, &convolution_op->params, sizeof(convolution_op->context.dwconv.params));
 
-  convolution_op->compute[dwconv_compute_index].type = xnn_parallelization_type_2d;
-  convolution_op->compute[dwconv_compute_index].range[0] = convolution_op->batch_size;
+  const size_t batch_size = convolution_op->batch_size;
+  convolution_op->compute[dwconv_compute_index].range[0] = batch_size;
   convolution_op->compute[dwconv_compute_index].range[1] = output_height;
   convolution_op->state = xnn_run_state_needs_setup;
 
   if (is_unipass) {
+    convolution_op->compute[dwconv_compute_index].type = xnn_parallelization_type_2d;
     convolution_op->compute[dwconv_compute_index].task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv_unipass;
     convolution_op->context.dwconv.unipass_ukernel = convolution_op->ukernel.dwconv.unipass_fn;
   } else {
-    convolution_op->compute[dwconv_compute_index].task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv_multipass;
+    const size_t buffer_size =
+      round_up_po2(
+        (groups + (XNN_MULTIPASS_EXTRA_BYTES >> log2_input_element_size)) << log2_accumulator_element_size,
+        XNN_ALLOCATION_ALIGNMENT);
+    convolution_op->context.dwconv.buffer_size = buffer_size;
+    if (is_transient_indirection_buffer) {
+      convolution_op->context.dwconv.multipass_buffer_offset = indirection_buffer_size;
+    }
+    const bool use_threads_workspace_size = num_threads < batch_size * output_height;
+    if (use_threads_workspace_size) {
+      convolution_op->compute[dwconv_compute_index].type = xnn_parallelization_type_2d_with_thread;
+      convolution_op->compute[dwconv_compute_index].task_2d_with_thread =
+        (pthreadpool_task_2d_with_thread_t) xnn_compute_dwconv_multipass_with_thread;
+      total_workspace_size += num_threads * buffer_size;
+    } else {
+      convolution_op->compute[dwconv_compute_index].type = xnn_parallelization_type_2d;
+      convolution_op->compute[dwconv_compute_index].task_2d =
+        (pthreadpool_task_2d_t) xnn_compute_dwconv_multipass;
+      total_workspace_size += batch_size * output_height * buffer_size;
+    }
+
     convolution_op->context.dwconv.multipass_ukernel = convolution_op->ukernel.dwconv.multipass_fn;
-    convolution_op->context.dwconv.buffer_size =
-      (groups + (XNN_MULTIPASS_EXTRA_BYTES >> log2_input_element_size)) << log2_accumulator_element_size;
   }
+
+  *workspace_size = total_workspace_size;
+  *workspace_alignment = total_workspace_size == 0 ? 1 : XNN_ALLOCATION_ALIGNMENT;
 
   return xnn_status_success;
 }
@@ -2123,10 +2146,10 @@ static enum xnn_status reshape_convolution2d_nhwc(
   uint32_t log2_accumulator_element_size,
   uint32_t extra_weights_elements_size,
   uint32_t log2_output_element_size,
-  size_t* output_height_out,
-  size_t* output_width_out,
   size_t* workspace_size,
   size_t* workspace_alignment,
+  size_t* output_height_out,
+  size_t* output_width_out,
   pthreadpool_t threadpool)
 {
   if (convolution_op->type != expected_operator_type) {
@@ -2233,10 +2256,10 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_qu8(
     size_t batch_size,
     size_t input_height,
     size_t input_width,
-    size_t* output_height_out,
-    size_t* output_width_out,
     size_t* workspace_size,
     size_t* workspace_alignment,
+    size_t* output_height_out,
+    size_t* output_width_out,
     pthreadpool_t threadpool)
 {
   return reshape_convolution2d_nhwc(
@@ -2247,8 +2270,8 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_qu8(
     /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_INT32_T,
     /*extra_weights_elements_size=*/sizeof(int32_t),
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    output_height_out, output_width_out,
     workspace_size, workspace_alignment,
+    output_height_out, output_width_out,
     threadpool);
 }
 
@@ -2257,10 +2280,10 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_qs8(
     size_t batch_size,
     size_t input_height,
     size_t input_width,
-    size_t* output_height_out,
-    size_t* output_width_out,
     size_t* workspace_size,
     size_t* workspace_alignment,
+    size_t* output_height_out,
+    size_t* output_width_out,
     pthreadpool_t threadpool)
 {
   return reshape_convolution2d_nhwc(
@@ -2271,8 +2294,8 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_qs8(
     /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_INT32_T,
     /*extra_weights_elements_size=*/sizeof(int32_t),
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    output_height_out, output_width_out,
     workspace_size, workspace_alignment,
+    output_height_out, output_width_out,
     threadpool);
 }
 
@@ -2281,10 +2304,10 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     size_t batch_size,
     size_t input_height,
     size_t input_width,
-    size_t* output_height_out,
-    size_t* output_width_out,
     size_t* workspace_size,
     size_t* workspace_alignment,
+    size_t* output_height_out,
+    size_t* output_width_out,
     pthreadpool_t threadpool)
 {
   return reshape_convolution2d_nhwc(
@@ -2295,8 +2318,8 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_INT32_T,
     /*extra_weights_elements_size=*/sizeof(int32_t) + sizeof(float),
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    output_height_out, output_width_out,
     workspace_size, workspace_alignment,
+    output_height_out, output_width_out,
     threadpool);
 }
 
@@ -2305,10 +2328,10 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_f16(
     size_t batch_size,
     size_t input_height,
     size_t input_width,
-    size_t* output_height_out,
-    size_t* output_width_out,
     size_t* workspace_size,
     size_t* workspace_alignment,
+    size_t* output_height_out,
+    size_t* output_width_out,
     pthreadpool_t threadpool)
 {
   return reshape_convolution2d_nhwc(
@@ -2319,8 +2342,8 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_f16(
     /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*extra_weights_elements_size=*/sizeof(uint16_t),
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    output_height_out, output_width_out,
     workspace_size, workspace_alignment,
+    output_height_out, output_width_out,
     threadpool);
 }
 
@@ -2329,10 +2352,10 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_f32(
     size_t batch_size,
     size_t input_height,
     size_t input_width,
-    size_t* output_height_out,
-    size_t* output_width_out,
     size_t* workspace_size,
     size_t* workspace_alignment,
+    size_t* output_height_out,
+    size_t* output_width_out,
     pthreadpool_t threadpool)
 {
   return reshape_convolution2d_nhwc(
@@ -2343,8 +2366,8 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_f32(
     /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*extra_weights_elements_size=*/sizeof(float),
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    output_height_out, output_width_out,
     workspace_size, workspace_alignment,
+    output_height_out, output_width_out,
     threadpool);
 }
 
@@ -2411,6 +2434,12 @@ static enum xnn_status setup_dwconv(
     convolution_op->context.dwconv_indirection_init.indirection_buffer = (const void**) workspace;
   } else {
     convolution_op->context.dwconv.input_offset = (size_t) ((uintptr_t) convolution_op->input - (uintptr_t) convolution_op->last_input);
+  }
+
+  if (convolution_op->context.dwconv.buffer_size) {
+    assert(workspace != NULL);
+    convolution_op->context.dwconv.multipass_buffer =
+      (void*) ((uintptr_t) workspace + convolution_op->context.dwconv.multipass_buffer_offset);
   }
 
   convolution_op->context.dwconv.output = convolution_op->output;

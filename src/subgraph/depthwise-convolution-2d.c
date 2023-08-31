@@ -299,7 +299,7 @@ static enum xnn_status reshape_convolution_operator(
         batch_size,
         input_height,
         input_width,
-        NULL, NULL,
+        /*output_height_out=*/NULL, /*output_width_out=*/NULL,
         threadpool);
       break;
     case xnn_operator_type_convolution_nchw_f32:
@@ -308,7 +308,7 @@ static enum xnn_status reshape_convolution_operator(
         batch_size,
         input_height,
         input_width,
-        NULL, NULL,
+        /*output_height_out=*/NULL, /*output_width_out=*/NULL,
         threadpool);
       break;
     case xnn_operator_type_convolution_nhwc_f32:
@@ -317,8 +317,8 @@ static enum xnn_status reshape_convolution_operator(
         batch_size,
         input_height,
         input_width,
-        NULL, NULL,
         &opdata->workspace_size, &opdata->workspace_alignment,
+        /*output_height_out=*/NULL, /*output_width_out=*/NULL,
         threadpool);
       break;
     case xnn_operator_type_convolution_nhwc_f16:
@@ -327,8 +327,8 @@ static enum xnn_status reshape_convolution_operator(
         batch_size,
         input_height,
         input_width,
-        NULL, NULL,
         &opdata->workspace_size, &opdata->workspace_alignment,
+        /*output_height_out=*/NULL, /*output_width_out=*/NULL,
         threadpool);
       break;
     case xnn_operator_type_convolution_nhwc_qc8:
@@ -337,8 +337,8 @@ static enum xnn_status reshape_convolution_operator(
         batch_size,
         input_height,
         input_width,
-        NULL, NULL,
         &opdata->workspace_size, &opdata->workspace_alignment,
+        /*output_height_out=*/NULL, /*output_width_out=*/NULL,
         threadpool);
       break;
     case xnn_operator_type_convolution_nhwc_qs8:
@@ -347,8 +347,8 @@ static enum xnn_status reshape_convolution_operator(
         batch_size,
         input_height,
         input_width,
-        NULL, NULL,
         &opdata->workspace_size, &opdata->workspace_alignment,
+        /*output_height_out=*/NULL, /*output_width_out=*/NULL,
         threadpool);
       break;
     case xnn_operator_type_convolution_nhwc_qu8:
@@ -357,8 +357,8 @@ static enum xnn_status reshape_convolution_operator(
         batch_size,
         input_height,
         input_width,
-        NULL, NULL,
         &opdata->workspace_size, &opdata->workspace_alignment,
+        /*output_height_out=*/NULL, /*output_width_out=*/NULL,
         threadpool);
       break;
     default:
