@@ -48,32 +48,33 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4__wasm(
     w = (const int32_t*) w + 4;
 
     size_t k = kc;
-    for (; k >= 2 * sizeof(int8_t); k -= 2 * sizeof(int8_t)) {
-      const int32_t va00 = (int32_t) *a0++;
-      const int32_t va01 = (int32_t) *a0++;
+    for (; k >= 2 * sizeof(uint8_t); k -= 2 * sizeof(uint8_t)) {
+      const int32_t va0c0 = (int32_t) a0[0];
+      const int32_t va0c1 = (int32_t) a0[1];
+      a0 += 2;
 
       const uint32_t vbi0 = (uint32_t) ((const uint8_t*) w)[0];
       const uint32_t vbi1 = (uint32_t) ((const uint8_t*) w)[1];
       const uint32_t vbi2 = (uint32_t) ((const uint8_t*) w)[2];
       const uint32_t vbi3 = (uint32_t) ((const uint8_t*) w)[3];
-      const int32_t vb00 = (int32_t) (vbi0 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb10 = (int32_t) (vbi1 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb20 = (int32_t) (vbi2 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb30 = (int32_t) (vbi3 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb01 = (int32_t) (vbi0 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb11 = (int32_t) (vbi1 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb21 = (int32_t) (vbi2 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb31 = (int32_t) (vbi3 >> 4) + vminus_kernel_zero_point;
-      w = (const int8_t*) w + 4;
+      w = (const uint8_t*) w + 4;
+      const int32_t vb0c0 = (int32_t) (vbi0 & 0xF) + vminus_kernel_zero_point;
+      const int32_t vb1c0 = (int32_t) (vbi1 & 0xF) + vminus_kernel_zero_point;
+      const int32_t vb2c0 = (int32_t) (vbi2 & 0xF) + vminus_kernel_zero_point;
+      const int32_t vb3c0 = (int32_t) (vbi3 & 0xF) + vminus_kernel_zero_point;
+      const int32_t vb0c1 = (int32_t) (vbi0 >> 4) + vminus_kernel_zero_point;
+      const int32_t vb1c1 = (int32_t) (vbi1 >> 4) + vminus_kernel_zero_point;
+      const int32_t vb2c1 = (int32_t) (vbi2 >> 4) + vminus_kernel_zero_point;
+      const int32_t vb3c1 = (int32_t) (vbi3 >> 4) + vminus_kernel_zero_point;
 
-      vacc0x0 += va00 * vb00;
-      vacc0x1 += va00 * vb10;
-      vacc0x2 += va00 * vb20;
-      vacc0x3 += va00 * vb30;
-      vacc0x0 += va01 * vb01;
-      vacc0x1 += va01 * vb11;
-      vacc0x2 += va01 * vb21;
-      vacc0x3 += va01 * vb31;
+      vacc0x0 += va0c0 * vb0c0;
+      vacc0x1 += va0c0 * vb1c0;
+      vacc0x2 += va0c0 * vb2c0;
+      vacc0x3 += va0c0 * vb3c0;
+      vacc0x0 += va0c1 * vb0c1;
+      vacc0x1 += va0c1 * vb1c1;
+      vacc0x2 += va0c1 * vb2c1;
+      vacc0x3 += va0c1 * vb3c1;
     }
     if XNN_UNLIKELY(k != 0) {
       const int32_t va0 = (int32_t) *a0++;
@@ -82,11 +83,11 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4__wasm(
       const uint32_t vbi1 = (uint32_t) ((const uint8_t*) w)[1];
       const uint32_t vbi2 = (uint32_t) ((const uint8_t*) w)[2];
       const uint32_t vbi3 = (uint32_t) ((const uint8_t*) w)[3];
+      w = (const uint8_t*) w + 4;
       const int32_t vb0 = (int32_t) vbi0 + vminus_kernel_zero_point;
       const int32_t vb1 = (int32_t) vbi1 + vminus_kernel_zero_point;
       const int32_t vb2 = (int32_t) vbi2 + vminus_kernel_zero_point;
       const int32_t vb3 = (int32_t) vbi3 + vminus_kernel_zero_point;
-      w = (const int8_t*) w + 4;
 
       vacc0x0 += va0 * vb0;
       vacc0x1 += va0 * vb1;
