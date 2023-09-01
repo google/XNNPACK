@@ -27,7 +27,7 @@
 
 
 void GEMMBenchmark(benchmark::State& state,
-  xnn_qd8_f32_qc8w_gemm_ukernel_fn gemm,
+  xnn_qd8_f32_qc8w_gemm_minmax_ukernel_fn gemm,
   xnn_init_f32_minmax_params_fn init_params,
   size_t mr, size_t nr, size_t kr, size_t sr,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
