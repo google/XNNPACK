@@ -288,13 +288,13 @@ static enum xnn_status reshape_mean_nd(
       mean_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_global_average_pooling_nwc_unipass;
       mean_op->context.global_average_pooling_nwc.unipass_ukernel = mean_op->gavgpool_config->unipass;
     } else {
-      const size_t buffer_size = round_up_po2(
+      const size_t multipass_batch_stride = round_up_po2(
           (channel_like_dim + (XNN_MAX_SIMD_SIZE >> log2_data_element_size)) << log2_accumulator_element_size,
           XNN_ALLOCATION_ALIGNMENT);
       const size_t num_threads = pthreadpool_get_threads_count(threadpool);
-      *workspace_size = num_threads * buffer_size;
+      *workspace_size = num_threads * multipass_batch_stride;
       *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
-      mean_op->context.global_average_pooling_nwc.buffer_size = buffer_size;
+      mean_op->context.global_average_pooling_nwc.multipass_batch_stride = multipass_batch_stride;
       mean_op->compute[0].type = xnn_parallelization_type_1d_with_thread;
       mean_op->compute[0].task_1d_with_thread =
         (pthreadpool_task_1d_with_thread_t) xnn_compute_global_average_pooling_nwc_multipass_with_thread;
@@ -415,11 +415,11 @@ static enum xnn_status setup_mean_nd(
     mean_op->context.global_average_pooling_nwc.input = input;
     mean_op->context.global_average_pooling_nwc.output = output;
 
-    if (mean_op->context.global_average_pooling_nwc.buffer_size != 0 && workspace == NULL) {
+    if (mean_op->context.global_average_pooling_nwc.multipass_batch_stride != 0 && workspace == NULL) {
       xnn_log_error(
         "failed to setup %s operator: workspace of size %zu required but workspace is NULL",
         xnn_operator_type_to_string(mean_op->type),
-        mean_op->context.global_average_pooling_nwc.buffer_size);
+        mean_op->context.global_average_pooling_nwc.multipass_batch_stride);
     }
     mean_op->context.global_average_pooling_nwc.multipass_buffer = workspace;
   }

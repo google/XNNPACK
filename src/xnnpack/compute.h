@@ -985,12 +985,16 @@ struct global_average_pooling_nwc_context {
     xnn_gavgpool_unipass_ukernel_fn unipass_ukernel;
     xnn_gavgpool_multipass_ukernel_fn multipass_ukernel;
   };
-  size_t buffer_size;
+  size_t multipass_batch_stride;
   void* multipass_buffer;
 };
 
 #ifndef __cplusplus
   XNN_PRIVATE void xnn_compute_global_average_pooling_nwc_unipass(
+      const struct global_average_pooling_nwc_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index);
+
+  XNN_PRIVATE void xnn_compute_global_average_pooling_nwc_multipass(
       const struct global_average_pooling_nwc_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index);
 

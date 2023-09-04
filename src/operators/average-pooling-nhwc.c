@@ -782,7 +782,7 @@ static enum xnn_status reshape_average_pooling2d(
       *workspace_size = num_threads * buffer_size;
       *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
       average_pooling_op->compute[0].type = xnn_parallelization_type_1d_with_thread;
-      average_pooling_op->context.global_average_pooling_nwc.buffer_size = buffer_size;
+      average_pooling_op->context.global_average_pooling_nwc.multipass_batch_stride = buffer_size;
       average_pooling_op->compute[0].task_1d_with_thread =
         (pthreadpool_task_1d_with_thread_t) xnn_compute_global_average_pooling_nwc_multipass_with_thread;
       average_pooling_op->context.global_average_pooling_nwc.multipass_ukernel = gavgpool->multipass;
@@ -1125,11 +1125,11 @@ static enum xnn_status setup_average_pooling2d(
     // Global average pooling
     average_pooling_op->context.global_average_pooling_nwc.input = input;
     average_pooling_op->context.global_average_pooling_nwc.output = output;
-    if (average_pooling_op->context.global_average_pooling_nwc.buffer_size != 0 && workspace == NULL) {
+    if (average_pooling_op->context.global_average_pooling_nwc.multipass_batch_stride != 0 && workspace == NULL) {
       xnn_log_error(
         "failed to setup %s operator: workspace of size %zu required but workspace is NULL",
         xnn_operator_type_to_string(average_pooling_op->type),
-        average_pooling_op->context.global_average_pooling_nwc.buffer_size);
+        average_pooling_op->context.global_average_pooling_nwc.multipass_batch_stride);
     }
     average_pooling_op->context.global_average_pooling_nwc.multipass_buffer = workspace;
   } else {
