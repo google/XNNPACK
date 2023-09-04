@@ -1,4 +1,3 @@
-
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -124,36 +123,47 @@ class F32IGemmSplatGenerator : public internal::GemmIGemmCommons {
   void InnerLoopPartialUnroll(LocalsArray& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Local& w, Local& kc,
                               size_t max_mr, size_t k_per_iteration, size_t k_const) {
     Local k = MakeLocal(kc);
-    InnerLoopPartialUnrollNoRemainder(as, vacc0123, vacc4567, w, k, max_mr, k_per_iteration);
-    InnerLoopFullUnrollNoRemainder(as, vacc0123, vacc4567, w, k, max_mr,
-                                   IterationsInMainLoop(k_const) % k_per_iteration);
+    if (k_const >= 4) {
+      InnerLoopPartialUnrollNoRemainder(as, vacc0123, vacc4567, w, k, max_mr, k_per_iteration);
+      InnerLoopFullUnrollNoRemainder(as, vacc0123, vacc4567, w, k, max_mr,
+                                     IterationsInMainLoop(k_const) % k_per_iteration);
+    }
 
     Remainder(as, vacc0123, vacc4567, k, w, k_const, max_mr);
   }
 
   void Remainder(LocalsArray& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Local& k, Local& w, size_t k_const,
                  size_t max_mr) {
-    if (k_const % 4 != 0) {
+    const size_t remainder_k = k_const % 4;
+    if (remainder_k & 2) {
+      k = I32Const(2 * sizeof(float));
       DoWhile(
         [&] {
-          auto vas = MakeLocalsArray(max_mr, v128);
-          for (size_t i = 0; i < max_mr; i++) {
-            vas[i] = V128Load32Splat(as[i]);
-            as[i] = I32Add(as[i], I32Const(sizeof(float)));
-          }
-
-          auto vb0123 = MakeLocal(v128);
-          auto vb4567 = MakeLocal(v128);
-          LoadVbs(vb0123, vb4567, w, /*offset=*/0);
-          w = I32Add(w, I32Const(8 * sizeof(float)));
-
-          MulAdd(vacc0123, vas, vb0123, max_mr);
-          MulAdd(vacc4567, vas, vb4567, max_mr);
-
+          RemainderIteration(as, vacc0123, vacc4567, k, w, k_const, max_mr);
           k = I32Sub(k, I32Const(sizeof(float)));
         },
         [&] { I32NeZ(k); });
     }
+    if (remainder_k & 1) {
+      RemainderIteration(as, vacc0123, vacc4567, k, w, k_const, max_mr);
+    }
+  }
+
+  void RemainderIteration(LocalsArray& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Local& k, Local& w,
+                          size_t k_const, size_t max_mr) {
+    auto vas = MakeLocalsArray(max_mr, v128);
+    for (size_t i = 0; i < max_mr; i++) {
+      vas[i] = V128Load32Splat(as[i]);
+      as[i] = I32Add(as[i], I32Const(sizeof(float)));
+    }
+
+    auto vb0123 = MakeLocal(v128);
+    auto vb4567 = MakeLocal(v128);
+    LoadVbs(vb0123, vb4567, w, /*offset=*/0);
+    w = I32Add(w, I32Const(8 * sizeof(float)));
+
+    MulAdd(vacc0123, vas, vb0123, max_mr);
+    MulAdd(vacc4567, vas, vb4567, max_mr);
   }
 
   void InnerLoopFullUnrollNoRemainder(LocalsArray& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Local& w, Local& k,
