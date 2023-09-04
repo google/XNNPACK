@@ -1,0 +1,53 @@
+# Copyright 2023 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Scalar
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x1__scalar
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x2__scalar
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4__scalar
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8__scalar
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x2__scalar
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x4__scalar
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8__scalar
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4__scalar
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+
+# WAsm
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x2__wasm
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4__wasm
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8__wasm
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x2__wasm
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x4__wasm
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8__wasm
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4__wasm
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2

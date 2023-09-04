@@ -14,7 +14,7 @@
 #include <xnnpack/unaligned.h>
 
 
-void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x2__scalar(
+void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x1__scalar(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -38,11 +38,9 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x2__scalar(
   const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
   do {
     const int32_t vksum0 = unaligned_indexed_load_s32(w, 0);
-    const int32_t vksum1 = unaligned_indexed_load_s32(w, 1);
     const int32_t vinput_zero_point0 = quantization_params[0].zero_point;
     int32_t vacc0x0 = vksum0 * vinput_zero_point0;
-    int32_t vacc0x1 = vksum1 * vinput_zero_point0;
-    w = (const int32_t*) w + 2;
+    w = (const int32_t*) w + 1;
 
     size_t k = kc;
     for (; k >= 2 * sizeof(uint8_t); k -= 2 * sizeof(uint8_t)) {
@@ -51,71 +49,51 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x2__scalar(
       a0 += 2;
 
       const uint32_t vbi0 = (uint32_t) ((const uint8_t*) w)[0];
-      const uint32_t vbi1 = (uint32_t) ((const uint8_t*) w)[1];
-      w = (const uint8_t*) w + 2;
+      w = (const uint8_t*) w + 1;
       const int32_t vb0c0 = (int32_t) (vbi0 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb1c0 = (int32_t) (vbi1 & 0xF) + vminus_kernel_zero_point;
       const int32_t vb0c1 = (int32_t) (vbi0 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb1c1 = (int32_t) (vbi1 >> 4) + vminus_kernel_zero_point;
 
       vacc0x0 += va0c0 * vb0c0;
-      vacc0x1 += va0c0 * vb1c0;
       vacc0x0 += va0c1 * vb0c1;
-      vacc0x1 += va0c1 * vb1c1;
     }
     if XNN_UNLIKELY(k != 0) {
       const int32_t va0 = (int32_t) *a0++;
 
       const uint32_t vbi0 = (uint32_t) ((const uint8_t*) w)[0];
-      const uint32_t vbi1 = (uint32_t) ((const uint8_t*) w)[1];
-      w = (const uint8_t*) w + 2;
+      w = (const uint8_t*) w + 1;
       const int32_t vb0 = (int32_t) vbi0 + vminus_kernel_zero_point;
-      const int32_t vb1 = (int32_t) vbi1 + vminus_kernel_zero_point;
 
       vacc0x0 += va0 * vb0;
-      vacc0x1 += va0 * vb1;
     }
 
     float vout0x0 = (float) vacc0x0;
-    float vout0x1 = (float) vacc0x1;
 
     const float vinput_scale0 = quantization_params[0].inv_scale;
     vout0x0 *= vinput_scale0;
-    vout0x1 *= vinput_scale0;
 
     const float vfilter_output_scale0 = unaligned_indexed_load_f32(w, 0);
     vout0x0 *= vfilter_output_scale0;
-    const float vfilter_output_scale1 = unaligned_indexed_load_f32(w, 1);
-    vout0x1 *= vfilter_output_scale1;
 
-    const float vbias0 = unaligned_indexed_load_f32(w, 2);
+    const float vbias0 = unaligned_indexed_load_f32(w, 1);
     vout0x0 += vbias0;
-    const float vbias1 = unaligned_indexed_load_f32(w, 3);
-    vout0x1 += vbias1;
 
-    w = (const float*) w + 4;
+    w = (const float*) w + 2;
 
     const float voutput_min = params->scalar.min;
     vout0x0 = math_max_f32(vout0x0, voutput_min);
-    vout0x1 = math_max_f32(vout0x1, voutput_min);
 
     const float voutput_max = params->scalar.max;
     vout0x0 = math_min_f32(vout0x0, voutput_max);
-    vout0x1 = math_min_f32(vout0x1, voutput_max);
 
-    if XNN_LIKELY(nc >= 2) {
+    if XNN_LIKELY(nc >= 1) {
       c0[0] = vout0x0;
-      c0[1] = vout0x1;
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
 
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
 
-      nc -= 2;
+      nc -= 1;
     } else {
-      if (nc & 1) {
-        c0[0] = vout0x0;
-      }
 
       nc = 0;
     }

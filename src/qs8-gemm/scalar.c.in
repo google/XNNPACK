@@ -97,25 +97,26 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
 
     size_t k = kc;
     $if DATATYPE == "QC4":
-      for (; k >= 2 * sizeof(${XINT8_T}); k -= 2 * sizeof(${XINT8_T})) {
+      for (; k >= 2 * sizeof(uint8_t); k -= 2 * sizeof(uint8_t)) {
         $for M in range(MR):
-          const int32_t va${M}0 = (int32_t) *a${M}++;
-          const int32_t va${M}1 = (int32_t) *a${M}++;
+          const int32_t va${M}c0 = (int32_t) a${M}[0];
+          const int32_t va${M}c1 = (int32_t) a${M}[1];
+          a${M} += 2;
 
         $for N in range(NR):
           const uint32_t vbi${N} = (uint32_t) ((const uint8_t*) w)[${N}];
+        w = (const uint8_t*) w + ${NR};
         $for N in range(NR):
-          const int32_t vb${N}0 = (int32_t) (vbi${N} & 0xF) + vminus_kernel_zero_point;
+          const int32_t vb${N}c0 = (int32_t) (vbi${N} & 0xF) + vminus_kernel_zero_point;
         $for N in range(NR):
-          const int32_t vb${N}1 = (int32_t) (vbi${N} >> 4) + vminus_kernel_zero_point;
-        w = (const int8_t*) w + ${NR};
+          const int32_t vb${N}c1 = (int32_t) (vbi${N} >> 4) + vminus_kernel_zero_point;
 
         $for M in range(MR):
           $for N in range(NR):
-            vacc${M}x${N} += va${M}0 * vb${N}0;
+            vacc${M}x${N} += va${M}c0 * vb${N}c0;
         $for M in range(MR):
           $for N in range(NR):
-            vacc${M}x${N} += va${M}1 * vb${N}1;
+            vacc${M}x${N} += va${M}c1 * vb${N}c1;
       }
       if XNN_UNLIKELY(k != 0) {
         $for M in range(MR):
@@ -123,9 +124,9 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
 
         $for N in range(NR):
           const uint32_t vbi${N} = (uint32_t) ((const uint8_t*) w)[${N}];
+        w = (const uint8_t*) w + ${NR};
         $for N in range(NR):
           const int32_t vb${N} = (int32_t) vbi${N} + vminus_kernel_zero_point;
-        w = (const int8_t*) w + ${NR};
 
         $for M in range(MR):
           $for N in range(NR):
