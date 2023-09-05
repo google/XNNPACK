@@ -108,6 +108,13 @@ void GEMMBenchmark(benchmark::State& state,
     uint64_t(state.iterations()) * 2 * mc * nc * kc, benchmark::Counter::kIsRate);
 }
 
+static void qd8_f32_qc4w_gemm_1x1__scalar(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x1__scalar,
+    xnn_init_f32_qc4w_minmax_scalar_params,
+    /*mr=*/1, /*nr=*/1, /*kr=*/1, /*sr=*/1);
+}
+
 static void qd8_f32_qc4w_gemm_1x2__scalar(benchmark::State& state, const char* net) {
   GEMMBenchmark(state,
     xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x2__scalar,
@@ -208,6 +215,7 @@ static void qd8_f32_qc4w_gemm_4x4__scalar(benchmark::State& state, const char* n
   }
 #endif // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+BENCHMARK_GEMM(qd8_f32_qc4w_gemm_1x1__scalar)
 BENCHMARK_GEMM(qd8_f32_qc4w_gemm_1x2__scalar)
 BENCHMARK_GEMM(qd8_f32_qc4w_gemm_1x4__scalar)
 BENCHMARK_GEMM(qd8_f32_qc4w_gemm_1x8__scalar)

@@ -665,14 +665,6 @@ void GemmMicrokernelTester::Test(
 
     std::generate(b.begin(), b.end(), std::ref(w8rng));
 
-    // For odd k ensure last nibble is padded with 0
-    if (k() & 1) {
-      for (size_t n_index = 0; n_index < n(); n_index++) {
-        const size_t nb_index = n_index * k_stride + k_stride - 1;
-        b[nb_index] &= UINT8_C(0xF);
-      }
-    }
-
     std::generate(bias.begin(), bias.end(), std::ref(f32rng));
     std::generate(kernel_scale.begin(), kernel_scale.end(), std::ref(scalerng));
     std::fill(c.begin(), c.end(), nanf(""));
@@ -711,9 +703,7 @@ void GemmMicrokernelTester::Test(
           const size_t nb_index = n_index * k_stride + k_index / 2;
           const int32_t bv = int32_t((k_index % 2 == 0) ? (b[nb_index] & UINT8_C(0xF)) : (b[nb_index] >> 4)) - b_zero_point();
           ksum += bv;
-          c_ref[m_index * n() + n_index] +=
-              int32_t(a[m_index * a_stride() + k_index]) *
-              int32_t(bv);
+          c_ref[m_index * n() + n_index] += int32_t(a[m_index * a_stride() + k_index]) * int32_t(bv);
         }
         c_ref[m_index * n() + n_index] -= (quantization_params[m_index].zero_point * ksum);
         c_ref[m_index * n() + n_index] *= quantization_params[m_index].inv_scale * kernel_scale[n_index];

@@ -36,6 +36,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x1__scalar(
   float* c0 = c;
 
   const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
+  kc = round_up_po2(kc, 2);
   do {
     const int32_t vksum0 = unaligned_indexed_load_s32(w, 0);
     const int32_t vinput_zero_point0 = quantization_params[0].zero_point;
@@ -55,15 +56,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x1__scalar(
 
       vacc0x0 += va0c0 * vb0c0;
       vacc0x0 += va0c1 * vb0c1;
-    }
-    if XNN_UNLIKELY(k != 0) {
-      const int32_t va0 = (int32_t) *a0++;
-
-      const uint32_t vbi0 = (uint32_t) ((const uint8_t*) w)[0];
-      w = (const uint8_t*) w + 1;
-      const int32_t vb0 = (int32_t) vbi0 + vminus_kernel_zero_point;
-
-      vacc0x0 += va0 * vb0;
     }
 
     float vout0x0 = (float) vacc0x0;

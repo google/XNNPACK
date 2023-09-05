@@ -41,6 +41,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8__scalar(
   }
 
   const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
+  kc = round_up_po2(kc, 2);
   do {
     const int32_t vksum0 = ((const int32_t*) w)[0];
     const int32_t vksum1 = ((const int32_t*) w)[1];
@@ -137,45 +138,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8__scalar(
       vacc1x5 += va1c1 * vb5c1;
       vacc1x6 += va1c1 * vb6c1;
       vacc1x7 += va1c1 * vb7c1;
-    }
-    if XNN_UNLIKELY(k != 0) {
-      const int32_t va0 = (int32_t) *a0++;
-      const int32_t va1 = (int32_t) *a1++;
-
-      const uint32_t vbi0 = (uint32_t) ((const uint8_t*) w)[0];
-      const uint32_t vbi1 = (uint32_t) ((const uint8_t*) w)[1];
-      const uint32_t vbi2 = (uint32_t) ((const uint8_t*) w)[2];
-      const uint32_t vbi3 = (uint32_t) ((const uint8_t*) w)[3];
-      const uint32_t vbi4 = (uint32_t) ((const uint8_t*) w)[4];
-      const uint32_t vbi5 = (uint32_t) ((const uint8_t*) w)[5];
-      const uint32_t vbi6 = (uint32_t) ((const uint8_t*) w)[6];
-      const uint32_t vbi7 = (uint32_t) ((const uint8_t*) w)[7];
-      w = (const uint8_t*) w + 8;
-      const int32_t vb0 = (int32_t) vbi0 + vminus_kernel_zero_point;
-      const int32_t vb1 = (int32_t) vbi1 + vminus_kernel_zero_point;
-      const int32_t vb2 = (int32_t) vbi2 + vminus_kernel_zero_point;
-      const int32_t vb3 = (int32_t) vbi3 + vminus_kernel_zero_point;
-      const int32_t vb4 = (int32_t) vbi4 + vminus_kernel_zero_point;
-      const int32_t vb5 = (int32_t) vbi5 + vminus_kernel_zero_point;
-      const int32_t vb6 = (int32_t) vbi6 + vminus_kernel_zero_point;
-      const int32_t vb7 = (int32_t) vbi7 + vminus_kernel_zero_point;
-
-      vacc0x0 += va0 * vb0;
-      vacc0x1 += va0 * vb1;
-      vacc0x2 += va0 * vb2;
-      vacc0x3 += va0 * vb3;
-      vacc0x4 += va0 * vb4;
-      vacc0x5 += va0 * vb5;
-      vacc0x6 += va0 * vb6;
-      vacc0x7 += va0 * vb7;
-      vacc1x0 += va1 * vb0;
-      vacc1x1 += va1 * vb1;
-      vacc1x2 += va1 * vb2;
-      vacc1x3 += va1 * vb3;
-      vacc1x4 += va1 * vb4;
-      vacc1x5 += va1 * vb5;
-      vacc1x6 += va1 * vb6;
-      vacc1x7 += va1 * vb7;
     }
 
     float vout0x0 = (float) vacc0x0;

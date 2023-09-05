@@ -337,6 +337,7 @@ void xnn_pack_qs8_qc4w_gemm_goi_w(
   const size_t skr = sr * kr;
   const uint32_t izp = (uint32_t) params->input_zero_point;
   const uint32_t kzp = (uint32_t) params->kernel_zero_point;
+  assert(kzp <= 15);
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
@@ -361,12 +362,12 @@ void xnn_pack_qs8_qc4w_gemm_goi_w(
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
             const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
             if ((kc_idx + 1) == kb && (kc & 1)) {
-              const uint8_t kv = k[(nr_block_start + nr_block_offset) * kb + kc_idx] & UINT8_C(0xF);
-              ksum += ((uint32_t) kv) - kzp;
+              const uint8_t kv = (k[(nr_block_start + nr_block_offset) * kb + kc_idx] & UINT8_C(0xF)) | (kzp << 4);
+              ksum += ((uint32_t) kv & UINT8_C(0xF)) - kzp;
               ((uint8_t*) packed_weights)[kr_block_offset] = kv;
             } else if (kc_idx < kb) {
               const uint8_t kv = k[(nr_block_start + nr_block_offset) * kb + kc_idx];
-              ksum += ((uint32_t) kv & UINT8_C(0xF)) + ((uint32_t) (kv >> 4u) & UINT8_C(0xF)) - kzp * 2;
+              ksum += ((uint32_t) kv & UINT8_C(0xF)) + ((uint32_t) (kv >> 4)) - kzp * 2;
               ((uint8_t*) packed_weights)[kr_block_offset] = kv;
             }
           }

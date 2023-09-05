@@ -41,6 +41,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x4__wasm(
   }
 
   const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
+  kc = round_up_po2(kc, 2);
   do {
     const int32_t vksum0 = ((const int32_t*) w)[0];
     const int32_t vksum1 = ((const int32_t*) w)[1];
@@ -97,29 +98,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x4__wasm(
       vacc1x1 += va1c1 * vb1c1;
       vacc1x2 += va1c1 * vb2c1;
       vacc1x3 += va1c1 * vb3c1;
-    }
-    if XNN_UNLIKELY(k != 0) {
-      const int32_t va0 = (int32_t) *a0++;
-      const int32_t va1 = (int32_t) *a1++;
-
-      const uint32_t vbi0 = (uint32_t) ((const uint8_t*) w)[0];
-      const uint32_t vbi1 = (uint32_t) ((const uint8_t*) w)[1];
-      const uint32_t vbi2 = (uint32_t) ((const uint8_t*) w)[2];
-      const uint32_t vbi3 = (uint32_t) ((const uint8_t*) w)[3];
-      w = (const uint8_t*) w + 4;
-      const int32_t vb0 = (int32_t) vbi0 + vminus_kernel_zero_point;
-      const int32_t vb1 = (int32_t) vbi1 + vminus_kernel_zero_point;
-      const int32_t vb2 = (int32_t) vbi2 + vminus_kernel_zero_point;
-      const int32_t vb3 = (int32_t) vbi3 + vminus_kernel_zero_point;
-
-      vacc0x0 += va0 * vb0;
-      vacc0x1 += va0 * vb1;
-      vacc0x2 += va0 * vb2;
-      vacc0x3 += va0 * vb3;
-      vacc1x0 += va1 * vb0;
-      vacc1x1 += va1 * vb1;
-      vacc1x2 += va1 * vb2;
-      vacc1x3 += va1 * vb3;
     }
 
     float vout0x0 = (float) vacc0x0;

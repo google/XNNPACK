@@ -72,6 +72,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
     const int32_t vb_zero_point = params->${PARAMS_STRUCT}.kernel_zero_point;
   $elif DATATYPE == "QC4":
     const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
+    kc = round_up_po2(kc, 2);
   do {
     $if DATATYPE in ["QD8", "QC4"]:
       $if NR % 4 != 0:
@@ -117,20 +118,6 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
         $for M in range(MR):
           $for N in range(NR):
             vacc${M}x${N} += va${M}c1 * vb${N}c1;
-      }
-      if XNN_UNLIKELY(k != 0) {
-        $for M in range(MR):
-          const int32_t va${M} = (int32_t) *a${M}++;
-
-        $for N in range(NR):
-          const uint32_t vbi${N} = (uint32_t) ((const uint8_t*) w)[${N}];
-        w = (const uint8_t*) w + ${NR};
-        $for N in range(NR):
-          const int32_t vb${N} = (int32_t) vbi${N} + vminus_kernel_zero_point;
-
-        $for M in range(MR):
-          $for N in range(NR):
-            vacc${M}x${N} += va${M} * vb${N};
       }
     $else:
       do {
