@@ -203,7 +203,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c2__${IS
             const __m128i vxb0 = _mm_cvtepi8_epi16(vb0);
           $else:
             const __m128i vxb0 = _mm_srai_epi16(_mm_unpacklo_epi8(vb0, vb0), 8);
-        w = (const void*) ((const ${XINT8_T}*) w + 8);
+        w = (const ${XINT8_T}*) w + 8;
 
       $for M in range(MR):
         $if XOP:
@@ -229,7 +229,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c2__${IS
               const __m128i vxb1 = _mm_cvtepi8_epi16(vb1);
             $else:
               const __m128i vxb1 = _mm_srai_epi16(_mm_unpacklo_epi8(vb1, vb1), 8);
-          w = (const void*) ((const ${XINT8_T}*) w + 8);
+          w = (const ${XINT8_T}*) w + 8;
 
         $for M in range(MR):
           $if XOP:
@@ -255,7 +255,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c2__${IS
                 const __m128i vxb2 = _mm_cvtepi8_epi16(vb2);
               $else:
                 const __m128i vxb2 = _mm_srai_epi16(_mm_unpacklo_epi8(vb2, vb2), 8);
-            w = (const void*) ((const ${XINT8_T}*) w + 8);
+            w = (const ${XINT8_T}*) w + 8;
 
           $for M in range(MR):
             $if XOP:
@@ -273,7 +273,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c2__${IS
 
     $if DATATYPE == "QC8":
       const __m128 vscale0123 = _mm_loadu_ps((const float*) w);
-      w = (const void*) ((const float*) w + 4);
+      w = (const float*) w + 4;
       $for M in range(MR):
         vscaled${M}x0123 = _mm_mul_ps(vscaled${M}x0123, vscale0123);
     $else:

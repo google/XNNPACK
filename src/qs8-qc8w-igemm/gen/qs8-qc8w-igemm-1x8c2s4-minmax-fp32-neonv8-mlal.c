@@ -151,9 +151,9 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c2s4__neonv8_mlal(
     float32x4_t vfpacc0x0123 = vcvtq_f32_s32(vacc0x0123);
     float32x4_t vfpacc0x4567 = vcvtq_f32_s32(vacc0x4567);
 
-    const float32x4_t vscale0123 = vld1q_f32((const float*) w); w = (const void*) ((const float*) w + 4);
+    const float32x4_t vscale0123 = vld1q_f32((const float*) w); w = (const float*) w + 4;
     vfpacc0x0123 = vmulq_f32(vfpacc0x0123, vscale0123);
-    const float32x4_t vscale4567 = vld1q_f32((const float*) w); w = (const void*) ((const float*) w + 4);
+    const float32x4_t vscale4567 = vld1q_f32((const float*) w); w = (const float*) w + 4;
     vfpacc0x4567 = vmulq_f32(vfpacc0x4567, vscale4567);
 
     vacc0x0123 = vcvtnq_s32_f32(vfpacc0x0123);

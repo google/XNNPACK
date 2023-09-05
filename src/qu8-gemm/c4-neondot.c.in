@@ -68,7 +68,7 @@ void xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neondo
     // Initialize accumulators with bias. ${NR} bias values are loaded from the
     // weight matrix, at the start of the group of ${NR} columns.
     $for N in range(0, NR, 4):
-      uint32x4_t vpacc0x${ABC[N:N+4]} = vld1q_u32(w); w = (const void*) ((const uint32_t*) w + 4);
+      uint32x4_t vpacc0x${ABC[N:N+4]} = vld1q_u32(w); w = (const uint32_t*) w + 4;
     $for M in range(1, MR):
       $for N in range(0, NR, 4):
         uint32x4_t vpacc${M}x${ABC[N:N+4]} = vpacc0x${ABC[N:N+4]};
@@ -86,7 +86,7 @@ void xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neondo
       // Load a 8x${NR} block of weights.
       $for K in range(0, 8, 4):
         $for N in range(0, NR, 4):
-          const uint8x16_t vb${ABC[K:K+4]}x${ABC[N:N+4]} = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
+          const uint8x16_t vb${ABC[K:K+4]}x${ABC[N:N+4]} = vld1q_u8(w); w = (const uint8_t*) w + 16;
 
       // Multiply-accumulate: ${MR}x8 * 8x${NR} --> ${MR}x${NR}.
       $for M in range(MR):
@@ -105,7 +105,7 @@ void xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neondo
 
       // Load a 4x${NR} block of weights.
       $for N in range(0, NR, 4):
-        const uint8x16_t vb0123x${ABC[N:N+4]} = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
+        const uint8x16_t vb0123x${ABC[N:N+4]} = vld1q_u8(w); w = (const uint8_t*) w + 16;
 
       // Multiply-accumulate: ${MR}x4 * 4x${NR} --> ${MR}x${NR}.
       $for M in range(MR):

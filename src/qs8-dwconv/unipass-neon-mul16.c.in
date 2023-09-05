@@ -99,10 +99,10 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
         $for C in range(0, CHANNEL_TILE, 8):
           $if DATATYPE == "QU8":
             const int16x8_t vi${K}x${ABC[C:C+8]} = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(i${K}))); i${K} += 8;
-            const int16x8_t vk${K}x${ABC[C:C+8]} = vreinterpretq_s16_u16(vsubl_u8(vld1_u8(w), vkernel_zero_point)); w = (const void*) ((const ${XINT8_T}*) w + 8);
+            const int16x8_t vk${K}x${ABC[C:C+8]} = vreinterpretq_s16_u16(vsubl_u8(vld1_u8(w), vkernel_zero_point)); w = (const ${XINT8_T}*) w + 8;
           $else:
             const int16x8_t vi${K}x${ABC[C:C+8]} = vmovl_s8(vld1_s8(i${K})); i${K} += 8;
-            const int16x8_t vk${K}x${ABC[C:C+8]} = vmovl_s8(vld1_s8(w)); w = (const void*) ((const ${XINT8_T}*) w + 8);
+            const int16x8_t vk${K}x${ABC[C:C+8]} = vmovl_s8(vld1_s8(w)); w = (const ${XINT8_T}*) w + 8;
 
         $for C in range(0, CHANNEL_TILE, 8):
           vacc${ABC[C:C+4]} = vmlal_s16(vacc${ABC[C:C+4]}, vget_low_s16(vi${K}x${ABC[C:C+8]}), vget_low_s16(vk${K}x${ABC[C:C+8]}));
@@ -123,7 +123,7 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
 
         $if DATATYPE == "QC8":
           $for C in range(0, CHANNEL_TILE, 4):
-            const float32x4_t vscale${ABC[C:C+4]} = vld1q_f32((const float*) w); w = (const void*) ((const float*) w + 4);
+            const float32x4_t vscale${ABC[C:C+4]} = vld1q_f32((const float*) w); w = (const float*) w + 4;
 
           $for C in range(0, CHANNEL_TILE, 4):
             vfpacc${ABC[C:C+4]} = vmulq_f32(vfpacc${ABC[C:C+4]}, vscale${ABC[C:C+4]});

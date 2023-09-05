@@ -165,7 +165,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4c2__xop_ld64(
         a3 = (const int8_t*) ((uintptr_t) a3 + k);
 
         const __m128i vb0 = _mm_loadl_epi64((const __m128i*) w);
-        w = (const void*) ((const int8_t*) w + 8);
+        w = (const int8_t*) w + 8;
         const __m128i vxb0 = _mm_cvtepi8_epi16(vb0);
 
         vacc0x0123 = _mm_maddd_epi16(
@@ -179,7 +179,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4c2__xop_ld64(
 
         if (k > 2 * sizeof(int8_t)) {
           const __m128i vb1 = _mm_loadl_epi64((const __m128i*) w);
-          w = (const void*) ((const int8_t*) w + 8);
+          w = (const int8_t*) w + 8;
           const __m128i vxb1 = _mm_cvtepi8_epi16(vb1);
 
           vacc0x0123 = _mm_maddd_epi16(
@@ -193,7 +193,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4c2__xop_ld64(
 
           if (k > 4 * sizeof(int8_t)) {
             const __m128i vb2 = _mm_loadl_epi64((const __m128i*) w);
-            w = (const void*) ((const int8_t*) w + 8);
+            w = (const int8_t*) w + 8;
             const __m128i vxb2 = _mm_cvtepi8_epi16(vb2);
 
             vacc0x0123 = _mm_maddd_epi16(
@@ -216,7 +216,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4c2__xop_ld64(
     __m128 vscaled3x0123 = _mm_cvtepi32_ps(vacc3x0123);
 
     const __m128 vscale0123 = _mm_loadu_ps((const float*) w);
-    w = (const void*) ((const float*) w + 4);
+    w = (const float*) w + 4;
     vscaled0x0123 = _mm_mul_ps(vscaled0x0123, vscale0123);
     vscaled1x0123 = _mm_mul_ps(vscaled1x0123, vscale0123);
     vscaled2x0123 = _mm_mul_ps(vscaled2x0123, vscale0123);

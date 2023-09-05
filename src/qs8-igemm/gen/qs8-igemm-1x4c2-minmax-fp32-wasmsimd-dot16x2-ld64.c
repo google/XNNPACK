@@ -85,21 +85,21 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x4c2__wasmsimd_dot16x2_ld64(
         a0 = (const int8_t*) ((uintptr_t) a0 + k);
 
         const v128_t vxb0 = wasm_i16x8_load8x8(w);
-        w = (const void*) ((const int8_t*) w + 8);
+        w = (const int8_t*) w + 8;
 
         vacc0x0123 = wasm_i32x4_add(vacc0x0123,
           wasm_i32x4_dot_i16x8(wasm_v32x4_shuffle(vxa0, vxa0, 0, 0, 0, 0), vxb0));
 
         if (k > 2 * sizeof(int8_t)) {
           const v128_t vxb1 = wasm_i16x8_load8x8(w);
-          w = (const void*) ((const int8_t*) w + 8);
+          w = (const int8_t*) w + 8;
 
           vacc0x0123 = wasm_i32x4_add(vacc0x0123,
             wasm_i32x4_dot_i16x8(wasm_v32x4_shuffle(vxa0, vxa0, 1, 1, 1, 1), vxb1));
 
           if (k > 4 * sizeof(int8_t)) {
             const v128_t vxb2 = wasm_i16x8_load8x8(w);
-            w = (const void*) ((const int8_t*) w + 8);
+            w = (const int8_t*) w + 8;
 
             vacc0x0123 = wasm_i32x4_add(vacc0x0123,
               wasm_i32x4_dot_i16x8(wasm_v32x4_shuffle(vxa0, vxa0, 2, 2, 2, 2), vxb2));

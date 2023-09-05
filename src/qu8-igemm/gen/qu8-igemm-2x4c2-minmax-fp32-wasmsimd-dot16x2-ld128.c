@@ -109,7 +109,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__wasmsimd_dot16x2_ld128(
         a1 = (const uint8_t*) ((uintptr_t) a1 + k);
 
         const v128_t vxb0 = wasm_i16x8_sub(wasm_u16x8_load8x8(w), vb_zero_point);
-        w = (const void*) ((const uint8_t*) w + 8);
+        w = (const uint8_t*) w + 8;
 
         vacc0x0123 = wasm_i32x4_add(vacc0x0123,
           wasm_i32x4_dot_i16x8(wasm_v32x4_shuffle(vxa0, vxa0, 0, 0, 0, 0), vxb0));
@@ -118,7 +118,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__wasmsimd_dot16x2_ld128(
 
         if (k > 2 * sizeof(uint8_t)) {
           const v128_t vxb1 = wasm_i16x8_sub(wasm_u16x8_load8x8(w), vb_zero_point);
-          w = (const void*) ((const uint8_t*) w + 8);
+          w = (const uint8_t*) w + 8;
 
           vacc0x0123 = wasm_i32x4_add(vacc0x0123,
             wasm_i32x4_dot_i16x8(wasm_v32x4_shuffle(vxa0, vxa0, 1, 1, 1, 1), vxb1));
@@ -127,7 +127,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__wasmsimd_dot16x2_ld128(
 
           if (k > 4 * sizeof(uint8_t)) {
             const v128_t vxb2 = wasm_i16x8_sub(wasm_u16x8_load8x8(w), vb_zero_point);
-            w = (const void*) ((const uint8_t*) w + 8);
+            w = (const uint8_t*) w + 8;
 
             vacc0x0123 = wasm_i32x4_add(vacc0x0123,
               wasm_i32x4_dot_i16x8(wasm_v32x4_shuffle(vxa0, vxa0, 2, 2, 2, 2), vxb2));

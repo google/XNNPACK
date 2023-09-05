@@ -68,7 +68,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x$
 
   do {
     $for N in range(0, NR, 2):
-      int32x4_t vacc0x${ABC[N:N+2]} = vreinterpretq_s32_u64(vmovl_u32(vld1_u32(w))); w = (const void*) ((uintptr_t) w + 2 * sizeof(int32_t));
+      int32x4_t vacc0x${ABC[N:N+2]} = vreinterpretq_s32_u64(vmovl_u32(vld1_u32(w))); w = (const int32_t*) w + 2;
     $for M in range(1, MR):
       $for N in range(0, NR, 2):
         int32x4_t vacc${M}x${ABC[N:N+2]} = vacc0x${ABC[N:N+2]};
@@ -101,7 +101,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x$
 
           $for K in range(2):
             $for N in range(0, NR, 2):
-              const int8x8_t vb${ABC[N:N+2]}c${K}x0 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
+              const int8x8_t vb${ABC[N:N+2]}c${K}x0 = vld1_s8(w); w = (const int8_t*) w + 8;
 
           $for K in range(2):
             $for M in range(MR):
@@ -118,7 +118,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x$
             $for N in range(0, NR, 2):
               $for M in range(MR):
                 int16x8_t vprod${M}x${ABC[N:N+2]}c${K} = vmull_s8(vb${ABC[N:N+2]}c${K}x0, va${M}c${K}x0);
-              const int8x8_t vb${ABC[N:N+2]}c${K}x1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
+              const int8x8_t vb${ABC[N:N+2]}c${K}x1 = vld1_s8(w); w = (const int8_t*) w + 8;
               $for M in range(MR):
                 vprod${M}x${ABC[N:N+2]}c${K} = vmlal_s8(vprod${M}x${ABC[N:N+2]}c${K}, vb${ABC[N:N+2]}c${K}x1, va${M}c${K}x1);
               $for M in range(MR):
@@ -139,7 +139,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x$
 
         $for K in range(2):
           $for N in range(0, NR, 2):
-            const int8x8_t vb${ABC[N:N+2]}c${K} = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
+            const int8x8_t vb${ABC[N:N+2]}c${K} = vld1_s8(w); w = (const int8_t*) w + 8;
 
         $for K in range(2):
           $for M in range(MR):
@@ -164,7 +164,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x$
           const int8x8_t va${M} = vld1_s8(a${M}); a${M} = (const int8_t*) ((uintptr_t) a${M} + k);
 
         $for N in range(0, NR, 2):
-          const int8x8_t vb${ABC[N:N+2]}c0 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
+          const int8x8_t vb${ABC[N:N+2]}c0 = vld1_s8(w); w = (const int8_t*) w + 8;
 
         $for M in range(MR):
           const int8x8_t va${M}c0 = vreinterpret_s8_s32(vdup_lane_s32(vreinterpret_s32_s8(va${M}), 0));
@@ -210,7 +210,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x$
 
       $if DATATYPE == "QC8":
         $for N in range(0, NR, 4):
-          const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32((const float*) w); w = (const void*) ((const float*) w + 4);
+          const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32((const float*) w); w = (const float*) w + 4;
           $for M in range(MR):
             vfpacc${M}x${ABC[N:N+4]} = vmulq_f32(vfpacc${M}x${ABC[N:N+4]}, vscale${ABC[N:N+4]});
       $else:

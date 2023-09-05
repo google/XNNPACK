@@ -52,10 +52,10 @@ void xnn_qu8_gemm_minmax_rndnu_ukernel_2x16c4__neondot(
   do {
     // Initialize accumulators with bias. 16 bias values are loaded from the
     // weight matrix, at the start of the group of 16 columns.
-    uint32x4_t vpacc0x0123 = vld1q_u32(w); w = (const void*) ((const uint32_t*) w + 4);
-    uint32x4_t vpacc0x4567 = vld1q_u32(w); w = (const void*) ((const uint32_t*) w + 4);
-    uint32x4_t vpacc0x89AB = vld1q_u32(w); w = (const void*) ((const uint32_t*) w + 4);
-    uint32x4_t vpacc0xCDEF = vld1q_u32(w); w = (const void*) ((const uint32_t*) w + 4);
+    uint32x4_t vpacc0x0123 = vld1q_u32(w); w = (const uint32_t*) w + 4;
+    uint32x4_t vpacc0x4567 = vld1q_u32(w); w = (const uint32_t*) w + 4;
+    uint32x4_t vpacc0x89AB = vld1q_u32(w); w = (const uint32_t*) w + 4;
+    uint32x4_t vpacc0xCDEF = vld1q_u32(w); w = (const uint32_t*) w + 4;
     uint32x4_t vpacc1x0123 = vpacc0x0123;
     uint32x4_t vpacc1x4567 = vpacc0x4567;
     uint32x4_t vpacc1x89AB = vpacc0x89AB;
@@ -72,14 +72,14 @@ void xnn_qu8_gemm_minmax_rndnu_ukernel_2x16c4__neondot(
       const uint8x8_t va1x01234567 = vld1_u8(a1); a1 += 8;
 
       // Load a 8x16 block of weights.
-      const uint8x16_t vb0123x0123 = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
-      const uint8x16_t vb0123x4567 = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
-      const uint8x16_t vb0123x89AB = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
-      const uint8x16_t vb0123xCDEF = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
-      const uint8x16_t vb4567x0123 = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
-      const uint8x16_t vb4567x4567 = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
-      const uint8x16_t vb4567x89AB = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
-      const uint8x16_t vb4567xCDEF = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
+      const uint8x16_t vb0123x0123 = vld1q_u8(w); w = (const uint8_t*) w + 16;
+      const uint8x16_t vb0123x4567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
+      const uint8x16_t vb0123x89AB = vld1q_u8(w); w = (const uint8_t*) w + 16;
+      const uint8x16_t vb0123xCDEF = vld1q_u8(w); w = (const uint8_t*) w + 16;
+      const uint8x16_t vb4567x0123 = vld1q_u8(w); w = (const uint8_t*) w + 16;
+      const uint8x16_t vb4567x4567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
+      const uint8x16_t vb4567x89AB = vld1q_u8(w); w = (const uint8_t*) w + 16;
+      const uint8x16_t vb4567xCDEF = vld1q_u8(w); w = (const uint8_t*) w + 16;
 
       // Multiply-accumulate: 2x8 * 8x16 --> 2x16.
       vnacc0 = vdot_u32(vnacc0, va_zero_point, va0x01234567);
@@ -110,10 +110,10 @@ void xnn_qu8_gemm_minmax_rndnu_ukernel_2x16c4__neondot(
       const uint8x8_t va1x01234567 = vreinterpret_u8_u32(vld1_lane_u32((const void*) a1, vmov_n_u32(0), 0)); a1 += 4;
 
       // Load a 4x16 block of weights.
-      const uint8x16_t vb0123x0123 = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
-      const uint8x16_t vb0123x4567 = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
-      const uint8x16_t vb0123x89AB = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
-      const uint8x16_t vb0123xCDEF = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
+      const uint8x16_t vb0123x0123 = vld1q_u8(w); w = (const uint8_t*) w + 16;
+      const uint8x16_t vb0123x4567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
+      const uint8x16_t vb0123x89AB = vld1q_u8(w); w = (const uint8_t*) w + 16;
+      const uint8x16_t vb0123xCDEF = vld1q_u8(w); w = (const uint8_t*) w + 16;
 
       // Multiply-accumulate: 2x4 * 4x16 --> 2x16.
       vnacc0 = vdot_u32(vnacc0, va_zero_point, va0x01234567);

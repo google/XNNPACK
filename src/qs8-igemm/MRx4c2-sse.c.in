@@ -185,7 +185,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_fp32_ukernel_${MR}x4c2__${ISA}_${VARIANT.
           a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} + k);
 
         const __m128i vb0 = _mm_loadl_epi64((const __m128i*) w);
-        w = (const void*) ((const ${XINT8_T}*) w + 8);
+        w = (const ${XINT8_T}*) w + 8;
         $if DATATYPE == "QU8":
           $if SSE == 4:
             const __m128i vxb0 = _mm_sub_epi16(_mm_cvtepu8_epi16(vb0), vb_zero_point);
@@ -207,7 +207,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_fp32_ukernel_${MR}x4c2__${ISA}_${VARIANT.
 
         if (k > 2 * sizeof(${XINT8_T})) {
           const __m128i vb1 = _mm_loadl_epi64((const __m128i*) w);
-          w = (const void*) ((const ${XINT8_T}*) w + 8);
+          w = (const ${XINT8_T}*) w + 8;
           $if DATATYPE == "QU8":
             $if SSE == 4:
               const __m128i vxb1 = _mm_sub_epi16(_mm_cvtepu8_epi16(vb1), vb_zero_point);
@@ -229,7 +229,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_fp32_ukernel_${MR}x4c2__${ISA}_${VARIANT.
 
           if (k > 4 * sizeof(${XINT8_T})) {
             const __m128i vb2 = _mm_loadl_epi64((const __m128i*) w);
-            w = (const void*) ((const ${XINT8_T}*) w + 8);
+            w = (const ${XINT8_T}*) w + 8;
             $if DATATYPE == "QU8":
               $if SSE == 4:
                 const __m128i vxb2 = _mm_sub_epi16(_mm_cvtepu8_epi16(vb2), vb_zero_point);
@@ -259,7 +259,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_fp32_ukernel_${MR}x4c2__${ISA}_${VARIANT.
 
     $if DATATYPE == "QC8":
       const __m128 vscale0123 = _mm_loadu_ps((const float*) w);
-      w = (const void*) ((const float*) w + 4);
+      w = (const float*) w + 4;
       $for M in range(MR):
         vscaled${M}x0123 = _mm_mul_ps(vscaled${M}x0123, vscale0123);
     $else:

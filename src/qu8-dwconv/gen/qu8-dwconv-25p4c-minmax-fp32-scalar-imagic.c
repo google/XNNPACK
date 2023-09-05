@@ -618,7 +618,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_25p4c__scalar_imagic(
       const uint8_t* k = (const uint8_t*) ((uintptr_t) w + 4 * sizeof(int32_t));
       do {
         int32_t vacc = *((const int32_t*) w);
-        w = (const void*) ((uintptr_t) w + sizeof(int32_t));
+        w = (const int32_t*) w + 1;
 
         const int32_t vi0 = (int32_t) (uint32_t) *i0++;
         const int32_t vk0 = (int32_t) (uint32_t) k[0] - vkernel_zero_point;

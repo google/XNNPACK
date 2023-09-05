@@ -117,7 +117,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x4c8__sse2_ld128(
     __m128 vscaled1x0123 = _mm_cvtepi32_ps(vacc1x0123);
 
     const __m128 vscale0123 = _mm_load_ps((const float*) w);
-    w = (const void*) ((const float*) w + 4);
+    w = (const float*) w + 4;
     vscaled0x0123 = _mm_mul_ps(vscaled0x0123, vscale0123);
     vscaled1x0123 = _mm_mul_ps(vscaled1x0123, vscale0123);
 

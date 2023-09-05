@@ -3846,7 +3846,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c8__xop_ld64(
     __m128 vscaled0x0123 = _mm_cvtepi32_ps(vacc0x0123);
 
     const __m128 vscale0123 = _mm_load_ps((const float*) w);
-    w = (const void*) ((const float*) w + 4);
+    w = (const float*) w + 4;
     vscaled0x0123 = _mm_mul_ps(vscaled0x0123, vscale0123);
 
     const __m128 voutput_max_less_zero_point = _mm_load_ps(params->fp32_sse4.output_max_less_zero_point);
@@ -3973,7 +3973,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x4c8__xop_ld64(
     __m128 vscaled1x0123 = _mm_cvtepi32_ps(vacc1x0123);
 
     const __m128 vscale0123 = _mm_load_ps((const float*) w);
-    w = (const void*) ((const float*) w + 4);
+    w = (const float*) w + 4;
     vscaled0x0123 = _mm_mul_ps(vscaled0x0123, vscale0123);
     vscaled1x0123 = _mm_mul_ps(vscaled1x0123, vscale0123);
 
@@ -4101,7 +4101,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4c8__xop_ld64(
     __m128 vscaled0x0123 = _mm_cvtepi32_ps(vacc0x0123);
 
     const __m128 vscale0123 = _mm_load_ps((const float*) w);
-    w = (const void*) ((const float*) w + 4);
+    w = (const float*) w + 4;
     vscaled0x0123 = _mm_mul_ps(vscaled0x0123, vscale0123);
 
     const __m128 voutput_max_less_zero_point = _mm_load_ps(params->fp32_sse4.output_max_less_zero_point);
@@ -4242,7 +4242,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x4c8__xop_ld64(
     __m128 vscaled1x0123 = _mm_cvtepi32_ps(vacc1x0123);
 
     const __m128 vscale0123 = _mm_load_ps((const float*) w);
-    w = (const void*) ((const float*) w + 4);
+    w = (const float*) w + 4;
     vscaled0x0123 = _mm_mul_ps(vscaled0x0123, vscale0123);
     vscaled1x0123 = _mm_mul_ps(vscaled1x0123, vscale0123);
 

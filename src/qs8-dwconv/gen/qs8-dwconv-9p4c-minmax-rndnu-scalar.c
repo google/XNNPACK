@@ -272,7 +272,7 @@ void xnn_qs8_dwconv_minmax_rndnu_ukernel_9p4c__scalar(
       const int8_t* k = (const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t));
       do {
         int32_t vacc = *((const int32_t*) w);
-        w = (const void*) ((uintptr_t) w + sizeof(int32_t));
+        w = (const int32_t*) w + 1;
 
         const int32_t vi0 = (int32_t) *i0++;
         const int32_t vk0 = (int32_t) k[0];

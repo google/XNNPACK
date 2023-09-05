@@ -137,7 +137,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_fp32_ukernel_${MR}x4c2s4__wasmsimd_dot16x
 
     $if DATATYPE == "QC8":
       const v128_t vscale0123 = wasm_v128_load(w);
-      w = (const void*) ((const float*) w + 4);
+      w = (const float*) w + 4;
       $for M in range(MR):
         vacc${M}x0123 = wasm_f32x4_mul(vacc${M}x0123, vscale0123);
     $else:

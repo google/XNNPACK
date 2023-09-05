@@ -156,7 +156,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x$
 
       $if DATATYPE == "QC8":
         $for N in range(0, NR, 4):
-          const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32((const float*) w); w = (const void*) ((const float*) w + 4);
+          const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32((const float*) w); w = (const float*) w + 4;
           $for M in range(MR):
             vfpacc${M}x${ABC[N:N+4]} = vmulq_f32(vfpacc${M}x${ABC[N:N+4]}, vscale${ABC[N:N+4]});
       $else:

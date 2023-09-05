@@ -178,7 +178,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c2s4__${
 
     $if DATATYPE == "QC8":
       const __m128 vscale0123 = _mm_loadu_ps((const float*) w);
-      w = (const void*) ((const float*) w + 4);
+      w = (const float*) w + 4;
       $for M in range(MR):
         vscaled${M}x0123 = _mm_mul_ps(vscaled${M}x0123, vscale0123);
     $else:
