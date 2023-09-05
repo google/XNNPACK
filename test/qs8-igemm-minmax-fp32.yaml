@@ -194,16 +194,10 @@
 - name: xnn_qs8_igemm_minmax_fp32_ukernel_2x8c8__neon_mlal
   init: xnn_init_qs8_conv_minmax_fp32_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_fp32_ukernel_2x8c8__neonv8_mlal
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_2x8c8__neoni8mm
   init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neon_mlal_lane
-  init: xnn_init_qs8_conv_minmax_fp32_neon_params
-  k-block: 8
-- name: xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane
-  init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
-  k-block: 8
-- name: xnn_qs8_igemm_minmax_fp32_ukernel_2x8c8__neoni8mm
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_2x8c8__neonv8_mlal
   init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
   k-block: 16
 - name: xnn_qs8_igemm_minmax_fp32_ukernel_2x16c8__neoni8mm
@@ -212,6 +206,12 @@
 - name: xnn_qs8_igemm_minmax_fp32_ukernel_4x8c8__neoni8mm
   init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
   k-block: 16
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neon_mlal_lane
+  init: xnn_init_qs8_conv_minmax_fp32_neon_params
+  k-block: 8
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane
+  init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
+  k-block: 8
 - name: xnn_qs8_igemm_minmax_fp32_ukernel_4x16c8__neoni8mm
   init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
   k-block: 16

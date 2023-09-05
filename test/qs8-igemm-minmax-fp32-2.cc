@@ -11724,474 +11724,6 @@
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_eq_8) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(16)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(16)
-      .k(8)
-      .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, strided_cn) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(16)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(16)
-      .k(8)
-      .cn_stride(19)
-      .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_eq_8_subtile) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t n = 1; n <= 16; n++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        GemmMicrokernelTester()
-          .mr(4)
-          .nr(16)
-          .kr(1)
-          .sr(1)
-          .m(m)
-          .n(n)
-          .k(8)
-          .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-      }
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_eq_8_subtile_m) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t m = 1; m <= 4; m++) {
-      GemmMicrokernelTester()
-        .mr(4)
-        .nr(16)
-        .kr(1)
-        .sr(1)
-        .m(m)
-        .n(16)
-        .k(8)
-        .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_eq_8_subtile_n) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t n = 1; n <= 16; n++) {
-      GemmMicrokernelTester()
-        .mr(4)
-        .nr(16)
-        .kr(1)
-        .sr(1)
-        .m(4)
-        .n(n)
-        .k(8)
-        .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_lt_8) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (size_t k = 1; k < 8; k++) {
-      GemmMicrokernelTester()
-        .mr(4)
-        .nr(16)
-        .kr(1)
-        .sr(1)
-        .m(4)
-        .n(16)
-        .k(k)
-        .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_lt_8_subtile) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (size_t k = 1; k < 8; k++) {
-      for (uint32_t n = 1; n <= 16; n++) {
-        for (uint32_t m = 1; m <= 4; m++) {
-          GemmMicrokernelTester()
-            .mr(4)
-            .nr(16)
-            .kr(1)
-            .sr(1)
-            .m(m)
-            .n(n)
-            .k(k)
-            .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-        }
-      }
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_gt_8) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (size_t k = 9; k < 16; k++) {
-      GemmMicrokernelTester()
-        .mr(4)
-        .nr(16)
-        .kr(1)
-        .sr(1)
-        .m(4)
-        .n(16)
-        .k(k)
-        .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_gt_8_subtile) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (size_t k = 9; k < 16; k++) {
-      for (uint32_t n = 1; n <= 16; n++) {
-        for (uint32_t m = 1; m <= 4; m++) {
-          GemmMicrokernelTester()
-            .mr(4)
-            .nr(16)
-            .kr(1)
-            .sr(1)
-            .m(m)
-            .n(n)
-            .k(k)
-            .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-        }
-      }
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_div_8) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (size_t k = 16; k <= 80; k += 8) {
-      GemmMicrokernelTester()
-        .mr(4)
-        .nr(16)
-        .kr(1)
-        .sr(1)
-        .m(4)
-        .n(16)
-        .k(k)
-        .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_div_8_subtile) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t n = 1; n <= 16; n++) {
-        for (uint32_t m = 1; m <= 4; m++) {
-          GemmMicrokernelTester()
-            .mr(4)
-            .nr(16)
-            .kr(1)
-            .sr(1)
-            .m(m)
-            .n(n)
-            .k(k)
-            .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-        }
-      }
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, n_gt_16) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t n = 17; n < 32; n++) {
-      for (size_t k = 1; k <= 40; k += 9) {
-        GemmMicrokernelTester()
-          .mr(4)
-          .nr(16)
-          .kr(1)
-          .sr(1)
-          .m(4)
-          .n(n)
-          .k(k)
-          .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-      }
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, n_gt_16_strided_cn) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t n = 17; n < 32; n++) {
-      for (size_t k = 1; k <= 40; k += 9) {
-        GemmMicrokernelTester()
-          .mr(4)
-          .nr(16)
-          .kr(1)
-          .sr(1)
-          .m(4)
-          .n(n)
-          .k(k)
-          .cn_stride(19)
-          .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-      }
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, n_gt_16_subtile) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t n = 17; n < 32; n++) {
-      for (size_t k = 1; k <= 40; k += 9) {
-        for (uint32_t m = 1; m <= 4; m++) {
-          GemmMicrokernelTester()
-            .mr(4)
-            .nr(16)
-            .kr(1)
-            .sr(1)
-            .m(m)
-            .n(n)
-            .k(k)
-            .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-        }
-      }
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, n_div_16) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t n = 32; n <= 48; n += 16) {
-      for (size_t k = 1; k <= 40; k += 9) {
-        GemmMicrokernelTester()
-          .mr(4)
-          .nr(16)
-          .kr(1)
-          .sr(1)
-          .m(4)
-          .n(n)
-          .k(k)
-          .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-      }
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, n_div_16_strided_cn) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t n = 32; n <= 48; n += 16) {
-      for (size_t k = 1; k <= 40; k += 9) {
-        GemmMicrokernelTester()
-          .mr(4)
-          .nr(16)
-          .kr(1)
-          .sr(1)
-          .m(4)
-          .n(n)
-          .k(k)
-          .cn_stride(19)
-          .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-      }
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, n_div_16_subtile) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t n = 32; n <= 48; n += 16) {
-      for (size_t k = 1; k <= 40; k += 9) {
-        for (uint32_t m = 1; m <= 4; m++) {
-          GemmMicrokernelTester()
-            .mr(4)
-            .nr(16)
-            .kr(1)
-            .sr(1)
-            .m(m)
-            .n(n)
-            .k(k)
-            .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-        }
-      }
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, small_kernel) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (size_t k = 1; k <= 40; k += 9) {
-      GemmMicrokernelTester()
-        .mr(4)
-        .nr(16)
-        .kr(1)
-        .sr(1)
-        .m(4)
-        .n(16)
-        .k(k)
-        .ks(3)
-        .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, small_kernel_subtile) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t n = 1; n <= 16; n++) {
-        for (uint32_t m = 1; m <= 4; m++) {
-          GemmMicrokernelTester()
-            .mr(4)
-            .nr(16)
-            .kr(1)
-            .sr(1)
-            .m(m)
-            .n(n)
-            .k(k)
-            .ks(3)
-            .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-        }
-      }
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, n_gt_16_small_kernel) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t n = 17; n < 32; n++) {
-      for (size_t k = 1; k <= 40; k += 9) {
-        GemmMicrokernelTester()
-          .mr(4)
-          .nr(16)
-          .kr(1)
-          .sr(1)
-          .m(4)
-          .n(n)
-          .k(k)
-          .ks(3)
-          .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-      }
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, n_div_16_small_kernel) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t n = 32; n <= 48; n += 16) {
-      for (size_t k = 1; k <= 40; k += 9) {
-        GemmMicrokernelTester()
-          .mr(4)
-          .nr(16)
-          .kr(1)
-          .sr(1)
-          .m(4)
-          .n(n)
-          .k(k)
-          .ks(3)
-          .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-      }
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, strided_cm_subtile) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t n = 1; n <= 16; n++) {
-        for (uint32_t m = 1; m <= 4; m++) {
-          GemmMicrokernelTester()
-            .mr(4)
-            .nr(16)
-            .kr(1)
-            .sr(1)
-            .m(m)
-            .n(n)
-            .k(k)
-            .cm_stride(19)
-            .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-        }
-      }
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, a_offset) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (size_t k = 1; k <= 40; k += 9) {
-      GemmMicrokernelTester()
-        .mr(4)
-        .nr(16)
-        .kr(1)
-        .sr(1)
-        .m(4)
-        .n(16)
-        .k(k)
-        .ks(3)
-        .a_offset(163)
-        .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, zero) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t mz = 0; mz < 4; mz++) {
-        GemmMicrokernelTester()
-          .mr(4)
-          .nr(16)
-          .kr(1)
-          .sr(1)
-          .m(4)
-          .n(16)
-          .k(k)
-          .ks(3)
-          .a_offset(163)
-          .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-      }
-    }
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, qmin) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(16)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(16)
-      .k(8)
-      .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, qmax) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(16)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(16)
-      .k(8)
-      .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-  }
-
-  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, strided_cm) {
-    TEST_REQUIRES_ARM_NEON_V8;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(16)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(16)
-      .k(8)
-      .cm_stride(19)
-      .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
-  }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
 #if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
   TEST(QS8_IGEMM_MINMAX_FP32_2X16C8__NEONI8MM, k_eq_16) {
     TEST_REQUIRES_ARM_NEON_I8MM;
@@ -12658,6 +12190,474 @@
       .Test(xnn_qs8_igemm_minmax_fp32_ukernel_2x16c8__neoni8mm, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
   }
 #endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_eq_8) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    GemmMicrokernelTester()
+      .mr(4)
+      .nr(16)
+      .kr(1)
+      .sr(1)
+      .m(4)
+      .n(16)
+      .k(8)
+      .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, strided_cn) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    GemmMicrokernelTester()
+      .mr(4)
+      .nr(16)
+      .kr(1)
+      .sr(1)
+      .m(4)
+      .n(16)
+      .k(8)
+      .cn_stride(19)
+      .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_eq_8_subtile) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(16)
+          .kr(1)
+          .sr(1)
+          .m(m)
+          .n(n)
+          .k(8)
+          .iterations(1)
+          .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_eq_8_subtile_m) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (uint32_t m = 1; m <= 4; m++) {
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(16)
+        .kr(1)
+        .sr(1)
+        .m(m)
+        .n(16)
+        .k(8)
+        .iterations(1)
+        .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_eq_8_subtile_n) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (uint32_t n = 1; n <= 16; n++) {
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(16)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(n)
+        .k(8)
+        .iterations(1)
+        .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_lt_8) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (size_t k = 1; k < 8; k++) {
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(16)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(16)
+        .k(k)
+        .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_lt_8_subtile) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (size_t k = 1; k < 8; k++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
+          GemmMicrokernelTester()
+            .mr(4)
+            .nr(16)
+            .kr(1)
+            .sr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        }
+      }
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_gt_8) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (size_t k = 9; k < 16; k++) {
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(16)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(16)
+        .k(k)
+        .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_gt_8_subtile) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (size_t k = 9; k < 16; k++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
+          GemmMicrokernelTester()
+            .mr(4)
+            .nr(16)
+            .kr(1)
+            .sr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        }
+      }
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_div_8) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (size_t k = 16; k <= 80; k += 8) {
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(16)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(16)
+        .k(k)
+        .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_div_8_subtile) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (size_t k = 16; k <= 80; k += 8) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
+          GemmMicrokernelTester()
+            .mr(4)
+            .nr(16)
+            .kr(1)
+            .sr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        }
+      }
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, n_gt_16) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(16)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, n_gt_16_strided_cn) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(16)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .cn_stride(19)
+          .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, n_gt_16_subtile) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        for (uint32_t m = 1; m <= 4; m++) {
+          GemmMicrokernelTester()
+            .mr(4)
+            .nr(16)
+            .kr(1)
+            .sr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        }
+      }
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, n_div_16) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(16)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, n_div_16_strided_cn) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(16)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .cn_stride(19)
+          .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, n_div_16_subtile) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        for (uint32_t m = 1; m <= 4; m++) {
+          GemmMicrokernelTester()
+            .mr(4)
+            .nr(16)
+            .kr(1)
+            .sr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        }
+      }
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, small_kernel) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (size_t k = 1; k <= 40; k += 9) {
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(16)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(16)
+        .k(k)
+        .ks(3)
+        .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, small_kernel_subtile) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (size_t k = 1; k <= 40; k += 9) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
+          GemmMicrokernelTester()
+            .mr(4)
+            .nr(16)
+            .kr(1)
+            .sr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .ks(3)
+            .iterations(1)
+            .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        }
+      }
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, n_gt_16_small_kernel) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(16)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .ks(3)
+          .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, n_div_16_small_kernel) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(16)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .ks(3)
+          .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, strided_cm_subtile) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (size_t k = 1; k <= 40; k += 9) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
+          GemmMicrokernelTester()
+            .mr(4)
+            .nr(16)
+            .kr(1)
+            .sr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .cm_stride(19)
+            .iterations(1)
+            .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        }
+      }
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, a_offset) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (size_t k = 1; k <= 40; k += 9) {
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(16)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(16)
+        .k(k)
+        .ks(3)
+        .a_offset(163)
+        .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, zero) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (size_t k = 1; k <= 40; k += 9) {
+      for (uint32_t mz = 0; mz < 4; mz++) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(16)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(16)
+          .k(k)
+          .ks(3)
+          .a_offset(163)
+          .zero_index(mz)
+          .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, qmin) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    GemmMicrokernelTester()
+      .mr(4)
+      .nr(16)
+      .kr(1)
+      .sr(1)
+      .m(4)
+      .n(16)
+      .k(8)
+      .qmin(128)
+      .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, qmax) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    GemmMicrokernelTester()
+      .mr(4)
+      .nr(16)
+      .kr(1)
+      .sr(1)
+      .m(4)
+      .n(16)
+      .k(8)
+      .qmax(128)
+      .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_IGEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, strided_cm) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    GemmMicrokernelTester()
+      .mr(4)
+      .nr(16)
+      .kr(1)
+      .sr(1)
+      .m(4)
+      .n(16)
+      .k(8)
+      .cm_stride(19)
+      .Test(xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
 #if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
