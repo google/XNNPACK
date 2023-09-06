@@ -12374,8 +12374,7 @@ alias(
 selects.config_setting_group(
     name = "dwconv_multipass_enabled_by_default",
     match_any = [
-        # Disabled by default, only enabled explicitly
-        ":xnn_enable_dwconv_multipass_explicit_true",
+        "//conditions:default",
     ],
 )
 
