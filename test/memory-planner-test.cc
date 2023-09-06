@@ -218,7 +218,7 @@ TEST(MemoryPlanner, LeakyReluInPlaceAfterConv) {
 
   // Should only need space for conv_out tensor.
   ASSERT_EQ(runtime->workspace->size,
-            round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 1 + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) + MEMORY_ARENA_EXTRA_BYTES);
   ASSERT_EQ(runtime->values[conv_out].data, runtime->values[leaky_relu_out].data);
 }
 
@@ -263,7 +263,9 @@ TEST(MemoryPlanner, LeakyReluWithTwoConsumersCannotBeInPlace) {
   // Since leaky relu has 2 consumers, we cannot yet do it in place since we cannot easily find all consumers of the
   // value without traversing the graph. This limitation can be lifted in the future.
   ASSERT_EQ(runtime->workspace->size,
-            round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 2 + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[leaky_relu_out])
+            + xnn_tensor_get_rounded_size(&runtime->values[conv_out])
+            + MEMORY_ARENA_EXTRA_BYTES);
   ASSERT_NE(runtime->values[conv_out].data, runtime->values[leaky_relu_out].data);
 }
 
@@ -306,7 +308,7 @@ TEST(MemoryPlanner, HardSwishAndLeakyReluInPlaceAfterConv) {
 
   // Should only need space for conv_out tensor, leaky relu and hard swish can be in place.
   ASSERT_EQ(runtime->workspace->size,
-            round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 1 + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) + MEMORY_ARENA_EXTRA_BYTES);
   ASSERT_EQ(runtime->values[conv_out].data, runtime->values[leaky_relu_out].data);
   ASSERT_EQ(runtime->values[leaky_relu_out].data, runtime->values[hard_swish_out].data);
 }
@@ -331,7 +333,7 @@ TEST(MemoryPlanner, ExternalInputsCannotBeInPlace) {
 
   // Need space allocated for leaky relu output tensor because we cannot modify the external input tensor.
   ASSERT_EQ(runtime->workspace->size,
-            round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 1 + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[leaky_relu_out]) + MEMORY_ARENA_EXTRA_BYTES);
 }
 
 TEST(MemoryPlanner, PersistentValuesCannotReuseInternalValues) {
@@ -357,7 +359,9 @@ TEST(MemoryPlanner, PersistentValuesCannotReuseInternalValues) {
 
   // Persistent values need to be allocated their own space.
   ASSERT_EQ(runtime->workspace->size,
-            round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 2 + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[clamp_out_id])
+            + xnn_tensor_get_rounded_size(&runtime->values[leaky_relu_out_id])
+            + MEMORY_ARENA_EXTRA_BYTES);
 
 }
 
@@ -381,7 +385,7 @@ TEST(MemoryPlanner, CannotReuseStaticValues) {
 
   // clamp_out_id cannot reuse static_id (because it is static).
   ASSERT_EQ(runtime->workspace->size,
-            round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 1 + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[clamp_out_id]) + MEMORY_ARENA_EXTRA_BYTES);
 }
 
 TEST(MemoryPlanner, Add2WithLHSConstant) {
@@ -421,7 +425,7 @@ TEST(MemoryPlanner, Add2WithLHSConstant) {
 
   // Should only need space for conv_out tensor.
   ASSERT_EQ(runtime->workspace->size,
-            round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 1 + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) + MEMORY_ARENA_EXTRA_BYTES);
   ASSERT_EQ(runtime->values[conv_out].data, runtime->values[add_out_id].data);
 }
 
@@ -462,7 +466,7 @@ TEST(MemoryPlanner, Add2WithRHSConstant) {
 
   // Should only need space for conv_out tensor.
   ASSERT_EQ(runtime->workspace->size,
-            round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 1 + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) + MEMORY_ARENA_EXTRA_BYTES);
   ASSERT_EQ(runtime->values[conv_out].data, runtime->values[add_out_id].data);
 }
 
@@ -503,7 +507,7 @@ TEST(MemoryPlanner, Mul2WithLHSConstant) {
 
   // Should only need space for conv_out tensor.
   ASSERT_EQ(runtime->workspace->size,
-            round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 1 + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) + MEMORY_ARENA_EXTRA_BYTES);
   ASSERT_EQ(runtime->values[conv_out].data, runtime->values[mul_out_id].data);
 }
 
@@ -544,7 +548,7 @@ TEST(MemoryPlanner, Mul2WithRHSConstant) {
 
   // Should only need space for conv_out tensor.
   ASSERT_EQ(runtime->workspace->size,
-            round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 1 + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) + MEMORY_ARENA_EXTRA_BYTES);
   ASSERT_EQ(runtime->values[conv_out].data, runtime->values[mul_out_id].data);
 }
 
@@ -595,10 +599,10 @@ TEST(MemoryPlanner, Add2WithImplicitBroadcast) {
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
-  // Need space for hard_wish_out conv_out tensor.
+  // Need space for hard_swish_out conv_out tensor.
   ASSERT_EQ(runtime->workspace->size,
-            round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES)
-            + round_up_po2(1 * 1 * 1 * 3 * sizeof(float), XNN_EXTRA_BYTES)
+            xnn_tensor_get_rounded_size(&runtime->values[hard_swish_out])
+            + xnn_tensor_get_rounded_size(&runtime->values[conv_out])
             + MEMORY_ARENA_EXTRA_BYTES);
   // add_out should reuse conv_out, hard_swish_out is too small.
   ASSERT_EQ(runtime->values[conv_out].data, runtime->values[add_out].data);
@@ -665,9 +669,9 @@ TEST(MemoryPlanner, Add2WithInputMultipleConsumers) {
 
   // Need space for conv_out, add cannot reuse conv_out, max_pooling_2d_out is also too small, so it needs allocation.
   ASSERT_EQ(runtime->workspace->size,
-            round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES)  // for conv_out
-            + round_up_po2(1 * 1 * 1 * 3 * sizeof(float), XNN_EXTRA_BYTES)  // for max_pooling_2d_out
-            + round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES)  // for add_out
+            xnn_tensor_get_rounded_size(&runtime->values[conv_out])  // for conv_out
+            + xnn_tensor_get_rounded_size(&runtime->values[max_pooling_2d_out])  // for max_pooling_2d_out
+            + xnn_tensor_get_rounded_size(&runtime->values[add_out])  // for add_out
             + MEMORY_ARENA_EXTRA_BYTES);
   // add_out should reuse conv_out, hard_swish_out is too small.
   ASSERT_NE(runtime->values[conv_out].data, runtime->values[max_pooling_2d_out].data);
@@ -709,9 +713,9 @@ TEST(MemoryPlanner, FullyConnectedDynamicFilterDynamicBias) {
   ASSERT_EQ(fc_opdata->type, xnn_node_type_fully_connected);
 
   ASSERT_EQ(runtime->workspace->size,
-            round_up_po2(2 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES)  // for filter_id
-            + round_up_po2(fc_opdata->workspace_size, XNN_EXTRA_BYTES)  // for weights packing
-            + round_up_po2(2 * sizeof(float), XNN_EXTRA_BYTES)  // for bias_id
+            xnn_tensor_get_rounded_size(&runtime->values[filter_id])  // for filter_id
+            + xnn_get_rounded_size(fc_opdata->workspace_size)  // for weights packing
+            + xnn_tensor_get_rounded_size(&runtime->values[bias_id])  // for bias_id
             + MEMORY_ARENA_EXTRA_BYTES);
 }
 
@@ -747,8 +751,8 @@ TEST(MemoryPlanner, FullyConnectedDynamicFilterStaticBias) {
   ASSERT_EQ(fc_opdata->type, xnn_node_type_fully_connected);
 
   ASSERT_EQ(runtime->workspace->size,
-            round_up_po2(2 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES)  // for filter_id
-            + round_up_po2(fc_opdata->workspace_size, XNN_EXTRA_BYTES)  // for weights packing
+            xnn_tensor_get_rounded_size(&runtime->values[filter_id])  // for filter_id
+            + xnn_get_rounded_size(fc_opdata->workspace_size)  // for weights packing
             + MEMORY_ARENA_EXTRA_BYTES);
 }
 
@@ -783,8 +787,8 @@ TEST(MemoryPlanner, FullyConnectedDynamicFilterNoBias) {
   ASSERT_EQ(fc_opdata->type, xnn_node_type_fully_connected);
 
   ASSERT_EQ(runtime->workspace->size,
-            round_up_po2(2 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES)  // for filter_id
-            + round_up_po2(fc_opdata->workspace_size, XNN_EXTRA_BYTES)  // for weights packing
+            xnn_tensor_get_rounded_size(&runtime->values[filter_id])  // for filter_id
+            + xnn_get_rounded_size(fc_opdata->workspace_size)  // for weights packing
             + MEMORY_ARENA_EXTRA_BYTES);
 }
 
@@ -820,8 +824,8 @@ TEST(MemoryPlanner, FullyConnectedStaticFilterDynamicBias) {
   ASSERT_EQ(fc_opdata->type, xnn_node_type_fully_connected);
 
   ASSERT_EQ(runtime->workspace->size,
-            round_up_po2(fc_opdata->workspace_size, XNN_EXTRA_BYTES)  // for weights packing
-            + round_up_po2(2 * sizeof(float), XNN_EXTRA_BYTES)  // for bias_id
+            xnn_get_rounded_size(fc_opdata->workspace_size)  // for weights packing
+            + xnn_tensor_get_rounded_size(&runtime->values[bias_id])  // for bias_id
             + MEMORY_ARENA_EXTRA_BYTES);
 }
 
@@ -851,7 +855,7 @@ TEST(MemoryPlanner, FullyConnectedExternalFilterExternalBias) {
   ASSERT_EQ(fc_opdata->type, xnn_node_type_fully_connected);
 
   ASSERT_EQ(runtime->workspace->size,
-            + round_up_po2(fc_opdata->workspace_size, XNN_EXTRA_BYTES)  // for weights packing
+            + xnn_get_rounded_size(fc_opdata->workspace_size)  // for weights packing
             + MEMORY_ARENA_EXTRA_BYTES);
 }
 

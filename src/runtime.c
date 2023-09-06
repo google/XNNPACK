@@ -203,11 +203,12 @@ static enum xnn_status initialize_workspace_values(
       if (value->datatype == xnn_datatype_qdint8) {
         value->quantization.dynamic_params =
           (void*) ((uintptr_t) runtime->workspace->data + persistent_size + mem_alloc_tracker->usage[i].alloc_offset
-                   + round_up_po2(value->size, XNN_EXTRA_BYTES));
+                   + xnn_tensor_get_rounded_size(value));
+
       }
     } else if (value->allocation_type == xnn_allocation_type_persistent) {
       value->data = (void*) ((uintptr_t) runtime->workspace->data + persistent_offset);
-      persistent_offset += round_up_po2(value->size, XNN_EXTRA_BYTES);
+      persistent_offset += xnn_tensor_get_rounded_size(value);
     }
   }
   assert(persistent_offset == persistent_size);
@@ -556,7 +557,7 @@ enum xnn_status track_operator_workspace(
         return status;
       }
       xnn_add_operator_workspace_allocation_tracker(
-        mem_alloc_tracker, runtime->num_values + opdata_id, round_up_po2(opdata->workspace_size, XNN_EXTRA_BYTES),
+        mem_alloc_tracker, runtime->num_values + opdata_id, xnn_get_rounded_size(opdata->workspace_size),
         opdata_id);
     }
   }
@@ -581,15 +582,15 @@ enum xnn_status xnn_setup_runtime(
 
     if (value->allocation_type == xnn_allocation_type_workspace) {
       // Value is purely internal to the runtime, and must be allocated in its workspace.
-      size_t tensor_size = round_up_po2(value->size, XNN_EXTRA_BYTES);
+      size_t tensor_size = xnn_tensor_get_rounded_size(value);
       if (value->datatype == xnn_datatype_qdint8) {
         const size_t batch_dims_size = xnn_shape_multiply_batch_dims(&value->shape, value->quantization.num_nonbatch_dims);
-        tensor_size += round_up_po2((batch_dims_size + XNN_EXTRA_QUANTIZATION_PARAMS)
-                                    * sizeof(struct xnn_dynamic_quantization_params), XNN_EXTRA_BYTES);
+        tensor_size += xnn_get_rounded_size((batch_dims_size + XNN_EXTRA_QUANTIZATION_PARAMS)
+                                    * sizeof(struct xnn_dynamic_quantization_params));
       }
       xnn_add_value_allocation_tracker(&mem_alloc_tracker, i, tensor_size);
     } else if (value->allocation_type == xnn_allocation_type_persistent) {
-      persistent_size += round_up_po2(value->size, XNN_EXTRA_BYTES);
+      persistent_size += xnn_tensor_get_rounded_size(value);
     }
   }
   size_t old_persistent_size = runtime->workspace->persistent_size;

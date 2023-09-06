@@ -493,6 +493,19 @@ size_t xnn_tensor_get_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id);
 // Checks if a tensor shape is completely known.
 bool xnn_tensor_shape_is_static(const struct xnn_value* value);
 
+XNN_INLINE size_t xnn_get_rounded_size(size_t size)
+{
+  // We round it to XNN_EXTRA_BYTES to ensure that we can read more than the actual size of the tensor, and round it
+  // to allocation alignment to ensure that all tensors and operator workspaces are aligned correctly.
+  return round_up_po2(round_up_po2(size, XNN_EXTRA_BYTES), XNN_ALLOCATION_ALIGNMENT);
+}
+
+// Returns the size of tensor rounded to appropriate extra bytes and allocation alignment.
+XNN_INLINE size_t xnn_tensor_get_rounded_size(const struct xnn_value* value)
+{
+  return xnn_get_rounded_size(value->size);
+}
+
 // Sets a single dimension of to based on a dimension of from.
 enum xnn_shape_inference_status xnn_tensor_propagate_dimension(
   struct xnn_value* to,
