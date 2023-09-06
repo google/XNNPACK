@@ -62,7 +62,7 @@ void xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c8__neoni8
         c${M} = c${M-1};
       }
 
-  const uint8x16_t vkernel_zero_point = vld1q_dup_u8(&params->${PARAMS_STRUCT}.kernel_zero_point[0]);
+  const uint8x16_t vkernel_zero_point = vreinterpretq_u8_u32(vld1q_dup_u32((const void*) params->${PARAMS_STRUCT}.kernel_zero_point));
 
   // Loop over groups of ${NR} columns.
   do {

@@ -59,7 +59,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x16c8__neoni8mm(
     c3 = c2;
   }
 
-  const uint8x16_t vkernel_zero_point = vld1q_dup_u8(&params->fp32_neonv8.kernel_zero_point[0]);
+  const uint8x16_t vkernel_zero_point = vreinterpretq_u8_u32(vld1q_dup_u32((const void*) params->fp32_neonv8.kernel_zero_point));
 
   // Loop over groups of 16 columns.
   do {
