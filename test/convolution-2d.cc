@@ -964,16 +964,17 @@ TEST_F(ConvolutionTestF32, transient_indirection_buffer)
 
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
-  size_t workspace_size = 0;
-  size_t workspace_alignment = 1;
+  size_t workspace_size = SIZE_MAX;
+  size_t workspace_alignment = SIZE_MAX;
   ASSERT_EQ(
     xnn_status_success, xnn_reshape_convolution2d_nhwc_f32(
                           op, batch_size, input_height, input_width,
                           &workspace_size, &workspace_alignment,
                           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                           /*threadpool=*/nullptr));
-  ASSERT_NE(workspace_size, 0);
-  ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+  // workspace_size might be 0 if we hit the vmulcaddc path which does not require any indirection buffers.
+  ASSERT_NE(workspace_size, SIZE_MAX);
+  ASSERT_NE(workspace_alignment, SIZE_MAX);
   std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
   ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(op, workspace.data(), input.data(), operator_output.data()));
 
