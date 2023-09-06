@@ -32,7 +32,9 @@ protected:
     rng = std::mt19937((*random_device)());
     input_size_dist = std::uniform_int_distribution<uint32_t>(10, 15);
     kernel_size_dist = std::uniform_int_distribution<uint32_t>(1, 5);
-    stride_dist = std::uniform_int_distribution<uint32_t>(1, 2);
+    subsampling_dist = std::uniform_int_distribution<uint32_t>(1, 5);
+    // max value of (dilation * kernel size) must be smaller than input size.
+    dilation_dist = std::uniform_int_distribution<uint32_t>(1, 2);
     f32dist = std::uniform_real_distribution<float>(0.1f, 1.0f);
     scale_dist = std::uniform_real_distribution<float>(1.0f, 5.0f);
     i32dist = std::uniform_int_distribution<int32_t>(-10000, 10000);
@@ -42,10 +44,10 @@ protected:
     input_width = input_size_dist(rng);
     kernel_height = kernel_size_dist(rng);
     kernel_width = kernel_size_dist(rng);
-    subsampling_height = stride_dist(rng);
-    subsampling_width = subsampling_height;
-    dilation_height = 1;  // TODO(zhin): test other dilation values.
-    dilation_width = dilation_height;
+    subsampling_height = subsampling_dist(rng);
+    subsampling_width = subsampling_dist(rng);
+    dilation_height = dilation_dist(rng);
+    dilation_width = dilation_dist(rng);
     groups = input_size_dist(rng);
     group_input_channels = input_size_dist(rng);
     group_output_channels = input_size_dist(rng);
@@ -71,7 +73,8 @@ protected:
   std::mt19937 rng;
   std::uniform_int_distribution<uint32_t> input_size_dist;
   std::uniform_int_distribution<uint32_t> kernel_size_dist;
-  std::uniform_int_distribution<uint32_t> stride_dist;
+  std::uniform_int_distribution<uint32_t> subsampling_dist;
+  std::uniform_int_distribution<uint32_t> dilation_dist;
   std::uniform_int_distribution<int32_t> i32dist;
   std::uniform_real_distribution<float> f32dist;
   std::uniform_real_distribution<float> scale_dist;
