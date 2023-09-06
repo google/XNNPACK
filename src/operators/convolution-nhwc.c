@@ -52,8 +52,8 @@ static inline const struct xnn_dwconv_config* find_dwconv_ukernel(
 {
   const struct xnn_dwconv_config* best_ukernel = NULL;
   while (num_ukernels-- != 0) {
-    // Find the smallest primary_tile that is at least as big as kernel_size.
-    if (ukernel->primary_tile >= kernel_size) {
+    // Find the smallest unipass primary_tile that is at least as big as kernel_size.
+    if (ukernel->last_tile == 0 && ukernel->primary_tile >= kernel_size) {
       if (best_ukernel == NULL || ukernel->primary_tile < best_ukernel->primary_tile) {
         best_ukernel = ukernel;
       }

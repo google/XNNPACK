@@ -34,7 +34,7 @@ protected:
     random_device = std::make_unique<std::random_device>();
     rng = std::mt19937((*random_device)());
     input_size_dist = std::uniform_int_distribution<uint32_t>(10, 15);
-    kernel_size_dist = std::uniform_int_distribution<uint32_t>(1, 5);
+    kernel_size_dist = std::uniform_int_distribution<uint32_t>(1, 7);
     stride_dist = std::uniform_int_distribution<uint32_t>(1, 2);
     f32dist = std::uniform_real_distribution<float>(0.1f, 1.0f);
     i32dist = std::uniform_int_distribution<int32_t>(-10000, 10000);
