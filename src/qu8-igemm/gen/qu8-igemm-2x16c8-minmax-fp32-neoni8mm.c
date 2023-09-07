@@ -96,17 +96,17 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_2x16c8__neoni8mm(
         const uint8x16_t vb45x01234567 = vld1q_u8(w); w = (const int8_t*) w + 16;
         const uint8x16_t vb67x01234567 = vld1q_u8(w); w = (const int8_t*) w + 16;
         const uint8x16_t vb89x01234567 = vld1q_u8(w); w = (const int8_t*) w + 16;
-        const uint8x16_t vb1011x01234567 = vld1q_u8(w); w = (const int8_t*) w + 16;
-        const uint8x16_t vb1213x01234567 = vld1q_u8(w); w = (const int8_t*) w + 16;
-        const uint8x16_t vb1415x01234567 = vld1q_u8(w); w = (const int8_t*) w + 16;
+        const uint8x16_t vbABx01234567 = vld1q_u8(w); w = (const int8_t*) w + 16;
+        const uint8x16_t vbCDx01234567 = vld1q_u8(w); w = (const int8_t*) w + 16;
+        const uint8x16_t vbEFx01234567 = vld1q_u8(w); w = (const int8_t*) w + 16;
         const uint8x16_t vb01x89ABCDEF = vld1q_u8(w); w = (const int8_t*) w + 16;
         const uint8x16_t vb23x89ABCDEF = vld1q_u8(w); w = (const int8_t*) w + 16;
         const uint8x16_t vb45x89ABCDEF = vld1q_u8(w); w = (const int8_t*) w + 16;
         const uint8x16_t vb67x89ABCDEF = vld1q_u8(w); w = (const int8_t*) w + 16;
         const uint8x16_t vb89x89ABCDEF = vld1q_u8(w); w = (const int8_t*) w + 16;
-        const uint8x16_t vb1011x89ABCDEF = vld1q_u8(w); w = (const int8_t*) w + 16;
-        const uint8x16_t vb1213x89ABCDEF = vld1q_u8(w); w = (const int8_t*) w + 16;
-        const uint8x16_t vb1415x89ABCDEF = vld1q_u8(w); w = (const int8_t*) w + 16;
+        const uint8x16_t vbABx89ABCDEF = vld1q_u8(w); w = (const int8_t*) w + 16;
+        const uint8x16_t vbCDx89ABCDEF = vld1q_u8(w); w = (const int8_t*) w + 16;
+        const uint8x16_t vbEFx89ABCDEF = vld1q_u8(w); w = (const int8_t*) w + 16;
 
         // Multiply-accumulate: 2x16 * 16x16 --> 2x16.
         vnacc01 = vmmlaq_u32(vnacc01, vkernel_zero_point, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]));
@@ -115,26 +115,26 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_2x16c8__neoni8mm(
         vpacc01x45 = vmmlaq_u32(vpacc01x45, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]), vb45x01234567);
         vpacc01x67 = vmmlaq_u32(vpacc01x67, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]), vb67x01234567);
         vpacc01x89 = vmmlaq_u32(vpacc01x89, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]), vb89x01234567);
-        vpacc01xAB = vmmlaq_u32(vpacc01xAB, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]), vb1011x01234567);
-        vpacc01xCD = vmmlaq_u32(vpacc01xCD, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]), vb1213x01234567);
-        vpacc01xEF = vmmlaq_u32(vpacc01xEF, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]), vb1415x01234567);
+        vpacc01xAB = vmmlaq_u32(vpacc01xAB, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]), vbABx01234567);
+        vpacc01xCD = vmmlaq_u32(vpacc01xCD, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]), vbCDx01234567);
+        vpacc01xEF = vmmlaq_u32(vpacc01xEF, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]), vbEFx01234567);
         vnacc01 = vmmlaq_u32(vnacc01, vkernel_zero_point, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[1]));
         vpacc01x01 = vmmlaq_u32(vpacc01x01, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[1]), vb01x89ABCDEF);
         vpacc01x23 = vmmlaq_u32(vpacc01x23, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[1]), vb23x89ABCDEF);
         vpacc01x45 = vmmlaq_u32(vpacc01x45, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[1]), vb45x89ABCDEF);
         vpacc01x67 = vmmlaq_u32(vpacc01x67, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[1]), vb67x89ABCDEF);
         vpacc01x89 = vmmlaq_u32(vpacc01x89, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[1]), vb89x89ABCDEF);
-        vpacc01xAB = vmmlaq_u32(vpacc01xAB, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[1]), vb1011x89ABCDEF);
-        vpacc01xCD = vmmlaq_u32(vpacc01xCD, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[1]), vb1213x89ABCDEF);
-        vpacc01xEF = vmmlaq_u32(vpacc01xEF, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[1]), vb1415x89ABCDEF);
+        vpacc01xAB = vmmlaq_u32(vpacc01xAB, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[1]), vbABx89ABCDEF);
+        vpacc01xCD = vmmlaq_u32(vpacc01xCD, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[1]), vbCDx89ABCDEF);
+        vpacc01xEF = vmmlaq_u32(vpacc01xEF, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[1]), vbEFx89ABCDEF);
 
         k -= 16 * sizeof(uint8_t);
       }
       // Handle up to 8 final positions of `k`
       if XNN_UNLIKELY(k != 0) {
         // Load a 2x8 block of activations.
-        uint64x2_t va01x0123456789ABCDEF = vld1q_dup_u64((const void*) a0); a0 += 8;
-        va01x0123456789ABCDEF = vld1q_lane_u64((const void*) a1, va01x0123456789ABCDEF, 1); a1 += 8;
+        uint64x2_t va01x01234567 = vld1q_dup_u64((const void*) a0); a0 += 8;
+        va01x01234567 = vld1q_lane_u64((const void*) a1, va01x01234567, 1); a1 += 8;
 
         // Load a 16x16 block of weights.
         const uint8x16_t vb01x01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
@@ -142,20 +142,20 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_2x16c8__neoni8mm(
         const uint8x16_t vb45x01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
         const uint8x16_t vb67x01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
         const uint8x16_t vb89x01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
-        const uint8x16_t vb1011x01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
-        const uint8x16_t vb1213x01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
-        const uint8x16_t vb1415x01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
+        const uint8x16_t vbABx01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
+        const uint8x16_t vbCDx01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
+        const uint8x16_t vbEFx01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
 
         // Multiply-accumulate: 2x8 * 8x16 --> 2x16.
-        vnacc01 = vmmlaq_u32(vnacc01, vkernel_zero_point, vreinterpretq_u8_u64(va01x0123456789ABCDEF));
-        vpacc01x01 = vmmlaq_u32(vpacc01x01, vreinterpretq_u8_u64(va01x0123456789ABCDEF), vb01x01234567);
-        vpacc01x23 = vmmlaq_u32(vpacc01x23, vreinterpretq_u8_u64(va01x0123456789ABCDEF), vb23x01234567);
-        vpacc01x45 = vmmlaq_u32(vpacc01x45, vreinterpretq_u8_u64(va01x0123456789ABCDEF), vb45x01234567);
-        vpacc01x67 = vmmlaq_u32(vpacc01x67, vreinterpretq_u8_u64(va01x0123456789ABCDEF), vb67x01234567);
-        vpacc01x89 = vmmlaq_u32(vpacc01x89, vreinterpretq_u8_u64(va01x0123456789ABCDEF), vb89x01234567);
-        vpacc01xAB = vmmlaq_u32(vpacc01xAB, vreinterpretq_u8_u64(va01x0123456789ABCDEF), vb1011x01234567);
-        vpacc01xCD = vmmlaq_u32(vpacc01xCD, vreinterpretq_u8_u64(va01x0123456789ABCDEF), vb1213x01234567);
-        vpacc01xEF = vmmlaq_u32(vpacc01xEF, vreinterpretq_u8_u64(va01x0123456789ABCDEF), vb1415x01234567);
+        vnacc01 = vmmlaq_u32(vnacc01, vkernel_zero_point, vreinterpretq_u8_u64(va01x01234567));
+        vpacc01x01 = vmmlaq_u32(vpacc01x01, vreinterpretq_u8_u64(va01x01234567), vb01x01234567);
+        vpacc01x23 = vmmlaq_u32(vpacc01x23, vreinterpretq_u8_u64(va01x01234567), vb23x01234567);
+        vpacc01x45 = vmmlaq_u32(vpacc01x45, vreinterpretq_u8_u64(va01x01234567), vb45x01234567);
+        vpacc01x67 = vmmlaq_u32(vpacc01x67, vreinterpretq_u8_u64(va01x01234567), vb67x01234567);
+        vpacc01x89 = vmmlaq_u32(vpacc01x89, vreinterpretq_u8_u64(va01x01234567), vb89x01234567);
+        vpacc01xAB = vmmlaq_u32(vpacc01xAB, vreinterpretq_u8_u64(va01x01234567), vbABx01234567);
+        vpacc01xCD = vmmlaq_u32(vpacc01xCD, vreinterpretq_u8_u64(va01x01234567), vbCDx01234567);
+        vpacc01xEF = vmmlaq_u32(vpacc01xEF, vreinterpretq_u8_u64(va01x01234567), vbEFx01234567);
       }
       p -= 2 * sizeof(void*);
     } while (p != 0);
