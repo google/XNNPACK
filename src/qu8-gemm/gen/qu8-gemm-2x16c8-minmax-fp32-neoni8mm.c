@@ -79,7 +79,6 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_2x16c8__neoni8mm(
       va01x0123456789ABCDEF = vld2q_lane_u64((const void*) a0, va01x0123456789ABCDEF, 0); a0 += 16;
       va01x0123456789ABCDEF = vld2q_lane_u64((const void*) a1, va01x0123456789ABCDEF, 1); a1 += 16;
 
-
       // Load a 16x16 block of weights.
       const uint8x16_t vb01x01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
       const uint8x16_t vb23x01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
@@ -123,8 +122,8 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_2x16c8__neoni8mm(
     // Handle up to 8 final positions of `k`
     if XNN_UNLIKELY(k != 0) {
       // Load a 2x8 block of activations.
-      va01x0123456789ABCDEF.val[0] = vld1q_lane_u64((const void*) a0, va01x0123456789ABCDEF.val[0], 0); a0 += 8;
-      va01x0123456789ABCDEF.val[0] = vld1q_lane_u64((const void*) a1, va01x0123456789ABCDEF.val[0], 1); a1 += 8;
+      uint64x2_t va01x0123456789ABCDEF = vld1q_dup_u64((const void*) a0); a0 += 8;
+      va01x0123456789ABCDEF = vld1q_lane_u64((const void*) a1, va01x0123456789ABCDEF, 1); a1 += 8;
 
       // Load a 16x16 block of weights.
       const uint8x16_t vb01x01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
@@ -137,15 +136,15 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_2x16c8__neoni8mm(
       const uint8x16_t vb1415x01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
 
       // Multiply-accumulate: 2x8 * 8x16 --> 2x16.
-      vnacc01 = vmmlaq_u32(vnacc01, vkernel_zero_point, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]));
-      vpacc01x01 = vmmlaq_u32(vpacc01x01, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]), vb01x01234567);
-      vpacc01x23 = vmmlaq_u32(vpacc01x23, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]), vb23x01234567);
-      vpacc01x45 = vmmlaq_u32(vpacc01x45, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]), vb45x01234567);
-      vpacc01x67 = vmmlaq_u32(vpacc01x67, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]), vb67x01234567);
-      vpacc01x89 = vmmlaq_u32(vpacc01x89, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]), vb89x01234567);
-      vpacc01xAB = vmmlaq_u32(vpacc01xAB, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]), vb1011x01234567);
-      vpacc01xCD = vmmlaq_u32(vpacc01xCD, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]), vb1213x01234567);
-      vpacc01xEF = vmmlaq_u32(vpacc01xEF, vreinterpretq_u8_u64(va01x0123456789ABCDEF.val[0]), vb1415x01234567);
+      vnacc01 = vmmlaq_u32(vnacc01, vkernel_zero_point, vreinterpretq_u8_u64(va01x0123456789ABCDEF));
+      vpacc01x01 = vmmlaq_u32(vpacc01x01, vreinterpretq_u8_u64(va01x0123456789ABCDEF), vb01x01234567);
+      vpacc01x23 = vmmlaq_u32(vpacc01x23, vreinterpretq_u8_u64(va01x0123456789ABCDEF), vb23x01234567);
+      vpacc01x45 = vmmlaq_u32(vpacc01x45, vreinterpretq_u8_u64(va01x0123456789ABCDEF), vb45x01234567);
+      vpacc01x67 = vmmlaq_u32(vpacc01x67, vreinterpretq_u8_u64(va01x0123456789ABCDEF), vb67x01234567);
+      vpacc01x89 = vmmlaq_u32(vpacc01x89, vreinterpretq_u8_u64(va01x0123456789ABCDEF), vb89x01234567);
+      vpacc01xAB = vmmlaq_u32(vpacc01xAB, vreinterpretq_u8_u64(va01x0123456789ABCDEF), vb1011x01234567);
+      vpacc01xCD = vmmlaq_u32(vpacc01xCD, vreinterpretq_u8_u64(va01x0123456789ABCDEF), vb1213x01234567);
+      vpacc01xEF = vmmlaq_u32(vpacc01xEF, vreinterpretq_u8_u64(va01x0123456789ABCDEF), vb1415x01234567);
     }
 
     // Subtract zero point from accumulators.
