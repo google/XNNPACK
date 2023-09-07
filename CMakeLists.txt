@@ -3356,7 +3356,9 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       models/qs8-mobilenet-v1.cc
       models/qs8-mobilenet-v2.cc
       models/qu8-mobilenet-v1.cc
-      models/qu8-mobilenet-v2.cc)
+      models/qu8-mobilenet-v2.cc
+      models/qu8-mobilenet-v3-large.cc
+      models/qu8-mobilenet-v3-small.cc)
     SET_TARGET_PROPERTIES(bench-models PROPERTIES CXX_EXTENSIONS YES)
     TARGET_INCLUDE_DIRECTORIES(bench-models PRIVATE .)
     TARGET_LINK_LIBRARIES(bench-models PRIVATE fp16 benchmark)
