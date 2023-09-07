@@ -93,7 +93,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x8__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64,
       xnn_init_f16_minmax_fp16arith_params,
-      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/4, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
@@ -104,7 +104,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x8__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64,
       xnn_init_f16_minmax_fp16arith_params,
-      6 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/6, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
@@ -115,7 +115,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x8__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64,
       xnn_init_f16_minmax_fp16arith_params,
-      8 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/8, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
@@ -126,7 +126,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32,
       xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32,
       xnn_init_f16_minmax_fp16arith_params,
-      4 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/4, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
@@ -137,7 +137,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
       xnn_init_f16_minmax_fp16arith_params,
-      4 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/4, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
@@ -148,7 +148,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32,
       xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32,
       xnn_init_f16_minmax_fp16arith_params,
-      6 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/6, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
@@ -159,7 +159,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
       xnn_init_f16_minmax_fp16arith_params,
-      6 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/6, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
@@ -170,7 +170,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
       xnn_init_f16_minmax_fp16arith_params,
-      6 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/6, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
@@ -181,7 +181,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
       xnn_init_f16_minmax_fp16arith_params,
-      6 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/6, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
@@ -192,7 +192,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
       xnn_init_f16_minmax_fp16arith_params,
-      6 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/6, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
@@ -216,7 +216,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x8__neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64,
       xnn_init_f16_minmax_fp16arith_params,
-      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/4, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
@@ -227,7 +227,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x8__neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64,
       xnn_init_f16_minmax_fp16arith_params,
-      6 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/6, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
@@ -238,7 +238,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x8__neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64,
       xnn_init_f16_minmax_fp16arith_params,
-      8 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/8, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
@@ -249,7 +249,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x16__neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64,
       xnn_init_f16_minmax_fp16arith_params,
-      4 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/4, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
@@ -260,7 +260,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x16__neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64,
       xnn_init_f16_minmax_fp16arith_params,
-      6 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/6, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
@@ -271,7 +271,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x16__neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64,
       xnn_init_f16_minmax_fp16arith_params,
-      8 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/8, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
@@ -291,7 +291,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x8__avx2_broadcast,
       xnn_f16_igemm_minmax_ukernel_1x8__avx2_broadcast,
       xnn_init_f16_minmax_avx_params,
-      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/4, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckAVX2);
   }
   static void f16_gemm_5x8__avx2_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -301,7 +301,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x8__avx2_broadcast,
       xnn_f16_igemm_minmax_ukernel_1x8__avx2_broadcast,
       xnn_init_f16_minmax_avx_params,
-      5 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/5, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckAVX2);
   }
   static void f16_gemm_6x8__avx2_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -311,7 +311,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x8__avx2_broadcast,
       xnn_f16_igemm_minmax_ukernel_1x8__avx2_broadcast,
       xnn_init_f16_minmax_avx_params,
-      6 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/6, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckAVX2);
   }
   static void f16_gemm_7x8__avx2_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -321,7 +321,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x8__avx2_broadcast,
       xnn_f16_igemm_minmax_ukernel_1x8__avx2_broadcast,
       xnn_init_f16_minmax_avx_params,
-      7 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/7, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckAVX2);
   }
 
@@ -332,7 +332,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x16__avx2_broadcast,
       xnn_f16_igemm_minmax_ukernel_1x16__avx2_broadcast,
       xnn_init_f16_minmax_avx_params,
-      3 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/3, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckAVX2);
   }
   static void f16_gemm_4x16__avx2_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -342,7 +342,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x16__avx2_broadcast,
       xnn_f16_igemm_minmax_ukernel_1x16__avx2_broadcast,
       xnn_init_f16_minmax_avx_params,
-      4 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/4, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckAVX2);
   }
   static void f16_gemm_5x16__avx2_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -352,7 +352,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_gemm_minmax_ukernel_1x16__avx2_broadcast,
       xnn_f16_igemm_minmax_ukernel_1x16__avx2_broadcast,
       xnn_init_f16_minmax_avx_params,
-      5 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/5, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckAVX2);
   }
 
@@ -363,7 +363,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_f32acc_gemm_minmax_ukernel_1x8__avx2_broadcast,
       xnn_f16_f32acc_igemm_minmax_ukernel_1x8__avx2_broadcast,
       xnn_init_f16_minmax_avx_params,
-      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/4, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckAVX2);
   }
   static void f16_f32acc_gemm_5x8__avx2_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -373,7 +373,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_f32acc_gemm_minmax_ukernel_1x8__avx2_broadcast,
       xnn_f16_f32acc_igemm_minmax_ukernel_1x8__avx2_broadcast,
       xnn_init_f16_minmax_avx_params,
-      5 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/5, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckAVX2);
   }
   static void f16_f32acc_gemm_6x8__avx2_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -383,7 +383,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_f32acc_gemm_minmax_ukernel_1x8__avx2_broadcast,
       xnn_f16_f32acc_igemm_minmax_ukernel_1x8__avx2_broadcast,
       xnn_init_f16_minmax_avx_params,
-      6 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/6, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckAVX2);
   }
   static void f16_f32acc_gemm_7x8__avx2_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -393,7 +393,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_f32acc_gemm_minmax_ukernel_1x8__avx2_broadcast,
       xnn_f16_f32acc_igemm_minmax_ukernel_1x8__avx2_broadcast,
       xnn_init_f16_minmax_avx_params,
-      7 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/7, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckAVX2);
   }
 
@@ -404,7 +404,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_f32acc_gemm_minmax_ukernel_1x16__avx2_broadcast,
       xnn_f16_f32acc_igemm_minmax_ukernel_1x16__avx2_broadcast,
       xnn_init_f16_minmax_avx_params,
-      3 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/3, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckAVX2);
   }
   static void f16_f32acc_gemm_4x16__avx2_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -414,7 +414,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_f32acc_gemm_minmax_ukernel_1x16__avx2_broadcast,
       xnn_f16_f32acc_igemm_minmax_ukernel_1x16__avx2_broadcast,
       xnn_init_f16_minmax_avx_params,
-      4 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/4, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckAVX2);
   }
   static void f16_f32acc_gemm_5x16__avx2_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -424,7 +424,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_f32acc_gemm_minmax_ukernel_1x16__avx2_broadcast,
       xnn_f16_f32acc_igemm_minmax_ukernel_1x16__avx2_broadcast,
       xnn_init_f16_minmax_avx_params,
-      5 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      /*mr=*/5, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckAVX2);
   }
 
