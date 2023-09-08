@@ -251,7 +251,7 @@ class FullyConnectedOperatorTester {
       }
 
       // Create, setup, run, and destroy Fully Connected operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
       xnn_operator_t fully_connected_op = nullptr;
 
       xnn_weights_cache weights_cache;
@@ -422,7 +422,7 @@ class FullyConnectedOperatorTester {
         });
 
       // Create, setup, run, and destroy Fully Connected operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
       xnn_operator_t fully_connected_op = nullptr;
 
       xnn_weights_cache weights_cache;
@@ -436,8 +436,8 @@ class FullyConnectedOperatorTester {
       const xnn_status status = xnn_create_fully_connected_nc_qs8(
           input_channels(), output_channels(),
           input_stride(), output_stride(),
-          input_zero_point, 1.0f /* input scale */,
-          1.0f /* kernel scale */,
+          input_zero_point, /*input_scale=*/1.0f,
+          /*kernel_scale=*/1.0f,
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
           transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
@@ -481,8 +481,8 @@ class FullyConnectedOperatorTester {
         ASSERT_EQ(xnn_status_success,
                   xnn_create_fully_connected_nc_qs8(
                       input_channels(), output_channels(), input_stride(),
-                      output_stride(), input_zero_point, 1.0f /* input scale */,
-                      1.0f /* kernel scale */, kernel.data(),
+                      output_stride(), input_zero_point, /*input_scale=*/1.0f,
+                      /*kernel_scale=*/1.0f, kernel.data(),
                       has_bias() ? bias.data() : nullptr, output_zero_point,
                       output_scale, int8_t(qmin() - 0x80),
                       int8_t(qmax() - 0x80),
@@ -608,7 +608,7 @@ class FullyConnectedOperatorTester {
         });
 
       // Create, setup, run, and destroy Fully Connected operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
       xnn_operator_t fully_connected_op = nullptr;
 
       xnn_weights_cache weights_cache;
@@ -622,8 +622,8 @@ class FullyConnectedOperatorTester {
       const xnn_status status = xnn_create_fully_connected_nc_qu8(
           input_channels(), output_channels(),
           input_stride(), output_stride(),
-          input_zero_point, 1.0f /* input scale */,
-          kernel_zero_point, 1.0f /* kernel scale */,
+          input_zero_point, /*input_scale=*/1.0f,
+          kernel_zero_point, /*kernel_scale=*/1.0f,
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, qmin(), qmax(),
           transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
@@ -666,8 +666,8 @@ class FullyConnectedOperatorTester {
         ASSERT_EQ(xnn_status_success,
                   xnn_create_fully_connected_nc_qu8(
                       input_channels(), output_channels(), input_stride(),
-                      output_stride(), input_zero_point, 1.0f /* input scale */,
-                      kernel_zero_point, 1.0f /* kernel scale */, kernel.data(),
+                      output_stride(), input_zero_point, /*input_scale=*/1.0f,
+                      kernel_zero_point, /*kernel_scale=*/1.0f, kernel.data(),
                       has_bias() ? bias.data() : nullptr, output_zero_point,
                       output_scale, qmin(), qmax(),
                       transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
@@ -780,7 +780,7 @@ class FullyConnectedOperatorTester {
       }
 
       // Create, setup, run, and destroy Fully Connected operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
       xnn_operator_t fully_connected_op = nullptr;
 
       std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_code_cache(
@@ -995,7 +995,7 @@ class FullyConnectedOperatorTester {
       }
 
       // Create, setup, run, and destroy Fully Connected operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
       xnn_operator_t fully_connected_op = nullptr;
 
       std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_code_cache(
@@ -1208,7 +1208,7 @@ class FullyConnectedOperatorTester {
       }
 
       // Create, setup, run, and destroy Fully Connected operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
       xnn_operator_t fully_connected_op = nullptr;
 
       std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_code_cache(
@@ -1410,7 +1410,7 @@ class FullyConnectedOperatorTester {
       }
 
       // Create, setup, run, and destroy Fully Connected operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
       xnn_operator_t fully_connected_op = nullptr;
 
       xnn_weights_cache weights_cache;
