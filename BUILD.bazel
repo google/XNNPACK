@@ -5432,7 +5432,6 @@ xnnpack_cc_library(
         ":normalization",
         ":operators",
         ":params",
-        ":prod_microkernels",
         ":subgraph",
     ],
 )
