@@ -148,32 +148,32 @@ struct xnn_value {
 };
 
 
-XNN_INLINE bool xnn_value_is_external(const struct xnn_value* value) {
+XNN_INLINE static bool xnn_value_is_external(const struct xnn_value* value) {
   return (value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) != 0;
 }
 
-XNN_INLINE bool xnn_value_is_external_output(const struct xnn_value* value) {
+XNN_INLINE static bool xnn_value_is_external_output(const struct xnn_value* value) {
   return (value->flags & XNN_VALUE_FLAG_EXTERNAL_OUTPUT) != 0;
 }
 
-XNN_INLINE bool xnn_value_is_external_input(const struct xnn_value* value) {
+XNN_INLINE static bool xnn_value_is_external_input(const struct xnn_value* value) {
   return (value->flags & XNN_VALUE_FLAG_EXTERNAL_INPUT) != 0;
 }
 
-XNN_INLINE bool xnn_value_is_internal(const struct xnn_value* value) {
+XNN_INLINE static bool xnn_value_is_internal(const struct xnn_value* value) {
   return (
     (value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT | XNN_VALUE_FLAG_PERSISTENT)) == 0);
 }
 
-XNN_INLINE bool xnn_value_is_persistent(const struct xnn_value* value) {
+XNN_INLINE static bool xnn_value_is_persistent(const struct xnn_value* value) {
   return value->allocation_type == xnn_allocation_type_persistent;
 }
 
-XNN_INLINE bool xnn_value_is_valid(const struct xnn_value* value) {
+XNN_INLINE static bool xnn_value_is_valid(const struct xnn_value* value) {
   return value->type != xnn_value_type_invalid;
 }
 
-XNN_INLINE bool xnn_value_is_static(const struct xnn_value* value) {
+XNN_INLINE static bool xnn_value_is_static(const struct xnn_value* value) {
   return value->allocation_type == xnn_allocation_type_static;
 }
 
@@ -493,7 +493,7 @@ size_t xnn_tensor_get_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id);
 // Checks if a tensor shape is completely known.
 bool xnn_tensor_shape_is_static(const struct xnn_value* value);
 
-XNN_INLINE size_t xnn_get_rounded_size(size_t size)
+XNN_INLINE static size_t xnn_get_rounded_size(size_t size)
 {
   // We round it to XNN_EXTRA_BYTES to ensure that we can read more than the actual size of the tensor, and round it
   // to allocation alignment to ensure that all tensors and operator workspaces are aligned correctly.
@@ -501,7 +501,7 @@ XNN_INLINE size_t xnn_get_rounded_size(size_t size)
 }
 
 // Returns the size of tensor rounded to appropriate extra bytes and allocation alignment.
-XNN_INLINE size_t xnn_tensor_get_rounded_size(const struct xnn_value* value)
+XNN_INLINE static size_t xnn_tensor_get_rounded_size(const struct xnn_value* value)
 {
   return xnn_get_rounded_size(value->size);
 }
