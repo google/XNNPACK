@@ -272,7 +272,7 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_QU8_END2END(qu8_gemm_4x16__asm_aarch64_neon_mlal_lane_ld64_prfm);
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
-#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
   static void qu8_gemm_1x8c8__neoni8mm(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_qu8_gemm_minmax_rndnu_ukernel_1x8c8__neoni8mm,
@@ -384,7 +384,7 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_QU8_END2END(qu8_gemm_4x16c8__neoni8mm);
   BENCHMARK_QU8_END2END(qu8_gemm_6x16c8__neoni8mm);
   BENCHMARK_QU8_END2END(qu8_gemm_8x16c8__neoni8mm);
-#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
 
 #if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void qu8_gemm_1x8c4__neondot(benchmark::State& state, models::ExecutionPlanFactory model) {
