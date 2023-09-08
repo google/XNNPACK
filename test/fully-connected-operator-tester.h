@@ -568,7 +568,7 @@ class FullyConnectedOperatorTester {
       for (size_t oc = 0; oc < output_channels(); oc++) {
         // Make filter weights within the same output channel to use the same sign as the bias.
         // This ensures that no catastrophic cancellation occurs, but test covers both positive and negative outputs.
-        if (std::signbit(bias[oc])) {
+        if (bias[oc] < 0) {
           for (size_t ic = 0; ic < input_channels(); ic++) {
             kernel[oc * input_channels() + ic] = -std::abs(kernel[oc * input_channels() + ic]);
           }

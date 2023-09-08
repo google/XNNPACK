@@ -1498,7 +1498,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile_rounded) {
   // c rounded to channel_subtile is 8, so we will have 2 channel_tile loops in first and middle pass.
 
   std::vector<int32_t> b(c);
-  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4, 5, 6]
+  std::iota(b.begin(), b.end(), 0);   // b = [0, 1, 2, 3, 4, 5, 6]
   std::vector<uint8_t> k(c * h * w);  // k = [7, 8, // first 2x2 kernel
                                     //      9, 10,
                                     //      11, 12, // second 2x2 kernel
@@ -10135,7 +10135,7 @@ TEST(PACK_F32_TO_F16_DWCONV_OKI_W, null_bias) {
   const size_t w = 1;
 
   std::vector<float> k(h * w);  // k = [3, 4, 5]
-  std::iota(k.begin(), k.end(), 3);
+  std::iota(k.begin(), k.end(), 3.0f);
   std::vector<uint16_t> packed_weights(primary_tile * 2);
 
   xnn_pack_f32_to_f16_dconv_oki_w(

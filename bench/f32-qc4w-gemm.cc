@@ -49,7 +49,9 @@ static void GEMMBenchmark(benchmark::State& state,
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
   auto u8rng = std::bind(
-    std::uniform_int_distribution<uint16_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
+    std::uniform_int_distribution<int32_t>(
+      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max()),
+    std::ref(rng));
 
   std::vector<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));

@@ -564,7 +564,7 @@ void GemmMicrokernelTester::Test(
       (void*) ((uintptr_t) packed_w.data() + nr() * (ks() * packed_k() * sizeof(int8_t) + 2 * sizeof(float))));
 
     // Compute 32-bit results and output quantization arguments.
-    std::fill(c_ref.begin(), c_ref.end(), 0);
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
         int32_t ksum = 0;
@@ -2364,6 +2364,7 @@ size_t NumArgsOnStack(TrampolineType type) {
       return kNumArgsOnStackForIGEMM;
     default:
       assert(false);
+      return 0;
   }
 }
 

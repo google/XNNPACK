@@ -143,7 +143,7 @@ class MeanOperatorTester {
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00)  /* NaN */);
 
       // Compute reference results.
-      std::fill(output_ref.begin(), output_ref.end(), 0.0);
+      std::fill(output_ref.begin(), output_ref.end(), 0.0f);
       for (size_t i = 0; i < input_dims[0]; i++) {
         for (size_t j = 0; j < input_dims[1]; j++) {
           for (size_t k = 0; k < input_dims[2]; k++) {
