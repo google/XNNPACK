@@ -131,17 +131,17 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c8__neoni8mm(
       const int8x16_t vb45x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
       const int8x16_t vb67x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
       const int8x16_t vb89x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
-      const int8x16_t vb1011x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
-      const int8x16_t vb1213x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
-      const int8x16_t vb1415x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const int8x16_t vbABx01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const int8x16_t vbCDx01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const int8x16_t vbEFx01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
       const int8x16_t vb01x89ABCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
       const int8x16_t vb23x89ABCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
       const int8x16_t vb45x89ABCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
       const int8x16_t vb67x89ABCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
       const int8x16_t vb89x89ABCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
-      const int8x16_t vb1011x89ABCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
-      const int8x16_t vb1213x89ABCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
-      const int8x16_t vb1415x89ABCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const int8x16_t vbABx89ABCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const int8x16_t vbCDx89ABCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const int8x16_t vbEFx89ABCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
 
       // Multiply-accumulate: 4x8 * 8x16 --> 4x16.
       vacc01x01 = vmmlaq_s32(vacc01x01, va01x01234567, vb01x01234567);
@@ -149,76 +149,71 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c8__neoni8mm(
       vacc01x45 = vmmlaq_s32(vacc01x45, va01x01234567, vb45x01234567);
       vacc01x67 = vmmlaq_s32(vacc01x67, va01x01234567, vb67x01234567);
       vacc01x89 = vmmlaq_s32(vacc01x89, va01x01234567, vb89x01234567);
-      vacc01xAB = vmmlaq_s32(vacc01xAB, va01x01234567, vb1011x01234567);
-      vacc01xCD = vmmlaq_s32(vacc01xCD, va01x01234567, vb1213x01234567);
-      vacc01xEF = vmmlaq_s32(vacc01xEF, va01x01234567, vb1415x01234567);
+      vacc01xAB = vmmlaq_s32(vacc01xAB, va01x01234567, vbABx01234567);
+      vacc01xCD = vmmlaq_s32(vacc01xCD, va01x01234567, vbCDx01234567);
+      vacc01xEF = vmmlaq_s32(vacc01xEF, va01x01234567, vbEFx01234567);
       vacc23x01 = vmmlaq_s32(vacc23x01, va23x01234567, vb01x01234567);
       vacc23x23 = vmmlaq_s32(vacc23x23, va23x01234567, vb23x01234567);
       vacc23x45 = vmmlaq_s32(vacc23x45, va23x01234567, vb45x01234567);
       vacc23x67 = vmmlaq_s32(vacc23x67, va23x01234567, vb67x01234567);
       vacc23x89 = vmmlaq_s32(vacc23x89, va23x01234567, vb89x01234567);
-      vacc23xAB = vmmlaq_s32(vacc23xAB, va23x01234567, vb1011x01234567);
-      vacc23xCD = vmmlaq_s32(vacc23xCD, va23x01234567, vb1213x01234567);
-      vacc23xEF = vmmlaq_s32(vacc23xEF, va23x01234567, vb1415x01234567);
+      vacc23xAB = vmmlaq_s32(vacc23xAB, va23x01234567, vbABx01234567);
+      vacc23xCD = vmmlaq_s32(vacc23xCD, va23x01234567, vbCDx01234567);
+      vacc23xEF = vmmlaq_s32(vacc23xEF, va23x01234567, vbEFx01234567);
       vacc01x01 = vmmlaq_s32(vacc01x01, va01x89ABCDEF, vb01x89ABCDEF);
       vacc01x23 = vmmlaq_s32(vacc01x23, va01x89ABCDEF, vb23x89ABCDEF);
       vacc01x45 = vmmlaq_s32(vacc01x45, va01x89ABCDEF, vb45x89ABCDEF);
       vacc01x67 = vmmlaq_s32(vacc01x67, va01x89ABCDEF, vb67x89ABCDEF);
       vacc01x89 = vmmlaq_s32(vacc01x89, va01x89ABCDEF, vb89x89ABCDEF);
-      vacc01xAB = vmmlaq_s32(vacc01xAB, va01x89ABCDEF, vb1011x89ABCDEF);
-      vacc01xCD = vmmlaq_s32(vacc01xCD, va01x89ABCDEF, vb1213x89ABCDEF);
-      vacc01xEF = vmmlaq_s32(vacc01xEF, va01x89ABCDEF, vb1415x89ABCDEF);
+      vacc01xAB = vmmlaq_s32(vacc01xAB, va01x89ABCDEF, vbABx89ABCDEF);
+      vacc01xCD = vmmlaq_s32(vacc01xCD, va01x89ABCDEF, vbCDx89ABCDEF);
+      vacc01xEF = vmmlaq_s32(vacc01xEF, va01x89ABCDEF, vbEFx89ABCDEF);
       vacc23x01 = vmmlaq_s32(vacc23x01, va23x89ABCDEF, vb01x89ABCDEF);
       vacc23x23 = vmmlaq_s32(vacc23x23, va23x89ABCDEF, vb23x89ABCDEF);
       vacc23x45 = vmmlaq_s32(vacc23x45, va23x89ABCDEF, vb45x89ABCDEF);
       vacc23x67 = vmmlaq_s32(vacc23x67, va23x89ABCDEF, vb67x89ABCDEF);
       vacc23x89 = vmmlaq_s32(vacc23x89, va23x89ABCDEF, vb89x89ABCDEF);
-      vacc23xAB = vmmlaq_s32(vacc23xAB, va23x89ABCDEF, vb1011x89ABCDEF);
-      vacc23xCD = vmmlaq_s32(vacc23xCD, va23x89ABCDEF, vb1213x89ABCDEF);
-      vacc23xEF = vmmlaq_s32(vacc23xEF, va23x89ABCDEF, vb1415x89ABCDEF);
+      vacc23xAB = vmmlaq_s32(vacc23xAB, va23x89ABCDEF, vbABx89ABCDEF);
+      vacc23xCD = vmmlaq_s32(vacc23xCD, va23x89ABCDEF, vbCDx89ABCDEF);
+      vacc23xEF = vmmlaq_s32(vacc23xEF, va23x89ABCDEF, vbEFx89ABCDEF);
 
       k -= 16 * sizeof(int8_t);
     }
-    // Handle up to 16 final positions of `k`
+    // Handle up to 8 final positions of `k`
     if XNN_UNLIKELY(k != 0) {
-      do {
-        // Load a 4x8 block of activations.
-        va01x0123456789ABCDEF.val[0] = vld1q_lane_u64((const void*) a0, va01x0123456789ABCDEF.val[0], 0); a0 += 8;
-        va01x0123456789ABCDEF.val[0] = vld1q_lane_u64((const void*) a1, va01x0123456789ABCDEF.val[0], 1); a1 += 8;
-        const int8x16_t va01x01234567 = vreinterpretq_s8_u64(va01x0123456789ABCDEF.val[0]);
-        va23x0123456789ABCDEF.val[0] = vld1q_lane_u64((const void*) a2, va23x0123456789ABCDEF.val[0], 0); a2 += 8;
-        va23x0123456789ABCDEF.val[0] = vld1q_lane_u64((const void*) a3, va23x0123456789ABCDEF.val[0], 1); a3 += 8;
-        const int8x16_t va23x01234567 = vreinterpretq_s8_u64(va23x0123456789ABCDEF.val[0]);
+      // Load a 4x8 block of activations.
+      uint64x2_t va01x01234567 = vld1q_dup_u64((const void*) a0); a0 += 8;
+      uint64x2_t va23x01234567 = vld1q_dup_u64((const void*) a2); a2 += 8;
+      va01x01234567 = vld1q_lane_u64((const void*) a1, va01x01234567, 1); a1 += 8;
+      va23x01234567 = vld1q_lane_u64((const void*) a3, va23x01234567, 1); a3 += 8;
 
-        // Load a 16x16 block of weights.
-        const int8x16_t vb01x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
-        const int8x16_t vb23x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
-        const int8x16_t vb45x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
-        const int8x16_t vb67x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
-        const int8x16_t vb89x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
-        const int8x16_t vb1011x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
-        const int8x16_t vb1213x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
-        const int8x16_t vb1415x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
+      // Load a 16x16 block of weights.
+      const int8x16_t vb01x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const int8x16_t vb23x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const int8x16_t vb45x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const int8x16_t vb67x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const int8x16_t vb89x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const int8x16_t vbABx01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const int8x16_t vbCDx01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const int8x16_t vbEFx01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
 
-        // Multiply-accumulate: 4x4 * 4x16 --> 4x16.
-        vacc01x01 = vmmlaq_s32(vacc01x01, va01x01234567, vb01x01234567);
-        vacc01x23 = vmmlaq_s32(vacc01x23, va01x01234567, vb23x01234567);
-        vacc01x45 = vmmlaq_s32(vacc01x45, va01x01234567, vb45x01234567);
-        vacc01x67 = vmmlaq_s32(vacc01x67, va01x01234567, vb67x01234567);
-        vacc01x89 = vmmlaq_s32(vacc01x89, va01x01234567, vb89x01234567);
-        vacc01xAB = vmmlaq_s32(vacc01xAB, va01x01234567, vb1011x01234567);
-        vacc01xCD = vmmlaq_s32(vacc01xCD, va01x01234567, vb1213x01234567);
-        vacc01xEF = vmmlaq_s32(vacc01xEF, va01x01234567, vb1415x01234567);
-        vacc23x01 = vmmlaq_s32(vacc23x01, va23x01234567, vb01x01234567);
-        vacc23x23 = vmmlaq_s32(vacc23x23, va23x01234567, vb23x01234567);
-        vacc23x45 = vmmlaq_s32(vacc23x45, va23x01234567, vb45x01234567);
-        vacc23x67 = vmmlaq_s32(vacc23x67, va23x01234567, vb67x01234567);
-        vacc23x89 = vmmlaq_s32(vacc23x89, va23x01234567, vb89x01234567);
-        vacc23xAB = vmmlaq_s32(vacc23xAB, va23x01234567, vb1011x01234567);
-        vacc23xCD = vmmlaq_s32(vacc23xCD, va23x01234567, vb1213x01234567);
-        vacc23xEF = vmmlaq_s32(vacc23xEF, va23x01234567, vb1415x01234567);
-        k -= 8 * sizeof(int8_t);
-      } while (k != 0);
+      // Multiply-accumulate: 4x4 * 4x16 --> 4x16.
+      vacc01x01 = vmmlaq_s32(vacc01x01, vreinterpretq_s8_u64(va01x01234567), vb01x01234567);
+      vacc01x23 = vmmlaq_s32(vacc01x23, vreinterpretq_s8_u64(va01x01234567), vb23x01234567);
+      vacc01x45 = vmmlaq_s32(vacc01x45, vreinterpretq_s8_u64(va01x01234567), vb45x01234567);
+      vacc01x67 = vmmlaq_s32(vacc01x67, vreinterpretq_s8_u64(va01x01234567), vb67x01234567);
+      vacc01x89 = vmmlaq_s32(vacc01x89, vreinterpretq_s8_u64(va01x01234567), vb89x01234567);
+      vacc01xAB = vmmlaq_s32(vacc01xAB, vreinterpretq_s8_u64(va01x01234567), vbABx01234567);
+      vacc01xCD = vmmlaq_s32(vacc01xCD, vreinterpretq_s8_u64(va01x01234567), vbCDx01234567);
+      vacc01xEF = vmmlaq_s32(vacc01xEF, vreinterpretq_s8_u64(va01x01234567), vbEFx01234567);
+      vacc23x01 = vmmlaq_s32(vacc23x01, vreinterpretq_s8_u64(va23x01234567), vb01x01234567);
+      vacc23x23 = vmmlaq_s32(vacc23x23, vreinterpretq_s8_u64(va23x01234567), vb23x01234567);
+      vacc23x45 = vmmlaq_s32(vacc23x45, vreinterpretq_s8_u64(va23x01234567), vb45x01234567);
+      vacc23x67 = vmmlaq_s32(vacc23x67, vreinterpretq_s8_u64(va23x01234567), vb67x01234567);
+      vacc23x89 = vmmlaq_s32(vacc23x89, vreinterpretq_s8_u64(va23x01234567), vb89x01234567);
+      vacc23xAB = vmmlaq_s32(vacc23xAB, vreinterpretq_s8_u64(va23x01234567), vbABx01234567);
+      vacc23xCD = vmmlaq_s32(vacc23xCD, vreinterpretq_s8_u64(va23x01234567), vbCDx01234567);
+      vacc23xEF = vmmlaq_s32(vacc23xEF, vreinterpretq_s8_u64(va23x01234567), vbEFx01234567);
     }
 
     int32x4_t vacc0x0123 = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vacc01x01), vreinterpretq_u64_s32(vacc01x23)));

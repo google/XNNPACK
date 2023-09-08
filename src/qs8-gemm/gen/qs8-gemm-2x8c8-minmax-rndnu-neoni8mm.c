@@ -95,27 +95,23 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_2x8c8__neoni8mm(
 
       k -= 16 * sizeof(int8_t);
     }
-    // Handle up to 16 final positions of `k`
+    // Handle up to 8 final positions of `k`
     if XNN_UNLIKELY(k != 0) {
-      do {
-        // Load a 2x8 block of activations.
-        va01x0123456789ABCDEF.val[0] = vld1q_lane_u64((const void*) a0, va01x0123456789ABCDEF.val[0], 0); a0 += 8;
-        va01x0123456789ABCDEF.val[0] = vld1q_lane_u64((const void*) a1, va01x0123456789ABCDEF.val[0], 1); a1 += 8;
-        const int8x16_t va01x01234567 = vreinterpretq_s8_u64(va01x0123456789ABCDEF.val[0]);
+      // Load a 2x8 block of activations.
+      uint64x2_t va01x01234567 = vld1q_dup_u64((const void*) a0); a0 += 8;
+      va01x01234567 = vld1q_lane_u64((const void*) a1, va01x01234567, 1); a1 += 8;
 
-        // Load a 16x8 block of weights.
-        const int8x16_t vb01x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
-        const int8x16_t vb23x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
-        const int8x16_t vb45x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
-        const int8x16_t vb67x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
+      // Load a 16x8 block of weights.
+      const int8x16_t vb01x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const int8x16_t vb23x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const int8x16_t vb45x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const int8x16_t vb67x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
 
-        // Multiply-accumulate: 2x4 * 4x8 --> 2x8.
-        vacc01x01 = vmmlaq_s32(vacc01x01, va01x01234567, vb01x01234567);
-        vacc01x23 = vmmlaq_s32(vacc01x23, va01x01234567, vb23x01234567);
-        vacc01x45 = vmmlaq_s32(vacc01x45, va01x01234567, vb45x01234567);
-        vacc01x67 = vmmlaq_s32(vacc01x67, va01x01234567, vb67x01234567);
-        k -= 8 * sizeof(int8_t);
-      } while (k != 0);
+      // Multiply-accumulate: 2x4 * 4x8 --> 2x8.
+      vacc01x01 = vmmlaq_s32(vacc01x01, vreinterpretq_s8_u64(va01x01234567), vb01x01234567);
+      vacc01x23 = vmmlaq_s32(vacc01x23, vreinterpretq_s8_u64(va01x01234567), vb23x01234567);
+      vacc01x45 = vmmlaq_s32(vacc01x45, vreinterpretq_s8_u64(va01x01234567), vb45x01234567);
+      vacc01x67 = vmmlaq_s32(vacc01x67, vreinterpretq_s8_u64(va01x01234567), vb67x01234567);
     }
 
     int32x4_t vacc0x0123 = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vacc01x01), vreinterpretq_u64_s32(vacc01x23)));

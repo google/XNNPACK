@@ -16,7 +16,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c8__neoni8mm(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c8__neoni8mm(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -29,7 +29,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c8__neoni8mm(
     const union xnn_qs8_qc8w_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
-  assert(mr <= 2);
+  assert(mr <= 1);
   assert(nc != 0);
   assert(kc != 0);
   assert(kc % sizeof(int8_t) == 0);
@@ -40,12 +40,6 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c8__neoni8mm(
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const int8_t* a0 = a;
   int8_t* c0 = c;
-  const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
-  int8_t* c1 = (int8_t*) ((uintptr_t) c0 + cm_stride);
-  if XNN_UNPREDICTABLE(mr != 2) {
-    a1 = a0;
-    c1 = c0;
-  }
 
   // Loop over groups of 16 columns.
   do {
@@ -73,9 +67,8 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c8__neoni8mm(
     va01x0123456789ABCDEF.val[1] = vdupq_n_u64(0);
 
     while (k >= 16 * sizeof(int8_t)) {
-      // Load a 2x16 block of activations.
+      // Load a 1x16 block of activations.
       va01x0123456789ABCDEF = vld2q_lane_u64((const void*) a0, va01x0123456789ABCDEF, 0); a0 += 16;
-      va01x0123456789ABCDEF = vld2q_lane_u64((const void*) a1, va01x0123456789ABCDEF, 1); a1 += 16;
 
       const int8x16_t va01x01234567 = vreinterpretq_s8_u64(va01x0123456789ABCDEF.val[0]);
       const int8x16_t va01x89ABCDEF = vreinterpretq_s8_u64(va01x0123456789ABCDEF.val[1]);
@@ -98,7 +91,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c8__neoni8mm(
       const int8x16_t vbCDx89ABCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
       const int8x16_t vbEFx89ABCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
 
-      // Multiply-accumulate: 2x8 * 8x16 --> 2x16.
+      // Multiply-accumulate: 1x8 * 8x16 --> 1x16.
       vacc01x01 = vmmlaq_s32(vacc01x01, va01x01234567, vb01x01234567);
       vacc01x23 = vmmlaq_s32(vacc01x23, va01x01234567, vb23x01234567);
       vacc01x45 = vmmlaq_s32(vacc01x45, va01x01234567, vb45x01234567);
@@ -120,9 +113,8 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c8__neoni8mm(
     }
     // Handle up to 8 final positions of `k`
     if XNN_UNLIKELY(k != 0) {
-      // Load a 2x8 block of activations.
+      // Load a 1x8 block of activations.
       uint64x2_t va01x01234567 = vld1q_dup_u64((const void*) a0); a0 += 8;
-      va01x01234567 = vld1q_lane_u64((const void*) a1, va01x01234567, 1); a1 += 8;
 
       // Load a 16x16 block of weights.
       const int8x16_t vb01x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
@@ -134,7 +126,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c8__neoni8mm(
       const int8x16_t vbCDx01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
       const int8x16_t vbEFx01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
 
-      // Multiply-accumulate: 2x4 * 4x16 --> 2x16.
+      // Multiply-accumulate: 1x4 * 4x16 --> 1x16.
       vacc01x01 = vmmlaq_s32(vacc01x01, vreinterpretq_s8_u64(va01x01234567), vb01x01234567);
       vacc01x23 = vmmlaq_s32(vacc01x23, vreinterpretq_s8_u64(va01x01234567), vb23x01234567);
       vacc01x45 = vmmlaq_s32(vacc01x45, vreinterpretq_s8_u64(va01x01234567), vb45x01234567);
@@ -146,105 +138,74 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c8__neoni8mm(
     }
 
     int32x4_t vacc0x0123 = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vacc01x01), vreinterpretq_u64_s32(vacc01x23)));
-    int32x4_t vacc1x0123 = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vacc01x01), vreinterpretq_u64_s32(vacc01x23)));
     int32x4_t vacc0x4567 = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vacc01x45), vreinterpretq_u64_s32(vacc01x67)));
-    int32x4_t vacc1x4567 = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vacc01x45), vreinterpretq_u64_s32(vacc01x67)));
     int32x4_t vacc0x89AB = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vacc01x89), vreinterpretq_u64_s32(vacc01xAB)));
-    int32x4_t vacc1x89AB = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vacc01x89), vreinterpretq_u64_s32(vacc01xAB)));
     int32x4_t vacc0xCDEF = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vacc01xCD), vreinterpretq_u64_s32(vacc01xEF)));
-    int32x4_t vacc1xCDEF = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vacc01xCD), vreinterpretq_u64_s32(vacc01xEF)));
     float32x4_t vfpacc0x0123 = vcvtq_f32_s32(vacc0x0123);
     float32x4_t vfpacc0x4567 = vcvtq_f32_s32(vacc0x4567);
     float32x4_t vfpacc0x89AB = vcvtq_f32_s32(vacc0x89AB);
     float32x4_t vfpacc0xCDEF = vcvtq_f32_s32(vacc0xCDEF);
-    float32x4_t vfpacc1x0123 = vcvtq_f32_s32(vacc1x0123);
-    float32x4_t vfpacc1x4567 = vcvtq_f32_s32(vacc1x4567);
-    float32x4_t vfpacc1x89AB = vcvtq_f32_s32(vacc1x89AB);
-    float32x4_t vfpacc1xCDEF = vcvtq_f32_s32(vacc1xCDEF);
 
     const float32x4_t vscale0123 = vld1q_f32((const float*) w); w = (const float*) w + 4;
     vfpacc0x0123 = vmulq_f32(vfpacc0x0123, vscale0123);
-    vfpacc1x0123 = vmulq_f32(vfpacc1x0123, vscale0123);
     const float32x4_t vscale4567 = vld1q_f32((const float*) w); w = (const float*) w + 4;
     vfpacc0x4567 = vmulq_f32(vfpacc0x4567, vscale4567);
-    vfpacc1x4567 = vmulq_f32(vfpacc1x4567, vscale4567);
     const float32x4_t vscale89AB = vld1q_f32((const float*) w); w = (const float*) w + 4;
     vfpacc0x89AB = vmulq_f32(vfpacc0x89AB, vscale89AB);
-    vfpacc1x89AB = vmulq_f32(vfpacc1x89AB, vscale89AB);
     const float32x4_t vscaleCDEF = vld1q_f32((const float*) w); w = (const float*) w + 4;
     vfpacc0xCDEF = vmulq_f32(vfpacc0xCDEF, vscaleCDEF);
-    vfpacc1xCDEF = vmulq_f32(vfpacc1xCDEF, vscaleCDEF);
 
     vacc0x0123 = vcvtnq_s32_f32(vfpacc0x0123);
     vacc0x4567 = vcvtnq_s32_f32(vfpacc0x4567);
     vacc0x89AB = vcvtnq_s32_f32(vfpacc0x89AB);
     vacc0xCDEF = vcvtnq_s32_f32(vfpacc0xCDEF);
-    vacc1x0123 = vcvtnq_s32_f32(vfpacc1x0123);
-    vacc1x4567 = vcvtnq_s32_f32(vfpacc1x4567);
-    vacc1x89AB = vcvtnq_s32_f32(vfpacc1x89AB);
-    vacc1xCDEF = vcvtnq_s32_f32(vfpacc1xCDEF);
 
     const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->fp32_neonv8.output_zero_point);
     #if XNN_ARCH_ARM64
       const int16x8_t vacc0x01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0x0123), vacc0x4567), voutput_zero_point);
       const int16x8_t vacc0x89ABCDEF = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0x89AB), vacc0xCDEF), voutput_zero_point);
-      const int16x8_t vacc1x01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc1x0123), vacc1x4567), voutput_zero_point);
-      const int16x8_t vacc1x89ABCDEF = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc1x89AB), vacc1xCDEF), voutput_zero_point);
 
       int8x16_t vout0x0123456789ABCDEF = vqmovn_high_s16(vqmovn_s16(vacc0x01234567), vacc0x89ABCDEF);
-      int8x16_t vout1x0123456789ABCDEF = vqmovn_high_s16(vqmovn_s16(vacc1x01234567), vacc1x89ABCDEF);
     #else
       const int16x8_t vacc0x01234567 = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc0x0123), vqmovn_s32(vacc0x4567)), voutput_zero_point);
       const int16x8_t vacc0x89ABCDEF = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc0x89AB), vqmovn_s32(vacc0xCDEF)), voutput_zero_point);
-      const int16x8_t vacc1x01234567 = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc1x0123), vqmovn_s32(vacc1x4567)), voutput_zero_point);
-      const int16x8_t vacc1x89ABCDEF = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc1x89AB), vqmovn_s32(vacc1xCDEF)), voutput_zero_point);
 
       int8x16_t vout0x0123456789ABCDEF = vcombine_s8(vqmovn_s16(vacc0x01234567), vqmovn_s16(vacc0x89ABCDEF));
-      int8x16_t vout1x0123456789ABCDEF = vcombine_s8(vqmovn_s16(vacc1x01234567), vqmovn_s16(vacc1x89ABCDEF));
     #endif
     const int8x16_t voutput_min = vld1q_dup_s8(&params->fp32_neonv8.output_min);
     const int8x16_t voutput_max = vld1q_dup_s8(&params->fp32_neonv8.output_max);
 
     vout0x0123456789ABCDEF = vmaxq_s8(vout0x0123456789ABCDEF, voutput_min);
-    vout1x0123456789ABCDEF = vmaxq_s8(vout1x0123456789ABCDEF, voutput_min);
 
     vout0x0123456789ABCDEF = vminq_s8(vout0x0123456789ABCDEF, voutput_max);
-    vout1x0123456789ABCDEF = vminq_s8(vout1x0123456789ABCDEF, voutput_max);
 
     if (nc >= 16) {
       // Main case where there the 16 columns fit in the destination.
       vst1q_s8(c0 + 0, vout0x0123456789ABCDEF);
-      vst1q_s8(c1 + 0, vout1x0123456789ABCDEF);
 
       // Advance to the next 16 columns.
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
-      c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
-      a1 = (const int8_t*) ((uintptr_t) a1 - kc);
 
       nc -= 16;
     } else {
       // Final case where not all of the 16 columns fit in the destination.
-      int8x16_t vout0x01234567_1x01234567 = vcombine_s8(vget_low_s8(vout0x0123456789ABCDEF), vget_low_s8(vout1x0123456789ABCDEF));
+      int8x8_t vout0x01234567 = vget_low_s8(vout0x0123456789ABCDEF);
       if (nc & 8) {
-        vst1_s8(c0, vget_low_s8(vout0x01234567_1x01234567)); c0 += 8;
-        vst1_s8(c1, vget_high_s8(vout0x01234567_1x01234567)); c1 += 8;
-        vout0x01234567_1x01234567 = vcombine_s8(vget_high_s8(vout0x0123456789ABCDEF), vget_high_s8(vout1x0123456789ABCDEF));
+        vst1_s8(c0, vout0x01234567); c0 += 8;
+        vout0x01234567 = vget_high_s8(vout0x0123456789ABCDEF);
       }
       if (nc & 4) {
-        vst1q_lane_u32((void*) c0, vreinterpretq_u32_s8(vout0x01234567_1x01234567), 0); c0 += 4;
-        vst1q_lane_u32((void*) c1, vreinterpretq_u32_s8(vout0x01234567_1x01234567), 2); c1 += 4;
-        vout0x01234567_1x01234567 = vextq_s8(vout0x01234567_1x01234567, vout0x01234567_1x01234567, 4);
+        vst1_lane_u32((void*) c0, vreinterpret_u32_s8(vout0x01234567), 0); c0 += 4;
+        vout0x01234567 = vext_s8(vout0x01234567, vout0x01234567, 4);
       }
       if (nc & 2) {
-        vst1q_lane_u16((void*) c0, vreinterpretq_u16_s8(vout0x01234567_1x01234567), 0); c0 += 2;
-        vst1q_lane_u16((void*) c1, vreinterpretq_u16_s8(vout0x01234567_1x01234567), 4); c1 += 2;
-        vout0x01234567_1x01234567 = vextq_s8(vout0x01234567_1x01234567, vout0x01234567_1x01234567, 2);
+        vst1_lane_u16((void*) c0, vreinterpret_u16_s8(vout0x01234567), 0); c0 += 2;
+        vout0x01234567 = vext_s8(vout0x01234567, vout0x01234567, 2);
       }
       if (nc & 1) {
-        vst1q_lane_s8(c0, vout0x01234567_1x01234567, 0);
-        vst1q_lane_s8(c1, vout0x01234567_1x01234567, 8);
+        vst1_lane_s8(c0, vout0x01234567, 0);
       }
 
       nc = 0;
