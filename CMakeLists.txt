@@ -1116,6 +1116,7 @@ IF(XNNPACK_BUILD_TESTS)
     ADD_TEST(NAME elu-nc-eager-test COMMAND elu-nc-eager-test)
 
     ADD_EXECUTABLE(fully-connected-nc-test test/fully-connected-nc.cc)
+    SET_TARGET_PROPERTIES(fully-connected-nc-test PROPERTIES CXX_EXTENSIONS YES)
     TARGET_INCLUDE_DIRECTORIES(fully-connected-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(fully-connected-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME fully-connected-nc-test COMMAND fully-connected-nc-test)

@@ -143,6 +143,8 @@
   string: "Fully Connected (NC, QD8, F32, QC8W)"
 - name: xnn_operator_type_fully_connected_nc_qs8
   string: "Fully Connected (NC, QS8)"
+- name: xnn_operator_type_fully_connected_nc_qs8_qc8w
+  string: "Fully Connected (NC, QS8, QC8W)"
 - name: xnn_operator_type_fully_connected_nc_qu8
   string: "Fully Connected (NC, QU8)"
 - name: xnn_operator_type_global_average_pooling_ncw_f16
