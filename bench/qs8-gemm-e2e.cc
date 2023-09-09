@@ -44,7 +44,7 @@ static void GEMMEnd2EndBenchmark(
     return;
   }
 
-  struct xnn_gemm_config* gemm_config = xnn_init_qu8_gemm_config();
+  struct xnn_gemm_config* gemm_config = xnn_init_qs8_gemm_config();
   assert(gemm_config != nullptr);
 
   // Override microkernels chosen in xnn_initialize
@@ -344,6 +344,97 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_QS8_END2END(qs8_gemm_2x8c8__asm_aarch64_neon_mlal)
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
+#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+  static void qs8_gemm_2x8c8__neoni8mm(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_2x8c8__neoni8mm,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_2x8c8__neoni8mm,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c8__neoni8mm,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_1x8c8__neoni8mm,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/2, 8 /*nr=*/, /*log2_kr=*/3, /*log2_sr=*/0,
+      benchmark::utils::CheckNEONI8MM);
+  }
+  static void qs8_gemm_4x8c8__neoni8mm(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c8__neoni8mm,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c8__neoni8mm,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c8__neoni8mm,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_1x8c8__neoni8mm,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/4, 8 /*nr=*/, /*log2_kr=*/3, /*log2_sr=*/0,
+      benchmark::utils::CheckNEONI8MM);
+  }
+  static void qs8_gemm_6x8c8__neoni8mm(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_6x8c8__neoni8mm,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_6x8c8__neoni8mm,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c8__neoni8mm,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_1x8c8__neoni8mm,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/6, 8 /*nr=*/, /*log2_kr=*/3, /*log2_sr=*/0,
+      benchmark::utils::CheckNEONI8MM);
+  }
+  static void qs8_gemm_8x8c8__neoni8mm(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_8x8c8__neoni8mm,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_8x8c8__neoni8mm,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c8__neoni8mm,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_1x8c8__neoni8mm,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/8, 8 /*nr=*/, /*log2_kr=*/3, /*log2_sr=*/0,
+      benchmark::utils::CheckNEONI8MM);
+  }
+  static void qs8_gemm_2x16c8__neoni8mm(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_2x16c8__neoni8mm,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_2x16c8__neoni8mm,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c8__neoni8mm,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_1x16c8__neoni8mm,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/2, /*nr=*/16, /*log2_kr=*/3, /*log2_sr=*/0,
+      benchmark::utils::CheckNEONI8MM);
+  }
+  static void qs8_gemm_4x16c8__neoni8mm(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c8__neoni8mm,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_4x16c8__neoni8mm,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c8__neoni8mm,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_1x16c8__neoni8mm,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/4, /*nr=*/16, /*log2_kr=*/3, /*log2_sr=*/0,
+      benchmark::utils::CheckNEONI8MM);
+  }
+  static void qs8_gemm_6x16c8__neoni8mm(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_6x16c8__neoni8mm,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_6x16c8__neoni8mm,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c8__neoni8mm,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_1x16c8__neoni8mm,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/6, /*nr=*/16, /*log2_kr=*/3, /*log2_sr=*/0,
+      benchmark::utils::CheckNEONI8MM);
+  }
+  static void qs8_gemm_8x16c8__neoni8mm(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_8x16c8__neoni8mm,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_8x16c8__neoni8mm,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c8__neoni8mm,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_1x16c8__neoni8mm,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/8, /*nr=*/16, /*log2_kr=*/3, /*log2_sr=*/0,
+      benchmark::utils::CheckNEONI8MM);
+  }
+
+  BENCHMARK_QS8_END2END(qs8_gemm_2x8c8__neoni8mm);
+  BENCHMARK_QS8_END2END(qs8_gemm_4x8c8__neoni8mm);
+  BENCHMARK_QS8_END2END(qs8_gemm_6x8c8__neoni8mm);
+  BENCHMARK_QS8_END2END(qs8_gemm_8x8c8__neoni8mm);
+  BENCHMARK_QS8_END2END(qs8_gemm_2x16c8__neoni8mm);
+  BENCHMARK_QS8_END2END(qs8_gemm_4x16c8__neoni8mm);
+  BENCHMARK_QS8_END2END(qs8_gemm_6x16c8__neoni8mm);
+  BENCHMARK_QS8_END2END(qs8_gemm_8x16c8__neoni8mm);
+#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
 
 #if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void qs8_gemm_4x8c4__neondot(benchmark::State& state, models::ExecutionPlanFactory model) {
