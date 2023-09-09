@@ -135,9 +135,6 @@
   k-block: 4
 
 # ARM NEONI8MM
- - name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8c8__neoni8mm
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
-  k-block: 8
 - name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__neoni8mm
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
   k-block: 8
@@ -148,6 +145,9 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
   k-block: 8
 - name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c8__neoni8mm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
+  k-block: 8
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8c8__neoni8mm
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
   k-block: 8
 - name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c8__neoni8mm
