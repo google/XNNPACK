@@ -140,132 +140,133 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
   alignas(16) static std::array<uint8_t, 1024 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v116;
   alignas(16) static std::array<uint8_t, 1001 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v117;
   alignas(16) static std::array<uint8_t, 1001 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v118;
-  alignas(16) static std::array<uint8_t, 432 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w119;
-  alignas(16) static std::array<int32_t, 16 + XNN_EXTRA_BYTES / sizeof(int32_t)> w120;
-  alignas(16) static std::array<uint8_t, 144 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w121;
-  alignas(16) static std::array<int32_t, 16 + XNN_EXTRA_BYTES / sizeof(int32_t)> w122;
-  alignas(16) static std::array<uint8_t, 128 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w123;
-  alignas(16) static std::array<int32_t, 8 + XNN_EXTRA_BYTES / sizeof(int32_t)> w124;
-  alignas(16) static std::array<uint8_t, 128 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w125;
-  alignas(16) static std::array<int32_t, 16 + XNN_EXTRA_BYTES / sizeof(int32_t)> w126;
-  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w127;
+  alignas(16) static std::array<uint8_t, 1001 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v119;
+  alignas(16) static std::array<uint8_t, 432 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w120;
+  alignas(16) static std::array<int32_t, 16 + XNN_EXTRA_BYTES / sizeof(int32_t)> w121;
+  alignas(16) static std::array<uint8_t, 144 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w122;
+  alignas(16) static std::array<int32_t, 16 + XNN_EXTRA_BYTES / sizeof(int32_t)> w123;
+  alignas(16) static std::array<uint8_t, 128 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w124;
+  alignas(16) static std::array<int32_t, 8 + XNN_EXTRA_BYTES / sizeof(int32_t)> w125;
+  alignas(16) static std::array<uint8_t, 128 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w126;
+  alignas(16) static std::array<int32_t, 16 + XNN_EXTRA_BYTES / sizeof(int32_t)> w127;
   alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w128;
-  alignas(16) static std::array<uint8_t, 256 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w129;
-  alignas(16) static std::array<int32_t, 16 + XNN_EXTRA_BYTES / sizeof(int32_t)> w130;
-  alignas(16) static std::array<uint8_t, 1152 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w131;
-  alignas(16) static std::array<int32_t, 72 + XNN_EXTRA_BYTES / sizeof(int32_t)> w132;
-  alignas(16) static std::array<uint8_t, 648 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w133;
-  alignas(16) static std::array<int32_t, 72 + XNN_EXTRA_BYTES / sizeof(int32_t)> w134;
-  alignas(16) static std::array<uint8_t, 1728 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w135;
-  alignas(16) static std::array<int32_t, 24 + XNN_EXTRA_BYTES / sizeof(int32_t)> w136;
-  alignas(16) static std::array<uint8_t, 2112 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w137;
-  alignas(16) static std::array<int32_t, 88 + XNN_EXTRA_BYTES / sizeof(int32_t)> w138;
-  alignas(16) static std::array<uint8_t, 792 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w139;
-  alignas(16) static std::array<int32_t, 88 + XNN_EXTRA_BYTES / sizeof(int32_t)> w140;
-  alignas(16) static std::array<uint8_t, 2112 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w141;
-  alignas(16) static std::array<int32_t, 24 + XNN_EXTRA_BYTES / sizeof(int32_t)> w142;
-  alignas(16) static std::array<uint8_t, 2304 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w143;
-  alignas(16) static std::array<int32_t, 96 + XNN_EXTRA_BYTES / sizeof(int32_t)> w144;
-  alignas(16) static std::array<uint8_t, 2400 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w145;
-  alignas(16) static std::array<int32_t, 96 + XNN_EXTRA_BYTES / sizeof(int32_t)> w146;
-  alignas(16) static std::array<uint8_t, 2304 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w147;
-  alignas(16) static std::array<int32_t, 24 + XNN_EXTRA_BYTES / sizeof(int32_t)> w148;
-  alignas(16) static std::array<uint8_t, 2304 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w149;
-  alignas(16) static std::array<int32_t, 96 + XNN_EXTRA_BYTES / sizeof(int32_t)> w150;
-  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w151;
+  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w129;
+  alignas(16) static std::array<uint8_t, 256 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w130;
+  alignas(16) static std::array<int32_t, 16 + XNN_EXTRA_BYTES / sizeof(int32_t)> w131;
+  alignas(16) static std::array<uint8_t, 1152 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w132;
+  alignas(16) static std::array<int32_t, 72 + XNN_EXTRA_BYTES / sizeof(int32_t)> w133;
+  alignas(16) static std::array<uint8_t, 648 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w134;
+  alignas(16) static std::array<int32_t, 72 + XNN_EXTRA_BYTES / sizeof(int32_t)> w135;
+  alignas(16) static std::array<uint8_t, 1728 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w136;
+  alignas(16) static std::array<int32_t, 24 + XNN_EXTRA_BYTES / sizeof(int32_t)> w137;
+  alignas(16) static std::array<uint8_t, 2112 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w138;
+  alignas(16) static std::array<int32_t, 88 + XNN_EXTRA_BYTES / sizeof(int32_t)> w139;
+  alignas(16) static std::array<uint8_t, 792 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w140;
+  alignas(16) static std::array<int32_t, 88 + XNN_EXTRA_BYTES / sizeof(int32_t)> w141;
+  alignas(16) static std::array<uint8_t, 2112 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w142;
+  alignas(16) static std::array<int32_t, 24 + XNN_EXTRA_BYTES / sizeof(int32_t)> w143;
+  alignas(16) static std::array<uint8_t, 2304 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w144;
+  alignas(16) static std::array<int32_t, 96 + XNN_EXTRA_BYTES / sizeof(int32_t)> w145;
+  alignas(16) static std::array<uint8_t, 2400 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w146;
+  alignas(16) static std::array<int32_t, 96 + XNN_EXTRA_BYTES / sizeof(int32_t)> w147;
+  alignas(16) static std::array<uint8_t, 2304 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w148;
+  alignas(16) static std::array<int32_t, 24 + XNN_EXTRA_BYTES / sizeof(int32_t)> w149;
+  alignas(16) static std::array<uint8_t, 2304 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w150;
+  alignas(16) static std::array<int32_t, 96 + XNN_EXTRA_BYTES / sizeof(int32_t)> w151;
   alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w152;
-  alignas(16) static std::array<uint8_t, 3840 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w153;
-  alignas(16) static std::array<int32_t, 40 + XNN_EXTRA_BYTES / sizeof(int32_t)> w154;
-  alignas(16) static std::array<uint8_t, 9600 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w155;
-  alignas(16) static std::array<int32_t, 240 + XNN_EXTRA_BYTES / sizeof(int32_t)> w156;
-  alignas(16) static std::array<uint8_t, 6000 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w157;
-  alignas(16) static std::array<int32_t, 240 + XNN_EXTRA_BYTES / sizeof(int32_t)> w158;
-  alignas(16) static std::array<uint8_t, 15360 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w159;
-  alignas(16) static std::array<int32_t, 64 + XNN_EXTRA_BYTES / sizeof(int32_t)> w160;
-  alignas(16) static std::array<uint8_t, 15360 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w161;
-  alignas(16) static std::array<int32_t, 240 + XNN_EXTRA_BYTES / sizeof(int32_t)> w162;
-  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w163;
+  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w153;
+  alignas(16) static std::array<uint8_t, 3840 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w154;
+  alignas(16) static std::array<int32_t, 40 + XNN_EXTRA_BYTES / sizeof(int32_t)> w155;
+  alignas(16) static std::array<uint8_t, 9600 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w156;
+  alignas(16) static std::array<int32_t, 240 + XNN_EXTRA_BYTES / sizeof(int32_t)> w157;
+  alignas(16) static std::array<uint8_t, 6000 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w158;
+  alignas(16) static std::array<int32_t, 240 + XNN_EXTRA_BYTES / sizeof(int32_t)> w159;
+  alignas(16) static std::array<uint8_t, 15360 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w160;
+  alignas(16) static std::array<int32_t, 64 + XNN_EXTRA_BYTES / sizeof(int32_t)> w161;
+  alignas(16) static std::array<uint8_t, 15360 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w162;
+  alignas(16) static std::array<int32_t, 240 + XNN_EXTRA_BYTES / sizeof(int32_t)> w163;
   alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w164;
-  alignas(16) static std::array<uint8_t, 9600 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w165;
-  alignas(16) static std::array<int32_t, 40 + XNN_EXTRA_BYTES / sizeof(int32_t)> w166;
-  alignas(16) static std::array<uint8_t, 9600 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w167;
-  alignas(16) static std::array<int32_t, 240 + XNN_EXTRA_BYTES / sizeof(int32_t)> w168;
-  alignas(16) static std::array<uint8_t, 6000 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w169;
-  alignas(16) static std::array<int32_t, 240 + XNN_EXTRA_BYTES / sizeof(int32_t)> w170;
-  alignas(16) static std::array<uint8_t, 15360 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w171;
-  alignas(16) static std::array<int32_t, 64 + XNN_EXTRA_BYTES / sizeof(int32_t)> w172;
-  alignas(16) static std::array<uint8_t, 15360 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w173;
-  alignas(16) static std::array<int32_t, 240 + XNN_EXTRA_BYTES / sizeof(int32_t)> w174;
-  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w175;
+  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w165;
+  alignas(16) static std::array<uint8_t, 9600 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w166;
+  alignas(16) static std::array<int32_t, 40 + XNN_EXTRA_BYTES / sizeof(int32_t)> w167;
+  alignas(16) static std::array<uint8_t, 9600 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w168;
+  alignas(16) static std::array<int32_t, 240 + XNN_EXTRA_BYTES / sizeof(int32_t)> w169;
+  alignas(16) static std::array<uint8_t, 6000 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w170;
+  alignas(16) static std::array<int32_t, 240 + XNN_EXTRA_BYTES / sizeof(int32_t)> w171;
+  alignas(16) static std::array<uint8_t, 15360 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w172;
+  alignas(16) static std::array<int32_t, 64 + XNN_EXTRA_BYTES / sizeof(int32_t)> w173;
+  alignas(16) static std::array<uint8_t, 15360 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w174;
+  alignas(16) static std::array<int32_t, 240 + XNN_EXTRA_BYTES / sizeof(int32_t)> w175;
   alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w176;
-  alignas(16) static std::array<uint8_t, 9600 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w177;
-  alignas(16) static std::array<int32_t, 40 + XNN_EXTRA_BYTES / sizeof(int32_t)> w178;
-  alignas(16) static std::array<uint8_t, 4800 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w179;
-  alignas(16) static std::array<int32_t, 120 + XNN_EXTRA_BYTES / sizeof(int32_t)> w180;
-  alignas(16) static std::array<uint8_t, 3000 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w181;
-  alignas(16) static std::array<int32_t, 120 + XNN_EXTRA_BYTES / sizeof(int32_t)> w182;
-  alignas(16) static std::array<uint8_t, 3840 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w183;
-  alignas(16) static std::array<int32_t, 32 + XNN_EXTRA_BYTES / sizeof(int32_t)> w184;
-  alignas(16) static std::array<uint8_t, 3840 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w185;
-  alignas(16) static std::array<int32_t, 120 + XNN_EXTRA_BYTES / sizeof(int32_t)> w186;
-  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w187;
+  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w177;
+  alignas(16) static std::array<uint8_t, 9600 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w178;
+  alignas(16) static std::array<int32_t, 40 + XNN_EXTRA_BYTES / sizeof(int32_t)> w179;
+  alignas(16) static std::array<uint8_t, 4800 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w180;
+  alignas(16) static std::array<int32_t, 120 + XNN_EXTRA_BYTES / sizeof(int32_t)> w181;
+  alignas(16) static std::array<uint8_t, 3000 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w182;
+  alignas(16) static std::array<int32_t, 120 + XNN_EXTRA_BYTES / sizeof(int32_t)> w183;
+  alignas(16) static std::array<uint8_t, 3840 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w184;
+  alignas(16) static std::array<int32_t, 32 + XNN_EXTRA_BYTES / sizeof(int32_t)> w185;
+  alignas(16) static std::array<uint8_t, 3840 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w186;
+  alignas(16) static std::array<int32_t, 120 + XNN_EXTRA_BYTES / sizeof(int32_t)> w187;
   alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w188;
-  alignas(16) static std::array<uint8_t, 5760 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w189;
-  alignas(16) static std::array<int32_t, 48 + XNN_EXTRA_BYTES / sizeof(int32_t)> w190;
-  alignas(16) static std::array<uint8_t, 6912 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w191;
-  alignas(16) static std::array<int32_t, 144 + XNN_EXTRA_BYTES / sizeof(int32_t)> w192;
-  alignas(16) static std::array<uint8_t, 3600 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w193;
-  alignas(16) static std::array<int32_t, 144 + XNN_EXTRA_BYTES / sizeof(int32_t)> w194;
-  alignas(16) static std::array<uint8_t, 5760 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w195;
-  alignas(16) static std::array<int32_t, 40 + XNN_EXTRA_BYTES / sizeof(int32_t)> w196;
-  alignas(16) static std::array<uint8_t, 5760 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w197;
-  alignas(16) static std::array<int32_t, 144 + XNN_EXTRA_BYTES / sizeof(int32_t)> w198;
-  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w199;
+  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w189;
+  alignas(16) static std::array<uint8_t, 5760 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w190;
+  alignas(16) static std::array<int32_t, 48 + XNN_EXTRA_BYTES / sizeof(int32_t)> w191;
+  alignas(16) static std::array<uint8_t, 6912 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w192;
+  alignas(16) static std::array<int32_t, 144 + XNN_EXTRA_BYTES / sizeof(int32_t)> w193;
+  alignas(16) static std::array<uint8_t, 3600 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w194;
+  alignas(16) static std::array<int32_t, 144 + XNN_EXTRA_BYTES / sizeof(int32_t)> w195;
+  alignas(16) static std::array<uint8_t, 5760 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w196;
+  alignas(16) static std::array<int32_t, 40 + XNN_EXTRA_BYTES / sizeof(int32_t)> w197;
+  alignas(16) static std::array<uint8_t, 5760 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w198;
+  alignas(16) static std::array<int32_t, 144 + XNN_EXTRA_BYTES / sizeof(int32_t)> w199;
   alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w200;
-  alignas(16) static std::array<uint8_t, 6912 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w201;
-  alignas(16) static std::array<int32_t, 48 + XNN_EXTRA_BYTES / sizeof(int32_t)> w202;
-  alignas(16) static std::array<uint8_t, 13824 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w203;
-  alignas(16) static std::array<int32_t, 288 + XNN_EXTRA_BYTES / sizeof(int32_t)> w204;
-  alignas(16) static std::array<uint8_t, 7200 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w205;
-  alignas(16) static std::array<int32_t, 288 + XNN_EXTRA_BYTES / sizeof(int32_t)> w206;
-  alignas(16) static std::array<uint8_t, 20736 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w207;
-  alignas(16) static std::array<int32_t, 72 + XNN_EXTRA_BYTES / sizeof(int32_t)> w208;
-  alignas(16) static std::array<uint8_t, 20736 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w209;
-  alignas(16) static std::array<int32_t, 288 + XNN_EXTRA_BYTES / sizeof(int32_t)> w210;
-  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w211;
+  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w201;
+  alignas(16) static std::array<uint8_t, 6912 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w202;
+  alignas(16) static std::array<int32_t, 48 + XNN_EXTRA_BYTES / sizeof(int32_t)> w203;
+  alignas(16) static std::array<uint8_t, 13824 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w204;
+  alignas(16) static std::array<int32_t, 288 + XNN_EXTRA_BYTES / sizeof(int32_t)> w205;
+  alignas(16) static std::array<uint8_t, 7200 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w206;
+  alignas(16) static std::array<int32_t, 288 + XNN_EXTRA_BYTES / sizeof(int32_t)> w207;
+  alignas(16) static std::array<uint8_t, 20736 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w208;
+  alignas(16) static std::array<int32_t, 72 + XNN_EXTRA_BYTES / sizeof(int32_t)> w209;
+  alignas(16) static std::array<uint8_t, 20736 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w210;
+  alignas(16) static std::array<int32_t, 288 + XNN_EXTRA_BYTES / sizeof(int32_t)> w211;
   alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w212;
-  alignas(16) static std::array<uint8_t, 27648 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w213;
-  alignas(16) static std::array<int32_t, 96 + XNN_EXTRA_BYTES / sizeof(int32_t)> w214;
-  alignas(16) static std::array<uint8_t, 55296 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w215;
-  alignas(16) static std::array<int32_t, 576 + XNN_EXTRA_BYTES / sizeof(int32_t)> w216;
-  alignas(16) static std::array<uint8_t, 14400 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w217;
-  alignas(16) static std::array<int32_t, 576 + XNN_EXTRA_BYTES / sizeof(int32_t)> w218;
-  alignas(16) static std::array<uint8_t, 82944 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w219;
-  alignas(16) static std::array<int32_t, 144 + XNN_EXTRA_BYTES / sizeof(int32_t)> w220;
-  alignas(16) static std::array<uint8_t, 82944 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w221;
-  alignas(16) static std::array<int32_t, 576 + XNN_EXTRA_BYTES / sizeof(int32_t)> w222;
-  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w223;
+  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w213;
+  alignas(16) static std::array<uint8_t, 27648 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w214;
+  alignas(16) static std::array<int32_t, 96 + XNN_EXTRA_BYTES / sizeof(int32_t)> w215;
+  alignas(16) static std::array<uint8_t, 55296 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w216;
+  alignas(16) static std::array<int32_t, 576 + XNN_EXTRA_BYTES / sizeof(int32_t)> w217;
+  alignas(16) static std::array<uint8_t, 14400 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w218;
+  alignas(16) static std::array<int32_t, 576 + XNN_EXTRA_BYTES / sizeof(int32_t)> w219;
+  alignas(16) static std::array<uint8_t, 82944 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w220;
+  alignas(16) static std::array<int32_t, 144 + XNN_EXTRA_BYTES / sizeof(int32_t)> w221;
+  alignas(16) static std::array<uint8_t, 82944 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w222;
+  alignas(16) static std::array<int32_t, 576 + XNN_EXTRA_BYTES / sizeof(int32_t)> w223;
   alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w224;
-  alignas(16) static std::array<uint8_t, 55296 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w225;
-  alignas(16) static std::array<int32_t, 96 + XNN_EXTRA_BYTES / sizeof(int32_t)> w226;
-  alignas(16) static std::array<uint8_t, 55296 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w227;
-  alignas(16) static std::array<int32_t, 576 + XNN_EXTRA_BYTES / sizeof(int32_t)> w228;
-  alignas(16) static std::array<uint8_t, 14400 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w229;
-  alignas(16) static std::array<int32_t, 576 + XNN_EXTRA_BYTES / sizeof(int32_t)> w230;
-  alignas(16) static std::array<uint8_t, 82944 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w231;
-  alignas(16) static std::array<int32_t, 144 + XNN_EXTRA_BYTES / sizeof(int32_t)> w232;
-  alignas(16) static std::array<uint8_t, 82944 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w233;
-  alignas(16) static std::array<int32_t, 576 + XNN_EXTRA_BYTES / sizeof(int32_t)> w234;
-  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w235;
+  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w225;
+  alignas(16) static std::array<uint8_t, 55296 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w226;
+  alignas(16) static std::array<int32_t, 96 + XNN_EXTRA_BYTES / sizeof(int32_t)> w227;
+  alignas(16) static std::array<uint8_t, 55296 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w228;
+  alignas(16) static std::array<int32_t, 576 + XNN_EXTRA_BYTES / sizeof(int32_t)> w229;
+  alignas(16) static std::array<uint8_t, 14400 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w230;
+  alignas(16) static std::array<int32_t, 576 + XNN_EXTRA_BYTES / sizeof(int32_t)> w231;
+  alignas(16) static std::array<uint8_t, 82944 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w232;
+  alignas(16) static std::array<int32_t, 144 + XNN_EXTRA_BYTES / sizeof(int32_t)> w233;
+  alignas(16) static std::array<uint8_t, 82944 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w234;
+  alignas(16) static std::array<int32_t, 576 + XNN_EXTRA_BYTES / sizeof(int32_t)> w235;
   alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w236;
-  alignas(16) static std::array<uint8_t, 55296 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w237;
-  alignas(16) static std::array<int32_t, 96 + XNN_EXTRA_BYTES / sizeof(int32_t)> w238;
-  alignas(16) static std::array<uint8_t, 55296 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w239;
-  alignas(16) static std::array<int32_t, 576 + XNN_EXTRA_BYTES / sizeof(int32_t)> w240;
-  alignas(16) static std::array<uint8_t, 589824 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w241;
-  alignas(16) static std::array<int32_t, 1024 + XNN_EXTRA_BYTES / sizeof(int32_t)> w242;
-  alignas(16) static std::array<uint8_t, 1025024 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w243;
-  alignas(16) static std::array<int32_t, 1001 + XNN_EXTRA_BYTES / sizeof(int32_t)> w244;
+  alignas(16) static std::array<uint8_t, 1 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w237;
+  alignas(16) static std::array<uint8_t, 55296 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w238;
+  alignas(16) static std::array<int32_t, 96 + XNN_EXTRA_BYTES / sizeof(int32_t)> w239;
+  alignas(16) static std::array<uint8_t, 55296 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w240;
+  alignas(16) static std::array<int32_t, 576 + XNN_EXTRA_BYTES / sizeof(int32_t)> w241;
+  alignas(16) static std::array<uint8_t, 589824 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w242;
+  alignas(16) static std::array<int32_t, 1024 + XNN_EXTRA_BYTES / sizeof(int32_t)> w243;
+  alignas(16) static std::array<uint8_t, 1025024 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w244;
+  alignas(16) static std::array<int32_t, 1001 + XNN_EXTRA_BYTES / sizeof(int32_t)> w245;
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
@@ -390,132 +391,133 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
   std::generate(v116.begin(), v116.end(), std::ref(qu8rng));
   std::generate(v117.begin(), v117.end(), std::ref(qu8rng));
   std::generate(v118.begin(), v118.end(), std::ref(qu8rng));
-  std::generate(w119.begin(), w119.end(), std::ref(qu8rng));
-  std::generate(w120.begin(), w120.end(), std::ref(qs32rng));
-  std::generate(w121.begin(), w121.end(), std::ref(qu8rng));
-  std::generate(w122.begin(), w122.end(), std::ref(qs32rng));
-  std::generate(w123.begin(), w123.end(), std::ref(qu8rng));
-  std::generate(w124.begin(), w124.end(), std::ref(qs32rng));
-  std::generate(w125.begin(), w125.end(), std::ref(qu8rng));
-  std::generate(w126.begin(), w126.end(), std::ref(qs32rng));
-  std::generate(w127.begin(), w127.end(), std::ref(qu8rng));
+  std::generate(v119.begin(), v119.end(), std::ref(qu8rng));
+  std::generate(w120.begin(), w120.end(), std::ref(qu8rng));
+  std::generate(w121.begin(), w121.end(), std::ref(qs32rng));
+  std::generate(w122.begin(), w122.end(), std::ref(qu8rng));
+  std::generate(w123.begin(), w123.end(), std::ref(qs32rng));
+  std::generate(w124.begin(), w124.end(), std::ref(qu8rng));
+  std::generate(w125.begin(), w125.end(), std::ref(qs32rng));
+  std::generate(w126.begin(), w126.end(), std::ref(qu8rng));
+  std::generate(w127.begin(), w127.end(), std::ref(qs32rng));
   std::generate(w128.begin(), w128.end(), std::ref(qu8rng));
   std::generate(w129.begin(), w129.end(), std::ref(qu8rng));
-  std::generate(w130.begin(), w130.end(), std::ref(qs32rng));
-  std::generate(w131.begin(), w131.end(), std::ref(qu8rng));
-  std::generate(w132.begin(), w132.end(), std::ref(qs32rng));
-  std::generate(w133.begin(), w133.end(), std::ref(qu8rng));
-  std::generate(w134.begin(), w134.end(), std::ref(qs32rng));
-  std::generate(w135.begin(), w135.end(), std::ref(qu8rng));
-  std::generate(w136.begin(), w136.end(), std::ref(qs32rng));
-  std::generate(w137.begin(), w137.end(), std::ref(qu8rng));
-  std::generate(w138.begin(), w138.end(), std::ref(qs32rng));
-  std::generate(w139.begin(), w139.end(), std::ref(qu8rng));
-  std::generate(w140.begin(), w140.end(), std::ref(qs32rng));
-  std::generate(w141.begin(), w141.end(), std::ref(qu8rng));
-  std::generate(w142.begin(), w142.end(), std::ref(qs32rng));
-  std::generate(w143.begin(), w143.end(), std::ref(qu8rng));
-  std::generate(w144.begin(), w144.end(), std::ref(qs32rng));
-  std::generate(w145.begin(), w145.end(), std::ref(qu8rng));
-  std::generate(w146.begin(), w146.end(), std::ref(qs32rng));
-  std::generate(w147.begin(), w147.end(), std::ref(qu8rng));
-  std::generate(w148.begin(), w148.end(), std::ref(qs32rng));
-  std::generate(w149.begin(), w149.end(), std::ref(qu8rng));
-  std::generate(w150.begin(), w150.end(), std::ref(qs32rng));
-  std::generate(w151.begin(), w151.end(), std::ref(qu8rng));
+  std::generate(w130.begin(), w130.end(), std::ref(qu8rng));
+  std::generate(w131.begin(), w131.end(), std::ref(qs32rng));
+  std::generate(w132.begin(), w132.end(), std::ref(qu8rng));
+  std::generate(w133.begin(), w133.end(), std::ref(qs32rng));
+  std::generate(w134.begin(), w134.end(), std::ref(qu8rng));
+  std::generate(w135.begin(), w135.end(), std::ref(qs32rng));
+  std::generate(w136.begin(), w136.end(), std::ref(qu8rng));
+  std::generate(w137.begin(), w137.end(), std::ref(qs32rng));
+  std::generate(w138.begin(), w138.end(), std::ref(qu8rng));
+  std::generate(w139.begin(), w139.end(), std::ref(qs32rng));
+  std::generate(w140.begin(), w140.end(), std::ref(qu8rng));
+  std::generate(w141.begin(), w141.end(), std::ref(qs32rng));
+  std::generate(w142.begin(), w142.end(), std::ref(qu8rng));
+  std::generate(w143.begin(), w143.end(), std::ref(qs32rng));
+  std::generate(w144.begin(), w144.end(), std::ref(qu8rng));
+  std::generate(w145.begin(), w145.end(), std::ref(qs32rng));
+  std::generate(w146.begin(), w146.end(), std::ref(qu8rng));
+  std::generate(w147.begin(), w147.end(), std::ref(qs32rng));
+  std::generate(w148.begin(), w148.end(), std::ref(qu8rng));
+  std::generate(w149.begin(), w149.end(), std::ref(qs32rng));
+  std::generate(w150.begin(), w150.end(), std::ref(qu8rng));
+  std::generate(w151.begin(), w151.end(), std::ref(qs32rng));
   std::generate(w152.begin(), w152.end(), std::ref(qu8rng));
   std::generate(w153.begin(), w153.end(), std::ref(qu8rng));
-  std::generate(w154.begin(), w154.end(), std::ref(qs32rng));
-  std::generate(w155.begin(), w155.end(), std::ref(qu8rng));
-  std::generate(w156.begin(), w156.end(), std::ref(qs32rng));
-  std::generate(w157.begin(), w157.end(), std::ref(qu8rng));
-  std::generate(w158.begin(), w158.end(), std::ref(qs32rng));
-  std::generate(w159.begin(), w159.end(), std::ref(qu8rng));
-  std::generate(w160.begin(), w160.end(), std::ref(qs32rng));
-  std::generate(w161.begin(), w161.end(), std::ref(qu8rng));
-  std::generate(w162.begin(), w162.end(), std::ref(qs32rng));
-  std::generate(w163.begin(), w163.end(), std::ref(qu8rng));
+  std::generate(w154.begin(), w154.end(), std::ref(qu8rng));
+  std::generate(w155.begin(), w155.end(), std::ref(qs32rng));
+  std::generate(w156.begin(), w156.end(), std::ref(qu8rng));
+  std::generate(w157.begin(), w157.end(), std::ref(qs32rng));
+  std::generate(w158.begin(), w158.end(), std::ref(qu8rng));
+  std::generate(w159.begin(), w159.end(), std::ref(qs32rng));
+  std::generate(w160.begin(), w160.end(), std::ref(qu8rng));
+  std::generate(w161.begin(), w161.end(), std::ref(qs32rng));
+  std::generate(w162.begin(), w162.end(), std::ref(qu8rng));
+  std::generate(w163.begin(), w163.end(), std::ref(qs32rng));
   std::generate(w164.begin(), w164.end(), std::ref(qu8rng));
   std::generate(w165.begin(), w165.end(), std::ref(qu8rng));
-  std::generate(w166.begin(), w166.end(), std::ref(qs32rng));
-  std::generate(w167.begin(), w167.end(), std::ref(qu8rng));
-  std::generate(w168.begin(), w168.end(), std::ref(qs32rng));
-  std::generate(w169.begin(), w169.end(), std::ref(qu8rng));
-  std::generate(w170.begin(), w170.end(), std::ref(qs32rng));
-  std::generate(w171.begin(), w171.end(), std::ref(qu8rng));
-  std::generate(w172.begin(), w172.end(), std::ref(qs32rng));
-  std::generate(w173.begin(), w173.end(), std::ref(qu8rng));
-  std::generate(w174.begin(), w174.end(), std::ref(qs32rng));
-  std::generate(w175.begin(), w175.end(), std::ref(qu8rng));
+  std::generate(w166.begin(), w166.end(), std::ref(qu8rng));
+  std::generate(w167.begin(), w167.end(), std::ref(qs32rng));
+  std::generate(w168.begin(), w168.end(), std::ref(qu8rng));
+  std::generate(w169.begin(), w169.end(), std::ref(qs32rng));
+  std::generate(w170.begin(), w170.end(), std::ref(qu8rng));
+  std::generate(w171.begin(), w171.end(), std::ref(qs32rng));
+  std::generate(w172.begin(), w172.end(), std::ref(qu8rng));
+  std::generate(w173.begin(), w173.end(), std::ref(qs32rng));
+  std::generate(w174.begin(), w174.end(), std::ref(qu8rng));
+  std::generate(w175.begin(), w175.end(), std::ref(qs32rng));
   std::generate(w176.begin(), w176.end(), std::ref(qu8rng));
   std::generate(w177.begin(), w177.end(), std::ref(qu8rng));
-  std::generate(w178.begin(), w178.end(), std::ref(qs32rng));
-  std::generate(w179.begin(), w179.end(), std::ref(qu8rng));
-  std::generate(w180.begin(), w180.end(), std::ref(qs32rng));
-  std::generate(w181.begin(), w181.end(), std::ref(qu8rng));
-  std::generate(w182.begin(), w182.end(), std::ref(qs32rng));
-  std::generate(w183.begin(), w183.end(), std::ref(qu8rng));
-  std::generate(w184.begin(), w184.end(), std::ref(qs32rng));
-  std::generate(w185.begin(), w185.end(), std::ref(qu8rng));
-  std::generate(w186.begin(), w186.end(), std::ref(qs32rng));
-  std::generate(w187.begin(), w187.end(), std::ref(qu8rng));
+  std::generate(w178.begin(), w178.end(), std::ref(qu8rng));
+  std::generate(w179.begin(), w179.end(), std::ref(qs32rng));
+  std::generate(w180.begin(), w180.end(), std::ref(qu8rng));
+  std::generate(w181.begin(), w181.end(), std::ref(qs32rng));
+  std::generate(w182.begin(), w182.end(), std::ref(qu8rng));
+  std::generate(w183.begin(), w183.end(), std::ref(qs32rng));
+  std::generate(w184.begin(), w184.end(), std::ref(qu8rng));
+  std::generate(w185.begin(), w185.end(), std::ref(qs32rng));
+  std::generate(w186.begin(), w186.end(), std::ref(qu8rng));
+  std::generate(w187.begin(), w187.end(), std::ref(qs32rng));
   std::generate(w188.begin(), w188.end(), std::ref(qu8rng));
   std::generate(w189.begin(), w189.end(), std::ref(qu8rng));
-  std::generate(w190.begin(), w190.end(), std::ref(qs32rng));
-  std::generate(w191.begin(), w191.end(), std::ref(qu8rng));
-  std::generate(w192.begin(), w192.end(), std::ref(qs32rng));
-  std::generate(w193.begin(), w193.end(), std::ref(qu8rng));
-  std::generate(w194.begin(), w194.end(), std::ref(qs32rng));
-  std::generate(w195.begin(), w195.end(), std::ref(qu8rng));
-  std::generate(w196.begin(), w196.end(), std::ref(qs32rng));
-  std::generate(w197.begin(), w197.end(), std::ref(qu8rng));
-  std::generate(w198.begin(), w198.end(), std::ref(qs32rng));
-  std::generate(w199.begin(), w199.end(), std::ref(qu8rng));
+  std::generate(w190.begin(), w190.end(), std::ref(qu8rng));
+  std::generate(w191.begin(), w191.end(), std::ref(qs32rng));
+  std::generate(w192.begin(), w192.end(), std::ref(qu8rng));
+  std::generate(w193.begin(), w193.end(), std::ref(qs32rng));
+  std::generate(w194.begin(), w194.end(), std::ref(qu8rng));
+  std::generate(w195.begin(), w195.end(), std::ref(qs32rng));
+  std::generate(w196.begin(), w196.end(), std::ref(qu8rng));
+  std::generate(w197.begin(), w197.end(), std::ref(qs32rng));
+  std::generate(w198.begin(), w198.end(), std::ref(qu8rng));
+  std::generate(w199.begin(), w199.end(), std::ref(qs32rng));
   std::generate(w200.begin(), w200.end(), std::ref(qu8rng));
   std::generate(w201.begin(), w201.end(), std::ref(qu8rng));
-  std::generate(w202.begin(), w202.end(), std::ref(qs32rng));
-  std::generate(w203.begin(), w203.end(), std::ref(qu8rng));
-  std::generate(w204.begin(), w204.end(), std::ref(qs32rng));
-  std::generate(w205.begin(), w205.end(), std::ref(qu8rng));
-  std::generate(w206.begin(), w206.end(), std::ref(qs32rng));
-  std::generate(w207.begin(), w207.end(), std::ref(qu8rng));
-  std::generate(w208.begin(), w208.end(), std::ref(qs32rng));
-  std::generate(w209.begin(), w209.end(), std::ref(qu8rng));
-  std::generate(w210.begin(), w210.end(), std::ref(qs32rng));
-  std::generate(w211.begin(), w211.end(), std::ref(qu8rng));
+  std::generate(w202.begin(), w202.end(), std::ref(qu8rng));
+  std::generate(w203.begin(), w203.end(), std::ref(qs32rng));
+  std::generate(w204.begin(), w204.end(), std::ref(qu8rng));
+  std::generate(w205.begin(), w205.end(), std::ref(qs32rng));
+  std::generate(w206.begin(), w206.end(), std::ref(qu8rng));
+  std::generate(w207.begin(), w207.end(), std::ref(qs32rng));
+  std::generate(w208.begin(), w208.end(), std::ref(qu8rng));
+  std::generate(w209.begin(), w209.end(), std::ref(qs32rng));
+  std::generate(w210.begin(), w210.end(), std::ref(qu8rng));
+  std::generate(w211.begin(), w211.end(), std::ref(qs32rng));
   std::generate(w212.begin(), w212.end(), std::ref(qu8rng));
   std::generate(w213.begin(), w213.end(), std::ref(qu8rng));
-  std::generate(w214.begin(), w214.end(), std::ref(qs32rng));
-  std::generate(w215.begin(), w215.end(), std::ref(qu8rng));
-  std::generate(w216.begin(), w216.end(), std::ref(qs32rng));
-  std::generate(w217.begin(), w217.end(), std::ref(qu8rng));
-  std::generate(w218.begin(), w218.end(), std::ref(qs32rng));
-  std::generate(w219.begin(), w219.end(), std::ref(qu8rng));
-  std::generate(w220.begin(), w220.end(), std::ref(qs32rng));
-  std::generate(w221.begin(), w221.end(), std::ref(qu8rng));
-  std::generate(w222.begin(), w222.end(), std::ref(qs32rng));
-  std::generate(w223.begin(), w223.end(), std::ref(qu8rng));
+  std::generate(w214.begin(), w214.end(), std::ref(qu8rng));
+  std::generate(w215.begin(), w215.end(), std::ref(qs32rng));
+  std::generate(w216.begin(), w216.end(), std::ref(qu8rng));
+  std::generate(w217.begin(), w217.end(), std::ref(qs32rng));
+  std::generate(w218.begin(), w218.end(), std::ref(qu8rng));
+  std::generate(w219.begin(), w219.end(), std::ref(qs32rng));
+  std::generate(w220.begin(), w220.end(), std::ref(qu8rng));
+  std::generate(w221.begin(), w221.end(), std::ref(qs32rng));
+  std::generate(w222.begin(), w222.end(), std::ref(qu8rng));
+  std::generate(w223.begin(), w223.end(), std::ref(qs32rng));
   std::generate(w224.begin(), w224.end(), std::ref(qu8rng));
   std::generate(w225.begin(), w225.end(), std::ref(qu8rng));
-  std::generate(w226.begin(), w226.end(), std::ref(qs32rng));
-  std::generate(w227.begin(), w227.end(), std::ref(qu8rng));
-  std::generate(w228.begin(), w228.end(), std::ref(qs32rng));
-  std::generate(w229.begin(), w229.end(), std::ref(qu8rng));
-  std::generate(w230.begin(), w230.end(), std::ref(qs32rng));
-  std::generate(w231.begin(), w231.end(), std::ref(qu8rng));
-  std::generate(w232.begin(), w232.end(), std::ref(qs32rng));
-  std::generate(w233.begin(), w233.end(), std::ref(qu8rng));
-  std::generate(w234.begin(), w234.end(), std::ref(qs32rng));
-  std::generate(w235.begin(), w235.end(), std::ref(qu8rng));
+  std::generate(w226.begin(), w226.end(), std::ref(qu8rng));
+  std::generate(w227.begin(), w227.end(), std::ref(qs32rng));
+  std::generate(w228.begin(), w228.end(), std::ref(qu8rng));
+  std::generate(w229.begin(), w229.end(), std::ref(qs32rng));
+  std::generate(w230.begin(), w230.end(), std::ref(qu8rng));
+  std::generate(w231.begin(), w231.end(), std::ref(qs32rng));
+  std::generate(w232.begin(), w232.end(), std::ref(qu8rng));
+  std::generate(w233.begin(), w233.end(), std::ref(qs32rng));
+  std::generate(w234.begin(), w234.end(), std::ref(qu8rng));
+  std::generate(w235.begin(), w235.end(), std::ref(qs32rng));
   std::generate(w236.begin(), w236.end(), std::ref(qu8rng));
   std::generate(w237.begin(), w237.end(), std::ref(qu8rng));
-  std::generate(w238.begin(), w238.end(), std::ref(qs32rng));
-  std::generate(w239.begin(), w239.end(), std::ref(qu8rng));
-  std::generate(w240.begin(), w240.end(), std::ref(qs32rng));
-  std::generate(w241.begin(), w241.end(), std::ref(qu8rng));
-  std::generate(w242.begin(), w242.end(), std::ref(qs32rng));
-  std::generate(w243.begin(), w243.end(), std::ref(qu8rng));
-  std::generate(w244.begin(), w244.end(), std::ref(qs32rng));
+  std::generate(w238.begin(), w238.end(), std::ref(qu8rng));
+  std::generate(w239.begin(), w239.end(), std::ref(qs32rng));
+  std::generate(w240.begin(), w240.end(), std::ref(qu8rng));
+  std::generate(w241.begin(), w241.end(), std::ref(qs32rng));
+  std::generate(w242.begin(), w242.end(), std::ref(qu8rng));
+  std::generate(w243.begin(), w243.end(), std::ref(qs32rng));
+  std::generate(w244.begin(), w244.end(), std::ref(qu8rng));
+  std::generate(w245.begin(), w245.end(), std::ref(qs32rng));
 
   Operators operators;
   xnn_status status;
@@ -538,7 +540,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.007874015718698502 /* input_scale */,
     (uint8_t) 108 /* kernel_zero_point */,
     0.03232726827263832 /* kernel_scale */,
-    w119.data(), w120.data(),
+    w120.data(), w121.data(),
     (uint8_t) 99 /* output_zero_point */,
     0.2920726239681244 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -581,7 +583,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.173323854804039 /* input_scale */,
     (uint8_t) 127 /* kernel_zero_point */,
     0.0927056297659874 /* kernel_scale */,
-    w121.data(), w122.data(),
+    w122.data(), w123.data(),
     (uint8_t) 0 /* output_zero_point */,
     0.9925559759140015 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -625,7 +627,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.9925559759140015 /* input_scale */,
     (uint8_t) 57 /* kernel_zero_point */,
     0.00045214465353637934 /* kernel_scale */,
-    w123.data(), w124.data(),
+    w124.data(), w125.data(),
     (uint8_t) 0 /* output_zero_point */,
     0.03975478187203407 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -655,7 +657,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.03975478187203407 /* input_scale */,
     (uint8_t) 1 /* kernel_zero_point */,
     0.0007166960276663303 /* kernel_scale */,
-    w125.data(), w126.data(),
+    w126.data(), w127.data(),
     (uint8_t) 0 /* output_zero_point */,
     0.014429666101932526 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -727,7 +729,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.9246004223823547 /* input_scale */,
     (uint8_t) 146 /* kernel_zero_point */,
     0.017008759081363678 /* kernel_scale */,
-    w129.data(), w130.data(),
+    w130.data(), w131.data(),
     (uint8_t) 130 /* output_zero_point */,
     2.010422706604004 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -757,7 +759,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     2.010422706604004 /* input_scale */,
     (uint8_t) 123 /* kernel_zero_point */,
     0.005887787323445082 /* kernel_scale */,
-    w131.data(), w132.data(),
+    w132.data(), w133.data(),
     (uint8_t) 0 /* output_zero_point */,
     0.9493569135665894 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -787,7 +789,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.9493569135665894 /* input_scale */,
     (uint8_t) 113 /* kernel_zero_point */,
     0.033502571284770966 /* kernel_scale */,
-    w133.data(), w134.data(),
+    w134.data(), w135.data(),
     (uint8_t) 0 /* output_zero_point */,
     0.6341432929039001 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -817,7 +819,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.6341432929039001 /* input_scale */,
     (uint8_t) 153 /* kernel_zero_point */,
     0.017683790996670723 /* kernel_scale */,
-    w135.data(), w136.data(),
+    w136.data(), w137.data(),
     (uint8_t) 119 /* output_zero_point */,
     1.0579205751419067 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -847,7 +849,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     1.0579205751419067 /* input_scale */,
     (uint8_t) 99 /* kernel_zero_point */,
     0.005299868993461132 /* kernel_scale */,
-    w137.data(), w138.data(),
+    w138.data(), w139.data(),
     (uint8_t) 0 /* output_zero_point */,
     0.20985400676727295 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -877,7 +879,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.20985400676727295 /* input_scale */,
     (uint8_t) 144 /* kernel_zero_point */,
     0.05344513803720474 /* kernel_scale */,
-    w139.data(), w140.data(),
+    w140.data(), w141.data(),
     (uint8_t) 0 /* output_zero_point */,
     0.22873805463314056 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -907,7 +909,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.22873805463314056 /* input_scale */,
     (uint8_t) 139 /* kernel_zero_point */,
     0.015702862292528152 /* kernel_scale */,
-    w141.data(), w142.data(),
+    w142.data(), w143.data(),
     (uint8_t) 124 /* output_zero_point */,
     0.8896244764328003 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -951,7 +953,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     1.0426580905914307 /* input_scale */,
     (uint8_t) 154 /* kernel_zero_point */,
     0.002672378672286868 /* kernel_scale */,
-    w143.data(), w144.data(),
+    w144.data(), w145.data(),
     (uint8_t) 110 /* output_zero_point */,
     0.3380434811115265 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -994,7 +996,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.18497292697429657 /* input_scale */,
     (uint8_t) 142 /* kernel_zero_point */,
     0.031311504542827606 /* kernel_scale */,
-    w145.data(), w146.data(),
+    w146.data(), w147.data(),
     (uint8_t) 134 /* output_zero_point */,
     0.24109338223934174 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1051,7 +1053,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.1065792664885521 /* input_scale */,
     (uint8_t) 98 /* kernel_zero_point */,
     0.005171800963580608 /* kernel_scale */,
-    w147.data(), w148.data(),
+    w148.data(), w149.data(),
     (uint8_t) 0 /* output_zero_point */,
     0.051762163639068604 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1081,7 +1083,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.051762163639068604 /* input_scale */,
     (uint8_t) 106 /* kernel_zero_point */,
     0.005030923057347536 /* kernel_scale */,
-    w149.data(), w150.data(),
+    w150.data(), w151.data(),
     (uint8_t) 98 /* output_zero_point */,
     0.03421778604388237 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1153,7 +1155,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.07695811986923218 /* input_scale */,
     (uint8_t) 128 /* kernel_zero_point */,
     0.03726894408464432 /* kernel_scale */,
-    w153.data(), w154.data(),
+    w154.data(), w155.data(),
     (uint8_t) 127 /* output_zero_point */,
     0.3759814500808716 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1183,7 +1185,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.3759814500808716 /* input_scale */,
     (uint8_t) 159 /* kernel_zero_point */,
     0.003184415865689516 /* kernel_scale */,
-    w155.data(), w156.data(),
+    w156.data(), w157.data(),
     (uint8_t) 128 /* output_zero_point */,
     0.17979219555854797 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1226,7 +1228,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.08579955250024796 /* input_scale */,
     (uint8_t) 143 /* kernel_zero_point */,
     0.1883949190378189 /* kernel_scale */,
-    w157.data(), w158.data(),
+    w158.data(), w159.data(),
     (uint8_t) 130 /* output_zero_point */,
     0.49307096004486084 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1283,7 +1285,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.220099538564682 /* input_scale */,
     (uint8_t) 149 /* kernel_zero_point */,
     0.009354852139949799 /* kernel_scale */,
-    w159.data(), w160.data(),
+    w160.data(), w161.data(),
     (uint8_t) 0 /* output_zero_point */,
     0.016910869628190994 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1313,7 +1315,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.016910869628190994 /* input_scale */,
     (uint8_t) 108 /* kernel_zero_point */,
     0.006087664980441332 /* kernel_scale */,
-    w161.data(), w162.data(),
+    w162.data(), w163.data(),
     (uint8_t) 144 /* output_zero_point */,
     0.03480793163180351 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1385,7 +1387,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.02150452695786953 /* input_scale */,
     (uint8_t) 115 /* kernel_zero_point */,
     0.1018327996134758 /* kernel_scale */,
-    w165.data(), w166.data(),
+    w166.data(), w167.data(),
     (uint8_t) 137 /* output_zero_point */,
     0.4652852416038513 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1429,7 +1431,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.44771137833595276 /* input_scale */,
     (uint8_t) 129 /* kernel_zero_point */,
     0.0009919562144204974 /* kernel_scale */,
-    w167.data(), w168.data(),
+    w168.data(), w169.data(),
     (uint8_t) 118 /* output_zero_point */,
     0.12498034536838531 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1472,7 +1474,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.06491293758153915 /* input_scale */,
     (uint8_t) 101 /* kernel_zero_point */,
     0.13295969367027283 /* kernel_scale */,
-    w169.data(), w170.data(),
+    w170.data(), w171.data(),
     (uint8_t) 150 /* output_zero_point */,
     0.29956355690956116 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1529,7 +1531,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.11336661875247955 /* input_scale */,
     (uint8_t) 163 /* kernel_zero_point */,
     0.007440278306603432 /* kernel_scale */,
-    w171.data(), w172.data(),
+    w172.data(), w173.data(),
     (uint8_t) 0 /* output_zero_point */,
     0.008480816148221493 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1559,7 +1561,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.008480816148221493 /* input_scale */,
     (uint8_t) 110 /* kernel_zero_point */,
     0.006039419211447239 /* kernel_scale */,
-    w173.data(), w174.data(),
+    w174.data(), w175.data(),
     (uint8_t) 135 /* output_zero_point */,
     0.027621593326330185 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1631,7 +1633,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.0160247553139925 /* input_scale */,
     (uint8_t) 131 /* kernel_zero_point */,
     0.22305507957935333 /* kernel_scale */,
-    w177.data(), w178.data(),
+    w178.data(), w179.data(),
     (uint8_t) 139 /* output_zero_point */,
     0.544162929058075 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1675,7 +1677,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.6061347723007202 /* input_scale */,
     (uint8_t) 90 /* kernel_zero_point */,
     0.0014072866179049015 /* kernel_scale */,
-    w179.data(), w180.data(),
+    w180.data(), w181.data(),
     (uint8_t) 117 /* output_zero_point */,
     0.13909709453582764 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1718,7 +1720,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.0727764368057251 /* input_scale */,
     (uint8_t) 121 /* kernel_zero_point */,
     0.09157519787549973 /* kernel_scale */,
-    w181.data(), w182.data(),
+    w182.data(), w183.data(),
     (uint8_t) 140 /* output_zero_point */,
     0.28514617681503296 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1775,7 +1777,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.1223522424697876 /* input_scale */,
     (uint8_t) 40 /* kernel_zero_point */,
     0.0008257423178292811 /* kernel_scale */,
-    w183.data(), w184.data(),
+    w184.data(), w185.data(),
     (uint8_t) 0 /* output_zero_point */,
     0.025332391262054443 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1805,7 +1807,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.025332391262054443 /* input_scale */,
     (uint8_t) 220 /* kernel_zero_point */,
     0.0021832138299942017 /* kernel_scale */,
-    w185.data(), w186.data(),
+    w186.data(), w187.data(),
     (uint8_t) 139 /* output_zero_point */,
     0.026293933391571045 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1877,7 +1879,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.04942065477371216 /* input_scale */,
     (uint8_t) 101 /* kernel_zero_point */,
     0.03507576882839203 /* kernel_scale */,
-    w189.data(), w190.data(),
+    w190.data(), w191.data(),
     (uint8_t) 129 /* output_zero_point */,
     0.39454951882362366 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1907,7 +1909,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.39454951882362366 /* input_scale */,
     (uint8_t) 148 /* kernel_zero_point */,
     0.0015211983118206263 /* kernel_scale */,
-    w191.data(), w192.data(),
+    w192.data(), w193.data(),
     (uint8_t) 114 /* output_zero_point */,
     0.18048983812332153 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -1950,7 +1952,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.09509307891130447 /* input_scale */,
     (uint8_t) 115 /* kernel_zero_point */,
     0.0958247184753418 /* kernel_scale */,
-    w193.data(), w194.data(),
+    w194.data(), w195.data(),
     (uint8_t) 151 /* output_zero_point */,
     0.3922523558139801 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2007,7 +2009,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.14624309539794922 /* input_scale */,
     (uint8_t) 130 /* kernel_zero_point */,
     0.0060674939304590225 /* kernel_scale */,
-    w195.data(), w196.data(),
+    w196.data(), w197.data(),
     (uint8_t) 0 /* output_zero_point */,
     0.008962834253907204 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2037,7 +2039,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.008962834253907204 /* input_scale */,
     (uint8_t) 124 /* kernel_zero_point */,
     0.004431542940437794 /* kernel_scale */,
-    w197.data(), w198.data(),
+    w198.data(), w199.data(),
     (uint8_t) 134 /* output_zero_point */,
     0.02729739062488079 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2109,7 +2111,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.023374175652861595 /* input_scale */,
     (uint8_t) 125 /* kernel_zero_point */,
     0.13331712782382965 /* kernel_scale */,
-    w201.data(), w202.data(),
+    w202.data(), w203.data(),
     (uint8_t) 140 /* output_zero_point */,
     0.42487239837646484 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2153,7 +2155,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.48052287101745605 /* input_scale */,
     (uint8_t) 132 /* kernel_zero_point */,
     0.0014037908986210823 /* kernel_scale */,
-    w203.data(), w204.data(),
+    w204.data(), w205.data(),
     (uint8_t) 113 /* output_zero_point */,
     0.14607380330562592 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2196,7 +2198,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.07805965095758438 /* input_scale */,
     (uint8_t) 105 /* kernel_zero_point */,
     0.035035692155361176 /* kernel_scale */,
-    w205.data(), w206.data(),
+    w206.data(), w207.data(),
     (uint8_t) 83 /* output_zero_point */,
     0.13729262351989746 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2253,7 +2255,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.08693098276853561 /* input_scale */,
     (uint8_t) 120 /* kernel_zero_point */,
     0.006728844251483679 /* kernel_scale */,
-    w207.data(), w208.data(),
+    w208.data(), w209.data(),
     (uint8_t) 0 /* output_zero_point */,
     0.016604457050561905 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2283,7 +2285,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.016604457050561905 /* input_scale */,
     (uint8_t) 152 /* kernel_zero_point */,
     0.005426046904176474 /* kernel_scale */,
-    w209.data(), w210.data(),
+    w210.data(), w211.data(),
     (uint8_t) 123 /* output_zero_point */,
     0.03482932597398758 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2355,7 +2357,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.03586701303720474 /* input_scale */,
     (uint8_t) 122 /* kernel_zero_point */,
     0.019641198217868805 /* kernel_scale */,
-    w213.data(), w214.data(),
+    w214.data(), w215.data(),
     (uint8_t) 130 /* output_zero_point */,
     0.2735706567764282 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2385,7 +2387,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.2735706567764282 /* input_scale */,
     (uint8_t) 145 /* kernel_zero_point */,
     0.0017236428102478385 /* kernel_scale */,
-    w215.data(), w216.data(),
+    w216.data(), w217.data(),
     (uint8_t) 118 /* output_zero_point */,
     0.14194171130657196 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2428,7 +2430,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.07257640361785889 /* input_scale */,
     (uint8_t) 96 /* kernel_zero_point */,
     0.174177348613739 /* kernel_scale */,
-    w217.data(), w218.data(),
+    w218.data(), w219.data(),
     (uint8_t) 104 /* output_zero_point */,
     0.23463939130306244 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2485,7 +2487,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.1241951510310173 /* input_scale */,
     (uint8_t) 115 /* kernel_zero_point */,
     0.005609261337667704 /* kernel_scale */,
-    w219.data(), w220.data(),
+    w220.data(), w221.data(),
     (uint8_t) 0 /* output_zero_point */,
     0.014928853139281273 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2515,7 +2517,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.014928853139281273 /* input_scale */,
     (uint8_t) 91 /* kernel_zero_point */,
     0.008804556913673878 /* kernel_scale */,
-    w221.data(), w222.data(),
+    w222.data(), w223.data(),
     (uint8_t) 129 /* output_zero_point */,
     0.04489157348871231 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2587,7 +2589,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.023340530693531036 /* input_scale */,
     (uint8_t) 132 /* kernel_zero_point */,
     0.11193376779556274 /* kernel_scale */,
-    w225.data(), w226.data(),
+    w226.data(), w227.data(),
     (uint8_t) 131 /* output_zero_point */,
     0.3130902945995331 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2631,7 +2633,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.3734561800956726 /* input_scale */,
     (uint8_t) 153 /* kernel_zero_point */,
     0.0030694138258695602 /* kernel_scale */,
-    w227.data(), w228.data(),
+    w228.data(), w229.data(),
     (uint8_t) 157 /* output_zero_point */,
     0.3907496929168701 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2674,7 +2676,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.1398279368877411 /* input_scale */,
     (uint8_t) 218 /* kernel_zero_point */,
     2.1697041988372803 /* kernel_scale */,
-    w229.data(), w230.data(),
+    w230.data(), w231.data(),
     (uint8_t) 110 /* output_zero_point */,
     0.6755003929138184 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2731,7 +2733,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.3347671329975128 /* input_scale */,
     (uint8_t) 96 /* kernel_zero_point */,
     0.006274337414652109 /* kernel_scale */,
-    w231.data(), w232.data(),
+    w232.data(), w233.data(),
     (uint8_t) 0 /* output_zero_point */,
     0.04336833581328392 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2761,7 +2763,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.04336833581328392 /* input_scale */,
     (uint8_t) 91 /* kernel_zero_point */,
     0.008546789176762104 /* kernel_scale */,
-    w233.data(), w234.data(),
+    w234.data(), w235.data(),
     (uint8_t) 115 /* output_zero_point */,
     0.09501760452985764 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2833,7 +2835,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.19521307945251465 /* input_scale */,
     (uint8_t) 130 /* kernel_zero_point */,
     0.02609884925186634 /* kernel_scale */,
-    w237.data(), w238.data(),
+    w238.data(), w239.data(),
     (uint8_t) 129 /* output_zero_point */,
     0.7081664800643921 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2877,7 +2879,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.808801531791687 /* input_scale */,
     (uint8_t) 142 /* kernel_zero_point */,
     0.003396135289222002 /* kernel_scale */,
-    w239.data(), w240.data(),
+    w240.data(), w241.data(),
     (uint8_t) 131 /* output_zero_point */,
     0.9106870889663696 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2934,7 +2936,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.40212398767471313 /* input_scale */,
     (uint8_t) 97 /* kernel_zero_point */,
     0.006370874121785164 /* kernel_scale */,
-    w241.data(), w242.data(),
+    w242.data(), w243.data(),
     (uint8_t) 170 /* output_zero_point */,
     0.05783478170633316 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -2991,7 +2993,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     0.01954001374542713 /* input_scale */,
     (uint8_t) 113 /* kernel_zero_point */,
     0.0029929860029369593 /* kernel_scale */,
-    w243.data(), w244.data(),
+    w244.data(), w245.data(),
     (uint8_t) 77 /* output_zero_point */,
     0.07862140238285065 /* output_scale */,
     (uint8_t) 0 /* output min */,  (uint8_t) 255 /* output max */,
@@ -3017,6 +3019,22 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
   operators.emplace_back(op117, xnn_delete_operator);
+
+  xnn_operator_t op118 = nullptr;
+  status = xnn_create_softmax_nc_qu8(
+    /*channels=*/1001,
+    /*input_stride=*/1001,
+    /*output_stride=*/1001,
+    /*input_scale=*/0.07862140238285065,
+    /*output_zero_point=*/0,
+    /*output_scale=*/0.00390625,
+    /*flags=*/0,
+    &op118);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to create operation #118" << std::endl;
+    return ExecutionPlan();
+  }
+  operators.emplace_back(op118, xnn_delete_operator);
 
   size_t op0_workspace_size = 0;
   size_t op0_workspace_alignment = 0;
@@ -4526,6 +4544,15 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  status = xnn_reshape_softmax_nc_qu8(
+    op118,
+    /*batch_size=*/1,
+    /*threadpool=*/threadpool);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #118" << std::endl;
+    return ExecutionPlan();
+  }
+
   Workspace workspace(max_workspace_size);
 
   status = xnn_setup_convolution2d_nhwc_qu8(
@@ -4579,7 +4606,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_add_nd_qu8(
     op6,
-    v6.data() /* a */, w127.data() /* b */, /*output=*/v7.data());
+    v6.data() /* a */, w128.data() /* b */, /*output=*/v7.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #6" << std::endl;
     return ExecutionPlan();
@@ -4587,7 +4614,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_multiply_nd_qu8(
     op7,
-    v7.data() /* a */, w128.data() /* b */, /*output=*/v8.data());
+    v7.data() /* a */, w129.data() /* b */, /*output=*/v8.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #7" << std::endl;
     return ExecutionPlan();
@@ -4724,7 +4751,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_add_nd_qu8(
     op24,
-    v24.data() /* a */, w151.data() /* b */, /*output=*/v25.data());
+    v24.data() /* a */, w152.data() /* b */, /*output=*/v25.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #24" << std::endl;
     return ExecutionPlan();
@@ -4732,7 +4759,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_multiply_nd_qu8(
     op25,
-    v25.data() /* a */, w152.data() /* b */, /*output=*/v26.data());
+    v25.data() /* a */, w153.data() /* b */, /*output=*/v26.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #25" << std::endl;
     return ExecutionPlan();
@@ -4813,7 +4840,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_add_nd_qu8(
     op35,
-    v35.data() /* a */, w163.data() /* b */, /*output=*/v36.data());
+    v35.data() /* a */, w164.data() /* b */, /*output=*/v36.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #35" << std::endl;
     return ExecutionPlan();
@@ -4821,7 +4848,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_multiply_nd_qu8(
     op36,
-    v36.data() /* a */, w164.data() /* b */, /*output=*/v37.data());
+    v36.data() /* a */, w165.data() /* b */, /*output=*/v37.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #36" << std::endl;
     return ExecutionPlan();
@@ -4910,7 +4937,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_add_nd_qu8(
     op47,
-    v47.data() /* a */, w175.data() /* b */, /*output=*/v48.data());
+    v47.data() /* a */, w176.data() /* b */, /*output=*/v48.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #47" << std::endl;
     return ExecutionPlan();
@@ -4918,7 +4945,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_multiply_nd_qu8(
     op48,
-    v48.data() /* a */, w176.data() /* b */, /*output=*/v49.data());
+    v48.data() /* a */, w177.data() /* b */, /*output=*/v49.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #48" << std::endl;
     return ExecutionPlan();
@@ -5007,7 +5034,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_add_nd_qu8(
     op59,
-    v59.data() /* a */, w187.data() /* b */, /*output=*/v60.data());
+    v59.data() /* a */, w188.data() /* b */, /*output=*/v60.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #59" << std::endl;
     return ExecutionPlan();
@@ -5015,7 +5042,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_multiply_nd_qu8(
     op60,
-    v60.data() /* a */, w188.data() /* b */, /*output=*/v61.data());
+    v60.data() /* a */, w189.data() /* b */, /*output=*/v61.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #60" << std::endl;
     return ExecutionPlan();
@@ -5096,7 +5123,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_add_nd_qu8(
     op70,
-    v70.data() /* a */, w199.data() /* b */, /*output=*/v71.data());
+    v70.data() /* a */, w200.data() /* b */, /*output=*/v71.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #70" << std::endl;
     return ExecutionPlan();
@@ -5104,7 +5131,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_multiply_nd_qu8(
     op71,
-    v71.data() /* a */, w200.data() /* b */, /*output=*/v72.data());
+    v71.data() /* a */, w201.data() /* b */, /*output=*/v72.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #71" << std::endl;
     return ExecutionPlan();
@@ -5193,7 +5220,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_add_nd_qu8(
     op82,
-    v82.data() /* a */, w211.data() /* b */, /*output=*/v83.data());
+    v82.data() /* a */, w212.data() /* b */, /*output=*/v83.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #82" << std::endl;
     return ExecutionPlan();
@@ -5201,7 +5228,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_multiply_nd_qu8(
     op83,
-    v83.data() /* a */, w212.data() /* b */, /*output=*/v84.data());
+    v83.data() /* a */, w213.data() /* b */, /*output=*/v84.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #83" << std::endl;
     return ExecutionPlan();
@@ -5282,7 +5309,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_add_nd_qu8(
     op93,
-    v93.data() /* a */, w223.data() /* b */, /*output=*/v94.data());
+    v93.data() /* a */, w224.data() /* b */, /*output=*/v94.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #93" << std::endl;
     return ExecutionPlan();
@@ -5290,7 +5317,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_multiply_nd_qu8(
     op94,
-    v94.data() /* a */, w224.data() /* b */, /*output=*/v95.data());
+    v94.data() /* a */, w225.data() /* b */, /*output=*/v95.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #94" << std::endl;
     return ExecutionPlan();
@@ -5379,7 +5406,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_add_nd_qu8(
     op105,
-    v105.data() /* a */, w235.data() /* b */, /*output=*/v106.data());
+    v105.data() /* a */, w236.data() /* b */, /*output=*/v106.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #105" << std::endl;
     return ExecutionPlan();
@@ -5387,7 +5414,7 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
 
   status = xnn_setup_multiply_nd_qu8(
     op106,
-    v106.data() /* a */, w236.data() /* b */, /*output=*/v107.data());
+    v106.data() /* a */, w237.data() /* b */, /*output=*/v107.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #106" << std::endl;
     return ExecutionPlan();
@@ -5480,6 +5507,14 @@ ExecutionPlan QU8MobileNetV3Small(pthreadpool_t threadpool) {
     /*input=*/v117.data(), /*output=*/v118.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #117" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_setup_softmax_nc_qu8(
+    op118,
+    /*input=*/v118.data(), /*output=*/v119.data());
+  if (status != xnn_status_success) {
+    std::cerr << "failed to setup operation #118" << std::endl;
     return ExecutionPlan();
   }
 
