@@ -94,14 +94,31 @@ class FullyConnectedOperatorTester {
     }
   }
 
+  inline FullyConnectedOperatorTester& input_zero_point(size_t input_zero_point) {
+    this->input_zero_point_ = input_zero_point;
+    return *this;
+  }
+
+  inline size_t input_zero_point() const {
+    return this->input_zero_point_;
+  }
+
   inline FullyConnectedOperatorTester& kernel_zero_point(size_t kernel_zero_point) {
-    assert(kernel_zero_point >= 1);
     this->kernel_zero_point_ = kernel_zero_point;
     return *this;
   }
 
   inline size_t kernel_zero_point() const {
     return this->kernel_zero_point_;
+  }
+
+  inline FullyConnectedOperatorTester& output_zero_point(size_t output_zero_point) {
+    this->output_zero_point_ = output_zero_point;
+    return *this;
+  }
+
+  inline size_t output_zero_point() const {
+    return this->output_zero_point_;
   }
 
   inline FullyConnectedOperatorTester& qmin(uint8_t qmin) {
@@ -366,8 +383,6 @@ class FullyConnectedOperatorTester {
     std::vector<int32_t> accumulators(batch_size() * output_channels());
     std::vector<double> output_ref(batch_size() * output_channels());
 
-    const int8_t input_zero_point = 127;
-
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
@@ -389,7 +404,7 @@ class FullyConnectedOperatorTester {
           for (size_t oc = 0; oc < output_channels(); oc++) {
             for (size_t ic = 0; ic < input_channels(); ic++) {
               accumulators[i * output_channels() + oc] +=
-                (int32_t(input[i * input_stride() + ic]) - int32_t(input_zero_point)) *
+                (int32_t(input[i * input_stride() + ic]) - int32_t(input_zero_point() - 0x80)) *
                 int32_t(kernel[ic * output_channels() + oc]);
             }
           }
@@ -399,7 +414,7 @@ class FullyConnectedOperatorTester {
           for (size_t oc = 0; oc < output_channels(); oc++) {
             for (size_t ic = 0; ic < input_channels(); ic++) {
               accumulators[i * output_channels() + oc] +=
-                (int32_t(input[i * input_stride() + ic]) - int32_t(input_zero_point)) *
+                (int32_t(input[i * input_stride() + ic]) - int32_t(input_zero_point() - 0x80)) *
                 int32_t(kernel[oc * input_channels() + ic]);
             }
           }
@@ -436,7 +451,7 @@ class FullyConnectedOperatorTester {
       const xnn_status status = xnn_create_fully_connected_nc_qs8(
           input_channels(), output_channels(),
           input_stride(), output_stride(),
-          input_zero_point, /*input_scale=*/1.0f,
+          int8_t(input_zero_point() - 0x80), /*input_scale=*/1.0f,
           /*kernel_scale=*/1.0f,
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
@@ -481,7 +496,7 @@ class FullyConnectedOperatorTester {
         ASSERT_EQ(xnn_status_success,
                   xnn_create_fully_connected_nc_qs8(
                       input_channels(), output_channels(), input_stride(),
-                      output_stride(), input_zero_point, /*input_scale=*/1.0f,
+                      output_stride(), int8_t(input_zero_point() - 0x80), /*input_scale=*/1.0f,
                       /*kernel_scale=*/1.0f, kernel.data(),
                       has_bias() ? bias.data() : nullptr, output_zero_point,
                       output_scale, int8_t(qmin() - 0x80),
@@ -556,9 +571,6 @@ class FullyConnectedOperatorTester {
     std::vector<double> output_ref(batch_size() * output_channels());
     std::vector<float> requantization_scales(output_channels());
 
-    const int8_t input_zero_point = -1;
-    const int8_t output_zero_point = -1;
-
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
@@ -594,7 +606,7 @@ class FullyConnectedOperatorTester {
           for (size_t oc = 0; oc < output_channels(); oc++) {
             for (size_t ic = 0; ic < input_channels(); ic++) {
               accumulators[i * output_channels() + oc] +=
-                (int32_t(input[i * input_stride() + ic]) - int32_t(input_zero_point)) *
+                (int32_t(input[i * input_stride() + ic]) - int32_t(input_zero_point() - 0x80)) *
                 int32_t(kernel[ic * output_channels() + oc]);
             }
           }
@@ -604,7 +616,7 @@ class FullyConnectedOperatorTester {
           for (size_t oc = 0; oc < output_channels(); oc++) {
             for (size_t ic = 0; ic < input_channels(); ic++) {
               accumulators[i * output_channels() + oc] +=
-                (int32_t(input[i * input_stride() + ic]) - int32_t(input_zero_point)) *
+                (int32_t(input[i * input_stride() + ic]) - int32_t(input_zero_point() - 0x80)) *
                 int32_t(kernel[oc * input_channels() + ic]);
             }
           }
@@ -623,11 +635,11 @@ class FullyConnectedOperatorTester {
         float requantization_scale = 0x1.0p-32f;
         if (accumulated_max != 0) {
           requantization_scale = std::max(requantization_scale,
-            float(int32_t(std::numeric_limits<int8_t>::max()) - int32_t(output_zero_point)) / float(accumulated_max));
+            float(int32_t(std::numeric_limits<int8_t>::max()) - int32_t(output_zero_point() - 0x80)) / float(accumulated_max));
         }
         if (accumulated_min != 0) {
           requantization_scale = std::max(requantization_scale,
-            float(int32_t(std::numeric_limits<int8_t>::min()) - int32_t(output_zero_point)) / float(accumulated_min));
+            float(int32_t(std::numeric_limits<int8_t>::min()) - int32_t(output_zero_point() - 0x80)) / float(accumulated_min));
         }
         requantization_scale = std::min(requantization_scale, 0x1.FFFFFEp-1f);
         requantization_scales[oc] = requantization_scale;
@@ -636,7 +648,7 @@ class FullyConnectedOperatorTester {
       // Renormalize reference results.
       for (size_t oc = 0; oc < output_channels(); oc++) {
         for (size_t i = 0; i < batch_size(); i++) {
-          output_ref[i * output_channels() + oc] = double(int32_t(output_zero_point)) +
+          output_ref[i * output_channels() + oc] = double(int32_t(output_zero_point() - 0x80)) +
             double(accumulators[i * output_channels() + oc]) * double(requantization_scales[oc]);
         }
       }
@@ -660,10 +672,10 @@ class FullyConnectedOperatorTester {
       const xnn_status status = xnn_create_fully_connected_nc_qs8_qc8w(
           input_channels(), output_channels(),
           input_stride(), output_stride(),
-          input_zero_point, /*input_scale=*/1.0f,
+          int8_t(input_zero_point() - 0x80), /*input_scale=*/1.0f,
           requantization_scales.data(),
           kernel.data(), has_bias() ? bias.data() : nullptr,
-          output_zero_point, /*output_scale=*/1.0f, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+          int8_t(output_zero_point() - 0x80), /*output_scale=*/1.0f, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
           transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
           nullptr, auto_weights_cache.get(),
           &fully_connected_op);
@@ -705,9 +717,9 @@ class FullyConnectedOperatorTester {
         ASSERT_EQ(xnn_status_success,
                   xnn_create_fully_connected_nc_qs8_qc8w(
                       input_channels(), output_channels(), input_stride(),
-                      output_stride(), input_zero_point, /*input_scale=*/1.0f,
+                      output_stride(), (int8_t) (input_zero_point() - 0x80), /*input_scale=*/1.0f,
                       requantization_scales.data(), kernel.data(),
-                      has_bias() ? bias.data() : nullptr, output_zero_point,
+                      has_bias() ? bias.data() : nullptr, int8_t(output_zero_point() - 0x80),
                       /*output_scale=*/1.0f, int8_t(qmin() - 0x80),
                       int8_t(qmax() - 0x80),
                       transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
@@ -773,9 +785,6 @@ class FullyConnectedOperatorTester {
     std::vector<int32_t> accumulators(batch_size() * output_channels());
     std::vector<double> output_ref(batch_size() * output_channels());
 
-    const uint8_t input_zero_point = 127;
-    const uint8_t kernel_zero_point = 127;
-
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return u8dist(rng); });
@@ -797,8 +806,8 @@ class FullyConnectedOperatorTester {
           for (size_t oc = 0; oc < output_channels(); oc++) {
             for (size_t ic = 0; ic < input_channels(); ic++) {
               accumulators[i * output_channels() + oc] +=
-                (int32_t(input[i * input_stride() + ic]) - int32_t(input_zero_point)) *
-                (int32_t(kernel[ic * output_channels() + oc]) - int32_t(kernel_zero_point));
+                (int32_t(input[i * input_stride() + ic]) - int32_t(input_zero_point())) *
+                (int32_t(kernel[ic * output_channels() + oc]) - int32_t(kernel_zero_point()));
             }
           }
         }
@@ -807,8 +816,8 @@ class FullyConnectedOperatorTester {
           for (size_t oc = 0; oc < output_channels(); oc++) {
             for (size_t ic = 0; ic < input_channels(); ic++) {
               accumulators[i * output_channels() + oc] +=
-                (int32_t(input[i * input_stride() + ic]) - int32_t(input_zero_point)) *
-                (int32_t(kernel[oc * input_channels() + ic]) - int32_t(kernel_zero_point));
+                (int32_t(input[i * input_stride() + ic]) - int32_t(input_zero_point())) *
+                (int32_t(kernel[oc * input_channels() + ic]) - int32_t(kernel_zero_point()));
             }
           }
         }
@@ -844,8 +853,8 @@ class FullyConnectedOperatorTester {
       const xnn_status status = xnn_create_fully_connected_nc_qu8(
           input_channels(), output_channels(),
           input_stride(), output_stride(),
-          input_zero_point, /*input_scale=*/1.0f,
-          kernel_zero_point, /*kernel_scale=*/1.0f,
+          input_zero_point(), /*input_scale=*/1.0f,
+          uint8_t(kernel_zero_point()), /*kernel_scale=*/1.0f,
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, qmin(), qmax(),
           transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
@@ -888,8 +897,8 @@ class FullyConnectedOperatorTester {
         ASSERT_EQ(xnn_status_success,
                   xnn_create_fully_connected_nc_qu8(
                       input_channels(), output_channels(), input_stride(),
-                      output_stride(), input_zero_point, /*input_scale=*/1.0f,
-                      kernel_zero_point, /*kernel_scale=*/1.0f, kernel.data(),
+                      output_stride(), input_zero_point(), /*input_scale=*/1.0f,
+                      uint8_t(kernel_zero_point()), /*kernel_scale=*/1.0f, kernel.data(),
                       has_bias() ? bias.data() : nullptr, output_zero_point,
                       output_scale, qmin(), qmax(),
                       transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
@@ -1765,6 +1774,8 @@ class FullyConnectedOperatorTester {
   size_t output_channels_{1};
   size_t output_stride_{0};
   size_t batch_size_{1};
+  uint8_t input_zero_point_{127};
+  uint8_t output_zero_point_{127};
   uint8_t kernel_zero_point_{127};  // set qc4w kernel zero point to invalid
   uint8_t qmin_{0};
   uint8_t qmax_{255};
