@@ -35,4 +35,5 @@
 #define BENCHMARK_QU8_END2END(benchmark_fn) \
   BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v1, models::QU8MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime(); \
   BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v2, models::QU8MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime(); \
-  BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v3, models::QU8MobileNetV3Large)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v3, models::QU8MobileNetV3Large)->Unit(benchmark::kMicrosecond)->UseRealTime(); \
+  BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v3, models::QU8MobileNetV3Small)->Unit(benchmark::kMicrosecond)->UseRealTime();

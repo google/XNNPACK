@@ -6807,6 +6807,19 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "qu8_mobilenet_v3_small",
+    srcs = ["models/qu8-mobilenet-v3-small.cc"],
+    hdrs = ["src/xnnpack/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    deps = [
+        ":XNNPACK",
+        ":aligned_allocator",
+        ":cache",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "fp16_mobilenet_v2",
     srcs = ["models/fp16-mobilenet-v2.cc"],
     hdrs = ["src/xnnpack/models.h"],
@@ -7076,6 +7089,7 @@ xnnpack_benchmark(
         ":qu8_mobilenet_v1",
         ":qu8_mobilenet_v2",
         ":qu8_mobilenet_v3_large",
+        ":qu8_mobilenet_v3_small",
     ],
 )
 
@@ -7090,6 +7104,7 @@ xnnpack_benchmark(
         ":qu8_mobilenet_v1",
         ":qu8_mobilenet_v2",
         ":qu8_mobilenet_v3_large",
+        ":qu8_mobilenet_v3_small",
     ],
 )
 
@@ -7124,6 +7139,7 @@ xnnpack_benchmark(
         ":qu8_mobilenet_v1",
         ":qu8_mobilenet_v2",
         ":qu8_mobilenet_v3_large",
+        ":qu8_mobilenet_v3_small",
         "@pthreadpool",
     ],
 )
