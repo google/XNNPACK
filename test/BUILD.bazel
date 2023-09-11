@@ -2412,7 +2412,7 @@ xnnpack_unit_test(
 xnnpack_binary(
     name = "operator_size_test",
     srcs = ["operator-size.c"],
-    deps = ["//:xnnpack_for_tfjs"],
+    deps = ["//:XNNPACK"],
 )
 
 xnnpack_binary(

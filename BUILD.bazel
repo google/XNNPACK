@@ -3201,13 +3201,11 @@ xnnpack_cc_library(
     deps = [
         ":allocator",
         ":common",
-        ":hardware_config",
         ":logging",
         ":math",
         ":microkernels_h",
         ":microparams",
         ":microparams_init",
-        ":normalization",
         ":operators",
         ":params",
         ":subgraph",
@@ -3246,71 +3244,6 @@ xnnpack_cc_library(
         ":params",
         ":subgraph_test_mode",
         ":test_microkernels",
-    ],
-)
-
-# Specialized XNNPACK version for TensorFlow Lite. Excludes operators currently
-# not used by the TensorFlow Lite XNNPACK delegate to minimize code size.
-xnnpack_cc_library(
-    name = "xnnpack_for_tflite",
-    srcs = [
-        "src/init.c",
-    ],
-    hdrs = ["include/xnnpack.h"],
-    copts = select({
-        ":debug_build": [],
-        "//conditions:default": xnnpack_min_size_copts(),
-    }) + select({
-        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
-        "//conditions:default": [],
-    }),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    visibility = xnnpack_visibility(),
-    deps = [
-        ":allocator",
-        ":common",
-        ":logging",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":microparams_init",
-        ":operators",
-        ":params",
-        ":prod_microkernels",
-        ":subgraph",
-    ],
-)
-
-# Specialized XNNPACK version for TensorFlow.js. Excludes operators currently
-# not used by the TensorFlow.js WebAssembly backend to minimize code size.
-xnnpack_cc_library(
-    name = "xnnpack_for_tfjs",
-    srcs = [
-        "src/init.c",
-    ],
-    hdrs = ["include/xnnpack.h"],
-    copts = select({
-        ":debug_build": [],
-        "//conditions:default": xnnpack_min_size_copts(),
-    }) + select({
-        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
-        "//conditions:default": [],
-    }),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    visibility = xnnpack_visibility(),
-    deps = [
-        ":allocator",
-        ":common",
-        ":logging",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":microparams_init",
-        ":operators",
-        ":params",
-        ":prod_microkernels",
     ],
 )
 
