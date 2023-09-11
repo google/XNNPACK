@@ -442,7 +442,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, adjacent_1_dims) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 1D) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_1D) {
     TransposeNormalizationTester()
       .num_dims(1)
       .element_size(4)
@@ -457,7 +457,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 1D) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 2D_flatten_1D) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_2D_flatten_1D) {
     TransposeNormalizationTester()
       .num_dims(2)
       .element_size(4)
@@ -472,7 +472,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 2D_flatten_1D) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 2D_flatten_2D) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_2D_flatten_2D) {
     TransposeNormalizationTester()
       .num_dims(2)
       .element_size(4)
@@ -487,7 +487,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 2D_flatten_2D) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 3D_redundant_dim) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_3D_redundant_dim) {
     TransposeNormalizationTester()
       .num_dims(3)
       .element_size(4)
@@ -502,7 +502,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 3D_redundant_dim) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 3D_all_ones) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_3D_all_ones) {
     TransposeNormalizationTester()
       .num_dims(3)
       .element_size(4)
@@ -517,7 +517,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 3D_all_ones) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 3D_flatten_1D) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_3D_flatten_1D) {
     TransposeNormalizationTester()
       .num_dims(3)
       .element_size(4)
@@ -532,7 +532,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 3D_flatten_1D) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 3D_flatten_2D) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_3D_flatten_2D) {
     TransposeNormalizationTester()
       .num_dims(3)
       .element_size(4)
@@ -547,7 +547,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 3D_flatten_2D) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 3D_flatten_element_size_2D) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_3D_flatten_element_size_2D) {
     TransposeNormalizationTester()
       .num_dims(3)
       .element_size(4)
@@ -562,7 +562,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 3D_flatten_element_size_2D) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 3D_flatten_3D) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_3D_flatten_3D) {
     TransposeNormalizationTester()
       .num_dims(3)
       .element_size(4)
@@ -577,7 +577,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 3D_flatten_3D) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 3D_redundant_dim_first) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_3D_redundant_dim_first) {
     TransposeNormalizationTester()
       .num_dims(3)
       .element_size(4)
@@ -592,7 +592,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 3D_redundant_dim_first) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 4D_to_1D) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_4D_to_1D) {
     TransposeNormalizationTester()
       .num_dims(4)
       .element_size(4)
@@ -607,7 +607,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 4D_to_1D) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 4D_flatten_element_size_2D) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_4D_flatten_element_size_2D) {
     TransposeNormalizationTester()
       .num_dims(4)
       .element_size(1)
@@ -622,7 +622,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 4D_flatten_element_size_2D) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 4D_flatten_3D) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_4D_flatten_3D) {
     TransposeNormalizationTester()
       .num_dims(4)
       .element_size(2)
@@ -637,7 +637,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 4D_flatten_3D) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 5D_double_flatten_3D) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_5D_double_flatten_3D) {
     TransposeNormalizationTester()
       .num_dims(5)
       .element_size(4)
@@ -652,7 +652,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 5D_double_flatten_3D) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 5D_flatten_3D) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_5D_flatten_3D) {
     TransposeNormalizationTester()
       .num_dims(5)
       .element_size(2)
@@ -667,7 +667,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 5D_flatten_3D) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 5D_flatten_4D) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_5D_flatten_4D) {
     TransposeNormalizationTester()
       .num_dims(5)
       .element_size(2)
@@ -682,7 +682,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 5D_flatten_4D) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 5D_flatten_2D) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_5D_flatten_2D) {
     TransposeNormalizationTester()
       .num_dims(6)
       .element_size(4)
@@ -697,7 +697,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 5D_flatten_2D) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 6D_flatten_3D) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_6D_flatten_3D) {
     TransposeNormalizationTester()
       .num_dims(6)
       .element_size(4)
@@ -712,7 +712,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 6D_flatten_3D) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 6D_double_flatten_3D) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_6D_double_flatten_3D) {
     TransposeNormalizationTester()
       .num_dims(6)
       .element_size(4)
@@ -727,7 +727,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 6D_double_flatten_3D) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 6D_double_flatten_4D) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_6D_double_flatten_4D) {
     TransposeNormalizationTester()
       .num_dims(6)
       .element_size(4)
@@ -742,7 +742,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, 6D_double_flatten_4D) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, 6D_flatten_ones) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_6D_flatten_ones) {
     TransposeNormalizationTester()
       .num_dims(6)
       .element_size(4)

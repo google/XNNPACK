@@ -803,12 +803,12 @@ TEST_F(WasmOpsTest, F32x4Mul) {
   TestV128BinaryOp(0xE6, &WasmOpsTest::F32x4Mul);
 }
 
-TEST_F(V128StoreLaneWasmOpTest, 32Lane) {
+TEST_F(V128StoreLaneWasmOpTest, Store32Lane) {
   SetStoreLaneExpectations(0x5A);
   V128Store32Lane(v128_value_, v128_value_, kLane, kOffset, kAlignment);
 }
 
-TEST_F(V128StoreLaneWasmOpTest, 64Lane) {
+TEST_F(V128StoreLaneWasmOpTest, Store64Lane) {
   SetStoreLaneExpectations(0x5B);
   V128Store64Lane(v128_value_, v128_value_, kLane, kOffset, kAlignment);
 }

@@ -58,7 +58,7 @@ constexpr std::array<std::pair<size_t, size_t>, 3> kDim6TestCases = {{
     {kDim6 - 6, 1},
 }};
 
-TEST(SLICE_ND_X32, 1d) {
+TEST(SLICE_ND_X32, slice_1d) {
   for (const auto& dim1_offset_size : kDim1TestCases) {
     const size_t dim1_offset = dim1_offset_size.first;
     const size_t dim1_size = dim1_offset_size.second;
@@ -70,7 +70,7 @@ TEST(SLICE_ND_X32, 1d) {
   }
 }
 
-TEST(SLICE_ND_X32, 2d) {
+TEST(SLICE_ND_X32, slice_2d) {
   for (const auto& dim1_offset_size : kDim1TestCases) {
     const size_t dim1_offset = dim1_offset_size.first;
     const size_t dim1_size = dim1_offset_size.second;
@@ -86,7 +86,7 @@ TEST(SLICE_ND_X32, 2d) {
   }
 }
 
-TEST(SLICE_ND_X32, 3d) {
+TEST(SLICE_ND_X32, slice_3d) {
   for (const auto& dim1_offset_size : kDim1TestCases) {
     const size_t dim1_offset = dim1_offset_size.first;
     const size_t dim1_size = dim1_offset_size.second;
@@ -106,7 +106,7 @@ TEST(SLICE_ND_X32, 3d) {
   }
 }
 
-TEST(SLICE_ND_X32, 4d) {
+TEST(SLICE_ND_X32, slice_4d) {
   for (const auto& dim1_offset_size : kDim1TestCases) {
     const size_t dim1_offset = dim1_offset_size.first;
     const size_t dim1_size = dim1_offset_size.second;
@@ -130,7 +130,7 @@ TEST(SLICE_ND_X32, 4d) {
   }
 }
 
-TEST(SLICE_ND_X32, 5d) {
+TEST(SLICE_ND_X32, slice_5d) {
   for (const auto& dim1_offset_size : kDim1TestCases) {
     const size_t dim1_offset = dim1_offset_size.first;
     const size_t dim1_size = dim1_offset_size.second;
@@ -158,7 +158,7 @@ TEST(SLICE_ND_X32, 5d) {
   }
 }
 
-TEST(SLICE_ND_X32, 6d) {
+TEST(SLICE_ND_X32, slice_6d) {
   for (const auto& dim1_offset_size : kDim1TestCases) {
     const size_t dim1_offset = dim1_offset_size.first;
     const size_t dim1_size = dim1_offset_size.second;

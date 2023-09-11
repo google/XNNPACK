@@ -9,7 +9,7 @@
 #include "slice-normalization-tester.h"
 #include <gtest/gtest.h>
 
-TEST(SLICE_NORMALIZATION_TEST, 1d_full_slice) {
+TEST(SLICE_NORMALIZATION_TEST, normalize_1d_full_slice) {
   SliceNormalizationTester()
       .input_shape({3})
       .offsets({0})
@@ -20,7 +20,7 @@ TEST(SLICE_NORMALIZATION_TEST, 1d_full_slice) {
       .Test();
 }
 
-TEST(SLICE_NORMALIZATION_TEST, 6d_full_slice) {
+TEST(SLICE_NORMALIZATION_TEST, normalize_6d_full_slice) {
   SliceNormalizationTester()
       .input_shape({3, 4, 5, 6, 7, 8})
       .offsets({0, 0, 0, 0, 0, 0})
