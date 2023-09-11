@@ -403,7 +403,7 @@ static void init_f32_dwconv_config(void) {
 
       #if XNN_ENABLE_DWCONV_MULTIPASS
         f32_dwconv_config[3].minmax.multipass = (xnn_dwconv_multipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2;
-        f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_sse_params;
+        f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_avx_params;
         f32_dwconv_config[3].channel_tile = 8;
         f32_dwconv_config[3].channel_subtile = 8;
         f32_dwconv_config[3].channel_round = 4;
