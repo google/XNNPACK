@@ -3346,6 +3346,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       models/fp32-mobilenet-v1.cc
       models/fp32-mobilenet-v1-jit.cc
       models/fp32-mobilenet-v2.cc
+      models/fp32-mobilenet-v2-jit.cc
       models/fp32-mobilenet-v3-large.cc
       models/fp32-mobilenet-v3-small.cc
       models/fp32-mobilenet-v3-small-fused.cc
