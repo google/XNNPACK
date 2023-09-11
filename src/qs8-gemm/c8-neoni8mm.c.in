@@ -78,16 +78,24 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     // weight matrix, at the start of the group of ${NR} columns.
     $if DATATYPE == "QD8":
       $for M in range(0, MR, 2):
-        const int32x4_t vinput_zero_point${ABC[M:M+2]} = vld1q_s32(&quantization_params[${M}].zero_point);
+        $if M + 1 < MR:
+          const int32x4_t vinput_zero_point${ABC[M:M+2]} = vld1q_s32(&quantization_params[${M}].zero_point);
+        $else:
+          const int32x4_t vinput_zero_point${ABC[M:M+2]} = vld1q_dup_s32(&quantization_params[${M}].zero_point);
         $for N in range(0, NR, 4):
           $if M == 0:
             const int32x4_t vksum${ABC[N:N+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
           const int32x4_t vksumzp${M}x${ABC[N:N+4]} = vmulq_lane_s32(vksum${ABC[N:N+4]}, vget_low_s32(vinput_zero_point${ABC[M:M+2]}), 0);
-          const int32x4_t vksumzp${M+1}x${ABC[N:N+4]} = vmulq_lane_s32(vksum${ABC[N:N+4]}, vget_high_s32(vinput_zero_point${ABC[M:M+2]}), 0);
+          $if M + 1 < MR:
+            const int32x4_t vksumzp${M+1}x${ABC[N:N+4]} = vmulq_lane_s32(vksum${ABC[N:N+4]}, vget_high_s32(vinput_zero_point${ABC[M:M+2]}), 0);
       $for M in range(0, MR, 2):
         $for N in range(0, NR, 4):
-          int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M+1}x${ABC[N:N+4]})));
-          int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M+1}x${ABC[N:N+4]})));
+          $if M + 1 < MR:
+            int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M+1}x${ABC[N:N+4]})));
+            int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M+1}x${ABC[N:N+4]})));
+          $else:
+            int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]})));
+            int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]})));
     $else:
       $for N in range(0, NR, 4):
         const uint64x2x2_t vbias01x${ABC[N:N+4]} = vld2q_dup_u64(w); w = (const int32_t*) w + 4;
