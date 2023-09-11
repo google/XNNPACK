@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert NR % 4 == 0
-$assert 4 <= NR <= 16
+$assert NR % 8 == 0
+$assert 8 <= NR <= 16
 $assert REQUANTIZATION in ["FP32", "RNDNU"] or not REQUANTIZATION
 $assert DATATYPE in ["QC8", "QD8", "QS8"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
@@ -85,9 +85,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         $for N in range(0, NR, 4):
           $if M == 0:
             const int32x4_t vksum${ABC[N:N+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
-          const int32x4_t vksumzp${M}x${ABC[N:N+4]} = vmulq_lane_s32(vksum${ABC[N:N+4]}, vget_low_s32(vinput_zero_point${ABC[M:M+2]}), 0);
           $if M + 1 < MR:
+            const int32x4_t vksumzp${M}x${ABC[N:N+4]} = vmulq_lane_s32(vksum${ABC[N:N+4]}, vget_low_s32(vinput_zero_point${ABC[M:M+2]}), 0);
             const int32x4_t vksumzp${M+1}x${ABC[N:N+4]} = vmulq_lane_s32(vksum${ABC[N:N+4]}, vget_high_s32(vinput_zero_point${ABC[M:M+2]}), 0);
+          $else:
+            const int32x4_t vksumzp${M}x${ABC[N:N+4]} = vmulq_s32(vksum${ABC[N:N+4]}, vinput_zero_point${ABC[M:M+2]});
       $for M in range(0, MR, 2):
         $for N in range(0, NR, 4):
           $if M + 1 < MR:

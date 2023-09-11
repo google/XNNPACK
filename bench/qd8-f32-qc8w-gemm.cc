@@ -304,41 +304,6 @@ void GEMMBenchmark(benchmark::State& state,
       /*mr=*/8, /*nr=*/8, /*kr=*/8, /*sr=*/1,
       benchmark::utils::CheckNEONI8MM);
   }
-  static void qd8_f32_qc8w_gemm_1x4c8__neoni8mm(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4c8__neoni8mm,
-      xnn_init_f32_minmax_scalar_params,
-      /*mr=*/1, /*nr=*/4, /*kr=*/8, /*sr=*/1,
-      benchmark::utils::CheckNEONI8MM);
-  }
-  static void qd8_f32_qc8w_gemm_2x4c8__neoni8mm(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4c8__neoni8mm,
-      xnn_init_f32_minmax_scalar_params,
-      /*mr=*/2, /*nr=*/4, /*kr=*/8, /*sr=*/1,
-      benchmark::utils::CheckNEONI8MM);
-  }
-  static void qd8_f32_qc8w_gemm_4x4c8__neoni8mm(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4c8__neoni8mm,
-      xnn_init_f32_minmax_scalar_params,
-      /*mr=*/4, /*nr=*/4, /*kr=*/8, /*sr=*/1,
-      benchmark::utils::CheckNEONI8MM);
-  }
-  static void qd8_f32_qc8w_gemm_6x4c8__neoni8mm(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_6x4c8__neoni8mm,
-      xnn_init_f32_minmax_scalar_params,
-      /*mr=*/6, /*nr=*/4, /*kr=*/8, /*sr=*/1,
-      benchmark::utils::CheckNEONI8MM);
-  }
-  static void qd8_f32_qc8w_gemm_8x4c8__neoni8mm(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_8x4c8__neoni8mm,
-      xnn_init_f32_minmax_scalar_params,
-      /*mr=*/8, /*nr=*/4, /*kr=*/8, /*sr=*/1,
-      benchmark::utils::CheckNEONI8MM);
-  }
 #endif //XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -842,13 +807,8 @@ static void qd8_f32_qc8w_gemm_4x4__scalar(benchmark::State& state, const char* n
   BENCHMARK_GEMM(qd8_f32_qc8w_gemm_1x8c8__neoni8mm)
   BENCHMARK_GEMM(qd8_f32_qc8w_gemm_2x8c8__neoni8mm)
   BENCHMARK_GEMM(qd8_f32_qc8w_gemm_4x8c8__neoni8mm)
-  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_6x4c8__neoni8mm)
   BENCHMARK_GEMM(qd8_f32_qc8w_gemm_6x8c8__neoni8mm)
   BENCHMARK_GEMM(qd8_f32_qc8w_gemm_8x8c8__neoni8mm)
-  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_1x4c8__neoni8mm)
-  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_2x4c8__neoni8mm)
-  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_4x4c8__neoni8mm)
-  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_8x4c8__neoni8mm)
 #endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
 
 #if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
