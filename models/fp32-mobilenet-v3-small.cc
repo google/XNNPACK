@@ -2,6 +2,8 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
 
 #include <xnnpack.h>
 
@@ -14,12 +16,11 @@
 
 #include <xnnpack/cache.h>
 #include <xnnpack/common.h>
-#include <xnnpack/memory.h>
 #include <xnnpack/models.h>
 
 namespace models {
 
-ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
+ExecutionPlan FP32MobileNetV3Small(pthreadpool_t threadpool) {
   alignas(16) static std::array<float, 150528 + XNN_EXTRA_BYTES / sizeof(float)> v0;
   alignas(16) static std::array<float, 200704 + XNN_EXTRA_BYTES / sizeof(float)> v1;
   alignas(16) static std::array<float, 200704 + XNN_EXTRA_BYTES / sizeof(float)> v2;
@@ -120,114 +121,116 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
   alignas(16) static std::array<float, 1024 + XNN_EXTRA_BYTES / sizeof(float)> v97;
   alignas(16) static std::array<float, 1024 + XNN_EXTRA_BYTES / sizeof(float)> v98;
   alignas(16) static std::array<float, 1001 + XNN_EXTRA_BYTES / sizeof(float)> v99;
-  alignas(16) static std::array<float, 432 + XNN_EXTRA_BYTES / sizeof(float)> w100;
-  alignas(16) static std::array<float, 16 + XNN_EXTRA_BYTES / sizeof(float)> w101;
-  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w102;
+  alignas(16) static std::array<float, 1001 + XNN_EXTRA_BYTES / sizeof(float)> v100;
+  alignas(16) static std::array<float, 1001 + XNN_EXTRA_BYTES / sizeof(float)> v101;
+  alignas(16) static std::array<float, 432 + XNN_EXTRA_BYTES / sizeof(float)> w102;
   alignas(16) static std::array<float, 16 + XNN_EXTRA_BYTES / sizeof(float)> w103;
-  alignas(16) static std::array<float, 128 + XNN_EXTRA_BYTES / sizeof(float)> w104;
-  alignas(16) static std::array<float, 8 + XNN_EXTRA_BYTES / sizeof(float)> w105;
+  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w104;
+  alignas(16) static std::array<float, 16 + XNN_EXTRA_BYTES / sizeof(float)> w105;
   alignas(16) static std::array<float, 128 + XNN_EXTRA_BYTES / sizeof(float)> w106;
-  alignas(16) static std::array<float, 16 + XNN_EXTRA_BYTES / sizeof(float)> w107;
-  alignas(16) static std::array<float, 256 + XNN_EXTRA_BYTES / sizeof(float)> w108;
+  alignas(16) static std::array<float, 8 + XNN_EXTRA_BYTES / sizeof(float)> w107;
+  alignas(16) static std::array<float, 128 + XNN_EXTRA_BYTES / sizeof(float)> w108;
   alignas(16) static std::array<float, 16 + XNN_EXTRA_BYTES / sizeof(float)> w109;
-  alignas(16) static std::array<float, 1152 + XNN_EXTRA_BYTES / sizeof(float)> w110;
-  alignas(16) static std::array<float, 72 + XNN_EXTRA_BYTES / sizeof(float)> w111;
-  alignas(16) static std::array<float, 648 + XNN_EXTRA_BYTES / sizeof(float)> w112;
+  alignas(16) static std::array<float, 256 + XNN_EXTRA_BYTES / sizeof(float)> w110;
+  alignas(16) static std::array<float, 16 + XNN_EXTRA_BYTES / sizeof(float)> w111;
+  alignas(16) static std::array<float, 1152 + XNN_EXTRA_BYTES / sizeof(float)> w112;
   alignas(16) static std::array<float, 72 + XNN_EXTRA_BYTES / sizeof(float)> w113;
-  alignas(16) static std::array<float, 1728 + XNN_EXTRA_BYTES / sizeof(float)> w114;
-  alignas(16) static std::array<float, 24 + XNN_EXTRA_BYTES / sizeof(float)> w115;
-  alignas(16) static std::array<float, 2112 + XNN_EXTRA_BYTES / sizeof(float)> w116;
-  alignas(16) static std::array<float, 88 + XNN_EXTRA_BYTES / sizeof(float)> w117;
-  alignas(16) static std::array<float, 792 + XNN_EXTRA_BYTES / sizeof(float)> w118;
+  alignas(16) static std::array<float, 648 + XNN_EXTRA_BYTES / sizeof(float)> w114;
+  alignas(16) static std::array<float, 72 + XNN_EXTRA_BYTES / sizeof(float)> w115;
+  alignas(16) static std::array<float, 1728 + XNN_EXTRA_BYTES / sizeof(float)> w116;
+  alignas(16) static std::array<float, 24 + XNN_EXTRA_BYTES / sizeof(float)> w117;
+  alignas(16) static std::array<float, 2112 + XNN_EXTRA_BYTES / sizeof(float)> w118;
   alignas(16) static std::array<float, 88 + XNN_EXTRA_BYTES / sizeof(float)> w119;
-  alignas(16) static std::array<float, 2112 + XNN_EXTRA_BYTES / sizeof(float)> w120;
-  alignas(16) static std::array<float, 24 + XNN_EXTRA_BYTES / sizeof(float)> w121;
-  alignas(16) static std::array<float, 2304 + XNN_EXTRA_BYTES / sizeof(float)> w122;
-  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> w123;
-  alignas(16) static std::array<float, 2400 + XNN_EXTRA_BYTES / sizeof(float)> w124;
+  alignas(16) static std::array<float, 792 + XNN_EXTRA_BYTES / sizeof(float)> w120;
+  alignas(16) static std::array<float, 88 + XNN_EXTRA_BYTES / sizeof(float)> w121;
+  alignas(16) static std::array<float, 2112 + XNN_EXTRA_BYTES / sizeof(float)> w122;
+  alignas(16) static std::array<float, 24 + XNN_EXTRA_BYTES / sizeof(float)> w123;
+  alignas(16) static std::array<float, 2304 + XNN_EXTRA_BYTES / sizeof(float)> w124;
   alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> w125;
-  alignas(16) static std::array<float, 2304 + XNN_EXTRA_BYTES / sizeof(float)> w126;
-  alignas(16) static std::array<float, 24 + XNN_EXTRA_BYTES / sizeof(float)> w127;
+  alignas(16) static std::array<float, 2400 + XNN_EXTRA_BYTES / sizeof(float)> w126;
+  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> w127;
   alignas(16) static std::array<float, 2304 + XNN_EXTRA_BYTES / sizeof(float)> w128;
-  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> w129;
-  alignas(16) static std::array<float, 3840 + XNN_EXTRA_BYTES / sizeof(float)> w130;
-  alignas(16) static std::array<float, 40 + XNN_EXTRA_BYTES / sizeof(float)> w131;
-  alignas(16) static std::array<float, 9600 + XNN_EXTRA_BYTES / sizeof(float)> w132;
-  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w133;
-  alignas(16) static std::array<float, 6000 + XNN_EXTRA_BYTES / sizeof(float)> w134;
+  alignas(16) static std::array<float, 24 + XNN_EXTRA_BYTES / sizeof(float)> w129;
+  alignas(16) static std::array<float, 2304 + XNN_EXTRA_BYTES / sizeof(float)> w130;
+  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> w131;
+  alignas(16) static std::array<float, 3840 + XNN_EXTRA_BYTES / sizeof(float)> w132;
+  alignas(16) static std::array<float, 40 + XNN_EXTRA_BYTES / sizeof(float)> w133;
+  alignas(16) static std::array<float, 9600 + XNN_EXTRA_BYTES / sizeof(float)> w134;
   alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w135;
-  alignas(16) static std::array<float, 15360 + XNN_EXTRA_BYTES / sizeof(float)> w136;
-  alignas(16) static std::array<float, 64 + XNN_EXTRA_BYTES / sizeof(float)> w137;
+  alignas(16) static std::array<float, 6000 + XNN_EXTRA_BYTES / sizeof(float)> w136;
+  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w137;
   alignas(16) static std::array<float, 15360 + XNN_EXTRA_BYTES / sizeof(float)> w138;
-  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w139;
-  alignas(16) static std::array<float, 9600 + XNN_EXTRA_BYTES / sizeof(float)> w140;
-  alignas(16) static std::array<float, 40 + XNN_EXTRA_BYTES / sizeof(float)> w141;
+  alignas(16) static std::array<float, 64 + XNN_EXTRA_BYTES / sizeof(float)> w139;
+  alignas(16) static std::array<float, 15360 + XNN_EXTRA_BYTES / sizeof(float)> w140;
+  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w141;
   alignas(16) static std::array<float, 9600 + XNN_EXTRA_BYTES / sizeof(float)> w142;
-  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w143;
-  alignas(16) static std::array<float, 6000 + XNN_EXTRA_BYTES / sizeof(float)> w144;
+  alignas(16) static std::array<float, 40 + XNN_EXTRA_BYTES / sizeof(float)> w143;
+  alignas(16) static std::array<float, 9600 + XNN_EXTRA_BYTES / sizeof(float)> w144;
   alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w145;
-  alignas(16) static std::array<float, 15360 + XNN_EXTRA_BYTES / sizeof(float)> w146;
-  alignas(16) static std::array<float, 64 + XNN_EXTRA_BYTES / sizeof(float)> w147;
+  alignas(16) static std::array<float, 6000 + XNN_EXTRA_BYTES / sizeof(float)> w146;
+  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w147;
   alignas(16) static std::array<float, 15360 + XNN_EXTRA_BYTES / sizeof(float)> w148;
-  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w149;
-  alignas(16) static std::array<float, 9600 + XNN_EXTRA_BYTES / sizeof(float)> w150;
-  alignas(16) static std::array<float, 40 + XNN_EXTRA_BYTES / sizeof(float)> w151;
-  alignas(16) static std::array<float, 4800 + XNN_EXTRA_BYTES / sizeof(float)> w152;
-  alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> w153;
-  alignas(16) static std::array<float, 3000 + XNN_EXTRA_BYTES / sizeof(float)> w154;
+  alignas(16) static std::array<float, 64 + XNN_EXTRA_BYTES / sizeof(float)> w149;
+  alignas(16) static std::array<float, 15360 + XNN_EXTRA_BYTES / sizeof(float)> w150;
+  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w151;
+  alignas(16) static std::array<float, 9600 + XNN_EXTRA_BYTES / sizeof(float)> w152;
+  alignas(16) static std::array<float, 40 + XNN_EXTRA_BYTES / sizeof(float)> w153;
+  alignas(16) static std::array<float, 4800 + XNN_EXTRA_BYTES / sizeof(float)> w154;
   alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> w155;
-  alignas(16) static std::array<float, 3840 + XNN_EXTRA_BYTES / sizeof(float)> w156;
-  alignas(16) static std::array<float, 32 + XNN_EXTRA_BYTES / sizeof(float)> w157;
+  alignas(16) static std::array<float, 3000 + XNN_EXTRA_BYTES / sizeof(float)> w156;
+  alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> w157;
   alignas(16) static std::array<float, 3840 + XNN_EXTRA_BYTES / sizeof(float)> w158;
-  alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> w159;
-  alignas(16) static std::array<float, 5760 + XNN_EXTRA_BYTES / sizeof(float)> w160;
-  alignas(16) static std::array<float, 48 + XNN_EXTRA_BYTES / sizeof(float)> w161;
-  alignas(16) static std::array<float, 6912 + XNN_EXTRA_BYTES / sizeof(float)> w162;
-  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w163;
-  alignas(16) static std::array<float, 3600 + XNN_EXTRA_BYTES / sizeof(float)> w164;
+  alignas(16) static std::array<float, 32 + XNN_EXTRA_BYTES / sizeof(float)> w159;
+  alignas(16) static std::array<float, 3840 + XNN_EXTRA_BYTES / sizeof(float)> w160;
+  alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> w161;
+  alignas(16) static std::array<float, 5760 + XNN_EXTRA_BYTES / sizeof(float)> w162;
+  alignas(16) static std::array<float, 48 + XNN_EXTRA_BYTES / sizeof(float)> w163;
+  alignas(16) static std::array<float, 6912 + XNN_EXTRA_BYTES / sizeof(float)> w164;
   alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w165;
-  alignas(16) static std::array<float, 5760 + XNN_EXTRA_BYTES / sizeof(float)> w166;
-  alignas(16) static std::array<float, 40 + XNN_EXTRA_BYTES / sizeof(float)> w167;
+  alignas(16) static std::array<float, 3600 + XNN_EXTRA_BYTES / sizeof(float)> w166;
+  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w167;
   alignas(16) static std::array<float, 5760 + XNN_EXTRA_BYTES / sizeof(float)> w168;
-  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w169;
-  alignas(16) static std::array<float, 6912 + XNN_EXTRA_BYTES / sizeof(float)> w170;
-  alignas(16) static std::array<float, 48 + XNN_EXTRA_BYTES / sizeof(float)> w171;
-  alignas(16) static std::array<float, 13824 + XNN_EXTRA_BYTES / sizeof(float)> w172;
-  alignas(16) static std::array<float, 288 + XNN_EXTRA_BYTES / sizeof(float)> w173;
-  alignas(16) static std::array<float, 7200 + XNN_EXTRA_BYTES / sizeof(float)> w174;
+  alignas(16) static std::array<float, 40 + XNN_EXTRA_BYTES / sizeof(float)> w169;
+  alignas(16) static std::array<float, 5760 + XNN_EXTRA_BYTES / sizeof(float)> w170;
+  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w171;
+  alignas(16) static std::array<float, 6912 + XNN_EXTRA_BYTES / sizeof(float)> w172;
+  alignas(16) static std::array<float, 48 + XNN_EXTRA_BYTES / sizeof(float)> w173;
+  alignas(16) static std::array<float, 13824 + XNN_EXTRA_BYTES / sizeof(float)> w174;
   alignas(16) static std::array<float, 288 + XNN_EXTRA_BYTES / sizeof(float)> w175;
-  alignas(16) static std::array<float, 20736 + XNN_EXTRA_BYTES / sizeof(float)> w176;
-  alignas(16) static std::array<float, 72 + XNN_EXTRA_BYTES / sizeof(float)> w177;
+  alignas(16) static std::array<float, 7200 + XNN_EXTRA_BYTES / sizeof(float)> w176;
+  alignas(16) static std::array<float, 288 + XNN_EXTRA_BYTES / sizeof(float)> w177;
   alignas(16) static std::array<float, 20736 + XNN_EXTRA_BYTES / sizeof(float)> w178;
-  alignas(16) static std::array<float, 288 + XNN_EXTRA_BYTES / sizeof(float)> w179;
-  alignas(16) static std::array<float, 27648 + XNN_EXTRA_BYTES / sizeof(float)> w180;
-  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> w181;
-  alignas(16) static std::array<float, 55296 + XNN_EXTRA_BYTES / sizeof(float)> w182;
-  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w183;
-  alignas(16) static std::array<float, 14400 + XNN_EXTRA_BYTES / sizeof(float)> w184;
+  alignas(16) static std::array<float, 72 + XNN_EXTRA_BYTES / sizeof(float)> w179;
+  alignas(16) static std::array<float, 20736 + XNN_EXTRA_BYTES / sizeof(float)> w180;
+  alignas(16) static std::array<float, 288 + XNN_EXTRA_BYTES / sizeof(float)> w181;
+  alignas(16) static std::array<float, 27648 + XNN_EXTRA_BYTES / sizeof(float)> w182;
+  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> w183;
+  alignas(16) static std::array<float, 55296 + XNN_EXTRA_BYTES / sizeof(float)> w184;
   alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w185;
-  alignas(16) static std::array<float, 82944 + XNN_EXTRA_BYTES / sizeof(float)> w186;
-  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w187;
+  alignas(16) static std::array<float, 14400 + XNN_EXTRA_BYTES / sizeof(float)> w186;
+  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w187;
   alignas(16) static std::array<float, 82944 + XNN_EXTRA_BYTES / sizeof(float)> w188;
-  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w189;
-  alignas(16) static std::array<float, 55296 + XNN_EXTRA_BYTES / sizeof(float)> w190;
-  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> w191;
+  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w189;
+  alignas(16) static std::array<float, 82944 + XNN_EXTRA_BYTES / sizeof(float)> w190;
+  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w191;
   alignas(16) static std::array<float, 55296 + XNN_EXTRA_BYTES / sizeof(float)> w192;
-  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w193;
-  alignas(16) static std::array<float, 14400 + XNN_EXTRA_BYTES / sizeof(float)> w194;
+  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> w193;
+  alignas(16) static std::array<float, 55296 + XNN_EXTRA_BYTES / sizeof(float)> w194;
   alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w195;
-  alignas(16) static std::array<float, 82944 + XNN_EXTRA_BYTES / sizeof(float)> w196;
-  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w197;
+  alignas(16) static std::array<float, 14400 + XNN_EXTRA_BYTES / sizeof(float)> w196;
+  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w197;
   alignas(16) static std::array<float, 82944 + XNN_EXTRA_BYTES / sizeof(float)> w198;
-  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w199;
-  alignas(16) static std::array<float, 55296 + XNN_EXTRA_BYTES / sizeof(float)> w200;
-  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> w201;
+  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w199;
+  alignas(16) static std::array<float, 82944 + XNN_EXTRA_BYTES / sizeof(float)> w200;
+  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w201;
   alignas(16) static std::array<float, 55296 + XNN_EXTRA_BYTES / sizeof(float)> w202;
-  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w203;
-  alignas(16) static std::array<float, 589824 + XNN_EXTRA_BYTES / sizeof(float)> w204;
-  alignas(16) static std::array<float, 1024 + XNN_EXTRA_BYTES / sizeof(float)> w205;
-  alignas(16) static std::array<float, 1025024 + XNN_EXTRA_BYTES / sizeof(float)> w206;
-  alignas(16) static std::array<float, 1001 + XNN_EXTRA_BYTES / sizeof(float)> w207;
+  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> w203;
+  alignas(16) static std::array<float, 55296 + XNN_EXTRA_BYTES / sizeof(float)> w204;
+  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w205;
+  alignas(16) static std::array<float, 589824 + XNN_EXTRA_BYTES / sizeof(float)> w206;
+  alignas(16) static std::array<float, 1024 + XNN_EXTRA_BYTES / sizeof(float)> w207;
+  alignas(16) static std::array<float, 1025024 + XNN_EXTRA_BYTES / sizeof(float)> w208;
+  alignas(16) static std::array<float, 1001 + XNN_EXTRA_BYTES / sizeof(float)> w209;
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
@@ -332,8 +335,8 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
   std::generate(v97.begin(), v97.end(), std::ref(f32rng));
   std::generate(v98.begin(), v98.end(), std::ref(f32rng));
   std::generate(v99.begin(), v99.end(), std::ref(f32rng));
-  std::generate(w100.begin(), w100.end(), std::ref(f32rng));
-  std::generate(w101.begin(), w101.end(), std::ref(f32rng));
+  std::generate(v100.begin(), v100.end(), std::ref(f32rng));
+  std::generate(v101.begin(), v101.end(), std::ref(f32rng));
   std::generate(w102.begin(), w102.end(), std::ref(f32rng));
   std::generate(w103.begin(), w103.end(), std::ref(f32rng));
   std::generate(w104.begin(), w104.end(), std::ref(f32rng));
@@ -440,22 +443,12 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
   std::generate(w205.begin(), w205.end(), std::ref(f32rng));
   std::generate(w206.begin(), w206.end(), std::ref(f32rng));
   std::generate(w207.begin(), w207.end(), std::ref(f32rng));
+  std::generate(w208.begin(), w208.end(), std::ref(f32rng));
+  std::generate(w209.begin(), w209.end(), std::ref(f32rng));
 
   Operators operators;
   xnn_status status;
   xnn_code_cache* code_cache_ptr = nullptr;
-#if XNN_PLATFORM_JIT
-  xnn_code_cache code_cache;
-  if (use_jit) {
-    status = xnn_init_code_cache(&code_cache);
-    if (status != xnn_status_success) {
-      std::cerr << "failed to initialize code cache" << std::endl;
-      return ExecutionPlan();
-    }
-    code_cache_ptr = &code_cache;
-  }
-#endif  // XNN_PLATFORM_JIT
-
   size_t max_workspace_size = 0;
 
   xnn_operator_t op0 = nullptr;
@@ -470,11 +463,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     16 /* output_channels_per_group */,
     3 /* input pixel stride */,
     16 /* output pixel stride */,
-    w100.data(), w101.data(),
+    w102.data(), w103.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #0" << std::endl;
@@ -507,11 +500,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     16 /* input pixel stride */,
     16 /* output pixel stride */,
-    w102.data(), w103.data(),
+    w104.data(), w105.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op2);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #2" << std::endl;
@@ -543,11 +536,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     8 /* output_channels_per_group */,
     16 /* input pixel stride */,
     8 /* output pixel stride */,
-    w104.data(), w105.data(),
+    w106.data(), w107.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op4);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #4" << std::endl;
@@ -567,11 +560,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     16 /* output_channels_per_group */,
     8 /* input pixel stride */,
     16 /* output pixel stride */,
-    w106.data(), w107.data(),
+    w108.data(), w109.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op5);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #5" << std::endl;
@@ -602,11 +595,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     16 /* output_channels_per_group */,
     16 /* input pixel stride */,
     16 /* output pixel stride */,
-    w108.data(), w109.data(),
+    w110.data(), w111.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op7);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #7" << std::endl;
@@ -626,11 +619,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     72 /* output_channels_per_group */,
     16 /* input pixel stride */,
     72 /* output pixel stride */,
-    w110.data(), w111.data(),
+    w112.data(), w113.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op8);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #8" << std::endl;
@@ -650,11 +643,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     72 /* input pixel stride */,
     72 /* output pixel stride */,
-    w112.data(), w113.data(),
+    w114.data(), w115.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op9);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #9" << std::endl;
@@ -674,11 +667,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     24 /* output_channels_per_group */,
     72 /* input pixel stride */,
     24 /* output pixel stride */,
-    w114.data(), w115.data(),
+    w116.data(), w117.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op10);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #10" << std::endl;
@@ -698,11 +691,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     88 /* output_channels_per_group */,
     24 /* input pixel stride */,
     88 /* output pixel stride */,
-    w116.data(), w117.data(),
+    w118.data(), w119.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op11);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #11" << std::endl;
@@ -722,11 +715,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     88 /* input pixel stride */,
     88 /* output pixel stride */,
-    w118.data(), w119.data(),
+    w120.data(), w121.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op12);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #12" << std::endl;
@@ -746,11 +739,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     24 /* output_channels_per_group */,
     88 /* input pixel stride */,
     24 /* output pixel stride */,
-    w120.data(), w121.data(),
+    w122.data(), w123.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op13);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #13" << std::endl;
@@ -759,7 +752,7 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
   operators.emplace_back(op13, xnn_delete_operator);
 
   xnn_operator_t op14 = nullptr;
-  status = xnn_create_add_nd_f32(
+            status = xnn_create_add_nd_f32(
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op14);
@@ -781,11 +774,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     96 /* output_channels_per_group */,
     24 /* input pixel stride */,
     96 /* output pixel stride */,
-    w122.data(), w123.data(),
+    w124.data(), w125.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op15);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #15" << std::endl;
@@ -818,11 +811,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     96 /* input pixel stride */,
     96 /* output pixel stride */,
-    w124.data(), w125.data(),
+    w126.data(), w127.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op17);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #17" << std::endl;
@@ -867,11 +860,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     24 /* output_channels_per_group */,
     96 /* input pixel stride */,
     24 /* output pixel stride */,
-    w126.data(), w127.data(),
+    w128.data(), w129.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op20);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #20" << std::endl;
@@ -891,11 +884,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     96 /* output_channels_per_group */,
     24 /* input pixel stride */,
     96 /* output pixel stride */,
-    w128.data(), w129.data(),
+    w130.data(), w131.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op21);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #21" << std::endl;
@@ -926,11 +919,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     40 /* output_channels_per_group */,
     96 /* input pixel stride */,
     40 /* output pixel stride */,
-    w130.data(), w131.data(),
+    w132.data(), w133.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op23);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #23" << std::endl;
@@ -950,11 +943,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     240 /* output_channels_per_group */,
     40 /* input pixel stride */,
     240 /* output pixel stride */,
-    w132.data(), w133.data(),
+    w134.data(), w135.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op24);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #24" << std::endl;
@@ -987,11 +980,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     240 /* input pixel stride */,
     240 /* output pixel stride */,
-    w134.data(), w135.data(),
+    w136.data(), w137.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op26);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #26" << std::endl;
@@ -1036,11 +1029,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     64 /* output_channels_per_group */,
     240 /* input pixel stride */,
     64 /* output pixel stride */,
-    w136.data(), w137.data(),
+    w138.data(), w139.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op29);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #29" << std::endl;
@@ -1060,11 +1053,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     240 /* output_channels_per_group */,
     64 /* input pixel stride */,
     240 /* output pixel stride */,
-    w138.data(), w139.data(),
+    w140.data(), w141.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op30);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #30" << std::endl;
@@ -1095,11 +1088,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     40 /* output_channels_per_group */,
     240 /* input pixel stride */,
     40 /* output pixel stride */,
-    w140.data(), w141.data(),
+    w142.data(), w143.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op32);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #32" << std::endl;
@@ -1108,7 +1101,7 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
   operators.emplace_back(op32, xnn_delete_operator);
 
   xnn_operator_t op33 = nullptr;
-  status = xnn_create_add_nd_f32(
+            status = xnn_create_add_nd_f32(
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op33);
@@ -1130,11 +1123,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     240 /* output_channels_per_group */,
     40 /* input pixel stride */,
     240 /* output pixel stride */,
-    w142.data(), w143.data(),
+    w144.data(), w145.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op34);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #34" << std::endl;
@@ -1167,11 +1160,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     240 /* input pixel stride */,
     240 /* output pixel stride */,
-    w144.data(), w145.data(),
+    w146.data(), w147.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op36);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #36" << std::endl;
@@ -1216,11 +1209,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     64 /* output_channels_per_group */,
     240 /* input pixel stride */,
     64 /* output pixel stride */,
-    w146.data(), w147.data(),
+    w148.data(), w149.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op39);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #39" << std::endl;
@@ -1240,11 +1233,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     240 /* output_channels_per_group */,
     64 /* input pixel stride */,
     240 /* output pixel stride */,
-    w148.data(), w149.data(),
+    w150.data(), w151.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op40);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #40" << std::endl;
@@ -1275,11 +1268,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     40 /* output_channels_per_group */,
     240 /* input pixel stride */,
     40 /* output pixel stride */,
-    w150.data(), w151.data(),
+    w152.data(), w153.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op42);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #42" << std::endl;
@@ -1288,7 +1281,7 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
   operators.emplace_back(op42, xnn_delete_operator);
 
   xnn_operator_t op43 = nullptr;
-  status = xnn_create_add_nd_f32(
+            status = xnn_create_add_nd_f32(
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op43);
@@ -1310,11 +1303,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     120 /* output_channels_per_group */,
     40 /* input pixel stride */,
     120 /* output pixel stride */,
-    w152.data(), w153.data(),
+    w154.data(), w155.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op44);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #44" << std::endl;
@@ -1347,11 +1340,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     120 /* input pixel stride */,
     120 /* output pixel stride */,
-    w154.data(), w155.data(),
+    w156.data(), w157.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op46);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #46" << std::endl;
@@ -1396,11 +1389,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     32 /* output_channels_per_group */,
     120 /* input pixel stride */,
     32 /* output pixel stride */,
-    w156.data(), w157.data(),
+    w158.data(), w159.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op49);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #49" << std::endl;
@@ -1420,11 +1413,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     120 /* output_channels_per_group */,
     32 /* input pixel stride */,
     120 /* output pixel stride */,
-    w158.data(), w159.data(),
+    w160.data(), w161.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op50);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #50" << std::endl;
@@ -1455,11 +1448,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     48 /* output_channels_per_group */,
     120 /* input pixel stride */,
     48 /* output pixel stride */,
-    w160.data(), w161.data(),
+    w162.data(), w163.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op52);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #52" << std::endl;
@@ -1479,11 +1472,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     144 /* output_channels_per_group */,
     48 /* input pixel stride */,
     144 /* output pixel stride */,
-    w162.data(), w163.data(),
+    w164.data(), w165.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op53);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #53" << std::endl;
@@ -1516,11 +1509,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     144 /* input pixel stride */,
     144 /* output pixel stride */,
-    w164.data(), w165.data(),
+    w166.data(), w167.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op55);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #55" << std::endl;
@@ -1565,11 +1558,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     40 /* output_channels_per_group */,
     144 /* input pixel stride */,
     40 /* output pixel stride */,
-    w166.data(), w167.data(),
+    w168.data(), w169.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op58);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #58" << std::endl;
@@ -1589,11 +1582,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     144 /* output_channels_per_group */,
     40 /* input pixel stride */,
     144 /* output pixel stride */,
-    w168.data(), w169.data(),
+    w170.data(), w171.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op59);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #59" << std::endl;
@@ -1624,11 +1617,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     48 /* output_channels_per_group */,
     144 /* input pixel stride */,
     48 /* output pixel stride */,
-    w170.data(), w171.data(),
+    w172.data(), w173.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op61);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #61" << std::endl;
@@ -1637,7 +1630,7 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
   operators.emplace_back(op61, xnn_delete_operator);
 
   xnn_operator_t op62 = nullptr;
-  status = xnn_create_add_nd_f32(
+            status = xnn_create_add_nd_f32(
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op62);
@@ -1659,11 +1652,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     288 /* output_channels_per_group */,
     48 /* input pixel stride */,
     288 /* output pixel stride */,
-    w172.data(), w173.data(),
+    w174.data(), w175.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op63);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #63" << std::endl;
@@ -1696,11 +1689,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     288 /* input pixel stride */,
     288 /* output pixel stride */,
-    w174.data(), w175.data(),
+    w176.data(), w177.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op65);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #65" << std::endl;
@@ -1745,11 +1738,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     72 /* output_channels_per_group */,
     288 /* input pixel stride */,
     72 /* output pixel stride */,
-    w176.data(), w177.data(),
+    w178.data(), w179.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op68);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #68" << std::endl;
@@ -1769,11 +1762,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     288 /* output_channels_per_group */,
     72 /* input pixel stride */,
     288 /* output pixel stride */,
-    w178.data(), w179.data(),
+    w180.data(), w181.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op69);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #69" << std::endl;
@@ -1804,11 +1797,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     96 /* output_channels_per_group */,
     288 /* input pixel stride */,
     96 /* output pixel stride */,
-    w180.data(), w181.data(),
+    w182.data(), w183.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op71);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #71" << std::endl;
@@ -1828,11 +1821,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     576 /* output_channels_per_group */,
     96 /* input pixel stride */,
     576 /* output pixel stride */,
-    w182.data(), w183.data(),
+    w184.data(), w185.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op72);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #72" << std::endl;
@@ -1865,11 +1858,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     576 /* input pixel stride */,
     576 /* output pixel stride */,
-    w184.data(), w185.data(),
+    w186.data(), w187.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op74);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #74" << std::endl;
@@ -1914,11 +1907,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     144 /* output_channels_per_group */,
     576 /* input pixel stride */,
     144 /* output pixel stride */,
-    w186.data(), w187.data(),
+    w188.data(), w189.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op77);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #77" << std::endl;
@@ -1938,11 +1931,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     576 /* output_channels_per_group */,
     144 /* input pixel stride */,
     576 /* output pixel stride */,
-    w188.data(), w189.data(),
+    w190.data(), w191.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op78);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #78" << std::endl;
@@ -1973,11 +1966,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     96 /* output_channels_per_group */,
     576 /* input pixel stride */,
     96 /* output pixel stride */,
-    w190.data(), w191.data(),
+    w192.data(), w193.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op80);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #80" << std::endl;
@@ -1986,7 +1979,7 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
   operators.emplace_back(op80, xnn_delete_operator);
 
   xnn_operator_t op81 = nullptr;
-  status = xnn_create_add_nd_f32(
+            status = xnn_create_add_nd_f32(
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op81);
@@ -2008,11 +2001,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     576 /* output_channels_per_group */,
     96 /* input pixel stride */,
     576 /* output pixel stride */,
-    w192.data(), w193.data(),
+    w194.data(), w195.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op82);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #82" << std::endl;
@@ -2045,11 +2038,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     576 /* input pixel stride */,
     576 /* output pixel stride */,
-    w194.data(), w195.data(),
+    w196.data(), w197.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op84);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #84" << std::endl;
@@ -2094,11 +2087,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     144 /* output_channels_per_group */,
     576 /* input pixel stride */,
     144 /* output pixel stride */,
-    w196.data(), w197.data(),
+    w198.data(), w199.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op87);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #87" << std::endl;
@@ -2118,11 +2111,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     576 /* output_channels_per_group */,
     144 /* input pixel stride */,
     576 /* output pixel stride */,
-    w198.data(), w199.data(),
+    w200.data(), w201.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op88);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #88" << std::endl;
@@ -2153,11 +2146,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     96 /* output_channels_per_group */,
     576 /* input pixel stride */,
     96 /* output pixel stride */,
-    w200.data(), w201.data(),
+    w202.data(), w203.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op90);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #90" << std::endl;
@@ -2166,7 +2159,7 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
   operators.emplace_back(op90, xnn_delete_operator);
 
   xnn_operator_t op91 = nullptr;
-  status = xnn_create_add_nd_f32(
+            status = xnn_create_add_nd_f32(
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op91);
@@ -2188,11 +2181,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     576 /* output_channels_per_group */,
     96 /* input pixel stride */,
     576 /* output pixel stride */,
-    w202.data(), w203.data(),
+    w204.data(), w205.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op92);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #92" << std::endl;
@@ -2237,11 +2230,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     1024 /* output_channels_per_group */,
     576 /* input pixel stride */,
     1024 /* output pixel stride */,
-    w204.data(), w205.data(),
+    w206.data(), w207.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op95);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #95" << std::endl;
@@ -2286,11 +2279,11 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     1001 /* output_channels_per_group */,
     1024 /* input pixel stride */,
     1001 /* output pixel stride */,
-    w206.data(), w207.data(),
+    w208.data(), w209.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
-    nullptr,
+    nullptr /* weights_cache */,
     &op98);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #98" << std::endl;
@@ -2298,11 +2291,31 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
   }
   operators.emplace_back(op98, xnn_delete_operator);
 
-#if XNN_PLATFORM_JIT
-  if (use_jit) {
-    xnn_finalize_code_memory(&code_cache.cache.code);
+  xnn_operator_t op99 = nullptr;
+  status = xnn_create_copy_nc_x32(
+    1 /* channels */,
+    1 /* input stride */,
+    1 /* output stride */,
+    0 /* flags */,
+    &op99);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to create operation #99" << std::endl;
+    return ExecutionPlan();
   }
-#endif  // XNN_PLATFORM_JIT
+  operators.emplace_back(op99, xnn_delete_operator);
+
+  xnn_operator_t op100 = nullptr;
+  status = xnn_create_softmax_nc_f32(
+    /*channels=*/1001,
+    /*input_stride=*/1001,
+    /*output_stride=*/1001,
+    /*flags=*/0,
+    &op100);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to create operation #100" << std::endl;
+    return ExecutionPlan();
+  }
+  operators.emplace_back(op100, xnn_delete_operator);
 
   size_t op0_workspace_size = 0;
   size_t op0_workspace_alignment = 0;
@@ -3569,6 +3582,24 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  status = xnn_reshape_copy_nc_x32(
+    op99,
+    /*batch_size=*/1001,
+    /*threadpool=*/threadpool);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #99" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_softmax_nc_f32(
+    op100,
+    /*batch_size=*/1,
+    /*threadpool=*/threadpool);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #100" << std::endl;
+    return ExecutionPlan();
+  }
+
   Workspace workspace(max_workspace_size);
 
   status = xnn_setup_convolution2d_nhwc_f32(
@@ -4374,18 +4405,26 @@ ExecutionPlan FP32MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  status = xnn_setup_copy_nc_x32(
+    op99,
+    /*input=*/v99.data(), /*output=*/v100.data());
+  if (status != xnn_status_success) {
+    std::cerr << "failed to setup operation #99" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_setup_softmax_nc_f32(
+    op100,
+    /*input=*/v100.data(), /*output=*/v101.data());
+  if (status != xnn_status_success) {
+    std::cerr << "failed to setup operation #100" << std::endl;
+    return ExecutionPlan();
+  }
+
   XNN_PRAGMA_CLANG("clang diagnostic push")
   XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wpessimizing-move\"")
   return ExecutionPlan{operators, workspace};
   XNN_PRAGMA_CLANG("clang diagnostic pop")
-}
-
-ExecutionPlan FP32MobileNetV3Small(pthreadpool_t threadpool) {
-  return FP32MobileNetV3Small(false, threadpool);
-}
-
-ExecutionPlan FP32MobileNetV3SmallJit(pthreadpool_t threadpool) {
-  return FP32MobileNetV3Small(true, threadpool);
 }
 
 }  // namespace models

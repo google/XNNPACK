@@ -16,164 +16,167 @@
 
 #include <xnnpack/cache.h>
 #include <xnnpack/common.h>
+#if XNN_PLATFORM_JIT
+  #include <xnnpack/memory.h>
+#endif  // XNN_PLATFORM_JIT
 #include <xnnpack/models.h>
 
 namespace models {
 
-ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
+ExecutionPlan FP32MobileNetV3SmallJit(pthreadpool_t threadpool) {
   alignas(16) static std::array<float, 150528 + XNN_EXTRA_BYTES / sizeof(float)> v0;
   alignas(16) static std::array<float, 200704 + XNN_EXTRA_BYTES / sizeof(float)> v1;
   alignas(16) static std::array<float, 200704 + XNN_EXTRA_BYTES / sizeof(float)> v2;
-  alignas(16) static std::array<float, 200704 + XNN_EXTRA_BYTES / sizeof(float)> v3;
-  alignas(16) static std::array<float, 200704 + XNN_EXTRA_BYTES / sizeof(float)> v4;
-  alignas(16) static std::array<float, 200704 + XNN_EXTRA_BYTES / sizeof(float)> v5;
-  alignas(16) static std::array<float, 802816 + XNN_EXTRA_BYTES / sizeof(float)> v6;
-  alignas(16) static std::array<float, 200704 + XNN_EXTRA_BYTES / sizeof(float)> v7;
-  alignas(16) static std::array<float, 75264 + XNN_EXTRA_BYTES / sizeof(float)> v8;
+  alignas(16) static std::array<float, 50176 + XNN_EXTRA_BYTES / sizeof(float)> v3;
+  alignas(16) static std::array<float, 16 + XNN_EXTRA_BYTES / sizeof(float)> v4;
+  alignas(16) static std::array<float, 8 + XNN_EXTRA_BYTES / sizeof(float)> v5;
+  alignas(16) static std::array<float, 16 + XNN_EXTRA_BYTES / sizeof(float)> v6;
+  alignas(16) static std::array<float, 50176 + XNN_EXTRA_BYTES / sizeof(float)> v7;
+  alignas(16) static std::array<float, 50176 + XNN_EXTRA_BYTES / sizeof(float)> v8;
   alignas(16) static std::array<float, 225792 + XNN_EXTRA_BYTES / sizeof(float)> v9;
-  alignas(16) static std::array<float, 225792 + XNN_EXTRA_BYTES / sizeof(float)> v10;
-  alignas(16) static std::array<float, 75264 + XNN_EXTRA_BYTES / sizeof(float)> v11;
-  alignas(16) static std::array<float, 75264 + XNN_EXTRA_BYTES / sizeof(float)> v12;
-  alignas(16) static std::array<float, 225792 + XNN_EXTRA_BYTES / sizeof(float)> v13;
-  alignas(16) static std::array<float, 56448 + XNN_EXTRA_BYTES / sizeof(float)> v14;
-  alignas(16) static std::array<float, 72 + XNN_EXTRA_BYTES / sizeof(float)> v15;
-  alignas(16) static std::array<float, 24 + XNN_EXTRA_BYTES / sizeof(float)> v16;
-  alignas(16) static std::array<float, 72 + XNN_EXTRA_BYTES / sizeof(float)> v17;
-  alignas(16) static std::array<float, 56448 + XNN_EXTRA_BYTES / sizeof(float)> v18;
-  alignas(16) static std::array<float, 31360 + XNN_EXTRA_BYTES / sizeof(float)> v19;
-  alignas(16) static std::array<float, 94080 + XNN_EXTRA_BYTES / sizeof(float)> v20;
-  alignas(16) static std::array<float, 94080 + XNN_EXTRA_BYTES / sizeof(float)> v21;
-  alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> v22;
-  alignas(16) static std::array<float, 32 + XNN_EXTRA_BYTES / sizeof(float)> v23;
-  alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> v24;
-  alignas(16) static std::array<float, 94080 + XNN_EXTRA_BYTES / sizeof(float)> v25;
-  alignas(16) static std::array<float, 31360 + XNN_EXTRA_BYTES / sizeof(float)> v26;
-  alignas(16) static std::array<float, 31360 + XNN_EXTRA_BYTES / sizeof(float)> v27;
-  alignas(16) static std::array<float, 94080 + XNN_EXTRA_BYTES / sizeof(float)> v28;
-  alignas(16) static std::array<float, 94080 + XNN_EXTRA_BYTES / sizeof(float)> v29;
-  alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> v30;
-  alignas(16) static std::array<float, 32 + XNN_EXTRA_BYTES / sizeof(float)> v31;
-  alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> v32;
-  alignas(16) static std::array<float, 94080 + XNN_EXTRA_BYTES / sizeof(float)> v33;
-  alignas(16) static std::array<float, 31360 + XNN_EXTRA_BYTES / sizeof(float)> v34;
-  alignas(16) static std::array<float, 31360 + XNN_EXTRA_BYTES / sizeof(float)> v35;
-  alignas(16) static std::array<float, 188160 + XNN_EXTRA_BYTES / sizeof(float)> v36;
-  alignas(16) static std::array<float, 188160 + XNN_EXTRA_BYTES / sizeof(float)> v37;
+  alignas(16) static std::array<float, 56448 + XNN_EXTRA_BYTES / sizeof(float)> v10;
+  alignas(16) static std::array<float, 18816 + XNN_EXTRA_BYTES / sizeof(float)> v11;
+  alignas(16) static std::array<float, 68992 + XNN_EXTRA_BYTES / sizeof(float)> v12;
+  alignas(16) static std::array<float, 68992 + XNN_EXTRA_BYTES / sizeof(float)> v13;
+  alignas(16) static std::array<float, 18816 + XNN_EXTRA_BYTES / sizeof(float)> v14;
+  alignas(16) static std::array<float, 18816 + XNN_EXTRA_BYTES / sizeof(float)> v15;
+  alignas(16) static std::array<float, 75264 + XNN_EXTRA_BYTES / sizeof(float)> v16;
+  alignas(16) static std::array<float, 75264 + XNN_EXTRA_BYTES / sizeof(float)> v17;
+  alignas(16) static std::array<float, 18816 + XNN_EXTRA_BYTES / sizeof(float)> v18;
+  alignas(16) static std::array<float, 18816 + XNN_EXTRA_BYTES / sizeof(float)> v19;
+  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> v20;
+  alignas(16) static std::array<float, 24 + XNN_EXTRA_BYTES / sizeof(float)> v21;
+  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> v22;
+  alignas(16) static std::array<float, 18816 + XNN_EXTRA_BYTES / sizeof(float)> v23;
+  alignas(16) static std::array<float, 7840 + XNN_EXTRA_BYTES / sizeof(float)> v24;
+  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v25;
+  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v26;
+  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v27;
+  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v28;
+  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> v29;
+  alignas(16) static std::array<float, 64 + XNN_EXTRA_BYTES / sizeof(float)> v30;
+  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> v31;
+  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v32;
+  alignas(16) static std::array<float, 7840 + XNN_EXTRA_BYTES / sizeof(float)> v33;
+  alignas(16) static std::array<float, 7840 + XNN_EXTRA_BYTES / sizeof(float)> v34;
+  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v35;
+  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v36;
+  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v37;
   alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v38;
-  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v39;
-  alignas(16) static std::array<float, 15680 + XNN_EXTRA_BYTES / sizeof(float)> v40;
-  alignas(16) static std::array<float, 39200 + XNN_EXTRA_BYTES / sizeof(float)> v41;
-  alignas(16) static std::array<float, 39200 + XNN_EXTRA_BYTES / sizeof(float)> v42;
-  alignas(16) static std::array<float, 39200 + XNN_EXTRA_BYTES / sizeof(float)> v43;
-  alignas(16) static std::array<float, 39200 + XNN_EXTRA_BYTES / sizeof(float)> v44;
-  alignas(16) static std::array<float, 15680 + XNN_EXTRA_BYTES / sizeof(float)> v45;
-  alignas(16) static std::array<float, 15680 + XNN_EXTRA_BYTES / sizeof(float)> v46;
-  alignas(16) static std::array<float, 36064 + XNN_EXTRA_BYTES / sizeof(float)> v47;
-  alignas(16) static std::array<float, 36064 + XNN_EXTRA_BYTES / sizeof(float)> v48;
-  alignas(16) static std::array<float, 36064 + XNN_EXTRA_BYTES / sizeof(float)> v49;
-  alignas(16) static std::array<float, 36064 + XNN_EXTRA_BYTES / sizeof(float)> v50;
-  alignas(16) static std::array<float, 15680 + XNN_EXTRA_BYTES / sizeof(float)> v51;
-  alignas(16) static std::array<float, 15680 + XNN_EXTRA_BYTES / sizeof(float)> v52;
-  alignas(16) static std::array<float, 36064 + XNN_EXTRA_BYTES / sizeof(float)> v53;
-  alignas(16) static std::array<float, 36064 + XNN_EXTRA_BYTES / sizeof(float)> v54;
-  alignas(16) static std::array<float, 36064 + XNN_EXTRA_BYTES / sizeof(float)> v55;
-  alignas(16) static std::array<float, 36064 + XNN_EXTRA_BYTES / sizeof(float)> v56;
-  alignas(16) static std::array<float, 15680 + XNN_EXTRA_BYTES / sizeof(float)> v57;
-  alignas(16) static std::array<float, 15680 + XNN_EXTRA_BYTES / sizeof(float)> v58;
-  alignas(16) static std::array<float, 94080 + XNN_EXTRA_BYTES / sizeof(float)> v59;
-  alignas(16) static std::array<float, 94080 + XNN_EXTRA_BYTES / sizeof(float)> v60;
-  alignas(16) static std::array<float, 94080 + XNN_EXTRA_BYTES / sizeof(float)> v61;
-  alignas(16) static std::array<float, 94080 + XNN_EXTRA_BYTES / sizeof(float)> v62;
-  alignas(16) static std::array<float, 480 + XNN_EXTRA_BYTES / sizeof(float)> v63;
-  alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> v64;
-  alignas(16) static std::array<float, 480 + XNN_EXTRA_BYTES / sizeof(float)> v65;
-  alignas(16) static std::array<float, 94080 + XNN_EXTRA_BYTES / sizeof(float)> v66;
-  alignas(16) static std::array<float, 21952 + XNN_EXTRA_BYTES / sizeof(float)> v67;
-  alignas(16) static std::array<float, 131712 + XNN_EXTRA_BYTES / sizeof(float)> v68;
-  alignas(16) static std::array<float, 131712 + XNN_EXTRA_BYTES / sizeof(float)> v69;
-  alignas(16) static std::array<float, 131712 + XNN_EXTRA_BYTES / sizeof(float)> v70;
-  alignas(16) static std::array<float, 131712 + XNN_EXTRA_BYTES / sizeof(float)> v71;
-  alignas(16) static std::array<float, 672 + XNN_EXTRA_BYTES / sizeof(float)> v72;
-  alignas(16) static std::array<float, 168 + XNN_EXTRA_BYTES / sizeof(float)> v73;
-  alignas(16) static std::array<float, 672 + XNN_EXTRA_BYTES / sizeof(float)> v74;
-  alignas(16) static std::array<float, 131712 + XNN_EXTRA_BYTES / sizeof(float)> v75;
-  alignas(16) static std::array<float, 21952 + XNN_EXTRA_BYTES / sizeof(float)> v76;
-  alignas(16) static std::array<float, 21952 + XNN_EXTRA_BYTES / sizeof(float)> v77;
-  alignas(16) static std::array<float, 131712 + XNN_EXTRA_BYTES / sizeof(float)> v78;
-  alignas(16) static std::array<float, 131712 + XNN_EXTRA_BYTES / sizeof(float)> v79;
-  alignas(16) static std::array<float, 32928 + XNN_EXTRA_BYTES / sizeof(float)> v80;
-  alignas(16) static std::array<float, 32928 + XNN_EXTRA_BYTES / sizeof(float)> v81;
-  alignas(16) static std::array<float, 672 + XNN_EXTRA_BYTES / sizeof(float)> v82;
-  alignas(16) static std::array<float, 168 + XNN_EXTRA_BYTES / sizeof(float)> v83;
-  alignas(16) static std::array<float, 672 + XNN_EXTRA_BYTES / sizeof(float)> v84;
-  alignas(16) static std::array<float, 32928 + XNN_EXTRA_BYTES / sizeof(float)> v85;
-  alignas(16) static std::array<float, 7840 + XNN_EXTRA_BYTES / sizeof(float)> v86;
-  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v87;
-  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v88;
-  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v89;
-  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v90;
-  alignas(16) static std::array<float, 960 + XNN_EXTRA_BYTES / sizeof(float)> v91;
-  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> v92;
-  alignas(16) static std::array<float, 960 + XNN_EXTRA_BYTES / sizeof(float)> v93;
-  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v94;
-  alignas(16) static std::array<float, 7840 + XNN_EXTRA_BYTES / sizeof(float)> v95;
-  alignas(16) static std::array<float, 7840 + XNN_EXTRA_BYTES / sizeof(float)> v96;
-  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v97;
-  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v98;
-  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v99;
-  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v100;
-  alignas(16) static std::array<float, 960 + XNN_EXTRA_BYTES / sizeof(float)> v101;
-  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> v102;
-  alignas(16) static std::array<float, 960 + XNN_EXTRA_BYTES / sizeof(float)> v103;
-  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v104;
-  alignas(16) static std::array<float, 7840 + XNN_EXTRA_BYTES / sizeof(float)> v105;
-  alignas(16) static std::array<float, 7840 + XNN_EXTRA_BYTES / sizeof(float)> v106;
-  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v107;
-  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v108;
-  alignas(16) static std::array<float, 960 + XNN_EXTRA_BYTES / sizeof(float)> v109;
-  alignas(16) static std::array<float, 1280 + XNN_EXTRA_BYTES / sizeof(float)> v110;
-  alignas(16) static std::array<float, 1280 + XNN_EXTRA_BYTES / sizeof(float)> v111;
-  alignas(16) static std::array<float, 1280 + XNN_EXTRA_BYTES / sizeof(float)> v112;
-  alignas(16) static std::array<float, 1001 + XNN_EXTRA_BYTES / sizeof(float)> v113;
-  alignas(16) static std::array<float, 1001 + XNN_EXTRA_BYTES / sizeof(float)> v114;
-  alignas(16) static std::array<float, 1001 + XNN_EXTRA_BYTES / sizeof(float)> v115;
-  alignas(16) static std::array<float, 432 + XNN_EXTRA_BYTES / sizeof(float)> w116;
-  alignas(16) static std::array<float, 16 + XNN_EXTRA_BYTES / sizeof(float)> w117;
-  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w118;
-  alignas(16) static std::array<float, 16 + XNN_EXTRA_BYTES / sizeof(float)> w119;
-  alignas(16) static std::array<float, 256 + XNN_EXTRA_BYTES / sizeof(float)> w120;
-  alignas(16) static std::array<float, 16 + XNN_EXTRA_BYTES / sizeof(float)> w121;
-  alignas(16) static std::array<float, 1024 + XNN_EXTRA_BYTES / sizeof(float)> w122;
-  alignas(16) static std::array<float, 64 + XNN_EXTRA_BYTES / sizeof(float)> w123;
-  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w124;
-  alignas(16) static std::array<float, 64 + XNN_EXTRA_BYTES / sizeof(float)> w125;
-  alignas(16) static std::array<float, 1536 + XNN_EXTRA_BYTES / sizeof(float)> w126;
-  alignas(16) static std::array<float, 24 + XNN_EXTRA_BYTES / sizeof(float)> w127;
-  alignas(16) static std::array<float, 1728 + XNN_EXTRA_BYTES / sizeof(float)> w128;
-  alignas(16) static std::array<float, 72 + XNN_EXTRA_BYTES / sizeof(float)> w129;
-  alignas(16) static std::array<float, 648 + XNN_EXTRA_BYTES / sizeof(float)> w130;
-  alignas(16) static std::array<float, 72 + XNN_EXTRA_BYTES / sizeof(float)> w131;
-  alignas(16) static std::array<float, 1728 + XNN_EXTRA_BYTES / sizeof(float)> w132;
-  alignas(16) static std::array<float, 24 + XNN_EXTRA_BYTES / sizeof(float)> w133;
-  alignas(16) static std::array<float, 1728 + XNN_EXTRA_BYTES / sizeof(float)> w134;
-  alignas(16) static std::array<float, 72 + XNN_EXTRA_BYTES / sizeof(float)> w135;
-  alignas(16) static std::array<float, 1800 + XNN_EXTRA_BYTES / sizeof(float)> w136;
-  alignas(16) static std::array<float, 72 + XNN_EXTRA_BYTES / sizeof(float)> w137;
-  alignas(16) static std::array<float, 1728 + XNN_EXTRA_BYTES / sizeof(float)> w138;
-  alignas(16) static std::array<float, 24 + XNN_EXTRA_BYTES / sizeof(float)> w139;
-  alignas(16) static std::array<float, 1728 + XNN_EXTRA_BYTES / sizeof(float)> w140;
-  alignas(16) static std::array<float, 72 + XNN_EXTRA_BYTES / sizeof(float)> w141;
-  alignas(16) static std::array<float, 2880 + XNN_EXTRA_BYTES / sizeof(float)> w142;
+  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> v39;
+  alignas(16) static std::array<float, 64 + XNN_EXTRA_BYTES / sizeof(float)> v40;
+  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> v41;
+  alignas(16) static std::array<float, 47040 + XNN_EXTRA_BYTES / sizeof(float)> v42;
+  alignas(16) static std::array<float, 7840 + XNN_EXTRA_BYTES / sizeof(float)> v43;
+  alignas(16) static std::array<float, 7840 + XNN_EXTRA_BYTES / sizeof(float)> v44;
+  alignas(16) static std::array<float, 23520 + XNN_EXTRA_BYTES / sizeof(float)> v45;
+  alignas(16) static std::array<float, 23520 + XNN_EXTRA_BYTES / sizeof(float)> v46;
+  alignas(16) static std::array<float, 23520 + XNN_EXTRA_BYTES / sizeof(float)> v47;
+  alignas(16) static std::array<float, 23520 + XNN_EXTRA_BYTES / sizeof(float)> v48;
+  alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> v49;
+  alignas(16) static std::array<float, 32 + XNN_EXTRA_BYTES / sizeof(float)> v50;
+  alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> v51;
+  alignas(16) static std::array<float, 23520 + XNN_EXTRA_BYTES / sizeof(float)> v52;
+  alignas(16) static std::array<float, 9408 + XNN_EXTRA_BYTES / sizeof(float)> v53;
+  alignas(16) static std::array<float, 28224 + XNN_EXTRA_BYTES / sizeof(float)> v54;
+  alignas(16) static std::array<float, 28224 + XNN_EXTRA_BYTES / sizeof(float)> v55;
+  alignas(16) static std::array<float, 28224 + XNN_EXTRA_BYTES / sizeof(float)> v56;
+  alignas(16) static std::array<float, 28224 + XNN_EXTRA_BYTES / sizeof(float)> v57;
+  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> v58;
+  alignas(16) static std::array<float, 40 + XNN_EXTRA_BYTES / sizeof(float)> v59;
+  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> v60;
+  alignas(16) static std::array<float, 28224 + XNN_EXTRA_BYTES / sizeof(float)> v61;
+  alignas(16) static std::array<float, 9408 + XNN_EXTRA_BYTES / sizeof(float)> v62;
+  alignas(16) static std::array<float, 9408 + XNN_EXTRA_BYTES / sizeof(float)> v63;
+  alignas(16) static std::array<float, 56448 + XNN_EXTRA_BYTES / sizeof(float)> v64;
+  alignas(16) static std::array<float, 56448 + XNN_EXTRA_BYTES / sizeof(float)> v65;
+  alignas(16) static std::array<float, 14112 + XNN_EXTRA_BYTES / sizeof(float)> v66;
+  alignas(16) static std::array<float, 14112 + XNN_EXTRA_BYTES / sizeof(float)> v67;
+  alignas(16) static std::array<float, 288 + XNN_EXTRA_BYTES / sizeof(float)> v68;
+  alignas(16) static std::array<float, 72 + XNN_EXTRA_BYTES / sizeof(float)> v69;
+  alignas(16) static std::array<float, 288 + XNN_EXTRA_BYTES / sizeof(float)> v70;
+  alignas(16) static std::array<float, 14112 + XNN_EXTRA_BYTES / sizeof(float)> v71;
+  alignas(16) static std::array<float, 4704 + XNN_EXTRA_BYTES / sizeof(float)> v72;
+  alignas(16) static std::array<float, 28224 + XNN_EXTRA_BYTES / sizeof(float)> v73;
+  alignas(16) static std::array<float, 28224 + XNN_EXTRA_BYTES / sizeof(float)> v74;
+  alignas(16) static std::array<float, 28224 + XNN_EXTRA_BYTES / sizeof(float)> v75;
+  alignas(16) static std::array<float, 28224 + XNN_EXTRA_BYTES / sizeof(float)> v76;
+  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> v77;
+  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> v78;
+  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> v79;
+  alignas(16) static std::array<float, 28224 + XNN_EXTRA_BYTES / sizeof(float)> v80;
+  alignas(16) static std::array<float, 4704 + XNN_EXTRA_BYTES / sizeof(float)> v81;
+  alignas(16) static std::array<float, 4704 + XNN_EXTRA_BYTES / sizeof(float)> v82;
+  alignas(16) static std::array<float, 28224 + XNN_EXTRA_BYTES / sizeof(float)> v83;
+  alignas(16) static std::array<float, 28224 + XNN_EXTRA_BYTES / sizeof(float)> v84;
+  alignas(16) static std::array<float, 28224 + XNN_EXTRA_BYTES / sizeof(float)> v85;
+  alignas(16) static std::array<float, 28224 + XNN_EXTRA_BYTES / sizeof(float)> v86;
+  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> v87;
+  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> v88;
+  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> v89;
+  alignas(16) static std::array<float, 28224 + XNN_EXTRA_BYTES / sizeof(float)> v90;
+  alignas(16) static std::array<float, 4704 + XNN_EXTRA_BYTES / sizeof(float)> v91;
+  alignas(16) static std::array<float, 4704 + XNN_EXTRA_BYTES / sizeof(float)> v92;
+  alignas(16) static std::array<float, 28224 + XNN_EXTRA_BYTES / sizeof(float)> v93;
+  alignas(16) static std::array<float, 28224 + XNN_EXTRA_BYTES / sizeof(float)> v94;
+  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> v95;
+  alignas(16) static std::array<float, 1024 + XNN_EXTRA_BYTES / sizeof(float)> v96;
+  alignas(16) static std::array<float, 1024 + XNN_EXTRA_BYTES / sizeof(float)> v97;
+  alignas(16) static std::array<float, 1024 + XNN_EXTRA_BYTES / sizeof(float)> v98;
+  alignas(16) static std::array<float, 1001 + XNN_EXTRA_BYTES / sizeof(float)> v99;
+  alignas(16) static std::array<float, 1001 + XNN_EXTRA_BYTES / sizeof(float)> v100;
+  alignas(16) static std::array<float, 1001 + XNN_EXTRA_BYTES / sizeof(float)> v101;
+  alignas(16) static std::array<float, 432 + XNN_EXTRA_BYTES / sizeof(float)> w102;
+  alignas(16) static std::array<float, 16 + XNN_EXTRA_BYTES / sizeof(float)> w103;
+  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w104;
+  alignas(16) static std::array<float, 16 + XNN_EXTRA_BYTES / sizeof(float)> w105;
+  alignas(16) static std::array<float, 128 + XNN_EXTRA_BYTES / sizeof(float)> w106;
+  alignas(16) static std::array<float, 8 + XNN_EXTRA_BYTES / sizeof(float)> w107;
+  alignas(16) static std::array<float, 128 + XNN_EXTRA_BYTES / sizeof(float)> w108;
+  alignas(16) static std::array<float, 16 + XNN_EXTRA_BYTES / sizeof(float)> w109;
+  alignas(16) static std::array<float, 256 + XNN_EXTRA_BYTES / sizeof(float)> w110;
+  alignas(16) static std::array<float, 16 + XNN_EXTRA_BYTES / sizeof(float)> w111;
+  alignas(16) static std::array<float, 1152 + XNN_EXTRA_BYTES / sizeof(float)> w112;
+  alignas(16) static std::array<float, 72 + XNN_EXTRA_BYTES / sizeof(float)> w113;
+  alignas(16) static std::array<float, 648 + XNN_EXTRA_BYTES / sizeof(float)> w114;
+  alignas(16) static std::array<float, 72 + XNN_EXTRA_BYTES / sizeof(float)> w115;
+  alignas(16) static std::array<float, 1728 + XNN_EXTRA_BYTES / sizeof(float)> w116;
+  alignas(16) static std::array<float, 24 + XNN_EXTRA_BYTES / sizeof(float)> w117;
+  alignas(16) static std::array<float, 2112 + XNN_EXTRA_BYTES / sizeof(float)> w118;
+  alignas(16) static std::array<float, 88 + XNN_EXTRA_BYTES / sizeof(float)> w119;
+  alignas(16) static std::array<float, 792 + XNN_EXTRA_BYTES / sizeof(float)> w120;
+  alignas(16) static std::array<float, 88 + XNN_EXTRA_BYTES / sizeof(float)> w121;
+  alignas(16) static std::array<float, 2112 + XNN_EXTRA_BYTES / sizeof(float)> w122;
+  alignas(16) static std::array<float, 24 + XNN_EXTRA_BYTES / sizeof(float)> w123;
+  alignas(16) static std::array<float, 2304 + XNN_EXTRA_BYTES / sizeof(float)> w124;
+  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> w125;
+  alignas(16) static std::array<float, 2400 + XNN_EXTRA_BYTES / sizeof(float)> w126;
+  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> w127;
+  alignas(16) static std::array<float, 2304 + XNN_EXTRA_BYTES / sizeof(float)> w128;
+  alignas(16) static std::array<float, 24 + XNN_EXTRA_BYTES / sizeof(float)> w129;
+  alignas(16) static std::array<float, 2304 + XNN_EXTRA_BYTES / sizeof(float)> w130;
+  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> w131;
+  alignas(16) static std::array<float, 3840 + XNN_EXTRA_BYTES / sizeof(float)> w132;
+  alignas(16) static std::array<float, 40 + XNN_EXTRA_BYTES / sizeof(float)> w133;
+  alignas(16) static std::array<float, 9600 + XNN_EXTRA_BYTES / sizeof(float)> w134;
+  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w135;
+  alignas(16) static std::array<float, 6000 + XNN_EXTRA_BYTES / sizeof(float)> w136;
+  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w137;
+  alignas(16) static std::array<float, 15360 + XNN_EXTRA_BYTES / sizeof(float)> w138;
+  alignas(16) static std::array<float, 64 + XNN_EXTRA_BYTES / sizeof(float)> w139;
+  alignas(16) static std::array<float, 15360 + XNN_EXTRA_BYTES / sizeof(float)> w140;
+  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w141;
+  alignas(16) static std::array<float, 9600 + XNN_EXTRA_BYTES / sizeof(float)> w142;
   alignas(16) static std::array<float, 40 + XNN_EXTRA_BYTES / sizeof(float)> w143;
-  alignas(16) static std::array<float, 4800 + XNN_EXTRA_BYTES / sizeof(float)> w144;
-  alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> w145;
-  alignas(16) static std::array<float, 3000 + XNN_EXTRA_BYTES / sizeof(float)> w146;
-  alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> w147;
-  alignas(16) static std::array<float, 3840 + XNN_EXTRA_BYTES / sizeof(float)> w148;
-  alignas(16) static std::array<float, 32 + XNN_EXTRA_BYTES / sizeof(float)> w149;
-  alignas(16) static std::array<float, 3840 + XNN_EXTRA_BYTES / sizeof(float)> w150;
-  alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> w151;
-  alignas(16) static std::array<float, 4800 + XNN_EXTRA_BYTES / sizeof(float)> w152;
+  alignas(16) static std::array<float, 9600 + XNN_EXTRA_BYTES / sizeof(float)> w144;
+  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w145;
+  alignas(16) static std::array<float, 6000 + XNN_EXTRA_BYTES / sizeof(float)> w146;
+  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w147;
+  alignas(16) static std::array<float, 15360 + XNN_EXTRA_BYTES / sizeof(float)> w148;
+  alignas(16) static std::array<float, 64 + XNN_EXTRA_BYTES / sizeof(float)> w149;
+  alignas(16) static std::array<float, 15360 + XNN_EXTRA_BYTES / sizeof(float)> w150;
+  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w151;
+  alignas(16) static std::array<float, 9600 + XNN_EXTRA_BYTES / sizeof(float)> w152;
   alignas(16) static std::array<float, 40 + XNN_EXTRA_BYTES / sizeof(float)> w153;
   alignas(16) static std::array<float, 4800 + XNN_EXTRA_BYTES / sizeof(float)> w154;
   alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> w155;
@@ -183,88 +186,54 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   alignas(16) static std::array<float, 32 + XNN_EXTRA_BYTES / sizeof(float)> w159;
   alignas(16) static std::array<float, 3840 + XNN_EXTRA_BYTES / sizeof(float)> w160;
   alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> w161;
-  alignas(16) static std::array<float, 4800 + XNN_EXTRA_BYTES / sizeof(float)> w162;
-  alignas(16) static std::array<float, 40 + XNN_EXTRA_BYTES / sizeof(float)> w163;
-  alignas(16) static std::array<float, 9600 + XNN_EXTRA_BYTES / sizeof(float)> w164;
-  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w165;
-  alignas(16) static std::array<float, 2160 + XNN_EXTRA_BYTES / sizeof(float)> w166;
-  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w167;
-  alignas(16) static std::array<float, 19200 + XNN_EXTRA_BYTES / sizeof(float)> w168;
-  alignas(16) static std::array<float, 80 + XNN_EXTRA_BYTES / sizeof(float)> w169;
-  alignas(16) static std::array<float, 16000 + XNN_EXTRA_BYTES / sizeof(float)> w170;
-  alignas(16) static std::array<float, 200 + XNN_EXTRA_BYTES / sizeof(float)> w171;
-  alignas(16) static std::array<float, 1800 + XNN_EXTRA_BYTES / sizeof(float)> w172;
-  alignas(16) static std::array<float, 200 + XNN_EXTRA_BYTES / sizeof(float)> w173;
-  alignas(16) static std::array<float, 16000 + XNN_EXTRA_BYTES / sizeof(float)> w174;
-  alignas(16) static std::array<float, 80 + XNN_EXTRA_BYTES / sizeof(float)> w175;
-  alignas(16) static std::array<float, 14720 + XNN_EXTRA_BYTES / sizeof(float)> w176;
-  alignas(16) static std::array<float, 184 + XNN_EXTRA_BYTES / sizeof(float)> w177;
-  alignas(16) static std::array<float, 1656 + XNN_EXTRA_BYTES / sizeof(float)> w178;
-  alignas(16) static std::array<float, 184 + XNN_EXTRA_BYTES / sizeof(float)> w179;
-  alignas(16) static std::array<float, 14720 + XNN_EXTRA_BYTES / sizeof(float)> w180;
-  alignas(16) static std::array<float, 80 + XNN_EXTRA_BYTES / sizeof(float)> w181;
-  alignas(16) static std::array<float, 14720 + XNN_EXTRA_BYTES / sizeof(float)> w182;
-  alignas(16) static std::array<float, 184 + XNN_EXTRA_BYTES / sizeof(float)> w183;
-  alignas(16) static std::array<float, 1656 + XNN_EXTRA_BYTES / sizeof(float)> w184;
-  alignas(16) static std::array<float, 184 + XNN_EXTRA_BYTES / sizeof(float)> w185;
-  alignas(16) static std::array<float, 14720 + XNN_EXTRA_BYTES / sizeof(float)> w186;
-  alignas(16) static std::array<float, 80 + XNN_EXTRA_BYTES / sizeof(float)> w187;
-  alignas(16) static std::array<float, 38400 + XNN_EXTRA_BYTES / sizeof(float)> w188;
-  alignas(16) static std::array<float, 480 + XNN_EXTRA_BYTES / sizeof(float)> w189;
-  alignas(16) static std::array<float, 4320 + XNN_EXTRA_BYTES / sizeof(float)> w190;
-  alignas(16) static std::array<float, 480 + XNN_EXTRA_BYTES / sizeof(float)> w191;
-  alignas(16) static std::array<float, 57600 + XNN_EXTRA_BYTES / sizeof(float)> w192;
-  alignas(16) static std::array<float, 120 + XNN_EXTRA_BYTES / sizeof(float)> w193;
-  alignas(16) static std::array<float, 57600 + XNN_EXTRA_BYTES / sizeof(float)> w194;
-  alignas(16) static std::array<float, 480 + XNN_EXTRA_BYTES / sizeof(float)> w195;
-  alignas(16) static std::array<float, 53760 + XNN_EXTRA_BYTES / sizeof(float)> w196;
-  alignas(16) static std::array<float, 112 + XNN_EXTRA_BYTES / sizeof(float)> w197;
-  alignas(16) static std::array<float, 75264 + XNN_EXTRA_BYTES / sizeof(float)> w198;
-  alignas(16) static std::array<float, 672 + XNN_EXTRA_BYTES / sizeof(float)> w199;
-  alignas(16) static std::array<float, 6048 + XNN_EXTRA_BYTES / sizeof(float)> w200;
-  alignas(16) static std::array<float, 672 + XNN_EXTRA_BYTES / sizeof(float)> w201;
-  alignas(16) static std::array<float, 112896 + XNN_EXTRA_BYTES / sizeof(float)> w202;
-  alignas(16) static std::array<float, 168 + XNN_EXTRA_BYTES / sizeof(float)> w203;
-  alignas(16) static std::array<float, 112896 + XNN_EXTRA_BYTES / sizeof(float)> w204;
-  alignas(16) static std::array<float, 672 + XNN_EXTRA_BYTES / sizeof(float)> w205;
-  alignas(16) static std::array<float, 75264 + XNN_EXTRA_BYTES / sizeof(float)> w206;
-  alignas(16) static std::array<float, 112 + XNN_EXTRA_BYTES / sizeof(float)> w207;
-  alignas(16) static std::array<float, 75264 + XNN_EXTRA_BYTES / sizeof(float)> w208;
-  alignas(16) static std::array<float, 672 + XNN_EXTRA_BYTES / sizeof(float)> w209;
-  alignas(16) static std::array<float, 16800 + XNN_EXTRA_BYTES / sizeof(float)> w210;
-  alignas(16) static std::array<float, 672 + XNN_EXTRA_BYTES / sizeof(float)> w211;
-  alignas(16) static std::array<float, 112896 + XNN_EXTRA_BYTES / sizeof(float)> w212;
-  alignas(16) static std::array<float, 168 + XNN_EXTRA_BYTES / sizeof(float)> w213;
-  alignas(16) static std::array<float, 112896 + XNN_EXTRA_BYTES / sizeof(float)> w214;
-  alignas(16) static std::array<float, 672 + XNN_EXTRA_BYTES / sizeof(float)> w215;
-  alignas(16) static std::array<float, 107520 + XNN_EXTRA_BYTES / sizeof(float)> w216;
-  alignas(16) static std::array<float, 160 + XNN_EXTRA_BYTES / sizeof(float)> w217;
-  alignas(16) static std::array<float, 153600 + XNN_EXTRA_BYTES / sizeof(float)> w218;
-  alignas(16) static std::array<float, 960 + XNN_EXTRA_BYTES / sizeof(float)> w219;
-  alignas(16) static std::array<float, 24000 + XNN_EXTRA_BYTES / sizeof(float)> w220;
-  alignas(16) static std::array<float, 960 + XNN_EXTRA_BYTES / sizeof(float)> w221;
-  alignas(16) static std::array<float, 230400 + XNN_EXTRA_BYTES / sizeof(float)> w222;
-  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w223;
-  alignas(16) static std::array<float, 230400 + XNN_EXTRA_BYTES / sizeof(float)> w224;
-  alignas(16) static std::array<float, 960 + XNN_EXTRA_BYTES / sizeof(float)> w225;
-  alignas(16) static std::array<float, 153600 + XNN_EXTRA_BYTES / sizeof(float)> w226;
-  alignas(16) static std::array<float, 160 + XNN_EXTRA_BYTES / sizeof(float)> w227;
-  alignas(16) static std::array<float, 153600 + XNN_EXTRA_BYTES / sizeof(float)> w228;
-  alignas(16) static std::array<float, 960 + XNN_EXTRA_BYTES / sizeof(float)> w229;
-  alignas(16) static std::array<float, 24000 + XNN_EXTRA_BYTES / sizeof(float)> w230;
-  alignas(16) static std::array<float, 960 + XNN_EXTRA_BYTES / sizeof(float)> w231;
-  alignas(16) static std::array<float, 230400 + XNN_EXTRA_BYTES / sizeof(float)> w232;
-  alignas(16) static std::array<float, 240 + XNN_EXTRA_BYTES / sizeof(float)> w233;
-  alignas(16) static std::array<float, 230400 + XNN_EXTRA_BYTES / sizeof(float)> w234;
-  alignas(16) static std::array<float, 960 + XNN_EXTRA_BYTES / sizeof(float)> w235;
-  alignas(16) static std::array<float, 153600 + XNN_EXTRA_BYTES / sizeof(float)> w236;
-  alignas(16) static std::array<float, 160 + XNN_EXTRA_BYTES / sizeof(float)> w237;
-  alignas(16) static std::array<float, 153600 + XNN_EXTRA_BYTES / sizeof(float)> w238;
-  alignas(16) static std::array<float, 960 + XNN_EXTRA_BYTES / sizeof(float)> w239;
-  alignas(16) static std::array<float, 1228800 + XNN_EXTRA_BYTES / sizeof(float)> w240;
-  alignas(16) static std::array<float, 1280 + XNN_EXTRA_BYTES / sizeof(float)> w241;
-  alignas(16) static std::array<float, 1281280 + XNN_EXTRA_BYTES / sizeof(float)> w242;
-  alignas(16) static std::array<float, 1001 + XNN_EXTRA_BYTES / sizeof(float)> w243;
+  alignas(16) static std::array<float, 5760 + XNN_EXTRA_BYTES / sizeof(float)> w162;
+  alignas(16) static std::array<float, 48 + XNN_EXTRA_BYTES / sizeof(float)> w163;
+  alignas(16) static std::array<float, 6912 + XNN_EXTRA_BYTES / sizeof(float)> w164;
+  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w165;
+  alignas(16) static std::array<float, 3600 + XNN_EXTRA_BYTES / sizeof(float)> w166;
+  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w167;
+  alignas(16) static std::array<float, 5760 + XNN_EXTRA_BYTES / sizeof(float)> w168;
+  alignas(16) static std::array<float, 40 + XNN_EXTRA_BYTES / sizeof(float)> w169;
+  alignas(16) static std::array<float, 5760 + XNN_EXTRA_BYTES / sizeof(float)> w170;
+  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w171;
+  alignas(16) static std::array<float, 6912 + XNN_EXTRA_BYTES / sizeof(float)> w172;
+  alignas(16) static std::array<float, 48 + XNN_EXTRA_BYTES / sizeof(float)> w173;
+  alignas(16) static std::array<float, 13824 + XNN_EXTRA_BYTES / sizeof(float)> w174;
+  alignas(16) static std::array<float, 288 + XNN_EXTRA_BYTES / sizeof(float)> w175;
+  alignas(16) static std::array<float, 7200 + XNN_EXTRA_BYTES / sizeof(float)> w176;
+  alignas(16) static std::array<float, 288 + XNN_EXTRA_BYTES / sizeof(float)> w177;
+  alignas(16) static std::array<float, 20736 + XNN_EXTRA_BYTES / sizeof(float)> w178;
+  alignas(16) static std::array<float, 72 + XNN_EXTRA_BYTES / sizeof(float)> w179;
+  alignas(16) static std::array<float, 20736 + XNN_EXTRA_BYTES / sizeof(float)> w180;
+  alignas(16) static std::array<float, 288 + XNN_EXTRA_BYTES / sizeof(float)> w181;
+  alignas(16) static std::array<float, 27648 + XNN_EXTRA_BYTES / sizeof(float)> w182;
+  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> w183;
+  alignas(16) static std::array<float, 55296 + XNN_EXTRA_BYTES / sizeof(float)> w184;
+  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w185;
+  alignas(16) static std::array<float, 14400 + XNN_EXTRA_BYTES / sizeof(float)> w186;
+  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w187;
+  alignas(16) static std::array<float, 82944 + XNN_EXTRA_BYTES / sizeof(float)> w188;
+  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w189;
+  alignas(16) static std::array<float, 82944 + XNN_EXTRA_BYTES / sizeof(float)> w190;
+  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w191;
+  alignas(16) static std::array<float, 55296 + XNN_EXTRA_BYTES / sizeof(float)> w192;
+  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> w193;
+  alignas(16) static std::array<float, 55296 + XNN_EXTRA_BYTES / sizeof(float)> w194;
+  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w195;
+  alignas(16) static std::array<float, 14400 + XNN_EXTRA_BYTES / sizeof(float)> w196;
+  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w197;
+  alignas(16) static std::array<float, 82944 + XNN_EXTRA_BYTES / sizeof(float)> w198;
+  alignas(16) static std::array<float, 144 + XNN_EXTRA_BYTES / sizeof(float)> w199;
+  alignas(16) static std::array<float, 82944 + XNN_EXTRA_BYTES / sizeof(float)> w200;
+  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w201;
+  alignas(16) static std::array<float, 55296 + XNN_EXTRA_BYTES / sizeof(float)> w202;
+  alignas(16) static std::array<float, 96 + XNN_EXTRA_BYTES / sizeof(float)> w203;
+  alignas(16) static std::array<float, 55296 + XNN_EXTRA_BYTES / sizeof(float)> w204;
+  alignas(16) static std::array<float, 576 + XNN_EXTRA_BYTES / sizeof(float)> w205;
+  alignas(16) static std::array<float, 589824 + XNN_EXTRA_BYTES / sizeof(float)> w206;
+  alignas(16) static std::array<float, 1024 + XNN_EXTRA_BYTES / sizeof(float)> w207;
+  alignas(16) static std::array<float, 1025024 + XNN_EXTRA_BYTES / sizeof(float)> w208;
+  alignas(16) static std::array<float, 1001 + XNN_EXTRA_BYTES / sizeof(float)> w209;
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
@@ -371,20 +340,20 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   std::generate(v99.begin(), v99.end(), std::ref(f32rng));
   std::generate(v100.begin(), v100.end(), std::ref(f32rng));
   std::generate(v101.begin(), v101.end(), std::ref(f32rng));
-  std::generate(v102.begin(), v102.end(), std::ref(f32rng));
-  std::generate(v103.begin(), v103.end(), std::ref(f32rng));
-  std::generate(v104.begin(), v104.end(), std::ref(f32rng));
-  std::generate(v105.begin(), v105.end(), std::ref(f32rng));
-  std::generate(v106.begin(), v106.end(), std::ref(f32rng));
-  std::generate(v107.begin(), v107.end(), std::ref(f32rng));
-  std::generate(v108.begin(), v108.end(), std::ref(f32rng));
-  std::generate(v109.begin(), v109.end(), std::ref(f32rng));
-  std::generate(v110.begin(), v110.end(), std::ref(f32rng));
-  std::generate(v111.begin(), v111.end(), std::ref(f32rng));
-  std::generate(v112.begin(), v112.end(), std::ref(f32rng));
-  std::generate(v113.begin(), v113.end(), std::ref(f32rng));
-  std::generate(v114.begin(), v114.end(), std::ref(f32rng));
-  std::generate(v115.begin(), v115.end(), std::ref(f32rng));
+  std::generate(w102.begin(), w102.end(), std::ref(f32rng));
+  std::generate(w103.begin(), w103.end(), std::ref(f32rng));
+  std::generate(w104.begin(), w104.end(), std::ref(f32rng));
+  std::generate(w105.begin(), w105.end(), std::ref(f32rng));
+  std::generate(w106.begin(), w106.end(), std::ref(f32rng));
+  std::generate(w107.begin(), w107.end(), std::ref(f32rng));
+  std::generate(w108.begin(), w108.end(), std::ref(f32rng));
+  std::generate(w109.begin(), w109.end(), std::ref(f32rng));
+  std::generate(w110.begin(), w110.end(), std::ref(f32rng));
+  std::generate(w111.begin(), w111.end(), std::ref(f32rng));
+  std::generate(w112.begin(), w112.end(), std::ref(f32rng));
+  std::generate(w113.begin(), w113.end(), std::ref(f32rng));
+  std::generate(w114.begin(), w114.end(), std::ref(f32rng));
+  std::generate(w115.begin(), w115.end(), std::ref(f32rng));
   std::generate(w116.begin(), w116.end(), std::ref(f32rng));
   std::generate(w117.begin(), w117.end(), std::ref(f32rng));
   std::generate(w118.begin(), w118.end(), std::ref(f32rng));
@@ -479,44 +448,19 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   std::generate(w207.begin(), w207.end(), std::ref(f32rng));
   std::generate(w208.begin(), w208.end(), std::ref(f32rng));
   std::generate(w209.begin(), w209.end(), std::ref(f32rng));
-  std::generate(w210.begin(), w210.end(), std::ref(f32rng));
-  std::generate(w211.begin(), w211.end(), std::ref(f32rng));
-  std::generate(w212.begin(), w212.end(), std::ref(f32rng));
-  std::generate(w213.begin(), w213.end(), std::ref(f32rng));
-  std::generate(w214.begin(), w214.end(), std::ref(f32rng));
-  std::generate(w215.begin(), w215.end(), std::ref(f32rng));
-  std::generate(w216.begin(), w216.end(), std::ref(f32rng));
-  std::generate(w217.begin(), w217.end(), std::ref(f32rng));
-  std::generate(w218.begin(), w218.end(), std::ref(f32rng));
-  std::generate(w219.begin(), w219.end(), std::ref(f32rng));
-  std::generate(w220.begin(), w220.end(), std::ref(f32rng));
-  std::generate(w221.begin(), w221.end(), std::ref(f32rng));
-  std::generate(w222.begin(), w222.end(), std::ref(f32rng));
-  std::generate(w223.begin(), w223.end(), std::ref(f32rng));
-  std::generate(w224.begin(), w224.end(), std::ref(f32rng));
-  std::generate(w225.begin(), w225.end(), std::ref(f32rng));
-  std::generate(w226.begin(), w226.end(), std::ref(f32rng));
-  std::generate(w227.begin(), w227.end(), std::ref(f32rng));
-  std::generate(w228.begin(), w228.end(), std::ref(f32rng));
-  std::generate(w229.begin(), w229.end(), std::ref(f32rng));
-  std::generate(w230.begin(), w230.end(), std::ref(f32rng));
-  std::generate(w231.begin(), w231.end(), std::ref(f32rng));
-  std::generate(w232.begin(), w232.end(), std::ref(f32rng));
-  std::generate(w233.begin(), w233.end(), std::ref(f32rng));
-  std::generate(w234.begin(), w234.end(), std::ref(f32rng));
-  std::generate(w235.begin(), w235.end(), std::ref(f32rng));
-  std::generate(w236.begin(), w236.end(), std::ref(f32rng));
-  std::generate(w237.begin(), w237.end(), std::ref(f32rng));
-  std::generate(w238.begin(), w238.end(), std::ref(f32rng));
-  std::generate(w239.begin(), w239.end(), std::ref(f32rng));
-  std::generate(w240.begin(), w240.end(), std::ref(f32rng));
-  std::generate(w241.begin(), w241.end(), std::ref(f32rng));
-  std::generate(w242.begin(), w242.end(), std::ref(f32rng));
-  std::generate(w243.begin(), w243.end(), std::ref(f32rng));
 
   Operators operators;
   xnn_status status;
   xnn_code_cache* code_cache_ptr = nullptr;
+#if XNN_PLATFORM_JIT
+  xnn_code_cache code_cache;
+  status = xnn_init_code_cache(&code_cache);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to initialize code cache" << std::endl;
+    return ExecutionPlan();
+  }
+  code_cache_ptr = &code_cache;
+#endif  // XNN_PLATFORM_JIT
   size_t max_workspace_size = 0;
 
   xnn_operator_t op0 = nullptr;
@@ -531,7 +475,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     16 /* output_channels_per_group */,
     3 /* input pixel stride */,
     16 /* output pixel stride */,
-    w116.data(), w117.data(),
+    w102.data(), w103.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
@@ -558,17 +502,17 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op2 = nullptr;
   status = xnn_create_convolution2d_nhwc_f32(
-    1 /* top padding */, 1 /* right padding */,
-    1 /* bottom padding */, 1 /* left padding */,
+    0 /* top padding */, 1 /* right padding */,
+    1 /* bottom padding */, 0 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
+    2 /* subsampling height */, 2 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     16 /* groups */,
     1 /* input channels per group */,
     1 /* output_channels_per_group */,
     16 /* input pixel stride */,
     16 /* output pixel stride */,
-    w118.data(), w119.data(),
+    w104.data(), w105.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
@@ -581,22 +525,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op2, xnn_delete_operator);
 
   xnn_operator_t op3 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    16 /* input channels per group */,
-    16 /* output_channels_per_group */,
-    16 /* input pixel stride */,
-    16 /* output pixel stride */,
-    w120.data(), w121.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_global_average_pooling_nwc_f32(
+    16 /* channels */, 16 /* input stride */, 16 /* output stride */,
+    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op3);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #3" << std::endl;
@@ -605,9 +537,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op3, xnn_delete_operator);
 
   xnn_operator_t op4 = nullptr;
-            status = xnn_create_add_nd_f32(
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_convolution2d_nhwc_f32(
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    1 /* groups */,
+    16 /* input channels per group */,
+    8 /* output_channels_per_group */,
+    16 /* input pixel stride */,
+    8 /* output pixel stride */,
+    w106.data(), w107.data(),
+    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op4);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #4" << std::endl;
@@ -623,12 +568,12 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
-    16 /* input channels per group */,
-    64 /* output_channels_per_group */,
-    16 /* input pixel stride */,
-    64 /* output pixel stride */,
-    w122.data(), w123.data(),
-    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+    8 /* input channels per group */,
+    16 /* output_channels_per_group */,
+    8 /* input pixel stride */,
+    16 /* output pixel stride */,
+    w108.data(), w109.data(),
+    0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
@@ -640,22 +585,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op5, xnn_delete_operator);
 
   xnn_operator_t op6 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 1 /* right padding */,
-    1 /* bottom padding */, 0 /* left padding */,
-    3 /* kernel height */, 3 /* kernel width */,
-    2 /* subsampling height */, 2 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    64 /* groups */,
-    1 /* input channels per group */,
-    1 /* output_channels_per_group */,
-    64 /* input pixel stride */,
-    64 /* output pixel stride */,
-    w124.data(), w125.data(),
-    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_multiply_nd_f32(
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op6);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #6" << std::endl;
@@ -671,11 +603,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
-    64 /* input channels per group */,
-    24 /* output_channels_per_group */,
-    64 /* input pixel stride */,
-    24 /* output pixel stride */,
-    w126.data(), w127.data(),
+    16 /* input channels per group */,
+    16 /* output_channels_per_group */,
+    16 /* input pixel stride */,
+    16 /* output pixel stride */,
+    w110.data(), w111.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
@@ -695,11 +627,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
-    24 /* input channels per group */,
+    16 /* input channels per group */,
     72 /* output_channels_per_group */,
-    24 /* input pixel stride */,
+    16 /* input pixel stride */,
     72 /* output pixel stride */,
-    w128.data(), w129.data(),
+    w112.data(), w113.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
@@ -713,17 +645,17 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op9 = nullptr;
   status = xnn_create_convolution2d_nhwc_f32(
-    1 /* top padding */, 1 /* right padding */,
-    1 /* bottom padding */, 1 /* left padding */,
+    0 /* top padding */, 1 /* right padding */,
+    1 /* bottom padding */, 0 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
+    2 /* subsampling height */, 2 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     72 /* groups */,
     1 /* input channels per group */,
     1 /* output_channels_per_group */,
     72 /* input pixel stride */,
     72 /* output pixel stride */,
-    w130.data(), w131.data(),
+    w114.data(), w115.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
@@ -747,7 +679,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     24 /* output_channels_per_group */,
     72 /* input pixel stride */,
     24 /* output pixel stride */,
-    w132.data(), w133.data(),
+    w116.data(), w117.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
@@ -760,9 +692,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op10, xnn_delete_operator);
 
   xnn_operator_t op11 = nullptr;
-            status = xnn_create_add_nd_f32(
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_convolution2d_nhwc_f32(
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    1 /* groups */,
+    24 /* input channels per group */,
+    88 /* output_channels_per_group */,
+    24 /* input pixel stride */,
+    88 /* output pixel stride */,
+    w118.data(), w119.data(),
+    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op11);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #11" << std::endl;
@@ -772,17 +717,17 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op12 = nullptr;
   status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
+    1 /* top padding */, 1 /* right padding */,
+    1 /* bottom padding */, 1 /* left padding */,
+    3 /* kernel height */, 3 /* kernel width */,
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    24 /* input channels per group */,
-    72 /* output_channels_per_group */,
-    24 /* input pixel stride */,
-    72 /* output pixel stride */,
-    w134.data(), w135.data(),
+    88 /* groups */,
+    1 /* input channels per group */,
+    1 /* output_channels_per_group */,
+    88 /* input pixel stride */,
+    88 /* output pixel stride */,
+    w120.data(), w121.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
@@ -796,18 +741,18 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op13 = nullptr;
   status = xnn_create_convolution2d_nhwc_f32(
-    1 /* top padding */, 2 /* right padding */,
-    2 /* bottom padding */, 1 /* left padding */,
-    5 /* kernel height */, 5 /* kernel width */,
-    2 /* subsampling height */, 2 /* subsampling width */,
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
-    72 /* groups */,
-    1 /* input channels per group */,
-    1 /* output_channels_per_group */,
-    72 /* input pixel stride */,
-    72 /* output pixel stride */,
-    w136.data(), w137.data(),
-    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+    1 /* groups */,
+    88 /* input channels per group */,
+    24 /* output_channels_per_group */,
+    88 /* input pixel stride */,
+    24 /* output pixel stride */,
+    w122.data(), w123.data(),
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
@@ -819,9 +764,8 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op13, xnn_delete_operator);
 
   xnn_operator_t op14 = nullptr;
-  status = xnn_create_global_average_pooling_nwc_f32(
-    72 /* channels */, 72 /* input stride */, 72 /* output stride */,
-    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
+            status = xnn_create_add_nd_f32(
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op14);
   if (status != xnn_status_success) {
@@ -838,12 +782,12 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
-    72 /* input channels per group */,
-    24 /* output_channels_per_group */,
-    72 /* input pixel stride */,
-    24 /* output pixel stride */,
-    w138.data(), w139.data(),
-    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+    24 /* input channels per group */,
+    96 /* output_channels_per_group */,
+    24 /* input pixel stride */,
+    96 /* output pixel stride */,
+    w124.data(), w125.data(),
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
@@ -855,22 +799,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op15, xnn_delete_operator);
 
   xnn_operator_t op16 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    24 /* input channels per group */,
-    72 /* output_channels_per_group */,
-    24 /* input pixel stride */,
-    72 /* output pixel stride */,
-    w140.data(), w141.data(),
-    0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
+  status = xnn_create_hardswish_nc_f32(
+    96 /* channels */,
+    96 /* input stride */,
+    96 /* output stride */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op16);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #16" << std::endl;
@@ -879,9 +812,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op16, xnn_delete_operator);
 
   xnn_operator_t op17 = nullptr;
-  status = xnn_create_multiply_nd_f32(
+  status = xnn_create_convolution2d_nhwc_f32(
+    1 /* top padding */, 2 /* right padding */,
+    2 /* bottom padding */, 1 /* left padding */,
+    5 /* kernel height */, 5 /* kernel width */,
+    2 /* subsampling height */, 2 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    96 /* groups */,
+    1 /* input channels per group */,
+    1 /* output_channels_per_group */,
+    96 /* input pixel stride */,
+    96 /* output pixel stride */,
+    w126.data(), w127.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op17);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #17" << std::endl;
@@ -890,22 +836,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op17, xnn_delete_operator);
 
   xnn_operator_t op18 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    72 /* input channels per group */,
-    40 /* output_channels_per_group */,
-    72 /* input pixel stride */,
-    40 /* output pixel stride */,
-    w142.data(), w143.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_hardswish_nc_f32(
+    96 /* channels */,
+    96 /* input stride */,
+    96 /* output stride */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op18);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #18" << std::endl;
@@ -914,22 +849,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op18, xnn_delete_operator);
 
   xnn_operator_t op19 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    40 /* input channels per group */,
-    120 /* output_channels_per_group */,
-    40 /* input pixel stride */,
-    120 /* output pixel stride */,
-    w144.data(), w145.data(),
-    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_global_average_pooling_nwc_f32(
+    96 /* channels */, 96 /* input stride */, 96 /* output stride */,
+    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op19);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #19" << std::endl;
@@ -939,17 +862,17 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op20 = nullptr;
   status = xnn_create_convolution2d_nhwc_f32(
-    2 /* top padding */, 2 /* right padding */,
-    2 /* bottom padding */, 2 /* left padding */,
-    5 /* kernel height */, 5 /* kernel width */,
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
-    120 /* groups */,
-    1 /* input channels per group */,
-    1 /* output_channels_per_group */,
-    120 /* input pixel stride */,
-    120 /* output pixel stride */,
-    w146.data(), w147.data(),
+    1 /* groups */,
+    96 /* input channels per group */,
+    24 /* output_channels_per_group */,
+    96 /* input pixel stride */,
+    24 /* output pixel stride */,
+    w128.data(), w129.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
@@ -962,10 +885,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op20, xnn_delete_operator);
 
   xnn_operator_t op21 = nullptr;
-  status = xnn_create_global_average_pooling_nwc_f32(
-    120 /* channels */, 120 /* input stride */, 120 /* output stride */,
-    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
+  status = xnn_create_convolution2d_nhwc_f32(
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    1 /* groups */,
+    24 /* input channels per group */,
+    96 /* output_channels_per_group */,
+    24 /* input pixel stride */,
+    96 /* output pixel stride */,
+    w130.data(), w131.data(),
+    0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op21);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #21" << std::endl;
@@ -974,22 +909,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op21, xnn_delete_operator);
 
   xnn_operator_t op22 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    120 /* input channels per group */,
-    32 /* output_channels_per_group */,
-    120 /* input pixel stride */,
-    32 /* output pixel stride */,
-    w148.data(), w149.data(),
-    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_multiply_nd_f32(
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op22);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #22" << std::endl;
@@ -1005,12 +927,12 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
-    32 /* input channels per group */,
-    120 /* output_channels_per_group */,
-    32 /* input pixel stride */,
-    120 /* output pixel stride */,
-    w150.data(), w151.data(),
-    0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
+    96 /* input channels per group */,
+    40 /* output_channels_per_group */,
+    96 /* input pixel stride */,
+    40 /* output pixel stride */,
+    w132.data(), w133.data(),
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
@@ -1022,52 +944,6 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op23, xnn_delete_operator);
 
   xnn_operator_t op24 = nullptr;
-  status = xnn_create_multiply_nd_f32(
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
-    0 /* flags */,
-    &op24);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #24" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op24, xnn_delete_operator);
-
-  xnn_operator_t op25 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    120 /* input channels per group */,
-    40 /* output_channels_per_group */,
-    120 /* input pixel stride */,
-    40 /* output pixel stride */,
-    w152.data(), w153.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
-    0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
-    &op25);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #25" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op25, xnn_delete_operator);
-
-  xnn_operator_t op26 = nullptr;
-            status = xnn_create_add_nd_f32(
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
-    0 /* flags */,
-    &op26);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #26" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op26, xnn_delete_operator);
-
-  xnn_operator_t op27 = nullptr;
   status = xnn_create_convolution2d_nhwc_f32(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
@@ -1076,14 +952,64 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
     40 /* input channels per group */,
-    120 /* output_channels_per_group */,
+    240 /* output_channels_per_group */,
     40 /* input pixel stride */,
-    120 /* output pixel stride */,
-    w154.data(), w155.data(),
-    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+    240 /* output pixel stride */,
+    w134.data(), w135.data(),
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
+    &op24);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to create operation #24" << std::endl;
+    return ExecutionPlan();
+  }
+  operators.emplace_back(op24, xnn_delete_operator);
+
+  xnn_operator_t op25 = nullptr;
+  status = xnn_create_hardswish_nc_f32(
+    240 /* channels */,
+    240 /* input stride */,
+    240 /* output stride */,
+    0 /* flags */,
+    &op25);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to create operation #25" << std::endl;
+    return ExecutionPlan();
+  }
+  operators.emplace_back(op25, xnn_delete_operator);
+
+  xnn_operator_t op26 = nullptr;
+  status = xnn_create_convolution2d_nhwc_f32(
+    2 /* top padding */, 2 /* right padding */,
+    2 /* bottom padding */, 2 /* left padding */,
+    5 /* kernel height */, 5 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    240 /* groups */,
+    1 /* input channels per group */,
+    1 /* output_channels_per_group */,
+    240 /* input pixel stride */,
+    240 /* output pixel stride */,
+    w136.data(), w137.data(),
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+    0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
+    &op26);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to create operation #26" << std::endl;
+    return ExecutionPlan();
+  }
+  operators.emplace_back(op26, xnn_delete_operator);
+
+  xnn_operator_t op27 = nullptr;
+  status = xnn_create_hardswish_nc_f32(
+    240 /* channels */,
+    240 /* input stride */,
+    240 /* output stride */,
+    0 /* flags */,
     &op27);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #27" << std::endl;
@@ -1092,22 +1018,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op27, xnn_delete_operator);
 
   xnn_operator_t op28 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    2 /* top padding */, 2 /* right padding */,
-    2 /* bottom padding */, 2 /* left padding */,
-    5 /* kernel height */, 5 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    120 /* groups */,
-    1 /* input channels per group */,
-    1 /* output_channels_per_group */,
-    120 /* input pixel stride */,
-    120 /* output pixel stride */,
-    w156.data(), w157.data(),
-    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_global_average_pooling_nwc_f32(
+    240 /* channels */, 240 /* input stride */, 240 /* output stride */,
+    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op28);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #28" << std::endl;
@@ -1116,10 +1030,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op28, xnn_delete_operator);
 
   xnn_operator_t op29 = nullptr;
-  status = xnn_create_global_average_pooling_nwc_f32(
-    120 /* channels */, 120 /* input stride */, 120 /* output stride */,
-    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
+  status = xnn_create_convolution2d_nhwc_f32(
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    1 /* groups */,
+    240 /* input channels per group */,
+    64 /* output_channels_per_group */,
+    240 /* input pixel stride */,
+    64 /* output pixel stride */,
+    w138.data(), w139.data(),
+    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op29);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #29" << std::endl;
@@ -1135,12 +1061,12 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
-    120 /* input channels per group */,
-    32 /* output_channels_per_group */,
-    120 /* input pixel stride */,
-    32 /* output pixel stride */,
-    w158.data(), w159.data(),
-    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+    64 /* input channels per group */,
+    240 /* output_channels_per_group */,
+    64 /* input pixel stride */,
+    240 /* output pixel stride */,
+    w140.data(), w141.data(),
+    0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
@@ -1152,22 +1078,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op30, xnn_delete_operator);
 
   xnn_operator_t op31 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    32 /* input channels per group */,
-    120 /* output_channels_per_group */,
-    32 /* input pixel stride */,
-    120 /* output pixel stride */,
-    w160.data(), w161.data(),
-    0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
+  status = xnn_create_multiply_nd_f32(
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op31);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #31" << std::endl;
@@ -1176,9 +1089,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op31, xnn_delete_operator);
 
   xnn_operator_t op32 = nullptr;
-  status = xnn_create_multiply_nd_f32(
+  status = xnn_create_convolution2d_nhwc_f32(
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    1 /* groups */,
+    240 /* input channels per group */,
+    40 /* output_channels_per_group */,
+    240 /* input pixel stride */,
+    40 /* output pixel stride */,
+    w142.data(), w143.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op32);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #32" << std::endl;
@@ -1187,22 +1113,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op32, xnn_delete_operator);
 
   xnn_operator_t op33 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    120 /* input channels per group */,
-    40 /* output_channels_per_group */,
-    120 /* input pixel stride */,
-    40 /* output pixel stride */,
-    w162.data(), w163.data(),
+            status = xnn_create_add_nd_f32(
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op33);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #33" << std::endl;
@@ -1211,17 +1124,6 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op33, xnn_delete_operator);
 
   xnn_operator_t op34 = nullptr;
-            status = xnn_create_add_nd_f32(
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
-    0 /* flags */,
-    &op34);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #34" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op34, xnn_delete_operator);
-
-  xnn_operator_t op35 = nullptr;
   status = xnn_create_convolution2d_nhwc_f32(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
@@ -1233,11 +1135,24 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     240 /* output_channels_per_group */,
     40 /* input pixel stride */,
     240 /* output pixel stride */,
-    w164.data(), w165.data(),
+    w144.data(), w145.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
+    &op34);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to create operation #34" << std::endl;
+    return ExecutionPlan();
+  }
+  operators.emplace_back(op34, xnn_delete_operator);
+
+  xnn_operator_t op35 = nullptr;
+  status = xnn_create_hardswish_nc_f32(
+    240 /* channels */,
+    240 /* input stride */,
+    240 /* output stride */,
+    0 /* flags */,
     &op35);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #35" << std::endl;
@@ -1246,11 +1161,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op35, xnn_delete_operator);
 
   xnn_operator_t op36 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    240 /* channels */,
-    240 /* input stride */,
-    240 /* output stride */,
+  status = xnn_create_convolution2d_nhwc_f32(
+    2 /* top padding */, 2 /* right padding */,
+    2 /* bottom padding */, 2 /* left padding */,
+    5 /* kernel height */, 5 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    240 /* groups */,
+    1 /* input channels per group */,
+    1 /* output_channels_per_group */,
+    240 /* input pixel stride */,
+    240 /* output pixel stride */,
+    w146.data(), w147.data(),
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op36);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #36" << std::endl;
@@ -1259,22 +1185,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op36, xnn_delete_operator);
 
   xnn_operator_t op37 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 1 /* right padding */,
-    1 /* bottom padding */, 0 /* left padding */,
-    3 /* kernel height */, 3 /* kernel width */,
-    2 /* subsampling height */, 2 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    240 /* groups */,
-    1 /* input channels per group */,
-    1 /* output_channels_per_group */,
-    240 /* input pixel stride */,
-    240 /* output pixel stride */,
-    w166.data(), w167.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_hardswish_nc_f32(
+    240 /* channels */,
+    240 /* input stride */,
+    240 /* output stride */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op37);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #37" << std::endl;
@@ -1283,10 +1198,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op37, xnn_delete_operator);
 
   xnn_operator_t op38 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    240 /* channels */,
-    240 /* input stride */,
-    240 /* output stride */,
+  status = xnn_create_global_average_pooling_nwc_f32(
+    240 /* channels */, 240 /* input stride */, 240 /* output stride */,
+    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op38);
   if (status != xnn_status_success) {
@@ -1304,11 +1218,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
     240 /* input channels per group */,
-    80 /* output_channels_per_group */,
+    64 /* output_channels_per_group */,
     240 /* input pixel stride */,
-    80 /* output pixel stride */,
-    w168.data(), w169.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+    64 /* output pixel stride */,
+    w148.data(), w149.data(),
+    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
@@ -1327,12 +1241,12 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
-    80 /* input channels per group */,
-    200 /* output_channels_per_group */,
-    80 /* input pixel stride */,
-    200 /* output pixel stride */,
-    w170.data(), w171.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+    64 /* input channels per group */,
+    240 /* output_channels_per_group */,
+    64 /* input pixel stride */,
+    240 /* output pixel stride */,
+    w150.data(), w151.data(),
+    0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
@@ -1344,10 +1258,8 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op40, xnn_delete_operator);
 
   xnn_operator_t op41 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    200 /* channels */,
-    200 /* input stride */,
-    200 /* output stride */,
+  status = xnn_create_multiply_nd_f32(
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op41);
   if (status != xnn_status_success) {
@@ -1358,17 +1270,17 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op42 = nullptr;
   status = xnn_create_convolution2d_nhwc_f32(
-    1 /* top padding */, 1 /* right padding */,
-    1 /* bottom padding */, 1 /* left padding */,
-    3 /* kernel height */, 3 /* kernel width */,
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
-    200 /* groups */,
-    1 /* input channels per group */,
-    1 /* output_channels_per_group */,
-    200 /* input pixel stride */,
-    200 /* output pixel stride */,
-    w172.data(), w173.data(),
+    1 /* groups */,
+    240 /* input channels per group */,
+    40 /* output_channels_per_group */,
+    240 /* input pixel stride */,
+    40 /* output pixel stride */,
+    w152.data(), w153.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
@@ -1381,10 +1293,8 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op42, xnn_delete_operator);
 
   xnn_operator_t op43 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    200 /* channels */,
-    200 /* input stride */,
-    200 /* output stride */,
+            status = xnn_create_add_nd_f32(
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op43);
   if (status != xnn_status_success) {
@@ -1401,11 +1311,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
-    200 /* input channels per group */,
-    80 /* output_channels_per_group */,
-    200 /* input pixel stride */,
-    80 /* output pixel stride */,
-    w174.data(), w175.data(),
+    40 /* input channels per group */,
+    120 /* output_channels_per_group */,
+    40 /* input pixel stride */,
+    120 /* output pixel stride */,
+    w154.data(), w155.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
@@ -1418,8 +1328,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op44, xnn_delete_operator);
 
   xnn_operator_t op45 = nullptr;
-            status = xnn_create_add_nd_f32(
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_hardswish_nc_f32(
+    120 /* channels */,
+    120 /* input stride */,
+    120 /* output stride */,
     0 /* flags */,
     &op45);
   if (status != xnn_status_success) {
@@ -1430,17 +1342,17 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op46 = nullptr;
   status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
+    2 /* top padding */, 2 /* right padding */,
+    2 /* bottom padding */, 2 /* left padding */,
+    5 /* kernel height */, 5 /* kernel width */,
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    80 /* input channels per group */,
-    184 /* output_channels_per_group */,
-    80 /* input pixel stride */,
-    184 /* output pixel stride */,
-    w176.data(), w177.data(),
+    120 /* groups */,
+    1 /* input channels per group */,
+    1 /* output_channels_per_group */,
+    120 /* input pixel stride */,
+    120 /* output pixel stride */,
+    w156.data(), w157.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
@@ -1454,9 +1366,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op47 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    184 /* channels */,
-    184 /* input stride */,
-    184 /* output stride */,
+    120 /* channels */,
+    120 /* input stride */,
+    120 /* output stride */,
     0 /* flags */,
     &op47);
   if (status != xnn_status_success) {
@@ -1466,22 +1378,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op47, xnn_delete_operator);
 
   xnn_operator_t op48 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    1 /* top padding */, 1 /* right padding */,
-    1 /* bottom padding */, 1 /* left padding */,
-    3 /* kernel height */, 3 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    184 /* groups */,
-    1 /* input channels per group */,
-    1 /* output_channels_per_group */,
-    184 /* input pixel stride */,
-    184 /* output pixel stride */,
-    w178.data(), w179.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_global_average_pooling_nwc_f32(
+    120 /* channels */, 120 /* input stride */, 120 /* output stride */,
+    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op48);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #48" << std::endl;
@@ -1490,11 +1390,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op48, xnn_delete_operator);
 
   xnn_operator_t op49 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    184 /* channels */,
-    184 /* input stride */,
-    184 /* output stride */,
+  status = xnn_create_convolution2d_nhwc_f32(
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    1 /* groups */,
+    120 /* input channels per group */,
+    32 /* output_channels_per_group */,
+    120 /* input pixel stride */,
+    32 /* output pixel stride */,
+    w158.data(), w159.data(),
+    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op49);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #49" << std::endl;
@@ -1510,12 +1421,12 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
-    184 /* input channels per group */,
-    80 /* output_channels_per_group */,
-    184 /* input pixel stride */,
-    80 /* output pixel stride */,
-    w180.data(), w181.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+    32 /* input channels per group */,
+    120 /* output_channels_per_group */,
+    32 /* input pixel stride */,
+    120 /* output pixel stride */,
+    w160.data(), w161.data(),
+    0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
@@ -1527,7 +1438,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op50, xnn_delete_operator);
 
   xnn_operator_t op51 = nullptr;
-            status = xnn_create_add_nd_f32(
+  status = xnn_create_multiply_nd_f32(
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op51);
@@ -1545,11 +1456,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
-    80 /* input channels per group */,
-    184 /* output_channels_per_group */,
-    80 /* input pixel stride */,
-    184 /* output pixel stride */,
-    w182.data(), w183.data(),
+    120 /* input channels per group */,
+    48 /* output_channels_per_group */,
+    120 /* input pixel stride */,
+    48 /* output pixel stride */,
+    w162.data(), w163.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
@@ -1562,11 +1473,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op52, xnn_delete_operator);
 
   xnn_operator_t op53 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    184 /* channels */,
-    184 /* input stride */,
-    184 /* output stride */,
+  status = xnn_create_convolution2d_nhwc_f32(
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    1 /* groups */,
+    48 /* input channels per group */,
+    144 /* output_channels_per_group */,
+    48 /* input pixel stride */,
+    144 /* output pixel stride */,
+    w164.data(), w165.data(),
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op53);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #53" << std::endl;
@@ -1575,22 +1497,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op53, xnn_delete_operator);
 
   xnn_operator_t op54 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    1 /* top padding */, 1 /* right padding */,
-    1 /* bottom padding */, 1 /* left padding */,
-    3 /* kernel height */, 3 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    184 /* groups */,
-    1 /* input channels per group */,
-    1 /* output_channels_per_group */,
-    184 /* input pixel stride */,
-    184 /* output pixel stride */,
-    w184.data(), w185.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_hardswish_nc_f32(
+    144 /* channels */,
+    144 /* input stride */,
+    144 /* output stride */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op54);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #54" << std::endl;
@@ -1599,11 +1510,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op54, xnn_delete_operator);
 
   xnn_operator_t op55 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    184 /* channels */,
-    184 /* input stride */,
-    184 /* output stride */,
+  status = xnn_create_convolution2d_nhwc_f32(
+    2 /* top padding */, 2 /* right padding */,
+    2 /* bottom padding */, 2 /* left padding */,
+    5 /* kernel height */, 5 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    144 /* groups */,
+    1 /* input channels per group */,
+    1 /* output_channels_per_group */,
+    144 /* input pixel stride */,
+    144 /* output pixel stride */,
+    w166.data(), w167.data(),
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op55);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #55" << std::endl;
@@ -1612,22 +1534,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op55, xnn_delete_operator);
 
   xnn_operator_t op56 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    184 /* input channels per group */,
-    80 /* output_channels_per_group */,
-    184 /* input pixel stride */,
-    80 /* output pixel stride */,
-    w186.data(), w187.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_hardswish_nc_f32(
+    144 /* channels */,
+    144 /* input stride */,
+    144 /* output stride */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op56);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #56" << std::endl;
@@ -1636,8 +1547,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op56, xnn_delete_operator);
 
   xnn_operator_t op57 = nullptr;
-            status = xnn_create_add_nd_f32(
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_global_average_pooling_nwc_f32(
+    144 /* channels */, 144 /* input stride */, 144 /* output stride */,
+    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op57);
   if (status != xnn_status_success) {
@@ -1654,12 +1566,12 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
-    80 /* input channels per group */,
-    480 /* output_channels_per_group */,
-    80 /* input pixel stride */,
-    480 /* output pixel stride */,
-    w188.data(), w189.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+    144 /* input channels per group */,
+    40 /* output_channels_per_group */,
+    144 /* input pixel stride */,
+    40 /* output pixel stride */,
+    w168.data(), w169.data(),
+    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
@@ -1671,11 +1583,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op58, xnn_delete_operator);
 
   xnn_operator_t op59 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    480 /* channels */,
-    480 /* input stride */,
-    480 /* output stride */,
+  status = xnn_create_convolution2d_nhwc_f32(
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    1 /* groups */,
+    40 /* input channels per group */,
+    144 /* output_channels_per_group */,
+    40 /* input pixel stride */,
+    144 /* output pixel stride */,
+    w170.data(), w171.data(),
+    0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op59);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #59" << std::endl;
@@ -1684,22 +1607,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op59, xnn_delete_operator);
 
   xnn_operator_t op60 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    1 /* top padding */, 1 /* right padding */,
-    1 /* bottom padding */, 1 /* left padding */,
-    3 /* kernel height */, 3 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    480 /* groups */,
-    1 /* input channels per group */,
-    1 /* output_channels_per_group */,
-    480 /* input pixel stride */,
-    480 /* output pixel stride */,
-    w190.data(), w191.data(),
+  status = xnn_create_multiply_nd_f32(
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op60);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #60" << std::endl;
@@ -1708,11 +1618,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op60, xnn_delete_operator);
 
   xnn_operator_t op61 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    480 /* channels */,
-    480 /* input stride */,
-    480 /* output stride */,
+  status = xnn_create_convolution2d_nhwc_f32(
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    1 /* groups */,
+    144 /* input channels per group */,
+    48 /* output_channels_per_group */,
+    144 /* input pixel stride */,
+    48 /* output pixel stride */,
+    w172.data(), w173.data(),
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op61);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #61" << std::endl;
@@ -1721,9 +1642,8 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op61, xnn_delete_operator);
 
   xnn_operator_t op62 = nullptr;
-  status = xnn_create_global_average_pooling_nwc_f32(
-    480 /* channels */, 480 /* input stride */, 480 /* output stride */,
-    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
+            status = xnn_create_add_nd_f32(
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op62);
   if (status != xnn_status_success) {
@@ -1740,12 +1660,12 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
-    480 /* input channels per group */,
-    120 /* output_channels_per_group */,
-    480 /* input pixel stride */,
-    120 /* output pixel stride */,
-    w192.data(), w193.data(),
-    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+    48 /* input channels per group */,
+    288 /* output_channels_per_group */,
+    48 /* input pixel stride */,
+    288 /* output pixel stride */,
+    w174.data(), w175.data(),
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
@@ -1757,22 +1677,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op63, xnn_delete_operator);
 
   xnn_operator_t op64 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    120 /* input channels per group */,
-    480 /* output_channels_per_group */,
-    120 /* input pixel stride */,
-    480 /* output pixel stride */,
-    w194.data(), w195.data(),
-    0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
+  status = xnn_create_hardswish_nc_f32(
+    288 /* channels */,
+    288 /* input stride */,
+    288 /* output stride */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op64);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #64" << std::endl;
@@ -1781,9 +1690,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op64, xnn_delete_operator);
 
   xnn_operator_t op65 = nullptr;
-  status = xnn_create_multiply_nd_f32(
+  status = xnn_create_convolution2d_nhwc_f32(
+    1 /* top padding */, 2 /* right padding */,
+    2 /* bottom padding */, 1 /* left padding */,
+    5 /* kernel height */, 5 /* kernel width */,
+    2 /* subsampling height */, 2 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    288 /* groups */,
+    1 /* input channels per group */,
+    1 /* output_channels_per_group */,
+    288 /* input pixel stride */,
+    288 /* output pixel stride */,
+    w176.data(), w177.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op65);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #65" << std::endl;
@@ -1792,22 +1714,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op65, xnn_delete_operator);
 
   xnn_operator_t op66 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    480 /* input channels per group */,
-    112 /* output_channels_per_group */,
-    480 /* input pixel stride */,
-    112 /* output pixel stride */,
-    w196.data(), w197.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_hardswish_nc_f32(
+    288 /* channels */,
+    288 /* input stride */,
+    288 /* output stride */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op66);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #66" << std::endl;
@@ -1816,22 +1727,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op66, xnn_delete_operator);
 
   xnn_operator_t op67 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    112 /* input channels per group */,
-    672 /* output_channels_per_group */,
-    112 /* input pixel stride */,
-    672 /* output pixel stride */,
-    w198.data(), w199.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_global_average_pooling_nwc_f32(
+    288 /* channels */, 288 /* input stride */, 288 /* output stride */,
+    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op67);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #67" << std::endl;
@@ -1840,11 +1739,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op67, xnn_delete_operator);
 
   xnn_operator_t op68 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    672 /* channels */,
-    672 /* input stride */,
-    672 /* output stride */,
+  status = xnn_create_convolution2d_nhwc_f32(
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    1 /* groups */,
+    288 /* input channels per group */,
+    72 /* output_channels_per_group */,
+    288 /* input pixel stride */,
+    72 /* output pixel stride */,
+    w178.data(), w179.data(),
+    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op68);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #68" << std::endl;
@@ -1854,18 +1764,18 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op69 = nullptr;
   status = xnn_create_convolution2d_nhwc_f32(
-    1 /* top padding */, 1 /* right padding */,
-    1 /* bottom padding */, 1 /* left padding */,
-    3 /* kernel height */, 3 /* kernel width */,
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
-    672 /* groups */,
-    1 /* input channels per group */,
-    1 /* output_channels_per_group */,
-    672 /* input pixel stride */,
-    672 /* output pixel stride */,
-    w200.data(), w201.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+    1 /* groups */,
+    72 /* input channels per group */,
+    288 /* output_channels_per_group */,
+    72 /* input pixel stride */,
+    288 /* output pixel stride */,
+    w180.data(), w181.data(),
+    0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
@@ -1877,10 +1787,8 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op69, xnn_delete_operator);
 
   xnn_operator_t op70 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    672 /* channels */,
-    672 /* input stride */,
-    672 /* output stride */,
+  status = xnn_create_multiply_nd_f32(
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op70);
   if (status != xnn_status_success) {
@@ -1890,10 +1798,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op70, xnn_delete_operator);
 
   xnn_operator_t op71 = nullptr;
-  status = xnn_create_global_average_pooling_nwc_f32(
-    672 /* channels */, 672 /* input stride */, 672 /* output stride */,
-    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
+  status = xnn_create_convolution2d_nhwc_f32(
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    1 /* groups */,
+    288 /* input channels per group */,
+    96 /* output_channels_per_group */,
+    288 /* input pixel stride */,
+    96 /* output pixel stride */,
+    w182.data(), w183.data(),
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op71);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #71" << std::endl;
@@ -1909,12 +1829,12 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
-    672 /* input channels per group */,
-    168 /* output_channels_per_group */,
-    672 /* input pixel stride */,
-    168 /* output pixel stride */,
-    w202.data(), w203.data(),
-    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+    96 /* input channels per group */,
+    576 /* output_channels_per_group */,
+    96 /* input pixel stride */,
+    576 /* output pixel stride */,
+    w184.data(), w185.data(),
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
@@ -1926,22 +1846,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op72, xnn_delete_operator);
 
   xnn_operator_t op73 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    168 /* input channels per group */,
-    672 /* output_channels_per_group */,
-    168 /* input pixel stride */,
-    672 /* output pixel stride */,
-    w204.data(), w205.data(),
-    0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
+  status = xnn_create_hardswish_nc_f32(
+    576 /* channels */,
+    576 /* input stride */,
+    576 /* output stride */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op73);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #73" << std::endl;
@@ -1950,9 +1859,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op73, xnn_delete_operator);
 
   xnn_operator_t op74 = nullptr;
-  status = xnn_create_multiply_nd_f32(
+  status = xnn_create_convolution2d_nhwc_f32(
+    2 /* top padding */, 2 /* right padding */,
+    2 /* bottom padding */, 2 /* left padding */,
+    5 /* kernel height */, 5 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    576 /* groups */,
+    1 /* input channels per group */,
+    1 /* output_channels_per_group */,
+    576 /* input pixel stride */,
+    576 /* output pixel stride */,
+    w186.data(), w187.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op74);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #74" << std::endl;
@@ -1961,22 +1883,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op74, xnn_delete_operator);
 
   xnn_operator_t op75 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    672 /* input channels per group */,
-    112 /* output_channels_per_group */,
-    672 /* input pixel stride */,
-    112 /* output pixel stride */,
-    w206.data(), w207.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_hardswish_nc_f32(
+    576 /* channels */,
+    576 /* input stride */,
+    576 /* output stride */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op75);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #75" << std::endl;
@@ -1985,8 +1896,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op75, xnn_delete_operator);
 
   xnn_operator_t op76 = nullptr;
-            status = xnn_create_add_nd_f32(
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_global_average_pooling_nwc_f32(
+    576 /* channels */, 576 /* input stride */, 576 /* output stride */,
+    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op76);
   if (status != xnn_status_success) {
@@ -2003,12 +1915,12 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
-    112 /* input channels per group */,
-    672 /* output_channels_per_group */,
-    112 /* input pixel stride */,
-    672 /* output pixel stride */,
-    w208.data(), w209.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+    576 /* input channels per group */,
+    144 /* output_channels_per_group */,
+    576 /* input pixel stride */,
+    144 /* output pixel stride */,
+    w188.data(), w189.data(),
+    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
@@ -2020,11 +1932,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op77, xnn_delete_operator);
 
   xnn_operator_t op78 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    672 /* channels */,
-    672 /* input stride */,
-    672 /* output stride */,
+  status = xnn_create_convolution2d_nhwc_f32(
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    1 /* groups */,
+    144 /* input channels per group */,
+    576 /* output_channels_per_group */,
+    144 /* input pixel stride */,
+    576 /* output pixel stride */,
+    w190.data(), w191.data(),
+    0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op78);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #78" << std::endl;
@@ -2033,22 +1956,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op78, xnn_delete_operator);
 
   xnn_operator_t op79 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    1 /* top padding */, 2 /* right padding */,
-    2 /* bottom padding */, 1 /* left padding */,
-    5 /* kernel height */, 5 /* kernel width */,
-    2 /* subsampling height */, 2 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    672 /* groups */,
-    1 /* input channels per group */,
-    1 /* output_channels_per_group */,
-    672 /* input pixel stride */,
-    672 /* output pixel stride */,
-    w210.data(), w211.data(),
+  status = xnn_create_multiply_nd_f32(
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op79);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #79" << std::endl;
@@ -2057,11 +1967,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op79, xnn_delete_operator);
 
   xnn_operator_t op80 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    672 /* channels */,
-    672 /* input stride */,
-    672 /* output stride */,
+  status = xnn_create_convolution2d_nhwc_f32(
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    1 /* groups */,
+    576 /* input channels per group */,
+    96 /* output_channels_per_group */,
+    576 /* input pixel stride */,
+    96 /* output pixel stride */,
+    w192.data(), w193.data(),
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op80);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #80" << std::endl;
@@ -2070,9 +1991,8 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op80, xnn_delete_operator);
 
   xnn_operator_t op81 = nullptr;
-  status = xnn_create_global_average_pooling_nwc_f32(
-    672 /* channels */, 672 /* input stride */, 672 /* output stride */,
-    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
+            status = xnn_create_add_nd_f32(
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op81);
   if (status != xnn_status_success) {
@@ -2089,12 +2009,12 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
-    672 /* input channels per group */,
-    168 /* output_channels_per_group */,
-    672 /* input pixel stride */,
-    168 /* output pixel stride */,
-    w212.data(), w213.data(),
-    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+    96 /* input channels per group */,
+    576 /* output_channels_per_group */,
+    96 /* input pixel stride */,
+    576 /* output pixel stride */,
+    w194.data(), w195.data(),
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
@@ -2106,22 +2026,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op82, xnn_delete_operator);
 
   xnn_operator_t op83 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    168 /* input channels per group */,
-    672 /* output_channels_per_group */,
-    168 /* input pixel stride */,
-    672 /* output pixel stride */,
-    w214.data(), w215.data(),
-    0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
+  status = xnn_create_hardswish_nc_f32(
+    576 /* channels */,
+    576 /* input stride */,
+    576 /* output stride */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op83);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #83" << std::endl;
@@ -2130,9 +2039,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op83, xnn_delete_operator);
 
   xnn_operator_t op84 = nullptr;
-  status = xnn_create_multiply_nd_f32(
+  status = xnn_create_convolution2d_nhwc_f32(
+    2 /* top padding */, 2 /* right padding */,
+    2 /* bottom padding */, 2 /* left padding */,
+    5 /* kernel height */, 5 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    576 /* groups */,
+    1 /* input channels per group */,
+    1 /* output_channels_per_group */,
+    576 /* input pixel stride */,
+    576 /* output pixel stride */,
+    w196.data(), w197.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op84);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #84" << std::endl;
@@ -2141,22 +2063,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op84, xnn_delete_operator);
 
   xnn_operator_t op85 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    672 /* input channels per group */,
-    160 /* output_channels_per_group */,
-    672 /* input pixel stride */,
-    160 /* output pixel stride */,
-    w216.data(), w217.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_hardswish_nc_f32(
+    576 /* channels */,
+    576 /* input stride */,
+    576 /* output stride */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op85);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #85" << std::endl;
@@ -2165,22 +2076,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op85, xnn_delete_operator);
 
   xnn_operator_t op86 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    160 /* input channels per group */,
-    960 /* output_channels_per_group */,
-    160 /* input pixel stride */,
-    960 /* output pixel stride */,
-    w218.data(), w219.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_global_average_pooling_nwc_f32(
+    576 /* channels */, 576 /* input stride */, 576 /* output stride */,
+    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op86);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #86" << std::endl;
@@ -2189,11 +2088,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op86, xnn_delete_operator);
 
   xnn_operator_t op87 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    960 /* channels */,
-    960 /* input stride */,
-    960 /* output stride */,
+  status = xnn_create_convolution2d_nhwc_f32(
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    1 /* groups */,
+    576 /* input channels per group */,
+    144 /* output_channels_per_group */,
+    576 /* input pixel stride */,
+    144 /* output pixel stride */,
+    w198.data(), w199.data(),
+    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op87);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #87" << std::endl;
@@ -2203,18 +2113,18 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op88 = nullptr;
   status = xnn_create_convolution2d_nhwc_f32(
-    2 /* top padding */, 2 /* right padding */,
-    2 /* bottom padding */, 2 /* left padding */,
-    5 /* kernel height */, 5 /* kernel width */,
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
-    960 /* groups */,
-    1 /* input channels per group */,
-    1 /* output_channels_per_group */,
-    960 /* input pixel stride */,
-    960 /* output pixel stride */,
-    w220.data(), w221.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+    1 /* groups */,
+    144 /* input channels per group */,
+    576 /* output_channels_per_group */,
+    144 /* input pixel stride */,
+    576 /* output pixel stride */,
+    w200.data(), w201.data(),
+    0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
@@ -2226,10 +2136,8 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op88, xnn_delete_operator);
 
   xnn_operator_t op89 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    960 /* channels */,
-    960 /* input stride */,
-    960 /* output stride */,
+  status = xnn_create_multiply_nd_f32(
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op89);
   if (status != xnn_status_success) {
@@ -2239,10 +2147,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op89, xnn_delete_operator);
 
   xnn_operator_t op90 = nullptr;
-  status = xnn_create_global_average_pooling_nwc_f32(
-    960 /* channels */, 960 /* input stride */, 960 /* output stride */,
-    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
+  status = xnn_create_convolution2d_nhwc_f32(
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    1 /* groups */,
+    576 /* input channels per group */,
+    96 /* output_channels_per_group */,
+    576 /* input pixel stride */,
+    96 /* output pixel stride */,
+    w202.data(), w203.data(),
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op90);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #90" << std::endl;
@@ -2251,22 +2171,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op90, xnn_delete_operator);
 
   xnn_operator_t op91 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    960 /* input channels per group */,
-    240 /* output_channels_per_group */,
-    960 /* input pixel stride */,
-    240 /* output pixel stride */,
-    w222.data(), w223.data(),
-    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+            status = xnn_create_add_nd_f32(
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op91);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #91" << std::endl;
@@ -2282,12 +2189,12 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
     1 /* groups */,
-    240 /* input channels per group */,
-    960 /* output_channels_per_group */,
-    240 /* input pixel stride */,
-    960 /* output pixel stride */,
-    w224.data(), w225.data(),
-    0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
+    96 /* input channels per group */,
+    576 /* output_channels_per_group */,
+    96 /* input pixel stride */,
+    576 /* output pixel stride */,
+    w204.data(), w205.data(),
+    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
     nullptr /* weights_cache */,
@@ -2299,8 +2206,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op92, xnn_delete_operator);
 
   xnn_operator_t op93 = nullptr;
-  status = xnn_create_multiply_nd_f32(
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_hardswish_nc_f32(
+    576 /* channels */,
+    576 /* input stride */,
+    576 /* output stride */,
     0 /* flags */,
     &op93);
   if (status != xnn_status_success) {
@@ -2310,22 +2219,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op93, xnn_delete_operator);
 
   xnn_operator_t op94 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    960 /* input channels per group */,
-    160 /* output_channels_per_group */,
-    960 /* input pixel stride */,
-    160 /* output pixel stride */,
-    w226.data(), w227.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_global_average_pooling_nwc_f32(
+    576 /* channels */, 576 /* input stride */, 576 /* output stride */,
+    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op94);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #94" << std::endl;
@@ -2334,9 +2231,22 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op94, xnn_delete_operator);
 
   xnn_operator_t op95 = nullptr;
-            status = xnn_create_add_nd_f32(
+  status = xnn_create_convolution2d_nhwc_f32(
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
+    1 /* subsampling height */, 1 /* subsampling width */,
+    1 /* dilation_height */, 1 /* dilation_width */,
+    1 /* groups */,
+    576 /* input channels per group */,
+    1024 /* output_channels_per_group */,
+    576 /* input pixel stride */,
+    1024 /* output pixel stride */,
+    w206.data(), w207.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    code_cache_ptr,
+    nullptr /* weights_cache */,
     &op95);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #95" << std::endl;
@@ -2345,22 +2255,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op95, xnn_delete_operator);
 
   xnn_operator_t op96 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    160 /* input channels per group */,
-    960 /* output_channels_per_group */,
-    160 /* input pixel stride */,
-    960 /* output pixel stride */,
-    w228.data(), w229.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+  status = xnn_create_hardswish_nc_f32(
+    1024 /* channels */,
+    1024 /* input stride */,
+    1024 /* output stride */,
     0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
     &op96);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #96" << std::endl;
@@ -2369,10 +2268,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op96, xnn_delete_operator);
 
   xnn_operator_t op97 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    960 /* channels */,
-    960 /* input stride */,
-    960 /* output stride */,
+  status = xnn_create_global_average_pooling_nwc_f32(
+    1024 /* channels */, 1024 /* input stride */, 1024 /* output stride */,
+    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op97);
   if (status != xnn_status_success) {
@@ -2383,17 +2281,17 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op98 = nullptr;
   status = xnn_create_convolution2d_nhwc_f32(
-    2 /* top padding */, 2 /* right padding */,
-    2 /* bottom padding */, 2 /* left padding */,
-    5 /* kernel height */, 5 /* kernel width */,
+    0 /* top padding */, 0 /* right padding */,
+    0 /* bottom padding */, 0 /* left padding */,
+    1 /* kernel height */, 1 /* kernel width */,
     1 /* subsampling height */, 1 /* subsampling width */,
     1 /* dilation_height */, 1 /* dilation_width */,
-    960 /* groups */,
-    1 /* input channels per group */,
-    1 /* output_channels_per_group */,
-    960 /* input pixel stride */,
-    960 /* output pixel stride */,
-    w230.data(), w231.data(),
+    1 /* groups */,
+    1024 /* input channels per group */,
+    1001 /* output_channels_per_group */,
+    1024 /* input pixel stride */,
+    1001 /* output pixel stride */,
+    w208.data(), w209.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     code_cache_ptr,
@@ -2406,10 +2304,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op98, xnn_delete_operator);
 
   xnn_operator_t op99 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    960 /* channels */,
-    960 /* input stride */,
-    960 /* output stride */,
+  status = xnn_create_copy_nc_x32(
+    1 /* channels */,
+    1 /* input stride */,
+    1 /* output stride */,
     0 /* flags */,
     &op99);
   if (status != xnn_status_success) {
@@ -2419,10 +2317,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   operators.emplace_back(op99, xnn_delete_operator);
 
   xnn_operator_t op100 = nullptr;
-  status = xnn_create_global_average_pooling_nwc_f32(
-    960 /* channels */, 960 /* input stride */, 960 /* output stride */,
-    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
-    0 /* flags */,
+  status = xnn_create_softmax_nc_f32(
+    /*channels=*/1001,
+    /*input_stride=*/1001,
+    /*output_stride=*/1001,
+    /*flags=*/0,
     &op100);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #100" << std::endl;
@@ -2430,247 +2329,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   }
   operators.emplace_back(op100, xnn_delete_operator);
 
-  xnn_operator_t op101 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    960 /* input channels per group */,
-    240 /* output_channels_per_group */,
-    960 /* input pixel stride */,
-    240 /* output pixel stride */,
-    w232.data(), w233.data(),
-    0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
-    0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
-    &op101);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #101" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op101, xnn_delete_operator);
-
-  xnn_operator_t op102 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    240 /* input channels per group */,
-    960 /* output_channels_per_group */,
-    240 /* input pixel stride */,
-    960 /* output pixel stride */,
-    w234.data(), w235.data(),
-    0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
-    0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
-    &op102);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #102" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op102, xnn_delete_operator);
-
-  xnn_operator_t op103 = nullptr;
-  status = xnn_create_multiply_nd_f32(
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
-    0 /* flags */,
-    &op103);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #103" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op103, xnn_delete_operator);
-
-  xnn_operator_t op104 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    960 /* input channels per group */,
-    160 /* output_channels_per_group */,
-    960 /* input pixel stride */,
-    160 /* output pixel stride */,
-    w236.data(), w237.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
-    0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
-    &op104);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #104" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op104, xnn_delete_operator);
-
-  xnn_operator_t op105 = nullptr;
-            status = xnn_create_add_nd_f32(
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
-    0 /* flags */,
-    &op105);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #105" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op105, xnn_delete_operator);
-
-  xnn_operator_t op106 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    160 /* input channels per group */,
-    960 /* output_channels_per_group */,
-    160 /* input pixel stride */,
-    960 /* output pixel stride */,
-    w238.data(), w239.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
-    0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
-    &op106);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #106" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op106, xnn_delete_operator);
-
-  xnn_operator_t op107 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    960 /* channels */,
-    960 /* input stride */,
-    960 /* output stride */,
-    0 /* flags */,
-    &op107);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #107" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op107, xnn_delete_operator);
-
-  xnn_operator_t op108 = nullptr;
-  status = xnn_create_global_average_pooling_nwc_f32(
-    960 /* channels */, 960 /* input stride */, 960 /* output stride */,
-    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
-    0 /* flags */,
-    &op108);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #108" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op108, xnn_delete_operator);
-
-  xnn_operator_t op109 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    960 /* input channels per group */,
-    1280 /* output_channels_per_group */,
-    960 /* input pixel stride */,
-    1280 /* output pixel stride */,
-    w240.data(), w241.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
-    0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
-    &op109);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #109" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op109, xnn_delete_operator);
-
-  xnn_operator_t op110 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    1280 /* channels */,
-    1280 /* input stride */,
-    1280 /* output stride */,
-    0 /* flags */,
-    &op110);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #110" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op110, xnn_delete_operator);
-
-  xnn_operator_t op111 = nullptr;
-  status = xnn_create_global_average_pooling_nwc_f32(
-    1280 /* channels */, 1280 /* input stride */, 1280 /* output stride */,
-    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
-    0 /* flags */,
-    &op111);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #111" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op111, xnn_delete_operator);
-
-  xnn_operator_t op112 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
-    0 /* top padding */, 0 /* right padding */,
-    0 /* bottom padding */, 0 /* left padding */,
-    1 /* kernel height */, 1 /* kernel width */,
-    1 /* subsampling height */, 1 /* subsampling width */,
-    1 /* dilation_height */, 1 /* dilation_width */,
-    1 /* groups */,
-    1280 /* input channels per group */,
-    1001 /* output_channels_per_group */,
-    1280 /* input pixel stride */,
-    1001 /* output pixel stride */,
-    w242.data(), w243.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
-    0 /* flags */,
-    code_cache_ptr,
-    nullptr /* weights_cache */,
-    &op112);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #112" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op112, xnn_delete_operator);
-
-  xnn_operator_t op113 = nullptr;
-  status = xnn_create_copy_nc_x32(
-    1 /* channels */,
-    1 /* input stride */,
-    1 /* output stride */,
-    0 /* flags */,
-    &op113);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #113" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op113, xnn_delete_operator);
-
-  xnn_operator_t op114 = nullptr;
-  status = xnn_create_softmax_nc_f32(
-    /*channels=*/1001,
-    /*input_stride=*/1001,
-    /*output_stride=*/1001,
-    /*flags=*/0,
-    &op114);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #114" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op114, xnn_delete_operator);
+#if XNN_PLATFORM_JIT
+  xnn_finalize_code_memory(&code_cache.cache.code);
+#endif  // XNN_PLATFORM_JIT
 
   size_t op0_workspace_size = 0;
   size_t op0_workspace_alignment = 0;
@@ -2711,11 +2372,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   size_t op3_workspace_size = 0;
   size_t op3_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_global_average_pooling_nwc_f32(
     op3,
-    /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
+    /*batch_size=*/1, 3136 /* width */,
     &op3_workspace_size, &op3_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op3_workspace_size);
   if (status != xnn_status_success) {
@@ -2723,14 +2383,15 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 112, 112, 16 };
-    const size_t b_shape[] = { 1, 112, 112, 16 };
-    status = xnn_reshape_add_nd_f32(
-      op4,
-      4, a_shape, 4, b_shape,
-      /*threadpool=*/threadpool);
-  }
+  size_t op4_workspace_size = 0;
+  size_t op4_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
+    op4,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op4_workspace_size, &op4_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op4_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #4" << std::endl;
     return ExecutionPlan();
@@ -2740,7 +2401,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op5_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op5,
-    /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     &op5_workspace_size, &op5_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -2750,15 +2411,14 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  size_t op6_workspace_size = 0;
-  size_t op6_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
-    op6,
-    /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
-    &op6_workspace_size, &op6_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op6_workspace_size);
+  {
+    const size_t a_shape[] = { 1, 56, 56, 16 };
+    const size_t b_shape[] = { 1, 1, 1, 16 };
+    status = xnn_reshape_multiply_nd_f32(
+      op6,
+      4, a_shape, 4, b_shape,
+      /*threadpool=*/threadpool);
+  }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #6" << std::endl;
     return ExecutionPlan();
@@ -2810,7 +2470,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op10_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op10,
-    /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
+    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     &op10_workspace_size, &op10_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -2820,14 +2480,15 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 56, 56, 24 };
-    const size_t b_shape[] = { 1, 56, 56, 24 };
-    status = xnn_reshape_add_nd_f32(
-      op11,
-      4, a_shape, 4, b_shape,
-      /*threadpool=*/threadpool);
-  }
+  size_t op11_workspace_size = 0;
+  size_t op11_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
+    op11,
+    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
+    &op11_workspace_size, &op11_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op11_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #11" << std::endl;
     return ExecutionPlan();
@@ -2837,7 +2498,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op12_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op12,
-    /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
+    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     &op12_workspace_size, &op12_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -2851,7 +2512,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op13_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op13,
-    /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
+    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     &op13_workspace_size, &op13_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -2861,14 +2522,14 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  size_t op14_workspace_size = 0;
-  size_t op14_workspace_alignment = 0;
-  status = xnn_reshape_global_average_pooling_nwc_f32(
-    op14,
-    /*batch_size=*/1, 784 /* width */,
-    &op14_workspace_size, &op14_workspace_alignment,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op14_workspace_size);
+  {
+    const size_t a_shape[] = { 1, 28, 28, 24 };
+    const size_t b_shape[] = { 1, 28, 28, 24 };
+    status = xnn_reshape_add_nd_f32(
+      op14,
+      4, a_shape, 4, b_shape,
+      /*threadpool=*/threadpool);
+  }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #14" << std::endl;
     return ExecutionPlan();
@@ -2878,7 +2539,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op15_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op15,
-    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     &op15_workspace_size, &op15_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -2888,42 +2549,33 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  size_t op16_workspace_size = 0;
-  size_t op16_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_hardswish_nc_f32(
     op16,
-    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
-    &op16_workspace_size, &op16_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*batch_size=*/784,
     /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op16_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #16" << std::endl;
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 28, 28, 72 };
-    const size_t b_shape[] = { 1, 1, 1, 72 };
-    status = xnn_reshape_multiply_nd_f32(
-      op17,
-      4, a_shape, 4, b_shape,
-      /*threadpool=*/threadpool);
-  }
+  size_t op17_workspace_size = 0;
+  size_t op17_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
+    op17,
+    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
+    &op17_workspace_size, &op17_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op17_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #17" << std::endl;
     return ExecutionPlan();
   }
 
-  size_t op18_workspace_size = 0;
-  size_t op18_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_hardswish_nc_f32(
     op18,
-    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
-    &op18_workspace_size, &op18_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*batch_size=*/196,
     /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op18_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #18" << std::endl;
     return ExecutionPlan();
@@ -2931,11 +2583,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   size_t op19_workspace_size = 0;
   size_t op19_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_global_average_pooling_nwc_f32(
     op19,
-    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
+    /*batch_size=*/1, 196 /* width */,
     &op19_workspace_size, &op19_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op19_workspace_size);
   if (status != xnn_status_success) {
@@ -2947,7 +2598,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op20_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op20,
-    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     &op20_workspace_size, &op20_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -2959,10 +2610,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   size_t op21_workspace_size = 0;
   size_t op21_workspace_alignment = 0;
-  status = xnn_reshape_global_average_pooling_nwc_f32(
+  status = xnn_reshape_convolution2d_nhwc_f32(
     op21,
-    /*batch_size=*/1, 784 /* width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     &op21_workspace_size, &op21_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op21_workspace_size);
   if (status != xnn_status_success) {
@@ -2970,15 +2622,14 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  size_t op22_workspace_size = 0;
-  size_t op22_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
-    op22,
-    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
-    &op22_workspace_size, &op22_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op22_workspace_size);
+  {
+    const size_t a_shape[] = { 1, 14, 14, 96 };
+    const size_t b_shape[] = { 1, 1, 1, 96 };
+    status = xnn_reshape_multiply_nd_f32(
+      op22,
+      4, a_shape, 4, b_shape,
+      /*threadpool=*/threadpool);
+  }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #22" << std::endl;
     return ExecutionPlan();
@@ -2988,7 +2639,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op23_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op23,
-    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     &op23_workspace_size, &op23_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -2998,55 +2649,47 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 28, 28, 120 };
-    const size_t b_shape[] = { 1, 1, 1, 120 };
-    status = xnn_reshape_multiply_nd_f32(
-      op24,
-      4, a_shape, 4, b_shape,
-      /*threadpool=*/threadpool);
-  }
+  size_t op24_workspace_size = 0;
+  size_t op24_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
+    op24,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op24_workspace_size, &op24_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op24_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #24" << std::endl;
     return ExecutionPlan();
   }
 
-  size_t op25_workspace_size = 0;
-  size_t op25_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_hardswish_nc_f32(
     op25,
-    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
-    &op25_workspace_size, &op25_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*batch_size=*/196,
     /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op25_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #25" << std::endl;
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 28, 28, 40 };
-    const size_t b_shape[] = { 1, 28, 28, 40 };
-    status = xnn_reshape_add_nd_f32(
-      op26,
-      4, a_shape, 4, b_shape,
-      /*threadpool=*/threadpool);
-  }
+  size_t op26_workspace_size = 0;
+  size_t op26_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
+    op26,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op26_workspace_size, &op26_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op26_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #26" << std::endl;
     return ExecutionPlan();
   }
 
-  size_t op27_workspace_size = 0;
-  size_t op27_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_hardswish_nc_f32(
     op27,
-    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
-    &op27_workspace_size, &op27_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*batch_size=*/196,
     /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op27_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #27" << std::endl;
     return ExecutionPlan();
@@ -3054,11 +2697,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   size_t op28_workspace_size = 0;
   size_t op28_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_global_average_pooling_nwc_f32(
     op28,
-    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
+    /*batch_size=*/1, 196 /* width */,
     &op28_workspace_size, &op28_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op28_workspace_size);
   if (status != xnn_status_success) {
@@ -3068,10 +2710,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   size_t op29_workspace_size = 0;
   size_t op29_workspace_alignment = 0;
-  status = xnn_reshape_global_average_pooling_nwc_f32(
+  status = xnn_reshape_convolution2d_nhwc_f32(
     op29,
-    /*batch_size=*/1, 784 /* width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     &op29_workspace_size, &op29_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op29_workspace_size);
   if (status != xnn_status_success) {
@@ -3093,101 +2736,100 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  size_t op31_workspace_size = 0;
-  size_t op31_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
-    op31,
-    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
-    &op31_workspace_size, &op31_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op31_workspace_size);
+  {
+    const size_t a_shape[] = { 1, 14, 14, 240 };
+    const size_t b_shape[] = { 1, 1, 1, 240 };
+    status = xnn_reshape_multiply_nd_f32(
+      op31,
+      4, a_shape, 4, b_shape,
+      /*threadpool=*/threadpool);
+  }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #31" << std::endl;
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 28, 28, 120 };
-    const size_t b_shape[] = { 1, 1, 1, 120 };
-    status = xnn_reshape_multiply_nd_f32(
-      op32,
-      4, a_shape, 4, b_shape,
-      /*threadpool=*/threadpool);
-  }
+  size_t op32_workspace_size = 0;
+  size_t op32_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
+    op32,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op32_workspace_size, &op32_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op32_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #32" << std::endl;
     return ExecutionPlan();
   }
 
-  size_t op33_workspace_size = 0;
-  size_t op33_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
-    op33,
-    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
-    &op33_workspace_size, &op33_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op33_workspace_size);
+  {
+    const size_t a_shape[] = { 1, 14, 14, 40 };
+    const size_t b_shape[] = { 1, 14, 14, 40 };
+    status = xnn_reshape_add_nd_f32(
+      op33,
+      4, a_shape, 4, b_shape,
+      /*threadpool=*/threadpool);
+  }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #33" << std::endl;
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 28, 28, 40 };
-    const size_t b_shape[] = { 1, 28, 28, 40 };
-    status = xnn_reshape_add_nd_f32(
-      op34,
-      4, a_shape, 4, b_shape,
-      /*threadpool=*/threadpool);
-  }
+  size_t op34_workspace_size = 0;
+  size_t op34_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
+    op34,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op34_workspace_size, &op34_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op34_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #34" << std::endl;
     return ExecutionPlan();
   }
 
-  size_t op35_workspace_size = 0;
-  size_t op35_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_hardswish_nc_f32(
     op35,
-    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
-    &op35_workspace_size, &op35_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*batch_size=*/196,
     /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op35_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #35" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_hardswish_nc_f32(
+  size_t op36_workspace_size = 0;
+  size_t op36_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
     op36,
-    /*batch_size=*/784,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op36_workspace_size, &op36_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op36_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #36" << std::endl;
     return ExecutionPlan();
   }
 
-  size_t op37_workspace_size = 0;
-  size_t op37_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_hardswish_nc_f32(
     op37,
-    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
-    &op37_workspace_size, &op37_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*batch_size=*/196,
     /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op37_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #37" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_hardswish_nc_f32(
+  size_t op38_workspace_size = 0;
+  size_t op38_workspace_alignment = 0;
+  status = xnn_reshape_global_average_pooling_nwc_f32(
     op38,
-    /*batch_size=*/196,
+    /*batch_size=*/1, 196 /* width */,
+    &op38_workspace_size, &op38_workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op38_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #38" << std::endl;
     return ExecutionPlan();
@@ -3197,7 +2839,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op39_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op39,
-    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     &op39_workspace_size, &op39_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -3211,7 +2853,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op40_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op40,
-    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     &op40_workspace_size, &op40_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -3221,10 +2863,14 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_hardswish_nc_f32(
-    op41,
-    /*batch_size=*/196,
-    /*threadpool=*/threadpool);
+  {
+    const size_t a_shape[] = { 1, 14, 14, 240 };
+    const size_t b_shape[] = { 1, 1, 1, 240 };
+    status = xnn_reshape_multiply_nd_f32(
+      op41,
+      4, a_shape, 4, b_shape,
+      /*threadpool=*/threadpool);
+  }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #41" << std::endl;
     return ExecutionPlan();
@@ -3244,10 +2890,14 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_hardswish_nc_f32(
-    op43,
-    /*batch_size=*/196,
-    /*threadpool=*/threadpool);
+  {
+    const size_t a_shape[] = { 1, 14, 14, 40 };
+    const size_t b_shape[] = { 1, 14, 14, 40 };
+    status = xnn_reshape_add_nd_f32(
+      op43,
+      4, a_shape, 4, b_shape,
+      /*threadpool=*/threadpool);
+  }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #43" << std::endl;
     return ExecutionPlan();
@@ -3267,14 +2917,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 14, 14, 80 };
-    const size_t b_shape[] = { 1, 14, 14, 80 };
-    status = xnn_reshape_add_nd_f32(
-      op45,
-      4, a_shape, 4, b_shape,
-      /*threadpool=*/threadpool);
-  }
+  status = xnn_reshape_hardswish_nc_f32(
+    op45,
+    /*batch_size=*/196,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #45" << std::endl;
     return ExecutionPlan();
@@ -3305,11 +2951,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   size_t op48_workspace_size = 0;
   size_t op48_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_global_average_pooling_nwc_f32(
     op48,
-    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    /*batch_size=*/1, 196 /* width */,
     &op48_workspace_size, &op48_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op48_workspace_size);
   if (status != xnn_status_success) {
@@ -3317,10 +2962,15 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_hardswish_nc_f32(
+  size_t op49_workspace_size = 0;
+  size_t op49_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
     op49,
-    /*batch_size=*/196,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op49_workspace_size, &op49_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op49_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #49" << std::endl;
     return ExecutionPlan();
@@ -3330,7 +2980,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op50_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op50,
-    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     &op50_workspace_size, &op50_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -3341,9 +2991,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   }
 
   {
-    const size_t a_shape[] = { 1, 14, 14, 80 };
-    const size_t b_shape[] = { 1, 14, 14, 80 };
-    status = xnn_reshape_add_nd_f32(
+    const size_t a_shape[] = { 1, 14, 14, 120 };
+    const size_t b_shape[] = { 1, 1, 1, 120 };
+    status = xnn_reshape_multiply_nd_f32(
       op51,
       4, a_shape, 4, b_shape,
       /*threadpool=*/threadpool);
@@ -3367,60 +3017,60 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_hardswish_nc_f32(
+  size_t op53_workspace_size = 0;
+  size_t op53_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
     op53,
-    /*batch_size=*/196,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op53_workspace_size, &op53_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op53_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #53" << std::endl;
     return ExecutionPlan();
   }
 
-  size_t op54_workspace_size = 0;
-  size_t op54_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_hardswish_nc_f32(
     op54,
-    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
-    &op54_workspace_size, &op54_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*batch_size=*/196,
     /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op54_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #54" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_hardswish_nc_f32(
+  size_t op55_workspace_size = 0;
+  size_t op55_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
     op55,
-    /*batch_size=*/196,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op55_workspace_size, &op55_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op55_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #55" << std::endl;
     return ExecutionPlan();
   }
 
-  size_t op56_workspace_size = 0;
-  size_t op56_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_hardswish_nc_f32(
     op56,
-    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
-    &op56_workspace_size, &op56_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*batch_size=*/196,
     /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op56_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #56" << std::endl;
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 14, 14, 80 };
-    const size_t b_shape[] = { 1, 14, 14, 80 };
-    status = xnn_reshape_add_nd_f32(
-      op57,
-      4, a_shape, 4, b_shape,
-      /*threadpool=*/threadpool);
-  }
+  size_t op57_workspace_size = 0;
+  size_t op57_workspace_alignment = 0;
+  status = xnn_reshape_global_average_pooling_nwc_f32(
+    op57,
+    /*batch_size=*/1, 196 /* width */,
+    &op57_workspace_size, &op57_workspace_alignment,
+    /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op57_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #57" << std::endl;
     return ExecutionPlan();
@@ -3430,7 +3080,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op58_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op58,
-    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     &op58_workspace_size, &op58_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -3440,46 +3090,55 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_hardswish_nc_f32(
+  size_t op59_workspace_size = 0;
+  size_t op59_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
     op59,
-    /*batch_size=*/196,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op59_workspace_size, &op59_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op59_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #59" << std::endl;
     return ExecutionPlan();
   }
 
-  size_t op60_workspace_size = 0;
-  size_t op60_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
-    op60,
-    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
-    &op60_workspace_size, &op60_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op60_workspace_size);
+  {
+    const size_t a_shape[] = { 1, 14, 14, 144 };
+    const size_t b_shape[] = { 1, 1, 1, 144 };
+    status = xnn_reshape_multiply_nd_f32(
+      op60,
+      4, a_shape, 4, b_shape,
+      /*threadpool=*/threadpool);
+  }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #60" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_hardswish_nc_f32(
+  size_t op61_workspace_size = 0;
+  size_t op61_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
     op61,
-    /*batch_size=*/196,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op61_workspace_size, &op61_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op61_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #61" << std::endl;
     return ExecutionPlan();
   }
 
-  size_t op62_workspace_size = 0;
-  size_t op62_workspace_alignment = 0;
-  status = xnn_reshape_global_average_pooling_nwc_f32(
-    op62,
-    /*batch_size=*/1, 196 /* width */,
-    &op62_workspace_size, &op62_workspace_alignment,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op62_workspace_size);
+  {
+    const size_t a_shape[] = { 1, 14, 14, 48 };
+    const size_t b_shape[] = { 1, 14, 14, 48 };
+    status = xnn_reshape_add_nd_f32(
+      op62,
+      4, a_shape, 4, b_shape,
+      /*threadpool=*/threadpool);
+  }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #62" << std::endl;
     return ExecutionPlan();
@@ -3489,7 +3148,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op63_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op63,
-    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     &op63_workspace_size, &op63_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -3499,42 +3158,33 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  size_t op64_workspace_size = 0;
-  size_t op64_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_hardswish_nc_f32(
     op64,
-    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
-    &op64_workspace_size, &op64_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*batch_size=*/196,
     /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op64_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #64" << std::endl;
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 14, 14, 480 };
-    const size_t b_shape[] = { 1, 1, 1, 480 };
-    status = xnn_reshape_multiply_nd_f32(
-      op65,
-      4, a_shape, 4, b_shape,
-      /*threadpool=*/threadpool);
-  }
+  size_t op65_workspace_size = 0;
+  size_t op65_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
+    op65,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    &op65_workspace_size, &op65_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op65_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #65" << std::endl;
     return ExecutionPlan();
   }
 
-  size_t op66_workspace_size = 0;
-  size_t op66_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_hardswish_nc_f32(
     op66,
-    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
-    &op66_workspace_size, &op66_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*batch_size=*/49,
     /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op66_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #66" << std::endl;
     return ExecutionPlan();
@@ -3542,11 +3192,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   size_t op67_workspace_size = 0;
   size_t op67_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_global_average_pooling_nwc_f32(
     op67,
-    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    /*batch_size=*/1, 49 /* width */,
     &op67_workspace_size, &op67_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op67_workspace_size);
   if (status != xnn_status_success) {
@@ -3554,10 +3203,15 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_hardswish_nc_f32(
+  size_t op68_workspace_size = 0;
+  size_t op68_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
     op68,
-    /*batch_size=*/196,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op68_workspace_size, &op68_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op68_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #68" << std::endl;
     return ExecutionPlan();
@@ -3567,7 +3221,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op69_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op69,
-    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     &op69_workspace_size, &op69_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -3577,10 +3231,14 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_hardswish_nc_f32(
-    op70,
-    /*batch_size=*/196,
-    /*threadpool=*/threadpool);
+  {
+    const size_t a_shape[] = { 1, 7, 7, 288 };
+    const size_t b_shape[] = { 1, 1, 1, 288 };
+    status = xnn_reshape_multiply_nd_f32(
+      op70,
+      4, a_shape, 4, b_shape,
+      /*threadpool=*/threadpool);
+  }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #70" << std::endl;
     return ExecutionPlan();
@@ -3588,10 +3246,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   size_t op71_workspace_size = 0;
   size_t op71_workspace_alignment = 0;
-  status = xnn_reshape_global_average_pooling_nwc_f32(
+  status = xnn_reshape_convolution2d_nhwc_f32(
     op71,
-    /*batch_size=*/1, 196 /* width */,
+    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     &op71_workspace_size, &op71_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op71_workspace_size);
   if (status != xnn_status_success) {
@@ -3603,7 +3262,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op72_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op72,
-    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     &op72_workspace_size, &op72_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -3613,55 +3272,46 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  size_t op73_workspace_size = 0;
-  size_t op73_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_hardswish_nc_f32(
     op73,
-    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
-    &op73_workspace_size, &op73_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*batch_size=*/49,
     /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op73_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #73" << std::endl;
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 14, 14, 672 };
-    const size_t b_shape[] = { 1, 1, 1, 672 };
-    status = xnn_reshape_multiply_nd_f32(
-      op74,
-      4, a_shape, 4, b_shape,
-      /*threadpool=*/threadpool);
-  }
+  size_t op74_workspace_size = 0;
+  size_t op74_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
+    op74,
+    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
+    &op74_workspace_size, &op74_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op74_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #74" << std::endl;
     return ExecutionPlan();
   }
 
-  size_t op75_workspace_size = 0;
-  size_t op75_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_hardswish_nc_f32(
     op75,
-    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
-    &op75_workspace_size, &op75_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*batch_size=*/49,
     /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op75_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #75" << std::endl;
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 14, 14, 112 };
-    const size_t b_shape[] = { 1, 14, 14, 112 };
-    status = xnn_reshape_add_nd_f32(
-      op76,
-      4, a_shape, 4, b_shape,
-      /*threadpool=*/threadpool);
-  }
+  size_t op76_workspace_size = 0;
+  size_t op76_workspace_alignment = 0;
+  status = xnn_reshape_global_average_pooling_nwc_f32(
+    op76,
+    /*batch_size=*/1, 49 /* width */,
+    &op76_workspace_size, &op76_workspace_alignment,
+    /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op76_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #76" << std::endl;
     return ExecutionPlan();
@@ -3671,7 +3321,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op77_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op77,
-    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     &op77_workspace_size, &op77_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -3681,46 +3331,55 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_hardswish_nc_f32(
+  size_t op78_workspace_size = 0;
+  size_t op78_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
     op78,
-    /*batch_size=*/196,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op78_workspace_size, &op78_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op78_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #78" << std::endl;
     return ExecutionPlan();
   }
 
-  size_t op79_workspace_size = 0;
-  size_t op79_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
-    op79,
-    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
-    &op79_workspace_size, &op79_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op79_workspace_size);
+  {
+    const size_t a_shape[] = { 1, 7, 7, 576 };
+    const size_t b_shape[] = { 1, 1, 1, 576 };
+    status = xnn_reshape_multiply_nd_f32(
+      op79,
+      4, a_shape, 4, b_shape,
+      /*threadpool=*/threadpool);
+  }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #79" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_hardswish_nc_f32(
+  size_t op80_workspace_size = 0;
+  size_t op80_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
     op80,
-    /*batch_size=*/49,
+    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
+    &op80_workspace_size, &op80_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op80_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #80" << std::endl;
     return ExecutionPlan();
   }
 
-  size_t op81_workspace_size = 0;
-  size_t op81_workspace_alignment = 0;
-  status = xnn_reshape_global_average_pooling_nwc_f32(
-    op81,
-    /*batch_size=*/1, 49 /* width */,
-    &op81_workspace_size, &op81_workspace_alignment,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op81_workspace_size);
+  {
+    const size_t a_shape[] = { 1, 7, 7, 96 };
+    const size_t b_shape[] = { 1, 7, 7, 96 };
+    status = xnn_reshape_add_nd_f32(
+      op81,
+      4, a_shape, 4, b_shape,
+      /*threadpool=*/threadpool);
+  }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #81" << std::endl;
     return ExecutionPlan();
@@ -3730,7 +3389,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op82_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op82,
-    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     &op82_workspace_size, &op82_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -3740,42 +3399,33 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  size_t op83_workspace_size = 0;
-  size_t op83_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_hardswish_nc_f32(
     op83,
-    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
-    &op83_workspace_size, &op83_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*batch_size=*/49,
     /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op83_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #83" << std::endl;
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 7, 7, 672 };
-    const size_t b_shape[] = { 1, 1, 1, 672 };
-    status = xnn_reshape_multiply_nd_f32(
-      op84,
-      4, a_shape, 4, b_shape,
-      /*threadpool=*/threadpool);
-  }
+  size_t op84_workspace_size = 0;
+  size_t op84_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
+    op84,
+    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
+    &op84_workspace_size, &op84_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op84_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #84" << std::endl;
     return ExecutionPlan();
   }
 
-  size_t op85_workspace_size = 0;
-  size_t op85_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_hardswish_nc_f32(
     op85,
-    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
-    &op85_workspace_size, &op85_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*batch_size=*/49,
     /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op85_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #85" << std::endl;
     return ExecutionPlan();
@@ -3783,11 +3433,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   size_t op86_workspace_size = 0;
   size_t op86_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_global_average_pooling_nwc_f32(
     op86,
-    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
+    /*batch_size=*/1, 49 /* width */,
     &op86_workspace_size, &op86_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op86_workspace_size);
   if (status != xnn_status_success) {
@@ -3795,10 +3444,15 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_hardswish_nc_f32(
+  size_t op87_workspace_size = 0;
+  size_t op87_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
     op87,
-    /*batch_size=*/49,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op87_workspace_size, &op87_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op87_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #87" << std::endl;
     return ExecutionPlan();
@@ -3808,7 +3462,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op88_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op88,
-    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     &op88_workspace_size, &op88_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -3818,10 +3472,14 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_hardswish_nc_f32(
-    op89,
-    /*batch_size=*/49,
-    /*threadpool=*/threadpool);
+  {
+    const size_t a_shape[] = { 1, 7, 7, 576 };
+    const size_t b_shape[] = { 1, 1, 1, 576 };
+    status = xnn_reshape_multiply_nd_f32(
+      op89,
+      4, a_shape, 4, b_shape,
+      /*threadpool=*/threadpool);
+  }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #89" << std::endl;
     return ExecutionPlan();
@@ -3829,10 +3487,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   size_t op90_workspace_size = 0;
   size_t op90_workspace_alignment = 0;
-  status = xnn_reshape_global_average_pooling_nwc_f32(
+  status = xnn_reshape_convolution2d_nhwc_f32(
     op90,
-    /*batch_size=*/1, 49 /* width */,
+    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     &op90_workspace_size, &op90_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op90_workspace_size);
   if (status != xnn_status_success) {
@@ -3840,15 +3499,14 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  size_t op91_workspace_size = 0;
-  size_t op91_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
-    op91,
-    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
-    &op91_workspace_size, &op91_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op91_workspace_size);
+  {
+    const size_t a_shape[] = { 1, 7, 7, 96 };
+    const size_t b_shape[] = { 1, 7, 7, 96 };
+    status = xnn_reshape_add_nd_f32(
+      op91,
+      4, a_shape, 4, b_shape,
+      /*threadpool=*/threadpool);
+  }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #91" << std::endl;
     return ExecutionPlan();
@@ -3858,7 +3516,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op92_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op92,
-    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     &op92_workspace_size, &op92_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -3868,14 +3526,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 7, 7, 960 };
-    const size_t b_shape[] = { 1, 1, 1, 960 };
-    status = xnn_reshape_multiply_nd_f32(
-      op93,
-      4, a_shape, 4, b_shape,
-      /*threadpool=*/threadpool);
-  }
+  status = xnn_reshape_hardswish_nc_f32(
+    op93,
+    /*batch_size=*/49,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #93" << std::endl;
     return ExecutionPlan();
@@ -3883,11 +3537,10 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   size_t op94_workspace_size = 0;
   size_t op94_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_global_average_pooling_nwc_f32(
     op94,
-    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
+    /*batch_size=*/1, 49 /* width */,
     &op94_workspace_size, &op94_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op94_workspace_size);
   if (status != xnn_status_success) {
@@ -3895,37 +3548,37 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 7, 7, 160 };
-    const size_t b_shape[] = { 1, 7, 7, 160 };
-    status = xnn_reshape_add_nd_f32(
-      op95,
-      4, a_shape, 4, b_shape,
-      /*threadpool=*/threadpool);
-  }
+  size_t op95_workspace_size = 0;
+  size_t op95_workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
+    op95,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
+    &op95_workspace_size, &op95_workspace_alignment,
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op95_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #95" << std::endl;
     return ExecutionPlan();
   }
 
-  size_t op96_workspace_size = 0;
-  size_t op96_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
+  status = xnn_reshape_hardswish_nc_f32(
     op96,
-    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
-    &op96_workspace_size, &op96_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    /*batch_size=*/1,
     /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op96_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #96" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_hardswish_nc_f32(
+  size_t op97_workspace_size = 0;
+  size_t op97_workspace_alignment = 0;
+  status = xnn_reshape_global_average_pooling_nwc_f32(
     op97,
-    /*batch_size=*/49,
+    /*batch_size=*/1, 1 /* width */,
+    &op97_workspace_size, &op97_workspace_alignment,
     /*threadpool=*/threadpool);
+  max_workspace_size = std::max(max_workspace_size, op97_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #97" << std::endl;
     return ExecutionPlan();
@@ -3935,7 +3588,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   size_t op98_workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op98,
-    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     &op98_workspace_size, &op98_workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/threadpool);
@@ -3945,197 +3598,21 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_hardswish_nc_f32(
+  status = xnn_reshape_copy_nc_x32(
     op99,
-    /*batch_size=*/49,
+    /*batch_size=*/1001,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #99" << std::endl;
     return ExecutionPlan();
   }
 
-  size_t op100_workspace_size = 0;
-  size_t op100_workspace_alignment = 0;
-  status = xnn_reshape_global_average_pooling_nwc_f32(
+  status = xnn_reshape_softmax_nc_f32(
     op100,
-    /*batch_size=*/1, 49 /* width */,
-    &op100_workspace_size, &op100_workspace_alignment,
+    /*batch_size=*/1,
     /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op100_workspace_size);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #100" << std::endl;
-    return ExecutionPlan();
-  }
-
-  size_t op101_workspace_size = 0;
-  size_t op101_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
-    op101,
-    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
-    &op101_workspace_size, &op101_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op101_workspace_size);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to reshape operation #101" << std::endl;
-    return ExecutionPlan();
-  }
-
-  size_t op102_workspace_size = 0;
-  size_t op102_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
-    op102,
-    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
-    &op102_workspace_size, &op102_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op102_workspace_size);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to reshape operation #102" << std::endl;
-    return ExecutionPlan();
-  }
-
-  {
-    const size_t a_shape[] = { 1, 7, 7, 960 };
-    const size_t b_shape[] = { 1, 1, 1, 960 };
-    status = xnn_reshape_multiply_nd_f32(
-      op103,
-      4, a_shape, 4, b_shape,
-      /*threadpool=*/threadpool);
-  }
-  if (status != xnn_status_success) {
-    std::cerr << "failed to reshape operation #103" << std::endl;
-    return ExecutionPlan();
-  }
-
-  size_t op104_workspace_size = 0;
-  size_t op104_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
-    op104,
-    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
-    &op104_workspace_size, &op104_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op104_workspace_size);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to reshape operation #104" << std::endl;
-    return ExecutionPlan();
-  }
-
-  {
-    const size_t a_shape[] = { 1, 7, 7, 160 };
-    const size_t b_shape[] = { 1, 7, 7, 160 };
-    status = xnn_reshape_add_nd_f32(
-      op105,
-      4, a_shape, 4, b_shape,
-      /*threadpool=*/threadpool);
-  }
-  if (status != xnn_status_success) {
-    std::cerr << "failed to reshape operation #105" << std::endl;
-    return ExecutionPlan();
-  }
-
-  size_t op106_workspace_size = 0;
-  size_t op106_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
-    op106,
-    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
-    &op106_workspace_size, &op106_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op106_workspace_size);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to reshape operation #106" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_reshape_hardswish_nc_f32(
-    op107,
-    /*batch_size=*/49,
-    /*threadpool=*/threadpool);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to reshape operation #107" << std::endl;
-    return ExecutionPlan();
-  }
-
-  size_t op108_workspace_size = 0;
-  size_t op108_workspace_alignment = 0;
-  status = xnn_reshape_global_average_pooling_nwc_f32(
-    op108,
-    /*batch_size=*/1, 49 /* width */,
-    &op108_workspace_size, &op108_workspace_alignment,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op108_workspace_size);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to reshape operation #108" << std::endl;
-    return ExecutionPlan();
-  }
-
-  size_t op109_workspace_size = 0;
-  size_t op109_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
-    op109,
-    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
-    &op109_workspace_size, &op109_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op109_workspace_size);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to reshape operation #109" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_reshape_hardswish_nc_f32(
-    op110,
-    /*batch_size=*/1,
-    /*threadpool=*/threadpool);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to reshape operation #110" << std::endl;
-    return ExecutionPlan();
-  }
-
-  size_t op111_workspace_size = 0;
-  size_t op111_workspace_alignment = 0;
-  status = xnn_reshape_global_average_pooling_nwc_f32(
-    op111,
-    /*batch_size=*/1, 1 /* width */,
-    &op111_workspace_size, &op111_workspace_alignment,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op111_workspace_size);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to reshape operation #111" << std::endl;
-    return ExecutionPlan();
-  }
-
-  size_t op112_workspace_size = 0;
-  size_t op112_workspace_alignment = 0;
-  status = xnn_reshape_convolution2d_nhwc_f32(
-    op112,
-    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
-    &op112_workspace_size, &op112_workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    /*threadpool=*/threadpool);
-  max_workspace_size = std::max(max_workspace_size, op112_workspace_size);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to reshape operation #112" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_reshape_copy_nc_x32(
-    op113,
-    /*batch_size=*/1001,
-    /*threadpool=*/threadpool);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to reshape operation #113" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_reshape_softmax_nc_f32(
-    op114,
-    /*batch_size=*/1,
-    /*threadpool=*/threadpool);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to reshape operation #114" << std::endl;
     return ExecutionPlan();
   }
 
@@ -4165,17 +3642,18 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_global_average_pooling_nwc_f32(
     op3,
-    workspace.data(), /*input=*/v3.data(), /*output=*/v4.data());
+    workspace.data(),
+    /*input=*/v3.data(), /*output=*/v4.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #3" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_add_nd_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op4,
-    v4.data() /* a */, v2.data() /* b */, /*output=*/v5.data());
+    workspace.data(), /*input=*/v4.data(), /*output=*/v5.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #4" << std::endl;
     return ExecutionPlan();
@@ -4189,9 +3667,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_multiply_nd_f32(
     op6,
-    workspace.data(), /*input=*/v6.data(), /*output=*/v7.data());
+    v3.data() /* a */, v6.data() /* b */, /*output=*/v7.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #6" << std::endl;
     return ExecutionPlan();
@@ -4229,9 +3707,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_add_nd_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op11,
-    v11.data() /* a */, v8.data() /* b */, /*output=*/v12.data());
+    workspace.data(), /*input=*/v11.data(), /*output=*/v12.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #11" << std::endl;
     return ExecutionPlan();
@@ -4253,10 +3731,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_global_average_pooling_nwc_f32(
+  status = xnn_setup_add_nd_f32(
     op14,
-    workspace.data(),
-    /*input=*/v14.data(), /*output=*/v15.data());
+    v14.data() /* a */, v11.data() /* b */, /*output=*/v15.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #14" << std::endl;
     return ExecutionPlan();
@@ -4270,33 +3747,34 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_hardswish_nc_f32(
     op16,
-    workspace.data(), /*input=*/v16.data(), /*output=*/v17.data());
+    /*input=*/v16.data(), /*output=*/v17.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #16" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_multiply_nd_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op17,
-    v14.data() /* a */, v17.data() /* b */, /*output=*/v18.data());
+    workspace.data(), /*input=*/v17.data(), /*output=*/v18.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #17" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_hardswish_nc_f32(
     op18,
-    workspace.data(), /*input=*/v18.data(), /*output=*/v19.data());
+    /*input=*/v18.data(), /*output=*/v19.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #18" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_global_average_pooling_nwc_f32(
     op19,
-    workspace.data(), /*input=*/v19.data(), /*output=*/v20.data());
+    workspace.data(),
+    /*input=*/v19.data(), /*output=*/v20.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #19" << std::endl;
     return ExecutionPlan();
@@ -4310,18 +3788,17 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_global_average_pooling_nwc_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op21,
-    workspace.data(),
-    /*input=*/v21.data(), /*output=*/v22.data());
+    workspace.data(), /*input=*/v21.data(), /*output=*/v22.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #21" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_multiply_nd_f32(
     op22,
-    workspace.data(), /*input=*/v22.data(), /*output=*/v23.data());
+    v19.data() /* a */, v22.data() /* b */, /*output=*/v23.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #22" << std::endl;
     return ExecutionPlan();
@@ -4335,50 +3812,50 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_multiply_nd_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op24,
-    v21.data() /* a */, v24.data() /* b */, /*output=*/v25.data());
+    workspace.data(), /*input=*/v24.data(), /*output=*/v25.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #24" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_hardswish_nc_f32(
     op25,
-    workspace.data(), /*input=*/v25.data(), /*output=*/v26.data());
+    /*input=*/v25.data(), /*output=*/v26.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #25" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_add_nd_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op26,
-    v26.data() /* a */, v19.data() /* b */, /*output=*/v27.data());
+    workspace.data(), /*input=*/v26.data(), /*output=*/v27.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #26" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_hardswish_nc_f32(
     op27,
-    workspace.data(), /*input=*/v27.data(), /*output=*/v28.data());
+    /*input=*/v27.data(), /*output=*/v28.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #27" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_global_average_pooling_nwc_f32(
     op28,
-    workspace.data(), /*input=*/v28.data(), /*output=*/v29.data());
+    workspace.data(),
+    /*input=*/v28.data(), /*output=*/v29.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #28" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_global_average_pooling_nwc_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op29,
-    workspace.data(),
-    /*input=*/v29.data(), /*output=*/v30.data());
+    workspace.data(), /*input=*/v29.data(), /*output=*/v30.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #29" << std::endl;
     return ExecutionPlan();
@@ -4392,64 +3869,65 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_multiply_nd_f32(
     op31,
-    workspace.data(), /*input=*/v31.data(), /*output=*/v32.data());
+    v28.data() /* a */, v31.data() /* b */, /*output=*/v32.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #31" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_multiply_nd_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op32,
-    v29.data() /* a */, v32.data() /* b */, /*output=*/v33.data());
+    workspace.data(), /*input=*/v32.data(), /*output=*/v33.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #32" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_add_nd_f32(
     op33,
-    workspace.data(), /*input=*/v33.data(), /*output=*/v34.data());
+    v33.data() /* a */, v24.data() /* b */, /*output=*/v34.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #33" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_add_nd_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op34,
-    v34.data() /* a */, v27.data() /* b */, /*output=*/v35.data());
+    workspace.data(), /*input=*/v34.data(), /*output=*/v35.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #34" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_hardswish_nc_f32(
     op35,
-    workspace.data(), /*input=*/v35.data(), /*output=*/v36.data());
+    /*input=*/v35.data(), /*output=*/v36.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #35" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_hardswish_nc_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op36,
-    /*input=*/v36.data(), /*output=*/v37.data());
+    workspace.data(), /*input=*/v36.data(), /*output=*/v37.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #36" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_hardswish_nc_f32(
     op37,
-    workspace.data(), /*input=*/v37.data(), /*output=*/v38.data());
+    /*input=*/v37.data(), /*output=*/v38.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #37" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_hardswish_nc_f32(
+  status = xnn_setup_global_average_pooling_nwc_f32(
     op38,
+    workspace.data(),
     /*input=*/v38.data(), /*output=*/v39.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #38" << std::endl;
@@ -4472,9 +3950,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_hardswish_nc_f32(
+  status = xnn_setup_multiply_nd_f32(
     op41,
-    /*input=*/v41.data(), /*output=*/v42.data());
+    v38.data() /* a */, v41.data() /* b */, /*output=*/v42.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #41" << std::endl;
     return ExecutionPlan();
@@ -4488,9 +3966,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_hardswish_nc_f32(
+  status = xnn_setup_add_nd_f32(
     op43,
-    /*input=*/v43.data(), /*output=*/v44.data());
+    v43.data() /* a */, v34.data() /* b */, /*output=*/v44.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #43" << std::endl;
     return ExecutionPlan();
@@ -4504,9 +3982,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_add_nd_f32(
+  status = xnn_setup_hardswish_nc_f32(
     op45,
-    v45.data() /* a */, v40.data() /* b */, /*output=*/v46.data());
+    /*input=*/v45.data(), /*output=*/v46.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #45" << std::endl;
     return ExecutionPlan();
@@ -4528,17 +4006,18 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_global_average_pooling_nwc_f32(
     op48,
-    workspace.data(), /*input=*/v48.data(), /*output=*/v49.data());
+    workspace.data(),
+    /*input=*/v48.data(), /*output=*/v49.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #48" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_hardswish_nc_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op49,
-    /*input=*/v49.data(), /*output=*/v50.data());
+    workspace.data(), /*input=*/v49.data(), /*output=*/v50.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #49" << std::endl;
     return ExecutionPlan();
@@ -4552,9 +4031,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_add_nd_f32(
+  status = xnn_setup_multiply_nd_f32(
     op51,
-    v51.data() /* a */, v46.data() /* b */, /*output=*/v52.data());
+    v48.data() /* a */, v51.data() /* b */, /*output=*/v52.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #51" << std::endl;
     return ExecutionPlan();
@@ -4568,41 +4047,42 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_hardswish_nc_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op53,
-    /*input=*/v53.data(), /*output=*/v54.data());
+    workspace.data(), /*input=*/v53.data(), /*output=*/v54.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #53" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_hardswish_nc_f32(
     op54,
-    workspace.data(), /*input=*/v54.data(), /*output=*/v55.data());
+    /*input=*/v54.data(), /*output=*/v55.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #54" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_hardswish_nc_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op55,
-    /*input=*/v55.data(), /*output=*/v56.data());
+    workspace.data(), /*input=*/v55.data(), /*output=*/v56.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #55" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_hardswish_nc_f32(
     op56,
-    workspace.data(), /*input=*/v56.data(), /*output=*/v57.data());
+    /*input=*/v56.data(), /*output=*/v57.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #56" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_add_nd_f32(
+  status = xnn_setup_global_average_pooling_nwc_f32(
     op57,
-    v57.data() /* a */, v52.data() /* b */, /*output=*/v58.data());
+    workspace.data(),
+    /*input=*/v57.data(), /*output=*/v58.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #57" << std::endl;
     return ExecutionPlan();
@@ -4616,34 +4096,33 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_hardswish_nc_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op59,
-    /*input=*/v59.data(), /*output=*/v60.data());
+    workspace.data(), /*input=*/v59.data(), /*output=*/v60.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #59" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_multiply_nd_f32(
     op60,
-    workspace.data(), /*input=*/v60.data(), /*output=*/v61.data());
+    v57.data() /* a */, v60.data() /* b */, /*output=*/v61.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #60" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_hardswish_nc_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op61,
-    /*input=*/v61.data(), /*output=*/v62.data());
+    workspace.data(), /*input=*/v61.data(), /*output=*/v62.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #61" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_global_average_pooling_nwc_f32(
+  status = xnn_setup_add_nd_f32(
     op62,
-    workspace.data(),
-    /*input=*/v62.data(), /*output=*/v63.data());
+    v62.data() /* a */, v53.data() /* b */, /*output=*/v63.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #62" << std::endl;
     return ExecutionPlan();
@@ -4657,41 +4136,42 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_hardswish_nc_f32(
     op64,
-    workspace.data(), /*input=*/v64.data(), /*output=*/v65.data());
+    /*input=*/v64.data(), /*output=*/v65.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #64" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_multiply_nd_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op65,
-    v62.data() /* a */, v65.data() /* b */, /*output=*/v66.data());
+    workspace.data(), /*input=*/v65.data(), /*output=*/v66.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #65" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_hardswish_nc_f32(
     op66,
-    workspace.data(), /*input=*/v66.data(), /*output=*/v67.data());
+    /*input=*/v66.data(), /*output=*/v67.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #66" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_global_average_pooling_nwc_f32(
     op67,
-    workspace.data(), /*input=*/v67.data(), /*output=*/v68.data());
+    workspace.data(),
+    /*input=*/v67.data(), /*output=*/v68.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #67" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_hardswish_nc_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op68,
-    /*input=*/v68.data(), /*output=*/v69.data());
+    workspace.data(), /*input=*/v68.data(), /*output=*/v69.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #68" << std::endl;
     return ExecutionPlan();
@@ -4705,18 +4185,17 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_hardswish_nc_f32(
+  status = xnn_setup_multiply_nd_f32(
     op70,
-    /*input=*/v70.data(), /*output=*/v71.data());
+    v67.data() /* a */, v70.data() /* b */, /*output=*/v71.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #70" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_global_average_pooling_nwc_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op71,
-    workspace.data(),
-    /*input=*/v71.data(), /*output=*/v72.data());
+    workspace.data(), /*input=*/v71.data(), /*output=*/v72.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #71" << std::endl;
     return ExecutionPlan();
@@ -4730,33 +4209,34 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_hardswish_nc_f32(
     op73,
-    workspace.data(), /*input=*/v73.data(), /*output=*/v74.data());
+    /*input=*/v73.data(), /*output=*/v74.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #73" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_multiply_nd_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op74,
-    v71.data() /* a */, v74.data() /* b */, /*output=*/v75.data());
+    workspace.data(), /*input=*/v74.data(), /*output=*/v75.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #74" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_hardswish_nc_f32(
     op75,
-    workspace.data(), /*input=*/v75.data(), /*output=*/v76.data());
+    /*input=*/v75.data(), /*output=*/v76.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #75" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_add_nd_f32(
+  status = xnn_setup_global_average_pooling_nwc_f32(
     op76,
-    v76.data() /* a */, v67.data() /* b */, /*output=*/v77.data());
+    workspace.data(),
+    /*input=*/v76.data(), /*output=*/v77.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #76" << std::endl;
     return ExecutionPlan();
@@ -4770,34 +4250,33 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_hardswish_nc_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op78,
-    /*input=*/v78.data(), /*output=*/v79.data());
+    workspace.data(), /*input=*/v78.data(), /*output=*/v79.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #78" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_multiply_nd_f32(
     op79,
-    workspace.data(), /*input=*/v79.data(), /*output=*/v80.data());
+    v76.data() /* a */, v79.data() /* b */, /*output=*/v80.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #79" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_hardswish_nc_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op80,
-    /*input=*/v80.data(), /*output=*/v81.data());
+    workspace.data(), /*input=*/v80.data(), /*output=*/v81.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #80" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_global_average_pooling_nwc_f32(
+  status = xnn_setup_add_nd_f32(
     op81,
-    workspace.data(),
-    /*input=*/v81.data(), /*output=*/v82.data());
+    v81.data() /* a */, v72.data() /* b */, /*output=*/v82.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #81" << std::endl;
     return ExecutionPlan();
@@ -4811,41 +4290,42 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_hardswish_nc_f32(
     op83,
-    workspace.data(), /*input=*/v83.data(), /*output=*/v84.data());
+    /*input=*/v83.data(), /*output=*/v84.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #83" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_multiply_nd_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op84,
-    v81.data() /* a */, v84.data() /* b */, /*output=*/v85.data());
+    workspace.data(), /*input=*/v84.data(), /*output=*/v85.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #84" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_hardswish_nc_f32(
     op85,
-    workspace.data(), /*input=*/v85.data(), /*output=*/v86.data());
+    /*input=*/v85.data(), /*output=*/v86.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #85" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_global_average_pooling_nwc_f32(
     op86,
-    workspace.data(), /*input=*/v86.data(), /*output=*/v87.data());
+    workspace.data(),
+    /*input=*/v86.data(), /*output=*/v87.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #86" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_hardswish_nc_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op87,
-    /*input=*/v87.data(), /*output=*/v88.data());
+    workspace.data(), /*input=*/v87.data(), /*output=*/v88.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #87" << std::endl;
     return ExecutionPlan();
@@ -4859,26 +4339,25 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_hardswish_nc_f32(
+  status = xnn_setup_multiply_nd_f32(
     op89,
-    /*input=*/v89.data(), /*output=*/v90.data());
+    v86.data() /* a */, v89.data() /* b */, /*output=*/v90.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #89" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_global_average_pooling_nwc_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op90,
-    workspace.data(),
-    /*input=*/v90.data(), /*output=*/v91.data());
+    workspace.data(), /*input=*/v90.data(), /*output=*/v91.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #90" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_add_nd_f32(
     op91,
-    workspace.data(), /*input=*/v91.data(), /*output=*/v92.data());
+    v91.data() /* a */, v82.data() /* b */, /*output=*/v92.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #91" << std::endl;
     return ExecutionPlan();
@@ -4892,40 +4371,42 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_multiply_nd_f32(
+  status = xnn_setup_hardswish_nc_f32(
     op93,
-    v90.data() /* a */, v93.data() /* b */, /*output=*/v94.data());
+    /*input=*/v93.data(), /*output=*/v94.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #93" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_global_average_pooling_nwc_f32(
     op94,
-    workspace.data(), /*input=*/v94.data(), /*output=*/v95.data());
+    workspace.data(),
+    /*input=*/v94.data(), /*output=*/v95.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #94" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_add_nd_f32(
+  status = xnn_setup_convolution2d_nhwc_f32(
     op95,
-    v95.data() /* a */, v86.data() /* b */, /*output=*/v96.data());
+    workspace.data(), /*input=*/v95.data(), /*output=*/v96.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #95" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_f32(
+  status = xnn_setup_hardswish_nc_f32(
     op96,
-    workspace.data(), /*input=*/v96.data(), /*output=*/v97.data());
+    /*input=*/v96.data(), /*output=*/v97.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #96" << std::endl;
     return ExecutionPlan();
   }
 
-  status = xnn_setup_hardswish_nc_f32(
+  status = xnn_setup_global_average_pooling_nwc_f32(
     op97,
+    workspace.data(),
     /*input=*/v97.data(), /*output=*/v98.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #97" << std::endl;
@@ -4940,7 +4421,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_hardswish_nc_f32(
+  status = xnn_setup_copy_nc_x32(
     op99,
     /*input=*/v99.data(), /*output=*/v100.data());
   if (status != xnn_status_success) {
@@ -4948,126 +4429,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_global_average_pooling_nwc_f32(
+  status = xnn_setup_softmax_nc_f32(
     op100,
-    workspace.data(),
     /*input=*/v100.data(), /*output=*/v101.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #100" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_setup_convolution2d_nhwc_f32(
-    op101,
-    workspace.data(), /*input=*/v101.data(), /*output=*/v102.data());
-  if (status != xnn_status_success) {
-    std::cerr << "failed to setup operation #101" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_setup_convolution2d_nhwc_f32(
-    op102,
-    workspace.data(), /*input=*/v102.data(), /*output=*/v103.data());
-  if (status != xnn_status_success) {
-    std::cerr << "failed to setup operation #102" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_setup_multiply_nd_f32(
-    op103,
-    v100.data() /* a */, v103.data() /* b */, /*output=*/v104.data());
-  if (status != xnn_status_success) {
-    std::cerr << "failed to setup operation #103" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_setup_convolution2d_nhwc_f32(
-    op104,
-    workspace.data(), /*input=*/v104.data(), /*output=*/v105.data());
-  if (status != xnn_status_success) {
-    std::cerr << "failed to setup operation #104" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_setup_add_nd_f32(
-    op105,
-    v105.data() /* a */, v96.data() /* b */, /*output=*/v106.data());
-  if (status != xnn_status_success) {
-    std::cerr << "failed to setup operation #105" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_setup_convolution2d_nhwc_f32(
-    op106,
-    workspace.data(), /*input=*/v106.data(), /*output=*/v107.data());
-  if (status != xnn_status_success) {
-    std::cerr << "failed to setup operation #106" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_setup_hardswish_nc_f32(
-    op107,
-    /*input=*/v107.data(), /*output=*/v108.data());
-  if (status != xnn_status_success) {
-    std::cerr << "failed to setup operation #107" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_setup_global_average_pooling_nwc_f32(
-    op108,
-    workspace.data(),
-    /*input=*/v108.data(), /*output=*/v109.data());
-  if (status != xnn_status_success) {
-    std::cerr << "failed to setup operation #108" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_setup_convolution2d_nhwc_f32(
-    op109,
-    workspace.data(), /*input=*/v109.data(), /*output=*/v110.data());
-  if (status != xnn_status_success) {
-    std::cerr << "failed to setup operation #109" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_setup_hardswish_nc_f32(
-    op110,
-    /*input=*/v110.data(), /*output=*/v111.data());
-  if (status != xnn_status_success) {
-    std::cerr << "failed to setup operation #110" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_setup_global_average_pooling_nwc_f32(
-    op111,
-    workspace.data(),
-    /*input=*/v111.data(), /*output=*/v112.data());
-  if (status != xnn_status_success) {
-    std::cerr << "failed to setup operation #111" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_setup_convolution2d_nhwc_f32(
-    op112,
-    workspace.data(), /*input=*/v112.data(), /*output=*/v113.data());
-  if (status != xnn_status_success) {
-    std::cerr << "failed to setup operation #112" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_setup_copy_nc_x32(
-    op113,
-    /*input=*/v113.data(), /*output=*/v114.data());
-  if (status != xnn_status_success) {
-    std::cerr << "failed to setup operation #113" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_setup_softmax_nc_f32(
-    op114,
-    /*input=*/v114.data(), /*output=*/v115.data());
-  if (status != xnn_status_success) {
-    std::cerr << "failed to setup operation #114" << std::endl;
     return ExecutionPlan();
   }
 
