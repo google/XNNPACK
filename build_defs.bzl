@@ -207,7 +207,7 @@ def xnnpack_cc_library(
             "//conditions:default": [],
         }),
         textual_hdrs = hdrs,
-        visibility = visibility,
+        visibility = visibility + [":__subpackages__"],
         testonly = testonly,
     )
 
@@ -343,7 +343,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
             tags = tags,
         )
 
-def xnnpack_binary(name, srcs, copts = [], deps = []):
+def xnnpack_binary(name, srcs, copts = [], deps = [], linkopts = []):
     """Minimal binary
 
     Args:
@@ -353,6 +353,7 @@ def xnnpack_binary(name, srcs, copts = [], deps = []):
              for include/ and src/ directories of XNNPACK are always prepended
              before these user-specified flags.
       deps: The list of libraries to be linked.
+      linkopts: The list of additional linker options
     """
     native.cc_binary(
         name = name,
@@ -364,7 +365,7 @@ def xnnpack_binary(name, srcs, copts = [], deps = []):
         linkopts = select({
             "//:emscripten": xnnpack_emscripten_minimal_linkopts(),
             "//conditions:default": [],
-        }),
+        }) + linkopts,
         linkstatic = True,
         deps = deps,
     )
