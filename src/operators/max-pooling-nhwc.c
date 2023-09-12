@@ -102,14 +102,14 @@ static enum xnn_status create_max_pooling2d_nhwc(
 
   if (stride_height > pooling_height) {
     xnn_log_error(
-      "failed to define %s operator with %" PRIu32 " stride height: must be less than pooling height %" PRIu32,
+      "failed to create %s operator with %" PRIu32 " stride height: must be less than pooling height %" PRIu32,
       xnn_operator_type_to_string(operator_type), stride_height, pooling_height);
     return xnn_status_invalid_parameter;
   }
 
   if (stride_width > pooling_width) {
     xnn_log_error(
-      "failed to define %s operator with %" PRIu32 " stride width: must be less than pooling width %" PRIu32,
+      "failed to create %s operator with %" PRIu32 " stride width: must be less than pooling width %" PRIu32,
       xnn_operator_type_to_string(operator_type), stride_width, pooling_width);
     return xnn_status_invalid_parameter;
   }
