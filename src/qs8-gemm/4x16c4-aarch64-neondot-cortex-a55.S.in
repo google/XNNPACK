@@ -46,7 +46,10 @@ $else:
 // C2  x9 v18 v22 v26 v30
 // C3  x7 v19 v23 v27 v31
 // temp x14 for Cortex-A55 loads
-// unused v14 v15
+$if DATATYPE == "QD8":
+  // unused v14 v15
+$else:
+  // unused v12 v13 v14 v15
 
 BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55
 

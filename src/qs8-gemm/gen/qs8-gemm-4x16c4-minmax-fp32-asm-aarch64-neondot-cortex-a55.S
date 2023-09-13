@@ -35,7 +35,7 @@
 // C2  x9 v18 v22 v26 v30
 // C3  x7 v19 v23 v27 v31
 // temp x14 for Cortex-A55 loads
-// unused v14 v15
+// unused v12 v13 v14 v15
 
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55
 

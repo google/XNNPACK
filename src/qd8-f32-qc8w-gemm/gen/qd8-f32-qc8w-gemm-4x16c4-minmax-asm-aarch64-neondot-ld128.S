@@ -41,7 +41,7 @@
 // C1  x8 v17 v21 v25 v29
 // C2  x9 v18 v22 v26 v30
 // C3  x7 v19 v23 v27 v31
-// unused v8 v9 v10 v11 v14 v15
+// unused v14 v15
 
 BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_ld128
 
@@ -61,11 +61,10 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         CSEL        x9,  x8,  x9, LS        //   c2 = c1
 
         LDP         x12, x11, [sp]          // cn_stride, params
-
         LDR         x16, [sp, 16]           // &quantization_params[0].zero_point
-        STP         d8,  d9, [sp, -16]!
-        STP         d10,  d11, [sp, -16]!
-        STP         d12,  d13, [sp, -16]!
+        STP         d8,  d9, [sp, -48]!
+        STP         d10, d11, [sp, 16]
+        STP         d12,  d13, [sp, 32]
         LDP         q12, q13, [x16]         // v12 & v13 interleaved zero_point & scale
 
         CMP         x0, 4                   // if mr < 4
@@ -314,9 +313,9 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         B.NE        0b
 
         # Restore d8-d13 from stack
-        LDP         d12, d13, [sp], 16
-        LDP         d10,  d11, [sp], 16
-        LDP         d8,  d9, [sp], 16
+        LDP         d12, d13, [sp, 32]
+        LDP         d10, d11, [sp, 16]
+        LDP         d8, d9, [sp], 48
         RET
 
 
@@ -449,9 +448,9 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         STR         s16, [x6]
 9:
         # Restore d8-d13 from stack
-        LDP         d12, d13, [sp], 16
-        LDP         d10,  d11, [sp], 16
-        LDP         d8,  d9, [sp], 16
+        LDP         d12, d13, [sp, 32]
+        LDP         d10, d11, [sp, 16]
+        LDP         d8, d9, [sp], 48
         RET
 
 END_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_ld128

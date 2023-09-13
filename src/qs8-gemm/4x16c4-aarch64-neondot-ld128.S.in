@@ -76,7 +76,7 @@ $elif DATATYPE == "QD8":
 // C2  x9 v18 v22 v26 v30
 // C3  x7 v19 v23 v27 v31
 $if DATATYPE == "QD8":
-  // unused v8 v9 v10 v11 v14 v15
+  // unused v14 v15
 $else:
   // unused v8 v9 v10 v11 v12 v13 v14 v15
 
@@ -98,12 +98,11 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x
         CSEL        x9,  x8,  x9, LS        //   c2 = c1
 
         LDP         x12, x11, [sp]          // cn_stride, params
-
         $if DATATYPE == "QD8":
           LDR         x16, [sp, 16]           // &quantization_params[0].zero_point
-          STP         d8,  d9, [sp, -16]!
-          STP         d10,  d11, [sp, -16]!
-          STP         d12,  d13, [sp, -16]!
+          STP         d8,  d9, [sp, -48]!
+          STP         d10, d11, [sp, 16]
+          STP         d12,  d13, [sp, 32]
           LDP         q12, q13, [x16]         // v12 & v13 interleaved zero_point & scale
 
         CMP         x0, 4                   // if mr < 4
@@ -370,9 +369,9 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x
 
           $if DATATYPE == "QD8":
             # Restore d8-d13 from stack
-            LDP         d12, d13, [sp], 16
-            LDP         d10,  d11, [sp], 16
-            LDP         d8,  d9, [sp], 16
+            LDP         d12, d13, [sp, 32]
+            LDP         d10, d11, [sp, 16]
+            LDP         d8, d9, [sp], 48
           RET
         $elif REQUANTIZATION == "RNDNU":
           # Apply params - preshift, scale, postshift, bias and clamp
@@ -702,9 +701,9 @@ $if DATATYPE == "QD8":
           STR         s16, [x6]
   9:
           # Restore d8-d13 from stack
-          LDP         d12, d13, [sp], 16
-          LDP         d10,  d11, [sp], 16
-          LDP         d8,  d9, [sp], 16
+          LDP         d12, d13, [sp, 32]
+          LDP         d10, d11, [sp, 16]
+          LDP         d8, d9, [sp], 48
           RET
 $else:
   10:

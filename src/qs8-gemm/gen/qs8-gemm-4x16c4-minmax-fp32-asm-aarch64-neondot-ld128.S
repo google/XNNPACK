@@ -63,7 +63,6 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld12
 
         LDP         x12, x11, [sp]          // cn_stride, params
 
-
         CMP         x0, 4                   // if mr < 4
         ADD         x4, x13, x4             // a3 = a2 + a_stride
         ADD         x7,  x9, x7             // c3 = c2 + cm_stride
