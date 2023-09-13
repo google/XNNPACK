@@ -627,6 +627,16 @@ PROD_NEONFMA_MICROKERNEL_SRCS = [
 ]
 
 PROD_NEON_AARCH64_MICROKERNEL_SRCS = [
+    "src/f32-vbinary/gen/f32-vdiv-minmax-aarch64-neon-u8.c",
+    "src/f32-vbinary/gen/f32-vdivc-minmax-aarch64-neon-u8.c",
+    "src/f32-vbinary/gen/f32-vrdivc-minmax-aarch64-neon-u8.c",
+    "src/f32-vsqrt/gen/f32-vsqrt-aarch64-neon-sqrt-u4.c",
+    "src/x8-lut/gen/x8-lut-aarch64-neon-tbx128x4-u64.c",
+    "src/x24-transposec/x24-transposec-4x4-aarch64-neon-tbl128.c",
+    "src/x32-transposec/x32-transposec-4x4-aarch64-neon-tbl128.c",
+]
+
+PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS = [
     "src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-aarch64-neonfma-2x2.c",
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-aarch64-neonfma-3x4.c",
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-aarch64-neonfma-2x4-acc2.c",
@@ -634,11 +644,9 @@ PROD_NEON_AARCH64_MICROKERNEL_SRCS = [
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-aarch64-neonfma-1x4-acc2.c",
     "src/f32-gemm/gen/f32-gemm-1x8-minmax-aarch64-neonfma-lane-ld64.c",
     "src/f32-gemm/gen/f32-gemm-4x2-minmax-aarch64-neonfma-lane-ld64.c",
-    "src/f32-gemm/gen/f32-gemm-6x2-minmax-aarch64-neonfma-lane-ld64.c",
     "src/f32-gemm/gen/f32-gemm-6x8-minmax-aarch64-neonfma-lane-ld64.c",
     "src/f32-igemm/gen/f32-igemm-1x8-minmax-aarch64-neonfma-lane-ld64.c",
     "src/f32-igemm/gen/f32-igemm-4x2-minmax-aarch64-neonfma-lane-ld64.c",
-    "src/f32-igemm/gen/f32-igemm-6x2-minmax-aarch64-neonfma-lane-ld64.c",
     "src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-lane-ld64.c",
     "src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x8-minmax-aarch64-neonfma-lane-ld128.c",
     "src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-aarch64-neonfma-lane-ld128.c",
@@ -647,14 +655,7 @@ PROD_NEON_AARCH64_MICROKERNEL_SRCS = [
     "src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-aarch64-neonfma-lane-ld64.c",
     "src/f32-spmm/gen/f32-spmm-32x2-minmax-aarch64-neonfma.c",
     "src/f32-spmm/gen/f32-spmm-32x4-minmax-aarch64-neonfma.c",
-    "src/f32-vbinary/gen/f32-vdiv-minmax-aarch64-neon-u8.c",
-    "src/f32-vbinary/gen/f32-vdivc-minmax-aarch64-neon-u8.c",
-    "src/f32-vbinary/gen/f32-vrdivc-minmax-aarch64-neon-u8.c",
-    "src/f32-vsqrt/gen/f32-vsqrt-aarch64-neon-sqrt-u4.c",
     "src/f32-vtanh/gen/f32-vtanh-aarch64-neonfma-expm1minus-rr1-p6h5ts-div-u16.c",
-    "src/x8-lut/gen/x8-lut-aarch64-neon-tbx128x4-u64.c",
-    "src/x24-transposec/x24-transposec-4x4-aarch64-neon-tbl128.c",
-    "src/x32-transposec/x32-transposec-4x4-aarch64-neon-tbl128.c",
 ]
 
 PROD_NEONV8_MICROKERNEL_SRCS = [
@@ -2815,7 +2816,10 @@ xnnpack_cc_library(
         "-mfpu=neon-vfpv4",
     ],
     aarch32_srcs = ["src/amalgam/gen/neonfma.c"],
-    aarch64_srcs = ["src/amalgam/gen/neonfma.c"],
+    aarch64_srcs = [
+        "src/amalgam/gen/neonfma-aarch64.c",
+        "src/amalgam/gen/neonfma.c",
+    ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -2859,7 +2863,7 @@ xnnpack_cc_library(
         "-mfpu=neon-vfpv4",
     ],
     aarch32_srcs = PROD_NEONFMA_MICROKERNEL_SRCS,
-    aarch64_srcs = PROD_NEONFMA_MICROKERNEL_SRCS,
+    aarch64_srcs = PROD_NEONFMA_MICROKERNEL_SRCS + PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [

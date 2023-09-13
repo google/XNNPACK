@@ -30,9 +30,10 @@ tools/amalgamate-microkernels.py -i immintrin.h -s PROD_AVX512VBMI_MICROKERNEL_S
 tools/amalgamate-microkernels.py -i arm_acle.h -s PROD_ARMSIMD32_MICROKERNEL_SRCS -o src/amalgam/gen/armsimd32.c &
 tools/amalgamate-microkernels.py -i arm_fp16.h -s PROD_FP16ARITH_MICROKERNEL_SRCS -o src/amalgam/gen/fp16arith.c &
 tools/amalgamate-microkernels.py -i arm_neon.h -s PROD_NEON_MICROKERNEL_SRCS -o src/amalgam/gen/neon.c &
+tools/amalgamate-microkernels.py -i arm_neon.h -s PROD_NEON_AARCH64_MICROKERNEL_SRCS -o src/amalgam/gen/neon-aarch64.c &
 tools/amalgamate-microkernels.py -i arm_neon.h -s PROD_NEONFP16_MICROKERNEL_SRCS -o src/amalgam/gen/neonfp16.c &
 tools/amalgamate-microkernels.py -i arm_neon.h -s PROD_NEONFMA_MICROKERNEL_SRCS -o src/amalgam/gen/neonfma.c &
-tools/amalgamate-microkernels.py -i arm_neon.h -s PROD_NEON_AARCH64_MICROKERNEL_SRCS -o src/amalgam/gen/neon-aarch64.c &
+tools/amalgamate-microkernels.py -i arm_neon.h -s PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS -o src/amalgam/gen/neonfma-aarch64.c &
 tools/amalgamate-microkernels.py -i arm_neon.h -s PROD_NEONV8_MICROKERNEL_SRCS -o src/amalgam/gen/neonv8.c &
 tools/amalgamate-microkernels.py -i arm_neon.h -s PROD_NEONFP16ARITH_MICROKERNEL_SRCS -o src/amalgam/gen/neonfp16arith.c &
 tools/amalgamate-microkernels.py -i arm_neon.h -s PROD_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS -o src/amalgam/gen/neonfp16arith-aarch64.c &
