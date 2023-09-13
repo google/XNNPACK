@@ -39,9 +39,9 @@ tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -D ACCTYPE=F32 -o
 tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-5x16-minmax-avx2-broadcast.c &
 
 ################################## Unit tests #################################
-tools/generate-gemm-test.py --spec test/f16-igemm-minmax.yaml --output test/f16-igemm-minmax.cc &
-tools/generate-gemm-test.py --spec test/f16-igemm-jit.yaml --output test/f16-igemm-jit.cc &
-tools/generate-gemm-test.py --spec test/f16-f32acc-igemm-minmax.yaml --output test/f16-f32acc-igemm-minmax.cc &
+tools/generate-gemm-test.py --spec test/f16-igemm-minmax.yaml --output-test test/f16-igemm-minmax.cc &
+tools/generate-gemm-test.py --spec test/f16-igemm-jit.yaml --output-test test/f16-igemm-jit.cc &
+tools/generate-gemm-test.py --spec test/f16-f32acc-igemm-minmax.yaml --output-test test/f16-f32acc-igemm-minmax.cc &
 
 wait # JIT requires assembly files to be generated first.
 

@@ -23,11 +23,17 @@ parser.add_argument(
     "-s", "--spec", metavar="FILE", required=True, help="Spec (YAML) file")
 parser.add_argument(
     "-o",
-    "--output",
+    "--output-test",
     action="append",
     metavar="FILE",
     required=True,
-    help="Output (C++ source) file(s)")
+    help="Test output (C++ source) file(s)")
+parser.add_argument(
+    "-b",
+    "--output-bench",
+    metavar="FILE",
+    required=False,
+    help="Benchmark output (C++ source) file(s)")
 parser.set_defaults(defines=list())
 
 def split_ukernel_name(name):
@@ -54,6 +60,24 @@ def split_ukernel_name(name):
 
   return mr, nr, kr, sr, xw, requantization, arch, isa, assembly
 
+
+GEMM_BENCH_CODE = """\
+static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    ${GEMM},
+    ${INIT_PARAMS},
+    /*mr=*/${MR}, /*nr=*/${NR}, /*kr=*/${KR}, /*sr=*/${SR},
+    $if ISA_CHECK:
+      benchmark::utils::${ISA_CHECK},
+    $else:
+      /*isa_check=*/nullptr,
+    $if EXTENDED_WEIGHTS:
+      /*extended_weights=*/true);
+    $else:
+      /*extended_weights=*/false);
+}\n
+BENCHMARK_GEMM(${UKERNEL_NAME})
+"""
 
 GEMM_TEST_CODE = """\
 TEST(${TEST_NAME}, k_eq_${KBLOCK}) {
@@ -1148,7 +1172,7 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
     if "minmax" in init_fn:
       activation = "minmax"
 
-  return xngen.preprocess(
+  test_case = xngen.preprocess(
       GEMM_TEST_CODE, {
           "TEST_NAME": ukernel_name.upper().replace("UKERNEL_", ""),
           "TEST_ARGS": test_args,
@@ -1170,11 +1194,29 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
           "PROTOTYPE": prototype,
           "JIT": jit,
       })
+  if len(test_args) == 1:
+    init_params= "nullptr"
+  else:
+    init_params= test_args[1]
+
+  benchmark = xngen.preprocess(
+      GEMM_BENCH_CODE, {
+          "UKERNEL_NAME": ukernel_name,
+          "GEMM": test_args[0],
+          "INIT_PARAMS": init_params,
+          "MR": mr,
+          "NR": nr,
+          "KR": kr,
+          "SR": sr,
+          "EXTENDED_WEIGHTS": xw,
+          "ISA_CHECK": xnncommon.generate_isa_utilcheck_macro(isa),
+      })
+  return test_case, benchmark
 
 
 def main(args):
   options = parser.parse_args(args)
-  num_output_files = len(options.output)
+  num_output_files = len(options.output_test)
 
   with codecs.open(options.spec, "r", encoding="utf-8") as spec_file:
     spec_yaml = yaml.safe_load(spec_file)
@@ -1209,8 +1251,33 @@ def main(args):
 """.format(
     specification=options.spec, generator=sys.argv[0])
 
-    outputs = collections.defaultdict(lambda: tests)
+    benches = """\
+// Copyright 2023 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Specification: {specification}
+//   Generator: {generator}
 
+#include <benchmark/benchmark.h>
+#include "bench/gemm-benchmark.h"
+#include "bench/utils.h"
+
+#include <xnnpack/isa-checks.h>
+#include <xnnpack/gemm.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
+""".format(specification=options.spec, generator=sys.argv[0])
+
+    test_outputs = collections.defaultdict(lambda: tests)
+    bench_outputs = benches
+
+    sorted_spec_yaml = collections.defaultdict(list)
+    isa_hierarchy = xnncommon._ISA_HIERARCHY_MAP
+
+    benches = [""] * len(isa_hierarchy)
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       k_block = int(ukernel_spec["k-block"])
@@ -1222,26 +1289,40 @@ def main(args):
       mr, nr, kr, sr, xw, requantization, arch, isa, assembly = \
         split_ukernel_name(name)
 
-      test_case = generate_test_cases(name, mr, nr, kr, sr, xw, k_block,
+      test_case, bench_case = generate_test_cases(name, mr, nr, kr, sr, xw, k_block,
                                       init_fn, requantization, pipelined, isa,
                                       jit, prototype, post_op)
 
       # Hash the name of each microkernel and figure out which output file to
       # write it to.
       output_index = zlib.crc32(bytes(name, "utf-8")) % num_output_files
-      outputs[options.
-              output[output_index]] += "\n\n" + xnncommon.postprocess_test_case(
+      test_outputs[options.output_test[output_index]] += "\n\n" + xnncommon.postprocess_test_case(
                   test_case, arch, isa, assembly, jit)
+      benches[isa_hierarchy.get(isa, 0)] +=  "\n\n" + xnncommon.postprocess_test_case(bench_case, arch, isa, assembly, jit)
 
-    for output_name in options.output:
+    for arch_idx in reversed(range(len(isa_hierarchy))):
+      bench_outputs += benches[arch_idx]
+
+    bench_outputs += """\n
+#ifndef XNNPACK_BENCHMARK_NO_MAIN
+BENCHMARK_MAIN();
+#endif
+"""
+    def write_output(output_name, output_str):
       txt_changed = True
       if os.path.exists(output_name):
         with codecs.open(output_name, "r", encoding="utf-8") as output_file:
-          txt_changed = output_file.read() != outputs[output_name]
-
+          txt_changed = output_file.read() != output_str
       if txt_changed:
         with codecs.open(output_name, "w", encoding="utf-8") as output_file:
-          output_file.write(outputs[output_name])
+          output_file.write(output_str)
+
+    for output_name in options.output_test:
+      write_output(output_name, test_outputs[output_name])
+
+    if options.output_bench:
+      output_name = options.output_bench
+      write_output(output_name, bench_outputs)
 
 
 if __name__ == "__main__":

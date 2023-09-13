@@ -79,6 +79,33 @@ _ISA_TO_ARCH_MAP = {
   "wasmblendvps": ["wasmrelaxedsimd"],
 }
 
+_ISA_TO_UTILCHECK_MAP = {
+  "armsimd32": "CheckARMV6",
+  "fp16arith": "CheckFP16ARITH",
+  "neon": "CheckNEON",
+  "neonfp16": "CheckNEONFP16",
+  "neonfma": "CheckNEONFMA",
+  "neonv8": "CheckNEONV8",
+  "neonfp16arith": "CheckNEONFP16ARITH",
+  "neonbf16": "CheckNEONBF16",
+  "neondot": "CheckNEONDOT",
+  "neoni8mm": "CheckNEONI8MM",
+  "ssse3": "CheckSSSE3",
+  "sse41": "CheckSSE41",
+  "avx": "CheckAVX",
+  "f16c": "CheckF16C",
+  "xop": "CheckXOP",
+  "avx2": "CheckAVX2",
+  "fma3": "CheckFMA3",
+  "avx512f": "CheckAVX512F",
+  "avx512skx": "CheckAVX512SKX",
+  "avx512vbmi": "CheckAVX512VBMI",
+  "rvv": "CheckRVV",
+  "wasmpshufb": "CheckWAsmPSHUFB",
+  "wasmsdot": "CheckWAsmSDOT",
+  "wasmblendvps": "CheckWAsmBLENDVPS",
+}
+
 _ISA_TO_CHECK_MAP = {
   "armsimd32": "TEST_REQUIRES_ARM_SIMD32",
   "fp16arith": "TEST_REQUIRES_ARM_FP16_ARITH",
@@ -133,6 +160,8 @@ def parse_target_name(target_name):
 def generate_isa_check_macro(isa):
   return _ISA_TO_CHECK_MAP.get(isa, "")
 
+def generate_isa_utilcheck_macro(isa):
+  return _ISA_TO_UTILCHECK_MAP.get(isa, "")
 
 def arch_to_macro(arch, isa):
   return _ARCH_TO_MACRO_MAP[arch]
@@ -156,3 +185,23 @@ def postprocess_test_case(test_case, arch, isa, assembly=False, jit=False):
       "#endif  // %s\n" % guard
   else:
     return test_case
+
+_ISA_HIERARCHY = [
+  "sse",
+  "sse2",
+  "ssse3",
+  "sse41",
+  "avx",
+  "avx2",
+  "xop",
+  "avx512f",
+  "avx512skx",
+  "avx512vbmi",
+  "armsimd32",
+  "neon",
+  "neonv8",
+  "neondot",
+  "neoni8mm",
+]
+
+_ISA_HIERARCHY_MAP = {isa: v for v, isa in enumerate(_ISA_HIERARCHY)}

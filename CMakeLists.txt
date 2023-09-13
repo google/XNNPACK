@@ -3804,6 +3804,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(qs8-f32-vcvt-bench PRIVATE benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(qs8-f32-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
+  ADD_EXECUTABLE(qs8-gemm-fp32-bench bench/qs8-gemm-fp32.cc)
+  TARGET_INCLUDE_DIRECTORIES(qs8-gemm-fp32-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(qs8-gemm-fp32-bench PRIVATE benchmark pthreadpool jit microparams-init)
+  TARGET_LINK_LIBRARIES(qs8-gemm-fp32-bench PRIVATE bench-utils jit hardware-config logging microkernels-all microparams-init packing)
+
   ADD_EXECUTABLE(qs8-gemm-bench bench/qs8-gemm.cc)
   TARGET_INCLUDE_DIRECTORIES(qs8-gemm-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(qs8-gemm-bench PRIVATE benchmark pthreadpool jit microparams-init)
