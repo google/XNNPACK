@@ -3,8 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cstdint>
+
 #include <algorithm>
 #include <numeric>
+#include <vector>
 
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/microkernel-utils.h>
@@ -15,7 +18,103 @@
 #include <gmock/gmock.h>
 #include <fp16/fp16.h>
 
-// GEMM GIO packing tests
+// QD8-F32-QC4W GEMM packing tests.
+
+TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, g_eq_1) {
+  const size_t g = 1;
+  const size_t nc = 5;
+  const size_t kc = 3;
+  const size_t nr = 2;
+  const size_t kr = 2;
+  const size_t sr = 1;
+
+  const size_t rounded_nc = round_up_po2(nc, 2) >> 1;
+  const size_t kb = round_up_po2(kc, 2) >> 1;
+
+  std::vector<int32_t> b(g * nc);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
+  std::vector<uint8_t> k(g * rounded_nc * kc);
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
+  k[0] = 0x10;
+  k[1] = 0x32;
+  k[2] = 0x04;
+  k[3] = 0x65;
+  k[4] = 0x87;
+  k[5] = 0x09;
+  k[6] = 0xba;
+  k[7] = 0xdc;
+  k[8] = 0x0e;
+  std::vector<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kb, kr * sr)));
+  auto a = xnn_qs8_qc4w_packing_params{ 0, 0xf };
+  xnn_pack_qs8_qc4w_gemm_gio_w(g, nc, kc, nr, kr, sr, /*k_stride=*/nc,
+    k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
+
+  const std::vector<uint8_t> expected = {
+    // 2 bias.
+    0x00, 0x00, 0x00, 0x00,
+    0x01, 0x00, 0x00, 0x00,
+    0x50, 0xfa,  // kernel zero point (0xf)
+    0x61, 0xfb,  // kernel zero point (0xf)
+    // 2 bias.
+    0x02, 0x00, 0x00, 0x00,
+    0x03, 0x00, 0x00, 0x00,
+    0x72, 0xfc,  // kernel zero point (0xf)
+    0x83, 0xfd,  // kernel zero point (0xf)
+    // 1 bias and padding.
+    0x04, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x94, 0xfe,  // kernel zero point (0xf)
+    0x00, 0x00,  // padding
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, g_eq_1) {
+  size_t g = 1;
+  size_t nc = 3;
+  size_t kc = 5;
+  size_t nr = 2;
+  size_t kr = 2;
+  size_t sr = 1;
+
+  size_t kb = round_up_po2(kc, 2) >> 1;
+
+  std::vector<int32_t> b(g * nc);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2]
+  std::vector<uint8_t> k(g * nc * kb);
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
+  k[0] = 0x10;
+  k[1] = 0x32;
+  k[2] = 0x04;
+  k[3] = 0x65;
+  k[4] = 0x87;
+  k[5] = 0x09;
+  k[6] = 0xba;
+  k[7] = 0xdc;
+  k[8] = 0x0e;
+  std::vector<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kb, kr * sr)));
+  auto a = xnn_qs8_qc4w_packing_params{ 0, 0xf };
+  xnn_pack_qs8_qc4w_gemm_goi_w(g, nc, kc, nr, kr, sr,
+    k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
+
+  const std::vector<uint8_t> expected = {
+    // 2 bias.
+    0x00, 0x00, 0x00, 0x00,
+    0x01, 0x00, 0x00, 0x00,
+    0x10, 0x32,
+    0x65, 0x87,
+    0xf4, 0x00,
+    0xf9, 0x00,
+    // 1 bias and padding.
+    0x02, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0xba, 0xdc,
+    0x00, 0x00,
+    0xfe, 0x00,
+    0x00, 0x00,
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
 
 TEST(PACK_F32_GEMM_GIO_W, g_eq_1) {
   size_t g = 1;
