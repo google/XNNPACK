@@ -61,7 +61,7 @@ def split_ukernel_name(name):
   return mr, nr, kr, sr, xw, requantization, arch, isa, assembly
 
 
-GEMM_BENCH_CODE = """\
+GEMM_BENCH_CODE_XW = """\
 static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
   GEMMBenchmark(state,
     ${GEMM},
@@ -71,10 +71,21 @@ static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
       benchmark::utils::${ISA_CHECK},
     $else:
       /*isa_check=*/nullptr,
-    $if EXTENDED_WEIGHTS:
-      /*extended_weights=*/true);
+    /*extended_weights=*/true);
+}\n
+BENCHMARK_GEMM(${UKERNEL_NAME})
+"""
+
+GEMM_BENCH_CODE = """\
+static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    ${GEMM},
+    ${INIT_PARAMS},
+    /*mr=*/${MR}, /*nr=*/${NR}, /*kr=*/${KR}, /*sr=*/${SR},
+    $if ISA_CHECK:
+      benchmark::utils::${ISA_CHECK});
     $else:
-      /*extended_weights=*/false);
+      /*isa_check=*/nullptr);
 }\n
 BENCHMARK_GEMM(${UKERNEL_NAME})
 """
@@ -1200,7 +1211,7 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
     init_params= test_args[1]
 
   benchmark = xngen.preprocess(
-      GEMM_BENCH_CODE, {
+      GEMM_BENCH_CODE_XW if xw else GEMM_BENCH_CODE, {
           "UKERNEL_NAME": ukernel_name,
           "GEMM": test_args[0],
           "INIT_PARAMS": init_params,

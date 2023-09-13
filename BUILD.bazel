@@ -5549,27 +5549,23 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "qd8_f32_qc8w_gemm_bench",
     srcs = [
-        "bench/gemm.h",
         "bench/qd8-f32-qc8w-gemm.cc",
     ],
-    copts = xnnpack_optional_ruy_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":allocator",
-        ":math",
-    ] + xnnpack_optional_ruy_deps(),
+        ":gemm_benchmark",
+        ":isa_checks",
+    ],
 )
 
 xnnpack_benchmark(
     name = "qd8_f32_qc4w_gemm_bench",
     srcs = [
-        "bench/gemm.h",
         "bench/qd8-f32-qc4w-gemm.cc",
     ],
-    copts = xnnpack_optional_ruy_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":allocator",
-        ":math",
-    ] + xnnpack_optional_ruy_deps(),
+        ":gemm_benchmark",
+        ":isa_checks",
+    ],
 )
 
 xnnpack_benchmark(
@@ -5605,6 +5601,17 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qs8_gemm_rndnu_bench",
+    srcs = [
+        "bench/qs8-gemm-rndnu.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+        ":isa_checks",
+    ],
+)
+
+xnnpack_benchmark(
     name = "qs8_gemm_bench",
     srcs = [
         "bench/gemm.h",
@@ -5615,6 +5622,17 @@ xnnpack_benchmark(
         ":enable_jit",
         ":math",
     ] + xnnpack_optional_ruy_deps() + xnnpack_optional_gemmlowp_deps(),
+)
+
+xnnpack_benchmark(
+    name = "qs8_qc8w_gemm_fp32_bench",
+    srcs = [
+        "bench/qs8-qc8w-gemm-fp32.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+        ":isa_checks",
+    ],
 )
 
 xnnpack_benchmark(
@@ -5707,6 +5725,28 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":math",
     ] + xnnpack_optional_ruy_deps() + xnnpack_optional_gemmlowp_deps(),
+)
+
+xnnpack_benchmark(
+    name = "qu8_gemm_fp32_bench",
+    srcs = [
+        "bench/qu8-gemm-fp32.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+        ":isa_checks",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qu8_gemm_rndnu_bench",
+    srcs = [
+        "bench/qu8-gemm-rndnu.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+        ":isa_checks",
+    ],
 )
 
 xnnpack_benchmark(
