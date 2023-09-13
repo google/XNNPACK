@@ -3,6 +3,20 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# ARM NEONDOT
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__neondot
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x16c4__neondot
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x16c4__neondot
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x16c4__neondot
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 16
+
 # ARM NEON
 - name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16__neon_mlal_lane
   init: xnn_init_f32_qc4w_minmax_scalar_params

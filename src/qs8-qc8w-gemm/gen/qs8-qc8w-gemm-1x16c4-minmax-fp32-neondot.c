@@ -15,7 +15,6 @@
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 
-
 void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__neondot(
     size_t mr,
     size_t nc,
@@ -37,10 +36,10 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__neondot(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 4 * sizeof(int8_t));
   const int8_t* a0 = a;
   int8_t* c0 = c;
 
+  kc = round_up_po2(kc, 4 * sizeof(int8_t));
   // Loop over groups of 16 columns.
   do {
     // Initialize accumulators with bias. 16 bias values are loaded from the

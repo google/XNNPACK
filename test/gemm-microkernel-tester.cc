@@ -632,6 +632,7 @@ void GemmMicrokernelTester::Test(
       std::uniform_int_distribution<int32_t>(0, std::numeric_limits<uint8_t>::max()),
       std::ref(rng));
 
+  const size_t kr_bytes = (kr() + 1) / 2;
   const size_t k_stride = (k() + 1) / 2;
   const size_t packed_k_bytes = (packed_k() + 1) / 2;
   std::vector<float> input(m() * k());
@@ -673,7 +674,7 @@ void GemmMicrokernelTester::Test(
     // Row sums are multiplied by input zero point, since we don't know it
     // until runtime, set it to 1.
     const xnn_qs8_qc4w_packing_params packing_params = { /*input_zero_point=*/1, b_zero_point()};
-    xnn_pack_qs8_qc4w_gemm_goi_w(/*g=*/1, n(), k(), nr(), kr(), sr(),
+    xnn_pack_qs8_qc4w_gemm_goi_w(/*g=*/1, n(), k(), nr(), kr_bytes, sr(),
       b.data(), /*bias=*/nullptr, /*scale=*/nullptr,
       packed_w.data(), 2 * sizeof(float) * nr(), &packing_params);
     // Fill in packed kernel scale

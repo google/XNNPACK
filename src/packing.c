@@ -369,6 +369,9 @@ void xnn_pack_qs8_qc4w_gemm_goi_w(
               const uint8_t kv = k[(nr_block_start + nr_block_offset) * kb + kc_idx];
               ksum += ((uint32_t) kv & UINT8_C(0xF)) + ((uint32_t) (kv >> 4)) - kzp * 2;
               ((uint8_t*) packed_weights)[kr_block_offset] = kv;
+            } else {
+              const uint8_t kv = kzp | (kzp << 4);
+              ((uint8_t*) packed_weights)[kr_block_offset] = kv;
             }
           }
           unaligned_indexed_store_u32(packed_b, nr_block_offset, unaligned_indexed_load_u32(packed_b, nr_block_offset) - ksum * izp);

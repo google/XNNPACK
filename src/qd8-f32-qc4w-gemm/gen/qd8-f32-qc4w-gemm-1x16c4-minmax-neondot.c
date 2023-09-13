@@ -14,7 +14,7 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
 
-void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__neondot(
+void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__neondot(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -24,7 +24,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__neondot(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
+    const union xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
@@ -39,6 +39,8 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__neondot(
   const int8_t* a0 = a;
   float* c0 = c;
 
+  const int8x16_t vminus_kernel_zero_point = vld1q_dup_s8((const void*) &params->scalar.minus_kernel_zero_point);
+  const uint8x16_t vmask = vmovq_n_u8(UINT8_C(0xF));
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   // Loop over groups of 16 columns.
   do {
@@ -62,14 +64,30 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__neondot(
       const int8x8_t va0x01234567 = vld1_s8(a0); a0 += 8;
 
       // Load a 8x16 block of weights.
-      const int8x16_t vb0123x0123 = vld1q_s8(w); w = (const int8_t*) w + 16;
-      const int8x16_t vb0123x4567 = vld1q_s8(w); w = (const int8_t*) w + 16;
-      const int8x16_t vb0123x89AB = vld1q_s8(w); w = (const int8_t*) w + 16;
-      const int8x16_t vb0123xCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
-      const int8x16_t vb4567x0123 = vld1q_s8(w); w = (const int8_t*) w + 16;
-      const int8x16_t vb4567x4567 = vld1q_s8(w); w = (const int8_t*) w + 16;
-      const int8x16_t vb4567x89AB = vld1q_s8(w); w = (const int8_t*) w + 16;
-      const int8x16_t vb4567xCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const uint8x16_t vb0123x01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
+      const uint8x16_t vb0123x89ABCDEF = vld1q_u8(w); w = (const uint8_t*) w + 16;
+      const uint8x16_t vb4567x01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
+      const uint8x16_t vb4567x89ABCDEF = vld1q_u8(w); w = (const uint8_t*) w + 16;
+      const uint8x16_t vb0123x01234567c02 = vandq_u8(vb0123x01234567, vmask);
+      const uint8x16_t vb0123x01234567c13 = vshrq_n_u8(vb0123x01234567, 4);
+      const uint8x16_t vb0123x89ABCDEFc02 = vandq_u8(vb0123x89ABCDEF, vmask);
+      const uint8x16_t vb0123x89ABCDEFc13 = vshrq_n_u8(vb0123x89ABCDEF, 4);
+      const uint8x16_t vb4567x01234567c02 = vandq_u8(vb4567x01234567, vmask);
+      const uint8x16_t vb4567x01234567c13 = vshrq_n_u8(vb4567x01234567, 4);
+      const uint8x16_t vb4567x89ABCDEFc02 = vandq_u8(vb4567x89ABCDEF, vmask);
+      const uint8x16_t vb4567x89ABCDEFc13 = vshrq_n_u8(vb4567x89ABCDEF, 4);
+      uint8x16x2_t vb0123x01234567c0123 = vzipq_u8(vb0123x01234567c02, vb0123x01234567c13);
+      uint8x16x2_t vb0123x89ABCDEFc0123 = vzipq_u8(vb0123x89ABCDEFc02, vb0123x89ABCDEFc13);
+      uint8x16x2_t vb4567x01234567c0123 = vzipq_u8(vb4567x01234567c02, vb4567x01234567c13);
+      uint8x16x2_t vb4567x89ABCDEFc0123 = vzipq_u8(vb4567x89ABCDEFc02, vb4567x89ABCDEFc13);
+      const int8x16_t vb0123x0123 = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb0123x01234567c0123.val[0]));
+      const int8x16_t vb0123x4567 = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb0123x01234567c0123.val[1]));
+      const int8x16_t vb0123x89AB = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb0123x89ABCDEFc0123.val[0]));
+      const int8x16_t vb0123xCDEF = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb0123x89ABCDEFc0123.val[1]));
+      const int8x16_t vb4567x0123 = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb4567x01234567c0123.val[0]));
+      const int8x16_t vb4567x4567 = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb4567x01234567c0123.val[1]));
+      const int8x16_t vb4567x89AB = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb4567x89ABCDEFc0123.val[0]));
+      const int8x16_t vb4567xCDEF = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb4567x89ABCDEFc0123.val[1]));
 
       // Multiply-accumulate: 1x8 * 8x16 --> 1x16.
       vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb0123x0123, va0x01234567, 0);
@@ -89,10 +107,18 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__neondot(
       const int8x8_t va0x01234567 = vld1_s8(a0); a0 += 4;
 
       // Load a 4x16 block of weights.
-      const int8x16_t vb0123x0123 = vld1q_s8(w); w = (const int8_t*) w + 16;
-      const int8x16_t vb0123x4567 = vld1q_s8(w); w = (const int8_t*) w + 16;
-      const int8x16_t vb0123x89AB = vld1q_s8(w); w = (const int8_t*) w + 16;
-      const int8x16_t vb0123xCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
+      const uint8x16_t vb0123x01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
+      const uint8x16_t vb0123x89ABCDEF = vld1q_u8(w); w = (const uint8_t*) w + 16;
+      const uint8x16_t vb0123x01234567c02 = vandq_u8(vb0123x01234567, vmask);
+      const uint8x16_t vb0123x01234567c13 = vshrq_n_u8(vb0123x01234567, 4);
+      const uint8x16_t vb0123x89ABCDEFc02 = vandq_u8(vb0123x89ABCDEF, vmask);
+      const uint8x16_t vb0123x89ABCDEFc13 = vshrq_n_u8(vb0123x89ABCDEF, 4);
+      uint8x16x2_t vb0123x01234567c0123 = vzipq_u8(vb0123x01234567c02, vb0123x01234567c13);
+      uint8x16x2_t vb0123x89ABCDEFc0123 = vzipq_u8(vb0123x89ABCDEFc02, vb0123x89ABCDEFc13);
+      const int8x16_t vb0123x0123 = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb0123x01234567c0123.val[0]));
+      const int8x16_t vb0123x4567 = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb0123x01234567c0123.val[1]));
+      const int8x16_t vb0123x89AB = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb0123x89ABCDEFc0123.val[0]));
+      const int8x16_t vb0123xCDEF = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb0123x89ABCDEFc0123.val[1]));
 
       // Multiply-accumulate: 1x4 * 4x16 --> 1x16.
       vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb0123x0123, va0x01234567, 0);

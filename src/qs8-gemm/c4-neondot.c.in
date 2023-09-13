@@ -7,9 +7,9 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert NR % 8 == 0
 $assert 8 <= NR <= 16
 $assert REQUANTIZATION in ["FP32", "RNDNU"] or not REQUANTIZATION
-$assert DATATYPE in ["QC8", "QD8", "QS8"]
+$assert DATATYPE in ["QC8", "QS8", "QD8", "QC4"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
-$assert DATATYPE != "QD8" or not REQUANTIZATION
+$assert not DATATYPE in ["QD8", "QC4"] or not REQUANTIZATION
 #include <assert.h>
 
 #include <arm_neon.h>
@@ -19,12 +19,11 @@ $if REQUANTIZATION == "FP32":
   #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 
-
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w", "QS8": "qs8"}[DATATYPE]
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QD8": "qd8_f32_qc8w", "QC4": "qd8_f32_qc4w"}[DATATYPE]
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if REQUANTIZATION == "FP32" else "neon")
-$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QS8": "xnn_qs8_conv_minmax_params"}[DATATYPE]
-$OUT_T = "float" if DATATYPE == "QD8" else "int8_t"
+$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QC4": "xnn_f32_qc4w_minmax_params"}[DATATYPE]
+$OUT_T = "float" if DATATYPE in ["QD8", "QC4"] else "int8_t"
 void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c4__neondot(
     size_t mr,
     size_t nc,
@@ -35,7 +34,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     ${OUT_T}* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    $if DATATYPE == "QD8":
+    $if DATATYPE in ["QD8", "QC4"]:
       const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)],
       const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
     $else:
@@ -50,7 +49,6 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 4 * sizeof(int8_t));
   const int8_t* a0 = a;
   ${OUT_T}* c0 = c;
   $for M in range(1, MR):
@@ -72,11 +70,15 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         c${M} = c${M-1};
       }
 
+  $if DATATYPE == "QC4":
+    const int8x16_t vminus_kernel_zero_point = vld1q_dup_s8((const void*) &params->scalar.minus_kernel_zero_point);
+    const uint8x16_t vmask = vmovq_n_u8(UINT8_C(0xF));
+  kc = round_up_po2(kc, 4 * sizeof(int8_t));
   // Loop over groups of ${NR} columns.
   do {
     // Initialize accumulators with bias. ${NR} bias values are loaded from the
     // weight matrix, at the start of the group of ${NR} columns.
-    $if DATATYPE == "QD8":
+    $if DATATYPE in ["QD8", "QC4"]:
       $for M in range(0, MR, 2):
         $if M + 1 == MR:
           const int32x4_t vinput_zero_point${M} = vld1q_dup_s32(&quantization_params[${M}].zero_point);
@@ -107,9 +109,25 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         const int8x8_t va${M}x01234567 = vld1_s8(a${M}); a${M} += 8;
 
       // Load a 8x${NR} block of weights.
-      $for K in range(0, 8, 4):
-        $for N in range(0, NR, 4):
-          const int8x16_t vb${ABC[K:K+4]}x${ABC[N:N+4]} = vld1q_s8(w); w = (const int8_t*) w + 16;
+      $if DATATYPE == "QC4":
+        $for K in range(0, 8, 4):
+          $for N in range(0, NR, 8):
+            const uint8x16_t vb${ABC[K:K+4]}x${ABC[N:N+8]} = vld1q_u8(w); w = (const uint8_t*) w + 16;
+        $for K in range(0, 8, 4):
+          $for N in range(0, NR, 8):
+            const uint8x16_t vb${ABC[K:K+4]}x${ABC[N:N+8]}c02 = vandq_u8(vb${ABC[K:K+4]}x${ABC[N:N+8]}, vmask);
+            const uint8x16_t vb${ABC[K:K+4]}x${ABC[N:N+8]}c13 = vshrq_n_u8(vb${ABC[K:K+4]}x${ABC[N:N+8]}, 4);
+        $for K in range(0, 8, 4):
+          $for N in range(0, NR, 8):
+            uint8x16x2_t vb${ABC[K:K+4]}x${ABC[N:N+8]}c0123 = vzipq_u8(vb${ABC[K:K+4]}x${ABC[N:N+8]}c02, vb${ABC[K:K+4]}x${ABC[N:N+8]}c13);
+        $for K in range(0, 8, 4):
+          $for N in range(0, NR, 8):
+            const int8x16_t vb${ABC[K:K+4]}x${ABC[N:N+4]} = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb${ABC[K:K+4]}x${ABC[N:N+8]}c0123.val[0]));
+            const int8x16_t vb${ABC[K:K+4]}x${ABC[N+4:N+8]} = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb${ABC[K:K+4]}x${ABC[N:N+8]}c0123.val[1]));
+      $else:
+        $for K in range(0, 8, 4):
+          $for N in range(0, NR, 4):
+            const int8x16_t vb${ABC[K:K+4]}x${ABC[N:N+4]} = vld1q_s8(w); w = (const int8_t*) w + 16;
 
       // Multiply-accumulate: ${MR}x8 * 8x${NR} --> ${MR}x${NR}.
       $for K in range(0, 8, 4):
@@ -126,8 +144,20 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         const int8x8_t va${M}x01234567 = vld1_s8(a${M}); a${M} += 4;
 
       // Load a 4x${NR} block of weights.
-      $for N in range(0, NR, 4):
-        const int8x16_t vb0123x${ABC[N:N+4]} = vld1q_s8(w); w = (const int8_t*) w + 16;
+      $if DATATYPE == "QC4":
+        $for N in range(0, NR, 8):
+          const uint8x16_t vb0123x${ABC[N:N+8]} = vld1q_u8(w); w = (const uint8_t*) w + 16;
+        $for N in range(0, NR, 8):
+          const uint8x16_t vb0123x${ABC[N:N+8]}c02 = vandq_u8(vb0123x${ABC[N:N+8]}, vmask);
+          const uint8x16_t vb0123x${ABC[N:N+8]}c13 = vshrq_n_u8(vb0123x${ABC[N:N+8]}, 4);
+        $for N in range(0, NR, 8):
+          uint8x16x2_t vb0123x${ABC[N:N+8]}c0123 = vzipq_u8(vb0123x${ABC[N:N+8]}c02, vb0123x${ABC[N:N+8]}c13);
+        $for N in range(0, NR, 8):
+          const int8x16_t vb0123x${ABC[N:N+4]} = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb0123x${ABC[N:N+8]}c0123.val[0]));
+          const int8x16_t vb0123x${ABC[N+4:N+8]} = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb0123x${ABC[N:N+8]}c0123.val[1]));
+      $else:
+        $for N in range(0, NR, 4):
+          const int8x16_t vb0123x${ABC[N:N+4]} = vld1q_s8(w); w = (const int8_t*) w + 16;
 
       // Multiply-accumulate: ${MR}x4 * 4x${NR} --> ${MR}x${NR}.
       $for M in range(MR):
@@ -135,7 +165,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
           vacc${M}x${ABC[N:N+4]} = vdotq_lane_s32(vacc${M}x${ABC[N:N+4]}, vb0123x${ABC[N:N+4]}, va${M}x01234567, 0);
     }
 
-    $if DATATYPE == "QD8":
+    $if DATATYPE in ["QD8", "QC4"]:
       $for M in range(0, MR):
         $for N in range(0, NR, 4):
           float32x4_t vout${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});

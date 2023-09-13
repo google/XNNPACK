@@ -14,7 +14,6 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
 
-
 void xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__neondot(
     size_t mr,
     size_t nc,
@@ -36,7 +35,6 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__neondot(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 4 * sizeof(int8_t));
   const int8_t* a0 = a;
   int8_t* c0 = c;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
@@ -58,6 +56,7 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__neondot(
     c3 = c2;
   }
 
+  kc = round_up_po2(kc, 4 * sizeof(int8_t));
   // Loop over groups of 16 columns.
   do {
     // Initialize accumulators with bias. 16 bias values are loaded from the
