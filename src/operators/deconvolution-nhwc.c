@@ -1182,7 +1182,7 @@ static enum xnn_status reshape_deconvolution2d_nhwc(
   deconvolution_op->output_height = xnn_compute_deconvolution_output_dimension(
       input_height, deconvolution_op->padding_top + deconvolution_op->padding_bottom,
       adjustment_height, deconvolution_op->kernel_height, deconvolution_op->dilation_height, deconvolution_op->stride_height);
-  deconvolution_op->output_width = deconvolution_op->output_width = xnn_compute_deconvolution_output_dimension(
+  deconvolution_op->output_width = xnn_compute_deconvolution_output_dimension(
       input_width, deconvolution_op->padding_left + deconvolution_op->padding_right,
       adjustment_width, deconvolution_op->kernel_width, deconvolution_op->dilation_width, deconvolution_op->stride_width);
 
