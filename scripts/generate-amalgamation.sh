@@ -6,6 +6,7 @@
 
 # Scalar microkernels
 tools/amalgamate-microkernels.py -s PROD_SCALAR_MICROKERNEL_SRCS -o src/amalgam/gen/scalar.c &
+tools/amalgamate-microkernels.py -s PROD_FMA_MICROKERNEL_SRCS -o src/amalgam/gen/fma.c &
 
 # Wasm microkernels
 tools/amalgamate-microkernels.py -s PROD_WASM_MICROKERNEL_SRCS -o src/amalgam/gen/wasm.c &

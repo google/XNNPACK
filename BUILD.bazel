@@ -291,7 +291,6 @@ PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/f32-vrnd/gen/f32-vrndz-scalar-libm-u4.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-lut64-p2-div-u2.c",
     "src/f32-vsqrt/gen/f32-vsqrt-scalar-sqrt-u1.c",
-    "src/f32-vtanh/gen/f32-vtanh-fma-expm1minus-rr1-lut8-p4h3ts-div-u4.c",
     "src/f32-vtanh/gen/f32-vtanh-scalar-expm1minus-rr1-lut8-p4h3ts-div-u4.c",
     "src/f32-vunary/gen/f32-vabs-scalar-u4.c",
     "src/f32-vunary/gen/f32-vneg-scalar-u4.c",
@@ -413,6 +412,10 @@ PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/x32-zip/x32-zip-x2-scalar.c",
     "src/x32-zip/x32-zip-x3-scalar.c",
     "src/x32-zip/x32-zip-x4-scalar.c",
+]
+
+PROD_FMA_MICROKERNEL_SRCS = [
+    "src/f32-vtanh/gen/f32-vtanh-fma-expm1minus-rr1-lut8-p4h3ts-div-u4.c",
 ]
 
 PROD_ARMSIMD32_MICROKERNEL_SRCS = [
@@ -2237,6 +2240,7 @@ xnnpack_cc_library(
         "-ffp-contract=off",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
+    riscv_srcs = ["src/amalgam/gen/fma.c"],
     deps = [
         ":common",
         ":math",
@@ -2281,6 +2285,7 @@ xnnpack_cc_library(
         "-ffp-contract=off",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
+    riscv_srcs = PROD_FMA_MICROKERNEL_SRCS,
     deps = [
         ":common",
         ":math",
