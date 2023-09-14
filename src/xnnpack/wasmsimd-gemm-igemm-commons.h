@@ -5,7 +5,6 @@
 
 #pragma once
 
-
 #include <algorithm>
 #include <cstdint>
 #include <iterator>
@@ -17,17 +16,20 @@
 #include <xnnpack/post-operation.h>
 #include <xnnpack/wasm-assembler.h>
 
+
 namespace xnnpack {
 namespace internal {
 
 template <typename Generator>
 xnn_status generate_gemm_or_igemm(xnn_code_buffer* b, const char* name, size_t max_mr, size_t kc,
-                                  size_t loop_unroll_iters, bool full_unroll, size_t nc_mod_nr, const void* params) {
+                                  size_t loop_unroll_iters, bool full_unroll, size_t nc_mod_nr, bool use_fma,
+                                  const void* params) {
   size_t iters = kc / sizeof(float);
   assert(!full_unroll || (iters == loop_unroll_iters));
   Generator generator(b);
 
-  generator.generate(name, max_mr, iters, loop_unroll_iters, full_unroll, nc_mod_nr,  static_cast<const jit_gemm_params*>(params));
+  generator.generate(name, max_mr, iters, loop_unroll_iters, full_unroll, nc_mod_nr, use_fma,
+                     static_cast<const jit_gemm_params*>(params));
   generator.Emit();
   auto finalized = generator.finalize();
   if (generator.error() == xnnpack::Error::kOutOfMemory) {
@@ -87,12 +89,26 @@ class PostOps : public WasmAssembler {
     }
   }
 
+  auto F32x4Max(const Local& a, const Local& b) {
+  #if XNN_ARCH_WASMRELAXEDSIMD
+    return F32x4RelaxedMax(a, b);
+  #endif
+    return F32x4Pmax(a, b);
+  }
+
+  auto F32x4Min(const Local& a, const Local& b) {
+  #if XNN_ARCH_WASMRELAXEDSIMD
+    return F32x4RelaxedMin(a, b);
+  #endif
+    return F32x4Pmin(a, b);
+  }
+
   void Clamp(Local& value) {
     if (clamps_consts_.clamp_max) {
-      value = F32x4Pmin(clamps_consts_.vmax, value);
+      value = F32x4Min(clamps_consts_.vmax, value);
     }
     if (clamps_consts_.clamp_min) {
-      value = F32x4Pmax(clamps_consts_.vmin, value);
+      value = F32x4Max(clamps_consts_.vmin, value);
     }
   }
 
@@ -148,6 +164,7 @@ class PostOps : public WasmAssembler {
 class GemmIGemmCommons : public PostOps {
  public:
   using PostOps::PostOps;
+
  protected:
   struct StoreArgs {
     StoreArgs(LocalsArray* cs, LocalsArray* vacc0123, LocalsArray* vacc4567, LocalsArray* as, Local* cn_stride, Local* kc, Local* nc):
@@ -203,5 +220,5 @@ class GemmIGemmCommons : public PostOps {
   }
 };
 
-}
-}
+}  // namespace internal
+}  // namespace xnnpack
