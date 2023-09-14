@@ -88,7 +88,7 @@ def xnnpack_cc_library(
         defines = [],
         includes = [],
         deps = [],
-        visibility = [],
+        visibility = [":__subpackages__"],
         testonly = False):
     """C/C++/assembly library with architecture-specific configuration.
 
@@ -207,7 +207,7 @@ def xnnpack_cc_library(
             "//conditions:default": [],
         }),
         textual_hdrs = hdrs,
-        visibility = visibility + [":__subpackages__"],
+        visibility = visibility,
         testonly = testonly,
     )
 
