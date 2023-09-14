@@ -18,7 +18,7 @@ def xnnpack_emscripten_test_linkopts():
         "-s DEMANGLE_SUPPORT=1",
         "-s EXIT_RUNTIME=1",
         "-s ALLOW_MEMORY_GROWTH=1",
-        "--pre-js $(location :preamble.js.lds)",
+        "--pre-js $(location //:preamble.js.lds)",
     ]
 
 def xnnpack_emscripten_benchmark_linkopts():
@@ -31,11 +31,11 @@ def xnnpack_emscripten_benchmark_linkopts():
         "-s ALLOW_MEMORY_GROWTH=1",
         "-s INITIAL_MEMORY=1gb",
         "-s MAXIMUM_MEMORY=4gb",
-        "--pre-js $(location :preamble.js.lds)",
+        "--pre-js $(location //:preamble.js.lds)",
     ]
 
 def xnnpack_emscripten_deps():
     """Emscripten-specific dependencies for unit tests and benchmarks."""
     return [
-        ":preamble.js.lds",
+        "//:preamble.js.lds",
     ]
