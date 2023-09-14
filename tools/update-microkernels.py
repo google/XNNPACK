@@ -260,10 +260,11 @@ def main(args):
       if ext == '.sollya':
         continue
 
+      subdir = os.path.relpath(root, root_dir)
+      filepath = os.path.join(subdir, name)
+
       # Build microkernel name -> microkernel filepath mapping
       if options.amalgamate:
-        subdir = os.path.relpath(root, root_dir)
-        filepath = os.path.join(subdir, name)
         with open(os.path.join(root_dir, filepath), 'r', encoding='utf-8') as f:
           content = f.read()
           microkernels = re.findall(MICROKERNEL_NAME_REGEX, content)
