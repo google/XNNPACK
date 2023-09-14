@@ -382,12 +382,14 @@ DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(xnn_init_f32_minmax_scalar_params)
   DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(xnn_init_f32_minmax_wasmsimd_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+
 #define DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                    \
     union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)], \
     float output_min,                                             \
     float output_max,                                             \
     uint8_t kernel_zero_point);
+
 DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_scalar_params)
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_sse_params)
@@ -397,6 +399,7 @@ DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_scalar_par
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_wasmsimd_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
 
 #define DECLARE_INIT_F16_HSWISH_PARAMS_FUNCTION(fn_name) \
   XNN_INTERNAL size_t fn_name(                           \
