@@ -464,6 +464,9 @@ void xnn_pack_qs8_qc4w_gemm_gio_w(
               ksum += (uint32_t) kv_top + (uint32_t) kv_bot - kzp * 2;
               const uint8_t kv = (kv_top << 4) | kv_bot;
               ((uint8_t*) packed_weights)[kr_block_offset] = kv;
+            } else {
+              const uint8_t kv = kzp | (kzp << 4);
+              ((uint8_t*) packed_weights)[kr_block_offset] = kv;
             }
           }
           unaligned_indexed_store_u32(packed_b, nr_block_offset, unaligned_indexed_load_u32(packed_b, nr_block_offset) - ksum * izp);

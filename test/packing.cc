@@ -22,8 +22,8 @@
 
 TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, g_eq_1) {
   const size_t g = 1;
-  const size_t nc = 5;
-  const size_t kc = 3;
+  const size_t nc = 3;
+  const size_t kc = 5;
   const size_t nr = 2;
   const size_t kr = 2;
   const size_t sr = 1;
@@ -32,18 +32,19 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, g_eq_1) {
   const size_t kb = round_up_po2(kc, 2) >> 1;
 
   std::vector<int32_t> b(g * nc);
-  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2]
   std::vector<uint8_t> k(g * rounded_nc * kc);
   std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
   k[0] = 0x10;
-  k[1] = 0x32;
-  k[2] = 0x04;
-  k[3] = 0x65;
-  k[4] = 0x87;
-  k[5] = 0x09;
-  k[6] = 0xba;
-  k[7] = 0xdc;
-  k[8] = 0x0e;
+  k[1] = 0x02;
+  k[2] = 0x43;
+  k[3] = 0x05;
+  k[4] = 0x76;
+  k[5] = 0x08;
+  k[6] = 0xa9;
+  k[7] = 0x0b;
+  k[8] = 0xdc;
+  k[9] = 0x0e;
   std::vector<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kb, kr * sr)));
   auto a = xnn_qs8_qc4w_packing_params{ 0, 0xf };
   xnn_pack_qs8_qc4w_gemm_gio_w(g, nc, kc, nr, kr, sr, /*k_stride=*/nc,
@@ -53,18 +54,17 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, g_eq_1) {
     // 2 bias.
     0x00, 0x00, 0x00, 0x00,
     0x01, 0x00, 0x00, 0x00,
-    0x50, 0xfa,  // kernel zero point (0xf)
-    0x61, 0xfb,  // kernel zero point (0xf)
-    // 2 bias.
-    0x02, 0x00, 0x00, 0x00,
-    0x03, 0x00, 0x00, 0x00,
-    0x72, 0xfc,  // kernel zero point (0xf)
-    0x83, 0xfd,  // kernel zero point (0xf)
+    0x30, 0x96,
+    0x41, 0xa7,
+    0xfc, 0xff,  // kernel zero point (0xf)
+    0xfd, 0xff,  // kernel zero point (0xf)
     // 1 bias and padding.
-    0x04, 0x00, 0x00, 0x00,
+    0x02, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00,
-    0x94, 0xfe,  // kernel zero point (0xf)
-    0x00, 0x00,  // padding
+    0x52, 0xb8,
+    0x00, 0x00,
+    0xfe, 0xff,  // kernel zero point (0xf)
+    0x00, 0x00,
   };
   EXPECT_EQ(expected, packed_weights);
 }
