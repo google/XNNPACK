@@ -321,7 +321,7 @@ void GEMMBenchmark(benchmark::State& state,
   const size_t kc = state.range(2);
 
   const size_t nc_stride = benchmark::utils::RoundUp(nc, nr);
-  const size_t kc_stride = benchmark::utils::RoundUp(kc, kr * sr) / 2;
+  const size_t kc_stride = benchmark::utils::RoundUp(kc, kr / 2 * sr) / 2;
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
@@ -348,7 +348,7 @@ void GEMMBenchmark(benchmark::State& state,
 
   const xnn_qs8_packing_params packing_params = { /*input_zero_point=*/1 };
   // Note that bias will be incorrect with qs8 pack.  Use qc4w variation when available
-  xnn_pack_qs8_gemm_goi_w(1, nc, kc / 2, nr, kr, sr,
+  xnn_pack_qs8_gemm_goi_w(1, nc, kc / 2, nr, kr / 2, sr,
                           (const int8_t*) k.data(), /*bias=*/nullptr, /*scale=*/nullptr, w.data(), sizeof(float) * 2 * nr, &packing_params);
   std::vector<float> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));
