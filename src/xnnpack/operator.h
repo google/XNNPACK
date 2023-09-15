@@ -44,7 +44,7 @@ struct xnn_ukernel_dwconv {
   uint8_t last_tile;
   // For unipass, tile_size == primary_tile, otherwise it is calculated based on
   // how many pass the middle_tile runs.
-  uint8_t tile_size;
+  size_t tile_size;
 };
 
 // Direct 2D Depthwise Convolution
