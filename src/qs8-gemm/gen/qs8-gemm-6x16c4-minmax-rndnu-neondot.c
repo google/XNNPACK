@@ -14,6 +14,7 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
 
+
 void xnn_qs8_gemm_minmax_rndnu_ukernel_6x16c4__neondot(
     size_t mr,
     size_t nc,

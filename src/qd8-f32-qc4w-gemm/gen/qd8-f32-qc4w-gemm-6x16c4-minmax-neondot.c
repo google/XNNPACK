@@ -14,6 +14,7 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
 
+
 void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x16c4__neondot(
     size_t mr,
     size_t nc,
@@ -133,10 +134,10 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x16c4__neondot(
       const uint8x16_t vb4567x01234567c13 = vshrq_n_u8(vb4567x01234567, 4);
       const uint8x16_t vb4567x89ABCDEFc02 = vandq_u8(vb4567x89ABCDEF, vmask);
       const uint8x16_t vb4567x89ABCDEFc13 = vshrq_n_u8(vb4567x89ABCDEF, 4);
-      uint8x16x2_t vb0123x01234567c0123 = vzipq_u8(vb0123x01234567c02, vb0123x01234567c13);
-      uint8x16x2_t vb0123x89ABCDEFc0123 = vzipq_u8(vb0123x89ABCDEFc02, vb0123x89ABCDEFc13);
-      uint8x16x2_t vb4567x01234567c0123 = vzipq_u8(vb4567x01234567c02, vb4567x01234567c13);
-      uint8x16x2_t vb4567x89ABCDEFc0123 = vzipq_u8(vb4567x89ABCDEFc02, vb4567x89ABCDEFc13);
+      const uint8x16x2_t vb0123x01234567c0123 = vzipq_u8(vb0123x01234567c02, vb0123x01234567c13);
+      const uint8x16x2_t vb0123x89ABCDEFc0123 = vzipq_u8(vb0123x89ABCDEFc02, vb0123x89ABCDEFc13);
+      const uint8x16x2_t vb4567x01234567c0123 = vzipq_u8(vb4567x01234567c02, vb4567x01234567c13);
+      const uint8x16x2_t vb4567x89ABCDEFc0123 = vzipq_u8(vb4567x89ABCDEFc02, vb4567x89ABCDEFc13);
       const int8x16_t vb0123x0123 = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb0123x01234567c0123.val[0]));
       const int8x16_t vb0123x4567 = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb0123x01234567c0123.val[1]));
       const int8x16_t vb0123x89AB = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vb0123x89ABCDEFc0123.val[0]));

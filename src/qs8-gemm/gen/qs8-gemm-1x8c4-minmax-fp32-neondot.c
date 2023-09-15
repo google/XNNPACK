@@ -15,6 +15,7 @@
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 
+
 void xnn_qs8_gemm_minmax_fp32_ukernel_1x8c4__neondot(
     size_t mr,
     size_t nc,
