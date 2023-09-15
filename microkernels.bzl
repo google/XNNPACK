@@ -4511,19 +4511,14 @@ ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS = [
 ]
 
 ALL_NEONI8MM_MICROKERNEL_SRCS = [
-    "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x4c8-minmax-neoni8mm.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-neoni8mm.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x16c8-minmax-neoni8mm.c",
-    "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x4c8-minmax-neoni8mm.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-neoni8mm.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x16c8-minmax-neoni8mm.c",
-    "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x4c8-minmax-neoni8mm.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-neoni8mm.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x16c8-minmax-neoni8mm.c",
-    "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x4c8-minmax-neoni8mm.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x8c8-minmax-neoni8mm.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x16c8-minmax-neoni8mm.c",
-    "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x4c8-minmax-neoni8mm.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x8c8-minmax-neoni8mm.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x16c8-minmax-neoni8mm.c",
     "src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-fp32-neoni8mm.c",
