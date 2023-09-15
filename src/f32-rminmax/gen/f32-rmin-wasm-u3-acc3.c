@@ -17,7 +17,7 @@ void xnn_f32_rmin_ukernel__wasm_u3_acc3(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_default_params* params)
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);

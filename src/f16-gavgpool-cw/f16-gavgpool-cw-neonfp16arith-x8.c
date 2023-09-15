@@ -16,7 +16,7 @@ void xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x8(
     size_t channels,
     const void* input,
     void* output,
-    const union xnn_f16_gavgpool_params* params) XNN_OOB_READS
+    const union xnn_f16_gavgpool_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(elements != 0);
   assert(elements % sizeof(uint16_t) == 0);

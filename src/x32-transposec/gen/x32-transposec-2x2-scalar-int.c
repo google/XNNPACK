@@ -21,7 +21,7 @@ void xnn_x32_transposec_ukernel__2x2_scalar_int(
     size_t output_stride,
     size_t block_width,
     size_t block_height,
-    const union xnn_x32_transpose_params* params) XNN_OOB_READS
+    const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(output_stride >= block_height * sizeof(int));
   assert(input_stride >= block_width * sizeof(int));

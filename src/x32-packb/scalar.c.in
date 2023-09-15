@@ -33,7 +33,7 @@ void xnn_x${BITS}_${NAME}_gemm_ukernel_${CHANNEL_TILE}c${CHANNEL_SUBTILE}s${CHAN
   ${WTYPE}* packed_weights,
   size_t channel_tile_stride,
   size_t channel_subtile_stride,
-  const union xnn_x32_packb_params* params)
+  const union xnn_x32_packb_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(groups != 0);
   assert(channels != 0);
