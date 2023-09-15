@@ -17,7 +17,7 @@
 #include <xnnpack/microparams-init.h>
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void qs8_gemm_minmax_rndnu_ukernel_1x8c8__neoni8mm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c8__neoni8mm,
@@ -27,10 +27,10 @@
   }
 
   BENCHMARK_GEMM(qs8_gemm_minmax_rndnu_ukernel_1x8c8__neoni8mm)
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void qs8_gemm_minmax_rndnu_ukernel_1x16c8__neoni8mm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c8__neoni8mm,
@@ -40,10 +40,10 @@
   }
 
   BENCHMARK_GEMM(qs8_gemm_minmax_rndnu_ukernel_1x16c8__neoni8mm)
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void qs8_gemm_minmax_rndnu_ukernel_2x8c8__neoni8mm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qs8_gemm_minmax_rndnu_ukernel_2x8c8__neoni8mm,
@@ -53,10 +53,10 @@
   }
 
   BENCHMARK_GEMM(qs8_gemm_minmax_rndnu_ukernel_2x8c8__neoni8mm)
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void qs8_gemm_minmax_rndnu_ukernel_2x16c8__neoni8mm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qs8_gemm_minmax_rndnu_ukernel_2x16c8__neoni8mm,
@@ -66,10 +66,10 @@
   }
 
   BENCHMARK_GEMM(qs8_gemm_minmax_rndnu_ukernel_2x16c8__neoni8mm)
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void qs8_gemm_minmax_rndnu_ukernel_4x8c8__neoni8mm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c8__neoni8mm,
@@ -79,10 +79,10 @@
   }
 
   BENCHMARK_GEMM(qs8_gemm_minmax_rndnu_ukernel_4x8c8__neoni8mm)
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void qs8_gemm_minmax_rndnu_ukernel_4x16c8__neoni8mm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c8__neoni8mm,
@@ -92,10 +92,10 @@
   }
 
   BENCHMARK_GEMM(qs8_gemm_minmax_rndnu_ukernel_4x16c8__neoni8mm)
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void qs8_gemm_minmax_rndnu_ukernel_6x8c8__neoni8mm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qs8_gemm_minmax_rndnu_ukernel_6x8c8__neoni8mm,
@@ -105,10 +105,10 @@
   }
 
   BENCHMARK_GEMM(qs8_gemm_minmax_rndnu_ukernel_6x8c8__neoni8mm)
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void qs8_gemm_minmax_rndnu_ukernel_6x16c8__neoni8mm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qs8_gemm_minmax_rndnu_ukernel_6x16c8__neoni8mm,
@@ -118,10 +118,10 @@
   }
 
   BENCHMARK_GEMM(qs8_gemm_minmax_rndnu_ukernel_6x16c8__neoni8mm)
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void qs8_gemm_minmax_rndnu_ukernel_8x8c8__neoni8mm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qs8_gemm_minmax_rndnu_ukernel_8x8c8__neoni8mm,
@@ -131,10 +131,10 @@
   }
 
   BENCHMARK_GEMM(qs8_gemm_minmax_rndnu_ukernel_8x8c8__neoni8mm)
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void qs8_gemm_minmax_rndnu_ukernel_8x16c8__neoni8mm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qs8_gemm_minmax_rndnu_ukernel_8x16c8__neoni8mm,
@@ -144,7 +144,7 @@
   }
 
   BENCHMARK_GEMM(qs8_gemm_minmax_rndnu_ukernel_8x16c8__neoni8mm)
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
 #if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY

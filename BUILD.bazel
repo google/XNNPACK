@@ -1450,6 +1450,12 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neoni8mm_bench_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+i8mm",
+        "-mfpu=neon-fp-armv8",
+    ],
+    aarch32_srcs = ALL_NEONI8MM_MICROKERNEL_SRCS,
     aarch64_copts = [
         "-march=armv8.2-a+i8mm",
     ],
@@ -1469,6 +1475,12 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neoni8mm_prod_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+i8mm",
+        "-mfpu=neon-fp-armv8",
+    ],
+    aarch32_srcs = ["src/amalgam/gen/neoni8mm.c"],
     aarch64_copts = ["-march=armv8.2-a+i8mm"],
     aarch64_srcs = ["src/amalgam/gen/neoni8mm.c"],
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -1486,6 +1498,12 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neoni8mm_test_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+i8mm",
+        "-mfpu=neon-fp-armv8",
+    ],
+    aarch32_srcs = ALL_NEONI8MM_MICROKERNEL_SRCS,
     aarch64_copts = ["-march=armv8.2-a+i8mm"],
     aarch64_srcs = ALL_NEONI8MM_MICROKERNEL_SRCS,
     copts = [
@@ -9841,6 +9859,7 @@ alias(
 selects.config_setting_group(
     name = "arm_i8mm_enabled_by_default",
     match_any = [
+        ":aarch32",
         ":aarch64",
     ],
 )

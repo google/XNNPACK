@@ -480,7 +480,7 @@
 #endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(QD8_F32_QC8W_GEMM_MINMAX_1X8C8__NEONI8MM, k_eq_16) {
     TEST_REQUIRES_ARM_NEON_I8MM;
     GemmMicrokernelTester()
@@ -933,10 +933,10 @@
       .cm_stride(11)
       .Test(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c8__neoni8mm, xnn_init_f32_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(QD8_F32_QC8W_GEMM_MINMAX_1X16C8__NEONI8MM, k_eq_16) {
     TEST_REQUIRES_ARM_NEON_I8MM;
     GemmMicrokernelTester()
@@ -1389,10 +1389,10 @@
       .cm_stride(19)
       .Test(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__neoni8mm, xnn_init_f32_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(QD8_F32_QC8W_GEMM_MINMAX_2X8C8__NEONI8MM, k_eq_16) {
     TEST_REQUIRES_ARM_NEON_I8MM;
     GemmMicrokernelTester()
@@ -1845,10 +1845,10 @@
       .cm_stride(11)
       .Test(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x8c8__neoni8mm, xnn_init_f32_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(QD8_F32_QC8W_GEMM_MINMAX_2X16C8__NEONI8MM, k_eq_16) {
     TEST_REQUIRES_ARM_NEON_I8MM;
     GemmMicrokernelTester()
@@ -2301,10 +2301,10 @@
       .cm_stride(19)
       .Test(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x16c8__neoni8mm, xnn_init_f32_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(QD8_F32_QC8W_GEMM_MINMAX_4X8C8__NEONI8MM, k_eq_16) {
     TEST_REQUIRES_ARM_NEON_I8MM;
     GemmMicrokernelTester()
@@ -2757,10 +2757,10 @@
       .cm_stride(11)
       .Test(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x8c8__neoni8mm, xnn_init_f32_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(QD8_F32_QC8W_GEMM_MINMAX_4X16C8__NEONI8MM, k_eq_16) {
     TEST_REQUIRES_ARM_NEON_I8MM;
     GemmMicrokernelTester()
@@ -3213,10 +3213,10 @@
       .cm_stride(19)
       .Test(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c8__neoni8mm, xnn_init_f32_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(QD8_F32_QC8W_GEMM_MINMAX_6X8C8__NEONI8MM, k_eq_16) {
     TEST_REQUIRES_ARM_NEON_I8MM;
     GemmMicrokernelTester()
@@ -3669,10 +3669,10 @@
       .cm_stride(11)
       .Test(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_6x8c8__neoni8mm, xnn_init_f32_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(QD8_F32_QC8W_GEMM_MINMAX_8X16C8__NEONI8MM, k_eq_16) {
     TEST_REQUIRES_ARM_NEON_I8MM;
     GemmMicrokernelTester()
@@ -4125,7 +4125,7 @@
       .cm_stride(19)
       .Test(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_8x16c8__neoni8mm, xnn_init_f32_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

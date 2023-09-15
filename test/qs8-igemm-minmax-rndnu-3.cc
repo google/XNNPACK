@@ -1428,7 +1428,7 @@
 #endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(QS8_IGEMM_MINMAX_RNDNU_1X8C8__NEONI8MM, k_eq_16) {
     TEST_REQUIRES_ARM_NEON_I8MM;
     GemmMicrokernelTester()
@@ -1893,10 +1893,10 @@
       .cm_stride(11)
       .Test(xnn_qs8_igemm_minmax_rndnu_ukernel_1x8c8__neoni8mm, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
   }
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(QS8_IGEMM_MINMAX_RNDNU_1X16C8__NEONI8MM, k_eq_16) {
     TEST_REQUIRES_ARM_NEON_I8MM;
     GemmMicrokernelTester()
@@ -2361,7 +2361,7 @@
       .cm_stride(19)
       .Test(xnn_qs8_igemm_minmax_rndnu_ukernel_1x16c8__neoni8mm, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
   }
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
