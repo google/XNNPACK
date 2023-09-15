@@ -1623,7 +1623,7 @@ size_t xnn_init_f32_scale_avx_params(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 void xnn_update_f32_scaleminmax_scalar_params(
-  union xnn_f32_scaleminmax_params* params,
+  union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale)
 {
   params->scalar.scale = scale;
@@ -1631,7 +1631,7 @@ void xnn_update_f32_scaleminmax_scalar_params(
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 void xnn_update_f32_scaleminmax_sse_params(
-  union xnn_f32_scaleminmax_params* params,
+  union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale)
 {
   for (uint32_t i = 0; i < 4; i++) {
@@ -1793,7 +1793,7 @@ size_t xnn_init_f16_gavgpool_neonfp16arith_params(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 void xnn_update_f32_gavgpool_params(
-  union xnn_f32_gavgpool_params* params,
+  union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
   float multiplier,
   uint32_t width)
 {
@@ -1828,7 +1828,7 @@ void xnn_update_f32_gavgpool_params(
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 void xnn_update_f16_gavgpool_neonfp16arith_params(
-  union xnn_f16_gavgpool_params* params,
+  union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t multiplier,
   uint32_t width)
 {
@@ -4784,7 +4784,7 @@ size_t xnn_init_f32_chw_wasmsimd_stride2_params(
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 void xnn_update_f16_chw_neonfp16arith_stride1_params(
-  union xnn_f16_chw_params* params,
+  union xnn_f16_chw_params params[XNN_MIN_ELEMENTS(1)],
   uint32_t width)
 {
   const uint32_t w8 = (width - 1) & 7;
@@ -4799,7 +4799,7 @@ void xnn_update_f16_chw_neonfp16arith_stride1_params(
 }
 
 void xnn_update_f16_chw_neonfp16arith_stride2_params(
-  union xnn_f16_chw_params* params,
+  union xnn_f16_chw_params params[XNN_MIN_ELEMENTS(1)],
   uint32_t width)
 {
   const uint32_t w16 = (width - 1) & 15;
@@ -4824,7 +4824,7 @@ void xnn_update_f16_chw_neonfp16arith_stride2_params(
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 void xnn_update_f32_chw_neon_stride1_params(
-  union xnn_f32_chw_params* params,
+  union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
   uint32_t width)
 {
   const uint32_t w4 = (width - 1) & 3;
@@ -4835,7 +4835,7 @@ void xnn_update_f32_chw_neon_stride1_params(
 }
 
 void xnn_update_f32_chw_neon_stride2_params(
-  union xnn_f32_chw_params* params,
+  union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
   uint32_t width)
 {
   const uint32_t w8 = (width - 1) & 7;
@@ -4852,7 +4852,7 @@ void xnn_update_f32_chw_neon_stride2_params(
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 void xnn_update_f32_chw_sse_stride1_params(
-  union xnn_f32_chw_params* params,
+  union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
   uint32_t width)
 {
   const uint32_t w4 = (width - 1) & 3;
@@ -4863,7 +4863,7 @@ void xnn_update_f32_chw_sse_stride1_params(
 }
 
 void xnn_update_f32_chw_sse_stride2_params(
-  union xnn_f32_chw_params* params,
+  union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
   uint32_t width)
 {
   const uint32_t w8 = (width - 1) & 7;
@@ -4880,7 +4880,7 @@ void xnn_update_f32_chw_sse_stride2_params(
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 void xnn_update_f32_chw_wasmsimd_stride1_params(
-  union xnn_f32_chw_params* params,
+  union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
   uint32_t width)
 {
   const uint32_t w4 = (width - 1) & 3;
@@ -4891,7 +4891,7 @@ void xnn_update_f32_chw_wasmsimd_stride1_params(
 }
 
 void xnn_update_f32_chw_wasmsimd_stride2_params(
-  union xnn_f32_chw_params* params,
+  union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
   uint32_t width)
 {
   const uint32_t w8 = (width - 1) & 7;

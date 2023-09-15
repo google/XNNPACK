@@ -240,6 +240,12 @@
   #define XNN_MIN_ELEMENTS(count) static count
 #endif
 
+#if defined(__cplusplus) || XNN_COMPILER_MSVC
+  #define XNN_RESTRICT
+#else
+  #define XNN_RESTRICT restrict
+#endif
+
 #if defined(__GNUC__)
   #define XNN_LIKELY(condition) (__builtin_expect(!!(condition), 1))
   #define XNN_UNLIKELY(condition) (__builtin_expect(!!(condition), 0))

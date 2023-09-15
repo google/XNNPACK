@@ -23,7 +23,7 @@ extern "C" {
       size_t n,                                  \
       const uint8_t* x,                          \
       uint8_t* y,                                \
-      const uint8_t* t);
+      const uint8_t table[XNN_RESTRICT XNN_MIN_ELEMENTS(256)]);
 
 DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__scalar_u1)
 DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__scalar_u2)

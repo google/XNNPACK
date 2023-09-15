@@ -26,7 +26,7 @@ extern "C" {
     const uint32_t* nidx_nnzmap,                          \
     float* output,                                        \
     size_t output_stride,                                 \
-    const union xnn_f32_minmax_params* params);
+    const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_spmm_minmax_ukernel_1x1__scalar)
 DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_spmm_minmax_ukernel_1x1__scalar_pipelined)
@@ -129,7 +129,7 @@ DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_spmm_minmax_ukernel_32x4__aarch
     const uint32_t* nidx_nnzmap,                          \
     void* output,                                         \
     size_t output_stride,                                 \
-    const union xnn_f16_minmax_params* params);
+    const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith)
 DECLARE_F16_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_pipelined)

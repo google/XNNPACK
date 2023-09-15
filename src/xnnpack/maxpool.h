@@ -29,7 +29,7 @@ extern "C" {
       void* output,                                          \
       size_t input_increment,                                \
       size_t output_increment,                               \
-      const union xnn_f16_minmax_params* params);
+      const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8)
 DECLARE_F16_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8)
@@ -45,7 +45,7 @@ DECLARE_F16_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_f16_maxpool_minmax_ukernel_9p8x_
       float* output,                                         \
       size_t input_increment,                                \
       size_t output_increment,                               \
-      const union xnn_f32_minmax_params* params);
+      const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F32_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_f32_maxpool_minmax_ukernel_9p8x__neon_c4)
 DECLARE_F32_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_f32_maxpool_minmax_ukernel_9p8x__scalar_c1)
@@ -65,7 +65,7 @@ DECLARE_F32_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_f32_maxpool_minmax_ukernel_9p8x_
       uint8_t* output,                                      \
       size_t input_increment,                               \
       size_t output_increment,                              \
-      const union xnn_u8_minmax_params* params);
+      const union xnn_u8_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_U8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16)
 DECLARE_U8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1)
@@ -83,7 +83,7 @@ DECLARE_U8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_u8_maxpool_minmax_ukernel_9p8x__w
       int8_t* output,                                       \
       size_t input_increment,                               \
       size_t output_increment,                              \
-      const union xnn_s8_minmax_params* params);
+      const union xnn_s8_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_s8_maxpool_minmax_ukernel_2p2x__neon_c16)
 DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_s8_maxpool_minmax_ukernel_4p3x__neon_c16)

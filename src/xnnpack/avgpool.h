@@ -31,7 +31,7 @@ extern "C" {
       void* output,                                                    \
       size_t input_increment,                                          \
       size_t output_increment,                                         \
-      const union xnn_f16_scaleminmax_params* params);
+      const union xnn_f16_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_avgpool_minmax_ukernel_9p8x__f16c_c8)
 DECLARE_F16_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_avgpool_minmax_ukernel_9p8x__neonfp16arith_c8)
@@ -48,7 +48,7 @@ DECLARE_F16_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_avgpool_minmax_uke
       void* output,                                                  \
       size_t input_increment,                                        \
       size_t output_increment,                                       \
-      const union xnn_f16_scaleminmax_params* params);
+      const union xnn_f16_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_avgpool_minmax_ukernel_9x__f16c_c8)
 DECLARE_F16_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_avgpool_minmax_ukernel_9x__neonfp16arith_c8)
@@ -66,7 +66,7 @@ DECLARE_F16_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_avgpool_minmax_ukern
       float* output,                                                   \
       size_t input_increment,                                          \
       size_t output_increment,                                         \
-      const union xnn_f32_scaleminmax_params* params);
+      const union xnn_f32_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F32_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_avgpool_minmax_ukernel_9p8x__neon_c4)
 DECLARE_F32_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_avgpool_minmax_ukernel_9p8x__scalar_c1)
@@ -87,7 +87,7 @@ DECLARE_F32_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_avgpool_minmax_uke
       float* output,                                                 \
       size_t input_increment,                                        \
       size_t output_increment,                                       \
-      const union xnn_f32_scaleminmax_params* params);
+      const union xnn_f32_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F32_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_avgpool_minmax_ukernel_9x__neon_c4)
 DECLARE_F32_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_avgpool_minmax_ukernel_9x__scalar_c1)
@@ -109,7 +109,7 @@ DECLARE_F32_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_avgpool_minmax_ukern
       uint8_t* output,                                                 \
       size_t input_increment,                                          \
       size_t output_increment,                                         \
-      const union xnn_qu8_avgpool_minmax_params* params);
+      const union xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_QU8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8)
 DECLARE_QU8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1)
@@ -127,7 +127,7 @@ DECLARE_QU8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_fp3
       uint8_t* output,                                               \
       size_t input_increment,                                        \
       size_t output_increment,                                       \
-      const union xnn_qu8_avgpool_minmax_params* params);
+      const union xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_QU8_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__neon_c8)
 DECLARE_QU8_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__scalar_imagic_c1)

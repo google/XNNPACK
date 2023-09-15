@@ -25,7 +25,7 @@ extern "C" {
       const float* w,                                          \
       float* y,                                                \
       size_t y_stride,                                         \
-      const union xnn_f32_minmax_params* params);
+      const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F32_VMULCADDC_MINMAX_UKERNEL_FUNCTION(xnn_f32_vmulcaddc_minmax_ukernel_c4__neon_2x)
 DECLARE_F32_VMULCADDC_MINMAX_UKERNEL_FUNCTION(xnn_f32_vmulcaddc_minmax_ukernel_c8__neon_2x)
@@ -65,7 +65,7 @@ DECLARE_F32_VMULCADDC_MINMAX_UKERNEL_FUNCTION(xnn_f32_vmulcaddc_minmax_ukernel_c
       const void* w,                                           \
       void* y,                                                 \
       size_t y_stride,                                         \
-      const union xnn_f16_minmax_params* params);
+      const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_VMULCADDC_MINMAX_UKERNEL_FUNCTION(xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x)
 DECLARE_F16_VMULCADDC_MINMAX_UKERNEL_FUNCTION(xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x)

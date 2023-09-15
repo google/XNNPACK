@@ -21,7 +21,7 @@ extern "C" {
       size_t n,                                      \
       const int8_t* input,                           \
       int8_t* output,                                \
-      const union xnn_qs8_lrelu_params* params);
+      const union xnn_qs8_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_QS8_VLRELU_UKERNEL_FUNCTION(xnn_qs8_vlrelu_ukernel__neon_u8)
 DECLARE_QS8_VLRELU_UKERNEL_FUNCTION(xnn_qs8_vlrelu_ukernel__neon_u16)
@@ -76,7 +76,7 @@ DECLARE_QS8_VLRELU_UKERNEL_FUNCTION(xnn_qs8_vlrelu_ukernel__scalar_select_u4)
       size_t n,                                      \
       const uint8_t* input,                          \
       uint8_t* output,                               \
-      const union xnn_qu8_lrelu_params* params);
+      const union xnn_qu8_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_QU8_VLRELU_UKERNEL_FUNCTION(xnn_qu8_vlrelu_ukernel__neon_u8)
 DECLARE_QU8_VLRELU_UKERNEL_FUNCTION(xnn_qu8_vlrelu_ukernel__neon_u16)

@@ -29,7 +29,7 @@ extern "C" {
       void* output,                                                     \
       size_t input_increment,                                           \
       size_t output_increment,                                          \
-      const union xnn_f16_minmax_params* params);
+      const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_pavgpool_minmax_ukernel_9p8x__avx2_c8)
 DECLARE_F16_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_pavgpool_minmax_ukernel_9p8x__neonfp16arith_c8)
@@ -47,7 +47,7 @@ DECLARE_F16_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_pavgpool_minmax_u
       void* output,                                                   \
       size_t input_increment,                                         \
       size_t output_increment,                                        \
-      const union xnn_f16_minmax_params* params);
+      const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8)
 DECLARE_F16_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_pavgpool_minmax_ukernel_9x__neonfp16arith_c8)
@@ -66,7 +66,7 @@ DECLARE_F16_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_pavgpool_minmax_uke
       float* output,                                                    \
       size_t input_increment,                                           \
       size_t output_increment,                                          \
-      const union xnn_f32_minmax_params* params);
+      const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F32_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9p8x__neon_c4)
 DECLARE_F32_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9p8x__scalar_c1)
@@ -88,7 +88,7 @@ DECLARE_F32_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_u
       float* output,                                                  \
       size_t input_increment,                                         \
       size_t output_increment,                                        \
-      const union xnn_f32_minmax_params* params);
+      const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F32_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9x__neon_c4)
 DECLARE_F32_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9x__scalar_c1)
