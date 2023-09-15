@@ -105,27 +105,9 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}) {
     .n(${NR})
     .k(${KBLOCK})
     $if KERNELTYPE == 'qc4w':
-      .b_zero_point(7)
+      .b_zero_point(8)
     .Test(${", ".join(TEST_ARGS)});
 }
-
-$if KERNELTYPE == 'qc4w':
-  TEST(${TEST_NAME}, no_zero_point) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    GemmMicrokernelTester()
-      $if EXTENDED_WEIGHTS:
-        .extended_weights(true)
-      .mr(${MR})
-      .nr(${NR})
-      .kr(${KR})
-      .sr(${SR})
-      .m(${MR})
-      .n(${NR})
-      .k(${KBLOCK})
-      .b_zero_point(0)
-      .Test(${", ".join(TEST_ARGS)});
-  }
 
 TEST(${TEST_NAME}, strided_cn) {
   $if ISA_CHECK:
@@ -142,7 +124,7 @@ TEST(${TEST_NAME}, strided_cn) {
     .k(${KBLOCK})
     .cn_stride(${next_prime(NR + 1)})
     $if KERNELTYPE == 'qc4w':
-      .b_zero_point(7)
+      .b_zero_point(8)
     .Test(${", ".join(TEST_ARGS)});
 }
 
@@ -162,7 +144,7 @@ $if UKERNEL_TYPE != "IGEMM":
       .k(${KBLOCK})
       .a_stride(${next_prime(KBLOCK + 1)})
       $if KERNELTYPE == 'qc4w':
-        .b_zero_point(7)
+        .b_zero_point(8)
       .Test(${", ".join(TEST_ARGS)});
   }
 
@@ -183,7 +165,7 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile) {
         .k(${KBLOCK})
         .iterations(1)
         $if KERNELTYPE == 'qc4w':
-          .b_zero_point(7)
+          .b_zero_point(8)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -205,7 +187,7 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile_m) {
       .k(${KBLOCK})
       .iterations(1)
       $if KERNELTYPE == 'qc4w':
-        .b_zero_point(7)
+        .b_zero_point(8)
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -227,7 +209,7 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile_n) {
       .k(${KBLOCK})
       .iterations(1)
       $if KERNELTYPE == 'qc4w':
-        .b_zero_point(7)
+        .b_zero_point(8)
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -247,7 +229,7 @@ $if IS_PIPELINED:
       .n(${NR})
       .k(${KBLOCK * 2})
       $if KERNELTYPE == 'qc4w':
-        .b_zero_point(7)
+        .b_zero_point(8)
       .Test(${", ".join(TEST_ARGS)});
   }
 
@@ -267,7 +249,7 @@ $if IS_PIPELINED:
         .k(${KBLOCK * 2})
         .a_stride(${next_prime(KBLOCK * 2 + 1)})
         $if KERNELTYPE == 'qc4w':
-          .b_zero_point(7)
+          .b_zero_point(8)
         .Test(${", ".join(TEST_ARGS)});
     }
 
@@ -288,7 +270,7 @@ $if IS_PIPELINED:
           .k(${KBLOCK * 2})
           .iterations(1)
           $if KERNELTYPE == 'qc4w':
-            .b_zero_point(7)
+            .b_zero_point(8)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -310,7 +292,7 @@ $if KBLOCK > 1:
         .n(${NR})
         .k(k)
         $if KERNELTYPE == 'qc4w':
-          .b_zero_point(7)
+          .b_zero_point(8)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -332,7 +314,7 @@ $if KBLOCK > 1:
           .k(k)
           .a_stride(${next_prime(ADJKBLOCK + 1)})
           $if KERNELTYPE == 'qc4w':
-            .b_zero_point(7)
+            .b_zero_point(8)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -355,7 +337,7 @@ $if KBLOCK > 1:
             .k(k)
             .iterations(1)
             $if KERNELTYPE == 'qc4w':
-              .b_zero_point(7)
+              .b_zero_point(8)
             .Test(${", ".join(TEST_ARGS)});
         }
       }
@@ -377,7 +359,7 @@ TEST(${TEST_NAME}, k_gt_${ADJKBLOCK}) {
       .n(${NR})
       .k(k)
       $if KERNELTYPE == 'qc4w':
-        .b_zero_point(7)
+        .b_zero_point(8)
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -399,7 +381,7 @@ $if UKERNEL_TYPE.startswith("GEMM"):
         .k(k)
         .a_stride(${next_prime(10 if ADJKBLOCK == 1 else ADJKBLOCK * 2 + 1)})
         $if KERNELTYPE == 'qc4w':
-          .b_zero_point(7)
+          .b_zero_point(8)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -422,7 +404,7 @@ TEST(${TEST_NAME}, k_gt_${ADJKBLOCK}_subtile) {
           .k(k)
           .iterations(1)
           $if KERNELTYPE == 'qc4w':
-            .b_zero_point(7)
+            .b_zero_point(8)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -445,7 +427,7 @@ $if KBLOCK > 1:
         .n(${NR})
         .k(k)
         $if KERNELTYPE == 'qc4w':
-          .b_zero_point(7)
+          .b_zero_point(8)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -467,7 +449,7 @@ $if KBLOCK > 1:
           .k(k)
           .a_stride(${next_prime(KBLOCK * 10 + 1)})
           $if KERNELTYPE == 'qc4w':
-            .b_zero_point(7)
+            .b_zero_point(8)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -490,7 +472,7 @@ $if KBLOCK > 1:
             .k(k)
             .iterations(1)
             $if KERNELTYPE == 'qc4w':
-              .b_zero_point(7)
+              .b_zero_point(8)
             .Test(${", ".join(TEST_ARGS)});
         }
       }
@@ -513,7 +495,7 @@ TEST(${TEST_NAME}, n_gt_${NR}) {
         .n(n)
         .k(k)
         $if KERNELTYPE == 'qc4w':
-          .b_zero_point(7)
+          .b_zero_point(8)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -537,7 +519,7 @@ $if JIT:
           .k(k)
           .known_nc_mod_nr(false)
           $if KERNELTYPE == 'qc4w':
-            .b_zero_point(7)
+            .b_zero_point(8)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -560,7 +542,7 @@ TEST(${TEST_NAME}, n_gt_${NR}_strided_cn) {
         .k(k)
         .cn_stride(${next_prime(NR + 1)})
         $if KERNELTYPE == 'qc4w':
-          .b_zero_point(7)
+          .b_zero_point(8)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -584,7 +566,7 @@ $if UKERNEL_TYPE != "IGEMM":
           .k(k)
           .a_stride(${next_prime(KBLOCK * 5 + 1)})
           $if KERNELTYPE == 'qc4w':
-            .b_zero_point(7)
+            .b_zero_point(8)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -608,7 +590,7 @@ TEST(${TEST_NAME}, n_gt_${NR}_subtile) {
           .k(k)
           .iterations(1)
           $if KERNELTYPE == 'qc4w':
-            .b_zero_point(7)
+            .b_zero_point(8)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -631,7 +613,7 @@ TEST(${TEST_NAME}, n_div_${NR}) {
         .n(n)
         .k(k)
         $if KERNELTYPE == 'qc4w':
-          .b_zero_point(7)
+          .b_zero_point(8)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -654,7 +636,7 @@ TEST(${TEST_NAME}, n_div_${NR}_strided_cn) {
         .k(k)
         .cn_stride(${next_prime(NR + 1)})
         $if KERNELTYPE == 'qc4w':
-          .b_zero_point(7)
+          .b_zero_point(8)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -678,7 +660,7 @@ $if UKERNEL_TYPE != "IGEMM":
           .k(k)
           .a_stride(${next_prime(KBLOCK * 5 + 1)})
           $if KERNELTYPE == 'qc4w':
-            .b_zero_point(7)
+            .b_zero_point(8)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -702,7 +684,7 @@ TEST(${TEST_NAME}, n_div_${NR}_subtile) {
           .k(k)
           .iterations(1)
           $if KERNELTYPE == 'qc4w':
-            .b_zero_point(7)
+            .b_zero_point(8)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -726,7 +708,7 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
         .k(k)
         .ks(3)
         $if KERNELTYPE == 'qc4w':
-          .b_zero_point(7)
+          .b_zero_point(8)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -750,7 +732,7 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
             .ks(3)
             .iterations(1)
             $if KERNELTYPE == 'qc4w':
-              .b_zero_point(7)
+              .b_zero_point(8)
             .Test(${", ".join(TEST_ARGS)});
         }
       }
@@ -774,7 +756,7 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
           .k(k)
           .ks(3)
           $if KERNELTYPE == 'qc4w':
-            .b_zero_point(7)
+            .b_zero_point(8)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -797,7 +779,7 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
           .k(k)
           .ks(3)
           $if KERNELTYPE == 'qc4w':
-            .b_zero_point(7)
+            .b_zero_point(8)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -822,7 +804,7 @@ TEST(${TEST_NAME}, strided_cm_subtile) {
           .cm_stride(${next_prime(NR + 1)})
           .iterations(1)
           $if KERNELTYPE == 'qc4w':
-            .b_zero_point(7)
+            .b_zero_point(8)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -847,7 +829,7 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
         .ks(3)
         .a_offset(${next_prime(MR * KBLOCK * 5 + 1)})
         $if KERNELTYPE == 'qc4w':
-          .b_zero_point(7)
+          .b_zero_point(8)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -871,7 +853,7 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
           .a_offset(${next_prime(MR * KBLOCK * 5 + 1)})
           .zero_index(mz)
           $if KERNELTYPE == 'qc4w':
-            .b_zero_point(7)
+            .b_zero_point(8)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -893,7 +875,7 @@ $if ACTIVATION == "MINMAX":
       .k(${KBLOCK})
       .qmin(128)
       $if KERNELTYPE == 'qc4w':
-        .b_zero_point(7)
+        .b_zero_point(8)
       .Test(${", ".join(TEST_ARGS)});
   }
 
@@ -912,7 +894,7 @@ $if ACTIVATION == "MINMAX":
       .k(${KBLOCK})
       .qmax(128)
       $if KERNELTYPE == 'qc4w':
-        .b_zero_point(7)
+        .b_zero_point(8)
       .Test(${", ".join(TEST_ARGS)});
   }
 
@@ -931,7 +913,7 @@ TEST(${TEST_NAME}, strided_cm) {
     .k(${KBLOCK})
     .cm_stride(${next_prime(NR + 1)})
     $if KERNELTYPE == 'qc4w':
-      .b_zero_point(7)
+      .b_zero_point(8)
     .Test(${", ".join(TEST_ARGS)});
 }
 
@@ -955,7 +937,7 @@ $if DATATYPE == "qu8":
     }
   }
 
-$if DATATYPE in ["qu8", "f32_qc4w"]:
+$if DATATYPE == "qu8":
   TEST(${TEST_NAME}, no_b_zero_point) {
     $if ISA_CHECK:
       ${ISA_CHECK};
@@ -975,7 +957,6 @@ $if DATATYPE in ["qu8", "f32_qc4w"]:
     }
   }
 
-$if DATATYPE == "qu8":
   TEST(${TEST_NAME}, b_zero_point) {
     $if ISA_CHECK:
       ${ISA_CHECK};
@@ -995,27 +976,6 @@ $if DATATYPE == "qu8":
     }
   }
 
-$if DATATYPE == "f32_qc4w":
-  TEST(${TEST_NAME}, b_zero_point) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (uint8_t b_zero_point = 0; b_zero_point <= 15; ++b_zero_point) {
-      GemmMicrokernelTester()
-        $if EXTENDED_WEIGHTS:
-          .extended_weights(true)
-        .mr(${MR})
-        .nr(${NR})
-        .kr(${KR})
-        .sr(${SR})
-        .m(${MR})
-        .n(${NR})
-        .k(${KBLOCK})
-        .b_zero_point(b_zero_point)
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-
-$if DATATYPE == "qu8":
   TEST(${TEST_NAME}, no_zero_point) {
     $if ISA_CHECK:
       ${ISA_CHECK};
@@ -1055,7 +1015,7 @@ $if TEST_NAME.startswith('GENERATE') and DATATYPE in ['f32', 'f16']:
             .k(k)
             .iterations(1)
             $if KERNELTYPE == 'qc4w':
-              .b_zero_point(7)
+              .b_zero_point(8)
             .Test(${", ".join(TEST_ARGS)});
         }
       }
