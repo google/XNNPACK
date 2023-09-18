@@ -312,13 +312,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
     }
 
     $if DATATYPE in ["QD8", "QC4"]:
-      $if DATATYPE == "QC4":
-        $for M in range(0, MR):
-          $for N in range(0, NR, 4):
-            vacc${M}x${ABC[N:N+4]} = vshrq_n_s32(vacc${M}x${ABC[N:N+4]}, 4);
-      $for M in range(MR):
+      $for M in range(0, MR):
         $for N in range(0, NR, 4):
-          float32x4_t vout${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});
+          $if DATATYPE == "QC4":
+            float32x4_t vout${M}x${ABC[N:N+4]} = vcvtq_n_f32_s32(vacc${M}x${ABC[N:N+4]}, 4);
+          $else:
+            float32x4_t vout${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});
 
       $for M in range(0, MR, 2):
         $if M + 1 == MR:

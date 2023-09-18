@@ -97,7 +97,6 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__neondot_ld64(
       int32x4_t vacc0xCDEF = vcombine_s32(vpadd_s32(vget_low_s32(vacc0xCD), vget_high_s32(vacc0xCD)), vpadd_s32(vget_low_s32(vacc0xEF), vget_high_s32(vacc0xEF)));
     #endif
 
-
     float32x4_t vout0x0123 = vcvtq_f32_s32(vacc0x0123);
     float32x4_t vout0x4567 = vcvtq_f32_s32(vacc0x4567);
     float32x4_t vout0x89AB = vcvtq_f32_s32(vacc0x89AB);

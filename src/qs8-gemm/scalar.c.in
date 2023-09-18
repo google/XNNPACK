@@ -142,12 +142,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
     $if DATATYPE in ["QD8", "QC4"]:
       $for M in range(MR):
         $for N in range(NR):
-          float vout${M}x${N} = (float) vacc${M}x${N};
-
-      $if DATATYPE == "QC4":
-        $for M in range(MR):
-          $for N in range(NR):
-            vout${M}x${N} *= 1.0f / 16.0f;
+          $if DATATYPE == "QC4":
+            float vout${M}x${N} = (float) math_asr_s32(vacc${M}x${N}, 4);
+          $else:
+            float vout${M}x${N} = (float) vacc${M}x${N};
 
       $for M in range(MR):
         const float vinput_scale${M} = quantization_params[${M}].inv_scale;

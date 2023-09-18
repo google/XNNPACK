@@ -89,7 +89,6 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8__wasm(
     float vout0x6 = (float) vacc0x6;
     float vout0x7 = (float) vacc0x7;
 
-
     const float vinput_scale0 = quantization_params[0].inv_scale;
     vout0x0 *= vinput_scale0;
     vout0x1 *= vinput_scale0;

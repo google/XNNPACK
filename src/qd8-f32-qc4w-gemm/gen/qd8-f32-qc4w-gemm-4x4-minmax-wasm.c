@@ -143,39 +143,22 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4__wasm(
       vacc3x3 += va3c1 * vb3c1;
     }
 
-    float vout0x0 = (float) vacc0x0;
-    float vout0x1 = (float) vacc0x1;
-    float vout0x2 = (float) vacc0x2;
-    float vout0x3 = (float) vacc0x3;
-    float vout1x0 = (float) vacc1x0;
-    float vout1x1 = (float) vacc1x1;
-    float vout1x2 = (float) vacc1x2;
-    float vout1x3 = (float) vacc1x3;
-    float vout2x0 = (float) vacc2x0;
-    float vout2x1 = (float) vacc2x1;
-    float vout2x2 = (float) vacc2x2;
-    float vout2x3 = (float) vacc2x3;
-    float vout3x0 = (float) vacc3x0;
-    float vout3x1 = (float) vacc3x1;
-    float vout3x2 = (float) vacc3x2;
-    float vout3x3 = (float) vacc3x3;
-
-    vout0x0 *= 1.0f / 16.0f;
-    vout0x1 *= 1.0f / 16.0f;
-    vout0x2 *= 1.0f / 16.0f;
-    vout0x3 *= 1.0f / 16.0f;
-    vout1x0 *= 1.0f / 16.0f;
-    vout1x1 *= 1.0f / 16.0f;
-    vout1x2 *= 1.0f / 16.0f;
-    vout1x3 *= 1.0f / 16.0f;
-    vout2x0 *= 1.0f / 16.0f;
-    vout2x1 *= 1.0f / 16.0f;
-    vout2x2 *= 1.0f / 16.0f;
-    vout2x3 *= 1.0f / 16.0f;
-    vout3x0 *= 1.0f / 16.0f;
-    vout3x1 *= 1.0f / 16.0f;
-    vout3x2 *= 1.0f / 16.0f;
-    vout3x3 *= 1.0f / 16.0f;
+    float vout0x0 = (float) math_asr_s32(vacc0x0, 4);
+    float vout0x1 = (float) math_asr_s32(vacc0x1, 4);
+    float vout0x2 = (float) math_asr_s32(vacc0x2, 4);
+    float vout0x3 = (float) math_asr_s32(vacc0x3, 4);
+    float vout1x0 = (float) math_asr_s32(vacc1x0, 4);
+    float vout1x1 = (float) math_asr_s32(vacc1x1, 4);
+    float vout1x2 = (float) math_asr_s32(vacc1x2, 4);
+    float vout1x3 = (float) math_asr_s32(vacc1x3, 4);
+    float vout2x0 = (float) math_asr_s32(vacc2x0, 4);
+    float vout2x1 = (float) math_asr_s32(vacc2x1, 4);
+    float vout2x2 = (float) math_asr_s32(vacc2x2, 4);
+    float vout2x3 = (float) math_asr_s32(vacc2x3, 4);
+    float vout3x0 = (float) math_asr_s32(vacc3x0, 4);
+    float vout3x1 = (float) math_asr_s32(vacc3x1, 4);
+    float vout3x2 = (float) math_asr_s32(vacc3x2, 4);
+    float vout3x3 = (float) math_asr_s32(vacc3x3, 4);
 
     const float vinput_scale0 = quantization_params[0].inv_scale;
     vout0x0 *= vinput_scale0;

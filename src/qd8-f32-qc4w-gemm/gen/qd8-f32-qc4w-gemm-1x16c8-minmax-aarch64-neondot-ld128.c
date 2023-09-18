@@ -185,15 +185,10 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__aarch64_neondot_ld128(
       int32x4_t vacc0xCDEF = vcombine_s32(vpadd_s32(vget_low_s32(vacc0xCD), vget_high_s32(vacc0xCD)), vpadd_s32(vget_low_s32(vacc0xEF), vget_high_s32(vacc0xEF)));
     #endif
 
-    vacc0x0123 = vshrq_n_s32(vacc0x0123, 4);
-    vacc0x4567 = vshrq_n_s32(vacc0x4567, 4);
-    vacc0x89AB = vshrq_n_s32(vacc0x89AB, 4);
-    vacc0xCDEF = vshrq_n_s32(vacc0xCDEF, 4);
-
-    float32x4_t vout0x0123 = vcvtq_f32_s32(vacc0x0123);
-    float32x4_t vout0x4567 = vcvtq_f32_s32(vacc0x4567);
-    float32x4_t vout0x89AB = vcvtq_f32_s32(vacc0x89AB);
-    float32x4_t vout0xCDEF = vcvtq_f32_s32(vacc0xCDEF);
+    float32x4_t vout0x0123 = vcvtq_n_f32_s32(vacc0x0123, 4);
+    float32x4_t vout0x4567 = vcvtq_n_f32_s32(vacc0x4567, 4);
+    float32x4_t vout0x89AB = vcvtq_n_f32_s32(vacc0x89AB, 4);
+    float32x4_t vout0xCDEF = vcvtq_n_f32_s32(vacc0xCDEF, 4);
 
     const float32x4_t vinput_scale0 = vld1q_dup_f32(&quantization_params[0].inv_scale);
     vout0x0123 = vmulq_f32(vout0x0123, vinput_scale0);

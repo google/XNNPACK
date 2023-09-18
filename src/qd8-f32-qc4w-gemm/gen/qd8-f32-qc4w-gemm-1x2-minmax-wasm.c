@@ -64,11 +64,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x2__wasm(
       vacc0x1 += va0c1 * vb1c1;
     }
 
-    float vout0x0 = (float) vacc0x0;
-    float vout0x1 = (float) vacc0x1;
-
-    vout0x0 *= 1.0f / 16.0f;
-    vout0x1 *= 1.0f / 16.0f;
+    float vout0x0 = (float) math_asr_s32(vacc0x0, 4);
+    float vout0x1 = (float) math_asr_s32(vacc0x1, 4);
 
     const float vinput_scale0 = quantization_params[0].inv_scale;
     vout0x0 *= vinput_scale0;
