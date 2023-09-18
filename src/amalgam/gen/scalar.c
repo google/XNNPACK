@@ -14321,6 +14321,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x2__scalar(
     float vout0x0 = (float) vacc0x0;
     float vout0x1 = (float) vacc0x1;
 
+
     const float vinput_scale0 = quantization_params[0].inv_scale;
     vout0x0 *= vinput_scale0;
     vout0x1 *= vinput_scale0;
@@ -14419,6 +14420,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4__scalar(
     float vout0x1 = (float) vacc0x1;
     float vout0x2 = (float) vacc0x2;
     float vout0x3 = (float) vacc0x3;
+
 
     const float vinput_scale0 = quantization_params[0].inv_scale;
     vout0x0 *= vinput_scale0;
@@ -14544,6 +14546,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x2__scalar(
     float vout0x1 = (float) vacc0x1;
     float vout1x0 = (float) vacc1x0;
     float vout1x1 = (float) vacc1x1;
+
 
     const float vinput_scale0 = quantization_params[0].inv_scale;
     vout0x0 *= vinput_scale0;
@@ -14719,6 +14722,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4__scalar(
     float vout3x1 = (float) vacc3x1;
     float vout3x2 = (float) vacc3x2;
     float vout3x3 = (float) vacc3x3;
+
 
     const float vinput_scale0 = quantization_params[0].inv_scale;
     vout0x0 *= vinput_scale0;
