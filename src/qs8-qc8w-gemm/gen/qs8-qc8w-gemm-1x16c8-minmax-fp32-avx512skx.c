@@ -106,7 +106,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c8__avx512skx(
       nc -= 16;
     } else {
       // Prepare mask for valid 8-bit elements (depends on nc).
-      const __mmask64 vmask = _cvtu64_mask64((uint64_t) ((UINT32_C(1) << nc) - UINT32_C(1)));
+      const __mmask16 vmask = _cvtu32_mask16((UINT32_C(1) << nc) - UINT32_C(1));
 
       _mm_mask_storeu_epi8(c0, vmask, vout0x0123456789ABCDEF);
 

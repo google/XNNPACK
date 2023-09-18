@@ -132,10 +132,10 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_2x16c8__avx512skx(
       nc -= 16;
     } else {
       // Prepare mask for valid 8-bit elements (depends on nc).
-      __mmask64 vmask = _cvtu64_mask64((uint64_t) ((UINT32_C(1) << nc) - UINT32_C(1)));
+      __mmask32 vmask = _cvtu32_mask32((UINT32_C(1) << nc) - UINT32_C(1));
 
       _mm256_mask_storeu_epi8(c0, vmask, vout01x0123456789ABCDEF);
-      vmask = _kshiftli_mask64(vmask, 16);
+      vmask = _kshiftli_mask32(vmask, 16);
       _mm256_mask_storeu_epi8(c1 - 16, vmask, vout01x0123456789ABCDEF);
 
       nc = 0;
