@@ -11,6 +11,7 @@
 #include <xnnpack/log.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/params.h>
+#include <xnnpack/requantization.h>
 #include <xnnpack/subgraph.h>
 #include <xnnpack/subgraph-validation.h>
 
@@ -29,6 +30,9 @@ static enum xnn_status create_average_pooling_operator(
   assert(input_id < num_values);
 
   assert(node->num_outputs == 1);
+  const uint32_t output_id = node->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_values);
 
   const size_t channel_dim = values[input_id].shape.dim[3];
   assert(channel_dim == values[node->outputs[0]].shape.dim[3]);
@@ -67,6 +71,30 @@ static enum xnn_status create_average_pooling_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
+    case xnn_compute_type_qu8:
+      {
+        const float output_scale = values[output_id].quantization.scale;
+        const int32_t output_zero_point = values[output_id].quantization.zero_point;
+        const int8_t output_min = xnn_qu8_quantize(node->activation.output_min, output_scale, output_zero_point);
+        const int8_t output_max = xnn_qu8_quantize(node->activation.output_max, output_scale, output_zero_point);
+        const int32_t input_zero_point = values[input_id].quantization.zero_point;
+        const float input_scale = values[input_id].quantization.scale;
+        status = xnn_create_average_pooling2d_nhwc_qu8(
+          node->params.pooling_2d.padding_top,
+          node->params.pooling_2d.padding_right,
+          node->params.pooling_2d.padding_bottom,
+          node->params.pooling_2d.padding_left,
+          node->params.pooling_2d.pooling_height,
+          node->params.pooling_2d.pooling_width,
+          node->params.pooling_2d.stride_height,
+          node->params.pooling_2d.stride_width,
+          channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+          input_zero_point, input_scale, output_zero_point, output_scale,
+          output_min, output_max,
+          node->flags,
+          &opdata->operator_objects[0]);
+        break;
+      }
     default:
       XNN_UNREACHABLE;
   }
@@ -98,6 +126,17 @@ static enum xnn_status reshape_average_pooling_operator(
         threadpool);
     case xnn_operator_type_average_pooling_nhwc_f32:
       return xnn_reshape_average_pooling2d_nhwc_f32(
+        opdata->operator_objects[0],
+        batch_size,
+        input_height,
+        input_width,
+        &opdata->workspace_size,
+        &opdata->workspace_alignment,
+        /*output_height_out=*/NULL,
+        /*output_width_out=*/NULL,
+        threadpool);
+    case xnn_operator_type_average_pooling_nhwc_qu8:
+      return xnn_reshape_average_pooling2d_nhwc_qu8(
         opdata->operator_objects[0],
         batch_size,
         input_height,
@@ -143,6 +182,12 @@ static enum xnn_status setup_average_pooling_operator(
         output_data);
     case xnn_operator_type_average_pooling_nhwc_f32:
       return xnn_setup_average_pooling2d_nhwc_f32(
+        opdata->operator_objects[0],
+        opdata->workspace,
+        input_data,
+        output_data);
+    case xnn_operator_type_average_pooling_nhwc_qu8:
+      return xnn_setup_average_pooling2d_nhwc_qu8(
         opdata->operator_objects[0],
         opdata->workspace,
         input_data,
@@ -241,6 +286,7 @@ enum xnn_status xnn_define_average_pooling_2d(
 
   switch (input_value->datatype) {
     case xnn_datatype_fp32:
+    case xnn_datatype_quint8:
       break;
     default:
       xnn_log_error(
@@ -261,8 +307,22 @@ enum xnn_status xnn_define_average_pooling_2d(
     return status;
   }
 
+  status = xnn_subgraph_check_datatype_matches(xnn_node_type_average_pooling_2d, input_id, input_value, output_id, output_value);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  struct xnn_node* node = xnn_subgraph_new_node(subgraph);
+  if (node == NULL) {
+    return xnn_status_out_of_memory;
+  }
+
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
+      node->compute_type = xnn_compute_type_fp32;
+      break;
+    case xnn_datatype_quint8:
+      node->compute_type = xnn_compute_type_qu8;
       break;
     default:
       xnn_log_error(
@@ -272,13 +332,7 @@ enum xnn_status xnn_define_average_pooling_2d(
       return xnn_status_invalid_parameter;
   }
 
-  struct xnn_node* node = xnn_subgraph_new_node(subgraph);
-  if (node == NULL) {
-    return xnn_status_out_of_memory;
-  }
-
   node->type = xnn_node_type_average_pooling_2d;
-  node->compute_type = xnn_compute_type_fp32;
   node->params.pooling_2d.padding_top = input_padding_top;
   node->params.pooling_2d.padding_right = input_padding_right;
   node->params.pooling_2d.padding_bottom = input_padding_bottom;
