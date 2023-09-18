@@ -1,0 +1,1404 @@
+# Copyright 2023 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+load(
+    "//:build_defs.bzl",
+    "xnnpack_benchmark",
+    "xnnpack_cc_library",
+    "xnnpack_optional_dnnl_copts",
+    "xnnpack_optional_dnnl_deps",
+    "xnnpack_optional_gemmlowp_copts",
+    "xnnpack_optional_gemmlowp_deps",
+    "xnnpack_optional_ruy_copts",
+    "xnnpack_optional_ruy_deps",
+    "xnnpack_optional_tflite_copts",
+    "xnnpack_optional_tflite_deps",
+    "xnnpack_visibility",
+)
+
+MICROKERNEL_BENCHMARK_DEPS = [
+    ":bench_utils",
+    "//:aligned_allocator",
+    "//:bench_microkernels",
+    "//:common",
+    "//:enable_assembly",
+    "//:microkernels_h",
+    "//:packing",
+    "//:params",
+    "//:microparams",
+    "//:microparams_init",
+    "//:xnnpack_h",
+    "@FP16",
+]
+
+OPERATOR_BENCHMARK_DEPS = [
+    ":bench_utils",
+    "//:XNNPACK",
+    "//:aligned_allocator",
+    "//:cache",
+    "//:common",
+    "@FP16",
+]
+
+xnnpack_cc_library(
+    name = "bench_utils",
+    srcs = ["utils.cc"],
+    hdrs = ["utils.h"],
+    copts = select({
+        "//:cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
+    visibility = xnnpack_visibility(),
+    deps = [
+        "//:XNNPACK",
+        "//:allocator",
+        "//:common",
+        "//:params",
+        "@com_google_benchmark//:benchmark",
+    ] + select({
+        "//:cpuinfo_enabled": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
+)
+
+######################### Benchmarks for micro-kernels #########################
+
+xnnpack_benchmark(
+    name = "f32_vcmul_bench",
+    srcs = [
+        "f32-vcmul.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qd8_f32_qc8w_gemm_bench",
+    srcs = [
+        "qd8-f32-qc8w-gemm.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+        "//:isa_checks",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qd8_f32_qc4w_gemm_bench",
+    srcs = [
+        "qd8-f32-qc4w-gemm.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+        "//:isa_checks",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qs8_dwconv_bench",
+    srcs = [
+        "dwconv.h",
+        "qs8-dwconv.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:indirection",
+        "//:microkernel_utils",
+        "//:operators",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qs8_f32_vcvt_bench",
+    srcs = [
+        "qs8-f32-vcvt.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qs8_gemm_fp32_bench",
+    srcs = [
+        "qs8-gemm-fp32.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+        "//:isa_checks",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qs8_gemm_rndnu_bench",
+    srcs = [
+        "qs8-gemm-rndnu.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+        "//:isa_checks",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qs8_gemm_bench",
+    srcs = [
+        "gemm.h",
+        "qs8-gemm.cc",
+    ],
+    copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:enable_jit",
+        "//:math",
+    ] + xnnpack_optional_ruy_deps() + xnnpack_optional_gemmlowp_deps(),
+)
+
+xnnpack_benchmark(
+    name = "qs8_qc8w_gemm_fp32_bench",
+    srcs = [
+        "qs8-qc8w-gemm-fp32.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+        "//:isa_checks",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qs8_requantization_bench",
+    srcs = [
+        "qs8-requantization.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + ["//:requantization_stubs"],
+)
+
+xnnpack_benchmark(
+    name = "qs8_vadd_bench",
+    srcs = [
+        "qs8-vadd.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qs8_vaddc_bench",
+    srcs = [
+        "qs8-vaddc.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qs8_vcvt_bench",
+    srcs = [
+        "qs8-vcvt.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qs16_qs8_vcvt_bench",
+    srcs = [
+        "qs16-qs8-vcvt.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qs8_vhswish_bench",
+    srcs = [
+        "qs8-vhswish.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qs8_vlrelu_bench",
+    srcs = [
+        "qs8-vlrelu.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qs8_vmul_bench",
+    srcs = [
+        "qs8-vmul.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qs8_vmulc_bench",
+    srcs = [
+        "qs8-vmulc.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qu8_f32_vcvt_bench",
+    srcs = [
+        "qu8-f32-vcvt.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qu8_gemm_bench",
+    srcs = [
+        "gemm.h",
+        "qu8-gemm.cc",
+    ],
+    copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:math",
+    ] + xnnpack_optional_ruy_deps() + xnnpack_optional_gemmlowp_deps(),
+)
+
+xnnpack_benchmark(
+    name = "qu8_gemm_fp32_bench",
+    srcs = [
+        "qu8-gemm-fp32.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+        "//:isa_checks",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qu8_gemm_rndnu_bench",
+    srcs = [
+        "qu8-gemm-rndnu.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+        "//:isa_checks",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qu8_requantization_bench",
+    srcs = [
+        "qu8-requantization.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + ["//:requantization_stubs"],
+)
+
+xnnpack_benchmark(
+    name = "qu8_vadd_bench",
+    srcs = [
+        "qu8-vadd.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qu8_vaddc_bench",
+    srcs = [
+        "qu8-vaddc.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qu8_vcvt_bench",
+    srcs = [
+        "qu8-vcvt.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qu8_vhswish_bench",
+    srcs = [
+        "qu8-vhswish.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qu8_vlrelu_bench",
+    srcs = [
+        "qu8-vlrelu.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qu8_vmul_bench",
+    srcs = [
+        "qu8-vmul.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qu8_vmulc_bench",
+    srcs = [
+        "qu8-vmulc.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "bf16_gemm_bench",
+    srcs = [
+        "bf16-gemm.cc",
+        "gemm.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:math",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f16_f32acc_igemm_bench",
+    srcs = [
+        "conv.h",
+        "f16-f32acc-igemm.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:indirection",
+        "//:operators",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f16_igemm_bench",
+    srcs = [
+        "conv.h",
+        "f16-igemm.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:indirection",
+        "//:operators",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f16_f32acc_gemm_bench",
+    srcs = [
+        "f16-f32acc-gemm.cc",
+        "gemm.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:math",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f16_gemm_bench",
+    srcs = [
+        "f16-gemm.cc",
+        "gemm.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:math",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f16_raddstoreexpminusmax_bench",
+    srcs = [
+        "f16-raddstoreexpminusmax.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f16_rsum_bench",
+    srcs = [
+        "f16-rsum.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f16_f32acc_rsum_bench",
+    srcs = [
+        "f16-f32acc-rsum.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f16_spmm_bench",
+    srcs = [
+        "f16-spmm.cc",
+        "spmm.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f16_vsigmoid_bench",
+    srcs = [
+        "f16-vsigmoid.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f16_vtanh_bench",
+    srcs = [
+        "f16-vtanh.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f16_f32_vcvt_bench",
+    srcs = [
+        "f16-f32-vcvt.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_igemm_bench",
+    srcs = [
+        "conv.h",
+        "f32-igemm.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:indirection",
+        "//:operators",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f32_conv_hwc_bench",
+    srcs = [
+        "dconv.h",
+        "f32-conv-hwc.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f16_conv_hwc2chw_bench",
+    srcs = [
+        "dconv.h",
+        "f16-conv-hwc2chw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f16_gavgpool_cw_bench",
+    srcs = [
+        "f16-gavgpool-cw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_gavgpool_cw_bench",
+    srcs = [
+        "f32-gavgpool-cw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_conv_hwc2chw_bench",
+    srcs = [
+        "dconv.h",
+        "f32-conv-hwc2chw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f16_dwconv_bench",
+    srcs = [
+        "dwconv.h",
+        "f16-dwconv.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:indirection",
+        "//:microkernel_utils",
+        "//:operators",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f32_dwconv_bench",
+    srcs = [
+        "dwconv.h",
+        "f32-dwconv.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:indirection",
+        "//:microkernel_utils",
+        "//:operators",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f32_dwconv2d_chw_bench",
+    srcs = [
+        "dwconv.h",
+        "f32-dwconv2d-chw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:indirection",
+        "//:operators",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f16_dwconv2d_chw_bench",
+    srcs = [
+        "dwconv.h",
+        "f16-dwconv2d-chw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:indirection",
+        "//:operators",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f32_f16_vcvt_bench",
+    srcs = [
+        "f32-f16-vcvt.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "xx_transposev_bench",
+    srcs = [
+        "xx-transposev.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "x8_transpose_bench",
+    srcs = [
+        "x8-transpose.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "x16_transpose_bench",
+    srcs = [
+        "x16-transpose.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "x24_transpose_bench",
+    srcs = [
+        "x24-transpose.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "x32_transpose_bench",
+    srcs = [
+        "x32-transpose.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "x64_transpose_bench",
+    srcs = [
+        "x64-transpose.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_bgemm_bench",
+    srcs = [
+        "bgemm.h",
+        "f32-bgemm.cc",
+    ],
+    copts = xnnpack_optional_ruy_copts(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:allocator",
+        "//:math",
+    ] + xnnpack_optional_ruy_deps(),
+)
+
+xnnpack_benchmark(
+    name = "f32_gemm_bench",
+    srcs = [
+        "f32-gemm.cc",
+        "gemm.h",
+    ],
+    copts = xnnpack_optional_ruy_copts(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:allocator",
+        "//:math",
+    ] + xnnpack_optional_ruy_deps(),
+)
+
+xnnpack_benchmark(
+    name = "f32_qc4w_gemm_bench",
+    srcs = [
+        "f32-qc4w-gemm.cc",
+        "gemm.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:allocator",
+        "//:math",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f32_qc8w_gemm_bench",
+    srcs = [
+        "f32-qc8w-gemm.cc",
+        "gemm.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:allocator",
+        "//:math",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f32_qs8_vcvt_bench",
+    srcs = [
+        "f32-qs8-vcvt.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_qu8_vcvt_bench",
+    srcs = [
+        "f32-qu8-vcvt.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_raddexpminusmax_bench",
+    srcs = [
+        "f32-raddexpminusmax.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_raddextexp_bench",
+    srcs = [
+        "f32-raddextexp.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_raddstoreexpminusmax_bench",
+    srcs = [
+        "f32-raddstoreexpminusmax.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_rmax_bench",
+    srcs = [
+        "f32-rmax.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_rminmax_bench",
+    srcs = [
+        "f32-rminmax.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_rmin_bench",
+    srcs = [
+        "f32-rmin.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_round_bench",
+    srcs = [
+        "f32-round.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_rsum_bench",
+    srcs = [
+        "f32-rsum.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_spmm_bench",
+    srcs = [
+        "f32-spmm.cc",
+        "spmm.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_softmax_bench",
+    srcs = [
+        "f32-softmax.cc",
+    ],
+    copts = xnnpack_optional_dnnl_copts(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_dnnl_deps(),
+)
+
+xnnpack_benchmark(
+    name = "f16_velu_bench",
+    srcs = [
+        "f16-velu.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_velu_bench",
+    srcs = [
+        "f32-velu.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_vhswish_bench",
+    srcs = [
+        "f32-vhswish.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_vlrelu_bench",
+    srcs = [
+        "f32-vlrelu.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_vrelu_bench",
+    srcs = [
+        "f32-vrelu.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + ["//:jit_test_mode"],
+)
+
+xnnpack_benchmark(
+    name = "f32_vrndd_bench",
+    srcs = [
+        "f32-vrndd.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_vrndne_bench",
+    srcs = [
+        "f32-vrndne.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_vrndu_bench",
+    srcs = [
+        "f32-vrndu.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_vrndz_bench",
+    srcs = [
+        "f32-vrndz.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_vscaleexpminusmax_bench",
+    srcs = [
+        "f32-vscaleexpminusmax.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_vscaleextexp_bench",
+    srcs = [
+        "f32-vscaleextexp.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_vsigmoid_bench",
+    srcs = [
+        "f32-vsigmoid.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f16_vsqrt_bench",
+    srcs = [
+        "f16-vsqrt.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_vsqrt_bench",
+    srcs = [
+        "f32-vsqrt.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_vtanh_bench",
+    srcs = [
+        "f32-vtanh.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_im2col_gemm_bench",
+    srcs = [
+        "conv.h",
+        "f32-im2col-gemm.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:im2col",
+        "//:math",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "s16_rmaxabs_bench",
+    srcs = [
+        "s16-rmaxabs.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "s16_window_bench",
+    srcs = [
+        "s16-window.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "u32_filterbank_accumulate_bench",
+    srcs = [
+        "u32-filterbank-accumulate.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "u32_filterbank_subtract_bench",
+    srcs = [
+        "u32-filterbank-subtract.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "u32_vlog_bench",
+    srcs = [
+        "u32-vlog.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "u64_u32_vsqrtshift_bench",
+    srcs = [
+        "u64-u32-vsqrtshift.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "i16_vlshift_bench",
+    srcs = [
+        "i16-vlshift.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "cs16_vsquareabs_bench",
+    srcs = [
+        "cs16-vsquareabs.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "cs16_bfly4_bench",
+    srcs = [
+        "cs16-bfly4.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "cs16_fftr_bench",
+    srcs = [
+        "cs16-fftr.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "x8_lut_bench",
+    srcs = [
+        "x8-lut.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "x8_packw_bench",
+    srcs = [
+        "bgemm.h",
+        "x8-packw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:allocator",
+        "//:math",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "x16_packw_bench",
+    srcs = [
+        "bgemm.h",
+        "x16-packw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:allocator",
+        "//:math",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "x32_packw_bench",
+    srcs = [
+        "bgemm.h",
+        "x32-packw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:allocator",
+        "//:math",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "gemm_benchmark",
+    srcs = ["gemm.h"],
+    hdrs = ["gemm-benchmark.h"],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+########################### Benchmarks for operators ###########################
+
+xnnpack_benchmark(
+    name = "abs_bench",
+    srcs = ["abs.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "average_pooling_bench",
+    srcs = ["average-pooling.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "bankers_rounding_bench",
+    srcs = ["bankers-rounding.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "batch_matrix_multiply_bench",
+    srcs = ["batch-matrix-multiply.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "ceiling_bench",
+    srcs = ["ceiling.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "channel_shuffle_bench",
+    srcs = ["channel-shuffle.cc"],
+    deps = OPERATOR_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "convert_bench",
+    srcs = [
+        "convert.cc",
+    ],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "convolution_bench",
+    srcs = ["convolution.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "deconvolution_bench",
+    srcs = ["deconvolution.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "elu_bench",
+    srcs = ["elu.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "floor_bench",
+    srcs = ["floor.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "fully_connected_bench",
+    srcs = ["fully-connected.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "global_average_pooling_bench",
+    srcs = ["global-average-pooling.cc"],
+    deps = OPERATOR_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "hardswish_bench",
+    srcs = ["hardswish.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "leaky_relu_bench",
+    srcs = ["leaky-relu.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "max_pooling_bench",
+    srcs = ["max-pooling.cc"],
+    deps = OPERATOR_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "negate_bench",
+    srcs = ["negate.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "prelu_bench",
+    srcs = ["prelu.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "scaled_dot_product_attention_bench",
+    srcs = ["scaled-dot-product-attention.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "sigmoid_bench",
+    srcs = ["sigmoid.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "softmax_bench",
+    srcs = ["softmax.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "square_bench",
+    srcs = ["square.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "square_root_bench",
+    srcs = ["square-root.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "tanh_bench",
+    srcs = ["tanh.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "truncation_bench",
+    srcs = ["truncation.cc"],
+    deps = OPERATOR_BENCHMARK_DEPS,
+)
+
+############################### Other benchmarks ###############################
+
+xnnpack_benchmark(
+    name = "jit_bench",
+    srcs = ["jit.cc"],
+    deps = OPERATOR_BENCHMARK_DEPS + [
+        "//:memory",
+        "//:microkernels_h",
+        "//:microparams",
+    ],
+)
+
+############################### E2E benchmarks ###############################
+
+xnnpack_benchmark(
+    name = "f16_dwconv_e2e_bench",
+    srcs = [
+        "end2end.h",
+        "f16-dwconv-e2e.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:XNNPACK",
+        "//:fp16_mobilenet_v1",
+        "//:fp16_mobilenet_v2",
+        "//:fp16_mobilenet_v3_large",
+        "//:fp16_mobilenet_v3_small",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f16_gemm_e2e_bench",
+    srcs = [
+        "end2end.h",
+        "f16-gemm-e2e.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:XNNPACK",
+        "//:fp16_mobilenet_v1",
+        "//:fp16_mobilenet_v2",
+        "//:fp16_mobilenet_v3_large",
+        "//:fp16_mobilenet_v3_small",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f32_dwconv_e2e_bench",
+    srcs = [
+        "end2end.h",
+        "f32-dwconv-e2e.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:XNNPACK",
+        "//:fp32_mobilenet_v1",
+        "//:fp32_mobilenet_v1_jit",
+        "//:fp32_mobilenet_v2",
+        "//:fp32_mobilenet_v2_jit",
+        "//:fp32_mobilenet_v3_large",
+        "//:fp32_mobilenet_v3_large_jit",
+        "//:fp32_mobilenet_v3_small",
+        "//:fp32_mobilenet_v3_small_jit",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f32_gemm_e2e_bench",
+    srcs = [
+        "end2end.h",
+        "f32-gemm-e2e.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:XNNPACK",
+        "//:fp32_mobilenet_v1",
+        "//:fp32_mobilenet_v1_jit",
+        "//:fp32_mobilenet_v2",
+        "//:fp32_mobilenet_v2_jit",
+        "//:fp32_mobilenet_v3_large",
+        "//:fp32_mobilenet_v3_large_jit",
+        "//:fp32_mobilenet_v3_small",
+        "//:fp32_mobilenet_v3_small_jit",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qs8_dwconv_e2e_bench",
+    srcs = [
+        "end2end.h",
+        "qs8-dwconv-e2e.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:XNNPACK",
+        "//:qs8_mobilenet_v1",
+        "//:qs8_mobilenet_v2",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qs8_gemm_e2e_bench",
+    srcs = [
+        "end2end.h",
+        "qs8-gemm-e2e.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:XNNPACK",
+        "//:qs8_mobilenet_v1",
+        "//:qs8_mobilenet_v2",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qu8_gemm_e2e_bench",
+    srcs = [
+        "end2end.h",
+        "qu8-gemm-e2e.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:XNNPACK",
+        "//:qu8_mobilenet_v1",
+        "//:qu8_mobilenet_v2",
+        "//:qu8_mobilenet_v3_large",
+        "//:qu8_mobilenet_v3_small",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qu8_dwconv_e2e_bench",
+    srcs = [
+        "end2end.h",
+        "qu8-dwconv-e2e.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:XNNPACK",
+        "//:qu8_mobilenet_v1",
+        "//:qu8_mobilenet_v2",
+        "//:qu8_mobilenet_v3_large",
+        "//:qu8_mobilenet_v3_small",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "end2end_bench",
+    srcs = ["end2end.cc"],
+    deps = [
+        ":bench_utils",
+        "//:XNNPACK",
+        "//:aligned_allocator",
+        "//:fp16_mobilenet_v1",
+        "//:fp16_mobilenet_v2",
+        "//:fp16_mobilenet_v3_large",
+        "//:fp16_mobilenet_v3_small",
+        "//:fp16_sparse_mobilenet_v1",
+        "//:fp16_sparse_mobilenet_v2",
+        "//:fp16_sparse_mobilenet_v3_large",
+        "//:fp16_sparse_mobilenet_v3_small",
+        "//:fp32_mobilenet_v1",
+        "//:fp32_mobilenet_v1_jit",
+        "//:fp32_mobilenet_v2",
+        "//:fp32_mobilenet_v2_jit",
+        "//:fp32_mobilenet_v3_large",
+        "//:fp32_mobilenet_v3_large_jit",
+        "//:fp32_mobilenet_v3_small",
+        "//:fp32_mobilenet_v3_small_fused",
+        "//:fp32_mobilenet_v3_small_jit",
+        "//:fp32_sparse_mobilenet_v1",
+        "//:fp32_sparse_mobilenet_v2",
+        "//:fp32_sparse_mobilenet_v3_large",
+        "//:fp32_sparse_mobilenet_v3_small",
+        "//:qs8_mobilenet_v1",
+        "//:qs8_mobilenet_v2",
+        "//:qs8_qc8w_mobilenet_v1",
+        "//:qs8_qc8w_mobilenet_v2",
+        "//:qu8_mobilenet_v1",
+        "//:qu8_mobilenet_v2",
+        "//:qu8_mobilenet_v3_large",
+        "//:qu8_mobilenet_v3_small",
+        "@pthreadpool",
+    ],
+)

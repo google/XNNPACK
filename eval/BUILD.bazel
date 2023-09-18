@@ -13,11 +13,11 @@ load(
 ACCURACY_EVAL_DEPS = [
     "//:aligned_allocator",
     "//:bench_microkernels",
-    "//:bench_utils",
     "//:common",
     "//:isa_checks",
     "//:math",
     "//:math_stubs",
+    "//bench:bench_utils",
     "@FP16",
     "@pthreadpool",
 ]
