@@ -194,6 +194,14 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_qu8(
     goto error;
   }
 
+  const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0;
+  if (any_padding || tf_same_padding) {
+    xnn_log_error(
+      "%s operator doesn not support padding",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_qu8));
+    goto error;
+  }
+
   const size_t zero_bytes = channels * sizeof(uint8_t) + XNN_EXTRA_BYTES;
   void* zero_buffer = xnn_allocate_simd_memory(zero_bytes);
   if (zero_buffer == NULL) {

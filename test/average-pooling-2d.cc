@@ -20,11 +20,13 @@
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator-utils.h>
 #include <xnnpack/operator.h>
+#include <xnnpack/requantization.h>
 #include <xnnpack/subgraph.h>
 
-class AveragePoolingTestF32 : public ::testing::Test {
+template<typename T>
+class AveragePoolingTest : public ::testing::Test {
 protected:
-  AveragePoolingTestF32()
+  AveragePoolingTest()
   {
     random_device = std::make_unique<std::random_device>();
     rng = std::mt19937((*random_device)());
@@ -49,12 +51,12 @@ protected:
     output_width = xnn_compute_convolution_output_dimension(
       input_padding_left + input_width + input_padding_right, pooling_width, 1, stride_width);
     output_min = std::uniform_real_distribution<float>(-255.0f, 0.0f)(rng);
-    output_max = std::uniform_real_distribution<float>(0.1f, 255.0f)(rng);
+    output_max = std::uniform_real_distribution<float>(1.f, 255.0f)(rng);
     input_dims = {batch_size, input_height, input_width, channels};
     output_dims = {batch_size, output_height, output_width, channels};
-    input = std::vector<float>(XNN_EXTRA_BYTES / sizeof(float) + batch_size * input_height * input_width * channels);
-    operator_output = std::vector<float>(batch_size * output_height * output_width * channels);
-    subgraph_output = std::vector<float>(batch_size * output_height * output_width * channels);
+    input = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + batch_size * input_height * input_width * channels);
+    operator_output = std::vector<T>(batch_size * output_height * output_width * channels);
+    subgraph_output = std::vector<T>(batch_size * output_height * output_width * channels);
   }
 
   std::unique_ptr<std::random_device> random_device;
@@ -84,10 +86,13 @@ protected:
   uint32_t input_id;
   uint32_t output_id;
 
-  std::vector<float> input;
-  std::vector<float> operator_output;
-  std::vector<float> subgraph_output;
+  std::vector<T> input;
+  std::vector<T> operator_output;
+  std::vector<T> subgraph_output;
 };
+
+using AveragePoolingTestF32 = AveragePoolingTest<float>;
+using AveragePoolingTestQU8 = AveragePoolingTest<uint8_t>;
 
 TEST_F(AveragePoolingTestF32, define)
 {
@@ -202,6 +207,147 @@ TEST_F(AveragePoolingTestF32, matches_operator_api)
     xnn_status_success,
     xnn_define_average_pooling_2d(
       subgraph, input_padding_top, input_padding_right, input_padding_bottom, input_padding_left, pooling_height,
+      pooling_width, stride_height, stride_width, output_min, output_max, input_id, output_id,
+      /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+  std::array<xnn_external_value, 2> external = {
+    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  ASSERT_EQ(subgraph_output, operator_output);
+}
+
+TEST_F(AveragePoolingTestQU8, define)
+{
+  const uint8_t input_zero_point = 0;
+  const float input_scale = 1.f;
+  const uint8_t output_zero_point = input_zero_point;
+  const float output_scale = input_scale;
+
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+
+  input_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_quantized_tensor_value(
+                          subgraph, xnn_datatype_quint8, input_zero_point, input_scale, input_dims.size(), input_dims.data(), nullptr, 0,
+                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+
+  output_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_quantized_tensor_value(
+                          subgraph, xnn_datatype_quint8, output_zero_point, output_scale, output_dims.size(), output_dims.data(), nullptr, 1,
+                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+
+  const uint8_t quantized_output_min = xnn_qu8_quantize(output_min, output_scale, output_zero_point);
+  const uint8_t quantized_output_max = xnn_qu8_quantize(output_max, output_scale, output_zero_point);
+
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_define_average_pooling_2d(
+      subgraph, /*input_padding_top=*/0, /*input_padding_right=*/0, /*input_padding_bottom=*/0, /*input_padding_left=*/0, pooling_height,
+      pooling_width, stride_height, stride_width, quantized_output_min, quantized_output_max, input_id, output_id,
+      /*flags=*/0));
+
+  ASSERT_EQ(subgraph->num_nodes, 1);
+  const struct xnn_node* node = &subgraph->nodes[0];
+  ASSERT_EQ(node->type, xnn_node_type_average_pooling_2d);
+  ASSERT_EQ(node->compute_type, xnn_compute_type_qu8);
+
+  ASSERT_EQ(node->params.pooling_2d.padding_top, 0);
+  ASSERT_EQ(node->params.pooling_2d.padding_right, 0);
+  ASSERT_EQ(node->params.pooling_2d.padding_bottom, 0);
+  ASSERT_EQ(node->params.pooling_2d.padding_left, 0);
+  ASSERT_EQ(node->params.pooling_2d.pooling_height, pooling_height);
+  ASSERT_EQ(node->params.pooling_2d.pooling_width, pooling_width);
+  ASSERT_EQ(node->params.pooling_2d.stride_height, stride_height);
+  ASSERT_EQ(node->params.pooling_2d.stride_width, stride_width);
+  ASSERT_EQ(node->activation.output_min, quantized_output_min);
+  ASSERT_EQ(node->activation.output_max, quantized_output_max);
+  ASSERT_EQ(node->num_inputs, 1);
+  ASSERT_EQ(node->inputs[0], input_id);
+  ASSERT_EQ(node->num_outputs, 1);
+  ASSERT_EQ(node->outputs[0], output_id);
+  ASSERT_EQ(node->flags, 0);
+}
+
+TEST_F(AveragePoolingTestQU8, matches_operator_api)
+{
+  std::uniform_real_distribution<float> scale_dist(0.1f, 10.f);;
+  std::uniform_int_distribution<uint8_t> u8dist(0, 255);
+  const int32_t input_zero_point = u8dist(rng);
+  const float input_scale = scale_dist(rng);
+  const int32_t output_zero_point = u8dist(rng);
+  const float output_scale = scale_dist(rng);
+  std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
+  std::fill(operator_output.begin(), operator_output.end(), UINT8_C(0xA5));
+  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT8_C(0xA5));
+
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  const uint8_t quantized_output_min = xnn_qu8_quantize(output_min, output_scale, output_zero_point);
+  const uint8_t quantized_output_max = xnn_qu8_quantize(output_max, output_scale, output_zero_point);
+  // Call operator API.
+  xnn_operator_t op = nullptr;
+  const xnn_status status = xnn_create_average_pooling2d_nhwc_qu8(
+    /*input_padding_top=*/0, /*input_padding_right=*/0, /*input_padding_bottom=*/0, /*input_padding_left=*/0, pooling_height, pooling_width,
+    stride_height, stride_width, channels, channels, channels, input_zero_point, input_scale, output_zero_point, output_scale, quantized_output_min, quantized_output_max, /*flags=*/0, &op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
+
+  size_t workspace_size = 0;
+  size_t workspace_alignment = 0;
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_reshape_average_pooling2d_nhwc_qu8(
+      op, batch_size, input_height, input_width,
+      &workspace_size, &workspace_alignment,
+      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+      /*threadpool=*/nullptr));
+  ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  ASSERT_EQ(xnn_status_success, xnn_setup_average_pooling2d_nhwc_qu8(op, workspace.data(), input.data(), operator_output.data()));
+
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
+
+  // Call subgraph API.
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  input_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_quantized_tensor_value(
+                          subgraph, xnn_datatype_quint8, input_zero_point, input_scale, input_dims.size(), input_dims.data(), nullptr, /*external_id=*/0,
+                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+
+  output_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_define_quantized_tensor_value(
+      subgraph, xnn_datatype_quint8, output_zero_point, output_scale, output_dims.size(), output_dims.data(), nullptr, /*external_id=*/1,
+      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_define_average_pooling_2d(
+      subgraph, /*input_padding_top=*/0, /*input_padding_right=*/0, /*input_padding_bottom=*/0, /*input_padding_left=*/0, pooling_height,
       pooling_width, stride_height, stride_width, output_min, output_max, input_id, output_id,
       /*flags=*/0));
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));

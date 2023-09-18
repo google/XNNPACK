@@ -6999,6 +6999,7 @@ xnnpack_unit_test(
         ":node_type",
         ":operator_utils",
         ":operators_test_mode",
+        ":requantization",
         ":subgraph_test_mode",
     ],
 )
