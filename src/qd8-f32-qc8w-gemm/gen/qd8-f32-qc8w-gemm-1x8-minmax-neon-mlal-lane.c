@@ -41,9 +41,8 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8__neon_mlal_lane(
   float* c0 = c;
 
   do {
-    const int32x4_t vksum0123 = vld1q_s32(w); w = (const int32_t*) w + 4;
-    const int32x4_t vksum4567 = vld1q_s32(w); w = (const int32_t*) w + 4;
-
+    int32x4_t vksum0123 = vld1q_s32(w); w = (const int32_t*) w + 4;
+    int32x4_t vksum4567 = vld1q_s32(w); w = (const int32_t*) w + 4;
     const int32x4_t vzp0 = vld1q_dup_s32(&quantization_params[0].zero_point);
     int32x4_t vacc0x0123 = vmulq_s32(vksum0123, vzp0);
     int32x4_t vacc0x4567 = vmulq_s32(vksum4567, vzp0);
@@ -97,6 +96,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8__neon_mlal_lane(
       const int16x8_t vxa0 = vmovl_s8(va0);
 
       const int8x8_t vb01234567c0 = vld1_s8(w); w = (const int8_t*) w + 8;
+
       const int16x8_t vxb01234567c0 = vmovl_s8(vb01234567c0);
 
       vacc0x0123 = vmlal_lane_s16(vacc0x0123, vget_low_s16(vxb01234567c0), vget_low_s16(vxa0), 0);

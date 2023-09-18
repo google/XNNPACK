@@ -41,7 +41,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x2__wasm(
     c1 = c0;
   }
 
-  const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
   kc = round_up_po2(kc, 2);
   do {
     const int32_t vksum0 = unaligned_indexed_load_s32(w, 0);
@@ -63,13 +62,13 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x2__wasm(
       const int32_t va1c1 = (int32_t) a1[1];
       a1 += 2;
 
-      const uint32_t vbi0 = (uint32_t) ((const uint8_t*) w)[0];
-      const uint32_t vbi1 = (uint32_t) ((const uint8_t*) w)[1];
+      const uint8_t vbi0 = ((const uint8_t*) w)[0];
+      const uint8_t vbi1 = ((const uint8_t*) w)[1];
       w = (const uint8_t*) w + 2;
-      const int32_t vb0c0 = (int32_t) (vbi0 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb1c0 = (int32_t) (vbi1 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb0c1 = (int32_t) (vbi0 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb1c1 = (int32_t) (vbi1 >> 4) + vminus_kernel_zero_point;
+      const int32_t vb0c0 = (int32_t) (int8_t) (vbi0 << 4);
+      const int32_t vb0c1 = (int32_t) (int8_t) (vbi0 & 0xF0);
+      const int32_t vb1c0 = (int32_t) (int8_t) (vbi1 << 4);
+      const int32_t vb1c1 = (int32_t) (int8_t) (vbi1 & 0xF0);
 
       vacc0x0 += va0c0 * vb0c0;
       vacc0x1 += va0c0 * vb1c0;
@@ -85,6 +84,11 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x2__wasm(
     float vout0x1 = (float) vacc0x1;
     float vout1x0 = (float) vacc1x0;
     float vout1x1 = (float) vacc1x1;
+
+    vout0x0 *= 1.0f / 16.0f;
+    vout0x1 *= 1.0f / 16.0f;
+    vout1x0 *= 1.0f / 16.0f;
+    vout1x1 *= 1.0f / 16.0f;
 
     const float vinput_scale0 = quantization_params[0].inv_scale;
     vout0x0 *= vinput_scale0;

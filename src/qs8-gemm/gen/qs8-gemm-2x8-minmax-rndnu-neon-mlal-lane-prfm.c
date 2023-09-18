@@ -122,6 +122,7 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_2x8__neon_mlal_lane_prfm(
       const int16x8_t vxa1 = vmovl_s8(va1);
 
       const int8x8_t vb01234567c0 = vld1_s8(w); w = (const int8_t*) w + 8;
+
       const int16x8_t vxb01234567c0 = vmovl_s8(vb01234567c0);
 
       vacc0x0123 = vmlal_lane_s16(vacc0x0123, vget_low_s16(vxb01234567c0), vget_low_s16(vxa0), 0);

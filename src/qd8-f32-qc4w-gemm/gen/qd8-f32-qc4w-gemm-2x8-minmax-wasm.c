@@ -40,7 +40,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8__wasm(
     c1 = c0;
   }
 
-  const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
   kc = round_up_po2(kc, 2);
   do {
     const int32_t vksum0 = ((const int32_t*) w)[0];
@@ -80,31 +79,31 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8__wasm(
       const int32_t va1c1 = (int32_t) a1[1];
       a1 += 2;
 
-      const uint32_t vbi0 = (uint32_t) ((const uint8_t*) w)[0];
-      const uint32_t vbi1 = (uint32_t) ((const uint8_t*) w)[1];
-      const uint32_t vbi2 = (uint32_t) ((const uint8_t*) w)[2];
-      const uint32_t vbi3 = (uint32_t) ((const uint8_t*) w)[3];
-      const uint32_t vbi4 = (uint32_t) ((const uint8_t*) w)[4];
-      const uint32_t vbi5 = (uint32_t) ((const uint8_t*) w)[5];
-      const uint32_t vbi6 = (uint32_t) ((const uint8_t*) w)[6];
-      const uint32_t vbi7 = (uint32_t) ((const uint8_t*) w)[7];
+      const uint8_t vbi0 = ((const uint8_t*) w)[0];
+      const uint8_t vbi1 = ((const uint8_t*) w)[1];
+      const uint8_t vbi2 = ((const uint8_t*) w)[2];
+      const uint8_t vbi3 = ((const uint8_t*) w)[3];
+      const uint8_t vbi4 = ((const uint8_t*) w)[4];
+      const uint8_t vbi5 = ((const uint8_t*) w)[5];
+      const uint8_t vbi6 = ((const uint8_t*) w)[6];
+      const uint8_t vbi7 = ((const uint8_t*) w)[7];
       w = (const uint8_t*) w + 8;
-      const int32_t vb0c0 = (int32_t) (vbi0 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb1c0 = (int32_t) (vbi1 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb2c0 = (int32_t) (vbi2 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb3c0 = (int32_t) (vbi3 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb4c0 = (int32_t) (vbi4 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb5c0 = (int32_t) (vbi5 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb6c0 = (int32_t) (vbi6 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb7c0 = (int32_t) (vbi7 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb0c1 = (int32_t) (vbi0 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb1c1 = (int32_t) (vbi1 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb2c1 = (int32_t) (vbi2 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb3c1 = (int32_t) (vbi3 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb4c1 = (int32_t) (vbi4 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb5c1 = (int32_t) (vbi5 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb6c1 = (int32_t) (vbi6 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb7c1 = (int32_t) (vbi7 >> 4) + vminus_kernel_zero_point;
+      const int32_t vb0c0 = (int32_t) (int8_t) (vbi0 << 4);
+      const int32_t vb0c1 = (int32_t) (int8_t) (vbi0 & 0xF0);
+      const int32_t vb1c0 = (int32_t) (int8_t) (vbi1 << 4);
+      const int32_t vb1c1 = (int32_t) (int8_t) (vbi1 & 0xF0);
+      const int32_t vb2c0 = (int32_t) (int8_t) (vbi2 << 4);
+      const int32_t vb2c1 = (int32_t) (int8_t) (vbi2 & 0xF0);
+      const int32_t vb3c0 = (int32_t) (int8_t) (vbi3 << 4);
+      const int32_t vb3c1 = (int32_t) (int8_t) (vbi3 & 0xF0);
+      const int32_t vb4c0 = (int32_t) (int8_t) (vbi4 << 4);
+      const int32_t vb4c1 = (int32_t) (int8_t) (vbi4 & 0xF0);
+      const int32_t vb5c0 = (int32_t) (int8_t) (vbi5 << 4);
+      const int32_t vb5c1 = (int32_t) (int8_t) (vbi5 & 0xF0);
+      const int32_t vb6c0 = (int32_t) (int8_t) (vbi6 << 4);
+      const int32_t vb6c1 = (int32_t) (int8_t) (vbi6 & 0xF0);
+      const int32_t vb7c0 = (int32_t) (int8_t) (vbi7 << 4);
+      const int32_t vb7c1 = (int32_t) (int8_t) (vbi7 & 0xF0);
 
       vacc0x0 += va0c0 * vb0c0;
       vacc0x1 += va0c0 * vb1c0;
@@ -156,6 +155,23 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8__wasm(
     float vout1x5 = (float) vacc1x5;
     float vout1x6 = (float) vacc1x6;
     float vout1x7 = (float) vacc1x7;
+
+    vout0x0 *= 1.0f / 16.0f;
+    vout0x1 *= 1.0f / 16.0f;
+    vout0x2 *= 1.0f / 16.0f;
+    vout0x3 *= 1.0f / 16.0f;
+    vout0x4 *= 1.0f / 16.0f;
+    vout0x5 *= 1.0f / 16.0f;
+    vout0x6 *= 1.0f / 16.0f;
+    vout0x7 *= 1.0f / 16.0f;
+    vout1x0 *= 1.0f / 16.0f;
+    vout1x1 *= 1.0f / 16.0f;
+    vout1x2 *= 1.0f / 16.0f;
+    vout1x3 *= 1.0f / 16.0f;
+    vout1x4 *= 1.0f / 16.0f;
+    vout1x5 *= 1.0f / 16.0f;
+    vout1x6 *= 1.0f / 16.0f;
+    vout1x7 *= 1.0f / 16.0f;
 
     const float vinput_scale0 = quantization_params[0].inv_scale;
     vout0x0 *= vinput_scale0;

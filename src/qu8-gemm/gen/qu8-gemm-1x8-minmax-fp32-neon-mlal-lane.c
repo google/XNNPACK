@@ -93,6 +93,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x8__neon_mlal_lane(
       const int16x8_t vxa0 = vreinterpretq_s16_u16(vmovl_u8(va0));
 
       const uint8x8_t vb01234567c0 = vld1_u8(w); w = (const uint8_t*) w + 8;
+
       const int16x8_t vxb01234567c0 = vreinterpretq_s16_u16(vsubl_u8(vb01234567c0, vb_zero_point));
 
       vacc0x0123 = vmlal_lane_s16(vacc0x0123, vget_low_s16(vxb01234567c0), vget_low_s16(vxa0), 0);

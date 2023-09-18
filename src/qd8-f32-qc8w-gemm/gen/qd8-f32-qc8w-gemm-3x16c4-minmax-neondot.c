@@ -37,6 +37,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x16c4__neondot(
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 4 * sizeof(int8_t));
   const int8_t* a0 = a;
   float* c0 = c;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
@@ -52,7 +53,6 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x16c4__neondot(
     c2 = c1;
   }
 
-  kc = round_up_po2(kc, 4 * sizeof(int8_t));
   // Loop over groups of 16 columns.
   do {
     // Initialize accumulators with bias. 16 bias values are loaded from the
@@ -163,7 +163,6 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x16c4__neondot(
     float32x4_t vout2x4567 = vcvtq_f32_s32(vacc2x4567);
     float32x4_t vout2x89AB = vcvtq_f32_s32(vacc2x89AB);
     float32x4_t vout2xCDEF = vcvtq_f32_s32(vacc2xCDEF);
-
     const float32x4_t vinput_scale01 = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[0].zero_point));
     vout0x0123 = vmulq_lane_f32(vout0x0123, vget_low_f32(vinput_scale01), 1);
     vout1x0123 = vmulq_lane_f32(vout1x0123, vget_high_f32(vinput_scale01), 1);

@@ -75,8 +75,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
       }
 
   $if DATATYPE == "QC4":
-    const int8x16_t vminus_kernel_zero_point = vld1q_dup_s8((const void*) &params->scalar.minus_kernel_zero_point);
-    const uint8x16_t vmask = vmovq_n_u8(UINT8_C(0xF));
+    const uint8x16_t vmask = vmovq_n_u8(UINT8_C(0xF0));
   do {
     $if DATATYPE in ["QD8", "QC4"]:
       $for M in range(0, MR, 2):
@@ -117,13 +116,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
           $for N in range(0, NR, 4):
             const uint8x16_t vb${ABC[N:N+4]}c01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
           $for N in range(0, NR, 4):
-            const uint8x16_t vb${ABC[N:N+4]}c0246 = vandq_u8(vb${ABC[N:N+4]}c01234567, vmask);
-            const uint8x16_t vb${ABC[N:N+4]}c1357 = vshrq_n_u8(vb${ABC[N:N+4]}c01234567, 4);
+            const uint8x16_t vb${ABC[N:N+4]}c0246 = vshlq_n_u8(vb${ABC[N:N+4]}c01234567, 4);
+            const uint8x16_t vb${ABC[N:N+4]}c1357 = vandq_u8(vb${ABC[N:N+4]}c01234567, vmask);
           $for N in range(0, NR, 4):
             const uint8x16x2_t vbi${ABC[N:N+4]}c01234567 = vzipq_u8(vb${ABC[N:N+4]}c0246, vb${ABC[N:N+4]}c1357);
-          $for N in range(0, NR, 4):
-            const int8x16_t vb${ABC[N:N+2]}c01234567 = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vbi${ABC[N:N+4]}c01234567.val[0]));
-            const int8x16_t vb${ABC[N+2:N+4]}c01234567 = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vbi${ABC[N:N+4]}c01234567.val[1]));
+            const int8x16_t vb${ABC[N:N+2]}c01234567 = vreinterpretq_s8_u8(vbi${ABC[N:N+4]}c01234567.val[0]);
+            const int8x16_t vb${ABC[N+2:N+4]}c01234567 = vreinterpretq_s8_u8(vbi${ABC[N:N+4]}c01234567.val[1]);
         $else:
           $for N in range(0, NR, 2):
             const int8x16_t vb${ABC[N:N+2]}c01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
@@ -136,13 +134,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
           $for N in range(0, NR, 4):
             const uint8x16_t vb${ABC[N:N+4]}c89ABCDEF = vld1q_u8(w); w = (const uint8_t*) w + 16;
           $for N in range(0, NR, 4):
-            const uint8x16_t vb${ABC[N:N+4]}c8ACE = vandq_u8(vb${ABC[N:N+4]}c89ABCDEF, vmask);
-            const uint8x16_t vb${ABC[N:N+4]}c9BDF = vshrq_n_u8(vb${ABC[N:N+4]}c89ABCDEF, 4);
+            const uint8x16_t vb${ABC[N:N+4]}c8ACE = vshlq_n_u8(vb${ABC[N:N+4]}c89ABCDEF, 4);
+            const uint8x16_t vb${ABC[N:N+4]}c9BDF = vandq_u8(vb${ABC[N:N+4]}c89ABCDEF, vmask);
           $for N in range(0, NR, 4):
             const uint8x16x2_t vbi${ABC[N:N+4]}c89ABCDEF = vzipq_u8(vb${ABC[N:N+4]}c8ACE, vb${ABC[N:N+4]}c9BDF);
-          $for N in range(0, NR, 4):
-            const int8x16_t vb${ABC[N:N+2]}c89ABCDEF = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vbi${ABC[N:N+4]}c89ABCDEF.val[0]));
-            const int8x16_t vb${ABC[N+2:N+4]}c89ABCDEF = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vbi${ABC[N:N+4]}c89ABCDEF.val[1]));
+            const int8x16_t vb${ABC[N:N+2]}c89ABCDEF = vreinterpretq_s8_u8(vbi${ABC[N:N+4]}c89ABCDEF.val[0]);
+            const int8x16_t vb${ABC[N+2:N+4]}c89ABCDEF = vreinterpretq_s8_u8(vbi${ABC[N:N+4]}c89ABCDEF.val[1]);
         $else:
           $for N in range(0, NR, 2):
             const int8x16_t vb${ABC[N:N+2]}c89ABCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
@@ -161,13 +158,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
           $for N in range(0, NR, 4):
             const uint8x16_t vb${ABC[N:N+4]}c01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
           $for N in range(0, NR, 4):
-            const uint8x16_t vb${ABC[N:N+4]}c0246 = vandq_u8(vb${ABC[N:N+4]}c01234567, vmask);
-            const uint8x16_t vb${ABC[N:N+4]}c1357 = vshrq_n_u8(vb${ABC[N:N+4]}c01234567, 4);
+            const uint8x16_t vb${ABC[N:N+4]}c0246 = vshlq_n_u8(vb${ABC[N:N+4]}c01234567, 4);
+            const uint8x16_t vb${ABC[N:N+4]}c1357 = vandq_u8(vb${ABC[N:N+4]}c01234567, vmask);
           $for N in range(0, NR, 4):
             const uint8x16x2_t vbi${ABC[N:N+4]}c01234567 = vzipq_u8(vb${ABC[N:N+4]}c0246, vb${ABC[N:N+4]}c1357);
-          $for N in range(0, NR, 4):
-            const int8x16_t vb${ABC[N:N+2]}c01234567 = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vbi${ABC[N:N+4]}c01234567.val[0]));
-            const int8x16_t vb${ABC[N+2:N+4]}c01234567 = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vbi${ABC[N:N+4]}c01234567.val[1]));
+            const int8x16_t vb${ABC[N:N+2]}c01234567 = vreinterpretq_s8_u8(vbi${ABC[N:N+4]}c01234567.val[0]);
+            const int8x16_t vb${ABC[N+2:N+4]}c01234567 = vreinterpretq_s8_u8(vbi${ABC[N:N+4]}c01234567.val[1]);
         $else:
           $for N in range(0, NR, 2):
             const int8x16_t vb${ABC[N:N+2]}c01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
@@ -185,13 +181,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
           $for N in range(0, NR, 4):
             const uint8x16_t vb${ABC[N:N+4]}c01234567 = vld1q_u8(w); w = (const uint8_t*) w + 16;
           $for N in range(0, NR, 4):
-            const uint8x16_t vb${ABC[N:N+4]}c0246 = vandq_u8(vb${ABC[N:N+4]}c01234567, vmask);
-            const uint8x16_t vb${ABC[N:N+4]}c1357 = vshrq_n_u8(vb${ABC[N:N+4]}c01234567, 4);
+            const uint8x16_t vb${ABC[N:N+4]}c0246 = vshlq_n_u8(vb${ABC[N:N+4]}c01234567, 4);
+            const uint8x16_t vb${ABC[N:N+4]}c1357 = vandq_u8(vb${ABC[N:N+4]}c01234567, vmask);
           $for N in range(0, NR, 4):
             const uint8x16x2_t vbi${ABC[N:N+4]}c01234567 = vzipq_u8(vb${ABC[N:N+4]}c0246, vb${ABC[N:N+4]}c1357);
-          $for N in range(0, NR, 4):
-            const int8x16_t vb${ABC[N:N+2]}c01234567 = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vbi${ABC[N:N+4]}c01234567.val[0]));
-            const int8x16_t vb${ABC[N+2:N+4]}c01234567 = vaddq_s8(vminus_kernel_zero_point, vreinterpretq_s8_u8(vbi${ABC[N:N+4]}c01234567.val[1]));
+            const int8x16_t vb${ABC[N:N+2]}c01234567 = vreinterpretq_s8_u8(vbi${ABC[N:N+4]}c01234567.val[0]);
+            const int8x16_t vb${ABC[N+2:N+4]}c01234567 = vreinterpretq_s8_u8(vbi${ABC[N:N+4]}c01234567.val[1]);
         $else:
           $for N in range(0, NR, 2):
             const int8x16_t vb${ABC[N:N+2]}c01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
@@ -214,6 +209,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     #endif
 
     $if DATATYPE in ["QD8", "QC4"]:
+      $if DATATYPE == "QC4":
+        $for M in range(0, MR):
+          $for N in range(0, NR, 4):
+             vacc${M}x${ABC[N:N+4]} = vshrq_n_s32(vacc${M}x${ABC[N:N+4]}, 4);
+
       $for M in range(0, MR):
         $for N in range(0, NR, 4):
           float32x4_t vout${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});

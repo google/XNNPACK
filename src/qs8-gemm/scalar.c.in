@@ -71,7 +71,6 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
   $if DATATYPE == "QU8":
     const int32_t vb_zero_point = params->${PARAMS_STRUCT}.kernel_zero_point;
   $elif DATATYPE == "QC4":
-    const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
     kc = round_up_po2(kc, 2);
   do {
     $if DATATYPE in ["QD8", "QC4"]:
@@ -105,12 +104,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
           a${M} += 2;
 
         $for N in range(NR):
-          const uint32_t vbi${N} = (uint32_t) ((const uint8_t*) w)[${N}];
+          const uint8_t vbi${N} = ((const uint8_t*) w)[${N}];
         w = (const uint8_t*) w + ${NR};
         $for N in range(NR):
-          const int32_t vb${N}c0 = (int32_t) (vbi${N} & 0xF) + vminus_kernel_zero_point;
-        $for N in range(NR):
-          const int32_t vb${N}c1 = (int32_t) (vbi${N} >> 4) + vminus_kernel_zero_point;
+          const int32_t vb${N}c0 = (int32_t) (int8_t) (vbi${N} << 4);
+          const int32_t vb${N}c1 = (int32_t) (int8_t) (vbi${N} & 0xF0);
 
         $for M in range(MR):
           $for N in range(NR):
@@ -145,6 +143,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
       $for M in range(MR):
         $for N in range(NR):
           float vout${M}x${N} = (float) vacc${M}x${N};
+
+      $if DATATYPE == "QC4":
+        $for M in range(MR):
+          $for N in range(NR):
+            vout${M}x${N} *= 1.0f / 16.0f;
 
       $for M in range(MR):
         const float vinput_scale${M} = quantization_params[${M}].inv_scale;
