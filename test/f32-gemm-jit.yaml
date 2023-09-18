@@ -171,3 +171,34 @@
 - name: xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x4
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
+# WAsm Relaxed SIMD JIT
+- name: xnn_generate_f32_gemm_ukernel_6x8__wasmrelaxedsimd32_x86_fma_loadsplat_xinf
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_generate_f32_gemm_ukernel_6x8__wasmrelaxedsimd32_x86_fma_loadsplat_x1
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_generate_f32_gemm_ukernel_6x8__wasmrelaxedsimd32_x86_fma_loadsplat_x2
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_generate_f32_gemm_ukernel_6x8__wasmrelaxedsimd32_x86_fma_loadsplat_x4
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_generate_f32_gemm_ukernel_6x8__wasmrelaxedsimd32_x86_fma_loadsplat_x8
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_generate_f32_gemm_ukernel_6x8__wasmrelaxedsimd32_x86_loadsplat_xinf
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_generate_f32_gemm_ukernel_6x8__wasmrelaxedsimd32_x86_loadsplat_x1
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_generate_f32_gemm_ukernel_6x8__wasmrelaxedsimd32_x86_loadsplat_x2
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_generate_f32_gemm_ukernel_6x8__wasmrelaxedsimd32_x86_loadsplat_x4
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_generate_f32_gemm_ukernel_6x8__wasmrelaxedsimd32_x86_loadsplat_x8
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1

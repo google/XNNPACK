@@ -133,7 +133,7 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c8__neoni8mm(
     // Handle up to 8 final positions of `k`
     if XNN_UNLIKELY(k != 0) {
       // Load a 1x8 block of activations.
-      uint64x2_t va01x01234567 = vld1q_dup_u64((const void*) a0); a0 += 8;
+      const uint64x2_t va01x01234567 = vld1q_dup_u64((const void*) a0); a0 += 8;
 
       // Load a 16x16 block of weights.
       const int8x16_t vb01x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
@@ -167,6 +167,7 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c8__neoni8mm(
       int32x4_t vacc0x89AB = vcombine_s32(vget_low_s32(vacc01x89), vget_low_s32(vacc01xAB));
       int32x4_t vacc0xCDEF = vcombine_s32(vget_low_s32(vacc01xCD), vget_low_s32(vacc01xEF));
     #endif
+
     const int32x4_t vright_pre_shift = vld1q_dup_s32(&params->rndnu_neon.right_pre_shift);
     const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
     const int32x4_t vright_post_shift = vld1q_dup_s32(&params->rndnu_neon.right_post_shift);
