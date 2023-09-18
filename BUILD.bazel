@@ -5689,6 +5689,7 @@ xnnpack_unit_test(
         "test/qu8-requantization.cc",
         "test/requantization-tester.h",
     ],
+    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [":requantization_stubs"],
 )
 
