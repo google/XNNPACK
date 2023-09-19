@@ -446,9 +446,11 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f16(
     fp16_ieee_from_fp32_value(1.0f / (float) (int32_t) pooling_size), fp16_output_min, fp16_output_max);
   const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0;
   if (any_padding || tf_same_padding) {
+    // pavgpool does not include padding (zero) elements when calculating the average.
     pavgpool_config->init.f16(&average_pooling_op->params.f16_minmax, fp16_output_min, fp16_output_max);
     average_pooling_op->ukernel.type = xnn_microkernel_type_pixelwise_average_pooling;
   } else {
+    // avgpool includes padding elements when calculating the average.
     average_pooling_op->ukernel.type = xnn_microkernel_type_average_pooling;
   }
   average_pooling_op->flags = flags;
@@ -647,9 +649,11 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
     1.0f / (float) (int32_t) pooling_size, output_min, output_max);
   const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0;
   if (any_padding || tf_same_padding) {
+    // pavgpool does not include padding (zero) elements when calculating the average.
     pavgpool_config->init.f32(&average_pooling_op->params.f32_minmax, output_min, output_max);
     average_pooling_op->ukernel.type = xnn_microkernel_type_pixelwise_average_pooling;
   } else {
+    // avgpool includes padding elements when calculating the average.
     average_pooling_op->ukernel.type = xnn_microkernel_type_average_pooling;
   }
   average_pooling_op->flags = flags;
