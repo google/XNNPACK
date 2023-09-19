@@ -77,19 +77,16 @@ void xnn_qs8_qc8w_gemm_xw_minmax_fp32_ukernel_2x8c8__avx2(
       a1 += 8;
 
       const __m256i vxb01 = _mm256_load_si256((const __m256i*) w);
+      const __m256i vxb23 = _mm256_load_si256((const __m256i*) ((const int16_t*) w + 16));
+      const __m256i vxb45 = _mm256_load_si256((const __m256i*) ((const int16_t*) w + 32));
+      const __m256i vxb67 = _mm256_load_si256((const __m256i*) ((const int16_t*) w + 48));
 
       vacc0x01 = _mm256_add_epi32(vacc0x01, _mm256_madd_epi16(vxa0, vxb01));
       vacc1x01 = _mm256_add_epi32(vacc1x01, _mm256_madd_epi16(vxa1, vxb01));
-      const __m256i vxb23 = _mm256_load_si256((const __m256i*) ((const int16_t*) w + 16));
-
       vacc0x23 = _mm256_add_epi32(vacc0x23, _mm256_madd_epi16(vxa0, vxb23));
       vacc1x23 = _mm256_add_epi32(vacc1x23, _mm256_madd_epi16(vxa1, vxb23));
-      const __m256i vxb45 = _mm256_load_si256((const __m256i*) ((const int16_t*) w + 32));
-
       vacc0x45 = _mm256_add_epi32(vacc0x45, _mm256_madd_epi16(vxa0, vxb45));
       vacc1x45 = _mm256_add_epi32(vacc1x45, _mm256_madd_epi16(vxa1, vxb45));
-      const __m256i vxb67 = _mm256_load_si256((const __m256i*) ((const int16_t*) w + 48));
-
       vacc0x67 = _mm256_add_epi32(vacc0x67, _mm256_madd_epi16(vxa0, vxb67));
       vacc1x67 = _mm256_add_epi32(vacc1x67, _mm256_madd_epi16(vxa1, vxb67));
 
