@@ -35,6 +35,7 @@ using SumArray = int (*)(const int*, int);
 using MemCpy = void (*)(int*, const int*, int);
 using V128Add = void (*)(const float*, float*);
 using V128AddConst = void (*)(const float*, float*);
+using V128MAdd = void (*)(const float*, float*);
 using V128Shuffle = void (*)(const float*, float*);
 
 namespace xnnpack {
@@ -552,6 +553,34 @@ struct V128AddConstGeneratorTestSuite : GeneratorTestSuite<V128AddConstGenerator
   }
 };
 
+#if XNN_ARCH_WASMRELAXEDSIMD
+struct V128MaddGenerator : WasmAssembler {
+  explicit V128MaddGenerator(xnn_code_buffer* bf) : WasmAssembler(bf) {
+    ValTypesToInt three_v128 = {{v128, 3}};
+    AddFunc<2>({}, "v128_madd", {i32, i32}, three_v128, [this](Local src, Local dst) {
+      auto a = MakeLocal(v128);
+      auto b = MakeLocal(v128);
+      auto c = MakeLocal(v128);
+      a = V128Load(src);
+      b = V128Load32Splat(src, /*offset=*/16);
+      c = V128Load32Splat(src, /*offset=*/20);
+      a = F32x4RelaxedMadd(a, b, c);
+      V128Store(dst, a);
+    });
+  }
+};
+
+struct V128MaddGeneratorTestSuite : GeneratorTestSuite<V128MaddGenerator, V128MAdd> {
+  static void ExpectFuncCorrect(V128MAdd v128_madd) {
+    static constexpr std::array<float, 6> kIn = {1, 2, 3, 4, 5, 6};
+    static constexpr std::array<float, 4> kExpectedOut = {11, 16, 21, 26};
+    std::array<float, 4> out;
+    v128_madd(kIn.data(), out.data());
+    EXPECT_THAT(out, ElementsAreArray(kExpectedOut));
+  }
+};
+#endif
+
 struct V128AddPiGenerator : WasmAssembler {
   explicit V128AddPiGenerator(xnn_code_buffer* bf) : WasmAssembler(bf) {
     ValTypesToInt two_v128 = {{v128, 2}};
@@ -706,7 +735,12 @@ using WasmAssemblerTestSuits =
                  SumUntilLocalsArrayWithIndexTestSuite, DoWhileTestSuite, SumArrayTestSuite, MemCpyTestSuite,
                  AddDelayedInitTestSuite, ManyLocalsGeneratorTestSuite, V128AddGeneratorTestSuite,
                  V128AddPiGeneratorTestSuite, V128AddConstGeneratorTestSuite, I64x2ShuffleGeneratorTestSuite,
-                 GetPiTestSuite, Get5TrickyTestSuite>;
+                 GetPiTestSuite, Get5TrickyTestSuite
+#if XNN_ARCH_WASMRELAXEDSIMD
+                 ,
+                 V128MaddGeneratorTestSuite
+#endif
+                 >;
 INSTANTIATE_TYPED_TEST_SUITE_P(WasmAssemblerTestSuits, WasmAssemblerTest, WasmAssemblerTestSuits);
 
 TEST(WasmAssemblerTest, InvalidCode) {
@@ -883,6 +917,16 @@ TEST_F(WasmOpsTest, I32NeZ) {
   ExpectCallEncode8(0x47);
   I32NeZ(i32_value_);
 }
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+TEST_F(WasmOpsTest, V128F32x4RelaxedMin) {
+  TestV128BinaryOp(0x10D, &WasmOpsTest::F32x4RelaxedMin);
+}
+
+TEST_F(WasmOpsTest, V128F32x4RelaxedMax) {
+  TestV128BinaryOp(0x10E, &WasmOpsTest::F32x4RelaxedMax);
+}
+#endif
 
 using ::xnnpack::internal::LocalsManager;
 
