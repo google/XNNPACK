@@ -19,7 +19,7 @@ class F32GemmS4Generator : public internal::GemmIGemmS4Commons {
   using GemmIGemmS4Commons::GemmIGemmS4Commons;
 
   void generate(const char* name, size_t max_mr, size_t k_const, size_t k_per_iteration, bool full_unroll,
-                size_t nc_mod_nr, const jit_gemm_params* jit_gemm_params) {
+                size_t nc_mod_nr, bool use_fma, const jit_gemm_params* jit_gemm_params) {
     ValTypesToInt locals_declaration = {{i32, max_mr * 2 + 2}, {v128, max_mr * 3 + 8}};
     AddFunc<10>({}, name, locals_declaration,
                 [&](auto mr, auto nc, auto kc, auto a, auto a_stride, auto w, auto c, auto cm_stride, auto cn_stride,
@@ -51,10 +51,7 @@ class F32GemmS4Generator : public internal::GemmIGemmS4Commons {
                       if (nc_mod_nr == 0) {
                         Store8Floats(store_args);
                       } else {
-                        IfElse([&] { I32GeU(nc, I32Const(8)); },
-                               [&] {
-                                 Store8Floats(store_args);
-                               },
+                        IfElse([&] { I32GeU(nc, I32Const(8)); }, [&] { Store8Floats(store_args); },
                                [&] {
                                  if (is_nc_mod_nr_known) {
                                    if (nc_mod_nr & 4) {
@@ -67,15 +64,9 @@ class F32GemmS4Generator : public internal::GemmIGemmS4Commons {
                                      Store1Floats(store_args);
                                    }
                                  } else {
-                                   MaskedIf(
-                                       [&] { Store4Floats(store_args);  },
-                                       nc, 4);
-                                  MaskedIf(
-                                      [&] { Store2Floats(store_args);  },
-                                      nc, 2);
-                                  MaskedIf(
-                                      [&] { Store1Floats(store_args);  },
-                                      nc, 1);
+                                   MaskedIf([&] { Store4Floats(store_args); }, nc, 4);
+                                   MaskedIf([&] { Store2Floats(store_args); }, nc, 2);
+                                   MaskedIf([&] { Store1Floats(store_args); }, nc, 1);
                                  }
                                  Return();
                                });
@@ -84,14 +75,12 @@ class F32GemmS4Generator : public internal::GemmIGemmS4Commons {
                     [&] { I32Ne(nc, I32Const(0)); });
                 });
   }
+
  private:
   template <typename Body>
-      void MaskedIf(Body&& body, const Local& nc, size_t mask) {
-        If(
-            [&] { I32And(nc, I32Const(mask)); },
-            std::forward<Body>(body)
-          );
-      }
+  void MaskedIf(Body&& body, const Local& nc, size_t mask) {
+    If([&] { I32And(nc, I32Const(mask)); }, std::forward<Body>(body));
+  }
 
   void Store8Floats(StoreArgs& args) {
     for (int i = args.max_mr - 1; i >= 0; i--) {
@@ -140,7 +129,7 @@ xnn_status_t xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x1(xnn_code_buf
   static const char* kFunctionName = "xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd_x86_x1";
   assert(max_mr <= 6);
   return xnnpack::generate(b, kFunctionName, max_mr, kc, /*k_per_iteration=*/4,
-                           /*full_unroll=*/false, nc_mod_nr, params);
+                           /*full_unroll=*/false, nc_mod_nr, /*use_fma=*/false, params);
 }
 
 xnn_status_t xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x2(xnn_code_buffer* b, size_t max_mr, size_t nc_mod_nr,
@@ -148,7 +137,7 @@ xnn_status_t xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x2(xnn_code_buf
   static const char* kFunctionName = "xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd_x86_x2";
   assert(max_mr <= 6);
   return xnnpack::generate(b, kFunctionName, max_mr, kc, /*k_per_iteration=*/8,
-                           /*full_unroll=*/false, nc_mod_nr, params);
+                           /*full_unroll=*/false, nc_mod_nr, /*use_fma=*/false, params);
 }
 
 xnn_status_t xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x4(xnn_code_buffer* b, size_t max_mr, size_t nc_mod_nr,
@@ -156,7 +145,7 @@ xnn_status_t xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x4(xnn_code_buf
   static const char* kFunctionName = "xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd_x86_x4";
   assert(max_mr <= 6);
   return xnnpack::generate(b, kFunctionName, max_mr, kc, /*k_per_iteration=*/16,
-                           /*full_unroll=*/false, nc_mod_nr, params);
+                           /*full_unroll=*/false, nc_mod_nr, /*use_fma=*/false, params);
 }
 
 xnn_status_t xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_xinf(xnn_code_buffer* b, size_t max_mr,
@@ -165,6 +154,6 @@ xnn_status_t xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_xinf(xnn_code_b
   assert(max_mr <= 6);
   return xnnpack::generate(b, kFunctionName, max_mr, kc,
                            /*k_per_iteration=*/kc / sizeof(float),
-                           /*full_unroll=*/true, nc_mod_nr, params);
+                           /*full_unroll=*/true, nc_mod_nr, /*use_fma=*/false, params);
 }
 }
