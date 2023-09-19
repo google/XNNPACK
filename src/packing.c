@@ -469,7 +469,7 @@ void xnn_pack_qs8_qc4w_gemm_gio_w(
               ((uint8_t*) packed_weights)[kr_block_offset] = kv ^ 0x88;
             }
           }
-          unaligned_indexed_store_u32(packed_b, nr_block_offset, unaligned_indexed_load_u32(packed_b, nr_block_offset) - ksum * izp);
+          unaligned_indexed_store_u32(packed_b, nr_block_offset, unaligned_indexed_load_u32(packed_b, nr_block_offset) - ksum * izp * 16);
           packed_weights = (uint8_t*) packed_weights + kr;
         }
         packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;
