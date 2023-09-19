@@ -128,6 +128,11 @@ static void DWConvEnd2EndBenchmark(
     }
   }
 
+  if (!found) {
+    state.SkipWithError("can't find unipass with specified primary tile to replace or multipass to replace");
+    return;
+  }
+
   // Override microkernels chosen in xnn_initialize
   for (size_t i = 0; i < XNN_MAX_QS8_DWCONV_UKERNELS; i++) {
     // Replace only the microkernel the matching kernel size.
