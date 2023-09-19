@@ -2412,15 +2412,13 @@ xnnpack_unit_test(
 xnnpack_binary(
     name = "operator_size_test",
     srcs = ["operator-size.c"],
-    deps = ["//:xnnpack_for_tfjs"],
+    deps = ["//:XNNPACK"],
 )
 
 xnnpack_binary(
     name = "subgraph_size_test",
     srcs = ["subgraph-size.c"],
-    deps = [
-        "//:XNNPACK",
-    ],
+    deps = ["//:XNNPACK"],
 )
 
 ########################### Unit tests for operators ##########################

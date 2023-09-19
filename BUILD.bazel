@@ -3201,13 +3201,11 @@ xnnpack_cc_library(
     deps = [
         ":allocator",
         ":common",
-        ":hardware_config",
         ":logging",
         ":math",
         ":microkernels_h",
         ":microparams",
         ":microparams_init",
-        ":normalization",
         ":operators",
         ":params",
         ":subgraph",
