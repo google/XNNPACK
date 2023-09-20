@@ -240,6 +240,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_6x8c8__neoni8mm(
       int32x4_t vacc4x4567 = vcombine_s32(vget_low_s32(vacc45x45), vget_low_s32(vacc45x67));
       int32x4_t vacc5x4567 = vcombine_s32(vget_high_s32(vacc45x45), vget_high_s32(vacc45x67));
     #endif
+
     float32x4_t vfpacc0x0123 = vcvtq_f32_s32(vacc0x0123);
     float32x4_t vfpacc0x4567 = vcvtq_f32_s32(vacc0x4567);
     float32x4_t vfpacc1x0123 = vcvtq_f32_s32(vacc1x0123);
