@@ -3492,7 +3492,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
     ADD_EXECUTABLE(square-bench bench/square.cc)
     TARGET_INCLUDE_DIRECTORIES(square-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(square-bench PRIVATE XNNPACK benchmark bench-utils)
+    TARGET_LINK_LIBRARIES(square-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
     ADD_EXECUTABLE(square-root-bench bench/square-root.cc)
     TARGET_INCLUDE_DIRECTORIES(square-root-bench PRIVATE .)
