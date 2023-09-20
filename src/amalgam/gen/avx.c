@@ -938,7 +938,7 @@ void xnn_f32_dwconv_minmax_ukernel_4p16c__avx(
   } while (--output_width != 0);
 }
 
-void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
+void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -1013,7 +1013,7 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
         i1 += 8;
 
         const __m256 vk1x01234567 = _mm256_load_ps(w + 16);
-        __m256 vacc01234567p1 = _mm256_mul_ps(vi1x01234567, vk1x01234567);
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi1x01234567, vk1x01234567));
 
         const __m256 vi2x01234567 = _mm256_loadu_ps(i2);
         i2 += 8;
@@ -1025,7 +1025,7 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
         i3 += 8;
 
         const __m256 vk3x01234567 = _mm256_load_ps(w + 32);
-        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi3x01234567, vk3x01234567));
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi3x01234567, vk3x01234567));
 
         const __m256 vi4x01234567 = _mm256_loadu_ps(i4);
         i4 += 8;
@@ -1037,12 +1037,10 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
         i5 += 8;
 
         const __m256 vk5x01234567 = _mm256_load_ps(w + 48);
-        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi5x01234567, vk5x01234567));
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi5x01234567, vk5x01234567));
 
         w += 56;
 
-        // Add up all accumulators to vacc01234567p0
-        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, vacc01234567p1);
 
         _mm256_store_ps(b, vacc01234567p0);
         b += 8;
@@ -1063,7 +1061,7 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
         const __m256 vi1x01234567 = _mm256_maskload_ps(i1, vmask);
 
         const __m256 vk1x01234567 = _mm256_load_ps(w + 16);
-        __m256 vacc01234567p1 = _mm256_mul_ps(vi1x01234567, vk1x01234567);
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi1x01234567, vk1x01234567));
 
         const __m256 vi2x01234567 = _mm256_maskload_ps(i2, vmask);
 
@@ -1073,7 +1071,7 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
         const __m256 vi3x01234567 = _mm256_maskload_ps(i3, vmask);
 
         const __m256 vk3x01234567 = _mm256_load_ps(w + 32);
-        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi3x01234567, vk3x01234567));
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi3x01234567, vk3x01234567));
 
         const __m256 vi4x01234567 = _mm256_maskload_ps(i4, vmask);
 
@@ -1083,12 +1081,10 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
         const __m256 vi5x01234567 = _mm256_maskload_ps(i5, vmask);
 
         const __m256 vk5x01234567 = _mm256_load_ps(w + 48);
-        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi5x01234567, vk5x01234567));
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi5x01234567, vk5x01234567));
 
         w += 56;
 
-        // Add up all accumulators to vacc01234567p0
-        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, vacc01234567p1);
 
         _mm256_store_ps(b, vacc01234567p0);
       }
@@ -1145,7 +1141,7 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
         i1 += 8;
 
         const __m256 vk1x01234567 = _mm256_load_ps(w + 8);
-        __m256 vacc01234567p1 = _mm256_mul_ps(vi1x01234567, vk1x01234567);
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi1x01234567, vk1x01234567));
 
         const __m256 vi2x01234567 = _mm256_loadu_ps(i2);
         i2 += 8;
@@ -1157,7 +1153,7 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
         i3 += 8;
 
         const __m256 vk3x01234567 = _mm256_load_ps(w + 24);
-        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi3x01234567, vk3x01234567));
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi3x01234567, vk3x01234567));
 
         const __m256 vi4x01234567 = _mm256_loadu_ps(i4);
         i4 += 8;
@@ -1169,12 +1165,10 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
         i5 += 8;
 
         const __m256 vk5x01234567 = _mm256_load_ps(w + 40);
-        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi5x01234567, vk5x01234567));
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi5x01234567, vk5x01234567));
 
         w += 48;
 
-        // Add up all accumulators to vacc01234567p0
-        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, vacc01234567p1);
 
         _mm256_store_ps(b, vacc01234567p0);
         b += 8;
@@ -1195,7 +1189,7 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
         const __m256 vi1x01234567 = _mm256_maskload_ps(i1, vmask);
 
         const __m256 vk1x01234567 = _mm256_load_ps(w + 8);
-        __m256 vacc01234567p1 = _mm256_mul_ps(vi1x01234567, vk1x01234567);
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi1x01234567, vk1x01234567));
 
         const __m256 vi2x01234567 = _mm256_maskload_ps(i2, vmask);
 
@@ -1205,7 +1199,7 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
         const __m256 vi3x01234567 = _mm256_maskload_ps(i3, vmask);
 
         const __m256 vk3x01234567 = _mm256_load_ps(w + 24);
-        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi3x01234567, vk3x01234567));
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi3x01234567, vk3x01234567));
 
         const __m256 vi4x01234567 = _mm256_maskload_ps(i4, vmask);
 
@@ -1215,12 +1209,10 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
         const __m256 vi5x01234567 = _mm256_maskload_ps(i5, vmask);
 
         const __m256 vk5x01234567 = _mm256_load_ps(w + 40);
-        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi5x01234567, vk5x01234567));
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi5x01234567, vk5x01234567));
 
         w += 48;
 
-        // Add up all accumulators to vacc01234567p0
-        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, vacc01234567p1);
 
         _mm256_store_ps(b, vacc01234567p0);
       }
@@ -1285,7 +1277,7 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
 
         __m256 vk1x01234567 = _mm256_load_ps(w + 8);
 
-        __m256 vacc01234567p1 = _mm256_mul_ps(vi1x01234567, vk1x01234567);
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi1x01234567, vk1x01234567));
 
         const __m256 vi2x01234567 = _mm256_loadu_ps(i2);
         i2 += 8;
@@ -1299,7 +1291,7 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
 
         __m256 vk3x01234567 = _mm256_load_ps(w + 24);
 
-        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi3x01234567, vk3x01234567));
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi3x01234567, vk3x01234567));
 
         const __m256 vi4x01234567 = _mm256_loadu_ps(i4);
         i4 += 8;
@@ -1313,7 +1305,7 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
 
         __m256 vk5x01234567 = _mm256_load_ps(w + 40);
 
-        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi5x01234567, vk5x01234567));
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi5x01234567, vk5x01234567));
 
         const __m256 vi6x01234567 = _mm256_loadu_ps(i6);
         i6 += 8;
@@ -1325,8 +1317,6 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
         w += 56;
 
 
-        // Add up all accumulators to vacc01234567p0
-        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, vacc01234567p1);
 
         __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
 
@@ -1348,7 +1338,7 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
 
         const __m256 vi1x01234567 = _mm256_maskload_ps(i1, vmask);
         __m256 vk1x01234567 = _mm256_load_ps(w + 8);
-        __m256 vacc01234567p1 = _mm256_mul_ps(vi1x01234567, vk1x01234567);
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi1x01234567, vk1x01234567));
 
         const __m256 vi2x01234567 = _mm256_maskload_ps(i2, vmask);
         __m256 vk2x01234567 = _mm256_load_ps(w + 16);
@@ -1356,7 +1346,7 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
 
         const __m256 vi3x01234567 = _mm256_maskload_ps(i3, vmask);
         __m256 vk3x01234567 = _mm256_load_ps(w + 24);
-        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi3x01234567, vk3x01234567));
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi3x01234567, vk3x01234567));
 
         const __m256 vi4x01234567 = _mm256_maskload_ps(i4, vmask);
         __m256 vk4x01234567 = _mm256_load_ps(w + 32);
@@ -1364,14 +1354,12 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2(
 
         const __m256 vi5x01234567 = _mm256_maskload_ps(i5, vmask);
         __m256 vk5x01234567 = _mm256_load_ps(w + 40);
-        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi5x01234567, vk5x01234567));
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi5x01234567, vk5x01234567));
 
         const __m256 vi6x01234567 = _mm256_maskload_ps(i6, vmask);
         __m256 vk6x01234567 = _mm256_load_ps(w + 48);
         vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi6x01234567, vk6x01234567));
 
-        // Add up all accumulators to vacc01234567p0
-        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, vacc01234567p1);
 
         __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
         vacc01234567 = _mm256_min_ps(vmax, vacc01234567);

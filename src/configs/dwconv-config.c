@@ -323,8 +323,10 @@ static void init_f32_dwconv_config(void) {
       f32_dwconv_config[2].channel_round = 1;
       f32_dwconv_config[2].primary_tile = 9;
 
+      // Multipass microkernel "acc" value should match unipass and also match across different hardware config.
+      // Accumulation (FMA) can produce different results, which results in tests only failing on certain platforms.
       #if XNN_ENABLE_DWCONV_MULTIPASS
-        f32_dwconv_config[3].minmax.multipass = (xnn_dwconv_multipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_5f5m5l32c16s1r__avx512f_acc2;
+        f32_dwconv_config[3].minmax.multipass = (xnn_dwconv_multipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_5f5m5l32c16s1r__avx512f;
         f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_scalar_params;
         f32_dwconv_config[3].channel_tile = 32;
         f32_dwconv_config[3].channel_subtile = 16;
@@ -402,7 +404,7 @@ static void init_f32_dwconv_config(void) {
       f32_dwconv_config[2].primary_tile = 9;
 
       #if XNN_ENABLE_DWCONV_MULTIPASS
-        f32_dwconv_config[3].minmax.multipass = (xnn_dwconv_multipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2;
+        f32_dwconv_config[3].minmax.multipass = (xnn_dwconv_multipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx;
         f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_avx_params;
         f32_dwconv_config[3].channel_tile = 8;
         f32_dwconv_config[3].channel_subtile = 8;
@@ -441,7 +443,7 @@ static void init_f32_dwconv_config(void) {
       f32_dwconv_config[2].primary_tile = 9;
 
       #if XNN_ENABLE_DWCONV_MULTIPASS
-        f32_dwconv_config[3].minmax.multipass = (xnn_dwconv_multipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_8f8m9l16c4s4r__sse_acc2;
+        f32_dwconv_config[3].minmax.multipass = (xnn_dwconv_multipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_8f8m9l16c4s4r__sse;
         f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_sse_params;
         f32_dwconv_config[3].channel_tile = 16;
         f32_dwconv_config[3].channel_subtile = 4;
@@ -628,7 +630,7 @@ static void init_f32_dwconv_config(void) {
     f32_dwconv_config[2].primary_tile = 9;
 
     #if XNN_ENABLE_DWCONV_MULTIPASS
-      f32_dwconv_config[3].minmax.multipass = (xnn_dwconv_multipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_5f5m5l1c1s1r__wasm;
+      f32_dwconv_config[3].minmax.multipass = (xnn_dwconv_multipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_5f5m5l1c1s1r__wasm_acc2;
       f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_scalar_params;
       f32_dwconv_config[3].channel_tile = 1;
       f32_dwconv_config[3].channel_subtile = 1;

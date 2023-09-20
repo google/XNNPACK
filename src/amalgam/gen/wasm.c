@@ -814,7 +814,7 @@ void xnn_f32_dwconv_minmax_ukernel_4p1c__wasm_acc2(
   } while (--output_width != 0);
 }
 
-void xnn_f32_dwconv_minmax_ukernel_5f5m5l1c1s1r__wasm(
+void xnn_f32_dwconv_minmax_ukernel_5f5m5l1c1s1r__wasm_acc2(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -876,19 +876,21 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l1c1s1r__wasm(
         vacc0p0 = math_muladd_f32(vi0, vk0, vacc0p0);
         const float vi1 = *i1++;
         const float vk1 = w[2];
-        vacc0p0 = math_muladd_f32(vi1, vk1, vacc0p0);
+        float vacc0p1 = vi1 * vk1;
         const float vi2 = *i2++;
         const float vk2 = w[3];
         vacc0p0 = math_muladd_f32(vi2, vk2, vacc0p0);
         const float vi3 = *i3++;
         const float vk3 = w[4];
-        vacc0p0 = math_muladd_f32(vi3, vk3, vacc0p0);
+        vacc0p1 = math_muladd_f32(vi3, vk3, vacc0p1);
         const float vi4 = *i4++;
         const float vk4 = w[5];
         vacc0p0 = math_muladd_f32(vi4, vk4, vacc0p0);
 
         w += 6;
 
+        // Add up all accumulators to vacc0p0
+        vacc0p0 = vacc0p0 + vacc0p1;
 
         *b++ = vacc0p0;
       }
@@ -932,17 +934,19 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l1c1s1r__wasm(
         vacc0p0 = math_muladd_f32(vi0, vk0, vacc0p0);
         const float vi1 = *i1++;
         const float vk1 = w[1];
-        vacc0p0 = math_muladd_f32(vi1, vk1, vacc0p0);
+        float vacc0p1 = vi1 * vk1;
         const float vi2 = *i2++;
         const float vk2 = w[2];
         vacc0p0 = math_muladd_f32(vi2, vk2, vacc0p0);
         const float vi3 = *i3++;
         const float vk3 = w[3];
-        vacc0p0 = math_muladd_f32(vi3, vk3, vacc0p0);
+        vacc0p1 = math_muladd_f32(vi3, vk3, vacc0p1);
         const float vi4 = *i4++;
         const float vk4 = w[4];
         vacc0p0 = math_muladd_f32(vi4, vk4, vacc0p0);
 
+        // Add up all accumulators to vacc0p0
+        vacc0p0 = vacc0p0 + vacc0p1;
 
         w += 5;
         *b++ = vacc0p0;
@@ -986,19 +990,21 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l1c1s1r__wasm(
         vacc0p0 = math_muladd_f32(vi0, vk0, vacc0p0);
         const float vi1 = *i1++;
         const float vk1 = w[1];
-        vacc0p0 = math_muladd_f32(vi1, vk1, vacc0p0);
+        float vacc0p1 = vi1 * vk1;
         const float vi2 = *i2++;
         const float vk2 = w[2];
         vacc0p0 = math_muladd_f32(vi2, vk2, vacc0p0);
         const float vi3 = *i3++;
         const float vk3 = w[3];
-        vacc0p0 = math_muladd_f32(vi3, vk3, vacc0p0);
+        vacc0p1 = math_muladd_f32(vi3, vk3, vacc0p1);
         const float vi4 = *i4++;
         const float vk4 = w[4];
         vacc0p0 = math_muladd_f32(vi4, vk4, vacc0p0);
 
         w += 5;
 
+        // Add up all accumulators to vacc0p0
+        vacc0p0 = vacc0p0 + vacc0p1;
 
         float vacc0 = __builtin_wasm_max_f32(vacc0p0, vmin);
         vacc0 = __builtin_wasm_min_f32(vacc0, vmax);
