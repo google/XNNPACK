@@ -3243,7 +3243,6 @@ xnnpack_cc_library(
         ":operators_test_mode",
         ":params",
         ":subgraph_test_mode",
-        ":test_microkernels",
     ],
 )
 
