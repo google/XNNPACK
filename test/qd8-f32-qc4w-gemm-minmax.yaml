@@ -78,6 +78,17 @@
   init: xnn_init_f32_qc4w_minmax_scalar_params
   k-block: 8
 
+# AVX2
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx2
+  init: xnn_init_f32_qc4w_minmax_avx_params
+  k-block: 8
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c8__avx2
+  init: xnn_init_f32_qc4w_minmax_avx_params
+  k-block: 8
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x8c8__avx2
+  init: xnn_init_f32_qc4w_minmax_avx_params
+  k-block: 8
+
 # Scalar
 - name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x1__scalar
   init: xnn_init_f32_qc4w_minmax_scalar_params
