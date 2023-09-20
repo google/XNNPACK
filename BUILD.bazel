@@ -3568,7 +3568,7 @@ config_setting(
 
 config_setting(
     name = "linux_arm64",
-    values = {"cpu": "aarch64"},
+    flag_values = {"cpu": "aarch64"},
 )
 
 config_setting(
@@ -3598,7 +3598,7 @@ config_setting(
 
 config_setting(
     name = "linux_riscv64",
-    values = {"cpu": "riscv64"},
+    constraint_values = ["@platforms//cpu:riscv64"],
 )
 
 config_setting(
@@ -3638,10 +3638,7 @@ config_setting(
     },
 )
 
-config_setting(
-    name = "windows_x86_64",
-    values = {"cpu": "x64_windows"},
-)
+config_setting(name = "windows_x86_64")
 
 config_setting(
     name = "windows_x86_64_clang",
