@@ -289,6 +289,8 @@
   string: "Transpose (ND, X16)"
 - name: xnn_operator_type_transpose_nd_x32
   string: "Transpose (ND, X32)"
+- name: xnn_operator_type_transpose_nd_x64
+  string: "Transpose (ND, X64)"
 - name: xnn_operator_type_truncation_nc_f16
   string: "Truncation (NC, F16)"
 - name: xnn_operator_type_truncation_nc_f32

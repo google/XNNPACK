@@ -4,6 +4,7 @@
 #include <limits>
 
 #include <xnnpack/assembler.h>
+#include <xnnpack/common.h>
 #include <xnnpack/microparams.h>
 #include <xnnpack/post-operation.h>
 #include <xnnpack/wasm-assembler.h>
@@ -17,7 +18,8 @@ class F32IGemmLoadsplatGenerator : public internal::GemmIGemmLoadsplatCommons {
   using GemmIGemmLoadsplatCommons::GemmIGemmLoadsplatCommons;
 
   void generate(const char* name, size_t max_mr, size_t iters, size_t loop_unroll_iters, size_t full_unroll,
-                size_t nc_mod_nr, const jit_gemm_params* jit_gemm_params) {
+                size_t nc_mod_nr, bool use_fma, const jit_gemm_params* jit_gemm_params) {
+    assert(!use_fma || XNN_ARCH_WASMRELAXEDSIMD);
     ValTypesToInt locals_declaration = {{i32, max_mr * 2 + 5}, {v128, max_mr * 3 + 8}};
     AddFunc<12>({}, name, locals_declaration,
                 [&](auto mr, auto nc, auto kc, const auto ks, auto a, auto w, auto c, auto cm_stride, auto cn_stride,
@@ -47,7 +49,8 @@ class F32IGemmLoadsplatGenerator : public internal::GemmIGemmLoadsplatCommons {
                             as[i] = Select(I32Add(as[i], a_offset), as[i], I32Ne(as[i], zero));
                           }
 
-                          InnerLoop(as, vacc0123, vacc4567, w, kc, max_mr, loop_unroll_iters, iters, full_unroll);
+                          InnerLoop(as, vacc0123, vacc4567, w, kc, max_mr, loop_unroll_iters, iters, full_unroll,
+                                    use_fma);
 
                           a = I32Add(a, I32Const(max_mr * sizeof(void*)));
                           p = I32Sub(p, I32Const(max_mr * sizeof(void*)));
@@ -109,7 +112,8 @@ xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1(xnn
                                                                              const void* params) {
   static const char* kFunctionName = "xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1";
   assert(max_mr <= 6);
-  return xnnpack::generate(b, kFunctionName, max_mr, kc, 1, /*full_unroll=*/false, nc_mod_nr, params);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, 1, /*full_unroll=*/false, nc_mod_nr, /*use_fma=*/false,
+                           params);
 }
 
 xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x2(xnn_code_buffer* b, size_t max_mr,
@@ -117,7 +121,8 @@ xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x2(xnn
                                                                              const void* params) {
   static const char* kFunctionName = "xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x2";
   assert(max_mr <= 6);
-  return xnnpack::generate(b, kFunctionName, max_mr, kc, 2, /*full_unroll=*/false, nc_mod_nr, params);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, 2, /*full_unroll=*/false, nc_mod_nr, /*use_fma=*/false,
+                           params);
 }
 
 xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x4(xnn_code_buffer* b, size_t max_mr,
@@ -125,7 +130,8 @@ xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x4(xnn
                                                                              const void* params) {
   static const char* kFunctionName = "xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x4";
   assert(max_mr <= 6);
-  return xnnpack::generate(b, kFunctionName, max_mr, kc, 4, /*full_unroll=*/false, nc_mod_nr, params);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, 4, /*full_unroll=*/false, nc_mod_nr, /*use_fma=*/false,
+                           params);
 }
 
 xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x8(xnn_code_buffer* b, size_t max_mr,
@@ -133,7 +139,8 @@ xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x8(xnn
                                                                              const void* params) {
   static const char* kFunctionName = "xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x8";
   assert(max_mr <= 6);
-  return xnnpack::generate(b, kFunctionName, max_mr, kc, 8, /*full_unroll=*/false, nc_mod_nr, params);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, 8, /*full_unroll=*/false, nc_mod_nr, /*use_fma=*/false,
+                           params);
 }
 
 xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_xinf(xnn_code_buffer* b, size_t max_mr,
@@ -141,6 +148,99 @@ xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_xinf(x
                                                                                const void* params) {
   static const char* kFunctionName = "xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_xinf";
   assert(max_mr <= 6);
-  return xnnpack::generate(b, kFunctionName, max_mr, kc, kc / sizeof(float), /*full_unroll=*/true, nc_mod_nr, params);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, kc / sizeof(float), /*full_unroll=*/true, nc_mod_nr,
+                           /*use_fma=*/false, params);
 }
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmrelaxedsimd32_x86_fma_loadsplat_x1(xnn_code_buffer* b,
+                                                                                        size_t max_mr, size_t nc_mod_nr,
+                                                                                        size_t kc, size_t ks,
+                                                                                        const void* params) {
+  static const char* kFunctionName = "xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1";
+  assert(max_mr <= 6);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, 1, /*full_unroll=*/false, nc_mod_nr, /*use_fma=*/true, params);
+}
+
+xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmrelaxedsimd32_x86_fma_loadsplat_x2(xnn_code_buffer* b,
+                                                                                        size_t max_mr, size_t nc_mod_nr,
+                                                                                        size_t kc, size_t ks,
+                                                                                        const void* params) {
+  static const char* kFunctionName = "xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x2";
+  assert(max_mr <= 6);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, 2, /*full_unroll=*/false, nc_mod_nr, /*use_fma=*/true, params);
+}
+
+xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmrelaxedsimd32_x86_fma_loadsplat_x4(xnn_code_buffer* b,
+                                                                                        size_t max_mr, size_t nc_mod_nr,
+                                                                                        size_t kc, size_t ks,
+                                                                                        const void* params) {
+  static const char* kFunctionName = "xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x4";
+  assert(max_mr <= 6);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, 4, /*full_unroll=*/false, nc_mod_nr, /*use_fma=*/true, params);
+}
+
+xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmrelaxedsimd32_x86_fma_loadsplat_x8(xnn_code_buffer* b,
+                                                                                        size_t max_mr, size_t nc_mod_nr,
+                                                                                        size_t kc, size_t ks,
+                                                                                        const void* params) {
+  static const char* kFunctionName = "xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x8";
+  assert(max_mr <= 6);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, 8, /*full_unroll=*/false, nc_mod_nr, /*use_fma=*/true, params);
+}
+
+xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmrelaxedsimd32_x86_fma_loadsplat_xinf(
+  xnn_code_buffer* b, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const void* params) {
+  static const char* kFunctionName = "xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_xinf";
+  assert(max_mr <= 6);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, kc / sizeof(float), /*full_unroll=*/true, nc_mod_nr,
+                           /*use_fma=*/true, params);
+}
+
+xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmrelaxedsimd32_x86_loadsplat_x1(xnn_code_buffer* b, size_t max_mr,
+                                                                                    size_t nc_mod_nr, size_t kc,
+                                                                                    size_t ks, const void* params) {
+  static const char* kFunctionName = "xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1";
+  assert(max_mr <= 6);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, 1, /*full_unroll=*/false, nc_mod_nr, /*use_fma=*/false,
+                           params);
+}
+
+xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmrelaxedsimd32_x86_loadsplat_x2(xnn_code_buffer* b, size_t max_mr,
+                                                                                    size_t nc_mod_nr, size_t kc,
+                                                                                    size_t ks, const void* params) {
+  static const char* kFunctionName = "xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x2";
+  assert(max_mr <= 6);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, 2, /*full_unroll=*/false, nc_mod_nr, /*use_fma=*/false,
+                           params);
+}
+
+xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmrelaxedsimd32_x86_loadsplat_x4(xnn_code_buffer* b, size_t max_mr,
+                                                                                    size_t nc_mod_nr, size_t kc,
+                                                                                    size_t ks, const void* params) {
+  static const char* kFunctionName = "xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x4";
+  assert(max_mr <= 6);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, 4, /*full_unroll=*/false, nc_mod_nr, /*use_fma=*/false,
+                           params);
+}
+
+xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmrelaxedsimd32_x86_loadsplat_x8(xnn_code_buffer* b, size_t max_mr,
+                                                                                    size_t nc_mod_nr, size_t kc,
+                                                                                    size_t ks, const void* params) {
+  static const char* kFunctionName = "xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x8";
+  assert(max_mr <= 6);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, 8, /*full_unroll=*/false, nc_mod_nr, /*use_fma=*/false,
+                           params);
+}
+
+xnn_status_t xnn_generate_f32_igemm_ukernel_6x8__wasmrelaxedsimd32_x86_loadsplat_xinf(xnn_code_buffer* b, size_t max_mr,
+                                                                                      size_t nc_mod_nr, size_t kc,
+                                                                                      size_t ks, const void* params) {
+  static const char* kFunctionName = "xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_xinf";
+  assert(max_mr <= 6);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, kc / sizeof(float), /*full_unroll=*/true, nc_mod_nr,
+                           /*use_fma=*/false, params);
+}
+
+#endif
 }
