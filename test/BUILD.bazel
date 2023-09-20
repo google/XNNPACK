@@ -51,7 +51,7 @@ xnnpack_cc_library(
     hdrs = ["gemm-microkernel-tester.h"],
     deps = MICROKERNEL_TEST_DEPS + [
         "//:XNNPACK_test_mode",
-        "//:packing",
+        "//:packing_test_mode",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -93,7 +93,7 @@ xnnpack_unit_test(
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -106,7 +106,7 @@ xnnpack_unit_test(
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -397,7 +397,7 @@ xnnpack_unit_test(
         "f16-vmulcaddc-minmax.cc",
         "vmulcaddc-microkernel-tester.h",
     ],
-    deps = MICROKERNEL_TEST_DEPS + ["//:packing"],
+    deps = MICROKERNEL_TEST_DEPS + ["//:packing_test_mode"],
 )
 
 xnnpack_unit_test(
@@ -633,7 +633,7 @@ xnnpack_unit_test(
         "conv-hwc-microkernel-tester.h",
         "f32-conv-hwc.cc",
     ],
-    deps = MICROKERNEL_TEST_DEPS + ["//:packing"],
+    deps = MICROKERNEL_TEST_DEPS + ["//:packing_test_mode"],
 )
 
 xnnpack_unit_test(
@@ -642,7 +642,7 @@ xnnpack_unit_test(
         "conv-hwc2chw-microkernel-tester.h",
         "f16-conv-hwc2chw.cc",
     ],
-    deps = MICROKERNEL_TEST_DEPS + ["//:packing"],
+    deps = MICROKERNEL_TEST_DEPS + ["//:packing_test_mode"],
 )
 
 xnnpack_unit_test(
@@ -651,7 +651,7 @@ xnnpack_unit_test(
         "conv-hwc2chw-microkernel-tester.h",
         "f32-conv-hwc2chw.cc",
     ],
-    deps = MICROKERNEL_TEST_DEPS + ["//:packing"],
+    deps = MICROKERNEL_TEST_DEPS + ["//:packing_test_mode"],
 )
 
 xnnpack_unit_test(
@@ -662,7 +662,7 @@ xnnpack_unit_test(
     ],
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -675,7 +675,7 @@ xnnpack_unit_test(
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -688,7 +688,7 @@ xnnpack_unit_test(
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -701,7 +701,7 @@ xnnpack_unit_test(
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -711,7 +711,7 @@ xnnpack_unit_test(
         "dwconv2d-microkernel-tester.h",
         "f16-dwconv2d-chw.cc",
     ],
-    deps = MICROKERNEL_TEST_DEPS + ["//:packing"],
+    deps = MICROKERNEL_TEST_DEPS + ["//:packing_test_mode"],
 )
 
 xnnpack_unit_test(
@@ -720,7 +720,7 @@ xnnpack_unit_test(
         "dwconv2d-microkernel-tester.h",
         "f32-dwconv2d-chw.cc",
     ],
-    deps = MICROKERNEL_TEST_DEPS + ["//:packing"],
+    deps = MICROKERNEL_TEST_DEPS + ["//:packing_test_mode"],
 )
 
 xnnpack_unit_test(
@@ -793,7 +793,7 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -1267,7 +1267,7 @@ xnnpack_unit_test(
         "f32-vmulcaddc-minmax.cc",
         "vmulcaddc-microkernel-tester.h",
     ],
-    deps = MICROKERNEL_TEST_DEPS + ["//:packing"],
+    deps = MICROKERNEL_TEST_DEPS + ["//:packing_test_mode"],
 )
 
 xnnpack_unit_test(
@@ -1522,7 +1522,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -1536,7 +1536,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -1599,7 +1599,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -1612,7 +1612,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -1625,7 +1625,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -1637,7 +1637,7 @@ xnnpack_unit_test(
     ],
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -1865,7 +1865,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -1878,7 +1878,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -1891,7 +1891,7 @@ xnnpack_unit_test(
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -1903,7 +1903,7 @@ xnnpack_unit_test(
     ],
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -2260,7 +2260,7 @@ xnnpack_unit_test(
         "x32-packb.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -2271,7 +2271,7 @@ xnnpack_unit_test(
         "x8-packw.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -2282,7 +2282,7 @@ xnnpack_unit_test(
         "x16-packw.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -2293,7 +2293,7 @@ xnnpack_unit_test(
         "x32-packw.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -2376,7 +2376,7 @@ xnnpack_unit_test(
         "x32-zerob.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
-        "//:packing",
+        "//:packing_test_mode",
     ],
 )
 
@@ -2412,12 +2412,14 @@ xnnpack_unit_test(
 xnnpack_binary(
     name = "operator_size_test",
     srcs = ["operator-size.c"],
+    # Use non test_mode to get more accurate size.
     deps = ["//:XNNPACK"],
 )
 
 xnnpack_binary(
     name = "subgraph_size_test",
     srcs = ["subgraph-size.c"],
+    # Use non test_mode to get more accurate size.
     deps = ["//:XNNPACK"],
 )
 
@@ -4017,7 +4019,7 @@ xnnpack_unit_test(
         "subgraph-tester.h",
     ],
     deps = [
-        "//:XNNPACK",
+        "//:XNNPACK_test_mode",
         "//:subgraph_test_mode",
     ],
 )
@@ -4030,7 +4032,7 @@ xnnpack_unit_test(
         "subgraph-tester.h",
     ],
     deps = [
-        "//:XNNPACK",
+        "//:XNNPACK_test_mode",
         "//:subgraph_test_mode",
     ],
 )
@@ -4043,7 +4045,7 @@ xnnpack_unit_test(
         "subgraph-tester.h",
     ],
     deps = [
-        "//:XNNPACK",
+        "//:XNNPACK_test_mode",
         "//:common",
         "//:math",
         "//:node_type",
@@ -4058,7 +4060,7 @@ xnnpack_unit_test(
         "subgraph-tester.h",
     ],
     deps = [
-        "//:XNNPACK",
+        "//:XNNPACK_test_mode",
         "//:subgraph_test_mode",
     ],
 )
@@ -4073,7 +4075,7 @@ xnnpack_unit_test(
     ],
     deps = [
         "@FP16",
-        "//:XNNPACK",
+        "//:XNNPACK_test_mode",
         "//:allocator",
         "//:node_type",
         "//:subgraph_test_mode",
@@ -4138,7 +4140,7 @@ xnnpack_unit_test(
     name = "code_cache_test",
     srcs = ["code-cache.cc"],
     deps = [
-        "//:XNNPACK",
+        "//:XNNPACK_test_mode",
         "//:cache",
     ],
 )
@@ -4147,7 +4149,7 @@ xnnpack_unit_test(
     name = "weights_cache_test",
     srcs = ["weights-cache.cc"],
     deps = [
-        "//:XNNPACK",
+        "//:XNNPACK_test_mode",
         "//:cache",
         "//:common",
     ],
