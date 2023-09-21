@@ -200,13 +200,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     // Handle up to 8 final positions of `k`
     if XNN_UNLIKELY(k != 0) {
       // Load a ${MR}x8 block of activations.
-      $if MR == 1:
-        $for M in range(0, MR, 2):
-          const uint64x2_t va${M}${M+1}x${ABC[0:8]} = vld1q_dup_u64((const void*) a${M}); a${M} += 8;
-      $else:
-        $for M in range(0, MR, 2):
-          uint64x2_t va${M}${M+1}x${ABC[0:8]} = vld1q_dup_u64((const void*) a${M}); a${M} += 8;
-        $for M in range(0, MR, 2):
+      $for M in range(0, MR, 2):
+        uint64x2_t va${M}${M+1}x${ABC[0:8]} = vld1q_dup_u64((const void*) a${M}); a${M} += 8;
+      $for M in range(0, MR, 2):
+        $if M + 1 < MR:
           va${M}${M+1}x${ABC[0:8]} = vld1q_lane_u64((const void*) a${M+1}, va${M}${M+1}x${ABC[0:8]}, 1); a${M+1} += 8;
 
       // Load a 16x${NR} block of weights.

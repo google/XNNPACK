@@ -70,6 +70,32 @@
 
 
 #if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  static void qu8_gemm_minmax_rndnu_ukernel_3x8c8__neoni8mm(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_3x8c8__neoni8mm,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      /*mr=*/3, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckNEONI8MM);
+  }
+
+  BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_3x8c8__neoni8mm)
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  static void qu8_gemm_minmax_rndnu_ukernel_3x16c8__neoni8mm(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_3x16c8__neoni8mm,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      /*mr=*/3, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckNEONI8MM);
+  }
+
+  BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_3x16c8__neoni8mm)
+#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+
+#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void qu8_gemm_minmax_rndnu_ukernel_4x8c8__neoni8mm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c8__neoni8mm,
