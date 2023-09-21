@@ -239,6 +239,7 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_6x8c8__neoni8mm(
       int32x4_t vacc4x4567 = vcombine_s32(vget_low_s32(vacc45x45), vget_low_s32(vacc45x67));
       int32x4_t vacc5x4567 = vcombine_s32(vget_high_s32(vacc45x45), vget_high_s32(vacc45x67));
     #endif
+
     const int32x4_t vright_pre_shift = vld1q_dup_s32(&params->rndnu_neon.right_pre_shift);
     const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
     const int32x4_t vright_post_shift = vld1q_dup_s32(&params->rndnu_neon.right_post_shift);

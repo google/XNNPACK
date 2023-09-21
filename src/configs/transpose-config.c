@@ -51,6 +51,10 @@ static void init_transpose_config(void) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__4x4_reuse_dec_zip_neon,
         .tile_size = 32,
       };
+      transpose_config.x64 = (struct xnn_transpose_subconfig) {
+        .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x64_transposec_ukernel__2x2_reuse_dec_zip_neon,
+        .tile_size = 32,
+      };
       transpose_config.xx = (struct xnn_transpose_subconfig) {
         .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_scalar_memcpy,
         .tile_size = 32,
@@ -71,6 +75,10 @@ static void init_transpose_config(void) {
       };
       transpose_config.x32 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__2x4_scalar_int,
+        .tile_size = 32,
+      };
+      transpose_config.x64 = (struct xnn_transpose_subconfig) {
+        .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x64_transposec_ukernel__4x2_scalar_int,
         .tile_size = 32,
       };
       transpose_config.xx = (struct xnn_transpose_subconfig) {
@@ -97,6 +105,10 @@ static void init_transpose_config(void) {
       .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__4x4_aarch64_neon_tbl128,
       .tile_size = 32,
       .init.x32 = (xnn_init_x32_transpose_params_fn) xnn_init_x32_transpose_neon_tbl128_params,
+    };
+    transpose_config.x64 = (struct xnn_transpose_subconfig) {
+      .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x64_transposec_ukernel__2x2_multi_dec_zip_neon,
+      .tile_size = 32,
     };
     transpose_config.xx = (struct xnn_transpose_subconfig) {
       .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_scalar_memcpy,
@@ -127,6 +139,10 @@ static void init_transpose_config(void) {
       .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__4x4_sse,
       .tile_size = 32,
     };
+    transpose_config.x64 = (struct xnn_transpose_subconfig) {
+      .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x64_transposec_ukernel__2x2_multi_mov_sse2,
+      .tile_size = 32,
+    };
     if (hardware_config->use_x86_ssse3) {
       transpose_config.x24 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x24_transposec_ukernel__4x4_ssse3,
@@ -138,6 +154,11 @@ static void init_transpose_config(void) {
       transpose_config.x32 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__8x8_reuse_multi_avx,
         .init.x32 = (xnn_init_x32_transpose_params_fn) xnn_init_x32_transpose_avx_params,
+        .tile_size = 32,
+      };
+      transpose_config.x64 = (struct xnn_transpose_subconfig) {
+        .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x64_transposec_ukernel__4x4_reuse_multi_avx,
+        .init.x64 = (xnn_init_x64_transpose_params_fn) xnn_init_x64_transpose_avx_params,
         .tile_size = 32,
       };
     }
@@ -171,6 +192,10 @@ static void init_transpose_config(void) {
       .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__4x4_reuse_mov_wasmsimd,
       .tile_size = 32,
     };
+    transpose_config.x64 = (struct xnn_transpose_subconfig) {
+      .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x64_transposec_ukernel__4x2_scalar_int,
+      .tile_size = 32,
+    };
     transpose_config.xx = (struct xnn_transpose_subconfig) {
       .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_scalar_memcpy,
       .tile_size = 32,
@@ -193,6 +218,10 @@ static void init_transpose_config(void) {
       .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__2x4_scalar_int,
       .tile_size = 32,
     };
+    transpose_config.x64 = (struct xnn_transpose_subconfig) {
+      .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x64_transposec_ukernel__4x2_scalar_int,
+      .tile_size = 32,
+    };
     transpose_config.xx = (struct xnn_transpose_subconfig) {
       .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_scalar_memcpy,
       .tile_size = 32,
@@ -213,6 +242,10 @@ static void init_transpose_config(void) {
     };
     transpose_config.x32 = (struct xnn_transpose_subconfig) {
       .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__2x4_scalar_int,
+      .tile_size = 32,
+    };
+    transpose_config.x64 = (struct xnn_transpose_subconfig) {
+      .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x64_transposec_ukernel__4x2_scalar_int,
       .tile_size = 32,
     };
     transpose_config.xx = (struct xnn_transpose_subconfig) {
