@@ -81,36 +81,33 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
     const __m256i vb_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.kernel_zero_point);
     do {
       const __m128i va0 = _mm_broadcastq_epi64(_mm_loadl_epi64((const __m128i*) a0));
-      const __m256i vxa0 = _mm256_cvtepu8_epi16(va0);
       a0 += 8;
       const __m128i va1 = _mm_broadcastq_epi64(_mm_loadl_epi64((const __m128i*) a1));
-      const __m256i vxa1 = _mm256_cvtepu8_epi16(va1);
       a1 += 8;
       const __m128i va2 = _mm_broadcastq_epi64(_mm_loadl_epi64((const __m128i*) a2));
-      const __m256i vxa2 = _mm256_cvtepu8_epi16(va2);
       a2 += 8;
+      const __m256i vxa0 = _mm256_cvtepu8_epi16(va0);
+      const __m256i vxa1 = _mm256_cvtepu8_epi16(va1);
+      const __m256i vxa2 = _mm256_cvtepu8_epi16(va2);
 
       const __m128i vb01 = _mm_load_si128((const __m128i*) w);
+      const __m128i vb23 = _mm_load_si128((const __m128i*) ((const uint8_t*) w + 16));
+      const __m128i vb45 = _mm_load_si128((const __m128i*) ((const uint8_t*) w + 32));
+      const __m128i vb67 = _mm_load_si128((const __m128i*) ((const uint8_t*) w + 48));
       const __m256i vxb01 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb01), vb_zero_point);
+      const __m256i vxb23 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb23), vb_zero_point);
+      const __m256i vxb45 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb45), vb_zero_point);
+      const __m256i vxb67 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb67), vb_zero_point);
 
       vacc0x01 = _mm256_add_epi32(vacc0x01, _mm256_madd_epi16(vxa0, vxb01));
       vacc1x01 = _mm256_add_epi32(vacc1x01, _mm256_madd_epi16(vxa1, vxb01));
       vacc2x01 = _mm256_add_epi32(vacc2x01, _mm256_madd_epi16(vxa2, vxb01));
-      const __m128i vb23 = _mm_load_si128((const __m128i*) ((const uint8_t*) w + 16));
-      const __m256i vxb23 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb23), vb_zero_point);
-
       vacc0x23 = _mm256_add_epi32(vacc0x23, _mm256_madd_epi16(vxa0, vxb23));
       vacc1x23 = _mm256_add_epi32(vacc1x23, _mm256_madd_epi16(vxa1, vxb23));
       vacc2x23 = _mm256_add_epi32(vacc2x23, _mm256_madd_epi16(vxa2, vxb23));
-      const __m128i vb45 = _mm_load_si128((const __m128i*) ((const uint8_t*) w + 32));
-      const __m256i vxb45 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb45), vb_zero_point);
-
       vacc0x45 = _mm256_add_epi32(vacc0x45, _mm256_madd_epi16(vxa0, vxb45));
       vacc1x45 = _mm256_add_epi32(vacc1x45, _mm256_madd_epi16(vxa1, vxb45));
       vacc2x45 = _mm256_add_epi32(vacc2x45, _mm256_madd_epi16(vxa2, vxb45));
-      const __m128i vb67 = _mm_load_si128((const __m128i*) ((const uint8_t*) w + 48));
-      const __m256i vxb67 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb67), vb_zero_point);
-
       vacc0x67 = _mm256_add_epi32(vacc0x67, _mm256_madd_epi16(vxa0, vxb67));
       vacc1x67 = _mm256_add_epi32(vacc1x67, _mm256_madd_epi16(vxa1, vxb67));
       vacc2x67 = _mm256_add_epi32(vacc2x67, _mm256_madd_epi16(vxa2, vxb67));

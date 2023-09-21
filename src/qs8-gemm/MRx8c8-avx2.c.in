@@ -99,28 +99,32 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
     do {
       $for M in range(MR):
         const __m128i va${M} = _mm_broadcastq_epi64(_mm_loadl_epi64((const __m128i*) a${M}));
+        a${M} += 8;
+      $for M in range(MR):
         $if DATATYPE == "QU8":
           const __m256i vxa${M} = _mm256_cvtepu8_epi16(va${M});
         $else:
           const __m256i vxa${M} = _mm256_cvtepi8_epi16(va${M});
-        a${M} += 8;
 
-      $for N in range(0, 8, 2):
-        $if VARIANT == "EXTENDED":
+      $if VARIANT == "EXTENDED":
+        $for N in range(0, 8, 2):
           $if N == 0:
             const __m256i vxb${N}${N+1} = _mm256_load_si256((const __m256i*) w);
           $else:
             const __m256i vxb${N}${N+1} = _mm256_load_si256((const __m256i*) ((const int16_t*) w + ${N * 8}));
-        $else:
+      $else:
+        $for N in range(0, 8, 2):
           $if N == 0:
             const __m128i vb${N}${N+1} = _mm_load_si128((const __m128i*) w);
           $else:
             const __m128i vb${N}${N+1} = _mm_load_si128((const __m128i*) ((const ${XINT8_T}*) w + ${N * 8}));
+        $for N in range(0, 8, 2):
           $if DATATYPE == "QU8":
             const __m256i vxb${N}${N+1} = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb${N}${N+1}), vb_zero_point);
           $else:
             const __m256i vxb${N}${N+1} = _mm256_cvtepi8_epi16(vb${N}${N+1});
 
+      $for N in range(0, 8, 2):
         $for M in range(MR):
           vacc${M}x${N}${N+1} = _mm256_add_epi32(vacc${M}x${N}${N+1}, _mm256_madd_epi16(vxa${M}, vxb${N}${N+1}));
 
