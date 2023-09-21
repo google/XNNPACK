@@ -6,6 +6,8 @@ on:
       - '**.c'
       - '**.cc'
       - '**.h'
+      - 'BUILD.bazel'
+      - '**.bzl'
       - 'CMakeLists.txt'
       - 'cmake/**'
       - 'scripts/build-*.sh'
