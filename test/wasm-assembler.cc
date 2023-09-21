@@ -881,9 +881,18 @@ TEST_F(WasmOpsTest, V128Andnot) {
   TestV128BinaryOp(0x4F, &WasmOpsTest::V128Andnot);
 }
 
-TEST_F(WasmOpsTest, V128F32x4Splat) {
+TEST_F(WasmOpsTest, I32x4MaxS) {
+  TestV128BinaryOp(0xB8, &WasmOpsTest::I32x4MaxS);
+}
+
+TEST_F(WasmOpsTest, F32x4Splat) {
   ExpectEncodeVectorOpcode(0x13);
   F32x4Splat(f32_value_);
+}
+
+TEST_F(WasmOpsTest, I32x4Splat) {
+  ExpectEncodeVectorOpcode(0x11);
+  I32x4Splat(i32_value_);
 }
 
 TEST_F(WasmOpsTest, I32x4Shuffle) {
@@ -918,12 +927,13 @@ TEST_F(WasmOpsTest, I32NeZ) {
   I32NeZ(i32_value_);
 }
 
+
 #if XNN_ARCH_WASMRELAXEDSIMD
-TEST_F(WasmOpsTest, V128F32x4RelaxedMin) {
+TEST_F(WasmOpsTest, F32x4RelaxedMin) {
   TestV128BinaryOp(0x10D, &WasmOpsTest::F32x4RelaxedMin);
 }
 
-TEST_F(WasmOpsTest, V128F32x4RelaxedMax) {
+TEST_F(WasmOpsTest, F32x4RelaxedMax) {
   TestV128BinaryOp(0x10E, &WasmOpsTest::F32x4RelaxedMax);
 }
 #endif

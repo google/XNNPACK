@@ -665,11 +665,9 @@ void GemmMicrokernelTester::Test(
     }
 
     std::generate(b.begin(), b.end(), std::ref(w8rng));
-
     std::generate(bias.begin(), bias.end(), std::ref(f32rng));
     std::generate(kernel_scale.begin(), kernel_scale.end(), std::ref(scalerng));
     std::fill(c.begin(), c.end(), nanf(""));
-
     std::fill(packed_w.begin(), packed_w.end(), 0);
     // Row sums are multiplied by input zero point, since we don't know it
     // until runtime, set it to 1.
@@ -702,7 +700,7 @@ void GemmMicrokernelTester::Test(
         int32_t ksum = 0;
         for (size_t k_index = 0; k_index < k(); k_index++) {
           const size_t nb_index = n_index * k_stride + k_index / 2;
-          const int32_t bv = int32_t(((k_index % 2 == 0) ? (b[nb_index] & UINT8_C(0xF)) : (b[nb_index] >> 4))) - 8;;
+          const int32_t bv = int32_t((k_index % 2 == 0) ? (b[nb_index] & UINT8_C(0xF)) : (b[nb_index] >> 4)) - b_zero_point();
           ksum += bv;
           c_ref[m_index * n() + n_index] += int32_t(a[m_index * a_stride() + k_index]) * int32_t(bv);
         }
