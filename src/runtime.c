@@ -244,6 +244,10 @@ static enum xnn_status initialize_workspace_values(
           if (value->data != NULL) {
             // Data can be null as the runtime using this workspace might not have been set up.
             value->data = (void*) ((uintptr_t) value->data + workspace_data_delta);
+            if (value->datatype == xnn_datatype_qdint8) {
+              value->quantization.dynamic_params = (void*) ((uintptr_t) value->quantization.dynamic_params
+                                                            + workspace_data_delta);
+            }
           }
         }
       }
