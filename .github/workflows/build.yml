@@ -204,4 +204,21 @@ jobs:
       - name: Build with Xcode
         run: cmake --build build/ios/x86_64 --parallel $(sysctl -n hw.ncpu) -- -sdk iphonesimulator -quiet
         working-directory: ${{ github.workspace }}
-
+  bazel-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Android NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          # Use old version of NDK so that android_ndk_repository works correctly (need platforms folder in NDK).
+          ndk-version: r20b
+          add-to-path: false
+      - name: Build and run tests
+        run: |
+          bazel test test:all
+        working-directory: ${{ github.workspace }}
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
