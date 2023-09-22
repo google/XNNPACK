@@ -616,7 +616,7 @@ void xnn_pack_qs8_gemm_xw_goi_w(
   size_t sr,
   const int8_t* k,
   const int32_t* b,
-  const void* scale,
+  const float* scale,
   void* packed_weights,
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
