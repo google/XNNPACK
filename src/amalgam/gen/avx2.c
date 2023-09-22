@@ -3239,12 +3239,13 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c8__avx2(
       a0 += 8;
 
       const __m128i vb01 = _mm_load_si128((const __m128i*) w);
-      const __m256i vxb01 = _mm256_cvtepi8_epi16(vb01);
       const __m128i vb23 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
-      const __m256i vxb23 = _mm256_cvtepi8_epi16(vb23);
       const __m128i vb45 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 32));
-      const __m256i vxb45 = _mm256_cvtepi8_epi16(vb45);
       const __m128i vb67 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 48));
+      w = (const int8_t*) w + 64;
+      const __m256i vxb01 = _mm256_cvtepi8_epi16(vb01);
+      const __m256i vxb23 = _mm256_cvtepi8_epi16(vb23);
+      const __m256i vxb45 = _mm256_cvtepi8_epi16(vb45);
       const __m256i vxb67 = _mm256_cvtepi8_epi16(vb67);
 
       vacc0x01 = _mm256_add_epi32(vacc0x01, _mm256_madd_epi16(vxa0, vxb01));
@@ -3252,7 +3253,6 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c8__avx2(
       vacc0x45 = _mm256_add_epi32(vacc0x45, _mm256_madd_epi16(vxa0, vxb45));
       vacc0x67 = _mm256_add_epi32(vacc0x67, _mm256_madd_epi16(vxa0, vxb67));
 
-      w = (const int8_t*) w + 64;
       k -= 8 * sizeof(int8_t);
     } while (k != 0);
 
@@ -3392,12 +3392,13 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x8c8__avx2(
       a2 += 8;
 
       const __m128i vb01 = _mm_load_si128((const __m128i*) w);
-      const __m256i vxb01 = _mm256_cvtepi8_epi16(vb01);
       const __m128i vb23 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
-      const __m256i vxb23 = _mm256_cvtepi8_epi16(vb23);
       const __m128i vb45 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 32));
-      const __m256i vxb45 = _mm256_cvtepi8_epi16(vb45);
       const __m128i vb67 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 48));
+      w = (const int8_t*) w + 64;
+      const __m256i vxb01 = _mm256_cvtepi8_epi16(vb01);
+      const __m256i vxb23 = _mm256_cvtepi8_epi16(vb23);
+      const __m256i vxb45 = _mm256_cvtepi8_epi16(vb45);
       const __m256i vxb67 = _mm256_cvtepi8_epi16(vb67);
 
       vacc0x01 = _mm256_add_epi32(vacc0x01, _mm256_madd_epi16(vxa0, vxb01));
@@ -3413,7 +3414,6 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x8c8__avx2(
       vacc1x67 = _mm256_add_epi32(vacc1x67, _mm256_madd_epi16(vxa1, vxb67));
       vacc2x67 = _mm256_add_epi32(vacc2x67, _mm256_madd_epi16(vxa2, vxb67));
 
-      w = (const int8_t*) w + 64;
       k -= 8 * sizeof(int8_t);
     } while (k != 0);
 
@@ -4516,12 +4516,13 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x8c8__avx2(
       a0 += 8;
 
       const __m128i vb01 = _mm_load_si128((const __m128i*) w);
-      const __m256i vxb01 = _mm256_cvtepi8_epi16(vb01);
       const __m128i vb23 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
-      const __m256i vxb23 = _mm256_cvtepi8_epi16(vb23);
       const __m128i vb45 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 32));
-      const __m256i vxb45 = _mm256_cvtepi8_epi16(vb45);
       const __m128i vb67 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 48));
+      w = (const int8_t*) w + 64;
+      const __m256i vxb01 = _mm256_cvtepi8_epi16(vb01);
+      const __m256i vxb23 = _mm256_cvtepi8_epi16(vb23);
+      const __m256i vxb45 = _mm256_cvtepi8_epi16(vb45);
       const __m256i vxb67 = _mm256_cvtepi8_epi16(vb67);
 
       vacc0x01 = _mm256_add_epi32(vacc0x01, _mm256_madd_epi16(vxa0, vxb01));
@@ -4529,7 +4530,6 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x8c8__avx2(
       vacc0x45 = _mm256_add_epi32(vacc0x45, _mm256_madd_epi16(vxa0, vxb45));
       vacc0x67 = _mm256_add_epi32(vacc0x67, _mm256_madd_epi16(vxa0, vxb67));
 
-      w = (const int8_t*) w + 64;
       k -= 8 * sizeof(int8_t);
     } while (k != 0);
 
@@ -4670,12 +4670,13 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
       a2 += 8;
 
       const __m128i vb01 = _mm_load_si128((const __m128i*) w);
-      const __m256i vxb01 = _mm256_cvtepi8_epi16(vb01);
       const __m128i vb23 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
-      const __m256i vxb23 = _mm256_cvtepi8_epi16(vb23);
       const __m128i vb45 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 32));
-      const __m256i vxb45 = _mm256_cvtepi8_epi16(vb45);
       const __m128i vb67 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 48));
+      w = (const int8_t*) w + 64;
+      const __m256i vxb01 = _mm256_cvtepi8_epi16(vb01);
+      const __m256i vxb23 = _mm256_cvtepi8_epi16(vb23);
+      const __m256i vxb45 = _mm256_cvtepi8_epi16(vb45);
       const __m256i vxb67 = _mm256_cvtepi8_epi16(vb67);
 
       vacc0x01 = _mm256_add_epi32(vacc0x01, _mm256_madd_epi16(vxa0, vxb01));
@@ -4691,7 +4692,6 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
       vacc1x67 = _mm256_add_epi32(vacc1x67, _mm256_madd_epi16(vxa1, vxb67));
       vacc2x67 = _mm256_add_epi32(vacc2x67, _mm256_madd_epi16(vxa2, vxb67));
 
-      w = (const int8_t*) w + 64;
       k -= 8 * sizeof(int8_t);
     } while (k != 0);
 
@@ -6256,12 +6256,13 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avx2(
       a0 += 8;
 
       const __m128i vb01 = _mm_load_si128((const __m128i*) w);
-      const __m256i vxb01 = _mm256_cvtepi8_epi16(vb01);
       const __m128i vb23 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
-      const __m256i vxb23 = _mm256_cvtepi8_epi16(vb23);
       const __m128i vb45 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 32));
-      const __m256i vxb45 = _mm256_cvtepi8_epi16(vb45);
       const __m128i vb67 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 48));
+      w = (const int8_t*) w + 64;
+      const __m256i vxb01 = _mm256_cvtepi8_epi16(vb01);
+      const __m256i vxb23 = _mm256_cvtepi8_epi16(vb23);
+      const __m256i vxb45 = _mm256_cvtepi8_epi16(vb45);
       const __m256i vxb67 = _mm256_cvtepi8_epi16(vb67);
 
       vacc0x01 = _mm256_add_epi32(vacc0x01, _mm256_madd_epi16(vxa0, vxb01));
@@ -6269,7 +6270,6 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avx2(
       vacc0x45 = _mm256_add_epi32(vacc0x45, _mm256_madd_epi16(vxa0, vxb45));
       vacc0x67 = _mm256_add_epi32(vacc0x67, _mm256_madd_epi16(vxa0, vxb67));
 
-      w = (const int8_t*) w + 64;
       k -= 8 * sizeof(int8_t);
     } while (k != 0);
 
@@ -6411,12 +6411,13 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x8c8__avx2(
       a2 += 8;
 
       const __m128i vb01 = _mm_load_si128((const __m128i*) w);
-      const __m256i vxb01 = _mm256_cvtepi8_epi16(vb01);
       const __m128i vb23 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
-      const __m256i vxb23 = _mm256_cvtepi8_epi16(vb23);
       const __m128i vb45 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 32));
-      const __m256i vxb45 = _mm256_cvtepi8_epi16(vb45);
       const __m128i vb67 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 48));
+      w = (const int8_t*) w + 64;
+      const __m256i vxb01 = _mm256_cvtepi8_epi16(vb01);
+      const __m256i vxb23 = _mm256_cvtepi8_epi16(vb23);
+      const __m256i vxb45 = _mm256_cvtepi8_epi16(vb45);
       const __m256i vxb67 = _mm256_cvtepi8_epi16(vb67);
 
       vacc0x01 = _mm256_add_epi32(vacc0x01, _mm256_madd_epi16(vxa0, vxb01));
@@ -6432,7 +6433,6 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x8c8__avx2(
       vacc1x67 = _mm256_add_epi32(vacc1x67, _mm256_madd_epi16(vxa1, vxb67));
       vacc2x67 = _mm256_add_epi32(vacc2x67, _mm256_madd_epi16(vxa2, vxb67));
 
-      w = (const int8_t*) w + 64;
       k -= 8 * sizeof(int8_t);
     } while (k != 0);
 
@@ -8250,12 +8250,13 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x8c8__avx2(
       a0 += 8;
 
       const __m128i vb01 = _mm_load_si128((const __m128i*) w);
-      const __m256i vxb01 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb01), vb_zero_point);
       const __m128i vb23 = _mm_load_si128((const __m128i*) ((const uint8_t*) w + 16));
-      const __m256i vxb23 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb23), vb_zero_point);
       const __m128i vb45 = _mm_load_si128((const __m128i*) ((const uint8_t*) w + 32));
-      const __m256i vxb45 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb45), vb_zero_point);
       const __m128i vb67 = _mm_load_si128((const __m128i*) ((const uint8_t*) w + 48));
+      w = (const uint8_t*) w + 64;
+      const __m256i vxb01 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb01), vb_zero_point);
+      const __m256i vxb23 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb23), vb_zero_point);
+      const __m256i vxb45 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb45), vb_zero_point);
       const __m256i vxb67 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb67), vb_zero_point);
 
       vacc0x01 = _mm256_add_epi32(vacc0x01, _mm256_madd_epi16(vxa0, vxb01));
@@ -8263,7 +8264,6 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x8c8__avx2(
       vacc0x45 = _mm256_add_epi32(vacc0x45, _mm256_madd_epi16(vxa0, vxb45));
       vacc0x67 = _mm256_add_epi32(vacc0x67, _mm256_madd_epi16(vxa0, vxb67));
 
-      w = (const uint8_t*) w + 64;
       k -= 8 * sizeof(uint8_t);
     } while (k != 0);
 
@@ -8405,12 +8405,13 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
       a2 += 8;
 
       const __m128i vb01 = _mm_load_si128((const __m128i*) w);
-      const __m256i vxb01 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb01), vb_zero_point);
       const __m128i vb23 = _mm_load_si128((const __m128i*) ((const uint8_t*) w + 16));
-      const __m256i vxb23 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb23), vb_zero_point);
       const __m128i vb45 = _mm_load_si128((const __m128i*) ((const uint8_t*) w + 32));
-      const __m256i vxb45 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb45), vb_zero_point);
       const __m128i vb67 = _mm_load_si128((const __m128i*) ((const uint8_t*) w + 48));
+      w = (const uint8_t*) w + 64;
+      const __m256i vxb01 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb01), vb_zero_point);
+      const __m256i vxb23 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb23), vb_zero_point);
+      const __m256i vxb45 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb45), vb_zero_point);
       const __m256i vxb67 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb67), vb_zero_point);
 
       vacc0x01 = _mm256_add_epi32(vacc0x01, _mm256_madd_epi16(vxa0, vxb01));
@@ -8426,7 +8427,6 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
       vacc1x67 = _mm256_add_epi32(vacc1x67, _mm256_madd_epi16(vxa1, vxb67));
       vacc2x67 = _mm256_add_epi32(vacc2x67, _mm256_madd_epi16(vxa2, vxb67));
 
-      w = (const uint8_t*) w + 64;
       k -= 8 * sizeof(uint8_t);
     } while (k != 0);
 
