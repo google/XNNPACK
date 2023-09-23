@@ -29,6 +29,9 @@ static enum xnn_status create_batch_matrix_multiply_operator(
 
   enum xnn_status status;
   switch (node->compute_type) {
+    case xnn_compute_type_fp16:
+      status = xnn_create_batch_matrix_multiply_nc_f16(node->flags, &opdata->operator_objects[0]);
+      break;
     case xnn_compute_type_fp32:
       status = xnn_create_batch_matrix_multiply_nc_f32(node->flags, &opdata->operator_objects[0]);
       break;
@@ -62,6 +65,13 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
   const size_t batch_size = xnn_shape_multiply_batch_dims(&input1->shape, 2);
 
   switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_batch_matrix_multiply_nc_f16:
+      return xnn_reshape_batch_matrix_multiply_nc_f16(
+        opdata->operator_objects[0],
+        batch_size,
+        m, k, n,
+        &opdata->workspace_size, &opdata->workspace_alignment,
+        threadpool);
     case xnn_operator_type_batch_matrix_multiply_nc_f32:
       return xnn_reshape_batch_matrix_multiply_nc_f32(
         opdata->operator_objects[0],
@@ -105,6 +115,10 @@ static enum xnn_status setup_batch_matrix_multiply_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_batch_matrix_multiply_nc_f16:
+      return xnn_setup_batch_matrix_multiply_nc_f16(
+        opdata->operator_objects[0],
+        opdata->workspace, input1_data, input2_data, output_data);
     case xnn_operator_type_batch_matrix_multiply_nc_f32:
       return xnn_setup_batch_matrix_multiply_nc_f32(
         opdata->operator_objects[0],
@@ -120,6 +134,11 @@ static inline enum xnn_compute_type validate_datatypes(
   enum xnn_datatype output_datatype)
 {
   switch (input2_datatype) {
+    case xnn_datatype_fp16:
+      if (input1_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_fp16) {
+        return xnn_compute_type_fp16;
+      }
+      break;
     case xnn_datatype_fp32:
       if (input1_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp32) {
         return xnn_compute_type_fp32;
@@ -155,6 +174,7 @@ enum xnn_status xnn_define_batch_matrix_multiply(
   }
 
   switch (input1_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;
     default:
@@ -186,6 +206,7 @@ enum xnn_status xnn_define_batch_matrix_multiply(
   }
 
   switch (input2_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;
     default:
@@ -225,6 +246,7 @@ enum xnn_status xnn_define_batch_matrix_multiply(
   }
 
   switch (output_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;
     default:

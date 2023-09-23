@@ -732,6 +732,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
     switch (node->type) {
       case xnn_node_type_abs:
       case xnn_node_type_add2:
+      case xnn_node_type_batch_matrix_multiply:
       case xnn_node_type_divide:
       case xnn_node_type_maximum2:
       case xnn_node_type_minimum2:
