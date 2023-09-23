@@ -31,6 +31,8 @@
   string: "Bankers Rounding (NC, F16)"
 - name: xnn_operator_type_bankers_rounding_nc_f32
   string: "Bankers Rounding (NC, F32)"
+- name: xnn_operator_type_batch_matrix_multiply_nc_f16
+  string: "Batch Matrix Multiply (NC, F16)"
 - name: xnn_operator_type_batch_matrix_multiply_nc_f32
   string: "Batch Matrix Multiply (NC, F32)"
 - name: xnn_operator_type_ceiling_nc_f16

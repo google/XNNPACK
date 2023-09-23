@@ -2236,6 +2236,27 @@ enum xnn_status xnn_run_bankers_rounding_nc_f32(
   uint32_t flags,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_batch_matrix_multiply_nc_f16(
+  uint32_t flags,
+  xnn_operator_t* batch_matrix_multiply_op);
+
+enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f16(
+  xnn_operator_t batch_matrix_multiply_op,
+  size_t batch_size,
+  size_t m,
+  size_t k,
+  size_t n,
+  size_t* workspace_size,
+  size_t* workspace_alignment,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_batch_matrix_multiply_nc_f16(
+  xnn_operator_t batch_matrix_multiply_op,
+  void* workspace,
+  const void* lhs_input,
+  const void* rhs_input,
+  void* output);
+
 enum xnn_status xnn_create_batch_matrix_multiply_nc_f32(
   uint32_t flags,
   xnn_operator_t* batch_matrix_multiply_op);
@@ -2253,8 +2274,8 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f32(
 enum xnn_status xnn_setup_batch_matrix_multiply_nc_f32(
   xnn_operator_t batch_matrix_multiply_op,
   void* workspace,
-  const float* input1,
-  const float* input2,
+  const float* lhs_input,
+  const float* rhs_input,
   float* output);
 
 enum xnn_status xnn_create_ceiling_nc_f16(
