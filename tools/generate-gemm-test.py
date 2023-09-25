@@ -66,6 +66,7 @@ static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
   GEMMBenchmark(state,
     ${GEMM},
     ${INIT_PARAMS},
+    ${PACK_FN},
     /*mr=*/${MR}, /*nr=*/${NR}, /*kr=*/${KR}, /*sr=*/${SR},
     $if ISA_CHECK:
       benchmark::utils::${ISA_CHECK},
@@ -81,6 +82,7 @@ static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
   GEMMBenchmark(state,
     ${GEMM},
     ${INIT_PARAMS},
+    ${PACK_FN},
     /*mr=*/${MR}, /*nr=*/${NR}, /*kr=*/${KR}, /*sr=*/${SR},
     $if ISA_CHECK:
       benchmark::utils::${ISA_CHECK});
@@ -1085,7 +1087,7 @@ $if TEST_NAME.startswith('GENERATE') and DATATYPE in ['f32', 'f16'] and PROTOTYP
 """
 
 
-def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
+def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn, pack_fn,
                         requantization, is_pipelined, isa, jit, prototype, post_op):
   """Generates all tests cases for a GEMM micro-kernel.
 
@@ -1099,6 +1101,7 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
     k_block: Number of K values processed per one iteration of the main loop of
       the micro-kernel.
     init_fn: C name of the function to initialize microkernel parameters.
+    pack_fn: C name of the function to pack the weights.
     requantization: name of the requantization scheme used by the microkernel.
     is_pipelined: Indicates if the micro-kernel is implemented with software
       pipelining. Additional test cases are generated for software pipelined
@@ -1134,10 +1137,13 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
   test_args = [ukernel]
   if init_fn:
     test_args.append(init_fn)
-    if requantization:
-      requantization_datatype = {"qc8": "qs8"}.get(datatype, datatype)
-      test_args.append("xnn_%s_requantize_%s" % \
-        (requantization_datatype, requantization))
+
+  if pack_fn:
+    test_args.append(pack_fn)
+
+  if init_fn and requantization:
+    requantization_datatype = {"qc8": "qs8"}.get(datatype, datatype)
+    test_args.append("xnn_%s_requantize_%s" % (requantization_datatype, requantization))
 
   if jit:
     if "minmax" in init_fn:
@@ -1165,16 +1171,13 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
           "PROTOTYPE": prototype,
           "JIT": jit,
       })
-  if len(test_args) == 1:
-    init_params= "nullptr"
-  else:
-    init_params= test_args[1]
 
   benchmark = xngen.preprocess(
       GEMM_BENCH_CODE_XW if xw else GEMM_BENCH_CODE, {
           "UKERNEL_NAME": ukernel_name,
-          "GEMM": test_args[0],
-          "INIT_PARAMS": init_params,
+          "GEMM": ukernel,
+          "INIT_PARAMS": init_fn,
+          "PACK_FN": pack_fn,
           "MR": mr,
           "NR": nr,
           "KR": kr,
@@ -1253,6 +1256,7 @@ def main(args):
       name = ukernel_spec["name"]
       k_block = int(ukernel_spec["k-block"])
       init_fn = ukernel_spec.get("init")
+      pack_fn = ukernel_spec.get("pack")
       pipelined = bool(ukernel_spec.get("pipelined", False))
       jit = name.startswith("xnn_generate")
       prototype = ukernel_spec.get("prototype")
@@ -1261,7 +1265,7 @@ def main(args):
         split_ukernel_name(name)
 
       test_case, bench_case = generate_test_cases(name, mr, nr, kr, sr, xw, k_block,
-                                      init_fn, requantization, pipelined, isa,
+                                      init_fn, pack_fn, requantization, pipelined, isa,
                                       jit, prototype, post_op)
 
       # Hash the name of each microkernel and figure out which output file to

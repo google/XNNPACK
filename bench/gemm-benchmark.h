@@ -6,7 +6,6 @@
 #pragma once
 
 #include <algorithm>
-#include <cfloat>
 #include <cmath>
 #include <functional>
 #include <limits>
@@ -26,9 +25,11 @@
 #include <xnnpack/pack.h>
 
 namespace {
+
 void GEMMBenchmark(benchmark::State& state,
   xnn_qs8_gemm_minmax_ukernel_fn gemm,
   xnn_init_qs8_conv_minmax_params_fn init_params,
+  xnn_pack_qs8_gemm_fn pack,
   size_t mr, size_t nr, size_t kr, size_t sr,
   benchmark::utils::IsaCheckFunction isa_check,
   bool extended_weights)
@@ -67,13 +68,8 @@ void GEMMBenchmark(benchmark::State& state,
   std::fill(w.begin(), w.end(), 0);
 
   const xnn_qs8_packing_params packing_params = { 127 };
-  if (extended_weights) {
-    xnn_pack_qs8_gemm_xw_goi_w(/*g=*/1, nc, kc, nr, kr, sr,
-      k.data(), b.data(), /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, &packing_params);
-  } else {
-    xnn_pack_qs8_gemm_goi_w(/*g=*/1, nc, kc, nr, kr, sr,
-      k.data(), b.data(), /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, &packing_params);
-  }
+  pack(/*g=*/1, nc, kc, nr, kr, sr, k.data(), b.data(), /*scale=*/nullptr, w.data(),
+       /*extra_bytes=*/0, &packing_params);
   std::vector<int8_t> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), INT8_C(0xA5));
 
@@ -121,6 +117,7 @@ void GEMMBenchmark(benchmark::State& state,
 void GEMMBenchmark(benchmark::State& state,
   xnn_qs8_qc8w_gemm_minmax_ukernel_fn gemm,
   xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
+  xnn_pack_qs8_gemm_fn pack,
   size_t mr, size_t nr, size_t kr, size_t sr,
   benchmark::utils::IsaCheckFunction isa_check,
   bool extended_weights)
@@ -159,13 +156,8 @@ void GEMMBenchmark(benchmark::State& state,
   std::fill(w.begin(), w.end(), 0);
 
   const xnn_qs8_packing_params packing_params = { int8_t(127 - 0x80) };
-  if (extended_weights) {
-    xnn_pack_qs8_gemm_xw_goi_w(/*g=*/1, nc, kc, nr, kr, sr,
-      k.data(), b.data(), /*scale=*/nullptr, w.data(), nr * sizeof(float), &packing_params);
-  } else {
-    xnn_pack_qs8_gemm_goi_w(/*g=*/1, nc, kc, nr, kr, sr,
-      k.data(), b.data(), /*scale=*/nullptr, w.data(), nr * sizeof(float), &packing_params);
-  }
+  pack(/*g=*/1, nc, kc, nr, kr, sr, k.data(), b.data(), /*scale=*/nullptr, w.data(),
+       nr * sizeof(float), &packing_params);
   std::vector<int8_t> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), INT8_C(0xA5));
 
@@ -212,24 +204,27 @@ void GEMMBenchmark(benchmark::State& state,
 void GEMMBenchmark(benchmark::State& state,
   xnn_qs8_qc8w_gemm_minmax_ukernel_fn gemm,
   xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
+  xnn_pack_qs8_gemm_fn pack,
   size_t mr, size_t nr, size_t kr, size_t sr,
   benchmark::utils::IsaCheckFunction isa_check)
 {
-  return GEMMBenchmark(state, gemm, init_params, mr, nr, kr, sr, isa_check, /*extended_weights=*/false);
+  return GEMMBenchmark(state, gemm, init_params, pack, mr, nr, kr, sr, isa_check, /*extended_weights=*/false);
 }
 
 void GEMMBenchmark(benchmark::State& state,
   xnn_qs8_gemm_minmax_ukernel_fn gemm,
   xnn_init_qs8_conv_minmax_params_fn init_params,
+  xnn_pack_qs8_gemm_fn pack,
   size_t mr, size_t nr, size_t kr, size_t sr,
   benchmark::utils::IsaCheckFunction isa_check)
 {
-  return GEMMBenchmark(state, gemm, init_params, mr, nr, kr, sr, isa_check, /*extended_weights=*/false);
+  return GEMMBenchmark(state, gemm, init_params, pack, mr, nr, kr, sr, isa_check, /*extended_weights=*/false);
 }
 
 void GEMMBenchmark(benchmark::State& state,
   xnn_qd8_f32_qc8w_gemm_ukernel_fn gemm,
   xnn_init_f32_minmax_params_fn init_params,
+  xnn_pack_qs8_gemm_fn pack,
   size_t mr, size_t nr, size_t kr, size_t sr,
   benchmark::utils::IsaCheckFunction isa_check)
 {
@@ -266,8 +261,8 @@ void GEMMBenchmark(benchmark::State& state,
   std::fill(w.begin(), w.end(), 0);
 
   const xnn_qs8_packing_params packing_params = { /*input_zero_point=*/1 };
-  xnn_pack_qs8_gemm_goi_w(1, nc, kc, nr, kr, sr,
-                          k.data(), /*bias=*/nullptr, /*scale=*/nullptr, w.data(), sizeof(float) * 2 * nr, &packing_params);
+  pack(1, nc, kc, nr, kr, sr, k.data(), /*bias=*/nullptr, /*scale=*/nullptr, w.data(),
+       sizeof(float) * 2 * nr, &packing_params);
   std::vector<float> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));
 
@@ -309,6 +304,7 @@ void GEMMBenchmark(benchmark::State& state,
 void GEMMBenchmark(benchmark::State& state,
   xnn_qd8_f32_qc4w_gemm_ukernel_fn gemm,
   xnn_init_f32_qc4w_minmax_params_fn init_params,
+  xnn_pack_qs8_qc4w_gemm_fn pack,
   size_t mr, size_t nr, size_t kr, size_t sr,
   benchmark::utils::IsaCheckFunction isa_check)
 {
@@ -346,10 +342,9 @@ void GEMMBenchmark(benchmark::State& state,
   std::vector<char, AlignedAllocator<char, 64>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), 0);
 
-  const xnn_qs8_packing_params packing_params = { /*input_zero_point=*/1 };
-  // Note that bias will be incorrect with qs8 pack.  Use qc4w variation when available
-  xnn_pack_qs8_gemm_goi_w(1, nc, kc / 2, nr, kr, sr,
-                          (const int8_t*) k.data(), /*bias=*/nullptr, /*scale=*/nullptr, w.data(), sizeof(float) * 2 * nr, &packing_params);
+  const xnn_qs8_qc4w_packing_params packing_params = { /*input_zero_point=*/1, /*kernel_zero_point=*/8 };
+  pack(1, nc, kc / 2, nr, kr, sr, k.data(), /*bias=*/nullptr, /*scale=*/nullptr,
+       w.data(), sizeof(float) * 2 * nr, &packing_params);
   std::vector<float> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));
 
@@ -391,6 +386,7 @@ void GEMMBenchmark(benchmark::State& state,
 static void GEMMBenchmark(benchmark::State& state,
   xnn_qu8_gemm_minmax_ukernel_fn gemm,
   xnn_init_qu8_conv_minmax_params_fn init_params,
+  xnn_pack_qu8_gemm_fn pack,
   size_t mr, size_t nr, size_t kr, size_t sr,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
@@ -426,8 +422,8 @@ static void GEMMBenchmark(benchmark::State& state,
   std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), 0);
   const xnn_qu8_packing_params packing_params = { 127, 127 };
-  xnn_pack_qu8_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr,
-    k.data(), b.data(), /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, &packing_params);
+  pack(/*groups=*/1, nc, kc, nr, kr, sr, k.data(), b.data(), /*scale=*/nullptr, w.data(),
+       /*extra_bytes=*/0, &packing_params);
   std::vector<uint8_t> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), 0xA5);
 
@@ -468,4 +464,4 @@ static void GEMMBenchmark(benchmark::State& state,
     uint64_t(state.iterations()) * 2 * mc * nc * kc, benchmark::Counter::kIsRate);
 }
 
-}
+}  // namespace

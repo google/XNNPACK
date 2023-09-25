@@ -6,90 +6,117 @@
 # AArch64 assembly
 - name: xnn_f32_ppmm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 4
 - name: xnn_f32_ppmm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a75_prfm
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 4
 - name: xnn_f32_ppmm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 4
 - name: xnn_f32_ppmm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128_prfm
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 4
 - name: xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_cortex_a75_prfm
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128_prfm
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 
 # ARM NEON
 - name: xnn_f32_ppmm_minmax_ukernel_4x8__aarch64_neonfma
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_4x8__aarch64_neonfma_prfm
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_4x8__neon
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_4x8__neon_prfm
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_4x16__aarch64_neonfma
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_4x16__aarch64_neonfma_prfm
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_4x16__neon
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_4x16__neon_prfm
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_8x8__aarch64_neonfma
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_8x8__aarch64_neonfma_prfm
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_8x8__neon
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_8x8__neon_prfm
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 
 # x86 SSE
 - name: xnn_f32_ppmm_minmax_ukernel_4x8__sse
   init: xnn_init_f32_minmax_sse_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 
 # WAsm SIMD
 - name: xnn_f32_ppmm_minmax_ukernel_4x8__wasmsimd_arm_splat
   init: xnn_init_f32_minmax_wasmsimd_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_4x8__wasmsimd_x86_splat
   init: xnn_init_f32_minmax_wasmsimd_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 
 # Scalar
 - name: xnn_f32_ppmm_minmax_ukernel_2x4__scalar
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_3x3__scalar
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_4x2__scalar
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_4x4__scalar
   init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
   k-block: 1

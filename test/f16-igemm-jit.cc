@@ -35,7 +35,7 @@
       .m(1)
       .n(16)
       .k(4)
-      .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_1X16__AARCH64_NEONFP16ARITH_LD64, strided_cn) {
@@ -49,7 +49,7 @@
       .n(16)
       .k(4)
       .cn_stride(19)
-      .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_1X16__AARCH64_NEONFP16ARITH_LD64, k_eq_4_subtile) {
@@ -65,7 +65,7 @@
           .n(n)
           .k(4)
           .iterations(1)
-          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -82,7 +82,7 @@
         .n(16)
         .k(4)
         .iterations(1)
-        .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -98,7 +98,7 @@
         .n(n)
         .k(4)
         .iterations(1)
-        .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -113,7 +113,7 @@
         .m(1)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -131,7 +131,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -148,7 +148,7 @@
         .m(1)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -166,7 +166,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -183,7 +183,7 @@
         .m(1)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -201,7 +201,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -219,7 +219,7 @@
           .m(1)
           .n(n)
           .k(k)
-          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -237,7 +237,7 @@
           .n(n)
           .k(k)
           .known_nc_mod_nr(false)
-          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -255,7 +255,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -274,7 +274,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -292,7 +292,7 @@
           .m(1)
           .n(n)
           .k(k)
-          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -310,7 +310,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -329,7 +329,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -347,7 +347,7 @@
         .n(16)
         .k(k)
         .ks(3)
-        .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -366,7 +366,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -385,7 +385,7 @@
           .n(n)
           .k(k)
           .ks(3)
-          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -403,7 +403,7 @@
           .n(n)
           .k(k)
           .ks(3)
-          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -423,7 +423,7 @@
             .k(k)
             .cm_stride(19)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -442,7 +442,7 @@
         .k(k)
         .ks(3)
         .a_offset(23)
-        .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -461,7 +461,7 @@
           .ks(3)
           .a_offset(23)
           .zero_index(mz)
-          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -477,7 +477,7 @@
       .n(16)
       .k(4)
       .qmin(128)
-      .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_1X16__AARCH64_NEONFP16ARITH_LD64, qmax) {
@@ -491,7 +491,7 @@
       .n(16)
       .k(4)
       .qmax(128)
-      .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_1X16__AARCH64_NEONFP16ARITH_LD64, strided_cm) {
@@ -505,7 +505,7 @@
       .n(16)
       .k(4)
       .cm_stride(19)
-      .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_1X16__AARCH64_NEONFP16ARITH_LD64, subtile_m_upto_mr) {
@@ -522,7 +522,7 @@
             .n(16)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -540,7 +540,7 @@
         .n(16)
         .k(4)
         .Test(
-            xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params,
+            xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w,
             &xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64);
     }
   #endif // XNN_ENABLE_ASSEMBLY
@@ -558,7 +558,7 @@
       .m(4)
       .n(16)
       .k(4)
-      .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_4X16__AARCH64_NEONFP16ARITH_LD64, strided_cn) {
@@ -572,7 +572,7 @@
       .n(16)
       .k(4)
       .cn_stride(19)
-      .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_4X16__AARCH64_NEONFP16ARITH_LD64, k_eq_4_subtile) {
@@ -588,7 +588,7 @@
           .n(n)
           .k(4)
           .iterations(1)
-          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -605,7 +605,7 @@
         .n(16)
         .k(4)
         .iterations(1)
-        .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -621,7 +621,7 @@
         .n(n)
         .k(4)
         .iterations(1)
-        .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -636,7 +636,7 @@
         .m(4)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -654,7 +654,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -671,7 +671,7 @@
         .m(4)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -689,7 +689,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -706,7 +706,7 @@
         .m(4)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -724,7 +724,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -742,7 +742,7 @@
           .m(4)
           .n(n)
           .k(k)
-          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -760,7 +760,7 @@
           .n(n)
           .k(k)
           .known_nc_mod_nr(false)
-          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -778,7 +778,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -797,7 +797,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -815,7 +815,7 @@
           .m(4)
           .n(n)
           .k(k)
-          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -833,7 +833,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -852,7 +852,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -870,7 +870,7 @@
         .n(16)
         .k(k)
         .ks(3)
-        .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -889,7 +889,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -908,7 +908,7 @@
           .n(n)
           .k(k)
           .ks(3)
-          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -926,7 +926,7 @@
           .n(n)
           .k(k)
           .ks(3)
-          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -946,7 +946,7 @@
             .k(k)
             .cm_stride(19)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -965,7 +965,7 @@
         .k(k)
         .ks(3)
         .a_offset(83)
-        .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -984,7 +984,7 @@
           .ks(3)
           .a_offset(83)
           .zero_index(mz)
-          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1000,7 +1000,7 @@
       .n(16)
       .k(4)
       .qmin(128)
-      .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_4X16__AARCH64_NEONFP16ARITH_LD64, qmax) {
@@ -1014,7 +1014,7 @@
       .n(16)
       .k(4)
       .qmax(128)
-      .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_4X16__AARCH64_NEONFP16ARITH_LD64, strided_cm) {
@@ -1028,7 +1028,7 @@
       .n(16)
       .k(4)
       .cm_stride(19)
-      .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_4X16__AARCH64_NEONFP16ARITH_LD64, subtile_m_upto_mr) {
@@ -1045,7 +1045,7 @@
             .n(16)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -1063,7 +1063,7 @@
         .n(16)
         .k(4)
         .Test(
-            xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params,
+            xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w,
             &xnn_f16_igemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld64);
     }
   #endif // XNN_ENABLE_ASSEMBLY
@@ -1081,7 +1081,7 @@
       .m(6)
       .n(16)
       .k(2)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A55, strided_cn) {
@@ -1095,7 +1095,7 @@
       .n(16)
       .k(2)
       .cn_stride(19)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A55, k_eq_2_subtile) {
@@ -1111,7 +1111,7 @@
           .n(n)
           .k(2)
           .iterations(1)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1128,7 +1128,7 @@
         .n(16)
         .k(2)
         .iterations(1)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -1144,7 +1144,7 @@
         .n(n)
         .k(2)
         .iterations(1)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -1159,7 +1159,7 @@
         .m(6)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -1177,7 +1177,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -1194,7 +1194,7 @@
         .m(6)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -1212,7 +1212,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -1229,7 +1229,7 @@
         .m(6)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -1247,7 +1247,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -1265,7 +1265,7 @@
           .m(6)
           .n(n)
           .k(k)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1283,7 +1283,7 @@
           .n(n)
           .k(k)
           .known_nc_mod_nr(false)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1301,7 +1301,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1320,7 +1320,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -1338,7 +1338,7 @@
           .m(6)
           .n(n)
           .k(k)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1356,7 +1356,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1375,7 +1375,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -1393,7 +1393,7 @@
         .n(16)
         .k(k)
         .ks(3)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -1412,7 +1412,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -1431,7 +1431,7 @@
           .n(n)
           .k(k)
           .ks(3)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1449,7 +1449,7 @@
           .n(n)
           .k(k)
           .ks(3)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1469,7 +1469,7 @@
             .k(k)
             .cm_stride(19)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -1488,7 +1488,7 @@
         .k(k)
         .ks(3)
         .a_offset(67)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -1507,7 +1507,7 @@
           .ks(3)
           .a_offset(67)
           .zero_index(mz)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1523,7 +1523,7 @@
       .n(16)
       .k(2)
       .qmin(128)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A55, qmax) {
@@ -1537,7 +1537,7 @@
       .n(16)
       .k(2)
       .qmax(128)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A55, strided_cm) {
@@ -1551,7 +1551,7 @@
       .n(16)
       .k(2)
       .cm_stride(19)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A55, subtile_m_upto_mr) {
@@ -1568,7 +1568,7 @@
             .n(16)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -1586,7 +1586,7 @@
         .n(16)
         .k(2)
         .Test(
-            xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params,
+            xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w,
             &xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55);
     }
   #endif // XNN_ENABLE_ASSEMBLY
@@ -1604,7 +1604,7 @@
       .m(6)
       .n(16)
       .k(4)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A55R0, strided_cn) {
@@ -1618,7 +1618,7 @@
       .n(16)
       .k(4)
       .cn_stride(19)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A55R0, k_eq_4_subtile) {
@@ -1634,7 +1634,7 @@
           .n(n)
           .k(4)
           .iterations(1)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1651,7 +1651,7 @@
         .n(16)
         .k(4)
         .iterations(1)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -1667,7 +1667,7 @@
         .n(n)
         .k(4)
         .iterations(1)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -1682,7 +1682,7 @@
         .m(6)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -1700,7 +1700,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -1717,7 +1717,7 @@
         .m(6)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -1735,7 +1735,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -1752,7 +1752,7 @@
         .m(6)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -1770,7 +1770,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -1788,7 +1788,7 @@
           .m(6)
           .n(n)
           .k(k)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1806,7 +1806,7 @@
           .n(n)
           .k(k)
           .known_nc_mod_nr(false)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1824,7 +1824,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1843,7 +1843,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -1861,7 +1861,7 @@
           .m(6)
           .n(n)
           .k(k)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1879,7 +1879,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1898,7 +1898,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -1916,7 +1916,7 @@
         .n(16)
         .k(k)
         .ks(3)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -1935,7 +1935,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -1954,7 +1954,7 @@
           .n(n)
           .k(k)
           .ks(3)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1972,7 +1972,7 @@
           .n(n)
           .k(k)
           .ks(3)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -1992,7 +1992,7 @@
             .k(k)
             .cm_stride(19)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -2011,7 +2011,7 @@
         .k(k)
         .ks(3)
         .a_offset(127)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -2030,7 +2030,7 @@
           .ks(3)
           .a_offset(127)
           .zero_index(mz)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -2046,7 +2046,7 @@
       .n(16)
       .k(4)
       .qmin(128)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A55R0, qmax) {
@@ -2060,7 +2060,7 @@
       .n(16)
       .k(4)
       .qmax(128)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A55R0, strided_cm) {
@@ -2074,7 +2074,7 @@
       .n(16)
       .k(4)
       .cm_stride(19)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A55R0, subtile_m_upto_mr) {
@@ -2091,7 +2091,7 @@
             .n(16)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -2109,7 +2109,7 @@
         .n(16)
         .k(4)
         .Test(
-            xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params,
+            xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w,
             &xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55r0);
     }
   #endif // XNN_ENABLE_ASSEMBLY
@@ -2127,7 +2127,7 @@
       .m(6)
       .n(16)
       .k(2)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A75, strided_cn) {
@@ -2141,7 +2141,7 @@
       .n(16)
       .k(2)
       .cn_stride(19)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A75, k_eq_2_subtile) {
@@ -2157,7 +2157,7 @@
           .n(n)
           .k(2)
           .iterations(1)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -2174,7 +2174,7 @@
         .n(16)
         .k(2)
         .iterations(1)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -2190,7 +2190,7 @@
         .n(n)
         .k(2)
         .iterations(1)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -2205,7 +2205,7 @@
         .m(6)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -2223,7 +2223,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -2240,7 +2240,7 @@
         .m(6)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -2258,7 +2258,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -2275,7 +2275,7 @@
         .m(6)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -2293,7 +2293,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -2311,7 +2311,7 @@
           .m(6)
           .n(n)
           .k(k)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -2329,7 +2329,7 @@
           .n(n)
           .k(k)
           .known_nc_mod_nr(false)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -2347,7 +2347,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -2366,7 +2366,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -2384,7 +2384,7 @@
           .m(6)
           .n(n)
           .k(k)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -2402,7 +2402,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -2421,7 +2421,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -2439,7 +2439,7 @@
         .n(16)
         .k(k)
         .ks(3)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -2458,7 +2458,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -2477,7 +2477,7 @@
           .n(n)
           .k(k)
           .ks(3)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -2495,7 +2495,7 @@
           .n(n)
           .k(k)
           .ks(3)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -2515,7 +2515,7 @@
             .k(k)
             .cm_stride(19)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -2534,7 +2534,7 @@
         .k(k)
         .ks(3)
         .a_offset(67)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -2553,7 +2553,7 @@
           .ks(3)
           .a_offset(67)
           .zero_index(mz)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -2569,7 +2569,7 @@
       .n(16)
       .k(2)
       .qmin(128)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A75, qmax) {
@@ -2583,7 +2583,7 @@
       .n(16)
       .k(2)
       .qmax(128)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A75, strided_cm) {
@@ -2597,7 +2597,7 @@
       .n(16)
       .k(2)
       .cm_stride(19)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A75, subtile_m_upto_mr) {
@@ -2614,7 +2614,7 @@
             .n(16)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -2632,7 +2632,7 @@
         .n(16)
         .k(2)
         .Test(
-            xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params,
+            xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w,
             &xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a75);
     }
   #endif // XNN_ENABLE_ASSEMBLY
@@ -2650,7 +2650,7 @@
       .m(6)
       .n(16)
       .k(4)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_LD64, strided_cn) {
@@ -2664,7 +2664,7 @@
       .n(16)
       .k(4)
       .cn_stride(19)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_LD64, k_eq_4_subtile) {
@@ -2680,7 +2680,7 @@
           .n(n)
           .k(4)
           .iterations(1)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -2697,7 +2697,7 @@
         .n(16)
         .k(4)
         .iterations(1)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -2713,7 +2713,7 @@
         .n(n)
         .k(4)
         .iterations(1)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -2728,7 +2728,7 @@
         .m(6)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -2746,7 +2746,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -2763,7 +2763,7 @@
         .m(6)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -2781,7 +2781,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -2798,7 +2798,7 @@
         .m(6)
         .n(16)
         .k(k)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -2816,7 +2816,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -2834,7 +2834,7 @@
           .m(6)
           .n(n)
           .k(k)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -2852,7 +2852,7 @@
           .n(n)
           .k(k)
           .known_nc_mod_nr(false)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -2870,7 +2870,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -2889,7 +2889,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -2907,7 +2907,7 @@
           .m(6)
           .n(n)
           .k(k)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -2925,7 +2925,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -2944,7 +2944,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -2962,7 +2962,7 @@
         .n(16)
         .k(k)
         .ks(3)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -2981,7 +2981,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -3000,7 +3000,7 @@
           .n(n)
           .k(k)
           .ks(3)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -3018,7 +3018,7 @@
           .n(n)
           .k(k)
           .ks(3)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -3038,7 +3038,7 @@
             .k(k)
             .cm_stride(19)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -3057,7 +3057,7 @@
         .k(k)
         .ks(3)
         .a_offset(127)
-        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+        .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
     }
   }
 
@@ -3076,7 +3076,7 @@
           .ks(3)
           .a_offset(127)
           .zero_index(mz)
-          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+          .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
       }
     }
   }
@@ -3092,7 +3092,7 @@
       .n(16)
       .k(4)
       .qmin(128)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_LD64, qmax) {
@@ -3106,7 +3106,7 @@
       .n(16)
       .k(4)
       .qmax(128)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_LD64, strided_cm) {
@@ -3120,7 +3120,7 @@
       .n(16)
       .k(4)
       .cm_stride(19)
-      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+      .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
   }
 
   TEST(GENERATE_F16_IGEMM_6X16__AARCH64_NEONFP16ARITH_LD64, subtile_m_upto_mr) {
@@ -3137,7 +3137,7 @@
             .n(16)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
+            .Test(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w);
         }
       }
     }
@@ -3155,7 +3155,7 @@
         .n(16)
         .k(4)
         .Test(
-            xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params,
+            xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_conv_goki_w,
             &xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld64);
     }
   #endif // XNN_ENABLE_ASSEMBLY
