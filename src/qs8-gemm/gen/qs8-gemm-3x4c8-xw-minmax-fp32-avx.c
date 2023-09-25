@@ -105,7 +105,7 @@ void xnn_qs8_gemm_xw_minmax_fp32_ukernel_3x4c8__avx(
       vacc1x3 = _mm_add_epi32(vacc1x3, _mm_madd_epi16(vxa1, vxb3));
       vacc2x3 = _mm_add_epi32(vacc2x3, _mm_madd_epi16(vxa2, vxb3));
 
-      w = (const void*) ((const int16_t*) w + 32);
+      w = (const int16_t*) w + 32;
       k += 8 * sizeof(int8_t);
     }
 

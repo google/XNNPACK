@@ -9,17 +9,14 @@
 
 #include <assert.h>
 
-#ifdef _MSC_VER
-  #include <intrin.h>
-#else
-  #include <x86intrin.h>
-#endif
+#include <smmintrin.h>
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
+#include <xnnpack/unaligned.h>
 
 
-void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x4c8__avx_ld64(
+void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x4c8__sse41_ld64(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -29,7 +26,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x4c8__avx_ld64(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
+    const union xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
@@ -59,9 +56,11 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x4c8__avx_ld64(
 
   do {
     const __m128i vksum = _mm_load_si128((const __m128i*) w);
-    const __m128i vinput_zero_point0 = _mm_castps_si128(_mm_broadcast_ss((const float*) &quantization_params[0].zero_point));
-    const __m128i vinput_zero_point1 = _mm_castps_si128(_mm_broadcast_ss((const float*) &quantization_params[1].zero_point));
-    const __m128i vinput_zero_point2 = _mm_castps_si128(_mm_broadcast_ss((const float*) &quantization_params[2].zero_point));
+    const __m128i vinput_zero_point01 = _mm_loadu_si128((const __m128i*) &quantization_params[0]);
+    const __m128i vinput_zero_point0 = _mm_shuffle_epi32(vinput_zero_point01, _MM_SHUFFLE(0, 0, 0, 0));
+    const __m128i vinput_zero_point1 = _mm_shuffle_epi32(vinput_zero_point01, _MM_SHUFFLE(2, 2, 2, 2));
+    __m128i vinput_zero_point2 = _mm_cvtsi32_si128(*((const int*) &quantization_params[2].zero_point));
+    vinput_zero_point2 = _mm_shuffle_epi32(vinput_zero_point2, _MM_SHUFFLE(0, 0, 0, 0));
     const __m128i vzero = _mm_setzero_si128();
     const __m128i vinit0 = _mm_mullo_epi32(vksum, vinput_zero_point0);
     const __m128i vinit1 = _mm_mullo_epi32(vksum, vinput_zero_point1);
@@ -81,6 +80,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x4c8__avx_ld64(
     w = (const int32_t*) w + 4;
 
     size_t k = 0;
+    const __m128i vmask = _mm_set1_epi8(UINT8_C(0xF0));
     while (k < kc) {
       const __m128i va0 = _mm_loadl_epi64((const __m128i*) a0);
       const __m128i vxa0 = _mm_cvtepi8_epi16(va0);
@@ -92,32 +92,48 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x4c8__avx_ld64(
       const __m128i vxa2 = _mm_cvtepi8_epi16(va2);
       a2 += 8;
 
-      const __m128i vb0 = _mm_loadl_epi64((const __m128i*) w);
-      const __m128i vxb0 = _mm_cvtepi8_epi16(vb0);
+      const __m128i vb0 = _mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + 0));
+      const __m128i vbs0 = _mm_slli_epi32(vb0, 4);
+      const __m128i vbh0 = _mm_and_si128(vb0, vmask);
+      const __m128i vbl0 = _mm_and_si128(vbs0, vmask);
+      const __m128i vblh0 = _mm_unpacklo_epi8(vbl0, vbh0);
+      const __m128i vxb0 = _mm_cvtepi8_epi16(vblh0);
 
       vacc0x0 = _mm_add_epi32(vacc0x0, _mm_madd_epi16(vxa0, vxb0));
       vacc1x0 = _mm_add_epi32(vacc1x0, _mm_madd_epi16(vxa1, vxb0));
       vacc2x0 = _mm_add_epi32(vacc2x0, _mm_madd_epi16(vxa2, vxb0));
-      const __m128i vb1 = _mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 8));
-      const __m128i vxb1 = _mm_cvtepi8_epi16(vb1);
+      const __m128i vb1 = _mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + 4));
+      const __m128i vbs1 = _mm_slli_epi32(vb1, 4);
+      const __m128i vbh1 = _mm_and_si128(vb1, vmask);
+      const __m128i vbl1 = _mm_and_si128(vbs1, vmask);
+      const __m128i vblh1 = _mm_unpacklo_epi8(vbl1, vbh1);
+      const __m128i vxb1 = _mm_cvtepi8_epi16(vblh1);
 
       vacc0x1 = _mm_add_epi32(vacc0x1, _mm_madd_epi16(vxa0, vxb1));
       vacc1x1 = _mm_add_epi32(vacc1x1, _mm_madd_epi16(vxa1, vxb1));
       vacc2x1 = _mm_add_epi32(vacc2x1, _mm_madd_epi16(vxa2, vxb1));
-      const __m128i vb2 = _mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 16));
-      const __m128i vxb2 = _mm_cvtepi8_epi16(vb2);
+      const __m128i vb2 = _mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + 8));
+      const __m128i vbs2 = _mm_slli_epi32(vb2, 4);
+      const __m128i vbh2 = _mm_and_si128(vb2, vmask);
+      const __m128i vbl2 = _mm_and_si128(vbs2, vmask);
+      const __m128i vblh2 = _mm_unpacklo_epi8(vbl2, vbh2);
+      const __m128i vxb2 = _mm_cvtepi8_epi16(vblh2);
 
       vacc0x2 = _mm_add_epi32(vacc0x2, _mm_madd_epi16(vxa0, vxb2));
       vacc1x2 = _mm_add_epi32(vacc1x2, _mm_madd_epi16(vxa1, vxb2));
       vacc2x2 = _mm_add_epi32(vacc2x2, _mm_madd_epi16(vxa2, vxb2));
-      const __m128i vb3 = _mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 24));
-      const __m128i vxb3 = _mm_cvtepi8_epi16(vb3);
+      const __m128i vb3 = _mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + 12));
+      const __m128i vbs3 = _mm_slli_epi32(vb3, 4);
+      const __m128i vbh3 = _mm_and_si128(vb3, vmask);
+      const __m128i vbl3 = _mm_and_si128(vbs3, vmask);
+      const __m128i vblh3 = _mm_unpacklo_epi8(vbl3, vbh3);
+      const __m128i vxb3 = _mm_cvtepi8_epi16(vblh3);
 
       vacc0x3 = _mm_add_epi32(vacc0x3, _mm_madd_epi16(vxa0, vxb3));
       vacc1x3 = _mm_add_epi32(vacc1x3, _mm_madd_epi16(vxa1, vxb3));
       vacc2x3 = _mm_add_epi32(vacc2x3, _mm_madd_epi16(vxa2, vxb3));
 
-      w = (const int8_t*) w + 32;
+      w = (const int8_t*) w + 16;
       k += 8 * sizeof(int8_t);
     }
 
@@ -132,13 +148,17 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x4c8__avx_ld64(
     __m128i vacc1x0123 = _mm_hadd_epi32(vacc1x01, vacc1x23);
     __m128i vacc2x0123 = _mm_hadd_epi32(vacc2x01, vacc2x23);
 
+    vacc0x0123 = _mm_srai_epi32(vacc0x0123, 4);
+    vacc1x0123 = _mm_srai_epi32(vacc1x0123, 4);
+    vacc2x0123 = _mm_srai_epi32(vacc2x0123, 4);
     __m128 vout0x0123 = _mm_cvtepi32_ps(vacc0x0123);
     __m128 vout1x0123 = _mm_cvtepi32_ps(vacc1x0123);
     __m128 vout2x0123 = _mm_cvtepi32_ps(vacc2x0123);
 
-    const __m128 vinput_scale0 = _mm_broadcast_ss(&quantization_params[0].inv_scale);
-    const __m128 vinput_scale1 = _mm_broadcast_ss(&quantization_params[1].inv_scale);
-    const __m128 vinput_scale2 = _mm_broadcast_ss(&quantization_params[2].inv_scale);
+    const __m128i vinput_scale01 = _mm_loadu_si128((const __m128i*) &quantization_params[0]);
+    const __m128 vinput_scale0 = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale01, _MM_SHUFFLE(1, 1, 1, 1)));
+    const __m128 vinput_scale1 = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale01, _MM_SHUFFLE(3, 3, 3, 3)));
+    const __m128 vinput_scale2 = _mm_load1_ps(&quantization_params[2].inv_scale);
 
     vout0x0123 = _mm_mul_ps(vout0x0123, vinput_scale0);
     vout1x0123 = _mm_mul_ps(vout1x0123, vinput_scale1);

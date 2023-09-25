@@ -136,7 +136,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4c8__xop_ld64(
       vacc2x3 = _mm_maddd_epi16(vxa2, vxb3, vacc2x3);
       vacc3x3 = _mm_maddd_epi16(vxa3, vxb3, vacc3x3);
 
-      w = (const void*) ((const int8_t*) w + 32);
+      w = (const int8_t*) w + 32;
       k += 8 * sizeof(int8_t);
     }
 
