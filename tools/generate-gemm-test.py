@@ -527,6 +527,25 @@ $if JIT:
     }
   }
 
+  TEST(${TEST_NAME}, relu) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    GemmMicrokernelTester()
+      $if EXTENDED_WEIGHTS:
+        .extended_weights(true)
+      .mr(${MR})
+      .nr(${NR})
+      .kr(${KR})
+      .sr(${SR})
+      .m(${MR})
+      .n(${NR})
+      .k(${KBLOCK})
+      .relu(true)
+      $if KERNELTYPE == 'qc4w':
+        .b_zero_point(8)
+      .Test(${", ".join(TEST_ARGS)});
+  }
+
 TEST(${TEST_NAME}, n_gt_${NR}_strided_cn) {
   $if ISA_CHECK:
     ${ISA_CHECK};

@@ -209,6 +209,15 @@ class GemmMicrokernelTester {
     return known_nc_mod_nr_;
   }
 
+  GemmMicrokernelTester& relu(bool relu) {
+    this->relu_ = relu;
+    return *this;
+  }
+
+  bool relu() const {
+    return relu_;
+  }
+
   size_t nc_mod_nr() const {
     return known_nc_mod_nr() ? n() % nr() : SIZE_MAX;
   }
@@ -420,4 +429,5 @@ class GemmMicrokernelTester {
   bool extended_weights_{false};
   size_t iterations_{15};
   bool known_nc_mod_nr_{true};
+  bool relu_{false};
 };
