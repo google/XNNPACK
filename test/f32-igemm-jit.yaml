@@ -249,3 +249,35 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_conv_goki_w
   k-block: 1
+- name: xnn_generate_f32_igemm_ukernel_6x8s4__wasmrelaxedsimd32_x86_fma_xinf
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 4
+- name: xnn_generate_f32_igemm_ukernel_6x8s4__wasmrelaxedsimd32_x86_fma_x1
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 4
+- name: xnn_generate_f32_igemm_ukernel_6x8s4__wasmrelaxedsimd32_x86_fma_x2
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 4
+- name: xnn_generate_f32_igemm_ukernel_6x8s4__wasmrelaxedsimd32_x86_fma_x4
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 4
+- name: xnn_generate_f32_igemm_ukernel_6x8s4__wasmrelaxedsimd32_x86_xinf
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 4
+- name: xnn_generate_f32_igemm_ukernel_6x8s4__wasmrelaxedsimd32_x86_x1
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 4
+- name: xnn_generate_f32_igemm_ukernel_6x8s4__wasmrelaxedsimd32_x86_x2
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 4
+- name: xnn_generate_f32_igemm_ukernel_6x8s4__wasmrelaxedsimd32_x86_x4
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 4

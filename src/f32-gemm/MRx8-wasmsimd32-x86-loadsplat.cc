@@ -11,6 +11,7 @@ class F32GemmLoadsplatGenerator : public internal::GemmIGemmLoadsplatCommons {
   void generate(const char* name, size_t max_mr, size_t iters, size_t loop_unroll_iters, size_t full_unroll,
                 size_t nc_mod_nr, bool use_fma, const jit_gemm_params* jit_gemm_params) {
     assert(!use_fma || XNN_ARCH_WASMRELAXEDSIMD);
+    use_fma_ = use_fma;
     ValTypesToInt locals_declaration = {{i32, max_mr * 2 + 2}, {v128, max_mr * 3 + 8}};
     AddFunc<10>({}, name, locals_declaration,
                 [&](auto mr, auto nc, auto kc, auto a, auto a_stride, auto w, auto c, auto cm_stride, auto cn_stride,
@@ -31,7 +32,7 @@ class F32GemmLoadsplatGenerator : public internal::GemmIGemmLoadsplatCommons {
 
                       w = I32Add(w, I32Const(8 * sizeof(float)));
 
-                      InnerLoop(as, vacc0123, vacc4567, w, kc, max_mr, loop_unroll_iters, iters, full_unroll, use_fma);
+                      InnerLoop(as, vacc0123, vacc4567, w, kc, max_mr, loop_unroll_iters, iters, full_unroll);
 
                       ApplyPostOps(vacc0123);
                       ApplyPostOps(vacc4567);

@@ -225,9 +225,23 @@ class GemmIGemmCommons : public PostOps {
 
   void MulAdd(LocalsArray& vaccs, const LocalsArray& vas, const Local& vb, size_t max_mr) {
     for (size_t i = 0; i < max_mr; i++) {
-      vaccs[i] = F32x4Add(F32x4Mul(vas[i], vb), vaccs[i]);
+      vaccs[i] = MultiplyAndAdd(vas[i], vb, vaccs[i]);
     }
   }
+
+  template <typename Value>
+  ValueOnStack MultiplyAndAdd(const Value& a, const Local& b, const Local& c) {
+  #if XNN_ARCH_WASMRELAXEDSIMD
+    if (use_fma_) {
+      return F32x4RelaxedMadd(a, b, c);
+    } else
+  #endif
+    {
+      return F32x4Add(F32x4Mul(a, b), c);
+    }
+  }
+
+  bool use_fma_{false};
 };
 
 }  // namespace internal

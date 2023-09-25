@@ -93,7 +93,7 @@ class GemmIGemmS4Commons : public GemmIGemmCommons {
 
   void MulAddCond(LocalsArray& vaccs, const LocalsArray& vas, const Local& vb, const Local& vzero, size_t max_mr) {
     for (size_t i = 0; i < max_mr; i++) {
-      vaccs[i] = F32x4Add(F32x4Mul(V128Andnot(vas[i], F32x4Eq(vb, vzero)), vb), vaccs[i]);
+      vaccs[i] = MultiplyAndAdd(V128Andnot(vas[i], F32x4Eq(vb, vzero)), vb, vaccs[i]);
     }
   }
 
