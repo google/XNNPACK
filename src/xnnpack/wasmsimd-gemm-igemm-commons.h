@@ -61,13 +61,18 @@ class PostOps : public WasmAssembler {
   }
 
   void InitClampLimit(float min, float max) {
-    clamps_consts_.clamp_min = min != -std::numeric_limits<float>::infinity();
-    clamps_consts_.clamp_max = max != +std::numeric_limits<float>::infinity();
-    if (clamps_consts_.clamp_min) {
-      clamps_consts_.vmin = MakeLocal(V128Const(min));
+    clamp_consts_.clamp_min = min != -std::numeric_limits<float>::infinity();
+    clamp_consts_.clamp_max = max != +std::numeric_limits<float>::infinity();
+    clamp_consts_.relu = (min == 0.0f && !clamp_consts_.clamp_max);
+    if (clamp_consts_.relu) {
+      clamp_consts_.vmin = MakeLocal(I32x4Splat(I32Const(0)));
+      return;
     }
-    if (clamps_consts_.clamp_max) {
-      clamps_consts_.vmax = MakeLocal(V128Const(max));
+    if (clamp_consts_.clamp_min) {
+      clamp_consts_.vmin = MakeLocal(V128Const(min));
+    }
+    if (clamp_consts_.clamp_max) {
+      clamp_consts_.vmax = MakeLocal(V128Const(max));
     }
   }
 
@@ -104,11 +109,15 @@ class PostOps : public WasmAssembler {
   }
 
   void Clamp(Local& value) {
-    if (clamps_consts_.clamp_max) {
-      value = F32x4Min(clamps_consts_.vmax, value);
+    if (clamp_consts_.relu) {
+      value = I32x4MaxS(clamp_consts_.vmin, value);
+      return;
     }
-    if (clamps_consts_.clamp_min) {
-      value = F32x4Max(clamps_consts_.vmin, value);
+    if (clamp_consts_.clamp_max) {
+      value = F32x4Min(clamp_consts_.vmax, value);
+    }
+    if (clamp_consts_.clamp_min) {
+      value = F32x4Max(clamp_consts_.vmin, value);
     }
   }
 
@@ -152,12 +161,13 @@ class PostOps : public WasmAssembler {
     bool clamp_max{};
     Local vmin;
     Local vmax;
+    bool relu{false};
   };
 
   const xnn_post_operation* ops_ = nullptr;
   size_t num_ops_{};
   HswishConsts hswish_consts_;
-  ClampConsts clamps_consts_;
+  ClampConsts clamp_consts_;
 };
 
 
