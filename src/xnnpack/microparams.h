@@ -169,6 +169,7 @@ union xnn_f32_qc4w_minmax_params {
     XNN_ALIGN(16) uint32_t magic_bias_c1[4];
     XNN_ALIGN(16) float magic_bias_plus_kernel_zero_point_c0[4];
     XNN_ALIGN(16) float magic_bias_plus_kernel_zero_point_c1[4];
+    XNN_ALIGN(16) uint8_t mask[8];
   } sse;
   struct {
     XNN_ALIGN(32) float min[8];

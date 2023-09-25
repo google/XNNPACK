@@ -154,7 +154,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
       $if SSE < 4 or VARIANT == "LD128":
         const __m128i vzero = _mm_setzero_si128();
     $if DATATYPE == "QC4":
-      const __m128i vmask = _mm_set1_epi8(UINT8_C(0xF0));
+      const __m128i vmask = _mm_loadl_epi64((const __m128i*) params->sse.mask);  // 0xF0
     while (k < kc) {
       $for M in range(MR):
         const __m128i va${M} = _mm_loadl_epi64((const __m128i*) a${M});
@@ -209,7 +209,10 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
               const __m128i vbh${N} = _mm_and_si128(vb${N}, vmask);
               const __m128i vbl${N} = _mm_and_si128(vbs${N}, vmask);
               const __m128i vblh${N} = _mm_unpacklo_epi8(vbl${N}, vbh${N});
-              const __m128i vxb${N} = _mm_cvtepi8_epi16(vblh${N});
+              $if SSE == 4:
+                const __m128i vxb${N} = _mm_cvtepi8_epi16(vblh${N});
+              $else:
+                const __m128i vxb${N} = _mm_srai_epi16(_mm_unpacklo_epi8(vblh${N}, vblh${N}), 8);
             $else:
               $if N == 0:
                 const __m128i vb${N} = _mm_loadl_epi64((const __m128i*) w);
