@@ -46,14 +46,11 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4c8__wasmsimd_dot16x2_ld64(
     const v128_t vinput_zero_point0 = wasm_v128_load32_splat(&quantization_params[0].zero_point);
     const v128_t vinit0x0123 = wasm_i32x4_mul(vksum0123, vinput_zero_point0);
 
-    const v128_t vinit0x02 = wasm_i64x2_shl(vinit0x0123, 32);
-    const v128_t vinit0x13 = wasm_u64x2_shr(vinit0x0123, 32);
-
     const v128_t vzero = wasm_i32x4_const_splat(0);
-    v128_t vacc0x0 = wasm_v64x2_shuffle(vinit0x02, vzero, 0, 2);
-    v128_t vacc0x1 = wasm_v64x2_shuffle(vinit0x13, vzero, 0, 2);
-    v128_t vacc0x2 = wasm_v64x2_shuffle(vinit0x02, vzero, 1, 3);
-    v128_t vacc0x3 = wasm_v64x2_shuffle(vinit0x13, vzero, 1, 3);
+    v128_t vacc0x0 = wasm_v32x4_shuffle(vinit0x0123, vzero, 0, 5, 6, 7);
+    v128_t vacc0x1 = wasm_v32x4_shuffle(vinit0x0123, vzero, 4, 1, 6, 7);
+    v128_t vacc0x2 = wasm_v32x4_shuffle(vinit0x0123, vzero, 4, 5, 2, 7);
+    v128_t vacc0x3 = wasm_v32x4_shuffle(vinit0x0123, vzero, 4, 5, 6, 3);
     w = (const int32_t*) w + 4;
 
     size_t k = kc;
