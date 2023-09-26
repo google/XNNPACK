@@ -194,6 +194,7 @@ union xnn_f32_qc4w_minmax_params {
     XNN_ALIGN(8) float min[2];
     XNN_ALIGN(8) float max[2];
     XNN_ALIGN(8) int32_t minus_kernel_zero_point[2];
+    XNN_ALIGN(8) uint8_t mask[8];
   } wasmsimd;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };

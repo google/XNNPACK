@@ -2048,6 +2048,9 @@ size_t xnn_init_f32_qc4w_minmax_wasmsimd_params(
   for (uint32_t i = 0; i < 4; i++) {
     params->wasmsimd.minus_kernel_zero_point[i] = -(int32_t) kernel_zero_point;
   }
+  for (uint32_t i = 0; i < 8; i++) {
+    params->wasmsimd.mask[i] = 0xF0;
+  }
   return sizeof(params->wasmsimd);
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
