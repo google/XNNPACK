@@ -1061,11 +1061,10 @@ static enum xnn_status reshape_fully_connected_nc(
     if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
       fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d_with_uarch;
       if (dynamic_quantization) {
-        fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_hmp_dqgemm;
+        fully_connected_op->compute[0].task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_dqgemm;
       } else {
         fully_connected_op->compute[0].task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_gemm;
       }
-      fully_connected_op->compute[0].task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_gemm;
     } else {
       fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
       if (dynamic_quantization) {
