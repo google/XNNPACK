@@ -304,6 +304,20 @@
     }
   }
 
+  TEST(GENERATE_F16_GEMM_1X16__AARCH64_NEONFP16ARITH_LD64, relu) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    GemmMicrokernelTester()
+      .mr(1)
+      .nr(16)
+      .kr(1)
+      .sr(1)
+      .m(1)
+      .n(16)
+      .k(4)
+      .relu(true)
+      .Test(xnn_generate_f16_gemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w);
+  }
+
   TEST(GENERATE_F16_GEMM_1X16__AARCH64_NEONFP16ARITH_LD64, n_gt_16_strided_cn) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (uint32_t n = 17; n < 32; n++) {
@@ -813,6 +827,20 @@
           .Test(xnn_generate_f16_gemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w);
       }
     }
+  }
+
+  TEST(GENERATE_F16_GEMM_4X16__AARCH64_NEONFP16ARITH_LD64, relu) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    GemmMicrokernelTester()
+      .mr(4)
+      .nr(16)
+      .kr(1)
+      .sr(1)
+      .m(4)
+      .n(16)
+      .k(4)
+      .relu(true)
+      .Test(xnn_generate_f16_gemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w);
   }
 
   TEST(GENERATE_F16_GEMM_4X16__AARCH64_NEONFP16ARITH_LD64, n_gt_16_strided_cn) {
@@ -1326,6 +1354,20 @@
     }
   }
 
+  TEST(GENERATE_F16_GEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A55, relu) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    GemmMicrokernelTester()
+      .mr(6)
+      .nr(16)
+      .kr(1)
+      .sr(1)
+      .m(6)
+      .n(16)
+      .k(4)
+      .relu(true)
+      .Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w);
+  }
+
   TEST(GENERATE_F16_GEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A55, n_gt_16_strided_cn) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (uint32_t n = 17; n < 32; n++) {
@@ -1835,6 +1877,20 @@
           .Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w);
       }
     }
+  }
+
+  TEST(GENERATE_F16_GEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A55R0, relu) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    GemmMicrokernelTester()
+      .mr(6)
+      .nr(16)
+      .kr(1)
+      .sr(1)
+      .m(6)
+      .n(16)
+      .k(4)
+      .relu(true)
+      .Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w);
   }
 
   TEST(GENERATE_F16_GEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A55R0, n_gt_16_strided_cn) {
@@ -2348,6 +2404,20 @@
     }
   }
 
+  TEST(GENERATE_F16_GEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A75, relu) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    GemmMicrokernelTester()
+      .mr(6)
+      .nr(16)
+      .kr(1)
+      .sr(1)
+      .m(6)
+      .n(16)
+      .k(4)
+      .relu(true)
+      .Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w);
+  }
+
   TEST(GENERATE_F16_GEMM_6X16__AARCH64_NEONFP16ARITH_CORTEX_A75, n_gt_16_strided_cn) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (uint32_t n = 17; n < 32; n++) {
@@ -2857,6 +2927,20 @@
           .Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w);
       }
     }
+  }
+
+  TEST(GENERATE_F16_GEMM_6X16__AARCH64_NEONFP16ARITH_LD64, relu) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    GemmMicrokernelTester()
+      .mr(6)
+      .nr(16)
+      .kr(1)
+      .sr(1)
+      .m(6)
+      .n(16)
+      .k(4)
+      .relu(true)
+      .Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w);
   }
 
   TEST(GENERATE_F16_GEMM_6X16__AARCH64_NEONFP16ARITH_LD64, n_gt_16_strided_cn) {
