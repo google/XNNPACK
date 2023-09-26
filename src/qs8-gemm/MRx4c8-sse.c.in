@@ -87,6 +87,8 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
         c${M} = c${M-1};
       }
 
+  $if DATATYPE == "QC4":
+    const __m128i vmask = _mm_load_si128((const __m128i*) params->sse.mask);  // 0xF0
   do {
     $if DATATYPE in ["QD8", "QC4"]:
       const __m128i vksum = _mm_load_si128((const __m128i*) w);
@@ -153,8 +155,6 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
       const __m128i vb_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.kernel_zero_point);
       $if SSE < 4 or VARIANT == "LD128":
         const __m128i vzero = _mm_setzero_si128();
-    $if DATATYPE == "QC4":
-      const __m128i vmask = _mm_loadl_epi64((const __m128i*) params->sse.mask);  // 0xF0
     while (k < kc) {
       $for M in range(MR):
         const __m128i va${M} = _mm_loadl_epi64((const __m128i*) a${M});

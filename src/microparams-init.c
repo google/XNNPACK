@@ -1989,7 +1989,7 @@ size_t xnn_init_f32_qc4w_minmax_sse_params(
     params->sse.magic_bias_plus_kernel_zero_point_c0[i] = 0x1.0001E0p+23f + (float) kernel_zero_point;
     params->sse.magic_bias_plus_kernel_zero_point_c1[i] = 0x1.00001Ep+19f + (float) kernel_zero_point;
   }
-  for (uint32_t i = 0; i < 8; i++) {
+  for (uint32_t i = 0; i < 16; i++) {
     params->sse.mask[i] = 0xF0;
   }
   return sizeof(params->sse);
@@ -2009,6 +2009,8 @@ size_t xnn_init_f32_qc4w_minmax_avx_params(
     params->avx.magic_bias_c1[i] = 0x4900000F;
     params->avx.magic_bias_plus_kernel_zero_point_c0[i] = 0x1.0001E0p+23f + (float) kernel_zero_point;
     params->avx.magic_bias_plus_kernel_zero_point_c1[i] = 0x1.00001Ep+19f + (float) kernel_zero_point;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
     params->avx.mask[i] = 0xF0;
   }
   return sizeof(params->avx);
