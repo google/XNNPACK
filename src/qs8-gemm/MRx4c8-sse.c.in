@@ -89,6 +89,11 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
 
   $if DATATYPE == "QC4":
     const __m128i vmask = _mm_load_si128((const __m128i*) params->sse.mask);  // 0xF0
+    $if XOP:
+      const __m128i vshift = _mm_load_si128((const __m128i*) params->xop.shift);  // 4
+      const __m128i vpermlo = _mm_load_si128((const __m128i*) params->xop.permlo);
+      $if VARIANT == "LD128":
+        const __m128i vpermhi = _mm_load_si128((const __m128i*) params->xop.permhi);
   do {
     $if DATATYPE in ["QD8", "QC4"]:
       const __m128i vksum = _mm_load_si128((const __m128i*) w);
@@ -177,20 +182,27 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
       $if VARIANT == "LD128":
         $for N in range(0, 4, 2):
           $if DATATYPE == "QC4":
-            const __m128i vb${N} = _mm_loadl_epi64((const __m128i*) ((const ${XINT8_T}*) w + ${N * 4}));
-            const __m128i vbs${N} = _mm_slli_epi32(vb${N}, 4);
-            const __m128i vbh${N} = _mm_and_si128(vb${N}, vmask);
-            const __m128i vbl${N} = _mm_and_si128(vbs${N}, vmask);
-            const __m128i vb${N}${N+1} = _mm_unpacklo_epi8(vbl${N}, vbh${N});
-            $# SSE 4, AVX & XOP
-            $if SSE == 4:
-              const __m128i vxb${N} = _mm_cvtepi8_epi16(vb${N}${N+1});
-              const __m128i vxb${N+1} = _mm_srai_epi16(_mm_unpackhi_epi8(vb${N}${N+1}, vb${N}${N+1}), 8);
+            const __m128i vb${N}${N+1} = _mm_loadl_epi64((const __m128i*) ((const ${XINT8_T}*) w + ${N * 4}));
+            $if XOP:
+              const __m128i vbl${N}${N+1} = _mm_shl_epi8(vb${N}${N+1}, vshift);
+              const __m128i vbh${N}${N+1} = _mm_and_si128(vb${N}${N+1}, vmask);
+              const __m128i vxb${N} = _mm_perm_epi8(vbl${N}${N+1}, vbh${N}${N+1}, vpermlo);
+              const __m128i vxb${N+1} = _mm_perm_epi8(vbl${N}${N+1}, vbh${N}${N+1}, vpermhi);
+            $# SSE 4, AVX
+            $elif SSE == 4:
+              const __m128i vbl${N}${N+1} = _mm_slli_epi32(vb${N}${N+1}, 4);
+              const __m128i vblh${N}${N+1} = _mm_unpacklo_epi8(vbl${N}${N+1}, vb${N}${N+1});
+              const __m128i vbm${N}${N+1} = _mm_and_si128(vblh${N}${N+1}, vmask);
+              const __m128i vxb${N} = _mm_cvtepi8_epi16(vbm${N}${N+1});
+              const __m128i vxb${N+1} = _mm_srai_epi16(_mm_unpackhi_epi8(vbm${N}${N+1}, vbm${N}${N+1}), 8);
             $# SSE 2 only
             $else:
-              const __m128i vsb${N}${N+1} = _mm_cmpgt_epi8(_mm_setzero_si128(), vb${N}${N+1});
-              const __m128i vxb${N} = _mm_unpacklo_epi8(vb${N}${N+1}, vsb${N}${N+1});
-              const __m128i vxb${N+1} = _mm_unpackhi_epi8(vb${N}${N+1}, vsb${N}${N+1});
+              const __m128i vbl${N}${N+1} = _mm_slli_epi32(vb${N}${N+1}, 4);
+              const __m128i vblh${N}${N+1} = _mm_unpacklo_epi8(vbl${N}${N+1}, vb${N}${N+1});
+              const __m128i vbm${N}${N+1} = _mm_and_si128(vblh${N}${N+1}, vmask);
+              const __m128i vsb${N}${N+1} = _mm_cmpgt_epi8(_mm_setzero_si128(), vbm${N}${N+1});
+              const __m128i vxb${N} =   _mm_unpacklo_epi8(vbm${N}${N+1}, vsb${N}${N+1});
+              const __m128i vxb${N+1} = _mm_unpackhi_epi8(vbm${N}${N+1}, vsb${N}${N+1});
           $else:
             $if N == 0:
               const __m128i vb${N}${N+1} = _mm_load_si128((const __m128i*) w);
@@ -221,14 +233,23 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
           $if VARIANT == "LD64":
             $if DATATYPE == "QC4":
               const __m128i vb${N} = _mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + ${N * 4}));
-              const __m128i vbs${N} = _mm_slli_epi32(vb${N}, 4);
-              const __m128i vbh${N} = _mm_and_si128(vb${N}, vmask);
-              const __m128i vbl${N} = _mm_and_si128(vbs${N}, vmask);
-              const __m128i vblh${N} = _mm_unpacklo_epi8(vbl${N}, vbh${N});
-              $if SSE == 4:
-                const __m128i vxb${N} = _mm_cvtepi8_epi16(vblh${N});
+              $if XOP:
+                const __m128i vbl${N} = _mm_shl_epi8(vb${N}, vshift);
+                const __m128i vbh${N} = _mm_and_si128(vb${N}, vmask);
+                const __m128i vxb${N} = _mm_perm_epi8(vbl${N}, vbh${N}, vpermlo);
+              $# SSE 4, AVX
+              $elif SSE == 4:
+                const __m128i vbl${N} = _mm_slli_epi32(vb${N}, 4);
+                const __m128i vblh${N} = _mm_unpacklo_epi8(vbl${N}, vb${N});
+                const __m128i vbm${N} = _mm_and_si128(vblh${N}, vmask);
+                const __m128i vxb${N} = _mm_cvtepi8_epi16(vbm${N});
+              $# SSE 2 only
               $else:
-                const __m128i vxb${N} = _mm_srai_epi16(_mm_unpacklo_epi8(vblh${N}, vblh${N}), 8);
+                const __m128i vbl${N} = _mm_slli_epi32(vb${N}, 4);
+                const __m128i vblh${N} = _mm_unpacklo_epi8(vbl${N}, vb${N});
+                const __m128i vbm${N} = _mm_and_si128(vblh${N}, vmask);
+                const __m128i vsb${N} = _mm_cmpgt_epi8(_mm_setzero_si128(), vbm${N});
+                const __m128i vxb${N} =   _mm_unpacklo_epi8(vbm${N}, vsb${N});
             $else:
               $if N == 0:
                 const __m128i vb${N} = _mm_loadl_epi64((const __m128i*) w);
