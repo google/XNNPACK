@@ -795,7 +795,8 @@ static void init_f32_gemm_config(void) {
     if (hardware_config->is_x86) {
       #if XNN_ARCH_WASMRELAXEDSIMD
         #if XNN_ENABLE_JIT
-          #error "JIT for WASM Relaxed SIMD is not supported"
+          f32_gemm_config.generator.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_codegen(xnn_generate_f32_gemm_ukernel_6x8__wasmrelaxedsimd32_x86_fma_loadsplat_x1);
+          f32_gemm_config.generator.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_codegen(xnn_generate_f32_igemm_ukernel_6x8__wasmrelaxedsimd32_x86_fma_loadsplat_x1);
         #endif
         f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__wasmrelaxedsimd_fma_loadsplat);
         f32_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__wasmrelaxedsimd_fma_loadsplat);
@@ -1380,7 +1381,7 @@ static void init_f32_qc8w_gemm_config(void) {
     if (hardware_config->is_x86) {
       #if XNN_ARCH_WASMRELAXEDSIMD
         #if XNN_ENABLE_JIT
-          #error "JIT for WASM Relaxed SIMD is not supported"
+          // TODO(b/302273500) Implement WASM JIT relaxed simd qc8w kernels
         #endif
         f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_qc8w_gemm_minmax_ukernel_4x8__wasmrelaxedsimd_fma_loadsplat);
         f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_qc8w_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat);
