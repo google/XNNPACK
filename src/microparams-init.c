@@ -380,6 +380,37 @@ size_t xnn_init_qs8_conv_minmax_fp32_avx512_params(
   }
   return sizeof(params->fp32_avx512);
 }
+
+size_t xnn_init_qs8_conv_minmax_fp32_avx512vnni_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
+  for (uint32_t i = 0; i < 64; i++) {
+    params->fp32_avx512vnni.sign_mask[i] = 0x80;
+  }
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  for (uint32_t i = 0; i < 16; i++) {
+    params->fp32_avx512vnni.scale[i] = scale;
+    params->fp32_avx512vnni.output_max_less_zero_point[i] = output_max_less_zero_point;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->fp32_avx512vnni.output_zero_point[i] = output_zero_point;
+  }
+  const int8_t control_mask[16] = {0, 1, 2, 3, 8, 9, 10, 11, 4, 5, 6, 7, 12, 13, 14, 15};
+  for(uint32_t i = 0; i < 16; i++) {
+    params->fp32_avx512vnni.shuffle_control_mask[i] = control_mask[i];
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->fp32_avx512vnni.output_min[i] = output_min;
+  }
+  return sizeof(params->fp32_avx512vnni);
+}
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM

@@ -156,6 +156,18 @@
   #define TEST_REQUIRES_X86_AVX512VBMI
 #endif
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  #define TEST_REQUIRES_X86_AVX512VNNI \
+    do { \
+      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config(); \
+      if (hardware_config == nullptr || !hardware_config->use_x86_avx512vnni) { \
+        GTEST_SKIP(); \
+      } \
+    } while (0)
+#else
+  #define TEST_REQUIRES_X86_AVX512VNNI
+#endif
+
 #if XNN_ARCH_ARM
   #define TEST_REQUIRES_ARM_SIMD32 \
     do { \
