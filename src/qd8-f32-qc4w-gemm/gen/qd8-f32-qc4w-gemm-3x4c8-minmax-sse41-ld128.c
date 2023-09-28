@@ -92,13 +92,13 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x4c8__sse41_ld128(
       const __m128i vxa2 = _mm_cvtepi8_epi16(va2);
       a2 += 8;
 
-      const __m128i vb0 = _mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 0));
-      const __m128i vbs0 = _mm_slli_epi32(vb0, 4);
-      const __m128i vbh0 = _mm_and_si128(vb0, vmask);
-      const __m128i vbl0 = _mm_and_si128(vbs0, vmask);
-      const __m128i vb01 = _mm_unpacklo_epi8(vbl0, vbh0);
-      const __m128i vxb0 = _mm_cvtepi8_epi16(vb01);
-      const __m128i vxb1 = _mm_srai_epi16(_mm_unpackhi_epi8(vb01, vb01), 8);
+      const __m128i vb01 = _mm_loadl_epi64((const __m128i*) ((const int8_t*) w));
+      const __m128i vbl01 = _mm_slli_epi32(vb01, 4);
+      const __m128i vblh01 = _mm_unpacklo_epi8(vbl01, vb01);
+      const __m128i vbm01 = _mm_and_si128(vblh01, vmask);
+      const __m128i vxbm1 = _mm_unpackhi_epi8(vbm01, vbm01);
+      const __m128i vxb0 = _mm_cvtepi8_epi16(vbm01);
+      const __m128i vxb1 = _mm_srai_epi16(vxbm1, 8);
 
       vacc0x0 = _mm_add_epi32(vacc0x0, _mm_madd_epi16(vxa0, vxb0));
       vacc0x1 = _mm_add_epi32(vacc0x1, _mm_madd_epi16(vxa0, vxb1));
@@ -106,13 +106,13 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x4c8__sse41_ld128(
       vacc1x1 = _mm_add_epi32(vacc1x1, _mm_madd_epi16(vxa1, vxb1));
       vacc2x0 = _mm_add_epi32(vacc2x0, _mm_madd_epi16(vxa2, vxb0));
       vacc2x1 = _mm_add_epi32(vacc2x1, _mm_madd_epi16(vxa2, vxb1));
-      const __m128i vb2 = _mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 8));
-      const __m128i vbs2 = _mm_slli_epi32(vb2, 4);
-      const __m128i vbh2 = _mm_and_si128(vb2, vmask);
-      const __m128i vbl2 = _mm_and_si128(vbs2, vmask);
-      const __m128i vb23 = _mm_unpacklo_epi8(vbl2, vbh2);
-      const __m128i vxb2 = _mm_cvtepi8_epi16(vb23);
-      const __m128i vxb3 = _mm_srai_epi16(_mm_unpackhi_epi8(vb23, vb23), 8);
+      const __m128i vb23 = _mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 8));
+      const __m128i vbl23 = _mm_slli_epi32(vb23, 4);
+      const __m128i vblh23 = _mm_unpacklo_epi8(vbl23, vb23);
+      const __m128i vbm23 = _mm_and_si128(vblh23, vmask);
+      const __m128i vxbm3 = _mm_unpackhi_epi8(vbm23, vbm23);
+      const __m128i vxb2 = _mm_cvtepi8_epi16(vbm23);
+      const __m128i vxb3 = _mm_srai_epi16(vxbm3, 8);
 
       vacc0x2 = _mm_add_epi32(vacc0x2, _mm_madd_epi16(vxa0, vxb2));
       vacc0x3 = _mm_add_epi32(vacc0x3, _mm_madd_epi16(vxa0, vxb3));

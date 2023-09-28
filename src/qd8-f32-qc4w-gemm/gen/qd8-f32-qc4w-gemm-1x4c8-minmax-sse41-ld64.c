@@ -61,36 +61,32 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4c8__sse41_ld64(
       const __m128i vxa0 = _mm_cvtepi8_epi16(va0);
       a0 += 8;
 
-      const __m128i vb0 = _mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + 0));
-      const __m128i vbs0 = _mm_slli_epi32(vb0, 4);
-      const __m128i vbh0 = _mm_and_si128(vb0, vmask);
-      const __m128i vbl0 = _mm_and_si128(vbs0, vmask);
-      const __m128i vblh0 = _mm_unpacklo_epi8(vbl0, vbh0);
-      const __m128i vxb0 = _mm_cvtepi8_epi16(vblh0);
+      const __m128i vb0 = _mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w));
+      const __m128i vbl0 = _mm_slli_epi32(vb0, 4);
+      const __m128i vblh0 = _mm_unpacklo_epi8(vbl0, vb0);
+      const __m128i vbm0 = _mm_and_si128(vblh0, vmask);
+      const __m128i vxb0 = _mm_cvtepi8_epi16(vbm0);
 
       vacc0x0 = _mm_add_epi32(vacc0x0, _mm_madd_epi16(vxa0, vxb0));
       const __m128i vb1 = _mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + 4));
-      const __m128i vbs1 = _mm_slli_epi32(vb1, 4);
-      const __m128i vbh1 = _mm_and_si128(vb1, vmask);
-      const __m128i vbl1 = _mm_and_si128(vbs1, vmask);
-      const __m128i vblh1 = _mm_unpacklo_epi8(vbl1, vbh1);
-      const __m128i vxb1 = _mm_cvtepi8_epi16(vblh1);
+      const __m128i vbl1 = _mm_slli_epi32(vb1, 4);
+      const __m128i vblh1 = _mm_unpacklo_epi8(vbl1, vb1);
+      const __m128i vbm1 = _mm_and_si128(vblh1, vmask);
+      const __m128i vxb1 = _mm_cvtepi8_epi16(vbm1);
 
       vacc0x1 = _mm_add_epi32(vacc0x1, _mm_madd_epi16(vxa0, vxb1));
       const __m128i vb2 = _mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + 8));
-      const __m128i vbs2 = _mm_slli_epi32(vb2, 4);
-      const __m128i vbh2 = _mm_and_si128(vb2, vmask);
-      const __m128i vbl2 = _mm_and_si128(vbs2, vmask);
-      const __m128i vblh2 = _mm_unpacklo_epi8(vbl2, vbh2);
-      const __m128i vxb2 = _mm_cvtepi8_epi16(vblh2);
+      const __m128i vbl2 = _mm_slli_epi32(vb2, 4);
+      const __m128i vblh2 = _mm_unpacklo_epi8(vbl2, vb2);
+      const __m128i vbm2 = _mm_and_si128(vblh2, vmask);
+      const __m128i vxb2 = _mm_cvtepi8_epi16(vbm2);
 
       vacc0x2 = _mm_add_epi32(vacc0x2, _mm_madd_epi16(vxa0, vxb2));
       const __m128i vb3 = _mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + 12));
-      const __m128i vbs3 = _mm_slli_epi32(vb3, 4);
-      const __m128i vbh3 = _mm_and_si128(vb3, vmask);
-      const __m128i vbl3 = _mm_and_si128(vbs3, vmask);
-      const __m128i vblh3 = _mm_unpacklo_epi8(vbl3, vbh3);
-      const __m128i vxb3 = _mm_cvtepi8_epi16(vblh3);
+      const __m128i vbl3 = _mm_slli_epi32(vb3, 4);
+      const __m128i vblh3 = _mm_unpacklo_epi8(vbl3, vb3);
+      const __m128i vbm3 = _mm_and_si128(vblh3, vmask);
+      const __m128i vxb3 = _mm_cvtepi8_epi16(vbm3);
 
       vacc0x3 = _mm_add_epi32(vacc0x3, _mm_madd_epi16(vxa0, vxb3));
 
