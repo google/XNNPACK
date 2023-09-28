@@ -1694,6 +1694,10 @@ ALL_AVX512VNNI_MICROKERNEL_SRCS = [
     "src/qs8-gemm/gen/qs8-gemm-2x16c4-minmax-fp32-avx512vnni.c",
     "src/qs8-gemm/gen/qs8-gemm-3x16c4-minmax-fp32-avx512vnni.c",
     "src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-fp32-avx512vnni.c",
+    "src/qs8-gemm/gen/qs8-gemm-5x16c4-minmax-fp32-avx512vnni.c",
+    "src/qs8-gemm/gen/qs8-gemm-6x16c4-minmax-fp32-avx512vnni.c",
+    "src/qs8-gemm/gen/qs8-gemm-7x16c4-minmax-fp32-avx512vnni.c",
+    "src/qs8-gemm/gen/qs8-gemm-8x16c4-minmax-fp32-avx512vnni.c",
 ]
 
 ALL_F16C_MICROKERNEL_SRCS = [

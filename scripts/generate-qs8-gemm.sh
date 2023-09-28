@@ -1692,6 +1692,10 @@ tools/xngen src/qs8-gemm/MRx16c4-avx512vnni.c.in -D MR=1 -D DATATYPE=QS8 -D REQU
 tools/xngen src/qs8-gemm/MRx16c4-avx512vnni.c.in -D MR=2 -D DATATYPE=QS8 -D REQUANTIZATION=FP32 -o src/qs8-gemm/gen/qs8-gemm-2x16c4-minmax-fp32-avx512vnni.c &
 tools/xngen src/qs8-gemm/MRx16c4-avx512vnni.c.in -D MR=3 -D DATATYPE=QS8 -D REQUANTIZATION=FP32 -o src/qs8-gemm/gen/qs8-gemm-3x16c4-minmax-fp32-avx512vnni.c &
 tools/xngen src/qs8-gemm/MRx16c4-avx512vnni.c.in -D MR=4 -D DATATYPE=QS8 -D REQUANTIZATION=FP32 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-fp32-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx16c4-avx512vnni.c.in -D MR=5 -D DATATYPE=QS8 -D REQUANTIZATION=FP32 -o src/qs8-gemm/gen/qs8-gemm-5x16c4-minmax-fp32-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx16c4-avx512vnni.c.in -D MR=6 -D DATATYPE=QS8 -D REQUANTIZATION=FP32 -o src/qs8-gemm/gen/qs8-gemm-6x16c4-minmax-fp32-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx16c4-avx512vnni.c.in -D MR=7 -D DATATYPE=QS8 -D REQUANTIZATION=FP32 -o src/qs8-gemm/gen/qs8-gemm-7x16c4-minmax-fp32-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx16c4-avx512vnni.c.in -D MR=8 -D DATATYPE=QS8 -D REQUANTIZATION=FP32 -o src/qs8-gemm/gen/qs8-gemm-8x16c4-minmax-fp32-avx512vnni.c &
 
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/qd8-f32-qc8w-gemm-minmax.yaml --output-test test/qd8-f32-qc8w-gemm-minmax.cc --output-bench bench/qd8-f32-qc8w-gemm.cc &

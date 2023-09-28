@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -6,7 +6,6 @@
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
 $assert DATATYPE in ["QC8", "QD8", "QS8", "QU8"]
-$assert MR <= 4
 #include <assert.h>
 
 #include <immintrin.h>
@@ -105,7 +104,6 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
 
       $for M in range(MR):
         va${M}x0123 = _mm512_xor_epi32(va${M}x0123, vsign_mask);
-
 
       const __m512i vb0123456789ABCDEF = _mm512_load_si512(w);
 
