@@ -63,7 +63,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_5x8__avx2_broadcast(
   }
 
   do {
-    __m256 vacc0x01234567 = _mm256_loadu_ps((const float*) w + 0);
+    __m256 vacc0x01234567 = _mm256_loadu_ps((const float*) w);
     __m256 vacc1x01234567 = vacc0x01234567;
     __m256 vacc2x01234567 = vacc0x01234567;
     __m256 vacc3x01234567 = vacc0x01234567;
@@ -83,7 +83,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_5x8__avx2_broadcast(
       const __m256 va4 = _mm256_broadcast_ss(a4);
       a4 += 1;
 
-      const __m256i vbi01234567 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) w));
+      const __m256i vbi01234567 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) ((const int8_t*) w)));
       w = (const int8_t*) w + 8;
       const __m256 vb01234567 = _mm256_cvtepi32_ps(vbi01234567);
 
@@ -96,7 +96,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_5x8__avx2_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
-    const __m256 vscale01234567 = _mm256_loadu_ps((const float*) w + 0);
+    const __m256 vscale01234567 = _mm256_loadu_ps((const float*) w);
     vacc0x01234567 = _mm256_mul_ps(vacc0x01234567, vscale01234567);
     vacc1x01234567 = _mm256_mul_ps(vacc1x01234567, vscale01234567);
     vacc2x01234567 = _mm256_mul_ps(vacc2x01234567, vscale01234567);

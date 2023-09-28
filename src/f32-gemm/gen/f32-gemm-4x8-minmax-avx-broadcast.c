@@ -57,7 +57,7 @@ void xnn_f32_gemm_minmax_ukernel_4x8__avx_broadcast(
   }
 
   do {
-    __m256 vacc0x01234567 = _mm256_load_ps(w + 0);
+    __m256 vacc0x01234567 = _mm256_load_ps(w);
     __m256 vacc1x01234567 = vacc0x01234567;
     __m256 vacc2x01234567 = vacc0x01234567;
     __m256 vacc3x01234567 = vacc0x01234567;

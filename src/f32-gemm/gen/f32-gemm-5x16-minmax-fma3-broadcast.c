@@ -63,7 +63,7 @@ void xnn_f32_gemm_minmax_ukernel_5x16__fma3_broadcast(
   }
 
   do {
-    __m256 vacc0x01234567 = _mm256_load_ps(w + 0);
+    __m256 vacc0x01234567 = _mm256_load_ps(w);
     __m256 vacc0x89ABCDEF = _mm256_load_ps(w + 8);
     __m256 vacc1x01234567 = vacc0x01234567;
     __m256 vacc1x89ABCDEF = vacc0x89ABCDEF;

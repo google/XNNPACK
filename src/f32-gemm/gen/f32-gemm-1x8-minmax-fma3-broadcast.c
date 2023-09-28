@@ -39,7 +39,7 @@ void xnn_f32_gemm_minmax_ukernel_1x8__fma3_broadcast(
   float* c0 = c;
 
   do {
-    __m256 vacc0x01234567 = _mm256_load_ps(w + 0);
+    __m256 vacc0x01234567 = _mm256_load_ps(w);
     w += 8;
 
     size_t k = kc;
