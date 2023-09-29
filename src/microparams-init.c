@@ -2026,6 +2026,38 @@ size_t xnn_init_f32_qc4w_minmax_sse_params(
   return sizeof(params->sse);
 }
 
+size_t xnn_init_f32_qc4w_minmax_xop_params(
+  union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float output_min,
+  float output_max,
+  uint8_t kernel_zero_point)
+{
+  assert(kernel_zero_point <= 15);
+  for (uint32_t i = 0; i < 4; i++) {
+    params->xop.min[i] = output_min;
+    params->xop.max[i] = output_max;
+    params->xop.magic_bias_c0[i] = 0x4B0000F0;
+    params->xop.magic_bias_c1[i] = 0x4900000F;
+    params->xop.magic_bias_plus_kernel_zero_point_c0[i] = 0x1.0001E0p+23f + (float) kernel_zero_point;
+    params->xop.magic_bias_plus_kernel_zero_point_c1[i] = 0x1.00001Ep+19f + (float) kernel_zero_point;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->xop.mask[i] = 0xF0;
+    params->xop.shift[i] = 4;
+  }
+  for (uint32_t i = 0; i < 4; i++) {
+    params->xop.permlo[i * 2]     = i;
+    params->xop.permlo[i * 2 + 1] = i + 0xC0;
+    params->xop.permlo[i * 2 + 8] = i + 0x10;
+    params->xop.permlo[i * 2 + 9] = i + 0xD0;
+    params->xop.permhi[i * 2]     = i + 0x04;
+    params->xop.permhi[i * 2 + 1] = i + 0xC4;
+    params->xop.permhi[i * 2 + 8] = i + 0x14;
+    params->xop.permhi[i * 2 + 9] = i + 0xD4;
+  }
+  return sizeof(params->xop);
+}
+
 size_t xnn_init_f32_qc4w_minmax_avx_params(
   union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,

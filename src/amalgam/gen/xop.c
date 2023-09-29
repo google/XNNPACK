@@ -46,7 +46,10 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4c8__xop_ld128(
   const int8_t* a0 = a;
   float* c0 = c;
 
-  const __m128i vmask = _mm_load_si128((const __m128i*) params->sse.mask);  // 0xF0
+  const __m128i vmask = _mm_load_si128((const __m128i*) params->xop.mask);  // 0xF0
+  const __m128i vshift = _mm_load_si128((const __m128i*) params->xop.shift);  // 4
+  const __m128i vpermlo = _mm_load_si128((const __m128i*) params->xop.permlo);
+  const __m128i vpermhi = _mm_load_si128((const __m128i*) params->xop.permhi);
   do {
     const __m128i vksum = _mm_load_si128((const __m128i*) w);
     const __m128i vinput_zero_point0 = _mm_castps_si128(_mm_broadcast_ss((const float*) &quantization_params[0].zero_point));
@@ -65,22 +68,18 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4c8__xop_ld128(
       a0 += 8;
 
       const __m128i vb01 = _mm_loadl_epi64((const __m128i*) ((const int8_t*) w));
-      const __m128i vbl01 = _mm_slli_epi32(vb01, 4);
-      const __m128i vblh01 = _mm_unpacklo_epi8(vbl01, vb01);
-      const __m128i vbm01 = _mm_and_si128(vblh01, vmask);
-      const __m128i vxbm1 = _mm_unpackhi_epi8(vbm01, vbm01);
-      const __m128i vxb0 = _mm_cvtepi8_epi16(vbm01);
-      const __m128i vxb1 = _mm_srai_epi16(vxbm1, 8);
+      const __m128i vbl01 = _mm_shl_epi8(vb01, vshift);
+      const __m128i vbh01 = _mm_and_si128(vb01, vmask);
+      const __m128i vxb0 = _mm_perm_epi8(vbl01, vbh01, vpermlo);
+      const __m128i vxb1 = _mm_perm_epi8(vbl01, vbh01, vpermhi);
 
       vacc0x0 = _mm_maddd_epi16(vxa0, vxb0, vacc0x0);
       vacc0x1 = _mm_maddd_epi16(vxa0, vxb1, vacc0x1);
       const __m128i vb23 = _mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 8));
-      const __m128i vbl23 = _mm_slli_epi32(vb23, 4);
-      const __m128i vblh23 = _mm_unpacklo_epi8(vbl23, vb23);
-      const __m128i vbm23 = _mm_and_si128(vblh23, vmask);
-      const __m128i vxbm3 = _mm_unpackhi_epi8(vbm23, vbm23);
-      const __m128i vxb2 = _mm_cvtepi8_epi16(vbm23);
-      const __m128i vxb3 = _mm_srai_epi16(vxbm3, 8);
+      const __m128i vbl23 = _mm_shl_epi8(vb23, vshift);
+      const __m128i vbh23 = _mm_and_si128(vb23, vmask);
+      const __m128i vxb2 = _mm_perm_epi8(vbl23, vbh23, vpermlo);
+      const __m128i vxb3 = _mm_perm_epi8(vbl23, vbh23, vpermhi);
 
       vacc0x2 = _mm_maddd_epi16(vxa0, vxb2, vacc0x2);
       vacc0x3 = _mm_maddd_epi16(vxa0, vxb3, vacc0x3);
@@ -108,10 +107,10 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4c8__xop_ld128(
     w = (const float*) w + 8;
     vout0x0123 = _mm_add_ps(vout0x0123, vbias0123);
 
-    const __m128 vmin = _mm_load_ps(params->sse.min);
+    const __m128 vmin = _mm_load_ps(params->xop.min);
     vout0x0123 = _mm_max_ps(vout0x0123, vmin);
 
-    const __m128 vmax = _mm_load_ps(params->sse.max);
+    const __m128 vmax = _mm_load_ps(params->xop.max);
     vout0x0123 = _mm_min_ps(vout0x0123, vmax);
 
     if XNN_LIKELY(nc >= 4) {
@@ -180,7 +179,10 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4c8__xop_ld128(
     c3 = c2;
   }
 
-  const __m128i vmask = _mm_load_si128((const __m128i*) params->sse.mask);  // 0xF0
+  const __m128i vmask = _mm_load_si128((const __m128i*) params->xop.mask);  // 0xF0
+  const __m128i vshift = _mm_load_si128((const __m128i*) params->xop.shift);  // 4
+  const __m128i vpermlo = _mm_load_si128((const __m128i*) params->xop.permlo);
+  const __m128i vpermhi = _mm_load_si128((const __m128i*) params->xop.permhi);
   do {
     const __m128i vksum = _mm_load_si128((const __m128i*) w);
     const __m128i vinput_zero_point0 = _mm_castps_si128(_mm_broadcast_ss((const float*) &quantization_params[0].zero_point));
@@ -226,12 +228,10 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4c8__xop_ld128(
       a3 += 8;
 
       const __m128i vb01 = _mm_loadl_epi64((const __m128i*) ((const int8_t*) w));
-      const __m128i vbl01 = _mm_slli_epi32(vb01, 4);
-      const __m128i vblh01 = _mm_unpacklo_epi8(vbl01, vb01);
-      const __m128i vbm01 = _mm_and_si128(vblh01, vmask);
-      const __m128i vxbm1 = _mm_unpackhi_epi8(vbm01, vbm01);
-      const __m128i vxb0 = _mm_cvtepi8_epi16(vbm01);
-      const __m128i vxb1 = _mm_srai_epi16(vxbm1, 8);
+      const __m128i vbl01 = _mm_shl_epi8(vb01, vshift);
+      const __m128i vbh01 = _mm_and_si128(vb01, vmask);
+      const __m128i vxb0 = _mm_perm_epi8(vbl01, vbh01, vpermlo);
+      const __m128i vxb1 = _mm_perm_epi8(vbl01, vbh01, vpermhi);
 
       vacc0x0 = _mm_maddd_epi16(vxa0, vxb0, vacc0x0);
       vacc0x1 = _mm_maddd_epi16(vxa0, vxb1, vacc0x1);
@@ -242,12 +242,10 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4c8__xop_ld128(
       vacc3x0 = _mm_maddd_epi16(vxa3, vxb0, vacc3x0);
       vacc3x1 = _mm_maddd_epi16(vxa3, vxb1, vacc3x1);
       const __m128i vb23 = _mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 8));
-      const __m128i vbl23 = _mm_slli_epi32(vb23, 4);
-      const __m128i vblh23 = _mm_unpacklo_epi8(vbl23, vb23);
-      const __m128i vbm23 = _mm_and_si128(vblh23, vmask);
-      const __m128i vxbm3 = _mm_unpackhi_epi8(vbm23, vbm23);
-      const __m128i vxb2 = _mm_cvtepi8_epi16(vbm23);
-      const __m128i vxb3 = _mm_srai_epi16(vxbm3, 8);
+      const __m128i vbl23 = _mm_shl_epi8(vb23, vshift);
+      const __m128i vbh23 = _mm_and_si128(vb23, vmask);
+      const __m128i vxb2 = _mm_perm_epi8(vbl23, vbh23, vpermlo);
+      const __m128i vxb3 = _mm_perm_epi8(vbl23, vbh23, vpermhi);
 
       vacc0x2 = _mm_maddd_epi16(vxa0, vxb2, vacc0x2);
       vacc0x3 = _mm_maddd_epi16(vxa0, vxb3, vacc0x3);
@@ -308,13 +306,13 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4c8__xop_ld128(
     vout2x0123 = _mm_add_ps(vout2x0123, vbias0123);
     vout3x0123 = _mm_add_ps(vout3x0123, vbias0123);
 
-    const __m128 vmin = _mm_load_ps(params->sse.min);
+    const __m128 vmin = _mm_load_ps(params->xop.min);
     vout0x0123 = _mm_max_ps(vout0x0123, vmin);
     vout1x0123 = _mm_max_ps(vout1x0123, vmin);
     vout2x0123 = _mm_max_ps(vout2x0123, vmin);
     vout3x0123 = _mm_max_ps(vout3x0123, vmin);
 
-    const __m128 vmax = _mm_load_ps(params->sse.max);
+    const __m128 vmax = _mm_load_ps(params->xop.max);
     vout0x0123 = _mm_min_ps(vout0x0123, vmax);
     vout1x0123 = _mm_min_ps(vout1x0123, vmax);
     vout2x0123 = _mm_min_ps(vout2x0123, vmax);
