@@ -240,7 +240,7 @@ void xnn_pack_qu8_gemm_goi_w(
         }
         packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (uint8_t*) packed_weights + extra_bytes;
     }
     k += nc * kc;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -304,7 +304,7 @@ void xnn_pack_qs8_gemm_goi_w(
         }
         packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (int8_t*) packed_weights + extra_bytes;
     }
     k += nc * kc;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -368,7 +368,7 @@ void xnn_pack_qs8_to_qu8_gemm_goi_w(
         }
         packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (int8_t*) packed_weights + extra_bytes;
     }
     k += nc * kc;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -443,7 +443,7 @@ void xnn_pack_qs8_qc4w_gemm_goi_w(
         }
         packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (uint8_t*) packed_weights + extra_bytes;
     }
     k += nc * kb;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -538,7 +538,7 @@ void xnn_pack_qs8_qc4w_gemm_gio_w(
         }
         packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (uint8_t*) packed_weights + extra_bytes;
     }
     const size_t padded_nc_in_bytes = (nc + 1) >> 1;
     k += padded_nc_in_bytes * kc;
@@ -599,7 +599,7 @@ void xnn_pack_f32_qs8w_gemm_goi_w(
         }
         packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (int8_t*) packed_weights + extra_bytes;
     }
     k += nc * kc;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -662,7 +662,7 @@ void xnn_pack_f32_qc4w_gemm_goi_w(
         }
         packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (int8_t*) packed_weights + extra_bytes;
     }
     k = (const uint8_t*) k + nc * kc;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -699,16 +699,16 @@ void xnn_pack_qs8_gemm_xw_goi_w(
       if XNN_LIKELY(b != NULL) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
-          packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
+          packed_weights = (int32_t*) packed_weights + 1;
         }
       } else {
         size_t n = nr_block_size;
         do {
           unaligned_store_s32(packed_weights, 0);
-          packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
+          packed_weights = (int32_t*) packed_weights + 1;
         } while (--n != 0);
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + (nr - nr_block_size) * sizeof(int32_t));
+      packed_weights = (int32_t*) packed_weights + (nr - nr_block_size);
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
@@ -726,7 +726,7 @@ void xnn_pack_qs8_gemm_xw_goi_w(
         }
         packed_weights = (int16_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (int8_t*)  packed_weights + extra_bytes;
     }
     k += nc * kc;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -960,7 +960,7 @@ void xnn_pack_qu8_gemm_gio_w(
         }
         packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (uint8_t*) packed_weights + extra_bytes;
     }
     k += nc * kc;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -1025,7 +1025,7 @@ void xnn_pack_qs8_gemm_gio_w(
         }
         packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (int8_t*) packed_weights + extra_bytes;
     }
     k += nc * kc;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -1086,7 +1086,7 @@ void xnn_pack_f32_qs8w_gemm_gio_w(
         }
         packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (int8_t*) packed_weights + extra_bytes;
     }
     k += nc * kc;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -1316,7 +1316,7 @@ void xnn_pack_qu8_conv_goki_w(
           packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;
         }
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (uint8_t*) packed_weights + extra_bytes;
     }
     k += ks * kc * nc;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -1383,7 +1383,7 @@ void xnn_pack_qs8_conv_goki_w(
           packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
         }
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (int8_t*) packed_weights + extra_bytes;
     }
     k += ks * kc * nc;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -1579,7 +1579,7 @@ void xnn_pack_qu8_conv_kgo_w(
           packed_weights = (uint8_t*) packed_weights + nr * kr;
         }
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (uint8_t*) packed_weights + extra_bytes;
     }
     k += nc;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -1636,7 +1636,7 @@ void xnn_pack_qs8_conv_kgo_w(
           packed_weights = (int8_t*) packed_weights + nr * kr;
         }
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (int8_t*) packed_weights + extra_bytes;
     }
     k += nc;
     if XNN_UNPREDICTABLE(b != NULL) {
