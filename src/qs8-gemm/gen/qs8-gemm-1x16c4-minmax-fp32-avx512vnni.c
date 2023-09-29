@@ -2,7 +2,7 @@
 //   Template: src/qs8-gemm/MRx16c4-avx512vnni.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2020 Google LLC
+// Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -58,7 +58,6 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__avx512vnni(
       a0 += 4;
 
       va0x0123 = _mm512_xor_epi32(va0x0123, vsign_mask);
-
 
       const __m512i vb0123456789ABCDEF = _mm512_load_si512(w);
 
