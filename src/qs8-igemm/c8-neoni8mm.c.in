@@ -6,8 +6,8 @@
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert NR % 8 == 0
 $assert 8 <= NR <= 16
-$assert REQUANTIZATION in ["FP32", "RNDNU"]
-$assert DATATYPE in ["QC8", "QS8"]
+$assert REQUANTIZATION in ["FP32", "RNDNU"] or not REQUANTIZATION
+$assert DATATYPE in ["QC8", "QS8", "QD8"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 #include <assert.h>
 
@@ -19,10 +19,11 @@ $if REQUANTIZATION == "FP32":
 #include <xnnpack/math.h>
 
 
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8"}[DATATYPE]
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QD8": "qd8_f32_qc8w"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if REQUANTIZATION == "FP32" else "neon")
-$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params"}[DATATYPE]
+$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QD8": "xnn_f32_minmax_params"}[DATATYPE]
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
+$OUT_T = "float" if DATATYPE in ["QC4", "QD8"] else "int8_t"
 void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c8__neoni8mm(
     size_t mr,
     size_t nc,
@@ -30,12 +31,16 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
     size_t ks,
     const int8_t** restrict a,
     const void* restrict w,
-    int8_t* restrict c,
+    ${OUT_T}* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    $if DATATYPE in ["QD8", "QC4"]:
+      const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)],
+      const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    $else:
+      const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -49,9 +54,9 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
   assert(c != NULL);
 
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
-  int8_t* c0 = c;
+  ${OUT_T}* c0 = c;
   $for M in range(1, MR):
-    int8_t* c${M} = (int8_t*) ((uintptr_t) c${M-1} + cm_stride);
+    ${OUT_T}* c${M} = (${OUT_T}*) ((uintptr_t) c${M-1} + cm_stride);
     $if M % 2 == 0:
       if XNN_UNPREDICTABLE(mr <= ${M}) {
         c${M} = c${M-1};
@@ -66,19 +71,51 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
       }
 
   do {
-    #if XNN_ARCH_ARM64
-      $for N in range(0, NR, 4):
-        const uint64x2x2_t vbias01x${ABC[N:N+4]} = vld2q_dup_u64(w); w = (const int32_t*) w + 4;
-    #else
-      $for N in range(0, NR, 4):
-        uint64x2x2_t vbias01x${ABC[N:N+4]};
-        vbias01x${ABC[N:N+4]}.val[0] = vld1q_dup_u64(w); w = (const int32_t*) w + 2;
-        vbias01x${ABC[N:N+4]}.val[1] = vld1q_dup_u64(w); w = (const int32_t*) w + 2;
-    #endif
-    $for M in range(0, MR, 2):
-      $for N in range(0, NR, 4):
-        int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vreinterpretq_s32_u64(vbias01x${ABC[N:N+4]}.val[0]);
-        int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vreinterpretq_s32_u64(vbias01x${ABC[N:N+4]}.val[1]);
+    $if DATATYPE == "QD8":
+      const int32x4_t vinput_zero_point = vld1q_dup_s32(&quantization_params->zero_point);
+      $for M in range(0, MR, 2):
+        $for N in range(0, NR, 4):
+          $if M == 0:
+            const int32x4_t vksum${ABC[N:N+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
+          $if M + 1 < MR:
+            const int32x4_t vksumzp${M}x${ABC[N:N+4]} = vmulq_s32(vksum${ABC[N:N+4]}, vinput_zero_point);
+            const int32x4_t vksumzp${M+1}x${ABC[N:N+4]} = vmulq_s32(vksum${ABC[N:N+4]}, vinput_zero_point);
+          $else:
+            const int32x4_t vksumzp${M}x${ABC[N:N+4]} = vmulq_s32(vksum${ABC[N:N+4]}, vinput_zero_point);
+
+      #if XNN_ARCH_ARM64
+        $for M in range(0, MR, 2):
+          $for N in range(0, NR, 4):
+            $if M + 1 < MR:
+              int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M+1}x${ABC[N:N+4]})));
+              int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M+1}x${ABC[N:N+4]})));
+            $else:
+              int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]})));
+              int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]})));
+      #else
+        $for M in range(0, MR, 2):
+          $for N in range(0, NR, 4):
+            $if M + 1 < MR:
+              int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vcombine_s32(vget_low_s32(vksumzp${M}x${ABC[N:N+4]}), vget_low_s32(vksumzp${M+1}x${ABC[N:N+4]}));
+              int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vcombine_s32(vget_high_s32(vksumzp${M}x${ABC[N:N+4]}), vget_high_s32(vksumzp${M+1}x${ABC[N:N+4]}));
+            $else:
+              int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vcombine_s32(vget_low_s32(vksumzp${M}x${ABC[N:N+4]}), vget_low_s32(vksumzp${M}x${ABC[N:N+4]}));
+              int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vcombine_s32(vget_high_s32(vksumzp${M}x${ABC[N:N+4]}), vget_high_s32(vksumzp${M}x${ABC[N:N+4]}));
+      #endif
+    $else:
+      #if XNN_ARCH_ARM64
+        $for N in range(0, NR, 4):
+          const uint64x2x2_t vbias01x${ABC[N:N+4]} = vld2q_dup_u64(w); w = (const int32_t*) w + 4;
+      #else
+        $for N in range(0, NR, 4):
+          uint64x2x2_t vbias01x${ABC[N:N+4]};
+          vbias01x${ABC[N:N+4]}.val[0] = vld1q_dup_u64(w); w = (const int32_t*) w + 2;
+          vbias01x${ABC[N:N+4]}.val[1] = vld1q_dup_u64(w); w = (const int32_t*) w + 2;
+      #endif
+      $for M in range(0, MR, 2):
+        $for N in range(0, NR, 4):
+          int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vreinterpretq_s32_u64(vbias01x${ABC[N:N+4]}.val[0]);
+          int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vreinterpretq_s32_u64(vbias01x${ABC[N:N+4]}.val[1]);
 
     size_t p = ks;
     do {
@@ -166,182 +203,257 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
           $if M + 1 < MR:
             int32x4_t vacc${M+1}x${ABC[N:N+4]} = vcombine_s32(vget_high_s32(vacc${M}${M+1}x${ABC[N:N+2]}), vget_high_s32(vacc${M}${M+1}x${ABC[N+2:N+4]}));
     #endif
-    $if REQUANTIZATION == "RNDNU":
-      const int32x4_t vright_pre_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_pre_shift);
-      const int32x4_t vmultiplier = vld1q_dup_s32(&params->${PARAMS_STRUCT}.multiplier);
-      const int32x4_t vright_post_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_post_shift);
+    $if DATATYPE == "QD8":
+      const float32x4_t vinput_scale = vld1q_dup_f32(&quantization_params->inv_scale);
+      $for M in range(0, MR):
+        $for N in range(0, NR, 4):
+          float32x4_t vout${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});
+      $for M in range(0, MR, 2):
+        $if M + 1 == MR:
+          $for N in range(0, NR, 4):
+            vout${M}x${ABC[N:N+4]} = vmulq_f32(vout${M}x${ABC[N:N+4]}, vinput_scale);
+        $else:
+          $for N in range(0, NR, 4):
+            vout${M}x${ABC[N:N+4]} = vmulq_f32(vout${M}x${ABC[N:N+4]}, vinput_scale);
+            vout${M+1}x${ABC[N:N+4]} = vmulq_f32(vout${M+1}x${ABC[N:N+4]}, vinput_scale);
 
-      $for M in range(MR):
-        $for N in range(0, NR, 4):
-          vacc${M}x${ABC[N:N+4]} = vshlq_s32(vacc${M}x${ABC[N:N+4]}, vright_pre_shift);
+      $for N in range(0, NR, 4):
+        const float32x4_t vfilter_output_scale${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
 
-      $for M in range(MR):
+      #if XNN_ARCH_ARM64
         $for N in range(0, NR, 4):
-          vacc${M}x${ABC[N:N+4]} = vqdmulhq_s32(vacc${M}x${ABC[N:N+4]}, vmultiplier);
-
-      $for M in range(MR):
-        $for N in range(0, NR, 4):
-          vacc${M}x${ABC[N:N+4]} = vrshlq_s32(vacc${M}x${ABC[N:N+4]}, vright_post_shift);
-    $elif REQUANTIZATION == "FP32":
-      $for M in range(MR):
-        $for N in range(0, NR, 4):
-          float32x4_t vfpacc${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});
-
-      $if DATATYPE == "QC8":
-        $for N in range(0, NR, 4):
-          const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32((const float*) w); w = (const float*) w + 4;
+          const float32x4_t vbias${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
           $for M in range(MR):
-            vfpacc${M}x${ABC[N:N+4]} = vmulq_f32(vfpacc${M}x${ABC[N:N+4]}, vscale${ABC[N:N+4]});
-      $else:
-        const float32x4_t vscale = vld1q_dup_f32(&params->${PARAMS_STRUCT}.scale);
+            vout${M}x${ABC[N:N+4]} = vfmaq_f32(vbias${ABC[N:N+4]}, vout${M}x${ABC[N:N+4]}, vfilter_output_scale${ABC[N:N+4]});
+      #else
+        $for N in range(0, NR, 4):
+          const float32x4_t vbias${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
+          $for M in range(MR):
+            vout${M}x${ABC[N:N+4]} = vmlaq_f32(vbias${ABC[N:N+4]}, vout${M}x${ABC[N:N+4]}, vfilter_output_scale${ABC[N:N+4]});
+      #endif
+
+      const float32x4_t voutput_min = vld1q_dup_f32(&params->scalar.min);
+      $for M in range(0, MR):
+        $for N in range(0, NR, 4):
+          vout${M}x${ABC[N:N+4]} = vmaxq_f32(vout${M}x${ABC[N:N+4]}, voutput_min);
+
+      const float32x4_t voutput_max = vld1q_dup_f32(&params->scalar.max);
+      $for M in range(0, MR):
+        $for N in range(0, NR, 4):
+          vout${M}x${ABC[N:N+4]} = vminq_f32(vout${M}x${ABC[N:N+4]}, voutput_max);
+
+      if XNN_LIKELY(nc >= ${NR}) {
+        $for M in reversed(range(MR)):
+          vst1q_f32(c${M}, vout${M}x${ABC[0:4]});
+          $for N in range(4, NR, 4):
+            vst1q_f32(c${M} + ${N}, vout${M}x${ABC[N:N+4]});
+
+        $for M in reversed(range(MR)):
+          c${M} = (${OUT_T}*) ((uintptr_t) c${M} + cn_stride);
+
+        a = (const int8_t**restrict) ((uintptr_t) a - ks);
+
+        nc -= ${NR};
+      } else {
+        $for LOG2N in reversed(range(NR.bit_length())):
+          $if NR != 1 << LOG2N:
+            $if LOG2N == 1:
+              $for M in reversed(range(MR)):
+                float32x2_t vout${M}x${ABC[N:N+2]} = vget_low_f32(vout${M}x${ABC[N:N+4]});
+            if (nc & ${1 << LOG2N}) {
+              $if LOG2N > 1:
+                $for N in range(0, 1 << LOG2N, 4):
+                  $for M in reversed(range(MR)):
+                    vst1q_f32(c${M}, vout${M}x${ABC[N:N+4]}); c${M} += 4;
+                    vout${M}x${ABC[N:N+4]} = vout${M}x${ABC[N+(1 << LOG2N):N+(1 << LOG2N)+4]};
+              $elif LOG2N == 1:
+                $for M in reversed(range(MR)):
+                  vst1_f32(c${M}, vout${M}x${ABC[N:N+2]}); c${M} += 2;
+                $for M in reversed(range(MR)):
+                  vout${M}x${ABC[N:N+2]} = vget_high_f32(vout${M}x${ABC[N:N+4]});
+              $elif LOG2N == 0:
+                $for M in reversed(range(MR)):
+                  vst1_lane_f32(c${M}, vout${M}x${ABC[N:N+2]}, 0);
+            }
+        nc = 0;
+      }
+    $else:
+      $if REQUANTIZATION == "RNDNU":
+        const int32x4_t vright_pre_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_pre_shift);
+        const int32x4_t vmultiplier = vld1q_dup_s32(&params->${PARAMS_STRUCT}.multiplier);
+        const int32x4_t vright_post_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_post_shift);
+
         $for M in range(MR):
           $for N in range(0, NR, 4):
-            vfpacc${M}x${ABC[N:N+4]} = vmulq_f32(vfpacc${M}x${ABC[N:N+4]}, vscale);
+            vacc${M}x${ABC[N:N+4]} = vshlq_s32(vacc${M}x${ABC[N:N+4]}, vright_pre_shift);
 
-      $for M in range(MR):
-        $for N in range(0, NR, 4):
-          vacc${M}x${ABC[N:N+4]} = vcvtnq_s32_f32(vfpacc${M}x${ABC[N:N+4]});
+        $for M in range(MR):
+          $for N in range(0, NR, 4):
+            vacc${M}x${ABC[N:N+4]} = vqdmulhq_s32(vacc${M}x${ABC[N:N+4]}, vmultiplier);
 
-    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->${PARAMS_STRUCT}.output_zero_point);
-#if XNN_ARCH_ARM64
-    $for M in range(MR):
-      $for N in range(0, NR, 8):
-        const int16x8_t vacc${M}x${ABC[N:N+8]} = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc${M}x${ABC[N:N+4]}), vacc${M}x${ABC[N+4:N+8]}), voutput_zero_point);
+        $for M in range(MR):
+          $for N in range(0, NR, 4):
+            vacc${M}x${ABC[N:N+4]} = vrshlq_s32(vacc${M}x${ABC[N:N+4]}, vright_post_shift);
+      $elif REQUANTIZATION == "FP32":
+        $for M in range(MR):
+          $for N in range(0, NR, 4):
+            float32x4_t vfpacc${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});
 
-    $for M in range(MR):
-      $for N in range(0, NR, 16):
-        $if N + 8 < NR:
-          int8x16_t vout${M}x${ABC[N:N+16]} = vqmovn_high_s16(vqmovn_s16(vacc${M}x${ABC[N:N+8]}), vacc${M}x${ABC[N+8:N+16]});
-        $elif M % 2 == 1:
-          int8x16_t vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vqmovn_high_s16(vqmovn_s16(vacc${M-1}x${ABC[N:N+8]}), vacc${M}x${ABC[N:N+8]});
-        $elif M + 1 == MR:
-          int8x8_t vout${M}x${ABC[N:N+8]} = vqmovn_s16(vacc${M}x${ABC[N:N+8]});
-#else
-    $for M in range(MR):
-      $for N in range(0, NR, 8):
-        const int16x8_t vacc${M}x${ABC[N:N+8]} = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc${M}x${ABC[N:N+4]}), vqmovn_s32(vacc${M}x${ABC[N+4:N+8]})), voutput_zero_point);
+        $if DATATYPE == "QC8":
+          $for N in range(0, NR, 4):
+            const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32((const float*) w); w = (const float*) w + 4;
+            $for M in range(MR):
+              vfpacc${M}x${ABC[N:N+4]} = vmulq_f32(vfpacc${M}x${ABC[N:N+4]}, vscale${ABC[N:N+4]});
+        $else:
+          const float32x4_t vscale = vld1q_dup_f32(&params->${PARAMS_STRUCT}.scale);
+          $for M in range(MR):
+            $for N in range(0, NR, 4):
+              vfpacc${M}x${ABC[N:N+4]} = vmulq_f32(vfpacc${M}x${ABC[N:N+4]}, vscale);
 
-    $for M in range(MR):
-      $for N in range(0, NR, 16):
-        $if N + 8 < NR:
-          int8x16_t vout${M}x${ABC[N:N+16]} = vcombine_s8(vqmovn_s16(vacc${M}x${ABC[N:N+8]}), vqmovn_s16(vacc${M}x${ABC[N+8:N+16]}));
-        $elif M % 2 == 1:
-          int8x16_t vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vcombine_s8(vqmovn_s16(vacc${M-1}x${ABC[N:N+8]}), vqmovn_s16(vacc${M}x${ABC[N:N+8]}));
-        $elif M + 1 == MR:
-          int8x8_t vout${M}x${ABC[N:N+8]} = vqmovn_s16(vacc${M}x${ABC[N:N+8]});
-#endif
-    $if NR == 8 and MR == 1:
-      const int8x8_t voutput_min = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_min);
-      const int8x8_t voutput_max = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_max);
-    $else:
-      const int8x16_t voutput_min = vld1q_dup_s8(&params->${PARAMS_STRUCT}.output_min);
-      const int8x16_t voutput_max = vld1q_dup_s8(&params->${PARAMS_STRUCT}.output_max);
+        $for M in range(MR):
+          $for N in range(0, NR, 4):
+            vacc${M}x${ABC[N:N+4]} = vcvtnq_s32_f32(vfpacc${M}x${ABC[N:N+4]});
 
-    $for M in reversed(range(MR)):
-      $for N in range(0, NR, 16):
-        $if N + 8 < NR:
-          vout${M}x${ABC[N:N+16]} = vmaxq_s8(vout${M}x${ABC[N:N+16]}, voutput_min);
-        $elif M % 2 == 1:
-          vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vmaxq_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]}, voutput_min);
-        $elif M + 1 == MR:
-          $if NR == 8 and MR == 1:
-            vout${M}x${ABC[N:N+8]} = vmax_s8(vout${M}x${ABC[N:N+8]}, voutput_min);
-          $else:
-            vout${M}x${ABC[N:N+8]} = vmax_s8(vout${M}x${ABC[N:N+8]}, vget_low_s8(voutput_min));
+      const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->${PARAMS_STRUCT}.output_zero_point);
+      #if XNN_ARCH_ARM64
+        $for M in range(MR):
+          $for N in range(0, NR, 8):
+            const int16x8_t vacc${M}x${ABC[N:N+8]} = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc${M}x${ABC[N:N+4]}), vacc${M}x${ABC[N+4:N+8]}), voutput_zero_point);
 
-    $for M in reversed(range(MR)):
-      $for N in range(0, NR, 16):
-        $if N + 8 < NR:
-          vout${M}x${ABC[N:N+16]} = vminq_s8(vout${M}x${ABC[N:N+16]}, voutput_max);
-        $elif M % 2 == 1:
-          vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vminq_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]}, voutput_max);
-        $elif M + 1 == MR:
-          $if NR == 8 and MR == 1:
-            vout${M}x${ABC[N:N+8]} = vmin_s8(vout${M}x${ABC[N:N+8]}, voutput_max);
-          $else:
-            vout${M}x${ABC[N:N+8]} = vmin_s8(vout${M}x${ABC[N:N+8]}, vget_low_s8(voutput_max));
+        $for M in range(MR):
+          $for N in range(0, NR, 16):
+            $if N + 8 < NR:
+              int8x16_t vout${M}x${ABC[N:N+16]} = vqmovn_high_s16(vqmovn_s16(vacc${M}x${ABC[N:N+8]}), vacc${M}x${ABC[N+8:N+16]});
+            $elif M % 2 == 1:
+              int8x16_t vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vqmovn_high_s16(vqmovn_s16(vacc${M-1}x${ABC[N:N+8]}), vacc${M}x${ABC[N:N+8]});
+            $elif M + 1 == MR:
+              int8x8_t vout${M}x${ABC[N:N+8]} = vqmovn_s16(vacc${M}x${ABC[N:N+8]});
+      #else
+        $for M in range(MR):
+          $for N in range(0, NR, 8):
+            const int16x8_t vacc${M}x${ABC[N:N+8]} = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc${M}x${ABC[N:N+4]}), vqmovn_s32(vacc${M}x${ABC[N+4:N+8]})), voutput_zero_point);
 
-    if (nc >= ${NR}) {
+        $for M in range(MR):
+          $for N in range(0, NR, 16):
+            $if N + 8 < NR:
+              int8x16_t vout${M}x${ABC[N:N+16]} = vcombine_s8(vqmovn_s16(vacc${M}x${ABC[N:N+8]}), vqmovn_s16(vacc${M}x${ABC[N+8:N+16]}));
+            $elif M % 2 == 1:
+              int8x16_t vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vcombine_s8(vqmovn_s16(vacc${M-1}x${ABC[N:N+8]}), vqmovn_s16(vacc${M}x${ABC[N:N+8]}));
+            $elif M + 1 == MR:
+              int8x8_t vout${M}x${ABC[N:N+8]} = vqmovn_s16(vacc${M}x${ABC[N:N+8]});
+      #endif
+      $if NR == 8 and MR == 1:
+        const int8x8_t voutput_min = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_min);
+        const int8x8_t voutput_max = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_max);
+      $else:
+        const int8x16_t voutput_min = vld1q_dup_s8(&params->${PARAMS_STRUCT}.output_min);
+        const int8x16_t voutput_max = vld1q_dup_s8(&params->${PARAMS_STRUCT}.output_max);
+
       $for M in reversed(range(MR)):
-        $if NR > 8:
-          vst1q_s8(c${M}, vout${M}x${ABC[N:N+16]});
-        $elif M % 2 == 1:
-          vst1_s8(c${M}, vget_high_s8(vout${M-1}x${ABC[0:8]}_${M}x${ABC[0:8]}));
-          vst1_s8(c${M-1}, vget_low_s8(vout${M-1}x${ABC[0:8]}_${M}x${ABC[0:8]}));
-        $elif M + 1 == MR:
-          vst1_s8(c${M}, vout${M}x${ABC[0:8]});
-      $for M in reversed(range(MR)):
-        $for N in range(16, NR, 16):
+        $for N in range(0, NR, 16):
           $if N + 8 < NR:
-            vst1q_s8(c${M} + ${N}, vout${M}x${ABC[N:N+16]});
+            vout${M}x${ABC[N:N+16]} = vmaxq_s8(vout${M}x${ABC[N:N+16]}, voutput_min);
           $elif M % 2 == 1:
-            vst1_s8(c${M} + ${N}, vget_high_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]}));
-            vst1_s8(c${M-1} + ${N}, vget_low_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]}));
+            vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vmaxq_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]}, voutput_min);
           $elif M + 1 == MR:
-            vst1_s8(c${M} + ${N}, vout${M}x${ABC[N:N+8]});
+            $if NR == 8 and MR == 1:
+              vout${M}x${ABC[N:N+8]} = vmax_s8(vout${M}x${ABC[N:N+8]}, voutput_min);
+            $else:
+              vout${M}x${ABC[N:N+8]} = vmax_s8(vout${M}x${ABC[N:N+8]}, vget_low_s8(voutput_min));
 
       $for M in reversed(range(MR)):
-        c${M} = (int8_t*) ((uintptr_t) c${M} + cn_stride);
-
-      a = (const int8_t**restrict) ((uintptr_t) a - ks);
-
-      nc -= ${NR};
-    } else {
-      $if NR == 16:
-        $for M in reversed(range(MR)):
-          $if M % 2 == 1:
-            int8x16_t vout${M-1}x01234567_${M}x01234567 = vcombine_s8(vget_low_s8(vout${M-1}x0123456789ABCDEF), vget_low_s8(vout${M}x0123456789ABCDEF));
+        $for N in range(0, NR, 16):
+          $if N + 8 < NR:
+            vout${M}x${ABC[N:N+16]} = vminq_s8(vout${M}x${ABC[N:N+16]}, voutput_max);
+          $elif M % 2 == 1:
+            vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vminq_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]}, voutput_max);
           $elif M + 1 == MR:
-            int8x8_t vout${M}x01234567 = vget_low_s8(vout${M}x0123456789ABCDEF);
-        if (nc & 8) {
+            $if NR == 8 and MR == 1:
+              vout${M}x${ABC[N:N+8]} = vmin_s8(vout${M}x${ABC[N:N+8]}, voutput_max);
+            $else:
+              vout${M}x${ABC[N:N+8]} = vmin_s8(vout${M}x${ABC[N:N+8]}, vget_low_s8(voutput_max));
+
+      if (nc >= ${NR}) {
+        $for M in reversed(range(MR)):
+          $if NR > 8:
+            vst1q_s8(c${M}, vout${M}x${ABC[N:N+16]});
+          $elif M % 2 == 1:
+            vst1_s8(c${M}, vget_high_s8(vout${M-1}x${ABC[0:8]}_${M}x${ABC[0:8]}));
+            vst1_s8(c${M-1}, vget_low_s8(vout${M-1}x${ABC[0:8]}_${M}x${ABC[0:8]}));
+          $elif M + 1 == MR:
+            vst1_s8(c${M}, vout${M}x${ABC[0:8]});
+        $for M in reversed(range(MR)):
+          $for N in range(16, NR, 16):
+            $if N + 8 < NR:
+              vst1q_s8(c${M} + ${N}, vout${M}x${ABC[N:N+16]});
+            $elif M % 2 == 1:
+              vst1_s8(c${M} + ${N}, vget_high_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]}));
+              vst1_s8(c${M-1} + ${N}, vget_low_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]}));
+            $elif M + 1 == MR:
+              vst1_s8(c${M} + ${N}, vout${M}x${ABC[N:N+8]});
+
+        $for M in reversed(range(MR)):
+          c${M} = (int8_t*) ((uintptr_t) c${M} + cn_stride);
+
+        a = (const int8_t**restrict) ((uintptr_t) a - ks);
+
+        nc -= ${NR};
+      } else {
+        $if NR == 16:
           $for M in reversed(range(MR)):
             $if M % 2 == 1:
-              vst1_s8(c${M}, vget_high_s8(vout${M-1}x01234567_${M}x01234567)); c${M} += 8;
-              vst1_s8(c${M-1}, vget_low_s8(vout${M-1}x01234567_${M}x01234567)); c${M-1} += 8;
+              int8x16_t vout${M-1}x01234567_${M}x01234567 = vcombine_s8(vget_low_s8(vout${M-1}x0123456789ABCDEF), vget_low_s8(vout${M}x0123456789ABCDEF));
             $elif M + 1 == MR:
-              vst1_s8(c${M}, vout${M}x01234567); c${M} += 8;
+              int8x8_t vout${M}x01234567 = vget_low_s8(vout${M}x0123456789ABCDEF);
+          if (nc & 8) {
+            $for M in reversed(range(MR)):
+              $if M % 2 == 1:
+                vst1_s8(c${M}, vget_high_s8(vout${M-1}x01234567_${M}x01234567)); c${M} += 8;
+                vst1_s8(c${M-1}, vget_low_s8(vout${M-1}x01234567_${M}x01234567)); c${M-1} += 8;
+              $elif M + 1 == MR:
+                vst1_s8(c${M}, vout${M}x01234567); c${M} += 8;
+            $for M in reversed(range(MR)):
+              $if M % 2 == 1:
+                vout${M-1}x01234567_${M}x01234567 = vcombine_s8(vget_high_s8(vout${M-1}x0123456789ABCDEF), vget_high_s8(vout${M}x0123456789ABCDEF));
+              $elif M + 1 == MR:
+                vout${M}x01234567 = vget_high_s8(vout${M}x0123456789ABCDEF);
+          }
+        if (nc & 4) {
           $for M in reversed(range(MR)):
             $if M % 2 == 1:
-              vout${M-1}x01234567_${M}x01234567 = vcombine_s8(vget_high_s8(vout${M-1}x0123456789ABCDEF), vget_high_s8(vout${M}x0123456789ABCDEF));
+              vst1q_lane_u32((void*) c${M}, vreinterpretq_u32_s8(vout${M-1}x01234567_${M}x01234567), 2); c${M} += 4;
+              vst1q_lane_u32((void*) c${M-1}, vreinterpretq_u32_s8(vout${M-1}x01234567_${M}x01234567), 0); c${M-1} += 4;
             $elif M + 1 == MR:
-              vout${M}x01234567 = vget_high_s8(vout${M}x0123456789ABCDEF);
+              vst1_lane_u32((void*) c${M}, vreinterpret_u32_s8(vout${M}x01234567), 0); c${M} += 4;
+          $for M in reversed(range(MR)):
+            $if M % 2 == 1:
+              vout${M-1}x01234567_${M}x01234567 = vextq_s8(vout${M-1}x01234567_${M}x01234567, vout${M-1}x01234567_${M}x01234567, 4);
+            $elif M + 1 == MR:
+              vout${M}x01234567 = vext_s8(vout${M}x01234567, vout${M}x01234567, 4);
         }
-      if (nc & 4) {
-        $for M in reversed(range(MR)):
-          $if M % 2 == 1:
-            vst1q_lane_u32((void*) c${M}, vreinterpretq_u32_s8(vout${M-1}x01234567_${M}x01234567), 2); c${M} += 4;
-            vst1q_lane_u32((void*) c${M-1}, vreinterpretq_u32_s8(vout${M-1}x01234567_${M}x01234567), 0); c${M-1} += 4;
-          $elif M + 1 == MR:
-            vst1_lane_u32((void*) c${M}, vreinterpret_u32_s8(vout${M}x01234567), 0); c${M} += 4;
-        $for M in reversed(range(MR)):
-          $if M % 2 == 1:
-            vout${M-1}x01234567_${M}x01234567 = vextq_s8(vout${M-1}x01234567_${M}x01234567, vout${M-1}x01234567_${M}x01234567, 4);
-          $elif M + 1 == MR:
-            vout${M}x01234567 = vext_s8(vout${M}x01234567, vout${M}x01234567, 4);
-      }
-      if (nc & 2) {
-        $for M in reversed(range(MR)):
-          $if M % 2 == 1:
-            vst1q_lane_u16((void*) c${M}, vreinterpretq_u16_s8(vout${M-1}x01234567_${M}x01234567), 4); c${M} += 2;
-            vst1q_lane_u16((void*) c${M-1}, vreinterpretq_u16_s8(vout${M-1}x01234567_${M}x01234567), 0); c${M-1} += 2;
-          $elif M + 1 == MR:
-            vst1_lane_u16((void*) c${M}, vreinterpret_u16_s8(vout${M}x01234567), 0); c${M} += 2;
-        $for M in reversed(range(MR)):
-          $if M % 2 == 1:
-            vout${M-1}x01234567_${M}x01234567 = vextq_s8(vout${M-1}x01234567_${M}x01234567, vout${M-1}x01234567_${M}x01234567, 2);
-          $elif M + 1 == MR:
-            vout${M}x01234567 = vext_s8(vout${M}x01234567, vout${M}x01234567, 2);
-      }
-      if (nc & 1) {
-        $for M in reversed(range(MR)):
-          $if M % 2 == 1:
-            vst1q_lane_s8(c${M}, vout${M-1}x01234567_${M}x01234567, 8);
-            vst1q_lane_s8(c${M-1}, vout${M-1}x01234567_${M}x01234567, 0);
-          $elif M + 1 == MR:
-            vst1_lane_s8(c${M}, vout${M}x01234567, 0);
-      }
+        if (nc & 2) {
+          $for M in reversed(range(MR)):
+            $if M % 2 == 1:
+              vst1q_lane_u16((void*) c${M}, vreinterpretq_u16_s8(vout${M-1}x01234567_${M}x01234567), 4); c${M} += 2;
+              vst1q_lane_u16((void*) c${M-1}, vreinterpretq_u16_s8(vout${M-1}x01234567_${M}x01234567), 0); c${M-1} += 2;
+            $elif M + 1 == MR:
+              vst1_lane_u16((void*) c${M}, vreinterpret_u16_s8(vout${M}x01234567), 0); c${M} += 2;
+          $for M in reversed(range(MR)):
+            $if M % 2 == 1:
+              vout${M-1}x01234567_${M}x01234567 = vextq_s8(vout${M-1}x01234567_${M}x01234567, vout${M-1}x01234567_${M}x01234567, 2);
+            $elif M + 1 == MR:
+              vout${M}x01234567 = vext_s8(vout${M}x01234567, vout${M}x01234567, 2);
+        }
+        if (nc & 1) {
+          $for M in reversed(range(MR)):
+            $if M % 2 == 1:
+              vst1q_lane_s8(c${M}, vout${M-1}x01234567_${M}x01234567, 8);
+              vst1q_lane_s8(c${M-1}, vout${M-1}x01234567_${M}x01234567, 0);
+            $elif M + 1 == MR:
+              vst1_lane_s8(c${M}, vout${M}x01234567, 0);
+        }
 
-      nc = 0;
-    }
+        nc = 0;
+      }
   } while (nc != 0);
 }
