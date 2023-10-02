@@ -1,0 +1,8 @@
+# Copyright 2023 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# ARM NEON+FP16ARITH
+- name: xnn_f16_gavgpool_cw_ukernel__neonfp16arith_u8
+  init: xnn_init_f16_gavgpool_neonfp16arith_params
