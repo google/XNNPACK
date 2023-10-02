@@ -228,7 +228,8 @@ enum xnn_status xnn_reshape_global_average_pooling_ncw_f32(
     (pthreadpool_task_2d_tile_1d_t) xnn_compute_global_average_pooling_ncw;
   global_average_pooling_op->compute[0].range[0] = batch_size;
   global_average_pooling_op->compute[0].range[1] = global_average_pooling_op->channels;
-  global_average_pooling_op->compute[0].tile[0] = global_average_pooling_op->channels; //xnn_params.f32.gavgpool_cw.channel_tile;
+  // Channel tile is always 1, microkernel will process all channels.
+  global_average_pooling_op->compute[0].tile[0] = global_average_pooling_op->channels;
 
   global_average_pooling_op->state = xnn_run_state_needs_setup;
 
@@ -287,7 +288,8 @@ enum xnn_status xnn_reshape_global_average_pooling_ncw_f16(
     (pthreadpool_task_2d_tile_1d_t) xnn_compute_global_average_pooling_ncw;
   global_average_pooling_op->compute[0].range[0] = batch_size;
   global_average_pooling_op->compute[0].range[1] = global_average_pooling_op->channels;
-  global_average_pooling_op->compute[0].tile[0] = global_average_pooling_op->channels; //xnn_params.f16.gavgpool_cw.channel_tile;
+  // Channel tile is always 1, microkernel will process all channels.
+  global_average_pooling_op->compute[0].tile[0] = global_average_pooling_op->channels;
 
   global_average_pooling_op->state = xnn_run_state_needs_setup;
 

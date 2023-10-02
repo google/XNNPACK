@@ -398,9 +398,10 @@ struct xnn_gavgpool_cw_config {
     xnn_update_f16_gavgpool_neonfp16arith_params_fn f16;
   } update;
 
-  // Number of channels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
-  uint8_t channel_tile;
+  // Number of input pixels in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of pixels in each call.
+  uint8_t pixel_tile;
+  // Channel tile is always 1.
 };
 XNN_INTERNAL const struct xnn_gavgpool_cw_config* xnn_init_f16_gavgpool_cw_config();
 XNN_INTERNAL const struct xnn_gavgpool_cw_config* xnn_init_f32_gavgpool_cw_config();
