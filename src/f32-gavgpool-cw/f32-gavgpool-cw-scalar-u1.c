@@ -9,7 +9,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_gavgpool_cw_ukernel__scalar_x1(
+void xnn_f32_gavgpool_cw_ukernel__scalar_u1(
     size_t elements,
     size_t channels,
     const float* input,

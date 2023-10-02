@@ -64,8 +64,8 @@ static void BenchmarkBatch(benchmark::internal::Benchmark* b)
 }
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  BENCHMARK_CAPTURE(f16_gavgpool_cw, f16_neon_x8,
-                    xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x8,
+  BENCHMARK_CAPTURE(f16_gavgpool_cw, f16_neon_u8,
+                    xnn_f16_gavgpool_cw_ukernel__neonfp16arith_u8,
                     xnn_init_f16_gavgpool_neonfp16arith_params,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(BenchmarkBatch)

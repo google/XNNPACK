@@ -10075,7 +10075,7 @@ void xnn_f32_f16_vcvt_ukernel__wasmsimd_u24(
   }
 }
 
-void xnn_f32_gavgpool_cw_ukernel__wasmsimd_arm_x4(
+void xnn_f32_gavgpool_cw_ukernel__wasmsimd_arm_u4(
     size_t elements,
     size_t channels,
     const float* input,
@@ -10183,7 +10183,7 @@ void xnn_f32_gavgpool_cw_ukernel__wasmsimd_arm_x4(
   }
 }
 
-void xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_x4(
+void xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_u4(
     size_t elements,
     size_t channels,
     const float* input,

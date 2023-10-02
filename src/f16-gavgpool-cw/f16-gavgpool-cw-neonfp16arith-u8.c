@@ -11,7 +11,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x8(
+void xnn_f16_gavgpool_cw_ukernel__neonfp16arith_u8(
     size_t elements,
     size_t channels,
     const void* input,

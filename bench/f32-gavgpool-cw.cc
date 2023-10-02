@@ -65,8 +65,8 @@ static void BenchmarkBatch(benchmark::internal::Benchmark* b)
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(f32_gavgpool_cw, f32_neon_x4,
-                    xnn_f32_gavgpool_cw_ukernel__neon_x4,
+  BENCHMARK_CAPTURE(f32_gavgpool_cw, f32_neon_u4,
+                    xnn_f32_gavgpool_cw_ukernel__neon_u4,
                     xnn_init_f32_gavgpool_params,
                     benchmark::utils::CheckNEON)
     ->Apply(BenchmarkBatch)
@@ -74,28 +74,28 @@ static void BenchmarkBatch(benchmark::internal::Benchmark* b)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(f32_gavgpool_cw, f32_sse_x4,
-                    xnn_f32_gavgpool_cw_ukernel__sse_x4,
+  BENCHMARK_CAPTURE(f32_gavgpool_cw, f32_sse_u4,
+                    xnn_f32_gavgpool_cw_ukernel__sse_u4,
                     xnn_init_f32_gavgpool_params)
     ->Apply(BenchmarkBatch)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD
-  BENCHMARK_CAPTURE(f32_gavgpool_cw, f32_wasmsimd_arm_x4,
-                    xnn_f32_gavgpool_cw_ukernel__wasmsimd_arm_x4,
+  BENCHMARK_CAPTURE(f32_gavgpool_cw, f32_wasmsimd_arm_u4,
+                    xnn_f32_gavgpool_cw_ukernel__wasmsimd_arm_u4,
                     xnn_init_f32_gavgpool_params)
     ->Apply(BenchmarkBatch)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gavgpool_cw, f32_wasmsimd_x86_x4,
-                    xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_x4,
+  BENCHMARK_CAPTURE(f32_gavgpool_cw, f32_wasmsimd_x86_u4,
+                    xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_u4,
                     xnn_init_f32_gavgpool_params)
     ->Apply(BenchmarkBatch)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD
 
-BENCHMARK_CAPTURE(f32_gavgpool_cw, f32_scalar_x1,
-                  xnn_f32_gavgpool_cw_ukernel__scalar_x1,
+BENCHMARK_CAPTURE(f32_gavgpool_cw, f32_scalar_u1,
+                  xnn_f32_gavgpool_cw_ukernel__scalar_u1,
                   xnn_init_scalar_f32_gavgpool_params)
   ->Apply(BenchmarkBatch)
   ->UseRealTime();

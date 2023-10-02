@@ -4258,7 +4258,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8(
   } while (output_height != 0);
 }
 
-void xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x8(
+void xnn_f16_gavgpool_cw_ukernel__neonfp16arith_u8(
     size_t elements,
     size_t channels,
     const void* input,

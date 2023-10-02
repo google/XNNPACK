@@ -5039,7 +5039,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__sse_2x4(
   } while (output_height != 0);
 }
 
-void xnn_f32_gavgpool_cw_ukernel__sse_x4(
+void xnn_f32_gavgpool_cw_ukernel__sse_u4(
     size_t elements,
     size_t channels,
     const float* input,

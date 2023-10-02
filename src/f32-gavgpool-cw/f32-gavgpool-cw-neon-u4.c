@@ -11,7 +11,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_gavgpool_cw_ukernel__neon_x4(
+void xnn_f32_gavgpool_cw_ukernel__neon_u4(
     size_t elements,
     size_t channels,
     const float* input,

@@ -313,11 +313,11 @@ DECLARE_QU8_GAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_gavgpool_minmax_fp3
       float* output,                                      \
       const union xnn_f32_gavgpool_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f32_gavgpool_cw_ukernel__neon_x4)
-DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f32_gavgpool_cw_ukernel__scalar_x1)
-DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f32_gavgpool_cw_ukernel__sse_x4)
-DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f32_gavgpool_cw_ukernel__wasmsimd_arm_x4)
-DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_x4)
+DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f32_gavgpool_cw_ukernel__neon_u4)
+DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f32_gavgpool_cw_ukernel__scalar_u1)
+DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f32_gavgpool_cw_ukernel__sse_u4)
+DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f32_gavgpool_cw_ukernel__wasmsimd_arm_u4)
+DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_u4)
 
 
 #define DECLARE_F16_GAVGPOOL_CW_UKERNEL_FUNCTION(fn_name) \
@@ -328,7 +328,7 @@ DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f32_gavgpool_cw_ukernel__wasmsimd_x
       void* output,                                       \
       const union xnn_f16_gavgpool_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-DECLARE_F16_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x8)
+DECLARE_F16_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f16_gavgpool_cw_ukernel__neonfp16arith_u8)
 
 
 #ifdef __cplusplus
