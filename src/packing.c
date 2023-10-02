@@ -378,7 +378,7 @@ void xnn_pack_qs8_to_qu8_gemm_goi_w(
 }
 
 // same as qs8 but ksum both nibbles.
-void xnn_pack_qs8_qc4w_gemm_goi_w(
+void xnn_pack_qs8_qc4w_legacy_gemm_goi_w(
   size_t g,
   size_t nc,
   size_t kc,
@@ -452,7 +452,7 @@ void xnn_pack_qs8_qc4w_gemm_goi_w(
   } while (--g != 0);
 }
 
-void xnn_pack_qs8_qc4w_gemm_gio_w(
+void xnn_pack_qs8_qc4w_legacy_gemm_gio_w(
   size_t g,
   size_t nc,
   size_t kc,

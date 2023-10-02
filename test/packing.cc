@@ -20,7 +20,7 @@
 
 // QD8-F32-QC4W GEMM packing tests.
 
-TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, g_eq_1) {
+TEST(PACK_QD8_F32_QC4W_GEMM_LEGACY_GIO_W, g_eq_1) {
   const size_t g = 1;
   const size_t nc = 3;
   const size_t kc = 5;
@@ -47,7 +47,7 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, g_eq_1) {
   k[9] = 0x0e;
   std::vector<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kb, kr * sr)));
   auto a = xnn_qs8_qc4w_packing_params{ 0, 0x8 };
-  xnn_pack_qs8_qc4w_gemm_gio_w(g, nc, kc, nr, kr, sr, /*k_stride=*/nc,
+  xnn_pack_qs8_qc4w_legacy_gemm_gio_w(g, nc, kc, nr, kr, sr, /*k_stride=*/nc,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
   const std::vector<uint8_t> expected = {
@@ -69,7 +69,7 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, g_eq_1) {
   EXPECT_EQ(expected, packed_weights);
 }
 
-TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, g_eq_1) {
+TEST(PACK_QD8_F32_QC4W_GEMM_LEGACY_GOI_W, g_eq_1) {
   size_t g = 1;
   size_t nc = 3;
   size_t kc = 5;
@@ -94,7 +94,7 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, g_eq_1) {
   k[8] = 0x0e;
   std::vector<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kb, kr * sr)));
   auto a = xnn_qs8_qc4w_packing_params{ 0, 0x8 };
-  xnn_pack_qs8_qc4w_gemm_goi_w(g, nc, kc, nr, kr, sr,
+  xnn_pack_qs8_qc4w_legacy_gemm_goi_w(g, nc, kc, nr, kr, sr,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
   const std::vector<uint8_t> expected = {
