@@ -392,10 +392,12 @@ XNN_INTERNAL const struct xnn_gavgpool_config* xnn_init_qu8_gavgpool_config();
 struct xnn_gavgpool_cw_config {
   xnn_gavgpool_cw_ukernel_fn ukernel;
   union {
-    xnn_init_f16_gavgpool_neonfp16arith_params_fn f16;
+    xnn_init_f16_gavgpool_neon_params_fn f16;
+    xnn_init_f32_gavgpool_params_fn f32;
   } init;
   union {
     xnn_update_f16_gavgpool_neonfp16arith_params_fn f16;
+    xnn_update_f32_gavgpool_params_fn f32;
   } update;
 
   // Number of input pixels in a tile.

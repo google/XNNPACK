@@ -2482,7 +2482,7 @@ typedef void (*xnn_init_qs8_qc8w_scale_params_fn)(
   const float scale[XNN_MIN_ELEMENTS(1)],
   void* packed_w);
 
-typedef size_t (*xnn_init_f16_gavgpool_neonfp16arith_params_fn)(
+typedef size_t (*xnn_init_f16_gavgpool_neon_params_fn)(
   union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t multiplier,
   uint16_t output_min,
@@ -2494,6 +2494,11 @@ typedef size_t (*xnn_init_f32_gavgpool_params_fn)(
   float multiplier,
   float output_min,
   float output_max,
+  uint32_t width);
+
+typedef void (*xnn_update_f32_gavgpool_params_fn)(
+  union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
+  float multiplier,
   uint32_t width);
 
 typedef size_t (*xnn_init_f32_chw_params_fn)(

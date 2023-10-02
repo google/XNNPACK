@@ -67,7 +67,7 @@ static void BenchmarkBatch(benchmark::internal::Benchmark* b)
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   BENCHMARK_CAPTURE(f32_gavgpool_cw, f32_neon_u4,
                     xnn_f32_gavgpool_cw_ukernel__neon_u4,
-                    xnn_init_f32_gavgpool_params,
+                    xnn_init_f32_gavgpool_neon_params,
                     benchmark::utils::CheckNEON)
     ->Apply(BenchmarkBatch)
     ->UseRealTime();
@@ -76,7 +76,7 @@ static void BenchmarkBatch(benchmark::internal::Benchmark* b)
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_gavgpool_cw, f32_sse_u4,
                     xnn_f32_gavgpool_cw_ukernel__sse_u4,
-                    xnn_init_f32_gavgpool_params)
+                    xnn_init_f32_gavgpool_sse_params)
     ->Apply(BenchmarkBatch)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -84,19 +84,19 @@ static void BenchmarkBatch(benchmark::internal::Benchmark* b)
 #if XNN_ARCH_WASMSIMD
   BENCHMARK_CAPTURE(f32_gavgpool_cw, f32_wasmsimd_arm_u4,
                     xnn_f32_gavgpool_cw_ukernel__wasmsimd_arm_u4,
-                    xnn_init_f32_gavgpool_params)
+                    xnn_init_f32_gavgpool_scalar_params)
     ->Apply(BenchmarkBatch)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_gavgpool_cw, f32_wasmsimd_x86_u4,
                     xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_u4,
-                    xnn_init_f32_gavgpool_params)
+                    xnn_init_f32_gavgpool_scalar_params)
     ->Apply(BenchmarkBatch)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD
 
 BENCHMARK_CAPTURE(f32_gavgpool_cw, f32_scalar_u1,
                   xnn_f32_gavgpool_cw_ukernel__scalar_u1,
-                  xnn_init_scalar_f32_gavgpool_params)
+                  xnn_init_f32_gavgpool_scalar_params)
   ->Apply(BenchmarkBatch)
   ->UseRealTime();
 

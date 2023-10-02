@@ -158,15 +158,16 @@ enum xnn_status xnn_create_global_average_pooling_ncw_f32(
     return xnn_status_invalid_parameter;
   }
 
-  union xnn_f32_gavgpool_params params;
-  xnn_init_f32_gavgpool_params(&params, nanf(""), output_min, output_max, 0);
-
   const struct xnn_gavgpool_cw_config* gavgpool_cw_config = xnn_init_f32_gavgpool_cw_config();
   if (gavgpool_cw_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_ncw_f32));
     return xnn_status_unsupported_hardware;
   }
+
+  union xnn_f32_gavgpool_params params;
+  assert(gavgpool_cw_config->init.f32 != NULL);
+  gavgpool_cw_config->init.f32(&params, nanf(""), output_min, output_max, 0);
 
   return create_global_average_pooling_ncw(
     channels, flags,

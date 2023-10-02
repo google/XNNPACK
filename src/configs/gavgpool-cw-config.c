@@ -62,12 +62,18 @@ static void init_f32_gavgpool_cw_config(void) {
       f32_gavgpool_cw_config.ukernel = (xnn_gavgpool_cw_ukernel_fn) xnn_f32_gavgpool_cw_ukernel__scalar_u1;
       f32_gavgpool_cw_config.pixel_tile = 1;
     }
+    f32_gavgpool_cw_config.init.f32 = xnn_init_f32_gavgpool_neon_params;
+    f32_gavgpool_cw_config.update.f32 = xnn_update_f32_gavgpool_params;
   #elif XNN_ARCH_ARM64
     f32_gavgpool_cw_config.ukernel = (xnn_gavgpool_cw_ukernel_fn) xnn_f32_gavgpool_cw_ukernel__neon_u4;
     f32_gavgpool_cw_config.pixel_tile = 4;
+    f32_gavgpool_cw_config.init.f32 = xnn_init_f32_gavgpool_neon_params;
+    f32_gavgpool_cw_config.update.f32 = xnn_update_f32_gavgpool_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     f32_gavgpool_cw_config.ukernel = (xnn_gavgpool_cw_ukernel_fn) xnn_f32_gavgpool_cw_ukernel__sse_u4;
     f32_gavgpool_cw_config.pixel_tile = 4;
+    f32_gavgpool_cw_config.init.f32 = xnn_init_f32_gavgpool_sse_params;
+    f32_gavgpool_cw_config.update.f32 = xnn_update_f32_gavgpool_params;
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -78,12 +84,18 @@ static void init_f32_gavgpool_cw_config(void) {
       f32_gavgpool_cw_config.ukernel = (xnn_gavgpool_cw_ukernel_fn) xnn_f32_gavgpool_cw_ukernel__wasmsimd_arm_u4;
       f32_gavgpool_cw_config.pixel_tile = 4;
     }
+    f32_gavgpool_cw_config.init.f32 = xnn_init_f32_gavgpool_scalar_params;
+    f32_gavgpool_cw_config.update.f32 = xnn_update_f32_gavgpool_params;
   #elif XNN_ARCH_WASM
     f32_gavgpool_cw_config.ukernel = (xnn_gavgpool_cw_ukernel_fn) xnn_f32_gavgpool_cw_ukernel__scalar_u1;
     f32_gavgpool_cw_config.pixel_tile = 1;
+    f32_gavgpool_cw_config.init.f32 = xnn_init_f32_gavgpool_scalar_params;
+    f32_gavgpool_cw_config.update.f32 = xnn_update_f32_gavgpool_params;
   #elif XNN_ARCH_RISCV
     f32_gavgpool_cw_config.ukernel = (xnn_gavgpool_cw_ukernel_fn) xnn_f32_gavgpool_cw_ukernel__scalar_u1;
     f32_gavgpool_cw_config.pixel_tile = 1;
+    f32_gavgpool_cw_config.init.f32 = xnn_init_f32_gavgpool_scalar_params;
+    f32_gavgpool_cw_config.update.f32 = xnn_update_f32_gavgpool_params;
   #endif
 }
 

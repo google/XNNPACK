@@ -1753,50 +1753,68 @@ size_t xnn_init_f32_scaleminmax_sse_params(
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-size_t xnn_init_f32_gavgpool_params(
+size_t xnn_init_f32_gavgpool_scalar_params(
   union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
   float multiplier,
   float output_min,
   float output_max,
   uint32_t width)
 {
-  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    for (uint32_t i = 0; i < 4; i++) {
-      params->sse.multiplier[i] = multiplier;
-      params->sse.output_min[i] = output_min;
-      params->sse.output_max[i] = output_max;
-    }
+  params->scalar.multiplier = multiplier;
+  params->scalar.output_min = output_min;
+  params->scalar.output_max = output_max;
 
-    const uint32_t w = (width - 1) & 3;
-    params->sse.mask[0] = UINT32_C(0xFFFFFFFF);
-    params->sse.mask[1] = -(uint32_t) (w >= 1);
-    params->sse.mask[2] = -(uint32_t) (w >= 2);
-    params->sse.mask[3] = -(uint32_t) (w >= 3);
-    return sizeof(params->sse);
-  #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
-    params->neon.multiplier = multiplier;
-    params->neon.output_min = output_min;
-    params->neon.output_max = output_max;
-
-    const uint32_t w = (width - 1) & 3;
-    params->neon.mask[0] = UINT32_C(0xFFFFFFFF);
-    params->neon.mask[1] = -(uint32_t) (w >= 1);
-    params->neon.mask[2] = -(uint32_t) (w >= 2);
-    params->neon.mask[3] = -(uint32_t) (w >= 3);
-    return sizeof(params->neon);
-  #else
-    params->scalar.multiplier = multiplier;
-    params->scalar.output_min = output_min;
-    params->scalar.output_max = output_max;
-
-    const uint32_t w = (width - 1) & 3;
-    params->scalar.mask[0] = UINT32_C(0xFFFFFFFF);
-    params->scalar.mask[1] = -(int32_t) (w >= 1);
-    params->scalar.mask[2] = -(int32_t) (w >= 2);
-    params->scalar.mask[3] = -(int32_t) (w >= 3);
-    return sizeof(params->scalar);
-  #endif
+  const uint32_t w = (width - 1) & 3;
+  params->scalar.mask[0] = UINT32_C(0xFFFFFFFF);
+  params->scalar.mask[1] = -(int32_t) (w >= 1);
+  params->scalar.mask[2] = -(int32_t) (w >= 2);
+  params->scalar.mask[3] = -(int32_t) (w >= 3);
+  return sizeof(params->scalar);
 }
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+size_t xnn_init_f32_gavgpool_neon_params(
+  union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
+  float multiplier,
+  float output_min,
+  float output_max,
+  uint32_t width)
+{
+  params->neon.multiplier = multiplier;
+  params->neon.output_min = output_min;
+  params->neon.output_max = output_max;
+
+  const uint32_t w = (width - 1) & 3;
+  params->neon.mask[0] = UINT32_C(0xFFFFFFFF);
+  params->neon.mask[1] = -(uint32_t) (w >= 1);
+  params->neon.mask[2] = -(uint32_t) (w >= 2);
+  params->neon.mask[3] = -(uint32_t) (w >= 3);
+  return sizeof(params->neon);
+}
+#endif
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+size_t xnn_init_f32_gavgpool_sse_params(
+  union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
+  float multiplier,
+  float output_min,
+  float output_max,
+  uint32_t width)
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse.multiplier[i] = multiplier;
+    params->sse.output_min[i] = output_min;
+    params->sse.output_max[i] = output_max;
+  }
+
+  const uint32_t w = (width - 1) & 3;
+  params->sse.mask[0] = UINT32_C(0xFFFFFFFF);
+  params->sse.mask[1] = -(uint32_t) (w >= 1);
+  params->sse.mask[2] = -(uint32_t) (w >= 2);
+  params->sse.mask[3] = -(uint32_t) (w >= 3);
+  return sizeof(params->sse);
+}
+#endif
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_f16_gavgpool_neonfp16arith_params(
@@ -1876,25 +1894,6 @@ void xnn_update_f16_gavgpool_neonfp16arith_params(
   params->neonfp16arith.mask[7] = -(uint16_t) (w >= 7);
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-size_t xnn_init_scalar_f32_gavgpool_params(
-  union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
-  float multiplier,
-  float output_min,
-  float output_max,
-  uint32_t width)
-{
-  params->scalar.multiplier = multiplier;
-  params->scalar.output_min = output_min;
-  params->scalar.output_max = output_max;
-
-  const uint32_t w = (width - 1) & 3;
-  params->scalar.mask[0] = UINT32_C(0xFFFFFFFF);
-  params->scalar.mask[1] = -(int32_t) (w >= 1);
-  params->scalar.mask[2] = -(int32_t) (w >= 2);
-  params->scalar.mask[3] = -(int32_t) (w >= 3);
-  return sizeof(params->scalar);
-}
 
 size_t xnn_init_bf16_minmax_scalar_params(
   union xnn_bf16_minmax_params params[XNN_MIN_ELEMENTS(1)],

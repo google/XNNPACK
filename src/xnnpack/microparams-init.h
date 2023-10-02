@@ -309,12 +309,21 @@ XNN_INTERNAL size_t xnn_init_f16_gavgpool_neonfp16arith_params(
   uint16_t output_max,
   uint32_t width);
 
-XNN_INTERNAL size_t xnn_init_f32_gavgpool_params(
-  union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
-  float multiplier,
-  float output_min,
-  float output_max,
-  uint32_t width);
+#define DECLARE_INIT_F32_GAVGPOOL_PARAMS_FUNCITON(fn_name)     \
+  XNN_INTERNAL size_t fn_name(                                 \
+    union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)], \
+    float multiplier,                                          \
+    float output_min,                                          \
+    float output_max,                                          \
+    uint32_t width);
+
+DECLARE_INIT_F32_GAVGPOOL_PARAMS_FUNCITON(xnn_init_f32_gavgpool_scalar_params);
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  DECLARE_INIT_F32_GAVGPOOL_PARAMS_FUNCITON(xnn_init_f32_gavgpool_neon_params);
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_F32_GAVGPOOL_PARAMS_FUNCITON(xnn_init_f32_gavgpool_sse_params);
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 XNN_INTERNAL void xnn_update_f16_gavgpool_neonfp16arith_params(
@@ -326,13 +335,6 @@ XNN_INTERNAL void xnn_update_f16_gavgpool_neonfp16arith_params(
 XNN_INTERNAL void xnn_update_f32_gavgpool_params(
   union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
   float multiplier,
-  uint32_t width);
-
-XNN_INTERNAL size_t xnn_init_scalar_f32_gavgpool_params(
-  union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
-  float multiplier,
-  float output_min,
-  float output_max,
   uint32_t width);
 
 

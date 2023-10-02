@@ -23,7 +23,7 @@
 void f16_gavgpool_cw(
     benchmark::State& state,
     xnn_f16_gavgpool_cw_ukernel_fn gavgpool_cw,
-    xnn_init_f16_gavgpool_neonfp16arith_params_fn init_params,
+    xnn_init_f16_gavgpool_neon_params_fn init_params,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {

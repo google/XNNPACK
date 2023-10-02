@@ -26,11 +26,6 @@
 
 class GAvgPoolCWMicrokernelTester {
  public:
-  enum class Variant {
-    Native,
-    Scalar,
-  };
-
   inline GAvgPoolCWMicrokernelTester& elements(size_t elements) {
     assert(elements != 0);
     this->elements_ = elements;
@@ -79,7 +74,7 @@ class GAvgPoolCWMicrokernelTester {
   }
 
 
-  void Test(xnn_f32_gavgpool_cw_ukernel_fn gavgpool, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_gavgpool_cw_ukernel_fn gavgpool, xnn_init_f32_gavgpool_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
@@ -109,16 +104,7 @@ class GAvgPoolCWMicrokernelTester {
 
       // Prepare parameters.
       union xnn_f32_gavgpool_params params;
-      switch (variant) {
-        case Variant::Native:
-          xnn_init_f32_gavgpool_params(
-            &params, 1.0f / float(elements()), y_min, y_max, elements());
-          break;
-        case Variant::Scalar:
-          xnn_init_scalar_f32_gavgpool_params(
-            &params, 1.0f / float(elements()), y_min, y_max, elements());
-          break;
-      }
+      init_params(&params, 1.0f / float(elements()), y_min, y_max, elements());
 
       // Clamp reference results.
       for (float& y_value : y_ref) {
@@ -140,7 +126,7 @@ class GAvgPoolCWMicrokernelTester {
     }
   }
 
-void Test(xnn_f16_gavgpool_cw_ukernel_fn gavgpool, xnn_init_f16_gavgpool_neonfp16arith_params_fn init_params) const {
+void Test(xnn_f16_gavgpool_cw_ukernel_fn gavgpool, xnn_init_f16_gavgpool_neon_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(0.1f, 10.0f);
