@@ -3119,7 +3119,7 @@ xnnpack_cc_library(
         "-DXNN_TEST_MODE=1",
     ],
     linkopts = select({
-        "emscripten": WASM_JIT_LINKOPTS,
+        "xnn_enable_jit_explicit_true_on_emscripten": WASM_JIT_LINKOPTS,
         "//conditions:default": [],
     }),
     msvc_copts = xnnpack_msvc_std_copts(),
