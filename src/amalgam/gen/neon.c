@@ -8036,7 +8036,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_lut64_p2_u8(
 #endif
 }
 
-void xnn_f32_rmax_ukernel__neon(
+void xnn_f32_rmax_ukernel__neon_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -25608,7 +25608,7 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16(
   } while (--output_pixels != 0);
 }
 
-void xnn_u8_rmax_ukernel__neon(
+void xnn_u8_rmax_ukernel__neon_u16(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,

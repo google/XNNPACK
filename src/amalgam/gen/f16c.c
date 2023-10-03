@@ -1329,7 +1329,7 @@ void xnn_f16_prelu_ukernel__f16c_2x16(
   } while (rows != 0);
 }
 
-void xnn_f16_rmax_ukernel__f16c(
+void xnn_f16_rmax_ukernel__f16c_u32(
     size_t batch,
     const void* input,
     void* output,

@@ -8,7 +8,7 @@
 #include <xnnpack/rmax.h>
 
 
-void xnn_u8_rmax_ukernel__scalar(
+void xnn_u8_rmax_ukernel__scalar_u2(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,

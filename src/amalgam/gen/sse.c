@@ -7373,7 +7373,7 @@ void xnn_f32_pavgpool_minmax_ukernel_9x__sse_c4(
   } while (--output_pixels != 0);
 }
 
-void xnn_f32_rmax_ukernel__sse(
+void xnn_f32_rmax_ukernel__sse_u16(
     size_t batch,
     const float* input,
     float* output,

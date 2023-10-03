@@ -18,7 +18,7 @@
     for (size_t n = 1; n < 32; n++) {
       RMaxMicrokernelTester()
         .n(n)
-        .Test(xnn_f16_rmax_ukernel__neonfp16arith);
+        .Test(xnn_f16_rmax_ukernel__neonfp16arith_u32);
     }
   }
 
@@ -26,7 +26,7 @@
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     RMaxMicrokernelTester()
       .n(32)
-      .Test(xnn_f16_rmax_ukernel__neonfp16arith);
+      .Test(xnn_f16_rmax_ukernel__neonfp16arith_u32);
   }
 
   TEST(F16_RMAX__NEONFP16ARITH, n_div_32) {
@@ -34,7 +34,7 @@
     for (size_t n = 64; n <= 128; n += 32) {
       RMaxMicrokernelTester()
         .n(n)
-        .Test(xnn_f16_rmax_ukernel__neonfp16arith);
+        .Test(xnn_f16_rmax_ukernel__neonfp16arith_u32);
     }
   }
 
@@ -43,7 +43,7 @@
     for (size_t n = 32; n < 64; n++) {
       RMaxMicrokernelTester()
         .n(n)
-        .Test(xnn_f16_rmax_ukernel__neonfp16arith);
+        .Test(xnn_f16_rmax_ukernel__neonfp16arith_u32);
     }
   }
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
@@ -54,7 +54,7 @@
     for (size_t n = 1; n < 32; n++) {
       RMaxMicrokernelTester()
         .n(n)
-        .Test(xnn_f16_rmax_ukernel__f16c);
+        .Test(xnn_f16_rmax_ukernel__f16c_u32);
     }
   }
 
@@ -62,7 +62,7 @@
     TEST_REQUIRES_X86_F16C;
     RMaxMicrokernelTester()
       .n(32)
-      .Test(xnn_f16_rmax_ukernel__f16c);
+      .Test(xnn_f16_rmax_ukernel__f16c_u32);
   }
 
   TEST(F16_RMAX__F16C, n_div_32) {
@@ -70,7 +70,7 @@
     for (size_t n = 64; n <= 128; n += 32) {
       RMaxMicrokernelTester()
         .n(n)
-        .Test(xnn_f16_rmax_ukernel__f16c);
+        .Test(xnn_f16_rmax_ukernel__f16c_u32);
     }
   }
 
@@ -79,7 +79,7 @@
     for (size_t n = 32; n < 64; n++) {
       RMaxMicrokernelTester()
         .n(n)
-        .Test(xnn_f16_rmax_ukernel__f16c);
+        .Test(xnn_f16_rmax_ukernel__f16c_u32);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

@@ -9,7 +9,7 @@
 #include <xnnpack/rmax.h>
 
 
-void xnn_f32_rmax_ukernel__scalar(
+void xnn_f32_rmax_ukernel__scalar_u4(
     size_t batch,
     const float* input,
     float* output,

@@ -11,7 +11,7 @@
 #include <xnnpack/rmax.h>
 
 
-void xnn_f32_rmax_ukernel__avx512f(
+void xnn_f32_rmax_ukernel__avx512f_u64(
     size_t batch,
     const float* input,
     float* output,

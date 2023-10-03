@@ -11,7 +11,7 @@
 #include <xnnpack/rmax.h>
 
 
-void xnn_f32_rmax_ukernel__wasmsimd_x86(
+void xnn_f32_rmax_ukernel__wasmsimd_x86_u16(
     size_t batch,
     const float* input,
     float* output,

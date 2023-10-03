@@ -20880,7 +20880,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_u16_acc2(
   *sum = vsum;
 }
 
-void xnn_f32_rmax_ukernel__wasmsimd_arm(
+void xnn_f32_rmax_ukernel__wasmsimd_arm_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -20925,7 +20925,7 @@ void xnn_f32_rmax_ukernel__wasmsimd_arm(
   *output = vmax;
 }
 
-void xnn_f32_rmax_ukernel__wasmsimd_x86(
+void xnn_f32_rmax_ukernel__wasmsimd_x86_u16(
     size_t batch,
     const float* input,
     float* output,

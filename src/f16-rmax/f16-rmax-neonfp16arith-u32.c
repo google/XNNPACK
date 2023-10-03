@@ -11,7 +11,7 @@
 #include <xnnpack/rmax.h>
 
 
-void xnn_f16_rmax_ukernel__neonfp16arith(
+void xnn_f16_rmax_ukernel__neonfp16arith_u32(
     size_t batch,
     const void* input,
     void* output,

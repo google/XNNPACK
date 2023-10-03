@@ -7809,7 +7809,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u40(
   vst1_lane_u16(sum, vreinterpret_u16_f16(vacc_lo), 0);
 }
 
-void xnn_f16_rmax_ukernel__neonfp16arith(
+void xnn_f16_rmax_ukernel__neonfp16arith_u32(
     size_t batch,
     const void* input,
     void* output,

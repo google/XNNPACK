@@ -11,7 +11,7 @@
 #include <xnnpack/rmax.h>
 
 
-void xnn_f32_rmax_ukernel__neon(
+void xnn_f32_rmax_ukernel__neon_u16(
     size_t batch,
     const float* input,
     float* output,

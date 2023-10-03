@@ -10327,7 +10327,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_u4_acc2(
   *sum = vacc;
 }
 
-void xnn_f32_rmax_ukernel__scalar(
+void xnn_f32_rmax_ukernel__scalar_u4(
     size_t batch,
     const float* input,
     float* output,
@@ -27721,7 +27721,7 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1(
   } while (--output_pixels != 0);
 }
 
-void xnn_u8_rmax_ukernel__scalar(
+void xnn_u8_rmax_ukernel__scalar_u2(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,

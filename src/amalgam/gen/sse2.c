@@ -14678,7 +14678,7 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16(
   } while (--output_pixels != 0);
 }
 
-void xnn_u8_rmax_ukernel__sse2(
+void xnn_u8_rmax_ukernel__sse2_u16(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,

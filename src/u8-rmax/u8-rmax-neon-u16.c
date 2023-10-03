@@ -8,12 +8,12 @@
 
 #include <assert.h>
 
-#include <emmintrin.h>
+#include <arm_neon.h>
 
 #include <xnnpack/rmax.h>
 
 
-void xnn_u8_rmax_ukernel__sse2(
+void xnn_u8_rmax_ukernel__neon_u16(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,
@@ -25,30 +25,29 @@ void xnn_u8_rmax_ukernel__sse2(
   assert(output != NULL);
 
   if XNN_LIKELY(batch >= 16) {
-    __m128i vmax = _mm_setzero_si128();
+    uint8x16_t vmax = vmovq_n_u8(0);
     do {
-      const __m128i vx = _mm_loadu_si128((const __m128i*) input);
-      input += 16;
-      vmax = _mm_max_epu8(vmax, vx);
+      const uint8x16_t vx = vld1q_u8(input); input += 16;
+      vmax = vmaxq_u8(vmax, vx);
       batch -= 16;
     } while (batch >= 16);
     if (batch != 0) {
       const size_t x_increment = batch - 16;
       input = (const uint8_t*) ((uintptr_t) input + x_increment);
-      const __m128i vx = _mm_loadu_si128((const __m128i*) input);
-      vmax = _mm_max_epu8(vmax, vx);
+      const uint8x16_t vx = vld1q_u8(input);
+      vmax = vmaxq_u8(vmax, vx);
     }
-    vmax = _mm_max_epu8(vmax, _mm_unpackhi_epi64(vmax, vmax));
-    vmax = _mm_max_epu8(vmax, _mm_srli_epi64(vmax, 32));
-    vmax = _mm_max_epu8(vmax, _mm_srli_epi32(vmax, 16));
-    vmax = _mm_max_epu8(vmax, _mm_srli_epi16(vmax, 8));
-    *output = (uint8_t) _mm_cvtsi128_si32(vmax);
+    uint8x8_t vmax8 = vmax_u8(vget_low_u8(vmax), vget_high_u8(vmax));
+    const uint8x8_t vmax4 = vpmax_u8(vmax8, vmax8);
+    const uint8x8_t vmax2 = vpmax_u8(vmax4, vmax4);
+    const uint8x8_t vmax1 = vpmax_u8(vmax2, vmax2);
+    vst1_lane_u8(output, vmax1, 0);
   } else {
-    uint8_t vmax = 0;
+    uint8x8_t vmax = vmov_n_u8(0);
     do {
-      const uint8_t vx = *input++;
-      vmax = vx > vmax ? vx : vmax;
+      const uint8x8_t vx = vld1_dup_u8(input); input += 1;
+      vmax = vmax_u8(vmax, vx);
     } while (--batch != 0);
-    *output = vmax;
+    vst1_lane_u8(output, vmax, 0);
   }
 }
