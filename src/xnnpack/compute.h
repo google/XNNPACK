@@ -889,6 +889,13 @@ struct average_pooling_context {
   size_t indirect_input_height_stride;
   size_t input_offset;
   size_t input_batch_stride;
+
+  // Stride to get to the next y of input. Used when we have compressed indirection buffers (i.e. indirection buffers
+  // contain only pointers to the first row of input).
+  size_t input_y_stride;
+  size_t indirect_top_height;  // Number of output rows that form the top section of indirection buffer.
+  size_t indirect_bot_start;  // Smallest output row y for the bottom section of indirection buffer.
+
   void* output;
   size_t output_batch_stride;
   size_t output_height_stride;
@@ -935,6 +942,13 @@ struct pixelwise_average_pooling_context {
   size_t indirect_input_height_stride;
   size_t input_offset;
   size_t input_batch_stride;
+
+  // Stride to get to the next y of input. Used when we have compressed indirection buffers (i.e. indirection buffers
+  // contain only pointers to the first row of input).
+  size_t input_y_stride;
+  size_t indirect_top_height;  // Number of output rows that form the top section of indirection buffer.
+  size_t indirect_bot_start;  // Smallest output row y for the bottom section of indirection buffer.
+
   const void* pixelwise_buffer;
   size_t pixelwise_buffer_height_stride;
   void* output;

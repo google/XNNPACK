@@ -814,9 +814,14 @@ static enum xnn_status reshape_average_pooling2d(
 
     const size_t last_input_height = average_pooling_op->last_input_height;
     const size_t last_input_width = average_pooling_op->last_input_width;
+
+    const size_t indirect_top_height = divide_round_up(average_pooling_op->padding_top, average_pooling_op->stride_height);
+    const size_t indirect_bot_height = divide_round_up(average_pooling_op->padding_bottom, average_pooling_op->stride_height);
+
     if (input_height != last_input_height || input_width != last_input_width) {
+      const size_t indirection_buffer_output_height = (indirect_top_height + indirect_bot_height + 1);
       // Micro-kernel may read up to (primary_tile - 1) elements after the end of indirection buffer.
-      const size_t indirection_buffer_size = sizeof(void*) * ((primary_tile - 1) + output_height * step_height);
+      const size_t indirection_buffer_size = sizeof(void*) * ((primary_tile - 1) + indirection_buffer_output_height * step_height);
 
       const void** indirection_buffer =
         (const void**) xnn_reallocate_memory(average_pooling_op->indirection_buffer, indirection_buffer_size);
@@ -833,7 +838,7 @@ static enum xnn_status reshape_average_pooling2d(
       // This offset must be aligned properly because inputs and input offsets need to be aligned.
       average_pooling_op->input = (void*) ((uintptr_t) average_pooling_op->zero_buffer + XNN_ALLOCATION_ALIGNMENT);
       average_pooling_op->last_input = average_pooling_op->input;
-      xnn_indirection_init_dwconv2d(
+      xnn_indirection_init_dwconv2d_compressed(
         /*output_y_start=*/0, /*output_y_end=*/average_pooling_op->output_height,
         average_pooling_op->indirection_buffer,
         average_pooling_op->input,
@@ -845,7 +850,9 @@ static enum xnn_status reshape_average_pooling2d(
         average_pooling_op->stride_height, average_pooling_op->stride_width,
         average_pooling_op->dilation_height, average_pooling_op->dilation_width,
         average_pooling_op->padding_top, average_pooling_op->padding_left,
-        step_height, step_width, primary_tile);
+        step_height, step_width,
+        indirect_top_height, indirect_bot_height,
+        primary_tile);
 
       average_pooling_op->last_input_height = input_height;
       average_pooling_op->last_input_width = input_width;
@@ -888,7 +895,12 @@ static enum xnn_status reshape_average_pooling2d(
       average_pooling_op->context.pixelwise_average_pooling = (struct pixelwise_average_pooling_context) {
         .indirect_input = average_pooling_op->indirection_buffer,
         .indirect_input_height_stride = indirect_input_height_stride,
+        .indirect_top_height = indirect_top_height,
+        .indirect_bot_start = average_pooling_op->output_height - indirect_bot_height,
         .input_batch_stride = input_height * input_width * average_pooling_op->input_pixel_stride << log2_data_element_size,
+        .input_y_stride =
+            average_pooling_op->stride_height * input_width * average_pooling_op->input_pixel_stride
+            << log2_data_element_size,
         .pixelwise_buffer = average_pooling_op->pixelwise_buffer,
         .pixelwise_buffer_height_stride = output_width << log2_data_element_size,
         .output_batch_stride = output_height * output_height_stride,
@@ -941,7 +953,12 @@ static enum xnn_status reshape_average_pooling2d(
       average_pooling_op->context.average_pooling = (struct average_pooling_context) {
         .indirect_input = average_pooling_op->indirection_buffer,
         .indirect_input_height_stride = indirect_input_height_stride,
+        .indirect_top_height = indirect_top_height,
+        .indirect_bot_start = average_pooling_op->output_height - indirect_bot_height,
         .input_batch_stride = input_height * input_width * average_pooling_op->input_pixel_stride << log2_data_element_size,
+        .input_y_stride =
+            average_pooling_op->stride_height * input_width * average_pooling_op->input_pixel_stride
+            << log2_data_element_size,
         .output_batch_stride = output_height * output_height_stride,
         .output_height_stride = output_height_stride,
         .output_width = output_width,
@@ -952,6 +969,7 @@ static enum xnn_status reshape_average_pooling2d(
         .output_increment = output_width_stride - (channels << log2_data_element_size),
         .params.f32 = average_pooling_op->params.f32_scaleminmax,
       };
+
       memcpy(&average_pooling_op->context.average_pooling.params, params, params_size);
       if (pooling_size <= primary_tile) {
         *workspace_size = 0;

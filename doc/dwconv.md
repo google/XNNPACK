@@ -105,3 +105,121 @@ ADBECF
 ```
 
 The weights similarly have to be packed column first.
+
+## Compressed indirection buffer
+
+One drawback of the indirection buffer is that its size is proportional to
+output size, which can be very big.
+
+```
+input  kernel
+
+ABC    ab
+DEF    cd
+GHI
+JKL
+MNO
+PQR
+STU
+VWX
+
+indirection buffers:
+ADBECF
+DGEHFI
+GJHKIL
+JMKNLO
+MPNQOR
+PSQTRU
+SVTWUX
+```
+
+Notice how along each column of the indirection buffer, each element is a
+constant offset, + 3, away. This allows us to compress along the Y dimension. We
+only need to have 1 row of indirection buffer, and specify a constant offset for
+each input as `y index * 3`.
+
+```
+indirection buffer (1 row):
+ABCDEF
+
+constant offset: 3 (added to each input)
+
+row 0: ADBECF + 0 * 3 = ADBECF
+row 1: ADBECF + 1 * 3 = DGEHFI
+row 2: ADBECF + 2 * 3 = GJHKIL
+row 3: ADBECF + 3 * 3 = JMKNLO
+row 4: ADBECF + 4 * 3 = MPNQOR
+row 5: ADBECF + 5 * 3 = PSQTRU
+row 6: ADBECF + 6 * 3 = SVTWUX
+```
+
+This constant offset is calculate in the compute function (in operator-run.c)
+based on `output_y`, and passed as `input_offset`.
+
+Note that left and right padding does not affect this: if we are reading from
+padding, the input pointer in the indirection buffer is set to the zero buffer,
+and in the microkernels, we check if the input pointer is the zero buffer
+*before* we add the input offset.
+
+### Top and bottom padding
+
+The above compression scheme is incomplete as it does not handle top and bottom
+padding.
+
+```
+input  kernel
+
+000
+ABC    ab
+DEF    cd
+GHI
+000
+
+(uncompressed) indirection buffers:
+0A0B0C
+ADBECF
+DGEHFI
+G0H0I0
+```
+
+The above compression scheme will result in inputs like so:
+
+```
+row 0: 0A0B0C + 0 * 3 = 0A0B0C
+row 1: 0A0B0C + 1 * 3 = 0D0E0F (wrong, due to zero buffer)
+```
+
+Due to the padding and zero buffer, the constant offset calculation does not
+work. So, we separate out the top section of the indirection buffer to account
+for top padding (and by the same logic, the bottom padding).
+
+The compressed indirection buffer thus has 3 sections: top, middle (compressed),
+and bottom. The top and bottom account for top and bottom padding respectively
+and are not compressed, so there is a row of indirection buffers for each row of
+output in these sections. The compressed section is always 1 row.
+
+```
+input  kernel
+
+000
+ABC    ab
+DEF    cd
+GHI
+000
+
+compressed indirection buffers:
+0A0B0C (top)
+ADBECF (middle) (1 less row than uncompressed)
+G0H0I0 (compressed)
+```
+
+In the compute function, we will then need to consider which row of output we
+are computing, as that will determine the row of indirection buffer to read, and
+also the input offset to use. With the above example:
+
+output_y | section | row in indirection buffer | input offset
+-------- | ------- | ------------------------- | ------------
+0        | top     | 0                         | 0
+1        | mid     | 1                         | 0
+2        | mid     | 1                         | 3
+3        | bot     | 0                         | 0
