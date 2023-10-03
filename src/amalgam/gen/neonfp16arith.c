@@ -23,7 +23,7 @@
 #include <xnnpack/prefetch.h>
 #include <xnnpack/prelu.h>
 #include <xnnpack/raddstoreexpminusmax.h>
-#include <xnnpack/rmax.h>
+#include <xnnpack/reduce.h>
 #include <xnnpack/spmm.h>
 #include <xnnpack/vbinary.h>
 #include <xnnpack/vmulcaddc.h>

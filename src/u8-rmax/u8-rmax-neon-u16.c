@@ -10,7 +10,7 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/rmax.h>
+#include <xnnpack/reduce.h>
 
 
 void xnn_u8_rmax_ukernel__neon_u16(

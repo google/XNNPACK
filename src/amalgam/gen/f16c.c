@@ -18,7 +18,6 @@
 #include <xnnpack/microparams.h>
 #include <xnnpack/prelu.h>
 #include <xnnpack/reduce.h>
-#include <xnnpack/rmax.h>
 #include <xnnpack/unaligned.h>
 #include <xnnpack/vbinary.h>
 #include <xnnpack/vcvt.h>

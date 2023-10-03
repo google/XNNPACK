@@ -5,7 +5,7 @@
 
 #include <assert.h>
 
-#include <xnnpack/rmax.h>
+#include <xnnpack/reduce.h>
 
 
 void xnn_u8_rmax_ukernel__scalar_u2(

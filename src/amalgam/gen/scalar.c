@@ -30,7 +30,6 @@
 #include <xnnpack/prelu.h>
 #include <xnnpack/raddstoreexpminusmax.h>
 #include <xnnpack/reduce.h>
-#include <xnnpack/rmax.h>
 #include <xnnpack/spmm.h>
 #include <xnnpack/transpose.h>
 #include <xnnpack/unaligned.h>

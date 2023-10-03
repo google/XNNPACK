@@ -11,7 +11,7 @@
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 
-#include <xnnpack/rmax.h>
+#include <xnnpack/reduce.h>
 #include "rmax-microkernel-tester.h"
 
 
