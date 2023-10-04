@@ -15,7 +15,6 @@
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/rmax.h>
 #include <xnnpack/reduce.h>
 
 

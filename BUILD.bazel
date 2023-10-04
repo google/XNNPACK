@@ -142,7 +142,6 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/raddextexp.h",
     "src/xnnpack/raddstoreexpminusmax.h",
     "src/xnnpack/reduce.h",
-    "src/xnnpack/rmax.h",
     "src/xnnpack/rmaxabs.h",
     "src/xnnpack/spmm.h",
     "src/xnnpack/transpose.h",

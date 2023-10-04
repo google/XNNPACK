@@ -19,7 +19,7 @@
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/raddstoreexpminusmax.h>
-#include <xnnpack/rmax.h>
+#include <xnnpack/reduce.h>
 
 
 static void f16_raddstoreexpminusmax(

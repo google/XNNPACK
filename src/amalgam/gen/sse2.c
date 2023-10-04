@@ -26,7 +26,7 @@
 #include <xnnpack/pad.h>
 #include <xnnpack/prelu.h>
 #include <xnnpack/raddstoreexpminusmax.h>
-#include <xnnpack/rmax.h>
+#include <xnnpack/reduce.h>
 #include <xnnpack/transpose.h>
 #include <xnnpack/unaligned.h>
 #include <xnnpack/unpool.h>
