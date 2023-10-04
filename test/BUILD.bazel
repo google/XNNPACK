@@ -467,7 +467,7 @@ xnnpack_unit_test(
     name = "f16_rmax_test",
     srcs = [
         "f16-rmax.cc",
-        "rmax-microkernel-tester.h",
+        "reduce-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -2221,7 +2221,7 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "u8_rmax_test",
     srcs = [
-        "rmax-microkernel-tester.h",
+        "reduce-microkernel-tester.h",
         "u8-rmax.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,

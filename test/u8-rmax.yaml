@@ -1,0 +1,13 @@
+# Copyright 2023 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# ARM NEON
+- name: xnn_u8_rmax_ukernel__neon_u16
+
+# x86
+- name: xnn_u8_rmax_ukernel__sse2_u16
+
+# Scalar
+- name: xnn_u8_rmax_ukernel__scalar_u2

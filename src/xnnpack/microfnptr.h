@@ -1418,11 +1418,23 @@ typedef void (*xnn_reduce_ukernel_fn)(
     void* output,
     const void* params);
 
+typedef void (*xnn_f16_reduce_ukernel_fn)(
+    size_t batch,
+    const void* input,
+    void* output,
+    const union xnn_f16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 typedef void (*xnn_f32_reduce_ukernel_fn)(
     size_t batch,
     const float* input,
     float* output,
     const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+typedef void (*xnn_u8_reduce_ukernel_fn)(
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output,
+    const void* params);
 
 // RSUM: Reduce-Sum
 
