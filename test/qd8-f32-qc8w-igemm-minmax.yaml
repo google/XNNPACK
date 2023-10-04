@@ -230,3 +230,21 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 2
+
+# WAsm SIMD
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4c16__wasmsdot
+  init: xnn_init_f32_minmax_wasmsimd_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 16
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x4c16__wasmsdot
+  init: xnn_init_f32_minmax_wasmsimd_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 16
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_3x4c16__wasmsdot
+  init: xnn_init_f32_minmax_wasmsimd_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 16
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x4c16__wasmsdot
+  init: xnn_init_f32_minmax_wasmsimd_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 16

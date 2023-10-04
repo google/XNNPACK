@@ -64,16 +64,12 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x4c16__wasmsdot(
         a0 += 16;
 
         const v128_t vb0 = wasm_v128_load(w);
-
         vacc0x0 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va0, vb0, vacc0x0);
         const v128_t vb1 = wasm_v128_load((const int8_t*) w + 16);
-
         vacc0x1 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va0, vb1, vacc0x1);
         const v128_t vb2 = wasm_v128_load((const int8_t*) w + 32);
-
         vacc0x2 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va0, vb2, vacc0x2);
         const v128_t vb3 = wasm_v128_load((const int8_t*) w + 48);
-
         vacc0x3 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va0, vb3, vacc0x3);
 
         w = (const int8_t*) w + 64;
