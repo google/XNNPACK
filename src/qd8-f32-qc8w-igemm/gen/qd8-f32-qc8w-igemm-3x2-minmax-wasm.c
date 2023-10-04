@@ -1,0 +1,180 @@
+// Auto-generated file. Do not edit!
+//   Template: src/qs8-igemm/scalar.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+
+#include <xnnpack/math.h>
+#include <xnnpack/gemm.h>
+#include <xnnpack/unaligned.h>
+
+
+void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_3x2__wasm(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    size_t ks,
+    const int8_t** restrict a,
+    const void* restrict w,
+    float* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    size_t a_offset,
+    const int8_t* zero,
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(mr != 0);
+  assert(mr <= 3);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(ks != 0);
+  assert(ks % (3 * sizeof(void*)) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  float* c0 = c;
+  float* c1 = (float*) ((uintptr_t) c0 + cm_stride);
+  if XNN_UNPREDICTABLE(mr < 2) {
+    c1 = c0;
+  }
+  float* c2 = (float*) ((uintptr_t) c1 + cm_stride);
+  if XNN_UNPREDICTABLE(mr <= 2) {
+    c2 = c1;
+  }
+
+  do {
+    const int32_t vksum0 = unaligned_indexed_load_s32(w, 0);
+    const int32_t vksum1 = unaligned_indexed_load_s32(w, 1);
+    const int32_t vinput_zero_point = quantization_params->zero_point;
+    int32_t vacc0x0 = vksum0 * vinput_zero_point;
+    int32_t vacc0x1 = vksum1 * vinput_zero_point;
+    int32_t vacc1x0 = vksum0 * vinput_zero_point;
+    int32_t vacc1x1 = vksum1 * vinput_zero_point;
+    int32_t vacc2x0 = vksum0 * vinput_zero_point;
+    int32_t vacc2x1 = vksum1 * vinput_zero_point;
+    w = (const void*) ((const int32_t*) w + 2);
+
+    size_t p = ks;
+    do {
+      const int8_t* restrict a0 = a[0];
+      assert(a0 != NULL);
+      if XNN_UNPREDICTABLE(a0 != zero) {
+        a0 = (const int8_t*) ((uintptr_t) a0 + a_offset);
+      }
+      const int8_t* restrict a1 = a[1];
+      assert(a1 != NULL);
+      if XNN_UNPREDICTABLE(a1 != zero) {
+        a1 = (const int8_t*) ((uintptr_t) a1 + a_offset);
+      }
+      const int8_t* restrict a2 = a[2];
+      assert(a2 != NULL);
+      if XNN_UNPREDICTABLE(a2 != zero) {
+        a2 = (const int8_t*) ((uintptr_t) a2 + a_offset);
+      }
+      a += 3;
+
+      size_t k = kc;
+      do {
+        const int32_t va0 = (int32_t) *a0++;
+        const int32_t va1 = (int32_t) *a1++;
+        const int32_t va2 = (int32_t) *a2++;
+
+        const int32_t vb0 = (int32_t) ((const int8_t*) w)[0];
+        const int32_t vb1 = (int32_t) ((const int8_t*) w)[1];
+        w = (const void*) ((const int8_t*) w + 2);
+
+        vacc0x0 += va0 * vb0;
+        vacc0x1 += va0 * vb1;
+        vacc1x0 += va1 * vb0;
+        vacc1x1 += va1 * vb1;
+        vacc2x0 += va2 * vb0;
+        vacc2x1 += va2 * vb1;
+
+        k -= sizeof(int8_t);
+      } while (k != 0);
+      p -= 3 * sizeof(void*);
+    } while (p != 0);
+
+    float vout0x0 = (float) vacc0x0;
+    float vout0x1 = (float) vacc0x1;
+    float vout1x0 = (float) vacc1x0;
+    float vout1x1 = (float) vacc1x1;
+    float vout2x0 = (float) vacc2x0;
+    float vout2x1 = (float) vacc2x1;
+
+    const float vinput_scale = quantization_params->inv_scale;
+    vout0x0 *= vinput_scale;
+    vout0x1 *= vinput_scale;
+    vout1x0 *= vinput_scale;
+    vout1x1 *= vinput_scale;
+    vout2x0 *= vinput_scale;
+    vout2x1 *= vinput_scale;
+
+    const float vfilter_output_scale0 = unaligned_indexed_load_f32(w, 0);
+    vout0x0 *= vfilter_output_scale0;
+    vout1x0 *= vfilter_output_scale0;
+    vout2x0 *= vfilter_output_scale0;
+    const float vfilter_output_scale1 = unaligned_indexed_load_f32(w, 1);
+    vout0x1 *= vfilter_output_scale1;
+    vout1x1 *= vfilter_output_scale1;
+    vout2x1 *= vfilter_output_scale1;
+
+    const float vbias0 = unaligned_indexed_load_f32(w, 2);
+    vout0x0 += vbias0;
+    vout1x0 += vbias0;
+    vout2x0 += vbias0;
+    const float vbias1 = unaligned_indexed_load_f32(w, 3);
+    vout0x1 += vbias1;
+    vout1x1 += vbias1;
+    vout2x1 += vbias1;
+
+    w = (const float*) w + 4;
+
+    const float voutput_min = params->scalar.min;
+    vout0x0 = __builtin_wasm_max_f32(vout0x0, voutput_min);
+    vout1x0 = __builtin_wasm_max_f32(vout1x0, voutput_min);
+    vout2x0 = __builtin_wasm_max_f32(vout2x0, voutput_min);
+    vout0x1 = __builtin_wasm_max_f32(vout0x1, voutput_min);
+    vout1x1 = __builtin_wasm_max_f32(vout1x1, voutput_min);
+    vout2x1 = __builtin_wasm_max_f32(vout2x1, voutput_min);
+
+    const float voutput_max = params->scalar.max;
+    vout0x0 = __builtin_wasm_min_f32(vout0x0, voutput_max);
+    vout1x0 = __builtin_wasm_min_f32(vout1x0, voutput_max);
+    vout2x0 = __builtin_wasm_min_f32(vout2x0, voutput_max);
+    vout0x1 = __builtin_wasm_min_f32(vout0x1, voutput_max);
+    vout1x1 = __builtin_wasm_min_f32(vout1x1, voutput_max);
+    vout2x1 = __builtin_wasm_min_f32(vout2x1, voutput_max);
+
+    if XNN_LIKELY(nc >= 2) {
+      c2[0] = vout2x0;
+      c2[1] = vout2x1;
+      c1[0] = vout1x0;
+      c1[1] = vout1x1;
+      c0[0] = vout0x0;
+      c0[1] = vout0x1;
+
+      c0 = (float*) ((uintptr_t) c0 + cn_stride);
+      c1 = (float*) ((uintptr_t) c1 + cn_stride);
+      c2 = (float*) ((uintptr_t) c2 + cn_stride);
+
+      a = (const int8_t**restrict) ((uintptr_t) a - ks);
+      nc -= 2;
+    } else {
+      if (nc & 1) {
+        c2[0] = vout2x0;
+        c1[0] = vout1x0;
+        c0[0] = vout0x0;
+      }
+
+      nc = 0;
+    }
+  } while (nc != 0);
+}
