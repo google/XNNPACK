@@ -30,22 +30,6 @@ DECLARE_F16_RMAX_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__f16c_u32)
 DECLARE_F16_RMAX_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__neonfp16arith_u32)
 
 
-#define DECLARE_F32_RMAX_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                       \
-      size_t batch,                                \
-      const float* input,                          \
-      float* output,                               \
-      const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__avx_u32)
-DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__avx512f_u64)
-DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__neon_u16)
-DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__scalar_u4)
-DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__sse_u16)
-DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__wasmsimd_arm_u16)
-DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__wasmsimd_x86_u16)
-
-
 #define DECLARE_U8_RMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                      \
       size_t batch,                               \

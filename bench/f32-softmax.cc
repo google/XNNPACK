@@ -19,8 +19,8 @@
 #include <xnnpack/raddexpminusmax.h>
 #include <xnnpack/raddextexp.h>
 #include <xnnpack/raddstoreexpminusmax.h>
-#include <xnnpack/rmax.h>
 #include <xnnpack/vbinary.h>
+#include <xnnpack/reduce.h>
 #include <xnnpack/vscaleexpminusmax.h>
 #include <xnnpack/vscaleextexp.h>
 
@@ -387,12 +387,12 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
     xnn_f32_vscaleextexp_ukernel__avx2_p5_u40,
     benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
   BENCHMARK_CAPTURE(ThreePassSoftMaxWithRecomputing, avx2_p5,
-    xnn_f32_rmax_ukernel__avx_u32,
+    xnn_f32_rmax_ukernel__avx_u32_acc4,
     xnn_f32_raddexpminusmax_ukernel__avx2_p5_u96,
     xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u24,
     benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
   BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, avx2_p5,
-    xnn_f32_rmax_ukernel__avx_u32,
+    xnn_f32_rmax_ukernel__avx_u32_acc4,
     xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u64_acc2,
     xnn_init_f32_expminus_avx2_rr1_p5_params,
     xnn_f32_vmulc_minmax_ukernel__avx_u16,
@@ -404,12 +404,12 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
     xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u16,
     benchmark::utils::CheckAVX512F)->Apply(CharacteristicArguments)->UseManualTime();
   BENCHMARK_CAPTURE(ThreePassSoftMaxWithRecomputing, avx512f_p5_scalef,
-    xnn_f32_rmax_ukernel__avx512f_u64,
+    xnn_f32_rmax_ukernel__avx512f_u64_acc4,
     xnn_f32_raddexpminusmax_ukernel__avx512f_p5_scalef_u128_acc4,
     xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u16,
     benchmark::utils::CheckAVX512F)->Apply(CharacteristicArguments)->UseManualTime();
   BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, avx512f_p5_scalef,
-    xnn_f32_rmax_ukernel__avx512f_u64,
+    xnn_f32_rmax_ukernel__avx512f_u64_acc4,
     xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u128_acc2,
     xnn_init_f32_expminus_avx512_rr1_p5_params,
     xnn_f32_vmulc_minmax_ukernel__avx512f_u32,
