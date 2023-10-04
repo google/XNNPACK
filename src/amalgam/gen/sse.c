@@ -22,7 +22,6 @@
 #include <xnnpack/maxpool.h>
 #include <xnnpack/pavgpool.h>
 #include <xnnpack/reduce.h>
-#include <xnnpack/rmax.h>
 #include <xnnpack/spmm.h>
 #include <xnnpack/transpose.h>
 #include <xnnpack/vbinary.h>
@@ -7373,7 +7372,7 @@ void xnn_f32_pavgpool_minmax_ukernel_9x__sse_c4(
   } while (--output_pixels != 0);
 }
 
-void xnn_f32_rmax_ukernel__sse_u16(
+void xnn_f32_rmax_ukernel__sse_u16_acc4(
     size_t batch,
     const float* input,
     float* output,
@@ -7389,34 +7388,38 @@ void xnn_f32_rmax_ukernel__sse_u16(
   __m128 vmax1 = vmax0;
   __m128 vmax2 = vmax0;
   __m128 vmax3 = vmax0;
-  for (; batch >= 64; batch -= 64) {
-    const __m128 vx0 = _mm_loadu_ps(input);
-    const __m128 vx1 = _mm_loadu_ps(input + 4);
-    const __m128 vx2 = _mm_loadu_ps(input + 8);
-    const __m128 vx3 = _mm_loadu_ps(input + 12);
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m128 vt0 = _mm_loadu_ps(input);
+    const __m128 vt1 = _mm_loadu_ps(input + 4);
+    const __m128 vt2 = _mm_loadu_ps(input + 8);
+    const __m128 vt3 = _mm_loadu_ps(input + 12);
     input += 16;
 
-    vmax0 = _mm_max_ps(vmax0, vx0);
-    vmax1 = _mm_max_ps(vmax1, vx1);
-    vmax2 = _mm_max_ps(vmax2, vx2);
-    vmax3 = _mm_max_ps(vmax3, vx3);
+    vmax0 = _mm_max_ps(vmax0, vt0);
+    vmax1 = _mm_max_ps(vmax1, vt1);
+    vmax2 = _mm_max_ps(vmax2, vt2);
+    vmax3 = _mm_max_ps(vmax3, vt3);
   }
-  __m128 vmax = _mm_max_ps(_mm_max_ps(vmax0, vmax1), _mm_max_ps(vmax2, vmax3));
-  for (; batch >= 16; batch -= 16) {
-    const __m128 vx = _mm_loadu_ps(input);
-    vmax = _mm_max_ps(vmax, vx);
+  vmax0 = _mm_max_ps(vmax0, vmax1);
+  vmax2 = _mm_max_ps(vmax2, vmax3);
+  vmax0 = _mm_max_ps(vmax0, vmax2);
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const __m128 vt = _mm_loadu_ps(input);
     input += 4;
+
+    vmax0 = _mm_max_ps(vmax0, vt);
   }
-  __m128 vmax_lo = _mm_max_ps(vmax, _mm_movehl_ps(vmax, vmax));
-  vmax_lo = _mm_max_ss(vmax_lo, _mm_shuffle_ps(vmax_lo, vmax_lo, _MM_SHUFFLE(3, 3, 1, 1)));
   if XNN_UNLIKELY(batch != 0) {
     do {
-      vmax_lo = _mm_max_ss(vmax_lo, _mm_load_ss(input));
+      const __m128 vt = _mm_load_ss(input);
       input += 1;
-      batch -= 4;
+      vmax0 = _mm_max_ss(vmax0, vt);
+      batch -= sizeof(float);
     } while (batch != 0);
   }
-  _mm_store_ss(output, vmax_lo);
+  vmax0 = _mm_max_ps(vmax0, _mm_movehl_ps(vmax0, vmax0));
+  vmax0 = _mm_max_ss(vmax0, _mm_shuffle_ps(vmax0, vmax0, _MM_SHUFFLE(1, 1, 1, 1)));
+  _mm_store_ss(output, vmax0);
 }
 
 void xnn_f32_rminmax_ukernel__sse_u16_acc4(

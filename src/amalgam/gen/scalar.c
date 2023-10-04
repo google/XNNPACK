@@ -10327,7 +10327,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_u4_acc2(
   *sum = vacc;
 }
 
-void xnn_f32_rmax_ukernel__scalar_u4(
+void xnn_f32_rmax_ukernel__scalar_u4_acc4(
     size_t batch,
     const float* input,
     float* output,
@@ -10342,29 +10342,30 @@ void xnn_f32_rmax_ukernel__scalar_u4(
   float vmax1 = vmax0;
   float vmax2 = vmax0;
   float vmax3 = vmax0;
-  for (; batch >= 16; batch -= 16) {
-    const float vx0 = input[0];
-    const float vx1 = input[1];
-    const float vx2 = input[2];
-    const float vx3 = input[3];
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const float vt0 = input[0];
+    const float vt1 = input[1];
+    const float vt2 = input[2];
+    const float vt3 = input[3];
     input += 4;
 
-    vmax0 = math_max_f32(vx0, vmax0);
-    vmax1 = math_max_f32(vx1, vmax1);
-    vmax2 = math_max_f32(vx2, vmax2);
-    vmax3 = math_max_f32(vx3, vmax3);
+    vmax0 = math_max_f32(vmax0, vt0);
+    vmax1 = math_max_f32(vmax1, vt1);
+    vmax2 = math_max_f32(vmax2, vt2);
+    vmax3 = math_max_f32(vmax3, vt3);
   }
-  const float vmax01 = math_max_f32(vmax0, vmax1);
-  const float vmax23 = math_max_f32(vmax2, vmax3);
-  float vmax = math_max_f32(vmax01, vmax23);
+  vmax0 = math_max_f32(vmax0, vmax1);
+  vmax2 = math_max_f32(vmax2, vmax3);
+  vmax0 = math_max_f32(vmax0, vmax2);
+
   if XNN_UNLIKELY(batch != 0) {
     do {
-      const float vx = *input++;
-      vmax = math_max_f32(vx, vmax);
-      batch -= 4;
+      const float vt = *input++;
+      vmax0 = math_max_f32(vmax0, vt);
+      batch -= sizeof(float);
     } while (batch != 0);
   }
-  *output = vmax;
+  output[0] = vmax0;
 }
 
 void xnn_f32_rminmax_ukernel__scalar_u4_acc4(

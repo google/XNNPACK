@@ -8036,7 +8036,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_lut64_p2_u8(
 #endif
 }
 
-void xnn_f32_rmax_ukernel__neon_u16(
+void xnn_f32_rmax_ukernel__neon_u16_acc4(
     size_t batch,
     const float* input,
     float* output,
@@ -8051,39 +8051,35 @@ void xnn_f32_rmax_ukernel__neon_u16(
   float32x4_t vmax1 = vmax0;
   float32x4_t vmax2 = vmax0;
   float32x4_t vmax3 = vmax0;
-  for (; batch >= 64; batch -= 64) {
-    const float32x4_t vx0 = vld1q_f32(input); input += 4;
-    const float32x4_t vx1 = vld1q_f32(input); input += 4;
-    const float32x4_t vx2 = vld1q_f32(input); input += 4;
-    const float32x4_t vx3 = vld1q_f32(input); input += 4;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const float32x4_t vt0 = vld1q_f32(input); input += 4;
+    const float32x4_t vt1 = vld1q_f32(input); input += 4;
+    const float32x4_t vt2 = vld1q_f32(input); input += 4;
+    const float32x4_t vt3 = vld1q_f32(input); input += 4;
 
-    vmax0 = vmaxq_f32(vmax0, vx0);
-    vmax1 = vmaxq_f32(vmax1, vx1);
-    vmax2 = vmaxq_f32(vmax2, vx2);
-    vmax3 = vmaxq_f32(vmax3, vx3);
+    vmax0 = vmaxq_f32(vmax0, vt0);
+    vmax1 = vmaxq_f32(vmax1, vt1);
+    vmax2 = vmaxq_f32(vmax2, vt2);
+    vmax3 = vmaxq_f32(vmax3, vt3);
   }
-  float32x4_t vmax = vmaxq_f32(vmaxq_f32(vmax0, vmax1), vmaxq_f32(vmax2, vmax3));
-  for (; batch >= 16; batch -= 16) {
-    const float32x4_t vx = vld1q_f32(input); input += 4;
-    vmax = vmaxq_f32(vmax, vx);
+  vmax0 = vmaxq_f32(vmax0, vmax1);
+  vmax2 = vmaxq_f32(vmax2, vmax3);
+  vmax0 = vmaxq_f32(vmax0, vmax2);
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const float32x4_t vt = vld1q_f32(input); input += 4;
+    vmax0 = vmaxq_f32(vmax0, vt);
   }
-#if XNN_ARCH_ARM64
-  float32x2_t vmax_lo = vget_low_f32(vpmaxq_f32(vmax, vmax));
-#else
-  float32x2_t vmax_lo = vmax_f32(vget_low_f32(vmax), vget_high_f32(vmax));
-#endif
-  if XNN_UNLIKELY(batch != 0) {
-    do {
-      const float32x2_t vx = vld1_dup_f32(input); input += 1;
-      vmax_lo = vmax_f32(vmax_lo, vx);
-      batch -= 4;
-    } while (batch != 0);
+  float32x2_t vmax = vmax_f32(vget_low_f32(vmax0), vget_high_f32(vmax0));
+  if XNN_UNLIKELY(batch & (2 * sizeof(float))) {
+    const float32x2_t vt = vld1_f32(input); input += 2;
+    vmax = vmax_f32(vmax, vt);
   }
-#if XNN_ARCH_ARM64
-  *output = vmaxv_f32(vmax_lo);
-#else
-  vst1_lane_f32(output, vpmax_f32(vmax_lo, vmax_lo), 0);
-#endif
+  vmax = vpmax_f32(vmax, vmax);
+  if XNN_UNLIKELY(batch & (1 * sizeof(float))) {
+    const float32x2_t vt = vld1_dup_f32(input);
+    vmax = vmax_f32(vmax, vt);
+  }
+  vst1_lane_f32(output, vmax, 0);
 }
 
 void xnn_f32_rminmax_ukernel__neon_u16_acc4(
