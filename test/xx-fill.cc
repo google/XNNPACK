@@ -1,7 +1,12 @@
-// Copyright 2020 Google LLC
+// Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Specification: test/xx-fill.yaml
+//   Generator: tools/generate-fill-test.py
+
 
 #include <gtest/gtest.h>
 
@@ -13,27 +18,6 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(XX_FILL__NEON_X64, channels_eq_1) {
-    TEST_REQUIRES_ARM_NEON;
-    FillMicrokernelTester()
-      .channels(1)
-      .Test(xnn_xx_fill_ukernel__neon_x64);
-  }
-
-  TEST(XX_FILL__NEON_X64, channels_eq_2) {
-    TEST_REQUIRES_ARM_NEON;
-    FillMicrokernelTester()
-      .channels(2)
-      .Test(xnn_xx_fill_ukernel__neon_x64);
-  }
-
-  TEST(XX_FILL__NEON_X64, channels_eq_4) {
-    TEST_REQUIRES_ARM_NEON;
-    FillMicrokernelTester()
-      .channels(4)
-      .Test(xnn_xx_fill_ukernel__neon_x64);
-  }
-
   TEST(XX_FILL__NEON_X64, channels_eq_64) {
     TEST_REQUIRES_ARM_NEON;
     FillMicrokernelTester()
@@ -96,27 +80,6 @@
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(XX_FILL__SSE2_X64, channels_eq_1) {
-    TEST_REQUIRES_X86_SSE2;
-    FillMicrokernelTester()
-      .channels(1)
-      .Test(xnn_xx_fill_ukernel__sse2_x64);
-  }
-
-  TEST(XX_FILL__SSE2_X64, channels_eq_2) {
-    TEST_REQUIRES_X86_SSE2;
-    FillMicrokernelTester()
-      .channels(2)
-      .Test(xnn_xx_fill_ukernel__sse2_x64);
-  }
-
-  TEST(XX_FILL__SSE2_X64, channels_eq_4) {
-    TEST_REQUIRES_X86_SSE2;
-    FillMicrokernelTester()
-      .channels(4)
-      .Test(xnn_xx_fill_ukernel__sse2_x64);
-  }
-
   TEST(XX_FILL__SSE2_X64, channels_eq_64) {
     TEST_REQUIRES_X86_SSE2;
     FillMicrokernelTester()
@@ -178,25 +141,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
-  TEST(XX_FILL__WASMSIMD_X64, channels_eq_1) {
-    FillMicrokernelTester()
-      .channels(1)
-      .Test(xnn_xx_fill_ukernel__wasmsimd_x64);
-  }
-
-  TEST(XX_FILL__WASMSIMD_X64, channels_eq_2) {
-    FillMicrokernelTester()
-      .channels(2)
-      .Test(xnn_xx_fill_ukernel__wasmsimd_x64);
-  }
-
-  TEST(XX_FILL__WASMSIMD_X64, channels_eq_4) {
-    FillMicrokernelTester()
-      .channels(4)
-      .Test(xnn_xx_fill_ukernel__wasmsimd_x64);
-  }
-
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(XX_FILL__WASMSIMD_X64, channels_eq_64) {
     FillMicrokernelTester()
       .channels(64)
@@ -249,26 +194,8 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
-TEST(XX_FILL__SCALAR_X16, channels_eq_1) {
-  FillMicrokernelTester()
-    .channels(1)
-    .Test(xnn_xx_fill_ukernel__scalar_x16);
-}
-
-TEST(XX_FILL__SCALAR_X16, channels_eq_2) {
-  FillMicrokernelTester()
-    .channels(2)
-    .Test(xnn_xx_fill_ukernel__scalar_x16);
-}
-
-TEST(XX_FILL__SCALAR_X16, channels_eq_4) {
-  FillMicrokernelTester()
-    .channels(4)
-    .Test(xnn_xx_fill_ukernel__scalar_x16);
-}
 
 TEST(XX_FILL__SCALAR_X16, channels_eq_16) {
   FillMicrokernelTester()
@@ -277,7 +204,7 @@ TEST(XX_FILL__SCALAR_X16, channels_eq_16) {
 }
 
 TEST(XX_FILL__SCALAR_X16, channels_div_16) {
-  for (size_t channels = 32; channels <= 48; channels += 48) {
+  for (size_t channels = 32; channels <= 48; channels += 16) {
     FillMicrokernelTester()
       .channels(channels)
       .Test(xnn_xx_fill_ukernel__scalar_x16);
@@ -317,7 +244,7 @@ TEST(XX_FILL__SCALAR_X16, multiple_rows_with_output_stride) {
       FillMicrokernelTester()
         .channels(channels)
         .rows(rows)
-        .output_stride(53)
+        .output_stride(49)
         .Test(xnn_xx_fill_ukernel__scalar_x16);
     }
   }
