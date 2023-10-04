@@ -184,7 +184,7 @@
       PadMicrokernelTester()
         .rows(1)
         .input_channels(1)
-        .pre_padding(post_padding)
+        .post_padding(post_padding)
         .Test(xnn_xx_pad_ukernel_p16__neon_u16);
     }
   }
@@ -407,7 +407,7 @@
       PadMicrokernelTester()
         .rows(1)
         .input_channels(1)
-        .pre_padding(post_padding)
+        .post_padding(post_padding)
         .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
     }
   }
@@ -612,7 +612,7 @@
       PadMicrokernelTester()
         .rows(1)
         .input_channels(1)
-        .pre_padding(post_padding)
+        .post_padding(post_padding)
         .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
     }
   }
@@ -797,7 +797,7 @@ TEST(XX_PAD_P4__SCALAR_U16, fulltile_post_padding_gt_4) {
     PadMicrokernelTester()
       .rows(1)
       .input_channels(1)
-      .pre_padding(post_padding)
+      .post_padding(post_padding)
       .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
   }
 }
