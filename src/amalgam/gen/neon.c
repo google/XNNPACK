@@ -29513,7 +29513,7 @@ void xnn_x8_zip_xm_ukernel__neon(
   }
 }
 
-void xnn_xx_fill_ukernel__neon_x64(
+void xnn_xx_fill_ukernel__neon_u64(
     size_t rows,
     size_t channels,
     void* output,

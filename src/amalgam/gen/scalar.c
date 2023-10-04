@@ -30250,7 +30250,7 @@ void xnn_xx_copy_ukernel__scalar_memcpy(size_t batch, const void* input, void* o
   memcpy(output, input, batch);
 }
 
-void xnn_xx_fill_ukernel__scalar_x16(
+void xnn_xx_fill_ukernel__scalar_u16(
     size_t rows,
     size_t channels,
     void* output,

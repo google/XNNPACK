@@ -3584,7 +3584,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x64-transposec/gen/x64-transposec-2x2-reuse-mov-zip-neon.c
   src/x64-transposec/gen/x64-transposec-2x2-reuse-multi-zip-neon.c
   src/x64-transposec/gen/x64-transposec-2x2-reuse-switch-zip-neon.c
-  src/xx-fill/xx-fill-neon-x64.c
+  src/xx-fill/xx-fill-neon-u64.c
   src/xx-pad/xx-pad-neon-u16.c)
 
 SET(ALL_NEON_AARCH64_MICROKERNEL_SRCS
@@ -6145,7 +6145,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x64-transposec/gen/x64-transposec-4x2-scalar-float.c
   src/x64-transposec/gen/x64-transposec-4x2-scalar-int.c
   src/xx-copy/xx-copy-scalar-memcpy.c
-  src/xx-fill/xx-fill-scalar-x16.c
+  src/xx-fill/xx-fill-scalar-u16.c
   src/xx-pad/xx-pad-scalar-u16.c
   src/xx-transposev/xx-transposev-1x1-scalar-memcpy.c)
 
@@ -6862,7 +6862,7 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/x64-transposec/gen/x64-transposec-2x2-reuse-mov-sse2.c
   src/x64-transposec/gen/x64-transposec-2x2-reuse-multi-sse2.c
   src/x64-transposec/gen/x64-transposec-2x2-reuse-switch-sse2.c
-  src/xx-fill/xx-fill-sse2-x64.c
+  src/xx-fill/xx-fill-sse2-u64.c
   src/xx-pad/xx-pad-sse2-u16.c)
 
 SET(ALL_SSE41_MICROKERNEL_SRCS
@@ -9320,7 +9320,7 @@ SET(ALL_WASMSIMD_MICROKERNEL_SRCS
   src/x32-zip/x32-zip-x3-wasmsimd.c
   src/x32-zip/x32-zip-x4-wasmsimd.c
   src/x32-zip/x32-zip-xm-wasmsimd.c
-  src/xx-fill/xx-fill-wasmsimd-x64.c
+  src/xx-fill/xx-fill-wasmsimd-u64.c
   src/xx-pad/xx-pad-wasmsimd-u16.c)
 
 SET(ALL_XOP_MICROKERNEL_SRCS

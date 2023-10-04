@@ -23,10 +23,10 @@ extern "C" {
     size_t output_stride,                      \
     const uint32_t fill_pattern);
 
-DECLARE_FILL_UKERNEL_FUNCTION(xnn_xx_fill_ukernel__neon_x64)
-DECLARE_FILL_UKERNEL_FUNCTION(xnn_xx_fill_ukernel__scalar_x16)
-DECLARE_FILL_UKERNEL_FUNCTION(xnn_xx_fill_ukernel__sse2_x64)
-DECLARE_FILL_UKERNEL_FUNCTION(xnn_xx_fill_ukernel__wasmsimd_x64)
+DECLARE_FILL_UKERNEL_FUNCTION(xnn_xx_fill_ukernel__neon_u64)
+DECLARE_FILL_UKERNEL_FUNCTION(xnn_xx_fill_ukernel__scalar_u16)
+DECLARE_FILL_UKERNEL_FUNCTION(xnn_xx_fill_ukernel__sse2_u64)
+DECLARE_FILL_UKERNEL_FUNCTION(xnn_xx_fill_ukernel__wasmsimd_u64)
 
 
 #ifdef __cplusplus

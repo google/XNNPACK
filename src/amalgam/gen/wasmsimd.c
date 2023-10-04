@@ -38587,7 +38587,7 @@ void xnn_x8_transposec_ukernel__16x16_reuse_mov_wasmsimd(
   } while (block_width != 0);
 }
 
-void xnn_xx_fill_ukernel__wasmsimd_x64(
+void xnn_xx_fill_ukernel__wasmsimd_u64(
     size_t rows,
     size_t channels,
     void* output,

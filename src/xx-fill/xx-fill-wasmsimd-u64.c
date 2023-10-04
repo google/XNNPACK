@@ -5,13 +5,13 @@
 
 #include <assert.h>
 
-#include <emmintrin.h>
+#include <wasm_simd128.h>
 
 #include <xnnpack/fill.h>
 #include <xnnpack/unaligned.h>
 
 
-void xnn_xx_fill_ukernel__sse2_x64(
+void xnn_xx_fill_ukernel__wasmsimd_u64(
     size_t rows,
     size_t channels,
     void* output,
@@ -23,23 +23,23 @@ void xnn_xx_fill_ukernel__sse2_x64(
 
   const size_t output_increment = output_stride - channels;
 
-  const __m128i vfill = _mm_shuffle_epi32(_mm_cvtsi32_si128(fill_pattern), _MM_SHUFFLE(0, 0, 0, 0));
+  const v128_t vfill_pattern = wasm_i32x4_splat(fill_pattern);
   do {
     size_t c = channels;
     for (; c >= 64 * sizeof(uint8_t); c -= 64 * sizeof(uint8_t)) {
-      _mm_storeu_si128((__m128i*) output, vfill);
-      _mm_storeu_si128((__m128i*) output + 1, vfill);
-      _mm_storeu_si128((__m128i*) output + 2, vfill);
-      _mm_storeu_si128((__m128i*) output + 3, vfill);
+      wasm_v128_store(output, vfill_pattern);
+      wasm_v128_store((uint8_t*) output + 16, vfill_pattern);
+      wasm_v128_store((uint8_t*) output + 32, vfill_pattern);
+      wasm_v128_store((uint8_t*) output + 48, vfill_pattern);
       output = ((uint8_t*) output + 64);
     }
     for (; c >= 16 * sizeof(uint8_t); c -= 16 * sizeof(uint8_t)) {
-      _mm_storeu_si128((__m128i*) output, vfill);
+      wasm_v128_store(output, vfill_pattern);
       output = ((uint8_t*) output + 16);
     }
     if XNN_UNLIKELY(c != 0) {
       if XNN_LIKELY(c & (8 * sizeof(uint8_t))) {
-        _mm_storel_epi64(output, vfill);
+        wasm_v128_store64_lane(output, vfill_pattern, 0);
         output = ((uint8_t*) output + 8);
       }
       if XNN_LIKELY(c & (4 * sizeof(uint8_t))) {
