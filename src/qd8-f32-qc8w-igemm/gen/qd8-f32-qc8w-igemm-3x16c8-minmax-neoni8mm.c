@@ -56,20 +56,20 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_3x16c8__neoni8mm(
     const int32x4_t vinput_zero_point = vld1q_dup_s32(&quantization_params->zero_point);
     const int32x4_t vksum0123 = vld1q_s32(w); w = (const int32_t*) w + 4;
     const int32x4_t vksumzp0x0123 = vmulq_s32(vksum0123, vinput_zero_point);
-    const int32x4_t vksumzp1x0123 = vmulq_s32(vksum0123, vinput_zero_point);
     const int32x4_t vksum4567 = vld1q_s32(w); w = (const int32_t*) w + 4;
     const int32x4_t vksumzp0x4567 = vmulq_s32(vksum4567, vinput_zero_point);
-    const int32x4_t vksumzp1x4567 = vmulq_s32(vksum4567, vinput_zero_point);
     const int32x4_t vksum89AB = vld1q_s32(w); w = (const int32_t*) w + 4;
     const int32x4_t vksumzp0x89AB = vmulq_s32(vksum89AB, vinput_zero_point);
-    const int32x4_t vksumzp1x89AB = vmulq_s32(vksum89AB, vinput_zero_point);
     const int32x4_t vksumCDEF = vld1q_s32(w); w = (const int32_t*) w + 4;
     const int32x4_t vksumzp0xCDEF = vmulq_s32(vksumCDEF, vinput_zero_point);
-    const int32x4_t vksumzp1xCDEF = vmulq_s32(vksumCDEF, vinput_zero_point);
-    const int32x4_t vksumzp2x0123 = vmulq_s32(vksum0123, vinput_zero_point);
-    const int32x4_t vksumzp2x4567 = vmulq_s32(vksum4567, vinput_zero_point);
-    const int32x4_t vksumzp2x89AB = vmulq_s32(vksum89AB, vinput_zero_point);
-    const int32x4_t vksumzp2xCDEF = vmulq_s32(vksumCDEF, vinput_zero_point);
+    const int32x4_t vksumzp1x0123 = vksumzp0x0123;
+    const int32x4_t vksumzp1x4567 = vksumzp0x4567;
+    const int32x4_t vksumzp1x89AB = vksumzp0x89AB;
+    const int32x4_t vksumzp1xCDEF = vksumzp0xCDEF;
+    const int32x4_t vksumzp2x0123 = vksumzp0x0123;
+    const int32x4_t vksumzp2x4567 = vksumzp0x4567;
+    const int32x4_t vksumzp2x89AB = vksumzp0x89AB;
+    const int32x4_t vksumzp2xCDEF = vksumzp0xCDEF;
 
     #if XNN_ARCH_ARM64
       int32x4_t vacc01x01 = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vksumzp0x0123), vreinterpretq_u64_s32(vksumzp1x0123)));

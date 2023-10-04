@@ -150,6 +150,38 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 8
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x8c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x8c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_6x8c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_8x8c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_6x16c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_8x16c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 4
 
 # AVX512SKX
 - name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c8__avx512skx

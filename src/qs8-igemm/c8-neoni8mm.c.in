@@ -73,15 +73,12 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
   do {
     $if DATATYPE == "QD8":
       const int32x4_t vinput_zero_point = vld1q_dup_s32(&quantization_params->zero_point);
-      $for M in range(0, MR, 2):
+      $for N in range(0, NR, 4):
+        const int32x4_t vksum${ABC[N:N+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
+        const int32x4_t vksumzp0x${ABC[N:N+4]} = vmulq_s32(vksum${ABC[N:N+4]}, vinput_zero_point);
+      $for M in range(1, MR):
         $for N in range(0, NR, 4):
-          $if M == 0:
-            const int32x4_t vksum${ABC[N:N+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
-          $if M + 1 < MR:
-            const int32x4_t vksumzp${M}x${ABC[N:N+4]} = vmulq_s32(vksum${ABC[N:N+4]}, vinput_zero_point);
-            const int32x4_t vksumzp${M+1}x${ABC[N:N+4]} = vmulq_s32(vksum${ABC[N:N+4]}, vinput_zero_point);
-          $else:
-            const int32x4_t vksumzp${M}x${ABC[N:N+4]} = vmulq_s32(vksum${ABC[N:N+4]}, vinput_zero_point);
+          const int32x4_t vksumzp${M}x${ABC[N:N+4]} = vksumzp0x${ABC[N:N+4]};
 
       #if XNN_ARCH_ARM64
         $for M in range(0, MR, 2):
