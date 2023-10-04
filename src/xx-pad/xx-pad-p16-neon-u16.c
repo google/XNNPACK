@@ -10,7 +10,7 @@
 #include <xnnpack/pad.h>
 
 
-void xnn_xx_pad_ukernel__neon_u16(
+void xnn_xx_pad_ukernel_p16__neon_u16(
     size_t rows,
     size_t channels,
     size_t pre_padding,
