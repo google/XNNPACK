@@ -27,10 +27,10 @@ extern "C" {
     size_t output_stride,                     \
     const uint32_t fill_pattern);
 
-DECLARE_PAD_UKERNEL_FUNCTION(xnn_xx_pad_ukernel__neon)
-DECLARE_PAD_UKERNEL_FUNCTION(xnn_xx_pad_ukernel__scalar)
-DECLARE_PAD_UKERNEL_FUNCTION(xnn_xx_pad_ukernel__sse2)
-DECLARE_PAD_UKERNEL_FUNCTION(xnn_xx_pad_ukernel__wasmsimd)
+DECLARE_PAD_UKERNEL_FUNCTION(xnn_xx_pad_ukernel__neon_u16)
+DECLARE_PAD_UKERNEL_FUNCTION(xnn_xx_pad_ukernel__scalar_u16)
+DECLARE_PAD_UKERNEL_FUNCTION(xnn_xx_pad_ukernel__sse2_u16)
+DECLARE_PAD_UKERNEL_FUNCTION(xnn_xx_pad_ukernel__wasmsimd_u16)
 
 
 #ifdef __cplusplus

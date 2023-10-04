@@ -29557,7 +29557,7 @@ void xnn_xx_fill_ukernel__neon_x64(
   } while (--rows != 0);
 }
 
-void xnn_xx_pad_ukernel__neon(
+void xnn_xx_pad_ukernel__neon_u16(
     size_t rows,
     size_t channels,
     size_t pre_padding,

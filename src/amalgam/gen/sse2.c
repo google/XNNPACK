@@ -17304,7 +17304,7 @@ void xnn_xx_fill_ukernel__sse2_x64(
   } while (--rows != 0);
 }
 
-void xnn_xx_pad_ukernel__sse2(
+void xnn_xx_pad_ukernel__sse2_u16(
     size_t rows,
     size_t channels,
     size_t pre_padding,
