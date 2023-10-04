@@ -1,7 +1,12 @@
-// Copyright 2019 Google LLC
+// Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Specification: test/xx-pad.yaml
+//   Generator: tools/generate-pad-test.py
+
 
 #include <gtest/gtest.h>
 
@@ -458,7 +463,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_copy_channels_eq_16) {
     PadMicrokernelTester()
       .rows(1)
@@ -657,7 +662,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 TEST(XX_PAD_P4__SCALAR_U16, fulltile_copy_channels_eq_16) {
