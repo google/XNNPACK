@@ -41,6 +41,8 @@ static enum xnn_status create_scaled_dot_product_attention_nhtc(
   size_t minmax_params_size,
   const void* expminus_params,
   size_t expminus_params_size,
+  const void* rmax_params,
+  size_t rmax_params_size,
   const void* tanh_params,
   size_t tanh_params_size,
   uint32_t flags,
@@ -84,7 +86,8 @@ static enum xnn_status create_scaled_dot_product_attention_nhtc(
 
   memcpy(&attention_op->params, minmax_params, minmax_params_size);
   memcpy(&attention_op->params2, expminus_params, expminus_params_size);
-  memcpy(&attention_op->params3, tanh_params, tanh_params_size);
+  memcpy(&attention_op->params3, rmax_params, rmax_params_size);
+  memcpy(&attention_op->params4, tanh_params, tanh_params_size);
 
   if (cap_type == xnn_attention_logits_cap_type_tanh) {
     const struct xnn_attention_logits_cap_tanh_params* cap_tanh_params =
@@ -155,6 +158,11 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f16(
     goto error;
   }
 
+  union xnn_f16_default_params rmax_params;
+  if (rmax_config->init.f16 != NULL) {
+    rmax_config->init.f16(&rmax_params);
+  }
+
   const struct xnn_binary_elementwise_config* vadd_config = xnn_init_f16_vadd_config();
   if (vadd_config == NULL) {
     xnn_log_error(
@@ -208,6 +216,7 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f16(
     vtanh_config,
     &minmax_params, sizeof(minmax_params),
     &expminus_params, sizeof(expminus_params),
+    &rmax_params, sizeof(rmax_params),
     &tanh_params, sizeof(tanh_params),
     flags,
     attention_op_out);
@@ -257,6 +266,11 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f32(
       "failed to create %s operator: unsupported hardware configuration",
       xnn_operator_type_to_string(operator_type));
     goto error;
+  }
+
+  union xnn_f32_default_params rmax_params;
+  if (rmax_config->init.f32 != NULL) {
+    rmax_config->init.f32(&rmax_params);
   }
 
   const struct xnn_binary_elementwise_config* vadd_config = xnn_init_f32_vadd_config();
@@ -312,6 +326,7 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f32(
     vtanh_config,
     &minmax_params, sizeof(minmax_params),
     &expminus_params, sizeof(expminus_params),
+    &rmax_params, sizeof(rmax_params),
     &tanh_params, sizeof(tanh_params),
     flags,
     attention_op_out);
@@ -356,6 +371,8 @@ static enum xnn_status reshape_scaled_dot_product_attention_nhtc(
   size_t minmax_params_size,
   const void* expminus_params,
   size_t expminus_params_size,
+  const void* rmax_params,
+  size_t rmax_params_size,
   const void* tanh_params,
   size_t tanh_params_size,
   pthreadpool_t threadpool)
@@ -598,6 +615,7 @@ static enum xnn_status reshape_scaled_dot_product_attention_nhtc(
 
   memcpy(&attention_op->context.attention.minmax_params, minmax_params, minmax_params_size);
   memcpy(&attention_op->context.attention.expminus_params, expminus_params, expminus_params_size);
+  memcpy(&attention_op->context.attention.rmax_params, rmax_params, rmax_params_size);
   memcpy(&attention_op->context.attention.tanh_params, tanh_params, tanh_params_size);
 
   attention_op->state = xnn_run_state_needs_setup;
@@ -639,7 +657,8 @@ enum xnn_status xnn_reshape_scaled_dot_product_attention_nhtc_f16(
     &cap, &cap_reciprocal, sizeof(uint16_t),
     &attention_op->params.f16_minmax, sizeof(attention_op->params.f16_minmax),
     &attention_op->params2.f16_expminus_params, sizeof(attention_op->params2.f16_expminus_params),
-    &attention_op->params3.f16_tanh, sizeof(attention_op->params3.f16_tanh),
+    &attention_op->params3.f16_rmax, sizeof(attention_op->params3.f16_rmax),
+    &attention_op->params4.f16_tanh, sizeof(attention_op->params4.f16_tanh),
     threadpool);
 }
 
@@ -676,7 +695,8 @@ enum xnn_status xnn_reshape_scaled_dot_product_attention_nhtc_f32(
     &cap, &cap_reciprocal, sizeof(float),
     &attention_op->params.f32_minmax, sizeof(attention_op->params.f32_minmax),
     &attention_op->params2.f32_expminus_params, sizeof(attention_op->params2.f32_expminus_params),
-    &attention_op->params3.f32_tanh, sizeof(attention_op->params3.f32_tanh),
+    &attention_op->params3.f32_rmax, sizeof(attention_op->params3.f32_rmax),
+    &attention_op->params4.f32_tanh, sizeof(attention_op->params4.f32_tanh),
     threadpool);
 }
 

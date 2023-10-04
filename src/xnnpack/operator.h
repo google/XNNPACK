@@ -315,9 +315,14 @@ struct xnn_operator {
   } params2;
   // Third set of params. Used by scaled dot attention operator.
   union {
+    union xnn_f16_default_params f16_rmax;
+    union xnn_f32_default_params f32_rmax;
+  } params3;
+  // Fourth set of params. Used by scaled dot attention operator.
+  union {
     union xnn_f16_tanh_params f16_tanh;
     union xnn_f32_tanh_params f32_tanh;
-  } params3;
+  } params4;
   size_t num_post_operation_params;
   void* post_operation_params;
   enum xnn_operator_type type;

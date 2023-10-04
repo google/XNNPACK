@@ -67,7 +67,16 @@ static void init_f32_rmax_config(void) {
   #elif XNN_ARCH_ARM64
     f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__neon_u16_acc4;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__sse_u16_acc4;
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_x86_avx512f) {
+      f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__avx512f_u64_acc4;
+    } else if (hardware_config->use_x86_avx) {
+      f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__avx_u32_acc4;
+      f32_rmax_config.init.f32 = xnn_init_f32_default_avx_params;
+    } else {
+      f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__sse_u16_acc4;
+    }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__wasmsimd_pminmax_u16_acc4;
   #elif XNN_ARCH_WASM

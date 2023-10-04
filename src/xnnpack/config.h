@@ -731,6 +731,10 @@ XNN_INTERNAL const struct xnn_zip_config* xnn_init_x32_zip_config();
 
 struct xnn_rmax_config {
   xnn_rmax_ukernel_fn ukernel;
+  union {
+    xnn_init_f32_default_params_fn f32;
+    xnn_init_f16_default_params_fn f16;
+  } init;
 };
 
 XNN_INTERNAL const struct xnn_rmax_config* xnn_init_f16_rmax_config();

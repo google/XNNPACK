@@ -389,6 +389,8 @@ static enum xnn_status reshape_softmax_nc_floating_point(
     const struct xnn_raddstoreexpminusmax_config raddstoreexpminusmax[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_binary_elementwise_config* vmul,
     xnn_compute_reciprocal_fn compute_reciprocal,
+    const void* rmax_params,
+    size_t rmax_params_size,
     const void* expminus_params,
     size_t expminus_params_size,
     const void* minmax_params,
@@ -430,6 +432,7 @@ static enum xnn_status reshape_softmax_nc_floating_point(
   if (vmul->linear.opc_ukernel != NULL) {
     softmax_op->context.floating_point_softmax.vmulc_ukernel = vmul->linear.opc_ukernel;
   };
+  memcpy(&softmax_op->context.floating_point_softmax.rmax_params, rmax_params, rmax_params_size);
   memcpy(&softmax_op->context.floating_point_softmax.expminus_params, expminus_params, expminus_params_size);
   memcpy(&softmax_op->context.floating_point_softmax.minmax_params, minmax_params, minmax_params_size);
   softmax_op->compute[0].type = xnn_parallelization_type_1d;
@@ -514,6 +517,11 @@ enum xnn_status xnn_reshape_softmax_nc_f16(
     size_t batch_size,
     pthreadpool_t threadpool)
 {
+  union xnn_f16_default_params rmax_params;
+  if (softmax_op->rmax_config->init.f16 != NULL) {
+    softmax_op->rmax_config->init.f16(&rmax_params);
+  }
+
   union xnn_f16_expminus_params expminus_params;
   if (softmax_op->raddstoreexpminusmax_config->init.f16 != NULL) {
     softmax_op->raddstoreexpminusmax_config->init.f16(&expminus_params);
@@ -530,6 +538,7 @@ enum xnn_status xnn_reshape_softmax_nc_f16(
     /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
     softmax_op->rmax_config->ukernel, softmax_op->raddstoreexpminusmax_config, f16_vmul_config,
     (xnn_compute_reciprocal_fn) compute_reciprocal_f16,
+    &rmax_params, sizeof(rmax_params),
     &expminus_params, sizeof(expminus_params),
     &minmax_params, sizeof(minmax_params));
 }
@@ -540,6 +549,11 @@ enum xnn_status xnn_reshape_softmax_nc_f32(
     pthreadpool_t threadpool)
 {
   const struct xnn_binary_elementwise_config* f32_vmul_config = softmax_op->vmul_config;
+
+  union xnn_f32_default_params rmax_params;
+  if (softmax_op->rmax_config->init.f32 != NULL) {
+    softmax_op->rmax_config->init.f32(&rmax_params);
+  }
 
   union xnn_f32_expminus_params expminus_params;
   if (softmax_op->raddstoreexpminusmax_config->init.f32 != NULL) {
@@ -555,6 +569,7 @@ enum xnn_status xnn_reshape_softmax_nc_f32(
     /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     softmax_op->rmax_config->ukernel, softmax_op->raddstoreexpminusmax_config, f32_vmul_config,
     (xnn_compute_reciprocal_fn) compute_reciprocal_f32,
+    &rmax_params, sizeof(rmax_params),
     &expminus_params, sizeof(expminus_params),
     &minmax_params, sizeof(minmax_params));
 }
