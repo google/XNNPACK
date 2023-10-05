@@ -313,15 +313,7 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     spec_name = os.path.splitext(os.path.split(options.spec)[1])[0]
-    microkernel_header = {
-      "VAddMicrokernelTester": "xnnpack/vbinary.h",
-      "VAddCMicrokernelTester": "xnnpack/vbinary.h",
-      "VMulMicrokernelTester": "xnnpack/vbinary.h",
-      "VMulCMicrokernelTester": "xnnpack/vbinary.h",
-      "VCMulMicrokernelTester": "xnnpack/vbinary.h",
-      "VBinaryMicrokernelTester": "xnnpack/vbinary.h",
-      "VBinaryCMicrokernelTester": "xnnpack/vbinary.h",
-    }[options.tester]
+    microkernel_header = "xnnpack/vbinary.h"
     tester_header = {
       "VAddMicrokernelTester": "vadd-microkernel-tester.h",
       "VAddCMicrokernelTester": "vaddc-microkernel-tester.h",
