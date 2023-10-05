@@ -1,10 +1,12 @@
-// Copyright (c) Facebook, Inc. and its affiliates.
-// All rights reserved.
-//
-// Copyright 2019 Google LLC
+// Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Specification: test/u8-lut32norm.yaml
+//   Generator: tools/generate-lut-norm-test.py
+
 
 #include <gtest/gtest.h>
 
