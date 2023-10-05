@@ -142,7 +142,4 @@ tools/xngen src/f32-qc4w-gemm/avx512-broadcast.c.in -D MR=6 -D NR=32 -D INC=0 -D
 tools/xngen src/f32-qc4w-gemm/avx512-broadcast.c.in -D MR=7 -D NR=32 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc8w-gemm/gen/f32-qc4w-gemm-7x32-minmax-avx512skx-broadcast.c &
 tools/xngen src/f32-qc4w-gemm/avx512-broadcast.c.in -D MR=8 -D NR=32 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc8w-gemm/gen/f32-qc4w-gemm-8x32-minmax-avx512skx-broadcast.c &
 
-################################## Unit tests #################################
-tools/generate-gemm-test.py --spec test/f32-qc4w-gemm-minmax.yaml --output-test test/f32-qc4w-gemm-minmax.cc &
-
 wait

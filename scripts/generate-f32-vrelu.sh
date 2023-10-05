@@ -38,7 +38,4 @@ tools/xngen src/f32-vrelu/avx.c.in -D BATCH_TILE=16 -o src/f32-vrelu/gen/f32-vre
 tools/xngen src/f32-vrelu/avx512f.c.in -D BATCH_TILE=16 -o src/f32-vrelu/gen/f32-vrelu-avx512f-u16.c &
 tools/xngen src/f32-vrelu/avx512f.c.in -D BATCH_TILE=32 -o src/f32-vrelu/gen/f32-vrelu-avx512f-u32.c &
 
-################################## Unit tests #################################
-tools/generate-vunary-test.py --spec test/f32-vrelu.yaml --output test/f32-vrelu.cc &
-
 wait

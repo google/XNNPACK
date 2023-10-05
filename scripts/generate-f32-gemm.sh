@@ -604,14 +604,6 @@ tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=7 -D NR=16 -D INC=1 -D DATA
 tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=8 -D NR=16 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-8x16-minmax-avx512f-broadcast.c &
 tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=8 -D NR=16 -D INC=1 -D DATATYPE=F32 -o src/f32-gemminc/gen/f32-gemminc-8x16-minmax-avx512f-broadcast.c &
 
-################################## Unit tests #################################
-tools/generate-gemm-test.py     --spec test/f32-gemm.yaml            --output-test test/f32-gemm.cc           --output-test test/f32-gemm-2.cc &
-tools/generate-gemm-test.py     --spec test/f32-gemm-relu.yaml       --output-test test/f32-gemm-relu.cc      --output-test test/f32-gemm-relu-2.cc &
-tools/generate-gemm-test.py     --spec test/f32-gemm-minmax.yaml     --output-test test/f32-gemm-minmax.cc    --output-test test/f32-gemm-minmax-2.cc &
-tools/generate-gemm-test.py     --spec test/f32-gemm-jit.yaml        --output-test test/f32-gemm-jit.cc &
-tools/generate-gemm-test.py     --spec test/f32-gemminc-minmax.yaml  --output-test test/f32-gemminc-minmax.cc --output-test test/f32-gemminc-minmax-2.cc &
-tools/generate-gemm-goi-test.py --spec test/f32-gemm-goi-minmax.yaml --output test/f32-gemm-goi-minmax.cc &
-
 wait # JIT requires the assembly files to be generated first.
 
 ##################################### JIT #####################################

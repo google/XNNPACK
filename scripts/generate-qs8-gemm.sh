@@ -1705,16 +1705,4 @@ tools/xngen src/qs8-gemm/MRx16c4-avx512vnni.c.in -D MR=6 -D DATATYPE=QS8 -D REQU
 tools/xngen src/qs8-gemm/MRx16c4-avx512vnni.c.in -D MR=7 -D DATATYPE=QS8 -D REQUANTIZATION=FP32 -o src/qs8-gemm/gen/qs8-gemm-7x16c4-minmax-fp32-avx512vnni.c &
 tools/xngen src/qs8-gemm/MRx16c4-avx512vnni.c.in -D MR=8 -D DATATYPE=QS8 -D REQUANTIZATION=FP32 -o src/qs8-gemm/gen/qs8-gemm-8x16c4-minmax-fp32-avx512vnni.c &
 
-################################## Unit tests #################################
-tools/generate-gemm-test.py --spec test/qd8-f32-qc8w-gemm-minmax.yaml --output-test test/qd8-f32-qc8w-gemm-minmax.cc --output-bench bench/qd8-f32-qc8w-gemm.cc &
-tools/generate-gemm-test.py --spec test/qd8-f32-qc4w-gemm-minmax.yaml --output-test test/qd8-f32-qc4w-gemm-minmax.cc --output-bench bench/qd8-f32-qc4w-gemm.cc &
-tools/generate-gemm-test.py --spec test/qs8-qc8w-gemm-minmax-fp32.yaml --output-test test/qs8-qc8w-gemm-minmax-fp32.cc --output-test test/qs8-qc8w-gemm-minmax-fp32-2.cc --output-test test/qs8-qc8w-gemm-minmax-fp32-3.cc --output-bench bench/qs8-qc8w-gemm-fp32.cc &
-tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-fp32.yaml --output-test test/qs8-gemm-minmax-fp32.cc --output-test test/qs8-gemm-minmax-fp32-2.cc --output-bench bench/qs8-gemm-fp32.cc &
-tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-fp32.yaml --output-test test/qu8-gemm-minmax-fp32.cc --output-test test/qu8-gemm-minmax-fp32-2.cc --output-bench bench/qu8-gemm-fp32.cc &
-tools/generate-gemm-test.py --spec test/qs8-qc8w-gemm-jit-fp32.yaml --output-test test/qs8-qc8w-gemm-jit-fp32.cc &
-
-tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-rndnu.yaml --output-test test/qs8-gemm-minmax-rndnu.cc --output-test test/qs8-gemm-minmax-rndnu-2.cc --output-test test/qs8-gemm-minmax-rndnu-3.cc --output-test test/qs8-gemm-minmax-rndnu-4.cc --output-test test/qs8-gemm-minmax-rndnu-5.cc --output-bench bench/qs8-gemm-rndnu.cc &
-tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-rndnu.yaml --output-test test/qu8-gemm-minmax-rndnu.cc --output-test test/qu8-gemm-minmax-rndnu-2.cc --output-bench bench/qu8-gemm-rndnu.cc &
-tools/generate-gemm-test.py --spec test/qs8-gemm-jit-rndnu.yaml --output-test test/qs8-gemm-jit-rndnu.cc &
-
 wait

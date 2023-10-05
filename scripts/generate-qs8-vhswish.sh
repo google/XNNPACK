@@ -22,8 +22,4 @@ tools/xngen src/qs8-vhswish/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=QU8 -o src/q
 tools/xngen src/qs8-vhswish/scalar.c.in -D BATCH_TILE=2 -D DATATYPE=QU8 -o src/qu8-vhswish/gen/qu8-vhswish-scalar-x2.c &
 tools/xngen src/qs8-vhswish/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -o src/qu8-vhswish/gen/qu8-vhswish-scalar-x4.c &
 
-################################## Unit tests #################################
-tools/generate-vhswish-test.py --spec test/qs8-vhswish.yaml --output test/qs8-vhswish.cc &
-tools/generate-vhswish-test.py --spec test/qu8-vhswish.yaml --output test/qu8-vhswish.cc &
-
 wait

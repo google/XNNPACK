@@ -72,9 +72,4 @@ tools/xngen src/f32-vunary/avx512f.c.in -D OP=NEG -D BATCH_TILE=32 -o src/f32-vu
 tools/xngen src/f32-vunary/avx512f.c.in -D OP=SQR -D BATCH_TILE=16 -o src/f32-vunary/gen/f32-vsqr-avx512f-u16.c &
 tools/xngen src/f32-vunary/avx512f.c.in -D OP=SQR -D BATCH_TILE=32 -o src/f32-vunary/gen/f32-vsqr-avx512f-u32.c &
 
-################################## Unit tests #################################
-tools/generate-vunary-test.py --spec test/f32-vabs.yaml --output test/f32-vabs.cc &
-tools/generate-vunary-test.py --spec test/f32-vneg.yaml --output test/f32-vneg.cc &
-tools/generate-vunary-test.py --spec test/f32-vsqr.yaml --output test/f32-vsqr.cc &
-
 wait

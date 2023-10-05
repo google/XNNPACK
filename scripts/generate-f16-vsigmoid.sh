@@ -51,7 +51,4 @@ tools/xngen src/f16-vsigmoid/avx2.c.in -D BATCH_TILE=48 -D DIV_ALGO=rcp -o src/f
 tools/xngen src/f16-vsigmoid/avx2.c.in -D BATCH_TILE=56 -D DIV_ALGO=rcp -o src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-rcp-u56.c &
 tools/xngen src/f16-vsigmoid/avx2.c.in -D BATCH_TILE=64 -D DIV_ALGO=rcp -o src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-rcp-u64.c &
 
-################################## Unit tests #################################
-tools/generate-vunary-test.py --spec test/f16-vsigmoid.yaml --output test/f16-vsigmoid.cc &
-
 wait

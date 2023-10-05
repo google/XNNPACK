@@ -11,7 +11,4 @@ tools/xngen src/u32-filterbank-accumulate/scalar.c.in -D BATCH_TILE=1 -o src/u32
 tools/xngen src/u32-filterbank-accumulate/neon.c.in -D BATCH_TILE=1 -o src/u32-filterbank-accumulate/gen/u32-filterbank-accumulate-neon-x1.c &
 tools/xngen src/u32-filterbank-accumulate/neon.c.in -D BATCH_TILE=2 -o src/u32-filterbank-accumulate/gen/u32-filterbank-accumulate-neon-x2.c &
 
-################################## Unit tests #################################
-tools/generate-filterbank-accumulate-test.py --spec test/u32-filterbank-accumulate.yaml --output test/u32-filterbank-accumulate.cc &
-
 wait

@@ -234,7 +234,4 @@ tools/xngen src/f32-velu/avx512f-rr1-p6.c.in -D BATCH_TILE=96  -o src/f32-velu/g
 tools/xngen src/f32-velu/avx512f-rr1-p6.c.in -D BATCH_TILE=112 -o src/f32-velu/gen/f32-velu-avx512f-rr1-p6-u112.c &
 tools/xngen src/f32-velu/avx512f-rr1-p6.c.in -D BATCH_TILE=128 -o src/f32-velu/gen/f32-velu-avx512f-rr1-p6-u128.c &
 
-################################## Unit tests #################################
-tools/generate-vunary-test.py --spec test/f32-velu.yaml --output test/f32-velu.cc &
-
 wait

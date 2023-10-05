@@ -28,7 +28,4 @@ tools/xngen src/f32-vcmul/scalar.c.in -D BATCH_TILE=2 -o src/f32-vcmul/gen/f32-v
 tools/xngen src/f32-vcmul/scalar.c.in -D BATCH_TILE=4 -o src/f32-vcmul/gen/f32-vcmul-scalar-u4.c &
 tools/xngen src/f32-vcmul/scalar.c.in -D BATCH_TILE=8 -o src/f32-vcmul/gen/f32-vcmul-scalar-u8.c &
 
-################################## Unit tests #################################
-tools/generate-vbinary-test.py --tester VCMulMicrokernelTester --spec test/f32-vcmul.yaml --output test/f32-vcmul.cc &
-
 wait

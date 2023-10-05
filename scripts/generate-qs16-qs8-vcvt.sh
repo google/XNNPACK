@@ -38,7 +38,4 @@ tools/xngen src/qs16-qs8-vcvt/scalar.c.in -D BATCH_TILE=1 -o src/qs16-qs8-vcvt/g
 tools/xngen src/qs16-qs8-vcvt/scalar.c.in -D BATCH_TILE=2 -o src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-scalar-u2.c &
 tools/xngen src/qs16-qs8-vcvt/scalar.c.in -D BATCH_TILE=4 -o src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-scalar-u4.c &
 
-################################## Unit tests #################################
-tools/generate-vcvt-test.py --spec test/qs16-qs8-vcvt.yaml --output test/qs16-qs8-vcvt.cc &
-
 wait

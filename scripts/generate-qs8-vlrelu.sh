@@ -107,8 +107,4 @@ tools/xngen src/qs8-vlrelu/scalar-andxor.c.in -D BATCH_TILE=1 -D DATATYPE=QU8 -o
 tools/xngen src/qs8-vlrelu/scalar-andxor.c.in -D BATCH_TILE=2 -D DATATYPE=QU8 -o src/qu8-vlrelu/gen/qu8-vlrelu-scalar-andxor-u2.c &
 tools/xngen src/qs8-vlrelu/scalar-andxor.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -o src/qu8-vlrelu/gen/qu8-vlrelu-scalar-andxor-u4.c &
 
-################################## Unit tests #################################
-tools/generate-vlrelu-test.py --spec test/qs8-vlrelu.yaml --output test/qs8-vlrelu.cc &
-tools/generate-vlrelu-test.py --spec test/qu8-vlrelu.yaml --output test/qu8-vlrelu.cc &
-
 wait

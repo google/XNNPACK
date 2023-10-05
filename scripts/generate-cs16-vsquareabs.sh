@@ -24,7 +24,4 @@ tools/xngen src/cs16-vsquareabs/hexagon.c.in -D BATCH_TILE=8  -o src/cs16-vsquar
 tools/xngen src/cs16-vsquareabs/hexagon.c.in -D BATCH_TILE=10 -o src/cs16-vsquareabs/gen/cs16-vsquareabs-hexagon-x10.c &
 tools/xngen src/cs16-vsquareabs/hexagon.c.in -D BATCH_TILE=12 -o src/cs16-vsquareabs/gen/cs16-vsquareabs-hexagon-x12.c &
 
-################################## Unit tests #################################
-tools/generate-vsquareabs-test.py --spec test/cs16-vsquareabs.yaml --output test/cs16-vsquareabs.cc &
-
 wait

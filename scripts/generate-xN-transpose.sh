@@ -165,12 +165,4 @@ tools/xngen src/x32-transposec/wasmsimd.c.in -D SIZE=32 IN_PTRS=MULTI OUT_PTRS=S
 tools/xngen src/x32-transposec/wasmsimd.c.in -D SIZE=32 IN_PTRS=MULTI OUT_PTRS=MULTI  -o src/x32-transposec/gen/x32-transposec-4x4-multi-multi-wasmsimd.c &
 tools/xngen src/x32-transposec/wasmsimd.c.in -D SIZE=32 IN_PTRS=MULTI OUT_PTRS=MOV    -o src/x32-transposec/gen/x32-transposec-4x4-multi-mov-wasmsimd.c &
 
-################################## Unit tests #################################
-tools/generate-transpose-test.py --spec test/x8-transpose.yaml  --output test/x8-transpose.cc &
-tools/generate-transpose-test.py --spec test/x16-transpose.yaml --output test/x16-transpose.cc &
-tools/generate-transpose-test.py --spec test/x24-transpose.yaml --output test/x24-transpose.cc &
-tools/generate-transpose-test.py --spec test/x32-transpose.yaml --output test/x32-transpose.cc &
-tools/generate-transpose-test.py --spec test/x64-transpose.yaml --output test/x64-transpose.cc &
-tools/generate-transpose-test.py --spec test/xx-transposev.yaml  --output test/xx-transposev.cc &
-
 wait

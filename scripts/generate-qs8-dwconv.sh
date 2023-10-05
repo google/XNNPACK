@@ -1086,19 +1086,4 @@ tools/xngen src/qs8-dwconv/multipass-avx512skx-mul32.c.in -D CHANNEL_TILE=32  -D
 tools/xngen src/qs8-dwconv/multipass-avx512skx-mul32.c.in -D CHANNEL_TILE=16  -D FIRST_PASS_TILE=8  -D MIDDLE_PASS_TILE=8  -D LAST_PASS_TILE=9 -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-8f8m9l16c16s1r-minmax-fp32-avx512skx-mul32.c &
 tools/xngen src/qs8-dwconv/multipass-avx512skx-mul32.c.in -D CHANNEL_TILE=32  -D FIRST_PASS_TILE=8  -D MIDDLE_PASS_TILE=8  -D LAST_PASS_TILE=9 -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-8f8m9l32c16s1r-minmax-fp32-avx512skx-mul32.c &
 
-################################## Unit tests #################################
-tools/generate-dwconv-unipass-test.py --spec test/qs8-qc8w-dwconv-minmax-unipass-fp32.yaml --output test/qs8-qc8w-dwconv-minmax-unipass-fp32.cc &
-tools/generate-dwconv-unipass-test.py --spec test/qs8-dwconv-minmax-unipass-fp32.yaml --output test/qs8-dwconv-minmax-unipass-fp32.cc &
-tools/generate-dwconv-unipass-test.py --spec test/qu8-dwconv-minmax-unipass-fp32.yaml --output test/qu8-dwconv-minmax-unipass-fp32.cc &
-
-tools/generate-dwconv-unipass-test.py --spec test/qs8-dwconv-minmax-unipass-rndnu.yaml --output test/qs8-dwconv-minmax-unipass-rndnu.cc &
-tools/generate-dwconv-unipass-test.py --spec test/qu8-dwconv-minmax-unipass-rndnu.yaml --output test/qu8-dwconv-minmax-unipass-rndnu.cc &
-
-tools/generate-dwconv-multipass-test.py --spec test/qs8-qc8w-dwconv-minmax-multipass-fp32.yaml --output test/qs8-qc8w-dwconv-minmax-multipass-fp32.cc &
-tools/generate-dwconv-multipass-test.py --spec test/qs8-dwconv-minmax-multipass-fp32.yaml --output test/qs8-dwconv-minmax-multipass-fp32.cc &
-tools/generate-dwconv-multipass-test.py --spec test/qu8-dwconv-minmax-multipass-fp32.yaml --output test/qu8-dwconv-minmax-multipass-fp32.cc &
-
-tools/generate-dwconv-multipass-test.py --spec test/qs8-dwconv-minmax-multipass-rndnu.yaml --output test/qs8-dwconv-minmax-multipass-rndnu.cc &
-tools/generate-dwconv-multipass-test.py --spec test/qu8-dwconv-minmax-multipass-rndnu.yaml --output test/qu8-dwconv-minmax-multipass-rndnu.cc &
-
 wait

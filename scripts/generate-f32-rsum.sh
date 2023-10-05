@@ -39,7 +39,4 @@ tools/xngen src/f32-rsum/scalar.c.in -D BATCH_TILE=3 -D ACCUMULATORS=3 -o src/f3
 tools/xngen src/f32-rsum/scalar.c.in -D BATCH_TILE=4 -D ACCUMULATORS=2 -o src/f32-rsum/gen/f32-rsum-scalar-u4-acc2.c &
 tools/xngen src/f32-rsum/scalar.c.in -D BATCH_TILE=4 -D ACCUMULATORS=4 -o src/f32-rsum/gen/f32-rsum-scalar-u4-acc4.c &
 
-################################## Unit tests #################################
-tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/f32-rsum.yaml --output test/f32-rsum.cc &
-
 wait

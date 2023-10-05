@@ -55,7 +55,4 @@ tools/xngen src/x8-lut/avx512vbmi-vpermx2b.c.in -D BATCH_TILE=128 -o src/x8-lut/
 tools/xngen src/x8-lut/avx512vbmi-vpermx2b.c.in -D BATCH_TILE=192 -o src/x8-lut/gen/x8-lut-avx512vbmi-vpermx2b-u192.c &
 tools/xngen src/x8-lut/avx512vbmi-vpermx2b.c.in -D BATCH_TILE=256 -o src/x8-lut/gen/x8-lut-avx512vbmi-vpermx2b-u256.c &
 
-################################## Unit tests #################################
-tools/generate-lut-test.py --spec test/x8-lut.yaml --output test/x8-lut.cc &
-
 wait

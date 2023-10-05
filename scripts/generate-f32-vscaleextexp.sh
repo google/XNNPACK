@@ -32,7 +32,4 @@ tools/xngen src/f32-vscaleextexp/avx512f-p5-scalef.c.in -D BATCH_TILE=160 -o src
 tools/xngen src/f32-vscaleextexp/avx512f-p5-scalef.c.in -D BATCH_TILE=176 -o src/f32-vscaleextexp/gen/f32-vscaleextexp-avx512f-p5-scalef-u176.c &
 tools/xngen src/f32-vscaleextexp/avx512f-p5-scalef.c.in -D BATCH_TILE=192 -o src/f32-vscaleextexp/gen/f32-vscaleextexp-avx512f-p5-scalef-u192.c &
 
-################################## Unit tests #################################
-tools/generate-vscaleextexp-test.py --spec test/f32-vscaleextexp.yaml --output test/f32-vscaleextexp.cc &
-
 wait

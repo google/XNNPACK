@@ -18,7 +18,4 @@ tools/xngen src/x32-packb/scalar.c.in -D BIAS=1 -D CHANNEL_TILE=2 -D CHANNEL_SUB
 tools/xngen src/x32-packb/scalar.c.in -D BIAS=1 -D CHANNEL_TILE=4 -D CHANNEL_SUBTILE=1 -D TYPE=float    -o src/x32-packb/gen/x32-packb-4c1s1r-gemm-scalar-float.c &
 tools/xngen src/x32-packb/scalar.c.in -D BIAS=1 -D CHANNEL_TILE=4 -D CHANNEL_SUBTILE=4 -D TYPE=float    -o src/x32-packb/gen/x32-packb-4c4s1r-gemm-scalar-float.c &
 
-################################## Unit tests #################################
-tools/generate-packb-test.py --spec test/x32-packb.yaml --output test/x32-packb.cc &
-
 wait

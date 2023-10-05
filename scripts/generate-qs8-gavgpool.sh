@@ -168,10 +168,4 @@ tools/xngen src/qs8-gavgpool/multipass-sse4.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 
 tools/xngen src/qs8-gavgpool/multipass-sse4.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=16 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-gavgpool/gen/qu8-gavgpool-7p7x-minmax-fp32-sse41-c16.c &
 tools/xngen src/qs8-gavgpool/multipass-sse4.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=24 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-gavgpool/gen/qu8-gavgpool-7p7x-minmax-fp32-sse41-c24.c &
 
-################################## Unit tests #################################
-tools/generate-gavgpool-test.py --spec test/qs8-gavgpool-minmax-fp32.yaml --output test/qs8-gavgpool-minmax-fp32.cc &
-tools/generate-gavgpool-test.py --spec test/qs8-gavgpool-minmax-rndnu.yaml --output test/qs8-gavgpool-minmax-rndnu.cc &
-tools/generate-gavgpool-test.py --spec test/qu8-gavgpool-minmax-fp32.yaml --output test/qu8-gavgpool-minmax-fp32.cc &
-tools/generate-gavgpool-test.py --spec test/qu8-gavgpool-minmax-rndnu.yaml --output test/qu8-gavgpool-minmax-rndnu.cc &
-
 wait

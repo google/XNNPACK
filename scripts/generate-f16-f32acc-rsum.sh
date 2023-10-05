@@ -19,7 +19,4 @@ tools/xngen src/f16-f32acc-rsum/f16c.c.in -D BATCH_TILE=24 -D ACCUMULATORS=3 -o 
 tools/xngen src/f16-f32acc-rsum/f16c.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -o src/f16-f32acc-rsum/gen/f16-f32acc-rsum-f16c-u32-acc2.c &
 tools/xngen src/f16-f32acc-rsum/f16c.c.in -D BATCH_TILE=32 -D ACCUMULATORS=4 -o src/f16-f32acc-rsum/gen/f16-f32acc-rsum-f16c-u32-acc4.c &
 
-################################## Unit tests #################################
-tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/f16-f32acc-rsum.yaml --output test/f16-f32acc-rsum.cc &
-
 wait

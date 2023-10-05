@@ -34,7 +34,4 @@ tools/xngen src/x16-packw/avx.c.in -D NR=8  -D PREFETCH=1 -D KBLOCK=16 -o src/x1
 tools/xngen src/x16-packw/avx.c.in -D NR=16 -D PREFETCH=0 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x16-gemm-goi-avx2-u16.c &
 tools/xngen src/x16-packw/avx.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x16-gemm-goi-avx2-u16-prfm.c &
 
-################################## Unit tests #################################
-tools/generate-packw-test.py --spec test/x16-packw.yaml --output test/x16-packw.cc &
-
 wait

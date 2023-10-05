@@ -196,11 +196,4 @@ tools/xngen src/qs8-vaddc/avx512skx-mul32-ld128.c.in -D BATCH_TILE=32 -D DATATYP
 tools/xngen src/qs8-vaddc/avx512skx-mul32-ld128.c.in -D BATCH_TILE=16 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-avx512skx-mul32-ld128-u16.c &
 tools/xngen src/qs8-vaddc/avx512skx-mul32-ld128.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-avx512skx-mul32-ld128-u32.c &
 
-################################## Unit tests #################################
-tools/generate-vbinary-test.py --tester VAddMicrokernelTester  --spec test/qs8-vadd-minmax.yaml  --output test/qs8-vadd-minmax.cc &
-tools/generate-vbinary-test.py --tester VAddMicrokernelTester  --spec test/qu8-vadd-minmax.yaml  --output test/qu8-vadd-minmax.cc &
-
-tools/generate-vbinary-test.py --tester VAddCMicrokernelTester --spec test/qs8-vaddc-minmax.yaml --output test/qs8-vaddc-minmax.cc &
-tools/generate-vbinary-test.py --tester VAddCMicrokernelTester --spec test/qu8-vaddc-minmax.yaml --output test/qu8-vaddc-minmax.cc &
-
 wait

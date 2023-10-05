@@ -32,7 +32,4 @@ tools/xngen src/f32-raddextexp/avx512f-p5-scalef.c.in -D BATCH_TILE=192 -D ACCUM
 tools/xngen src/f32-raddextexp/avx512f-p5-scalef.c.in -D BATCH_TILE=192 -D ACCUMULATORS=3 -o src/f32-raddextexp/gen/f32-raddextexp-avx512f-p5-scalef-u192-acc3.c &
 tools/xngen src/f32-raddextexp/avx512f-p5-scalef.c.in -D BATCH_TILE=192 -D ACCUMULATORS=6 -o src/f32-raddextexp/gen/f32-raddextexp-avx512f-p5-scalef-u192-acc6.c &
 
-################################## Unit tests #################################
-tools/generate-raddextexp-test.py --spec test/f32-raddextexp.yaml --output test/f32-raddextexp.cc &
-
 wait

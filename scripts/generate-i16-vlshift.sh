@@ -16,7 +16,4 @@ tools/xngen src/i16-vlshift/neon.c.in -D BATCH_TILE=16 -o src/i16-vlshift/gen/i1
 tools/xngen src/i16-vlshift/neon.c.in -D BATCH_TILE=24 -o src/i16-vlshift/gen/i16-vlshift-neon-u24.c &
 tools/xngen src/i16-vlshift/neon.c.in -D BATCH_TILE=32 -o src/i16-vlshift/gen/i16-vlshift-neon-u32.c &
 
-################################## Unit tests #################################
-tools/generate-vlshift-test.py --spec test/i16-vlshift.yaml --output test/i16-vlshift.cc &
-
 wait

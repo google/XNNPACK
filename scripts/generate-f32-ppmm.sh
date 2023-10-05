@@ -43,7 +43,4 @@ tools/xngen src/f32-ppmm/8x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=1 -o sr
 ################################### x86 SSE ###################################
 tools/xngen src/f32-ppmm/sse.c.in -D MR=4 -D NR=8 -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-sse.c &
 
-################################## Unit tests #################################
-tools/generate-gemm-test.py --spec test/f32-ppmm-minmax.yaml --output-test test/f32-ppmm-minmax.cc &
-
 wait

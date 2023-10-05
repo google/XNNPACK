@@ -431,8 +431,4 @@ tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -
 tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D DIV=NR2RECPS     -D FMA=0 -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-vtanh-neon-expm1minus-rr1-p6h5ts-nr2recps-u12.c &
 tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D DIV=NR2RECPS     -D FMA=0 -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-vtanh-neon-expm1minus-rr1-p6h5ts-nr2recps-u16.c &
 
-
-################################## Unit tests #################################
-tools/generate-vunary-test.py --spec test/f32-vtanh.yaml --output test/f32-vtanh.cc &
-
 wait

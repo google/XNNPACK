@@ -17,6 +17,3 @@ tools/xngen src/x32-packx/neon.c.in -D MR=8 -D PREFETCH=0 -D KBLOCK=8 -o src/x32
 tools/xngen src/x32-packx/neon.c.in -D MR=8 -D PREFETCH=1 -D KBLOCK=8 -o src/x32-packx/gen/x32-packx-8x-neon-st4-x8-prfm.c &
 
 wait
-
-### Tests for packing micro-kernels
-tools/generate-pack-test.py --spec test/x32-packx.yaml --output test/x32-packx.cc &

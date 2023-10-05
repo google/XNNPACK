@@ -12,7 +12,4 @@ tools/xngen src/f16-vclamp/neonfp16arith.c.in -D BATCH_TILE=16 -o src/f16-vclamp
 tools/xngen src/f16-vclamp/f16c.c.in -D BATCH_TILE=8  -o src/f16-vclamp/gen/f16-vclamp-f16c-u8.c &
 tools/xngen src/f16-vclamp/f16c.c.in -D BATCH_TILE=16 -o src/f16-vclamp/gen/f16-vclamp-f16c-u16.c &
 
-################################## Unit tests #################################
-tools/generate-vunary-test.py --spec test/f16-vclamp.yaml --output test/f16-vclamp.cc &
-
 wait

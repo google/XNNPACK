@@ -26,7 +26,4 @@ tools/xngen src/f16-gavgpool/multipass-f16c.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 
 tools/xngen src/f16-gavgpool/multipass-f16c.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=24 -o src/f16-gavgpool/gen/f16-gavgpool-7p7x-minmax-f16c-c24.c &
 tools/xngen src/f16-gavgpool/multipass-f16c.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=32 -o src/f16-gavgpool/gen/f16-gavgpool-7p7x-minmax-f16c-c32.c &
 
-################################## Unit tests #################################
-tools/generate-gavgpool-test.py --spec test/f16-gavgpool-minmax.yaml --output test/f16-gavgpool-minmax.cc &
-
 wait

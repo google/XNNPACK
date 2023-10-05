@@ -35,7 +35,4 @@ tools/xngen src/bf16-gemm/c8-neonbf16.c.in -D MR=3 -D NR=4 -D BFOPT=BFMLAL -o sr
 tools/xngen src/bf16-gemm/c8-neonbf16.c.in -D MR=4 -D NR=4 -D BFOPT=BFMLAL -o src/bf16-gemm/gen/bf16-gemm-4x4c8-minmax-neonbf16-bfmlal.c &
 tools/xngen src/bf16-gemm/c8-neonbf16.c.in -D MR=5 -D NR=4 -D BFOPT=BFMLAL -o src/bf16-gemm/gen/bf16-gemm-5x4c8-minmax-neonbf16-bfmlal.c &
 
-################################## Unit tests #################################
-tools/generate-gemm-test.py --spec test/bf16-gemm-minmax.yaml --output-test test/bf16-gemm-minmax.cc &
-
 wait

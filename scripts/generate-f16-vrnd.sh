@@ -24,10 +24,4 @@ tools/xngen src/f16-vrnd/f16c.c.in -D OP=RNDU  -D BATCH_TILE=16 -o src/f16-vrnd/
 tools/xngen src/f16-vrnd/f16c.c.in -D OP=RNDD  -D BATCH_TILE=8  -o src/f16-vrnd/gen/f16-vrndd-f16c-u8.c &
 tools/xngen src/f16-vrnd/f16c.c.in -D OP=RNDD  -D BATCH_TILE=16 -o src/f16-vrnd/gen/f16-vrndd-f16c-u16.c &
 
-################################## Unit tests #################################
-tools/generate-vunary-test.py --spec test/f16-vrndne.yaml --output test/f16-vrndne.cc &
-tools/generate-vunary-test.py --spec test/f16-vrndz.yaml  --output test/f16-vrndz.cc &
-tools/generate-vunary-test.py --spec test/f16-vrndu.yaml  --output test/f16-vrndu.cc &
-tools/generate-vunary-test.py --spec test/f16-vrndd.yaml  --output test/f16-vrndd.cc &
-
 wait

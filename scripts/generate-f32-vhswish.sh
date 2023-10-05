@@ -46,7 +46,4 @@ tools/xngen src/f32-vhswish/avx.c.in -D BATCH_TILE=16 -D FMA=3 -o src/f32-vhswis
 tools/xngen src/f32-vhswish/avx512f.c.in -D BATCH_TILE=16 -o src/f32-vhswish/gen/f32-vhswish-avx512f-u16.c &
 tools/xngen src/f32-vhswish/avx512f.c.in -D BATCH_TILE=32 -o src/f32-vhswish/gen/f32-vhswish-avx512f-u32.c &
 
-################################## Unit tests #################################
-tools/generate-vunary-test.py --spec test/f32-vhswish.yaml --output test/f32-vhswish.cc &
-
 wait

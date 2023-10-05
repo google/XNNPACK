@@ -320,7 +320,4 @@ tools/xngen src/f32-vsigmoid/scalar-rr2-p5-div.c.in -D BATCH_TILE=1 -o src/f32-v
 tools/xngen src/f32-vsigmoid/scalar-rr2-p5-div.c.in -D BATCH_TILE=2 -o src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-p5-div-u2.c &
 tools/xngen src/f32-vsigmoid/scalar-rr2-p5-div.c.in -D BATCH_TILE=4 -o src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-p5-div-u4.c &
 
-################################## Unit tests #################################
-tools/generate-vunary-test.py --spec test/f32-vsigmoid.yaml --output test/f32-vsigmoid.cc &
-
 wait

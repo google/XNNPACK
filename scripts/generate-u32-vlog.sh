@@ -10,7 +10,4 @@ tools/xngen src/u32-vlog/scalar.c.in -D BATCH_TILE=2 -o src/u32-vlog/gen/u32-vlo
 tools/xngen src/u32-vlog/scalar.c.in -D BATCH_TILE=3 -o src/u32-vlog/gen/u32-vlog-scalar-x3.c &
 tools/xngen src/u32-vlog/scalar.c.in -D BATCH_TILE=4 -o src/u32-vlog/gen/u32-vlog-scalar-x4.c &
 
-################################## Unit tests #################################
-tools/generate-vlog-test.py --spec test/u32-vlog.yaml --output test/u32-vlog.cc &
-
 wait

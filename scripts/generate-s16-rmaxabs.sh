@@ -16,7 +16,4 @@ tools/xngen src/s16-rmaxabs/neon.c.in -D BATCH_TILE=16 -o src/s16-rmaxabs/gen/s1
 tools/xngen src/s16-rmaxabs/neon.c.in -D BATCH_TILE=24 -o src/s16-rmaxabs/gen/s16-rmaxabs-neon-x24.c &
 tools/xngen src/s16-rmaxabs/neon.c.in -D BATCH_TILE=32 -o src/s16-rmaxabs/gen/s16-rmaxabs-neon-x32.c &
 
-################################## Unit tests #################################
-tools/generate-rmaxabs-test.py --spec test/s16-rmaxabs.yaml --output test/s16-rmaxabs.cc &
-
 wait

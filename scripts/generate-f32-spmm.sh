@@ -124,7 +124,4 @@ tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=8  -D NR=1 -D UNROLL=2 -D
 tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=16 -D NR=1 -D UNROLL=2 -D MINMAX=PMINMAX -o src/f32-spmm/gen/f32-spmm-16x1-minmax-wasmsimd-x86-pipelined-x2.c &
 tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=32 -D NR=1 -D UNROLL=2 -D MINMAX=PMINMAX -o src/f32-spmm/gen/f32-spmm-32x1-minmax-wasmsimd-x86-pipelined-x2.c &
 
-################################## Unit tests #################################
-tools/generate-spmm-test.py --spec test/f32-spmm-minmax.yaml --output test/f32-spmm-minmax.cc &
-
 wait

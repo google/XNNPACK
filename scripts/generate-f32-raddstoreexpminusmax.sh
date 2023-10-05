@@ -141,7 +141,4 @@ tools/xngen src/f32-raddstoreexpminusmax/scalar-rr2-lut64-p2.c.in -D BATCH_TILE=
 tools/xngen src/f32-raddstoreexpminusmax/scalar-rr2-lut64-p2.c.in -D BATCH_TILE=4 -D ACCUMULATORS=2 -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-scalar-rr2-lut64-p2-u4-acc2.c &
 tools/xngen src/f32-raddstoreexpminusmax/scalar-rr2-lut64-p2.c.in -D BATCH_TILE=4 -D ACCUMULATORS=4 -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-scalar-rr2-lut64-p2-u4-acc4.c &
 
-################################## Unit tests #################################
-tools/generate-raddstoreexpminusmax-test.py --spec test/f32-raddstoreexpminusmax.yaml --output test/f32-raddstoreexpminusmax.cc &
-
 wait

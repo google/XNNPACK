@@ -78,11 +78,6 @@ tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=3 -D NR=16 -D ACCTYPE=F32 -o 
 tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x16-minmax-avx2-broadcast.c &
 tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-5x16-minmax-avx2-broadcast.c &
 
-################################## Unit tests #################################
-tools/generate-gemm-test.py --spec test/f16-gemm-minmax.yaml --output-test test/f16-gemm-minmax.cc &
-tools/generate-gemm-test.py --spec test/f16-f32acc-gemm-minmax.yaml --output-test test/f16-f32acc-gemm-minmax.cc &
-tools/generate-gemm-test.py --spec test/f16-gemm-jit.yaml --output-test test/f16-gemm-jit.cc &
-
 wait # JIT requires assembly files to be generated first.
 
 ##################################### JIT #####################################

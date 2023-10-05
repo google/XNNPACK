@@ -32,7 +32,4 @@ tools/xngen src/f32-vscaleexpminusmax/avx512f-p5-scalef.c.in -D BATCH_TILE=160 -
 tools/xngen src/f32-vscaleexpminusmax/avx512f-p5-scalef.c.in -D BATCH_TILE=176 -o src/f32-vscaleexpminusmax/gen/f32-vscaleexpminusmax-avx512f-p5-scalef-u176.c &
 tools/xngen src/f32-vscaleexpminusmax/avx512f-p5-scalef.c.in -D BATCH_TILE=192 -o src/f32-vscaleexpminusmax/gen/f32-vscaleexpminusmax-avx512f-p5-scalef-u192.c &
 
-################################## Unit tests #################################
-tools/generate-vscaleexpminusmax-test.py --spec test/f32-vscaleexpminusmax.yaml --output test/f32-vscaleexpminusmax.cc &
-
 wait

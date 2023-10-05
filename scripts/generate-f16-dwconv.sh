@@ -105,8 +105,4 @@ tools/xngen src/f16-dwconv/multipass-fma3.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_
 tools/xngen src/f16-dwconv/multipass-fma3.c.in -D CHANNEL_TILE=32 -D FIRST_PASS_TILE=8 -D MIDDLE_PASS_TILE=8 -D LAST_PASS_TILE=9 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-8f8m9l32c8s4r-minmax-fma3.c &
 tools/xngen src/f16-dwconv/multipass-fma3.c.in -D CHANNEL_TILE=32 -D FIRST_PASS_TILE=8 -D MIDDLE_PASS_TILE=8 -D LAST_PASS_TILE=9 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-8f8m9l32c8s4r-minmax-fma3-acc2.c &
 
-################################## Unit tests #################################
-tools/generate-dwconv-unipass-test.py --spec test/f16-dwconv-minmax-unipass.yaml --output test/f16-dwconv-minmax-unipass.cc &
-tools/generate-dwconv-multipass-test.py --spec test/f16-dwconv-minmax-multipass.yaml --output test/f16-dwconv-minmax-multipass.cc &
-
 wait

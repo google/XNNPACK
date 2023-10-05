@@ -26,7 +26,4 @@ tools/xngen src/f32-ibilinear-chw/neon.c.in -D PIXEL_TILE=16 -D FMA=1 -o src/f32
 tools/xngen src/f32-ibilinear-chw/sse.c.in -D PIXEL_TILE=4 -o src/f32-ibilinear-chw/gen/f32-ibilinear-chw-sse-p4.c &
 tools/xngen src/f32-ibilinear-chw/sse.c.in -D PIXEL_TILE=8 -o src/f32-ibilinear-chw/gen/f32-ibilinear-chw-sse-p8.c &
 
-################################## Unit tests #################################
-tools/generate-ibilinear-chw-test.py --spec test/f32-ibilinear-chw.yaml --output test/f32-ibilinear-chw.cc &
-
 wait

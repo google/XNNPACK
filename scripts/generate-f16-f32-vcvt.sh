@@ -84,7 +84,4 @@ tools/xngen src/f16-f32-vcvt/scalar.c.in -D BATCH_TILE=2 -o src/f16-f32-vcvt/gen
 tools/xngen src/f16-f32-vcvt/scalar.c.in -D BATCH_TILE=3 -o src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-u3.c &
 tools/xngen src/f16-f32-vcvt/scalar.c.in -D BATCH_TILE=4 -o src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-u4.c &
 
-################################## Unit tests #################################
-tools/generate-vcvt-test.py --spec test/f16-f32-vcvt.yaml --output test/f16-f32-vcvt.cc &
-
 wait

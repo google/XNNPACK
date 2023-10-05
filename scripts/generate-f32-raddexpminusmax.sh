@@ -32,7 +32,4 @@ tools/xngen src/f32-raddexpminusmax/avx512f-p5-scalef.c.in -D BATCH_TILE=192 -D 
 tools/xngen src/f32-raddexpminusmax/avx512f-p5-scalef.c.in -D BATCH_TILE=192 -D ACCUMULATORS=3 -o src/f32-raddexpminusmax/gen/f32-raddexpminusmax-avx512f-p5-scalef-u192-acc3.c &
 tools/xngen src/f32-raddexpminusmax/avx512f-p5-scalef.c.in -D BATCH_TILE=192 -D ACCUMULATORS=6 -o src/f32-raddexpminusmax/gen/f32-raddexpminusmax-avx512f-p5-scalef-u192-acc6.c &
 
-################################## Unit tests #################################
-tools/generate-raddexpminusmax-test.py --spec test/f32-raddexpminusmax.yaml --output test/f32-raddexpminusmax.cc &
-
 wait

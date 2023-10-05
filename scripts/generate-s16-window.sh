@@ -26,7 +26,4 @@ tools/xngen src/s16-window/neon.c.in -D CHANNEL_TILE=16 -D SHIFT=15  -o src/s16-
 tools/xngen src/s16-window/neon.c.in -D CHANNEL_TILE=24 -D SHIFT=15  -o src/s16-window/gen/s16-window-shift15-neon-u24.c &
 tools/xngen src/s16-window/neon.c.in -D CHANNEL_TILE=32 -D SHIFT=15  -o src/s16-window/gen/s16-window-shift15-neon-u32.c &
 
-################################## Unit tests #################################
-tools/generate-window-test.py --spec test/s16-window.yaml --output test/s16-window.cc &
-
 wait

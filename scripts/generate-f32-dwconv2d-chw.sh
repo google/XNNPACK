@@ -407,7 +407,4 @@ tools/xngen src/f32-dwconv2d-chw/5x5s2p2-wasmsimd-splat.c.in -D ROW_TILE=2 -D AC
 tools/xngen src/f32-dwconv2d-chw/5x5s2p2-wasmsimd-splat.c.in -D ROW_TILE=2 -D ACCUMULATORS=3 -D X86=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-wasmsimd-x86-splat-2x4-acc3.c &
 tools/xngen src/f32-dwconv2d-chw/5x5s2p2-wasmsimd-splat.c.in -D ROW_TILE=3 -D ACCUMULATORS=2 -D X86=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-wasmsimd-x86-splat-3x4-acc2.c &
 
-################################## Unit tests #################################
-tools/generate-dwconv2d-chw-test.py --spec test/f32-dwconv2d-chw.yaml --output test/f32-dwconv2d-chw.cc &
-
 wait

@@ -20,9 +20,4 @@ tools/xngen src/f16-vunary/sse2.c.in -D OP=NEG -D BATCH_TILE=16 -o src/f16-vunar
 tools/xngen src/f16-vunary/f16c.c.in -D OP=SQR -D BATCH_TILE=8  -o src/f16-vunary/gen/f16-vsqr-f16c-u8.c &
 tools/xngen src/f16-vunary/f16c.c.in -D OP=SQR -D BATCH_TILE=16 -o src/f16-vunary/gen/f16-vsqr-f16c-u16.c &
 
-################################## Unit tests #################################
-tools/generate-vunary-test.py --spec test/f16-vabs.yaml --output test/f16-vabs.cc &
-tools/generate-vunary-test.py --spec test/f16-vneg.yaml --output test/f16-vneg.cc &
-tools/generate-vunary-test.py --spec test/f16-vsqr.yaml --output test/f16-vsqr.cc &
-
 wait

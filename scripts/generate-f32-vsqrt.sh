@@ -72,7 +72,4 @@ tools/xngen src/f32-vsqrt/avx512f-nr1fma1adj.c.in -D BATCH_TILE=96  -o src/f32-v
 tools/xngen src/f32-vsqrt/avx512f-nr1fma1adj.c.in -D BATCH_TILE=112 -o src/f32-vsqrt/gen/f32-vsqrt-avx512f-nr1fma1adj-u112.c &
 tools/xngen src/f32-vsqrt/avx512f-nr1fma1adj.c.in -D BATCH_TILE=128 -o src/f32-vsqrt/gen/f32-vsqrt-avx512f-nr1fma1adj-u128.c &
 
-################################## Unit tests #################################
-tools/generate-vunary-test.py --spec test/f32-vsqrt.yaml --output test/f32-vsqrt.cc &
-
 wait

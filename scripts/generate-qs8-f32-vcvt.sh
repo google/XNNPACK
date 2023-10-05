@@ -90,8 +90,4 @@ tools/xngen src/qs8-f32-vcvt/scalar.c.in -D BATCH_TILE=2 -D DATATYPE=QU8 -o src/
 tools/xngen src/qs8-f32-vcvt/scalar.c.in -D BATCH_TILE=3 -D DATATYPE=QU8 -o src/qu8-f32-vcvt/gen/qu8-f32-vcvt-scalar-u3.c &
 tools/xngen src/qs8-f32-vcvt/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -o src/qu8-f32-vcvt/gen/qu8-f32-vcvt-scalar-u4.c &
 
-################################## Unit tests #################################
-tools/generate-vcvt-test.py --spec test/qs8-f32-vcvt.yaml --output test/qs8-f32-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/qu8-f32-vcvt.yaml --output test/qu8-f32-vcvt.cc &
-
 wait

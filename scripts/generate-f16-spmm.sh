@@ -22,7 +22,4 @@ tools/xngen src/f16-spmm/neonfp16arith-pipelined.c.in -D MR=16 -D NR=1 -o src/f1
 tools/xngen src/f16-spmm/neonfp16arith-pipelined.c.in -D MR=24 -D NR=1 -o src/f16-spmm/gen/f16-spmm-24x1-minmax-neonfp16arith-pipelined.c &
 tools/xngen src/f16-spmm/neonfp16arith-pipelined.c.in -D MR=32 -D NR=1 -o src/f16-spmm/gen/f16-spmm-32x1-minmax-neonfp16arith-pipelined.c &
 
-################################## Unit tests #################################
-tools/generate-spmm-test.py --spec test/f16-spmm-minmax.yaml --output test/f16-spmm-minmax.cc &
-
 wait
