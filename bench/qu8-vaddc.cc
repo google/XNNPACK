@@ -18,7 +18,7 @@
 #include <xnnpack/common.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/vadd.h>
+#include <xnnpack/vbinary.h>
 
 
 static void qu8_vaddc(

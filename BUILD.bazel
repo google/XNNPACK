@@ -146,7 +146,6 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/spmm.h",
     "src/xnnpack/transpose.h",
     "src/xnnpack/unpool.h",
-    "src/xnnpack/vadd.h",
     "src/xnnpack/vbinary.h",
     "src/xnnpack/vcvt.h",
     "src/xnnpack/vhswish.h",

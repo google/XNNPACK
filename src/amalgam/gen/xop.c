@@ -17,7 +17,7 @@
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/unaligned.h>
-#include <xnnpack/vadd.h>
+#include <xnnpack/vbinary.h>
 
 
 void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4c8__xop_ld128(

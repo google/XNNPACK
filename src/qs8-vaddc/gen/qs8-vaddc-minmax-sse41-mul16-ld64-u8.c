@@ -12,7 +12,7 @@
 #include <smmintrin.h>
 
 #include <xnnpack/unaligned.h>
-#include <xnnpack/vadd.h>
+#include <xnnpack/vbinary.h>
 
 
 void xnn_qs8_vaddc_minmax_ukernel__sse41_mul16_ld64_u8(

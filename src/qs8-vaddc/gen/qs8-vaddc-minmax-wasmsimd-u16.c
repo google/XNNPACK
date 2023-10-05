@@ -11,7 +11,7 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/vadd.h>
+#include <xnnpack/vbinary.h>
 
 
 void xnn_qs8_vaddc_minmax_ukernel__wasmsimd_u16(

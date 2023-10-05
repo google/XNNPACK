@@ -12,7 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vadd.h>
+#include <xnnpack/vbinary.h>
 
 
 void xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16(

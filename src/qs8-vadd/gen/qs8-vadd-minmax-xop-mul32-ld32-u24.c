@@ -17,7 +17,7 @@
 
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/unaligned.h>
-#include <xnnpack/vadd.h>
+#include <xnnpack/vbinary.h>
 
 
 void xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_u24(

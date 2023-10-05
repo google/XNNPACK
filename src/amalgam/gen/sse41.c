@@ -21,7 +21,7 @@
 #include <xnnpack/microparams.h>
 #include <xnnpack/prelu.h>
 #include <xnnpack/unaligned.h>
-#include <xnnpack/vadd.h>
+#include <xnnpack/vbinary.h>
 #include <xnnpack/vcvt.h>
 #include <xnnpack/vlrelu.h>
 #include <xnnpack/vmul.h>

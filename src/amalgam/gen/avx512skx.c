@@ -17,7 +17,7 @@
 #include <xnnpack/lut.h>
 #include <xnnpack/math.h>
 #include <xnnpack/microparams.h>
-#include <xnnpack/vadd.h>
+#include <xnnpack/vbinary.h>
 #include <xnnpack/vcvt.h>
 #include <xnnpack/vunary.h>
 

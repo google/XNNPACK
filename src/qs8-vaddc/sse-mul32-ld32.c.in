@@ -22,7 +22,7 @@ $else:
 
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/unaligned.h>
-#include <xnnpack/vadd.h>
+#include <xnnpack/vbinary.h>
 
 
 $PARAMS_STRUCT = {"QS8": "sse4_mul32", "QU8": "sse4"}[DATATYPE]
