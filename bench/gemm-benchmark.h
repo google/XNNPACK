@@ -541,4 +541,71 @@ void GEMMBenchmark(benchmark::State& state,
     uint64_t(state.iterations()) * 2 * mc * nc * kc, benchmark::Counter::kIsRate);
 }
 
+void GEMMBenchmark(benchmark::State& state,
+  xnn_f32_gemm_minmax_ukernel_fn gemm,
+  xnn_init_f32_minmax_params_fn init_params,
+  size_t mr, size_t nr, size_t kr, size_t sr,
+  benchmark::utils::IsaCheckFunction isa_check = nullptr)
+{
+  if (isa_check != nullptr && !isa_check(state)) {
+    return;
+  }
+
+  const size_t mc = state.range(0);
+  const size_t nc = state.range(1);
+  const size_t kc = state.range(2);
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
+
+  std::vector<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
+  std::generate(a.begin(), a.end(), std::ref(f32rng));
+
+  const size_t k_elements = nc * kc;
+  const size_t c_elements = mc * nc;
+  const size_t num_buffers = 1 +
+    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
+      sizeof(float) * (k_elements + c_elements));
+
+  std::vector<float> k(k_elements * num_buffers);
+  std::vector<float> c(c_elements * num_buffers);
+  std::generate(k.begin(), k.end(), std::ref(f32rng));
+  std::fill(c.begin(), c.end(), std::nanf(""));
+
+  xnn_f32_minmax_params params;
+  init_params(&params,
+    -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+
+  size_t buffer_index = 0;
+  for (auto _ : state) {
+    // Use circular buffers (exceeding cache size) and prefetch to control cache state:
+    // - A is always in L1 cache (if fits, otherwise L2, L3, etc)
+    // - K is not in cache (for any cache level)
+    // - C is not in cache (for any cache level)
+    state.PauseTiming();
+    benchmark::utils::PrefetchToL1(a.data(), a.size() * sizeof(float));
+    buffer_index = (buffer_index + 1) % num_buffers;
+    state.ResumeTiming();
+
+    for (uint32_t m = 0; m < mc; m += mr) {
+      const uint32_t mb = min(mc - m, mr);
+      gemm(
+        mb, nc, kc * sizeof(float),
+        a.data() + m * kc, kc * sizeof(float),
+        k.data() + (buffer_index * k_elements),
+        c.data() + (buffer_index * mc + m) * nc, nc * sizeof(float), nr * sizeof(float),
+        &params);
+    }
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  state.counters["FLOPS"] = benchmark::Counter(
+    uint64_t(state.iterations()) * 2 * mc * nc * kc, benchmark::Counter::kIsRate);
+}
+
 }  // namespace

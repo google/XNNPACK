@@ -661,6 +661,22 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f32_gemm_goi_minmax_bench",
+    srcs = [
+        "f32-gemm-goi-minmax.cc",
+        "gemm.h",
+        "google/gemm.h",
+    ],
+    copts = xnnpack_optional_ruy_copts(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+        "//:allocator",
+        "//:isa_checks",
+        "//:math",
+    ] + xnnpack_optional_ruy_deps(),
+)
+
+xnnpack_benchmark(
     name = "f32_qc4w_gemm_bench",
     srcs = [
         "f32-qc4w-gemm.cc",
