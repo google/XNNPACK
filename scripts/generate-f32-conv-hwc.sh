@@ -25,4 +25,6 @@ tools/xngen src/f32-conv-hwc/3x3s2p0p1c3-neon-x1.c.in -D CHANNEL_TILE=8 -D HEIGH
 tools/xngen src/f32-conv-hwc/3x3s2p0p1c3-neon-x2.c.in -D CHANNEL_TILE=4 -D HEIGHT_TILE=2 -D FMA=0 -o src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x4-neon-2x2.c &
 tools/xngen src/f32-conv-hwc/3x3s2p0p1c3-neon-x2.c.in -D CHANNEL_TILE=8 -D HEIGHT_TILE=2 -D FMA=0 -o src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x8-neon-2x2.c &
 
+tools/generate-conv-hwc-test.py --spec test/f32-conv-hwc.yaml --output test/f32-conv-hwc.cc &
+
 wait
