@@ -14,7 +14,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 $if REQUANTIZATION == "FP32" and ARMV8:
   #include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vmul.h>
+#include <xnnpack/vbinary.h>
 
 
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if ARMV8 else "neon")

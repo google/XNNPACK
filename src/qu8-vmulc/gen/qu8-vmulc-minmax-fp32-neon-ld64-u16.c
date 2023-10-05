@@ -11,7 +11,7 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/vmul.h>
+#include <xnnpack/vbinary.h>
 
 
 void xnn_qu8_vmulc_minmax_fp32_ukernel__neon_ld64_u16(

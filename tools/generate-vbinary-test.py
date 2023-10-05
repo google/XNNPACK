@@ -316,8 +316,8 @@ def main(args):
     microkernel_header = {
       "VAddMicrokernelTester": "xnnpack/vbinary.h",
       "VAddCMicrokernelTester": "xnnpack/vbinary.h",
-      "VMulMicrokernelTester": "xnnpack/vmul.h",
-      "VMulCMicrokernelTester": "xnnpack/vmul.h",
+      "VMulMicrokernelTester": "xnnpack/vbinary.h",
+      "VMulCMicrokernelTester": "xnnpack/vbinary.h",
       "VCMulMicrokernelTester": "xnnpack/vbinary.h",
       "VBinaryMicrokernelTester": "xnnpack/vbinary.h",
       "VBinaryCMicrokernelTester": "xnnpack/vbinary.h",

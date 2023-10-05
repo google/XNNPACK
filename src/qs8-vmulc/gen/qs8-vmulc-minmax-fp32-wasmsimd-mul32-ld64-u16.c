@@ -11,7 +11,7 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/vmul.h>
+#include <xnnpack/vbinary.h>
 
 
 void xnn_qs8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_u16(

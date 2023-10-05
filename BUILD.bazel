@@ -152,7 +152,6 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/vlog.h",
     "src/xnnpack/vlrelu.h",
     "src/xnnpack/vlshift.h",
-    "src/xnnpack/vmul.h",
     "src/xnnpack/vmulcaddc.h",
     "src/xnnpack/vscaleexpminusmax.h",
     "src/xnnpack/vscaleextexp.h",

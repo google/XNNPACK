@@ -16,7 +16,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <${SSE_HEADER}>
 
 #include <xnnpack/unaligned.h>
-#include <xnnpack/vmul.h>
+#include <xnnpack/vbinary.h>
 
 
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("sse4" if SSE == 4 and DATATYPE == "QS8" else "sse2")

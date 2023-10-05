@@ -12,7 +12,7 @@
 #include <arm_neon.h>
 
 #include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vmul.h>
+#include <xnnpack/vbinary.h>
 
 
 void xnn_qu8_vmul_minmax_fp32_ukernel__neonv8_ld128_u16(

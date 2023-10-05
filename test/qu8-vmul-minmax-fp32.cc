@@ -14,7 +14,7 @@
 #include <xnnpack/isa-checks.h>
 
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/vmul.h>
+#include <xnnpack/vbinary.h>
 #include "vmul-microkernel-tester.h"
 
 

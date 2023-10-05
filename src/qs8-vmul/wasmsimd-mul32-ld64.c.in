@@ -12,7 +12,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/vmul.h>
+#include <xnnpack/vbinary.h>
 
 
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_wasmsimd"
