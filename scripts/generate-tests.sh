@@ -60,6 +60,7 @@ tools/generate-gemm-test.py --spec test/f32-gemm-relu.yaml       --output-test t
 tools/generate-gemm-test.py --spec test/f32-gemm-minmax.yaml     --output-test test/f32-gemm-minmax.cc    --output-test test/f32-gemm-minmax-2.cc &
 tools/generate-gemm-test.py --spec test/f32-gemm-jit.yaml        --output-test test/f32-gemm-jit.cc &
 tools/generate-gemm-test.py --spec test/f32-gemminc-minmax.yaml  --output-test test/f32-gemminc-minmax.cc --output-test test/f32-gemminc-minmax-2.cc &
+tools/generate-gemm-test.py --spec test/f32-gemm-goi-minmax.yaml --output-test test/f32-gemm-goi-minmax.cc &
 
 tools/generate-gemm-test.py --spec test/f32-qc4w-gemm-minmax.yaml --output-test test/f32-qc4w-gemm-minmax.cc &
 

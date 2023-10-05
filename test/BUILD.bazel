@@ -789,10 +789,10 @@ xnnpack_unit_test(
     name = "f32_gemm_goi_minmax_test",
     srcs = [
         "f32-gemm-goi-minmax.cc",
-        "gemm-goi-microkernel-tester.h",
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
         "//:packing_test_mode",
     ],
 )

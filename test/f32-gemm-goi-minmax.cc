@@ -8,7 +8,7 @@
 //
 // Auto-generated file. Do not edit!
 //   Specification: test/f32-gemm-goi-minmax.yaml
-//   Generator: tools/generate-gemm-goi-test.py
+//   Generator: tools/generate-gemm-test.py
 
 
 #include <gtest/gtest.h>
@@ -21,13 +21,13 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/ppmm.h>
-#include "gemm-goi-microkernel-tester.h"
+#include "gemm-microkernel-tester.h"
 
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    GemmGoiMicrokernelTester()
+    GemmMicrokernelTester()
       .mr(1)
       .nr(8)
       .kr(1)
@@ -40,7 +40,7 @@
 
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128, strided_cn) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    GemmGoiMicrokernelTester()
+    GemmMicrokernelTester()
       .mr(1)
       .nr(8)
       .kr(1)
@@ -54,7 +54,7 @@
 
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128, k_eq_4_strided_a) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    GemmGoiMicrokernelTester()
+    GemmMicrokernelTester()
       .mr(1)
       .nr(8)
       .kr(1)
@@ -70,7 +70,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 1; n <= 8; n++) {
       for (uint32_t m = 1; m <= 1; m++) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(1)
           .nr(8)
           .kr(1)
@@ -87,7 +87,7 @@
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128, k_eq_4_subtile_m) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t m = 1; m <= 1; m++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(1)
         .nr(8)
         .kr(1)
@@ -103,7 +103,7 @@
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128, k_eq_4_subtile_n) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 1; n <= 8; n++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(1)
         .nr(8)
         .kr(1)
@@ -119,7 +119,7 @@
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128, k_lt_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 1; k < 4; k++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(1)
         .nr(8)
         .kr(1)
@@ -134,7 +134,7 @@
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128, k_lt_4_strided_a) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 1; k < 4; k++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(1)
         .nr(8)
         .kr(1)
@@ -152,7 +152,7 @@
     for (size_t k = 1; k < 4; k++) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 1; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(1)
             .nr(8)
             .kr(1)
@@ -170,7 +170,7 @@
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128, k_gt_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 5; k < 8; k++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(1)
         .nr(8)
         .kr(1)
@@ -185,7 +185,7 @@
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128, k_gt_4_strided_a) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 5; k < 8; k++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(1)
         .nr(8)
         .kr(1)
@@ -203,7 +203,7 @@
     for (size_t k = 5; k < 8; k++) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 1; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(1)
             .nr(8)
             .kr(1)
@@ -221,7 +221,7 @@
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128, k_div_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 8; k <= 40; k += 4) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(1)
         .nr(8)
         .kr(1)
@@ -236,7 +236,7 @@
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128, k_div_4_strided_a) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 8; k <= 40; k += 4) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(1)
         .nr(8)
         .kr(1)
@@ -254,7 +254,7 @@
     for (size_t k = 8; k <= 40; k += 4) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 1; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(1)
             .nr(8)
             .kr(1)
@@ -273,7 +273,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(1)
           .nr(8)
           .kr(1)
@@ -290,7 +290,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(1)
           .nr(8)
           .kr(1)
@@ -308,7 +308,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(1)
           .nr(8)
           .kr(1)
@@ -327,7 +327,7 @@
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         for (uint32_t m = 1; m <= 1; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(1)
             .nr(8)
             .kr(1)
@@ -346,7 +346,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(1)
           .nr(8)
           .kr(1)
@@ -363,7 +363,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(1)
           .nr(8)
           .kr(1)
@@ -381,7 +381,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(1)
           .nr(8)
           .kr(1)
@@ -400,7 +400,7 @@
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
         for (uint32_t m = 1; m <= 1; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(1)
             .nr(8)
             .kr(1)
@@ -420,7 +420,7 @@
     for (size_t k = 1; k <= 20; k += 5) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 1; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(1)
             .nr(8)
             .kr(1)
@@ -438,7 +438,7 @@
 
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128, strided_cm) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    GemmGoiMicrokernelTester()
+    GemmMicrokernelTester()
       .mr(1)
       .nr(8)
       .kr(1)
@@ -455,7 +455,7 @@
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128_PRFM, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    GemmGoiMicrokernelTester()
+    GemmMicrokernelTester()
       .mr(1)
       .nr(8)
       .kr(1)
@@ -468,7 +468,7 @@
 
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128_PRFM, strided_cn) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    GemmGoiMicrokernelTester()
+    GemmMicrokernelTester()
       .mr(1)
       .nr(8)
       .kr(1)
@@ -482,7 +482,7 @@
 
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128_PRFM, k_eq_4_strided_a) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    GemmGoiMicrokernelTester()
+    GemmMicrokernelTester()
       .mr(1)
       .nr(8)
       .kr(1)
@@ -498,7 +498,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 1; n <= 8; n++) {
       for (uint32_t m = 1; m <= 1; m++) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(1)
           .nr(8)
           .kr(1)
@@ -515,7 +515,7 @@
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128_PRFM, k_eq_4_subtile_m) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t m = 1; m <= 1; m++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(1)
         .nr(8)
         .kr(1)
@@ -531,7 +531,7 @@
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128_PRFM, k_eq_4_subtile_n) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 1; n <= 8; n++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(1)
         .nr(8)
         .kr(1)
@@ -547,7 +547,7 @@
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128_PRFM, k_lt_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 1; k < 4; k++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(1)
         .nr(8)
         .kr(1)
@@ -562,7 +562,7 @@
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128_PRFM, k_lt_4_strided_a) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 1; k < 4; k++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(1)
         .nr(8)
         .kr(1)
@@ -580,7 +580,7 @@
     for (size_t k = 1; k < 4; k++) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 1; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(1)
             .nr(8)
             .kr(1)
@@ -598,7 +598,7 @@
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128_PRFM, k_gt_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 5; k < 8; k++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(1)
         .nr(8)
         .kr(1)
@@ -613,7 +613,7 @@
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128_PRFM, k_gt_4_strided_a) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 5; k < 8; k++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(1)
         .nr(8)
         .kr(1)
@@ -631,7 +631,7 @@
     for (size_t k = 5; k < 8; k++) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 1; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(1)
             .nr(8)
             .kr(1)
@@ -649,7 +649,7 @@
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128_PRFM, k_div_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 8; k <= 40; k += 4) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(1)
         .nr(8)
         .kr(1)
@@ -664,7 +664,7 @@
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128_PRFM, k_div_4_strided_a) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 8; k <= 40; k += 4) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(1)
         .nr(8)
         .kr(1)
@@ -682,7 +682,7 @@
     for (size_t k = 8; k <= 40; k += 4) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 1; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(1)
             .nr(8)
             .kr(1)
@@ -701,7 +701,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(1)
           .nr(8)
           .kr(1)
@@ -718,7 +718,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(1)
           .nr(8)
           .kr(1)
@@ -736,7 +736,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(1)
           .nr(8)
           .kr(1)
@@ -755,7 +755,7 @@
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         for (uint32_t m = 1; m <= 1; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(1)
             .nr(8)
             .kr(1)
@@ -774,7 +774,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(1)
           .nr(8)
           .kr(1)
@@ -791,7 +791,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(1)
           .nr(8)
           .kr(1)
@@ -809,7 +809,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(1)
           .nr(8)
           .kr(1)
@@ -828,7 +828,7 @@
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
         for (uint32_t m = 1; m <= 1; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(1)
             .nr(8)
             .kr(1)
@@ -848,7 +848,7 @@
     for (size_t k = 1; k <= 20; k += 5) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 1; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(1)
             .nr(8)
             .kr(1)
@@ -866,7 +866,7 @@
 
   TEST(F32_GEMM_GOI_MINMAX_1X8__ASM_AARCH64_NEONFMA_LD128_PRFM, strided_cm) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    GemmGoiMicrokernelTester()
+    GemmMicrokernelTester()
       .mr(1)
       .nr(8)
       .kr(1)
@@ -883,7 +883,7 @@
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   TEST(F32_GEMM_GOI_MINMAX_4X8__ASM_AARCH64_NEONFMA_LD128, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    GemmGoiMicrokernelTester()
+    GemmMicrokernelTester()
       .mr(4)
       .nr(8)
       .kr(1)
@@ -896,7 +896,7 @@
 
   TEST(F32_GEMM_GOI_MINMAX_4X8__ASM_AARCH64_NEONFMA_LD128, strided_cn) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    GemmGoiMicrokernelTester()
+    GemmMicrokernelTester()
       .mr(4)
       .nr(8)
       .kr(1)
@@ -910,7 +910,7 @@
 
   TEST(F32_GEMM_GOI_MINMAX_4X8__ASM_AARCH64_NEONFMA_LD128, k_eq_4_strided_a) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    GemmGoiMicrokernelTester()
+    GemmMicrokernelTester()
       .mr(4)
       .nr(8)
       .kr(1)
@@ -926,7 +926,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 1; n <= 8; n++) {
       for (uint32_t m = 1; m <= 4; m++) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(4)
           .nr(8)
           .kr(1)
@@ -943,7 +943,7 @@
   TEST(F32_GEMM_GOI_MINMAX_4X8__ASM_AARCH64_NEONFMA_LD128, k_eq_4_subtile_m) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t m = 1; m <= 4; m++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(4)
         .nr(8)
         .kr(1)
@@ -959,7 +959,7 @@
   TEST(F32_GEMM_GOI_MINMAX_4X8__ASM_AARCH64_NEONFMA_LD128, k_eq_4_subtile_n) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 1; n <= 8; n++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(4)
         .nr(8)
         .kr(1)
@@ -975,7 +975,7 @@
   TEST(F32_GEMM_GOI_MINMAX_4X8__ASM_AARCH64_NEONFMA_LD128, k_lt_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 1; k < 4; k++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(4)
         .nr(8)
         .kr(1)
@@ -990,7 +990,7 @@
   TEST(F32_GEMM_GOI_MINMAX_4X8__ASM_AARCH64_NEONFMA_LD128, k_lt_4_strided_a) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 1; k < 4; k++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(4)
         .nr(8)
         .kr(1)
@@ -1008,7 +1008,7 @@
     for (size_t k = 1; k < 4; k++) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 4; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(4)
             .nr(8)
             .kr(1)
@@ -1026,7 +1026,7 @@
   TEST(F32_GEMM_GOI_MINMAX_4X8__ASM_AARCH64_NEONFMA_LD128, k_gt_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 5; k < 8; k++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(4)
         .nr(8)
         .kr(1)
@@ -1041,7 +1041,7 @@
   TEST(F32_GEMM_GOI_MINMAX_4X8__ASM_AARCH64_NEONFMA_LD128, k_gt_4_strided_a) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 5; k < 8; k++) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(4)
         .nr(8)
         .kr(1)
@@ -1059,7 +1059,7 @@
     for (size_t k = 5; k < 8; k++) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 4; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(4)
             .nr(8)
             .kr(1)
@@ -1077,7 +1077,7 @@
   TEST(F32_GEMM_GOI_MINMAX_4X8__ASM_AARCH64_NEONFMA_LD128, k_div_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 8; k <= 40; k += 4) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(4)
         .nr(8)
         .kr(1)
@@ -1092,7 +1092,7 @@
   TEST(F32_GEMM_GOI_MINMAX_4X8__ASM_AARCH64_NEONFMA_LD128, k_div_4_strided_a) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t k = 8; k <= 40; k += 4) {
-      GemmGoiMicrokernelTester()
+      GemmMicrokernelTester()
         .mr(4)
         .nr(8)
         .kr(1)
@@ -1110,7 +1110,7 @@
     for (size_t k = 8; k <= 40; k += 4) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 4; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(4)
             .nr(8)
             .kr(1)
@@ -1129,7 +1129,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(4)
           .nr(8)
           .kr(1)
@@ -1146,7 +1146,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(4)
           .nr(8)
           .kr(1)
@@ -1164,7 +1164,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(4)
           .nr(8)
           .kr(1)
@@ -1183,7 +1183,7 @@
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         for (uint32_t m = 1; m <= 4; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(4)
             .nr(8)
             .kr(1)
@@ -1202,7 +1202,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(4)
           .nr(8)
           .kr(1)
@@ -1219,7 +1219,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(4)
           .nr(8)
           .kr(1)
@@ -1237,7 +1237,7 @@
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
-        GemmGoiMicrokernelTester()
+        GemmMicrokernelTester()
           .mr(4)
           .nr(8)
           .kr(1)
@@ -1256,7 +1256,7 @@
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
         for (uint32_t m = 1; m <= 4; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(4)
             .nr(8)
             .kr(1)
@@ -1276,7 +1276,7 @@
     for (size_t k = 1; k <= 20; k += 5) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 4; m++) {
-          GemmGoiMicrokernelTester()
+          GemmMicrokernelTester()
             .mr(4)
             .nr(8)
             .kr(1)
@@ -1294,7 +1294,7 @@
 
   TEST(F32_GEMM_GOI_MINMAX_4X8__ASM_AARCH64_NEONFMA_LD128, strided_cm) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    GemmGoiMicrokernelTester()
+    GemmMicrokernelTester()
       .mr(4)
       .nr(8)
       .kr(1)
