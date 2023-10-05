@@ -6833,7 +6833,6 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qu8-vlrelu/gen/qu8-vlrelu-sse2-u32.c
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-sse2-mul16-ld64-u8.c
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-sse2-mul16-ld64-u16.c
-  src/qu8-vmul/gen/qu8-vmul-minmax-fp32-sse2-mul16-ld64-x16.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse2-mul16-ld64-u8.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse2-mul16-ld64-u16.c
   src/s8-ibilinear/gen/s8-ibilinear-sse2-c8.c
