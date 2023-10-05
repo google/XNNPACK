@@ -1,0 +1,8 @@
+# Copyright 2023 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# ARM NEON FP16
+- name: xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2
+  init: xnn_init_f16_minmax_fp16arith_params

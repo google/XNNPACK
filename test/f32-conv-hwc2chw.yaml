@@ -1,0 +1,24 @@
+# Copyright 2023 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# AArch64
+- name: xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__neon_2x2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2
+  init: xnn_init_f32_minmax_scalar_params
+
+# x86
+- name: xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_1x1
+  init: xnn_init_f32_minmax_sse_params
+- name: xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_2x2
+  init: xnn_init_f32_minmax_sse_params
+
+# Wasm SIMD
+- name: xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2
+  init: xnn_init_f32_minmax_wasmsimd_params
+
+# Scalar
+- name: xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__scalar_1x1
+  init: xnn_init_f32_minmax_scalar_params
