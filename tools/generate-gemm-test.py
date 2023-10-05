@@ -65,8 +65,10 @@ GEMM_BENCH_CODE_XW = """\
 static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
   GEMMBenchmark(state,
     ${GEMM},
-    ${INIT_PARAMS},
-    ${PACK_FN},
+    $if INIT_PARAMS is not None:
+      ${INIT_PARAMS},
+    $if PACK_FN is not None:
+      ${PACK_FN},
     /*mr=*/${MR}, /*nr=*/${NR}, /*kr=*/${KR}, /*sr=*/${SR},
     $if ISA_CHECK:
       benchmark::utils::${ISA_CHECK},
@@ -81,8 +83,10 @@ GEMM_BENCH_CODE = """\
 static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
   GEMMBenchmark(state,
     ${GEMM},
-    ${INIT_PARAMS},
-    ${PACK_FN},
+    $if INIT_PARAMS is not None:
+      ${INIT_PARAMS},
+    $if PACK_FN is not None:
+      ${PACK_FN},
     /*mr=*/${MR}, /*nr=*/${NR}, /*kr=*/${KR}, /*sr=*/${SR},
     $if ISA_CHECK:
       benchmark::utils::${ISA_CHECK});
