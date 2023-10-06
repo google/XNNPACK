@@ -1772,7 +1772,7 @@ xnnpack_unit_test(
     name = "qs8_vadd_minmax_test",
     srcs = [
         "qs8-vadd-minmax.cc",
-        "vadd-microkernel-tester.h",
+        "vbinary-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -1781,7 +1781,7 @@ xnnpack_unit_test(
     name = "qs8_vaddc_minmax_test",
     srcs = [
         "qs8-vaddc-minmax.cc",
-        "vaddc-microkernel-tester.h",
+        "vbinaryc-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -2007,7 +2007,7 @@ xnnpack_unit_test(
     name = "qu8_vadd_minmax_test",
     srcs = [
         "qu8-vadd-minmax.cc",
-        "vadd-microkernel-tester.h",
+        "vbinary-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -2016,7 +2016,7 @@ xnnpack_unit_test(
     name = "qu8_vaddc_minmax_test",
     srcs = [
         "qu8-vaddc-minmax.cc",
-        "vaddc-microkernel-tester.h",
+        "vbinaryc-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )

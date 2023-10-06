@@ -20,7 +20,7 @@ import xnncommon
 parser = argparse.ArgumentParser(
   description='Vector binary operation microkernel test generator')
 parser.add_argument("-t", "--tester", metavar="TESTER", required=True,
-                    choices=["VAddMicrokernelTester", "VAddCMicrokernelTester",
+                    choices=[
                     "VCMulMicrokernelTester",
                     "VMulMicrokernelTester", "VMulCMicrokernelTester",
                     "VBinaryMicrokernelTester", "VBinaryCMicrokernelTester"],
@@ -113,7 +113,7 @@ TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
   }
 }
 
-$if TESTER in ["VAddCMicrokernelTester", "VMulCMicrokernelTester", "VBinaryCMicrokernelTester"]:
+$if TESTER in ["VMulCMicrokernelTester", "VBinaryCMicrokernelTester"]:
   TEST(${TEST_NAME}, inplace) {
     $if ISA_CHECK:
       ${ISA_CHECK};
@@ -285,7 +285,7 @@ def generate_test_cases(ukernel, op_type, init_fn, activation_type,
   _, test_name = ukernel.split("_", 1)
   _, datatype, _ = ukernel.split("_", 2)
   test_args = [ukernel]
-  if tester in ["VBinaryMicrokernelTester", "VBinaryCMicrokernelTester"]:
+  if tester in ["VBinaryMicrokernelTester", "VBinaryCMicrokernelTester"] and not datatype in ['qs8', 'qu8']:
     test_args.append("%s::OpType::%s" % (tester, op_type))
   if init_fn:
     test_args.append(init_fn)
@@ -315,8 +315,6 @@ def main(args):
     spec_name = os.path.splitext(os.path.split(options.spec)[1])[0]
     microkernel_header = "xnnpack/vbinary.h"
     tester_header = {
-      "VAddMicrokernelTester": "vadd-microkernel-tester.h",
-      "VAddCMicrokernelTester": "vaddc-microkernel-tester.h",
       "VMulMicrokernelTester": "vmul-microkernel-tester.h",
       "VMulCMicrokernelTester": "vmulc-microkernel-tester.h",
       "VCMulMicrokernelTester": "vcmul-microkernel-tester.h",
