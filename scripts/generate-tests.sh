@@ -91,8 +91,6 @@ tools/generate-gemm-test.py --spec test/qs8-qc8w-gemm-minmax-fp32.yaml \
   --output-bench bench/qs8-qc8w-gemm-fp32.cc &
 tools/generate-gemm-test.py --spec test/qs8-qc8w-gemm-jit-fp32.yaml --output-test test/qs8-qc8w-gemm-jit-fp32.cc &
 
-tools/generate-gemm-goi-test.py --spec test/f32-gemm-goi-minmax.yaml --output test/f32-gemm-goi-minmax.cc &
-
 ### Tests for IGEMM micro-kernels
 tools/generate-gemm-test.py --spec test/f16-igemm-minmax.yaml --output-test test/f16-igemm-minmax.cc &
 tools/generate-gemm-test.py --spec test/f16-igemm-jit.yaml --output-test test/f16-igemm-jit.cc &
