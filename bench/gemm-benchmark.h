@@ -343,7 +343,7 @@ void GEMMBenchmark(benchmark::State& state,
   std::fill(w.begin(), w.end(), 0);
 
   const xnn_qs8_qc4w_packing_params packing_params = { /*input_zero_point=*/1, /*kernel_zero_point=*/8 };
-  pack(1, nc, kc / 2, nr, kr, sr, k.data(), /*bias=*/nullptr, /*scale=*/nullptr,
+  pack(1, nc, kc, nr, kr, sr, k.data(), /*bias=*/nullptr, /*scale=*/nullptr,
        w.data(), sizeof(float) * 2 * nr, &packing_params);
   std::vector<float> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));

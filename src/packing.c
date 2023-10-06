@@ -397,6 +397,10 @@ void xnn_pack_qs8_qc4w_legacy_gemm_goi_w(
   assert(k != NULL);
   assert(packed_weights != NULL);
 
+  kr = (kr + 1) >> 1;
+  assert(kr == 1 || kr == 2 || kr == 4);
+  assert(sr == 1);
+  assert(kc != 0);
   const size_t kb = (kc + 1) >> 1;
   const size_t skr = sr * kr;
   const uint32_t izp = (uint32_t) params->input_zero_point;
@@ -472,6 +476,10 @@ void xnn_pack_qs8_qc4w_legacy_gemm_gio_w(
   assert(k != NULL);
   assert(packed_weights != NULL);
 
+  kr = (kr + 1) >> 1;
+  assert(kr == 1 || kr == 2 || kr == 4);
+  assert(sr == 1);
+  assert(kc != 0);
   const size_t kb = (kc + 1) >> 1;
   // Weights in GIO are padded with 0 in the O dimension if O is odd. k_stride is given in number of elements, convert
   // it to bytes since each element is half-byte.

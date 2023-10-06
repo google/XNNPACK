@@ -139,11 +139,10 @@ static enum xnn_status create_fully_connected_nc(
   xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
     aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
 
-  const size_t kr_bytes = filter_is_nibble ? ((kr + 1) / 2) : kr;
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     pack_gemm_gio_w(
       /*groups=*/1, output_channels, input_channels,
-      nr, kr_bytes, sr,
+      nr, kr, sr,
       output_channels,
       kernel, bias, /*scale=*/NULL,
       weights_ptr,
@@ -152,7 +151,7 @@ static enum xnn_status create_fully_connected_nc(
   } else {
     pack_gemm_goi_w(
       /*groups=*/1, output_channels, input_channels,
-      nr, kr_bytes, sr,
+      nr, kr, sr,
       kernel, bias, /*scale=*/NULL,
       weights_ptr,
       gemm_config->nr * extra_weights_bytes,
