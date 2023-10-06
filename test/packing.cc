@@ -25,7 +25,7 @@ TEST(PACK_QD8_F32_QC4W_GEMM_LEGACY_GIO_W, g_eq_1) {
   const size_t nc = 3;
   const size_t kc = 5;
   const size_t nr = 2;
-  const size_t kr = 2;
+  const size_t kr = 4;
   const size_t sr = 1;
 
   const size_t rounded_nc = round_up_po2(nc, 2) >> 1;
@@ -74,7 +74,7 @@ TEST(PACK_QD8_F32_QC4W_GEMM_LEGACY_GOI_W, g_eq_1) {
   size_t nc = 3;
   size_t kc = 5;
   size_t nr = 2;
-  size_t kr = 2;
+  size_t kr = 4;
   size_t sr = 1;
 
   size_t kb = round_up_po2(kc, 2) >> 1;
