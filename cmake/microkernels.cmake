@@ -6745,6 +6745,8 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/qs8-vaddc-minmax-sse2-mul16-ld64-u32.c
   src/qs8-vcvt/gen/qs8-vcvt-sse2-u16.c
   src/qs8-vcvt/gen/qs8-vcvt-sse2-u32.c
+  src/qs8-vhswish/gen/qs8-vhswish-sse2-u16.c
+  src/qs8-vhswish/gen/qs8-vhswish-sse2-u32.c
   src/qs8-vlrelu/gen/qs8-vlrelu-sse2-u16.c
   src/qs8-vlrelu/gen/qs8-vlrelu-sse2-u32.c
   src/qs8-vmul/gen/qs8-vmul-minmax-fp32-sse2-mul16-ld64-u8.c
@@ -6829,6 +6831,8 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qu8-vaddc/gen/qu8-vaddc-minmax-sse2-mul16-ld64-u16.c
   src/qu8-vcvt/gen/qu8-vcvt-sse2-u16.c
   src/qu8-vcvt/gen/qu8-vcvt-sse2-u32.c
+  src/qu8-vhswish/gen/qu8-vhswish-sse2-u16.c
+  src/qu8-vhswish/gen/qu8-vhswish-sse2-u32.c
   src/qu8-vlrelu/gen/qu8-vlrelu-sse2-u16.c
   src/qu8-vlrelu/gen/qu8-vlrelu-sse2-u32.c
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-sse2-mul16-ld64-u8.c
@@ -7210,6 +7214,9 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qs8-vcvt/gen/qs8-vcvt-sse41-u8.c
   src/qs8-vcvt/gen/qs8-vcvt-sse41-u16.c
   src/qs8-vcvt/gen/qs8-vcvt-sse41-u32.c
+  src/qs8-vhswish/gen/qs8-vhswish-sse41-u8.c
+  src/qs8-vhswish/gen/qs8-vhswish-sse41-u16.c
+  src/qs8-vhswish/gen/qs8-vhswish-sse41-u32.c
   src/qs8-vlrelu/gen/qs8-vlrelu-sse41-u8.c
   src/qs8-vlrelu/gen/qs8-vlrelu-sse41-u16.c
   src/qs8-vlrelu/gen/qs8-vlrelu-sse41-u32.c
@@ -7307,6 +7314,9 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qu8-vcvt/gen/qu8-vcvt-sse41-u8.c
   src/qu8-vcvt/gen/qu8-vcvt-sse41-u16.c
   src/qu8-vcvt/gen/qu8-vcvt-sse41-u32.c
+  src/qu8-vhswish/gen/qu8-vhswish-sse41-u8.c
+  src/qu8-vhswish/gen/qu8-vhswish-sse41-u16.c
+  src/qu8-vhswish/gen/qu8-vhswish-sse41-u32.c
   src/qu8-vlrelu/gen/qu8-vlrelu-sse41-u8.c
   src/qu8-vlrelu/gen/qu8-vlrelu-sse41-u16.c
   src/qu8-vlrelu/gen/qu8-vlrelu-sse41-u32.c
@@ -7351,6 +7361,8 @@ SET(ALL_SSSE3_MICROKERNEL_SRCS
   src/qs8-requantization/qs8-requantization-rndna-ssse3.c
   src/qs8-vcvt/gen/qs8-vcvt-ssse3-u16.c
   src/qs8-vcvt/gen/qs8-vcvt-ssse3-u32.c
+  src/qs8-vhswish/gen/qs8-vhswish-ssse3-u16.c
+  src/qs8-vhswish/gen/qs8-vhswish-ssse3-u32.c
   src/qs8-vlrelu/gen/qs8-vlrelu-ssse3-u16.c
   src/qs8-vlrelu/gen/qs8-vlrelu-ssse3-u32.c
   src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-ssse3-u4.c
@@ -7360,6 +7372,8 @@ SET(ALL_SSSE3_MICROKERNEL_SRCS
   src/qu8-requantization/qu8-requantization-rndna-ssse3.c
   src/qu8-vcvt/gen/qu8-vcvt-ssse3-u16.c
   src/qu8-vcvt/gen/qu8-vcvt-ssse3-u32.c
+  src/qu8-vhswish/gen/qu8-vhswish-ssse3-u16.c
+  src/qu8-vhswish/gen/qu8-vhswish-ssse3-u32.c
   src/qu8-vlrelu/gen/qu8-vlrelu-ssse3-u16.c
   src/qu8-vlrelu/gen/qu8-vlrelu-ssse3-u32.c
   src/x8-lut/gen/x8-lut-ssse3-u16.c

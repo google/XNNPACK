@@ -203,10 +203,12 @@ def main(args):
 
 #include <gtest/gtest.h>
 
+#include <vector>
+
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-
 #include <xnnpack/vhswish.h>
+
 #include "vhswish-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 

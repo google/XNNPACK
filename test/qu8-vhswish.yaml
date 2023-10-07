@@ -11,6 +11,26 @@
 - name: xnn_qu8_vhswish_ukernel__neon_u32
   init: xnn_init_qu8_hswish_neon_params
 
+# x86 SSE2
+- name: xnn_qu8_vhswish_ukernel__sse2_u16
+  init: xnn_init_qu8_hswish_sse2_params
+- name: xnn_qu8_vhswish_ukernel__sse2_u32
+  init: xnn_init_qu8_hswish_sse2_params
+
+# x86 SSSE3
+- name: xnn_qu8_vhswish_ukernel__ssse3_u16
+  init: xnn_init_qu8_hswish_sse2_params
+- name: xnn_qu8_vhswish_ukernel__ssse3_u32
+  init: xnn_init_qu8_hswish_sse2_params
+
+# x86 SSE4.1
+- name: xnn_qu8_vhswish_ukernel__sse41_u8
+  init: xnn_init_qu8_hswish_sse2_params
+- name: xnn_qu8_vhswish_ukernel__sse41_u16
+  init: xnn_init_qu8_hswish_sse2_params
+- name: xnn_qu8_vhswish_ukernel__sse41_u32
+  init: xnn_init_qu8_hswish_sse2_params
+
 # Scalar
 - name: xnn_qu8_vhswish_ukernel__scalar_u1
   init: xnn_init_qu8_hswish_scalar_params

@@ -10,10 +10,12 @@
 
 #include <gtest/gtest.h>
 
+#include <vector>
+
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-
 #include <xnnpack/vhswish.h>
+
 #include "vhswish-microkernel-tester.h"
 
 
@@ -312,6 +314,699 @@
     }
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(QU8_VHSWISH__SSE2_U16, batch_eq_16) {
+    TEST_REQUIRES_X86_SSE2;
+    VHSwishMicrokernelTester()
+      .batch_size(16)
+      .input_zero_point(150)
+      .output_zero_point(100)
+      .Test(xnn_qu8_vhswish_ukernel__sse2_u16, xnn_init_qu8_hswish_sse2_params);
+  }
+
+  TEST(QU8_VHSWISH__SSE2_U16, batch_div_16) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__sse2_u16, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE2_U16, batch_lt_16) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__sse2_u16, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE2_U16, batch_gt_16) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 17; batch_size < 32; batch_size++) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__sse2_u16, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE2_U16, input_scale) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_scale(input_scale)
+          .input_zero_point(150)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__sse2_u16, xnn_init_qu8_hswish_sse2_params);
+        }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE2_U16, output_scale) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .output_scale(output_scale)
+          .input_zero_point(150)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__sse2_u16, xnn_init_qu8_hswish_sse2_params);
+        }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE2_U16, input_zero_point) {
+    TEST_REQUIRES_X86_SSE2;
+    for (int16_t input_zero_point = 2; input_zero_point < 10; input_zero_point += 3) {
+      for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(input_zero_point)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__sse2_u16, xnn_init_qu8_hswish_sse2_params);
+      }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE2_U16, output_zero_point) {
+    TEST_REQUIRES_X86_SSE2;
+    for (int16_t output_zero_point = 2; output_zero_point < 10; output_zero_point += 3) {
+      for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(150)
+          .output_zero_point(output_zero_point)
+          .Test(xnn_qu8_vhswish_ukernel__sse2_u16, xnn_init_qu8_hswish_sse2_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(QU8_VHSWISH__SSE2_U32, batch_eq_32) {
+    TEST_REQUIRES_X86_SSE2;
+    VHSwishMicrokernelTester()
+      .batch_size(32)
+      .input_zero_point(150)
+      .output_zero_point(100)
+      .Test(xnn_qu8_vhswish_ukernel__sse2_u32, xnn_init_qu8_hswish_sse2_params);
+  }
+
+  TEST(QU8_VHSWISH__SSE2_U32, batch_div_32) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__sse2_u32, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE2_U32, batch_lt_32) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 1; batch_size < 32; batch_size++) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__sse2_u32, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE2_U32, batch_gt_32) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 33; batch_size < 64; batch_size++) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__sse2_u32, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE2_U32, input_scale) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_scale(input_scale)
+          .input_zero_point(150)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__sse2_u32, xnn_init_qu8_hswish_sse2_params);
+        }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE2_U32, output_scale) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .output_scale(output_scale)
+          .input_zero_point(150)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__sse2_u32, xnn_init_qu8_hswish_sse2_params);
+        }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE2_U32, input_zero_point) {
+    TEST_REQUIRES_X86_SSE2;
+    for (int16_t input_zero_point = 2; input_zero_point < 10; input_zero_point += 3) {
+      for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(input_zero_point)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__sse2_u32, xnn_init_qu8_hswish_sse2_params);
+      }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE2_U32, output_zero_point) {
+    TEST_REQUIRES_X86_SSE2;
+    for (int16_t output_zero_point = 2; output_zero_point < 10; output_zero_point += 3) {
+      for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(150)
+          .output_zero_point(output_zero_point)
+          .Test(xnn_qu8_vhswish_ukernel__sse2_u32, xnn_init_qu8_hswish_sse2_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(QU8_VHSWISH__SSSE3_U16, batch_eq_16) {
+    TEST_REQUIRES_X86_SSSE3;
+    VHSwishMicrokernelTester()
+      .batch_size(16)
+      .input_zero_point(150)
+      .output_zero_point(100)
+      .Test(xnn_qu8_vhswish_ukernel__ssse3_u16, xnn_init_qu8_hswish_sse2_params);
+  }
+
+  TEST(QU8_VHSWISH__SSSE3_U16, batch_div_16) {
+    TEST_REQUIRES_X86_SSSE3;
+    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__ssse3_u16, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSSE3_U16, batch_lt_16) {
+    TEST_REQUIRES_X86_SSSE3;
+    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__ssse3_u16, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSSE3_U16, batch_gt_16) {
+    TEST_REQUIRES_X86_SSSE3;
+    for (size_t batch_size = 17; batch_size < 32; batch_size++) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__ssse3_u16, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSSE3_U16, input_scale) {
+    TEST_REQUIRES_X86_SSSE3;
+    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_scale(input_scale)
+          .input_zero_point(150)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__ssse3_u16, xnn_init_qu8_hswish_sse2_params);
+        }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSSE3_U16, output_scale) {
+    TEST_REQUIRES_X86_SSSE3;
+    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .output_scale(output_scale)
+          .input_zero_point(150)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__ssse3_u16, xnn_init_qu8_hswish_sse2_params);
+        }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSSE3_U16, input_zero_point) {
+    TEST_REQUIRES_X86_SSSE3;
+    for (int16_t input_zero_point = 2; input_zero_point < 10; input_zero_point += 3) {
+      for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(input_zero_point)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__ssse3_u16, xnn_init_qu8_hswish_sse2_params);
+      }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSSE3_U16, output_zero_point) {
+    TEST_REQUIRES_X86_SSSE3;
+    for (int16_t output_zero_point = 2; output_zero_point < 10; output_zero_point += 3) {
+      for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(150)
+          .output_zero_point(output_zero_point)
+          .Test(xnn_qu8_vhswish_ukernel__ssse3_u16, xnn_init_qu8_hswish_sse2_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(QU8_VHSWISH__SSSE3_U32, batch_eq_32) {
+    TEST_REQUIRES_X86_SSSE3;
+    VHSwishMicrokernelTester()
+      .batch_size(32)
+      .input_zero_point(150)
+      .output_zero_point(100)
+      .Test(xnn_qu8_vhswish_ukernel__ssse3_u32, xnn_init_qu8_hswish_sse2_params);
+  }
+
+  TEST(QU8_VHSWISH__SSSE3_U32, batch_div_32) {
+    TEST_REQUIRES_X86_SSSE3;
+    for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__ssse3_u32, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSSE3_U32, batch_lt_32) {
+    TEST_REQUIRES_X86_SSSE3;
+    for (size_t batch_size = 1; batch_size < 32; batch_size++) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__ssse3_u32, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSSE3_U32, batch_gt_32) {
+    TEST_REQUIRES_X86_SSSE3;
+    for (size_t batch_size = 33; batch_size < 64; batch_size++) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__ssse3_u32, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSSE3_U32, input_scale) {
+    TEST_REQUIRES_X86_SSSE3;
+    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_scale(input_scale)
+          .input_zero_point(150)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__ssse3_u32, xnn_init_qu8_hswish_sse2_params);
+        }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSSE3_U32, output_scale) {
+    TEST_REQUIRES_X86_SSSE3;
+    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .output_scale(output_scale)
+          .input_zero_point(150)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__ssse3_u32, xnn_init_qu8_hswish_sse2_params);
+        }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSSE3_U32, input_zero_point) {
+    TEST_REQUIRES_X86_SSSE3;
+    for (int16_t input_zero_point = 2; input_zero_point < 10; input_zero_point += 3) {
+      for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(input_zero_point)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__ssse3_u32, xnn_init_qu8_hswish_sse2_params);
+      }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSSE3_U32, output_zero_point) {
+    TEST_REQUIRES_X86_SSSE3;
+    for (int16_t output_zero_point = 2; output_zero_point < 10; output_zero_point += 3) {
+      for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(150)
+          .output_zero_point(output_zero_point)
+          .Test(xnn_qu8_vhswish_ukernel__ssse3_u32, xnn_init_qu8_hswish_sse2_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(QU8_VHSWISH__SSE41_U8, batch_eq_8) {
+    TEST_REQUIRES_X86_SSE41;
+    VHSwishMicrokernelTester()
+      .batch_size(8)
+      .input_zero_point(150)
+      .output_zero_point(100)
+      .Test(xnn_qu8_vhswish_ukernel__sse41_u8, xnn_init_qu8_hswish_sse2_params);
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U8, batch_div_8) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__sse41_u8, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U8, batch_lt_8) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 1; batch_size < 8; batch_size++) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__sse41_u8, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U8, batch_gt_8) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 9; batch_size < 16; batch_size++) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__sse41_u8, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U8, input_scale) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_scale(input_scale)
+          .input_zero_point(150)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__sse41_u8, xnn_init_qu8_hswish_sse2_params);
+        }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U8, output_scale) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .output_scale(output_scale)
+          .input_zero_point(150)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__sse41_u8, xnn_init_qu8_hswish_sse2_params);
+        }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U8, input_zero_point) {
+    TEST_REQUIRES_X86_SSE41;
+    for (int16_t input_zero_point = 2; input_zero_point < 10; input_zero_point += 3) {
+      for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(input_zero_point)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__sse41_u8, xnn_init_qu8_hswish_sse2_params);
+      }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U8, output_zero_point) {
+    TEST_REQUIRES_X86_SSE41;
+    for (int16_t output_zero_point = 2; output_zero_point < 10; output_zero_point += 3) {
+      for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(150)
+          .output_zero_point(output_zero_point)
+          .Test(xnn_qu8_vhswish_ukernel__sse41_u8, xnn_init_qu8_hswish_sse2_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(QU8_VHSWISH__SSE41_U16, batch_eq_16) {
+    TEST_REQUIRES_X86_SSE41;
+    VHSwishMicrokernelTester()
+      .batch_size(16)
+      .input_zero_point(150)
+      .output_zero_point(100)
+      .Test(xnn_qu8_vhswish_ukernel__sse41_u16, xnn_init_qu8_hswish_sse2_params);
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U16, batch_div_16) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__sse41_u16, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U16, batch_lt_16) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__sse41_u16, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U16, batch_gt_16) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 17; batch_size < 32; batch_size++) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__sse41_u16, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U16, input_scale) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_scale(input_scale)
+          .input_zero_point(150)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__sse41_u16, xnn_init_qu8_hswish_sse2_params);
+        }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U16, output_scale) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .output_scale(output_scale)
+          .input_zero_point(150)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__sse41_u16, xnn_init_qu8_hswish_sse2_params);
+        }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U16, input_zero_point) {
+    TEST_REQUIRES_X86_SSE41;
+    for (int16_t input_zero_point = 2; input_zero_point < 10; input_zero_point += 3) {
+      for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(input_zero_point)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__sse41_u16, xnn_init_qu8_hswish_sse2_params);
+      }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U16, output_zero_point) {
+    TEST_REQUIRES_X86_SSE41;
+    for (int16_t output_zero_point = 2; output_zero_point < 10; output_zero_point += 3) {
+      for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(150)
+          .output_zero_point(output_zero_point)
+          .Test(xnn_qu8_vhswish_ukernel__sse41_u16, xnn_init_qu8_hswish_sse2_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(QU8_VHSWISH__SSE41_U32, batch_eq_32) {
+    TEST_REQUIRES_X86_SSE41;
+    VHSwishMicrokernelTester()
+      .batch_size(32)
+      .input_zero_point(150)
+      .output_zero_point(100)
+      .Test(xnn_qu8_vhswish_ukernel__sse41_u32, xnn_init_qu8_hswish_sse2_params);
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U32, batch_div_32) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__sse41_u32, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U32, batch_lt_32) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 1; batch_size < 32; batch_size++) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__sse41_u32, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U32, batch_gt_32) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 33; batch_size < 64; batch_size++) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(150)
+        .output_zero_point(100)
+        .Test(xnn_qu8_vhswish_ukernel__sse41_u32, xnn_init_qu8_hswish_sse2_params);
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U32, input_scale) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_scale(input_scale)
+          .input_zero_point(150)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__sse41_u32, xnn_init_qu8_hswish_sse2_params);
+        }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U32, output_scale) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .output_scale(output_scale)
+          .input_zero_point(150)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__sse41_u32, xnn_init_qu8_hswish_sse2_params);
+        }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U32, input_zero_point) {
+    TEST_REQUIRES_X86_SSE41;
+    for (int16_t input_zero_point = 2; input_zero_point < 10; input_zero_point += 3) {
+      for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(input_zero_point)
+          .output_zero_point(100)
+          .Test(xnn_qu8_vhswish_ukernel__sse41_u32, xnn_init_qu8_hswish_sse2_params);
+      }
+    }
+  }
+
+  TEST(QU8_VHSWISH__SSE41_U32, output_zero_point) {
+    TEST_REQUIRES_X86_SSE41;
+    for (int16_t output_zero_point = 2; output_zero_point < 10; output_zero_point += 3) {
+      for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(150)
+          .output_zero_point(output_zero_point)
+          .Test(xnn_qu8_vhswish_ukernel__sse41_u32, xnn_init_qu8_hswish_sse2_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 TEST(QU8_VHSWISH__SCALAR_U1, batch_eq_1) {

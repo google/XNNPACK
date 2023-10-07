@@ -87,18 +87,63 @@ static void qu8_vhswish(
 BENCHMARK_CAPTURE(qu8_vhswish, scalar_u1,
                   xnn_qu8_vhswish_ukernel__scalar_u1,
                   xnn_init_qu8_hswish_scalar_params)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
   ->UseRealTime();
 BENCHMARK_CAPTURE(qu8_vhswish, scalar_u2,
                   xnn_qu8_vhswish_ukernel__scalar_u2,
                   xnn_init_qu8_hswish_scalar_params)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
   ->UseRealTime();
 BENCHMARK_CAPTURE(qu8_vhswish, scalar_u4,
                   xnn_qu8_vhswish_ukernel__scalar_u4,
                   xnn_init_qu8_hswish_scalar_params)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
   ->UseRealTime();
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qu8_vhswish, sse41_u8,
+                    xnn_qu8_vhswish_ukernel__sse41_u8,
+                    xnn_init_qu8_hswish_sse2_params,
+                    benchmark::utils::CheckSSE41)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qu8_vhswish, sse41_u16,
+                    xnn_qu8_vhswish_ukernel__sse41_u16,
+                    xnn_init_qu8_hswish_sse2_params,
+                    benchmark::utils::CheckSSE41)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qu8_vhswish, sse41_u32,
+                    xnn_qu8_vhswish_ukernel__sse41_u32,
+                    xnn_init_qu8_hswish_sse2_params,
+                    benchmark::utils::CheckSSE41)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(qu8_vhswish, ssse3_u16,
+                    xnn_qu8_vhswish_ukernel__ssse3_u16,
+                    xnn_init_qu8_hswish_sse2_params,
+                    benchmark::utils::CheckSSSE3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qu8_vhswish, ssse3_u32,
+                    xnn_qu8_vhswish_ukernel__ssse3_u32,
+                    xnn_init_qu8_hswish_sse2_params,
+                    benchmark::utils::CheckSSSE3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(qu8_vhswish, sse2_u16,
+                    xnn_qu8_vhswish_ukernel__sse2_u16,
+                    xnn_init_qu8_hswish_sse2_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qu8_vhswish, sse2_u32,
+                    xnn_qu8_vhswish_ukernel__sse2_u32,
+                    xnn_init_qu8_hswish_sse2_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+#endif // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

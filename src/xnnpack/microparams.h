@@ -2054,7 +2054,7 @@ union xnn_f32_hswish_params {
 
 union xnn_qs8_hswish_params {
   struct {
-    int32_t input_zero_point;
+    uint32_t input_zero_point;
     int32_t output_zero_point;
     int32_t input_scale_div_mantissa;
     int32_t input_scale_div_exp;
@@ -2069,11 +2069,20 @@ union xnn_qs8_hswish_params {
     int16_t scale_ratio;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) int16_t input_zero_point[8];
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) int16_t input_scale_div[8];
+    XNN_ALIGN(16) int16_t scale_ratio[8];
+    XNN_ALIGN(32) int32_t half[4];
+  } sse2;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_qu8_hswish_params {
 struct {
-    int32_t input_zero_point;
+    uint32_t input_zero_point;
     int32_t output_zero_point;
     int32_t input_scale_div_mantissa;
     int32_t input_scale_div_exp;
@@ -2088,6 +2097,15 @@ struct {
     int16_t scale_ratio;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) int16_t input_zero_point[8];
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) int16_t input_scale_div[8];
+    XNN_ALIGN(16) int16_t scale_ratio[8];
+    XNN_ALIGN(32) int32_t half[4];
+  } sse2;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 

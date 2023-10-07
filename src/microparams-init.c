@@ -2222,7 +2222,7 @@ size_t xnn_init_qs8_hswish_scalar_params(
   float input_scale,
   float output_scale)
 {
-  params->scalar.input_zero_point = (int32_t) input_zero_point;
+  params->scalar.input_zero_point = (uint32_t) input_zero_point;
   params->scalar.output_zero_point= (int32_t) output_zero_point;
   const float divisor1 = 0x1.555556p-10f;
   const uint32_t input_scale_div = float_as_uint32(input_scale * divisor1);
@@ -2257,6 +2257,32 @@ size_t xnn_init_qs8_hswish_neon_params(
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+size_t xnn_init_qs8_hswish_sse2_params(
+  union xnn_qs8_hswish_params params[XNN_MIN_ELEMENTS(1)],
+  int16_t input_zero_point,
+  int16_t output_zero_point,
+  float input_scale,
+  float output_scale)
+{
+  const int16_t input_scale_div = (int16_t) -lrintf(256.0f * input_scale / 6.0f);
+  const float scale_ratio = input_scale / output_scale;
+  assert(scale_ratio >= 0x1.0p-8f);
+  assert(scale_ratio < 0x1.0p+7f);
+  const int16_t scale_ratio_param = (int16_t) -lrintf(scale_ratio * 512.0f);
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse2.input_zero_point[i] = input_zero_point;
+    params->sse2.output_zero_point[i] = output_zero_point;
+    params->sse2.input_scale_div[i] = input_scale_div;
+    params->sse2.scale_ratio[i] = scale_ratio_param;
+  }
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse2.half[i] = 16384;
+  }
+  return sizeof(params->sse2);
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 size_t xnn_init_qu8_hswish_scalar_params(
   union xnn_qu8_hswish_params params[XNN_MIN_ELEMENTS(1)],
   int16_t input_zero_point,
@@ -2264,7 +2290,7 @@ size_t xnn_init_qu8_hswish_scalar_params(
   float input_scale,
   float output_scale)
 {
-  params->scalar.input_zero_point = (int32_t) input_zero_point;
+  params->scalar.input_zero_point = (uint32_t) input_zero_point;
   params->scalar.output_zero_point= (int32_t) output_zero_point;
   const float divisor1 = 0x1.555556p-10f;
   const uint32_t input_scale_div = float_as_uint32(input_scale * divisor1);
@@ -2297,6 +2323,33 @@ size_t xnn_init_qu8_hswish_neon_params(
   return sizeof(params->neon);
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+size_t xnn_init_qu8_hswish_sse2_params(
+  union xnn_qu8_hswish_params params[XNN_MIN_ELEMENTS(1)],
+  int16_t input_zero_point,
+  int16_t output_zero_point,
+  float input_scale,
+  float output_scale)
+{
+  const int16_t input_scale_div = (int16_t) -lrintf(256.0f * input_scale / 6.0f);
+  const float scale_ratio = input_scale / output_scale;
+  assert(scale_ratio >= 0x1.0p-8f);
+  assert(scale_ratio < 0x1.0p+7f);
+  const int16_t scale_ratio_param = (int16_t) -lrintf(scale_ratio * 512.0f);
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse2.input_zero_point[i] = input_zero_point;
+    params->sse2.output_zero_point[i] = output_zero_point;
+    params->sse2.input_scale_div[i] = input_scale_div;
+    params->sse2.scale_ratio[i] = scale_ratio_param;
+  }
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse2.half[i] = 16384;
+  }
+
+  return sizeof(params->sse2);
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_f16_sigmoid_fp16arith_rr2_p2_params(

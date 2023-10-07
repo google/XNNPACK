@@ -111,7 +111,7 @@ void xnn_${DATATYPE.lower()}_vhswish_ukernel__scalar_u${BATCH_TILE}(
         vout = math_asr_s32(vin * vout, 15) + voutput_zero_point;
         vout = math_max_s32(vout, ${OUTPUT_MIN});
         vout = math_min_s32(vout, ${OUTPUT_MAX});
-        *output++ = (${XINT8_T}) vout;
+        *output = (${XINT8_T}) vout;
       $else:
         do {
           const int32_t vacc = (int32_t) ((vinput_zero_point - (uint32_t) *input++) << 7);
