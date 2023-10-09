@@ -260,16 +260,6 @@ def generate_test_cases(ukernel, nr, kr, sr, kblock, isa):
   return test_case, benchmark
 
 
-def write_output(output_name, output_str):
-  txt_changed = True
-  if os.path.exists(output_name):
-    with codecs.open(output_name, "r", encoding="utf-8") as output_file:
-      txt_changed = output_file.read() != output_str
-  if txt_changed:
-    with codecs.open(output_name, "w", encoding="utf-8") as output_file:
-      output_file.write(output_str)
-
-
 def main(args):
   options = parser.parse_args(args)
 
@@ -331,7 +321,7 @@ def main(args):
       benches[isa_hierarchy.get(isa, 0)] += \
         "\n\n" + xnncommon.postprocess_test_case(benchmark, arch, isa)
 
-    write_output(options.output, tests)
+    xnncommon.overwrite_if_changed(options.output, tests)
 
     for arch_idx in reversed(range(len(isa_hierarchy))):
       bench_output += benches[arch_idx]
@@ -344,7 +334,7 @@ BENCHMARK_MAIN();
 
     if options.output_bench:
       output_name = options.output_bench
-      write_output(output_name, bench_output)
+      xnncommon.overwrite_if_changed(output_name, bench_output)
 
 if __name__ == "__main__":
   main(sys.argv[1:])
