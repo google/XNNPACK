@@ -3571,14 +3571,14 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x32-packw/gen/x32-packw-x16-gemm-goi-neon-ld4lane-u4.c
   src/x32-packw/gen/x32-packw-x16-gemm-goi-neon-ld4lane-u8-prfm.c
   src/x32-packw/gen/x32-packw-x16-gemm-goi-neon-ld4lane-u8.c
-  src/x32-packx/gen/x32-packx-4x-neon-st4-x4-prfm.c
-  src/x32-packx/gen/x32-packx-4x-neon-st4-x4.c
-  src/x32-packx/gen/x32-packx-4x-neon-st4-x8-prfm.c
-  src/x32-packx/gen/x32-packx-4x-neon-st4-x8.c
-  src/x32-packx/gen/x32-packx-8x-neon-st4-x4-prfm.c
-  src/x32-packx/gen/x32-packx-8x-neon-st4-x4.c
-  src/x32-packx/gen/x32-packx-8x-neon-st4-x8-prfm.c
-  src/x32-packx/gen/x32-packx-8x-neon-st4-x8.c
+  src/x32-packx/gen/x32-packx-4x-neon-st4-u4-prfm.c
+  src/x32-packx/gen/x32-packx-4x-neon-st4-u4.c
+  src/x32-packx/gen/x32-packx-4x-neon-st4-u8-prfm.c
+  src/x32-packx/gen/x32-packx-4x-neon-st4-u8.c
+  src/x32-packx/gen/x32-packx-8x-neon-st4-u4-prfm.c
+  src/x32-packx/gen/x32-packx-8x-neon-st4-u4.c
+  src/x32-packx/gen/x32-packx-8x-neon-st4-u8-prfm.c
+  src/x32-packx/gen/x32-packx-8x-neon-st4-u8.c
   src/x32-transposec/gen/x32-transposec-2x2-multi-dec-zip-neon.c
   src/x32-transposec/gen/x32-transposec-2x2-multi-mov-zip-neon.c
   src/x32-transposec/gen/x32-transposec-2x2-multi-multi-zip-neon.c
