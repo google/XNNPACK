@@ -284,6 +284,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
     xnn_generate_igemms_up_to_max_mr(
       mr, gemm_config->generator, jit_gemm_params, group_output_channels, nr,
       group_input_channels << log2_input_element_size, kernel_size, deconvolution_op);
+    xnn_set_igemm_gemm_cases_codegen(mr, deconvolution_op);
   #endif  // XNN_PLATFORM_JIT
 
   deconvolution_op->state = xnn_run_state_invalid;
@@ -932,6 +933,9 @@ static enum xnn_status reshape_subconv2d_path(
   const size_t output_size = output_height * output_width;
   uint32_t mr = deconvolution_op->ukernel.igemm.mr;
   const uint32_t nr = deconvolution_op->ukernel.igemm.nr;
+  #if XNN_PLATFORM_JIT
+    xnn_set_igemm_gemm_cases_codegen(mr, deconvolution_op);
+  #endif  // XNN_PLATFORM_JIT
   bool use_gemm = deconvolution_op->ukernel.subtype == xnn_microkernel_type_gemm;
   #if XNN_ENABLE_GEMM_M_SPECIALIZATION
     if (use_gemm) {
