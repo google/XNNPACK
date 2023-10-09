@@ -22,7 +22,6 @@ parser = argparse.ArgumentParser(
 parser.add_argument("-t", "--tester", metavar="TESTER", required=True,
                     choices=[
                     "VCMulMicrokernelTester",
-                    "VMulMicrokernelTester", "VMulCMicrokernelTester",
                     "VBinaryMicrokernelTester", "VBinaryCMicrokernelTester"],
                     help="Tester class to be used in the generated test")
 parser.add_argument("-s", "--spec", metavar="FILE", required=True,
@@ -315,8 +314,6 @@ def main(args):
     spec_name = os.path.splitext(os.path.split(options.spec)[1])[0]
     microkernel_header = "xnnpack/vbinary.h"
     tester_header = {
-      "VMulMicrokernelTester": "vmul-microkernel-tester.h",
-      "VMulCMicrokernelTester": "vmulc-microkernel-tester.h",
       "VCMulMicrokernelTester": "vcmul-microkernel-tester.h",
       "VBinaryMicrokernelTester": "vbinary-microkernel-tester.h",
       "VBinaryCMicrokernelTester": "vbinaryc-microkernel-tester.h",
