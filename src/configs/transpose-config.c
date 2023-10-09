@@ -252,6 +252,28 @@ static void init_transpose_config(void) {
       .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_scalar_memcpy,
       .tile_size = 32,
     };
+  #elif XNN_ARCH_PPC64
+    transpose_config.copy = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
+    transpose_config.x8 = (struct xnn_transpose_subconfig) {
+      .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x8_transposec_ukernel__2x4_scalar_int,
+      .tile_size = 32,
+    };
+    transpose_config.x16 = (struct xnn_transpose_subconfig) {
+      .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x16_transposec_ukernel__2x4_scalar_int,
+      .tile_size = 32,
+    };
+    transpose_config.x24 = (struct xnn_transpose_subconfig) {
+      .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x24_transposec_ukernel__1x2_scalar,
+      .tile_size = 32,
+    };
+    transpose_config.x32 = (struct xnn_transpose_subconfig) {
+      .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__2x4_scalar_int,
+      .tile_size = 32,
+    };
+    transpose_config.xx = (struct xnn_transpose_subconfig) {
+      .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_scalar_memcpy,
+      .tile_size = 32,
+    };
   #else
     #error "Unsupported architecture"
   #endif

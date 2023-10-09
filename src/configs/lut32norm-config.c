@@ -45,6 +45,8 @@ static void init_u8_lut32norm_config(void) {
     u8_lut32norm_config.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
   #elif XNN_ARCH_RISCV
     u8_lut32norm_config.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
+  #elif XNN_ARCH_PPC64
+    u8_lut32norm_config.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
   #endif
 }
 

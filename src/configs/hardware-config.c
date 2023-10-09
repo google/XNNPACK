@@ -28,6 +28,10 @@
   #define COMPAT_HWCAP_ISA_V (1 << ('V' - 'A'))
 #endif
 
+#if XNN_ARCH_PPC64
+  #include <sys/auxv.h>
+#endif
+
 #if XNN_ARCH_WASMRELAXEDSIMD
   #include <wasm_simd128.h>
 #endif
@@ -113,6 +117,22 @@ static void init_hardware_config(void) {
     }
   #endif
 
+  #if XNN_ARCH_PPC64
+    const unsigned long HWCAPs = getauxval(AT_HWCAP);
+    const unsigned long HWCAPs_2 = getauxval(AT_HWCAP2);
+    if (HWCAPs & PPC_FEATURE_HAS_VSX) {
+      hardware_config.use_vsx = 1;
+    }
+    #if defined PPC_FEATURE2_ARCH_3_1
+      if (HWCAPs_2 &  PPC_FEATURE2_ARCH_3_1) {
+        hardware_config.use_vsx3 = 1;
+      }
+      if (HWCAPs_2 & PPC_FEATURE2_MMA) {
+        hardware_config.use_mma = 1;
+      }
+    #endif
+  #endif
+
   #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     // Unlike most other architectures, on x86/x86-64 when floating-point instructions
     // have no NaN arguments, but produce NaN output, the output NaN has sign bit set.
@@ -185,7 +205,7 @@ static void init_hardware_config(void) {
 #endif
 
 const struct xnn_hardware_config* xnn_init_hardware_config() {
-  #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !(XNN_ARCH_ARM64 && XNN_PLATFORM_WINDOWS)
+  #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !XNN_ARCH_PPC64 && !(XNN_ARCH_ARM64 && XNN_PLATFORM_WINDOWS)
     if (!cpuinfo_initialize()) {
       xnn_log_error("failed to initialize cpuinfo");
       return NULL;

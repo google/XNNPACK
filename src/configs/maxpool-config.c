@@ -115,6 +115,11 @@ static void init_f32_maxpool_config(void) {
     f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_maxpool_config.first_pass_tile_size = 9;
     f32_maxpool_config.remainder_pass_tile_size = 8;
+  #elif XNN_ARCH_PPC64
+    f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p8x__scalar_c1;
+    f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_maxpool_config.first_pass_tile_size = 9;
+    f32_maxpool_config.remainder_pass_tile_size = 8;
   #endif
 }
 
@@ -167,6 +172,11 @@ static void init_s8_maxpool_config(void) {
     s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
     s8_maxpool_config.first_pass_tile_size = 9;
     s8_maxpool_config.remainder_pass_tile_size = 8;
+  #elif XNN_ARCH_PPC64
+    s8_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1;
+    s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
+    s8_maxpool_config.first_pass_tile_size = 9;
+    s8_maxpool_config.remainder_pass_tile_size = 8;
   #endif
 }
 
@@ -206,6 +216,11 @@ static void init_u8_maxpool_config(void) {
     u8_maxpool_config.first_pass_tile_size = 9;
     u8_maxpool_config.remainder_pass_tile_size = 8;
   #elif XNN_ARCH_RISCV
+    u8_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1;
+    u8_maxpool_config.init.u8 = xnn_init_u8_minmax_scalar_params;
+    u8_maxpool_config.first_pass_tile_size = 9;
+    u8_maxpool_config.remainder_pass_tile_size = 8;
+  #elif XNN_ARCH_PPC64
     u8_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1;
     u8_maxpool_config.init.u8 = xnn_init_u8_minmax_scalar_params;
     u8_maxpool_config.first_pass_tile_size = 9;
