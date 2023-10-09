@@ -89,6 +89,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld64(
 
     vacc0x0123 = wasm_f32x4_convert_i32x4(vacc0x0123);
 
+
     const v128_t vscale = wasm_v128_load64_splat(params->fp32_wasmsimd.scale);
     vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vscale);
 

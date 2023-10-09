@@ -15,19 +15,20 @@
 #include <xnnpack/math.h>
 
 
-void xnn_qs8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld128(
+void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4c8__wasmsimd_dot16x2_ld64(
     size_t mr,
     size_t nc,
     size_t kc,
     size_t ks,
     const int8_t** restrict a,
     const void* restrict w,
-    int8_t* restrict c,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= 1);
@@ -41,13 +42,19 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld128(
   assert(c != NULL);
 
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
-  int8_t* c0 = c;
+  float* c0 = c;
 
+  const v128_t vinput_zero_point = wasm_v128_load32_splat(&quantization_params->zero_point);
+  const v128_t vinput_scale = wasm_v128_load32_splat(&quantization_params->inv_scale);
   do {
-    v128_t vacc0x0 = wasm_v128_load32_zero(w);
-    v128_t vacc0x1 = wasm_v128_load32_zero((const int32_t*) w + 1);
-    v128_t vacc0x2 = wasm_v128_load32_zero((const int32_t*) w + 2);
-    v128_t vacc0x3 = wasm_v128_load32_zero((const int32_t*) w + 3);
+    const v128_t vksum0123 = wasm_v128_load(w);
+    const v128_t vinit0x0123 = wasm_i32x4_mul(vksum0123, vinput_zero_point);
+
+    const v128_t vzero = wasm_i32x4_const_splat(0);
+    v128_t vacc0x0 = wasm_v32x4_shuffle(vinit0x0123, vzero, 0, 5, 6, 7);
+    v128_t vacc0x1 = wasm_v32x4_shuffle(vinit0x0123, vzero, 4, 1, 6, 7);
+    v128_t vacc0x2 = wasm_v32x4_shuffle(vinit0x0123, vzero, 4, 5, 2, 7);
+    v128_t vacc0x3 = wasm_v32x4_shuffle(vinit0x0123, vzero, 4, 5, 6, 3);
     w = (const void*) ((const int32_t*) w + 4);
 
     size_t p = ks;
@@ -63,17 +70,17 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld128(
         const v128_t vxa0 = wasm_i16x8_load8x8(a0);
         a0 += 8;
 
-        const v128_t vb01 = wasm_v128_load(w);
-        const v128_t vxb0 = wasm_i16x8_extend_low_i8x16(vb01);
-        const v128_t vxb1 = wasm_i16x8_extend_high_i8x16(vb01);
+        const v128_t vxb0 = wasm_i16x8_load8x8(w);
 
         vacc0x0 = wasm_i32x4_add(vacc0x0, wasm_i32x4_dot_i16x8(vxa0, vxb0));
+        const v128_t vxb1 = wasm_i16x8_load8x8((const int8_t*) w + 8);
+
         vacc0x1 = wasm_i32x4_add(vacc0x1, wasm_i32x4_dot_i16x8(vxa0, vxb1));
-        const v128_t vb23 = wasm_v128_load((const int8_t*) w + 16);
-        const v128_t vxb2 = wasm_i16x8_extend_low_i8x16(vb23);
-        const v128_t vxb3 = wasm_i16x8_extend_high_i8x16(vb23);
+        const v128_t vxb2 = wasm_i16x8_load8x8((const int8_t*) w + 16);
 
         vacc0x2 = wasm_i32x4_add(vacc0x2, wasm_i32x4_dot_i16x8(vxa0, vxb2));
+        const v128_t vxb3 = wasm_i16x8_load8x8((const int8_t*) w + 24);
+
         vacc0x3 = wasm_i32x4_add(vacc0x3, wasm_i32x4_dot_i16x8(vxa0, vxb3));
 
         w = (const void*) ((const int8_t*) w + 32);
@@ -89,45 +96,39 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld128(
 
     vacc0x0123 = wasm_f32x4_convert_i32x4(vacc0x0123);
 
+    vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vinput_scale);
 
-    const v128_t vscale = wasm_v128_load64_splat(params->fp32_wasmsimd.scale);
-    vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vscale);
+    const v128_t vfilter_output_scale0123 = wasm_v128_load(w);
+    vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vfilter_output_scale0123);
+    w = (const float*) w + 4;
 
-    const v128_t vmagic_bias = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias);
-    vacc0x0123 = wasm_f32x4_add(vacc0x0123, vmagic_bias);
+    const v128_t vbias0123 = wasm_v128_load(w);
+    vacc0x0123 = wasm_f32x4_add(vacc0x0123, vbias0123);
+    w = (const float*) w + 4;
 
-    const v128_t vmagic_min = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_min);
-    vacc0x0123 = wasm_i32x4_max(vacc0x0123, vmagic_min);
+    const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
+    vacc0x0123 = wasm_f32x4_pmax(vacc0x0123, vmin);
 
-    const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias_less_output_zero_point);
-    vacc0x0123 = wasm_i32x4_sub(vacc0x0123, vmagic_bias_less_output_zero_point);
+    const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
+    vacc0x0123 = wasm_f32x4_pmin(vacc0x0123, vmax);
 
-    v128_t vacc00x0123 = wasm_i16x8_narrow_i32x4(vacc0x0123, vacc0x0123);
-
-    v128_t vout = wasm_i8x16_narrow_i16x8(vacc00x0123, vacc00x0123);
-
-    const v128_t voutput_max = wasm_v128_load64_splat(params->fp32_wasmsimd.output_max);
-    vout = wasm_i8x16_min(vout, voutput_max);
-
-    if (nc >= 4) {
-      wasm_v128_store32_lane(c0, vout, 0);
-
-      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
+    if XNN_LIKELY(nc >= 4) {
+      wasm_v128_store(c0, vacc0x0123);
 
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
+
+      c0 = (float*) ((uintptr_t) c0 + cn_stride);
 
       nc -= 4;
     } else {
       if (nc & 2) {
-        wasm_v128_store16_lane(c0, vout, 0);
+        wasm_v128_store64_lane(c0, vacc0x0123, 0);
+        vacc0x0123 = wasm_v64x2_shuffle(vacc0x0123, vacc0x0123, 1, 1);
         c0 += 2;
-
-        vout = wasm_u32x4_shr(vout, 16);
       }
       if (nc & 1) {
-        wasm_v128_store8_lane(c0, vout, 0);
+        wasm_v128_store32_lane(c0, vacc0x0123, 0);
       }
-
       nc = 0;
     }
   } while (nc != 0);
