@@ -1977,6 +1977,18 @@ size_t xnn_init_f32_minmax_avx_params(
   }
   return sizeof(params->avx);
 }
+
+size_t xnn_init_f32_minmax_avx512vnni_params(
+  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float output_min,
+  float output_max) {
+  params->avx512vnni.min = output_min;
+  params->avx512vnni.max = output_max;
+  for(int i = 0; i < 64; i++) {
+    params->avx512vnni.sign_mask[i] = 0x80;
+  }
+  return sizeof(params->avx512vnni);
+}
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
