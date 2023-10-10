@@ -474,3 +474,17 @@
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 8
+
+# AVX2
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x8c8__avx2
+  init: xnn_init_f32_minmax_avx_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x8c8__avx2
+  init: xnn_init_f32_minmax_avx_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_3x8c8__avx2
+  init: xnn_init_f32_minmax_avx_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
