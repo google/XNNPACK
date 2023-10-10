@@ -483,6 +483,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         FADD        v21.4s, v21.4s, v1.4s
         FADD        v22.4s, v22.4s, v1.4s
         FADD        v23.4s, v23.4s, v1.4s
+        LD1R        {v0.4s}, [x11], #4      // min
         FADD        v24.4s, v24.4s, v2.4s
         FADD        v25.4s, v25.4s, v2.4s
         FADD        v26.4s, v26.4s, v2.4s
@@ -491,7 +492,6 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         FADD        v29.4s, v29.4s, v3.4s
         FADD        v30.4s, v30.4s, v3.4s
         FADD        v31.4s, v31.4s, v3.4s
-        LD1R        {v0.4s}, [x11], #4      // min
         LD1R        {v1.4s}, [x11]          //max
         FMAX        v16.4s, v16.4s, v0.4s
         FMAX        v17.4s, v17.4s, v0.4s

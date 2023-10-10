@@ -42,19 +42,19 @@
   pack: xnn_pack_qs8_qc4w_legacy_gemm_goi_w
   k-block: 8
 
-- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__aarch64_neondot_ld128
-  init: xnn_init_f32_qc4w_minmax_scalar_params
-  pack: xnn_pack_qs8_qc4w_legacy_gemm_goi_w
-  k-block: 16
-- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__neondot_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
-  pack: xnn_pack_qs8_qc4w_legacy_gemm_goi_w
-  k-block: 8
 - name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__aarch64_neondot_ld128
   init: xnn_init_f32_qc4w_minmax_scalar_params
   pack: xnn_pack_qs8_qc4w_legacy_gemm_goi_w
   k-block: 16
 - name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__neondot_ld64
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qc4w_legacy_gemm_goi_w
+  k-block: 8
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__aarch64_neondot_ld128
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qc4w_legacy_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__neondot_ld64
   init: xnn_init_f32_qc4w_minmax_scalar_params
   pack: xnn_pack_qs8_qc4w_legacy_gemm_goi_w
   k-block: 8
