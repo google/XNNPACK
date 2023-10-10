@@ -973,7 +973,7 @@ $else:
           LDP         d8,  d9, [sp], 32
           RET
 
-END_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55
+END_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
