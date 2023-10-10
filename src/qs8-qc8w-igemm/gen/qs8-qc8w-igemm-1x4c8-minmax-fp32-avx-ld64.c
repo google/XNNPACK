@@ -9,7 +9,11 @@
 
 #include <assert.h>
 
-#include <smmintrin.h>
+#ifdef _MSC_VER
+  #include <intrin.h>
+#else
+  #include <x86intrin.h>
+#endif
 
 #include <xnnpack/igemm.h>
 #include <xnnpack/math.h>
@@ -43,6 +47,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4c8__avx_ld64(
 
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   int8_t* c0 = c;
+
 
   do {
     __m128i vacc0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
