@@ -96,7 +96,6 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__
       const __m128 vinput_scale = _mm_broadcast_ss(&quantization_params->inv_scale);
     $else:
       const __m128 vinput_scale = _mm_load1_ps(&quantization_params->inv_scale);
-
   do {
     $if DATATYPE == "QD8":
       const __m128i vksum = _mm_load_si128((const __m128i*) w);
