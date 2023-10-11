@@ -431,6 +431,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         SCVTF       v21.4s, v21.4s
         SCVTF       v22.4s, v22.4s
         SCVTF       v23.4s, v23.4s
+        LDP         q0, q1, [x5], 32        // kernel_scale
         SCVTF       v24.4s, v24.4s
         SCVTF       v25.4s, v25.4s
         SCVTF       v26.4s, v26.4s
@@ -439,7 +440,6 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         SCVTF       v29.4s, v29.4s
         SCVTF       v30.4s, v30.4s
         SCVTF       v31.4s, v31.4s
-        LDP         q0, q1, [x5], 32        // kernel_scale
         LDP         q2, q3, [x5], 32
         FMUL        v4.4s, v0.4s, v13.s[0]  // kernel_scale * scale
         FMUL        v5.4s, v1.4s, v13.s[0]
@@ -465,6 +465,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         FMUL        v9.4s, v1.4s, v13.s[3]
         FMUL        v10.4s, v2.4s, v13.s[3]
         FMUL        v11.4s, v3.4s, v13.s[3]
+        LDP         q0, q1, [x5], 32        // bias
         FMUL        v18.4s, v18.4s, v4.4s
         FMUL        v22.4s, v22.4s, v5.4s
         FMUL        v26.4s, v26.4s, v6.4s
@@ -473,7 +474,6 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         FMUL        v23.4s, v23.4s, v9.4s
         FMUL        v27.4s, v27.4s, v10.4s
         FMUL        v31.4s, v31.4s, v11.4s
-        LDP         q0, q1, [x5], 32        // bias
         LDP         q2, q3, [x5], 32
         FADD        v16.4s, v16.4s, v0.4s
         FADD        v17.4s, v17.4s, v0.4s

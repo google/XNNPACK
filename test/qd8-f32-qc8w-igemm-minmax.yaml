@@ -230,6 +230,10 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_ld128
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 16
 
 # AVX512SKX
 - name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c8__avx512skx
