@@ -47,7 +47,6 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4c8__sse2_ld128(
   __m128i vinput_zero_point = _mm_cvtsi32_si128(*((const int*) &quantization_params->zero_point));
   vinput_zero_point = _mm_shuffle_epi32(vinput_zero_point, _MM_SHUFFLE(0, 0, 0, 0));
   const __m128 vinput_scale = _mm_load1_ps(&quantization_params->inv_scale);
-
   do {
     const __m128i vksum = _mm_load_si128((const __m128i*) w);
     const __m128i vzero = _mm_setzero_si128();

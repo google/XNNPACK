@@ -62,7 +62,6 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x4c8__xop_ld128(
 
   const __m128i vinput_zero_point = _mm_castps_si128(_mm_broadcast_ss((const float*) &quantization_params->zero_point));
   const __m128 vinput_scale = _mm_broadcast_ss(&quantization_params->inv_scale);
-
   do {
     const __m128i vksum = _mm_load_si128((const __m128i*) w);
     const __m128i vzero = _mm_setzero_si128();

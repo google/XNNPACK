@@ -56,7 +56,6 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_3x4c8__avx_ld128(
     c2 = c1;
   }
 
-
   do {
     __m128i vacc0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     __m128i vacc0x1 = _mm_cvtsi32_si128(((const int*) w)[1]);
