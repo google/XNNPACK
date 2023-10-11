@@ -783,12 +783,16 @@ void GemmMicrokernelTester::Test(
       std::uniform_int_distribution<int32_t>(0, std::numeric_limits<uint8_t>::max()),
       std::ref(rng));
 
-  const size_t k_stride = (k() + 1) / 2;
-  const size_t packed_k_bytes = (packed_k() + 1) / 2;
-  std::vector<float> input(m() * k());
-  std::vector<int8_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(int8_t));
+  const size_t planes = (pack == xnn_pack_qs8_qc4w_legacy_gemm_goi_w) ? 1 : 2;
+
+  const size_t k2 =  round_up_po2(k(), 2);  // tester assumes byte aligned rows
+  const size_t packed_k2 = round_up_po2(k(), kr() * sr() * planes);  // 2 blocks for nibbles
+  const size_t packed_k_bytes = (packed_k2 + 1)/ 2;
+
+  std::vector<float> input(m() * k2);
+  std::vector<int8_t> a((m() - 1) * a_stride() + k2 + XNN_EXTRA_BYTES / sizeof(int8_t));
   std::vector<xnn_qd8_quantization_params> quantization_params(mr());
-  std::vector<uint8_t> b(n() * k_stride);
+  std::vector<uint8_t> b(n() * k2 / 2);
   std::vector<float> bias(n());
   std::vector<float> kernel_scale(n());
   std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_w(packed_n() * packed_k_bytes +
@@ -800,11 +804,11 @@ void GemmMicrokernelTester::Test(
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), std::ref(f32rng));
     for (size_t i = 0; i < m(); ++i) {
-      const float* input_ptr = &input[i * k()];
-      const auto minmax = std::minmax_element(input_ptr, input_ptr + k());
+      const float* input_ptr = &input[i * k2];
+      const auto minmax = std::minmax_element(input_ptr, input_ptr + k2);
       quantization_params[i] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second);
       const float inv_scale = 1.f / quantization_params[i].inv_scale;
-      for (size_t j = 0; j < k(); ++j) {
+      for (size_t j = 0; j < k2; ++j) {
         float scaled_input = input_ptr[j] * inv_scale;
         scaled_input = std::min<float>(scaled_input, float(std::numeric_limits<int8_t>::max()
                                                            - quantization_params[i].zero_point));
@@ -822,7 +826,7 @@ void GemmMicrokernelTester::Test(
     // Row sums are multiplied by input zero point, since we don't know it
     // until runtime, set it to 1.
     const xnn_qs8_qc4w_packing_params packing_params = { /*input_zero_point=*/1, b_zero_point()};
-    pack(/*g=*/1, n(), k(), nr(), kr(), sr(),
+    pack(/*g=*/1, n(), k2, nr(), kr(), sr(),
       b.data(), /*bias=*/nullptr, /*scale=*/nullptr,
       packed_w.data(), 2 * sizeof(float) * nr(), &packing_params);
     // Fill in packed kernel scale
@@ -848,8 +852,8 @@ void GemmMicrokernelTester::Test(
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
         int32_t ksum = 0;
-        for (size_t k_index = 0; k_index < k(); k_index++) {
-          const size_t nb_index = n_index * k_stride + k_index / 2;
+        for (size_t k_index = 0; k_index < k2; k_index++) {
+          const size_t nb_index = (n_index * k2 + k_index) / 2;
           const int32_t bv = int32_t((k_index % 2 == 0) ? (b[nb_index] & UINT8_C(0xF)) : (b[nb_index] >> 4)) - b_zero_point();
           ksum += bv;
           c_ref[m_index * n() + n_index] += int32_t(a[m_index * a_stride() + k_index]) * int32_t(bv);
@@ -871,7 +875,7 @@ void GemmMicrokernelTester::Test(
 
     // Prepare parameters.
     xnn_f32_qc4w_minmax_params params;
-    init_params(&params, c_min, c_max, b_zero_point());
+    init_params(&params, c_min, c_max, 8);
 
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
@@ -879,7 +883,7 @@ void GemmMicrokernelTester::Test(
       }
     }
 
-    gemm(m(), n(), k(),
+    gemm(m(), n(), k2,
         a.data(), a_stride() * sizeof(int8_t),
         static_cast<const void*>(packed_w.data()),
         c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float), &params, quantization_params.data());
@@ -892,7 +896,7 @@ void GemmMicrokernelTester::Test(
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << " (accumulator = " << acc[i * n() + j]
             << "), optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
-            << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
+            << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k2;
       }
     }
   }

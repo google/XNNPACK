@@ -102,7 +102,39 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
     w = (const int32_t*) w + 4;
 
     size_t k = kc;
-    do {
+
+    $if DATATYPE == "QC4":
+      while (k >= 16 * sizeof(${XINT8_T})) {
+        $for M in range(MR):
+          v128_t vxa${M};
+        $for N in range(0, 8):
+          $if N % 4 == 0:
+            $for M in range(MR):
+              vxa${M} = ${WASM_X16X8_LOAD8X8}(a${M});
+              a${M} += 8;
+          $if N == 0:
+            const v128_t vb${N} = wasm_v128_load(w);
+            const v128_t vb${N+2} = wasm_v128_load((const ${XINT8_T}*) w + 16);
+            const v128_t vbm${N} = wasm_i8x16_shl(vb${N}, 4);
+            const v128_t vbm${N+2} = wasm_i8x16_shl(vb${N+2}, 4);
+            const v128_t vxb${N} = wasm_i16x8_extend_low_i8x16(vbm${N});
+            const v128_t vxb${N+1} = wasm_i16x8_extend_high_i8x16(vbm${N});
+            const v128_t vxb${N+2} = wasm_i16x8_extend_low_i8x16(vbm${N+2});
+            const v128_t vxb${N+3} = wasm_i16x8_extend_high_i8x16(vbm${N+2});
+          $if N == 4:
+            const v128_t vbm${N} = wasm_v128_and(vb${N-4}, vmask);
+            const v128_t vbm${N+2} = wasm_v128_and(vb${N-2}, vmask);
+            const v128_t vxb${N} = wasm_i16x8_extend_low_i8x16(vbm${N});
+            const v128_t vxb${N+1} = wasm_i16x8_extend_high_i8x16(vbm${N});
+            const v128_t vxb${N+2} = wasm_i16x8_extend_low_i8x16(vbm${N+2});
+            const v128_t vxb${N+3} = wasm_i16x8_extend_high_i8x16(vbm${N+2});
+          $for M in range(MR):
+            vacc${M}x${N % 4} = wasm_i32x4_add(vacc${M}x${N % 4}, wasm_i32x4_dot_i16x8(vxa${M}, vxb${N}));
+        w = (const ${XINT8_T}*) w + 32;
+        k -= 16 * sizeof(${XINT8_T});
+      }
+
+    while (k >= 8 * sizeof(${XINT8_T})) {
       $for M in range(MR):
         const v128_t vxa${M} = ${WASM_X16X8_LOAD8X8}(a${M});
         a${M} += 8;
@@ -127,13 +159,15 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
         $for N in range(4):
           $if VARIANT == "LD64":
             $if DATATYPE == "QC4":
-              const v128_t vb${N} = wasm_v128_load32_zero((const int8_t*) w + ${N * 4});
-              const v128_t vbl${N} = wasm_i8x16_shl(vb${N}, 4);
-              const v128_t vbh${N} = wasm_v128_and(vb${N}, vmask);
-              const v128_t vblh${N} = wasm_v8x16_shuffle(vbl${N}, vbh${N},
-                0, 16, 1, 17, 2, 18, 3, 19,
-                0, 16, 1, 17, 2, 18, 3, 19);
-              const v128_t vxb${N} = wasm_i16x8_extend_low_i8x16(vblh${N});
+              $if N == 0:
+                const v128_t vb${N} = wasm_v128_load(w);
+                const v128_t vb${N+2} = wasm_v128_load((const ${XINT8_T}*) w + 16);
+                const v128_t vbm${N} = wasm_i8x16_shl(vb${N}, 4);
+                const v128_t vbm${N+2} = wasm_i8x16_shl(vb${N+2}, 4);
+                const v128_t vxb${N} = wasm_i16x8_extend_low_i8x16(vbm${N});
+                const v128_t vxb${N+1} = wasm_i16x8_extend_high_i8x16(vbm${N});
+                const v128_t vxb${N+2} = wasm_i16x8_extend_low_i8x16(vbm${N+2});
+                const v128_t vxb${N+3} = wasm_i16x8_extend_high_i8x16(vbm${N+2});
             $elif DATATYPE == "QU8":
               $if N == 0:
                 const v128_t vxb${N} = wasm_i16x8_sub(wasm_u16x8_load8x8(w), vb_zero_point);
@@ -156,11 +190,11 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
       $if VARIANT == "EXTENDED":
         w = (const int16_t*) w + 32;
       $elif DATATYPE == "QC4":
-        w = (const ${XINT8_T}*) w + 16;
+        w = (const ${XINT8_T}*) w + 32;  // only low nibble used
       $else:
         w = (const ${XINT8_T}*) w + 32;
       k -= 8 * sizeof(${XINT8_T});
-    } while (k != 0);
+    };
 
     $for M in range(MR):
       const v128_t vacc${M}x02 = wasm_i32x4_add(wasm_v32x4_shuffle(vacc${M}x0, vacc${M}x2, 0, 4, 1, 5), wasm_v32x4_shuffle(vacc${M}x0, vacc${M}x2, 2, 6, 3, 7));

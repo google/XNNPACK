@@ -110,18 +110,14 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
 
       // Load a 8x${NR} block of weights.
       $if DATATYPE == "QC4":
-        $for K in range(0, 8, 4):
-          $for N in range(0, NR, 8):
-            const int8x16_t vb${ABC[K:K+4]}x${ABC[N:N+8]} = vld1q_s8(w); w = (const int8_t*) w + 16;
-        $for K in range(0, 8, 4):
-          $for N in range(0, NR, 8):
-            const int8x16_t vb${ABC[K:K+4]}x${ABC[N:N+8]}c02 = vshlq_n_s8(vb${ABC[K:K+4]}x${ABC[N:N+8]}, 4);
-            const int8x16_t vb${ABC[K:K+4]}x${ABC[N:N+8]}c13 = vandq_s8(vb${ABC[K:K+4]}x${ABC[N:N+8]}, vmask);
-        $for K in range(0, 8, 4):
-          $for N in range(0, NR, 8):
-            const int8x16x2_t vb${ABC[K:K+4]}x${ABC[N:N+8]}c0123 = vzipq_s8(vb${ABC[K:K+4]}x${ABC[N:N+8]}c02, vb${ABC[K:K+4]}x${ABC[N:N+8]}c13);
-            const int8x16_t vb${ABC[K:K+4]}x${ABC[N:N+4]} =   vb${ABC[K:K+4]}x${ABC[N:N+8]}c0123.val[0];
-            const int8x16_t vb${ABC[K:K+4]}x${ABC[N+4:N+8]} = vb${ABC[K:K+4]}x${ABC[N:N+8]}c0123.val[1];
+        $for K in range(0, 8, 8):
+          $for N in range(0, NR, 4):
+            const int8x16_t vb${ABC[K:K+8]}x${ABC[N:N+4]} = vld1q_s8(w); w = (const int8_t*) w + 16;
+        $for K in range(0, 8, 8):
+          $for N in range(0, NR, 4):
+            const int8x16_t vb${ABC[K:K+4]}x${ABC[N:N+4]} = vshlq_n_s8(vb${ABC[K:K+8]}x${ABC[N:N+4]}, 4);
+          $for N in range(0, NR, 4):
+            const int8x16_t vb${ABC[K+4:K+8]}x${ABC[N:N+4]} = vandq_s8(vb${ABC[K:K+8]}x${ABC[N:N+4]}, vmask);
       $else:
         $for K in range(0, 8, 4):
           $for N in range(0, NR, 4):
@@ -143,15 +139,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
 
       // Load a 4x${NR} block of weights.
       $if DATATYPE == "QC4":
-        $for N in range(0, NR, 8):
-          const int8x16_t vb0123x${ABC[N:N+8]} = vld1q_s8(w); w = (const int8_t*) w + 16;
-        $for N in range(0, NR, 8):
-          const int8x16_t vb0123x${ABC[N:N+8]}c02 = vshlq_n_s8(vb0123x${ABC[N:N+8]}, 4);
-          const int8x16_t vb0123x${ABC[N:N+8]}c13 = vandq_s8(vb0123x${ABC[N:N+8]}, vmask);
-        $for N in range(0, NR, 8):
-          int8x16x2_t vb0123x${ABC[N:N+8]}c0123 = vzipq_s8(vb0123x${ABC[N:N+8]}c02, vb0123x${ABC[N:N+8]}c13);
-          const int8x16_t vb0123x${ABC[N:N+4]} =   vb0123x${ABC[N:N+8]}c0123.val[0];
-          const int8x16_t vb0123x${ABC[N+4:N+8]} = vb0123x${ABC[N:N+8]}c0123.val[1];
+        $for N in range(0, NR, 4):
+          const int8x16_t vb01234567x${ABC[N:N+4]} = vld1q_s8(w); w = (const int8_t*) w + 16;
+        $for N in range(0, NR, 4):
+          const int8x16_t vb0123x${ABC[N:N+4]} = vshlq_n_s8(vb01234567x${ABC[N:N+4]}, 4);
       $else:
         $for N in range(0, NR, 4):
           const int8x16_t vb0123x${ABC[N:N+4]} = vld1q_s8(w); w = (const int8_t*) w + 16;

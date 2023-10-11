@@ -212,10 +212,12 @@ class FullyConnectedOperatorTester {
     std::uniform_real_distribution<float> f32idist(0.5f, 2.0f);
     std::uniform_int_distribution<int32_t> w8dist(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
+    const size_t k2 =  round_up_po2(input_channels(), 2);  // tester assumes byte aligned rows
+
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
       (batch_size() - 1) * input_stride() + input_channels());
     const size_t kernel_stride = calc_kernel_stride();
-    std::vector<uint8_t> kernel((transpose_weights() ? input_channels() : output_channels()) * kernel_stride);
+    std::vector<uint8_t> kernel((transpose_weights() ? k2 : output_channels()) * kernel_stride);
     std::vector<float> bias(output_channels());
     std::vector<float> output((batch_size() - 1) * output_stride() + output_channels());
     std::vector<float> output_ref(batch_size() * output_channels());

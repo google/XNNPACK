@@ -686,6 +686,7 @@ struct xnn_gemm_config {
   uint8_t nr;
   uint8_t log2_kr;
   uint8_t log2_sr;
+  uint8_t planes;  // number of 4 bit planes (1 for legacy, 2 for unzip)
 };
 
 XNN_INTERNAL struct xnn_gemm_config* xnn_init_f16_gemm_config();

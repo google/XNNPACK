@@ -65,6 +65,7 @@ struct xnn_ukernel_gemm {
   uint8_t nr;
   uint8_t kr;
   uint8_t sr;
+  uint8_t kp;
 };
 
 struct xnn_ukernel_igemm {
