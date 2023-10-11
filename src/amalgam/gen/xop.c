@@ -2263,6 +2263,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x4c8__xop_ld64(
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   int8_t* c0 = c;
 
+
   do {
     __m128i vacc0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     __m128i vacc0x1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -2383,6 +2384,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_2x4c8__xop_ld64(
   if XNN_UNPREDICTABLE(mr != 2) {
     c1 = c0;
   }
+
 
   do {
     __m128i vacc0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
@@ -4390,6 +4392,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4c8__xop_ld64(
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   int8_t* c0 = c;
 
+
   do {
     __m128i vacc0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     __m128i vacc0x1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -4511,6 +4514,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x4c8__xop_ld64(
   if XNN_UNPREDICTABLE(mr != 2) {
     c1 = c0;
   }
+
 
   do {
     __m128i vacc0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
@@ -6128,6 +6132,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__xop_ld64(
   kc = round_up_po2(kc, 8 * sizeof(uint8_t));
   uint8_t* c0 = c;
 
+
   do {
     __m128i vacc0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     __m128i vacc0x1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -6248,6 +6253,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__xop_ld64(
   if XNN_UNPREDICTABLE(mr != 2) {
     c1 = c0;
   }
+
 
   do {
     __m128i vacc0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
