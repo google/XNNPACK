@@ -118,7 +118,7 @@ const char* {enum_name}_to_string(enum {enum_name} {arg_name}) {{
     if debug_only:
       output += '#endif  // XNN_LOG_LEVEL > 0\n'
 
-    xnncommon.overwrite_if_changed(options.output, tests)
+    xnncommon.overwrite_if_changed(output_path, output)
 
 def generate_header(enum_name, spec_path, output_path, debug_only):
   with codecs.open(spec_path, 'r', encoding='utf-8') as spec_file:
