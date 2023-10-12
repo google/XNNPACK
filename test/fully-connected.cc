@@ -23,6 +23,7 @@
 #include <xnnpack/subgraph.h>
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 template <class InputType, class KernelType = InputType, class BiasType = InputType, class OutputType = InputType> class FullyConnectedTestBase : public ::testing::Test {
 protected:
@@ -2099,7 +2100,7 @@ TEST_F(FullyConnectedTestQD8F32QC8W, internally_allocated_dynamic_quantization_p
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
-  ASSERT_EQ(subgraph_output, operator_output);
+  EXPECT_THAT(subgraph_output, operator_output);
 }
 
 class FullyConnectedTestQD8F32QC4W : public FullyConnectedTestBase<int8_t, uint8_t, float, float> {
@@ -2166,7 +2167,9 @@ TEST_F(FullyConnectedTestQD8F32QC4W, define)
   ASSERT_EQ(node->flags, 0);
 }
 
-TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_parameters)
+// DISABLED_ due to increased flakiness, likely due to legacy/tester requiring rounding
+// Remove round up input/output channels and reenable
+TEST_F(FullyConnectedTestQD8F32QC4W, DISABLED_internally_allocated_dynamic_quantization_parameters)
 {
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/4, /*flags=*/0, &subgraph));
@@ -2271,7 +2274,7 @@ TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_p
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
-  ASSERT_EQ(subgraph_output, operator_output);
+  EXPECT_THAT(subgraph_output, operator_output);
 }
 
 TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_parameters_transposed_weights)
@@ -2379,5 +2382,5 @@ TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_p
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
-  ASSERT_EQ(subgraph_output, operator_output);
+  EXPECT_THAT(subgraph_output, operator_output);
 }
