@@ -1519,7 +1519,7 @@ IF(XNNPACK_BUILD_TESTS)
 
     ADD_EXECUTABLE(fully-connected-test test/fully-connected.cc)
     TARGET_INCLUDE_DIRECTORIES(fully-connected-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(fully-connected-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+    TARGET_LINK_LIBRARIES(fully-connected-test PRIVATE XNNPACK fp16 gmock gtest gtest_main subgraph)
     ADD_TEST(NAME fully-connected-test COMMAND fully-connected-test)
 
     ADD_EXECUTABLE(global-average-pooling-1d-test test/global-average-pooling-1d.cc)
