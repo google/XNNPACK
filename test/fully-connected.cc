@@ -22,11 +22,15 @@
 #include <xnnpack/requantization.h>
 #include <xnnpack/subgraph.h>
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-template <class InputType, class KernelType = InputType, class BiasType = InputType, class OutputType = InputType> class FullyConnectedTestBase : public ::testing::Test {
-protected:
+using testing::ElementsAreArray;
+
+template <class InputType, class KernelType = InputType,
+          class BiasType = InputType, class OutputType = InputType>
+class FullyConnectedTestBase : public ::testing::Test {
+ protected:
   FullyConnectedTestBase()
   {
     random_device = std::make_unique<std::random_device>();
@@ -714,9 +718,7 @@ TEST_F(FullyConnectedTestQC8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
+  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
 TEST_F(FullyConnectedTestQS8, matches_operator_api)
@@ -821,9 +823,7 @@ TEST_F(FullyConnectedTestQS8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
+  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
 TEST_F(FullyConnectedTestQU8, matches_operator_api)
@@ -929,9 +929,7 @@ TEST_F(FullyConnectedTestQU8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
+  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
 TEST_F(FullyConnectedTestF32, matches_operator_api)
@@ -1008,9 +1006,7 @@ TEST_F(FullyConnectedTestF32, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
+  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
 TEST_F(FullyConnectedTestF32QC4W, matches_operator_api)
@@ -1095,9 +1091,7 @@ TEST_F(FullyConnectedTestF32QC4W, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]) << " at " << i << " / " << operator_output.size();
-  }
+  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
 TEST_F(FullyConnectedTestF32QC4W, matches_operator_api_without_bias)
@@ -1175,9 +1169,7 @@ TEST_F(FullyConnectedTestF32QC4W, matches_operator_api_without_bias)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]) << " at " << i << " / " << operator_output.size();
-  }
+  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
 TEST_F(FullyConnectedTestF32QC8W, matches_operator_api)
@@ -1257,9 +1249,7 @@ TEST_F(FullyConnectedTestF32QC8W, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
+  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
 TEST_F(FullyConnectedTestF32QC8W, matches_operator_api_without_bias)
@@ -1333,9 +1323,7 @@ TEST_F(FullyConnectedTestF32QC8W, matches_operator_api_without_bias)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
+  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
 TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel)
@@ -1424,9 +1412,7 @@ TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
+  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
 TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel_no_bias)
@@ -1509,9 +1495,7 @@ TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel_no_bias
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
+  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
 TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_bias)
@@ -1600,9 +1584,7 @@ TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_bias)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
+  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
 TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel_and_bias)
@@ -1692,9 +1674,7 @@ TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel_and_bia
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
+  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
 TEST_F(FullyConnectedTestF32QC8W, matches_operator_api_transposed_weights)
@@ -1774,9 +1754,7 @@ TEST_F(FullyConnectedTestF32QC8W, matches_operator_api_transposed_weights)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
+  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
 TEST_F(FullyConnectedTestF32QC8W, non_static_kernel_is_invalid_parameter)
@@ -2100,7 +2078,7 @@ TEST_F(FullyConnectedTestQD8F32QC8W, internally_allocated_dynamic_quantization_p
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
-  EXPECT_THAT(subgraph_output, operator_output);
+  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
 class FullyConnectedTestQD8F32QC4W : public FullyConnectedTestBase<int8_t, uint8_t, float, float> {
@@ -2168,7 +2146,7 @@ TEST_F(FullyConnectedTestQD8F32QC4W, define)
 }
 
 // DISABLED_ due to increased flakiness, likely due to legacy/tester requiring rounding
-// Remove round up input/output channels and reenable
+// TODO: b/304931463 - Remove round up input/output channels and reenable
 TEST_F(FullyConnectedTestQD8F32QC4W, DISABLED_internally_allocated_dynamic_quantization_parameters)
 {
   xnn_subgraph_t subgraph = nullptr;
@@ -2274,7 +2252,7 @@ TEST_F(FullyConnectedTestQD8F32QC4W, DISABLED_internally_allocated_dynamic_quant
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
-  EXPECT_THAT(subgraph_output, operator_output);
+  ASSERT_EQ(subgraph_output, operator_output);
 }
 
 TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_parameters_transposed_weights)
@@ -2382,5 +2360,5 @@ TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_p
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
-  EXPECT_THAT(subgraph_output, operator_output);
+  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
