@@ -69,7 +69,6 @@ void xnn_qs8_gemm_xw_minmax_fp32_ukernel_3x4c8__wasmsimd_dot16x2(
 
     size_t k = kc;
 
-
     while (k >= 8 * sizeof(int8_t)) {
       const v128_t vxa0 = wasm_i16x8_load8x8(a0);
       a0 += 8;

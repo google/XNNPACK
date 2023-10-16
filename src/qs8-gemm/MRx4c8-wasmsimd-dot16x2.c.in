@@ -102,7 +102,6 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
     w = (const int32_t*) w + 4;
 
     size_t k = kc;
-
     $if DATATYPE == "QC4":
       while (k >= 16 * sizeof(${XINT8_T})) {
         $for M in range(MR):
