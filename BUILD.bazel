@@ -570,6 +570,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
+        ":math",
         ":microparams",
     ],
 )

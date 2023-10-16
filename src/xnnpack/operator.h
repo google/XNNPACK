@@ -176,6 +176,7 @@ struct xnn_operator {
   size_t output_width;
   size_t output_pixel_stride;
   void* output;
+  const void* quantization_params;
 
   union {
     // Pointer to allocated packed weights. Use this if weights_cache is NULL.

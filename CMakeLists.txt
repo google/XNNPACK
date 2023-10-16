@@ -515,6 +515,7 @@ IF(XNNPACK_BUILD_LIBRARY)
   # Need C_EXTENSIONS to get constants for mmap (MAP_ANONYMOUS).
   SET_TARGET_PROPERTIES(memory PROPERTIES C_EXTENSIONS YES)
   ADD_LIBRARY(convolution-test-helpers OBJECT test/convolution-test-helpers.cc)
+  TARGET_INCLUDE_DIRECTORIES(convolution-test-helpers PRIVATE include src)
   ADD_LIBRARY(post-operation OBJECT src/operators/post-operation.c)
   IF(XNNPACK_LIBRARY_TYPE STREQUAL "default")
     ADD_LIBRARY(XNNPACK ${XNNPACK_SRCS})
