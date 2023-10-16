@@ -531,6 +531,30 @@ static inline struct xnn_hmp_dqgemm_ukernel xnn_init_hmp_dqgemm_ukernel(
   return ukernel;
 }
 
+struct xnn_hmp_dqigemm_ukernel {
+  xnn_dqigemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
+#if XNN_PLATFORM_JIT
+  struct xnn_generated_code_chunk generated_code_chunk[XNN_MAX_UARCH_TYPES];
+#endif  // XNN_PLATFORM_JIT
+};
+
+static inline struct xnn_hmp_dqigemm_ukernel xnn_init_hmp_dqigemm_ukernel(
+    xnn_dqigemm_ukernel_fn function) {
+  struct xnn_hmp_dqigemm_ukernel ukernel = {{function}};
+#if XNN_PLATFORM_JIT
+  ukernel.generated_code_chunk[0].offset = SIZE_MAX;
+  ukernel.generated_code_chunk[0].offset_end = SIZE_MAX;
+#endif  // XNN_PLATFORM_JIT
+  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
+    ukernel.function[i] = function;
+#if XNN_PLATFORM_JIT
+    ukernel.generated_code_chunk[i].offset = SIZE_MAX;
+    ukernel.generated_code_chunk[i].offset_end = SIZE_MAX;
+#endif  // XNN_PLATFORM_JIT
+  }
+  return ukernel;
+}
+
 static inline struct xnn_hmp_gemm_ukernel xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn function) {
   struct xnn_hmp_gemm_ukernel ukernel = {{ function }};
 #if XNN_PLATFORM_JIT
@@ -605,7 +629,10 @@ struct gemm_fused_ukernels {
     struct xnn_hmp_gemm_ukernel gemm[XNN_MAX_MR];
     struct xnn_hmp_dqgemm_ukernel dqgemm[XNN_MAX_MR];
   };
-  struct xnn_hmp_igemm_ukernel igemm[XNN_MAX_MR];
+  union {
+    struct xnn_hmp_igemm_ukernel igemm[XNN_MAX_MR];
+    struct xnn_hmp_dqigemm_ukernel dqigemm[XNN_MAX_MR];
+  };
 };
 
 #if XNN_PLATFORM_JIT
