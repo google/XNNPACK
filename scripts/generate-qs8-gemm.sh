@@ -1712,5 +1712,6 @@ tools/xngen src/qs8-gemm/MRx16c4-avx512vnni.c.in -D MR=4 -D DATATYPE=QD8 -D REQU
 tools/xngen src/qs8-gemm/MRx16c4-avx512vnni.c.in -D MR=5 -D DATATYPE=QD8 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x16c4-minmax-avx512vnni.c &
 tools/xngen src/qs8-gemm/MRx16c4-avx512vnni.c.in -D MR=6 -D DATATYPE=QD8 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x16c4-minmax-avx512vnni.c &
 tools/xngen src/qs8-gemm/MRx16c4-avx512vnni.c.in -D MR=7 -D DATATYPE=QD8 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x16c4-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx16c4-avx512vnni.c.in -D MR=8 -D DATATYPE=QD8 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x16c4-minmax-avx512vnni.c &
 
 wait
