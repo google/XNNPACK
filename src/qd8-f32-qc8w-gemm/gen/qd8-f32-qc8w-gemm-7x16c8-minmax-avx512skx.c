@@ -124,9 +124,9 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c8__avx512skx(
     __m512i vacc6xCDEF = _mm512_mullo_epi32(vksumCDEF, vinput_zero_point6);
     w = (const int32_t*) w + 16;
 
-    size_t k = 0;
-    // Accumulate blocks multiplication for each row.
-    while (k < kc) {
+    size_t k = kc;
+
+    while (k >= 8 * sizeof(int8_t)) {
       const __m512i va0 = _mm512_broadcast_i32x4(_mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) a0)));
       a0 += 8;
       const __m512i va1 = _mm512_broadcast_i32x4(_mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) a1)));
@@ -180,7 +180,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c8__avx512skx(
       vacc6xCDEF = _mm512_add_epi32(vacc6xCDEF, _mm512_madd_epi16(va6, vbCDEF));
 
       w = (const int8_t*) w + 128;
-      k += 8 * sizeof(int8_t);
+      k -= 8 * sizeof(int8_t);
     }
 
     const __m512i vacc0x04152637 = _mm512_add_epi32(_mm512_unpacklo_epi32(vacc0x0123, vacc0x4567), _mm512_unpackhi_epi32(vacc0x0123, vacc0x4567));
@@ -266,13 +266,13 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c8__avx512skx(
       _mm512_storeu_ps(c1, vout1x0123456789ABCDEF);
       _mm512_storeu_ps(c0, vout0x0123456789ABCDEF);
 
-      a0 = (const int8_t*) ((uintptr_t) a0 - k);
-      a1 = (const int8_t*) ((uintptr_t) a1 - k);
-      a2 = (const int8_t*) ((uintptr_t) a2 - k);
-      a3 = (const int8_t*) ((uintptr_t) a3 - k);
-      a4 = (const int8_t*) ((uintptr_t) a4 - k);
-      a5 = (const int8_t*) ((uintptr_t) a5 - k);
-      a6 = (const int8_t*) ((uintptr_t) a6 - k);
+      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
+      a1 = (const int8_t*) ((uintptr_t) a1 - kc);
+      a2 = (const int8_t*) ((uintptr_t) a2 - kc);
+      a3 = (const int8_t*) ((uintptr_t) a3 - kc);
+      a4 = (const int8_t*) ((uintptr_t) a4 - kc);
+      a5 = (const int8_t*) ((uintptr_t) a5 - kc);
+      a6 = (const int8_t*) ((uintptr_t) a6 - kc);
 
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
       c1 = (float*) ((uintptr_t) c1 + cn_stride);

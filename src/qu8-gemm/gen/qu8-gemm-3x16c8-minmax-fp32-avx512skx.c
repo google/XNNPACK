@@ -58,6 +58,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x16c8__avx512skx(
   const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->fp32_avx512.output_max_less_zero_point);
   const __m512i voutput_zero_point = _mm512_load_si512(params->fp32_avx512.output_zero_point);
   const __m512i voutput_min = _mm512_load_si512(params->fp32_avx512.output_min);
+  const __m512i vb_zero_point = _mm512_load_si512(params->fp32_avx512.kernel_zero_point);
   do {
     __m512i vacc0x0123 = _mm512_maskz_expandloadu_epi32(vbias_mask, w);
     __m512i vacc0x4567 = _mm512_maskz_expandloadu_epi32(vbias_mask, (const int32_t*) w + 4);
@@ -73,9 +74,9 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x16c8__avx512skx(
     __m512i vacc2xCDEF = vacc0xCDEF;
     w = (const int32_t*) w + 16;
 
-    size_t k = 0;
-    const __m512i vb_zero_point = _mm512_load_si512(params->fp32_avx512.kernel_zero_point);
-    while (k < kc) {
+    size_t k = kc;
+
+    while (k >= 8 * sizeof(uint8_t)) {
       const __m512i va0 = _mm512_broadcast_i32x4(_mm_cvtepu8_epi16(_mm_loadl_epi64((const __m128i*) a0)));
       a0 += 8;
       const __m512i va1 = _mm512_broadcast_i32x4(_mm_cvtepu8_epi16(_mm_loadl_epi64((const __m128i*) a1)));
@@ -105,7 +106,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x16c8__avx512skx(
       vacc2xCDEF = _mm512_add_epi32(vacc2xCDEF, _mm512_madd_epi16(va2, vbCDEF));
 
       w = (const uint8_t*) w + 128;
-      k += 8 * sizeof(uint8_t);
+      k -= 8 * sizeof(uint8_t);
     }
 
     const __m512i vacc0x04152637 = _mm512_add_epi32(_mm512_unpacklo_epi32(vacc0x0123, vacc0x4567), _mm512_unpackhi_epi32(vacc0x0123, vacc0x4567));
@@ -148,9 +149,9 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x16c8__avx512skx(
       _mm_storeu_si128((__m128i*) c1, _mm512_extracti32x4_epi32(vout0122x0123456789ABCDEF, 1));
       _mm_storeu_si128((__m128i*) c2, _mm512_extracti32x4_epi32(vout0122x0123456789ABCDEF, 2));
 
-      a0 = (const uint8_t*) ((uintptr_t) a0 - k);
-      a1 = (const uint8_t*) ((uintptr_t) a1 - k);
-      a2 = (const uint8_t*) ((uintptr_t) a2 - k);
+      a0 = (const uint8_t*) ((uintptr_t) a0 - kc);
+      a1 = (const uint8_t*) ((uintptr_t) a1 - kc);
+      a2 = (const uint8_t*) ((uintptr_t) a2 - kc);
 
       c0 = (uint8_t*) ((uintptr_t) c0 + cn_stride);
       c1 = (uint8_t*) ((uintptr_t) c1 + cn_stride);
