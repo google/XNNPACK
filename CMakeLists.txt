@@ -294,6 +294,7 @@ SET(XNNPACK_SRCS
   src/configs/conv-hwc2chw-config.c
   src/configs/dwconv-config.c
   src/configs/dwconv2d-chw-config.c
+  src/configs/experiments-config.c
   src/configs/gavgpool-config.c
   src/configs/gavgpool-cw-config.c
   src/configs/gemm-config.c
