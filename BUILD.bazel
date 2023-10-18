@@ -219,6 +219,15 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "experiments_config",
+    srcs = ["src/configs/experiments-config.c"],
+    hdrs = ["src/xnnpack/experiments-config.h"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    visibility = xnnpack_visibility(),
+)
+
+xnnpack_cc_library(
     name = "common",
     hdrs = ["src/xnnpack/common.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -338,6 +347,7 @@ xnnpack_cc_library(
         ":enable_dwconv_multipass",
         ":enable_gemm_m_specialization",
         ":enable_jit",
+        ":experiments_config",
         ":hardware_config",
         ":logging",
         ":microkernels_h",
@@ -402,6 +412,7 @@ xnnpack_cc_library(
         ":enable_dwconv_multipass",
         ":enable_gemm_m_specialization",
         ":enable_jit",
+        ":experiments_config",
         ":hardware_config_test_mode",
         ":logging",
         ":microkernels_h",
@@ -3278,7 +3289,9 @@ xnnpack_cc_library(
     srcs = [
         "src/init.c",
     ],
-    hdrs = ["include/xnnpack.h"],
+    hdrs = [
+        "include/xnnpack.h",
+    ],
     copts = select({
         ":debug_build": [],
         "//conditions:default": xnnpack_min_size_copts(),
@@ -3308,7 +3321,9 @@ xnnpack_cc_library(
     srcs = [
         "src/init.c",
     ],
-    hdrs = ["include/xnnpack.h"],
+    hdrs = [
+        "include/xnnpack.h",
+    ],
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
