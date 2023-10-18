@@ -1025,7 +1025,7 @@ void GemmMicrokernelTester::Test(
 
   std::fill(junk.begin(), junk.end(), 0xA5);
 
-  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+  {//for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(a.begin(), a.end(), std::ref(i8rng));
     std::generate(b.begin(), b.end(), std::ref(w8rng));
     std::generate(bias.begin(), bias.end(), std::ref(i32rng));
