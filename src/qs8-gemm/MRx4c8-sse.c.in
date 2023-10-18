@@ -158,12 +158,12 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
           __m128i vacc${M}x${N} = vacc0x${N};
     w = (const int32_t*) w + 4;
 
-    size_t k = 0;
     $if DATATYPE == "QU8":
       const __m128i vb_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.kernel_zero_point);
       $if SSE < 4 or VARIANT == "LD128":
         const __m128i vzero = _mm_setzero_si128();
-    while (k < kc) {
+    size_t k = kc;
+    while (k >= 8 * sizeof(${XINT8_T})) {
       $for M in range(MR):
         const __m128i va${M} = _mm_loadl_epi64((const __m128i*) a${M});
         $if DATATYPE == "QU8":
@@ -298,7 +298,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
         w = (const ${XINT8_T}*) w + 16;
       $else:
         w = (const ${XINT8_T}*) w + 32;
-      k += 8 * sizeof(${XINT8_T});
+      k -= 8 * sizeof(${XINT8_T});
     }
 
     $if SSE >= 3:
