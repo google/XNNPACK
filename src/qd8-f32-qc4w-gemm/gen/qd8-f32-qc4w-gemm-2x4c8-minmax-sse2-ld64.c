@@ -90,8 +90,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x4c8__sse2_ld64(
     __m128i vacc1x3 = _mm_unpackhi_epi64(vksum231, vzero);
     w = (const int32_t*) w + 4;
 
-    size_t k = kc;
-    while (k >= 8 * sizeof(int8_t)) {
+    size_t k = 0;
+    while (k < kc) {
       const __m128i va0 = _mm_loadl_epi64((const __m128i*) a0);
       const __m128i vxa0 = _mm_srai_epi16(_mm_unpacklo_epi8(va0, va0), 8);
       a0 += 8;
@@ -137,7 +137,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x4c8__sse2_ld64(
       vacc1x3 = _mm_add_epi32(vacc1x3, _mm_madd_epi16(vxa1, vxb3));
 
       w = (const int8_t*) w + 16;
-      k -= 8 * sizeof(int8_t);
+      k += 8 * sizeof(int8_t);
     }
 
     const __m128i vacc0x02 = _mm_add_epi32(_mm_unpacklo_epi32(vacc0x0, vacc0x2), _mm_unpackhi_epi32(vacc0x0, vacc0x2));

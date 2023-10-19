@@ -75,8 +75,6 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
         c${M} = c${M-1};
       }
 
-  $if DATATYPE == "QU8":
-    const __m256i vb_zero_point = _mm256_load_si256((const __m256i*) params->${PARAMS_STRUCT}.kernel_zero_point);
   $if DATATYPE == "QC4":
     const __m128i vmask = _mm_load_si128((const __m128i*) params->avx.mask);  // 0xF0
   do {
@@ -99,8 +97,10 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
           __m256i vacc${M}x${ABC[N:N+2]} = vacc0x${ABC[N:N+2]};
     w = (const int32_t*) w + 8;
 
-    size_t k = kc;
-    while (k >= 8 * sizeof(${XINT8_T})) {
+    size_t k = 0;
+    $if DATATYPE == "QU8":
+      const __m256i vb_zero_point = _mm256_load_si256((const __m256i*) params->${PARAMS_STRUCT}.kernel_zero_point);
+    while (k < kc) {
       $for M in range(MR):
         const __m128i va${M} = ${_MM_CVTEPX8_EPI16}(_mm_loadl_epi64((const __m128i*) a${M}));
         const __m256i vxa${M} = _mm256_inserti128_si256(_mm256_castsi128_si256(va${M}), va${M}, 1);
@@ -143,7 +143,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
         w = (const ${XINT8_T}*) w + 32;
       $else:
         w = (const ${XINT8_T}*) w + 64;
-      k -= 8 * sizeof(${XINT8_T});
+      k += 8 * sizeof(${XINT8_T});
     }
 
     $for M in range(MR):
