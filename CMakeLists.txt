@@ -3684,7 +3684,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
   ADD_EXECUTABLE(f16-f32-vcvt-bench bench/f16-f32-vcvt.cc)
   TARGET_INCLUDE_DIRECTORIES(f16-f32-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-f32-vcvt-bench PRIVATE benchmark fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(f16-f32-vcvt-bench PRIVATE fp16 benchmark fp16 pthreadpool)
   TARGET_LINK_LIBRARIES(f16-f32-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
   ADD_EXECUTABLE(f32-bgemm-bench bench/f32-bgemm.cc)
@@ -3714,7 +3714,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
   ADD_EXECUTABLE(f32-f16-vcvt-bench bench/f32-f16-vcvt.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-f16-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-f16-vcvt-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-f16-vcvt-bench PRIVATE fp16 benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(f32-f16-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
   ADD_EXECUTABLE(f32-gavgpool-cw-bench bench/f32-gavgpool-cw.cc)
@@ -3759,12 +3759,12 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
   ADD_EXECUTABLE(f32-qs8-vcvt-bench bench/f32-qs8-vcvt.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-qs8-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-qs8-vcvt-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-qs8-vcvt-bench PRIVATE fp16 benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(f32-qs8-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
   ADD_EXECUTABLE(f32-qu8-vcvt-bench bench/f32-qu8-vcvt.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-qu8-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-qu8-vcvt-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-qu8-vcvt-bench PRIVATE fp16 benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(f32-qu8-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
   ADD_EXECUTABLE(f32-raddstoreexpminusmax-bench bench/f32-raddstoreexpminusmax.cc)
@@ -3904,7 +3904,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
   ADD_EXECUTABLE(qs8-f32-vcvt-bench bench/qs8-f32-vcvt.cc)
   TARGET_INCLUDE_DIRECTORIES(qs8-f32-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-f32-vcvt-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(qs8-f32-vcvt-bench PRIVATE fp16 benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(qs8-f32-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
   ADD_EXECUTABLE(qs8-gemm-fp32-bench bench/qs8-gemm-fp32.cc)
@@ -3955,12 +3955,12 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
   ADD_EXECUTABLE(qs8-vcvt-bench bench/qs8-vcvt.cc)
   TARGET_INCLUDE_DIRECTORIES(qs8-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-vcvt-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(qs8-vcvt-bench PRIVATE fp16 benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(qs8-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
   ADD_EXECUTABLE(qs16-qs8-vcvt-bench bench/qs16-qs8-vcvt.cc)
   TARGET_INCLUDE_DIRECTORIES(qs16-qs8-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs16-qs8-vcvt-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(qs16-qs8-vcvt-bench PRIVATE fp16 benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(qs16-qs8-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
   ADD_EXECUTABLE(qs8-vhswish-bench bench/qs8-vhswish.cc)
@@ -3985,7 +3985,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
   ADD_EXECUTABLE(qu8-f32-vcvt-bench bench/qu8-f32-vcvt.cc)
   TARGET_INCLUDE_DIRECTORIES(qu8-f32-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-f32-vcvt-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(qu8-f32-vcvt-bench PRIVATE fp16 benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(qu8-f32-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
   ADD_EXECUTABLE(qu8-gemm-bench bench/qu8-gemm.cc)
@@ -4011,7 +4011,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
   ADD_EXECUTABLE(qu8-vcvt-bench bench/qu8-vcvt.cc)
   TARGET_INCLUDE_DIRECTORIES(qu8-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-vcvt-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(qu8-vcvt-bench PRIVATE fp16 benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(qu8-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
   ADD_EXECUTABLE(qu8-vhswish-bench bench/qu8-vhswish.cc)
