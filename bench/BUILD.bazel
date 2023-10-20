@@ -24,6 +24,7 @@ MICROKERNEL_BENCHMARK_DEPS = [
     "//:bench_microkernels",
     "//:common",
     "//:enable_assembly",
+    "//:jit",
     "//:microkernels_h",
     "//:packing",
     "//:params",
@@ -1275,6 +1276,7 @@ xnnpack_benchmark(
     name = "jit_bench",
     srcs = ["jit.cc"],
     deps = OPERATOR_BENCHMARK_DEPS + [
+        "//:jit",
         "//:memory",
         "//:microkernels_h",
         "//:microparams",
