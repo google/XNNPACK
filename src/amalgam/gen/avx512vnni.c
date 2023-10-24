@@ -49,8 +49,9 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__avx512vnni(
     w = (const int32_t*) w + 16;
 
     size_t k = kc;
-    while (k >= 4 * sizeof(int8_t)) {
+    do {
       __m512i va0x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a0));
+
       a0 += 4;
 
       va0x0123 = _mm512_xor_epi32(va0x0123, vsign_mask);
@@ -61,7 +62,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__avx512vnni(
 
       w = (const int8_t*) w + 64;
       k -= 4 * sizeof(int8_t);
-    }
+    } while (k != 0);
 
     __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
 
@@ -178,20 +179,21 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c4__avx512vnni(
     w = (const int32_t*) w + 16;
 
     size_t k = kc;
-    while (k >= 4 * sizeof(int8_t)) {
+    do {
       __m512i va0x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a0));
-      a0 += 4;
       __m512i va1x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a1));
-      a1 += 4;
       __m512i va2x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a2));
-      a2 += 4;
       __m512i va3x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a3));
-      a3 += 4;
       __m512i va4x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a4));
-      a4 += 4;
       __m512i va5x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a5));
-      a5 += 4;
       __m512i va6x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a6));
+
+      a0 += 4;
+      a1 += 4;
+      a2 += 4;
+      a3 += 4;
+      a4 += 4;
+      a5 += 4;
       a6 += 4;
 
       va0x0123 = _mm512_xor_epi32(va0x0123, vsign_mask);
@@ -214,7 +216,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c4__avx512vnni(
 
       w = (const int8_t*) w + 64;
       k -= 4 * sizeof(int8_t);
-    }
+    } while (k != 0);
 
     __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
     __m512 vscaled1x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc1x0123456789ABCDEF);
