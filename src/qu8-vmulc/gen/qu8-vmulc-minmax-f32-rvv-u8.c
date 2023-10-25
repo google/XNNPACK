@@ -2,7 +2,7 @@
 //   Template: src/qs8-vmulc/rvv.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2021 Google LLC
+// Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -36,7 +36,7 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__rvv_u8(
   do {
     int32_t vl = __riscv_vsetvl_e8mf2(batch);
 
-    vuint8mf2_t in_a_u8v = __riscv_vle8_v_u8mf2(input_a, vl);
+    vuint8mf2_t in_a_u8v = __riscv_vle8_v_u8mf2(input_a, vl); input_a += vl;
     vuint16m1_t a_u16v = __riscv_vwsubu_vx_u16m1(in_a_u8v, a_zero_point, vl);
     vint16m1_t a_i16v = __riscv_vreinterpret_v_u16m1_i16m1(a_u16v);
 
@@ -50,11 +50,9 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__rvv_u8(
     out_u32v = __riscv_vsub_vx_u32m2(out_u32v, magic_bias_less_output_zero_point, vl);
     vuint16m1_t out_u16v = __riscv_vncvt_x_x_w_u16m1(out_u32v, vl);
     vuint8mf2_t out_u8v = __riscv_vncvt_x_x_w_u8mf2(out_u16v, vl);
-    __riscv_vse8_v_u8mf2(output, out_u8v, vl);
+    __riscv_vse8_v_u8mf2(output, out_u8v, vl); output += vl;
 
-    input_a += vl;
     input_b += vl;
-    output += vl;
     batch -= vl;
   } while (batch != 0);
 }
