@@ -52,8 +52,8 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c8__avx_ld64(
     __m128i vacc0x3 = _mm_cvtsi32_si128(((const int*) w)[3]);
     w = (const int32_t*) w + 4;
 
-    size_t k = 0;
-    while (k < kc) {
+    size_t k = kc;
+    while (k >= 8 * sizeof(int8_t)) {
       const __m128i va0 = _mm_loadl_epi64((const __m128i*) a0);
       const __m128i vxa0 = _mm_cvtepi8_epi16(va0);
       a0 += 8;
@@ -76,7 +76,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c8__avx_ld64(
       vacc0x3 = _mm_add_epi32(vacc0x3, _mm_madd_epi16(vxa0, vxb3));
 
       w = (const int8_t*) w + 32;
-      k += 8 * sizeof(int8_t);
+      k -= 8 * sizeof(int8_t);
     }
 
     const __m128i vacc0x01 = _mm_hadd_epi32(vacc0x0, vacc0x1);
