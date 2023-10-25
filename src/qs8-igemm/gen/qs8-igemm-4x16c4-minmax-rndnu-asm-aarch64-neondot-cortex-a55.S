@@ -22,7 +22,7 @@
 #     size_t cn_stride,                  [sp] -> (x0)
 #     size_t a_offset,                   [sp + 8] -> x8
 #     const int8_t* zero,                [sp + 16] -> x12
-#     const union xnn_qs8_conv_minmax_params params [sp + 24] -> (x11)
+#     const union xnn_qs8_conv_minmax_params *params)  [sp + 24] -> x11
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -49,7 +49,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_co
         LDP         x12, x11, [sp, 16]      // Load zero, params pointer
         CSEL        x16, x6,  x16, LO       //   c1 = c0
         ADD         x2, x2, 3               // kc = (kc + 3) & ~3
-        STP         d8,  d9, [sp, -32]!     // Save d8-d11 on stack
+        STP         d8,  d9, [sp, -32]!   // Save d8-d11 on stack
 
         ADD         x17, x16, x7            // c2 = c1 + cm_stride
         STP         d10, d11, [sp, 16]
@@ -420,7 +420,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_co
         # BLOCK 3
         SDOT        v28.4s, v11.16b, v4.4b[1]
         SDOT        v29.4s, v11.16b, v5.4b[1]
-        LDR         x11, [sp, 56]               // reload params pointer
+        LDR         x11, [sp, 56]                // reload params pointer
         SDOT        v30.4s, v11.16b, v6.4b[1]
         SDOT        v31.4s, v11.16b, v7.4b[1]
 
@@ -550,7 +550,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_co
 
         # Restore d8-d11 from stack
         LDP         d10, d11, [sp, 16]
-        LDP         d8,  d9, [sp], 32
+        LDP         d8, d9, [sp], 32
         RET
 
         # Remainder- 4 to 12 bytes of A

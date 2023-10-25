@@ -163,6 +163,16 @@ static void init_hardware_config(void) {
       }
       hardware_config.use_wasm_blendvps = !wasm_v128_any_true(diff);
     }
+    {
+      const v128_t input1 = wasm_f32x4_const(16777218.f, 0.f, 0.f, 0.f);
+      const v128_t input2 = wasm_f32x4_const(3.f, 0.f, 0.f, 0.f);
+      const v128_t input3 = wasm_f32x4_const(3.f, 0.f, 0.f, 0.f);
+      v128_t diff = wasm_i8x16_const_splat(0);
+      const v128_t relaxed_result = wasm_f32x4_relaxed_madd(input1, input2, input3);
+      const v128_t mul_result = wasm_f32x4_add(input3, wasm_f32x4_mul(input1, input2));
+      diff = wasm_v128_or(diff, wasm_v128_xor(mul_result, relaxed_result));
+      hardware_config.use_wasm_fma = !wasm_v128_any_true(diff);
+    }
   #endif  // XNN_ARCH_WASMRELAXEDSIMD
 }
 

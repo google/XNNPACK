@@ -9,7 +9,11 @@
 
 #include <assert.h>
 
-#include <smmintrin.h>
+#ifdef _MSC_VER
+  #include <intrin.h>
+#else
+  #include <x86intrin.h>
+#endif
 
 #include <xnnpack/igemm.h>
 #include <xnnpack/math.h>

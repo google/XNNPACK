@@ -27,8 +27,8 @@ extern "C" {
     size_t output_stride,                     \
     const uint32_t fill_pattern);
 
-DECLARE_PAD_UKERNEL_FUNCTION(xnn_xx_pad_ukernel_p16__neon_u16)
 DECLARE_PAD_UKERNEL_FUNCTION(xnn_xx_pad_ukernel_p4__scalar_u16)
+DECLARE_PAD_UKERNEL_FUNCTION(xnn_xx_pad_ukernel_p16__neon_u16)
 DECLARE_PAD_UKERNEL_FUNCTION(xnn_xx_pad_ukernel_p16__sse2_u16)
 DECLARE_PAD_UKERNEL_FUNCTION(xnn_xx_pad_ukernel_p16__wasmsimd_u16)
 

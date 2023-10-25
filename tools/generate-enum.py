@@ -118,14 +118,7 @@ const char* {enum_name}_to_string(enum {enum_name} {arg_name}) {{
     if debug_only:
       output += '#endif  // XNN_LOG_LEVEL > 0\n'
 
-    txt_changed = True
-    if os.path.exists(output_path):
-      with codecs.open(output_path, 'r', encoding='utf-8') as output_file:
-        txt_changed = output_file.read() != output
-
-    if txt_changed:
-      with codecs.open(output_path, 'w', encoding='utf-8') as output_file:
-        output_file.write(output)
+    xnncommon.overwrite_if_changed(output_path, output)
 
 def generate_header(enum_name, spec_path, output_path, debug_only):
   with codecs.open(spec_path, 'r', encoding='utf-8') as spec_file:
@@ -185,14 +178,7 @@ XNN_INTERNAL const char* {enum_name}_to_string(enum {enum_name} {arg_name});
 #endif
 """
 
-    txt_changed = True
-    if os.path.exists(output_path):
-      with codecs.open(output_path, 'r', encoding='utf-8') as output_file:
-        txt_changed = output_file.read() != output
-
-    if txt_changed:
-      with codecs.open(output_path, 'w', encoding='utf-8') as output_file:
-        output_file.write(output)
+    xnncommon.overwrite_if_changed(output_path, output)
 
 def main(args):
   options = parser.parse_args(args)

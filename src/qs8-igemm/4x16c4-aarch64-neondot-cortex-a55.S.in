@@ -3,15 +3,20 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert REQUANTIZATION in ["FP32", "RNDNU"]
-$assert DATATYPE in ["QC8", "QS8"]
+$assert REQUANTIZATION in ["FP32", "RNDNU"] or not REQUANTIZATION
+$assert DATATYPE in ["QC8", "QD8", "QS8"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
+$assert DATATYPE != "QD8" or not REQUANTIZATION
 
 #include <xnnpack/assembly.h>
 
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8"}[DATATYPE]
-$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params"}[DATATYPE]
-$REWIND_DECREMENT = 3 if DATATYPE == "QC8" else {"RNDNU": 15, "FP32": 7}[REQUANTIZATION]
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QD8": "qd8_f32_qc8w"}[DATATYPE]
+$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QD8": "xnn_f32_minmax_params"}[DATATYPE]
+$REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
+$REWIND_DECREMENT = 3 if DATATYPE == "QC8" else {"RNDNU": 15, "FP32": 7}[REQUANTIZATION] if REQUANTIZATION else 4
+$SP_OFFSET = 48 if DATATYPE == "QD8" else 32
+$STACK_REGISTERS = 12 if DATATYPE == "QD8" else 11
+$SCALING_PARAMS = "xnn_qd8_quantization_params" if DATATYPE == "QD8" else ""
 # void xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
@@ -24,7 +29,11 @@ $REWIND_DECREMENT = 3 if DATATYPE == "QC8" else {"RNDNU": 15, "FP32": 7}[REQUANT
 #     size_t cn_stride,                  [sp] -> (x0)
 #     size_t a_offset,                   [sp + 8] -> x8
 #     const int8_t* zero,                [sp + 16] -> x12
-#     const union ${PARAMS_UNION} params [sp + 24] -> (x11)
+$if DATATYPE == "QD8":
+  #     const union ${PARAMS_UNION} *params,  [sp + 24]  -> x11
+  #     const struct ${SCALING_PARAMS} *quantization_params) [sp + 32] -> x17
+$else:
+  #     const union ${PARAMS_UNION} *params)  [sp + 24] -> x11
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -38,11 +47,14 @@ $REWIND_DECREMENT = 3 if DATATYPE == "QC8" else {"RNDNU": 15, "FP32": 7}[REQUANT
 // C1  x16 v17 v21 v25 v29
 // C2  x17 v18 v22 v26 v30
 // C3   x7 v19 v23 v27 v31
-// unused v12 v13 v14 v15
+$if DATATYPE == "QD8":
+  // unused v13, v14 v15
+$else:
+  // unused v12 v13 v14 v15
 
 // x11 temp for Cortex-A55 loads
 
-BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55
+BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55
 
         # Clamp C pointers
         CMP         x0, 2                   // if mr < 2
@@ -51,7 +63,11 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukern
         LDP         x12, x11, [sp, 16]      // Load zero, params pointer
         CSEL        x16, x6,  x16, LO       //   c1 = c0
         ADD         x2, x2, 3               // kc = (kc + 3) & ~3
-        STP         d8,  d9, [sp, -32]!     // Save d8-d11 on stack
+        STP         d8,  d9, [sp, -${SP_OFFSET}]!   // Save d8-d11 on stack
+        $if DATATYPE == "QD8":
+          STR         d12,  [sp, 32]
+          LDR         x17, [sp, 80]           // &quantization_params.zero_point
+          LD1         {v12.4s}, [x17]         // zero point and scale
 
         ADD         x17, x16, x7            // c2 = c1 + cm_stride
         STP         d10, d11, [sp, 16]
@@ -67,19 +83,38 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukern
 0:
         # Load initial bias from w into accumulators
         LDP         q16, q20, [x5], 32
-        MOV         v17.16b, v16.16b
-        MOV         v18.16b, v16.16b
-        LDP         q24, q28, [x5], 32
-        MOV         v19.16b, v16.16b
-        MOV         v21.16b, v20.16b
-        MOV         v22.16b, v20.16b
-        MOV         v23.16b, v20.16b
-        MOV         v25.16b, v24.16b
-        MOV         v26.16b, v24.16b
-        MOV         v27.16b, v24.16b
-        MOV         v29.16b, v28.16b
-        MOV         v30.16b, v28.16b
-        MOV         v31.16b, v28.16b
+        $if DATATYPE != "QD8":
+          MOV         v17.16b, v16.16b
+          MOV         v18.16b, v16.16b
+          LDP         q24, q28, [x5], 32
+          MOV         v19.16b, v16.16b
+          MOV         v21.16b, v20.16b
+          MOV         v22.16b, v20.16b
+          MOV         v23.16b, v20.16b
+          MOV         v25.16b, v24.16b
+          MOV         v26.16b, v24.16b
+          MOV         v27.16b, v24.16b
+          MOV         v29.16b, v28.16b
+          MOV         v30.16b, v28.16b
+          MOV         v31.16b, v28.16b
+        $else:
+          MUL         v17.4s, v16.4s, v12.s[0]
+          MUL         v18.4s, v16.4s, v12.s[0]
+          LDP         q24, q28, [x5], 32
+          MUL         v19.4s, v16.4s, v12.s[0]
+          MUL         v21.4s, v20.4s, v12.s[0]
+          MUL         v22.4s, v20.4s, v12.s[0]
+          MUL         v23.4s, v20.4s, v12.s[0]
+          MUL         v25.4s, v24.4s, v12.s[0]
+          MUL         v26.4s, v24.4s, v12.s[0]
+          MUL         v27.4s, v24.4s, v12.s[0]
+          MUL         v29.4s, v28.4s, v12.s[0]
+          MUL         v30.4s, v28.4s, v12.s[0]
+          MUL         v31.4s, v28.4s, v12.s[0]
+          MUL         v24.4s, v24.4s, v12.s[0]
+          MUL         v28.4s, v28.4s, v12.s[0]
+          MUL         v16.4s, v16.4s, v12.s[0]
+          MUL         v20.4s, v20.4s, v12.s[0]
         MOV         x9, x3                  // p = ks
 
         .p2align    3
@@ -422,7 +457,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukern
         # BLOCK 3
         SDOT        v28.4s, v11.16b, v4.4b[1]
         SDOT        v29.4s, v11.16b, v5.4b[1]
-        LDR         x11, [sp, 56]               // reload params pointer
+        LDR         x11, [sp, ${SP_OFFSET + 24}]                // reload params pointer
         SDOT        v30.4s, v11.16b, v6.4b[1]
         SDOT        v31.4s, v11.16b, v7.4b[1]
 
@@ -435,7 +470,132 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukern
         SUBS        x9, x9, 32              // ks -= MR * sizeof(int8_t*)
         B.HI        1b
 
-        $if REQUANTIZATION == "RNDNU":
+        $if DATATYPE == "QD8":
+          SCVTF       v16.4s, v16.4s
+          SCVTF       v17.4s, v17.4s
+          SCVTF       v18.4s, v18.4s
+          SCVTF       v19.4s, v19.4s
+          SCVTF       v20.4s, v20.4s
+          SCVTF       v21.4s, v21.4s
+          SCVTF       v22.4s, v22.4s
+          SCVTF       v23.4s, v23.4s
+          LDP         q0, q1, [x5], 32        // kernel_scale
+          SCVTF       v24.4s, v24.4s
+          SCVTF       v25.4s, v25.4s
+          SCVTF       v26.4s, v26.4s
+          SCVTF       v27.4s, v27.4s
+          SCVTF       v28.4s, v28.4s
+          SCVTF       v29.4s, v29.4s
+          SCVTF       v30.4s, v30.4s
+          SCVTF       v31.4s, v31.4s
+          LDP         q2, q3, [x5], 32
+          FMUL        v4.4s, v0.4s, v12.s[1]  // kernel_scale * scale
+          FMUL        v5.4s, v1.4s, v12.s[1]
+          FMUL        v6.4s, v2.4s, v12.s[1]
+          FMUL        v7.4s, v3.4s, v12.s[1]
+          FMUL        v8.4s, v0.4s, v12.s[1]
+          FMUL        v9.4s, v1.4s, v12.s[1]
+          FMUL        v10.4s, v2.4s, v12.s[1]
+          FMUL        v11.4s, v3.4s, v12.s[1]
+          FMUL        v16.4s, v16.4s, v4.4s
+          FMUL        v20.4s, v20.4s, v5.4s
+          FMUL        v24.4s, v24.4s, v6.4s
+          FMUL        v28.4s, v28.4s, v7.4s
+          FMUL        v17.4s, v17.4s, v8.4s
+          FMUL        v21.4s, v21.4s, v9.4s
+          FMUL        v25.4s, v25.4s, v10.4s
+          FMUL        v29.4s, v29.4s, v11.4s
+          FMUL        v4.4s, v0.4s, v12.s[1]
+          FMUL        v5.4s, v1.4s, v12.s[1]
+          FMUL        v6.4s, v2.4s, v12.s[1]
+          FMUL        v7.4s, v3.4s, v12.s[1]
+          FMUL        v8.4s, v0.4s, v12.s[1]
+          FMUL        v9.4s, v1.4s, v12.s[1]
+          FMUL        v10.4s, v2.4s, v12.s[1]
+          FMUL        v11.4s, v3.4s, v12.s[1]
+          LDP         q0, q1, [x5], 32        // bias
+          FMUL        v18.4s, v18.4s, v4.4s
+          FMUL        v22.4s, v22.4s, v5.4s
+          FMUL        v26.4s, v26.4s, v6.4s
+          FMUL        v30.4s, v30.4s, v7.4s
+          FMUL        v19.4s, v19.4s, v8.4s
+          FMUL        v23.4s, v23.4s, v9.4s
+          FMUL        v27.4s, v27.4s, v10.4s
+          FMUL        v31.4s, v31.4s, v11.4s
+          LDP         q2, q3, [x5], 32
+          FADD        v16.4s, v16.4s, v0.4s
+          FADD        v17.4s, v17.4s, v0.4s
+          FADD        v18.4s, v18.4s, v0.4s
+          FADD        v19.4s, v19.4s, v0.4s
+          FADD        v20.4s, v20.4s, v1.4s
+          FADD        v21.4s, v21.4s, v1.4s
+          FADD        v22.4s, v22.4s, v1.4s
+          FADD        v23.4s, v23.4s, v1.4s
+          LD1R        {v0.4s}, [x11], #4      // min
+          FADD        v24.4s, v24.4s, v2.4s
+          FADD        v25.4s, v25.4s, v2.4s
+          FADD        v26.4s, v26.4s, v2.4s
+          FADD        v27.4s, v27.4s, v2.4s
+          FADD        v28.4s, v28.4s, v3.4s
+          FADD        v29.4s, v29.4s, v3.4s
+          FADD        v30.4s, v30.4s, v3.4s
+          FADD        v31.4s, v31.4s, v3.4s
+          LD1R        {v1.4s}, [x11]          //max
+          FMAX        v16.4s, v16.4s, v0.4s
+          FMAX        v17.4s, v17.4s, v0.4s
+          FMAX        v18.4s, v18.4s, v0.4s
+          FMAX        v19.4s, v19.4s, v0.4s
+          FMAX        v20.4s, v20.4s, v0.4s
+          FMAX        v21.4s, v21.4s, v0.4s
+          FMAX        v22.4s, v22.4s, v0.4s
+          FMAX        v23.4s, v23.4s, v0.4s
+          FMAX        v24.4s, v24.4s, v0.4s
+          FMAX        v25.4s, v25.4s, v0.4s
+          FMAX        v26.4s, v26.4s, v0.4s
+          FMAX        v27.4s, v27.4s, v0.4s
+          FMAX        v28.4s, v28.4s, v0.4s
+          FMAX        v29.4s, v29.4s, v0.4s
+          FMAX        v30.4s, v30.4s, v0.4s
+          FMAX        v31.4s, v31.4s, v0.4s
+          FMIN        v16.4s, v16.4s, v1.4s
+          FMIN        v17.4s, v17.4s, v1.4s
+          FMIN        v18.4s, v18.4s, v1.4s
+          FMIN        v19.4s, v19.4s, v1.4s
+          FMIN        v20.4s, v20.4s, v1.4s
+          FMIN        v21.4s, v21.4s, v1.4s
+          FMIN        v22.4s, v22.4s, v1.4s
+          FMIN        v23.4s, v23.4s, v1.4s
+          FMIN        v24.4s, v24.4s, v1.4s
+          FMIN        v25.4s, v25.4s, v1.4s
+          FMIN        v26.4s, v26.4s, v1.4s
+          FMIN        v27.4s, v27.4s, v1.4s
+          FMIN        v28.4s, v28.4s, v1.4s
+          FMIN        v29.4s, v29.4s, v1.4s
+          FMIN        v30.4s, v30.4s, v1.4s
+          FMIN        v31.4s, v31.4s, v1.4s
+          SUBS        x1, x1, 16
+          LDR         x0, [sp, 48]            // cn_stride
+          B.LO        7f
+          STP         q19, q23, [x7]
+          STP         q27, q31, [x7, #32]
+          ADD         x7, x7, x0
+
+          STP         q18, q22, [x17]
+          STP         q26, q30, [x17, #32]
+          ADD         x17, x17, x0
+
+          STP         q17, q21, [x16]
+          STP         q25, q29, [x16, #32]
+          ADD         x16, x16, x0
+
+          STP         q16, q20, [x6]
+          STP         q24, q28, [x6, #32]
+          ADD         x6, x6, x0
+
+          SUB         x4, x4, x3              // a -= ks
+          SUB         x11, x11, ${REWIND_DECREMENT}               // rewind params pointer
+          B.NE        0b
+        $elif REQUANTIZATION == "RNDNU":
           # Apply params - preshift, scale, postshift, bias and clamp
           LD1R        {v4.4s}, [x11], 4
           SQSHL       v16.4s, v16.4s, v4.4s   // shift to upper bits
@@ -569,71 +729,74 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukern
           FCVTNS      v30.4s, v30.4s
           FCVTNS      v31.4s, v31.4s
 
-        SQXTN       v16.4h, v16.4s
-        SQXTN       v17.4h, v17.4s
-        SQXTN       v18.4h, v18.4s
-        SQXTN       v19.4h, v19.4s
-        SQXTN       v24.4h, v24.4s
-        SQXTN       v25.4h, v25.4s
-        SQXTN       v26.4h, v26.4s
-        SQXTN       v27.4h, v27.4s
-        LD1R        {v6.8h}, [x11], 2       // add bias
+        $if DATATYPE != "QD8":
+          SQXTN       v16.4h, v16.4s
+          SQXTN       v17.4h, v17.4s
+          SQXTN       v18.4h, v18.4s
+          SQXTN       v19.4h, v19.4s
+          SQXTN       v24.4h, v24.4s
+          SQXTN       v25.4h, v25.4s
+          SQXTN       v26.4h, v26.4s
+          SQXTN       v27.4h, v27.4s
+          LD1R        {v6.8h}, [x11], 2       // add bias
 
-        SQXTN2      v16.8h, v20.4s
-        SQXTN2      v17.8h, v21.4s
-        SQXTN2      v18.8h, v22.4s
-        SQXTN2      v19.8h, v23.4s
-        SQXTN2      v24.8h, v28.4s
-        SQXTN2      v25.8h, v29.4s
-        SQXTN2      v26.8h, v30.4s
-        SQXTN2      v27.8h, v31.4s
+          SQXTN2      v16.8h, v20.4s
+          SQXTN2      v17.8h, v21.4s
+          SQXTN2      v18.8h, v22.4s
+          SQXTN2      v19.8h, v23.4s
+          SQXTN2      v24.8h, v28.4s
+          SQXTN2      v25.8h, v29.4s
+          SQXTN2      v26.8h, v30.4s
+          SQXTN2      v27.8h, v31.4s
 
-        SQADD       v16.8h, v16.8h, v6.8h
-        SQADD       v17.8h, v17.8h, v6.8h
-        SQADD       v18.8h, v18.8h, v6.8h
-        SQADD       v19.8h, v19.8h, v6.8h
-        SQADD       v24.8h, v24.8h, v6.8h
-        SQADD       v25.8h, v25.8h, v6.8h
-        SQADD       v26.8h, v26.8h, v6.8h
-        SQADD       v27.8h, v27.8h, v6.8h
-        LD1R        {v4.16b}, [x11], 1      // clamp min value
+          SQADD       v16.8h, v16.8h, v6.8h
+          SQADD       v17.8h, v17.8h, v6.8h
+          SQADD       v18.8h, v18.8h, v6.8h
+          SQADD       v19.8h, v19.8h, v6.8h
+          SQADD       v24.8h, v24.8h, v6.8h
+          SQADD       v25.8h, v25.8h, v6.8h
+          SQADD       v26.8h, v26.8h, v6.8h
+          SQADD       v27.8h, v27.8h, v6.8h
+          LD1R        {v4.16b}, [x11], 1      // clamp min value
 
-        SQXTN       v0.8b, v16.8h
-        SQXTN       v1.8b, v17.8h
-        SQXTN       v2.8b, v18.8h
-        SQXTN       v3.8b, v19.8h
-        LD1R        {v5.16b}, [x11]         // clamp max value
-        SQXTN2      v0.16b, v24.8h
-        SQXTN2      v1.16b, v25.8h
-        SQXTN2      v2.16b, v26.8h
-        SQXTN2      v3.16b, v27.8h
-        LDR         x0, [sp, 32]            // cn_stride
-        SMAX        v0.16b, v0.16b, v4.16b
-        SMAX        v1.16b, v1.16b, v4.16b
-        SUB         x11, x11, ${REWIND_DECREMENT}           // rewind params pointer
-        SMAX        v2.16b, v2.16b, v4.16b
-        SMAX        v3.16b, v3.16b, v4.16b
-        SUBS        x1, x1, 16
-        SMIN        v0.16b, v0.16b, v5.16b
-        SMIN        v1.16b, v1.16b, v5.16b
-        SMIN        v2.16b, v2.16b, v5.16b
-        SMIN        v3.16b, v3.16b, v5.16b
-        B.LO        7f
+          SQXTN       v0.8b, v16.8h
+          SQXTN       v1.8b, v17.8h
+          SQXTN       v2.8b, v18.8h
+          SQXTN       v3.8b, v19.8h
+          LD1R        {v5.16b}, [x11]         // clamp max value
+          SQXTN2      v0.16b, v24.8h
+          SQXTN2      v1.16b, v25.8h
+          SQXTN2      v2.16b, v26.8h
+          SQXTN2      v3.16b, v27.8h
+          LDR         x0, [sp, 32]            // cn_stride
+          SMAX        v0.16b, v0.16b, v4.16b
+          SMAX        v1.16b, v1.16b, v4.16b
+          SUB         x11, x11, ${REWIND_DECREMENT}           // rewind params pointer
+          SMAX        v2.16b, v2.16b, v4.16b
+          SMAX        v3.16b, v3.16b, v4.16b
+          SUBS        x1, x1, 16
+          SMIN        v0.16b, v0.16b, v5.16b
+          SMIN        v1.16b, v1.16b, v5.16b
+          SMIN        v2.16b, v2.16b, v5.16b
+          SMIN        v3.16b, v3.16b, v5.16b
+          B.LO        7f
 
-        # Store full 4 x 16
-        ST1         {v3.16b},  [x7], x0
-        ST1         {v2.16b}, [x17], x0
-        ST1         {v1.16b}, [x16], x0
-        ST1         {v0.16b},  [x6], x0
+          # Store full 4 x 16
+          ST1         {v3.16b},  [x7], x0
+          ST1         {v2.16b}, [x17], x0
+          ST1         {v1.16b}, [x16], x0
+          ST1         {v0.16b},  [x6], x0
 
-        SUB         x4, x4, x3              // a -= ks
+          SUB         x4, x4, x3              // a -= ks
 
-        # nc loop
-        B.HI        0b
+          # nc loop
+          B.HI        0b
 
-        # Restore d8-d11 from stack
+        # Restore d8-d${STACK_REGISTERS} from stack
+        $if DATATYPE == "QD8":
+          LDR         d12, [sp, 32]
         LDP         d10, d11, [sp, 16]
-        LDP         d8,  d9, [sp], 32
+        LDP         d8, d9, [sp], ${SP_OFFSET}
         RET
 
         # Remainder- 4 to 12 bytes of A
@@ -708,49 +871,109 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukern
 
         # Store odd width
         .p2align    3
-7:
-        TBZ         x1, 3, 8f
-        STR         d3, [x7], 8
-        STR         d2, [x17], 8
-        DUP         d3, v3.d[1]
-        DUP         d2, v2.d[1]
-        STR         d1, [x16], 8
-        STR         d0, [x6], 8
-        DUP         d1, v1.d[1]
-        DUP         d0, v0.d[1]
-8:
-        TBZ         x1, 2, 9f
-        STR         s3, [x7], 4
-        STR         s2, [x17], 4
-        DUP         s3, v3.s[1]
-        DUP         s2, v2.s[1]
-        STR         s1, [x16], 4
-        STR         s0, [x6], 4
-        DUP         s1, v1.s[1]
-        DUP         s0, v0.s[1]
-9:
-        TBZ         x1, 1, 10f
-        STR         h3, [x7], 2
-        STR         h2, [x17], 2
-        DUP         h3, v3.h[1]
-        DUP         h2, v2.h[1]
-        STR         h1, [x16], 2
-        STR         h0, [x6], 2
-        DUP         h1, v1.h[1]
-        DUP         h0, v0.h[1]
-10:
-        TBZ         x1, 0, 11f
-        STR         b3, [x7]
-        STR         b2, [x17]
-        STR         b1, [x16]
-        STR         b0, [x6]
-11:
-        # Restore d8-d11 from stack
-        LDP         d10, d11, [sp, 16]
-        LDP         d8,  d9, [sp], 32
-        RET
+$if DATATYPE == "QD8":
+  7:
+          TBZ         x1, 3, 8f
+          STP         q19, q23, [x7]
+          STP         q18, q22, [x17]
+          STP         q17, q21, [x16]
+          STP         q16, q20, [x6]
+          MOV         v16.16b, v24.16b
+          MOV         v17.16b, v25.16b
+          MOV         v18.16b, v26.16b
+          MOV         v19.16b, v27.16b
+          MOV         v20.16b, v28.16b
+          MOV         v21.16b, v29.16b
+          MOV         v22.16b, v30.16b
+          MOV         v23.16b, v31.16b
+          ADD         x7, x7, #32
+          ADD         x17, x17, #32
+          ADD         x16, x16, #32
+          ADD         x6, x6, #32
+  8:
+          TBZ         x1, 2, 9f
+          STR         q19, [x7]
+          STR         q18, [x17]
+          STR         q17, [x16]
+          STR         q16, [x6]
+          MOV         v16.16b, v20.16b
+          MOV         v17.16b, v21.16b
+          MOV         v18.16b, v22.16b
+          MOV         v19.16b, v23.16b
+          ADD         x7, x7, #16
+          ADD         x17, x17, #16
+          ADD         x16, x16, #16
+          ADD         x6, x6, #16
+  9:
+          TBZ         x1, 1, 10f
+          ST1         {v19.2s}, [x7]
+          ST1         {v18.2s}, [x17]
+          ST1         {v17.2s}, [x16]
+          ST1         {v16.2s}, [x6]
+          DUP         d16, v16.d[1]
+          DUP         d17, v17.d[1]
+          DUP         d18, v18.d[1]
+          DUP         d19, v19.d[1]
+          ADD         x7, x7, #8
+          ADD         x17, x17, #8
+          ADD         x16, x16, #8
+          ADD         x6, x6, #8
+  10:
+          TBZ         x1, 0, 11f
+          STR         s19, [x7]
+          STR         s18, [x17]
+          STR         s17, [x16]
+          STR         s16, [x6]
+  11:
+          # Restore d8-d12 from stack
+          LDR         d12, [sp, 32]
+          LDP         d10, d11, [sp, 16]
+          LDP         d8, d9, [sp], 48
+          RET
+$else:
+  7:
+          TBZ         x1, 3, 8f
+          STR         d3, [x7], 8
+          STR         d2, [x17], 8
+          DUP         d3, v3.d[1]
+          DUP         d2, v2.d[1]
+          STR         d1, [x16], 8
+          STR         d0, [x6], 8
+          DUP         d1, v1.d[1]
+          DUP         d0, v0.d[1]
+  8:
+          TBZ         x1, 2, 9f
+          STR         s3, [x7], 4
+          STR         s2, [x17], 4
+          DUP         s3, v3.s[1]
+          DUP         s2, v2.s[1]
+          STR         s1, [x16], 4
+          STR         s0, [x6], 4
+          DUP         s1, v1.s[1]
+          DUP         s0, v0.s[1]
+  9:
+          TBZ         x1, 1, 10f
+          STR         h3, [x7], 2
+          STR         h2, [x17], 2
+          DUP         h3, v3.h[1]
+          DUP         h2, v2.h[1]
+          STR         h1, [x16], 2
+          STR         h0, [x6], 2
+          DUP         h1, v1.h[1]
+          DUP         h0, v0.h[1]
+  10:
+          TBZ         x1, 0, 11f
+          STR         b3, [x7]
+          STR         b2, [x17]
+          STR         b1, [x16]
+          STR         b0, [x6]
+  11:
+          # Restore d8-d11 from stack
+          LDP         d10, d11, [sp, 16]
+          LDP         d8,  d9, [sp], 32
+          RET
 
-END_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55
+END_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
