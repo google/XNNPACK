@@ -4,6 +4,9 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+import codecs
+import os
+
 
 def _indent(text):
   return "\n".join(map(lambda t: "  " + t if t else t, text.splitlines()))
@@ -209,3 +212,13 @@ _ISA_HIERARCHY = [
 ]
 
 _ISA_HIERARCHY_MAP = {isa: v for v, isa in enumerate(_ISA_HIERARCHY)}
+
+
+def overwrite_if_changed(filepath, content):
+  txt_changed = True
+  if os.path.exists(filepath):
+    with codecs.open(filepath, "r", encoding="utf-8") as output_file:
+      txt_changed = output_file.read() != content
+  if txt_changed:
+    with codecs.open(filepath, "w", encoding="utf-8") as output_file:
+      output_file.write(content)

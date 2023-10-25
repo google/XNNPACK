@@ -570,6 +570,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
+        ":math",
         ":microparams",
     ],
 )
@@ -2992,7 +2993,6 @@ xnnpack_cc_library(
         ":enable_gemm_m_specialization",
         ":enable_jit",
         ":indirection",
-        ":jit",
         ":logging",
         ":math",
         ":microkernel_configs",
@@ -3008,7 +3008,10 @@ xnnpack_cc_library(
         ":xnnpack_h",
         "@FP16",
         "@pthreadpool",
-    ],
+    ] + select({
+        ":jit_enabled": [":jit"],
+        "//conditions:default": [],
+    }),
 )
 
 xnnpack_cc_library(

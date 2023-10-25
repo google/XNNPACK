@@ -12,6 +12,94 @@
 
 namespace xnnpack {
 
+void compute_convolution_qd8_f32_qc8w_reference_results(
+    size_t batch_size, size_t output_height, size_t output_width,
+    size_t input_height, size_t input_width, size_t input_padding_top,
+    size_t input_padding_right, size_t input_padding_bottom,
+    size_t input_padding_left, size_t kernel_height, size_t kernel_width,
+    size_t subsampling_height, size_t subsampling_width, size_t dilation_height,
+    size_t dilation_width, size_t groups, size_t group_input_channels,
+    size_t group_output_channels, size_t input_channel_stride,
+    const std::vector<int8_t>& input, const std::vector<int8_t>& filter,
+    const std::vector<float>& filter_scale,
+    const std::vector<xnn_qd8_quantization_params>& quantization_params,
+    std::vector<float>& output, bool has_bias, const std::vector<float>& bias) {
+  std::fill(output.begin(), output.end(), 0);
+
+  for (size_t i = 0; i < batch_size; i++) {
+    int32_t zero_point = quantization_params[i].zero_point;
+    float inv_scale = quantization_params[i].inv_scale;
+    for (size_t oy = 0; oy < output_height; oy++) {
+      for (size_t ox = 0; ox < output_width; ox++) {
+        // Compute reference results.
+        for (size_t ky = 0; ky < kernel_height; ky++) {
+          const size_t iy = oy * subsampling_height + ky * dilation_height -
+                            input_padding_top;
+          for (size_t kx = 0; kx < kernel_width; kx++) {
+            const size_t ix = ox * subsampling_width + kx * dilation_width -
+                              input_padding_left;
+            for (size_t g = 0; g < groups; g++) {
+              for (size_t oc = 0; oc < group_output_channels; oc++) {
+                for (size_t ic = 0; ic < group_input_channels; ic++) {
+                  if (iy < input_height && ix < input_width) {
+                    output[(((i * output_height + oy) * output_width + ox) *
+                                groups +
+                            g) *
+                               group_output_channels +
+                           oc] +=
+                        (int32_t(input[((i * input_height + iy) * input_width +
+                                        ix) *
+                                           input_channel_stride +
+                                       g * group_input_channels + ic]) -
+                         zero_point) *
+                        int32_t(filter[(((g * group_output_channels + oc) *
+                                             kernel_height +
+                                         ky) *
+                                            kernel_width +
+                                        kx) *
+                                           group_input_channels +
+                                       ic]);
+                  } else {
+                    output[(((i * output_height + oy) * output_width + ox) *
+                                groups +
+                            g) *
+                               group_output_channels +
+                           oc] +=
+                        -zero_point *
+                        int32_t(filter[(((g * group_output_channels + oc) *
+                                             kernel_height +
+                                         ky) *
+                                            kernel_width +
+                                        kx) *
+                                           group_input_channels +
+                                       ic]);
+                  }
+                }
+              }
+            }
+          }
+        }
+        // Initialize Bias
+        for (size_t g = 0; g < groups; g++) {
+          for (size_t oc = 0; oc < group_output_channels; oc++) {
+            size_t n_index = g * group_output_channels + oc;
+            output[(((i * output_height + oy) * output_width + ox) * groups +
+                    g) *
+                       group_output_channels +
+                   oc] *= (inv_scale * filter_scale[n_index]);
+            if (has_bias) {
+              output[(((i * output_height + oy) * output_width + ox) * groups +
+                      g) *
+                         group_output_channels +
+                     oc] += bias[g * group_output_channels + oc];
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 void compute_convolution_qs8_reference_results(
     size_t batch_size,
     size_t output_height,

@@ -65,6 +65,7 @@ struct xnn_ukernel_gemm {
   uint8_t nr;
   uint8_t kr;
   uint8_t sr;
+  uint8_t kp;
 };
 
 struct xnn_ukernel_igemm {
@@ -175,6 +176,7 @@ struct xnn_operator {
   size_t output_width;
   size_t output_pixel_stride;
   void* output;
+  const void* quantization_params;
 
   union {
     // Pointer to allocated packed weights. Use this if weights_cache is NULL.

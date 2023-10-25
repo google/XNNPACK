@@ -52,8 +52,9 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c8__avx512skx(
     __m512i vacc0xCDEF = _mm512_maskz_expandloadu_epi32(vbias_mask, (const int32_t*) w + 12);
     w = (const int32_t*) w + 16;
 
-    size_t k = 0;
-    while (k < kc) {
+    size_t k = kc;
+
+    while (k >= 8 * sizeof(int8_t)) {
       const __m512i va0 = _mm512_broadcast_i32x4(_mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) a0)));
       a0 += 8;
 
@@ -71,7 +72,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c8__avx512skx(
       vacc0xCDEF = _mm512_add_epi32(vacc0xCDEF, _mm512_madd_epi16(va0, vbCDEF));
 
       w = (const int8_t*) w + 128;
-      k += 8 * sizeof(int8_t);
+      k -= 8 * sizeof(int8_t);
     }
 
     const __m512i vacc0x04152637 = _mm512_add_epi32(_mm512_unpacklo_epi32(vacc0x0123, vacc0x4567), _mm512_unpackhi_epi32(vacc0x0123, vacc0x4567));
@@ -99,7 +100,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c8__avx512skx(
     if (nc >= 16) {
       _mm_storeu_si128((__m128i*) c0, vout0x0123456789ABCDEF);
 
-      a0 = (const int8_t*) ((uintptr_t) a0 - k);
+      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
 
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
 

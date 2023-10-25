@@ -191,7 +191,6 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
 
 2:
         LDP         q0, q1, [x5], 32        // kernel_scale
-        LDP         q2, q3, [x5], 32
         SCVTF       v19.4s, v19.4s
         SCVTF       v23.4s, v23.4s
         SCVTF       v27.4s, v27.4s
@@ -199,14 +198,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         SCVTF       v18.4s, v18.4s
         SCVTF       v22.4s, v22.4s
         SCVTF       v26.4s, v26.4s
-        FMUL        v8.4s, v0.4s, v13.s[3]      // kernel_scale * scale
-        FMUL        v9.4s, v1.4s, v13.s[3]
-        FMUL        v10.4s, v2.4s, v13.s[3]
-        FMUL        v11.4s, v3.4s, v13.s[3]
-        FMUL        v4.4s, v0.4s, v13.s[1]
-        FMUL        v5.4s, v1.4s, v13.s[1]
-        FMUL        v6.4s, v2.4s, v13.s[1]
-        FMUL        v7.4s, v3.4s, v13.s[1]
+        LDP         q2, q3, [x5], 32
         SCVTF       v30.4s, v30.4s
         SCVTF       v17.4s, v17.4s
         SCVTF       v21.4s, v21.4s
@@ -216,6 +208,14 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         SCVTF       v20.4s, v20.4s
         SCVTF       v24.4s, v24.4s
         SCVTF       v28.4s, v28.4s
+        FMUL        v8.4s, v0.4s, v13.s[3]      // kernel_scale * scale
+        FMUL        v9.4s, v1.4s, v13.s[3]
+        FMUL        v10.4s, v2.4s, v13.s[3]
+        FMUL        v11.4s, v3.4s, v13.s[3]
+        FMUL        v4.4s, v0.4s, v13.s[1]
+        FMUL        v5.4s, v1.4s, v13.s[1]
+        FMUL        v6.4s, v2.4s, v13.s[1]
+        FMUL        v7.4s, v3.4s, v13.s[1]
         FMUL        v19.4s, v19.4s, v8.4s
         FMUL        v8.4s, v0.4s, v12.s[3]
         FMUL        v23.4s, v23.4s, v9.4s
@@ -228,16 +228,16 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         FMUL        v4.4s, v0.4s, v12.s[1]
         FMUL        v22.4s, v22.4s, v5.4s
         FMUL        v5.4s, v1.4s, v12.s[1]
+        LDP         q0, q1, [x5], 32        // bias
         FMUL        v26.4s, v26.4s, v6.4s
         FMUL        v6.4s, v2.4s, v12.s[1]
         FMUL        v30.4s, v30.4s, v7.4s
         FMUL        v7.4s, v3.4s, v12.s[1]
-        LDP         q0, q1, [x5], 32        // bias
-        LDP         q2, q3, [x5], 32
         FMUL        v17.4s, v17.4s, v8.4s
         FMUL        v21.4s, v21.4s, v9.4s
         FMUL        v25.4s, v25.4s, v10.4s
         FMUL        v29.4s, v29.4s, v11.4s
+        LDP         q2, q3, [x5], 32
         FMUL        v16.4s, v16.4s, v4.4s
         FMUL        v20.4s, v20.4s, v5.4s
         FMUL        v24.4s, v24.4s, v6.4s

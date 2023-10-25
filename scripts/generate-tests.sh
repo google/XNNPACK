@@ -8,9 +8,9 @@
 tools/generate-pack-test.py --spec test/x32-packx.yaml --output test/x32-packx.cc &
 
 ### Tests for Pack Weights micro-kernels
-tools/generate-packw-test.py --spec test/x8-packw.yaml --output test/x8-packw.cc &
-tools/generate-packw-test.py --spec test/x16-packw.yaml --output test/x16-packw.cc &
-tools/generate-packw-test.py --spec test/x32-packw.yaml --output test/x32-packw.cc &
+tools/generate-packw-test.py --spec test/x8-packw.yaml --output test/x8-packw.cc --output-bench bench/x8-packw.cc &
+tools/generate-packw-test.py --spec test/x16-packw.yaml --output test/x16-packw.cc --output-bench bench/x16-packw.cc &
+tools/generate-packw-test.py --spec test/x32-packw.yaml --output test/x32-packw.cc --output-bench bench/x32-packw.cc &
 
 ### Tests for Zero Bias micro-kernels
 tools/generate-packb-test.py --spec test/x32-zerob.yaml --output test/x32-zerob.cc &
@@ -101,7 +101,7 @@ tools/generate-gemm-test.py --spec test/f32-igemm-relu.yaml --output-test test/f
 tools/generate-gemm-test.py --spec test/f32-igemm-minmax.yaml --output-test test/f32-igemm-minmax.cc --output-test test/f32-igemm-minmax-2.cc &
 tools/generate-gemm-test.py --spec test/f32-igemm-jit.yaml --output-test test/f32-igemm-jit.cc &
 
-tools/generate-gemm-test.py --spec test/qd8-f32-qc8w-igemm-minmax.yaml --output-test test/qd8-f32-qc8w-igemm-minmax.cc &
+tools/generate-gemm-test.py --spec test/qd8-f32-qc8w-igemm-minmax.yaml --output-test test/qd8-f32-qc8w-igemm-minmax.cc --output-test test/qd8-f32-qc8w-igemm-minmax-2.cc --output-test test/qd8-f32-qc8w-igemm-minmax-3.cc &
 
 tools/generate-gemm-test.py --spec test/qs8-igemm-minmax-fp32.yaml --output-test test/qs8-igemm-minmax-fp32.cc --output-test test/qs8-igemm-minmax-fp32-2.cc &
 tools/generate-gemm-test.py --spec test/qs8-igemm-minmax-rndnu.yaml --output-test test/qs8-igemm-minmax-rndnu.cc --output-test test/qs8-igemm-minmax-rndnu-2.cc --output-test test/qs8-igemm-minmax-rndnu-3.cc --output-test test/qs8-igemm-minmax-rndnu-4.cc &
@@ -185,15 +185,15 @@ tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/qu
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qs8-vaddc-minmax.yaml --output test/qs8-vaddc-minmax.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qu8-vaddc-minmax.yaml --output test/qu8-vaddc-minmax.cc &
 
-tools/generate-vbinary-test.py --tester VMulMicrokernelTester  --spec test/qs8-vmul-minmax-fp32.yaml  --output test/qs8-vmul-minmax-fp32.cc &
-tools/generate-vbinary-test.py --tester VMulMicrokernelTester  --spec test/qs8-vmul-minmax-rndnu.yaml  --output test/qs8-vmul-minmax-rndnu.cc &
-tools/generate-vbinary-test.py --tester VMulMicrokernelTester  --spec test/qu8-vmul-minmax-fp32.yaml  --output test/qu8-vmul-minmax-fp32.cc &
-tools/generate-vbinary-test.py --tester VMulMicrokernelTester  --spec test/qu8-vmul-minmax-rndnu.yaml  --output test/qu8-vmul-minmax-rndnu.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/qs8-vmul-minmax-fp32.yaml  --output test/qs8-vmul-minmax-fp32.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/qs8-vmul-minmax-rndnu.yaml  --output test/qs8-vmul-minmax-rndnu.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/qu8-vmul-minmax-fp32.yaml  --output test/qu8-vmul-minmax-fp32.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/qu8-vmul-minmax-rndnu.yaml  --output test/qu8-vmul-minmax-rndnu.cc &
 
-tools/generate-vbinary-test.py --tester VMulCMicrokernelTester --spec test/qs8-vmulc-minmax-fp32.yaml --output test/qs8-vmulc-minmax-fp32.cc &
-tools/generate-vbinary-test.py --tester VMulCMicrokernelTester --spec test/qs8-vmulc-minmax-rndnu.yaml --output test/qs8-vmulc-minmax-rndnu.cc &
-tools/generate-vbinary-test.py --tester VMulCMicrokernelTester --spec test/qu8-vmulc-minmax-fp32.yaml --output test/qu8-vmulc-minmax-fp32.cc &
-tools/generate-vbinary-test.py --tester VMulCMicrokernelTester --spec test/qu8-vmulc-minmax-rndnu.yaml --output test/qu8-vmulc-minmax-rndnu.cc &
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qs8-vmulc-minmax-fp32.yaml --output test/qs8-vmulc-minmax-fp32.cc &
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qs8-vmulc-minmax-rndnu.yaml --output test/qs8-vmulc-minmax-rndnu.cc &
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qu8-vmulc-minmax-fp32.yaml --output test/qu8-vmulc-minmax-fp32.cc &
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qu8-vmulc-minmax-rndnu.yaml --output test/qu8-vmulc-minmax-rndnu.cc &
 
 ### Tests for VUnary micro-kernels
 tools/generate-vunary-test.py --spec test/f16-vclamp.yaml --output test/f16-vclamp.cc &
@@ -299,15 +299,15 @@ tools/generate-dwconv2d-chw-test.py --spec test/f16-dwconv2d-chw.yaml --output t
 tools/generate-dwconv2d-chw-test.py --spec test/f32-dwconv2d-chw.yaml --output test/f32-dwconv2d-chw.cc &
 
 ### Tests for VConvert micro-kernels
-tools/generate-vcvt-test.py --spec test/qs8-vcvt.yaml --output test/qs8-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/qu8-vcvt.yaml --output test/qu8-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/qs8-f32-vcvt.yaml --output test/qs8-f32-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/qu8-f32-vcvt.yaml --output test/qu8-f32-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/f32-qs8-vcvt.yaml --output test/f32-qs8-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/f32-qu8-vcvt.yaml --output test/f32-qu8-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/f32-f16-vcvt.yaml --output test/f32-f16-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/f16-f32-vcvt.yaml --output test/f16-f32-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/qs16-qs8-vcvt.yaml --output test/qs16-qs8-vcvt.cc &
+tools/generate-vcvt-test.py --spec test/qs8-vcvt.yaml --output test/qs8-vcvt.cc --output-bench bench/qs8-vcvt.cc &
+tools/generate-vcvt-test.py --spec test/qu8-vcvt.yaml --output test/qu8-vcvt.cc --output-bench bench/qu8-vcvt.cc &
+tools/generate-vcvt-test.py --spec test/qs8-f32-vcvt.yaml --output test/qs8-f32-vcvt.cc --output-bench bench/qs8-f32-vcvt.cc &
+tools/generate-vcvt-test.py --spec test/qu8-f32-vcvt.yaml --output test/qu8-f32-vcvt.cc --output-bench bench/qu8-f32-vcvt.cc &
+tools/generate-vcvt-test.py --spec test/f32-qs8-vcvt.yaml --output test/f32-qs8-vcvt.cc --output-bench bench/f32-qs8-vcvt.cc &
+tools/generate-vcvt-test.py --spec test/f32-qu8-vcvt.yaml --output test/f32-qu8-vcvt.cc --output-bench bench/f32-qu8-vcvt.cc &
+tools/generate-vcvt-test.py --spec test/f32-f16-vcvt.yaml --output test/f32-f16-vcvt.cc --output-bench bench/f32-f16-vcvt.cc &
+tools/generate-vcvt-test.py --spec test/f16-f32-vcvt.yaml --output test/f16-f32-vcvt.cc --output-bench bench/f16-f32-vcvt.cc &
+tools/generate-vcvt-test.py --spec test/qs16-qs8-vcvt.yaml --output test/qs16-qs8-vcvt.cc --output-bench bench/qs16-qs8-vcvt.cc &
 
 ### Tests for VLShift micro-kernels
 tools/generate-vlshift-test.py --spec test/i16-vlshift.yaml --output test/i16-vlshift.cc &

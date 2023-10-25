@@ -160,40 +160,25 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
 
       // Load a 16x${NR} block of weights.
       $if DATATYPE == "QC4":
-        $for N in range(0, NR, 4):
-          const int8x16_t vb${ABC[N:N+4]}x${ABC[0:8]} = vld1q_s8(w); w = (const int8_t*) w + 16;
-        $for N in range(0, NR, 4):
-          const int8x16_t vb${ABC[N:N+4]}x${ABC[8:16]} = vld1q_s8(w); w = (const int8_t*) w + 16;
-        $for K in range(0, 16, 8):
-          $for N in range(0, NR, 4):
-            const int8x16_t vxb${ABC[N:N+4]}x${ABC[K:K+8:2]} = vshlq_n_s8(vb${ABC[N:N+4]}x${ABC[K:K+8]}, 4);
-            const int8x16_t vxb${ABC[N:N+4]}x${ABC[K+1:K+8:2]} = vandq_s8(vb${ABC[N:N+4]}x${ABC[K:K+8]}, vmask);
-        $for N in range(0, NR, 4):
-          const int8x16x2_t vxb${ABC[N:N+4]}x${ABC[0:8]} = vzipq_s8(vxb${ABC[N:N+4]}x${ABC[0:8:2]}, vxb${ABC[N:N+4]}x${ABC[1:8:2]});
-          const int8x16x2_t vxb${ABC[N:N+4]}x${ABC[8:16]} = vzipq_s8(vxb${ABC[N:N+4]}x${ABC[8:16:2]}, vxb${ABC[N:N+4]}x${ABC[9:16:2]});
-
-        // Multiply-accumulate: ${MR}x8 * 8x${NR} --> ${MR}x${NR}.
-        $for M in range(0, MR, 2):
-          $for N in range(0, NR, 4):
-            vacc${M}${M+1}x${ABC[N:N+2]} = vmmlaq_s32(vacc${M}${M+1}x${ABC[N:N+2]}, va${M}${M+1}x${ABC[0:8]}, vxb${ABC[N:N+4]}x${ABC[0:8]}.val[0]);
-            vacc${M}${M+1}x${ABC[N+2:N+4]} = vmmlaq_s32(vacc${M}${M+1}x${ABC[N+2:N+4]}, va${M}${M+1}x${ABC[0:8]}, vxb${ABC[N:N+4]}x${ABC[0:8]}.val[1]);
-        $for M in range(0, MR, 2):
-          $for N in range(0, NR, 4):
-            vacc${M}${M+1}x${ABC[N:N+2]} = vmmlaq_s32(vacc${M}${M+1}x${ABC[N:N+2]}, va${M}${M+1}x${ABC[8:16]}, vxb${ABC[N:N+4]}x${ABC[8:16]}.val[0]);
-            vacc${M}${M+1}x${ABC[N+2:N+4]} = vmmlaq_s32(vacc${M}${M+1}x${ABC[N+2:N+4]}, va${M}${M+1}x${ABC[8:16]}, vxb${ABC[N:N+4]}x${ABC[8:16]}.val[1]);
+        $for N in range(0, NR, 2):
+          const int8x16_t vb${ABC[N:N+2]}x${ABC[0:16]} = vld1q_s8(w); w = (const int8_t*) w + 16;
+        $for N in range(0, NR, 2):
+          const int8x16_t vb${ABC[N:N+2]}x${ABC[0:8]} = vshlq_n_s8(vb${ABC[N:N+2]}x${ABC[0:16]}, 4);
+        $for N in range(0, NR, 2):
+          const int8x16_t vb${ABC[N:N+2]}x${ABC[8:16]} = vandq_s8(vb${ABC[N:N+2]}x${ABC[0:16]}, vmask);
       $else:
         $for N in range(0, NR, 2):
           const int8x16_t vb${ABC[N:N+2]}x${ABC[0:8]} = vld1q_s8(w); w = (const int8_t*) w + 16;
         $for N in range(0, NR, 2):
           const int8x16_t vb${ABC[N:N+2]}x${ABC[8:16]} = vld1q_s8(w); w = (const int8_t*) w + 16;
 
-        // Multiply-accumulate: ${MR}x8 * 8x${NR} --> ${MR}x${NR}.
-        $for M in range(0, MR, 2):
-          $for N in range(0, NR, 2):
-            vacc${M}${M+1}x${ABC[N:N+2]} = vmmlaq_s32(vacc${M}${M+1}x${ABC[N:N+2]}, va${M}${M+1}x${ABC[0:8]}, vb${ABC[N:N+2]}x${ABC[0:8]});
-        $for M in range(0, MR, 2):
-          $for N in range(0, NR, 2):
-            vacc${M}${M+1}x${ABC[N:N+2]} = vmmlaq_s32(vacc${M}${M+1}x${ABC[N:N+2]}, va${M}${M+1}x${ABC[8:16]}, vb${ABC[N:N+2]}x${ABC[8:16]});
+      // Multiply-accumulate: ${MR}x8 * 8x${NR} --> ${MR}x${NR}.
+      $for M in range(0, MR, 2):
+        $for N in range(0, NR, 2):
+          vacc${M}${M+1}x${ABC[N:N+2]} = vmmlaq_s32(vacc${M}${M+1}x${ABC[N:N+2]}, va${M}${M+1}x${ABC[0:8]}, vb${ABC[N:N+2]}x${ABC[0:8]});
+      $for M in range(0, MR, 2):
+        $for N in range(0, NR, 2):
+          vacc${M}${M+1}x${ABC[N:N+2]} = vmmlaq_s32(vacc${M}${M+1}x${ABC[N:N+2]}, va${M}${M+1}x${ABC[8:16]}, vb${ABC[N:N+2]}x${ABC[8:16]});
 
       k -= 16 * sizeof(int8_t);
     }
@@ -208,26 +193,18 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
 
       // Load a 16x${NR} block of weights.
       $if DATATYPE == "QC4":
-        $for N in range(0, NR, 4):
-          const int8x16_t vb${ABC[N:N+4]}x${ABC[0:8]} = vld1q_s8(w); w = (const int8_t*) w + 16;
-        $for N in range(0, NR, 4):
-          const int8x16_t vxb${ABC[N:N+4]}x${ABC[0:8:2]} = vshlq_n_s8(vb${ABC[N:N+4]}x${ABC[0:8]}, 4);
-          const int8x16_t vxb${ABC[N:N+4]}x${ABC[1:8:2]} = vandq_s8(vb${ABC[N:N+4]}x${ABC[0:8]}, vmask);
-        $for N in range(0, NR, 4):
-          const int8x16x2_t vxb${ABC[N:N+4]}x${ABC[0:8]} = vzipq_s8(vxb${ABC[N:N+4]}x${ABC[0:8:2]}, vxb${ABC[N:N+4]}x${ABC[1:8:2]});
-        // Multiply-accumulate: ${MR}x4 * 4x${NR} --> ${MR}x${NR}.
-        $for M in range(0, MR, 2):
-          $for N in range(0, NR, 4):
-            vacc${M}${M+1}x${ABC[N:N+2]} = vmmlaq_s32(vacc${M}${M+1}x${ABC[N:N+2]}, vreinterpretq_s8_u64(va${M}${M+1}x${ABC[0:8]}), vxb${ABC[N:N+4]}x${ABC[0:8]}.val[0]);
-            vacc${M}${M+1}x${ABC[N+2:N+4]} = vmmlaq_s32(vacc${M}${M+1}x${ABC[N+2:N+4]}, vreinterpretq_s8_u64(va${M}${M+1}x${ABC[0:8]}), vxb${ABC[N:N+4]}x${ABC[0:8]}.val[1]);
+        $for N in range(0, NR, 2):
+          const int8x16_t vb${ABC[N:N+2]}x${ABC[0:16]} = vld1q_s8(w); w = (const int8_t*) w + 16;
+        $for N in range(0, NR, 2):
+          const int8x16_t vb${ABC[N:N+2]}x${ABC[0:8]} = vshlq_n_s8(vb${ABC[N:N+2]}x${ABC[0:16]}, 4);
       $else:
         $for N in range(0, NR, 2):
           const int8x16_t vb${ABC[N:N+2]}x${ABC[0:8]} = vld1q_s8(w); w = (const int8_t*) w + 16;
 
-        // Multiply-accumulate: ${MR}x4 * 4x${NR} --> ${MR}x${NR}.
-        $for M in range(0, MR, 2):
-          $for N in range(0, NR, 2):
-            vacc${M}${M+1}x${ABC[N:N+2]} = vmmlaq_s32(vacc${M}${M+1}x${ABC[N:N+2]}, vreinterpretq_s8_u64(va${M}${M+1}x${ABC[0:8]}), vb${ABC[N:N+2]}x${ABC[0:8]});
+      // Multiply-accumulate: ${MR}x4 * 4x${NR} --> ${MR}x${NR}.
+      $for M in range(0, MR, 2):
+        $for N in range(0, NR, 2):
+          vacc${M}${M+1}x${ABC[N:N+2]} = vmmlaq_s32(vacc${M}${M+1}x${ABC[N:N+2]}, vreinterpretq_s8_u64(va${M}${M+1}x${ABC[0:8]}), vb${ABC[N:N+2]}x${ABC[0:8]});
     }
 
     #if XNN_ARCH_ARM64

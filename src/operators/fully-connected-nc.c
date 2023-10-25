@@ -117,10 +117,22 @@ static enum xnn_status create_fully_connected_nc(
   const uint32_t nr = gemm_config->nr;
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  const uint32_t planes = gemm_config->planes;
 
   const size_t n_stride = round_up(output_channels, nr);
+
   size_t k_stride = round_up_po2(input_channels, kr * sr);
+
   if (filter_is_nibble) {
+    input_channels = round_up_po2(input_channels, planes);
+
+    if (planes < 1 || planes > 2) {
+      xnn_log_error(
+        "planes is %u but expected to be 1 or 2 for 4 bit", planes);
+      goto error;
+    }
+    k_stride = round_up_po2(input_channels, kr * sr * planes);
+
     // If filter is 4-bit, half k_stride (since we will scale k_stride by log2_filter_element_size, and we pass 0 for qc4).
     k_stride = round_up_po2(k_stride, 2) >> 1;
   }
@@ -204,8 +216,8 @@ static enum xnn_status create_fully_connected_nc(
     .nr = nr,
     .kr = kr,
     .sr = sr,
+    .kp = planes,
   };
-
   assert(XNN_MAX_MR >= mr);
   for (size_t i = 0; i < mr; i++) {
     fully_connected_op->ukernel.gemm.gemm_cases[i] = gemm_ukernels->gemm[i];
@@ -1098,7 +1110,7 @@ static enum xnn_status reshape_fully_connected_nc(
     return xnn_status_invalid_state;
   }
 
-  const size_t input_channels = fully_connected_op->group_input_channels;
+  size_t input_channels = fully_connected_op->group_input_channels;
   const size_t output_channels = fully_connected_op->group_output_channels;
 
   uint32_t mr = fully_connected_op->ukernel.gemm.mr;
@@ -1117,6 +1129,9 @@ static enum xnn_status reshape_fully_connected_nc(
   struct xnn_hmp_gemm_ukernel gemm_ukernel = gemm_cases[mr-1];
   size_t k_stride = round_up_po2(input_channels, fully_connected_op->ukernel.gemm.kr * fully_connected_op->ukernel.gemm.sr);
   if (filter_is_nibble) {
+    const uint32_t planes = fully_connected_op->ukernel.gemm.kp;
+    input_channels = round_up_po2(input_channels, planes);
+    k_stride = round_up_po2(input_channels, fully_connected_op->ukernel.gemm.kr * fully_connected_op->ukernel.gemm.sr * planes);
     // If filter is 4-bit, half k_stride (since we will scale k_stride by log2_filter_element_size, and we pass 0 for qc4).
     k_stride = round_up_po2(k_stride, 2) >> 1;
   }

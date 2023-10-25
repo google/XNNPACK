@@ -62,8 +62,9 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c8__avx512skx(
     __m512i vacc1xCDEF = vacc0xCDEF;
     w = (const int32_t*) w + 16;
 
-    size_t k = 0;
-    while (k < kc) {
+    size_t k = kc;
+
+    while (k >= 8 * sizeof(int8_t)) {
       const __m512i va0 = _mm512_broadcast_i32x4(_mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) a0)));
       a0 += 8;
       const __m512i va1 = _mm512_broadcast_i32x4(_mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) a1)));
@@ -87,7 +88,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c8__avx512skx(
       vacc1xCDEF = _mm512_add_epi32(vacc1xCDEF, _mm512_madd_epi16(va1, vbCDEF));
 
       w = (const int8_t*) w + 128;
-      k += 8 * sizeof(int8_t);
+      k -= 8 * sizeof(int8_t);
     }
 
     const __m512i vacc0x04152637 = _mm512_add_epi32(_mm512_unpacklo_epi32(vacc0x0123, vacc0x4567), _mm512_unpackhi_epi32(vacc0x0123, vacc0x4567));
