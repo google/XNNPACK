@@ -49,8 +49,9 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__avx512vnni(
     w = (const int32_t*) w + 16;
 
     size_t k = kc;
-    while (k >= 4 * sizeof(int8_t)) {
+    do {
       __m512i va0x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a0));
+
       a0 += 4;
 
       va0x0123 = _mm512_xor_epi32(va0x0123, vsign_mask);
@@ -61,7 +62,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__avx512vnni(
 
       w = (const int8_t*) w + 64;
       k -= 4 * sizeof(int8_t);
-    }
+    } while (k != 0);
 
     __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
 
@@ -178,20 +179,21 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c4__avx512vnni(
     w = (const int32_t*) w + 16;
 
     size_t k = kc;
-    while (k >= 4 * sizeof(int8_t)) {
+    do {
       __m512i va0x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a0));
-      a0 += 4;
       __m512i va1x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a1));
-      a1 += 4;
       __m512i va2x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a2));
-      a2 += 4;
       __m512i va3x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a3));
-      a3 += 4;
       __m512i va4x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a4));
-      a4 += 4;
       __m512i va5x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a5));
-      a5 += 4;
       __m512i va6x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a6));
+
+      a0 += 4;
+      a1 += 4;
+      a2 += 4;
+      a3 += 4;
+      a4 += 4;
+      a5 += 4;
       a6 += 4;
 
       va0x0123 = _mm512_xor_epi32(va0x0123, vsign_mask);
@@ -214,7 +216,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c4__avx512vnni(
 
       w = (const int8_t*) w + 64;
       k -= 4 * sizeof(int8_t);
-    }
+    } while (k != 0);
 
     __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
     __m512 vscaled1x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc1x0123456789ABCDEF);
@@ -313,6 +315,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512vnni(
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
+    const int8_t* zero_data,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
@@ -343,6 +346,8 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512vnni(
       const int8_t* restrict a0 = a[0];
       if XNN_UNPREDICTABLE(a0 != zero) {
         a0 = (const int8_t*) ((uintptr_t) a0 + a_offset);
+      } else {
+        a0 = zero_data;
       }
       a += 1;
 
@@ -422,6 +427,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512vnni(
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
+    const int8_t* zero_data,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
@@ -482,30 +488,44 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512vnni(
       const int8_t* restrict a0 = a[0];
       if XNN_UNPREDICTABLE(a0 != zero) {
         a0 = (const int8_t*) ((uintptr_t) a0 + a_offset);
+      } else {
+        a0 = zero_data;
       }
       const int8_t* restrict a1 = a[1];
       if XNN_UNPREDICTABLE(a1 != zero) {
         a1 = (const int8_t*) ((uintptr_t) a1 + a_offset);
+      } else {
+        a1 = zero_data;
       }
       const int8_t* restrict a2 = a[2];
       if XNN_UNPREDICTABLE(a2 != zero) {
         a2 = (const int8_t*) ((uintptr_t) a2 + a_offset);
+      } else {
+        a2 = zero_data;
       }
       const int8_t* restrict a3 = a[3];
       if XNN_UNPREDICTABLE(a3 != zero) {
         a3 = (const int8_t*) ((uintptr_t) a3 + a_offset);
+      } else {
+        a3 = zero_data;
       }
       const int8_t* restrict a4 = a[4];
       if XNN_UNPREDICTABLE(a4 != zero) {
         a4 = (const int8_t*) ((uintptr_t) a4 + a_offset);
+      } else {
+        a4 = zero_data;
       }
       const int8_t* restrict a5 = a[5];
       if XNN_UNPREDICTABLE(a5 != zero) {
         a5 = (const int8_t*) ((uintptr_t) a5 + a_offset);
+      } else {
+        a5 = zero_data;
       }
       const int8_t* restrict a6 = a[6];
       if XNN_UNPREDICTABLE(a6 != zero) {
         a6 = (const int8_t*) ((uintptr_t) a6 + a_offset);
+      } else {
+        a6 = zero_data;
       }
       a += 7;
 

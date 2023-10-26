@@ -46,7 +46,8 @@ BEGIN_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondo
         CMP         x0, 2                   // if mr < 2
         LDR         x8, [sp, 8]             // Load a_offset
         ADD         x16, x6, x7             // c1 = c0 + cm_stride
-        LDP         x12, x11, [sp, 16]      // Load zero, params pointer
+        LDR         x12, [sp, 16]      // Load zero
+        LDR         x11, [sp, 24]      // Load params pointer
         CSEL        x16, x6,  x16, LO       //   c1 = c0
         ADD         x2, x2, 3               // kc = (kc + 3) & ~3
         STP         d8,  d9, [sp, -32]!   // Save d8-d11 on stack
@@ -88,16 +89,16 @@ BEGIN_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondo
 
         CMP         x13, x12                // if a0 == zero
         ADD         x13, x13, x8            // a0 += a_offset
-        CSEL        x13, x12, x13, EQ       //   a0 = zero, else += a0 + a_offset
+        CSEL        x13, x12, x13, EQ       //   a0 = zero, else a0 += a_offset
         CMP         x14, x12                // if a1 == zero
         ADD         x14, x14, x8            // a1 += a_offset
-        CSEL        x14, x12, x14, EQ       //   a1 = zero, else += a1 + a_offset
+        CSEL        x14, x12, x14, EQ       //   a1 = zero, else a1 += a_offset
         CMP         x15, x12                // if a2 == zero
         ADD         x15, x15, x8            // a2 += a_offset
-        CSEL        x15, x12, x15, EQ       //   a2 = zero, else += a2 + a_offset
+        CSEL        x15, x12, x15, EQ       //   a2 = zero, else a2 += a_offset
         CMP         x10, x12                // if a3 == zero
         ADD         x10, x10, x8            // a3 += a_offset
-        CSEL        x10, x12, x10, EQ       //   a3 = zero, else += a3 + a_offset
+        CSEL        x10, x12, x10, EQ       //   a3 = zero, else a3 += a_offset
 
         # Is there at least 16 bytes for prologue/epilogue?
         SUBS        x0, x2, 16              // k = kc - 16

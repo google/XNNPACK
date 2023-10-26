@@ -27,6 +27,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_8x16c8__neoni8mm(
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
+    const int8_t* zero_data,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
@@ -184,34 +185,50 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_8x16c8__neoni8mm(
       const int8_t* restrict a0 = a[0];
       if XNN_UNPREDICTABLE(a0 != zero) {
         a0 = (const int8_t*) ((uintptr_t) a0 + a_offset);
+      } else {
+        a0 = zero_data;
       }
       const int8_t* restrict a1 = a[1];
       if XNN_UNPREDICTABLE(a1 != zero) {
         a1 = (const int8_t*) ((uintptr_t) a1 + a_offset);
+      } else {
+        a1 = zero_data;
       }
       const int8_t* restrict a2 = a[2];
       if XNN_UNPREDICTABLE(a2 != zero) {
         a2 = (const int8_t*) ((uintptr_t) a2 + a_offset);
+      } else {
+        a2 = zero_data;
       }
       const int8_t* restrict a3 = a[3];
       if XNN_UNPREDICTABLE(a3 != zero) {
         a3 = (const int8_t*) ((uintptr_t) a3 + a_offset);
+      } else {
+        a3 = zero_data;
       }
       const int8_t* restrict a4 = a[4];
       if XNN_UNPREDICTABLE(a4 != zero) {
         a4 = (const int8_t*) ((uintptr_t) a4 + a_offset);
+      } else {
+        a4 = zero_data;
       }
       const int8_t* restrict a5 = a[5];
       if XNN_UNPREDICTABLE(a5 != zero) {
         a5 = (const int8_t*) ((uintptr_t) a5 + a_offset);
+      } else {
+        a5 = zero_data;
       }
       const int8_t* restrict a6 = a[6];
       if XNN_UNPREDICTABLE(a6 != zero) {
         a6 = (const int8_t*) ((uintptr_t) a6 + a_offset);
+      } else {
+        a6 = zero_data;
       }
       const int8_t* restrict a7 = a[7];
       if XNN_UNPREDICTABLE(a7 != zero) {
         a7 = (const int8_t*) ((uintptr_t) a7 + a_offset);
+      } else {
+        a7 = zero_data;
       }
       a += 8;
 

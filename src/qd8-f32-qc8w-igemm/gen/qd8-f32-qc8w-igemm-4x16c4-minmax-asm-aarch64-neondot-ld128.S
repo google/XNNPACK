@@ -22,8 +22,9 @@
 #     size_t cn_stride,                  [sp] -> (x0)
 #     size_t a_offset,                   [sp + 8] -> x8
 #     const int8_t* zero,                [sp + 16] -> x12
-#     const union xnn_f32_minmax_params *params,  [sp + 24]  -> x11
-#     const struct xnn_qd8_quantization_params *quantization_params) [sp + 32] -> x16
+#     const int8_t* zero_data,             [sp + 24] -> x19
+#     const union xnn_f32_minmax_params *params,  [sp + 32]  -> x11
+#     const struct xnn_qd8_quantization_params *quantization_params) [sp + 40] -> x16
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -49,11 +50,14 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot
         ADD         x2, x2, 3               // kc = (kc + 3) & ~3
 
         ADD         x17, x16, x7            // c2 = c1 + cm_stride
-        LDP         x12, x11, [sp, 16]      // Load zero, params pointer
+        LDR         x12, [sp, 16]      // Load zero
+        LDR         x11, [sp, 32]      // Load params pointer
                                             // if mr <= 2
         CSEL        x17, x16, x17, LS       //   c2 = c1
         BIC         x2, x2, 3
-        LDR         x15, [sp, 32]           // &quantization_params[0].zero_point
+        STR         x19, [sp, -56] // Push x19 to the stack
+        LDR         x19, [sp, 24] // Load zero_data
+        LDR         x15, [sp, 40]           // &quantization_params[0].zero_point
         STP         d8,  d9, [sp, -48]!
         STP         d10, d11, [sp, 16]
         STP         d12,  d13, [sp, 32]
@@ -94,16 +98,16 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot
 
         CMP         x13, x12                // if a0 == zero
         ADD         x13, x13, x8            // a0 += a_offset
-        CSEL        x13, x12, x13, EQ       //   a0 = zero, else += a0 + a_offset
+        CSEL        x13, x19, x13, EQ       //   a0 = zero_data, else a0 += a_offset
         CMP         x14, x12                // if a1 == zero
         ADD         x14, x14, x8            // a1 += a_offset
-        CSEL        x14, x12, x14, EQ       //   a1 = zero, else += a1 + a_offset
+        CSEL        x14, x19, x14, EQ       //   a1 = zero_data, else a1 += a_offset
         CMP         x15, x12                // if a2 == zero
         ADD         x15, x15, x8            // a2 += a_offset
-        CSEL        x15, x12, x15, EQ       //   a2 = zero, else += a2 + a_offset
-        CMP         x10, x12                    // if a3 == zero
-        ADD         x10, x10, x8                // a3 += a_offset
-        CSEL        x10, x12, x10, EQ           //   a3 = zero, else += a3 + a_offset
+        CSEL        x15, x19, x15, EQ       //   a2 = zero_data, else a2 += a_offset
+        CMP         x10, x12                  // if a3 == zero
+        ADD         x10, x10, x8              // a3 += a_offset
+        CSEL        x10, x19, x10, EQ       //   a3 = zero_data, else a3 += a_offset
 
         # Is there at least 16 bytes for main loop?
         SUBS        x0, x2, 16              // k = kc - 16
@@ -319,6 +323,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot
         # nc loop
         B.HI        0b
         # Restore d8-d13 from stack
+        LDR         x19, [sp, -8]
         LDP         d12, d13, [sp, 32]
         LDP         d10, d11, [sp, 16]
         LDP         d8, d9, [sp], 48
@@ -458,6 +463,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot
         STR         s16, [x6]
 10:
         # Restore d8-d13 from stack
+        LDR         x19, [sp, -8]
         LDP         d12, d13, [sp, 32]
         LDP         d10, d11, [sp, 16]
         LDP         d8, d9, [sp], 48

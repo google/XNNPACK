@@ -768,7 +768,8 @@ DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_igemm_minmax_rndnu_ukernel_8x8
       size_t cm_stride,                                                           \
       size_t cn_stride,                                                           \
       size_t a_offset,                                                            \
-      const int8_t* zero,                                                         \
+      const int8_t* zero_sentinel,                                                \
+      const int8_t* zero_data,                                                    \
       const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)], \
       const struct xnn_qd8_quantization_params quantization_params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
@@ -919,8 +920,8 @@ DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax
 
 DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55)
 
-DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_ld128)
 DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x8c4__asm_aarch32_neondot_cortex_a55)
+DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_ld128)
 
 DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512vnni)
 DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x16c4__avx512vnni)

@@ -38,7 +38,8 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    $if DATATYPE == "QD8":
+    $if DATATYPE in ["QD8"]:
+      const int8_t* zero_data,
       const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)],
       const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
     $else:
@@ -97,6 +98,9 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
         const int8_t* restrict a${M} = a[${M}];
         if XNN_UNPREDICTABLE(a${M} != zero) {
           a${M} = (const int8_t*) ((uintptr_t) a${M} + a_offset);
+        $if DATATYPE == "QD8":
+          } else {
+            a${M} = zero_data;
         }
       a += ${MR};
 

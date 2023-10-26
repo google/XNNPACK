@@ -209,6 +209,8 @@ struct xnn_operator {
   uint32_t block_size;
 
   void* zero_buffer;
+  void** zero_buffers;
+  size_t zero_size;
   void* lookup_table;
   void* pixelwise_buffer;
   struct subconvolution_params* subconvolution_buffer;

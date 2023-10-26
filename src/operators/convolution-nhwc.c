@@ -689,8 +689,10 @@ static enum xnn_status create_convolution2d_nhwc(
       XNN_UNREACHABLE;
   }
 
+  convolution_op->zero_size = 0;
   const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0 && kernel_size != 1;
   if (any_padding || tf_same_padding) {
+    convolution_op->zero_size = zero_size;
     convolution_op->zero_buffer = xnn_allocate_simd_memory(zero_size);
     if (convolution_op->zero_buffer == NULL) {
       xnn_log_error(
@@ -1982,6 +1984,12 @@ static enum xnn_status reshape_igemm(
       }
     }
   #endif
+  if (dynamic_quantization && convolution_op->zero_size > 0) {
+    convolution_op->compute[igemm_compute_index].type = xnn_parallelization_type_1d;
+    convolution_op->compute[igemm_compute_index].task_1d = (pthreadpool_task_1d_t) xnn_compute_dq_zero_buffer;
+    convolution_op->compute[igemm_compute_index].range[0] = batch_size;
+    ++igemm_compute_index;
+  }
   if (groups == 1) {
     #if XNN_MAX_UARCH_TYPES > 1
       if (xnn_is_hmp_igemm_ukernel(igemm_ukernel)) {
@@ -2456,6 +2464,22 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_qd8_f32_qc8w(
     size_t* output_width_out,
     pthreadpool_t threadpool)
 {
+  convolution_op->last_input_height = convolution_op->input_height;
+  convolution_op->last_input_width = convolution_op->input_width;
+  convolution_op->input_height = input_height;
+  convolution_op->input_width = input_width;
+  if (input_size_changed(convolution_op)) {
+    if (convolution_op->zero_buffers) {
+      for (size_t i = 1; i < batch_size; ++i) {
+        xnn_release_simd_memory(convolution_op->zero_buffers[i]);
+      }
+    }
+    convolution_op->zero_buffers = xnn_reallocate_memory(convolution_op->zero_buffers, batch_size * sizeof(void*));
+    convolution_op->zero_buffers[0] = convolution_op->zero_buffer;
+    for (size_t i = 1; i < batch_size; ++i) {
+      convolution_op->zero_buffers[i] = xnn_allocate_simd_memory(convolution_op->zero_size);
+    }
+  }
   return reshape_convolution2d_nhwc(
     convolution_op, xnn_operator_type_convolution_nhwc_qd8_f32_qc8w,
     batch_size, input_height, input_width,
@@ -2618,6 +2642,8 @@ static enum xnn_status setup_igemm(
   } else {
     convolution_op->context.igemm.a_offset = (size_t) ((uintptr_t) convolution_op->input - (uintptr_t) convolution_op->last_input);
   }
+  convolution_op->context.igemm.zero_size = convolution_op->zero_size;
+  convolution_op->context.igemm.zero_buffers = convolution_op->zero_buffers;
   convolution_op->context.igemm.c = convolution_op->output;
   convolution_op->context.igemm.quantization_params = convolution_op->quantization_params;
   convolution_op->state = xnn_run_state_ready;

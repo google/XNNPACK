@@ -24,8 +24,9 @@
 //     size_t cn_stride,                   sp + 112 -> (r7)
 //     size_t a_offset,                    sp + 116 -> (r5)
 //     const int8_t* zero,                 sp + 120 -> (r7)
-//     xnn_f32_minmax_params *params,  sp + 124 -> (r5)
-//     const struct xnn_qd8_quantization_params *quantization_params) [sp + 128] -> (r5)
+//     const int8_t* zero_data,               sp + 124 -> (r4)
+//     xnn_f32_minmax_params *params,  sp + 128 -> (r5)
+//     const struct xnn_qd8_quantization_params *quantization_params) [sp + 132] -> (r5)
 
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
@@ -78,7 +79,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x8c4__asm_aarch32_neondot_
         MOVLO       r6, r8                  // c3
 
 
-        LDR         r5, [sp, 128]   // &quantization_params[0].zero_point
+        LDR         r5, [sp, 132]   // &quantization_params[0].zero_point
         VLD1.8      {q6, q7},  [r5]
 
 0:
@@ -103,30 +104,33 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x8c4__asm_aarch32_neondot_
         # - Load k = kc from stack
         LDR         r3, [r2,  0]            // A0
         LDR         r5, [sp, 116]           // a_offset
+        PUSH {r4}
+        LDR         r4, [sp, 128]           // zero_data
         CMP         r3,  r7                 // if a0 == zero
         LDR         r12, [r2,  4]           // A1
         ADD         r3,  r3, r5             // a0 += a_offset
         LDR         r10, [r2,  8]           // A2
-        MOVEQ       r3,  r7                 //   a0 = zero, else += a0 + a_offset
+        MOVEQ       r3,  r4                 // a0 = zero_data, else += a0 + a_offset
         LDR         r0, [r2, 12]            // A3
         CMP         r12,  r7                // if a1 == zero
         VLD1.8      {d4},  [r9]!            // B0
         ADD         r12, r12, r5            // a1 += a_offset
         VLD1.8      {d5},  [r9]!            // B1
-        MOVEQ       r12,  r7                //   a1 = zero, else += a1 + a_offset
+        MOVEQ       r12,  r4                // a1 = zero_data, else += a1 + a_offset
         VLD1.8      {d6},  [r9]!            // B2
         CMP         r10,  r7                // if a2 == zero
         VLD1.8      {d7},  [r9]!            // B3
         ADD         r10, r10, r5            // a2 += a_offset
         VLD1.8      {d0},  [r3]!            // A0
-        MOVEQ       r10,  r7                //   a2 = zero, else += a2 + a_offset
+        MOVEQ       r10,  r4                // a2 = zero_data, else += a2 + a_offset
         VLD1.8      {d1}, [r12]!            // A1
         CMP         r0,  r7                 // if a3 == zero
         ADD         r0,  r0, r5             // a3 += a_offset
-        LDR         r5, [sp, 52]            // k = kc
-        MOVEQ       r0,  r7                 //   a3 = zero, else += a3 + a_offset
-        SUBS        r5, r5, 8               // k = k - 8
+        MOVEQ       r0,  r4                // a3 = zero_data, else += a3 + a_offset
         ADD         r2, r2, 16
+        POP {r4}
+        LDR         r5, [sp, 52]            // k = kc
+        SUBS        r5, r5, 8               // k = k - 8
 
         BLO         6f                      // less than 8 channels?
 
@@ -207,7 +211,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x8c4__asm_aarch32_neondot_
         LDR         r7, [sp, 112]           // cn_stride
         LDR         r14, [sp, 56]           // p = ks
 
-        LDR         r5, [sp, 124]       // params
+        LDR         r5, [sp, 128]       // params
         VCVT.F32.S32    q8,  q8
         VCVT.F32.S32    q9,  q9
         VCVT.F32.S32    q10, q10

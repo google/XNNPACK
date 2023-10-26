@@ -114,9 +114,12 @@ void GemmMicrokernelTester::Test(
       }
     }
     std::shuffle(im2col.begin(), im2col.end(), rng);
+    std::vector<int8_t> zero_points(k(), quantization_params[0].zero_point);
+    const int8_t* zero_sentinel = (const int8_t*) &packing_params;
+    const int8_t* zero_data = zero_points.data();
     if (zero_index() != SIZE_MAX) {
       for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
-        im2col[ks_index * mr() + zero_index()] = a.data();
+        im2col[ks_index * mr() + zero_index()] = zero_sentinel;
       }
     }
     for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
@@ -128,23 +131,15 @@ void GemmMicrokernelTester::Test(
     std::fill(c_ref.begin(), c_ref.end(), 0.0f);
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
-        int32_t ksum = 0;
         for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
           for (size_t k_index = 0; k_index < k(); k_index++) {
-            if (im2col[ks_index * mr() + m_index] == a.data()) {
-              ksum += int32_t(b[(n_index * ks() + ks_index) * k() + k_index]);
+            if (im2col[ks_index * mr() + m_index] != zero_sentinel) {
               c_ref[m_index * n() + n_index] +=
-                (int32_t(im2col[ks_index * mr() + m_index][k_index])) *
-                int32_t(b[(n_index * ks() + ks_index) * k() + k_index]);
-            } else {
-              ksum += int32_t(b[(n_index * ks() + ks_index) * k() + k_index]);
-              c_ref[m_index * n() + n_index] +=
-                (int32_t(im2col[ks_index * mr() + m_index][k_index + a_offset()])) *
+                (int32_t(im2col[ks_index * mr() + m_index][k_index + a_offset()]) - quantization_params[0].zero_point) *
                 int32_t(b[(n_index * ks() + ks_index) * k() + k_index]);
             }
           }
         }
-        c_ref[m_index * n() + n_index] -= (quantization_params[0].zero_point * ksum);
         c_ref[m_index * n() + n_index] *= quantization_params[0].inv_scale * kernel_scale[n_index];
         c_ref[m_index * n() + n_index] += bias[n_index];
       }
@@ -169,12 +164,10 @@ void GemmMicrokernelTester::Test(
       }
     }
 
-    const int8_t* zero_pointer = (zero_index() != SIZE_MAX) ? a.data() : nullptr;
-
     igemm(m(), n(), k(), ks() * mr() * sizeof(void*),
         im2col.data(), static_cast<const void*>(packed_w.data()),
         c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
-        a_offset() * sizeof(uint8_t), zero_pointer,
+        a_offset() * sizeof(uint8_t), zero_sentinel, zero_data,
         &params, quantization_params.data());
 
     for (size_t i = 0; i < m(); i++) {

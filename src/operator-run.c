@@ -500,6 +500,13 @@ void xnn_compute_grouped_batch_igemm(
       &context->params);
 }
 
+void xnn_compute_dq_zero_buffer(
+    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index
+    ) {
+  memset(context->zero_buffers[batch_index], context->quantization_params[batch_index].zero_point, context->zero_size);
+}
+
 void xnn_compute_grouped_batch_dqigemm(
     const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,
@@ -524,6 +531,7 @@ void xnn_compute_grouped_batch_dqigemm(
       context->cn_stride,
       context->a_offset + group_index * context->ga_stride + batch_index * context->ba_stride,
       context->zero,
+      context->zero_buffers[batch_index],
       &context->params,
       (const void*) ((uintptr_t) &context->quantization_params[batch_index]));
 }
@@ -577,6 +585,7 @@ void xnn_compute_grouped_dqigemm(
       context->cn_stride,
       context->a_offset + group_index * context->ga_stride,
       context->zero,
+      context->zero_buffers[0],
       &context->params,
       (const void*) ((uintptr_t) context->quantization_params));
 }
@@ -630,6 +639,7 @@ void xnn_compute_batch_dqigemm(
       context->cn_stride,
       context->a_offset + batch_index * context->ba_stride,
       context->zero,
+      context->zero_buffers[batch_index],
       &context->params,
       (const void*) ((uintptr_t) &context->quantization_params[batch_index]));
 }
@@ -681,6 +691,7 @@ void xnn_compute_dqigemm(
       context->cn_stride,
       context->a_offset,
       context->zero,
+      context->zero_buffers[0],
       &context->params,
       (const void*) ((uintptr_t) &context->quantization_params[/*mr_block_start=*/0]));
 }
@@ -2191,6 +2202,7 @@ void xnn_compute_rope(
         context->cn_stride,
         context->a_offset + group_index * context->ga_stride + batch_index * context->ba_stride,
         context->zero,
+        context->zero_buffers[batch_index],
         &context->params,
         (const void*) ((uintptr_t) &context->quantization_params[batch_index]));
   }
@@ -2246,6 +2258,7 @@ void xnn_compute_rope(
         context->cn_stride,
         context->a_offset + group_index * context->ga_stride,
         context->zero,
+        context->zero_buffers[0],
         &context->params,
         (const void*) ((uintptr_t) context->quantization_params));
   }
@@ -2301,6 +2314,7 @@ void xnn_compute_rope(
         context->cn_stride,
         context->a_offset + batch_index * context->ba_stride,
         context->zero,
+        context->zero_buffers[batch_index],
         &context->params,
         (const void*) ((uintptr_t) &context->quantization_params[batch_index]));
   }
@@ -2354,6 +2368,7 @@ void xnn_compute_rope(
         context->cn_stride,
         context->a_offset,
         context->zero,
+        context->zero_buffers[0],
         &context->params,
         (const void*) ((uintptr_t) context->quantization_params));
   }

@@ -453,6 +453,8 @@ struct igemm_context {
   size_t a_offset;
   // Zero buffer.
   void* zero;
+  // Zero buffers.
+  void** zero_buffers;
   // Pointer to weights (kernel and bias) that have been packed.
   const void* packed_w;
   // Output matrix C.
@@ -473,6 +475,8 @@ struct igemm_context {
   size_t bc_stride;
   // Size, in bytes, of each element of C.
   uint32_t log2_csize;
+  // Size, in bytes, of the zero buffer.
+  size_t zero_size;
   // IGEMM microkernels.
   union {
     struct xnn_hmp_igemm_ukernel ukernel;
@@ -509,6 +513,10 @@ XNN_PRIVATE void xnn_compute_grouped_batch_igemm(
     const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index, size_t group_index, size_t mr_block_start,
     size_t nr_block_start, size_t mr_block_size, size_t nr_block_size);
+
+XNN_PRIVATE void xnn_compute_dq_zero_buffer(
+    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t size);
 
 XNN_PRIVATE void xnn_compute_dqigemm(
     const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],

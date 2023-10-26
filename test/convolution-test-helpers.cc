@@ -59,20 +59,6 @@ void compute_convolution_qd8_f32_qc8w_reference_results(
                                         kx) *
                                            group_input_channels +
                                        ic]);
-                  } else {
-                    output[(((i * output_height + oy) * output_width + ox) *
-                                groups +
-                            g) *
-                               group_output_channels +
-                           oc] +=
-                        -zero_point *
-                        int32_t(filter[(((g * group_output_channels + oc) *
-                                             kernel_height +
-                                         ky) *
-                                            kernel_width +
-                                        kx) *
-                                           group_input_channels +
-                                       ic]);
                   }
                 }
               }

@@ -291,9 +291,19 @@ typedef void (*xnn_f32_gemminc_minmax_ukernel_fn)(
 // IGEMM: Indirect GEMM without activation
 
 typedef void (*xnn_dqigemm_ukernel_fn)(
-    size_t mr, size_t nr, size_t kc, size_t ks, const void** a, const void* w,
-    void* c, size_t cm_stride, size_t cn_stride, size_t a_offset,
-    const void* zero, const void* params,
+    size_t mr,
+    size_t nr,
+    size_t kc,
+    size_t ks,
+    const void** a,
+    const void* w,
+    void* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    size_t a_offset,
+    const void* zero,
+    const void* zero_data,
+    const void* params,
     const struct xnn_qd8_quantization_params* quantization_params);
 
 typedef void (*xnn_igemm_ukernel_fn)(
@@ -398,6 +408,7 @@ typedef void (*xnn_qd8_f32_qc8w_igemm_ukernel_fn)(
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
+    const int8_t* zero_data,
     const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params* quantization_params);
 

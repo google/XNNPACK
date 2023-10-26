@@ -6750,6 +6750,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4__wasm(
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
+    const int8_t* zero_data,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
 {
@@ -6783,6 +6784,8 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4__wasm(
       assert(a0 != NULL);
       if XNN_UNPREDICTABLE(a0 != zero) {
         a0 = (const int8_t*) ((uintptr_t) a0 + a_offset);
+      } else {
+        a0 = zero_data;
       }
       a += 1;
 
@@ -6887,6 +6890,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x4__wasm(
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
+    const int8_t* zero_data,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
 {
@@ -6944,21 +6948,29 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x4__wasm(
       assert(a0 != NULL);
       if XNN_UNPREDICTABLE(a0 != zero) {
         a0 = (const int8_t*) ((uintptr_t) a0 + a_offset);
+      } else {
+        a0 = zero_data;
       }
       const int8_t* restrict a1 = a[1];
       assert(a1 != NULL);
       if XNN_UNPREDICTABLE(a1 != zero) {
         a1 = (const int8_t*) ((uintptr_t) a1 + a_offset);
+      } else {
+        a1 = zero_data;
       }
       const int8_t* restrict a2 = a[2];
       assert(a2 != NULL);
       if XNN_UNPREDICTABLE(a2 != zero) {
         a2 = (const int8_t*) ((uintptr_t) a2 + a_offset);
+      } else {
+        a2 = zero_data;
       }
       const int8_t* restrict a3 = a[3];
       assert(a3 != NULL);
       if XNN_UNPREDICTABLE(a3 != zero) {
         a3 = (const int8_t*) ((uintptr_t) a3 + a_offset);
+      } else {
+        a3 = zero_data;
       }
       a += 4;
 
