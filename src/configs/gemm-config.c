@@ -16,7 +16,7 @@
   #include <cpuinfo.h>
 #endif  // XNN_ENABLE_CPUINFO
 
-#include <xnnpack/experiments-config.h>
+#include <experiments-config.h>
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
 #include <xnnpack/microfnptr.h>

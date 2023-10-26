@@ -221,7 +221,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "experiments_config",
     srcs = ["src/configs/experiments-config.c"],
-    hdrs = ["src/xnnpack/experiments-config.h"],
+    hdrs = ["include/experiments-config.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
