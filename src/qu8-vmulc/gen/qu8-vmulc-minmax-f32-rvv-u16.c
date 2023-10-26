@@ -52,7 +52,6 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__rvv_u16(
     vuint8m1_t out_u8v = __riscv_vncvt_x_x_w_u8m1(out_u16v, vl);
     __riscv_vse8_v_u8m1(output, out_u8v, vl); output += vl;
 
-    input_b += vl;
     batch -= vl;
   } while (batch != 0);
 }
