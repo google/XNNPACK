@@ -206,6 +206,12 @@ union xnn_f32_qc4w_minmax_params {
     float magic_bias_plus_kernel_zero_point_c0;
     float magic_bias_plus_kernel_zero_point_c1;
   } avx512;
+  struct {
+    float min;
+    float max;
+    XNN_ALIGN(64) int8_t sign_mask[64];
+    XNN_ALIGN(64) int64_t permute_mask[8];
+  } avx512vnni;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   struct {
