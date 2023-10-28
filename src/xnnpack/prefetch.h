@@ -17,7 +17,7 @@ XNN_INLINE static void xnn_prefetch_to_l1(const void* address) {
     __builtin_prefetch(address);
   #elif defined(_MSC_VER)
     #if defined(_M_ARM) || defined(_M_ARM64) || defined(_M_ARM64EC)
-      __prefetch(address);
+      __prefetch((void*) address);
     #elif defined(_M_X64)
       _mm_prefetch(address, _MM_HINT_T0);
     #elif defined(_M_IX86)
