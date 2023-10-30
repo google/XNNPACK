@@ -114,7 +114,8 @@ void GemmMicrokernelTester::Test(
       }
     }
     std::shuffle(im2col.begin(), im2col.end(), rng);
-    std::vector<int8_t> zero_points(k(), quantization_params[0].zero_point);
+    const size_t k_stride =  round_up_po2(k(), kr() * sr());
+    std::vector<int8_t> zero_points(k_stride + XNN_EXTRA_BYTES, quantization_params[0].zero_point);
     const int8_t* zero_sentinel = (const int8_t*) &packing_params;
     const int8_t* zero_data = zero_points.data();
     if (zero_index() != SIZE_MAX) {
