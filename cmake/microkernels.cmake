@@ -3383,9 +3383,6 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-vhswish/gen/qs8-vhswish-neon-u8.c
   src/qs8-vhswish/gen/qs8-vhswish-neon-u16.c
   src/qs8-vhswish/gen/qs8-vhswish-neon-u32.c
-  src/qs8-vhswish/gen/qs8-vhswish-neon-x8.c
-  src/qs8-vhswish/gen/qs8-vhswish-neon-x16.c
-  src/qs8-vhswish/gen/qs8-vhswish-neon-x32.c
   src/qs8-vlrelu/gen/qs8-vlrelu-neon-u8.c
   src/qs8-vlrelu/gen/qs8-vlrelu-neon-u16.c
   src/qs8-vlrelu/gen/qs8-vlrelu-neon-u32.c
@@ -3513,9 +3510,9 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qu8-vcvt/gen/qu8-vcvt-neon-u8.c
   src/qu8-vcvt/gen/qu8-vcvt-neon-u16.c
   src/qu8-vcvt/gen/qu8-vcvt-neon-u32.c
-  src/qu8-vhswish/gen/qu8-vhswish-neon-x8.c
-  src/qu8-vhswish/gen/qu8-vhswish-neon-x16.c
-  src/qu8-vhswish/gen/qu8-vhswish-neon-x32.c
+  src/qu8-vhswish/gen/qu8-vhswish-neon-u8.c
+  src/qu8-vhswish/gen/qu8-vhswish-neon-u16.c
+  src/qu8-vhswish/gen/qu8-vhswish-neon-u32.c
   src/qu8-vlrelu/gen/qu8-vlrelu-neon-u8.c
   src/qu8-vlrelu/gen/qu8-vlrelu-neon-u16.c
   src/qu8-vlrelu/gen/qu8-vlrelu-neon-u32.c
@@ -5945,9 +5942,6 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qs8-vhswish/gen/qs8-vhswish-scalar-u1.c
   src/qs8-vhswish/gen/qs8-vhswish-scalar-u2.c
   src/qs8-vhswish/gen/qs8-vhswish-scalar-u4.c
-  src/qs8-vhswish/gen/qs8-vhswish-scalar-x1.c
-  src/qs8-vhswish/gen/qs8-vhswish-scalar-x2.c
-  src/qs8-vhswish/gen/qs8-vhswish-scalar-x4.c
   src/qs8-vlrelu/gen/qs8-vlrelu-scalar-andxor-u1.c
   src/qs8-vlrelu/gen/qs8-vlrelu-scalar-andxor-u2.c
   src/qs8-vlrelu/gen/qs8-vlrelu-scalar-andxor-u4.c
@@ -6114,9 +6108,9 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qu8-vcvt/gen/qu8-vcvt-scalar-u1.c
   src/qu8-vcvt/gen/qu8-vcvt-scalar-u2.c
   src/qu8-vcvt/gen/qu8-vcvt-scalar-u4.c
-  src/qu8-vhswish/gen/qu8-vhswish-scalar-x1.c
-  src/qu8-vhswish/gen/qu8-vhswish-scalar-x2.c
-  src/qu8-vhswish/gen/qu8-vhswish-scalar-x4.c
+  src/qu8-vhswish/gen/qu8-vhswish-scalar-u1.c
+  src/qu8-vhswish/gen/qu8-vhswish-scalar-u2.c
+  src/qu8-vhswish/gen/qu8-vhswish-scalar-u4.c
   src/qu8-vlrelu/gen/qu8-vlrelu-scalar-andxor-u1.c
   src/qu8-vlrelu/gen/qu8-vlrelu-scalar-andxor-u2.c
   src/qu8-vlrelu/gen/qu8-vlrelu-scalar-andxor-u4.c

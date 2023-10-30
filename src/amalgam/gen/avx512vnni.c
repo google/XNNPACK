@@ -51,7 +51,6 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__avx512vnni(
     size_t k = kc;
     do {
       __m512i va0x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a0));
-
       a0 += 4;
 
       va0x0123 = _mm512_xor_epi32(va0x0123, vsign_mask);
@@ -181,19 +180,18 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c4__avx512vnni(
     size_t k = kc;
     do {
       __m512i va0x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a0));
-      __m512i va1x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a1));
-      __m512i va2x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a2));
-      __m512i va3x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a3));
-      __m512i va4x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a4));
-      __m512i va5x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a5));
-      __m512i va6x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a6));
-
       a0 += 4;
+      __m512i va1x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a1));
       a1 += 4;
+      __m512i va2x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a2));
       a2 += 4;
+      __m512i va3x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a3));
       a3 += 4;
+      __m512i va4x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a4));
       a4 += 4;
+      __m512i va5x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a5));
       a5 += 4;
+      __m512i va6x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a6));
       a6 += 4;
 
       va0x0123 = _mm512_xor_epi32(va0x0123, vsign_mask);

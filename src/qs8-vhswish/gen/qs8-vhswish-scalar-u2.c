@@ -13,7 +13,7 @@
 #include <xnnpack/vhswish.h>
 
 
-void xnn_qs8_vhswish_ukernel__scalar_x2(
+void xnn_qs8_vhswish_ukernel__scalar_u2(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -86,6 +86,6 @@ void xnn_qs8_vhswish_ukernel__scalar_x2(
     vout = math_asr_s32(vin * vout, 15) + voutput_zero_point;
     vout = math_max_s32(vout, -128);
     vout = math_min_s32(vout, 127);
-    *output++ = (int8_t) vout;
+    *output = (int8_t) vout;
   }
 }
