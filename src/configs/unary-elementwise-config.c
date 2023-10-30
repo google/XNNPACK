@@ -1832,7 +1832,7 @@ static void init_qu8_cvt_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon_v8) {
+    if (hardware_config->use_arm_neon) {
       qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__neon_u32;
       qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_neon_params;
       qu8_cvt_config.element_tile = 32;
