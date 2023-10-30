@@ -11,6 +11,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <stdint.h>
 #include <stdio.h>
 #include <cstdlib>
 #include <functional>
@@ -120,8 +121,8 @@ class VHSwishMicrokernelTester {
         in -= 16384;  // subtract 0.5 in Q15
         in = std::min(in, 0);
         in = std::max(in, -32768);
-        const int32_t out = math_asr_s32(input_value * scale_ratio, 15);
-        int32_t output_value = math_asr_s32(in * out, 15) + output_zero_point();
+        const int32_t out = math_asr_s32(input_value * scale_ratio + INT32_C(0x4000), 15);
+        int32_t output_value = math_asr_s32(in * out + INT32_C(0x4000), 15) + output_zero_point();
         output_value = std::min<int32_t>(output_value, std::numeric_limits<int8_t>::max());
         output_value = std::max<int32_t>(output_value, std::numeric_limits<int8_t>::min());
         output_ref[i] = static_cast<int8_t>(output_value);
@@ -171,8 +172,8 @@ class VHSwishMicrokernelTester {
         in -= 16384;  // subtract 0.5 in Q15
         in = std::min(in, 0);
         in = std::max(in, -32768);
-        const int32_t out = math_asr_s32(input_value * scale_ratio, 15);
-        int32_t output_value = math_asr_s32(in * out, 15) + output_zero_point();
+        const int32_t out = math_asr_s32(input_value * scale_ratio + INT32_C(0x4000), 15);
+        int32_t output_value = math_asr_s32(in * out + INT32_C(0x4000), 15) + output_zero_point();
         output_value = std::min<int32_t>(output_value, std::numeric_limits<uint8_t>::max());
         output_value = std::max<int32_t>(output_value, std::numeric_limits<uint8_t>::min());
         output_ref[i] = static_cast<uint8_t>(output_value);

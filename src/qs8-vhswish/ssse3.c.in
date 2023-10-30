@@ -78,7 +78,7 @@ void xnn_${DATATYPE.lower()}_vhswish_ukernel__ssse3_u${BATCH_TILE}(
         vin${ABC[N]} = _mm_min_epi16(vin${ABC[N]}, vzero);
 
       $for N in range(2*SIMD_TILE):
-        const __m128i vout${ABC[N]} = _mm_mulhi_epi16(vextx${ABC[N]}, vscale_ratio);
+        const __m128i vout${ABC[N]} = _mm_mulhrs_epi16(vextx${ABC[N]}, vscale_ratio);
 
       $for N in range(2*SIMD_TILE):
         __m128i vacc${ABC[N]} = _mm_mulhrs_epi16(vout${ABC[N]}, vin${ABC[N]});
@@ -133,8 +133,8 @@ void xnn_${DATATYPE.lower()}_vhswish_ukernel__ssse3_u${BATCH_TILE}(
     vin0 = _mm_min_epi16(vin0, vzero);
     vin1 = _mm_min_epi16(vin1, vzero);
 
-    const __m128i vout0 = _mm_mulhi_epi16(vextx0, vscale_ratio);
-    const __m128i vout1 = _mm_mulhi_epi16(vextx1, vscale_ratio);
+    const __m128i vout0 = _mm_mulhrs_epi16(vextx0, vscale_ratio);
+    const __m128i vout1 = _mm_mulhrs_epi16(vextx1, vscale_ratio);
 
     __m128i vacc0 = _mm_mulhrs_epi16(vout0, vin0);
     __m128i vacc1 = _mm_mulhrs_epi16(vout1, vin1);
@@ -187,8 +187,8 @@ void xnn_${DATATYPE.lower()}_vhswish_ukernel__ssse3_u${BATCH_TILE}(
     vin0 = _mm_min_epi16(vin0, vzero);
     vin1 = _mm_min_epi16(vin1, vzero);
 
-    const __m128i vout0 = _mm_mulhi_epi16(vextx0, vscale_ratio);
-    const __m128i vout1 = _mm_mulhi_epi16(vextx1, vscale_ratio);
+    const __m128i vout0 = _mm_mulhrs_epi16(vextx0, vscale_ratio);
+    const __m128i vout1 = _mm_mulhrs_epi16(vextx1, vscale_ratio);
 
     __m128i vacc0 = _mm_mulhrs_epi16(vout0, vin0);
     __m128i vacc1 = _mm_mulhrs_epi16(vout1, vin1);

@@ -64,7 +64,7 @@ void xnn_${DATATYPE.lower()}_vhswish_ukernel__neon_u${BATCH_TILE}(
       $for N in range(2*SIMD_TILE):
         vacc${ABC[N]} = vshlq_n_s16(vacc${ABC[N]}, 7);
       $for N in range(2*SIMD_TILE):
-        int16x8_t vin${ABC[N]} = vqdmulhq_s16(vacc${ABC[N]}, vinput_scale_div_mantissa);
+        int16x8_t vin${ABC[N]} = vqrdmulhq_s16(vacc${ABC[N]}, vinput_scale_div_mantissa);
       $for N in range(2*SIMD_TILE):
         vin${ABC[N]} = vqshlq_s16(vin${ABC[N]}, vinput_scale_div_exp);
       $for N in range(2*SIMD_TILE):
@@ -72,9 +72,9 @@ void xnn_${DATATYPE.lower()}_vhswish_ukernel__neon_u${BATCH_TILE}(
       $for N in range(2*SIMD_TILE):
         vin${ABC[N]} = vminq_s16(vin${ABC[N]}, vzero);
       $for N in range(2*SIMD_TILE):
-        int16x8_t vout${ABC[N]} = vqdmulhq_s16(vacc${ABC[N]}, vscale_ratio);
+        int16x8_t vout${ABC[N]} = vqrdmulhq_s16(vacc${ABC[N]}, vscale_ratio);
       $for N in range(2*SIMD_TILE):
-        vout${ABC[N]} = vqdmulhq_s16(vout${ABC[N]}, vin${ABC[N]});
+        vout${ABC[N]} = vqrdmulhq_s16(vout${ABC[N]}, vin${ABC[N]});
       $for N in range(2*SIMD_TILE):
         vout${ABC[N]} = vqaddq_s16(vout${ABC[N]}, voutput_zero_point);
       $for N in range(SIMD_TILE):
@@ -89,12 +89,12 @@ void xnn_${DATATYPE.lower()}_vhswish_ukernel__neon_u${BATCH_TILE}(
     $else:
       int16x8_t vacc = vsubw_s8(vinput_zero_point, vx);
     vacc = vshlq_n_s16(vacc, 7);
-    int16x8_t vin = vqdmulhq_s16(vacc, vinput_scale_div_mantissa);
+    int16x8_t vin = vqrdmulhq_s16(vacc, vinput_scale_div_mantissa);
     vin = vqshlq_s16(vin, vinput_scale_div_exp);
     vin = vqsubq_s16(vin, vhalf);
     vin = vminq_s16(vin, vzero);
-    int16x8_t vout = vqdmulhq_s16(vacc, vscale_ratio);
-    vout = vqdmulhq_s16(vout, vin);
+    int16x8_t vout = vqrdmulhq_s16(vacc, vscale_ratio);
+    vout = vqrdmulhq_s16(vout, vin);
     vout = vqaddq_s16(vout, voutput_zero_point);
     const ${XINT8X8_T} vy = ${VQMOVXN_S16}(vout);
     ${VST1_X8}(output, vy); output += 8;
@@ -109,12 +109,12 @@ void xnn_${DATATYPE.lower()}_vhswish_ukernel__neon_u${BATCH_TILE}(
     $else:
       int16x8_t vacc = vsubw_s8(vinput_zero_point, vx);
     vacc = vshlq_n_s16(vacc, 7);
-    int16x8_t vin = vqdmulhq_s16(vacc, vinput_scale_div_mantissa);
+    int16x8_t vin = vqrdmulhq_s16(vacc, vinput_scale_div_mantissa);
     vin = vqshlq_s16(vin, vinput_scale_div_exp);
     vin = vqsubq_s16(vin, vhalf);
     vin = vminq_s16(vin, vzero);
-    int16x8_t vout = vqdmulhq_s16(vacc, vscale_ratio);
-    vout = vqdmulhq_s16(vout, vin);
+    int16x8_t vout = vqrdmulhq_s16(vacc, vscale_ratio);
+    vout = vqrdmulhq_s16(vout, vin);
     vout = vqaddq_s16(vout, voutput_zero_point);
     ${XINT8X8_T} vy = ${VQMOVXN_S16}(vout);
 

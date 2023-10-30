@@ -31,6 +31,14 @@
 - name: xnn_qs8_vhswish_ukernel__sse41_u32
   init: xnn_init_qs8_hswish_sse2_params
 
+# WAsm Relaxed SIMD
+- name: xnn_qs8_vhswish_ukernel__wasmsimd_u8
+  init: xnn_init_qs8_hswish_wasmsimd_params
+- name: xnn_qs8_vhswish_ukernel__wasmsimd_u16
+  init: xnn_init_qs8_hswish_wasmsimd_params
+- name: xnn_qs8_vhswish_ukernel__wasmsimd_u32
+  init: xnn_init_qs8_hswish_wasmsimd_params
+
 # Scalar
 - name: xnn_qs8_vhswish_ukernel__scalar_u1
   init: xnn_init_qs8_hswish_scalar_params

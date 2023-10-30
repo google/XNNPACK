@@ -41,8 +41,8 @@ void xnn_qs8_vhswish_ukernel__scalar_u1(
     vin = math_min_s32(vin, 0);
     vin = math_max_s32(vin, -32768);
 
-    int32_t vout = math_asr_s32(vacc * vscale_ratio, 15);
-    vout = math_asr_s32(vin * vout, 15) + voutput_zero_point;
+    int32_t vout = math_asr_s32(vacc * vscale_ratio + INT32_C(0x4000), 15);
+    vout = math_asr_s32(vin * vout + INT32_C(0x4000), 15) + voutput_zero_point;
     vout = math_max_s32(vout, -128);
     vout = math_min_s32(vout, 127);
     *output++ = (int8_t) vout;

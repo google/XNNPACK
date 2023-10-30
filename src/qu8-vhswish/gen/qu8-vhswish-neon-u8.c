@@ -37,12 +37,12 @@ void xnn_qu8_vhswish_ukernel__neon_u8(
     const uint8x8_t vx = vld1_u8(input); input += 8;
     int16x8_t vacc = vreinterpretq_s16_u16(vsubw_u8(vinput_zero_point, vx));
     vacc = vshlq_n_s16(vacc, 7);
-    int16x8_t vin = vqdmulhq_s16(vacc, vinput_scale_div_mantissa);
+    int16x8_t vin = vqrdmulhq_s16(vacc, vinput_scale_div_mantissa);
     vin = vqshlq_s16(vin, vinput_scale_div_exp);
     vin = vqsubq_s16(vin, vhalf);
     vin = vminq_s16(vin, vzero);
-    int16x8_t vout = vqdmulhq_s16(vacc, vscale_ratio);
-    vout = vqdmulhq_s16(vout, vin);
+    int16x8_t vout = vqrdmulhq_s16(vacc, vscale_ratio);
+    vout = vqrdmulhq_s16(vout, vin);
     vout = vqaddq_s16(vout, voutput_zero_point);
     const uint8x8_t vy = vqmovun_s16(vout);
     vst1_u8(output, vy); output += 8;
@@ -54,12 +54,12 @@ void xnn_qu8_vhswish_ukernel__neon_u8(
     const uint8x8_t vx = vld1_u8(input);
     int16x8_t vacc = vreinterpretq_s16_u16(vsubw_u8(vinput_zero_point, vx));
     vacc = vshlq_n_s16(vacc, 7);
-    int16x8_t vin = vqdmulhq_s16(vacc, vinput_scale_div_mantissa);
+    int16x8_t vin = vqrdmulhq_s16(vacc, vinput_scale_div_mantissa);
     vin = vqshlq_s16(vin, vinput_scale_div_exp);
     vin = vqsubq_s16(vin, vhalf);
     vin = vminq_s16(vin, vzero);
-    int16x8_t vout = vqdmulhq_s16(vacc, vscale_ratio);
-    vout = vqdmulhq_s16(vout, vin);
+    int16x8_t vout = vqrdmulhq_s16(vacc, vscale_ratio);
+    vout = vqrdmulhq_s16(vout, vin);
     vout = vqaddq_s16(vout, voutput_zero_point);
     uint8x8_t vy = vqmovun_s16(vout);
 

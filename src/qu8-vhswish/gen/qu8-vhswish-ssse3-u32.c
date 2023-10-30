@@ -91,10 +91,10 @@ void xnn_qu8_vhswish_ukernel__ssse3_u32(
     vin2 = _mm_min_epi16(vin2, vzero);
     vin3 = _mm_min_epi16(vin3, vzero);
 
-    const __m128i vout0 = _mm_mulhi_epi16(vextx0, vscale_ratio);
-    const __m128i vout1 = _mm_mulhi_epi16(vextx1, vscale_ratio);
-    const __m128i vout2 = _mm_mulhi_epi16(vextx2, vscale_ratio);
-    const __m128i vout3 = _mm_mulhi_epi16(vextx3, vscale_ratio);
+    const __m128i vout0 = _mm_mulhrs_epi16(vextx0, vscale_ratio);
+    const __m128i vout1 = _mm_mulhrs_epi16(vextx1, vscale_ratio);
+    const __m128i vout2 = _mm_mulhrs_epi16(vextx2, vscale_ratio);
+    const __m128i vout3 = _mm_mulhrs_epi16(vextx3, vscale_ratio);
 
     __m128i vacc0 = _mm_mulhrs_epi16(vout0, vin0);
     __m128i vacc1 = _mm_mulhrs_epi16(vout1, vin1);
@@ -147,8 +147,8 @@ void xnn_qu8_vhswish_ukernel__ssse3_u32(
     vin0 = _mm_min_epi16(vin0, vzero);
     vin1 = _mm_min_epi16(vin1, vzero);
 
-    const __m128i vout0 = _mm_mulhi_epi16(vextx0, vscale_ratio);
-    const __m128i vout1 = _mm_mulhi_epi16(vextx1, vscale_ratio);
+    const __m128i vout0 = _mm_mulhrs_epi16(vextx0, vscale_ratio);
+    const __m128i vout1 = _mm_mulhrs_epi16(vextx1, vscale_ratio);
 
     __m128i vacc0 = _mm_mulhrs_epi16(vout0, vin0);
     __m128i vacc1 = _mm_mulhrs_epi16(vout1, vin1);
@@ -196,8 +196,8 @@ void xnn_qu8_vhswish_ukernel__ssse3_u32(
     vin0 = _mm_min_epi16(vin0, vzero);
     vin1 = _mm_min_epi16(vin1, vzero);
 
-    const __m128i vout0 = _mm_mulhi_epi16(vextx0, vscale_ratio);
-    const __m128i vout1 = _mm_mulhi_epi16(vextx1, vscale_ratio);
+    const __m128i vout0 = _mm_mulhrs_epi16(vextx0, vscale_ratio);
+    const __m128i vout1 = _mm_mulhrs_epi16(vextx1, vscale_ratio);
 
     __m128i vacc0 = _mm_mulhrs_epi16(vout0, vin0);
     __m128i vacc1 = _mm_mulhrs_epi16(vout1, vin1);

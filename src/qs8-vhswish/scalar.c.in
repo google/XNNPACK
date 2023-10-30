@@ -44,8 +44,8 @@ void xnn_${DATATYPE.lower()}_vhswish_ukernel__scalar_u${BATCH_TILE}(
       vin = math_min_s32(vin, 0);
       vin = math_max_s32(vin, -32768);
 
-      int32_t vout = math_asr_s32(vacc * vscale_ratio, 15);
-      vout = math_asr_s32(vin * vout, 15) + voutput_zero_point;
+      int32_t vout = math_asr_s32(vacc * vscale_ratio + INT32_C(0x4000), 15);
+      vout = math_asr_s32(vin * vout + INT32_C(0x4000), 15) + voutput_zero_point;
       vout = math_max_s32(vout, ${OUTPUT_MIN});
       vout = math_min_s32(vout, ${OUTPUT_MAX});
       *output++ = (${XINT8_T}) vout;
@@ -79,10 +79,10 @@ void xnn_${DATATYPE.lower()}_vhswish_ukernel__scalar_u${BATCH_TILE}(
         vin${ABC[N]} = math_max_s32(vin${ABC[N]}, -32768);
 
       $for N in range(BATCH_TILE):
-        int32_t vout${ABC[N]} = math_asr_s32(vacc${ABC[N]} * vscale_ratio, 15);
+        int32_t vout${ABC[N]} = math_asr_s32(vacc${ABC[N]} * vscale_ratio + INT32_C(0x4000), 15);
 
       $for N in range(BATCH_TILE):
-        vout${ABC[N]} = math_asr_s32(vin${ABC[N]} * vout${ABC[N]}, 15) + voutput_zero_point;
+        vout${ABC[N]} = math_asr_s32(vin${ABC[N]} * vout${ABC[N]} + INT32_C(0x4000), 15) + voutput_zero_point;
 
       $for N in range(BATCH_TILE):
         vout${ABC[N]} = math_max_s32(vout${ABC[N]}, ${OUTPUT_MIN});
@@ -107,7 +107,7 @@ void xnn_${DATATYPE.lower()}_vhswish_ukernel__scalar_u${BATCH_TILE}(
         vin = math_min_s32(vin, 0);
         vin = math_max_s32(vin, -32768);
 
-        int32_t vout = math_asr_s32(vacc * vscale_ratio, 15);
+        int32_t vout = math_asr_s32(vacc * vscale_ratio + INT32_C(0x4000), 15);
         vout = math_asr_s32(vin * vout, 15) + voutput_zero_point;
         vout = math_max_s32(vout, ${OUTPUT_MIN});
         vout = math_min_s32(vout, ${OUTPUT_MAX});
@@ -125,7 +125,7 @@ void xnn_${DATATYPE.lower()}_vhswish_ukernel__scalar_u${BATCH_TILE}(
           vin = math_min_s32(vin, 0);
           vin = math_max_s32(vin, -32768);
 
-          int32_t vout = math_asr_s32(vacc * vscale_ratio, 15);
+          int32_t vout = math_asr_s32(vacc * vscale_ratio + INT32_C(0x4000), 15);
           vout = math_asr_s32(vin * vout, 15) + voutput_zero_point;
           vout = math_max_s32(vout, ${OUTPUT_MIN});
           vout = math_min_s32(vout, ${OUTPUT_MAX});

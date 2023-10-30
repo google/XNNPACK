@@ -93,10 +93,47 @@ void xnn_qs8_vhswish_ukernel__sse2_u32(
     vin2 = _mm_min_epi16(vin2, vzero);
     vin3 = _mm_min_epi16(vin3, vzero);
 
-    const __m128i vout0 = _mm_mulhi_epi16(vextx0, vscale_ratio);
-    const __m128i vout1 = _mm_mulhi_epi16(vextx1, vscale_ratio);
-    const __m128i vout2 = _mm_mulhi_epi16(vextx2, vscale_ratio);
-    const __m128i vout3 = _mm_mulhi_epi16(vextx3, vscale_ratio);
+    const __m128i vouthi0 =  _mm_mulhi_epi16(vextx0, vscale_ratio);
+    const __m128i vouthi1 =  _mm_mulhi_epi16(vextx1, vscale_ratio);
+    const __m128i vouthi2 =  _mm_mulhi_epi16(vextx2, vscale_ratio);
+    const __m128i vouthi3 =  _mm_mulhi_epi16(vextx3, vscale_ratio);
+
+    const __m128i voutlo0 =  _mm_mullo_epi16(vextx0, vscale_ratio);
+    const __m128i voutlo1 =  _mm_mullo_epi16(vextx1, vscale_ratio);
+    const __m128i voutlo2 =  _mm_mullo_epi16(vextx2, vscale_ratio);
+    const __m128i voutlo3 =  _mm_mullo_epi16(vextx3, vscale_ratio);
+
+    __m128i voutfirstfour0 = _mm_unpacklo_epi16(voutlo0, vouthi0);
+    __m128i voutlastfour0 = _mm_unpackhi_epi16(voutlo0, vouthi0);
+    __m128i voutfirstfour1 = _mm_unpacklo_epi16(voutlo1, vouthi1);
+    __m128i voutlastfour1 = _mm_unpackhi_epi16(voutlo1, vouthi1);
+    __m128i voutfirstfour2 = _mm_unpacklo_epi16(voutlo2, vouthi2);
+    __m128i voutlastfour2 = _mm_unpackhi_epi16(voutlo2, vouthi2);
+    __m128i voutfirstfour3 = _mm_unpacklo_epi16(voutlo3, vouthi3);
+    __m128i voutlastfour3 = _mm_unpackhi_epi16(voutlo3, vouthi3);
+
+    voutfirstfour0 = _mm_add_epi32(voutfirstfour0, vhalf);
+    voutlastfour0 = _mm_add_epi32(voutlastfour0, vhalf);
+    voutfirstfour1 = _mm_add_epi32(voutfirstfour1, vhalf);
+    voutlastfour1 = _mm_add_epi32(voutlastfour1, vhalf);
+    voutfirstfour2 = _mm_add_epi32(voutfirstfour2, vhalf);
+    voutlastfour2 = _mm_add_epi32(voutlastfour2, vhalf);
+    voutfirstfour3 = _mm_add_epi32(voutfirstfour3, vhalf);
+    voutlastfour3 = _mm_add_epi32(voutlastfour3, vhalf);
+
+    voutfirstfour0 = _mm_srai_epi32(voutfirstfour0, 15);
+    voutlastfour0 = _mm_srai_epi32(voutlastfour0, 15);
+    voutfirstfour1 = _mm_srai_epi32(voutfirstfour1, 15);
+    voutlastfour1 = _mm_srai_epi32(voutlastfour1, 15);
+    voutfirstfour2 = _mm_srai_epi32(voutfirstfour2, 15);
+    voutlastfour2 = _mm_srai_epi32(voutlastfour2, 15);
+    voutfirstfour3 = _mm_srai_epi32(voutfirstfour3, 15);
+    voutlastfour3 = _mm_srai_epi32(voutlastfour3, 15);
+
+    const __m128i vout0 = _mm_packs_epi32(voutfirstfour0, voutlastfour0);
+    const __m128i vout1 = _mm_packs_epi32(voutfirstfour1, voutlastfour1);
+    const __m128i vout2 = _mm_packs_epi32(voutfirstfour2, voutlastfour2);
+    const __m128i vout3 = _mm_packs_epi32(voutfirstfour3, voutlastfour3);
 
     const __m128i vacclo0 = _mm_mullo_epi16(vout0, vin0);
     const __m128i vacclo1 = _mm_mullo_epi16(vout1, vin1);
@@ -109,22 +146,30 @@ void xnn_qs8_vhswish_ukernel__sse2_u32(
     const __m128i vacchi3 = _mm_mulhi_epi16(vout3, vin3);
 
     __m128i vaccfirst0 = _mm_unpacklo_epi16(vacclo0, vacchi0);
-    vaccfirst0 = _mm_srli_epi32(vaccfirst0, 15);
+    vaccfirst0 = _mm_add_epi32(vaccfirst0, vhalf);
+    vaccfirst0 = _mm_srai_epi32(vaccfirst0, 15);
     __m128i vaccfirst1 = _mm_unpacklo_epi16(vacclo1, vacchi1);
-    vaccfirst1 = _mm_srli_epi32(vaccfirst1, 15);
+    vaccfirst1 = _mm_add_epi32(vaccfirst1, vhalf);
+    vaccfirst1 = _mm_srai_epi32(vaccfirst1, 15);
     __m128i vaccfirst2 = _mm_unpacklo_epi16(vacclo2, vacchi2);
-    vaccfirst2 = _mm_srli_epi32(vaccfirst2, 15);
+    vaccfirst2 = _mm_add_epi32(vaccfirst2, vhalf);
+    vaccfirst2 = _mm_srai_epi32(vaccfirst2, 15);
     __m128i vaccfirst3 = _mm_unpacklo_epi16(vacclo3, vacchi3);
-    vaccfirst3 = _mm_srli_epi32(vaccfirst3, 15);
+    vaccfirst3 = _mm_add_epi32(vaccfirst3, vhalf);
+    vaccfirst3 = _mm_srai_epi32(vaccfirst3, 15);
 
     __m128i vaccsec0 = _mm_unpackhi_epi16(vacclo0, vacchi0);
-    vaccsec0 = _mm_srli_epi32(vaccsec0, 15);
+    vaccsec0 = _mm_add_epi32(vaccsec0, vhalf);
+    vaccsec0 = _mm_srai_epi32(vaccsec0, 15);
     __m128i vaccsec1 = _mm_unpackhi_epi16(vacclo1, vacchi1);
-    vaccsec1 = _mm_srli_epi32(vaccsec1, 15);
+    vaccsec1 = _mm_add_epi32(vaccsec1, vhalf);
+    vaccsec1 = _mm_srai_epi32(vaccsec1, 15);
     __m128i vaccsec2 = _mm_unpackhi_epi16(vacclo2, vacchi2);
-    vaccsec2 = _mm_srli_epi32(vaccsec2, 15);
+    vaccsec2 = _mm_add_epi32(vaccsec2, vhalf);
+    vaccsec2 = _mm_srai_epi32(vaccsec2, 15);
     __m128i vaccsec3 = _mm_unpackhi_epi16(vacclo3, vacchi3);
-    vaccsec3 = _mm_srli_epi32(vaccsec3, 15);
+    vaccsec3 = _mm_add_epi32(vaccsec3, vhalf);
+    vaccsec3 = _mm_srai_epi32(vaccsec3, 15);
 
     __m128i vacc0 = _mm_packs_epi32(vaccfirst0, vaccsec0);
     __m128i vacc1 = _mm_packs_epi32(vaccfirst1, vaccsec1);
@@ -178,8 +223,29 @@ void xnn_qs8_vhswish_ukernel__sse2_u32(
     vin0 = _mm_min_epi16(vin0, vzero);
     vin1 = _mm_min_epi16(vin1, vzero);
 
-    const __m128i vout0 = _mm_mulhi_epi16(vextx0, vscale_ratio);
-    const __m128i vout1 = _mm_mulhi_epi16(vextx1, vscale_ratio);
+    const __m128i voutlo0 =  _mm_mullo_epi16(vextx0, vscale_ratio);
+    const __m128i voutlo1 =  _mm_mullo_epi16(vextx1, vscale_ratio);
+
+    const __m128i vouthi0 =  _mm_mulhi_epi16(vextx0, vscale_ratio);
+    const __m128i vouthi1 =  _mm_mulhi_epi16(vextx1, vscale_ratio);
+
+    __m128i voutfirstfour0 = _mm_unpacklo_epi16(voutlo0, vouthi0);
+    __m128i voutlastfour0 = _mm_unpackhi_epi16(voutlo0, vouthi0);
+    __m128i voutfirstfour1 = _mm_unpacklo_epi16(voutlo1, vouthi1);
+    __m128i voutlastfour1 = _mm_unpackhi_epi16(voutlo1, vouthi1);
+
+    voutfirstfour0 = _mm_add_epi32(voutfirstfour0, vhalf);
+    voutlastfour0 = _mm_add_epi32(voutlastfour0, vhalf);
+    voutfirstfour1 = _mm_add_epi32(voutfirstfour1, vhalf);
+    voutlastfour1 = _mm_add_epi32(voutlastfour1, vhalf);
+
+    voutfirstfour0 = _mm_srai_epi32(voutfirstfour0, 15);
+    voutlastfour0 = _mm_srai_epi32(voutlastfour0, 15);
+    voutfirstfour1 = _mm_srai_epi32(voutfirstfour1, 15);
+    voutlastfour1 = _mm_srai_epi32(voutlastfour1, 15);
+
+    const __m128i vout0 = _mm_packs_epi32(voutfirstfour0, voutlastfour0);
+    const __m128i vout1 = _mm_packs_epi32(voutfirstfour1, voutlastfour1);
 
     const __m128i vacclo0 = _mm_mullo_epi16(vout0, vin0);
     const __m128i vacclo1 = _mm_mullo_epi16(vout1, vin1);
@@ -188,13 +254,17 @@ void xnn_qs8_vhswish_ukernel__sse2_u32(
 
     __m128i vaccfirst0 = _mm_unpacklo_epi16(vacclo0, vacchi0);
     __m128i vaccfirst1 = _mm_unpacklo_epi16(vacclo1, vacchi1);
-    vaccfirst0 = _mm_srli_epi32(vaccfirst0, 15);
-    vaccfirst1 = _mm_srli_epi32(vaccfirst1, 15);
+    vaccfirst0 = _mm_add_epi32(vaccfirst0, vhalf);
+    vaccfirst1 = _mm_add_epi32(vaccfirst1, vhalf);
+    vaccfirst0 = _mm_srai_epi32(vaccfirst0, 15);
+    vaccfirst1 = _mm_srai_epi32(vaccfirst1, 15);
 
     __m128i vaccsec0 = _mm_unpackhi_epi16(vacclo0, vacchi0);
     __m128i vaccsec1 = _mm_unpackhi_epi16(vacclo1, vacchi1);
-    vaccsec0 = _mm_srli_epi32(vaccsec0, 15);
-    vaccsec1 = _mm_srli_epi32(vaccsec1, 15);
+    vaccsec0 = _mm_add_epi32(vaccsec0, vhalf);
+    vaccsec1 = _mm_add_epi32(vaccsec1, vhalf);
+    vaccsec0 = _mm_srai_epi32(vaccsec0, 15);
+    vaccsec1 = _mm_srai_epi32(vaccsec1, 15);
 
     __m128i vacc0 = _mm_packs_epi32(vaccfirst0, vaccsec0);
     __m128i vacc1 = _mm_packs_epi32(vaccfirst1, vaccsec1);
@@ -243,8 +313,29 @@ void xnn_qs8_vhswish_ukernel__sse2_u32(
     vin0 = _mm_min_epi16(vin0, vzero);
     vin1 = _mm_min_epi16(vin1, vzero);
 
-    const __m128i vout0 = _mm_mulhi_epi16(vextx0, vscale_ratio);
-    const __m128i vout1 = _mm_mulhi_epi16(vextx1, vscale_ratio);
+    const __m128i voutlo0 =  _mm_mullo_epi16(vextx0, vscale_ratio);
+    const __m128i voutlo1 =  _mm_mullo_epi16(vextx1, vscale_ratio);
+
+    const __m128i vouthi0 =  _mm_mulhi_epi16(vextx0, vscale_ratio);
+    const __m128i vouthi1 =  _mm_mulhi_epi16(vextx1, vscale_ratio);
+
+    __m128i voutfirstfour0 = _mm_unpacklo_epi16(voutlo0, vouthi0);
+    __m128i voutlastfour0 = _mm_unpackhi_epi16(voutlo0, vouthi0);
+    __m128i voutfirstfour1 = _mm_unpacklo_epi16(voutlo1, vouthi1);
+    __m128i voutlastfour1 = _mm_unpackhi_epi16(voutlo1, vouthi1);
+
+    voutfirstfour0 = _mm_add_epi32(voutfirstfour0, vhalf);
+    voutlastfour0 = _mm_add_epi32(voutlastfour0, vhalf);
+    voutfirstfour1 = _mm_add_epi32(voutfirstfour1, vhalf);
+    voutlastfour1 = _mm_add_epi32(voutlastfour1, vhalf);
+
+    voutfirstfour0 = _mm_srai_epi32(voutfirstfour0, 15);
+    voutlastfour0 = _mm_srai_epi32(voutlastfour0, 15);
+    voutfirstfour1 = _mm_srai_epi32(voutfirstfour1, 15);
+    voutlastfour1 = _mm_srai_epi32(voutlastfour1, 15);
+
+    const __m128i vout0 = _mm_packs_epi32(voutfirstfour0, voutlastfour0);
+    const __m128i vout1 = _mm_packs_epi32(voutfirstfour1, voutlastfour1);
 
     const __m128i vacclo0 = _mm_mullo_epi16(vout0, vin0);
     const __m128i vacclo1 = _mm_mullo_epi16(vout1, vin1);
@@ -253,13 +344,13 @@ void xnn_qs8_vhswish_ukernel__sse2_u32(
 
     __m128i vaccfirst0 = _mm_unpacklo_epi16(vacclo0, vacchi0);
     __m128i vaccfirst1 = _mm_unpacklo_epi16(vacclo1, vacchi1);
-    vaccfirst0 = _mm_srli_epi32(vaccfirst0, 15);
-    vaccfirst1 = _mm_srli_epi32(vaccfirst1, 15);
+    vaccfirst0 = _mm_srai_epi32(vaccfirst0, 15);
+    vaccfirst1 = _mm_srai_epi32(vaccfirst1, 15);
 
     __m128i vaccsec0 = _mm_unpackhi_epi16(vacclo0, vacchi0);
     __m128i vaccsec1 = _mm_unpackhi_epi16(vacclo1, vacchi1);
-    vaccsec0 = _mm_srli_epi32(vaccsec0, 15);
-    vaccsec1 = _mm_srli_epi32(vaccsec1, 15);
+    vaccsec0 = _mm_srai_epi32(vaccsec0, 15);
+    vaccsec1 = _mm_srai_epi32(vaccsec1, 15);
 
     __m128i vacc0 = _mm_packs_epi32(vaccfirst0, vaccsec0);
     __m128i vacc1 = _mm_packs_epi32(vaccfirst1, vaccsec1);

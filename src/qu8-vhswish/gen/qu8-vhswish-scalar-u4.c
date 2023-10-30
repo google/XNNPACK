@@ -68,15 +68,15 @@ void xnn_qu8_vhswish_ukernel__scalar_u4(
     vin2 = math_max_s32(vin2, -32768);
     vin3 = math_max_s32(vin3, -32768);
 
-    int32_t vout0 = math_asr_s32(vacc0 * vscale_ratio, 15);
-    int32_t vout1 = math_asr_s32(vacc1 * vscale_ratio, 15);
-    int32_t vout2 = math_asr_s32(vacc2 * vscale_ratio, 15);
-    int32_t vout3 = math_asr_s32(vacc3 * vscale_ratio, 15);
+    int32_t vout0 = math_asr_s32(vacc0 * vscale_ratio + INT32_C(0x4000), 15);
+    int32_t vout1 = math_asr_s32(vacc1 * vscale_ratio + INT32_C(0x4000), 15);
+    int32_t vout2 = math_asr_s32(vacc2 * vscale_ratio + INT32_C(0x4000), 15);
+    int32_t vout3 = math_asr_s32(vacc3 * vscale_ratio + INT32_C(0x4000), 15);
 
-    vout0 = math_asr_s32(vin0 * vout0, 15) + voutput_zero_point;
-    vout1 = math_asr_s32(vin1 * vout1, 15) + voutput_zero_point;
-    vout2 = math_asr_s32(vin2 * vout2, 15) + voutput_zero_point;
-    vout3 = math_asr_s32(vin3 * vout3, 15) + voutput_zero_point;
+    vout0 = math_asr_s32(vin0 * vout0 + INT32_C(0x4000), 15) + voutput_zero_point;
+    vout1 = math_asr_s32(vin1 * vout1 + INT32_C(0x4000), 15) + voutput_zero_point;
+    vout2 = math_asr_s32(vin2 * vout2 + INT32_C(0x4000), 15) + voutput_zero_point;
+    vout3 = math_asr_s32(vin3 * vout3 + INT32_C(0x4000), 15) + voutput_zero_point;
 
     vout0 = math_max_s32(vout0, 0);
     vout1 = math_max_s32(vout1, 0);
@@ -107,7 +107,7 @@ void xnn_qu8_vhswish_ukernel__scalar_u4(
       vin = math_min_s32(vin, 0);
       vin = math_max_s32(vin, -32768);
 
-      int32_t vout = math_asr_s32(vacc * vscale_ratio, 15);
+      int32_t vout = math_asr_s32(vacc * vscale_ratio + INT32_C(0x4000), 15);
       vout = math_asr_s32(vin * vout, 15) + voutput_zero_point;
       vout = math_max_s32(vout, 0);
       vout = math_min_s32(vout, 255);

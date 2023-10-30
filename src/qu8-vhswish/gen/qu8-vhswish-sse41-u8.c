@@ -45,7 +45,7 @@ void xnn_qu8_vhswish_ukernel__sse41_u8(
     vprod32lastfour = _mm_sub_epi32(vprod32lastfour, vhalf);
     __m128i vin = _mm_packs_epi32(vprod32firstfour, vprod32lastfour);
     vin = _mm_min_epi16(vin, vzero);
-    const __m128i vout = _mm_mulhi_epi16(vextx, vscale_ratio);
+    const __m128i vout = _mm_mulhrs_epi16(vextx, vscale_ratio);
     __m128i vacc = _mm_mulhrs_epi16(vout, vin);
     vacc = _mm_adds_epi16(vacc, voutput_zero_point);
     input += 8;
@@ -70,7 +70,7 @@ void xnn_qu8_vhswish_ukernel__sse41_u8(
     vprod32lastfour = _mm_sub_epi32(vprod32lastfour, vhalf);
     __m128i vin = _mm_packs_epi32(vprod32firstfour, vprod32lastfour);
     vin = _mm_min_epi16(vin, vzero);
-    const __m128i vout = _mm_mulhi_epi16(vextx, vscale_ratio);
+    const __m128i vout = _mm_mulhrs_epi16(vextx, vscale_ratio);
     __m128i vacc = _mm_mulhrs_epi16(vout, vin);
     vacc = _mm_adds_epi16(vacc, voutput_zero_point);
 
