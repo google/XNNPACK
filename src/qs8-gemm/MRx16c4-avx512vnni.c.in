@@ -83,8 +83,8 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
     const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
     const __m512i vsign_mask = _mm512_load_si512(params->avx512vnni.sign_mask);
     $if DATATYPE == "QC4":
-      const __m256i vhigh4b_mask = _mm256_set1_epi8(0xF0);
       const __m512i vpermute_mask = _mm512_load_epi64(params->avx512vnni.permute_mask);
+      const __m256i vvalue_mask = _mm256_load_si256((const __m256i*) params->avx512vnni.value_mask);
   $else:
     const __m512i vsign_mask = _mm512_load_si512(params->${PARAMS_STRUCT}.sign_mask);
     $if DATATYPE != "QC8":
@@ -107,7 +107,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
     w = (const int32_t*) w + 16;
 
     size_t k = kc;
-    while (k >= 4 * sizeof(${XINT8_T})) {
+    do {
       $for M in range(MR):
         __m512i va${M}x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a${M}));
         a${M} += 4;
@@ -119,8 +119,8 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
         const __m512i vb0123456789ABCDEF = _mm512_load_si512(w);
       $elif DATATYPE in ["QC4"]:
         __m256i vb4b0123456789ABCDEF = _mm256_loadu_si256(w);
-        const __m256i vb4bodd = _mm256_and_si256(vb4b0123456789ABCDEF, vhigh4b_mask);
-        const __m256i vb4beven = _mm256_and_si256(_mm256_slli_epi16(vb4b0123456789ABCDEF, 4), vhigh4b_mask);
+        const __m256i vb4bodd = _mm256_and_si256(vb4b0123456789ABCDEF, vvalue_mask);
+        const __m256i vb4beven = _mm256_and_si256(_mm256_slli_epi16(vb4b0123456789ABCDEF, 4), vvalue_mask);
         const __m256i vb012389AB = _mm256_unpacklo_epi8(vb4beven, vb4bodd);
         const __m256i vb4567CDEF = _mm256_unpackhi_epi8(vb4beven, vb4bodd);
         __m512i vb0123456789ABCDEF = _mm512_permutex2var_epi64(_mm512_castsi256_si512(vb012389AB), vpermute_mask, _mm512_castsi256_si512(vb4567CDEF));
@@ -133,7 +133,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
       $elif DATATYPE in ["QC4"]:
         w = (const ${XINT8_T}*) w + 32;
       k -= 4 * sizeof(${XINT8_T});
-    }
+    } while (k != 0);
 
     $if DATATYPE == "QC4":
       $for M in range(MR):

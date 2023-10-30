@@ -2148,6 +2148,9 @@ size_t xnn_init_f32_qc4w_minmax_avx512vnni_params(
   for(int i = 0; i < 8; i++) {
     params->avx512vnni.permute_mask[i] = permute_mask[i];
   }
+  for(int i = 0; i < 32; i++) {
+    params->avx512vnni.value_mask[i] = 0xF0;
+  }
   return sizeof(params->avx512vnni);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
