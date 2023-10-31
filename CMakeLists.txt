@@ -2146,13 +2146,13 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(f32-gemm-minmax-test test/f32-gemm-minmax.cc test/f32-gemm-minmax-2.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-gemm-minmax-test PRIVATE fp16 pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(f32-gemm-minmax-test PRIVATE pthreadpool gtest gtest_main)
   TARGET_LINK_LIBRARIES(f32-gemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME f32-gemm-minmax-test COMMAND f32-gemm-minmax-test)
 
   ADD_EXECUTABLE(f32-gemm-goi-minmax-test test/f32-gemm-goi-minmax.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-gemm-goi-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-gemm-goi-minmax-test PRIVATE fp16 pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(f32-gemm-goi-minmax-test PRIVATE pthreadpool gtest gtest_main)
   TARGET_LINK_LIBRARIES(f32-gemm-goi-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME f32-gemm-goi-minmax-test COMMAND f32-gemm-goi-minmax-test)
 
@@ -3731,12 +3731,12 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
   ADD_EXECUTABLE(f32-gemm-minmax-bench bench/f32-gemm-minmax.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-gemm-minmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-gemm-minmax-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-gemm-minmax-bench PRIVATE benchmark fp16 pthreadpool)
   TARGET_LINK_LIBRARIES(f32-gemm-minmax-bench PRIVATE jit bench-utils hardware-config logging microkernels-all microparams-init packing)
 
   ADD_EXECUTABLE(f32-gemm-goi-minmax-bench bench/f32-gemm-goi-minmax.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-gemm-goi-minmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-gemm-goi-minmax-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-gemm-goi-minmax-bench PRIVATE benchmark fp16 pthreadpool)
   TARGET_LINK_LIBRARIES(f32-gemm-goi-minmax-bench PRIVATE jit bench-utils hardware-config logging microkernels-all microparams-init packing)
 
   ADD_EXECUTABLE(f32-qc4w-gemm-bench bench/f32-qc4w-gemm.cc)
