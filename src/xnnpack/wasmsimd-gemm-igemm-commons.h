@@ -132,7 +132,7 @@ class PostOps : public WasmAssembler {
           Hswish(v);
           break;
         default:
-          XNN_LOG_UNREACHABLE("unsupported post operation: %u", ops[i].op_type);
+          XNN_LOG_UNREACHABLE("unsupported post operation: %u", ops_[i].op_type);
       }
     }
   }
