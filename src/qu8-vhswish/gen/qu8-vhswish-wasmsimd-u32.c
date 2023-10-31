@@ -36,6 +36,8 @@ void xnn_qu8_vhswish_ukernel__wasmsimd_u32(
   const v128_t vmin_val = wasm_v128_load64_splat(params->wasmsimd.min_val);
   const v128_t vhalf = wasm_v128_load64_splat(params->wasmsimd.half);
   const v128_t vzero = wasm_v128_load64_splat(params->wasmsimd.zero);
+  const v128_t vinput_scale_div_exp = wasm_i16x8_splat(1 << params->wasmsimd.input_scale_div_exp);
+
   for (; batch >= 32 * sizeof(uint8_t); batch -= 32 * sizeof(uint8_t)) {
     v128_t vacc0 = wasm_u16x8_load8x8(input);
     v128_t vacc1 = wasm_u16x8_load8x8(input + 8);
@@ -58,10 +60,10 @@ void xnn_qu8_vhswish_ukernel__wasmsimd_u32(
     const v128_t vbase2 = wasm_i16x8_q15mulr_sat(vacc2, vinput_scale_div_mantissa);
     const v128_t vbase3 = wasm_i16x8_q15mulr_sat(vacc3, vinput_scale_div_mantissa);
 
-    const v128_t vshifted0 = wasm_i16x8_shl(vbase0, params->wasmsimd.input_scale_div_exp);
-    const v128_t vshifted1 = wasm_i16x8_shl(vbase1, params->wasmsimd.input_scale_div_exp);
-    const v128_t vshifted2 = wasm_i16x8_shl(vbase2, params->wasmsimd.input_scale_div_exp);
-    const v128_t vshifted3 = wasm_i16x8_shl(vbase3, params->wasmsimd.input_scale_div_exp);
+    const v128_t vshifted0 = wasm_i16x8_mul(vbase0, vinput_scale_div_exp);
+    const v128_t vshifted1 = wasm_i16x8_mul(vbase1, vinput_scale_div_exp);
+    const v128_t vshifted2 = wasm_i16x8_mul(vbase2, vinput_scale_div_exp);
+    const v128_t vshifted3 = wasm_i16x8_mul(vbase3, vinput_scale_div_exp);
 
     const v128_t pos_mask0 = wasm_i16x8_ge(vbase0, vshift_max);
     v128_t vin0 = wasm_v128_bitselect(vmax_val, vshifted0, pos_mask0);
@@ -118,7 +120,7 @@ void xnn_qu8_vhswish_ukernel__wasmsimd_u32(
     vacc = wasm_i16x8_sub(vinput_zero_point, vacc);
     vacc = wasm_i16x8_shl(vacc, 7);
     const v128_t vbase = wasm_i16x8_q15mulr_sat(vacc, vinput_scale_div_mantissa);
-    const v128_t vshifted = wasm_i16x8_shl(vbase, params->wasmsimd.input_scale_div_exp);
+    const v128_t vshifted = wasm_i16x8_mul(vbase, vinput_scale_div_exp);
     const v128_t pos_mask = wasm_i16x8_ge(vbase, vshift_max);
     v128_t vin = wasm_v128_bitselect(vmax_val, vshifted, pos_mask);
     const v128_t neg_mask = wasm_i16x8_le(vbase, vshift_min);
@@ -142,7 +144,7 @@ void xnn_qu8_vhswish_ukernel__wasmsimd_u32(
     vacc = wasm_i16x8_sub(vinput_zero_point, vacc);
     vacc = wasm_i16x8_shl(vacc, 7);
     const v128_t vbase = wasm_i16x8_q15mulr_sat(vacc, vinput_scale_div_mantissa);
-    const v128_t vshifted = wasm_i16x8_shl(vbase, params->wasmsimd.input_scale_div_exp);
+    const v128_t vshifted = wasm_i16x8_mul(vbase, vinput_scale_div_exp);
     const v128_t pos_mask = wasm_i16x8_ge(vbase, vshift_max);
     v128_t vin = wasm_v128_bitselect(vmax_val, vshifted, pos_mask);
     const v128_t neg_mask = wasm_i16x8_le(vbase, vshift_min);
