@@ -28,13 +28,22 @@ tools/xngen src/qs8-vhswish/ssse3.c.in -D BATCH_TILE=16 -D DATATYPE=QU8 -o src/q
 tools/xngen src/qs8-vhswish/ssse3.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -o src/qu8-vhswish/gen/qu8-vhswish-ssse3-u32.c &
 
 ################################## x86 SSE4.1 #################################
-tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=8  -D DATATYPE=QS8 -o src/qs8-vhswish/gen/qs8-vhswish-sse41-u8.c &
-tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=16 -D DATATYPE=QS8 -o src/qs8-vhswish/gen/qs8-vhswish-sse41-u16.c &
-tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=32 -D DATATYPE=QS8 -o src/qs8-vhswish/gen/qs8-vhswish-sse41-u32.c &
+tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=8  -D DATATYPE=QS8 -D AVX=0 -o src/qs8-vhswish/gen/qs8-vhswish-sse41-u8.c &
+tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=16 -D DATATYPE=QS8 -D AVX=0 -o src/qs8-vhswish/gen/qs8-vhswish-sse41-u16.c &
+tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=32 -D DATATYPE=QS8 -D AVX=0 -o src/qs8-vhswish/gen/qs8-vhswish-sse41-u32.c &
 
-tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=8  -D DATATYPE=QU8 -o src/qu8-vhswish/gen/qu8-vhswish-sse41-u8.c &
-tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=16 -D DATATYPE=QU8 -o src/qu8-vhswish/gen/qu8-vhswish-sse41-u16.c &
-tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -o src/qu8-vhswish/gen/qu8-vhswish-sse41-u32.c &
+tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=8  -D DATATYPE=QU8 -D AVX=0 -o src/qu8-vhswish/gen/qu8-vhswish-sse41-u8.c &
+tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=16 -D DATATYPE=QU8 -D AVX=0 -o src/qu8-vhswish/gen/qu8-vhswish-sse41-u16.c &
+tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -D AVX=0 -o src/qu8-vhswish/gen/qu8-vhswish-sse41-u32.c &
+
+################################## x86 AVX #################################
+tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=8  -D DATATYPE=QS8 -D AVX=1 -o src/qs8-vhswish/gen/qs8-vhswish-avx-u8.c &
+tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=16 -D DATATYPE=QS8 -D AVX=1 -o src/qs8-vhswish/gen/qs8-vhswish-avx-u16.c &
+tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=32 -D DATATYPE=QS8 -D AVX=1 -o src/qs8-vhswish/gen/qs8-vhswish-avx-u32.c &
+
+tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=8  -D DATATYPE=QU8 -D AVX=1 -o src/qu8-vhswish/gen/qu8-vhswish-avx-u8.c &
+tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=16 -D DATATYPE=QU8 -D AVX=1 -o src/qu8-vhswish/gen/qu8-vhswish-avx-u16.c &
+tools/xngen src/qs8-vhswish/sse4.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -D AVX=1 -o src/qu8-vhswish/gen/qu8-vhswish-avx-u32.c &
 
 ################################## WAsm SIMD ##################################
 tools/xngen src/qs8-vhswish/wasmsimd.c.in -D BATCH_TILE=8  -D RELAXED=0 -D DATATYPE=QS8 -o src/qs8-vhswish/gen/qs8-vhswish-wasmsimd-u8.c &
