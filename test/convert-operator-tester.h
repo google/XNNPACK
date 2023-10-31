@@ -232,7 +232,7 @@ class ConvertOperatorTester {
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       (batch_size() - 1) * input_stride() + channels());
     std::vector<int8_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<xnn_dynamic_quantization_params> quantization_params(batch_size());
+    std::vector<xnn_dynamic_quantization_params> quantization_params(batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
     std::uniform_real_distribution<float> range_dist(-100000, 100000);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       const float first_val = range_dist(rng);

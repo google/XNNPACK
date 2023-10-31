@@ -230,6 +230,10 @@ class FullyConnectedOperatorTester {
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
       std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return f32idist(rng); });
       std::generate(quantization_params.begin(), quantization_params.end(), [&]() { return xnn_qd8_quantization_params{w8dist(rng), f32idist(rng)}; });
+      for (size_t i = batch_size(); i < batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS; ++i) {
+        quantization_params[i].zero_point = quantization_params[batch_size() - 1].zero_point;
+        quantization_params[i].inv_scale = quantization_params[batch_size() - 1].inv_scale;
+      }
       std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without renormalization.
@@ -410,6 +414,10 @@ class FullyConnectedOperatorTester {
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
       std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return f32idist(rng); });
       std::generate(quantization_params.begin(), quantization_params.end(), [&]() { return xnn_qd8_quantization_params{w8dist(rng), f32idist(rng)}; });
+      for (size_t i = batch_size(); i < batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS; ++i) {
+        quantization_params[i].zero_point = quantization_params[batch_size() - 1].zero_point;
+        quantization_params[i].inv_scale = quantization_params[batch_size() - 1].inv_scale;
+      }
       std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without renormalization.

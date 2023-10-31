@@ -1970,6 +1970,17 @@ void xnn_compute_reduce(
   } while (--batch_range != 0);
 }
 
+void xnn_compute_pad_qd8_params(
+    const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index)
+{
+  const size_t batch_size = context->batch_size;
+  for (size_t i = 0; i < XNN_EXTRA_QUANTIZATION_PARAMS; ++i) {
+    context->quantization_params[batch_size + i].zero_point = context->quantization_params[batch_size - 1].zero_point;
+    context->quantization_params[batch_size + i].inv_scale = context->quantization_params[batch_size - 1].inv_scale;
+  }
+}
+
 void xnn_compute_f32_qd8_convert(
     const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index)

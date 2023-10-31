@@ -1997,6 +1997,7 @@ TEST_F(FullyConnectedTestQD8F32QC8W, internally_allocated_dynamic_quantization_p
   std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+  std::generate(quantization_params.begin(), quantization_params.end(), [&]() { return xnn_dynamic_quantization_params{w8dist(rng), f32dist(rng)}; });
   std::generate(convert_input.begin(), convert_input.end(), [&]() { return f32dist(rng); });
 
   const float output_min = -std::numeric_limits<float>::infinity();
@@ -2165,6 +2166,7 @@ TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_p
   std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
   std::generate(convert_input.begin(), convert_input.end(), [&]() { return f32dist(rng); });
+  std::generate(quantization_params.begin(), quantization_params.end(), [&]() { return xnn_dynamic_quantization_params{w8dist(rng), f32dist(rng)}; });
 
   // Adjust number of kernel elements for QC4W. input_channels should be padded to byte boundary, hence even.
   const size_t rounded_input_channels = round_up_po2(input_channels, 2);
@@ -2273,6 +2275,7 @@ TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_p
   std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
   std::generate(convert_input.begin(), convert_input.end(), [&]() { return f32dist(rng); });
+  std::generate(quantization_params.begin(), quantization_params.end(), [&]() { return xnn_dynamic_quantization_params{w8dist(rng), f32dist(rng)}; });
 
   // Adjust number of kernel elements for QC4W. input_channels should be padded to byte boundary, hence even.
   const size_t rounded_output_channels = round_up_po2(output_channels, 2);

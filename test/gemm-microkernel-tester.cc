@@ -807,6 +807,10 @@ void GemmMicrokernelTester::Test(
         a[i * a_stride() + j] = int8_t(std::lrintf(scaled_input) + long(quantization_params[i].zero_point));
       }
     }
+    for (size_t i = m(); i < mr(); ++i) {
+      quantization_params[i].zero_point = quantization_params[m() - 1].zero_point;
+      quantization_params[i].inv_scale = quantization_params[m() - 1].inv_scale;
+    }
     std::generate(b.begin(), b.end(), std::ref(w8rng));
 
     std::generate(bias.begin(), bias.end(), std::ref(f32rng));
@@ -940,6 +944,10 @@ void GemmMicrokernelTester::Test(
                                                            - quantization_params[i].zero_point));
         a[i * a_stride() + j] = int8_t(std::lrintf(scaled_input) + long(quantization_params[i].zero_point));
       }
+    }
+    for (size_t i = m(); i < mr(); ++i) {
+      quantization_params[i].zero_point = quantization_params[m() - 1].zero_point;
+      quantization_params[i].inv_scale = quantization_params[m() - 1].inv_scale;
     }
 
     std::generate(b.begin(), b.end(), std::ref(w8rng));
