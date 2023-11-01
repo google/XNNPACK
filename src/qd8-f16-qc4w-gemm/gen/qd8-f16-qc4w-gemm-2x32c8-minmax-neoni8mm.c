@@ -464,14 +464,6 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_2x32c8__neoni8mm(
     vfp16out1xOPQR = vmin_f16(vfp16out1xOPQR, voutput_max);
     vfp16out1xSTUV = vmin_f16(vfp16out1xSTUV, voutput_max);
     if XNN_LIKELY(nc >= 32) {
-      vst1_u16(c1, vreinterpret_u16_f16(vfp16out1x0123));
-      vst1_u16(c1 + 4, vreinterpret_u16_f16(vfp16out1x4567));
-      vst1_u16(c1 + 8, vreinterpret_u16_f16(vfp16out1x89AB));
-      vst1_u16(c1 + 12, vreinterpret_u16_f16(vfp16out1xCDEF));
-      vst1_u16(c1 + 16, vreinterpret_u16_f16(vfp16out1xGHIJ));
-      vst1_u16(c1 + 20, vreinterpret_u16_f16(vfp16out1xKLMN));
-      vst1_u16(c1 + 24, vreinterpret_u16_f16(vfp16out1xOPQR));
-      vst1_u16(c1 + 28, vreinterpret_u16_f16(vfp16out1xSTUV));
       vst1_u16(c0, vreinterpret_u16_f16(vfp16out0x0123));
       vst1_u16(c0 + 4, vreinterpret_u16_f16(vfp16out0x4567));
       vst1_u16(c0 + 8, vreinterpret_u16_f16(vfp16out0x89AB));
@@ -480,6 +472,14 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_2x32c8__neoni8mm(
       vst1_u16(c0 + 20, vreinterpret_u16_f16(vfp16out0xKLMN));
       vst1_u16(c0 + 24, vreinterpret_u16_f16(vfp16out0xOPQR));
       vst1_u16(c0 + 28, vreinterpret_u16_f16(vfp16out0xSTUV));
+      vst1_u16(c1, vreinterpret_u16_f16(vfp16out1x0123));
+      vst1_u16(c1 + 4, vreinterpret_u16_f16(vfp16out1x4567));
+      vst1_u16(c1 + 8, vreinterpret_u16_f16(vfp16out1x89AB));
+      vst1_u16(c1 + 12, vreinterpret_u16_f16(vfp16out1xCDEF));
+      vst1_u16(c1 + 16, vreinterpret_u16_f16(vfp16out1xGHIJ));
+      vst1_u16(c1 + 20, vreinterpret_u16_f16(vfp16out1xKLMN));
+      vst1_u16(c1 + 24, vreinterpret_u16_f16(vfp16out1xOPQR));
+      vst1_u16(c1 + 28, vreinterpret_u16_f16(vfp16out1xSTUV));
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
       a1 = (const int8_t*) ((uintptr_t) a1 - kc);
@@ -490,48 +490,48 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_2x32c8__neoni8mm(
       nc -= 32;
     } else {
       if (nc & 16) {
-        vst1_u16(c1, vreinterpret_u16_f16(vfp16out1x0123)); c1 += 4;
-        vfp16out1x0123 = vfp16out1xGHIJ;
         vst1_u16(c0, vreinterpret_u16_f16(vfp16out0x0123)); c0 += 4;
         vfp16out0x0123 = vfp16out0xGHIJ;
-        vst1_u16(c1, vreinterpret_u16_f16(vfp16out1x4567)); c1 += 4;
-        vfp16out1x4567 = vfp16out1xKLMN;
+        vst1_u16(c1, vreinterpret_u16_f16(vfp16out1x0123)); c1 += 4;
+        vfp16out1x0123 = vfp16out1xGHIJ;
         vst1_u16(c0, vreinterpret_u16_f16(vfp16out0x4567)); c0 += 4;
         vfp16out0x4567 = vfp16out0xKLMN;
-        vst1_u16(c1, vreinterpret_u16_f16(vfp16out1x89AB)); c1 += 4;
-        vfp16out1x89AB = vfp16out1xOPQR;
+        vst1_u16(c1, vreinterpret_u16_f16(vfp16out1x4567)); c1 += 4;
+        vfp16out1x4567 = vfp16out1xKLMN;
         vst1_u16(c0, vreinterpret_u16_f16(vfp16out0x89AB)); c0 += 4;
         vfp16out0x89AB = vfp16out0xOPQR;
-        vst1_u16(c1, vreinterpret_u16_f16(vfp16out1xCDEF)); c1 += 4;
-        vfp16out1xCDEF = vfp16out1xSTUV;
+        vst1_u16(c1, vreinterpret_u16_f16(vfp16out1x89AB)); c1 += 4;
+        vfp16out1x89AB = vfp16out1xOPQR;
         vst1_u16(c0, vreinterpret_u16_f16(vfp16out0xCDEF)); c0 += 4;
         vfp16out0xCDEF = vfp16out0xSTUV;
+        vst1_u16(c1, vreinterpret_u16_f16(vfp16out1xCDEF)); c1 += 4;
+        vfp16out1xCDEF = vfp16out1xSTUV;
       }
       if (nc & 8) {
-        vst1_u16(c1, vreinterpret_u16_f16(vfp16out1x0123)); c1 += 4;
-        vfp16out1x0123 = vfp16out1x89AB;
         vst1_u16(c0, vreinterpret_u16_f16(vfp16out0x0123)); c0 += 4;
         vfp16out0x0123 = vfp16out0x89AB;
-        vst1_u16(c1, vreinterpret_u16_f16(vfp16out1x4567)); c1 += 4;
-        vfp16out1x4567 = vfp16out1xCDEF;
+        vst1_u16(c1, vreinterpret_u16_f16(vfp16out1x0123)); c1 += 4;
+        vfp16out1x0123 = vfp16out1x89AB;
         vst1_u16(c0, vreinterpret_u16_f16(vfp16out0x4567)); c0 += 4;
         vfp16out0x4567 = vfp16out0xCDEF;
+        vst1_u16(c1, vreinterpret_u16_f16(vfp16out1x4567)); c1 += 4;
+        vfp16out1x4567 = vfp16out1xCDEF;
       }
       if (nc & 4) {
-        vst1_u16(c1, vreinterpret_u16_f16(vfp16out1x0123)); c1 += 4;
-        vfp16out1x0123 = vfp16out1x4567;
         vst1_u16(c0, vreinterpret_u16_f16(vfp16out0x0123)); c0 += 4;
         vfp16out0x0123 = vfp16out0x4567;
+        vst1_u16(c1, vreinterpret_u16_f16(vfp16out1x0123)); c1 += 4;
+        vfp16out1x0123 = vfp16out1x4567;
       }
       if (nc & 2) {
-        vst1_lane_u32((void*) c1, vreinterpret_u32_f16(vfp16out1x0123), 0);  c1 += 2;
         vst1_lane_u32((void*) c0, vreinterpret_u32_f16(vfp16out0x0123), 0);  c0 += 2;
-        vfp16out1x0123 = vext_f16(vfp16out1x0123, vfp16out1x0123, 2);
+        vst1_lane_u32((void*) c1, vreinterpret_u32_f16(vfp16out1x0123), 0);  c1 += 2;
         vfp16out0x0123 = vext_f16(vfp16out0x0123, vfp16out0x0123, 2);
+        vfp16out1x0123 = vext_f16(vfp16out1x0123, vfp16out1x0123, 2);
       }
       if (nc & 1) {
-        vst1_lane_f16(c1, vfp16out1x0123, 0);
         vst1_lane_f16(c0, vfp16out0x0123, 0);
+        vst1_lane_f16(c1, vfp16out1x0123, 0);
       }
       nc = 0;
     }
