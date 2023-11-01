@@ -661,7 +661,7 @@ void GemmMicrokernelTester::Test(
   std::vector<int32_t> acc(m() * n());
   std::vector<float> c_ref(m() * n(), 0);
 
-  {//for (size_t iteration = 0; iteration < iterations(); iteration++) {
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), std::ref(f32rng));
     for (size_t i = 0; i < m(); ++i) {
       const float* input_ptr = &input[i * k()];
@@ -676,6 +676,10 @@ void GemmMicrokernelTester::Test(
                                                            - quantization_params[i].zero_point));
         a[i * a_stride() + j] = int8_t(std::lrintf(scaled_input) + long(quantization_params[i].zero_point));
       }
+    }
+    for (size_t i = m(); i < mr(); ++i) {
+      quantization_params[i].zero_point = quantization_params[m() - 1].zero_point;
+      quantization_params[i].inv_scale = quantization_params[m() - 1].inv_scale;
     }
     std::generate(b.begin(), b.end(), std::ref(w8rng));
 
@@ -944,6 +948,10 @@ void GemmMicrokernelTester::Test(
                                                            - quantization_params[i].zero_point));
         a[i * a_stride() + j] = int8_t(std::lrintf(scaled_input) + long(quantization_params[i].zero_point));
       }
+    }
+    for (size_t i = m(); i < mr(); ++i) {
+      quantization_params[i].zero_point = quantization_params[m() - 1].zero_point;
+      quantization_params[i].inv_scale = quantization_params[m() - 1].inv_scale;
     }
 
     std::generate(b.begin(), b.end(), std::ref(w8rng));
