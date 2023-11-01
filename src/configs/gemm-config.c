@@ -257,7 +257,7 @@ static void init_f16_gemm_config(void) {
 
 #if XNN_ARCH_WASMSIMD
   EM_JS(int, hardware_concurrency, (void), {
-    return window.navigator.hardwareConcurrency;
+    return self.navigator.hardwareConcurrency;
   });
   // A cpu with more than `kCoreCountThresholdForAdaptiveAvxOptimization` is
   // assumed to support AVX instructions.
