@@ -1147,10 +1147,10 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn, pack_fn,
   else:
     _, datatype, ukernel_type, activation, _ = ukernel.split("_", 4)
     kerneltype = datatype
-    if datatype == "f32" and ukernel_type in ["qc8w", "qc4w"]:
+    if datatype in ["f16", "f32"] and ukernel_type in ["qc8w", "qc4w"]:
       _, datatype, kerneltype, ukernel_type, activation, _ = ukernel.split("_", 5)
       datatype = datatype + "_" + kerneltype
-    if datatype == "qd8" and ukernel_type in ["f32"] and activation in ["qc8w", "qc4w"]:
+    if datatype == "qd8" and ukernel_type in ["f16", "f32"] and activation in ["qc8w", "qc4w"]:
       _, datatype, _, kerneltype, ukernel_type, activation, _ = ukernel.split("_", 6)
 
   if activation == "ukernel":

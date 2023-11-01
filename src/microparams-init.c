@@ -1941,6 +1941,19 @@ size_t xnn_init_f16_minmax_fp16arith_params(
   params->fp16arith.max = max;
   return sizeof(params->fp16arith);
 }
+
+size_t xnn_init_f16_qc4w_minmax_scalar_params(
+  union xnn_f16_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t output_min,
+  uint16_t output_max,
+  uint8_t kernel_zero_point)
+{
+  assert(kernel_zero_point <= 15);
+  params->fp16arith.min = output_min;
+  params->fp16arith.max = output_max;
+  params->fp16arith.minus_kernel_zero_point = -(int32_t) kernel_zero_point;
+  return sizeof(params->fp16arith);
+}
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

@@ -3739,6 +3739,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f32-gemm-goi-minmax-bench PRIVATE benchmark fp16 pthreadpool)
   TARGET_LINK_LIBRARIES(f32-gemm-goi-minmax-bench PRIVATE jit bench-utils hardware-config logging microkernels-all microparams-init packing)
 
+  ADD_EXECUTABLE(qd8-f16-qc4w-gemm-bench bench/qd8-f16-qc4w-gemm.cc)
+  TARGET_INCLUDE_DIRECTORIES(qd8-f16-qc4w-gemm-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(qd8-f16-qc4w-gemm-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(qd8-f16-qc4w-gemm-bench PRIVATE jit bench-utils hardware-config logging microkernels-all microparams-init packing)
+
   ADD_EXECUTABLE(f32-qc4w-gemm-bench bench/f32-qc4w-gemm.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-qc4w-gemm-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-qc4w-gemm-bench PRIVATE benchmark pthreadpool)

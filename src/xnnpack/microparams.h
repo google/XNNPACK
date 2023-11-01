@@ -160,6 +160,14 @@ union xnn_f32_minmax_params {
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
+union xnn_f16_qc4w_minmax_params {
+  struct {
+    uint16_t min;
+    uint16_t max;
+    int32_t minus_kernel_zero_point;
+  } fp16arith;
+};
+
 union xnn_f32_qc4w_minmax_params {
   struct {
     float min;

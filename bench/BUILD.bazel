@@ -97,6 +97,17 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qd8_f16_qc4w_gemm_bench",
+    srcs = [
+        "qd8-f16-qc4w-gemm.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+        "//:isa_checks",
+    ],
+)
+
+xnnpack_benchmark(
     name = "qd8_f32_qc4w_gemm_bench",
     srcs = [
         "qd8-f32-qc4w-gemm.cc",
