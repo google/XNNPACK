@@ -155,8 +155,8 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4c2__wasmsimd_dot16x2_ld128(
     vacc1x0123 = wasm_f32x4_pmin(vacc1x0123, vmax);
 
     if XNN_LIKELY(nc >= 4) {
-      wasm_v128_store(c1, vacc1x0123);
       wasm_v128_store(c0, vacc0x0123);
+      wasm_v128_store(c1, vacc1x0123);
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
       a1 = (const int8_t*) ((uintptr_t) a1 - kc);
@@ -167,16 +167,16 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4c2__wasmsimd_dot16x2_ld128(
       nc -= 4;
     } else {
       if (nc & 2) {
-        wasm_v128_store64_lane(c1, vacc1x0123, 0);
-        vacc1x0123 = wasm_v64x2_shuffle(vacc1x0123, vacc1x0123, 1, 1);
-        c1 += 2;
         wasm_v128_store64_lane(c0, vacc0x0123, 0);
         vacc0x0123 = wasm_v64x2_shuffle(vacc0x0123, vacc0x0123, 1, 1);
         c0 += 2;
+        wasm_v128_store64_lane(c1, vacc1x0123, 0);
+        vacc1x0123 = wasm_v64x2_shuffle(vacc1x0123, vacc1x0123, 1, 1);
+        c1 += 2;
       }
       if (nc & 1) {
-        wasm_v128_store32_lane(c1, vacc1x0123, 0);
         wasm_v128_store32_lane(c0, vacc0x0123, 0);
+        wasm_v128_store32_lane(c1, vacc1x0123, 0);
       }
       nc = 0;
     }

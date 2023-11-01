@@ -181,7 +181,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
           vout${M}x${N} = ${MIN_F32}(vout${M}x${N}, voutput_max);
 
       if XNN_LIKELY(nc >= ${NR}) {
-        $for M in reversed(range(MR)):
+        $for M in range(MR):
           $for N in range(NR):
             c${M}[${N}] = vout${M}x${N};
 
@@ -195,7 +195,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
       } else {
         $for LOG2N in reversed(range(NR.bit_length() - 1)):
           if (nc & ${1 << LOG2N}) {
-            $for M in reversed(range(MR)):
+            $for M in range(MR):
               $for N in range(1 << LOG2N):
                 c${M}[${N}] = vout${M}x${N};
               $if LOG2N != 0:

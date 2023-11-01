@@ -174,9 +174,9 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x4c8__sse41_ld128(
     vout2x0123 = _mm_min_ps(vout2x0123, vmax);
 
     if XNN_LIKELY(nc >= 4) {
-      _mm_storeu_ps(c2, vout2x0123);
-      _mm_storeu_ps(c1, vout1x0123);
       _mm_storeu_ps(c0, vout0x0123);
+      _mm_storeu_ps(c1, vout1x0123);
+      _mm_storeu_ps(c2, vout2x0123);
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
       a1 = (const int8_t*) ((uintptr_t) a1 - kc);
@@ -189,20 +189,20 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x4c8__sse41_ld128(
       nc -= 4;
     } else {
       if (nc & 2) {
-        _mm_storel_pi((__m64*) c2, vout2x0123);
-        vout2x0123 = _mm_unpackhi_ps(vout2x0123, vout2x0123);
-        c2 += 2;
-        _mm_storel_pi((__m64*) c1, vout1x0123);
-        vout1x0123 = _mm_unpackhi_ps(vout1x0123, vout1x0123);
-        c1 += 2;
         _mm_storel_pi((__m64*) c0, vout0x0123);
         vout0x0123 = _mm_unpackhi_ps(vout0x0123, vout0x0123);
         c0 += 2;
+        _mm_storel_pi((__m64*) c1, vout1x0123);
+        vout1x0123 = _mm_unpackhi_ps(vout1x0123, vout1x0123);
+        c1 += 2;
+        _mm_storel_pi((__m64*) c2, vout2x0123);
+        vout2x0123 = _mm_unpackhi_ps(vout2x0123, vout2x0123);
+        c2 += 2;
       }
       if (nc & 1) {
-        _mm_store_ss(c2, vout2x0123);
-        _mm_store_ss(c1, vout1x0123);
         _mm_store_ss(c0, vout0x0123);
+        _mm_store_ss(c1, vout1x0123);
+        _mm_store_ss(c2, vout2x0123);
       }
       nc = 0;
     }

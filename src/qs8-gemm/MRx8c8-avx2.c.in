@@ -213,39 +213,39 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
         vout${M}x01234567 = _mm256_min_ps(vout${M}x01234567, vmax);
 
       if XNN_LIKELY(nc >= 8) {
-        $for M in reversed(range(MR)):
+        $for M in range(MR):
           _mm256_storeu_ps(c${M}, vout${M}x01234567);
           c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
-        $for M in reversed(range(MR)):
+        $for M in range(MR):
           a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} - kc);
 
         nc -= 8;
       } else {
-        $for M in reversed(range(MR)):
+        $for M in range(MR):
           __m128 vout${M}x0123 = _mm256_castps256_ps128(vout${M}x01234567);
         if (nc & 4) {
-          $for M in reversed(range(MR)):
+          $for M in range(MR):
             _mm_storeu_ps(c${M}, vout${M}x0123);
 
-          $for M in reversed(range(MR)):
+          $for M in range(MR):
             vout${M}x0123 = _mm256_extractf128_ps(vout${M}x01234567, 1);
 
-          $for M in reversed(range(MR)):
+          $for M in range(MR):
             c${M} += 4;
         }
         if (nc & 2) {
-          $for M in reversed(range(MR)):
+          $for M in range(MR):
             _mm_storel_pi((__m64*) c${M}, vout${M}x0123);
 
-          $for M in reversed(range(MR)):
+          $for M in range(MR):
             vout${M}x0123 = _mm_movehl_ps(vout${M}x0123, vout${M}x0123);
 
-          $for M in reversed(range(MR)):
+          $for M in range(MR):
             c${M} += 2;
         }
         if (nc & 1) {
-          $for M in reversed(range(MR)):
+          $for M in range(MR):
             _mm_store_ss(c${M}, vout${M}x0123);
         }
         nc = 0;

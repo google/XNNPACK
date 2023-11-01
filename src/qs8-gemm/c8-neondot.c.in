@@ -251,7 +251,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
           vout${M}x${ABC[N:N+4]} = vminq_f32(vout${M}x${ABC[N:N+4]}, voutput_max);
 
       if XNN_LIKELY(nc >= ${NR}) {
-        $for M in reversed(range(MR)):
+        $for M in range(MR):
           vst1q_f32(c${M}, vout${M}x${ABC[0:4]});
           $for N in range(4, NR, 4):
             vst1q_f32(c${M} + ${N}, vout${M}x${ABC[N:N+4]});
@@ -267,21 +267,21 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
        $for LOG2N in reversed(range(NR.bit_length())):
           $if NR != 1 << LOG2N:
             $if LOG2N == 1:
-              $for M in reversed(range(MR)):
+              $for M in range(MR):
                 float32x2_t vout${M}x${ABC[N:N+2]} = vget_low_f32(vout${M}x${ABC[N:N+4]});
             if (nc & ${1 << LOG2N}) {
               $if LOG2N > 1:
                 $for N in range(0, 1 << LOG2N, 4):
-                  $for M in reversed(range(MR)):
+                  $for M in range(MR):
                     vst1q_f32(c${M}, vout${M}x${ABC[N:N+4]}); c${M} += 4;
                     vout${M}x${ABC[N:N+4]} = vout${M}x${ABC[N+(1 << LOG2N):N+(1 << LOG2N)+4]};
               $elif LOG2N == 1:
-                $for M in reversed(range(MR)):
+                $for M in range(MR):
                   vst1_f32(c${M}, vout${M}x${ABC[N:N+2]}); c${M} += 2;
-                $for M in reversed(range(MR)):
+                $for M in range(MR):
                   vout${M}x${ABC[N:N+2]} = vget_high_f32(vout${M}x${ABC[N:N+4]});
               $elif LOG2N == 0:
-                $for M in reversed(range(MR)):
+                $for M in range(MR):
                   vst1_lane_f32(c${M}, vout${M}x${ABC[N:N+2]}, 0);
             }
         nc = 0;

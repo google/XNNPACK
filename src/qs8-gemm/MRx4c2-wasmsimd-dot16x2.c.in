@@ -225,7 +225,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
         vacc${M}x0123 = wasm_f32x4_pmin(vacc${M}x0123, vmax);
 
       if XNN_LIKELY(nc >= 4) {
-        $for M in reversed(range(MR)):
+        $for M in range(MR):
           wasm_v128_store(c${M}, vacc${M}x0123);
 
         $for M in range(MR):
@@ -237,13 +237,13 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
         nc -= 4;
       } else {
         if (nc & 2) {
-          $for M in reversed(range(MR)):
+          $for M in range(MR):
             wasm_v128_store64_lane(c${M}, vacc${M}x0123, 0);
             vacc${M}x0123 = wasm_v64x2_shuffle(vacc${M}x0123, vacc${M}x0123, 1, 1);
             c${M} += 2;
         }
         if (nc & 1) {
-          $for M in reversed(range(MR)):
+          $for M in range(MR):
             wasm_v128_store32_lane(c${M}, vacc${M}x0123, 0);
         }
         nc = 0;

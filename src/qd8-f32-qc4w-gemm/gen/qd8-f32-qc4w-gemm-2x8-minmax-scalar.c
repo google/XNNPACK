@@ -264,14 +264,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8__scalar(
     vout1x7 = math_min_f32(vout1x7, voutput_max);
 
     if XNN_LIKELY(nc >= 8) {
-      c1[0] = vout1x0;
-      c1[1] = vout1x1;
-      c1[2] = vout1x2;
-      c1[3] = vout1x3;
-      c1[4] = vout1x4;
-      c1[5] = vout1x5;
-      c1[6] = vout1x6;
-      c1[7] = vout1x7;
       c0[0] = vout0x0;
       c0[1] = vout0x1;
       c0[2] = vout0x2;
@@ -280,6 +272,14 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8__scalar(
       c0[5] = vout0x5;
       c0[6] = vout0x6;
       c0[7] = vout0x7;
+      c1[0] = vout1x0;
+      c1[1] = vout1x1;
+      c1[2] = vout1x2;
+      c1[3] = vout1x3;
+      c1[4] = vout1x4;
+      c1[5] = vout1x5;
+      c1[6] = vout1x6;
+      c1[7] = vout1x7;
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
       a1 = (const int8_t*) ((uintptr_t) a1 - kc);
@@ -290,14 +290,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8__scalar(
       nc -= 8;
     } else {
       if (nc & 4) {
-        c1[0] = vout1x0;
-        c1[1] = vout1x1;
-        c1[2] = vout1x2;
-        c1[3] = vout1x3;
-        vout1x0 = vout1x4;
-        vout1x1 = vout1x5;
-        vout1x2 = vout1x6;
-        c1 += 4;
         c0[0] = vout0x0;
         c0[1] = vout0x1;
         c0[2] = vout0x2;
@@ -306,16 +298,16 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8__scalar(
         vout0x1 = vout0x5;
         vout0x2 = vout0x6;
         c0 += 4;
-      }
-      if (nc & 2) {
         c1[0] = vout1x0;
         c1[1] = vout1x1;
-        vout1x0 = vout1x2;
-        vout1x1 = vout1x3;
-        vout1x2 = vout1x4;
-        vout1x3 = vout1x5;
-        vout1x4 = vout1x6;
-        c1 += 2;
+        c1[2] = vout1x2;
+        c1[3] = vout1x3;
+        vout1x0 = vout1x4;
+        vout1x1 = vout1x5;
+        vout1x2 = vout1x6;
+        c1 += 4;
+      }
+      if (nc & 2) {
         c0[0] = vout0x0;
         c0[1] = vout0x1;
         vout0x0 = vout0x2;
@@ -324,10 +316,18 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8__scalar(
         vout0x3 = vout0x5;
         vout0x4 = vout0x6;
         c0 += 2;
+        c1[0] = vout1x0;
+        c1[1] = vout1x1;
+        vout1x0 = vout1x2;
+        vout1x1 = vout1x3;
+        vout1x2 = vout1x4;
+        vout1x3 = vout1x5;
+        vout1x4 = vout1x6;
+        c1 += 2;
       }
       if (nc & 1) {
-        c1[0] = vout1x0;
         c0[0] = vout0x0;
+        c1[0] = vout1x0;
       }
 
       nc = 0;

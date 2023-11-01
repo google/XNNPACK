@@ -260,7 +260,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
 
     $if DATATYPE in ["QD8", "QC4"]:
       if (nc >= 16) {
-        $for M in reversed(range(MR)):
+        $for M in range(MR):
           _mm512_storeu_ps(c${M}, vout${M}x0123456789ABCDEF);
 
         $for M in range(MR):
@@ -273,7 +273,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
       } else {
         // Prepare mask for valid 32-bit elements (depends on nc).
         const __mmask16 vmask = _cvtu32_mask16((UINT32_C(1) << nc) - 1);
-        $for M in reversed(range(MR)):
+        $for M in range(MR):
           _mm512_mask_storeu_ps(c${M}, vmask, vout${M}x0123456789ABCDEF);
 
         nc = 0;

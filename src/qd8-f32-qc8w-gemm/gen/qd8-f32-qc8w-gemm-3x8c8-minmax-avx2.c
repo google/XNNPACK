@@ -168,52 +168,52 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x8c8__avx2(
     vout2x01234567 = _mm256_min_ps(vout2x01234567, vmax);
 
     if XNN_LIKELY(nc >= 8) {
-      _mm256_storeu_ps(c2, vout2x01234567);
-      c2 = (float*) ((uintptr_t) c2 + cn_stride);
-      _mm256_storeu_ps(c1, vout1x01234567);
-      c1 = (float*) ((uintptr_t) c1 + cn_stride);
       _mm256_storeu_ps(c0, vout0x01234567);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
+      _mm256_storeu_ps(c1, vout1x01234567);
+      c1 = (float*) ((uintptr_t) c1 + cn_stride);
+      _mm256_storeu_ps(c2, vout2x01234567);
+      c2 = (float*) ((uintptr_t) c2 + cn_stride);
 
-      a2 = (const int8_t*) ((uintptr_t) a2 - kc);
-      a1 = (const int8_t*) ((uintptr_t) a1 - kc);
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
+      a1 = (const int8_t*) ((uintptr_t) a1 - kc);
+      a2 = (const int8_t*) ((uintptr_t) a2 - kc);
 
       nc -= 8;
     } else {
-      __m128 vout2x0123 = _mm256_castps256_ps128(vout2x01234567);
-      __m128 vout1x0123 = _mm256_castps256_ps128(vout1x01234567);
       __m128 vout0x0123 = _mm256_castps256_ps128(vout0x01234567);
+      __m128 vout1x0123 = _mm256_castps256_ps128(vout1x01234567);
+      __m128 vout2x0123 = _mm256_castps256_ps128(vout2x01234567);
       if (nc & 4) {
-        _mm_storeu_ps(c2, vout2x0123);
-        _mm_storeu_ps(c1, vout1x0123);
         _mm_storeu_ps(c0, vout0x0123);
+        _mm_storeu_ps(c1, vout1x0123);
+        _mm_storeu_ps(c2, vout2x0123);
 
-        vout2x0123 = _mm256_extractf128_ps(vout2x01234567, 1);
-        vout1x0123 = _mm256_extractf128_ps(vout1x01234567, 1);
         vout0x0123 = _mm256_extractf128_ps(vout0x01234567, 1);
+        vout1x0123 = _mm256_extractf128_ps(vout1x01234567, 1);
+        vout2x0123 = _mm256_extractf128_ps(vout2x01234567, 1);
 
-        c2 += 4;
-        c1 += 4;
         c0 += 4;
+        c1 += 4;
+        c2 += 4;
       }
       if (nc & 2) {
-        _mm_storel_pi((__m64*) c2, vout2x0123);
-        _mm_storel_pi((__m64*) c1, vout1x0123);
         _mm_storel_pi((__m64*) c0, vout0x0123);
+        _mm_storel_pi((__m64*) c1, vout1x0123);
+        _mm_storel_pi((__m64*) c2, vout2x0123);
 
-        vout2x0123 = _mm_movehl_ps(vout2x0123, vout2x0123);
-        vout1x0123 = _mm_movehl_ps(vout1x0123, vout1x0123);
         vout0x0123 = _mm_movehl_ps(vout0x0123, vout0x0123);
+        vout1x0123 = _mm_movehl_ps(vout1x0123, vout1x0123);
+        vout2x0123 = _mm_movehl_ps(vout2x0123, vout2x0123);
 
-        c2 += 2;
-        c1 += 2;
         c0 += 2;
+        c1 += 2;
+        c2 += 2;
       }
       if (nc & 1) {
-        _mm_store_ss(c2, vout2x0123);
-        _mm_store_ss(c1, vout1x0123);
         _mm_store_ss(c0, vout0x0123);
+        _mm_store_ss(c1, vout1x0123);
+        _mm_store_ss(c2, vout2x0123);
       }
       nc = 0;
     }

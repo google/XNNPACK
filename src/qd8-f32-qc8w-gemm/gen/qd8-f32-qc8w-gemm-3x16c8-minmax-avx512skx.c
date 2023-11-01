@@ -154,9 +154,9 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x16c8__avx512skx(
     vout2x0123456789ABCDEF = _mm512_min_ps(vout2x0123456789ABCDEF, voutput_max);
 
     if (nc >= 16) {
-      _mm512_storeu_ps(c2, vout2x0123456789ABCDEF);
-      _mm512_storeu_ps(c1, vout1x0123456789ABCDEF);
       _mm512_storeu_ps(c0, vout0x0123456789ABCDEF);
+      _mm512_storeu_ps(c1, vout1x0123456789ABCDEF);
+      _mm512_storeu_ps(c2, vout2x0123456789ABCDEF);
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
       a1 = (const int8_t*) ((uintptr_t) a1 - kc);
@@ -170,9 +170,9 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x16c8__avx512skx(
     } else {
       // Prepare mask for valid 32-bit elements (depends on nc).
       const __mmask16 vmask = _cvtu32_mask16((UINT32_C(1) << nc) - 1);
-      _mm512_mask_storeu_ps(c2, vmask, vout2x0123456789ABCDEF);
-      _mm512_mask_storeu_ps(c1, vmask, vout1x0123456789ABCDEF);
       _mm512_mask_storeu_ps(c0, vmask, vout0x0123456789ABCDEF);
+      _mm512_mask_storeu_ps(c1, vmask, vout1x0123456789ABCDEF);
+      _mm512_mask_storeu_ps(c2, vmask, vout2x0123456789ABCDEF);
 
       nc = 0;
     }

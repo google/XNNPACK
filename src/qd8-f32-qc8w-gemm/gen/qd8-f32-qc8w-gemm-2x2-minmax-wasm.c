@@ -110,10 +110,10 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x2__wasm(
     vout1x1 = __builtin_wasm_min_f32(vout1x1, voutput_max);
 
     if XNN_LIKELY(nc >= 2) {
-      c1[0] = vout1x0;
-      c1[1] = vout1x1;
       c0[0] = vout0x0;
       c0[1] = vout0x1;
+      c1[0] = vout1x0;
+      c1[1] = vout1x1;
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
       a1 = (const int8_t*) ((uintptr_t) a1 - kc);
@@ -124,8 +124,8 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x2__wasm(
       nc -= 2;
     } else {
       if (nc & 1) {
-        c1[0] = vout1x0;
         c0[0] = vout0x0;
+        c1[0] = vout1x0;
       }
 
       nc = 0;
