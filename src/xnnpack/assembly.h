@@ -43,4 +43,14 @@
 
   .macro END_FUNCTION name
   .endm
+#elif defined(_WIN32)
+  .macro BEGIN_FUNCTION name
+    .text
+    .p2align 4
+    .global _\name
+    _\name:
+  .endm
+
+  .macro END_FUNCTION name
+  .endm
 #endif
