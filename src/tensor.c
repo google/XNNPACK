@@ -34,7 +34,9 @@ static void set_allocation_type(struct xnn_value* value)
 static void set_shape(struct xnn_value* value, size_t num_dims, const size_t* dims)
 {
   value->shape.num_dims = num_dims;
-  memcpy(value->shape.dim, dims, num_dims * sizeof(size_t));
+  if (num_dims != 0) {
+    memcpy(value->shape.dim, dims, num_dims * sizeof(size_t));
+  }
   for (size_t i = 0; i < num_dims; i++) {
     const size_t original_dim = value->shape.dim[i];
     if (original_dim == 0) {
