@@ -121,20 +121,16 @@ tools/xngen src/qs8-vmulc/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1
 tools/xngen src/qs8-vmulc/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-avx-mul16-ld64-u16.c &
 
 ################################ RISC-V Vector ################################
-tools/xngen src/qs8-vmul/rvv.c.in -D BATCH_TILE=8 -D LMUL=f2 -D DATATYPE=QS8 -o src/qs8-vmul/gen/qs8-vmul-minmax-f32-rvv-u8.c &
-tools/xngen src/qs8-vmul/rvv.c.in -D BATCH_TILE=16 -D LMUL=1 -D DATATYPE=QS8 -o src/qs8-vmul/gen/qs8-vmul-minmax-f32-rvv-u16.c &
-tools/xngen src/qs8-vmul/rvv.c.in -D BATCH_TILE=32 -D LMUL=2 -D DATATYPE=QS8 -o src/qs8-vmul/gen/qs8-vmul-minmax-f32-rvv-u32.c &
+tools/xngen src/qs8-vmul/rvv.c.in -D -D LMUL=1 -D DATATYPE=QS8 -o src/qs8-vmul/gen/qs8-vmul-minmax-f32-rvv-u1v.c &
+tools/xngen src/qs8-vmul/rvv.c.in -D -D LMUL=2 -D DATATYPE=QS8 -o src/qs8-vmul/gen/qs8-vmul-minmax-f32-rvv-u2v.c &
 
-tools/xngen src/qs8-vmul/rvv.c.in -D BATCH_TILE=8 -D LMUL=f2 -D DATATYPE=QU8 -o src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u8.c &
-tools/xngen src/qs8-vmul/rvv.c.in -D BATCH_TILE=16 -D LMUL=1 -D DATATYPE=QU8 -o src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u16.c &
-tools/xngen src/qs8-vmul/rvv.c.in -D BATCH_TILE=32 -D LMUL=2 -D DATATYPE=QU8 -o src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u32.c &
+tools/xngen src/qs8-vmul/rvv.c.in -D -D LMUL=1 -D DATATYPE=QU8 -o src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u1v.c &
+tools/xngen src/qs8-vmul/rvv.c.in -D -D LMUL=2 -D DATATYPE=QU8 -o src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u2v.c &
 
-tools/xngen src/qs8-vmulc/rvv.c.in -D BATCH_TILE=8 -D LMUL=f2 -D DATATYPE=QS8 -o src/qs8-vmulc/gen/qs8-vmulc-minmax-f32-rvv-u8.c &
-tools/xngen src/qs8-vmulc/rvv.c.in -D BATCH_TILE=16 -D LMUL=1 -D DATATYPE=QS8 -o src/qs8-vmulc/gen/qs8-vmulc-minmax-f32-rvv-u16.c &
-tools/xngen src/qs8-vmulc/rvv.c.in -D BATCH_TILE=32 -D LMUL=2 -D DATATYPE=QS8 -o src/qs8-vmulc/gen/qs8-vmulc-minmax-f32-rvv-u32.c &
+tools/xngen src/qs8-vmulc/rvv.c.in -D -D LMUL=1 -D DATATYPE=QS8 -o src/qs8-vmulc/gen/qs8-vmulc-minmax-f32-rvv-u1v.c &
+tools/xngen src/qs8-vmulc/rvv.c.in -D -D LMUL=2 -D DATATYPE=QS8 -o src/qs8-vmulc/gen/qs8-vmulc-minmax-f32-rvv-u2v.c &
 
-tools/xngen src/qs8-vmulc/rvv.c.in -D BATCH_TILE=8 -D LMUL=f2 -D DATATYPE=QU8 -o src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u8.c &
-tools/xngen src/qs8-vmulc/rvv.c.in -D BATCH_TILE=16 -D LMUL=1 -D DATATYPE=QU8 -o src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u16.c &
-tools/xngen src/qs8-vmulc/rvv.c.in -D BATCH_TILE=32 -D LMUL=2 -D DATATYPE=QU8 -o src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u32.c &
+tools/xngen src/qs8-vmulc/rvv.c.in -D -D LMUL=1 -D DATATYPE=QU8 -o src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u1v.c &
+tools/xngen src/qs8-vmulc/rvv.c.in -D -D LMUL=2 -D DATATYPE=QU8 -o src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u2v.c &
 
 wait

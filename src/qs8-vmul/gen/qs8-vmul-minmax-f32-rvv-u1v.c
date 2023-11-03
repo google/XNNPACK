@@ -12,7 +12,7 @@
 #include <xnnpack/vbinary.h>
 
 
-void xnn_qs8_vmul_minmax_fp32_ukernel__rvv_u8(
+void xnn_qs8_vmul_minmax_fp32_ukernel__rvv_u1v(
     size_t batch,
     const int8_t* input_a,
     const int8_t* input_b,
@@ -34,25 +34,25 @@ void xnn_qs8_vmul_minmax_fp32_ukernel__rvv_u8(
   const int32_t magic_bias_less_output_zero_point = params->fp32_scalar.magic_bias_less_output_zero_point;
 
   do {
-    int32_t vl = __riscv_vsetvl_e8mf2(batch);
+    const size_t n = __riscv_vsetvl_e8m1(batch);
 
-    vint8mf2_t in_a_i8v = __riscv_vle8_v_i8mf2(input_a, vl); input_a += vl;
-    vint8mf2_t in_b_i8v = __riscv_vle8_v_i8mf2(input_b, vl); input_b += vl;
-    vint16m1_t a_i16v = __riscv_vwsub_vx_i16m1(in_a_i8v, a_zero_point, vl);
-    vint16m1_t b_i16v = __riscv_vwsub_vx_i16m1(in_b_i8v, b_zero_point, vl);
+    vint8m1_t in_a_i8v = __riscv_vle8_v_i8m1(input_a, n); input_a += n;
+    vint8m1_t in_b_i8v = __riscv_vle8_v_i8m1(input_b, n); input_b += n;
+    vint16m2_t a_i16v = __riscv_vwsub_vx_i16m2(in_a_i8v, a_zero_point, n);
+    vint16m2_t b_i16v = __riscv_vwsub_vx_i16m2(in_b_i8v, b_zero_point, n);
 
-    vint32m2_t acc_i32v = __riscv_vwmul_vv_i32m2(a_i16v, b_i16v, vl);
-    vfloat32m2_t acc_f32v = __riscv_vfcvt_f_x_v_f32m2(acc_i32v, vl);
-    acc_f32v = __riscv_vfmul_vf_f32m2(acc_f32v, scale, vl);
-    acc_f32v = __riscv_vfmin_vf_f32m2(__riscv_vfmax_vf_f32m2(acc_f32v, output_min_less_zero_point, vl), output_max_less_zero_point, vl);
-    acc_f32v = __riscv_vfadd_vf_f32m2(acc_f32v, magic_bias, vl);
+    vint32m4_t acc_i32v = __riscv_vwmul_vv_i32m4(a_i16v, b_i16v, n);
+    vfloat32m4_t acc_f32v = __riscv_vfcvt_f_x_v_f32m4(acc_i32v, n);
+    acc_f32v = __riscv_vfmul_vf_f32m4(acc_f32v, scale, n);
+    acc_f32v = __riscv_vfmin_vf_f32m4(__riscv_vfmax_vf_f32m4(acc_f32v, output_min_less_zero_point, n), output_max_less_zero_point, n);
+    acc_f32v = __riscv_vfadd_vf_f32m4(acc_f32v, magic_bias, n);
 
-    vint32m2_t out_i32v = __riscv_vfcvt_x_f_v_i32m2(acc_f32v, vl);
-    out_i32v = __riscv_vsub_vx_i32m2(out_i32v, magic_bias_less_output_zero_point, vl);
-    vint16m1_t out_i16v = __riscv_vncvt_x_x_w_i16m1(out_i32v, vl);
-    vint8mf2_t out_i8v = __riscv_vncvt_x_x_w_i8mf2(out_i16v, vl);
-    __riscv_vse8_v_i8mf2(output, out_i8v, vl); output += vl;
+    vint32m4_t out_i32v = __riscv_vfcvt_x_f_v_i32m4(acc_f32v, n);
+    out_i32v = __riscv_vsub_vx_i32m4(out_i32v, magic_bias_less_output_zero_point, n);
+    vint16m2_t out_i16v = __riscv_vncvt_x_x_w_i16m2(out_i32v, n);
+    vint8m1_t out_i8v = __riscv_vncvt_x_x_w_i8m1(out_i16v, n);
+    __riscv_vse8_v_i8m1(output, out_i8v, n); output += n;
 
-    batch -= vl;
+    batch -= n;
   } while (batch != 0);
 }

@@ -183,20 +183,14 @@ static void qu8_vmul(
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
-  BENCHMARK_CAPTURE(qu8_vmul, rvv_u8,
-                    xnn_qu8_vmul_minmax_fp32_ukernel__rvv_u8,
+  BENCHMARK_CAPTURE(qu8_vmul, rvv_u1v,
+                    xnn_qu8_vmul_minmax_fp32_ukernel__rvv_u1v,
                     xnn_init_qu8_mul_minmax_fp32_scalar_params,
                     benchmark::utils::CheckRVV)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(qu8_vmul, rvv_u16,
-                    xnn_qu8_vmul_minmax_fp32_ukernel__rvv_u16,
-                    xnn_init_qu8_mul_minmax_fp32_scalar_params,
-                    benchmark::utils::CheckRVV)
-    ->Apply(benchmark::utils::BinaryElementwiseParameters<uint8_t, uint8_t>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(qu8_vmul, rvv_u32,
-                    xnn_qu8_vmul_minmax_fp32_ukernel__rvv_u32,
+  BENCHMARK_CAPTURE(qu8_vmul, rvv_u2v,
+                    xnn_qu8_vmul_minmax_fp32_ukernel__rvv_u2v,
                     xnn_init_qu8_mul_minmax_fp32_scalar_params,
                     benchmark::utils::CheckRVV)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<uint8_t, uint8_t>)
