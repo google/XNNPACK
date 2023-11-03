@@ -45,6 +45,7 @@ _ISA_TO_MACRO_MAP = {
   "neonfp16arith": "XNN_ENABLE_ARM_FP16_VECTOR",
   "neonbf16": "XNN_ENABLE_ARM_BF16",
   "neondot": "XNN_ENABLE_ARM_DOTPROD",
+  "neondotfp16arith": "XNN_ENABLE_ARM_DOTPROD && XNN_ENABLE_ARM_FP16_VECTOR",
   "neoni8mm": "XNN_ENABLE_ARM_I8MM",
   "rvv": "XNN_ENABLE_RISCV_VECTOR",
 }
@@ -59,6 +60,7 @@ _ISA_TO_ARCH_MAP = {
   "neonfp16arith": ["aarch32", "aarch64"],
   "neonbf16": ["aarch32", "aarch64"],
   "neondot": ["aarch32", "aarch64"],
+  "neondotfp16arith": ["aarch32", "aarch64"],
   "neoni8mm": ["aarch32", "aarch64"],
   "sse": ["x86-32", "x86-64"],
   "sse2": ["x86-32", "x86-64"],
@@ -93,6 +95,7 @@ _ISA_TO_UTILCHECK_MAP = {
   "neonfp16arith": "CheckNEONFP16ARITH",
   "neonbf16": "CheckNEONBF16",
   "neondot": "CheckNEONDOT",
+  "neondotfp16arith": "CheckNEONDOT",
   "neoni8mm": "CheckNEONI8MM",
   "ssse3": "CheckSSSE3",
   "sse41": "CheckSSE41",
@@ -121,6 +124,7 @@ _ISA_TO_CHECK_MAP = {
   "neonfp16arith": "TEST_REQUIRES_ARM_NEON_FP16_ARITH",
   "neonbf16": "TEST_REQUIRES_ARM_NEON_BF16",
   "neondot": "TEST_REQUIRES_ARM_NEON_DOT",
+  "neondotfp16arith": "TEST_REQUIRES_ARM_NEON_DOT_FP16_ARITH",
   "neoni8mm": "TEST_REQUIRES_ARM_NEON_I8MM",
   "sse": "TEST_REQUIRES_X86_SSE",
   "sse2": "TEST_REQUIRES_X86_SSE2",
@@ -208,6 +212,7 @@ _ISA_HIERARCHY = [
   "neon",
   "neonv8",
   "neondot",
+  "neondotfp16",
   "neoni8mm",
 ]
 
