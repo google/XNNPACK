@@ -326,57 +326,34 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_6x8c8__neoni8mm(
       vout5x4567 = vmlaq_f32(vbias4567, vout5x4567, vfilter_output_scale4567);
     #endif
 
-    float16x4_t vfp16out0x0123 = vcvt_f16_f32(vout0x0123);
-    float16x4_t vfp16out0x4567 = vcvt_f16_f32(vout0x4567);
-    float16x4_t vfp16out1x0123 = vcvt_f16_f32(vout1x0123);
-    float16x4_t vfp16out1x4567 = vcvt_f16_f32(vout1x4567);
-    float16x4_t vfp16out2x0123 = vcvt_f16_f32(vout2x0123);
-    float16x4_t vfp16out2x4567 = vcvt_f16_f32(vout2x4567);
-    float16x4_t vfp16out3x0123 = vcvt_f16_f32(vout3x0123);
-    float16x4_t vfp16out3x4567 = vcvt_f16_f32(vout3x4567);
-    float16x4_t vfp16out4x0123 = vcvt_f16_f32(vout4x0123);
-    float16x4_t vfp16out4x4567 = vcvt_f16_f32(vout4x4567);
-    float16x4_t vfp16out5x0123 = vcvt_f16_f32(vout5x0123);
-    float16x4_t vfp16out5x4567 = vcvt_f16_f32(vout5x4567);
-    const float16x4_t voutput_min = vreinterpret_f16_u16(vld1_dup_u16(&params->fp16arith.min));
-    vfp16out0x0123 = vmax_f16(vfp16out0x0123, voutput_min);
-    vfp16out0x4567 = vmax_f16(vfp16out0x4567, voutput_min);
-    vfp16out1x0123 = vmax_f16(vfp16out1x0123, voutput_min);
-    vfp16out1x4567 = vmax_f16(vfp16out1x4567, voutput_min);
-    vfp16out2x0123 = vmax_f16(vfp16out2x0123, voutput_min);
-    vfp16out2x4567 = vmax_f16(vfp16out2x4567, voutput_min);
-    vfp16out3x0123 = vmax_f16(vfp16out3x0123, voutput_min);
-    vfp16out3x4567 = vmax_f16(vfp16out3x4567, voutput_min);
-    vfp16out4x0123 = vmax_f16(vfp16out4x0123, voutput_min);
-    vfp16out4x4567 = vmax_f16(vfp16out4x4567, voutput_min);
-    vfp16out5x0123 = vmax_f16(vfp16out5x0123, voutput_min);
-    vfp16out5x4567 = vmax_f16(vfp16out5x4567, voutput_min);
-    const float16x4_t voutput_max = vreinterpret_f16_u16(vld1_dup_u16(&params->fp16arith.max));
-    vfp16out0x0123 = vmin_f16(vfp16out0x0123, voutput_max);
-    vfp16out0x4567 = vmin_f16(vfp16out0x4567, voutput_max);
-    vfp16out1x0123 = vmin_f16(vfp16out1x0123, voutput_max);
-    vfp16out1x4567 = vmin_f16(vfp16out1x4567, voutput_max);
-    vfp16out2x0123 = vmin_f16(vfp16out2x0123, voutput_max);
-    vfp16out2x4567 = vmin_f16(vfp16out2x4567, voutput_max);
-    vfp16out3x0123 = vmin_f16(vfp16out3x0123, voutput_max);
-    vfp16out3x4567 = vmin_f16(vfp16out3x4567, voutput_max);
-    vfp16out4x0123 = vmin_f16(vfp16out4x0123, voutput_max);
-    vfp16out4x4567 = vmin_f16(vfp16out4x4567, voutput_max);
-    vfp16out5x0123 = vmin_f16(vfp16out5x0123, voutput_max);
-    vfp16out5x4567 = vmin_f16(vfp16out5x4567, voutput_max);
+    float16x8_t vfp16out0x01234567 = vcombine_f16(vcvt_f16_f32(vout0x0123), vcvt_f16_f32(vout0x4567));
+    float16x8_t vfp16out1x01234567 = vcombine_f16(vcvt_f16_f32(vout1x0123), vcvt_f16_f32(vout1x4567));
+    float16x8_t vfp16out2x01234567 = vcombine_f16(vcvt_f16_f32(vout2x0123), vcvt_f16_f32(vout2x4567));
+    float16x8_t vfp16out3x01234567 = vcombine_f16(vcvt_f16_f32(vout3x0123), vcvt_f16_f32(vout3x4567));
+    float16x8_t vfp16out4x01234567 = vcombine_f16(vcvt_f16_f32(vout4x0123), vcvt_f16_f32(vout4x4567));
+    float16x8_t vfp16out5x01234567 = vcombine_f16(vcvt_f16_f32(vout5x0123), vcvt_f16_f32(vout5x4567));
+
+    const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
+    vfp16out0x01234567 = vmaxq_f16(vfp16out0x01234567, voutput_min);
+    vfp16out1x01234567 = vmaxq_f16(vfp16out1x01234567, voutput_min);
+    vfp16out2x01234567 = vmaxq_f16(vfp16out2x01234567, voutput_min);
+    vfp16out3x01234567 = vmaxq_f16(vfp16out3x01234567, voutput_min);
+    vfp16out4x01234567 = vmaxq_f16(vfp16out4x01234567, voutput_min);
+    vfp16out5x01234567 = vmaxq_f16(vfp16out5x01234567, voutput_min);
+    const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
+    vfp16out0x01234567 = vminq_f16(vfp16out0x01234567, voutput_max);
+    vfp16out1x01234567 = vminq_f16(vfp16out1x01234567, voutput_max);
+    vfp16out2x01234567 = vminq_f16(vfp16out2x01234567, voutput_max);
+    vfp16out3x01234567 = vminq_f16(vfp16out3x01234567, voutput_max);
+    vfp16out4x01234567 = vminq_f16(vfp16out4x01234567, voutput_max);
+    vfp16out5x01234567 = vminq_f16(vfp16out5x01234567, voutput_max);
     if XNN_LIKELY(nc >= 8) {
-      vst1_u16(c0, vreinterpret_u16_f16(vfp16out0x0123));
-      vst1_u16(c0 + 4, vreinterpret_u16_f16(vfp16out0x4567));
-      vst1_u16(c1, vreinterpret_u16_f16(vfp16out1x0123));
-      vst1_u16(c1 + 4, vreinterpret_u16_f16(vfp16out1x4567));
-      vst1_u16(c2, vreinterpret_u16_f16(vfp16out2x0123));
-      vst1_u16(c2 + 4, vreinterpret_u16_f16(vfp16out2x4567));
-      vst1_u16(c3, vreinterpret_u16_f16(vfp16out3x0123));
-      vst1_u16(c3 + 4, vreinterpret_u16_f16(vfp16out3x4567));
-      vst1_u16(c4, vreinterpret_u16_f16(vfp16out4x0123));
-      vst1_u16(c4 + 4, vreinterpret_u16_f16(vfp16out4x4567));
-      vst1_u16(c5, vreinterpret_u16_f16(vfp16out5x0123));
-      vst1_u16(c5 + 4, vreinterpret_u16_f16(vfp16out5x4567));
+      vst1q_u16(c0, vreinterpretq_u16_f16(vfp16out0x01234567));
+      vst1q_u16(c1, vreinterpretq_u16_f16(vfp16out1x01234567));
+      vst1q_u16(c2, vreinterpretq_u16_f16(vfp16out2x01234567));
+      vst1q_u16(c3, vreinterpretq_u16_f16(vfp16out3x01234567));
+      vst1q_u16(c4, vreinterpretq_u16_f16(vfp16out4x01234567));
+      vst1q_u16(c5, vreinterpretq_u16_f16(vfp16out5x01234567));
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
       a1 = (const int8_t*) ((uintptr_t) a1 - kc);
@@ -394,42 +371,48 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_6x8c8__neoni8mm(
 
       nc -= 8;
     } else {
-      if (nc & 4) {
-        vst1_u16(c0, vreinterpret_u16_f16(vfp16out0x0123)); c0 += 4;
-        vfp16out0x0123 = vfp16out0x4567;
-        vst1_u16(c1, vreinterpret_u16_f16(vfp16out1x0123)); c1 += 4;
-        vfp16out1x0123 = vfp16out1x4567;
-        vst1_u16(c2, vreinterpret_u16_f16(vfp16out2x0123)); c2 += 4;
-        vfp16out2x0123 = vfp16out2x4567;
-        vst1_u16(c3, vreinterpret_u16_f16(vfp16out3x0123)); c3 += 4;
-        vfp16out3x0123 = vfp16out3x4567;
-        vst1_u16(c4, vreinterpret_u16_f16(vfp16out4x0123)); c4 += 4;
-        vfp16out4x0123 = vfp16out4x4567;
-        vst1_u16(c5, vreinterpret_u16_f16(vfp16out5x0123)); c5 += 4;
-        vfp16out5x0123 = vfp16out5x4567;
-      }
-      if (nc & 2) {
-        vst1_lane_u32((void*) c0, vreinterpret_u32_f16(vfp16out0x0123), 0);  c0 += 2;
-        vst1_lane_u32((void*) c1, vreinterpret_u32_f16(vfp16out1x0123), 0);  c1 += 2;
-        vst1_lane_u32((void*) c2, vreinterpret_u32_f16(vfp16out2x0123), 0);  c2 += 2;
-        vst1_lane_u32((void*) c3, vreinterpret_u32_f16(vfp16out3x0123), 0);  c3 += 2;
-        vst1_lane_u32((void*) c4, vreinterpret_u32_f16(vfp16out4x0123), 0);  c4 += 2;
-        vst1_lane_u32((void*) c5, vreinterpret_u32_f16(vfp16out5x0123), 0);  c5 += 2;
-        vfp16out0x0123 = vext_f16(vfp16out0x0123, vfp16out0x0123, 2);
-        vfp16out1x0123 = vext_f16(vfp16out1x0123, vfp16out1x0123, 2);
-        vfp16out2x0123 = vext_f16(vfp16out2x0123, vfp16out2x0123, 2);
-        vfp16out3x0123 = vext_f16(vfp16out3x0123, vfp16out3x0123, 2);
-        vfp16out4x0123 = vext_f16(vfp16out4x0123, vfp16out4x0123, 2);
-        vfp16out5x0123 = vext_f16(vfp16out5x0123, vfp16out5x0123, 2);
-      }
-      if (nc & 1) {
-        vst1_lane_f16(c0, vfp16out0x0123, 0);
-        vst1_lane_f16(c1, vfp16out1x0123, 0);
-        vst1_lane_f16(c2, vfp16out2x0123, 0);
-        vst1_lane_f16(c3, vfp16out3x0123, 0);
-        vst1_lane_f16(c4, vfp16out4x0123, 0);
-        vst1_lane_f16(c5, vfp16out5x0123, 0);
-      }
+     float16x4_t vfp16out0x0123 = vget_low_f16(vfp16out0x01234567);
+     float16x4_t vfp16out1x0123 = vget_low_f16(vfp16out1x01234567);
+     float16x4_t vfp16out2x0123 = vget_low_f16(vfp16out2x01234567);
+     float16x4_t vfp16out3x0123 = vget_low_f16(vfp16out3x01234567);
+     float16x4_t vfp16out4x0123 = vget_low_f16(vfp16out4x01234567);
+     float16x4_t vfp16out5x0123 = vget_low_f16(vfp16out5x01234567);
+     if (nc & 4) {
+       vst1_u16(c0, vreinterpret_u16_f16(vfp16out0x0123)); c0 += 4;
+       vst1_u16(c1, vreinterpret_u16_f16(vfp16out1x0123)); c1 += 4;
+       vst1_u16(c2, vreinterpret_u16_f16(vfp16out2x0123)); c2 += 4;
+       vst1_u16(c3, vreinterpret_u16_f16(vfp16out3x0123)); c3 += 4;
+       vst1_u16(c4, vreinterpret_u16_f16(vfp16out4x0123)); c4 += 4;
+       vst1_u16(c5, vreinterpret_u16_f16(vfp16out5x0123)); c5 += 4;
+       vfp16out0x0123 = vget_high_f16(vfp16out0x01234567);
+       vfp16out1x0123 = vget_high_f16(vfp16out1x01234567);
+       vfp16out2x0123 = vget_high_f16(vfp16out2x01234567);
+       vfp16out3x0123 = vget_high_f16(vfp16out3x01234567);
+       vfp16out4x0123 = vget_high_f16(vfp16out4x01234567);
+       vfp16out5x0123 = vget_high_f16(vfp16out5x01234567);
+     }
+     if (nc & 2) {
+       vst1_lane_u32((void*) c0, vreinterpret_u32_f16(vfp16out0x0123), 0); c0 += 2;
+       vst1_lane_u32((void*) c1, vreinterpret_u32_f16(vfp16out1x0123), 0); c1 += 2;
+       vst1_lane_u32((void*) c2, vreinterpret_u32_f16(vfp16out2x0123), 0); c2 += 2;
+       vst1_lane_u32((void*) c3, vreinterpret_u32_f16(vfp16out3x0123), 0); c3 += 2;
+       vst1_lane_u32((void*) c4, vreinterpret_u32_f16(vfp16out4x0123), 0); c4 += 2;
+       vst1_lane_u32((void*) c5, vreinterpret_u32_f16(vfp16out5x0123), 0); c5 += 2;
+       vfp16out0x0123 = vext_f16(vfp16out0x0123, vfp16out0x0123, 2);
+       vfp16out1x0123 = vext_f16(vfp16out1x0123, vfp16out1x0123, 2);
+       vfp16out2x0123 = vext_f16(vfp16out2x0123, vfp16out2x0123, 2);
+       vfp16out3x0123 = vext_f16(vfp16out3x0123, vfp16out3x0123, 2);
+       vfp16out4x0123 = vext_f16(vfp16out4x0123, vfp16out4x0123, 2);
+       vfp16out5x0123 = vext_f16(vfp16out5x0123, vfp16out5x0123, 2);
+     }
+     if (nc & 1) {
+       vst1_lane_u16(c0, vreinterpret_u16_f16(vfp16out0x0123), 0);
+       vst1_lane_u16(c1, vreinterpret_u16_f16(vfp16out1x0123), 0);
+       vst1_lane_u16(c2, vreinterpret_u16_f16(vfp16out2x0123), 0);
+       vst1_lane_u16(c3, vreinterpret_u16_f16(vfp16out3x0123), 0);
+       vst1_lane_u16(c4, vreinterpret_u16_f16(vfp16out4x0123), 0);
+       vst1_lane_u16(c5, vreinterpret_u16_f16(vfp16out5x0123), 0);
+     }
       nc = 0;
     }
   } while (nc != 0);

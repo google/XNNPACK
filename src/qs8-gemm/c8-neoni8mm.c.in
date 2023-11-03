@@ -263,21 +263,22 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
 
       $if DATATYPE in ["QD8_F16", "QC4_F16"]:
         $for M in range(0, MR):
-          $for N in range(0, NR, 4):
-            float16x4_t vfp16out${M}x${ABC[N:N+4]} = vcvt_f16_f32(vout${M}x${ABC[N:N+4]});
-        const float16x4_t voutput_min = vreinterpret_f16_u16(vld1_dup_u16(&params->fp16arith.min));
+          $for N in range(0, NR, 8):
+            float16x8_t vfp16out${M}x${ABC[N:N+8]} = vcombine_f16(vcvt_f16_f32(vout${M}x${ABC[N:N+4]}), vcvt_f16_f32(vout${M}x${ABC[N+4:N+8]}));
+
+        const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
         $for M in range(0, MR):
-          $for N in range(0, NR, 4):
-            vfp16out${M}x${ABC[N:N+4]} = vmax_f16(vfp16out${M}x${ABC[N:N+4]}, voutput_min);
-        const float16x4_t voutput_max = vreinterpret_f16_u16(vld1_dup_u16(&params->fp16arith.max));
+          $for N in range(0, NR, 8):
+            vfp16out${M}x${ABC[N:N+8]} = vmaxq_f16(vfp16out${M}x${ABC[N:N+8]}, voutput_min);
+        const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
         $for M in range(0, MR):
-          $for N in range(0, NR, 4):
-            vfp16out${M}x${ABC[N:N+4]} = vmin_f16(vfp16out${M}x${ABC[N:N+4]}, voutput_max);
+          $for N in range(0, NR, 8):
+            vfp16out${M}x${ABC[N:N+8]} = vminq_f16(vfp16out${M}x${ABC[N:N+8]}, voutput_max);
         if XNN_LIKELY(nc >= ${NR}) {
           $for M in range(MR):
-            vst1_u16(c${M}, vreinterpret_u16_f16(vfp16out${M}x${ABC[0:4]}));
-            $for N in range(4, NR, 4):
-              vst1_u16(c${M} + ${N}, vreinterpret_u16_f16(vfp16out${M}x${ABC[N:N+4]}));
+            vst1q_u16(c${M}, vreinterpretq_u16_f16(vfp16out${M}x${ABC[0:8]}));
+            $for N in range(8, NR, 8):
+              vst1q_u16(c${M} + ${N}, vreinterpretq_u16_f16(vfp16out${M}x${ABC[N:N+8]}));
 
           $for M in range(MR):
             a${M} = (const int8_t*) ((uintptr_t) a${M} - kc);
@@ -287,22 +288,30 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
 
           nc -= ${NR};
         } else {
-          $for LOG2N in reversed(range(NR.bit_length())):
+         $for LOG2N in reversed(range(NR.bit_length())):
             $if NR != 1 << LOG2N:
+              $if LOG2N == 2:
+                $for M in range(MR):
+                  float16x4_t vfp16out${M}x${ABC[N:N+4]} = vget_low_f16(vfp16out${M}x${ABC[N:N+8]});
               if (nc & ${1 << LOG2N}) {
-                $if LOG2N > 1:
-                  $for N in range(0, 1 << LOG2N, 4):
+                $if LOG2N > 2:
+                  $for N in range(0, 1 << LOG2N, 8):
                     $for M in range(MR):
-                      vst1_u16(c${M}, vreinterpret_u16_f16(vfp16out${M}x${ABC[N:N+4]})); c${M} += 4;
-                      vfp16out${M}x${ABC[N:N+4]} = vfp16out${M}x${ABC[N+(1 << LOG2N):N+(1 << LOG2N)+4]};
+                      vst1q_u16(c${M}, vreinterpretq_u16_f16(vfp16out${M}x${ABC[N:N+8]})); c${M} += 8;
+                      vfp16out${M}x${ABC[N:N+8]} = vfp16out${M}x${ABC[N+(1 << LOG2N):N+(1 << LOG2N)+8]};
+                $elif LOG2N == 2:
+                  $for M in range(MR):
+                    vst1_u16(c${M}, vreinterpret_u16_f16(vfp16out${M}x${ABC[N:N+4]})); c${M} += 4;
+                  $for M in range(MR):
+                    vfp16out${M}x${ABC[N:N+4]} = vget_high_f16(vfp16out${M}x${ABC[N:N+8]});
                 $elif LOG2N == 1:
                   $for M in range(MR):
-                    vst1_lane_u32((void*) c${M}, vreinterpret_u32_f16(vfp16out${M}x${ABC[N:N+4]}), 0);  c${M} += 2;
+                    vst1_lane_u32((void*) c${M}, vreinterpret_u32_f16(vfp16out${M}x${ABC[N:N+4]}), 0); c${M} += 2;
                   $for M in range(MR):
-                    vfp16out${M}x${ABC[0:4]} = vext_f16(vfp16out${M}x${ABC[0:4]}, vfp16out${M}x${ABC[0:4]}, 2);
+                    vfp16out${M}x${ABC[N:N+4]} = vext_f16(vfp16out${M}x${ABC[N:N+4]}, vfp16out${M}x${ABC[N:N+4]}, 2);
                 $elif LOG2N == 0:
                   $for M in range(MR):
-                    vst1_lane_f16(c${M}, vfp16out${M}x${ABC[N:N+4]}, 0);
+                    vst1_lane_u16(c${M}, vreinterpret_u16_f16(vfp16out${M}x${ABC[N:N+4]}), 0);
               }
           nc = 0;
         }
