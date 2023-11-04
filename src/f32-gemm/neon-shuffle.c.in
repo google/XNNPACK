@@ -15,6 +15,7 @@ $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 #include <xnnpack/gemm.h>
 
 
+$RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
 void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}s4__${"neonfma" if FMA else "neon"}(
     size_t mr,
@@ -156,13 +157,13 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         vacc${M}x${ABC[N:N+4]} = vmaxq_f32(vacc${M}x${ABC[N:N+4]}, vmin);
 
     if XNN_LIKELY(nc >= ${NR}) {
-      $for M in reversed(range(MR)):
+      $for M in RANGE_MR:
         vst1q_f32(c${M}, vacc${M}x${ABC[0:4]});
         $for N in range(4, NR, 4):
           vst1q_f32(c${M} + ${N}, vacc${M}x${ABC[N:N+4]});
         c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
-      $for M in reversed(range(MR)):
+      $for M in RANGE_MR:
         a${M} = (const float*) ((uintptr_t) a${M} - kc);
 
       nc -= ${NR};
@@ -173,24 +174,24 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
           if (nc & ${1 << LOG2N}) {
             $if LOG2N >= 2:
               $for N in range(0, 1 << LOG2N, 4):
-                $for M in reversed(range(MR)):
+                $for M in RANGE_MR:
                   vst1q_f32(c${M}, vacc${M}x${ABC[N:N+4]}); c${M} += 4;
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 $for N in range(0, NR - (1 << LOG2N), 4):
                   vacc${M}x${ABC[N:N+4]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 <<   LOG2N)+4]};
             $elif LOG2N == 1:
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 vst1_f32(c${M}, vacc${M}x${ABC[0:2]}); c${M} += 2;
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 vacc${M}x${ABC[0:2]} = vget_high_f32(vacc${M}x${ABC[0:4]});
             $elif LOG2N == 0:
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 vst1_lane_f32(c${M}, vacc${M}x${ABC[0:2]}, 0);
           }
           $if LOG2N == 2:
-            $for M in reversed(range(MR)):
+            $for M in RANGE_MR:
               float32x2_t vacc${M}x${ABC[0:2]} = vget_low_f32(vacc${M}x${ABC[0:4]});
 
       nc = 0;

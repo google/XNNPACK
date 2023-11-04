@@ -112,41 +112,41 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_3x32__avx512skx_broadcast(
     vacc2xGHIJKLMNOPQRSTUV = _mm512_min_ps(vmax, vacc2xGHIJKLMNOPQRSTUV);
 
     if XNN_LIKELY(nc >= 32) {
-      _mm512_storeu_ps(c2, vacc2x0123456789ABCDEF);
-      _mm512_storeu_ps(c2 + 16, vacc2xGHIJKLMNOPQRSTUV);
-      c2 = (float*) ((uintptr_t) c2 + cn_stride);
-      _mm512_storeu_ps(c1, vacc1x0123456789ABCDEF);
-      _mm512_storeu_ps(c1 + 16, vacc1xGHIJKLMNOPQRSTUV);
-      c1 = (float*) ((uintptr_t) c1 + cn_stride);
       _mm512_storeu_ps(c0, vacc0x0123456789ABCDEF);
       _mm512_storeu_ps(c0 + 16, vacc0xGHIJKLMNOPQRSTUV);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
+      _mm512_storeu_ps(c1, vacc1x0123456789ABCDEF);
+      _mm512_storeu_ps(c1 + 16, vacc1xGHIJKLMNOPQRSTUV);
+      c1 = (float*) ((uintptr_t) c1 + cn_stride);
+      _mm512_storeu_ps(c2, vacc2x0123456789ABCDEF);
+      _mm512_storeu_ps(c2 + 16, vacc2xGHIJKLMNOPQRSTUV);
+      c2 = (float*) ((uintptr_t) c2 + cn_stride);
 
-      a2 = (const float*) ((uintptr_t) a2 - kc);
-      a1 = (const float*) ((uintptr_t) a1 - kc);
       a0 = (const float*) ((uintptr_t) a0 - kc);
+      a1 = (const float*) ((uintptr_t) a1 - kc);
+      a2 = (const float*) ((uintptr_t) a2 - kc);
 
       nc -= 32;
     } else {
       if (nc & 16) {
-        _mm512_storeu_ps(c2, vacc2x0123456789ABCDEF);
-        _mm512_storeu_ps(c1, vacc1x0123456789ABCDEF);
         _mm512_storeu_ps(c0, vacc0x0123456789ABCDEF);
+        _mm512_storeu_ps(c1, vacc1x0123456789ABCDEF);
+        _mm512_storeu_ps(c2, vacc2x0123456789ABCDEF);
 
-        vacc2x0123456789ABCDEF = vacc2xGHIJKLMNOPQRSTUV;
-        vacc1x0123456789ABCDEF = vacc1xGHIJKLMNOPQRSTUV;
         vacc0x0123456789ABCDEF = vacc0xGHIJKLMNOPQRSTUV;
+        vacc1x0123456789ABCDEF = vacc1xGHIJKLMNOPQRSTUV;
+        vacc2x0123456789ABCDEF = vacc2xGHIJKLMNOPQRSTUV;
 
-        c2 += 16;
-        c1 += 16;
         c0 += 16;
+        c1 += 16;
+        c2 += 16;
       }
       if (nc & 15) {
         // Prepare mask for valid 32-bit elements (depends on nc).
         const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << (nc & 15)) - UINT32_C(1)));
-        _mm512_mask_storeu_ps(c2, vmask, vacc2x0123456789ABCDEF);
-        _mm512_mask_storeu_ps(c1, vmask, vacc1x0123456789ABCDEF);
         _mm512_mask_storeu_ps(c0, vmask, vacc0x0123456789ABCDEF);
+        _mm512_mask_storeu_ps(c1, vmask, vacc1x0123456789ABCDEF);
+        _mm512_mask_storeu_ps(c2, vmask, vacc2x0123456789ABCDEF);
       }
       nc = 0;
     }

@@ -18,6 +18,8 @@ $SSE_HEADER = {1: "immintrin.h", 2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
 $if DATATYPE == "QC8" and SSE == 4:
   #include <xnnpack/unaligned.h>
 
+
+$RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))
 $if DATATYPE in ["QC8", "QC4"]:
   $ISA = {2: "sse2", 4: "sse41"}[SSE]
 $else:
@@ -150,13 +152,13 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         vacc${M}x${ABC[N:N+4]} = _mm_max_ps(vacc${M}x${ABC[N:N+4]}, vmin);
 
     if XNN_LIKELY(nc >= ${NR}) {
-      $for M in reversed(range(MR)):
+      $for M in RANGE_MR:
         _mm_storeu_ps(c${M}, vacc${M}x${ABC[0:4]});
         $for N in range(4, NR, 4):
           _mm_storeu_ps(c${M} + ${N}, vacc${M}x${ABC[N:N+4]});
         c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
-      $for M in reversed(range(MR)):
+      $for M in RANGE_MR:
         a${M} = (const float*) ((uintptr_t) a${M} - kc);
 
       nc -= ${NR};
@@ -165,28 +167,28 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         $if NR != 1 << LOG2N:
           if (nc & ${1 << LOG2N}) {
             $if LOG2N >= 2:
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 _mm_storeu_ps(c${M}, vacc${M}x${ABC[0:4]});
                 $for N in range(4, 1 << LOG2N, 4):
                   _mm_storeu_ps(c${M} + ${N}, vacc${M}x${ABC[N:N+4]});
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 $for N in range(0, NR - (1 << LOG2N), 4):
                   vacc${M}x${ABC[N:N+4]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+4]};
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 c${M} += ${1 << LOG2N};
             $elif LOG2N == 1:
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 _mm_storel_pi((__m64*) c${M}, vacc${M}x${ABC[0:4]});
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 vacc${M}x${ABC[0:4]} = _mm_movehl_ps(vacc${M}x${ABC[0:4]}, vacc${M}x${ABC[0:4]});
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 c${M} += 2;
             $elif LOG2N == 0:
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 _mm_store_ss(c${M}, vacc${M}x${ABC[0:4]});
           }
 

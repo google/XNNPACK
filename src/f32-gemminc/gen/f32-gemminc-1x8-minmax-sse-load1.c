@@ -13,6 +13,7 @@
 
 #include <xnnpack/gemm.h>
 
+
 void xnn_f32_gemminc_minmax_ukernel_1x8__sse_load1(
     size_t mr,
     size_t nc,

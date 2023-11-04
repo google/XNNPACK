@@ -17,6 +17,7 @@ $if DATATYPE in ["QC4", "QC8"] and NR % 4 != 0:
   #include <xnnpack/unaligned.h>
 
 
+$RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w", "QC4": "f32_qc4w"}[DATATYPE]
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
@@ -183,19 +184,19 @@ void xnn_${DATATYPE_SPEC}_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WA
           vacc${M}${N} = ${MAX_F32}(vacc${M}${N}, 0.0f);
 
     if XNN_LIKELY(nc >= ${NR}) {
-      $for M in reversed(range(MR)):
+      $for M in RANGE_MR:
         $for N in range(NR):
           c${M}[${N}] = vacc${M}${N};
         c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
-      $for M in reversed(range(MR)):
+      $for M in RANGE_MR:
         a${M} = (const void*) ((uintptr_t) a${M} - kc);
 
       nc -= ${NR};
     } else {
       $for LOG2N in reversed(range(NR.bit_length() - 1)):
         if (nc & ${1 << LOG2N}) {
-          $for M in reversed(range(MR)):
+          $for M in RANGE_MR:
             $for N in range(1 << LOG2N):
               c${M}[${N}] = vacc${M}${N};
             $if LOG2N != 0:

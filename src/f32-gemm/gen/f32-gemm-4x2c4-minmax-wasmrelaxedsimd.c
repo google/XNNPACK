@@ -148,26 +148,26 @@ void xnn_f32_gemm_minmax_ukernel_4x2c4__wasmrelaxedsimd(
     vacc23x01 = wasm_f32x4_relaxed_min(vmax, vacc23x01);
 
     if XNN_LIKELY(nc >= 2) {
-      wasm_v128_store64_lane(c2, vacc23x01, 0);
-      c2 = (float*) ((uintptr_t) c2 + cn_stride);
-      a2 = (const float*) ((uintptr_t) a2 - kc);
-      wasm_v128_store64_lane(c3, vacc23x01, 1);
-      c3 = (float*) ((uintptr_t) c3 + cn_stride);
-      a3 = (const float*) ((uintptr_t) a3 - kc);
       wasm_v128_store64_lane(c0, vacc01x01, 0);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
       a0 = (const float*) ((uintptr_t) a0 - kc);
       wasm_v128_store64_lane(c1, vacc01x01, 1);
       c1 = (float*) ((uintptr_t) c1 + cn_stride);
       a1 = (const float*) ((uintptr_t) a1 - kc);
+      wasm_v128_store64_lane(c2, vacc23x01, 0);
+      c2 = (float*) ((uintptr_t) c2 + cn_stride);
+      a2 = (const float*) ((uintptr_t) a2 - kc);
+      wasm_v128_store64_lane(c3, vacc23x01, 1);
+      c3 = (float*) ((uintptr_t) c3 + cn_stride);
+      a3 = (const float*) ((uintptr_t) a3 - kc);
 
       nc -= 2;
     } else {
       assert(nc == 1);
-      wasm_v128_store32_lane(c2, vacc23x01, 0);
-      wasm_v128_store32_lane(c3, vacc23x01, 2);
       wasm_v128_store32_lane(c0, vacc01x01, 0);
       wasm_v128_store32_lane(c1, vacc01x01, 2);
+      wasm_v128_store32_lane(c2, vacc23x01, 0);
+      wasm_v128_store32_lane(c3, vacc23x01, 2);
 
       nc = 0;
     }

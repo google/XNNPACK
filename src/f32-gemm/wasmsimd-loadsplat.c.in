@@ -18,6 +18,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/gemm.h>
 
 
+$RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
 $if ACTIVATION == "MINMAX":
 $  WASM_F32X4_MIN={"ARM": "wasm_f32x4_min", "X86": "wasm_f32x4_pmin", "RELAXED": "wasm_f32x4_relaxed_min"}[ARCH]
@@ -149,13 +150,13 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}${ACTIVATION_SUFFIX}_ukerne
           vacc${M}x${ABC[N:N+4]} = wasm_i32x4_max(vacc${M}x${ABC[N:N+4]}, vzero);
 
     if XNN_LIKELY(nc >= ${NR}) {
-      $for M in reversed(range(MR)):
+      $for M in RANGE_MR:
         wasm_v128_store(c${M}, vacc${M}x${ABC[0:4]});
         $for N in range(4, NR, 4):
           wasm_v128_store(c${M} + ${N}, vacc${M}x${ABC[N:N+4]});
         c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
-      $for M in reversed(range(MR)):
+      $for M in RANGE_MR:
         a${M} = (const float*) ((uintptr_t) a${M} - kc);
 
       nc -= ${NR};
@@ -164,28 +165,28 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}${ACTIVATION_SUFFIX}_ukerne
         $if NR != 1 << LOG2N:
           if (nc & ${1 << LOG2N}) {
             $if LOG2N >= 2:
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 wasm_v128_store(c${M}, vacc${M}x${ABC[0:4]});
                 $for N in range(4, 1 << LOG2N, 4):
                   wasm_v128_store(c${M} + ${N}, vacc${M}x${ABC[N:N+4]});
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 $for N in range(0, NR - (1 << LOG2N), 4):
                   vacc${M}x${ABC[N:N+4]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+4]};
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 c${M} += ${1 << LOG2N};
             $elif LOG2N == 1:
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 wasm_v128_store64_lane(c${M}, vacc${M}x${ABC[0:4]}, 0);
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 vacc${M}x${ABC[0:4]} = wasm_v64x2_shuffle(vacc${M}x${ABC[0:4]}, vacc${M}x${ABC[0:4]}, 1, 1);
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 c${M} += 2;
             $elif LOG2N == 0:
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 wasm_v128_store32_lane(c${M}, vacc${M}x${ABC[0:4]}, 0);
           }
 

@@ -293,93 +293,93 @@ void xnn_f32_gemm_minmax_ukernel_4x16__aarch64_neonfma_lane_ld128(
     vacc3xCDEF = vmaxq_f32(vacc3xCDEF, vmin);
 
     if XNN_LIKELY(nc >= 16) {
-      vst1q_f32(c3, vacc3x0123);
-      vst1q_f32(c3 + 4, vacc3x4567);
-      vst1q_f32(c3 + 8, vacc3x89AB);
-      vst1q_f32(c3 + 12, vacc3xCDEF);
-      c3 = (float*) ((uintptr_t) c3 + cn_stride);
-      vst1q_f32(c2, vacc2x0123);
-      vst1q_f32(c2 + 4, vacc2x4567);
-      vst1q_f32(c2 + 8, vacc2x89AB);
-      vst1q_f32(c2 + 12, vacc2xCDEF);
-      c2 = (float*) ((uintptr_t) c2 + cn_stride);
-      vst1q_f32(c1, vacc1x0123);
-      vst1q_f32(c1 + 4, vacc1x4567);
-      vst1q_f32(c1 + 8, vacc1x89AB);
-      vst1q_f32(c1 + 12, vacc1xCDEF);
-      c1 = (float*) ((uintptr_t) c1 + cn_stride);
       vst1q_f32(c0, vacc0x0123);
       vst1q_f32(c0 + 4, vacc0x4567);
       vst1q_f32(c0 + 8, vacc0x89AB);
       vst1q_f32(c0 + 12, vacc0xCDEF);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
+      vst1q_f32(c1, vacc1x0123);
+      vst1q_f32(c1 + 4, vacc1x4567);
+      vst1q_f32(c1 + 8, vacc1x89AB);
+      vst1q_f32(c1 + 12, vacc1xCDEF);
+      c1 = (float*) ((uintptr_t) c1 + cn_stride);
+      vst1q_f32(c2, vacc2x0123);
+      vst1q_f32(c2 + 4, vacc2x4567);
+      vst1q_f32(c2 + 8, vacc2x89AB);
+      vst1q_f32(c2 + 12, vacc2xCDEF);
+      c2 = (float*) ((uintptr_t) c2 + cn_stride);
+      vst1q_f32(c3, vacc3x0123);
+      vst1q_f32(c3 + 4, vacc3x4567);
+      vst1q_f32(c3 + 8, vacc3x89AB);
+      vst1q_f32(c3 + 12, vacc3xCDEF);
+      c3 = (float*) ((uintptr_t) c3 + cn_stride);
 
-      a3 = (const float*) ((uintptr_t) a3 - kc);
-      a2 = (const float*) ((uintptr_t) a2 - kc);
-      a1 = (const float*) ((uintptr_t) a1 - kc);
       a0 = (const float*) ((uintptr_t) a0 - kc);
+      a1 = (const float*) ((uintptr_t) a1 - kc);
+      a2 = (const float*) ((uintptr_t) a2 - kc);
+      a3 = (const float*) ((uintptr_t) a3 - kc);
 
       nc -= 16;
 
     } else {
       if (nc & 8) {
-        vst1q_f32(c3, vacc3x0123); c3 += 4;
-        vst1q_f32(c2, vacc2x0123); c2 += 4;
-        vst1q_f32(c1, vacc1x0123); c1 += 4;
         vst1q_f32(c0, vacc0x0123); c0 += 4;
-        vst1q_f32(c3, vacc3x4567); c3 += 4;
-        vst1q_f32(c2, vacc2x4567); c2 += 4;
-        vst1q_f32(c1, vacc1x4567); c1 += 4;
+        vst1q_f32(c1, vacc1x0123); c1 += 4;
+        vst1q_f32(c2, vacc2x0123); c2 += 4;
+        vst1q_f32(c3, vacc3x0123); c3 += 4;
         vst1q_f32(c0, vacc0x4567); c0 += 4;
+        vst1q_f32(c1, vacc1x4567); c1 += 4;
+        vst1q_f32(c2, vacc2x4567); c2 += 4;
+        vst1q_f32(c3, vacc3x4567); c3 += 4;
 
-        vacc3x0123 = vacc3x89AB;
-        vacc3x4567 = vacc3xCDEF;
-        vacc2x0123 = vacc2x89AB;
-        vacc2x4567 = vacc2xCDEF;
-        vacc1x0123 = vacc1x89AB;
-        vacc1x4567 = vacc1xCDEF;
         vacc0x0123 = vacc0x89AB;
         vacc0x4567 = vacc0xCDEF;
+        vacc1x0123 = vacc1x89AB;
+        vacc1x4567 = vacc1xCDEF;
+        vacc2x0123 = vacc2x89AB;
+        vacc2x4567 = vacc2xCDEF;
+        vacc3x0123 = vacc3x89AB;
+        vacc3x4567 = vacc3xCDEF;
       }
       if (nc & 4) {
-        vst1q_f32(c3, vacc3x0123); c3 += 4;
-        vst1q_f32(c2, vacc2x0123); c2 += 4;
-        vst1q_f32(c1, vacc1x0123); c1 += 4;
         vst1q_f32(c0, vacc0x0123); c0 += 4;
+        vst1q_f32(c1, vacc1x0123); c1 += 4;
+        vst1q_f32(c2, vacc2x0123); c2 += 4;
+        vst1q_f32(c3, vacc3x0123); c3 += 4;
 
-        vacc3x0123 = vacc3x4567;
-        vacc3x4567 = vacc3x89AB;
-        vacc3x89AB = vacc3xCDEF;
-        vacc2x0123 = vacc2x4567;
-        vacc2x4567 = vacc2x89AB;
-        vacc2x89AB = vacc2xCDEF;
-        vacc1x0123 = vacc1x4567;
-        vacc1x4567 = vacc1x89AB;
-        vacc1x89AB = vacc1xCDEF;
         vacc0x0123 = vacc0x4567;
         vacc0x4567 = vacc0x89AB;
         vacc0x89AB = vacc0xCDEF;
+        vacc1x0123 = vacc1x4567;
+        vacc1x4567 = vacc1x89AB;
+        vacc1x89AB = vacc1xCDEF;
+        vacc2x0123 = vacc2x4567;
+        vacc2x4567 = vacc2x89AB;
+        vacc2x89AB = vacc2xCDEF;
+        vacc3x0123 = vacc3x4567;
+        vacc3x4567 = vacc3x89AB;
+        vacc3x89AB = vacc3xCDEF;
       }
-      float32x2_t vacc3x01 = vget_low_f32(vacc3x0123);
-      float32x2_t vacc2x01 = vget_low_f32(vacc2x0123);
-      float32x2_t vacc1x01 = vget_low_f32(vacc1x0123);
       float32x2_t vacc0x01 = vget_low_f32(vacc0x0123);
+      float32x2_t vacc1x01 = vget_low_f32(vacc1x0123);
+      float32x2_t vacc2x01 = vget_low_f32(vacc2x0123);
+      float32x2_t vacc3x01 = vget_low_f32(vacc3x0123);
       if (nc & 2) {
-        vst1_f32(c3, vacc3x01); c3 += 2;
-        vst1_f32(c2, vacc2x01); c2 += 2;
-        vst1_f32(c1, vacc1x01); c1 += 2;
         vst1_f32(c0, vacc0x01); c0 += 2;
+        vst1_f32(c1, vacc1x01); c1 += 2;
+        vst1_f32(c2, vacc2x01); c2 += 2;
+        vst1_f32(c3, vacc3x01); c3 += 2;
 
-        vacc3x01 = vget_high_f32(vacc3x0123);
-        vacc2x01 = vget_high_f32(vacc2x0123);
-        vacc1x01 = vget_high_f32(vacc1x0123);
         vacc0x01 = vget_high_f32(vacc0x0123);
+        vacc1x01 = vget_high_f32(vacc1x0123);
+        vacc2x01 = vget_high_f32(vacc2x0123);
+        vacc3x01 = vget_high_f32(vacc3x0123);
       }
       if (nc & 1) {
-        vst1_lane_f32(c3, vacc3x01, 0);
-        vst1_lane_f32(c2, vacc2x01, 0);
-        vst1_lane_f32(c1, vacc1x01, 0);
         vst1_lane_f32(c0, vacc0x01, 0);
+        vst1_lane_f32(c1, vacc1x01, 0);
+        vst1_lane_f32(c2, vacc2x01, 0);
+        vst1_lane_f32(c3, vacc3x01, 0);
       }
 
       nc = 0;

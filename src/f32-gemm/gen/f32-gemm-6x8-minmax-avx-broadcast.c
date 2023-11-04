@@ -122,85 +122,85 @@ void xnn_f32_gemm_minmax_ukernel_6x8__avx_broadcast(
     vacc5x01234567 = _mm256_min_ps(vmax, vacc5x01234567);
 
     if XNN_LIKELY(nc >= 8) {
-      _mm256_storeu_ps(c5, vacc5x01234567);
-      c5 = (float*) ((uintptr_t) c5 + cn_stride);
-      _mm256_storeu_ps(c4, vacc4x01234567);
-      c4 = (float*) ((uintptr_t) c4 + cn_stride);
-      _mm256_storeu_ps(c3, vacc3x01234567);
-      c3 = (float*) ((uintptr_t) c3 + cn_stride);
-      _mm256_storeu_ps(c2, vacc2x01234567);
-      c2 = (float*) ((uintptr_t) c2 + cn_stride);
-      _mm256_storeu_ps(c1, vacc1x01234567);
-      c1 = (float*) ((uintptr_t) c1 + cn_stride);
       _mm256_storeu_ps(c0, vacc0x01234567);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
+      _mm256_storeu_ps(c1, vacc1x01234567);
+      c1 = (float*) ((uintptr_t) c1 + cn_stride);
+      _mm256_storeu_ps(c2, vacc2x01234567);
+      c2 = (float*) ((uintptr_t) c2 + cn_stride);
+      _mm256_storeu_ps(c3, vacc3x01234567);
+      c3 = (float*) ((uintptr_t) c3 + cn_stride);
+      _mm256_storeu_ps(c4, vacc4x01234567);
+      c4 = (float*) ((uintptr_t) c4 + cn_stride);
+      _mm256_storeu_ps(c5, vacc5x01234567);
+      c5 = (float*) ((uintptr_t) c5 + cn_stride);
 
-      a5 = (const float*) ((uintptr_t) a5 - kc);
-      a4 = (const float*) ((uintptr_t) a4 - kc);
-      a3 = (const float*) ((uintptr_t) a3 - kc);
-      a2 = (const float*) ((uintptr_t) a2 - kc);
-      a1 = (const float*) ((uintptr_t) a1 - kc);
       a0 = (const float*) ((uintptr_t) a0 - kc);
+      a1 = (const float*) ((uintptr_t) a1 - kc);
+      a2 = (const float*) ((uintptr_t) a2 - kc);
+      a3 = (const float*) ((uintptr_t) a3 - kc);
+      a4 = (const float*) ((uintptr_t) a4 - kc);
+      a5 = (const float*) ((uintptr_t) a5 - kc);
 
       nc -= 8;
     } else {
-      __m128 vacc5x0123 = _mm256_castps256_ps128(vacc5x01234567);
-      __m128 vacc4x0123 = _mm256_castps256_ps128(vacc4x01234567);
-      __m128 vacc3x0123 = _mm256_castps256_ps128(vacc3x01234567);
-      __m128 vacc2x0123 = _mm256_castps256_ps128(vacc2x01234567);
-      __m128 vacc1x0123 = _mm256_castps256_ps128(vacc1x01234567);
       __m128 vacc0x0123 = _mm256_castps256_ps128(vacc0x01234567);
+      __m128 vacc1x0123 = _mm256_castps256_ps128(vacc1x01234567);
+      __m128 vacc2x0123 = _mm256_castps256_ps128(vacc2x01234567);
+      __m128 vacc3x0123 = _mm256_castps256_ps128(vacc3x01234567);
+      __m128 vacc4x0123 = _mm256_castps256_ps128(vacc4x01234567);
+      __m128 vacc5x0123 = _mm256_castps256_ps128(vacc5x01234567);
       if (nc & 4) {
-        _mm_storeu_ps(c5, vacc5x0123);
-        _mm_storeu_ps(c4, vacc4x0123);
-        _mm_storeu_ps(c3, vacc3x0123);
-        _mm_storeu_ps(c2, vacc2x0123);
-        _mm_storeu_ps(c1, vacc1x0123);
         _mm_storeu_ps(c0, vacc0x0123);
+        _mm_storeu_ps(c1, vacc1x0123);
+        _mm_storeu_ps(c2, vacc2x0123);
+        _mm_storeu_ps(c3, vacc3x0123);
+        _mm_storeu_ps(c4, vacc4x0123);
+        _mm_storeu_ps(c5, vacc5x0123);
 
-        vacc5x0123 = _mm256_extractf128_ps(vacc5x01234567, 1);
-        vacc4x0123 = _mm256_extractf128_ps(vacc4x01234567, 1);
-        vacc3x0123 = _mm256_extractf128_ps(vacc3x01234567, 1);
-        vacc2x0123 = _mm256_extractf128_ps(vacc2x01234567, 1);
-        vacc1x0123 = _mm256_extractf128_ps(vacc1x01234567, 1);
         vacc0x0123 = _mm256_extractf128_ps(vacc0x01234567, 1);
+        vacc1x0123 = _mm256_extractf128_ps(vacc1x01234567, 1);
+        vacc2x0123 = _mm256_extractf128_ps(vacc2x01234567, 1);
+        vacc3x0123 = _mm256_extractf128_ps(vacc3x01234567, 1);
+        vacc4x0123 = _mm256_extractf128_ps(vacc4x01234567, 1);
+        vacc5x0123 = _mm256_extractf128_ps(vacc5x01234567, 1);
 
-        c5 += 4;
-        c4 += 4;
-        c3 += 4;
-        c2 += 4;
-        c1 += 4;
         c0 += 4;
+        c1 += 4;
+        c2 += 4;
+        c3 += 4;
+        c4 += 4;
+        c5 += 4;
       }
       if (nc & 2) {
-        _mm_storel_pi((__m64*) c5, vacc5x0123);
-        _mm_storel_pi((__m64*) c4, vacc4x0123);
-        _mm_storel_pi((__m64*) c3, vacc3x0123);
-        _mm_storel_pi((__m64*) c2, vacc2x0123);
-        _mm_storel_pi((__m64*) c1, vacc1x0123);
         _mm_storel_pi((__m64*) c0, vacc0x0123);
+        _mm_storel_pi((__m64*) c1, vacc1x0123);
+        _mm_storel_pi((__m64*) c2, vacc2x0123);
+        _mm_storel_pi((__m64*) c3, vacc3x0123);
+        _mm_storel_pi((__m64*) c4, vacc4x0123);
+        _mm_storel_pi((__m64*) c5, vacc5x0123);
 
-        vacc5x0123 = _mm_movehl_ps(vacc5x0123, vacc5x0123);
-        vacc4x0123 = _mm_movehl_ps(vacc4x0123, vacc4x0123);
-        vacc3x0123 = _mm_movehl_ps(vacc3x0123, vacc3x0123);
-        vacc2x0123 = _mm_movehl_ps(vacc2x0123, vacc2x0123);
-        vacc1x0123 = _mm_movehl_ps(vacc1x0123, vacc1x0123);
         vacc0x0123 = _mm_movehl_ps(vacc0x0123, vacc0x0123);
+        vacc1x0123 = _mm_movehl_ps(vacc1x0123, vacc1x0123);
+        vacc2x0123 = _mm_movehl_ps(vacc2x0123, vacc2x0123);
+        vacc3x0123 = _mm_movehl_ps(vacc3x0123, vacc3x0123);
+        vacc4x0123 = _mm_movehl_ps(vacc4x0123, vacc4x0123);
+        vacc5x0123 = _mm_movehl_ps(vacc5x0123, vacc5x0123);
 
-        c5 += 2;
-        c4 += 2;
-        c3 += 2;
-        c2 += 2;
-        c1 += 2;
         c0 += 2;
+        c1 += 2;
+        c2 += 2;
+        c3 += 2;
+        c4 += 2;
+        c5 += 2;
       }
       if (nc & 1) {
-        _mm_store_ss(c5, vacc5x0123);
-        _mm_store_ss(c4, vacc4x0123);
-        _mm_store_ss(c3, vacc3x0123);
-        _mm_store_ss(c2, vacc2x0123);
-        _mm_store_ss(c1, vacc1x0123);
         _mm_store_ss(c0, vacc0x0123);
+        _mm_store_ss(c1, vacc1x0123);
+        _mm_store_ss(c2, vacc2x0123);
+        _mm_store_ss(c3, vacc3x0123);
+        _mm_store_ss(c4, vacc4x0123);
+        _mm_store_ss(c5, vacc5x0123);
       }
 
       nc = 0;

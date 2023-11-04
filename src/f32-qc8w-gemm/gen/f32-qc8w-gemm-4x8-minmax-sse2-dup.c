@@ -268,63 +268,63 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x8__sse2_dup(
     vacc3x4567 = _mm_max_ps(vacc3x4567, vmin);
 
     if XNN_LIKELY(nc >= 8) {
-      _mm_storeu_ps(c3, vacc3x0123);
-      _mm_storeu_ps(c3 + 4, vacc3x4567);
-      c3 = (float*) ((uintptr_t) c3 + cn_stride);
-      _mm_storeu_ps(c2, vacc2x0123);
-      _mm_storeu_ps(c2 + 4, vacc2x4567);
-      c2 = (float*) ((uintptr_t) c2 + cn_stride);
-      _mm_storeu_ps(c1, vacc1x0123);
-      _mm_storeu_ps(c1 + 4, vacc1x4567);
-      c1 = (float*) ((uintptr_t) c1 + cn_stride);
       _mm_storeu_ps(c0, vacc0x0123);
       _mm_storeu_ps(c0 + 4, vacc0x4567);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
+      _mm_storeu_ps(c1, vacc1x0123);
+      _mm_storeu_ps(c1 + 4, vacc1x4567);
+      c1 = (float*) ((uintptr_t) c1 + cn_stride);
+      _mm_storeu_ps(c2, vacc2x0123);
+      _mm_storeu_ps(c2 + 4, vacc2x4567);
+      c2 = (float*) ((uintptr_t) c2 + cn_stride);
+      _mm_storeu_ps(c3, vacc3x0123);
+      _mm_storeu_ps(c3 + 4, vacc3x4567);
+      c3 = (float*) ((uintptr_t) c3 + cn_stride);
 
-      a3 = (const float*) ((uintptr_t) a3 - kc);
-      a2 = (const float*) ((uintptr_t) a2 - kc);
-      a1 = (const float*) ((uintptr_t) a1 - kc);
       a0 = (const float*) ((uintptr_t) a0 - kc);
+      a1 = (const float*) ((uintptr_t) a1 - kc);
+      a2 = (const float*) ((uintptr_t) a2 - kc);
+      a3 = (const float*) ((uintptr_t) a3 - kc);
 
       nc -= 8;
     } else {
       if (nc & 4) {
-        _mm_storeu_ps(c3, vacc3x0123);
-        _mm_storeu_ps(c2, vacc2x0123);
-        _mm_storeu_ps(c1, vacc1x0123);
         _mm_storeu_ps(c0, vacc0x0123);
+        _mm_storeu_ps(c1, vacc1x0123);
+        _mm_storeu_ps(c2, vacc2x0123);
+        _mm_storeu_ps(c3, vacc3x0123);
 
-        vacc3x0123 = vacc3x4567;
-        vacc2x0123 = vacc2x4567;
-        vacc1x0123 = vacc1x4567;
         vacc0x0123 = vacc0x4567;
+        vacc1x0123 = vacc1x4567;
+        vacc2x0123 = vacc2x4567;
+        vacc3x0123 = vacc3x4567;
 
-        c3 += 4;
-        c2 += 4;
-        c1 += 4;
         c0 += 4;
+        c1 += 4;
+        c2 += 4;
+        c3 += 4;
       }
       if (nc & 2) {
-        _mm_storel_pi((__m64*) c3, vacc3x0123);
-        _mm_storel_pi((__m64*) c2, vacc2x0123);
-        _mm_storel_pi((__m64*) c1, vacc1x0123);
         _mm_storel_pi((__m64*) c0, vacc0x0123);
+        _mm_storel_pi((__m64*) c1, vacc1x0123);
+        _mm_storel_pi((__m64*) c2, vacc2x0123);
+        _mm_storel_pi((__m64*) c3, vacc3x0123);
 
-        vacc3x0123 = _mm_movehl_ps(vacc3x0123, vacc3x0123);
-        vacc2x0123 = _mm_movehl_ps(vacc2x0123, vacc2x0123);
-        vacc1x0123 = _mm_movehl_ps(vacc1x0123, vacc1x0123);
         vacc0x0123 = _mm_movehl_ps(vacc0x0123, vacc0x0123);
+        vacc1x0123 = _mm_movehl_ps(vacc1x0123, vacc1x0123);
+        vacc2x0123 = _mm_movehl_ps(vacc2x0123, vacc2x0123);
+        vacc3x0123 = _mm_movehl_ps(vacc3x0123, vacc3x0123);
 
-        c3 += 2;
-        c2 += 2;
-        c1 += 2;
         c0 += 2;
+        c1 += 2;
+        c2 += 2;
+        c3 += 2;
       }
       if (nc & 1) {
-        _mm_store_ss(c3, vacc3x0123);
-        _mm_store_ss(c2, vacc2x0123);
-        _mm_store_ss(c1, vacc1x0123);
         _mm_store_ss(c0, vacc0x0123);
+        _mm_store_ss(c1, vacc1x0123);
+        _mm_store_ss(c2, vacc2x0123);
+        _mm_store_ss(c3, vacc3x0123);
       }
 
       nc = 0;

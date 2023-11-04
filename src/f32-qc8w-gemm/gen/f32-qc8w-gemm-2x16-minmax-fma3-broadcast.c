@@ -97,53 +97,53 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_2x16__fma3_broadcast(
     vacc1x89ABCDEF = _mm256_min_ps(vmax, vacc1x89ABCDEF);
 
     if XNN_LIKELY(nc >= 16) {
-      _mm256_storeu_ps(c1, vacc1x01234567);
-      _mm256_storeu_ps(c1 + 8, vacc1x89ABCDEF);
-      c1 = (float*) ((uintptr_t) c1 + cn_stride);
       _mm256_storeu_ps(c0, vacc0x01234567);
       _mm256_storeu_ps(c0 + 8, vacc0x89ABCDEF);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
+      _mm256_storeu_ps(c1, vacc1x01234567);
+      _mm256_storeu_ps(c1 + 8, vacc1x89ABCDEF);
+      c1 = (float*) ((uintptr_t) c1 + cn_stride);
 
-      a1 = (const float*) ((uintptr_t) a1 - kc);
       a0 = (const float*) ((uintptr_t) a0 - kc);
+      a1 = (const float*) ((uintptr_t) a1 - kc);
 
       nc -= 16;
     } else {
       if (nc & 8) {
-        _mm256_storeu_ps(c1, vacc1x01234567);
         _mm256_storeu_ps(c0, vacc0x01234567);
+        _mm256_storeu_ps(c1, vacc1x01234567);
 
-        vacc1x01234567 = vacc1x89ABCDEF;
         vacc0x01234567 = vacc0x89ABCDEF;
+        vacc1x01234567 = vacc1x89ABCDEF;
 
-        c1 += 8;
         c0 += 8;
+        c1 += 8;
       }
-      __m128 vacc1x0123 = _mm256_castps256_ps128(vacc1x01234567);
       __m128 vacc0x0123 = _mm256_castps256_ps128(vacc0x01234567);
+      __m128 vacc1x0123 = _mm256_castps256_ps128(vacc1x01234567);
       if (nc & 4) {
-        _mm_storeu_ps(c1, vacc1x0123);
         _mm_storeu_ps(c0, vacc0x0123);
+        _mm_storeu_ps(c1, vacc1x0123);
 
-        vacc1x0123 = _mm256_extractf128_ps(vacc1x01234567, 1);
         vacc0x0123 = _mm256_extractf128_ps(vacc0x01234567, 1);
+        vacc1x0123 = _mm256_extractf128_ps(vacc1x01234567, 1);
 
-        c1 += 4;
         c0 += 4;
+        c1 += 4;
       }
       if (nc & 2) {
-        _mm_storel_pi((__m64*) c1, vacc1x0123);
         _mm_storel_pi((__m64*) c0, vacc0x0123);
+        _mm_storel_pi((__m64*) c1, vacc1x0123);
 
-        vacc1x0123 = _mm_movehl_ps(vacc1x0123, vacc1x0123);
         vacc0x0123 = _mm_movehl_ps(vacc0x0123, vacc0x0123);
+        vacc1x0123 = _mm_movehl_ps(vacc1x0123, vacc1x0123);
 
-        c1 += 2;
         c0 += 2;
+        c1 += 2;
       }
       if (nc & 1) {
-        _mm_store_ss(c1, vacc1x0123);
         _mm_store_ss(c0, vacc0x0123);
+        _mm_store_ss(c1, vacc1x0123);
       }
 
       nc = 0;

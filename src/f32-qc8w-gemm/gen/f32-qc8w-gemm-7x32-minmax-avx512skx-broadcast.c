@@ -184,73 +184,73 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_7x32__avx512skx_broadcast(
     vacc6xGHIJKLMNOPQRSTUV = _mm512_min_ps(vmax, vacc6xGHIJKLMNOPQRSTUV);
 
     if XNN_LIKELY(nc >= 32) {
-      _mm512_storeu_ps(c6, vacc6x0123456789ABCDEF);
-      _mm512_storeu_ps(c6 + 16, vacc6xGHIJKLMNOPQRSTUV);
-      c6 = (float*) ((uintptr_t) c6 + cn_stride);
-      _mm512_storeu_ps(c5, vacc5x0123456789ABCDEF);
-      _mm512_storeu_ps(c5 + 16, vacc5xGHIJKLMNOPQRSTUV);
-      c5 = (float*) ((uintptr_t) c5 + cn_stride);
-      _mm512_storeu_ps(c4, vacc4x0123456789ABCDEF);
-      _mm512_storeu_ps(c4 + 16, vacc4xGHIJKLMNOPQRSTUV);
-      c4 = (float*) ((uintptr_t) c4 + cn_stride);
-      _mm512_storeu_ps(c3, vacc3x0123456789ABCDEF);
-      _mm512_storeu_ps(c3 + 16, vacc3xGHIJKLMNOPQRSTUV);
-      c3 = (float*) ((uintptr_t) c3 + cn_stride);
-      _mm512_storeu_ps(c2, vacc2x0123456789ABCDEF);
-      _mm512_storeu_ps(c2 + 16, vacc2xGHIJKLMNOPQRSTUV);
-      c2 = (float*) ((uintptr_t) c2 + cn_stride);
-      _mm512_storeu_ps(c1, vacc1x0123456789ABCDEF);
-      _mm512_storeu_ps(c1 + 16, vacc1xGHIJKLMNOPQRSTUV);
-      c1 = (float*) ((uintptr_t) c1 + cn_stride);
       _mm512_storeu_ps(c0, vacc0x0123456789ABCDEF);
       _mm512_storeu_ps(c0 + 16, vacc0xGHIJKLMNOPQRSTUV);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
+      _mm512_storeu_ps(c1, vacc1x0123456789ABCDEF);
+      _mm512_storeu_ps(c1 + 16, vacc1xGHIJKLMNOPQRSTUV);
+      c1 = (float*) ((uintptr_t) c1 + cn_stride);
+      _mm512_storeu_ps(c2, vacc2x0123456789ABCDEF);
+      _mm512_storeu_ps(c2 + 16, vacc2xGHIJKLMNOPQRSTUV);
+      c2 = (float*) ((uintptr_t) c2 + cn_stride);
+      _mm512_storeu_ps(c3, vacc3x0123456789ABCDEF);
+      _mm512_storeu_ps(c3 + 16, vacc3xGHIJKLMNOPQRSTUV);
+      c3 = (float*) ((uintptr_t) c3 + cn_stride);
+      _mm512_storeu_ps(c4, vacc4x0123456789ABCDEF);
+      _mm512_storeu_ps(c4 + 16, vacc4xGHIJKLMNOPQRSTUV);
+      c4 = (float*) ((uintptr_t) c4 + cn_stride);
+      _mm512_storeu_ps(c5, vacc5x0123456789ABCDEF);
+      _mm512_storeu_ps(c5 + 16, vacc5xGHIJKLMNOPQRSTUV);
+      c5 = (float*) ((uintptr_t) c5 + cn_stride);
+      _mm512_storeu_ps(c6, vacc6x0123456789ABCDEF);
+      _mm512_storeu_ps(c6 + 16, vacc6xGHIJKLMNOPQRSTUV);
+      c6 = (float*) ((uintptr_t) c6 + cn_stride);
 
-      a6 = (const float*) ((uintptr_t) a6 - kc);
-      a5 = (const float*) ((uintptr_t) a5 - kc);
-      a4 = (const float*) ((uintptr_t) a4 - kc);
-      a3 = (const float*) ((uintptr_t) a3 - kc);
-      a2 = (const float*) ((uintptr_t) a2 - kc);
-      a1 = (const float*) ((uintptr_t) a1 - kc);
       a0 = (const float*) ((uintptr_t) a0 - kc);
+      a1 = (const float*) ((uintptr_t) a1 - kc);
+      a2 = (const float*) ((uintptr_t) a2 - kc);
+      a3 = (const float*) ((uintptr_t) a3 - kc);
+      a4 = (const float*) ((uintptr_t) a4 - kc);
+      a5 = (const float*) ((uintptr_t) a5 - kc);
+      a6 = (const float*) ((uintptr_t) a6 - kc);
 
       nc -= 32;
     } else {
       if (nc & 16) {
-        _mm512_storeu_ps(c6, vacc6x0123456789ABCDEF);
-        _mm512_storeu_ps(c5, vacc5x0123456789ABCDEF);
-        _mm512_storeu_ps(c4, vacc4x0123456789ABCDEF);
-        _mm512_storeu_ps(c3, vacc3x0123456789ABCDEF);
-        _mm512_storeu_ps(c2, vacc2x0123456789ABCDEF);
-        _mm512_storeu_ps(c1, vacc1x0123456789ABCDEF);
         _mm512_storeu_ps(c0, vacc0x0123456789ABCDEF);
+        _mm512_storeu_ps(c1, vacc1x0123456789ABCDEF);
+        _mm512_storeu_ps(c2, vacc2x0123456789ABCDEF);
+        _mm512_storeu_ps(c3, vacc3x0123456789ABCDEF);
+        _mm512_storeu_ps(c4, vacc4x0123456789ABCDEF);
+        _mm512_storeu_ps(c5, vacc5x0123456789ABCDEF);
+        _mm512_storeu_ps(c6, vacc6x0123456789ABCDEF);
 
-        vacc6x0123456789ABCDEF = vacc6xGHIJKLMNOPQRSTUV;
-        vacc5x0123456789ABCDEF = vacc5xGHIJKLMNOPQRSTUV;
-        vacc4x0123456789ABCDEF = vacc4xGHIJKLMNOPQRSTUV;
-        vacc3x0123456789ABCDEF = vacc3xGHIJKLMNOPQRSTUV;
-        vacc2x0123456789ABCDEF = vacc2xGHIJKLMNOPQRSTUV;
-        vacc1x0123456789ABCDEF = vacc1xGHIJKLMNOPQRSTUV;
         vacc0x0123456789ABCDEF = vacc0xGHIJKLMNOPQRSTUV;
+        vacc1x0123456789ABCDEF = vacc1xGHIJKLMNOPQRSTUV;
+        vacc2x0123456789ABCDEF = vacc2xGHIJKLMNOPQRSTUV;
+        vacc3x0123456789ABCDEF = vacc3xGHIJKLMNOPQRSTUV;
+        vacc4x0123456789ABCDEF = vacc4xGHIJKLMNOPQRSTUV;
+        vacc5x0123456789ABCDEF = vacc5xGHIJKLMNOPQRSTUV;
+        vacc6x0123456789ABCDEF = vacc6xGHIJKLMNOPQRSTUV;
 
-        c6 += 16;
-        c5 += 16;
-        c4 += 16;
-        c3 += 16;
-        c2 += 16;
-        c1 += 16;
         c0 += 16;
+        c1 += 16;
+        c2 += 16;
+        c3 += 16;
+        c4 += 16;
+        c5 += 16;
+        c6 += 16;
       }
       if (nc & 15) {
         // Prepare mask for valid 32-bit elements (depends on nc).
         const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << (nc & 15)) - UINT32_C(1)));
-        _mm512_mask_storeu_ps(c6, vmask, vacc6x0123456789ABCDEF);
-        _mm512_mask_storeu_ps(c5, vmask, vacc5x0123456789ABCDEF);
-        _mm512_mask_storeu_ps(c4, vmask, vacc4x0123456789ABCDEF);
-        _mm512_mask_storeu_ps(c3, vmask, vacc3x0123456789ABCDEF);
-        _mm512_mask_storeu_ps(c2, vmask, vacc2x0123456789ABCDEF);
-        _mm512_mask_storeu_ps(c1, vmask, vacc1x0123456789ABCDEF);
         _mm512_mask_storeu_ps(c0, vmask, vacc0x0123456789ABCDEF);
+        _mm512_mask_storeu_ps(c1, vmask, vacc1x0123456789ABCDEF);
+        _mm512_mask_storeu_ps(c2, vmask, vacc2x0123456789ABCDEF);
+        _mm512_mask_storeu_ps(c3, vmask, vacc3x0123456789ABCDEF);
+        _mm512_mask_storeu_ps(c4, vmask, vacc4x0123456789ABCDEF);
+        _mm512_mask_storeu_ps(c5, vmask, vacc5x0123456789ABCDEF);
+        _mm512_mask_storeu_ps(c6, vmask, vacc6x0123456789ABCDEF);
       }
       nc = 0;
     }

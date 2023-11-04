@@ -18,6 +18,7 @@ $if DATATYPE == "QC8":
   #include <xnnpack/unaligned.h>
 
 
+$RANGE_MRX2 = list(range(0, MR, 2))
 $if DATATYPE in ["QC8", "QC4"]:
   $ISA = {2: "sse2", 4: "sse41"}[SSE]
 $else:
@@ -172,7 +173,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}c4__${ISA}(
       vacc${M}${M+1}x01 = _mm_max_ps(vacc${M}${M+1}x01, vmin);
 
     if XNN_LIKELY(nc >= ${NR}) {
-      $for M in reversed(range(0, MR, 2)):
+      $for M in RANGE_MRX2:
         _mm_storel_pi((__m64*) c${M}, vacc${M}${M+1}x01);
         c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
         a${M} = (const float*) ((uintptr_t) a${M} - kc);
@@ -183,7 +184,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}c4__${ISA}(
       nc -= ${NR};
     } else {
       assert(nc == 1);
-      $for M in reversed(range(0, MR, 2)):
+      $for M in RANGE_MRX2:
         _mm_store_ss(c${M}, vacc${M}${M+1}x01);
         _mm_store_ss(c${M+1}, _mm_movehl_ps(vacc${M}${M+1}x01, vacc${M}${M+1}x01));
 

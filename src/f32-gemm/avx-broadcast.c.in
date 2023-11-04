@@ -17,6 +17,7 @@ $if AVX == 1 and DATATYPE == "QC8":
   #include <xnnpack/unaligned.h>
 
 
+$RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))
 $ISA = {0: "avx", 3: "fma3"}[FMA] if AVX == 1 else "avx2"
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
 void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_broadcast(
@@ -141,13 +142,13 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         vacc${M}x${ABC[N:N+8]} = _mm256_min_ps(vmax, vacc${M}x${ABC[N:N+8]});
 
     if XNN_LIKELY(nc >= ${NR}) {
-      $for M in reversed(range(MR)):
+      $for M in RANGE_MR:
         _mm256_storeu_ps(c${M}, vacc${M}x${ABC[0:8]});
         $for N in range(8, NR, 8):
           _mm256_storeu_ps(c${M} + ${N}, vacc${M}x${ABC[N:N+8]});
         c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
-      $for M in reversed(range(MR)):
+      $for M in RANGE_MR:
         a${M} = (const float*) ((uintptr_t) a${M} - kc);
 
       nc -= ${NR};
@@ -156,41 +157,41 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         $if NR != 1 << LOG2N:
           if (nc & ${1 << LOG2N}) {
             $if LOG2N >= 3:
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 _mm256_storeu_ps(c${M}, vacc${M}x${ABC[0:8]});
                 $for N in range(8, 1 << LOG2N, 8):
                   _mm256_storeu_ps(c${M} + ${N}, vacc${M}x${ABC[N:N+8]});
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 $for N in range(0, NR - (1 << LOG2N), 8):
                   vacc${M}x${ABC[N:N+8]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+8]};
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 c${M} += ${1 << LOG2N};
             $elif LOG2N == 2:
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 _mm_storeu_ps(c${M}, vacc${M}x${ABC[0:4]});
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 vacc${M}x${ABC[0:4]} = _mm256_extractf128_ps(vacc${M}x${ABC[0:8]}, 1);
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 c${M} += 4;
             $elif LOG2N == 1:
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 _mm_storel_pi((__m64*) c${M}, vacc${M}x${ABC[0:4]});
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 vacc${M}x${ABC[0:4]} = _mm_movehl_ps(vacc${M}x${ABC[0:4]}, vacc${M}x${ABC[0:4]});
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 c${M} += 2;
             $elif LOG2N == 0:
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 _mm_store_ss(c${M}, vacc${M}x${ABC[0:4]});
           }
         $if LOG2N == 3:
-          $for M in reversed(range(MR)):
+          $for M in RANGE_MR:
             __m128 vacc${M}x${ABC[0:4]} = _mm256_castps256_ps128(vacc${M}x${ABC[0:8]});
 
       nc = 0;

@@ -99,52 +99,52 @@ void xnn_f32_gemm_minmax_ukernel_3x8__wasmrelaxedsimd_fma_loadsplat(
     vacc2x4567 = wasm_f32x4_relaxed_min(vmax, vacc2x4567);
 
     if XNN_LIKELY(nc >= 8) {
-      wasm_v128_store(c2, vacc2x0123);
-      wasm_v128_store(c2 + 4, vacc2x4567);
-      c2 = (float*) ((uintptr_t) c2 + cn_stride);
-      wasm_v128_store(c1, vacc1x0123);
-      wasm_v128_store(c1 + 4, vacc1x4567);
-      c1 = (float*) ((uintptr_t) c1 + cn_stride);
       wasm_v128_store(c0, vacc0x0123);
       wasm_v128_store(c0 + 4, vacc0x4567);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
+      wasm_v128_store(c1, vacc1x0123);
+      wasm_v128_store(c1 + 4, vacc1x4567);
+      c1 = (float*) ((uintptr_t) c1 + cn_stride);
+      wasm_v128_store(c2, vacc2x0123);
+      wasm_v128_store(c2 + 4, vacc2x4567);
+      c2 = (float*) ((uintptr_t) c2 + cn_stride);
 
-      a2 = (const float*) ((uintptr_t) a2 - kc);
-      a1 = (const float*) ((uintptr_t) a1 - kc);
       a0 = (const float*) ((uintptr_t) a0 - kc);
+      a1 = (const float*) ((uintptr_t) a1 - kc);
+      a2 = (const float*) ((uintptr_t) a2 - kc);
 
       nc -= 8;
     } else {
       if (nc & 4) {
-        wasm_v128_store(c2, vacc2x0123);
-        wasm_v128_store(c1, vacc1x0123);
         wasm_v128_store(c0, vacc0x0123);
+        wasm_v128_store(c1, vacc1x0123);
+        wasm_v128_store(c2, vacc2x0123);
 
-        vacc2x0123 = vacc2x4567;
-        vacc1x0123 = vacc1x4567;
         vacc0x0123 = vacc0x4567;
+        vacc1x0123 = vacc1x4567;
+        vacc2x0123 = vacc2x4567;
 
-        c2 += 4;
-        c1 += 4;
         c0 += 4;
+        c1 += 4;
+        c2 += 4;
       }
       if (nc & 2) {
-        wasm_v128_store64_lane(c2, vacc2x0123, 0);
-        wasm_v128_store64_lane(c1, vacc1x0123, 0);
         wasm_v128_store64_lane(c0, vacc0x0123, 0);
+        wasm_v128_store64_lane(c1, vacc1x0123, 0);
+        wasm_v128_store64_lane(c2, vacc2x0123, 0);
 
-        vacc2x0123 = wasm_v64x2_shuffle(vacc2x0123, vacc2x0123, 1, 1);
-        vacc1x0123 = wasm_v64x2_shuffle(vacc1x0123, vacc1x0123, 1, 1);
         vacc0x0123 = wasm_v64x2_shuffle(vacc0x0123, vacc0x0123, 1, 1);
+        vacc1x0123 = wasm_v64x2_shuffle(vacc1x0123, vacc1x0123, 1, 1);
+        vacc2x0123 = wasm_v64x2_shuffle(vacc2x0123, vacc2x0123, 1, 1);
 
-        c2 += 2;
-        c1 += 2;
         c0 += 2;
+        c1 += 2;
+        c2 += 2;
       }
       if (nc & 1) {
-        wasm_v128_store32_lane(c2, vacc2x0123, 0);
-        wasm_v128_store32_lane(c1, vacc1x0123, 0);
         wasm_v128_store32_lane(c0, vacc0x0123, 0);
+        wasm_v128_store32_lane(c1, vacc1x0123, 0);
+        wasm_v128_store32_lane(c2, vacc2x0123, 0);
       }
 
       nc = 0;

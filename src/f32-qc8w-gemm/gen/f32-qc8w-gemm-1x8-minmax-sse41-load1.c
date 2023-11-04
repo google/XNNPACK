@@ -14,6 +14,7 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/unaligned.h>
 
+
 void xnn_f32_qc8w_gemm_minmax_ukernel_1x8__sse41_load1(
     size_t mr,
     size_t nc,

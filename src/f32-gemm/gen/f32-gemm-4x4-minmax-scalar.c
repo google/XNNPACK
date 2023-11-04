@@ -144,57 +144,57 @@ void xnn_f32_gemm_minmax_ukernel_4x4__scalar(
     vacc33 = math_min_f32(vacc33, vmax);
 
     if XNN_LIKELY(nc >= 4) {
-      c3[0] = vacc30;
-      c3[1] = vacc31;
-      c3[2] = vacc32;
-      c3[3] = vacc33;
-      c3 = (float*) ((uintptr_t) c3 + cn_stride);
-      c2[0] = vacc20;
-      c2[1] = vacc21;
-      c2[2] = vacc22;
-      c2[3] = vacc23;
-      c2 = (float*) ((uintptr_t) c2 + cn_stride);
-      c1[0] = vacc10;
-      c1[1] = vacc11;
-      c1[2] = vacc12;
-      c1[3] = vacc13;
-      c1 = (float*) ((uintptr_t) c1 + cn_stride);
       c0[0] = vacc00;
       c0[1] = vacc01;
       c0[2] = vacc02;
       c0[3] = vacc03;
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
+      c1[0] = vacc10;
+      c1[1] = vacc11;
+      c1[2] = vacc12;
+      c1[3] = vacc13;
+      c1 = (float*) ((uintptr_t) c1 + cn_stride);
+      c2[0] = vacc20;
+      c2[1] = vacc21;
+      c2[2] = vacc22;
+      c2[3] = vacc23;
+      c2 = (float*) ((uintptr_t) c2 + cn_stride);
+      c3[0] = vacc30;
+      c3[1] = vacc31;
+      c3[2] = vacc32;
+      c3[3] = vacc33;
+      c3 = (float*) ((uintptr_t) c3 + cn_stride);
 
-      a3 = (const void*) ((uintptr_t) a3 - kc);
-      a2 = (const void*) ((uintptr_t) a2 - kc);
-      a1 = (const void*) ((uintptr_t) a1 - kc);
       a0 = (const void*) ((uintptr_t) a0 - kc);
+      a1 = (const void*) ((uintptr_t) a1 - kc);
+      a2 = (const void*) ((uintptr_t) a2 - kc);
+      a3 = (const void*) ((uintptr_t) a3 - kc);
 
       nc -= 4;
     } else {
       if (nc & 2) {
-        c3[0] = vacc30;
-        c3[1] = vacc31;
-        vacc30 = vacc32;
-        c3 += 2;
-        c2[0] = vacc20;
-        c2[1] = vacc21;
-        vacc20 = vacc22;
-        c2 += 2;
-        c1[0] = vacc10;
-        c1[1] = vacc11;
-        vacc10 = vacc12;
-        c1 += 2;
         c0[0] = vacc00;
         c0[1] = vacc01;
         vacc00 = vacc02;
         c0 += 2;
+        c1[0] = vacc10;
+        c1[1] = vacc11;
+        vacc10 = vacc12;
+        c1 += 2;
+        c2[0] = vacc20;
+        c2[1] = vacc21;
+        vacc20 = vacc22;
+        c2 += 2;
+        c3[0] = vacc30;
+        c3[1] = vacc31;
+        vacc30 = vacc32;
+        c3 += 2;
       }
       if (nc & 1) {
-        c3[0] = vacc30;
-        c2[0] = vacc20;
-        c1[0] = vacc10;
         c0[0] = vacc00;
+        c1[0] = vacc10;
+        c2[0] = vacc20;
+        c3[0] = vacc30;
       }
 
       nc = 0;

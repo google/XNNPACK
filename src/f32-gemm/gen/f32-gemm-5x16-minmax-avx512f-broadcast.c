@@ -111,22 +111,22 @@ void xnn_f32_gemm_minmax_ukernel_5x16__avx512f_broadcast(
     vacc4x0123456789ABCDEF = _mm512_min_ps(vmax, vacc4x0123456789ABCDEF);
 
     if XNN_LIKELY(nc >= 16) {
-      _mm512_storeu_ps(c4, vacc4x0123456789ABCDEF);
-      c4 = (float*) ((uintptr_t) c4 + cn_stride);
-      _mm512_storeu_ps(c3, vacc3x0123456789ABCDEF);
-      c3 = (float*) ((uintptr_t) c3 + cn_stride);
-      _mm512_storeu_ps(c2, vacc2x0123456789ABCDEF);
-      c2 = (float*) ((uintptr_t) c2 + cn_stride);
-      _mm512_storeu_ps(c1, vacc1x0123456789ABCDEF);
-      c1 = (float*) ((uintptr_t) c1 + cn_stride);
       _mm512_storeu_ps(c0, vacc0x0123456789ABCDEF);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
+      _mm512_storeu_ps(c1, vacc1x0123456789ABCDEF);
+      c1 = (float*) ((uintptr_t) c1 + cn_stride);
+      _mm512_storeu_ps(c2, vacc2x0123456789ABCDEF);
+      c2 = (float*) ((uintptr_t) c2 + cn_stride);
+      _mm512_storeu_ps(c3, vacc3x0123456789ABCDEF);
+      c3 = (float*) ((uintptr_t) c3 + cn_stride);
+      _mm512_storeu_ps(c4, vacc4x0123456789ABCDEF);
+      c4 = (float*) ((uintptr_t) c4 + cn_stride);
 
-      a4 = (const float*) ((uintptr_t) a4 - kc);
-      a3 = (const float*) ((uintptr_t) a3 - kc);
-      a2 = (const float*) ((uintptr_t) a2 - kc);
-      a1 = (const float*) ((uintptr_t) a1 - kc);
       a0 = (const float*) ((uintptr_t) a0 - kc);
+      a1 = (const float*) ((uintptr_t) a1 - kc);
+      a2 = (const float*) ((uintptr_t) a2 - kc);
+      a3 = (const float*) ((uintptr_t) a3 - kc);
+      a4 = (const float*) ((uintptr_t) a4 - kc);
 
       nc -= 16;
     } else {
@@ -134,11 +134,11 @@ void xnn_f32_gemm_minmax_ukernel_5x16__avx512f_broadcast(
       assert(nc < 16);
       // Prepare mask for valid 32-bit elements (depends on nc).
       const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << nc) - UINT32_C(1)));
-      _mm512_mask_storeu_ps(c4, vmask, vacc4x0123456789ABCDEF);
-      _mm512_mask_storeu_ps(c3, vmask, vacc3x0123456789ABCDEF);
-      _mm512_mask_storeu_ps(c2, vmask, vacc2x0123456789ABCDEF);
-      _mm512_mask_storeu_ps(c1, vmask, vacc1x0123456789ABCDEF);
       _mm512_mask_storeu_ps(c0, vmask, vacc0x0123456789ABCDEF);
+      _mm512_mask_storeu_ps(c1, vmask, vacc1x0123456789ABCDEF);
+      _mm512_mask_storeu_ps(c2, vmask, vacc2x0123456789ABCDEF);
+      _mm512_mask_storeu_ps(c3, vmask, vacc3x0123456789ABCDEF);
+      _mm512_mask_storeu_ps(c4, vmask, vacc4x0123456789ABCDEF);
       nc = 0;
     }
   } while (nc != 0);

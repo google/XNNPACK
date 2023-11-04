@@ -16,6 +16,7 @@ $if DATATYPE in ["QC8", "QC4"]:
 #include <xnnpack/intrinsics-polyfill.h>
 
 
+$RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))
 $ISA = {"F32": "avx512f", "QC8": "avx512skx", "QC4": "avx512skx"}[DATATYPE]
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w", "QC4": "f32_qc4w"}[DATATYPE]
 void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_broadcast(
@@ -140,13 +141,13 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         vacc${M}x${ABC[N:N+16]} = _mm512_min_ps(vmax, vacc${M}x${ABC[N:N+16]});
 
     if XNN_LIKELY(nc >= ${NR}) {
-      $for M in reversed(range(MR)):
+      $for M in RANGE_MR:
         _mm512_storeu_ps(c${M}, vacc${M}x${ABC[0:16]});
         $for N in range(16, NR, 16):
           _mm512_storeu_ps(c${M} + ${N}, vacc${M}x${ABC[N:N+16]});
         c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
-      $for M in reversed(range(MR)):
+      $for M in RANGE_MR:
         a${M} = (const float*) ((uintptr_t) a${M} - kc);
 
       nc -= ${NR};
@@ -155,16 +156,16 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         $if NR != 1 << LOG2N:
           if (nc & ${1 << LOG2N}) {
             $if LOG2N >= 4:
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 _mm512_storeu_ps(c${M}, vacc${M}x${ABC[0:16]});
                 $for N in range(16, 1 << LOG2N, 16):
                   _mm512_storeu_ps(c${M} + ${N}, vacc${M}x${ABC[N:N+16]});
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 $for N in range(0, NR - (1 << LOG2N), 16):
                   vacc${M}x${ABC[N:N+16]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+16]};
 
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 c${M} += ${1 << LOG2N};
           }
         $if LOG2N == 4:
@@ -172,7 +173,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
             if (nc & 15) {
               // Prepare mask for valid 32-bit elements (depends on nc).
               const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << (nc & 15)) - UINT32_C(1)));
-              $for M in reversed(range(MR)):
+              $for M in RANGE_MR:
                 _mm512_mask_storeu_ps(c${M}, vmask, vacc${M}x${ABC[0:16]});
             }
           $else:
@@ -180,7 +181,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
             assert(nc < ${NR});
             // Prepare mask for valid 32-bit elements (depends on nc).
             const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << nc) - UINT32_C(1)));
-            $for M in reversed(range(MR)):
+            $for M in RANGE_MR:
               _mm512_mask_storeu_ps(c${M}, vmask, vacc${M}x${ABC[0:16]});
       nc = 0;
     }

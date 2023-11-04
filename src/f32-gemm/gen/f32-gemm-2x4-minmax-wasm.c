@@ -98,35 +98,35 @@ void xnn_f32_gemm_minmax_ukernel_2x4__wasm(
     vacc13 = __builtin_wasm_min_f32(vacc13, vmax);
 
     if XNN_LIKELY(nc >= 4) {
-      c1[0] = vacc10;
-      c1[1] = vacc11;
-      c1[2] = vacc12;
-      c1[3] = vacc13;
-      c1 = (float*) ((uintptr_t) c1 + cn_stride);
       c0[0] = vacc00;
       c0[1] = vacc01;
       c0[2] = vacc02;
       c0[3] = vacc03;
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
+      c1[0] = vacc10;
+      c1[1] = vacc11;
+      c1[2] = vacc12;
+      c1[3] = vacc13;
+      c1 = (float*) ((uintptr_t) c1 + cn_stride);
 
-      a1 = (const void*) ((uintptr_t) a1 - kc);
       a0 = (const void*) ((uintptr_t) a0 - kc);
+      a1 = (const void*) ((uintptr_t) a1 - kc);
 
       nc -= 4;
     } else {
       if (nc & 2) {
-        c1[0] = vacc10;
-        c1[1] = vacc11;
-        vacc10 = vacc12;
-        c1 += 2;
         c0[0] = vacc00;
         c0[1] = vacc01;
         vacc00 = vacc02;
         c0 += 2;
+        c1[0] = vacc10;
+        c1[1] = vacc11;
+        vacc10 = vacc12;
+        c1 += 2;
       }
       if (nc & 1) {
-        c1[0] = vacc10;
         c0[0] = vacc00;
+        c1[0] = vacc10;
       }
 
       nc = 0;

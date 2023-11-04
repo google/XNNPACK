@@ -135,26 +135,26 @@ void xnn_f32_gemm_minmax_ukernel_4x2c4__sse(
     vacc23x01 = _mm_max_ps(vacc23x01, vmin);
 
     if XNN_LIKELY(nc >= 2) {
-      _mm_storel_pi((__m64*) c2, vacc23x01);
-      c2 = (float*) ((uintptr_t) c2 + cn_stride);
-      a2 = (const float*) ((uintptr_t) a2 - kc);
-      _mm_storeh_pi((__m64*) c3, vacc23x01);
-      c3 = (float*) ((uintptr_t) c3 + cn_stride);
-      a3 = (const float*) ((uintptr_t) a3 - kc);
       _mm_storel_pi((__m64*) c0, vacc01x01);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
       a0 = (const float*) ((uintptr_t) a0 - kc);
       _mm_storeh_pi((__m64*) c1, vacc01x01);
       c1 = (float*) ((uintptr_t) c1 + cn_stride);
       a1 = (const float*) ((uintptr_t) a1 - kc);
+      _mm_storel_pi((__m64*) c2, vacc23x01);
+      c2 = (float*) ((uintptr_t) c2 + cn_stride);
+      a2 = (const float*) ((uintptr_t) a2 - kc);
+      _mm_storeh_pi((__m64*) c3, vacc23x01);
+      c3 = (float*) ((uintptr_t) c3 + cn_stride);
+      a3 = (const float*) ((uintptr_t) a3 - kc);
 
       nc -= 2;
     } else {
       assert(nc == 1);
-      _mm_store_ss(c2, vacc23x01);
-      _mm_store_ss(c3, _mm_movehl_ps(vacc23x01, vacc23x01));
       _mm_store_ss(c0, vacc01x01);
       _mm_store_ss(c1, _mm_movehl_ps(vacc01x01, vacc01x01));
+      _mm_store_ss(c2, vacc23x01);
+      _mm_store_ss(c3, _mm_movehl_ps(vacc23x01, vacc23x01));
 
       nc = 0;
     }
