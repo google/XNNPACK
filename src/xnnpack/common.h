@@ -135,7 +135,8 @@
 #endif
 
 #ifndef XNN_PLATFORM_JIT
-  #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS && !XNN_PLATFORM_FUCHSIA || XNN_PLATFORM_WEB
+  // TODO(b/309410154): Re-enable once __ARM_NR_cacheflush is fixed
+  #if (XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS && !XNN_PLATFORM_FUCHSIA || XNN_PLATFORM_WEB
     #define XNN_PLATFORM_JIT 1
   #else
     #define XNN_PLATFORM_JIT 0
