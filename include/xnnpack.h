@@ -1826,6 +1826,8 @@ enum xnn_status xnn_create_runtime(
 struct xnn_external_value {
   uint32_t id;
   void* data;
+  size_t num_dims;
+  const size_t* dim;
 };
 
 /// Setup data pointers for external inputs and outputs in a Runtime object.

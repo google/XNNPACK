@@ -541,7 +541,8 @@ enum xnn_shape_inference_status xnn_tensor_propagate_dimension(
     return xnn_shape_inference_status_no_change;
   }
 
-  if (inferred_dim < to->shape.minimum_dim[to_dim]) {
+  // HACK: skipping this for now to enable upper-bounded dynamic tensors with same minimum and maximum.
+  if (0 && inferred_dim < to->shape.minimum_dim[to_dim]) {
     xnn_log_error(
       "failed to infer dimension of tensor id %" PRIu32 ": inferred dimension (%zu) from tensor id %" PRIu32
       " is less than minimum dimension (%zu)", to->id, inferred_dim, from->id, to->shape.minimum_dim[to_dim]);

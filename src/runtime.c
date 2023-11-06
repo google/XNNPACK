@@ -568,6 +568,10 @@ enum xnn_status track_operator_workspace(
   return xnn_status_success;
 }
 
+bool is_shape_info_in_external_value(const struct xnn_external_value* external_value) {
+  return external_value->num_dims > 0 && external_value->dim != NULL;
+}
+
 enum xnn_status xnn_setup_runtime(
   xnn_runtime_t runtime,
   size_t num_external_values,
@@ -638,7 +642,26 @@ enum xnn_status xnn_setup_runtime(
     const struct xnn_external_value* external_value = &external_values[i];
     const uint32_t value_id = external_value->id;
     struct xnn_value* value = &runtime->values[value_id];
+    // Save the external value pointer so we can update the output
+    // sizes later after running the graph.
+    value->external_value = external_value;
     value->data = external_value->data;
+
+    // For backwards compatibility, only use this if the external value has shape info.
+    if (is_shape_info_in_external_value(external_value)) {
+
+      // Tensor rank can't change dynamically.
+      if (external_value->num_dims != value->shape.num_dims) {
+        xnn_log_error("failed to setup runtime: number of dimensions mismatch between expected (%zu) "
+          "and incoming external value [%zu]'s dimensions (%zu)",
+          value->shape.num_dims, i, external_value->num_dims);
+        return xnn_status_invalid_parameter;
+      }
+
+      if (value->flags & XNN_VALUE_FLAG_EXTERNAL_INPUT) {
+        memcpy(value->shape.dim, external_value->dim, sizeof(size_t) * value->shape.num_dims);
+      }
+    }
   }
 
   for (size_t i = 0; i < runtime->num_ops; i++) {
@@ -851,6 +874,25 @@ enum xnn_status xnn_invoke_runtime(
       }
     }
   }
+
+  // Propogate shape out to the external values for outputs.
+  for (size_t i = 0; i < runtime->num_values; i++) {
+
+    const struct xnn_value* value = &runtime->values[i];
+    struct xnn_external_value* external_value = (struct xnn_external_value*) value->external_value;
+
+    if ((value->flags & XNN_VALUE_FLAG_EXTERNAL_OUTPUT) && is_shape_info_in_external_value(external_value)) {
+
+      if (external_value->id != value->id || external_value->num_dims != value->shape.num_dims) {
+        xnn_log_error("Output external value mismatch, expected id #%" PRIu32 ", got id #%" PRIu32 ", expected rank %zu, got %zu",
+          value->id, external_value->id, value->shape.num_dims, external_value->num_dims);
+        return xnn_status_invalid_state;
+      }
+
+      memcpy((void*) external_value->dim, value->shape.dim, sizeof(size_t) * value->shape.num_dims);
+    }
+  }
+
   return xnn_status_success;
 }
 

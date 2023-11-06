@@ -145,6 +145,8 @@ struct xnn_value {
   // If not NULL, points to the original fp32 data, (which should be `data` before it was overwritten to point to
   // converted fp16 buffer.
   const void* fp32_data;
+  // temp change for PoC - this needs more discussions
+  const struct xnn_external_value* external_value;
 };
 
 
