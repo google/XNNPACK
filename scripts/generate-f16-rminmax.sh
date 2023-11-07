@@ -43,3 +43,5 @@ tools/xngen src/f16-rminmax/neonfp16arith.c.in -D BATCH_TILE=32 -D ACCUMULATORS=
 tools/xngen src/f16-rminmax/neonfp16arith.c.in -D BATCH_TILE=64 -D ACCUMULATORS=1 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-neonfp16arith-u64.c &
 tools/xngen src/f16-rminmax/neonfp16arith.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-neonfp16arith-u64-acc2.c &
 tools/xngen src/f16-rminmax/neonfp16arith.c.in -D BATCH_TILE=64 -D ACCUMULATORS=4 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-neonfp16arith-u64-acc4.c &
+
+wait

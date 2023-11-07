@@ -10,3 +10,5 @@ tools/xngen src/f16-qs8-vcvt/neonfp16arith.c.in -D BATCH_TILE=16 -D DATATYPE=QS8
 tools/xngen src/f16-qs8-vcvt/neonfp16arith.c.in -D BATCH_TILE=24 -D DATATYPE=QS8 -o src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u24.c &
 tools/xngen src/f16-qs8-vcvt/neonfp16arith.c.in -D BATCH_TILE=32 -D DATATYPE=QS8 -o src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u32.c &
 tools/xngen src/f16-qs8-vcvt/neonfp16arith.c.in -D BATCH_TILE=64 -D DATATYPE=QS8 -o src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u64.c &
+
+wait
