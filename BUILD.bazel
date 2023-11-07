@@ -1284,6 +1284,7 @@ xnnpack_cc_library(
         ":prefetch",
         ":tables",
         ":unaligned",
+        "@FP16",
     ],
 )
 

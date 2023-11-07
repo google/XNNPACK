@@ -6831,6 +6831,22 @@ size_t xnn_init_f32_qs8_cvt_scalar_lrintf_params(
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+size_t xnn_init_f16_qs8_cvt_neonfp16arith_params(
+  union xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  params->neonfp16arith.scale = scale;
+  params->neonfp16arith.output_zero_point = (int16_t) output_zero_point;
+  params->neonfp16arith.output_min = output_min;
+  params->neonfp16arith.output_max = output_max;
+  return sizeof(params->neonfp16arith);
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_f32_qs8_cvt_neon_params(
   union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,

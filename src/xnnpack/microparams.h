@@ -1190,6 +1190,18 @@ union xnn_f32_f16_cvt_params {
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
+union xnn_f16_qs8_cvt_params {
+  char _; // Dummy member variable to comply with the C standard
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    uint16_t scale;
+    int16_t output_zero_point;
+    int8_t output_min;
+    int8_t output_max;
+  } neonfp16arith;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+};
+
 union xnn_f32_qs8_cvt_params {
   struct {
     float scale;

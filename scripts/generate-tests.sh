@@ -307,6 +307,7 @@ tools/generate-vcvt-test.py --spec test/qs8-vcvt.yaml --output test/qs8-vcvt.cc 
 tools/generate-vcvt-test.py --spec test/qu8-vcvt.yaml --output test/qu8-vcvt.cc --output-bench bench/qu8-vcvt.cc &
 tools/generate-vcvt-test.py --spec test/qs8-f32-vcvt.yaml --output test/qs8-f32-vcvt.cc --output-bench bench/qs8-f32-vcvt.cc &
 tools/generate-vcvt-test.py --spec test/qu8-f32-vcvt.yaml --output test/qu8-f32-vcvt.cc --output-bench bench/qu8-f32-vcvt.cc &
+tools/generate-vcvt-test.py --spec test/f16-qs8-vcvt.yaml --output test/f16-qs8-vcvt.cc --output-bench bench/f16-qs8-vcvt.cc &
 tools/generate-vcvt-test.py --spec test/f32-qs8-vcvt.yaml --output test/f32-qs8-vcvt.cc --output-bench bench/f32-qs8-vcvt.cc &
 tools/generate-vcvt-test.py --spec test/f32-qu8-vcvt.yaml --output test/f32-qu8-vcvt.cc --output-bench bench/f32-qu8-vcvt.cc &
 tools/generate-vcvt-test.py --spec test/f32-f16-vcvt.yaml --output test/f32-f16-vcvt.cc --output-bench bench/f32-f16-vcvt.cc &

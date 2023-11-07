@@ -239,6 +239,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f16_qs8_vcvt_test",
+    srcs = [
+        "f16-qs8-vcvt.cc",
+        "vcvt-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f16_spmm_minmax_test",
     srcs = [
         "f16-spmm-minmax.cc",

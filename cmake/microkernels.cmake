@@ -4461,6 +4461,11 @@ SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-pavgpool/f16-pavgpool-9x-minmax-neonfp16arith-c8.c
   src/f16-prelu/gen/f16-prelu-neonfp16arith-2x8.c
   src/f16-prelu/gen/f16-prelu-neonfp16arith-2x16.c
+  src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u8.c
+  src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u16.c
+  src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u24.c
+  src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u32.c
+  src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u64.c
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u32-acc2.c
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u32-acc4.c
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u32.c
