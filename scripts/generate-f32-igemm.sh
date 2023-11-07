@@ -244,13 +244,27 @@ tools/xngen src/f32-igemm/neon-ld64.c.in      -D MR=4 -D NR=8 -D FMA=0 -D DUP=0 
 tools/xngen src/f32-igemm/neon-ld64.c.in      -D MR=4 -D NR=8 -D FMA=1 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch64-neonfma-lane-ld64.c &
 tools/xngen src/f32-igemm/neon-ld64.c.in      -D MR=6 -D NR=8 -D FMA=0 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-neon-lane-ld64.c &
 tools/xngen src/f32-igemm/neon-ld64.c.in      -D MR=6 -D NR=8 -D FMA=1 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-lane-ld64.c &
+
 ### LD128 micro-kernels
-tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=1 -D NR=8 -D FMA=0 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-neon-lane-ld128.c &
-tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=1 -D NR=8 -D FMA=1 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-aarch64-neonfma-lane-ld128.c &
-tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=4 -D NR=8 -D FMA=0 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-neon-lane-ld128.c &
-tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=4 -D NR=8 -D FMA=1 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch64-neonfma-lane-ld128.c &
-tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=6 -D NR=8 -D FMA=0 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-neon-lane-ld128.c &
-tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=6 -D NR=8 -D FMA=1 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=1 -D NR=8  -D FMA=0 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-neon-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=4 -D NR=8  -D FMA=0 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-neon-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=6 -D NR=8  -D FMA=0 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-neon-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=1 -D NR=16 -D FMA=0 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-1x16-minmax-neon-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=2 -D NR=16 -D FMA=0 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-2x16-minmax-neon-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=3 -D NR=16 -D FMA=0 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-3x16-minmax-neon-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=4 -D NR=16 -D FMA=0 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-4x16-minmax-neon-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=5 -D NR=16 -D FMA=0 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-5x16-minmax-neon-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=6 -D NR=16 -D FMA=0 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-6x16-minmax-neon-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=1 -D NR=8  -D FMA=1 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-aarch64-neonfma-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=4 -D NR=8  -D FMA=1 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch64-neonfma-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=6 -D NR=8  -D FMA=1 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=1 -D NR=16 -D FMA=1 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-1x16-minmax-aarch64-neonfma-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=2 -D NR=16 -D FMA=1 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-2x16-minmax-aarch64-neonfma-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=3 -D NR=16 -D FMA=1 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-3x16-minmax-aarch64-neonfma-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=4 -D NR=16 -D FMA=1 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-4x16-minmax-aarch64-neonfma-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=5 -D NR=16 -D FMA=1 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-5x16-minmax-aarch64-neonfma-lane-ld128.c &
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=6 -D NR=16 -D FMA=1 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-6x16-minmax-aarch64-neonfma-lane-ld128.c &
+
 ### MRx2 micro-kernels
 tools/xngen src/f32-igemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2 -D FMA=0 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-4x2-minmax-neon-lane-ld64.c &
 tools/xngen src/f32-igemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2 -D FMA=1 -D DUP=0 -o src/f32-igemm/gen/f32-igemm-4x2-minmax-aarch64-neonfma-lane-ld64.c &
