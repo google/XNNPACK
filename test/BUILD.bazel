@@ -473,6 +473,24 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f16_rmin_test",
+    srcs = [
+        "f16-rmin.cc",
+        "reduce-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_rminmax_test",
+    srcs = [
+        "f16-rminmax.cc",
+        "reduce-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f16_rsum_test",
     srcs = [
         "f16-rsum.cc",

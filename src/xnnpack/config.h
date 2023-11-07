@@ -298,6 +298,7 @@ struct xnn_reduce_config {
   size_t element_tile;
 };
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_f32acc_rsum_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_rminmax_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rminmax_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rsum_config();
 

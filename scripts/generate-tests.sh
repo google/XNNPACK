@@ -238,8 +238,10 @@ tools/generate-vlrelu-test.py --spec test/qu8-vlrelu.yaml --output test/qu8-vlre
 
 ### Tests for Reduce micro-kernels
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f16-rmax.yaml --output test/f16-rmax.cc &
+tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f16-rmin.yaml --output test/f16-rmin.cc &
 tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/f16-rsum.yaml --output test/f16-rsum.cc &
 tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/f16-f32acc-rsum.yaml --output test/f16-f32acc-rsum.cc &
+tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f16-rminmax.yaml --output test/f16-rminmax.cc &
 
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f32-rmax.yaml --output test/f32-rmax.cc &
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f32-rmin.yaml --output test/f32-rmin.cc &
