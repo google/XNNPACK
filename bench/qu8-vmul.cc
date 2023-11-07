@@ -182,6 +182,21 @@ static void qu8_vmul(
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(qu8_vmul, rvv_u1v,
+                    xnn_qu8_vmul_minmax_fp32_ukernel__rvv_u1v,
+                    xnn_init_qu8_mul_minmax_fp32_scalar_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::BinaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qu8_vmul, rvv_u2v,
+                    xnn_qu8_vmul_minmax_fp32_ukernel__rvv_u2v,
+                    xnn_init_qu8_mul_minmax_fp32_scalar_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::BinaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
 BENCHMARK_CAPTURE(qu8_vmul, scalar_u1,
                   xnn_qu8_vmul_minmax_fp32_ukernel__scalar_u1,
                   xnn_init_qu8_mul_minmax_fp32_scalar_params)

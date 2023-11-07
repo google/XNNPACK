@@ -35,6 +35,11 @@
   init: xnn_init_qs8_mul_minmax_fp32_wasmsimd_params
 - name: xnn_qs8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_u16
   init: xnn_init_qs8_mul_minmax_fp32_wasmsimd_params
+# RISC-V Vector
+- name: xnn_qs8_vmulc_minmax_fp32_ukernel__rvv_u1v
+  init: xnn_init_qs8_mul_minmax_fp32_scalar_params
+- name: xnn_qs8_vmulc_minmax_fp32_ukernel__rvv_u2v
+  init: xnn_init_qs8_mul_minmax_fp32_scalar_params
 # Scalar
 - name: xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_u1
   init: xnn_init_qs8_mul_minmax_fp32_scalar_params
