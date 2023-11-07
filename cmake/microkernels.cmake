@@ -1767,8 +1767,7 @@ SET(ALL_AVX512VNNI_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x16c4-minmax-avx512vnni.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x16c4-minmax-avx512vnni.c)
 
-SET(ALL_AVXVNNI_MICROKERNEL_SRCS
-  "")
+SET(ALL_AVXVNNI_MICROKERNEL_SRCS)
 
 SET(ALL_F16C_MICROKERNEL_SRCS
   src/f16-avgpool/f16-avgpool-9p8x-minmax-f16c-c8.c
