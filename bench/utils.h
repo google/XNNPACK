@@ -190,6 +190,10 @@ bool CheckAVX512VBMI(benchmark::State& state);
 // If VNNI or SKX-level AVX512 extensions are unsupported, report error in benchmark state, and return false.
 bool CheckAVX512VNNI(benchmark::State& state);
 
+// Check if x86 AVX-VNNI extension is supported.
+// If AVX-VNNI extension is unsupported, report error in benchmark state, and return false.
+bool CheckAVXVNNI(benchmark::State& state);
+
 // Check if PSHUFB instruction is available in WAsm Relaxed SIMD as Relaxed Swizzle.
 // If WAsm PSHUFB is unsupported, report error in benchmark state, and return false.
 bool CheckWAsmPSHUFB(benchmark::State& state);

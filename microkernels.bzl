@@ -1770,6 +1770,8 @@ ALL_AVX512VNNI_MICROKERNEL_SRCS = [
     "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x16c4-minmax-avx512vnni.c",
 ]
 
+ALL_AVXVNNI_MICROKERNEL_SRCS = []
+
 ALL_F16C_MICROKERNEL_SRCS = [
     "src/f16-avgpool/f16-avgpool-9p8x-minmax-f16c-c8.c",
     "src/f16-avgpool/f16-avgpool-9x-minmax-f16c-c8.c",
