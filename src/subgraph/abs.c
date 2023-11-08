@@ -61,21 +61,64 @@ static enum xnn_status reshape_abs_operator(
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
-  const size_t batch_size = xnn_shape_multiply_non_channel_dims(&values[input_id].shape);
+  const struct xnn_value* input = &values[input_id];
+
+  const uint32_t output_id = opdata->outputs[0];
+  struct xnn_value* output = (struct xnn_value*) &values[output_id];
+
+  const size_t batch_size = xnn_shape_multiply_non_channel_dims(&input->shape);
+
+  // Did the input batch size change?
+  bool output_needs_resize = false;
+  if (opdata->operator_objects[0]->batch_size != 0 &&
+        batch_size != 0 &&
+        opdata->operator_objects[0]->batch_size != batch_size) {
+    output_needs_resize = true;
+  }
+
+  enum xnn_status status = xnn_status_invalid_state;
+
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_abs_nc_f32:
-      return xnn_reshape_abs_nc_f32(
+      status = xnn_reshape_abs_nc_f32(
         opdata->operator_objects[0],
         batch_size,
         threadpool);
+      break;
     case xnn_operator_type_abs_nc_f16:
-      return xnn_reshape_abs_nc_f16(
+      status = xnn_reshape_abs_nc_f16(
         opdata->operator_objects[0],
         batch_size,
         threadpool);
+      break;
     default:
       XNN_UNREACHABLE;
   }
+
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  // Do we really need to resize the output?
+  if (output_needs_resize == false) {
+    return status;
+  }
+
+  // Let's make sure channels (i.e., last dimension) hasn't changed.
+  size_t op_channels = opdata->operator_objects[0]->channels;
+  size_t input_channels = input->shape.dim[input->shape.num_dims - 1];
+  if (op_channels != input_channels) {
+    xnn_log_error("failed to resize %s operator: shape change in the number of channels from %zu to %zu isn't supported",
+      xnn_node_type_to_string(xnn_node_type_abs), op_channels, input_channels);
+    return xnn_status_invalid_parameter;
+  }
+
+  // Update the output shape based on the input shape.
+  for (size_t cur_dim = 0; cur_dim < input->shape.num_dims; cur_dim++) {
+    xnn_tensor_propagate_dimension(output, cur_dim, input, cur_dim);
+  }
+
+  return xnn_status_success;
 }
 
 static enum xnn_status setup_abs_operator(
