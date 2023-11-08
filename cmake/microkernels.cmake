@@ -2449,6 +2449,9 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-1x8-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/f32-igemm-1x8-minmax-neon-lane-ld128.c
   src/f32-igemm/gen/f32-igemm-1x8s4-minmax-neon.c
+  src/f32-igemm/gen/f32-igemm-1x16-minmax-neon-lane-ld128.c
+  src/f32-igemm/gen/f32-igemm-2x16-minmax-neon-lane-ld128.c
+  src/f32-igemm/gen/f32-igemm-3x16-minmax-neon-lane-ld128.c
   src/f32-igemm/gen/f32-igemm-4x2-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/f32-igemm-4x4-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/f32-igemm-4x8-minmax-neon-dup-ld64.c
@@ -2456,12 +2459,15 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-4x8-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/f32-igemm-4x8-minmax-neon-lane-ld128.c
   src/f32-igemm/gen/f32-igemm-4x8s4-minmax-neon.c
+  src/f32-igemm/gen/f32-igemm-4x16-minmax-neon-lane-ld128.c
+  src/f32-igemm/gen/f32-igemm-5x16-minmax-neon-lane-ld128.c
   src/f32-igemm/gen/f32-igemm-6x2-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/f32-igemm-6x8-minmax-neon-dup-ld64.c
   src/f32-igemm/gen/f32-igemm-6x8-minmax-neon-dup-ld128.c
   src/f32-igemm/gen/f32-igemm-6x8-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/f32-igemm-6x8-minmax-neon-lane-ld128.c
   src/f32-igemm/gen/f32-igemm-6x8s4-minmax-neon.c
+  src/f32-igemm/gen/f32-igemm-6x16-minmax-neon-lane-ld128.c
   src/f32-igemm/gen/f32-igemm-8x8s4-minmax-neon.c
   src/f32-maxpool/f32-maxpool-9p8x-minmax-neon-c4.c
   src/f32-pavgpool/f32-pavgpool-9p8x-minmax-neon-c4.c
@@ -4243,13 +4249,19 @@ SET(ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS
   src/f32-gemminc/gen/f32-gemminc-6x8-minmax-aarch64-neonfma-lane-ld128.c
   src/f32-igemm/gen/f32-igemm-1x8-minmax-aarch64-neonfma-lane-ld64.c
   src/f32-igemm/gen/f32-igemm-1x8-minmax-aarch64-neonfma-lane-ld128.c
+  src/f32-igemm/gen/f32-igemm-1x16-minmax-aarch64-neonfma-lane-ld128.c
+  src/f32-igemm/gen/f32-igemm-2x16-minmax-aarch64-neonfma-lane-ld128.c
+  src/f32-igemm/gen/f32-igemm-3x16-minmax-aarch64-neonfma-lane-ld128.c
   src/f32-igemm/gen/f32-igemm-4x2-minmax-aarch64-neonfma-lane-ld64.c
   src/f32-igemm/gen/f32-igemm-4x4-minmax-aarch64-neonfma-lane-ld64.c
   src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch64-neonfma-lane-ld64.c
   src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch64-neonfma-lane-ld128.c
+  src/f32-igemm/gen/f32-igemm-4x16-minmax-aarch64-neonfma-lane-ld128.c
+  src/f32-igemm/gen/f32-igemm-5x16-minmax-aarch64-neonfma-lane-ld128.c
   src/f32-igemm/gen/f32-igemm-6x2-minmax-aarch64-neonfma-lane-ld64.c
   src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-lane-ld64.c
   src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-lane-ld128.c
+  src/f32-igemm/gen/f32-igemm-6x16-minmax-aarch64-neonfma-lane-ld128.c
   src/f32-ppmm/gen/f32-ppmm-4x8-minmax-aarch64-neonfma-prfm.c
   src/f32-ppmm/gen/f32-ppmm-4x8-minmax-aarch64-neonfma.c
   src/f32-ppmm/gen/f32-ppmm-4x16-minmax-aarch64-neonfma-prfm.c
