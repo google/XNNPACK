@@ -5570,6 +5570,9 @@ ALL_NEONV8_MICROKERNEL_SRCS = [
 ]
 
 ALL_RVV_MICROKERNEL_SRCS = [
+    "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-rvv-rr2-p6-u1v.c",
+    "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-rvv-rr2-p6-u2v.c",
+    "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-rvv-rr2-p6-u4v.c",
     "src/f32-rminmax/gen/f32-rmax-rvv-u1v.c",
     "src/f32-rminmax/gen/f32-rmax-rvv-u2v.c",
     "src/f32-rminmax/gen/f32-rmax-rvv-u4v.c",

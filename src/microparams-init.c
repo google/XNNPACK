@@ -4009,6 +4009,23 @@ size_t xnn_init_f16_expminus_fp16arith_rr2_p2_params(
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+size_t xnn_init_f32_expminus_rvv_rr2_p6_params(
+  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->rvv_rr2_p6.x_min = -0x1.5ebb82p6;
+  params->rvv_rr2_p6.log2e = 0x1.715476p+0f;
+  params->rvv_rr2_p6.ln2_hi = 0x1.62E400p-1f;
+  params->rvv_rr2_p6.ln2_lo = 0x1.7F7D1Cp-20f;
+  params->rvv_rr2_p6.c6 = 0x1.6850e4p-10f;
+  params->rvv_rr2_p6.c5 = 0x1.123bccp-7;
+  params->rvv_rr2_p6.c4 = 0x1.555b98p-5f;
+  params->rvv_rr2_p6.c3 = 0x1.55548ep-3f;
+  params->rvv_rr2_p6.c2 = 0x1.fffff8p-2f;
+  return sizeof(params->rvv_rr2_p6);
+}
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_f16_expminus_avx2_rr1_p2_params(
   union xnn_f16_expminus_params params[XNN_MIN_ELEMENTS(1)])
