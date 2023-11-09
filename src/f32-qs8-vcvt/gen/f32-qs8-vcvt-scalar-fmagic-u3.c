@@ -13,7 +13,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/vcvt.h>
 
-
 void xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_u3(
     size_t batch,
     const float* input,
@@ -25,6 +24,7 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_u3(
   assert(input != NULL);
   assert(output != NULL);
 
+  const float* i = input;
   const float vscale = params->scalar_fmagic.scale;
   const float voutput_min_less_zero_point = params->scalar_fmagic.output_min_less_zero_point;
   const float voutput_max_less_zero_point = params->scalar_fmagic.output_max_less_zero_point;
@@ -32,10 +32,10 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_u3(
   const int32_t vmagic_bias_less_zero_point = params->scalar_fmagic.magic_bias_less_zero_point;
 
   for (; batch >= 3 * sizeof(float); batch -= 3 * sizeof(float)) {
-    float vx0 = input[0];
-    float vx1 = input[1];
-    float vx2 = input[2];
-    input += 3;
+    float vx0 = i[0];
+    float vx1 = i[1];
+    float vx2 = i[2];
+    i += 3;
 
     vx0 *= vscale;
     vx1 *= vscale;
@@ -68,7 +68,7 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_u3(
   }
   if XNN_UNLIKELY(batch != 0) {
     do {
-      float vx = *input++;
+      float vx = *i++;
       vx *= vscale;
       vx = math_max_f32(vx, voutput_min_less_zero_point);
       vx = math_min_f32(vx, voutput_max_less_zero_point);

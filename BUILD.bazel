@@ -633,6 +633,7 @@ xnnpack_cc_library(
         ":prefetch",
         ":tables",
         ":unaligned",
+        "@FP16",
         "@FXdiv",
     ],
 )
@@ -656,6 +657,7 @@ xnnpack_cc_library(
         ":prefetch",
         ":tables",
         ":unaligned",
+        "@FP16",
         "@FXdiv",
     ],
 )
@@ -682,6 +684,7 @@ xnnpack_cc_library(
         ":prefetch",
         ":tables",
         ":unaligned",
+        "@FP16",
         "@FXdiv",
     ],
 )

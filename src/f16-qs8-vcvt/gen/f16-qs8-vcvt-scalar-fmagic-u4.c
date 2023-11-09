@@ -12,30 +12,31 @@
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/vcvt.h>
+#include <fp16/fp16.h>
 
-void xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_u4(
+void xnn_f16_qs8_vcvt_ukernel__scalar_fmagic_u4(
     size_t batch,
-    const float* input,
-    uint8_t* output,
-    const union xnn_f32_qu8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const void* input,
+    int8_t* output,
+    const union xnn_f16_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
-  assert(batch % sizeof(float) == 0);
+  assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const float* i = input;
+  const uint16_t* i = (const uint16_t*) input;
   const float vscale = params->scalar_fmagic.scale;
   const float voutput_min_less_zero_point = params->scalar_fmagic.output_min_less_zero_point;
   const float voutput_max_less_zero_point = params->scalar_fmagic.output_max_less_zero_point;
   const float vmagic_bias = params->scalar_fmagic.magic_bias;
   const int32_t vmagic_bias_less_zero_point = params->scalar_fmagic.magic_bias_less_zero_point;
 
-  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    float vx0 = i[0];
-    float vx1 = i[1];
-    float vx2 = i[2];
-    float vx3 = i[3];
+  for (; batch >= 4 * sizeof(uint16_t); batch -= 4 * sizeof(uint16_t)) {
+    float vx0 = fp16_ieee_to_fp32_value(i[0]);
+    float vx1 = fp16_ieee_to_fp32_value(i[1]);
+    float vx2 = fp16_ieee_to_fp32_value(i[2]);
+    float vx3 = fp16_ieee_to_fp32_value(i[3]);
     i += 4;
 
     vx0 *= vscale;
@@ -43,15 +44,15 @@ void xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_u4(
     vx2 *= vscale;
     vx3 *= vscale;
 
-    vx0 = __builtin_wasm_max_f32(vx0, voutput_min_less_zero_point);
-    vx1 = __builtin_wasm_max_f32(vx1, voutput_min_less_zero_point);
-    vx2 = __builtin_wasm_max_f32(vx2, voutput_min_less_zero_point);
-    vx3 = __builtin_wasm_max_f32(vx3, voutput_min_less_zero_point);
+    vx0 = math_max_f32(vx0, voutput_min_less_zero_point);
+    vx1 = math_max_f32(vx1, voutput_min_less_zero_point);
+    vx2 = math_max_f32(vx2, voutput_min_less_zero_point);
+    vx3 = math_max_f32(vx3, voutput_min_less_zero_point);
 
-    vx0 = __builtin_wasm_min_f32(vx0, voutput_max_less_zero_point);
-    vx1 = __builtin_wasm_min_f32(vx1, voutput_max_less_zero_point);
-    vx2 = __builtin_wasm_min_f32(vx2, voutput_max_less_zero_point);
-    vx3 = __builtin_wasm_min_f32(vx3, voutput_max_less_zero_point);
+    vx0 = math_min_f32(vx0, voutput_max_less_zero_point);
+    vx1 = math_min_f32(vx1, voutput_max_less_zero_point);
+    vx2 = math_min_f32(vx2, voutput_max_less_zero_point);
+    vx3 = math_min_f32(vx3, voutput_max_less_zero_point);
 
     vx0 += vmagic_bias;
     vx1 += vmagic_bias;
@@ -68,26 +69,26 @@ void xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_u4(
     vy2 -= vmagic_bias_less_zero_point;
     vy3 -= vmagic_bias_less_zero_point;
 
-    output[0] = (uint8_t) vy0;
-    output[1] = (uint8_t) vy1;
-    output[2] = (uint8_t) vy2;
-    output[3] = (uint8_t) vy3;
+    output[0] = (int8_t) vy0;
+    output[1] = (int8_t) vy1;
+    output[2] = (int8_t) vy2;
+    output[3] = (int8_t) vy3;
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
     do {
-      float vx = *i++;
+      float vx = fp16_ieee_to_fp32_value(*i++);
       vx *= vscale;
-      vx = __builtin_wasm_max_f32(vx, voutput_min_less_zero_point);
-      vx = __builtin_wasm_min_f32(vx, voutput_max_less_zero_point);
+      vx = math_max_f32(vx, voutput_min_less_zero_point);
+      vx = math_min_f32(vx, voutput_max_less_zero_point);
       vx += vmagic_bias;
 
       int32_t vy = (int32_t) float_as_uint32(vx);
       vy -= vmagic_bias_less_zero_point;
 
-      *output++ = (uint8_t) vy;
+      *output++ = (int8_t) vy;
 
-      batch -= sizeof(float);
+      batch -= sizeof(uint16_t);
     } while (batch != 0);
   }
 }

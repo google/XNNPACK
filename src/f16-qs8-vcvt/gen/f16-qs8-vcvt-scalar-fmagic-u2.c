@@ -12,27 +12,55 @@
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/vcvt.h>
+#include <fp16/fp16.h>
 
-void xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_u1(
+void xnn_f16_qs8_vcvt_ukernel__scalar_fmagic_u2(
     size_t batch,
-    const float* input,
+    const void* input,
     int8_t* output,
-    const union xnn_f32_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f16_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
-  assert(batch % sizeof(float) == 0);
+  assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const float* i = input;
+  const uint16_t* i = (const uint16_t*) input;
   const float vscale = params->scalar_fmagic.scale;
   const float voutput_min_less_zero_point = params->scalar_fmagic.output_min_less_zero_point;
   const float voutput_max_less_zero_point = params->scalar_fmagic.output_max_less_zero_point;
   const float vmagic_bias = params->scalar_fmagic.magic_bias;
   const int32_t vmagic_bias_less_zero_point = params->scalar_fmagic.magic_bias_less_zero_point;
 
-  do {
-    float vx = *i++;
+  for (; batch >= 2 * sizeof(uint16_t); batch -= 2 * sizeof(uint16_t)) {
+    float vx0 = fp16_ieee_to_fp32_value(i[0]);
+    float vx1 = fp16_ieee_to_fp32_value(i[1]);
+    i += 2;
+
+    vx0 *= vscale;
+    vx1 *= vscale;
+
+    vx0 = math_max_f32(vx0, voutput_min_less_zero_point);
+    vx1 = math_max_f32(vx1, voutput_min_less_zero_point);
+
+    vx0 = math_min_f32(vx0, voutput_max_less_zero_point);
+    vx1 = math_min_f32(vx1, voutput_max_less_zero_point);
+
+    vx0 += vmagic_bias;
+    vx1 += vmagic_bias;
+
+    int32_t vy0 = (int32_t) float_as_uint32(vx0);
+    int32_t vy1 = (int32_t) float_as_uint32(vx1);
+
+    vy0 -= vmagic_bias_less_zero_point;
+    vy1 -= vmagic_bias_less_zero_point;
+
+    output[0] = (int8_t) vy0;
+    output[1] = (int8_t) vy1;
+    output += 2;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    float vx = fp16_ieee_to_fp32_value(*i);
     vx *= vscale;
     vx = math_max_f32(vx, voutput_min_less_zero_point);
     vx = math_min_f32(vx, voutput_max_less_zero_point);
@@ -41,8 +69,6 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_u1(
     int32_t vy = (int32_t) float_as_uint32(vx);
     vy -= vmagic_bias_less_zero_point;
 
-    *output++ = (int8_t) vy;
-
-    batch -= sizeof(float);
-  } while (batch != 0);
+    *output = (int8_t) vy;
+  }
 }

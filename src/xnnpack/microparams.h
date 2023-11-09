@@ -1191,7 +1191,20 @@ union xnn_f32_f16_cvt_params {
 };
 
 union xnn_f16_qs8_cvt_params {
-  char _; // Dummy member variable to comply with the C standard
+  struct {
+    float scale;
+    float output_min_less_zero_point;
+    float output_max_less_zero_point;
+    float magic_bias;
+    int32_t magic_bias_less_zero_point;
+  } scalar_fmagic;
+  struct {
+    float scale;
+    float magic_bias;
+    int32_t magic_min;
+    int32_t magic_max;
+    int32_t magic_bias_less_zero_point;
+  } scalar_imagic;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t scale;

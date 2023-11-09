@@ -1049,6 +1049,9 @@ DECLARE_INIT_F32_F16_CVT_PARAMS_FUNCTION(xnn_init_f32_f16_cvt_scalar_fabsf_param
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_F16_QS8_CVT_PARAMS_FUNCTION(xnn_init_f16_qs8_cvt_neonfp16arith_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+DECLARE_INIT_F16_QS8_CVT_PARAMS_FUNCTION(xnn_init_f16_qs8_cvt_scalar_fmagic_params)
+DECLARE_INIT_F16_QS8_CVT_PARAMS_FUNCTION(xnn_init_f16_qs8_cvt_scalar_imagic_params)
         //
 #define DECLARE_INIT_F32_QS8_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \

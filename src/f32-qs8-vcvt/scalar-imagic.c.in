@@ -4,25 +4,37 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert BATCH_TILE >= 1
+$assert IDATATYPE in ["F16", "F32"]
+$assert ODATATYPE in ["QS8", "QU8"]
+$assert IDATATYPE == "F16" and ODATATYPE == "QS8" or IDATATYPE == "F32"
 #include <assert.h>
 
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/vcvt.h>
+$if IDATATYPE == "F16":
+  #include <fp16/fp16.h>
 
-
-$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
-void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_imagic_u${BATCH_TILE}(
+$INPUT_T = {"F16": "uint16_t", "F32": "float"}[IDATATYPE]
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[ODATATYPE]
+void xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_vcvt_ukernel__${"wasm" if WASM else "scalar"}_imagic_u${BATCH_TILE}(
     size_t batch,
-    const float* input,
+    $if IDATATYPE == "F16":
+      const void* input,
+    $else:
+      const ${INPUT_T}* input,
     ${XINT8_T}* output,
-    const union xnn_f32_${DATATYPE.lower()}_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
-  assert(batch % sizeof(float) == 0);
+  assert(batch % sizeof(${INPUT_T}) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
+  $if IDATATYPE == "F16":
+    const uint16_t* i = (const uint16_t*) input;
+  $else:
+    const float* i = input;
   const float vscale = params->scalar_imagic.scale;
   const float vmagic_bias = params->scalar_imagic.magic_bias;
   const int32_t vmagic_min = params->scalar_imagic.magic_min;
@@ -31,7 +43,10 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_imagic_u${BATCH_TILE}(
 
   $if BATCH_TILE == 1:
     do {
-      float vx = *input++;
+      $if IDATATYPE == "F16":
+        float vx = fp16_ieee_to_fp32_value(*i++);
+      $else:
+        float vx = *i++;
       vx *= vscale;
       vx += vmagic_bias;
 
@@ -42,13 +57,16 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_imagic_u${BATCH_TILE}(
 
       *output++ = (${XINT8_T}) vy;
 
-      batch -= sizeof(float);
+      batch -= sizeof(${INPUT_T});
     } while (batch != 0);
   $else:
-    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+    for (; batch >= ${BATCH_TILE} * sizeof(${INPUT_T}); batch -= ${BATCH_TILE} * sizeof(${INPUT_T})) {
       $for N in range(BATCH_TILE):
-        float vx${N} = input[${N}];
-      input += ${BATCH_TILE};
+        $if IDATATYPE == "F16":
+          float vx${N} = fp16_ieee_to_fp32_value(i[${N}]);
+        $else:
+          float vx${N} = i[${N}];
+      i += ${BATCH_TILE};
 
       $for N in range(BATCH_TILE):
         vx${N} *= vscale;
@@ -74,7 +92,10 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_imagic_u${BATCH_TILE}(
     }
     $if BATCH_TILE == 2:
       if XNN_UNLIKELY(batch != 0) {
-        float vx = *input;
+        $if IDATATYPE == "F16":
+          float vx = fp16_ieee_to_fp32_value(*i);
+        $else:
+          float vx = *i;
         vx *= vscale;
         vx += vmagic_bias;
 
@@ -88,7 +109,10 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_imagic_u${BATCH_TILE}(
     $else:
       if XNN_UNLIKELY(batch != 0) {
         do {
-          float vx = *input++;
+          $if IDATATYPE == "F16":
+            float vx = fp16_ieee_to_fp32_value(*i++);
+          $else:
+            float vx = *i++;
           vx *= vscale;
           vx += vmagic_bias;
 
@@ -99,7 +123,7 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_imagic_u${BATCH_TILE}(
 
           *output++ = (${XINT8_T}) vy;
 
-          batch -= sizeof(float);
+          batch -= sizeof(${INPUT_T});
         } while (batch != 0);
       }
 }

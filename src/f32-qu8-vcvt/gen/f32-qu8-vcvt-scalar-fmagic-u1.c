@@ -13,7 +13,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/vcvt.h>
 
-
 void xnn_f32_qu8_vcvt_ukernel__scalar_fmagic_u1(
     size_t batch,
     const float* input,
@@ -25,6 +24,7 @@ void xnn_f32_qu8_vcvt_ukernel__scalar_fmagic_u1(
   assert(input != NULL);
   assert(output != NULL);
 
+  const float* i = input;
   const float vscale = params->scalar_fmagic.scale;
   const float voutput_min_less_zero_point = params->scalar_fmagic.output_min_less_zero_point;
   const float voutput_max_less_zero_point = params->scalar_fmagic.output_max_less_zero_point;
@@ -32,7 +32,7 @@ void xnn_f32_qu8_vcvt_ukernel__scalar_fmagic_u1(
   const int32_t vmagic_bias_less_zero_point = params->scalar_fmagic.magic_bias_less_zero_point;
 
   do {
-    float vx = *input++;
+    float vx = *i++;
     vx *= vscale;
     vx = math_max_f32(vx, voutput_min_less_zero_point);
     vx = math_min_f32(vx, voutput_max_less_zero_point);
