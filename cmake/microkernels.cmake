@@ -5547,6 +5547,18 @@ SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-neonv8-ld128-u16.c)
 
 SET(ALL_RVV_MICROKERNEL_SRCS
+  src/f32-rminmax/gen/f32-rmax-rvv-u1v.c
+  src/f32-rminmax/gen/f32-rmax-rvv-u2v.c
+  src/f32-rminmax/gen/f32-rmax-rvv-u4v.c
+  src/f32-rminmax/gen/f32-rmax-rvv-u8v.c
+  src/f32-rminmax/gen/f32-rmin-rvv-u1v.c
+  src/f32-rminmax/gen/f32-rmin-rvv-u2v.c
+  src/f32-rminmax/gen/f32-rmin-rvv-u4v.c
+  src/f32-rminmax/gen/f32-rmin-rvv-u8v.c
+  src/f32-rminmax/gen/f32-rminmax-rvv-u1v.c
+  src/f32-rminmax/gen/f32-rminmax-rvv-u2v.c
+  src/f32-rminmax/gen/f32-rminmax-rvv-u4v.c
+  src/f32-rminmax/gen/f32-rminmax-rvv-u8v.c
   src/f32-vclamp/gen/f32-vclamp-rvv-u1v.c
   src/f32-vclamp/gen/f32-vclamp-rvv-u2v.c
   src/f32-vclamp/gen/f32-vclamp-rvv-u4v.c
