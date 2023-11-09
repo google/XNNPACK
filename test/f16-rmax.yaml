@@ -19,3 +19,10 @@
 
 # x86
 - name: xnn_f16_rmax_ukernel__f16c_u32
+
+# Scalar
+- name: xnn_f16_rmax_ukernel__scalar_u1
+- name: xnn_f16_rmax_ukernel__scalar_u2_acc2
+- name: xnn_f16_rmax_ukernel__scalar_u3_acc3
+- name: xnn_f16_rmax_ukernel__scalar_u4_acc2
+- name: xnn_f16_rmax_ukernel__scalar_u4_acc4

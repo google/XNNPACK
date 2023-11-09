@@ -70,7 +70,7 @@ static void init_f16_f32acc_rsum_config(void) {
 }
 
 static void init_f16_rminmax_config(void) {
-  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
+  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
@@ -82,6 +82,8 @@ static void init_f16_rminmax_config(void) {
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rminmax_ukernel__neonfp16arith_u32_acc2;
     }
+  #else
+    f16_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rminmax_ukernel__scalar_u4_acc4;
   #endif
 }
 

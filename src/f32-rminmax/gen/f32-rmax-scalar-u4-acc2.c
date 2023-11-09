@@ -13,7 +13,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/reduce.h>
 
-
 void xnn_f32_rmax_ukernel__scalar_u4_acc2(
     size_t batch,
     const float* input,
@@ -25,14 +24,16 @@ void xnn_f32_rmax_ukernel__scalar_u4_acc2(
   assert(input != NULL);
   assert(output != NULL);
 
-  float vmax0 = *input;
+  const float* i = input;
+
+  float vmax0 = *i;
   float vmax1 = vmax0;
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const float vt0 = input[0];
-    const float vt1 = input[1];
-    const float vt2 = input[2];
-    const float vt3 = input[3];
-    input += 4;
+    const float vt0 = i[0];
+    const float vt1 = i[1];
+    const float vt2 = i[2];
+    const float vt3 = i[3];
+    i += 4;
 
     vmax0 = math_max_f32(vmax0, vt0);
     vmax1 = math_max_f32(vmax1, vt1);
@@ -43,7 +44,7 @@ void xnn_f32_rmax_ukernel__scalar_u4_acc2(
 
   if XNN_UNLIKELY(batch != 0) {
     do {
-      const float vt = *input++;
+      const float vt = *i++;
       vmax0 = math_max_f32(vmax0, vt);
       batch -= sizeof(float);
     } while (batch != 0);

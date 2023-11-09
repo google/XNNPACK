@@ -12,7 +12,6 @@
 #include <xnnpack/common.h>
 #include <xnnpack/reduce.h>
 
-
 void xnn_f32_rmax_ukernel__wasm_u1(
     size_t batch,
     const float* input,
@@ -24,9 +23,11 @@ void xnn_f32_rmax_ukernel__wasm_u1(
   assert(input != NULL);
   assert(output != NULL);
 
-  float vmax0 = *input;
+  const float* i = input;
+
+  float vmax0 = *i;
   do {
-    const float vt = *input++;
+    const float vt = *i++;
     vmax0 = __builtin_wasm_max_f32(vmax0, vt);
     batch -= sizeof(float);
   } while (batch != 0);

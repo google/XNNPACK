@@ -12,30 +12,32 @@
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/reduce.h>
+#include <fp16/fp16.h>
 
-void xnn_f32_rminmax_ukernel__scalar_u3_acc3(
+void xnn_f16_rminmax_ukernel__scalar_u3_acc3(
     size_t batch,
-    const float* input,
-    float* output,
-    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const void* input,
+    void* output,
+    const union xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
-  assert(batch % sizeof(float) == 0);
+  assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const float* i = input;
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
 
-  float vmin0 = *i;
-  float vmax0 = *i;
+  float vmin0 = fp16_ieee_to_fp32_value(*i);
+  float vmax0 = fp16_ieee_to_fp32_value(*i);
   float vmin1 = vmin0;
   float vmax1 = vmax0;
   float vmin2 = vmin0;
   float vmax2 = vmax0;
-  for (; batch >= 3 * sizeof(float); batch -= 3 * sizeof(float)) {
-    const float vt0 = i[0];
-    const float vt1 = i[1];
-    const float vt2 = i[2];
+  for (; batch >= 3 * sizeof(uint16_t); batch -= 3 * sizeof(uint16_t)) {
+    const float vt0 = fp16_ieee_to_fp32_value(i[0]);
+    const float vt1 = fp16_ieee_to_fp32_value(i[1]);
+    const float vt2 = fp16_ieee_to_fp32_value(i[2]);
     i += 3;
 
     vmin0 = math_min_f32(vmin0, vt0);
@@ -52,12 +54,12 @@ void xnn_f32_rminmax_ukernel__scalar_u3_acc3(
 
   if XNN_UNLIKELY(batch != 0) {
     do {
-      const float vt = *i++;
+      const float vt = fp16_ieee_to_fp32_value(*i++);
       vmin0 = math_min_f32(vmin0, vt);
       vmax0 = math_max_f32(vmax0, vt);
-      batch -= sizeof(float);
+      batch -= sizeof(uint16_t);
     } while (batch != 0);
   }
-  output[0] = vmin0;
-  output[1] = vmax0;
+  o[0] = fp16_ieee_from_fp32_value(vmin0);
+  o[1] = fp16_ieee_from_fp32_value(vmax0);
 }

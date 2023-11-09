@@ -13,7 +13,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/reduce.h>
 
-
 void xnn_f32_rminmax_ukernel__scalar_u4_acc4(
     size_t batch,
     const float* input,
@@ -25,8 +24,10 @@ void xnn_f32_rminmax_ukernel__scalar_u4_acc4(
   assert(input != NULL);
   assert(output != NULL);
 
-  float vmin0 = *input;
-  float vmax0 = *input;
+  const float* i = input;
+
+  float vmin0 = *i;
+  float vmax0 = *i;
   float vmin1 = vmin0;
   float vmax1 = vmax0;
   float vmin2 = vmin0;
@@ -34,11 +35,11 @@ void xnn_f32_rminmax_ukernel__scalar_u4_acc4(
   float vmin3 = vmin0;
   float vmax3 = vmax0;
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const float vt0 = input[0];
-    const float vt1 = input[1];
-    const float vt2 = input[2];
-    const float vt3 = input[3];
-    input += 4;
+    const float vt0 = i[0];
+    const float vt1 = i[1];
+    const float vt2 = i[2];
+    const float vt3 = i[3];
+    i += 4;
 
     vmin0 = math_min_f32(vmin0, vt0);
     vmax0 = math_max_f32(vmax0, vt0);
@@ -58,7 +59,7 @@ void xnn_f32_rminmax_ukernel__scalar_u4_acc4(
 
   if XNN_UNLIKELY(batch != 0) {
     do {
-      const float vt = *input++;
+      const float vt = *i++;
       vmin0 = math_min_f32(vmin0, vt);
       vmax0 = math_max_f32(vmax0, vt);
       batch -= sizeof(float);

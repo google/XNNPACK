@@ -13,7 +13,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/reduce.h>
 
-
 void xnn_f32_rmin_ukernel__scalar_u1(
     size_t batch,
     const float* input,
@@ -25,9 +24,11 @@ void xnn_f32_rmin_ukernel__scalar_u1(
   assert(input != NULL);
   assert(output != NULL);
 
-  float vmin0 = *input;
+  const float* i = input;
+
+  float vmin0 = *i;
   do {
-    const float vt = *input++;
+    const float vt = *i++;
     vmin0 = math_min_f32(vmin0, vt);
     batch -= sizeof(float);
   } while (batch != 0);

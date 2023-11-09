@@ -11,7 +11,8 @@ $assert OP in ["MAX", "MIN", "MINMAX"]
 $if not WASM:
   #include <xnnpack/math.h>
 #include <xnnpack/reduce.h>
-
+$if DATATYPE == "F16":
+  #include <fp16/fp16.h>
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
 $MAX = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
@@ -20,21 +21,38 @@ $EMIT_MIN = "MIN" in OP
 $EMIT_MAX = "MAX" in OP
 $ISA = "wasm" if WASM else "scalar"
 $MAX_POS = 1 if OP == "MINMAX" else 0
-void xnn_f32_r${OP.lower()}_ukernel__${ISA}_u${BATCH_TILE}${ACC_SUFFIX}(
+$ITYPE = {"F32": "float", "F16": "uint16_t"}[DATATYPE]
+void xnn_${DATATYPE.lower()}_r${OP.lower()}_ukernel__${ISA}_u${BATCH_TILE}${ACC_SUFFIX}(
     size_t batch,
-    const float* input,
-    float* output,
-    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    $if DATATYPE == "F32":
+      const float* input,
+      float* output,
+    $elif DATATYPE == "F16":
+      const void* input,
+      void* output,
+    const union xnn_${DATATYPE.lower()}_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
-  assert(batch % sizeof(float) == 0);
+  assert(batch % sizeof(${ITYPE}) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  $if EMIT_MIN:
-    float vmin0 = *input;
-  $if EMIT_MAX:
-    float vmax0 = *input;
+  $if DATATYPE == "F32":
+    const float* i = input;
+  $elif DATATYPE == "F16":
+    const uint16_t* i = (const uint16_t*) input;
+    uint16_t* o = (uint16_t*) output;
+
+  $if DATATYPE == "F32":
+    $if EMIT_MIN:
+      float vmin0 = *i;
+    $if EMIT_MAX:
+      float vmax0 = *i;
+  $elif DATATYPE == "F16":
+    $if EMIT_MIN:
+      float vmin0 = fp16_ieee_to_fp32_value(*i);
+    $if EMIT_MAX:
+      float vmax0 = fp16_ieee_to_fp32_value(*i);
   $for A in range(1, ACCUMULATORS):
     $if EMIT_MIN:
       float vmin${A} = vmin0;
@@ -42,18 +60,24 @@ void xnn_f32_r${OP.lower()}_ukernel__${ISA}_u${BATCH_TILE}${ACC_SUFFIX}(
       float vmax${A} = vmax0;
   $if BATCH_TILE == 1:
     do {
-      const float vt = *input++;
+      $if DATATYPE == "F32":
+        const float vt = *i++;
+      $elif DATATYPE == "F16":
+        const float vt = fp16_ieee_to_fp32_value(*i++);
       $if EMIT_MIN:
         vmin0 = ${MIN}(vmin0, vt);
       $if EMIT_MAX:
         vmax0 = ${MAX}(vmax0, vt);
-      batch -= sizeof(float);
+      batch -= sizeof(${ITYPE});
     } while (batch != 0);
   $else:
-    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+    for (; batch >= ${BATCH_TILE} * sizeof(${ITYPE}); batch -= ${BATCH_TILE} * sizeof(${ITYPE})) {
       $for N in range(BATCH_TILE):
-        const float vt${N} = input[${N}];
-      input += ${BATCH_TILE};
+        $if DATATYPE == "F32":
+          const float vt${N} = i[${N}];
+        $elif DATATYPE == "F16":
+          const float vt${N} = fp16_ieee_to_fp32_value(i[${N}]);
+      i += ${BATCH_TILE};
 
       $for N in range(BATCH_TILE):
         $if EMIT_MIN:
@@ -74,23 +98,35 @@ void xnn_f32_r${OP.lower()}_ukernel__${ISA}_u${BATCH_TILE}${ACC_SUFFIX}(
 
     if XNN_UNLIKELY(batch != 0) {
       $if BATCH_TILE == 2:
-        const float vt = *input;
+        $if DATATYPE == "F32":
+          const float vt = *i;
+        $elif DATATYPE == "F16":
+          const float vt = fp16_ieee_to_fp32_value(*i);
         $if EMIT_MIN:
           vmin0 = ${MIN}(vmin0, vt);
         $if EMIT_MAX:
           vmax0 = ${MAX}(vmax0, vt);
       $else:
         do {
-          const float vt = *input++;
+          $if DATATYPE == "F32":
+            const float vt = *i++;
+          $elif DATATYPE == "F16":
+            const float vt = fp16_ieee_to_fp32_value(*i++);
           $if EMIT_MIN:
             vmin0 = ${MIN}(vmin0, vt);
           $if EMIT_MAX:
             vmax0 = ${MAX}(vmax0, vt);
-          batch -= sizeof(float);
+          batch -= sizeof(${ITYPE});
         } while (batch != 0);
     }
-  $if EMIT_MIN:
-    output[0] = vmin0;
-  $if EMIT_MAX:
-    output[${MAX_POS}] = vmax0;
+  $if DATATYPE == "F32":
+    $if EMIT_MIN:
+      output[0] = vmin0;
+    $if EMIT_MAX:
+      output[${MAX_POS}] = vmax0;
+  $elif DATATYPE == "F16":
+    $if EMIT_MIN:
+      o[0] = fp16_ieee_from_fp32_value(vmin0);
+    $if EMIT_MAX:
+      o[${MAX_POS}] = fp16_ieee_from_fp32_value(vmax0);
 }

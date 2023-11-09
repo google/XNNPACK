@@ -5265,6 +5265,21 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f16-qs8-vcvt/gen/f16-qs8-vcvt-scalar-imagic-u2.c
   src/f16-qs8-vcvt/gen/f16-qs8-vcvt-scalar-imagic-u3.c
   src/f16-qs8-vcvt/gen/f16-qs8-vcvt-scalar-imagic-u4.c
+  src/f16-rminmax/gen/f16-rmax-scalar-u1.c
+  src/f16-rminmax/gen/f16-rmax-scalar-u2-acc2.c
+  src/f16-rminmax/gen/f16-rmax-scalar-u3-acc3.c
+  src/f16-rminmax/gen/f16-rmax-scalar-u4-acc2.c
+  src/f16-rminmax/gen/f16-rmax-scalar-u4-acc4.c
+  src/f16-rminmax/gen/f16-rmin-scalar-u1.c
+  src/f16-rminmax/gen/f16-rmin-scalar-u2-acc2.c
+  src/f16-rminmax/gen/f16-rmin-scalar-u3-acc3.c
+  src/f16-rminmax/gen/f16-rmin-scalar-u4-acc2.c
+  src/f16-rminmax/gen/f16-rmin-scalar-u4-acc4.c
+  src/f16-rminmax/gen/f16-rminmax-scalar-u1.c
+  src/f16-rminmax/gen/f16-rminmax-scalar-u2-acc2.c
+  src/f16-rminmax/gen/f16-rminmax-scalar-u3-acc3.c
+  src/f16-rminmax/gen/f16-rminmax-scalar-u4-acc2.c
+  src/f16-rminmax/gen/f16-rminmax-scalar-u4-acc4.c
   src/f32-argmaxpool/f32-argmaxpool-4x-scalar-c1.c
   src/f32-argmaxpool/f32-argmaxpool-9p8x-scalar-c1.c
   src/f32-argmaxpool/f32-argmaxpool-9x-scalar-c1.c

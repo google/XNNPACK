@@ -16,3 +16,10 @@
 - name: xnn_f16_rminmax_ukernel__neonfp16arith_u64
 - name: xnn_f16_rminmax_ukernel__neonfp16arith_u64_acc2
 - name: xnn_f16_rminmax_ukernel__neonfp16arith_u64_acc4
+
+# Scalar
+- name: xnn_f16_rminmax_ukernel__scalar_u1
+- name: xnn_f16_rminmax_ukernel__scalar_u2_acc2
+- name: xnn_f16_rminmax_ukernel__scalar_u3_acc3
+- name: xnn_f16_rminmax_ukernel__scalar_u4_acc2
+- name: xnn_f16_rminmax_ukernel__scalar_u4_acc4

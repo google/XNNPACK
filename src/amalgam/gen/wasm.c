@@ -4116,6 +4116,7 @@ void xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_u4(
   assert(input != NULL);
   assert(output != NULL);
 
+  const float* i = input;
   const float vscale = params->scalar_fmagic.scale;
   const float voutput_min_less_zero_point = params->scalar_fmagic.output_min_less_zero_point;
   const float voutput_max_less_zero_point = params->scalar_fmagic.output_max_less_zero_point;
@@ -4123,11 +4124,11 @@ void xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_u4(
   const int32_t vmagic_bias_less_zero_point = params->scalar_fmagic.magic_bias_less_zero_point;
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    float vx0 = input[0];
-    float vx1 = input[1];
-    float vx2 = input[2];
-    float vx3 = input[3];
-    input += 4;
+    float vx0 = i[0];
+    float vx1 = i[1];
+    float vx2 = i[2];
+    float vx3 = i[3];
+    i += 4;
 
     vx0 *= vscale;
     vx1 *= vscale;
@@ -4167,7 +4168,7 @@ void xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_u4(
   }
   if XNN_UNLIKELY(batch != 0) {
     do {
-      float vx = *input++;
+      float vx = *i++;
       vx *= vscale;
       vx = __builtin_wasm_max_f32(vx, voutput_min_less_zero_point);
       vx = __builtin_wasm_min_f32(vx, voutput_max_less_zero_point);
@@ -4194,8 +4195,10 @@ void xnn_f32_rminmax_ukernel__wasm_u4_acc4(
   assert(input != NULL);
   assert(output != NULL);
 
-  float vmin0 = *input;
-  float vmax0 = *input;
+  const float* i = input;
+
+  float vmin0 = *i;
+  float vmax0 = *i;
   float vmin1 = vmin0;
   float vmax1 = vmax0;
   float vmin2 = vmin0;
@@ -4203,11 +4206,11 @@ void xnn_f32_rminmax_ukernel__wasm_u4_acc4(
   float vmin3 = vmin0;
   float vmax3 = vmax0;
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const float vt0 = input[0];
-    const float vt1 = input[1];
-    const float vt2 = input[2];
-    const float vt3 = input[3];
-    input += 4;
+    const float vt0 = i[0];
+    const float vt1 = i[1];
+    const float vt2 = i[2];
+    const float vt3 = i[3];
+    i += 4;
 
     vmin0 = __builtin_wasm_min_f32(vmin0, vt0);
     vmax0 = __builtin_wasm_max_f32(vmax0, vt0);
@@ -4227,7 +4230,7 @@ void xnn_f32_rminmax_ukernel__wasm_u4_acc4(
 
   if XNN_UNLIKELY(batch != 0) {
     do {
-      const float vt = *input++;
+      const float vt = *i++;
       vmin0 = __builtin_wasm_min_f32(vmin0, vt);
       vmax0 = __builtin_wasm_max_f32(vmax0, vt);
       batch -= sizeof(float);
