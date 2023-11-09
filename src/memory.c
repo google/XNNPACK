@@ -20,11 +20,16 @@
 #if !defined(_GNU_SOURCE)
 #define _GNU_SOURCE
 #endif
+
+#if XNN_ARCH_ARM && XNN_PLATFORM_JIT
+#include <sys/syscall.h>
+#endif
+
 #include <errno.h>
 #include <sys/mman.h>
-#include <sys/syscall.h>
 #include <unistd.h>
 #endif
+
 
 #include <stddef.h>
 #include <stdint.h>
