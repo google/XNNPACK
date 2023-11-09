@@ -22,6 +22,7 @@
 #endif
 #include <errno.h>
 #include <sys/mman.h>
+#include <sys/syscall.h>
 #include <unistd.h>
 #endif
 
@@ -278,8 +279,14 @@ enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buffer) {
       #if XNN_PLATFORM_WINDOWS
         FlushInstructionCache(GetCurrentProcess(), buffer->start, buffer->capacity);
       #else
+        #if XNN_ARCH_ARM
+          // TODO(b/309410154): Re-enable once __ARM_NR_cacheflush is fixed
+          // why, but something broke with cl/576649879. See b/307871190.
+          syscall(__ARM_NR_cacheflush, buffer->start, (void*) ((uint8_t*) buffer->start + buffer->capacity), 0);
+        #else
         // iOS toolchain doesn't support this, use sys_icache_invalidate, when we support iOS.
         __builtin___clear_cache(buffer->start, (void*) ((uint8_t*) buffer->start + buffer->capacity));
+        #endif  // XNN_ARCH_ARM
       #endif  // XNN_PLATFORM_WINDOWS
     #endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS
 
