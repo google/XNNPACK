@@ -248,6 +248,34 @@ static void f32_rminmax(
     ->UseRealTime();
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(f32_rminmax, rvv_u1v,
+                    xnn_f32_rminmax_ukernel__rvv_u1v,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckRVV)
+  ->Apply(benchmark::utils::ReductionParameters<float>)
+  ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, rvv_u2v,
+                    xnn_f32_rminmax_ukernel__rvv_u2v,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckRVV)
+  ->Apply(benchmark::utils::ReductionParameters<float>)
+  ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, rvv_u4v,
+                    xnn_f32_rminmax_ukernel__rvv_u4v,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckRVV)
+  ->Apply(benchmark::utils::ReductionParameters<float>)
+  ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, rvv_u8v,
+                    xnn_f32_rminmax_ukernel__rvv_u8v,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckRVV)
+  ->Apply(benchmark::utils::ReductionParameters<float>)
+  ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
 BENCHMARK_CAPTURE(f32_rminmax, scalar_u1,
                   xnn_f32_rminmax_ukernel__scalar_u1)
   ->Apply(benchmark::utils::ReductionParameters<float>)
