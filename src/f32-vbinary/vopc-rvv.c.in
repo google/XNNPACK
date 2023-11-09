@@ -1,0 +1,65 @@
+// Copyright 2023 SiFive, Inc.
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert LMUL in [1, 2, 4, 8]
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
+$assert ACTIVATION in ["LINEAR", "MINMAX", "RELU"]
+#include <assert.h>
+
+#include <riscv_vector.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vbinary.h>
+
+
+$OP_FUNC = {
+$  "ADD": "__riscv_vfadd_vf_f32",
+$  "DIV": "__riscv_vfdiv_vf_f32",
+$  "RDIV": "__riscv_vfrdiv_vf_f32",
+$  "MAX": "__riscv_vfmax_vf_f32",
+$  "MIN": "__riscv_vfmin_vf_f32",
+$  "MUL": "__riscv_vfmul_vf_f32",
+$  "SUB": "__riscv_vfsub_vf_f32",
+$  "RSUB": "__riscv_vfrsub_vf_f32",
+$  "SQRDIFF": "__riscv_vfsub_vf_f32",
+$}[OP]
+$SUFFIX = {"LINEAR": "", "RELU": "_relu", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "xnn_f32_default_params", "RELU": "xnn_f32_relu_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
+void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__rvv_u${LMUL}v(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  $if ACTIVATION == "MINMAX":
+    const float output_min = params->scalar.min;
+    const float output_max = params->scalar.max;
+  const float b = *input_b;
+  size_t n = batch >> 2;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m${LMUL}(n);
+    n -= vl;
+    vfloat32m${LMUL}_t va = __riscv_vle32_v_f32m${LMUL}(input_a, vl);
+    input_a += vl;
+    vfloat32m${LMUL}_t vacc = ${OP_FUNC}m${LMUL}(va, b, vl);
+    $if OP == "SQRDIFF":
+      vacc = __riscv_vfmul_vv_f32m${LMUL}(vacc, vacc, vl);
+    $if ACTIVATION == "MINMAX":
+      vacc = __riscv_vfmax_vf_f32m${LMUL}(vacc, output_min, vl);
+      vacc = __riscv_vfmin_vf_f32m${LMUL}(vacc, output_max, vl);
+    $elif ACTIVATION == "RELU":
+      vacc = __riscv_vfmax_vf_f32m${LMUL}(vacc, 0.0f, vl);
+    __riscv_vse32_v_f32m${LMUL}(output, vacc, vl);
+    output += vl;
+  } while (n > 0);
+}
