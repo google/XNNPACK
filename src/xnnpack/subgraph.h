@@ -11,8 +11,8 @@
 #include <xnnpack.h>
 #include <xnnpack/common.h>
 #include <xnnpack/cache.h>
+#include <xnnpack/math.h>
 #include <xnnpack/node-type.h>
-#include <xnnpack/quantization.h>
 
 #if defined(EMSCRIPTEN)
 #include <emscripten/emscripten.h>

@@ -218,6 +218,7 @@ struct xnn_operator {
 
   union {
     union xnn_f16_abs_params f16_abs;
+    union xnn_f16_default_params f16_default;
     union xnn_f16_f32_cvt_params f16_f32_cvt;
     union xnn_f16_hswish_params f16_hswish;
     union xnn_f16_elu_params f16_elu;
@@ -427,6 +428,7 @@ struct xnn_operator {
     struct transpose_context transpose;
     struct floating_point_softmax_context floating_point_softmax;
     struct u8_softmax_context u8_softmax;
+    struct f16_qd8_convert_context f16_qd8_convert;
     struct f32_qd8_convert_context f32_qd8_convert;
     struct univector_contiguous_context univector_contiguous;
     struct univector_strided_context univector_strided;

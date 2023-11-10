@@ -583,6 +583,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":microparams",
+        "@FP16",
     ],
 )
 

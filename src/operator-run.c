@@ -1981,6 +1981,26 @@ void xnn_compute_pad_qd8_params(
   }
 }
 
+void xnn_compute_f16_qd8_convert(
+    const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index)
+{
+  const size_t x_stride = context->x_stride;
+  const size_t y_stride = context->y_stride;
+  const size_t n        = context->n;
+  const void* input = (const void*) ((uintptr_t) context->x + x_stride * batch_index);
+  void* output = (void*) ((uintptr_t) context->y + y_stride * batch_index);
+
+  uint16_t minmax[2];
+  context->rminmax_ukernel(n, input, minmax, &context->params);
+  uint16_t f16_scale;
+  context->quantization_params[batch_index] = xnn_f16_qd8_asymmetric_quantization_params(minmax[0], minmax[1], &f16_scale);
+
+  union xnn_f16_qs8_cvt_params params;
+  context->init_params(&params, f16_scale, context->quantization_params[batch_index].zero_point, INT8_MIN, INT8_MAX);
+  context->convert_ukernel(n, input, output, &params);
+}
+
 void xnn_compute_f32_qd8_convert(
     const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index)

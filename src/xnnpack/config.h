@@ -198,6 +198,7 @@ struct xnn_unary_elementwise_config {
   xnn_vunary_ukernel_fn ukernel;
   union {
     xnn_init_f16_f32_cvt_params_fn f16_f32_cvt;
+    xnn_init_f16_qs8_cvt_params_fn f16_qs8_cvt;
     xnn_init_f16_abs_params_fn f16_abs;
     xnn_init_f16_elu_params_fn f16_elu;
     xnn_init_f16_hswish_params_fn f16_hswish;
@@ -255,6 +256,7 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_sqr_config(
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_sqrt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_tanh_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_to_f32_cvt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_to_qs8_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_abs_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_clamp_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_elu_config();
@@ -290,6 +292,7 @@ struct xnn_reduce_config {
   xnn_reduce_ukernel_fn ukernel;
   union {
     xnn_init_f16_f32acc_scale_params_fn f16_f32acc_scale;
+    xnn_init_f16_default_params_fn f16_default;
     xnn_init_f32_default_params_fn f32_default;
     xnn_init_f32_scale_params_fn f32_scale;
   } init;

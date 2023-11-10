@@ -2560,6 +2560,25 @@ enum xnn_status xnn_run_convert_nc_f16_f32(
   uint32_t flags,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_convert_nc_f16_qd8(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  uint32_t flags,
+  xnn_operator_t* convert_op_out);
+
+enum xnn_status xnn_reshape_convert_nc_f16_qd8(
+  xnn_operator_t convert_op,
+  size_t batch_size,
+  pthreadpool_t threadpool);
+
+// quantization_params must be padded with at least XNN_EXTRA_QUANTIZATION_PARAMS entries.
+enum xnn_status xnn_setup_convert_nc_f16_qd8(
+  xnn_operator_t convert_op,
+  const void* input,
+  int8_t* output,
+  struct xnn_dynamic_quantization_params* quantization_params);
+
 enum xnn_status xnn_create_convert_nc_f32_qd8(
   size_t channels,
   size_t input_stride,

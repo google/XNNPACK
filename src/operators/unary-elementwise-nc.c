@@ -608,6 +608,33 @@ enum xnn_status xnn_create_convert_nc_f32_qs8(
     xnn_operator_type_convert_nc_f32_qs8, convert_op_out);
 }
 
+enum xnn_status xnn_create_convert_nc_f16_qd8(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  uint32_t flags,
+  xnn_operator_t* convert_op_out)
+{
+  const struct xnn_reduce_config* f16_rminmax_config = xnn_init_f16_rminmax_config();
+  if (f16_rminmax_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(xnn_operator_type_convert_nc_f16_qd8));
+    return xnn_status_unsupported_hardware;
+  }
+
+  union xnn_f16_default_params params;
+  if (f16_rminmax_config->init.f16_default != NULL) {
+    f16_rminmax_config->init.f16_default(&params);
+  }
+
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    xnn_init_f16_to_qs8_cvt_config(), f16_rminmax_config,
+    &params, sizeof(params),
+    xnn_operator_type_convert_nc_f16_qd8, convert_op_out);
+}
+
 enum xnn_status xnn_create_convert_nc_f32_qd8(
   size_t channels,
   size_t input_stride,
@@ -1664,6 +1691,56 @@ enum xnn_status xnn_reshape_convert_nc_f32_f16(
     threadpool);
 }
 
+enum xnn_status xnn_reshape_convert_nc_f16_qd8(
+    xnn_operator_t convert_op,
+    size_t batch_size,
+    pthreadpool_t threadpool)
+{
+  if (convert_op->type != xnn_operator_type_convert_nc_f16_qd8) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f16_qd8),
+      xnn_operator_type_to_string(convert_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  convert_op->state = xnn_run_state_invalid;
+
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f16_qd8));
+    return xnn_status_uninitialized;
+  }
+
+  if (batch_size == 0) {
+    convert_op->state = xnn_run_state_skip;
+    return xnn_status_success;
+  }
+
+  convert_op->batch_size = batch_size;
+
+  convert_op->context.f16_qd8_convert = (struct f16_qd8_convert_context) {
+    .n = convert_op->channels * sizeof(uint16_t),
+    .x_stride = convert_op->input_pixel_stride * sizeof(uint16_t),
+    .y_stride = convert_op->output_pixel_stride,
+    .batch_size = batch_size,
+    .rminmax_ukernel = convert_op->rminmax_config->ukernel,
+    .convert_ukernel = convert_op->unary_elementwise_config->ukernel,
+    .init_params = convert_op->unary_elementwise_config->init.f16_qs8_cvt,
+  };
+  memcpy(&convert_op->context.f16_qd8_convert.params, &convert_op->params.f16_default, sizeof(convert_op->params.f16_default));
+
+  convert_op->compute[0].type = xnn_parallelization_type_1d;
+  convert_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_f16_qd8_convert;
+  convert_op->compute[0].range[0] = batch_size;
+
+  convert_op->compute[1].type = xnn_parallelization_type_1d;
+  convert_op->compute[1].task_1d = (pthreadpool_task_1d_t) xnn_compute_pad_qd8_params;
+  convert_op->compute[1].range[0] = 1;
+
+  convert_op->state = xnn_run_state_needs_setup;
+
+  return xnn_status_success;
+}
+
 enum xnn_status xnn_reshape_convert_nc_f32_qd8(
     xnn_operator_t convert_op,
     size_t batch_size,
@@ -2280,6 +2357,42 @@ enum xnn_status xnn_setup_convert_nc_f32_f16(
   return setup_unary_elementwise_nc(
     convert_op, xnn_operator_type_convert_nc_f32_f16,
     input, output);
+}
+
+enum xnn_status xnn_setup_convert_nc_f16_qd8(
+  xnn_operator_t convert_op,
+  const void* input,
+  int8_t* output,
+  struct xnn_dynamic_quantization_params* quantization_params)
+{
+  if (convert_op->type != xnn_operator_type_convert_nc_f16_qd8) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f16_qd8),
+      xnn_operator_type_to_string(convert_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  switch (convert_op->state) {
+    case xnn_run_state_skip:
+      return xnn_status_success;
+    case xnn_run_state_invalid:
+      xnn_log_error(
+        "failed to setup %s operator: operator has not been reshaped yet",
+        xnn_operator_type_to_string(convert_op->type));
+      return xnn_status_invalid_state;
+    case xnn_run_state_needs_setup:
+      // Operator has been reshaped, but not setup, continue with setup.
+    case xnn_run_state_ready:
+      // Operator has been reshaped, and we are setting up with different pointers.
+      break;
+  }
+
+  convert_op->context.f16_qd8_convert.x = input;
+  convert_op->context.f16_qd8_convert.y = output;
+  convert_op->context.f16_qd8_convert.quantization_params = (struct xnn_qd8_quantization_params*) quantization_params;
+  convert_op->state = xnn_run_state_ready;
+
+  return xnn_status_success;
 }
 
 enum xnn_status xnn_setup_convert_nc_f32_qd8(
