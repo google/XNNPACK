@@ -13,7 +13,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/vcvt.h>
 
-
 void xnn_f32_qs8_vcvt_ukernel__scalar_imagic_u3(
     size_t batch,
     const float* input,
@@ -25,6 +24,7 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_imagic_u3(
   assert(input != NULL);
   assert(output != NULL);
 
+  const float* i = input;
   const float vscale = params->scalar_imagic.scale;
   const float vmagic_bias = params->scalar_imagic.magic_bias;
   const int32_t vmagic_min = params->scalar_imagic.magic_min;
@@ -32,10 +32,10 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_imagic_u3(
   const int32_t vmagic_bias_less_zero_point = params->scalar_imagic.magic_bias_less_zero_point;
 
   for (; batch >= 3 * sizeof(float); batch -= 3 * sizeof(float)) {
-    float vx0 = input[0];
-    float vx1 = input[1];
-    float vx2 = input[2];
-    input += 3;
+    float vx0 = i[0];
+    float vx1 = i[1];
+    float vx2 = i[2];
+    i += 3;
 
     vx0 *= vscale;
     vx1 *= vscale;
@@ -68,7 +68,7 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_imagic_u3(
   }
   if XNN_UNLIKELY(batch != 0) {
     do {
-      float vx = *input++;
+      float vx = *i++;
       vx *= vscale;
       vx += vmagic_bias;
 
