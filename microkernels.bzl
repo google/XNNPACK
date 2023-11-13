@@ -4701,6 +4701,8 @@ ALL_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1recpsadj.c",
     "src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpe.c",
     "src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpeadj.c",
+    "src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-1x8c2s4-minmax-neonfp16arith.c",
+    "src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-2x8c2s4-minmax-neonfp16arith.c",
 ]
 
 ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS = [
