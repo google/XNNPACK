@@ -2095,16 +2095,6 @@ size_t xnn_init_f32_qc4w_minmax_xop_params(
     params->xop.mask[i] = 0xF0;
     params->xop.shift[i] = 4;
   }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->xop.permlo[i * 2]     = i;
-    params->xop.permlo[i * 2 + 1] = i + 0xC0;
-    params->xop.permlo[i * 2 + 8] = i + 0x10;
-    params->xop.permlo[i * 2 + 9] = i + 0xD0;
-    params->xop.permhi[i * 2]     = i + 0x04;
-    params->xop.permhi[i * 2 + 1] = i + 0xC4;
-    params->xop.permhi[i * 2 + 8] = i + 0x14;
-    params->xop.permhi[i * 2 + 9] = i + 0xD4;
-  }
   return sizeof(params->xop);
 }
 

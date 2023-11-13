@@ -49,6 +49,8 @@ void xnn_qs8_gemm_xw_minmax_fp32_ukernel_1x4c8__sse2(
     w = (const int32_t*) w + 4;
 
     size_t k = kc;
+
+
     while (k >= 8 * sizeof(int8_t)) {
       const __m128i va0 = _mm_loadl_epi64((const __m128i*) a0);
       const __m128i vxa0 = _mm_srai_epi16(_mm_unpacklo_epi8(va0, va0), 8);

@@ -184,7 +184,7 @@ union xnn_f32_qc4w_minmax_params {
     XNN_ALIGN(16) float magic_bias_plus_kernel_zero_point_c1[4];
     XNN_ALIGN(16) uint8_t mask[16];
   } sse;
-  // XOP is same as SSE with shift, permlo and permhi added
+  // XOP is same as SSE with shift added
   struct {
     XNN_ALIGN(16) float min[4];
     XNN_ALIGN(16) float max[4];
@@ -194,8 +194,6 @@ union xnn_f32_qc4w_minmax_params {
     XNN_ALIGN(16) float magic_bias_plus_kernel_zero_point_c1[4];
     XNN_ALIGN(16) uint8_t mask[16];
     XNN_ALIGN(16) uint8_t shift[16];
-    XNN_ALIGN(16) uint8_t permlo[16];
-    XNN_ALIGN(16) uint8_t permhi[16];
   } xop;
   struct {
     XNN_ALIGN(32) float min[8];
