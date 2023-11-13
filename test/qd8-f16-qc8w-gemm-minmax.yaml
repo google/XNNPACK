@@ -160,3 +160,9 @@
   init: xnn_init_f16_minmax_fp16arith_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+
+# AArch32 assembly
+- name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_4x8c4__asm_aarch32_neondotfp16arith_cortex_a55
+  init: xnn_init_f16_minmax_fp16arith_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8

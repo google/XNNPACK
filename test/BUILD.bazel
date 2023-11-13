@@ -1520,6 +1520,9 @@ xnnpack_unit_test(
     timeout = "moderate",
     srcs = [
         "qd8-f16-qc8w-gemm-minmax.cc",
+        "qd8-f16-qc8w-gemm-minmax-2.cc",
+        "qd8-f16-qc8w-gemm-minmax-3.cc",
+        "qd8-f16-qc8w-gemm-minmax-4.cc",
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [

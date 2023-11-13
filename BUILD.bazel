@@ -2565,7 +2565,7 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/assembly.h"],
     aarch32_copts = [
         "-marm",
-        "-march=armv8.2-a+dotprod",
+        "-march=armv8.2-a+dotprod+fp16",
         "-mfpu=neon-fp-armv8",
     ],
     aarch32_srcs = AARCH32_ASM_MICROKERNEL_SRCS,
