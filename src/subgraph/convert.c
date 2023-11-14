@@ -47,13 +47,24 @@ static enum xnn_status create_convert_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
+    case xnn_compute_type_fp16_to_qd8: {
+      // Channel stride depends on number of non batch dims.
+      const struct xnn_value* output_value = values + output_id;
+      const size_t num_nonbatch_dims = output_value->quantization.num_nonbatch_dims;
+      const size_t dq_channel_stride = xnn_shape_multiply_trailing_dims(&values[input_id].shape, num_input_dims - num_nonbatch_dims);
+      status = xnn_create_convert_nc_f16_qd8(
+        /*channels=*/dq_channel_stride, /*input_stride=*/dq_channel_stride,  /*output_stride=*/dq_channel_stride,
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
+    }
     case xnn_compute_type_fp32_to_qd8: {
       // Channel stride depends on number of non batch dims.
       const struct xnn_value* output_value = values + output_id;
       const size_t num_nonbatch_dims = output_value->quantization.num_nonbatch_dims;
       const size_t dq_channel_stride = xnn_shape_multiply_trailing_dims(&values[input_id].shape, num_input_dims - num_nonbatch_dims);
       status = xnn_create_convert_nc_f32_qd8(
-        dq_channel_stride /* channels */, dq_channel_stride /* input stride */, dq_channel_stride /* output stride */,
+        /*channels=*/dq_channel_stride, /*input_stride=*/dq_channel_stride,  /*output_stride=*/dq_channel_stride,
         node->flags,
         &opdata->operator_objects[0]);
       break;
@@ -139,6 +150,18 @@ static enum xnn_status reshape_convert_operator(
         opdata->operator_objects[0],
         batch_size,
         threadpool);
+    case xnn_operator_type_convert_nc_f16_qd8: {
+       // Channel stride depends on number of non batch dims.
+       const uint32_t output_id = opdata->outputs[0];
+       assert(output_id < num_values);
+       const struct xnn_value* output_value = values + output_id;
+       const size_t num_nonbatch_dims = output_value->quantization.num_nonbatch_dims;
+       const size_t dq_batch_size = xnn_shape_multiply_batch_dims(&values[output_id].shape, num_nonbatch_dims);
+      return xnn_reshape_convert_nc_f16_qd8(
+        opdata->operator_objects[0],
+        dq_batch_size,
+        threadpool);
+    }
     case xnn_operator_type_convert_nc_f32_qd8: {
        // Channel stride depends on number of non batch dims.
        const uint32_t output_id = opdata->outputs[0];
@@ -219,6 +242,16 @@ static enum xnn_status setup_convert_operator(
         opdata->operator_objects[0],
         input_data,
         output_data);
+    case xnn_operator_type_convert_nc_f16_qd8:
+    {
+      void* quantization_params = output_value->quantization.dynamic_params;
+      assert(quantization_params != NULL);
+      return xnn_setup_convert_nc_f16_qd8(
+        opdata->operator_objects[0],
+        input_data,
+        output_data,
+        quantization_params);
+    }
     case xnn_operator_type_convert_nc_f32_qd8:
     {
       void* quantization_params = output_value->quantization.dynamic_params;
@@ -289,8 +322,13 @@ static inline enum xnn_compute_type validate_datatypes(
       }
       break;
     case xnn_datatype_fp16:
-      if (output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_fp16_to_fp32;
+      switch (output_datatype) {
+        case (xnn_datatype_qdint8):
+          return xnn_compute_type_fp16_to_qd8;
+        case (xnn_datatype_fp32):
+          return xnn_compute_type_fp16_to_fp32;
+        default:
+          break;
       }
       break;
     case xnn_datatype_qint8:

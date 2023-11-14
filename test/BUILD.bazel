@@ -3659,6 +3659,7 @@ xnnpack_unit_test(
         "fully-connected.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
         "//:common",
