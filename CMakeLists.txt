@@ -586,7 +586,7 @@ IF(XNNPACK_TARGET_PROCESSOR STREQUAL "arm")
   SET_PROPERTY(SOURCE ${PROD_NEONDOT_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+dotprod -mfpu=neon-fp-armv8 ")
   SET_PROPERTY(SOURCE ${ALL_NEONI8MM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+i8mm+fp16 -mfpu=neon-fp-armv8 ")
   SET_PROPERTY(SOURCE ${PROD_NEONI8MM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+i8mm+fp16 -mfpu=neon-fp-armv8 ")
-  SET_PROPERTY(SOURCE ${AARCH32_ASM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+dotprod -mfpu=neon-fp-armv8 ")
+  SET_PROPERTY(SOURCE ${AARCH32_ASM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+dotprod+fp16 -mfpu=neon-fp-armv8 ")
   # Workground the neon detection bug in ARM v8
   # Related links:
   #   https://github.com/android/ndk/issues/910
