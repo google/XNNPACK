@@ -124,6 +124,55 @@ class SubgraphTester {
     return *this;
   }
 
+  inline SubgraphTester& AddDynamicallyQuantizedTensor(
+    const std::vector<size_t>& dims,
+    uint32_t external_id,
+    uint32_t flags = 0)
+  {
+    uint32_t id_out = 0;
+    const xnn_status status =
+        xnn_define_dynamically_quantized_tensor_value(subgraph_.get(), xnn_datatype_qdint8,
+                                          dims.size(), 1,
+                                dims.data(), external_id, flags, &id_out);
+    EXPECT_EQ(status, xnn_status_success);
+    EXPECT_EQ(id_out, external_id);
+
+    return *this;
+  }
+
+  inline SubgraphTester& AddStaticTensorQS8(const std::vector<size_t>& dims,
+                                            TensorType tensor_type,
+                                            const float* scale,
+                                            uint32_t external_id,
+                                            uint32_t flags = 0,
+                                            int8_t* data = nullptr) {
+    if (data == nullptr) {
+      const size_t num_elements = NumElements(dims);
+      static_data_.emplace_back(num_elements * sizeof(int8_t));
+      data = reinterpret_cast<int8_t*>(static_data_.back().data());
+
+      if (tensor_type == TensorType::kDense) {
+        std::generate(data, data + num_elements, [&]() { return w8dist(rng_); });
+      } else {
+        // Create tensor with 90% sparsity in two steps:
+        // 1. Generate non-zero elements in the beginning of the vector
+        // 2. Randomize positions of non-zero elements
+        const size_t num_nonzero_elements = num_elements / 10;
+        std::generate(data, data + num_nonzero_elements, [&]() { return f32dist(rng_); });
+        std::shuffle(data, data + num_elements, rng_);
+      }
+    }
+
+    uint32_t id_out;
+    const xnn_status status =
+        xnn_define_channelwise_quantized_tensor_value(subgraph_.get(), xnn_datatype_qcint8, scale, dims.size(), 0,
+                                dims.data(), data, external_id, flags, &id_out);
+    EXPECT_EQ(status, xnn_status_success);
+    EXPECT_EQ(id_out, external_id);
+    return *this;
+  }
+
+
   inline SubgraphTester& AddStaticTensorF32(const std::vector<size_t>& dims,
                                             TensorType tensor_type,
                                             uint32_t external_id,
@@ -217,6 +266,13 @@ class SubgraphTester {
     const xnn_status status = xnn_define_static_constant_pad(
         subgraph_.get(), pre_paddings.data(), post_paddings.data(), padding_value, input_id,
         output_id, /*flags=*/0);
+    EXPECT_EQ(status, xnn_status_success);
+    return *this;
+  }
+
+  inline SubgraphTester& AddConvert(uint32_t input_id, uint32_t output_id) {
+    const xnn_status status = xnn_define_convert(
+        subgraph_.get(), input_id, output_id, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
     return *this;
   }
@@ -512,7 +568,7 @@ class SubgraphTester {
   std::vector<std::vector<char>> static_data_;
   std::mt19937 rng_;
   std::uniform_real_distribution<float> f32dist = std::uniform_real_distribution<float>(-1.0f, +1.0f);
-
+  std::uniform_int_distribution<int8_t> w8dist = std::uniform_int_distribution<int8_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max());
 };
 
 }  // namespace xnnpack

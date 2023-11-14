@@ -3,10 +3,15 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
+#include <functional>
 #include <memory>
+#include <random>
+#include <vector>
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -383,6 +388,103 @@ TEST(SUBGRAPH_FP16, convolution_bias_used_by_another_node) {
   // But original fp32 weights kept around.
   ASSERT_EQ(static_cast<const float*>(static_value->fp32_data)[0], 1.0f);
   ASSERT_EQ(static_cast<const float*>(static_value->fp32_data)[1], 2.0f);
+}
+
+TEST(SUBGRAPH_FP16, fully_connected_qd8_f16_qc8w) {
+  auto tester = SubgraphTester(5);
+  auto reference_tester = SubgraphTester(5);
+
+  int8_t static_filter_data[6 + XNN_EXTRA_BYTES / sizeof(int8_t)] = {
+    1, 2, 3,
+    -3, -2, -1,
+  };
+  float bias[2] = {1, 2};
+  float kernel_scale[2] = {0.5f, 1.5f};
+  // external input[0]   bias [2]   static filter [1]
+  //        |              /        /
+  //  [convert f32->qd8]  /        /
+  //               \     /        /
+  //                \   /        /
+  //                [fully connected]
+  //                  |
+  //                fully connected out [3]
+  const uint32_t input_id = 0;
+  const uint32_t filter_id = 1;
+  const uint32_t bias_id = 2;
+  const uint32_t converted_input_id = 3;
+  const uint32_t fully_connected_out_id = 4;
+  tester
+      .AddInputTensorF32({5, 3}, input_id)
+      .AddDynamicallyQuantizedTensor({5, 3}, converted_input_id, /*flags=*/0)
+      .AddStaticTensorQS8({2, 3}, TensorType::kDense, &kernel_scale[0], filter_id, /*flags=*/0, static_filter_data)
+      .AddStaticTensorF32({2}, TensorType::kDense, bias_id, /*flags=*/0, &bias[0])
+      .AddOutputTensorF32({5, 2}, fully_connected_out_id)
+      .AddConvert(input_id, converted_input_id)
+      .AddFullyConnected(converted_input_id, filter_id, bias_id, fully_connected_out_id)
+      .Optimize()
+      .RewriteForFp16();
+
+  // After rewriting for FP16, the graph should look like this, with * indicating new operators and values created:
+  //
+  // external input[0]    bias [2]  filter [1]*
+  //           |                |     /
+  //        [convert f32->f16]  |    /
+  //              |             |   /
+  //        [convert f16->qd8]* |  /
+  //               \            | /
+  //                \           |/
+  //                [fully connected]
+  //                  |
+  //                [convert f16->f32]*
+  //                  |
+  //                fully connected out [3]
+
+  reference_tester
+      .AddInputTensorF32({5, 3}, input_id)
+      .AddDynamicallyQuantizedTensor({5, 3}, converted_input_id, /*flags=*/0)
+      .AddStaticTensorQS8({2, 3}, TensorType::kDense, &kernel_scale[0], filter_id, /*flags=*/0, static_filter_data)
+      .AddStaticTensorF32({2}, TensorType::kDense, bias_id, /*flags=*/0, &bias[0])
+      .AddOutputTensorF32({5, 2}, fully_connected_out_id)
+      .AddConvert(input_id, converted_input_id)
+      .AddFullyConnected(converted_input_id, filter_id, bias_id, fully_connected_out_id);
+
+  // We should have 4 nodes, the original fully connected and conversion nodes, a convert for the external input,
+  // and a convert for the external output.
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.f, 1.f), std::ref(rng));
+  std::vector<float> input(15);
+  std::generate(input.begin(), input.end(), std::ref(f32rng));
+  std::vector<float> reference_output(10), output(10);
+  ASSERT_EQ(tester.NumNodes(), 4);
+
+
+  xnn_runtime_t fp16_runtime_ptr = nullptr;
+  xnn_status status = xnn_create_runtime(tester.Subgraph(), &fp16_runtime_ptr);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_fp16_runtime(fp16_runtime_ptr, xnn_delete_runtime);
+  ASSERT_EQ(xnn_status_success, status);
+  xnn_runtime_t fp32_runtime_ptr = nullptr;
+  status = xnn_create_runtime(reference_tester.Subgraph(), &fp32_runtime_ptr);
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_fp32_runtime(fp32_runtime_ptr, xnn_delete_runtime);
+
+  std::array<xnn_external_value, 2> external_values = {
+    xnn_external_value{input_id, input.data()}, xnn_external_value{fully_connected_out_id, output.data()}};
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(fp16_runtime_ptr, 2, external_values.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(fp16_runtime_ptr));
+
+  std::array<xnn_external_value, 2> reference_external_values = {
+    xnn_external_value{input_id, input.data()}, xnn_external_value{fully_connected_out_id, reference_output.data()}};
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(fp32_runtime_ptr, 2, reference_external_values.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(fp32_runtime_ptr));
+
+  for (int i = 0; i < output.size(); ++i) {
+    const float tolerance = std::max(std::abs(reference_output[i]) * 5e-2, 5e-2);
+    ASSERT_NEAR(output[i], reference_output[i], tolerance);
+  }
 }
 
 TEST(SUBGRAPH_FP16, fully_connected_weights_used_by_another_node) {
