@@ -4582,6 +4582,9 @@ SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vsubc-minmax-neonfp16arith-u16.c
   src/f16-vclamp/gen/f16-vclamp-neonfp16arith-u8.c
   src/f16-vclamp/gen/f16-vclamp-neonfp16arith-u16.c
+  src/f16-vcmul/gen/f16-vcmul-neonfp16arith-u8.c
+  src/f16-vcmul/gen/f16-vcmul-neonfp16arith-u16.c
+  src/f16-vcmul/gen/f16-vcmul-neonfp16arith-u32.c
   src/f16-velu/gen/f16-velu-neonfp16arith-rr1-p3-u8.c
   src/f16-velu/gen/f16-velu-neonfp16arith-rr1-p3-u16.c
   src/f16-vhswish/gen/f16-vhswish-neonfp16arith-u8.c

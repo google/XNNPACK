@@ -2379,6 +2379,13 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vclamp-test PRIVATE hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME f32-vclamp-test COMMAND f32-vclamp-test)
 
+  ADD_EXECUTABLE(f16-vcmul-test test/f16-vcmul.cc)
+  SET_TARGET_PROPERTIES(f16-vcmul-test PROPERTIES CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-vcmul-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-vcmul-test PRIVATE fp16 pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(f16-vcmul-test PRIVATE hardware-config logging microkernels-all)
+  ADD_TEST(NAME f16-vcmul-test COMMAND f16-vcmul-test)
+
   ADD_EXECUTABLE(f32-vcmul-test test/f32-vcmul.cc)
   SET_TARGET_PROPERTIES(f32-vcmul-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f32-vcmul-test PRIVATE include src test)

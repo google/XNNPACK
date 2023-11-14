@@ -34,6 +34,10 @@ extern "C" {
       void* y,                                              \
       const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vcmul_ukernel__neonfp16arith_u8)
+DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vcmul_ukernel__neonfp16arith_u16)
+DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vcmul_ukernel__neonfp16arith_u32)
+
 DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vmax_ukernel__neonfp16arith_u8)
 DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vmax_ukernel__neonfp16arith_u16)
 DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vmin_ukernel__neonfp16arith_u8)

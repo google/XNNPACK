@@ -179,6 +179,7 @@ tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f3
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f32-vsubc-relu.yaml    --output test/f32-vsubc-relu.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f32-vsubc.yaml         --output test/f32-vsubc.cc &
 
+tools/generate-vbinary-test.py --tester VCMulMicrokernelTester --spec test/f16-vcmul.yaml --output test/f16-vcmul.cc &
 tools/generate-vbinary-test.py --tester VCMulMicrokernelTester --spec test/f32-vcmul.yaml --output test/f32-vcmul.cc &
 
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/qs8-vadd-minmax.yaml  --output test/qs8-vadd-minmax.cc &
