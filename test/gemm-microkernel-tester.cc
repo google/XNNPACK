@@ -685,7 +685,7 @@ void GemmMicrokernelTester::Test(
 
     std::generate(bias.begin(), bias.end(), std::ref(f32rng));
     std::generate(kernel_scale.begin(), kernel_scale.end(), std::ref(scalerng));
-    std::fill(c.begin(), c.end(), nanf(""));
+    std::fill(c.begin(), c.end(), UINT16_C(0xDEAD));
 
     std::fill(packed_w.begin(), packed_w.end(), 0);
     // Row sums are multiplied by input zero point, since we don't know it
