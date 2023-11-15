@@ -70,7 +70,7 @@ static enum xnn_status reshape_floor_operator(
         batch_size,
         threadpool);
     case xnn_operator_type_floor_nc_f16:
-      return xnn_reshape_floor_nc_f32(
+      return xnn_reshape_floor_nc_f16(
         opdata->operator_objects[0],
         batch_size,
         threadpool);
@@ -108,7 +108,7 @@ static enum xnn_status setup_floor_operator(
         input_data,
         output_data);
     case xnn_operator_type_floor_nc_f16:
-      return xnn_setup_floor_nc_f32(
+      return xnn_setup_floor_nc_f16(
         opdata->operator_objects[0],
         input_data,
         output_data);
