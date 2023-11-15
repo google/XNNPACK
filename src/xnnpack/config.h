@@ -150,6 +150,7 @@ struct xnn_cmul_config {
   size_t element_tile;
 };
 
+XNN_INTERNAL const struct xnn_cmul_config* xnn_init_f16_cmul_config();
 XNN_INTERNAL const struct xnn_cmul_config* xnn_init_f32_cmul_config();
 
 struct xnn_binary_elementwise_subconfig {

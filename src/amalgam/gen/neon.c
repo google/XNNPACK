@@ -9264,8 +9264,8 @@ void xnn_f32_vcmul_ukernel__neon_u8(
   const float* ai = (const float*) ((uintptr_t) input_a + batch);
   const float* br = input_b;
   const float* bi = (const float*) ((uintptr_t) input_b + batch);
-  float* or = output;
-  float* oi = (float*) ((uintptr_t) output + batch);
+  float* cr = output;
+  float* ci = (float*) ((uintptr_t) output + batch);
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const float32x4_t va0r = vld1q_f32(ar); ar += 4;
     const float32x4_t va0i = vld1q_f32(ai); ai += 4;
@@ -9286,10 +9286,10 @@ void xnn_f32_vcmul_ukernel__neon_u8(
     vacc1r = vmlsq_f32(vacc1r, va1i, vb1i);
     vacc1i = vmlaq_f32(vacc1i, va1i, vb1r);
 
-    vst1q_f32(or, vacc0r); or += 4;
-    vst1q_f32(oi, vacc0i); oi += 4;
-    vst1q_f32(or, vacc1r); or += 4;
-    vst1q_f32(oi, vacc1i); oi += 4;
+    vst1q_f32(cr, vacc0r); cr += 4;
+    vst1q_f32(ci, vacc0i); ci += 4;
+    vst1q_f32(cr, vacc1r); cr += 4;
+    vst1q_f32(ci, vacc1i); ci += 4;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float32x4_t var = vld1q_f32(ar); ar += 4;
@@ -9303,8 +9303,8 @@ void xnn_f32_vcmul_ukernel__neon_u8(
     vaccr = vmlsq_f32(vaccr, vai, vbi);
     vacci = vmlaq_f32(vacci, vai, vbr);
 
-    vst1q_f32(or, vaccr); or += 4;
-    vst1q_f32(oi, vacci); oi += 4;
+    vst1q_f32(cr, vaccr); cr += 4;
+    vst1q_f32(ci, vacci); ci += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
     const float32x4_t var = vld1q_f32(ar); ar += 4;
@@ -9321,14 +9321,14 @@ void xnn_f32_vcmul_ukernel__neon_u8(
     float32x2_t vaccr_lo = vget_low_f32(vaccr);
     float32x2_t vacci_lo = vget_low_f32(vacci);
     if (batch & (2 * sizeof(float))) {
-      vst1_f32(or, vaccr_lo); or += 2;
-      vst1_f32(oi, vacci_lo); oi += 2;
+      vst1_f32(cr, vaccr_lo); cr += 2;
+      vst1_f32(ci, vacci_lo); ci += 2;
       vaccr_lo = vget_high_f32(vaccr);
       vacci_lo = vget_high_f32(vacci);
     }
     if (batch & (1 * sizeof(float))) {
-      vst1_lane_f32(or, vaccr_lo, 0);
-      vst1_lane_f32(oi, vacci_lo, 0);
+      vst1_lane_f32(cr, vaccr_lo, 0);
+      vst1_lane_f32(ci, vacci_lo, 0);
     }
   }
 }
