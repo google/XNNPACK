@@ -131,6 +131,7 @@ enum xnn_operator_type {
   xnn_operator_type_resize_bilinear_nhwc_f32,
   xnn_operator_type_resize_bilinear_nhwc_s8,
   xnn_operator_type_resize_bilinear_nhwc_u8,
+  xnn_operator_type_rope_nthc_f16,
   xnn_operator_type_rope_nthc_f32,
   xnn_operator_type_scaled_dot_product_attention_nhtc_f16,
   xnn_operator_type_scaled_dot_product_attention_nhtc_f32,

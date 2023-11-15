@@ -74,6 +74,26 @@ error:
   return status;
 }
 
+enum xnn_status xnn_create_rope_nthc_f16(
+  size_t max_tokens,
+  uint32_t flags,
+  xnn_operator_t* rope_op_out)
+{
+  const struct xnn_cmul_config* config = xnn_init_f16_cmul_config();
+  if (config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_rope_nthc_f16));
+    return xnn_status_unsupported_hardware;
+  }
+
+  return create_rope_nthc(
+    max_tokens,
+    flags,
+    xnn_operator_type_rope_nthc_f16,
+    config,
+    rope_op_out);
+}
+
 enum xnn_status xnn_create_rope_nthc_f32(
   size_t max_tokens,
   uint32_t flags,
@@ -173,6 +193,22 @@ static enum xnn_status reshape_rope_nthc(
   return xnn_status_success;
 }
 
+enum xnn_status xnn_reshape_rope_nthc_f16(
+    xnn_operator_t rope_op,
+    size_t batch_size,
+    size_t tokens,
+    size_t heads,
+    size_t channels,
+    pthreadpool_t threadpool)
+{
+  return reshape_rope_nthc(
+    rope_op, xnn_operator_type_rope_nthc_f16,
+    batch_size, tokens, heads, channels,
+    /*log2_data_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    pthreadpool_get_threads_count(threadpool));
+}
+
 enum xnn_status xnn_reshape_rope_nthc_f32(
     xnn_operator_t rope_op,
     size_t batch_size,
@@ -224,6 +260,17 @@ static enum xnn_status setup_rope_nthc(
   rope_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
+}
+
+enum xnn_status xnn_setup_rope_nthc_f16(
+  xnn_operator_t rope_op,
+  const void* input,
+  const void* weights,
+  void* output)
+{
+  return setup_rope_nthc(
+    rope_op, xnn_operator_type_rope_nthc_f16,
+    input, weights, output);
 }
 
 enum xnn_status xnn_setup_rope_nthc_f32(

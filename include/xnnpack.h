@@ -4971,6 +4971,25 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_u8(
   const uint8_t* input,
   uint8_t* output);
 
+enum xnn_status xnn_create_rope_nthc_f16(
+  size_t max_tokens,
+  uint32_t flags,
+  xnn_operator_t* rope_op_out);
+
+enum xnn_status xnn_reshape_rope_nthc_f16(
+  xnn_operator_t rope_op,
+  size_t batch_size,
+  size_t tokens,
+  size_t heads,
+  size_t channels,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_rope_nthc_f16(
+  xnn_operator_t rope_op,
+  const void* input,
+  const void* weights,
+  void* output);
+
 enum xnn_status xnn_create_rope_nthc_f32(
   size_t max_tokens,
   uint32_t flags,
