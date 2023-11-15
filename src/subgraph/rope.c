@@ -27,11 +27,23 @@ static enum xnn_status create_rope_operator(
   assert(node->num_inputs == 2);
   assert(node->num_outputs == 1);
 
-  assert(node->compute_type == xnn_compute_type_fp32);
-  const enum xnn_status status = xnn_create_rope_nthc_f32(
-    node->params.rope.max_tokens,
-    /*flags=*/0,
-    &opdata->operator_objects[0]);
+  enum xnn_status status;
+  switch (node->compute_type) {
+    case xnn_compute_type_fp16:
+      status = xnn_create_rope_nthc_f16(
+        node->params.rope.max_tokens,
+        /*flags=*/0,
+        &opdata->operator_objects[0]);
+      break;
+    case xnn_compute_type_fp32:
+      status = xnn_create_rope_nthc_f32(
+        node->params.rope.max_tokens,
+        /*flags=*/0,
+        &opdata->operator_objects[0]);
+      break;
+    default:
+      status = xnn_status_invalid_parameter;
+  }
   return status;
 }
 
@@ -50,14 +62,26 @@ static enum xnn_status reshape_rope_operator(
   const size_t heads = values[input_id].shape.dim[num_input_dims - 2];
   const size_t channels = values[input_id].shape.dim[num_input_dims - 1];
 
-  assert(opdata->operator_objects[0]->type == xnn_operator_type_rope_nthc_f32);
-  return xnn_reshape_rope_nthc_f32(
-    opdata->operator_objects[0],
-    batch_size,
-    tokens,
-    heads,
-    channels,
-    threadpool);
+  switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_rope_nthc_f16:
+      return xnn_reshape_rope_nthc_f16(
+        opdata->operator_objects[0],
+        batch_size,
+        tokens,
+        heads,
+        channels,
+        threadpool);
+    case xnn_operator_type_rope_nthc_f32:
+      return xnn_reshape_rope_nthc_f32(
+        opdata->operator_objects[0],
+        batch_size,
+        tokens,
+        heads,
+        channels,
+        threadpool);
+    default:
+      return xnn_status_invalid_parameter;
+  }
 }
 
 static enum xnn_status setup_rope_operator(
@@ -90,12 +114,22 @@ static enum xnn_status setup_rope_operator(
   void* output_data = output_value->data;
   assert(output_data != NULL);
 
-  assert(opdata->operator_objects[0]->type == xnn_operator_type_rope_nthc_f32);
-  return xnn_setup_rope_nthc_f32(
-    opdata->operator_objects[0],
-    input_data,
-    weights_data,
-    output_data);
+  switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_rope_nthc_f16:
+      return xnn_setup_rope_nthc_f16(
+        opdata->operator_objects[0],
+        input_data,
+        weights_data,
+        output_data);
+    case xnn_operator_type_rope_nthc_f32:
+      return xnn_setup_rope_nthc_f32(
+        opdata->operator_objects[0],
+        input_data,
+        weights_data,
+        output_data);
+    default:
+      return xnn_status_invalid_parameter;
+  }
 }
 
 enum xnn_status xnn_define_rope(
