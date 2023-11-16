@@ -453,7 +453,7 @@ TEST(SUBGRAPH_FP16, fully_connected_qd8_f16_qc8w) {
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.f, 1.f), std::ref(rng));
-  std::vector<float> input(15);
+  std::vector<float> input(15 + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   std::vector<float> reference_output(10), output(10);
   ASSERT_EQ(tester.NumNodes(), 4);
