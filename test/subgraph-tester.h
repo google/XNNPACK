@@ -568,7 +568,7 @@ class SubgraphTester {
   std::vector<std::vector<char>> static_data_;
   std::mt19937 rng_;
   std::uniform_real_distribution<float> f32dist = std::uniform_real_distribution<float>(-1.0f, +1.0f);
-  std::uniform_int_distribution<int8_t> w8dist = std::uniform_int_distribution<int8_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max());
+  std::uniform_int_distribution<int32_t> w8dist = std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max());
 };
 
 }  // namespace xnnpack

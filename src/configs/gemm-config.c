@@ -1686,7 +1686,7 @@ static void init_qd8_f32_qc4w_gemm_config(void) {
 }
 
 static void init_qd8_f16_qc8w_gemm_config(void) {
-  #if XNN_ARCH_ARM
+  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
@@ -1777,7 +1777,7 @@ static void init_qd8_f16_qc8w_gemm_config(void) {
         }
       #endif  // XNN_ENABLE_ASSEMBLY
     }
-  #elif XNN_ARCH_ARM64
+  #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_PLATFORM_IOS || XNN_PLATFORM_MAC || XNN_PLATFORM_WINDOWS
