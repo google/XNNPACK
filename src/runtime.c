@@ -39,6 +39,36 @@
   #error "XNN_ENABLE_JIT is not defined"
 #endif
 
+enum xnn_status xnn_reshape_external_value(
+    xnn_runtime_t runtime,
+    uint32_t external_id,
+    size_t num_new_dims,
+    const size_t* new_dims) {
+  if (external_id >= runtime->num_values) {
+    xnn_log_error("failed to setup runtime: out-of-bounds ID %" PRIu32 " in external value",
+                  external_id);
+    return xnn_status_invalid_parameter;
+  }
+  struct xnn_value* value = &runtime->values[external_id];
+  if (value->allocation_type != xnn_allocation_type_external) {
+    xnn_log_error("failed to setup runtime: Value %" PRIu32 " is not external (%d)", external_id, value->allocation_type);
+    return xnn_status_invalid_parameter;
+  }
+  if (num_new_dims != value->shape.num_dims) {
+    xnn_log_error("failed to reshape runtime: num_new_dims (%zu) is not equal to num_dims (%zu)", num_new_dims, value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
+  const struct xnn_shape* shape = &value->shape;
+  for (size_t i = 0; i < num_new_dims; ++i) {
+    if (new_dims[i] > shape->maximum_dim[i]) {
+      xnn_log_error("failed to reshape runtime: dim %zu is larger than max shape (%zu) (%zu)", i, shape->maximum_dim[i], new_dims[i]);
+      return xnn_status_invalid_parameter;
+    }
+    value->shape.dim[i] = new_dims[i];
+  }
+  return xnn_status_success;
+}
+
 enum xnn_status xnn_create_workspace(xnn_workspace_t* workspace_out)
 {
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -504,6 +534,7 @@ enum xnn_status xnn_create_runtime_v4(
       }
       runtime->opdata[i].setup = node->setup;
       runtime->opdata[i].reshape = node->reshape;
+      runtime->opdata[i].infer_shape_forward = node->infer_shape_forward;
     }
   }
 
@@ -563,6 +594,22 @@ enum xnn_status track_operator_workspace(
       xnn_add_operator_workspace_allocation_tracker(
         mem_alloc_tracker, runtime->num_values + opdata_id, xnn_get_rounded_size(opdata->workspace_size),
         opdata_id);
+    }
+  }
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_reshape_runtime(
+  xnn_runtime_t runtime)
+{
+  for (size_t i = 0; i < runtime->num_ops; i++) {
+    if (runtime->opdata[i].infer_shape_forward == NULL) {
+      xnn_log_error("Operator %s does not support shape inference", xnn_operator_type_to_string(runtime->opdata[i].operator_objects[0]->type));
+      return xnn_status_invalid_parameter;
+    }
+    const enum xnn_shape_inference_status status = runtime->opdata[i].infer_shape_forward(&runtime->opdata[i], runtime->values, runtime->num_values);
+    if (status == xnn_shape_inference_status_error) {
+      return xnn_status_invalid_parameter;
     }
   }
   return xnn_status_success;

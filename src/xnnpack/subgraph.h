@@ -106,6 +106,7 @@ struct xnn_value {
   struct xnn_shape shape;
   /// Size of tensor.
   size_t size;
+  size_t max_size;
   /// Type of allocation for this tensors' data.
   enum xnn_allocation_type allocation_type;
   /// Binary features of the tensor. Supported values are any combination of:
@@ -210,8 +211,9 @@ enum xnn_shape_inference_status {
 };
 
 typedef enum xnn_shape_inference_status (*xnn_infer_shape_fn)(
-  const struct xnn_node* node,
-  struct xnn_value* values);
+  const struct xnn_operator_data* opdata,
+  struct xnn_value* values,
+  size_t num_values);
 
 enum xnn_compute_type {
   xnn_compute_type_invalid = 0,
@@ -394,6 +396,7 @@ struct xnn_operator_data {
   xnn_operator_t operator_objects[XNN_MAX_OPERATOR_OBJECTS];
   xnn_reshape_operator_fn reshape;
   xnn_setup_operator_fn setup;
+  xnn_infer_shape_fn infer_shape_forward;
   size_t batch_size;
   size_t sequence_size;
   size_t heads;
@@ -491,6 +494,7 @@ enum xnn_status xnn_subgraph_add_nodes(xnn_subgraph_t subgraph, size_t num_nodes
 size_t xnn_tensor_get_size(const struct xnn_value* value);
 
 size_t xnn_tensor_get_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id);
+size_t xnn_tensor_get_max_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id);
 
 // Checks if a tensor shape is completely known.
 bool xnn_tensor_shape_is_static(const struct xnn_value* value);
@@ -505,7 +509,7 @@ XNN_INLINE static size_t xnn_get_rounded_size(size_t size)
 // Returns the size of tensor rounded to appropriate extra bytes and allocation alignment.
 XNN_INLINE static size_t xnn_tensor_get_rounded_size(const struct xnn_value* value)
 {
-  return xnn_get_rounded_size(value->size);
+  return xnn_get_rounded_size(value->max_size);
 }
 
 // Sets a single dimension of to based on a dimension of from.

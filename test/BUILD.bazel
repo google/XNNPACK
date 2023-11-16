@@ -3330,6 +3330,20 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "dynamic_subgraph_test",
+    srcs = [
+        "dynamic_subgraph_test.cc",
+    ],
+    deps = [
+        ":subgraph_unary_tester",
+        "//:XNNPACK_test_mode",
+        "//:node_type",
+        "//:operators_test_mode",
+        "//:subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "abs_test",
     srcs = [
         "abs.cc",
