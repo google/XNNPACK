@@ -177,7 +177,7 @@
       } \
     } while (0)
 #else
-  #define TEST_REQUIRES_X86_AVX512VNNI
+  #define TEST_REQUIRES_X86_AVXVNNI
 #endif
 
 #if XNN_ARCH_ARM
