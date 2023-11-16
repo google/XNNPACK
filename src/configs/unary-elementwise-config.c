@@ -732,9 +732,9 @@ static void init_f32_elu_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_u64;
-      f32_elu_config.init.f32_elu = xnn_init_f32_elu_avx512_rr1_lut16_p3_params;
-      f32_elu_config.element_tile = 64;
+      f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__avx512f_rr1_p6_u128;
+      f32_elu_config.init.f32_elu = xnn_init_f32_elu_avx512_rr1_p6_params;
+      f32_elu_config.element_tile = 128;
     } else if (hardware_config->use_x86_avx2) {
       f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_u56;
       f32_elu_config.init.f32_elu = xnn_init_f32_elu_avx2_rr1_lut4_p4_params;
