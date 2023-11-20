@@ -10,10 +10,11 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
+#include <xnnpack/prefetch.h>
 #include <xnnpack/unaligned.h>
 
 
-void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__avx512vnni(
+void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__avx512vnni_prfm(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -64,6 +65,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__avx512vnni(
       const __m256i vb4567CDEF = _mm256_unpackhi_epi8(vb4beven, vb4bodd);
       __m512i vb0123456789ABCDEF = _mm512_permutex2var_epi64(_mm512_castsi256_si512(vb012389AB), vpermute_mask, _mm512_castsi256_si512(vb4567CDEF));
 
+      xnn_prefetch_to_l1((const int8_t*) w + 960);
+
       vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEF);
 
       w = (const int8_t*) w + 32;
@@ -102,7 +105,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__avx512vnni(
   } while (nc != 0);
 }
 
-void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x16c4__avx512vnni(
+void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x16c4__avx512vnni_prfm(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -218,6 +221,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x16c4__avx512vnni(
       const __m256i vb012389AB = _mm256_unpacklo_epi8(vb4beven, vb4bodd);
       const __m256i vb4567CDEF = _mm256_unpackhi_epi8(vb4beven, vb4bodd);
       __m512i vb0123456789ABCDEF = _mm512_permutex2var_epi64(_mm512_castsi256_si512(vb012389AB), vpermute_mask, _mm512_castsi256_si512(vb4567CDEF));
+
+      xnn_prefetch_to_l1((const int8_t*) w + 960);
 
       vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEF);
       vacc1x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc1x0123456789ABCDEF, va1x0123, vb0123456789ABCDEF);
@@ -323,7 +328,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x16c4__avx512vnni(
   } while (nc != 0);
 }
 
-void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__avx512vnni(
+void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__avx512vnni_prfm(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -367,6 +372,8 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__avx512vnni(
 
       const __m512i vb0123456789ABCDEF = _mm512_load_si512(w);
 
+      xnn_prefetch_to_l1((const int8_t*) w + 960);
+
       vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEF);
 
       w = (const int8_t*) w + 64;
@@ -404,7 +411,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__avx512vnni(
   } while (nc != 0);
 }
 
-void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c4__avx512vnni(
+void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c4__avx512vnni_prfm(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -513,6 +520,8 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c4__avx512vnni(
       va6x0123 = _mm512_xor_epi32(va6x0123, vsign_mask);
 
       const __m512i vb0123456789ABCDEF = _mm512_load_si512(w);
+
+      xnn_prefetch_to_l1((const int8_t*) w + 960);
 
       vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEF);
       vacc1x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc1x0123456789ABCDEF, va1x0123, vb0123456789ABCDEF);
