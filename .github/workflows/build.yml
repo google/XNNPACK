@@ -85,6 +85,27 @@ jobs:
       - name: Run tests
         run: ctest --output-on-failure --parallel $(nproc)
         working-directory: ${{ github.workspace }}/build/linux/riscv64
+  cmake-linux-riscv64-rvv:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update apt
+        run: sudo apt update
+      - name: Install ninja
+        run: sudo apt install ninja-build
+      - name: Download riscv64 cross-toolchain tarball
+        run: wget https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2023.11.20/riscv64-glibc-ubuntu-22.04-llvm-nightly-2023.11.20-nightly.tar.gz
+        working-directory: ${{ github.workspace }}
+      - name: Install riscv64 cross-toolchain
+        run: tar zxvf riscv64-glibc-ubuntu-22.04-llvm-nightly-2023.11.20-nightly.tar.gz
+        working-directory: ${{ github.workspace }}
+      - name: Configure and build
+        run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release -DXNNPACK_ENABLE_RISCV_VECTOR=ON -DRISCV_TOOLCHAIN_ROOT=${{ github.workspace }}/riscv/ -DRISCV_QEMU_ROOT=${{ github.workspace }}/riscv/
+        working-directory: ${{ github.workspace }}
+      - name: Run tests
+        run: ctest --output-on-failure --parallel $(nproc)
+        working-directory: ${{ github.workspace }}/build/linux/riscv64
   cmake-windows-arm64:
     runs-on: windows-latest
     timeout-minutes: 120
