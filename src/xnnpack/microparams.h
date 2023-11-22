@@ -173,6 +173,7 @@ union xnn_f32_qc4w_minmax_params {
     float min;
     float max;
     int32_t minus_kernel_zero_point;
+    uint8_t mask;  // 0xF0
   } scalar;
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
