@@ -2687,6 +2687,9 @@ xnnpack_aggregate_library(
     }) + select({
         ":riscv_vector_enabled": ["XNN_ENABLE_RISCV_VECTOR=1"],
         "//conditions:default": ["XNN_ENABLE_RISCV_VECTOR=0"],
+    }) + select({
+        ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
+        "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
     }),
     generic_deps = [
         ":scalar_bench_microkernels",
@@ -2710,6 +2713,9 @@ xnnpack_aggregate_library(
         "//conditions:default": [],
     }) + select({
         ":riscv_vector_enabled": [":rvv_bench_microkernels"],
+        "//conditions:default": [],
+    }) + select({
+        ":avxvnni_enabled": [":avxvnni_bench_microkernels"],
         "//conditions:default": [],
     }),
     wasm_deps = [
@@ -2737,7 +2743,6 @@ xnnpack_aggregate_library(
         ":avx512skx_bench_microkernels",
         ":avx512vbmi_bench_microkernels",
         ":avx512vnni_bench_microkernels",
-        ":avxvnni_bench_microkernels",
     ],
 )
 
@@ -2773,6 +2778,9 @@ xnnpack_aggregate_library(
     }) + select({
         ":arm_i8mm_enabled": ["XNN_ENABLE_ARM_I8MM=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_I8MM=0"],
+    }) + select({
+        ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
+        "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
     }),
     generic_deps = [
         ":scalar_prod_microkernels",
@@ -2793,6 +2801,9 @@ xnnpack_aggregate_library(
         "//conditions:default": [],
     }) + select({
         ":riscv_vector_enabled": [":rvv_prod_microkernels"],
+        "//conditions:default": [],
+    }) + select({
+        ":avxvnni_enabled": [":avxvnni_prod_microkernels"],
         "//conditions:default": [],
     }),
     wasm_deps = [
@@ -2820,7 +2831,6 @@ xnnpack_aggregate_library(
         ":avx512skx_prod_microkernels",
         ":avx512vbmi_prod_microkernels",
         ":avx512vnni_prod_microkernels",
-        ":avxvnni_prod_microkernels",
     ],
 )
 
@@ -2859,6 +2869,9 @@ xnnpack_aggregate_library(
     }) + select({
         ":riscv_vector_enabled": ["XNN_ENABLE_RISCV_VECTOR=1"],
         "//conditions:default": ["XNN_ENABLE_RISCV_VECTOR=0"],
+    }) + select({
+        ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
+        "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
     }),
     generic_deps = [
         ":scalar_test_microkernels",
@@ -2882,6 +2895,9 @@ xnnpack_aggregate_library(
         "//conditions:default": [],
     }) + select({
         ":riscv_vector_enabled": [":rvv_test_microkernels"],
+        "//conditions:default": [],
+    }) + select({
+        ":avxvnni_enabled": [":avxvnni_test_microkernels"],
         "//conditions:default": [],
     }),
     wasm_deps = [
@@ -2909,7 +2925,6 @@ xnnpack_aggregate_library(
         ":avx512skx_test_microkernels",
         ":avx512vbmi_test_microkernels",
         ":avx512vnni_test_microkernels",
-        ":avxvnni_test_microkernels",
     ],
 )
 
@@ -3678,6 +3693,18 @@ config_setting(
     define_values = {"xnn_enable_arm_i8mm": "false"},
 )
 
+# Enables usage of Intel AVX-VNNI (8-bit integer matrix multiply accumulate) kernels.
+config_setting(
+    name = "xnn_enable_avxvnni_explicit_true",
+    define_values = {"xnn_enable_avxvnni": "true"},
+)
+
+# Disables usage of Intel AVX-VNNI (8-bit integer matrix multiply accumulate) kernels.
+config_setting(
+    name = "xnn_enable_avxvnni_explicit_false",
+    define_values = {"xnn_enable_avxvnni": "false"},
+)
+
 # Enables usage of RISC-V Vector kernels.
 config_setting(
     name = "xnn_enable_riscv_vector_explicit_true",
@@ -3947,6 +3974,23 @@ alias(
         ":xnn_enable_arm_i8mm_explicit_true": ":xnn_enable_arm_i8mm_explicit_true",
         ":xnn_enable_arm_i8mm_explicit_false": ":xnn_enable_arm_i8mm_explicit_true",
         "//conditions:default": ":arm_i8mm_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avxvnni_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avxvnni_enabled",
+    actual = select({
+        ":xnn_enable_avxvnni_explicit_true": ":xnn_enable_avxvnni_explicit_true",
+        ":xnn_enable_avxvnni_explicit_false": ":xnn_enable_avxvnni_explicit_true",
+        "//build_config:windows_lexan": ":xnn_enable_avxvnni_explicit_true",
+        "//conditions:default": ":avxvnni_enabled_by_default",
     }),
 )
 

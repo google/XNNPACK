@@ -48,6 +48,7 @@ _ISA_TO_MACRO_MAP = {
   "neondotfp16arith": "XNN_ENABLE_ARM_DOTPROD && XNN_ENABLE_ARM_FP16_VECTOR",
   "neoni8mm": "XNN_ENABLE_ARM_I8MM",
   "rvv": "XNN_ENABLE_RISCV_VECTOR",
+  "avxvnni": "XNN_ENABLE_AVXVNNI",
 }
 
 _ISA_TO_ARCH_MAP = {
