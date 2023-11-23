@@ -3989,7 +3989,6 @@ alias(
     actual = select({
         ":xnn_enable_avxvnni_explicit_true": ":xnn_enable_avxvnni_explicit_true",
         ":xnn_enable_avxvnni_explicit_false": ":xnn_enable_avxvnni_explicit_true",
-        "//build_config:windows_lexan": ":xnn_enable_avxvnni_explicit_true",
         "//conditions:default": ":avxvnni_enabled_by_default",
     }),
 )
