@@ -112,7 +112,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x16c4__avx512vnni_prfm(
       const __m256i vb012389AB = _mm256_unpacklo_epi8(vb4beven, vb4bodd);
       const __m256i vb4567CDEF = _mm256_unpackhi_epi8(vb4beven, vb4bodd);
       __m512i vb0123456789ABCDEF = _mm512_permutex2var_epi64(_mm512_castsi256_si512(vb012389AB), vpermute_mask, _mm512_castsi256_si512(vb4567CDEF));
-
       xnn_prefetch_to_l1((const int8_t*) w + 960);
 
       vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEF);
