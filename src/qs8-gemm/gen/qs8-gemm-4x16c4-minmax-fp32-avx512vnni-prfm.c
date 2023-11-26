@@ -91,7 +91,6 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__avx512vnni_prfm(
       va3x0123 = _mm512_xor_epi32(va3x0123, vsign_mask);
 
       const __m512i vb0123456789ABCDEF = _mm512_load_si512(w);
-
       xnn_prefetch_to_l1((const int8_t*) w + 960);
 
       vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEF);
@@ -112,7 +111,6 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__avx512vnni_prfm(
     vscaled1x0123456789ABCDEF = _mm512_mul_ps(vscaled1x0123456789ABCDEF, vscale);
     vscaled2x0123456789ABCDEF = _mm512_mul_ps(vscaled2x0123456789ABCDEF, vscale);
     vscaled3x0123456789ABCDEF = _mm512_mul_ps(vscaled3x0123456789ABCDEF, vscale);
-
     vscaled0x0123456789ABCDEF = _mm512_min_ps(vscaled0x0123456789ABCDEF, voutput_max_less_zero_point);
     vscaled1x0123456789ABCDEF = _mm512_min_ps(vscaled1x0123456789ABCDEF, voutput_max_less_zero_point);
     vscaled2x0123456789ABCDEF = _mm512_min_ps(vscaled2x0123456789ABCDEF, voutput_max_less_zero_point);

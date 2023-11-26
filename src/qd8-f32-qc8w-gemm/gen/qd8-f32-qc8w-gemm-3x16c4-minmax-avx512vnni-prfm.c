@@ -83,7 +83,6 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x16c4__avx512vnni_prfm(
       va2x0123 = _mm512_xor_epi32(va2x0123, vsign_mask);
 
       const __m512i vb0123456789ABCDEF = _mm512_load_si512(w);
-
       xnn_prefetch_to_l1((const int8_t*) w + 960);
 
       vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEF);

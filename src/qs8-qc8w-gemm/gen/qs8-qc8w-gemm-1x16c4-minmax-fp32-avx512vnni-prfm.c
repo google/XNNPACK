@@ -18,7 +18,7 @@
 #include <xnnpack/prefetch.h>
 
 
-void xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__avx512vnni_prfm(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512vnni_prfm(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -28,7 +28,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__avx512vnni_prfm(
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qs8_qc8w_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= 1);
@@ -44,7 +44,6 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__avx512vnni_prfm(
   int8_t* c0 = c;
 
   const __m512i vsign_mask = _mm512_load_si512(params->fp32_avx512vnni.sign_mask);
-  const __m512 vscale = _mm512_load_ps(params->fp32_avx512vnni.scale);
   const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->fp32_avx512vnni.output_max_less_zero_point);
   const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx512vnni.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx512vnni.output_min);
@@ -71,7 +70,9 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__avx512vnni_prfm(
 
     __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
 
-    vscaled0x0123456789ABCDEF = _mm512_mul_ps(vscaled0x0123456789ABCDEF, vscale);
+    const __m512 vscale012345678ABCDEF = _mm512_load_ps(w);
+    w = (const float*) w + 16;
+    vscaled0x0123456789ABCDEF = _mm512_mul_ps(vscaled0x0123456789ABCDEF, vscale012345678ABCDEF);
     vscaled0x0123456789ABCDEF = _mm512_min_ps(vscaled0x0123456789ABCDEF, voutput_max_less_zero_point);
 
     vacc0x0123456789ABCDEF = _mm512_cvtps_epi32(vscaled0x0123456789ABCDEF);
