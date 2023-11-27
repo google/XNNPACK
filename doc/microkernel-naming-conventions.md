@@ -56,6 +56,15 @@ microkernel.
 
 ## GEMM and IGEMM microkernels
 
+GEMM refers to general matrix multiplication. IGEMM is a modification of GEMM,
+stands for indirect. Instead of reading matrix A directly, an IGEMM microkernel
+reads pointers to A (one level of indirection). See
+[The Indirect Convolution Algorithm](https://arxiv.org/abs/1907.02129) for
+details.
+
+In the context of convolution operator, we decide whether to use GEMM or IGEMM
+based on parameters like stride, padding, kernel size, etc.
+
 The `<parameters>` for GEMM and IGEMM microkernels represent the `mr` and `nr`
 of the microkernel. You can think of it as the number of rows and columns of the
 output calculated by the microkernel.
@@ -72,7 +81,7 @@ channel tile. `p` stands for primary, `c` for channel.
 
 Multi-pass have `UfVmWlXcYsZr` in their name, where `U` is the first pass tile,
 `V` is the middle pass tile, `W` is the last pass tile, `X` is the channel tile,
-`Y` is the channel subtile, and `Z` is the channel round.  `f` stands for first,
+`Y` is the channel subtile, and `Z` is the channel round. `f` stands for first,
 `m` for middle, `l` for last, `c` for channel, `s` for subtile, `r` for round.
 The kernel size must be at least `W+1`, the middle pass runs for as many
 iterations as possible, and the last pass handles the remainder (at least 1).
