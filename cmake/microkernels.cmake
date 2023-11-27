@@ -3776,14 +3776,19 @@ SET(ALL_NEONDOT_MICROKERNEL_SRCS
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x8c8-minmax-neondot-ld64.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x16c4-minmax-neondot.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x16c8-minmax-neondot-ld64.c
+  src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x32c4-minmax-neondot.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-2x8c4-minmax-neondot.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-2x16c4-minmax-neondot.c
+  src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-2x32c4-minmax-neondot.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x8c4-minmax-neondot.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x16c4-minmax-neondot.c
+  src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x32c4-minmax-neondot.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-6x8c4-minmax-neondot.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-6x16c4-minmax-neondot.c
+  src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-6x32c4-minmax-neondot.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-8x8c4-minmax-neondot.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-8x16c4-minmax-neondot.c
+  src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-8x32c4-minmax-neondot.c
   src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-fp32-neondot.c
   src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neondot.c
   src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-fp32-neondot-ld64.c
@@ -3915,7 +3920,22 @@ SET(ALL_NEONDOTFP16ARITH_MICROKERNEL_SRCS
   src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-5x8c4-minmax-neondotfp16arith.c
   src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-5x16c4-minmax-neondotfp16arith.c
   src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-6x8c4-minmax-neondotfp16arith.c
-  src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-6x16c4-minmax-neondotfp16arith.c)
+  src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-6x16c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-1x8c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-1x16c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-1x32c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-2x8c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-2x16c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-2x32c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-4x8c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-4x16c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-4x32c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-6x8c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-6x16c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-6x32c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-8x8c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-8x16c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-8x32c4-minmax-neondotfp16arith.c)
 
 SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/bf16-gemm/gen/bf16-gemm-1x4c8-minmax-neonfma-shland.c

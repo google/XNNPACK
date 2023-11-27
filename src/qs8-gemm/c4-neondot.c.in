@@ -9,7 +9,7 @@ $assert 8 <= NR <= 16
 $assert REQUANTIZATION in ["FP32", "RNDNU"] or not REQUANTIZATION
 $assert DATATYPE in ["QC8", "QS8", "QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
-$assert not DATATYPE in ["QD8", "QC4"] or not REQUANTIZATION
+$assert not DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"] or not REQUANTIZATION
 #include <assert.h>
 
 #include <arm_neon.h>
@@ -25,8 +25,8 @@ $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if REQUANTIZATION == "FP32" else "neon")
 $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QD8_F16": "xnn_f16_minmax_params", "QD8_F32": "xnn_f32_minmax_params", "QC4_F16": "xnn_f16_qc4w_minmax_params", "QC4_F32": "xnn_f32_qc4w_minmax_params"}[DATATYPE]
 $OUT_T = {"QC8": "int8_t", "QD8_F16": "void", "QD8_F32": "float", "QC4_F16": "void", "QC4_F32": "float", "QS8": "int8_t"}[DATATYPE]
-$FP16 = "fp16arith" if DATATYPE in ["QC4_F16", "QD8_F16"] else ""
-void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c4__neondot${FP16}(
+$ISA = "fp16arith" if DATATYPE in ["QC4_F16", "QD8_F16"] else ""
+void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c4__neondot${ISA}(
     size_t mr,
     size_t nc,
     size_t kc,
