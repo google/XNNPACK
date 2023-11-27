@@ -1937,8 +1937,8 @@ static void init_qd8_f16_qc8w_gemm_config(void) {
           #endif  // XNN_ENABLE_ARM_I8MM
         } else if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot && hardware_config->use_arm_neon_fp16_arith) {
           #if XNN_ENABLE_ARM_DOTPROD
-            qd8_f16_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f16_qc8w_gemm_minmax_ukernel_4x16c4__neondot);
-            qd8_f16_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x16c4__neondot);
+            qd8_f16_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f16_qc8w_gemm_minmax_ukernel_4x16c4__neondotfp16arith);
+            qd8_f16_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x16c4__neondotfp16arith);
             qd8_f16_qc8w_gemm_config.init.f16 = xnn_init_f16_minmax_fp16arith_params;
             qd8_f16_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w;
             qd8_f16_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
