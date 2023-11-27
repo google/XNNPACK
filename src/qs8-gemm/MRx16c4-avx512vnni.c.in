@@ -23,14 +23,6 @@ $PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx512vnni" if REQUANTIZATION else "
 $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params", "QC4": "xnn_f32_qc4w_minmax_params"}[DATATYPE]
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $OUT_T = "float" if DATATYPE in ["QD8", "QC4"] else XINT8_T
-$
-$if DATATYPE in ["QS8", "QD8"]:
-$  MM512_LOADX_PS="_mm512_load_ps"
-$  MM512_LOADX_EPI32="_mm512_load_epi32"
-$elif DATATYPE == "QC4":
-$  MM512_LOADX_PS="_mm512_loadu_ps"
-$  MM512_LOADX_EPI32="_mm512_loadu_epi32"
-
 void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__avx512vnni${"_prfm" if PREFETCH else ""}(
     size_t mr,
     size_t nc,
@@ -85,8 +77,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
     const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
     const __m512i vsign_mask = _mm512_set1_epi8(params->avx512vnni.sign_mask);  // 0x80
     $if DATATYPE == "QC4":
-      const __m512i vpermute_mask = _mm512_load_epi64(params->avx512vnni.permute_mask);
-      const __m256i vvalue_mask = _mm256_set1_epi8(params->avx512vnni.mask);  // 0xF0
+      const __m512i vvalue_mask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0xF0
   $else:
     const __m512i vsign_mask =_mm512_set1_epi8(params->${PARAMS_STRUCT}.sign_mask);  // 0x80
     $if DATATYPE != "QC8":
@@ -99,17 +90,51 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
     const __m512i vb_zero_point = _mm512_load_si512(params->${PARAMS_STRUCT}.kernel_zero_point);
   do {
     $if DATATYPE in ["QD8", "QC4"]:
-      const __m512i vksum0123456789ABCDEF = ${MM512_LOADX_EPI32}(w);
+      const __m512i vksum0123456789ABCDEF = _mm512_load_epi32(w);
       $for M in range(MR):
           __m512i vacc${M}x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point${M});
-    $elif DATATYPE == "QS8":
+    $else:
       __m512i vacc0x0123456789ABCDEF = _mm512_load_epi32(w);
       $for M in range(1, MR):
         __m512i vacc${M}x0123456789ABCDEF = vacc0x0123456789ABCDEF;
     w = (const int32_t*) w + 16;
 
     size_t k = kc;
-    do {
+    $if DATATYPE in ["QC4"]:
+      while (k >= 8 * sizeof(${XINT8_T})) {
+        $for M in range(MR):
+          __m512i va${M}x0123c0 = _mm512_set1_epi32((int) unaligned_load_u32(a${M}));
+          a${M} += 4;
+
+        $for M in range(MR):
+          va${M}x0123c0 = _mm512_xor_epi32(va${M}x0123c0, vsign_mask);
+
+        const __m512i vbb0123456789ABCDEFc01 = _mm512_load_si512(w);
+        const __m512i vbs123456789ABCDEFc0 = _mm512_slli_epi32(vbb0123456789ABCDEFc01, 4);
+        const __m512i vb0123456789ABCDEFc0 = _mm512_and_si512(vbs123456789ABCDEFc0, vvalue_mask);
+        $if PREFETCH:
+          xnn_prefetch_to_l1((const ${XINT8_T}*) w + 960);
+
+        $for M in range(MR):
+          vacc${M}x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc${M}x0123456789ABCDEF, va${M}x0123c0, vb0123456789ABCDEFc0);
+
+        $for M in range(MR):
+          __m512i va${M}x0123c1 = _mm512_set1_epi32((int) unaligned_load_u32(a${M}));
+          a${M} += 4;
+
+        $for M in range(MR):
+          va${M}x0123c1 = _mm512_xor_epi32(va${M}x0123c1, vsign_mask);
+
+        const __m512i vb0123456789ABCDEFc1 = _mm512_and_si512(vbb0123456789ABCDEFc01, vvalue_mask);
+
+        $for M in range(MR):
+          vacc${M}x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc${M}x0123456789ABCDEF, va${M}x0123c1, vb0123456789ABCDEFc1);
+
+        w = (const ${XINT8_T}*) w + 64;
+        k -= 8 * sizeof(${XINT8_T});
+      }
+
+    while (k >= 4 * sizeof(${XINT8_T})) {
       $for M in range(MR):
         __m512i va${M}x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a${M}));
         a${M} += 4;
@@ -120,25 +145,18 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
       $if DATATYPE in ["QS8", "QD8"]:
         const __m512i vb0123456789ABCDEF = _mm512_load_si512(w);
       $elif DATATYPE in ["QC4"]:
-        __m256i vb4b0123456789ABCDEF = _mm256_loadu_si256(w);
-        const __m256i vb4bodd = _mm256_and_si256(vb4b0123456789ABCDEF, vvalue_mask);
-        const __m256i vb4beven = _mm256_and_si256(_mm256_slli_epi16(vb4b0123456789ABCDEF, 4), vvalue_mask);
-        const __m256i vb012389AB = _mm256_unpacklo_epi8(vb4beven, vb4bodd);
-        const __m256i vb4567CDEF = _mm256_unpackhi_epi8(vb4beven, vb4bodd);
-        __m512i vb0123456789ABCDEF = _mm512_permutex2var_epi64(_mm512_castsi256_si512(vb012389AB), vpermute_mask, _mm512_castsi256_si512(vb4567CDEF));
+        const __m512i vbb0123456789ABCDEF = _mm512_load_si512(w);
+        const __m512i vbs123456789ABCDEF = _mm512_slli_epi32(vbb0123456789ABCDEF, 4);
+        const __m512i vb0123456789ABCDEF = _mm512_and_si512(vbs123456789ABCDEF, vvalue_mask);
       $if PREFETCH:
-
         xnn_prefetch_to_l1((const ${XINT8_T}*) w + 960);
 
       $for M in range(MR):
         vacc${M}x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc${M}x0123456789ABCDEF, va${M}x0123, vb0123456789ABCDEF);
 
-      $if DATATYPE in ["QS8", "QD8"]:
-        w = (const ${XINT8_T}*) w + 64;
-      $elif DATATYPE in ["QC4"]:
-        w = (const ${XINT8_T}*) w + 32;
+      w = (const ${XINT8_T}*) w + 64;
       k -= 4 * sizeof(${XINT8_T});
-    } while (k != 0);
+    }
 
     $if DATATYPE == "QC4":
       $for M in range(MR):
@@ -150,8 +168,8 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
       $for M in range(MR):
         vscaled${M}x0123456789ABCDEF = _mm512_mul_ps(vscaled${M}x0123456789ABCDEF, _mm512_set1_ps(quantization_params[${M}].inv_scale));
 
-      const __m512 vfilter_output_scale0123456789ABCDEF = ${MM512_LOADX_PS}((const float*) w);
-      const __m512 vbias0123456789ABCDEF = ${MM512_LOADX_PS}((const float*) w + 16);
+      const __m512 vfilter_output_scale0123456789ABCDEF = _mm512_load_ps((const float*) w);
+      const __m512 vbias0123456789ABCDEF = _mm512_load_ps((const float*) w + 16);
       w = (const float*) w + 32;
 
       $for M in range(MR):

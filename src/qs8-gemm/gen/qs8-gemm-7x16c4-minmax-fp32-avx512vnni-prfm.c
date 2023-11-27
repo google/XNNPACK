@@ -17,7 +17,6 @@
 #include <xnnpack/unaligned.h>
 #include <xnnpack/prefetch.h>
 
-
 void xnn_qs8_gemm_minmax_fp32_ukernel_7x16c4__avx512vnni_prfm(
     size_t mr,
     size_t nc,
@@ -96,7 +95,8 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_7x16c4__avx512vnni_prfm(
     w = (const int32_t*) w + 16;
 
     size_t k = kc;
-    do {
+
+    while (k >= 4 * sizeof(int8_t)) {
       __m512i va0x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a0));
       a0 += 4;
       __m512i va1x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a1));
@@ -121,7 +121,6 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_7x16c4__avx512vnni_prfm(
       va6x0123 = _mm512_xor_epi32(va6x0123, vsign_mask);
 
       const __m512i vb0123456789ABCDEF = _mm512_load_si512(w);
-
       xnn_prefetch_to_l1((const int8_t*) w + 960);
 
       vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEF);
@@ -134,7 +133,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_7x16c4__avx512vnni_prfm(
 
       w = (const int8_t*) w + 64;
       k -= 4 * sizeof(int8_t);
-    } while (k != 0);
+    }
 
     __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
     __m512 vscaled1x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc1x0123456789ABCDEF);
