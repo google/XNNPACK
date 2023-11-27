@@ -984,6 +984,7 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params
   pack: xnn_pack_qs8_gemm_xw_goi_w
   k-block: 8
+
 # x86 AVX512
 - name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c8__avx512skx
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx512_params
@@ -1001,6 +1002,24 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx512_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 8
+
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c8__avx512skx_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx512_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c8__avx512skx_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx512_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x16c8__avx512skx_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx512_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c8__avx512skx_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx512_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8
+
 # WAsm SIMD
 - name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c2__wasmsimd_dot16x2_ld64
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params

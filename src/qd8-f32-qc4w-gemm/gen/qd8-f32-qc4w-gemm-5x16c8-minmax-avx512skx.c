@@ -15,7 +15,6 @@
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 
-
 void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x16c8__avx512skx(
     size_t mr,
     size_t nc,
