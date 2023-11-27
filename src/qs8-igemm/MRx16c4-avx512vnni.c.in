@@ -72,9 +72,9 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4_
     const __m512 vinput_scale = _mm512_set1_ps(quantization_params->inv_scale);
     const __m512 voutput_min = _mm512_set1_ps(params->avx512vnni.min);
     const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
-    const __m512i vsign_mask = _mm512_load_si512(params->avx512vnni.sign_mask);
+    const __m512i vsign_mask = _mm512_set1_epi8(params->avx512vnni.sign_mask);  // 0x80
   $else:
-    const __m512i vsign_mask = _mm512_load_si512(params->${PARAMS_STRUCT}.sign_mask);
+    const __m512i vsign_mask = _mm512_set1_epi8(params->${PARAMS_STRUCT}.sign_mask);  // 0x80
     $if DATATYPE != "QC8":
       const __m512 vscale = _mm512_load_ps(params->${PARAMS_STRUCT}.scale);
     const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->${PARAMS_STRUCT}.output_max_less_zero_point);

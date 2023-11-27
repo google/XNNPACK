@@ -387,9 +387,7 @@ size_t xnn_init_qs8_qc8w_conv_minmax_fp32_avx512vnni_params(
   int8_t output_min,
   int8_t output_max)
 {
-  for (uint32_t i = 0; i < 64; i++) {
-    params->fp32_avx512vnni.sign_mask[i] = 0x80;
-  }
+  params->fp32_avx512vnni.sign_mask = 0x80;
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx512vnni.output_max_less_zero_point[i] = output_max_less_zero_point;
@@ -417,9 +415,8 @@ size_t xnn_init_qs8_conv_minmax_fp32_avx512vnni_params(
   assert(scale >= 0x1.0p-32f);
   assert(scale < 256.0f);
 
-  for (uint32_t i = 0; i < 64; i++) {
-    params->fp32_avx512vnni.sign_mask[i] = 0x80;
-  }
+  params->fp32_avx512vnni.sign_mask = 0x80;
+  params->fp32_avx512vnni.mask = 0xF0;
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx512vnni.scale[i] = scale;
@@ -2023,9 +2020,7 @@ size_t xnn_init_f32_minmax_avx512vnni_params(
   float output_max) {
   params->avx512vnni.min = output_min;
   params->avx512vnni.max = output_max;
-  for(int i = 0; i < 64; i++) {
-    params->avx512vnni.sign_mask[i] = 0x80;
-  }
+  params->avx512vnni.sign_mask = 0x80;
   return sizeof(params->avx512vnni);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -2144,15 +2139,11 @@ size_t xnn_init_f32_qc4w_minmax_avx512vnni_params(
   assert(kernel_zero_point <= 15);
   params->avx512vnni.min = output_min;
   params->avx512vnni.max = output_max;
-  for(int i = 0; i < 64; i++) {
-    params->avx512vnni.sign_mask[i] = 0x80;
-  }
+  params->avx512vnni.sign_mask = 0x80;
+  params->avx512vnni.mask = 0xF0;
   const int64_t permute_mask[8] = {0, 1, 8, 9, 2, 3, 10, 11};
   for(int i = 0; i < 8; i++) {
     params->avx512vnni.permute_mask[i] = permute_mask[i];
-  }
-  for(int i = 0; i < 32; i++) {
-    params->avx512vnni.value_mask[i] = 0xF0;
   }
   return sizeof(params->avx512vnni);
 }

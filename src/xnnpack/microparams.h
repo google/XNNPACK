@@ -149,7 +149,7 @@ union xnn_f32_minmax_params {
   struct {
     float min;
     float max;
-    XNN_ALIGN(64) int8_t sign_mask[64];
+    int8_t sign_mask;
   } avx512vnni;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -216,9 +216,9 @@ union xnn_f32_qc4w_minmax_params {
   struct {
     float min;
     float max;
-    XNN_ALIGN(64) int8_t sign_mask[64];
+    int8_t sign_mask;  // 0x80
+    int8_t mask;  // 0xF0
     XNN_ALIGN(64) int64_t permute_mask[8];
-    XNN_ALIGN(64) int8_t value_mask[32];
   } avx512vnni;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -380,7 +380,8 @@ union xnn_qs8_conv_minmax_params {
     XNN_ALIGN(64) int8_t output_min[64];
   } fp32_avx512;
   struct {
-    XNN_ALIGN(64) int8_t sign_mask[64];
+    int8_t sign_mask;
+    int8_t mask;
     XNN_ALIGN(64) float scale[16];
     XNN_ALIGN(64) float output_max_less_zero_point[16];
     XNN_ALIGN(64) int16_t output_zero_point[16];
@@ -460,7 +461,7 @@ union xnn_qs8_qc8w_conv_minmax_params {
     XNN_ALIGN(64) int8_t output_min[64];
   } fp32_avx512;
   struct {
-    XNN_ALIGN(64) int8_t sign_mask[64];
+    int8_t sign_mask;
     XNN_ALIGN(64) float output_max_less_zero_point[16];
     XNN_ALIGN(64) int16_t output_zero_point[32];
     XNN_ALIGN(16) int8_t shuffle_control_mask[16];
