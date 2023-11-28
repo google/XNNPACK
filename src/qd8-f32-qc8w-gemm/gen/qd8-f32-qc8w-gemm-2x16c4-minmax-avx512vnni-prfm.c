@@ -17,6 +17,7 @@
 #include <xnnpack/unaligned.h>
 #include <xnnpack/prefetch.h>
 
+
 void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x16c4__avx512vnni_prfm(
     size_t mr,
     size_t nc,
@@ -61,15 +62,33 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x16c4__avx512vnni_prfm(
     w = (const int32_t*) w + 16;
 
     size_t k = kc;
+    while (k >= 8 * sizeof(int8_t)) {
+      const __m512i va0x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a0)), vsign_mask);
+      const __m512i va0x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a0 + 4)), vsign_mask);
+      a0 += 8;
+      const __m512i va1x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a1)), vsign_mask);
+      const __m512i va1x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a1 + 4)), vsign_mask);
+      a1 += 8;
 
-    while (k >= 4 * sizeof(int8_t)) {
-      __m512i va0x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a0));
+      const __m512i vb0123456789ABCDEFx0123 = _mm512_load_si512(w);
+      const __m512i vb0123456789ABCDEFx4567 = _mm512_load_si512((const int8_t*) w + 64);
+      xnn_prefetch_to_l1((const int8_t*) w + 896);
+
+      vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEFx0123);
+      vacc1x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc1x0123456789ABCDEF, va1x0123, vb0123456789ABCDEFx0123);
+      xnn_prefetch_to_l1((const int8_t*) w + 960);
+      vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x4567, vb0123456789ABCDEFx4567);
+      vacc1x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc1x0123456789ABCDEF, va1x4567, vb0123456789ABCDEFx4567);
+
+      w = (const int8_t*) w + 128;
+      k -= 8 * sizeof(int8_t);
+    }
+
+    if (k != 0) {
+      const __m512i va0x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a0)), vsign_mask);
       a0 += 4;
-      __m512i va1x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a1));
+      const __m512i va1x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a1)), vsign_mask);
       a1 += 4;
-
-      va0x0123 = _mm512_xor_epi32(va0x0123, vsign_mask);
-      va1x0123 = _mm512_xor_epi32(va1x0123, vsign_mask);
 
       const __m512i vb0123456789ABCDEF = _mm512_load_si512(w);
       xnn_prefetch_to_l1((const int8_t*) w + 960);

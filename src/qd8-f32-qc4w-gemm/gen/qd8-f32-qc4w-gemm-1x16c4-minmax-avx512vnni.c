@@ -16,6 +16,7 @@
 #include <xnnpack/math.h>
 #include <xnnpack/unaligned.h>
 
+
 void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__avx512vnni(
     size_t mr,
     size_t nc,
@@ -54,35 +55,25 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__avx512vnni(
 
     size_t k = kc;
     while (k >= 8 * sizeof(int8_t)) {
-      __m512i va0x0123c0 = _mm512_set1_epi32((int) unaligned_load_u32(a0));
-      a0 += 4;
+      const __m512i va0x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a0)), vsign_mask);
+      const __m512i va0x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a0 + 4)), vsign_mask);
+      a0 += 8;
 
-      va0x0123c0 = _mm512_xor_epi32(va0x0123c0, vsign_mask);
+      const __m512i vbb0123456789ABCDEFx01234567 = _mm512_load_si512(w);
+      const __m512i vbs123456789ABCDEFx0123 = _mm512_slli_epi32(vbb0123456789ABCDEFx01234567, 4);
+      const __m512i vb0123456789ABCDEFx4567 = _mm512_and_si512(vbb0123456789ABCDEFx01234567, vvalue_mask);
+      const __m512i vb0123456789ABCDEFx0123 = _mm512_and_si512(vbs123456789ABCDEFx0123, vvalue_mask);
 
-      const __m512i vbb0123456789ABCDEFc01 = _mm512_load_si512(w);
-      const __m512i vbs123456789ABCDEFc0 = _mm512_slli_epi32(vbb0123456789ABCDEFc01, 4);
-      const __m512i vb0123456789ABCDEFc0 = _mm512_and_si512(vbs123456789ABCDEFc0, vvalue_mask);
-
-      vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x0123c0, vb0123456789ABCDEFc0);
-
-      __m512i va0x0123c1 = _mm512_set1_epi32((int) unaligned_load_u32(a0));
-      a0 += 4;
-
-      va0x0123c1 = _mm512_xor_epi32(va0x0123c1, vsign_mask);
-
-      const __m512i vb0123456789ABCDEFc1 = _mm512_and_si512(vbb0123456789ABCDEFc01, vvalue_mask);
-
-      vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x0123c1, vb0123456789ABCDEFc1);
+      vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEFx0123);
+      vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x4567, vb0123456789ABCDEFx4567);
 
       w = (const int8_t*) w + 64;
       k -= 8 * sizeof(int8_t);
     }
 
-    while (k >= 4 * sizeof(int8_t)) {
-      __m512i va0x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a0));
+    if (k != 0) {
+      const __m512i va0x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a0)), vsign_mask);
       a0 += 4;
-
-      va0x0123 = _mm512_xor_epi32(va0x0123, vsign_mask);
 
       const __m512i vbb0123456789ABCDEF = _mm512_load_si512(w);
       const __m512i vbs123456789ABCDEF = _mm512_slli_epi32(vbb0123456789ABCDEF, 4);
