@@ -62,6 +62,37 @@ static void f32_rsum(
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(f32_rsum, avx512f_u16,
+                    xnn_f32_rsum_ukernel__avx512f_u16,
+                    xnn_init_f32_scale_scalar_params,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rsum, avx512f_u32_acc2,
+                    xnn_f32_rsum_ukernel__avx512f_u32_acc2,
+                    xnn_init_f32_scale_scalar_params,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rsum, avx512f_u48_acc3,
+                    xnn_f32_rsum_ukernel__avx512f_u48_acc3,
+                    xnn_init_f32_scale_scalar_params,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rsum, avx512f_u64_acc2,
+                    xnn_f32_rsum_ukernel__avx512f_u64_acc2,
+                    xnn_init_f32_scale_scalar_params,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rsum, avx512f_u64_acc4,
+                    xnn_f32_rsum_ukernel__avx512f_u64_acc4,
+                    xnn_init_f32_scale_scalar_params,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+
   BENCHMARK_CAPTURE(f32_rsum, avx_u8,
                     xnn_f32_rsum_ukernel__avx_u8,
                     xnn_init_f32_scale_avx_params,

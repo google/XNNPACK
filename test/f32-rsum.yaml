@@ -39,6 +39,18 @@
 - name: xnn_f32_rsum_ukernel__avx_u32_acc4
   init: xnn_init_f32_scale_avx_params
 
+# x86 AVX512F
+- name: xnn_f32_rsum_ukernel__avx512f_u16
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__avx512f_u32_acc2
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__avx512f_u48_acc3
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__avx512f_u64_acc2
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__avx512f_u64_acc4
+  init: xnn_init_f32_scale_scalar_params
+
 # Wasm SIMD
 - name: xnn_f32_rsum_ukernel__wasmsimd_u4
   init: xnn_init_f32_scale_scalar_params
