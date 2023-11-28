@@ -391,6 +391,12 @@ static void init_f32_vadd_config(void) {
     f32_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_minmax_ukernel__scalar_u8;
     f32_vadd_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
     f32_vadd_config.element_tile = 8;
+  #elif XNN_ARCH_PPC64
+    f32_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vadd_minmax_ukernel__scalar_u8;
+    f32_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_minmax_ukernel__scalar_u8;
+    f32_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_minmax_ukernel__scalar_u8;
+    f32_vadd_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+    f32_vadd_config.element_tile = 8;
   #else
     #error "Unsupported architecture"
   #endif
@@ -475,6 +481,12 @@ static void init_f32_vdiv_config(void) {
     f32_vdiv_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrdivc_minmax_ukernel__scalar_u2;
     f32_vdiv_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
     f32_vdiv_config.element_tile = 2;
+  #elif XNN_ARCH_PPC64
+    f32_vdiv_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdiv_minmax_ukernel__scalar_u2;
+    f32_vdiv_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdivc_minmax_ukernel__scalar_u2;
+    f32_vdiv_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrdivc_minmax_ukernel__scalar_u2;
+    f32_vdiv_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+    f32_vdiv_config.element_tile = 2;
   #else
     #error "Unsupported architecture"
   #endif
@@ -544,6 +556,11 @@ static void init_f32_vmax_config(void) {
     f32_vmax_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmaxc_ukernel__scalar_u8;
     f32_vmax_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmaxc_ukernel__scalar_u8;
     f32_vmax_config.element_tile = 8;
+  #elif XNN_ARCH_PPC64
+    f32_vmax_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmax_ukernel__scalar_u8;
+    f32_vmax_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmaxc_ukernel__scalar_u8;
+    f32_vmax_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmaxc_ukernel__scalar_u8;
+    f32_vmax_config.element_tile = 8;
   #else
     #error "Unsupported architecture"
   #endif
@@ -609,6 +626,11 @@ static void init_f32_vmin_config(void) {
     f32_vmin_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vminc_ukernel__wasm_u8;
     f32_vmin_config.element_tile = 8;
   #elif XNN_ARCH_RISCV
+    f32_vmin_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmin_ukernel__scalar_u8;
+    f32_vmin_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vminc_ukernel__scalar_u8;
+    f32_vmin_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vminc_ukernel__scalar_u8;
+    f32_vmin_config.element_tile = 8;
+  #elif XNN_ARCH_PPC64
     f32_vmin_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmin_ukernel__scalar_u8;
     f32_vmin_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vminc_ukernel__scalar_u8;
     f32_vmin_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vminc_ukernel__scalar_u8;
@@ -692,6 +714,12 @@ static void init_f32_vmul_config(void) {
     f32_vmul_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
     f32_vmul_config.element_tile = 8;
   #elif XNN_ARCH_RISCV
+    f32_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmul_minmax_ukernel__scalar_u8;
+    f32_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_minmax_ukernel__scalar_u8;
+    f32_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_minmax_ukernel__scalar_u8;
+    f32_vmul_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+    f32_vmul_config.element_tile = 8;
+  #elif XNN_ARCH_PPC64
     f32_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmul_minmax_ukernel__scalar_u8;
     f32_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_minmax_ukernel__scalar_u8;
     f32_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_minmax_ukernel__scalar_u8;
@@ -781,6 +809,12 @@ static void init_f32_vsub_config(void) {
     f32_vsub_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrsubc_minmax_ukernel__scalar_u8;
     f32_vsub_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
     f32_vsub_config.element_tile = 8;
+  #elif XNN_ARCH_PPC64
+    f32_vsub_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsub_minmax_ukernel__scalar_u8;
+    f32_vsub_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsubc_minmax_ukernel__scalar_u8;
+    f32_vsub_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrsubc_minmax_ukernel__scalar_u8;
+    f32_vsub_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+    f32_vsub_config.element_tile = 8;
   #else
     #error "Unsupported architecture"
   #endif
@@ -837,6 +871,11 @@ static void init_f32_vsqrdiff_config(void) {
     f32_vsqrdiff_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsqrdiffc_ukernel__scalar_u8;
     f32_vsqrdiff_config.element_tile = 8;
   #elif XNN_ARCH_RISCV
+    f32_vsqrdiff_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsqrdiff_ukernel__scalar_u8;
+    f32_vsqrdiff_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsqrdiffc_ukernel__scalar_u8;
+    f32_vsqrdiff_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsqrdiffc_ukernel__scalar_u8;
+    f32_vsqrdiff_config.element_tile = 8;
+  #elif XNN_ARCH_PPC64
     f32_vsqrdiff_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsqrdiff_ukernel__scalar_u8;
     f32_vsqrdiff_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsqrdiffc_ukernel__scalar_u8;
     f32_vsqrdiff_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsqrdiffc_ukernel__scalar_u8;
@@ -927,6 +966,12 @@ static void init_qs8_vadd_config(void) {
     qs8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__scalar_u4;
     qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_scalar_params;
     qs8_vadd_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
+    qs8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__scalar_u4;
+    qs8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__scalar_u4;
+    qs8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__scalar_u4;
+    qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_scalar_params;
+    qs8_vadd_config.element_tile = 4;
   #else
     #error "Unsupported architecture"
   #endif
@@ -1003,6 +1048,12 @@ static void init_qs8_vmul_config(void) {
       qs8_vmul_config.init.qs8_mul = xnn_init_qs8_mul_minmax_fp32_scalar_params;
       qs8_vmul_config.element_tile = 4;
     #endif
+  #elif XNN_ARCH_PPC64
+    qs8_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmul_minmax_fp32_ukernel__scalar_u4;
+    qs8_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_u4;
+    qs8_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_u4;
+    qs8_vmul_config.init.qs8_mul = xnn_init_qs8_mul_minmax_fp32_scalar_params;
+    qs8_vmul_config.element_tile = 4;
   #else
     #error "Unsupported architecture"
   #endif
@@ -1089,6 +1140,12 @@ static void init_qu8_vadd_config(void) {
     qu8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__scalar_u4;
     qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_scalar_params;
     qu8_vadd_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
+    qu8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__scalar_u4;
+    qu8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__scalar_u4;
+    qu8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__scalar_u4;
+    qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_scalar_params;
+    qu8_vadd_config.element_tile = 4;
   #else
     #error "Unsupported architecture"
   #endif
@@ -1165,6 +1222,12 @@ static void init_qu8_vmul_config(void) {
       qu8_vmul_config.init.qu8_mul = xnn_init_qu8_mul_minmax_fp32_scalar_params;
       qu8_vmul_config.element_tile = 4;
     #endif
+  #elif XNN_ARCH_PPC64
+    qu8_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmul_minmax_fp32_ukernel__scalar_u4;
+    qu8_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_u4;
+    qu8_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_u4;
+    qu8_vmul_config.init.qu8_mul = xnn_init_qu8_mul_minmax_fp32_scalar_params;
+    qu8_vmul_config.element_tile = 4;
   #else
     #error "Unsupported architecture"
   #endif

@@ -107,6 +107,11 @@ static void init_f32_raddstoreexpminusmax_config(void) {
       (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_u4_acc2;
     f32_raddstoreexpminusmax_config.init.f32 = xnn_init_f32_expminus_scalar_rr2_p5_params;
     f32_raddstoreexpminusmax_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
+    f32_raddstoreexpminusmax_config.ukernel =
+      (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_u4_acc2;
+    f32_raddstoreexpminusmax_config.init.f32 = xnn_init_f32_expminus_scalar_rr2_p5_params;
+    f32_raddstoreexpminusmax_config.element_tile = 4;
   #endif
 }
 

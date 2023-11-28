@@ -116,6 +116,11 @@ static void init_f32_vmulcaddc_config(void) {
     f32_vmulcaddc_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_vmulcaddc_config.channel_tile = 1;
     f32_vmulcaddc_config.row_tile = 2;
+  #elif XNN_ARCH_PPC64
+    f32_vmulcaddc_config.ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f32_vmulcaddc_minmax_ukernel_c1__scalar_2x;
+    f32_vmulcaddc_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_vmulcaddc_config.channel_tile = 1;
+    f32_vmulcaddc_config.row_tile = 2;
   #endif
 }
 

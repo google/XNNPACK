@@ -134,6 +134,10 @@ static void init_f32_prelu_config(void) {
     f32_prelu_config.ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__scalar_2x4;
     f32_prelu_config.row_tile = 4;
     f32_prelu_config.channel_tile = 4;
+  #elif XNN_ARCH_PPC64
+    f32_prelu_config.ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__scalar_2x4;
+    f32_prelu_config.row_tile = 4;
+    f32_prelu_config.channel_tile = 4;
   #endif
 }
 

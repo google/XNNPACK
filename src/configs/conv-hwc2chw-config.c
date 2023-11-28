@@ -109,6 +109,13 @@ static void init_f32_conv_hwc2chw_3x3c3s2_config(void) {
     f32_conv_hwc2chw_3x3c3s2_config.output_channel_tile = 4;
     f32_conv_hwc2chw_3x3c3s2_config.output_height_tile = 1;
     f32_conv_hwc2chw_3x3c3s2_config.output_width_tile = 1;
+  #elif XNN_ARCH_PPC64
+    f32_conv_hwc2chw_3x3c3s2_config.ukernel_with_symm_padding =
+      (xnn_conv_hwc2chw_ukernel_fn) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__scalar_1x1;
+    f32_conv_hwc2chw_3x3c3s2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_conv_hwc2chw_3x3c3s2_config.output_channel_tile = 4;
+    f32_conv_hwc2chw_3x3c3s2_config.output_height_tile = 1;
+    f32_conv_hwc2chw_3x3c3s2_config.output_width_tile = 1;
   #endif
 }
 

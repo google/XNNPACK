@@ -53,6 +53,11 @@ struct xnn_hardware_config {
   // vlenb CSR (VLEN/8). 0 if vector extension is unsupported.
   uint32_t vlenb;
 #endif
+#if XNN_ARCH_PPC64
+  bool use_vsx;
+  bool use_vsx3;
+  bool use_mma;
+#endif
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   bool is_x86;
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

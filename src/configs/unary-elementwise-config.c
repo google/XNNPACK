@@ -583,6 +583,10 @@ static void init_f16_to_f32_cvt_config(void) {
     f16_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__scalar_u4;
     f16_to_f32_cvt_config.init.f16_f32_cvt = xnn_init_f16_f32_cvt_scalar_params;
     f16_to_f32_cvt_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
+    f16_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__scalar_u4;
+    f16_to_f32_cvt_config.init.f16_f32_cvt = xnn_init_f16_f32_cvt_scalar_params;
+    f16_to_f32_cvt_config.element_tile = 4;
   #endif
 }
 
@@ -646,6 +650,9 @@ static void init_f32_abs_config(void) {
   #elif XNN_ARCH_RISCV
     f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__scalar_u4;
     f32_abs_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
+    f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__scalar_u4;
+    f32_abs_config.element_tile = 4;
   #endif
 }
 
@@ -699,6 +706,10 @@ static void init_f32_clamp_config(void) {
     f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
     f32_clamp_config.element_tile = 4;
   #elif XNN_ARCH_RISCV
+    f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__scalar_u4;
+    f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+    f32_clamp_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
     f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__scalar_u4;
     f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
     f32_clamp_config.element_tile = 4;
@@ -782,6 +793,10 @@ static void init_f32_elu_config(void) {
     f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u4;
     f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_rr2_lut16_p3_params;
     f32_elu_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
+    f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u4;
+    f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_rr2_lut16_p3_params;
+    f32_elu_config.element_tile = 4;
   #endif
 }
 
@@ -839,6 +854,10 @@ static void init_f32_hswish_config(void) {
       f32_hswish_config.element_tile = 4;
     }
   #elif XNN_ARCH_RISCV
+    f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__scalar_u4;
+    f32_hswish_config.init.f32_hswish = xnn_init_f32_hswish_scalar_params;
+    f32_hswish_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
     f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__scalar_u4;
     f32_hswish_config.init.f32_hswish = xnn_init_f32_hswish_scalar_params;
     f32_hswish_config.element_tile = 4;
@@ -914,6 +933,10 @@ static void init_f32_lrelu_config(void) {
     f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__scalar_u4;
     f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
     f32_lrelu_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
+    f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__scalar_u4;
+    f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
+    f32_lrelu_config.element_tile = 4;
   #endif
 }
 
@@ -955,6 +978,9 @@ static void init_f32_neg_config(void) {
     f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__scalar_u4;
     f32_neg_config.element_tile = 4;
   #elif XNN_ARCH_RISCV
+    f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__scalar_u4;
+    f32_neg_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
     f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__scalar_u4;
     f32_neg_config.element_tile = 4;
   #endif
@@ -1023,6 +1049,9 @@ static void init_f32_rndd_config(void) {
   #elif XNN_ARCH_RISCV
     f32_rndd_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndd_ukernel__scalar_libm_u1;
     f32_rndd_config.element_tile = 1;
+  #elif XNN_ARCH_PPC64
+    f32_rndd_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndd_ukernel__scalar_libm_u1;
+    f32_rndd_config.element_tile = 1;
   #endif
 }
 
@@ -1070,6 +1099,9 @@ static void init_f32_rndne_config(void) {
     f32_rndne_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__scalar_libm_u4;
     f32_rndne_config.element_tile = 4;
   #elif XNN_ARCH_RISCV
+    f32_rndne_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__scalar_libm_u1;
+    f32_rndne_config.element_tile = 1;
+  #elif XNN_ARCH_PPC64
     f32_rndne_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__scalar_libm_u1;
     f32_rndne_config.element_tile = 1;
   #endif
@@ -1121,6 +1153,9 @@ static void init_f32_rndu_config(void) {
   #elif XNN_ARCH_RISCV
     f32_rndu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndu_ukernel__scalar_libm_u1;
     f32_rndu_config.element_tile = 1;
+  #elif XNN_ARCH_PPC64
+    f32_rndu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndu_ukernel__scalar_libm_u1;
+    f32_rndu_config.element_tile = 1;
   #endif
 }
 
@@ -1168,6 +1203,9 @@ static void init_f32_rndz_config(void) {
     f32_rndz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndz_ukernel__scalar_libm_u4;
     f32_rndz_config.element_tile = 4;
   #elif XNN_ARCH_RISCV
+    f32_rndz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndz_ukernel__scalar_libm_u1;
+    f32_rndz_config.element_tile = 1;
+  #elif XNN_ARCH_PPC64
     f32_rndz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndz_ukernel__scalar_libm_u1;
     f32_rndz_config.element_tile = 1;
   #endif
@@ -1232,6 +1270,10 @@ static void init_f32_sigmoid_config(void) {
     f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u2;
     f32_sigmoid_config.init.f32_sigmoid = xnn_init_f32_sigmoid_scalar_rr2_lut64_p2_params;
     f32_sigmoid_config.element_tile = 2;
+  #elif XNN_ARCH_PPC64
+    f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u2;
+    f32_sigmoid_config.init.f32_sigmoid = xnn_init_f32_sigmoid_scalar_rr2_lut64_p2_params;
+    f32_sigmoid_config.element_tile = 2;
   #endif
 }
 
@@ -1272,6 +1314,9 @@ static void init_f32_sqr_config(void) {
   #elif XNN_ARCH_RISCV
     f32_sqr_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__scalar_u4;
     f32_sqr_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
+    f32_sqr_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__scalar_u4;
+    f32_sqr_config.element_tile = 4;
   #endif
 }
 
@@ -1307,6 +1352,9 @@ static void init_f32_sqrt_config(void) {
     f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__scalar_sqrt_u1;
     f32_sqrt_config.element_tile = 1;
   #elif XNN_ARCH_RISCV
+    f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__scalar_sqrt_u1;
+    f32_sqrt_config.element_tile = 1;
+  #elif XNN_ARCH_PPC64
     f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__scalar_sqrt_u1;
     f32_sqrt_config.element_tile = 1;
   #endif
@@ -1389,6 +1437,10 @@ static void init_f32_tanh_config(void) {
     f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3ts_div_u4;
     f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params;
     f32_tanh_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
+    f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3ts_div_u4;
+    f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params;
+    f32_tanh_config.element_tile = 4;
   #endif
 }
 
@@ -1451,6 +1503,10 @@ static void init_f32_to_f16_cvt_config(void) {
     f32_to_f16_cvt_config.init.f32_f16_cvt = xnn_init_f32_f16_cvt_scalar_bitcast_params;
     f32_to_f16_cvt_config.element_tile = 4;
   #elif XNN_ARCH_RISCV
+    f32_to_f16_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_f16_vcvt_ukernel__scalar_fabsf_u2;
+    f32_to_f16_cvt_config.init.f32_f16_cvt = xnn_init_f32_f16_cvt_scalar_fabsf_params;
+    f32_to_f16_cvt_config.element_tile = 2;
+  #elif XNN_ARCH_PPC64
     f32_to_f16_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_f16_vcvt_ukernel__scalar_fabsf_u2;
     f32_to_f16_cvt_config.init.f32_f16_cvt = xnn_init_f32_f16_cvt_scalar_fabsf_params;
     f32_to_f16_cvt_config.element_tile = 2;
@@ -1524,6 +1580,10 @@ static void init_f32_to_qs8_cvt_config(void) {
     f32_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__scalar_lrintf_u4;
     f32_to_qs8_cvt_config.init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_lrintf_params;
     f32_to_qs8_cvt_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
+    f32_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__scalar_lrintf_u4;
+    f32_to_qs8_cvt_config.init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_lrintf_params;
+    f32_to_qs8_cvt_config.element_tile = 4;
   #endif
 }
 
@@ -1587,6 +1647,10 @@ static void init_f32_to_qu8_cvt_config(void) {
       f32_to_qu8_cvt_config.element_tile = 4;
     }
   #elif XNN_ARCH_RISCV
+    f32_to_qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_u4;
+    f32_to_qu8_cvt_config.init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_scalar_lrintf_params;
+    f32_to_qu8_cvt_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
     f32_to_qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_u4;
     f32_to_qu8_cvt_config.init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_scalar_lrintf_params;
     f32_to_qu8_cvt_config.element_tile = 4;
@@ -1657,6 +1721,10 @@ static void init_qs8_cvt_config(void) {
       qs8_cvt_config.element_tile = 4;
     }
   #elif XNN_ARCH_RISCV
+    qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__scalar_u4;
+    qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
+    qs8_cvt_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
     qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__scalar_u4;
     qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
     qs8_cvt_config.element_tile = 4;
@@ -1792,6 +1860,10 @@ static void init_qs8_lrelu_config(void) {
     qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__scalar_andxor_u4;
     qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_andxor_params;
     qs8_lrelu_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
+    qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__scalar_andxor_u4;
+    qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_andxor_params;
+    qs8_lrelu_config.element_tile = 4;
   #endif
 }
 
@@ -1845,6 +1917,10 @@ static void init_qs8_to_f32_cvt_config(void) {
     qs8_to_f32_cvt_config.init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_scalar_params;
     qs8_to_f32_cvt_config.element_tile = 1;
   #elif XNN_ARCH_RISCV
+    qs8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__scalar_u4;
+    qs8_to_f32_cvt_config.init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_scalar_params;
+    qs8_to_f32_cvt_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
     qs8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__scalar_u4;
     qs8_to_f32_cvt_config.init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_scalar_params;
     qs8_to_f32_cvt_config.element_tile = 4;
@@ -1915,6 +1991,10 @@ static void init_qu8_cvt_config(void) {
       qu8_cvt_config.element_tile = 4;
     }
   #elif XNN_ARCH_RISCV
+    qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__scalar_u4;
+    qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
+    qu8_cvt_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
     qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__scalar_u4;
     qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
     qu8_cvt_config.element_tile = 4;
@@ -2002,6 +2082,10 @@ static void init_qu8_lrelu_config(void) {
     qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__scalar_andxor_u4;
     qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_andxor_params;
     qu8_lrelu_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
+    qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__scalar_andxor_u4;
+    qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_andxor_params;
+    qu8_lrelu_config.element_tile = 4;
   #endif
 }
 
@@ -2058,6 +2142,10 @@ static void init_qu8_to_f32_cvt_config(void) {
     qu8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_f32_vcvt_ukernel__scalar_u4;
     qu8_to_f32_cvt_config.init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_scalar_params;
     qu8_to_f32_cvt_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
+    qu8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_f32_vcvt_ukernel__scalar_u4;
+    qu8_to_f32_cvt_config.init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_scalar_params;
+    qu8_to_f32_cvt_config.element_tile = 4;
   #endif
 }
 
@@ -2102,6 +2190,10 @@ static void init_s8_clamp_config(void) {
     s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__scalar_u4;
     s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
     s8_clamp_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
+    s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__scalar_u4;
+    s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
+    s8_clamp_config.element_tile = 4;
   #endif
 }
 
@@ -2138,6 +2230,10 @@ static void init_u8_clamp_config(void) {
     u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__scalar_u4;
     u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
     u8_clamp_config.element_tile = 4;
+  #elif XNN_ARCH_PPC64
+    u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__scalar_u4;
+    u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
+    u8_clamp_config.element_tile = 4;
   #endif
 }
 
@@ -2158,6 +2254,9 @@ static void init_xx_copy_config(void) {
     xx_copy_config.ukernel = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
     xx_copy_config.element_tile = 1;
   #elif XNN_ARCH_RISCV
+    xx_copy_config.ukernel = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
+    xx_copy_config.element_tile = 1;
+  #elif XNN_ARCH_PPC64
     xx_copy_config.ukernel = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
     xx_copy_config.element_tile = 1;
   #endif

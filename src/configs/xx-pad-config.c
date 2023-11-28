@@ -51,6 +51,9 @@ static void init_xx_pad_config(void) {
   #elif XNN_ARCH_RISCV
     xx_pad_config.ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel_p4__scalar_u16;
     xx_pad_config.row_tile = 1;
+  #elif XNN_ARCH_PPC64
+    xx_pad_config.ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel_p4__scalar_u16;
+    xx_pad_config.row_tile = 1;
   #else
     #error "Unsupported architecture"
   #endif

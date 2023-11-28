@@ -82,6 +82,9 @@ static void init_x8_lut_config(void) {
   #elif XNN_ARCH_RISCV
     x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_u4;
     x8_lut_config.tile_size = 4;
+  #elif XNN_ARCH_PPC64
+    x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_u4;
+    x8_lut_config.tile_size = 4;
   #else
     #error "Unsupported architecture"
   #endif
