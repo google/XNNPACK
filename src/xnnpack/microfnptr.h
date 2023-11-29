@@ -1653,6 +1653,12 @@ typedef void (*xnn_qs8_vcvt_ukernel_fn)(
     int8_t* output,
     const union xnn_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+typedef void (*xnn_qs8_f16_vcvt_ukernel_fn)(
+    size_t batch,
+    const int8_t* input,
+    void* output,
+    const union xnn_qs8_f16_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 typedef void (*xnn_qs8_f32_vcvt_ukernel_fn)(
     size_t batch,
     const int8_t* input,
@@ -2294,6 +2300,11 @@ typedef size_t (*xnn_init_qs8_cvt_params_fn)(
   float input_output_scale,
   int8_t input_zero_point,
   int8_t output_zero_point);
+
+typedef size_t (*xnn_init_qs8_f16_cvt_params_fn)(
+  union xnn_qs8_f16_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t scale,
+  int8_t zero_point);
 
 typedef size_t (*xnn_init_qs8_f32_cvt_params_fn)(
   union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],

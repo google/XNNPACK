@@ -4777,7 +4777,11 @@ SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x16-minmax-neonfp16arith-mlal-lane-prfm.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x16-minmax-neonfp16arith-mlal-lane.c
   src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-1x8c2s4-minmax-neonfp16arith.c
-  src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-2x8c2s4-minmax-neonfp16arith.c)
+  src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-2x8c2s4-minmax-neonfp16arith.c
+  src/qs8-f16-vcvt/gen/qs8-f16-vcvt-neonfp16arith-u8.c
+  src/qs8-f16-vcvt/gen/qs8-f16-vcvt-neonfp16arith-u16.c
+  src/qs8-f16-vcvt/gen/qs8-f16-vcvt-neonfp16arith-u24.c
+  src/qs8-f16-vcvt/gen/qs8-f16-vcvt-neonfp16arith-u32.c)
 
 SET(ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vdiv-minmax-aarch64-neonfp16arith-u8.c

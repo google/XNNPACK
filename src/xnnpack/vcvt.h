@@ -400,6 +400,18 @@ DECLARE_QS16_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs16_qs8_vcvt_ukernel__scalar_u1)
 DECLARE_QS16_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs16_qs8_vcvt_ukernel__scalar_u2)
 DECLARE_QS16_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs16_qs8_vcvt_ukernel__scalar_u4)
 
+#define DECLARE_QS8_F16_VCVT_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                           \
+      size_t n,                                        \
+      const int8_t* input,                             \
+      void* output,                                    \
+      const union xnn_qs8_f16_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+DECLARE_QS8_F16_VCVT_UKERNEL_FUNCTION(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8)
+DECLARE_QS8_F16_VCVT_UKERNEL_FUNCTION(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u16)
+DECLARE_QS8_F16_VCVT_UKERNEL_FUNCTION(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u24)
+DECLARE_QS8_F16_VCVT_UKERNEL_FUNCTION(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32)
+
 #define DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                           \
       size_t n,                                        \

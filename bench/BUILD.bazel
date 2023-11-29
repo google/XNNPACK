@@ -132,6 +132,15 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qs8_f16_vcvt_bench",
+    srcs = [
+        "qs8-f16-vcvt.cc",
+        "vcvt-benchmark.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "qs8_f32_vcvt_bench",
     srcs = [
         "qs8-f32-vcvt.cc",

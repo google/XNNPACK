@@ -23,7 +23,7 @@
 
 
 namespace {
-void f16_f32_vcvt(
+static void f16_f32_vcvt(
   benchmark::State& state,
   xnn_f16_f32_vcvt_ukernel_fn cvt,
   xnn_init_f16_f32_cvt_params_fn init_params = nullptr,
@@ -67,7 +67,7 @@ void f16_f32_vcvt(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-void f32_f16_vcvt(
+static void f32_f16_vcvt(
   benchmark::State& state,
   xnn_f32_f16_vcvt_ukernel_fn cvt,
   xnn_init_f32_f16_cvt_params_fn init_params = nullptr,
@@ -110,7 +110,7 @@ void f32_f16_vcvt(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-void f32_qs8_vcvt(
+static void f32_qs8_vcvt(
   benchmark::State& state,
   xnn_f32_qs8_vcvt_ukernel_fn cvt,
   xnn_init_f32_qs8_cvt_params_fn init_params,
@@ -155,7 +155,7 @@ void f32_qs8_vcvt(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-void f32_qu8_vcvt(
+static void f32_qu8_vcvt(
   benchmark::State& state,
   xnn_f32_qu8_vcvt_ukernel_fn cvt,
   xnn_init_f32_qu8_cvt_params_fn init_params,
@@ -200,7 +200,7 @@ void f32_qu8_vcvt(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-void qs8_vcvt(
+static void qs8_vcvt(
   benchmark::State& state,
   xnn_qs8_vcvt_ukernel_fn cvt,
   xnn_init_qs8_cvt_params_fn init_params,
@@ -243,7 +243,7 @@ void qs8_vcvt(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-void qu8_vcvt(
+static void qu8_vcvt(
   benchmark::State& state,
   xnn_qu8_vcvt_ukernel_fn cvt,
   xnn_init_qu8_cvt_params_fn init_params,
@@ -286,7 +286,7 @@ void qu8_vcvt(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-void qs16_qs8_vcvt(
+static void qs16_qs8_vcvt(
   benchmark::State& state,
   xnn_qs16_qs8_vcvt_ukernel_fn cvt,
   xnn_init_qs16_qs8_cvt_params_fn init_params,
@@ -330,7 +330,52 @@ void qs16_qs8_vcvt(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-void qs8_f32_vcvt(
+static void qs8_f16_vcvt(
+  benchmark::State& state,
+  xnn_qs8_f16_vcvt_ukernel_fn cvt,
+  xnn_init_qs8_f16_cvt_params_fn init_params,
+  benchmark::utils::IsaCheckFunction isa_check = nullptr)
+{
+  if (isa_check != nullptr && !isa_check(state)) {
+    return;
+  }
+
+  const size_t num_elements = state.range(0);
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  auto i8rng = std::bind(
+    std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
+    std::ref(rng));
+
+  std::vector<int8_t, AlignedAllocator<int8_t, 64>> x(num_elements + XNN_EXTRA_BYTES / sizeof(int8_t));
+  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> y(num_elements);
+  std::generate(x.begin(), x.end(), std::ref(i8rng));
+  std::fill(y.begin(), y.end(), UINT16_C(0x7E00));
+
+  xnn_qs8_f16_cvt_params params;
+  init_params(&params,
+    fp16_ieee_from_fp32_value(0.25f) /* scale */,
+    1 /* output zero point */);
+  for (auto _ : state) {
+    cvt(num_elements * sizeof(int8_t), x.data(), y.data(), &params);
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  const size_t elements_per_iteration = num_elements;
+  state.counters["elements"] =
+    benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
+
+  const size_t bytes_per_iteration = num_elements * (sizeof(int8_t) + sizeof(uint16_t));
+  state.counters["bytes"] =
+    benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
+}
+
+static void qs8_f32_vcvt(
   benchmark::State& state,
   xnn_qs8_f32_vcvt_ukernel_fn cvt,
   xnn_init_qs8_f32_cvt_params_fn init_params,
@@ -375,7 +420,7 @@ void qs8_f32_vcvt(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-void qu8_f32_vcvt(
+static void qu8_f32_vcvt(
   benchmark::State& state,
   xnn_qu8_f32_vcvt_ukernel_fn cvt,
   xnn_init_qu8_f32_cvt_params_fn init_params,
