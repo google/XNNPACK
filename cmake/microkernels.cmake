@@ -1076,6 +1076,10 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/qs8-dwconv-25p32c-minmax-fp32-avx2-mul16-vpmovsx.c
   src/qs8-dwconv/gen/qs8-dwconv-25p32c-minmax-fp32-avx2-mul16-vpunpck.c
   src/qs8-dwconv/gen/qs8-dwconv-25p32c-minmax-fp32-avx2-mul32.c
+  src/qs8-f16-vcvt/gen/qs8-f16-vcvt-avx2-u8.c
+  src/qs8-f16-vcvt/gen/qs8-f16-vcvt-avx2-u16.c
+  src/qs8-f16-vcvt/gen/qs8-f16-vcvt-avx2-u24.c
+  src/qs8-f16-vcvt/gen/qs8-f16-vcvt-avx2-u32.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx2-u8.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx2-u16.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx2-u24.c

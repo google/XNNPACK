@@ -1481,6 +1481,12 @@ union xnn_qs8_f16_cvt_params {
     uint16_t scale;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(32) int32_t minus_zero_point[8];
+    XNN_ALIGN(32) float scale[8];
+  } avx;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_qs8_f32_cvt_params {
