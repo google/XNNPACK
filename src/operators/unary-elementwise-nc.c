@@ -749,6 +749,39 @@ enum xnn_status xnn_create_convert_nc_qs8(
     xnn_operator_type_convert_nc_qs8, convert_op_out);
 }
 
+enum xnn_status xnn_create_convert_nc_qs8_f16(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  float input_scale,
+  int8_t input_zero_point,
+  uint32_t flags,
+  xnn_operator_t* convert_op_out)
+{
+  if (input_scale <= 0.0f || !isnormal(input_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input scale parameter: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs8_f16), input_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  const struct xnn_unary_elementwise_config* qs8_to_f16_cvt_config = xnn_init_qs8_to_f16_cvt_config();
+
+  const uint16_t fp16_input_scale = fp16_ieee_from_fp32_value(input_scale);
+
+  union xnn_qs8_f16_cvt_params params;
+  if XNN_LIKELY(qs8_to_f16_cvt_config != NULL) {
+    assert(qs8_to_f16_cvt_config->init.qs8_f16_cvt != NULL);
+    qs8_to_f16_cvt_config->init.qs8_f16_cvt(&params, fp16_input_scale, input_zero_point);
+  }
+
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    qs8_to_f16_cvt_config, /*rminmax_config=*/NULL,
+    &params, sizeof(params),
+    xnn_operator_type_convert_nc_qs8_f16, convert_op_out);
+}
+
 enum xnn_status xnn_create_convert_nc_qs8_f32(
   size_t channels,
   size_t input_stride,
@@ -1847,6 +1880,20 @@ enum xnn_status xnn_reshape_convert_nc_qs16_qs8(
     threadpool);
 }
 
+enum xnn_status xnn_reshape_convert_nc_qs8_f16(
+  xnn_operator_t convert_op,
+  size_t batch_size,
+  pthreadpool_t threadpool)
+{
+  return reshape_unary_elementwise_nc(
+    convert_op, xnn_operator_type_convert_nc_qs8_f16,
+    batch_size,
+    /*log2_input_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
+    &convert_op->params.qs8_f16_cvt, sizeof(convert_op->params.qs8_f16_cvt),
+    threadpool);
+}
+
 enum xnn_status xnn_reshape_convert_nc_qs8_f32(
   xnn_operator_t convert_op,
   size_t batch_size,
@@ -2468,6 +2515,16 @@ enum xnn_status xnn_setup_convert_nc_qs16_qs8(
 {
   return setup_unary_elementwise_nc(
     convert_op, xnn_operator_type_convert_nc_qs16_qs8,
+    input, output);
+}
+
+enum xnn_status xnn_setup_convert_nc_qs8_f16(
+  xnn_operator_t convert_op,
+  const int8_t* input,
+  void* output)
+{
+  return setup_unary_elementwise_nc(
+    convert_op, xnn_operator_type_convert_nc_qs8_f16,
     input, output);
 }
 

@@ -50,6 +50,7 @@ enum xnn_operator_type {
   xnn_operator_type_convert_nc_f32_qs8,
   xnn_operator_type_convert_nc_f32_qu8,
   xnn_operator_type_convert_nc_qs8,
+  xnn_operator_type_convert_nc_qs8_f16,
   xnn_operator_type_convert_nc_qs8_f32,
   xnn_operator_type_convert_nc_qs16_qs8,
   xnn_operator_type_convert_nc_qu8,

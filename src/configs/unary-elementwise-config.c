@@ -55,6 +55,7 @@ static struct xnn_unary_elementwise_config f32_to_qs8_cvt_config = {0};
 static struct xnn_unary_elementwise_config f32_to_qu8_cvt_config = {0};
 static struct xnn_unary_elementwise_config qs8_cvt_config = {0};
 static struct xnn_unary_elementwise_config qs8_lrelu_config = {0};
+static struct xnn_unary_elementwise_config qs8_to_f16_cvt_config = {0};
 static struct xnn_unary_elementwise_config qs8_to_f32_cvt_config = {0};
 static struct xnn_unary_elementwise_config qs16_to_qs8_cvt_config = {0};
 static struct xnn_unary_elementwise_config qu8_cvt_config = {0};
@@ -102,6 +103,7 @@ static struct xnn_unary_elementwise_config xx_copy_config = {0};
   static INIT_ONCE init_guard_f32_to_qu8_cvt = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_qs8_cvt = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_qs8_lrelu = INIT_ONCE_STATIC_INIT;
+  static INIT_ONCE init_guard_qs8_to_f16_cvt = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_qs8_to_f32_cvt = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_qs16_to_qs8_cvt = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_qu8_cvt = INIT_ONCE_STATIC_INIT;
@@ -148,6 +150,7 @@ static struct xnn_unary_elementwise_config xx_copy_config = {0};
   static pthread_once_t init_guard_qs8_cvt = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_qs16_to_qs8_cvt = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_qs8_lrelu = PTHREAD_ONCE_INIT;
+  static pthread_once_t init_guard_qs8_to_f16_cvt = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_qs8_to_f32_cvt = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_qu8_cvt = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_qu8_lrelu = PTHREAD_ONCE_INIT;
@@ -1867,6 +1870,26 @@ static void init_qs8_lrelu_config(void) {
   #endif
 }
 
+static void init_qs8_to_f16_cvt_config(void) {
+  #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_arm_neon_fp16_arith) {
+      qs8_to_f16_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32;
+      qs8_to_f16_cvt_config.init.qs8_f16_cvt = xnn_init_qs8_f16_cvt_neonfp16arith_params;
+      qs8_to_f16_cvt_config.element_tile = 32;
+    }
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_x86_avx2) {
+      qs8_to_f16_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f16_vcvt_ukernel__avx2_u16;
+      qs8_to_f16_cvt_config.init.qs8_f16_cvt = xnn_init_qs8_f16_cvt_avx_params;
+      qs8_to_f16_cvt_config.element_tile = 16;
+    }
+  #endif
+}
+
 static void init_qs8_to_f32_cvt_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -2459,6 +2482,11 @@ static void init_xx_copy_config(void) {
     return TRUE;
   }
 
+  static BOOL CALLBACK init_qs8_to_f16_cvt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
+    init_qs8_to_f16_cvt_config();
+    return TRUE;
+  }
+
   static BOOL CALLBACK init_qs8_to_f32_cvt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
     init_qs8_to_f32_cvt_config();
     return TRUE;
@@ -2965,6 +2993,19 @@ const struct xnn_unary_elementwise_config* xnn_init_qs8_lrelu_config() {
     pthread_once(&init_guard_qs8_lrelu, &init_qs8_lrelu_config);
   #endif
   return &qs8_lrelu_config;
+}
+
+const struct xnn_unary_elementwise_config* xnn_init_qs8_to_f16_cvt_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
+    return NULL;
+  }
+  #if XNN_PLATFORM_WINDOWS
+    InitOnceExecuteOnce(&init_guard_qs8_to_f16_cvt, &init_qs8_to_f16_cvt_config_windows, NULL, NULL);
+  #else
+    pthread_once(&init_guard_qs8_to_f16_cvt, &init_qs8_to_f16_cvt_config);
+  #endif
+  return &qs8_to_f16_cvt_config;
 }
 
 const struct xnn_unary_elementwise_config* xnn_init_qs8_to_f32_cvt_config() {

@@ -229,6 +229,7 @@ struct xnn_unary_elementwise_config {
     xnn_init_f32_sqrt_params_fn f32_sqrt;
     xnn_init_f32_tanh_params_fn f32_tanh;
     xnn_init_qs8_cvt_params_fn qs8_cvt;
+    xnn_init_qs8_f16_cvt_params_fn qs8_f16_cvt;
     xnn_init_qs8_f32_cvt_params_fn qs8_f32_cvt;
     xnn_init_qs8_hswish_params_fn qs8_hswish;
     xnn_init_qs8_lrelu_params_fn qs8_lrelu;
@@ -284,6 +285,7 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_to_qu8_cvt_
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_qs8_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_qs8_hswish_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_qs8_lrelu_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_qs8_to_f16_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_qs8_to_f32_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_qs16_to_qs8_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_qu8_cvt_config();
