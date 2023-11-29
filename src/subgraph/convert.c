@@ -43,7 +43,7 @@ static enum xnn_status create_convert_operator(
   switch (node->compute_type) {
     case xnn_compute_type_fp32_to_fp16:
       status = xnn_create_convert_nc_f32_f16(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        /*channels=*/channel_dim, /*input_stride=*/channel_dim, /*output_stride=*/channel_dim,
         node->flags,
         &opdata->operator_objects[0]);
       break;
@@ -71,7 +71,7 @@ static enum xnn_status create_convert_operator(
     }
     case xnn_compute_type_fp32_to_qs8:
       status = xnn_create_convert_nc_f32_qs8(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        /*channels=*/channel_dim, /*input_stride=*/channel_dim, /*output_stride=*/channel_dim,
         values[output_id].quantization.scale,
         (int8_t) values[output_id].quantization.zero_point,
         INT8_MIN, INT8_MAX,
@@ -80,7 +80,7 @@ static enum xnn_status create_convert_operator(
       break;
     case xnn_compute_type_fp32_to_qu8:
       status = xnn_create_convert_nc_f32_qu8(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        /*channels=*/channel_dim, /*input_stride=*/channel_dim, /*output_stride=*/channel_dim,
         values[output_id].quantization.scale,
         (uint8_t) values[output_id].quantization.zero_point,
         0, UINT8_MAX,
@@ -89,13 +89,13 @@ static enum xnn_status create_convert_operator(
       break;
     case xnn_compute_type_fp16_to_fp32:
       status = xnn_create_convert_nc_f16_f32(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        /*channels=*/channel_dim, /*input_stride=*/channel_dim, /*output_stride=*/channel_dim,
         node->flags,
         &opdata->operator_objects[0]);
       break;
     case xnn_compute_type_qs8:
       status = xnn_create_convert_nc_qs8(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        /*channels=*/channel_dim, /*input_stride=*/channel_dim, /*output_stride=*/channel_dim,
         values[input_id].quantization.scale,
         (int8_t) values[input_id].quantization.zero_point,
         values[output_id].quantization.scale,
@@ -103,9 +103,17 @@ static enum xnn_status create_convert_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
+    case xnn_compute_type_qs8_to_fp16:
+      status = xnn_create_convert_nc_qs8_f16(
+        /*channels=*/channel_dim, /*input_stride=*/channel_dim, /*output_stride=*/channel_dim,
+        values[input_id].quantization.scale,
+        (int8_t) values[input_id].quantization.zero_point,
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
     case xnn_compute_type_qs8_to_fp32:
       status = xnn_create_convert_nc_qs8_f32(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        /*channels=*/channel_dim, /*input_stride=*/channel_dim, /*output_stride=*/channel_dim,
         values[input_id].quantization.scale,
         (int8_t) values[input_id].quantization.zero_point,
         node->flags,
@@ -113,7 +121,7 @@ static enum xnn_status create_convert_operator(
       break;
     case xnn_compute_type_qu8:
       status = xnn_create_convert_nc_qu8(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        /*channels=*/channel_dim, /*input_stride=*/channel_dim, /*output_stride=*/channel_dim,
         values[input_id].quantization.scale,
         (uint8_t) values[input_id].quantization.zero_point,
         values[output_id].quantization.scale,
@@ -123,7 +131,7 @@ static enum xnn_status create_convert_operator(
       break;
     case xnn_compute_type_qu8_to_fp32:
       status = xnn_create_convert_nc_qu8_f32(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        /*channels=*/channel_dim, /*input_stride=*/channel_dim, /*output_stride=*/channel_dim,
         values[input_id].quantization.scale,
         (uint8_t) values[input_id].quantization.zero_point,
         node->flags,
@@ -191,6 +199,11 @@ static enum xnn_status reshape_convert_operator(
         threadpool);
     case xnn_operator_type_convert_nc_qs8:
       return xnn_reshape_convert_nc_qs8(
+        opdata->operator_objects[0],
+        batch_size,
+        threadpool);
+    case xnn_operator_type_convert_nc_qs8_f16:
+      return xnn_reshape_convert_nc_qs8_f16(
         opdata->operator_objects[0],
         batch_size,
         threadpool);
@@ -279,6 +292,11 @@ static enum xnn_status setup_convert_operator(
         output_data);
     case xnn_operator_type_convert_nc_qs8:
       return xnn_setup_convert_nc_qs8(
+        opdata->operator_objects[0],
+        input_data,
+        output_data);
+    case xnn_operator_type_convert_nc_qs8_f16:
+      return xnn_setup_convert_nc_qs8_f16(
         opdata->operator_objects[0],
         input_data,
         output_data);
