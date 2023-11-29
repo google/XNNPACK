@@ -49,7 +49,8 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__avx512vnni(
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx512vnni.output_min);
   const __m128i vshuffle_control_mask = _mm_loadu_si128((const __m128i*) params->fp32_avx512vnni.shuffle_control_mask);
   do {
-    __m512i vacc0x0123456789ABCDEF = _mm512_load_epi32(w);
+    __m512i vacc0x0x0123456789ABCDEF = _mm512_load_epi32(w);
+    __m512i vacc1x0x0123456789ABCDEF = _mm512_setzero_epi32();
     w = (const int32_t*) w + 16;
 
     size_t k = kc;
@@ -61,12 +62,13 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__avx512vnni(
       const __m512i vb0123456789ABCDEFx0123 = _mm512_load_si512(w);
       const __m512i vb0123456789ABCDEFx4567 = _mm512_load_si512((const int8_t*) w + 64);
 
-      vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEFx0123);
-      vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x4567, vb0123456789ABCDEFx4567);
+      vacc0x0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEFx0123);
+      vacc1x0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc1x0x0123456789ABCDEF, va0x4567, vb0123456789ABCDEFx4567);
 
       w = (const int8_t*) w + 128;
       k -= 8 * sizeof(int8_t);
     }
+    vacc0x0x0123456789ABCDEF = _mm512_add_epi32(vacc0x0x0123456789ABCDEF, vacc1x0x0123456789ABCDEF);
 
     if (k != 0) {
       const __m512i va0x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a0)), vsign_mask);
@@ -74,25 +76,25 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__avx512vnni(
 
       const __m512i vb0123456789ABCDEF = _mm512_load_si512(w);
 
-      vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEF);
+      vacc0x0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEF);
 
       w = (const int8_t*) w + 64;
       k -= 4 * sizeof(int8_t);
     }
 
-    __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
+    __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0x0123456789ABCDEF);
 
     vscaled0x0123456789ABCDEF = _mm512_mul_ps(vscaled0x0123456789ABCDEF, vscale);
 
     vscaled0x0123456789ABCDEF = _mm512_min_ps(vscaled0x0123456789ABCDEF, voutput_max_less_zero_point);
 
-    vacc0x0123456789ABCDEF = _mm512_cvtps_epi32(vscaled0x0123456789ABCDEF);
+    vacc0x0x0123456789ABCDEF = _mm512_cvtps_epi32(vscaled0x0123456789ABCDEF);
 
-    __m256i vacc0x012389AB4567CDEF = _mm256_packs_epi32(_mm512_castsi512_si256(vacc0x0123456789ABCDEF), _mm512_extracti32x8_epi32(vacc0x0123456789ABCDEF, 1));
+    __m256i vacc0x0x012389AB4567CDEF = _mm256_packs_epi32(_mm512_castsi512_si256(vacc0x0x0123456789ABCDEF), _mm512_extracti32x8_epi32(vacc0x0x0123456789ABCDEF, 1));
 
-    vacc0x012389AB4567CDEF = _mm256_adds_epi16(vacc0x012389AB4567CDEF, voutput_zero_point);
+    vacc0x0x012389AB4567CDEF = _mm256_adds_epi16(vacc0x0x012389AB4567CDEF, voutput_zero_point);
 
-    const __m128i vout0x012389AB4567CDEF = _mm_packs_epi16(_mm256_castsi256_si128(vacc0x012389AB4567CDEF), _mm256_extracti128_si256(vacc0x012389AB4567CDEF, 1));
+    const __m128i vout0x012389AB4567CDEF = _mm_packs_epi16(_mm256_castsi256_si128(vacc0x0x012389AB4567CDEF), _mm256_extracti128_si256(vacc0x0x012389AB4567CDEF, 1));
 
     __m128i vout0x0123456789ABCDEF = _mm_shuffle_epi8(vout0x012389AB4567CDEF, vshuffle_control_mask);
 
