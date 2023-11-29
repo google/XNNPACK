@@ -1694,3 +1694,167 @@ TEST(FULLY_CONNECTED_NC_QD8_F16_QC8W, weights_cache_unit_batch_transpose_weights
     .iterations(3)
     .TestQD8F16QC8W();
 }
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC4W, unit_batch) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(8)
+    .output_channels(4)
+    .kernel_zero_point(8)
+    .iterations(1)
+    .TestQD8F16QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC4W, unit_batch_with_qmin) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .qmin(128)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQD8F16QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC4W, unit_batch_with_qmax) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .qmax(128)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQD8F16QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC4W, unit_batch_with_input_stride) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(22)
+    .input_stride(28)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQD8F16QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC4W, unit_batch_with_output_stride) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .output_stride(29)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQD8F16QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC4W, unit_batch_transpose_weights) {
+  FullyConnectedOperatorTester()
+    .transpose_weights(true)
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(20)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQD8F16QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC4W, unit_batch_without_bias) {
+  FullyConnectedOperatorTester()
+    .has_bias(false)
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQD8F16QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC4W, small_batch) {
+  FullyConnectedOperatorTester()
+    .batch_size(4)
+    .input_channels(2)
+    .output_channels(16)
+    .kernel_zero_point(8)
+    .iterations(1)
+    .TestQD8F16QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC4W, small_batch_with_qmin) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(22)
+    .output_channels(19)
+    .qmin(128)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQD8F16QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC4W, small_batch_with_qmax) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(22)
+    .output_channels(19)
+    .qmax(128)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQD8F16QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC4W, small_batch_with_input_stride) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(22)
+    .input_stride(28)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQD8F16QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC4W, small_batch_with_output_stride) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(22)
+    .output_channels(19)
+    .output_stride(29)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQD8F16QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC4W, small_batch_without_bias) {
+  FullyConnectedOperatorTester()
+    .has_bias(false)
+    .batch_size(11)
+    .input_channels(22)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQD8F16QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC4W, weights_cache_unit_batch) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .use_weights_cache(true)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQD8F16QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC4W, weights_cache_unit_batch_transpose_weights) {
+  FullyConnectedOperatorTester()
+    .transpose_weights(true)
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(20)
+    .use_weights_cache(true)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQD8F16QC4W();
+}
