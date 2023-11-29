@@ -7,7 +7,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
 $assert DATATYPE in ["QC8", "QS8", "QU8", "QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
-$assert not DATATYPE in ["QD8", "QC4"] or not REQUANTIZATION
+$assert not DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"] or not REQUANTIZATION
 $assert VARIANT in ["LD128", "EXTENDED"]
 $assert MR <= 4
 #include <assert.h>

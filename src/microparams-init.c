@@ -2093,6 +2093,25 @@ size_t xnn_init_f32_qc4w_minmax_xop_params(
   return sizeof(params->xop);
 }
 
+size_t xnn_init_f16_qc4w_minmax_avx_params(
+  union xnn_f16_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t output_min,
+  uint16_t output_max,
+  uint8_t kernel_zero_point)
+{
+  assert(kernel_zero_point <= 15);
+  const float min_f32 = fp16_ieee_to_fp32_value(output_min);
+  const float max_f32 = fp16_ieee_to_fp32_value(output_max);
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.min[i] = min_f32;
+    params->avx.max[i] = max_f32;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx.mask[i] = 0xF0;
+  }
+  return sizeof(params->avx);
+}
+
 size_t xnn_init_f32_qc4w_minmax_avx_params(
   union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,

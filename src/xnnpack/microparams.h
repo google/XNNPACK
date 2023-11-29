@@ -166,6 +166,13 @@ union xnn_f16_qc4w_minmax_params {
     uint16_t max;
     int32_t minus_kernel_zero_point;
   } fp16arith;
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(32) float min[8];
+    XNN_ALIGN(32) float max[8];
+    XNN_ALIGN(32) uint8_t mask[16];
+  } avx;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_f32_qc4w_minmax_params {
