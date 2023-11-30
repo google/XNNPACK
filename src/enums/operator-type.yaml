@@ -89,6 +89,8 @@
   string: "Convolution (NHWC, F16)"
 - name: xnn_operator_type_convolution_nhwc_f32
   string: "Convolution (NHWC, F32)"
+- name: xnn_operator_type_convolution_nhwc_qd8_f16_qc8w
+  string: "Convolution (NHWC, QD8, F16, QC8W)"
 - name: xnn_operator_type_convolution_nhwc_qd8_f32_qc8w
   string: "Convolution (NHWC, QD8, F32, QC8W)"
 - name: xnn_operator_type_convolution_nhwc_qc8

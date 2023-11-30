@@ -850,6 +850,234 @@ class ConvolutionOperatorTester {
     }
   }
 
+  void TestNHWCxQD8F16QC8W() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_real_distribution<float> f32dist(-1.f, 1.f);
+    std::uniform_real_distribution<float> f32idist(0.1f, 1.0f);
+    std::uniform_int_distribution<int32_t> w8dist(
+        std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+    // Weights typically have a Gaussian distrubution centred on zero. A
+    // standard deviation of 40 means that > 99.99% of values fall in the
+    // -127->127 range. However, the reduce the chance of overflow, we constrain
+    // the weights further.
+    std::normal_distribution<float> normal_dist{0.f, 10.f};
+
+    std::vector<int8_t> input(
+        XNN_EXTRA_BYTES / sizeof(int8_t) +
+        batch_size() *
+            ((input_height() * input_width() - 1) * input_channel_stride() +
+             groups() * group_input_channels()));
+    std::vector<int8_t> kernel(groups() * group_output_channels() *
+                               kernel_height() * kernel_width() *
+                               group_input_channels());
+    std::vector<float> bias(groups() * group_output_channels());
+    std::vector<uint16_t> output(
+        batch_size() *
+        ((output_height() * output_width() - 1) * output_channel_stride() +
+         groups() * group_output_channels()));
+    std::vector<float> output_ref(batch_size() * output_height() *
+                                  output_width() * groups() *
+                                  group_output_channels());
+    std::vector<xnn_qd8_quantization_params> quantization_params(batch_size());
+    std::vector<float> kernel_scale(groups() * group_output_channels());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)>
+          auto_threadpool{nullptr, pthreadpool_destroy};
+      if (multithreaded()) {
+        const pthreadpool_t threadpool = pthreadpool_create(num_threads());
+        if (pthreadpool_get_threads_count(threadpool) <= 1) {
+          GTEST_SKIP();
+        } else {
+          auto_threadpool.reset(threadpool);
+        }
+      }
+      std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
+      std::generate(kernel.begin(), kernel.end(), [&]() { return (int8_t) normal_dist(rng); });
+      std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+      std::generate(kernel_scale.begin(), kernel_scale.end(),
+                    [&]() { return f32idist(rng); });
+      std::generate(
+          quantization_params.begin(), quantization_params.end(), [&]() {
+            return xnn_qd8_quantization_params{w8dist(rng), f32idist(rng)};
+          });
+      std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));
+
+      // Compute reference results.
+      xnnpack::compute_convolution_qd8_f32_qc8w_reference_results(
+          batch_size(), output_height(), output_width(), input_height(),
+          input_width(), padding_top(), padding_right(), padding_bottom(),
+          padding_left(), kernel_height(), kernel_width(), subsampling_height(),
+          subsampling_width(), dilation_height(), dilation_width(), groups(),
+          group_input_channels(), group_output_channels(),
+          input_channel_stride(), input, kernel, kernel_scale,
+          quantization_params, output_ref, has_bias(), bias);
+
+      const float output_min = -std::numeric_limits<float>::infinity();
+      const float output_max = std::numeric_limits<float>::infinity();
+
+      // Clamp reference results.
+      for (size_t i = 0; i < output_ref.size(); ++i) {
+        output_ref[i] = std::max(std::min(output_ref[i], output_max), output_min);
+        output_ref[i] = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_ref[i]));
+      }
+
+
+      // Clamp reference results.
+      for (float& value : output_ref) {
+        value = std::max(std::min(value, output_max), output_min);
+      }
+      // Create, setup, run, and destroy Convolution operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t convolution_op = nullptr;
+      xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)>
+          auto_weights_cache(nullptr, xnn_release_weights_cache);
+      if (use_weights_cache()) {
+        xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
+      }
+
+      uint32_t flags = 0;
+      if (padding_tf_same()) {
+        flags |= XNN_FLAG_TENSORFLOW_SAME_PADDING;
+      }
+      if (transient_indirection_buffer()) {
+        flags |= XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
+      }
+      xnn_status status = xnn_create_convolution2d_nhwc_qd8_f16_qc8w(
+          padding_tf_same() ? 0 : padding_top(),
+          padding_tf_same() ? 0 : padding_right(),
+          padding_tf_same() ? 0 : padding_bottom(),
+          padding_tf_same() ? 0 : padding_left(), kernel_height(),
+          kernel_width(), subsampling_height(), subsampling_width(),
+          dilation_height(), dilation_width(), groups(), group_input_channels(),
+          group_output_channels(), input_channel_stride(),
+          output_channel_stride(), kernel_scale.data(), kernel.data(),
+          has_bias() ? bias.data() : nullptr, output_min, output_max, flags,
+          /*code_cache=*/nullptr, auto_weights_cache.get(), &convolution_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, convolution_op);
+      if (use_weights_cache()) {
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_finalize_weights_cache(
+                &weights_cache, xnn_weights_cache_finalization_kind_soft));
+      }
+
+      // Smart pointer to automatically delete convolution_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+          auto_convolution_op(convolution_op, xnn_delete_operator);
+
+      size_t workspace_size = SIZE_MAX;
+      size_t workspace_alignment = SIZE_MAX;
+      ASSERT_EQ(xnn_status_success,
+                xnn_reshape_convolution2d_nhwc_qd8_f16_qc8w(
+                    convolution_op, batch_size(), input_height(), input_width(),
+                    &workspace_size, &workspace_alignment,
+                    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                    auto_threadpool.get()));
+      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>>
+          workspace(workspace_size);
+      std::iota(workspace.begin(), workspace.end(), 0);
+      if (transient_indirection_buffer()) {
+        ASSERT_NE(workspace_size, 0);
+        ASSERT_NE(workspace_size, SIZE_MAX);
+        ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_setup_convolution2d_nhwc_qd8_f16_qc8w(
+                convolution_op, workspace.data(), input.data(), output.data(),
+                reinterpret_cast<const struct xnn_dynamic_quantization_params*>(
+                    quantization_params.data())));
+      } else {
+        ASSERT_NE(workspace_size, SIZE_MAX);
+        ASSERT_NE(workspace_alignment, SIZE_MAX);
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_setup_convolution2d_nhwc_qd8_f16_qc8w(
+                convolution_op, workspace.data(), input.data(), output.data(),
+                reinterpret_cast<const struct xnn_dynamic_quantization_params*>(
+                    quantization_params.data())));
+      }
+      ASSERT_EQ(xnn_status_success,
+                xnn_run_operator(convolution_op, auto_threadpool.get()));
+
+      VerifyNHWCxF16(output, output_ref, output_min, output_max);
+
+      if (use_weights_cache()) {
+        xnn_operator_t convolution_op2 = nullptr;
+        size_t old_weights_cache_size = weights_cache.cache.weights.size;
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_create_convolution2d_nhwc_qd8_f16_qc8w(
+                      padding_tf_same() ? 0 : padding_top(),
+                      padding_tf_same() ? 0 : padding_right(),
+                      padding_tf_same() ? 0 : padding_bottom(),
+                      padding_tf_same() ? 0 : padding_left(), kernel_height(),
+                      kernel_width(), subsampling_height(), subsampling_width(),
+                      dilation_height(), dilation_width(), groups(),
+                      group_input_channels(), group_output_channels(),
+                      input_channel_stride(), output_channel_stride(),
+                      kernel_scale.data(), kernel.data(),
+                      has_bias() ? bias.data() : nullptr, output_min,
+                      output_max, flags, /*code_cache=*/nullptr,
+                      auto_weights_cache.get(), &convolution_op2));
+        ASSERT_NE(nullptr, convolution_op2);
+
+        // Smart pointer to automatically delete convolution_op.
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+            auto_convolution_op(convolution_op2, xnn_delete_operator);
+
+        std::vector<uint16_t> output2(output.size(), UINT16_C(0xDEAD));
+        size_t workspace_size = SIZE_MAX;
+        size_t workspace_alignment = SIZE_MAX;
+        ASSERT_EQ(xnn_status_success,
+                  xnn_reshape_convolution2d_nhwc_qd8_f16_qc8w(
+                      convolution_op2, batch_size(), input_height(),
+                      input_width(), &workspace_size, &workspace_alignment,
+                      /*output_height_out=*/nullptr,
+                      /*output_width_out=*/nullptr, auto_threadpool.get()));
+        std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>>
+            workspace(workspace_size);
+        std::iota(workspace.begin(), workspace.end(), 0);
+        if (transient_indirection_buffer()) {
+          ASSERT_NE(workspace_size, 0);
+          ASSERT_NE(workspace_size, SIZE_MAX);
+          ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+          ASSERT_EQ(xnn_status_success,
+                    xnn_setup_convolution2d_nhwc_qd8_f16_qc8w(
+                        convolution_op2, workspace.data(), input.data(),
+                        output2.data(),
+                        reinterpret_cast<
+                            const struct xnn_dynamic_quantization_params*>(
+                            quantization_params.data())));
+        } else {
+          ASSERT_NE(workspace_size, SIZE_MAX);
+          ASSERT_NE(workspace_alignment, SIZE_MAX);
+          ASSERT_EQ(xnn_status_success,
+                    xnn_setup_convolution2d_nhwc_qd8_f16_qc8w(
+                        convolution_op2, workspace.data(), input.data(),
+                        output2.data(),
+                        reinterpret_cast<
+                            const struct xnn_dynamic_quantization_params*>(
+                            quantization_params.data())));
+        }
+        ASSERT_EQ(xnn_status_success,
+                  xnn_run_operator(convolution_op2, auto_threadpool.get()));
+
+        VerifyNHWCxF16(output2, output_ref, output_min, output_max);
+        VerifyWeightsCache(weights_cache, old_weights_cache_size);
+      }
+    }
+  }
+
   void TestNHWCxQD8F32QC8W() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
@@ -2221,11 +2449,18 @@ class ConvolutionOperatorTester {
         for (size_t x = 0; x < output_width(); x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
-             EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_min)
-               << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-             EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_max)
-               << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-             EXPECT_NEAR(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c], fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), std::max(1.0e-4f, std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]) * 1.0e-2f))
+              // FP16 overflows, it's the nature of the beast. If both reference and
+              // actual are infinity, then consider the output to be correct.
+              const bool reference_infinity = std::isinf(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]);
+              const bool actual_infinity = std::isinf(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]));
+              if (reference_infinity && actual_infinity) {
+                continue;
+              }
+              EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_min)
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+              EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_max)
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+              EXPECT_NEAR(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c], fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), std::max(1.0e-4f, std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]) * 1.0e-2f))
                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
             }
           }

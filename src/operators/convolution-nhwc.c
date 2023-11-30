@@ -737,6 +737,112 @@ error:
   return status;
 }
 
+enum xnn_status xnn_create_convolution2d_nhwc_qd8_f16_qc8w(
+    uint32_t input_padding_top,
+    uint32_t input_padding_right,
+    uint32_t input_padding_bottom,
+    uint32_t input_padding_left,
+    uint32_t kernel_height,
+    uint32_t kernel_width,
+    uint32_t subsampling_height,
+    uint32_t subsampling_width,
+    uint32_t dilation_height,
+    uint32_t dilation_width,
+    uint32_t groups,
+    size_t group_input_channels,
+    size_t group_output_channels,
+    size_t input_channel_stride,
+    size_t output_channel_stride,
+    const float* kernel_scale,
+    const int8_t* kernel,
+    const float* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* convolution_op_out)
+{
+  if (isnan(output_min)) {
+    xnn_log_error(
+        "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+        xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qd8_f16_qc8w));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_max)) {
+    xnn_log_error(
+        "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+        xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qd8_f16_qc8w));
+    return xnn_status_invalid_parameter;
+  }
+  const uint16_t fp16_output_min = fp16_ieee_from_fp32_value(output_min);
+  const uint16_t fp16_output_max = fp16_ieee_from_fp32_value(output_max);
+  const float rounded_output_min = fp16_ieee_to_fp32_value(fp16_output_min);
+  const float rounded_output_max = fp16_ieee_to_fp32_value(fp16_output_max);
+  if (rounded_output_min >= rounded_output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f16), rounded_output_min, rounded_output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  const struct xnn_qs8_packing_params packing_params = { .input_zero_point = 1, };
+
+  const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f16_qc8w_gemm_config();
+  if (gemm_config == NULL) {
+    return xnn_status_unsupported_hardware;
+  }
+
+  union xnn_f16_minmax_params gemm_params;
+  if XNN_LIKELY(gemm_config->init.f16 != NULL) {
+    gemm_config->init.f16(&gemm_params, fp16_output_min, fp16_output_max);
+  }
+
+  return create_convolution2d_nhwc(
+    input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+    kernel_height, kernel_width,
+    subsampling_height, subsampling_width,
+    dilation_height, dilation_width,
+    groups, group_input_channels, group_output_channels,
+    input_channel_stride, output_channel_stride,
+    kernel, /*bias=*/NULL, flags,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*bias_element_size=*/sizeof(float),
+    (xnn_pack_vmulcaddc_w_fn) NULL,
+    (xnn_pack_dwconv_hwg_w_fn) NULL,
+    (xnn_pack_dwconv_ghw_w_fn) NULL,
+    (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
+    (xnn_pack_conv_kgo_w_fn) xnn_pack_qs8_conv_kgo_w,
+    (xnn_pack_conv_goki_w_fn) xnn_pack_qs8_conv_goki_w,
+    /*packing_params=*/&packing_params,
+    /*input_padding_byte=*/0,
+    /*packed_weights_padding_byte=*/0,
+    /*extra_weights_bytes=*/sizeof(float) * 2,
+    xnn_init_qs8_qc8w_scale_fp32_params, bias,
+    xnn_init_qs8_qc8w_scale_fp32_params, kernel_scale,
+    /*gemm_params=*/&gemm_params,
+    /*gemm_params_size=*/sizeof(gemm_params),
+    /*dwconv_params=*/NULL,
+    /*dwconv_params_size=*/0,
+    /*vmulcaddc_params=*/NULL,
+    /*vmulcaddc_params_size=*/0,
+    /*gemm_config=*/gemm_config,
+    /*dwconv_ukernel=*/NULL,
+    /*vmulcaddc_config=*/NULL,
+    /*jit_gemm_params=*/NULL,
+    /*linear_activation=*/false,
+    /*relu_activation=*/false,
+    /*operator_type=*/xnn_operator_type_convolution_nhwc_qd8_f16_qc8w,
+    /*num_post_operations=*/0,
+    /*post_operation_params=*/NULL,
+    /*dynamic_quantization=*/true,
+    /*code_cache=*/code_cache,
+    /*weights_cache=*/weights_cache,
+    convolution_op_out);
+}
+
 enum xnn_status xnn_create_convolution2d_nhwc_qd8_f32_qc8w(
     uint32_t input_padding_top,
     uint32_t input_padding_right,
@@ -2453,6 +2559,47 @@ static enum xnn_status reshape_convolution2d_nhwc(
   }
 }
 
+enum xnn_status xnn_reshape_convolution2d_nhwc_qd8_f16_qc8w(
+    xnn_operator_t convolution_op,
+    size_t batch_size,
+    size_t input_height,
+    size_t input_width,
+    size_t* workspace_size,
+    size_t* workspace_alignment,
+    size_t* output_height_out,
+    size_t* output_width_out,
+    pthreadpool_t threadpool)
+{
+  convolution_op->last_input_height = convolution_op->input_height;
+  convolution_op->last_input_width = convolution_op->input_width;
+  convolution_op->input_height = input_height;
+  convolution_op->input_width = input_width;
+  if (input_size_changed(convolution_op)) {
+    if (convolution_op->zero_buffers) {
+      for (size_t i = 1; i < batch_size; ++i) {
+        xnn_release_simd_memory(convolution_op->zero_buffers[i]);
+      }
+    }
+    convolution_op->zero_buffers = xnn_reallocate_memory(convolution_op->zero_buffers, batch_size * sizeof(void*));
+    convolution_op->zero_buffers[0] = convolution_op->zero_buffer;
+    for (size_t i = 1; i < batch_size; ++i) {
+      convolution_op->zero_buffers[i] = xnn_allocate_simd_memory(convolution_op->zero_size);
+    }
+  }
+  return reshape_convolution2d_nhwc(
+    convolution_op, xnn_operator_type_convolution_nhwc_qd8_f16_qc8w,
+    batch_size, input_height, input_width,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    /*extra_weights_elements_size=*/sizeof(int32_t) + sizeof(float) * 2,
+    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*dynamic_quantization=*/true,
+    workspace_size, workspace_alignment,
+    output_height_out, output_width_out,
+    threadpool);
+}
+
 enum xnn_status xnn_reshape_convolution2d_nhwc_qd8_f32_qc8w(
     xnn_operator_t convolution_op,
     size_t batch_size,
@@ -2756,6 +2903,19 @@ static enum xnn_status setup_convolution2d_nhwc(
     default:
       XNN_UNREACHABLE;
   }
+}
+
+enum xnn_status xnn_setup_convolution2d_nhwc_qd8_f16_qc8w(
+    xnn_operator_t convolution_op,
+    void* workspace,
+    const int8_t* input,
+    void* output,
+    const struct xnn_dynamic_quantization_params* quantization_params)
+{
+  return setup_convolution2d_nhwc(
+    convolution_op, xnn_operator_type_convolution_nhwc_qd8_f16_qc8w,
+    workspace, input, output, quantization_params,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T);
 }
 
 enum xnn_status xnn_setup_convolution2d_nhwc_qd8_f32_qc8w(
