@@ -175,6 +175,7 @@ static void init_f32_rsum_config(void) {
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       f32_rsum_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__avx512f_u64_acc4,
+        .init.f32_scale = xnn_init_f32_scale_scalar_params,
         .element_tile = 64,
       };
     } else if (hardware_config->use_x86_avx) {
