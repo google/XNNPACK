@@ -12,7 +12,7 @@
 
 .syntax unified
 
-// void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x8c4__asm_aarch32_neondot_cortex_a55(
+// void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x8c4__asm_aarch32_neondotfp16arith_cortex_a55(
 //     size_t mr,                                      r0
 //     size_t nc,                                      r1
 //     size_t kc,                                      r2 -> r5 -> sp + 52
@@ -25,7 +25,7 @@
 //     size_t a_offset,                    sp + 116 -> (r5)
 //     const int8_t* zero,                 sp + 120 -> (r7)
 //     const int8_t* zero_data,               sp + 124 -> (r4)
-//     xnn_f32_minmax_params *params,  sp + 128 -> (r5)
+//     xnn_f16_minmax_params *params,  sp + 128 -> (r5)
 //     const struct xnn_qd8_quantization_params *quantization_params) [sp + 132] -> (r5)
 
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
@@ -51,7 +51,7 @@
 // iOS does not support 32 bit ARM with Neon DotProduct.
 #ifndef __APPLE__
 
-BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x8c4__asm_aarch32_neondot_cortex_a55
+BEGIN_FUNCTION xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x8c4__asm_aarch32_neondotfp16arith_cortex_a55
         ADD         r2, r2, 3               // kc = (kc + 3) & ~3
         BIC         r2, r2, 3
         # Push 96 bytes
@@ -244,43 +244,43 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x8c4__asm_aarch32_neondot_
         // Load bias
         VLD1.8      {q0-q1},  [r9]!
 
-        VLD1.32     {d5}, [r5]                      // params.min/max
+        VLD1.32     {d5[0]}, [r5]                   // params.min/max
         VADD.F32    q8,  q8, q0
         VADD.F32    q10, q10, q0
         VADD.F32    q12, q12, q0
         VADD.F32    q14, q14, q0
-        VDUP.32     q4, d5[0]
+        VDUP.16     q4, d5[0]
         VADD.F32    q9,  q9, q1
         VADD.F32    q11, q11, q1
         VADD.F32    q13, q13, q1
         VADD.F32    q15, q15, q1
 
-        VMAX.F32    q8, q8, q4
-        VMAX.F32    q9, q9, q4
-        VMAX.F32    q10, q10, q4
-        VMAX.F32    q11, q11, q4
-        VDUP.32     q5, d5[1]
-        VMAX.F32    q12, q12, q4
-        VMAX.F32    q13, q13, q4
-        VMAX.F32    q14, q14, q4
-        VMAX.F32    q15, q15, q4
+        VCVT.F16.F32    d16,  q8
+        VCVT.F16.F32    d17,  q9
+        VCVT.F16.F32    d20,  q10
+        VCVT.F16.F32    d21,  q11
+        VCVT.F16.F32    d24,  q12
+        VCVT.F16.F32    d25,  q13
+        VCVT.F16.F32    d28,  q14
+        VCVT.F16.F32    d29,  q15
+        VMAX.F16    q8, q8, q4
+        VMAX.F16    q10, q10, q4
+        VDUP.16     q5, d5[1]
+        VMAX.F16    q12, q12, q4
+        VMAX.F16    q14, q14, q4
 
-        VMIN.F32    q8, q8, q5
-        VMIN.F32    q9, q9, q5
-        VMIN.F32    q10, q10, q5
-        VMIN.F32    q11, q11, q5
-        VMIN.F32    q12, q12, q5
-        VMIN.F32    q13, q13, q5
-        VMIN.F32    q14, q14, q5
-        VMIN.F32    q15, q15, q5
+        VMIN.F16    q8, q8, q5
+        VMIN.F16    q10, q10, q5
+        VMIN.F16    q12, q12, q5
+        VMIN.F16    q14, q14, q5
         SUBS        r1, r1, 8               // nc -= 8
 
         # Store full 4 x 8
         BLO         11f
-        VST1.32     {q14, q15}, [r6], r7
-        VST1.32     {q12, q13}, [r8], r7
-        VST1.32     {q10, q11}, [r4], r7
-        VST1.32     {q8, q9}, [r11], r7
+        VST1.16     {q14}, [r6], r7
+        VST1.16     {q12}, [r8], r7
+        VST1.16     {q10}, [r4], r7
+        VST1.16     {q8}, [r11], r7
 
         SUB         r2, r2, r14             // a -= ks
 
@@ -321,40 +321,40 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x8c4__asm_aarch32_neondot_
 11:
         TST         r1, 4
         BEQ         12f
-        VST1.32     {q14}, [r6]!
-        VMOV        q14, q15
-        VST1.32     {q12}, [r8]!
-        VMOV        q12, q13
-        VST1.32     {q10}, [r4]!
-        VMOV        q10, q11
-        VST1.32     {q8}, [r11]!
-        VMOV        q8, q9
+        VST1.16     {d28}, [r6]!
+        VMOV        d28, d29
+        VST1.16     {d24}, [r8]!
+        VMOV        d24, d25
+        VST1.16     {d20}, [r4]!
+        VMOV        d20, d21
+        VST1.16     {d16}, [r11]!
+        VMOV        d16, d17
+
 12:
         TST         r1, 2
         BEQ         13f
-        VST1.32     {d28}, [r6]!
-        VEXT.8      q14, q14, q14, 8
-        VST1.32     {d24}, [r8]!
-        VEXT.8      q12, q12, q12, 8
-        VST1.32     {d20}, [r4]!
-        VEXT.8      q10, q10, q10, 8
-        VST1.32     {d16}, [r11]!
-        VEXT.8      q8, q8, q8, 8
-
+        VST1.32     {d28[0]}, [r6]!
+        VEXT.8      d28, d28, d29, 4
+        VST1.32     {d24[0]}, [r8]!
+        VEXT.8      d24, d24, d25, 4
+        VST1.32     {d20[0]}, [r4]!
+        VEXT.8      d20, d20, d21, 4
+        VST1.32     {d16[0]}, [r11]!
+        VEXT.8      d16, d16, d17, 4
 13:
         TST         r1, 1
         BEQ         14f
-        VST1.32     {d28[0]}, [r6]!
-        VST1.32     {d24[0]}, [r8]!
-        VST1.32     {d20[0]}, [r4]!
-        VST1.32     {d16[0]}, [r11]!
+        VST1.16     {d28[0]}, [r6]
+        VST1.16     {d24[0]}, [r8]
+        VST1.16     {d20[0]}, [r4]
+        VST1.16     {d16[0]}, [r11]
 
 14:
         VPOP        {d8-d13}
         ADD         sp, sp, 12              // skip pad, r2, r3
         POP         {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
-END_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x8c4__asm_aarch32_neondot_cortex_a55
+END_FUNCTION xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x8c4__asm_aarch32_neondotfp16arith_cortex_a55
 #endif  // __APPLE__
 
 #ifdef __ELF__

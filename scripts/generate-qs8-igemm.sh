@@ -907,7 +907,8 @@ tools/xngen src/qs8-igemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETC
 ### C4 micro-kernels
 tools/xngen src/qs8-igemm/4x8c4-aarch32-neondot-ld64.S.in                           -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-igemm/gen/qs8-igemm-4x8c4-minmax-rndnu-asm-aarch32-neondot-ld64.S &
 tools/xngen src/qs8-igemm/4x8c4-aarch32-neondot-ld64.S.in                           -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8c4-minmax-fp32-asm-aarch32-neondot-ld64.S &
-tools/xngen src/qs8-igemm/4x8c4-aarch32-neondot-cortex-a55.S.in                     -D REQUANTIZATION=      -D DATATYPE=QD8 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x8c4-minmax-asm-aarch32-neondot-cortex-a55.S &
+tools/xngen src/qs8-igemm/4x8c4-aarch32-neondot-cortex-a55.S.in                     -D REQUANTIZATION=      -D DATATYPE=QD8_F16 -o src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-4x8c4-minmax-asm-aarch32-neondotfp16arith-cortex-a55.S &
+tools/xngen src/qs8-igemm/4x8c4-aarch32-neondot-cortex-a55.S.in                     -D REQUANTIZATION=      -D DATATYPE=QD8_F32 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x8c4-minmax-asm-aarch32-neondot-cortex-a55.S &
 tools/xngen src/qs8-igemm/4x8c4-aarch32-neondot-cortex-a55.S.in                     -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-igemm/gen/qs8-igemm-4x8c4-minmax-rndnu-asm-aarch32-neondot-cortex-a55.S &
 tools/xngen src/qs8-igemm/4x8c4-aarch32-neondot-cortex-a55.S.in                     -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8c4-minmax-fp32-asm-aarch32-neondot-cortex-a55.S &
 

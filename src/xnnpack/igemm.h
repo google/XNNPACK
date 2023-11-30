@@ -844,6 +844,8 @@ DECLARE_QD8_F16_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f16_qc8w_igemm_minmax
 DECLARE_QD8_F16_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c2s4__neonfp16arith)
 DECLARE_QD8_F16_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f16_qc8w_igemm_minmax_ukernel_2x8c2s4__neonfp16arith)
 
+DECLARE_QD8_F16_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x8c4__asm_aarch32_neondotfp16arith_cortex_a55)
+
 #define DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name)               \
   XNN_INTERNAL void fn_name(                                                      \
       size_t mr,                                                                  \
