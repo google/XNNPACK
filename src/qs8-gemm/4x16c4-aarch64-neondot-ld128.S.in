@@ -15,8 +15,8 @@ $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $REWIND_DECREMENT = 3 if DATATYPE == "QC8" else {"RNDNU": 15, "FP32": 7}[REQUANTIZATION] if REQUANTIZATION else 0
 $SCALING_PARAMS = "xnn_qd8_quantization_params" if DATATYPE in ["QD8_F16", "QD8_F32"] else ""
-$FP16 = "fp16arith" if DATATYPE in ["QD8_F16"] else ""
-# void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot${FP16}_ld128(
+$ISA = "fp16arith" if DATATYPE in ["QD8_F16"] else ""
+# void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot${ISA}_ld128(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -81,7 +81,7 @@ $if DATATYPE in ["QD8_F16", "QD8_F32"]:
 $else:
   // unused v8 v9 v10 v11 v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot${FP16}_ld128
+BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot${ISA}_ld128
 
         # Clamp A and C pointers
         CMP         x0, 2                   // if mr < 2
@@ -836,7 +836,7 @@ $else:
   14:
           RET
 
-END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot${FP16}_ld128
+END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot${ISA}_ld128
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

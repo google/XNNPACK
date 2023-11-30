@@ -4,19 +4,20 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert REQUANTIZATION in ["FP32", "RNDNU"] or not REQUANTIZATION
-$assert DATATYPE in ["QC8", "QD8", "QS8"]
+$assert DATATYPE in ["QC8", "QS8", "QD8_F16", "QD8_F32"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 $assert DATATYPE != "QD8" or not REQUANTIZATION
 
 #include <xnnpack/assembly.h>
 
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w", "QS8": "qs8"}[DATATYPE]
-$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QS8": "xnn_qs8_conv_minmax_params"}[DATATYPE]
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QD8_F16" : "qd8_f16_qc8w", "QD8_F32": "qd8_f32_qc8w"}[DATATYPE]
+$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QD8_F16": "xnn_f16_minmax_params", "QD8_F32": "xnn_f32_minmax_params"}[DATATYPE]
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $REWIND_DECREMENT = 3 if DATATYPE == "QC8" else {"RNDNU": 15, "FP32": 7}[REQUANTIZATION] if REQUANTIZATION else 0
-$SCALING_PARAMS = "xnn_qd8_quantization_params" if DATATYPE == "QD8" else ""
-$PARAM_OFFSET = 32 if DATATYPE == "QD8" else 24
-# void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot_ld128(
+$SCALING_PARAMS = "xnn_qd8_quantization_params" if DATATYPE in ["QD8_F16", "QD8_F32"] else ""
+$PARAM_OFFSET = 32 if DATATYPE in ["QD8_F16", "QD8_F32"] else 24
+$ISA = "fp16arith" if DATATYPE in ["QD8_F16"] else ""
+# void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot${ISA}_ld128(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -28,7 +29,7 @@ $PARAM_OFFSET = 32 if DATATYPE == "QD8" else 24
 #     size_t cn_stride,                  [sp] -> (x0)
 #     size_t a_offset,                   [sp + 8] -> x8
 #     const int8_t* zero,                [sp + 16] -> x12
-$if DATATYPE == "QD8":
+$if DATATYPE in ["QD8_F16", "QD8_F32"]:
   #     const int8_t* zero_data,             [sp + 24] -> x19
   #     const union ${PARAMS_UNION} *params,  [sp + 32]  -> x11
   #     const struct ${SCALING_PARAMS} *quantization_params) [sp + 40] -> x16
@@ -49,7 +50,7 @@ $else:
 // C3   x7 v19 v23 v27 v31
 // unused v8 v9 v10 v11 v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot_ld128
+BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot${ISA}_ld128
 
         # Clamp C pointers
         CMP         x0, 2                   // if mr < 2
@@ -64,7 +65,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_4
                                             // if mr <= 2
         CSEL        x17, x16, x17, LS       //   c2 = c1
         BIC         x2, x2, 3
-        $if DATATYPE == "QD8":
+        $if DATATYPE in ["QD8_F16", "QD8_F32"]:
           STR         x19, [sp, -56] // Push x19 to the stack
           LDR         x19, [sp, 24] // Load zero_data
           LDR         x15, [sp, 40]           // &quantization_params[0].zero_point
@@ -80,7 +81,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_4
         .p2align    3
 0:
         # Load initial bias from w into accumulators
-        $if DATATYPE != "QD8":
+        $if DATATYPE not in ["QD8_F16", "QD8_F32"]:
           LDP         q16, q20, [x5], 32
           MOV         v17.16b, v16.16b
           MOV         v18.16b, v16.16b
@@ -124,25 +125,25 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_4
 
         CMP         x13, x12                // if a0 == zero
         ADD         x13, x13, x8            // a0 += a_offset
-        $if DATATYPE == "QD8":
+        $if DATATYPE in ["QD8_F16", "QD8_F32"]:
           CSEL        x13, x19, x13, EQ       //   a0 = zero_data, else a0 += a_offset
         $else:
           CSEL        x13, x12, x13, EQ       //   a0 = zero, else a0 += a_offset
         CMP         x14, x12                // if a1 == zero
         ADD         x14, x14, x8            // a1 += a_offset
-        $if DATATYPE == "QD8":
+        $if DATATYPE in ["QD8_F16", "QD8_F32"]:
           CSEL        x14, x19, x14, EQ       //   a1 = zero_data, else a1 += a_offset
         $else:
           CSEL        x14, x12, x14, EQ       //   a1 = zero, else a1 += a_offset
         CMP         x15, x12                // if a2 == zero
         ADD         x15, x15, x8            // a2 += a_offset
-        $if DATATYPE == "QD8":
+        $if DATATYPE in ["QD8_F16", "QD8_F32"]:
           CSEL        x15, x19, x15, EQ       //   a2 = zero_data, else a2 += a_offset
         $else:
           CSEL        x15, x12, x15, EQ       //   a2 = zero, else a2 += a_offset
         CMP         x10, x12                  // if a3 == zero
         ADD         x10, x10, x8              // a3 += a_offset
-        $if DATATYPE == "QD8":
+        $if DATATYPE in ["QD8_F16", "QD8_F32"]:
           CSEL        x10, x19, x10, EQ       //   a3 = zero_data, else a3 += a_offset
         $else:
           CSEL        x10, x12, x10, EQ       //   a3 = zero, else a3 += a_offset
@@ -246,7 +247,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_4
         SUBS        x9, x9, 32              // ks -= MR * sizeof(int8_t*)
         B.HI        1b
 
-        $if DATATYPE == "QD8":
+        $if DATATYPE in ["QD8_F16", "QD8_F32"]:
           LDP         q0, q1, [x5], 32        // kernel_scale
           SCVTF       v19.4s, v19.4s
           SCVTF       v23.4s, v23.4s
@@ -291,7 +292,10 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_4
           FMUL        v20.4s, v20.4s, v5.4s
           FMUL        v24.4s, v24.4s, v6.4s
           FMUL        v28.4s, v28.4s, v7.4s
-          LD2R        {v4.4s, v5.4s}, [x11]       // min max
+          $if DATATYPE == "QD8_F32":
+            LD2R        {v4.4s, v5.4s}, [x11]       // min max
+          $elif DATATYPE == "QD8_F16":
+            LD2R        {v4.8h, v5.8h}, [x11]       // min max
           FADD        v19.4s, v19.4s, v0.4s
           FADD        v23.4s, v23.4s, v1.4s
           FADD        v27.4s, v27.4s, v2.4s
@@ -308,55 +312,100 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_4
           FADD        v20.4s, v20.4s, v1.4s
           FADD        v24.4s, v24.4s, v2.4s
           FADD        v28.4s, v28.4s, v3.4s
-          FMAX        v19.4s, v19.4s, v4.4s
-          FMAX        v23.4s, v23.4s, v4.4s
-          FMAX        v27.4s, v27.4s, v4.4s
-          FMAX        v31.4s, v31.4s, v4.4s
-          FMAX        v18.4s, v18.4s, v4.4s
-          FMAX        v22.4s, v22.4s, v4.4s
-          FMAX        v26.4s, v26.4s, v4.4s
-          FMAX        v30.4s, v30.4s, v4.4s
-          FMAX        v17.4s, v17.4s, v4.4s
-          FMAX        v21.4s, v21.4s, v4.4s
-          FMAX        v25.4s, v25.4s, v4.4s
-          FMAX        v29.4s, v29.4s, v4.4s
-          FMAX        v16.4s, v16.4s, v4.4s
-          FMAX        v20.4s, v20.4s, v4.4s
-          FMAX        v24.4s, v24.4s, v4.4s
-          FMAX        v28.4s, v28.4s, v4.4s
-          FMIN        v19.4s, v19.4s, v5.4s
-          FMIN        v23.4s, v23.4s, v5.4s
-          FMIN        v27.4s, v27.4s, v5.4s
-          FMIN        v31.4s, v31.4s, v5.4s
-          FMIN        v18.4s, v18.4s, v5.4s
-          FMIN        v22.4s, v22.4s, v5.4s
-          FMIN        v26.4s, v26.4s, v5.4s
-          LDR         x0, [sp, 48]                // cn_stride
-          FMIN        v30.4s, v30.4s, v5.4s
-          FMIN        v17.4s, v17.4s, v5.4s
-          FMIN        v21.4s, v21.4s, v5.4s
-          FMIN        v25.4s, v25.4s, v5.4s
-          FMIN        v29.4s, v29.4s, v5.4s
-          SUBS        x1, x1, 16
-          FMIN        v16.4s, v16.4s, v5.4s
-          FMIN        v20.4s, v20.4s, v5.4s
-          FMIN        v24.4s, v24.4s, v5.4s
-          FMIN        v28.4s, v28.4s, v5.4s
+          $if DATATYPE == "QD8_F32":
+            FMAX        v19.4s, v19.4s, v4.4s
+            FMAX        v23.4s, v23.4s, v4.4s
+            FMAX        v27.4s, v27.4s, v4.4s
+            FMAX        v31.4s, v31.4s, v4.4s
+            FMAX        v18.4s, v18.4s, v4.4s
+            FMAX        v22.4s, v22.4s, v4.4s
+            FMAX        v26.4s, v26.4s, v4.4s
+            FMAX        v30.4s, v30.4s, v4.4s
+            FMAX        v17.4s, v17.4s, v4.4s
+            FMAX        v21.4s, v21.4s, v4.4s
+            FMAX        v25.4s, v25.4s, v4.4s
+            FMAX        v29.4s, v29.4s, v4.4s
+            FMAX        v16.4s, v16.4s, v4.4s
+            FMAX        v20.4s, v20.4s, v4.4s
+            FMAX        v24.4s, v24.4s, v4.4s
+            FMAX        v28.4s, v28.4s, v4.4s
+            FMIN        v19.4s, v19.4s, v5.4s
+            FMIN        v23.4s, v23.4s, v5.4s
+            FMIN        v27.4s, v27.4s, v5.4s
+            FMIN        v31.4s, v31.4s, v5.4s
+            FMIN        v18.4s, v18.4s, v5.4s
+            FMIN        v22.4s, v22.4s, v5.4s
+            FMIN        v26.4s, v26.4s, v5.4s
+            LDR         x0, [sp, 48]                // cn_stride
+            FMIN        v30.4s, v30.4s, v5.4s
+            FMIN        v17.4s, v17.4s, v5.4s
+            FMIN        v21.4s, v21.4s, v5.4s
+            FMIN        v25.4s, v25.4s, v5.4s
+            FMIN        v29.4s, v29.4s, v5.4s
+            SUBS        x1, x1, 16
+            FMIN        v16.4s, v16.4s, v5.4s
+            FMIN        v20.4s, v20.4s, v5.4s
+            FMIN        v24.4s, v24.4s, v5.4s
+            FMIN        v28.4s, v28.4s, v5.4s
+          $elif DATATYPE == "QD8_F16":
+            FCVTN       v19.4h, v19.4s
+            FCVTN       v27.4h, v27.4s
+            FCVTN       v18.4h, v18.4s
+            FCVTN       v26.4h, v26.4s
+            FCVTN       v17.4h, v17.4s
+            FCVTN       v25.4h, v25.4s
+            FCVTN       v16.4h, v16.4s
+            FCVTN       v24.4h, v24.4s
+            FCVTN2      v19.8h, v23.4s
+            FCVTN2      v27.8h, v31.4s
+            FCVTN2      v18.8h, v22.4s
+            FCVTN2      v26.8h, v30.4s
+            FCVTN2      v17.8h, v21.4s
+            FCVTN2      v25.8h, v29.4s
+            FCVTN2      v16.8h, v20.4s
+            FCVTN2      v24.8h, v28.4s
+            LDR         x0, [sp, 48]                // cn_stride
+            FMAX        v19.8h, v19.8h, v4.8h
+            FMAX        v27.8h, v27.8h, v4.8h
+            FMAX        v18.8h, v18.8h, v4.8h
+            FMAX        v26.8h, v26.8h, v4.8h
+            FMAX        v17.8h, v17.8h, v4.8h
+            FMAX        v25.8h, v25.8h, v4.8h
+            FMAX        v16.8h, v16.8h, v4.8h
+            FMAX        v24.8h, v24.8h, v4.8h
+            SUBS        x1, x1, 16
+            FMIN        v19.8h, v19.8h, v5.8h
+            FMIN        v27.8h, v27.8h, v5.8h
+            FMIN        v18.8h, v18.8h, v5.8h
+            FMIN        v26.8h, v26.8h, v5.8h
+            FMIN        v17.8h, v17.8h, v5.8h
+            FMIN        v25.8h, v25.8h, v5.8h
+            FMIN        v16.8h, v16.8h, v5.8h
+            FMIN        v24.8h, v24.8h, v5.8h
           B.LO        6f
 
-          STP         q19, q23, [x7]
-          STP         q27, q31, [x7, #32]
-          ADD         x7, x7, x0
-          STP         q18, q22, [x17]
-          STP         q26, q30, [x17, #32]
-          ADD         x17, x17, x0
-          STP         q17, q21, [x16]
-          STP         q25, q29, [x16, #32]
-          ADD         x16, x16, x0
-          STP         q16, q20, [x6]
-          STP         q24, q28, [x6, #32]
-          ADD         x6, x6, x0
-
+          $if DATATYPE == "QD8_F32":
+            STP         q19, q23, [x7]
+            STP         q27, q31, [x7, #32]
+            ADD         x7, x7, x0
+            STP         q18, q22, [x17]
+            STP         q26, q30, [x17, #32]
+            ADD         x17, x17, x0
+            STP         q17, q21, [x16]
+            STP         q25, q29, [x16, #32]
+            ADD         x16, x16, x0
+            STP         q16, q20, [x6]
+            STP         q24, q28, [x6, #32]
+            ADD         x6, x6, x0
+          $elif DATATYPE == "QD8_F16":
+            STP         q19, q27, [x7]
+            ADD         x7, x7, x0
+            STP         q18, q26, [x17]
+            ADD         x17, x17, x0
+            STP         q17, q25, [x16]
+            ADD         x16, x16, x0
+            STP         q16, q24, [x6]
+            ADD         x6, x6, x0
           SUB         x4, x4, x3              // a -= ks
 
           # nc loop
@@ -501,7 +550,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_4
           FCVTNS      v30.4s, v30.4s
           FCVTNS      v31.4s, v31.4s
 
-        $if DATATYPE != "QD8":
+        $if DATATYPE not in ["QD8_F16", "QD8_F32"]:
           SQXTN       v16.4h, v16.4s
           SQXTN       v17.4h, v17.4s
           SQXTN       v18.4h, v18.4s
@@ -645,7 +694,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_4
 
         # Store odd width
         .p2align    3
-$if DATATYPE == "QD8":
+$if DATATYPE == "QD8_F32":
   6:
           TBZ         x1, 3, 7f
           STP         q19, q23, [x7]
@@ -705,6 +754,50 @@ $if DATATYPE == "QD8":
           LDP         d10, d11, [sp, 16]
           LDP         d8, d9, [sp], 48
           RET
+$if DATATYPE == "QD8_F16":
+  6:
+          TBZ         x1, 3, 7f
+          STR         q19, [x7], 16
+          STR         q18, [x17], 16
+          MOV         v19.16b, v27.16b
+          MOV         v18.16b, v26.16b
+          STR         q17, [x16], 16
+          STR         q16, [x6], 16
+          MOV         v17.16b, v25.16b
+          MOV         v16.16b, v24.16b
+  7:
+          TBZ         x1, 2, 8f
+          STR         d19, [x7], 8
+          STR         d18, [x17], 8
+          DUP         d19, v19.d[1]
+          DUP         d18, v18.d[1]
+          STR         d17, [x16], 8
+          STR         d16, [x6], 8
+          DUP         d17, v17.d[1]
+          DUP         d16, v16.d[1]
+  8:
+          TBZ         x1, 1, 9f
+          STR         s19, [x7], 4
+          STR         s18, [x17], 4
+          DUP         s19, v19.s[1]
+          DUP         s18, v18.s[1]
+          STR         s17, [x16], 4
+          STR         s16, [x6], 4
+          DUP         s17, v17.s[1]
+          DUP         s16, v16.s[1]
+  9:
+          TBZ         x1, 0, 10f
+          STR         h19, [x7]
+          STR         h18, [x17]
+          STR         h17, [x16]
+          STR         h16, [x6]
+  10:
+          # Restore d8-d13 from stack
+          LDR         x19, [sp, -8]
+          LDP         d12, d13, [sp, 32]
+          LDP         d10, d11, [sp, 16]
+          LDP         d8, d9, [sp], 48
+          RET
 $else:
   6:
           TBZ         x1, 3, 7f
@@ -745,7 +838,7 @@ $else:
   10:
           RET
 
-END_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot_ld128
+END_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot${ISA}_ld128
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
