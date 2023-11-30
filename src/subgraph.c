@@ -798,12 +798,19 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
   for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
     struct xnn_node* node = &subgraph->nodes[n];
     switch (node->type) {
-      case xnn_node_type_convolution_2d:
       case xnn_node_type_deconvolution_2d:
       case xnn_node_type_depthwise_convolution_2d:
       case xnn_node_type_prelu:
         subgraph->values[node->inputs[0]].fp16_compatible = true;
         subgraph->values[node->outputs[0]].fp16_compatible = true;
+        break;
+      case xnn_node_type_convolution_2d:
+        if (node->compute_type == xnn_compute_type_qd8_to_fp32) {
+          subgraph->values[node->outputs[0]].fp16_compatible = true;
+        } else {
+          subgraph->values[node->inputs[0]].fp16_compatible = true;
+          subgraph->values[node->outputs[0]].fp16_compatible = true;
+        }
         break;
       case xnn_node_type_fully_connected:
         if (node->compute_type == xnn_compute_type_qd8_to_fp32) {
