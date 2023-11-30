@@ -10,7 +10,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qd8_f32_qc8w_igemm_minmax__ukernel_4x16c4__asm_aarch64_neondot_cortex_a55(
+# void xnn_qd8_f16_qc8w_igemm_minmax__ukernel_4x16c4__asm_aarch64_neondotfp16arith_cortex_a55(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -23,7 +23,7 @@
 #     size_t a_offset,                   [sp + 8] -> x8
 #     const int8_t* zero,                [sp + 16] -> x12
 #     const int8_t* zero_data,             [sp + 24] -> x19
-#     const union xnn_f32_minmax_params *params,  [sp + 32]  -> x11
+#     const union xnn_f16_minmax_params *params,  [sp + 32]  -> x11
 #     const struct xnn_qd8_quantization_params *quantization_params) [sp + 40] -> x17
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
@@ -42,7 +42,7 @@
 
 // x11 temp for Cortex-A55 loads
 
-BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55
+BEGIN_FUNCTION xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondotfp16arith_cortex_a55
 
         # Clamp C pointers
         CMP         x0, 2                   // if mr < 2
@@ -505,7 +505,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot
         FADD        v21.4s, v21.4s, v1.4s
         FADD        v22.4s, v22.4s, v1.4s
         FADD        v23.4s, v23.4s, v1.4s
-        LD2R        {v0.4s, v1.4s}, [x11]       // min max
+        LD2R        {v0.8h, v1.8h}, [x11]       // min max
         FADD        v24.4s, v24.4s, v2.4s
         FADD        v25.4s, v25.4s, v2.4s
         FADD        v26.4s, v26.4s, v2.4s
@@ -514,55 +514,51 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot
         FADD        v29.4s, v29.4s, v3.4s
         FADD        v30.4s, v30.4s, v3.4s
         FADD        v31.4s, v31.4s, v3.4s
-        FMAX        v16.4s, v16.4s, v0.4s
-        FMAX        v17.4s, v17.4s, v0.4s
-        FMAX        v18.4s, v18.4s, v0.4s
-        FMAX        v19.4s, v19.4s, v0.4s
-        FMAX        v20.4s, v20.4s, v0.4s
-        FMAX        v21.4s, v21.4s, v0.4s
-        FMAX        v22.4s, v22.4s, v0.4s
-        FMAX        v23.4s, v23.4s, v0.4s
-        FMAX        v24.4s, v24.4s, v0.4s
-        FMAX        v25.4s, v25.4s, v0.4s
-        FMAX        v26.4s, v26.4s, v0.4s
-        FMAX        v27.4s, v27.4s, v0.4s
-        FMAX        v28.4s, v28.4s, v0.4s
-        FMAX        v29.4s, v29.4s, v0.4s
-        FMAX        v30.4s, v30.4s, v0.4s
-        FMAX        v31.4s, v31.4s, v0.4s
-        FMIN        v16.4s, v16.4s, v1.4s
-        FMIN        v17.4s, v17.4s, v1.4s
-        FMIN        v18.4s, v18.4s, v1.4s
-        FMIN        v19.4s, v19.4s, v1.4s
-        FMIN        v20.4s, v20.4s, v1.4s
-        FMIN        v21.4s, v21.4s, v1.4s
-        FMIN        v22.4s, v22.4s, v1.4s
-        FMIN        v23.4s, v23.4s, v1.4s
-        FMIN        v24.4s, v24.4s, v1.4s
-        FMIN        v25.4s, v25.4s, v1.4s
-        FMIN        v26.4s, v26.4s, v1.4s
-        FMIN        v27.4s, v27.4s, v1.4s
-        FMIN        v28.4s, v28.4s, v1.4s
-        FMIN        v29.4s, v29.4s, v1.4s
-        FMIN        v30.4s, v30.4s, v1.4s
-        FMIN        v31.4s, v31.4s, v1.4s
+        FCVTN       v16.4h, v16.4s
+        FCVTN       v17.4h, v17.4s
+        FCVTN       v18.4h, v18.4s
+        FCVTN       v19.4h, v19.4s
+        FCVTN       v24.4h, v24.4s
+        FCVTN       v25.4h, v25.4s
+        FCVTN       v26.4h, v26.4s
+        FCVTN       v27.4h, v27.4s
+        FCVTN2      v16.8h, v20.4s
+        FCVTN2      v17.8h, v21.4s
+        FCVTN2      v18.8h, v22.4s
+        FCVTN2      v19.8h, v23.4s
+        FCVTN2      v24.8h, v28.4s
+        FCVTN2      v25.8h, v29.4s
+        FCVTN2      v26.8h, v30.4s
+        FCVTN2      v27.8h, v31.4s
+        FMAX        v16.8h, v16.8h, v0.8h
+        FMAX        v17.8h, v17.8h, v0.8h
+        FMAX        v18.8h, v18.8h, v0.8h
+        FMAX        v19.8h, v19.8h, v0.8h
+        FMAX        v24.8h, v24.8h, v0.8h
+        FMAX        v25.8h, v25.8h, v0.8h
+        FMAX        v26.8h, v26.8h, v0.8h
+        FMAX        v27.8h, v27.8h, v0.8h
+        FMIN        v16.8h, v16.8h, v1.8h
+        FMIN        v17.8h, v17.8h, v1.8h
+        FMIN        v18.8h, v18.8h, v1.8h
+        FMIN        v19.8h, v19.8h, v1.8h
+        FMIN        v24.8h, v24.8h, v1.8h
+        FMIN        v25.8h, v25.8h, v1.8h
+        FMIN        v26.8h, v26.8h, v1.8h
+        FMIN        v27.8h, v27.8h, v1.8h
         SUBS        x1, x1, 16
         LDR         x0, [sp, 48]            // cn_stride
         B.LO        7f
-        STP         q19, q23, [x7]
-        STP         q27, q31, [x7, #32]
+        STP         q19, q27, [x7]
         ADD         x7, x7, x0
 
-        STP         q18, q22, [x17]
-        STP         q26, q30, [x17, #32]
+        STP         q18, q26, [x17]
         ADD         x17, x17, x0
 
-        STP         q17, q21, [x16]
-        STP         q25, q29, [x16, #32]
+        STP         q17, q25, [x16]
         ADD         x16, x16, x0
 
-        STP         q16, q20, [x6]
-        STP         q24, q28, [x6, #32]
+        STP         q16, q24, [x6]
         ADD         x6, x6, x0
         SUB         x4, x4, x3              // a -= ks
         B.NE        0b
@@ -649,56 +645,40 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot
         .p2align    3
 7:
         TBZ         x1, 3, 8f
-        STP         q19, q23, [x7]
-        STP         q18, q22, [x17]
-        STP         q17, q21, [x16]
-        STP         q16, q20, [x6]
+        STR         q19, [x7], 16
+        STR         q18, [x17], 16
+        STR         q17, [x16], 16
+        STR         q16, [x6], 16
         MOV         v16.16b, v24.16b
         MOV         v17.16b, v25.16b
         MOV         v18.16b, v26.16b
         MOV         v19.16b, v27.16b
-        MOV         v20.16b, v28.16b
-        MOV         v21.16b, v29.16b
-        MOV         v22.16b, v30.16b
-        MOV         v23.16b, v31.16b
-        ADD         x7, x7, #32
-        ADD         x17, x17, #32
-        ADD         x16, x16, #32
-        ADD         x6, x6, #32
 8:
         TBZ         x1, 2, 9f
-        STR         q19, [x7]
-        STR         q18, [x17]
-        STR         q17, [x16]
-        STR         q16, [x6]
-        MOV         v16.16b, v20.16b
-        MOV         v17.16b, v21.16b
-        MOV         v18.16b, v22.16b
-        MOV         v19.16b, v23.16b
-        ADD         x7, x7, #16
-        ADD         x17, x17, #16
-        ADD         x16, x16, #16
-        ADD         x6, x6, #16
-9:
-        TBZ         x1, 1, 10f
-        ST1         {v19.2s}, [x7]
-        ST1         {v18.2s}, [x17]
-        ST1         {v17.2s}, [x16]
-        ST1         {v16.2s}, [x6]
+        STR         d19, [x7], 8
+        STR         d18, [x17], 8
+        STR         d17, [x16], 8
+        STR         d16, [x6], 8
         DUP         d16, v16.d[1]
         DUP         d17, v17.d[1]
         DUP         d18, v18.d[1]
         DUP         d19, v19.d[1]
-        ADD         x7, x7, #8
-        ADD         x17, x17, #8
-        ADD         x16, x16, #8
-        ADD         x6, x6, #8
+9:
+        TBZ         x1, 1, 10f
+        STR         s19, [x7], 4
+        STR         s18, [x17], 4
+        STR         s17, [x16], 4
+        STR         s16, [x6], 4
+        DUP         s16, v16.s[1]
+        DUP         s17, v17.s[1]
+        DUP         s18, v18.s[1]
+        DUP         s19, v19.s[1]
 10:
         TBZ         x1, 0, 11f
-        STR         s19, [x7]
-        STR         s18, [x17]
-        STR         s17, [x16]
-        STR         s16, [x6]
+        STR         h19, [x7]
+        STR         h18, [x17]
+        STR         h17, [x16]
+        STR         h16, [x6]
 11:
         # Restore d8-d12 from stack
         LDR         x19, [sp, 40]
@@ -707,7 +687,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot
         LDP         d8, d9, [sp], 48
         RET
 
-END_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55
+END_FUNCTION xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondotfp16arith_cortex_a55
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

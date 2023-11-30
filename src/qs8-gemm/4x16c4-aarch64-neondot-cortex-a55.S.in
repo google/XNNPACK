@@ -17,8 +17,8 @@ $REWIND_DECREMENT = 3 if DATATYPE == "QC8" else {"RNDNU": 15, "FP32": 7}[REQUANT
 $SP_OFFSET = 48 if DATATYPE in ["QD8_F16", "QD8_F32"] else 32
 $STACK_REGISTERS = 13 if DATATYPE in ["QD8_F16", "QD8_F32"] else 11
 $SCALING_PARAMS = "xnn_qd8_quantization_params" if DATATYPE in ["QD8_F16", "QD8_F32"] else ""
-$FP16 = "fp16arith" if DATATYPE in ["QD8_F16"] else ""
-# void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot${FP16}_cortex_a55(
+$ISA = "fp16arith" if DATATYPE in ["QD8_F16"] else ""
+# void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot${ISA}_cortex_a55(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -52,7 +52,7 @@ $if DATATYPE in ["QD8_F16", "QD8_F32"]:
 $else:
   // unused v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot${FP16}_cortex_a55
+BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot${ISA}_cortex_a55
 
         # Clamp A and C pointers
         CMP         x0, 2                   // if mr < 2
@@ -1043,7 +1043,7 @@ $else:
           LDP         d8, d9, [sp], 32
           RET
 
-END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot${FP16}_cortex_a55
+END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot${ISA}_cortex_a55
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
