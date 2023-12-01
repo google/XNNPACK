@@ -29,8 +29,8 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_1, bh_1_bw_1) {
 }
 
 TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_1, bh_1_2_bw_1_2) {
-  for(size_t i = 1; i <= 2; ++i){
-    for(size_t j = 1; j <= 2; ++j){
+  for (size_t i = 1; i <= 2; ++i) {
+    for (size_t j = 1; j <= 2; ++j) {
       TransposeMicrokernelTester()
         .input_stride(j * 3)
         .output_stride(i * 7)
@@ -55,7 +55,7 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_1, bh_1_bw_2) {
 }
 
 TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_1, bh_1_bw_2_2) {
-  for(size_t i = 2; i < 2; ++i){
+  for (size_t i = 2; i < 2; ++i) {
     TransposeMicrokernelTester()
       .input_stride(i)
       .output_stride(2)
@@ -68,7 +68,7 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_1, bh_1_bw_2_2) {
 }
 
 TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_1, bh_2_bw_2_2) {
-  for(size_t i = 2; i < 2; ++i){
+  for (size_t i = 2; i < 2; ++i) {
     TransposeMicrokernelTester()
       .input_stride(i)
       .output_stride(2)
@@ -91,8 +91,8 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_1, bh_2_bw_1) {
     .Test(xnn_xx_transposev_ukernel__1x1_scalar_memcpy);
 }
 
-TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_1, bh_2_2_bw_1){
-  for(size_t i = 2; i < 2; ++i){
+TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_1, bh_2_2_bw_1) {
+  for (size_t i = 2; i < 2; ++i) {
     TransposeMicrokernelTester()
       .input_stride(18)
       .output_stride(i)
@@ -104,8 +104,8 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_1, bh_2_2_bw_1){
   }
 }
 
-TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_1, bh_2_2_bw_2){
-  for(size_t i = 2; i < 2; ++i){
+TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_1, bh_2_2_bw_2) {
+  for (size_t i = 2; i < 2; ++i) {
     TransposeMicrokernelTester()
       .input_stride(2)
       .output_stride(i)
@@ -118,8 +118,8 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_1, bh_2_2_bw_2){
 }
 
 TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_1, bh_2_2_bw_2_2) {
-  for(size_t i = 2; i < 2; ++i){
-    for(size_t j = 2; j < 2; ++j){
+  for (size_t i = 2; i < 2; ++i) {
+    for (size_t j = 2; j < 2; ++j) {
       TransposeMicrokernelTester()
         .input_stride(j)
         .output_stride(i)
@@ -213,8 +213,8 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_3, bh_1_bw_1) {
 }
 
 TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_3, bh_1_2_bw_1_2) {
-  for(size_t i = 1; i <= 2; ++i){
-    for(size_t j = 1; j <= 2; ++j){
+  for (size_t i = 1; i <= 2; ++i) {
+    for (size_t j = 1; j <= 2; ++j) {
       TransposeMicrokernelTester()
         .input_stride(j * 3)
         .output_stride(i * 7)
@@ -239,7 +239,7 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_3, bh_1_bw_2) {
 }
 
 TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_3, bh_1_bw_2_2) {
-  for(size_t i = 2; i < 2; ++i){
+  for (size_t i = 2; i < 2; ++i) {
     TransposeMicrokernelTester()
       .input_stride(i)
       .output_stride(2)
@@ -252,7 +252,7 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_3, bh_1_bw_2_2) {
 }
 
 TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_3, bh_2_bw_2_2) {
-  for(size_t i = 2; i < 2; ++i){
+  for (size_t i = 2; i < 2; ++i) {
     TransposeMicrokernelTester()
       .input_stride(i)
       .output_stride(2)
@@ -275,8 +275,8 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_3, bh_2_bw_1) {
     .Test(xnn_xx_transposev_ukernel__1x1_scalar_memcpy);
 }
 
-TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_3, bh_2_2_bw_1){
-  for(size_t i = 2; i < 2; ++i){
+TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_3, bh_2_2_bw_1) {
+  for (size_t i = 2; i < 2; ++i) {
     TransposeMicrokernelTester()
       .input_stride(18)
       .output_stride(i)
@@ -288,8 +288,8 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_3, bh_2_2_bw_1){
   }
 }
 
-TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_3, bh_2_2_bw_2){
-  for(size_t i = 2; i < 2; ++i){
+TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_3, bh_2_2_bw_2) {
+  for (size_t i = 2; i < 2; ++i) {
     TransposeMicrokernelTester()
       .input_stride(2)
       .output_stride(i)
@@ -302,8 +302,8 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_3, bh_2_2_bw_2){
 }
 
 TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_3, bh_2_2_bw_2_2) {
-  for(size_t i = 2; i < 2; ++i){
-    for(size_t j = 2; j < 2; ++j){
+  for (size_t i = 2; i < 2; ++i) {
+    for (size_t j = 2; j < 2; ++j) {
       TransposeMicrokernelTester()
         .input_stride(j)
         .output_stride(i)
@@ -397,8 +397,8 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_5, bh_1_bw_1) {
 }
 
 TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_5, bh_1_2_bw_1_2) {
-  for(size_t i = 1; i <= 2; ++i){
-    for(size_t j = 1; j <= 2; ++j){
+  for (size_t i = 1; i <= 2; ++i) {
+    for (size_t j = 1; j <= 2; ++j) {
       TransposeMicrokernelTester()
         .input_stride(j * 3)
         .output_stride(i * 7)
@@ -423,7 +423,7 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_5, bh_1_bw_2) {
 }
 
 TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_5, bh_1_bw_2_2) {
-  for(size_t i = 2; i < 2; ++i){
+  for (size_t i = 2; i < 2; ++i) {
     TransposeMicrokernelTester()
       .input_stride(i)
       .output_stride(2)
@@ -436,7 +436,7 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_5, bh_1_bw_2_2) {
 }
 
 TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_5, bh_2_bw_2_2) {
-  for(size_t i = 2; i < 2; ++i){
+  for (size_t i = 2; i < 2; ++i) {
     TransposeMicrokernelTester()
       .input_stride(i)
       .output_stride(2)
@@ -459,8 +459,8 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_5, bh_2_bw_1) {
     .Test(xnn_xx_transposev_ukernel__1x1_scalar_memcpy);
 }
 
-TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_5, bh_2_2_bw_1){
-  for(size_t i = 2; i < 2; ++i){
+TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_5, bh_2_2_bw_1) {
+  for (size_t i = 2; i < 2; ++i) {
     TransposeMicrokernelTester()
       .input_stride(18)
       .output_stride(i)
@@ -472,8 +472,8 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_5, bh_2_2_bw_1){
   }
 }
 
-TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_5, bh_2_2_bw_2){
-  for(size_t i = 2; i < 2; ++i){
+TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_5, bh_2_2_bw_2) {
+  for (size_t i = 2; i < 2; ++i) {
     TransposeMicrokernelTester()
       .input_stride(2)
       .output_stride(i)
@@ -486,8 +486,8 @@ TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_5, bh_2_2_bw_2){
 }
 
 TEST(XX_TRANSPOSEV__1X1_SCALAR_MEMCPY_5, bh_2_2_bw_2_2) {
-  for(size_t i = 2; i < 2; ++i){
-    for(size_t j = 2; j < 2; ++j){
+  for (size_t i = 2; i < 2; ++i) {
+    for (size_t j = 2; j < 2; ++j) {
       TransposeMicrokernelTester()
         .input_stride(j)
         .output_stride(i)

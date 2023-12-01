@@ -65,8 +65,8 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT}_bw_${TILE_WIDTH}) {
 TEST(${TEST_NAME}, bh_1_${TILE_HEIGHT * 2}_bw_1_${TILE_WIDTH * 2}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for(size_t i = 1; i <= ${TILE_HEIGHT * 2}; ++i){
-    for(size_t j = 1; j <= ${TILE_WIDTH * 2}; ++j){
+  for (size_t i = 1; i <= ${TILE_HEIGHT * 2}; ++i) {
+    for (size_t j = 1; j <= ${TILE_WIDTH * 2}; ++j) {
       TransposeMicrokernelTester()
         .input_stride(j * 3)
         .output_stride(i * 7)
@@ -95,7 +95,7 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT}_bw_${TILE_WIDTH * 2}) {
 TEST(${TEST_NAME}, bh_${TILE_HEIGHT}_bw_${TILE_WIDTH + 1}_${TILE_WIDTH * 2}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for(size_t i = ${TILE_WIDTH + 1}; i < ${TILE_WIDTH * 2}; ++i){
+  for (size_t i = ${TILE_WIDTH + 1}; i < ${TILE_WIDTH * 2}; ++i) {
     TransposeMicrokernelTester()
       .input_stride(i)
       .output_stride(${TILE_HEIGHT * 2})
@@ -110,7 +110,7 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT}_bw_${TILE_WIDTH + 1}_${TILE_WIDTH * 2}) {
 TEST(${TEST_NAME}, bh_${TILE_HEIGHT * 2}_bw_${TILE_WIDTH + 1}_${TILE_WIDTH * 2}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for(size_t i = ${TILE_WIDTH + 1}; i < ${TILE_WIDTH * 2}; ++i){
+  for (size_t i = ${TILE_WIDTH + 1}; i < ${TILE_WIDTH * 2}; ++i) {
     TransposeMicrokernelTester()
       .input_stride(i)
       .output_stride(${TILE_HEIGHT * 2})
@@ -135,10 +135,10 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT * 2}_bw_${TILE_WIDTH}) {
     .Test(${", ".join(TEST_ARGS)});
 }
 
-TEST(${TEST_NAME}, bh_${TILE_HEIGHT + 1}_${TILE_HEIGHT * 2}_bw_${TILE_WIDTH}){
+TEST(${TEST_NAME}, bh_${TILE_HEIGHT + 1}_${TILE_HEIGHT * 2}_bw_${TILE_WIDTH}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for(size_t i = ${TILE_HEIGHT + 1}; i < ${TILE_HEIGHT * 2}; ++i){
+  for (size_t i = ${TILE_HEIGHT + 1}; i < ${TILE_HEIGHT * 2}; ++i) {
     TransposeMicrokernelTester()
       .input_stride(${TILE_WIDTH + 17})
       .output_stride(i)
@@ -150,10 +150,10 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT + 1}_${TILE_HEIGHT * 2}_bw_${TILE_WIDTH}){
   }
 }
 
-TEST(${TEST_NAME}, bh_${TILE_HEIGHT + 1}_${TILE_HEIGHT * 2}_bw_${TILE_WIDTH * 2}){
+TEST(${TEST_NAME}, bh_${TILE_HEIGHT + 1}_${TILE_HEIGHT * 2}_bw_${TILE_WIDTH * 2}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for(size_t i = ${TILE_HEIGHT + 1}; i < ${TILE_HEIGHT * 2}; ++i){
+  for (size_t i = ${TILE_HEIGHT + 1}; i < ${TILE_HEIGHT * 2}; ++i) {
     TransposeMicrokernelTester()
       .input_stride(${TILE_WIDTH * 2})
       .output_stride(i)
@@ -168,8 +168,8 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT + 1}_${TILE_HEIGHT * 2}_bw_${TILE_WIDTH * 2}
 TEST(${TEST_NAME}, bh_${TILE_HEIGHT + 1}_${TILE_HEIGHT * 2}_bw_${TILE_WIDTH + 1}_${TILE_WIDTH * 2}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for(size_t i = ${TILE_HEIGHT + 1}; i < ${TILE_HEIGHT * 2}; ++i){
-    for(size_t j = ${TILE_WIDTH + 1}; j < ${TILE_WIDTH * 2}; ++j){
+  for (size_t i = ${TILE_HEIGHT + 1}; i < ${TILE_HEIGHT * 2}; ++i) {
+    for (size_t j = ${TILE_WIDTH + 1}; j < ${TILE_WIDTH * 2}; ++j) {
       TransposeMicrokernelTester()
         .input_stride(j)
         .output_stride(i)

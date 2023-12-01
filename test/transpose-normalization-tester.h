@@ -97,7 +97,7 @@ class TransposeNormalizationTester {
   inline TransposeNormalizationTester& calculate_expected_input_stride() {
     expected_input_stride_.resize(expected_dims());
     expected_input_stride_[expected_dims() - 1] = expected_element_size();
-    for(size_t i = expected_dims() - 1; i-- != 0;) {
+    for (size_t i = expected_dims() - 1; i-- != 0;) {
       expected_input_stride_[i] = expected_input_stride_[i + 1] * expected_shape_[i + 1];
     }
     return *this;
@@ -106,7 +106,7 @@ class TransposeNormalizationTester {
   inline TransposeNormalizationTester& calculate_expected_output_stride() {
     expected_output_stride_.resize(expected_dims());
     expected_output_stride_[expected_dims() - 1] = expected_element_size();
-    for(size_t i = expected_dims() - 1; i-- != 0;) {
+    for (size_t i = expected_dims() - 1; i-- != 0;) {
       expected_output_stride_[i] = expected_output_stride_[i + 1]
           * expected_shape_[expected_perm_[i + 1]];
     }
