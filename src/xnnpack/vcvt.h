@@ -412,10 +412,10 @@ DECLARE_QS8_F16_VCVT_UKERNEL_FUNCTION(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u1
 DECLARE_QS8_F16_VCVT_UKERNEL_FUNCTION(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u24)
 DECLARE_QS8_F16_VCVT_UKERNEL_FUNCTION(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32)
 
-DECLARE_QS8_F16_VCVT_UKERNEL_FUNCTION(xnn_qs8_f16_vcvt_ukernel__avx2_u8)
 DECLARE_QS8_F16_VCVT_UKERNEL_FUNCTION(xnn_qs8_f16_vcvt_ukernel__avx2_u16)
 DECLARE_QS8_F16_VCVT_UKERNEL_FUNCTION(xnn_qs8_f16_vcvt_ukernel__avx2_u24)
 DECLARE_QS8_F16_VCVT_UKERNEL_FUNCTION(xnn_qs8_f16_vcvt_ukernel__avx2_u32)
+DECLARE_QS8_F16_VCVT_UKERNEL_FUNCTION(xnn_qs8_f16_vcvt_ukernel__avx2_u64)
 
 #define DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                           \

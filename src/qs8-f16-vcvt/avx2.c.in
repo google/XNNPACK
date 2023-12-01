@@ -5,7 +5,7 @@
 
 $assert BATCH_TILE % 8 == 0
 $assert BATCH_TILE >= 8
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01"
 #include <assert.h>
 
 #include <immintrin.h>
