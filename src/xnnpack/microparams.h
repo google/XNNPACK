@@ -225,6 +225,8 @@ union xnn_f32_qc4w_minmax_params {
     float max;
     int8_t sign_mask;  // 0x80
     int8_t mask;  // 0xF0
+    int8_t masklo;  // 0x0F
+    XNN_ALIGN(64) uint8_t shufflelo[64];
   } avx512vnni;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
