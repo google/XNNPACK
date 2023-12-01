@@ -875,6 +875,9 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
           fp16_value->allocation_type = xnn_allocation_type_workspace;
           value->fp16_id = fp16_value->id;
         }
+      } else if (xnn_value_is_internal(value)) {
+        // fp16 tensors only need half the memory of fp32 tensors.
+        value->size /= 2;
       }
     }
   }
