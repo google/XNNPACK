@@ -12281,8 +12281,10 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c2s4__neonfp16arith(
       const float16x8_t voutput_min = vreinterpretq_f16_u16(voutput_minmax.val[0]);
       const float16x8_t voutput_max = vreinterpretq_f16_u16(voutput_minmax.val[1]);
     #else
-      const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
-      const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
+      // vld2_dup is to work around aarch32 clang bug with vld1q_dup
+      const uint16x4x2_t vminmax = vld2_dup_u16(&params->fp16arith.min);
+      const float16x8_t voutput_min = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[0], vminmax.val[0]));
+      const float16x8_t voutput_max = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[1], vminmax.val[1]));
     #endif
     vfp16out0x01234567 = vmaxq_f16(vfp16out0x01234567, voutput_min);
     vfp16out0x01234567 = vminq_f16(vfp16out0x01234567, voutput_max);
@@ -12553,8 +12555,10 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_2x8c2s4__neonfp16arith(
       const float16x8_t voutput_min = vreinterpretq_f16_u16(voutput_minmax.val[0]);
       const float16x8_t voutput_max = vreinterpretq_f16_u16(voutput_minmax.val[1]);
     #else
-      const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
-      const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
+      // vld2_dup is to work around aarch32 clang bug with vld1q_dup
+      const uint16x4x2_t vminmax = vld2_dup_u16(&params->fp16arith.min);
+      const float16x8_t voutput_min = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[0], vminmax.val[0]));
+      const float16x8_t voutput_max = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[1], vminmax.val[1]));
     #endif
     vfp16out0x01234567 = vmaxq_f16(vfp16out0x01234567, voutput_min);
     vfp16out1x01234567 = vmaxq_f16(vfp16out1x01234567, voutput_min);
