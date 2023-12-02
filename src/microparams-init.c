@@ -2160,6 +2160,13 @@ size_t xnn_init_f32_qc4w_minmax_avx512vnni_params(
   params->avx512vnni.max = output_max;
   params->avx512vnni.sign_mask = 0x80;
   params->avx512vnni.mask = 0xF0;
+  params->avx512vnni.masklo = 0x0F;
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx512vnni.shufflelo[i] =
+    params->avx512vnni.shufflelo[i + 16] =
+    params->avx512vnni.shufflelo[i + 32] =
+    params->avx512vnni.shufflelo[i + 48] = i * 16;
+  }
   return sizeof(params->avx512vnni);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
