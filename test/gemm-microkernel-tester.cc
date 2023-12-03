@@ -1065,8 +1065,7 @@ void GemmMicrokernelTester::Test(
       std::uniform_int_distribution<int32_t>(0, std::numeric_limits<uint8_t>::max()),
       std::ref(rng));
 
-  const size_t planes = (pack == xnn_pack_qs8_qc4w_legacy_gemm_goi_w) ? 1 : 2;
-
+  const size_t planes = 2;  // 4 bit is 2 planes - low nibbles and high nibbles
   const size_t k2 =  round_up_po2(k(), 2);  // tester assumes byte aligned rows
   const size_t packed_k2 = round_up_po2(k(), kr() * sr() * planes);  // 2 blocks for nibbles
   const size_t packed_k_bytes = (packed_k2 + 1)/ 2;
@@ -1205,8 +1204,7 @@ void GemmMicrokernelTester::Test(
       std::uniform_int_distribution<int32_t>(0, std::numeric_limits<uint8_t>::max()),
       std::ref(rng));
 
-  const size_t planes = (pack == xnn_pack_qs8_qc4w_legacy_gemm_goi_w) ? 1 : 2;
-
+  const size_t planes = 2;  // 4 bit is 2 planes - low nibbles and high nibbles
   const size_t k2 =  round_up_po2(k(), 2);  // tester assumes byte aligned rows
   const size_t packed_k2 = round_up_po2(k(), kr() * sr() * planes);  // 2 blocks for nibbles
   const size_t packed_k_bytes = (packed_k2 + 1)/ 2;

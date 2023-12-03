@@ -940,11 +940,6 @@ tools/xngen src/qs8-gemm/c8-neondot.c.in -D MR=1  -D NR=16 -D REQUANTIZATION=FP3
 tools/xngen src/qs8-gemm/c8-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D LD128=1 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-rndnu-aarch64-neondot-ld128.c &
 tools/xngen src/qs8-gemm/c8-neondot.c.in -D MR=1  -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D LD128=1 -o src/qs8-gemm/gen/qs8-gemm-1x16c8-minmax-rndnu-aarch64-neondot-ld128.c &
 
-tools/xngen src/qs8-gemm/c8-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=      -D DATATYPE=QC4 -D LD128=0 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-neondot-ld64.c &
-tools/xngen src/qs8-gemm/c8-neondot.c.in -D MR=1  -D NR=16 -D REQUANTIZATION=      -D DATATYPE=QC4 -D LD128=0 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x16c8-minmax-neondot-ld64.c &
-tools/xngen src/qs8-gemm/c8-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=      -D DATATYPE=QC4 -D LD128=1 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-aarch64-neondot-ld128.c &
-tools/xngen src/qs8-gemm/c8-neondot.c.in -D MR=1  -D NR=16 -D REQUANTIZATION=      -D DATATYPE=QC4 -D LD128=1 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x16c8-minmax-aarch64-neondot-ld128.c &
-
 ############################### AArch32 assembly ##############################
 ### Cortex-A53 lane micro-kernels
 tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in        -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-ld64.S &
