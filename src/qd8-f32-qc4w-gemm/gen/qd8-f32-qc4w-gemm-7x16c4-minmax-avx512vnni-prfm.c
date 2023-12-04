@@ -134,9 +134,9 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x16c4__avx512vnni_prfm(
       a6 += 8;
 
       const __m512i vbb0123456789ABCDEFx01234567 = _mm512_load_si512(w);
-      const __m512i vbs123456789ABCDEFx0123 = _mm512_slli_epi32(vbb0123456789ABCDEFx01234567, 4);
+      const __m512i vbs0123456789ABCDEFx0123 = _mm512_slli_epi32(vbb0123456789ABCDEFx01234567, 4);
       const __m512i vb0123456789ABCDEFx4567 = _mm512_and_si512(vbb0123456789ABCDEFx01234567, vvalue_mask);
-      const __m512i vb0123456789ABCDEFx0123 = _mm512_and_si512(vbs123456789ABCDEFx0123, vvalue_mask);
+      const __m512i vb0123456789ABCDEFx0123 = _mm512_and_si512(vbs0123456789ABCDEFx0123, vvalue_mask);
 
       vacc0x0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEFx0123);
       vacc0x1x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x1x0123456789ABCDEF, va1x0123, vb0123456789ABCDEFx0123);
@@ -182,8 +182,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x16c4__avx512vnni_prfm(
       a6 += 4;
 
       const __m512i vbb0123456789ABCDEF = _mm512_load_si512(w);
-      const __m512i vbs123456789ABCDEF = _mm512_slli_epi32(vbb0123456789ABCDEF, 4);
-      const __m512i vb0123456789ABCDEF = _mm512_and_si512(vbs123456789ABCDEF, vvalue_mask);
+      const __m512i vbs0123456789ABCDEF = _mm512_slli_epi32(vbb0123456789ABCDEF, 4);
+      const __m512i vb0123456789ABCDEF = _mm512_and_si512(vbs0123456789ABCDEF, vvalue_mask);
       xnn_prefetch_to_l1((const int8_t*) w + 960);
 
       vacc0x0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEF);
