@@ -1824,6 +1824,19 @@ void xnn_compute_slice_5d(
   context->ukernel(context->contiguous_size, input, output, NULL);
 }
 
+void xnn_compute_elementwise_binary_1d_tile(
+    const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t offset,
+    size_t size)
+{
+  size_t a_offset = ((context->a_stride[4] == 0 ? 0 : offset));
+  size_t b_offset = ((context->b_stride[4] == 0 ? 0 : offset));
+  const void* a = (const void*) ((uintptr_t) context->a + a_offset);
+  const void* b = (const void*) ((uintptr_t) context->b + b_offset);
+  void* y = (void*) ((uintptr_t) context->y + offset);
+  context->ukernel(size, a, b, y, &context->params);
+}
+
 void xnn_compute_elementwise_binary_1d(
     const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t i)

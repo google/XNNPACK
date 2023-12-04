@@ -368,6 +368,7 @@ struct xnn_operator {
     const struct xnn_x8_lut_config* lut_config;
     const struct xnn_cmul_config* cmul_config;
     const struct xnn_transpose_config* transpose_config;
+    const struct xnn_binary_elementwise_subconfig* binary_elementwise_subconfig;
     struct {
       const struct xnn_unary_elementwise_config* unary_elementwise_config;
       const struct xnn_reduce_config* rminmax_config;  // For dynamic quantization convert operator.

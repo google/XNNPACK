@@ -1181,6 +1181,9 @@ struct elementwise_binary_context {
 };
 
 #ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_elementwise_binary_1d_tile(
+      const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t offset, size_t tile);
   XNN_PRIVATE void xnn_compute_elementwise_binary_1d(
       const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t i);

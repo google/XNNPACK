@@ -162,6 +162,9 @@ struct xnn_binary_elementwise_subconfig {
   xnn_vbinary_ukernel_fn op_ukernel;
   xnn_vbinary_ukernel_fn opc_ukernel;
   xnn_vbinary_ukernel_fn ropc_ukernel;
+  // Number of elements in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
+  size_t element_tile;
 };
 
 struct xnn_binary_elementwise_config {
@@ -176,9 +179,6 @@ struct xnn_binary_elementwise_config {
     xnn_init_qu8_add_minmax_params_fn qu8_add;
     xnn_init_qu8_mul_minmax_params_fn qu8_mul;
   } init;
-  // Number of elements in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
-  size_t element_tile;
 };
 
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vadd_config();
