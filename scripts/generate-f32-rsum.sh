@@ -26,11 +26,11 @@ tools/xngen src/f32-rsum/avx.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -o src/f32-
 tools/xngen src/f32-rsum/avx.c.in -D BATCH_TILE=32 -D ACCUMULATORS=4 -o src/f32-rsum/gen/f32-rsum-avx-u32-acc4.c &
 
 ################################## x86 AVX512 #################################
-tools/xngen src/f32-rsum/avx512f.c.in -D BATCH_TILE=16 -D ACCUMULATORS=1 -o src/f32-rsum/gen/f32-rmax-avx512f-u16.c &
-tools/xngen src/f32-rsum/avx512f.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -o src/f32-rsum/gen/f32-rmax-avx512f-u32-acc2.c &
-tools/xngen src/f32-rsum/avx512f.c.in -D BATCH_TILE=48 -D ACCUMULATORS=3 -o src/f32-rsum/gen/f32-rmax-avx512f-u48-acc3.c &
-tools/xngen src/f32-rsum/avx512f.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -o src/f32-rsum/gen/f32-rmax-avx512f-u64-acc2.c &
-tools/xngen src/f32-rsum/avx512f.c.in -D BATCH_TILE=64 -D ACCUMULATORS=4 -o src/f32-rsum/gen/f32-rmax-avx512f-u64-acc4.c &
+tools/xngen src/f32-rsum/avx512f.c.in -D BATCH_TILE=16 -D ACCUMULATORS=1 -o src/f32-rsum/gen/f32-rsum-avx512f-u16.c &
+tools/xngen src/f32-rsum/avx512f.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -o src/f32-rsum/gen/f32-rsum-avx512f-u32-acc2.c &
+tools/xngen src/f32-rsum/avx512f.c.in -D BATCH_TILE=48 -D ACCUMULATORS=3 -o src/f32-rsum/gen/f32-rsum-avx512f-u48-acc3.c &
+tools/xngen src/f32-rsum/avx512f.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -o src/f32-rsum/gen/f32-rsum-avx512f-u64-acc2.c &
+tools/xngen src/f32-rsum/avx512f.c.in -D BATCH_TILE=64 -D ACCUMULATORS=4 -o src/f32-rsum/gen/f32-rsum-avx512f-u64-acc4.c &
 
 ################################## Wasm SIMD ##################################
 tools/xngen src/f32-rsum/wasmsimd.c.in -D BATCH_TILE=4  -D ACCUMULATORS=1 -o src/f32-rsum/gen/f32-rsum-wasmsimd-u4.c &
