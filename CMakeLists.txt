@@ -273,6 +273,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/multiply2.c
   src/subgraph/negate.c
   src/subgraph/prelu.c
+  src/subgraph/reshape-helpers.c
   src/subgraph/scaled-dot-product-attention.c
   src/subgraph/sigmoid.c
   src/subgraph/softmax.c
@@ -1472,6 +1473,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(abs-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(abs-test PRIVATE XNNPACK gtest gtest_main fp16)
     ADD_TEST(NAME abs-test COMMAND abs-test)
+
+    ADD_EXECUTABLE(add2-reshape-test test/add2-reshape.cc)
+    TARGET_INCLUDE_DIRECTORIES(add2-reshape-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(add2-reshape-test PRIVATE XNNPACK gtest gtest_main)
+    ADD_TEST(NAME add2-reshape-test COMMAND add2-reshape-test)
 
     ADD_EXECUTABLE(add2-test test/add2.cc)
     TARGET_INCLUDE_DIRECTORIES(add2-test PRIVATE src test)
