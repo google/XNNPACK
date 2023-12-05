@@ -46,7 +46,7 @@ BEGIN_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondo
         CMP         x0, 2                   // if mr < 2
         LDR         x8, [sp, 8]             // Load a_offset
         ADD         x16, x6, x7             // c1 = c0 + cm_stride
-        LDR         x12, [sp, 16]      // Load zero
+        LDR         x12, [sp, 16]       // Load zero
         LDR         x11, [sp, 24]      // Load params pointer
         CSEL        x16, x6,  x16, LO       //   c1 = c0
         ADD         x2, x2, 3               // kc = (kc + 3) & ~3
@@ -421,7 +421,7 @@ BEGIN_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondo
         # BLOCK 3
         SDOT        v28.4s, v11.16b, v4.4b[1]
         SDOT        v29.4s, v11.16b, v5.4b[1]
-        LDR         x11, [sp, 56]                // reload params pointer
+        LDR         x11, [sp, 56]                  // reload params pointer
         SDOT        v30.4s, v11.16b, v6.4b[1]
         SDOT        v31.4s, v11.16b, v7.4b[1]
 

@@ -79,7 +79,7 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x8c4__asm_aarch32_neondotf
         MOVLO       r6, r8                  // c3
 
 
-        LDR         r5, [sp, 132]   // &quantization_params[0].zero_point
+        LDR         r5, [sp, 132]       // &quantization_params[0].zero_point
         VLD1.8      {q6, q7},  [r5]
 
 0:
@@ -104,7 +104,7 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x8c4__asm_aarch32_neondotf
         # - Load k = kc from stack
         LDR         r3, [r2,  0]            // A0
         LDR         r5, [sp, 116]           // a_offset
-        PUSH {r4}
+        PUSH        {r4}
         LDR         r4, [sp, 128]           // zero_data
         CMP         r3,  r7                 // if a0 == zero
         LDR         r12, [r2,  4]           // A1
@@ -126,9 +126,9 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x8c4__asm_aarch32_neondotf
         VLD1.8      {d1}, [r12]!            // A1
         CMP         r0,  r7                 // if a3 == zero
         ADD         r0,  r0, r5             // a3 += a_offset
-        MOVEQ       r0,  r4                // a3 = zero_data, else += a3 + a_offset
+        MOVEQ       r0,  r4                 // a3 = zero_data, else += a3 + a_offset
         ADD         r2, r2, 16
-        POP {r4}
+        POP         {r4}
         LDR         r5, [sp, 52]            // k = kc
         SUBS        r5, r5, 8               // k = k - 8
 

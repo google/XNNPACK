@@ -121,7 +121,7 @@ BEGIN_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot
         VLD1.8      {d1}, [r12]!            // A1
         CMP         r0,  r7                 // if a3 == zero
         ADD         r0,  r0, r5             // a3 += a_offset
-        MOVEQ       r0,  r7                //   a3 = zero, else += a3 + a_offset
+        MOVEQ       r0,  r7                 //   a3 = zero, else += a3 + a_offset
         ADD         r2, r2, 16
         LDR         r5, [sp, 52]            // k = kc
         SUBS        r5, r5, 8               // k = k - 8

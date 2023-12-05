@@ -48,7 +48,7 @@ BEGIN_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondo
         ADD         x2, x2, 3               // kc = (kc + 3) & ~3
 
         ADD         x17, x16, x7            // c2 = c1 + cm_stride
-        LDR         x12, [sp, 16]      // Load zero
+        LDR         x12, [sp, 16]       // Load zero
         LDR         x11, [sp, 24]      // Load params pointer
                                             // if mr <= 2
         CSEL        x17, x16, x17, LS       //   c2 = c1
@@ -92,8 +92,8 @@ BEGIN_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondo
         CMP         x15, x12                // if a2 == zero
         ADD         x15, x15, x8            // a2 += a_offset
         CSEL        x15, x12, x15, EQ       //   a2 = zero, else a2 += a_offset
-        CMP         x10, x12                  // if a3 == zero
-        ADD         x10, x10, x8              // a3 += a_offset
+        CMP         x10, x12                    // if a3 == zero
+        ADD         x10, x10, x8                // a3 += a_offset
         CSEL        x10, x12, x10, EQ       //   a3 = zero, else a3 += a_offset
 
         # Is there at least 16 bytes for main loop?

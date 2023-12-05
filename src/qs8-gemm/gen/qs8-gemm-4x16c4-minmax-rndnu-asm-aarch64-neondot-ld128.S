@@ -286,7 +286,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_ld1
         SMIN        v1.16b, v1.16b, v5.16b
         SMIN        v2.16b, v2.16b, v5.16b
         SMIN        v3.16b, v3.16b, v5.16b
-        B.LO        10f
+        B.LO        5f
 
         # Store full 4 x 16
         ST1         {v0.16b}, [x6], x12
@@ -379,8 +379,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_ld1
 
         # Store odd width
         .p2align    3
-10:
-        TBZ         x1, 3, 11f
+5:
+        TBZ         x1, 3, 6f
         STR         d0, [x6], 8
         STR         d1, [x8], 8
         DUP         d0, v0.d[1]
@@ -389,8 +389,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_ld1
         STR         d3, [x7], 8
         DUP         d2, v2.d[1]
         DUP         d3, v3.d[1]
-11:
-        TBZ         x1, 2, 12f
+6:
+        TBZ         x1, 2, 7f
         STR         s0, [x6], 4
         STR         s1, [x8], 4
         DUP         s0, v0.s[1]
@@ -399,8 +399,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_ld1
         STR         s3, [x7], 4
         DUP         s2, v2.s[1]
         DUP         s3, v3.s[1]
-12:
-        TBZ         x1, 1, 13f
+7:
+        TBZ         x1, 1, 8f
         STR         h0, [x6], 2
         STR         h1, [x8], 2
         DUP         h0, v0.h[1]
@@ -409,13 +409,13 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_ld1
         STR         h3, [x7], 2
         DUP         h2, v2.h[1]
         DUP         h3, v3.h[1]
-13:
-        TBZ         x1, 0, 14f
+8:
+        TBZ         x1, 0, 9f
         STR         b0, [x6]
         STR         b1, [x8]
         STR         b2, [x9]
         STR         b3, [x7]
-14:
+9:
         RET
 
 END_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_ld128
