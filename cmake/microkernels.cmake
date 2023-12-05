@@ -5028,7 +5028,12 @@ SET(ALL_RVV_MICROKERNEL_SRCS
   src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u1v.c
   src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u2v.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u1v.c
-  src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u2v.c)
+  src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u2v.c
+  src/x32-transposec/gen/x32-transposec-2x2-rvv.c
+  src/x32-transposec/gen/x32-transposec-4x4-rvv.c
+  src/x32-transposec/gen/x32-transposec-8x8-rvv.c
+  src/x32-transposec/gen/x32-transposec-16x8-rvv.c
+  src/x32-transposec/gen/x32-transposec-32x8-rvv.c)
 
 SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/cs16-bfly4/cs16-bfly4-samples1-scalar.c
