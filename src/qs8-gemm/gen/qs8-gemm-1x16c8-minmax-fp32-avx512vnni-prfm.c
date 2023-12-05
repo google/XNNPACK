@@ -50,8 +50,8 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x16c8__avx512vnni_prfm(
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx512vnni.output_min);
   const __m128i vshuffle_control_mask = _mm_loadu_si128((const __m128i*) params->fp32_avx512vnni.shuffle_control_mask);
   do {
-    __m512i vacc0x01234567 = _mm512_cvtepu32_epi64(_mm256_load_epi32(w));
-    __m512i vacc0x89ABCDEF = _mm512_cvtepu32_epi64(_mm256_load_epi32((const int32_t*) w + 8));
+    __m512i vacc0x01234567 = _mm512_cvtepu32_epi64(_mm256_load_si256((const __m256i*) w));
+    __m512i vacc0x89ABCDEF = _mm512_cvtepu32_epi64(_mm256_load_si256((const __m256i*) ((const int32_t*) w + 8)));
     w = (const int32_t*) w + 16;
 
     size_t k = kc;

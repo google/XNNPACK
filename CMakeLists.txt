@@ -2855,7 +2855,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qs8-gavgpool-minmax-rndnu-test PRIVATE hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME qs8-gavgpool-minmax-rndnu-test COMMAND qs8-gavgpool-minmax-rndnu-test)
 
-  ADD_EXECUTABLE(qs8-gemm-minmax-fp32-test test/qs8-gemm-minmax-fp32.cc test/qs8-gemm-minmax-fp32-2.cc)
+  ADD_EXECUTABLE(qs8-gemm-minmax-fp32-test test/qs8-gemm-minmax-fp32.cc test/qs8-gemm-minmax-fp32-2.cc test/qs8-gemm-minmax-fp32-3.cc test/qs8-gemm-minmax-fp32-4.cc)
   TARGET_INCLUDE_DIRECTORIES(qs8-gemm-minmax-fp32-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(qs8-gemm-minmax-fp32-test PRIVATE pthreadpool gtest gtest_main)
   TARGET_LINK_LIBRARIES(qs8-gemm-minmax-fp32-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)

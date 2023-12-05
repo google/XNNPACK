@@ -1783,6 +1783,8 @@ xnnpack_unit_test(
     srcs = [
         "qs8-gemm-minmax-fp32.cc",
         "qs8-gemm-minmax-fp32-2.cc",
+        "qs8-gemm-minmax-fp32-3.cc",
+        "qs8-gemm-minmax-fp32-4.cc",
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [

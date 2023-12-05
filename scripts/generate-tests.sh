@@ -70,6 +70,7 @@ tools/generate-gemm-test.py --spec test/f32-qc8w-gemm-minmax.yaml --output-test 
 
 tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-fp32.yaml \
   --output-test test/qs8-gemm-minmax-fp32.cc --output-test test/qs8-gemm-minmax-fp32-2.cc \
+  --output-test test/qs8-gemm-minmax-fp32-3.cc --output-test test/qs8-gemm-minmax-fp32-4.cc \
   --output-bench bench/qs8-gemm-fp32.cc &
 tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-rndnu.yaml \
   --output-test test/qs8-gemm-minmax-rndnu.cc --output-test test/qs8-gemm-minmax-rndnu-2.cc --output-test test/qs8-gemm-minmax-rndnu-3.cc \
