@@ -5,7 +5,7 @@
 
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
-$assert DATATYPE in ["QD8", "QS8", "QC4"]
+$assert DATATYPE in ["QD8", "QS8", "QC4", "QC8"]
 #include <assert.h>
 
 #include <immintrin.h>
@@ -199,9 +199,15 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
           _mm512_mask_storeu_ps(c${M}, vmask, vscaled${M}x0123456789ABCDEF);
         nc = 0;
       }
-    $elif DATATYPE == "QS8":
-      $for M in range(MR):
-        vscaled${M}x0123456789ABCDEF = _mm512_mul_ps(vscaled${M}x0123456789ABCDEF, vscale);
+    $elif DATATYPE in ["QS8", "QC8"]:
+      $if DATATYPE == "QC8":
+        const __m512 vscale012345678ABCDEF = _mm512_load_ps(w);
+        w = (const float*) w + 16;
+        $for M in range(MR):
+          vscaled${M}x0123456789ABCDEF = _mm512_mul_ps(vscaled${M}x0123456789ABCDEF, vscale012345678ABCDEF);
+      $else:
+        $for M in range(MR):
+          vscaled${M}x0123456789ABCDEF = _mm512_mul_ps(vscaled${M}x0123456789ABCDEF, vscale);
 
       $for M in range(MR):
         vscaled${M}x0123456789ABCDEF = _mm512_min_ps(vscaled${M}x0123456789ABCDEF, voutput_max_less_zero_point);
