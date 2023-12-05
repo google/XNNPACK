@@ -219,6 +219,40 @@ static enum xnn_status setup_add_operator(
   }
 }
 
+static enum xnn_shape_inference_status infer_shape_forward(
+  const struct xnn_operator_data* opdata,
+  struct xnn_value* values,
+  size_t num_values)
+{
+  enum xnn_shape_inference_status status = xnn_shape_inference_status_no_change;
+
+  const uint32_t input0_id = opdata->inputs[0];
+  const uint32_t input1_id = opdata->inputs[1];
+  const uint32_t output_id = opdata->outputs[0];
+  struct xnn_value* output = &values[output_id];
+
+  // Propagate input shape to output.
+  const struct xnn_value* input0 = &values[input0_id];
+  const struct xnn_value* input1 = &values[input1_id];
+  for (size_t cur_dim = 0; cur_dim < input0->shape.num_dims; cur_dim++) {
+    const struct xnn_value* shape_value = input0;
+    // handle broadcasting
+    if (input0->shape.dim[cur_dim] == 1) {
+      shape_value = input1;
+    }
+    const enum xnn_shape_inference_status changed = xnn_tensor_propagate_dimension(output, cur_dim, shape_value, cur_dim);
+    if (changed == xnn_shape_inference_status_error) {
+      return changed;
+    } else if (changed == xnn_shape_inference_status_changed) {
+      // Only overwrite status if inference on this dimension changed. We could have changed something above, and not
+      // changed anything here, then overwriting status to be no_change will be incorrect.
+      status = changed;
+    }
+  }
+
+  return status;
+}
+
 enum xnn_status xnn_define_add2(
   xnn_subgraph_t subgraph,
   float output_min,
@@ -341,6 +375,8 @@ enum xnn_status xnn_define_add2(
   node->create = create_add_operator;
   node->reshape = reshape_add_operator;
   node->setup = setup_add_operator;
+
+  node->infer_shape_forward = infer_shape_forward;
 
   return xnn_status_success;
 }

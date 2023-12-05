@@ -98,6 +98,22 @@ static enum xnn_status check_zero_point(
   return xnn_status_success;
 }
 
+enum xnn_status xnn_tensor_set_max_shape(
+  xnn_subgraph_t subgraph,
+  uint32_t tensor_id,
+  size_t num_max_dims,
+  const size_t* max_dims)
+{
+  struct xnn_value* value = subgraph->values + tensor_id;
+
+  if (num_max_dims != value->shape.num_dims) {
+    xnn_log_error("Max dims %zu not equal num dims %zu", num_max_dims, value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
+  memcpy(&value->shape.maximum_dim, max_dims, num_max_dims * sizeof(size_t));
+  return xnn_status_success;
+}
+
 enum xnn_status xnn_define_tensor_value(
     xnn_subgraph_t subgraph,
     enum xnn_datatype datatype,
@@ -148,6 +164,7 @@ enum xnn_status xnn_define_tensor_value(
   value->datatype = datatype;
   set_shape(value, num_dims, dims);
   value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
+  value->max_size = xnn_tensor_get_max_size_by_id(subgraph, value->id);
   value->flags = flags;
   value->data = (void*) (uintptr_t) data;
   set_allocation_type(value);
@@ -213,6 +230,7 @@ enum xnn_status xnn_define_quantized_tensor_value(
   value->quantization.scale = scale;
   set_shape(value, num_dims, dims);
   value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
+  value->max_size = xnn_tensor_get_max_size_by_id(subgraph, value->id);
   value->flags = flags;
   value->data = (void*) (uintptr_t) data;
   set_allocation_type(value);
@@ -287,6 +305,7 @@ enum xnn_status xnn_define_dynamically_quantized_tensor_value(
   value->quantization.num_nonbatch_dims = num_nonbatch_dims;
   set_shape(value, num_dims, dims);
   value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
+  value->max_size = xnn_tensor_get_max_size_by_id(subgraph, value->id);
   value->flags = flags;
   value->data = NULL;
   set_allocation_type(value);
@@ -403,6 +422,7 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
   value->quantization.channel_dimension = channel_dim;
   set_shape(value, num_dims, dims);
   value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
+  value->max_size = xnn_tensor_get_max_size_by_id(subgraph, value->id);
   value->flags = flags;
   value->data = (void*) (uintptr_t) data;
   set_allocation_type(value);
@@ -411,14 +431,20 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
   return xnn_status_success;
 }
 
+size_t xnn_shape_multiply_all_dims2(
+  size_t num_dims, const size_t *dim)
+{
+  size_t batch_size = 1;
+  for (size_t i = 0; i < num_dims; i++) {
+    batch_size *= dim[i];
+  }
+  return batch_size;
+}
+
 size_t xnn_shape_multiply_all_dims(
   const struct xnn_shape shape[restrict XNN_MIN_ELEMENTS(1)])
 {
-  size_t batch_size = 1;
-  for (size_t i = 0; i < shape->num_dims; i++) {
-    batch_size *= shape->dim[i];
-  }
-  return batch_size;
+  return xnn_shape_multiply_all_dims2(shape->num_dims, shape->dim);
 }
 
 size_t xnn_shape_multiply_batch_dims(
@@ -464,13 +490,11 @@ size_t xnn_shape_multiply_trailing_dims(
   return product;
 }
 
-size_t xnn_tensor_get_size(const struct xnn_value* value)
+size_t tensor_get_size(enum xnn_datatype datatype, size_t num_dims, const size_t *dim)
 {
-  assert(value->type == xnn_value_type_dense_tensor);
-  assert(value->datatype != xnn_datatype_invalid);
 
   size_t size = 0;
-  switch (value->datatype) {
+  switch (datatype) {
     case xnn_datatype_fp16:
       size = 2;
       break;
@@ -492,14 +516,28 @@ size_t xnn_tensor_get_size(const struct xnn_value* value)
       XNN_UNREACHABLE;
   }
 
-  size *= xnn_shape_multiply_all_dims(&value->shape);
+  size *= xnn_shape_multiply_all_dims2(num_dims, dim);
 
   // Adjustments for nibbles, assume that we can't have sizes are byte-aligned (rounded up).
-  if (value->datatype == xnn_datatype_qcint4) {
+  if (datatype == xnn_datatype_qcint4) {
     size = round_up_po2(size, 2) >> 1;
   }
 
   return size;
+}
+
+size_t xnn_tensor_get_size(const struct xnn_value* value)
+{
+  assert(value->type == xnn_value_type_dense_tensor);
+  assert(value->datatype != xnn_datatype_invalid);
+  return tensor_get_size(value->datatype, value->shape.num_dims, value->shape.dim);
+}
+
+size_t xnn_tensor_get_max_size(const struct xnn_value* value)
+{
+  assert(value->type == xnn_value_type_dense_tensor);
+  assert(value->datatype != xnn_datatype_invalid);
+  return tensor_get_size(value->datatype, value->shape.num_dims, value->shape.maximum_dim);
 }
 
 size_t xnn_tensor_get_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id)
@@ -508,6 +546,14 @@ size_t xnn_tensor_get_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id)
 
   const struct xnn_value* value = subgraph->values + value_id;
   return xnn_tensor_get_size(value);
+}
+
+size_t xnn_tensor_get_max_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id)
+{
+  assert(value_id < subgraph->num_values);
+
+  const struct xnn_value* value = subgraph->values + value_id;
+  return xnn_tensor_get_max_size(value);
 }
 
 static bool tensor_dim_is_static(const struct xnn_value* value, uint32_t dim_index)

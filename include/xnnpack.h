@@ -248,6 +248,12 @@ enum xnn_datatype {
 ///                and XNN_VALUE_FLAG_EXTERNAL_OUTPUT.
 /// @param id_out - pointer to the variable that will be initialized with the Value ID upon successful return. If a
 ///                 valid @a external_id was provided, the variable will be initialized with the @a external_id value.
+enum xnn_status xnn_tensor_set_max_shape(
+  xnn_subgraph_t subgraph,
+  uint32_t tensor_id,
+  size_t num_max_dims,
+  const size_t* max_dims);
+
 enum xnn_status xnn_define_tensor_value(
   xnn_subgraph_t subgraph,
   enum xnn_datatype datatype,
@@ -1835,6 +1841,15 @@ struct xnn_external_value {
 ///                              match the number of external inputs and outputs in the runtime, i.e. all external
 ///                              inputs and outputs in the runtime must be specified in one call.
 /// @param external_values - array with location information for all external inputs and outputs in the runtime.
+enum xnn_status xnn_reshape_external_value(
+  xnn_runtime_t runtime,
+  uint32_t external_id,
+  size_t num_new_dims,
+  const size_t* new_dims);
+
+enum xnn_status xnn_reshape_runtime(
+  xnn_runtime_t runtime);
+
 enum xnn_status xnn_setup_runtime(
   xnn_runtime_t runtime,
   size_t num_external_values,
