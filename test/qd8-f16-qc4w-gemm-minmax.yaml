@@ -106,27 +106,11 @@
   init: xnn_init_f16_qc4w_minmax_scalar_params
   pack: xnn_pack_qs8_qc4w_gemm_goi_w
   k-block: 4
-- name: xnn_qd8_f16_qc4w_gemm_minmax_ukernel_2x8c4__neondotfp16arith
-  init: xnn_init_f16_qc4w_minmax_scalar_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
-  k-block: 4
-- name: xnn_qd8_f16_qc4w_gemm_minmax_ukernel_3x8c4__neondotfp16arith
-  init: xnn_init_f16_qc4w_minmax_scalar_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
-  k-block: 4
-- name: xnn_qd8_f16_qc4w_gemm_minmax_ukernel_4x8c4__neondotfp16arith
-  init: xnn_init_f16_qc4w_minmax_scalar_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
-  k-block: 4
-- name: xnn_qd8_f16_qc4w_gemm_minmax_ukernel_5x8c4__neondotfp16arith
-  init: xnn_init_f16_qc4w_minmax_scalar_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
-  k-block: 4
-- name: xnn_qd8_f16_qc4w_gemm_minmax_ukernel_6x8c4__neondotfp16arith
-  init: xnn_init_f16_qc4w_minmax_scalar_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w
-  k-block: 4
 - name: xnn_qd8_f16_qc4w_gemm_minmax_ukernel_1x16c4__neondotfp16arith
+  init: xnn_init_f16_qc4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 4
+- name: xnn_qd8_f16_qc4w_gemm_minmax_ukernel_2x8c4__neondotfp16arith
   init: xnn_init_f16_qc4w_minmax_scalar_params
   pack: xnn_pack_qs8_qc4w_gemm_goi_w
   k-block: 4
@@ -134,7 +118,15 @@
   init: xnn_init_f16_qc4w_minmax_scalar_params
   pack: xnn_pack_qs8_qc4w_gemm_goi_w
   k-block: 4
+- name: xnn_qd8_f16_qc4w_gemm_minmax_ukernel_3x8c4__neondotfp16arith
+  init: xnn_init_f16_qc4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 4
 - name: xnn_qd8_f16_qc4w_gemm_minmax_ukernel_3x16c4__neondotfp16arith
+  init: xnn_init_f16_qc4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 4
+- name: xnn_qd8_f16_qc4w_gemm_minmax_ukernel_4x8c4__neondotfp16arith
   init: xnn_init_f16_qc4w_minmax_scalar_params
   pack: xnn_pack_qs8_qc4w_gemm_goi_w
   k-block: 4
@@ -142,7 +134,15 @@
   init: xnn_init_f16_qc4w_minmax_scalar_params
   pack: xnn_pack_qs8_qc4w_gemm_goi_w
   k-block: 4
+- name: xnn_qd8_f16_qc4w_gemm_minmax_ukernel_5x8c4__neondotfp16arith
+  init: xnn_init_f16_qc4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 4
 - name: xnn_qd8_f16_qc4w_gemm_minmax_ukernel_5x16c4__neondotfp16arith
+  init: xnn_init_f16_qc4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 4
+- name: xnn_qd8_f16_qc4w_gemm_minmax_ukernel_6x8c4__neondotfp16arith
   init: xnn_init_f16_qc4w_minmax_scalar_params
   pack: xnn_pack_qs8_qc4w_gemm_goi_w
   k-block: 4
