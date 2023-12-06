@@ -49,14 +49,14 @@ static void xnnpack_abs_f16(benchmark::State& state) {
 
   xnn_operator_t abs_op = nullptr;
   status = xnn_create_abs_nc_f16(
-    1 /* channels */, 1 /* input stride */, 1 /* output stride */,
     0 /* flags */, &abs_op);
   if (status != xnn_status_success || abs_op == nullptr) {
     state.SkipWithError("failed to create Abs operator");
     return;
   }
 
-  status = xnn_reshape_abs_nc_f16(abs_op, batch_size, /*threadpool=*/nullptr);
+  status = xnn_reshape_abs_nc_f16(abs_op, batch_size,
+    /*channels=*/1, /*input_stride=*/1, /*output_stride=*/1, /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Abs operator");
     return;
@@ -115,14 +115,14 @@ static void xnnpack_abs_f32(benchmark::State& state) {
 
   xnn_operator_t abs_op = nullptr;
   status = xnn_create_abs_nc_f32(
-    1 /* channels */, 1 /* input stride */, 1 /* output stride */,
     0 /* flags */, &abs_op);
   if (status != xnn_status_success || abs_op == nullptr) {
     state.SkipWithError("failed to create Abs operator");
     return;
   }
 
-  status = xnn_reshape_abs_nc_f32(abs_op, batch_size, /*threadpool=*/nullptr);
+  status = xnn_reshape_abs_nc_f32(abs_op, batch_size,
+    /*channels=*/1, /*input_stride=*/1, /*output_stride=*/1, /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Abs operator");
     return;

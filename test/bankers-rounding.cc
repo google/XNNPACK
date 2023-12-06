@@ -67,7 +67,7 @@ TEST_F(BankersRoundingTestF32, matches_operator_api)
 
   // Call operator API.
   xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_bankers_rounding_nc_f32(channels, channels, channels, /*flags=*/0, &op);
+  const xnn_status status = xnn_create_bankers_rounding_nc_f32(/*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -76,7 +76,7 @@ TEST_F(BankersRoundingTestF32, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_bankers_rounding_nc_f32(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_bankers_rounding_nc_f32(op, batch_size, channels, channels, channels, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_bankers_rounding_nc_f32(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

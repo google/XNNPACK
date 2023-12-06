@@ -616,9 +616,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op1 = nullptr;
   status = xnn_create_copy_nc_x8(
-    16 /* channels */,
-    16 /* input stride */,
-    16 /* output stride */,
     0 /* flags */,
     &op1);
   if (status != xnn_status_success) {
@@ -1573,9 +1570,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op42 = nullptr;
   status = xnn_create_copy_nc_x8(
-    240 /* channels */,
-    240 /* input stride */,
-    240 /* output stride */,
     0 /* flags */,
     &op42);
   if (status != xnn_status_success) {
@@ -1616,9 +1610,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op44 = nullptr;
   status = xnn_create_copy_nc_x8(
-    240 /* channels */,
-    240 /* input stride */,
-    240 /* output stride */,
     0 /* flags */,
     &op44);
   if (status != xnn_status_success) {
@@ -1689,9 +1680,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op47 = nullptr;
   status = xnn_create_copy_nc_x8(
-    200 /* channels */,
-    200 /* input stride */,
-    200 /* output stride */,
     0 /* flags */,
     &op47);
   if (status != xnn_status_success) {
@@ -1732,9 +1720,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op49 = nullptr;
   status = xnn_create_copy_nc_x8(
-    200 /* channels */,
-    200 /* input stride */,
-    200 /* output stride */,
     0 /* flags */,
     &op49);
   if (status != xnn_status_success) {
@@ -1819,9 +1804,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op53 = nullptr;
   status = xnn_create_copy_nc_x8(
-    184 /* channels */,
-    184 /* input stride */,
-    184 /* output stride */,
     0 /* flags */,
     &op53);
   if (status != xnn_status_success) {
@@ -1862,9 +1844,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op55 = nullptr;
   status = xnn_create_copy_nc_x8(
-    184 /* channels */,
-    184 /* input stride */,
-    184 /* output stride */,
     0 /* flags */,
     &op55);
   if (status != xnn_status_success) {
@@ -1949,9 +1928,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op59 = nullptr;
   status = xnn_create_copy_nc_x8(
-    184 /* channels */,
-    184 /* input stride */,
-    184 /* output stride */,
     0 /* flags */,
     &op59);
   if (status != xnn_status_success) {
@@ -1992,9 +1968,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op61 = nullptr;
   status = xnn_create_copy_nc_x8(
-    184 /* channels */,
-    184 /* input stride */,
-    184 /* output stride */,
     0 /* flags */,
     &op61);
   if (status != xnn_status_success) {
@@ -2079,9 +2052,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op65 = nullptr;
   status = xnn_create_copy_nc_x8(
-    480 /* channels */,
-    480 /* input stride */,
-    480 /* output stride */,
     0 /* flags */,
     &op65);
   if (status != xnn_status_success) {
@@ -2122,9 +2092,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op67 = nullptr;
   status = xnn_create_copy_nc_x8(
-    480 /* channels */,
-    480 /* input stride */,
-    480 /* output stride */,
     0 /* flags */,
     &op67);
   if (status != xnn_status_success) {
@@ -2311,9 +2278,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op76 = nullptr;
   status = xnn_create_copy_nc_x8(
-    672 /* channels */,
-    672 /* input stride */,
-    672 /* output stride */,
     0 /* flags */,
     &op76);
   if (status != xnn_status_success) {
@@ -2354,9 +2318,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op78 = nullptr;
   status = xnn_create_copy_nc_x8(
-    672 /* channels */,
-    672 /* input stride */,
-    672 /* output stride */,
     0 /* flags */,
     &op78);
   if (status != xnn_status_success) {
@@ -2557,9 +2518,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op88 = nullptr;
   status = xnn_create_copy_nc_x8(
-    672 /* channels */,
-    672 /* input stride */,
-    672 /* output stride */,
     0 /* flags */,
     &op88);
   if (status != xnn_status_success) {
@@ -2600,9 +2558,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op90 = nullptr;
   status = xnn_create_copy_nc_x8(
-    672 /* channels */,
-    672 /* input stride */,
-    672 /* output stride */,
     0 /* flags */,
     &op90);
   if (status != xnn_status_success) {
@@ -2789,9 +2744,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op99 = nullptr;
   status = xnn_create_copy_nc_x8(
-    960 /* channels */,
-    960 /* input stride */,
-    960 /* output stride */,
     0 /* flags */,
     &op99);
   if (status != xnn_status_success) {
@@ -2832,9 +2784,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op101 = nullptr;
   status = xnn_create_copy_nc_x8(
-    960 /* channels */,
-    960 /* input stride */,
-    960 /* output stride */,
     0 /* flags */,
     &op101);
   if (status != xnn_status_success) {
@@ -3035,9 +2984,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op111 = nullptr;
   status = xnn_create_copy_nc_x8(
-    960 /* channels */,
-    960 /* input stride */,
-    960 /* output stride */,
     0 /* flags */,
     &op111);
   if (status != xnn_status_success) {
@@ -3078,9 +3024,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op113 = nullptr;
   status = xnn_create_copy_nc_x8(
-    960 /* channels */,
-    960 /* input stride */,
-    960 /* output stride */,
     0 /* flags */,
     &op113);
   if (status != xnn_status_success) {
@@ -3281,9 +3224,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op123 = nullptr;
   status = xnn_create_copy_nc_x8(
-    960 /* channels */,
-    960 /* input stride */,
-    960 /* output stride */,
     0 /* flags */,
     &op123);
   if (status != xnn_status_success) {
@@ -3338,9 +3278,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op126 = nullptr;
   status = xnn_create_copy_nc_x8(
-    1280 /* channels */,
-    1280 /* input stride */,
-    1280 /* output stride */,
     0 /* flags */,
     &op126);
   if (status != xnn_status_success) {
@@ -3395,9 +3332,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op129 = nullptr;
   status = xnn_create_copy_nc_x8(
-    1 /* channels */,
-    1 /* input stride */,
-    1 /* output stride */,
     0 /* flags */,
     &op129);
   if (status != xnn_status_success) {
@@ -3439,6 +3373,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op1,
     /*batch_size=*/12544,
+    16 /* channels */,
+    16 /* input stride */,
+    16 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #1" << std::endl;
@@ -3992,6 +3929,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op42,
     /*batch_size=*/784,
+    240 /* channels */,
+    240 /* input stride */,
+    240 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #42" << std::endl;
@@ -4015,6 +3955,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op44,
     /*batch_size=*/196,
+    240 /* channels */,
+    240 /* input stride */,
+    240 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #44" << std::endl;
@@ -4052,6 +3995,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op47,
     /*batch_size=*/196,
+    200 /* channels */,
+    200 /* input stride */,
+    200 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #47" << std::endl;
@@ -4075,6 +4021,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op49,
     /*batch_size=*/196,
+    200 /* channels */,
+    200 /* input stride */,
+    200 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #49" << std::endl;
@@ -4125,6 +4074,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op53,
     /*batch_size=*/196,
+    184 /* channels */,
+    184 /* input stride */,
+    184 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #53" << std::endl;
@@ -4148,6 +4100,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op55,
     /*batch_size=*/196,
+    184 /* channels */,
+    184 /* input stride */,
+    184 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #55" << std::endl;
@@ -4198,6 +4153,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op59,
     /*batch_size=*/196,
+    184 /* channels */,
+    184 /* input stride */,
+    184 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #59" << std::endl;
@@ -4221,6 +4179,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op61,
     /*batch_size=*/196,
+    184 /* channels */,
+    184 /* input stride */,
+    184 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #61" << std::endl;
@@ -4271,6 +4232,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op65,
     /*batch_size=*/196,
+    480 /* channels */,
+    480 /* input stride */,
+    480 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #65" << std::endl;
@@ -4294,6 +4258,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op67,
     /*batch_size=*/196,
+    480 /* channels */,
+    480 /* input stride */,
+    480 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #67" << std::endl;
@@ -4411,6 +4378,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op76,
     /*batch_size=*/196,
+    672 /* channels */,
+    672 /* input stride */,
+    672 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #76" << std::endl;
@@ -4434,6 +4404,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op78,
     /*batch_size=*/196,
+    672 /* channels */,
+    672 /* input stride */,
+    672 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #78" << std::endl;
@@ -4564,6 +4537,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op88,
     /*batch_size=*/196,
+    672 /* channels */,
+    672 /* input stride */,
+    672 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #88" << std::endl;
@@ -4587,6 +4563,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op90,
     /*batch_size=*/49,
+    672 /* channels */,
+    672 /* input stride */,
+    672 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #90" << std::endl;
@@ -4704,6 +4683,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op99,
     /*batch_size=*/49,
+    960 /* channels */,
+    960 /* input stride */,
+    960 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #99" << std::endl;
@@ -4727,6 +4709,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op101,
     /*batch_size=*/49,
+    960 /* channels */,
+    960 /* input stride */,
+    960 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #101" << std::endl;
@@ -4857,6 +4842,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op111,
     /*batch_size=*/49,
+    960 /* channels */,
+    960 /* input stride */,
+    960 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #111" << std::endl;
@@ -4880,6 +4868,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op113,
     /*batch_size=*/49,
+    960 /* channels */,
+    960 /* input stride */,
+    960 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #113" << std::endl;
@@ -5010,6 +5001,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op123,
     /*batch_size=*/49,
+    960 /* channels */,
+    960 /* input stride */,
+    960 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #123" << std::endl;
@@ -5046,6 +5040,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op126,
     /*batch_size=*/1,
+    1280 /* channels */,
+    1280 /* input stride */,
+    1280 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #126" << std::endl;
@@ -5082,6 +5079,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op129,
     /*batch_size=*/1001,
+    1 /* channels */,
+    1 /* input stride */,
+    1 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #129" << std::endl;

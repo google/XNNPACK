@@ -106,7 +106,6 @@ class SquareOperatorTester {
       xnn_operator_t square_op = nullptr;
 
       const xnn_status status = xnn_create_square_nc_f16(
-        channels(), input_stride(), output_stride(),
         0, &square_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -117,7 +116,8 @@ class SquareOperatorTester {
       // Smart pointer to automatically delete square_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_square_op(square_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_square_nc_f16(square_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_square_nc_f16(square_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_square_nc_f16(square_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(square_op, /*threadpool=*/nullptr));
 
@@ -161,14 +161,14 @@ class SquareOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_square_nc_f32(
-          channels(), input_stride(), output_stride(),
           0, &square_op));
       ASSERT_NE(nullptr, square_op);
 
       // Smart pointer to automatically delete square_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_square_op(square_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_square_nc_f32(square_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_square_nc_f32(square_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_square_nc_f32(square_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(square_op, /*threadpool=*/nullptr));
 

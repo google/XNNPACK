@@ -106,7 +106,6 @@ class FloorOperatorTester {
       xnn_operator_t floor_op = nullptr;
 
       const xnn_status status = xnn_create_floor_nc_f16(
-          channels(), input_stride(), output_stride(),
           0, &floor_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -117,7 +116,8 @@ class FloorOperatorTester {
       // Smart pointer to automatically delete floor_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_floor_op(floor_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_floor_nc_f16(floor_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_floor_nc_f16(floor_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_floor_nc_f16(floor_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(floor_op, /*threadpool=*/nullptr));
 
@@ -157,14 +157,14 @@ class FloorOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_floor_nc_f32(
-          channels(), input_stride(), output_stride(),
           0, &floor_op));
       ASSERT_NE(nullptr, floor_op);
 
       // Smart pointer to automatically delete floor_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_floor_op(floor_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_floor_nc_f32(floor_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_floor_nc_f32(floor_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_floor_nc_f32(floor_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(floor_op, /*threadpool=*/nullptr));
 

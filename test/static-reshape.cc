@@ -149,7 +149,7 @@ TEST_F(StaticReshapeTestInt8, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status =
-    xnn_create_copy_nc_x8(1, 1, 1, /*flags=*/0, &op);
+    xnn_create_copy_nc_x8(/*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -158,7 +158,7 @@ TEST_F(StaticReshapeTestInt8, matches_operator_api)
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   size_t batch_size = NumElements(dims);
-  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op, batch_size, 1, 1, 1, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_copy_nc_x8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -211,7 +211,7 @@ TEST_F(StaticReshapeTestUint8, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status =
-    xnn_create_copy_nc_x8(1, 1, 1, /*flags=*/0, &op);
+    xnn_create_copy_nc_x8(/*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -220,7 +220,7 @@ TEST_F(StaticReshapeTestUint8, matches_operator_api)
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   size_t batch_size = NumElements(dims);
-  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op, batch_size, 1, 1, 1, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_copy_nc_x8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -270,7 +270,7 @@ TEST_F(StaticReshapeTestF32, matches_operator_api)
 
   // Call operator API.
   xnn_operator_t op = nullptr;
-  xnn_status status = xnn_create_copy_nc_x32(1, 1, 1, /*flags=*/0, &op);
+  xnn_status status = xnn_create_copy_nc_x32(/*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -278,7 +278,7 @@ TEST_F(StaticReshapeTestF32, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
   size_t batch_size = NumElements(dims);
-  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x32(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x32(op, batch_size, 1, 1, 1, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_copy_nc_x32(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

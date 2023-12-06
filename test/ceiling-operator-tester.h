@@ -106,7 +106,6 @@ class CeilingOperatorTester {
       xnn_operator_t ceiling_op = nullptr;
 
       const xnn_status status = xnn_create_ceiling_nc_f16(
-          channels(), input_stride(), output_stride(),
           0, &ceiling_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -117,7 +116,8 @@ class CeilingOperatorTester {
       // Smart pointer to automatically delete ceiling_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_ceiling_op(ceiling_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_ceiling_nc_f16(ceiling_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_ceiling_nc_f16(ceiling_op, batch_size(),
+        channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_ceiling_nc_f16(ceiling_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(ceiling_op, /*threadpool=*/nullptr));
 
@@ -157,14 +157,14 @@ class CeilingOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_ceiling_nc_f32(
-          channels(), input_stride(), output_stride(),
           0, &ceiling_op));
       ASSERT_NE(nullptr, ceiling_op);
 
       // Smart pointer to automatically delete ceiling_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_ceiling_op(ceiling_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_ceiling_nc_f32(ceiling_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_ceiling_nc_f32(ceiling_op, batch_size(),
+        channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_ceiling_nc_f32(ceiling_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(ceiling_op, /*threadpool=*/nullptr));
 

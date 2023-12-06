@@ -159,7 +159,6 @@ class SigmoidOperatorTester {
       xnn_operator_t sigmoid_op = nullptr;
 
       const xnn_status status = xnn_create_sigmoid_nc_f16(
-          channels(), input_stride(), output_stride(),
           0, &sigmoid_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -170,7 +169,8 @@ class SigmoidOperatorTester {
       // Smart pointer to automatically delete sigmoid_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_sigmoid_op(sigmoid_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_sigmoid_nc_f16(sigmoid_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_sigmoid_nc_f16(sigmoid_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_sigmoid_nc_f16(sigmoid_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(sigmoid_op, /*threadpool=*/nullptr));
 
@@ -213,7 +213,6 @@ class SigmoidOperatorTester {
       xnn_operator_t sigmoid_op = nullptr;
 
       xnn_status status = xnn_create_sigmoid_nc_f32(
-          channels(), input_stride(), output_stride(),
           0, &sigmoid_op);
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, sigmoid_op);
@@ -221,7 +220,8 @@ class SigmoidOperatorTester {
       // Smart pointer to automatically delete sigmoid_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_sigmoid_op(sigmoid_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_sigmoid_nc_f32(sigmoid_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_sigmoid_nc_f32(sigmoid_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_sigmoid_nc_f32(sigmoid_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(sigmoid_op, /*threadpool=*/nullptr));
 
@@ -270,7 +270,6 @@ class SigmoidOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_sigmoid_nc_qs8(
-          channels(), input_stride(), output_stride(),
           int8_t(input_zero_point() - 0x80), input_scale(),
           int8_t(output_zero_point() - 0x80), output_scale(),
           int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
@@ -280,7 +279,8 @@ class SigmoidOperatorTester {
       // Smart pointer to automatically delete sigmoid_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_sigmoid_op(sigmoid_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_sigmoid_nc_qs8(sigmoid_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_sigmoid_nc_qs8(sigmoid_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_sigmoid_nc_qs8(sigmoid_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(sigmoid_op, /*threadpool=*/nullptr));
 
@@ -326,7 +326,6 @@ class SigmoidOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_sigmoid_nc_qu8(
-          channels(), input_stride(), output_stride(),
           input_zero_point(), input_scale(),
           output_zero_point(), output_scale(),
           qmin(), qmax(),
@@ -336,7 +335,8 @@ class SigmoidOperatorTester {
       // Smart pointer to automatically delete sigmoid_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_sigmoid_op(sigmoid_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_sigmoid_nc_qu8(sigmoid_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_sigmoid_nc_qu8(sigmoid_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_sigmoid_nc_qu8(sigmoid_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(sigmoid_op, /*threadpool=*/nullptr));
 

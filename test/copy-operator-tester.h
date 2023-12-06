@@ -106,14 +106,14 @@ class CopyOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_copy_nc_x8(
-          channels(), input_stride(), output_stride(),
           0, &copy_op));
       ASSERT_NE(nullptr, copy_op);
 
       // Smart pointer to automatically delete copy_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_copy_op(copy_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(copy_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(copy_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_copy_nc_x8(copy_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(copy_op, /*threadpool=*/nullptr));
 
@@ -153,14 +153,14 @@ class CopyOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_copy_nc_x16(
-          channels(), input_stride(), output_stride(),
           0, &copy_op));
       ASSERT_NE(nullptr, copy_op);
 
       // Smart pointer to automatically delete copy_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_copy_op(copy_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x16(copy_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x16(copy_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_copy_nc_x16(copy_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(copy_op, /*threadpool=*/nullptr));
 
@@ -200,14 +200,14 @@ class CopyOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_copy_nc_x32(
-          channels(), input_stride(), output_stride(),
           0, &copy_op));
       ASSERT_NE(nullptr, copy_op);
 
       // Smart pointer to automatically delete copy_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_copy_op(copy_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x32(copy_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x32(copy_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_copy_nc_x32(copy_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(copy_op, /*threadpool=*/nullptr));
 

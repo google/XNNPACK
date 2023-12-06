@@ -168,7 +168,7 @@ TEST_F(ClampTestQS8, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status =
-    xnn_create_clamp_nc_s8(channels, channels, channels, quantized_output_min, quantized_output_max, /*flags=*/0, &op);
+    xnn_create_clamp_nc_s8(quantized_output_min, quantized_output_max, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -176,7 +176,7 @@ TEST_F(ClampTestQS8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_clamp_nc_s8(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_clamp_nc_s8(op, batch_size, channels, channels, channels, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_clamp_nc_s8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -232,7 +232,7 @@ TEST_F(ClampTestQU8, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status =
-    xnn_create_clamp_nc_u8(channels, channels, channels, quantized_output_min, quantized_output_max, /*flags=*/0, &op);
+    xnn_create_clamp_nc_u8(quantized_output_min, quantized_output_max, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -240,7 +240,7 @@ TEST_F(ClampTestQU8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_clamp_nc_u8(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_clamp_nc_u8(op, batch_size, channels, channels, channels, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_clamp_nc_u8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -291,7 +291,7 @@ TEST_F(ClampTestF32, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status =
-    xnn_create_clamp_nc_f32(channels, channels, channels, output_min, output_max, /*flags=*/0, &op);
+    xnn_create_clamp_nc_f32(output_min, output_max, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -300,7 +300,7 @@ TEST_F(ClampTestF32, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_clamp_nc_f32(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_clamp_nc_f32(op, batch_size, channels, channels, channels, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_clamp_nc_f32(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

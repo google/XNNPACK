@@ -630,9 +630,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op1 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    16 /* channels */,
-    16 /* input stride */,
-    16 /* output stride */,
     0 /* flags */,
     &op1);
   if (status != xnn_status_success) {
@@ -1332,9 +1329,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op36 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    240 /* channels */,
-    240 /* input stride */,
-    240 /* output stride */,
     0 /* flags */,
     &op36);
   if (status != xnn_status_success) {
@@ -1369,9 +1363,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op38 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    240 /* channels */,
-    240 /* input stride */,
-    240 /* output stride */,
     0 /* flags */,
     &op38);
   if (status != xnn_status_success) {
@@ -1430,9 +1421,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op41 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    200 /* channels */,
-    200 /* input stride */,
-    200 /* output stride */,
     0 /* flags */,
     &op41);
   if (status != xnn_status_success) {
@@ -1467,9 +1455,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op43 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    200 /* channels */,
-    200 /* input stride */,
-    200 /* output stride */,
     0 /* flags */,
     &op43);
   if (status != xnn_status_success) {
@@ -1539,9 +1524,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op47 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    184 /* channels */,
-    184 /* input stride */,
-    184 /* output stride */,
     0 /* flags */,
     &op47);
   if (status != xnn_status_success) {
@@ -1576,9 +1558,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op49 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    184 /* channels */,
-    184 /* input stride */,
-    184 /* output stride */,
     0 /* flags */,
     &op49);
   if (status != xnn_status_success) {
@@ -1648,9 +1627,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op53 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    184 /* channels */,
-    184 /* input stride */,
-    184 /* output stride */,
     0 /* flags */,
     &op53);
   if (status != xnn_status_success) {
@@ -1685,9 +1661,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op55 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    184 /* channels */,
-    184 /* input stride */,
-    184 /* output stride */,
     0 /* flags */,
     &op55);
   if (status != xnn_status_success) {
@@ -1757,9 +1730,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op59 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    480 /* channels */,
-    480 /* input stride */,
-    480 /* output stride */,
     0 /* flags */,
     &op59);
   if (status != xnn_status_success) {
@@ -1794,9 +1764,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op61 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    480 /* channels */,
-    480 /* input stride */,
-    480 /* output stride */,
     0 /* flags */,
     &op61);
   if (status != xnn_status_success) {
@@ -1926,9 +1893,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op68 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    672 /* channels */,
-    672 /* input stride */,
-    672 /* output stride */,
     0 /* flags */,
     &op68);
   if (status != xnn_status_success) {
@@ -1963,9 +1927,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op70 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    672 /* channels */,
-    672 /* input stride */,
-    672 /* output stride */,
     0 /* flags */,
     &op70);
   if (status != xnn_status_success) {
@@ -2106,9 +2067,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op78 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    672 /* channels */,
-    672 /* input stride */,
-    672 /* output stride */,
     0 /* flags */,
     &op78);
   if (status != xnn_status_success) {
@@ -2143,9 +2101,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op80 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    672 /* channels */,
-    672 /* input stride */,
-    672 /* output stride */,
     0 /* flags */,
     &op80);
   if (status != xnn_status_success) {
@@ -2275,9 +2230,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op87 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    960 /* channels */,
-    960 /* input stride */,
-    960 /* output stride */,
     0 /* flags */,
     &op87);
   if (status != xnn_status_success) {
@@ -2312,9 +2264,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op89 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    960 /* channels */,
-    960 /* input stride */,
-    960 /* output stride */,
     0 /* flags */,
     &op89);
   if (status != xnn_status_success) {
@@ -2455,9 +2404,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op97 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    960 /* channels */,
-    960 /* input stride */,
-    960 /* output stride */,
     0 /* flags */,
     &op97);
   if (status != xnn_status_success) {
@@ -2492,9 +2438,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op99 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    960 /* channels */,
-    960 /* input stride */,
-    960 /* output stride */,
     0 /* flags */,
     &op99);
   if (status != xnn_status_success) {
@@ -2635,9 +2578,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op107 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    960 /* channels */,
-    960 /* input stride */,
-    960 /* output stride */,
     0 /* flags */,
     &op107);
   if (status != xnn_status_success) {
@@ -2684,9 +2624,6 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op110 = nullptr;
   status = xnn_create_hardswish_nc_f32(
-    1280 /* channels */,
-    1280 /* input stride */,
-    1280 /* output stride */,
     0 /* flags */,
     &op110);
   if (status != xnn_status_success) {
@@ -2744,6 +2681,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op1,
     /*batch_size=*/12544,
+    16 /* channels */,
+    16 /* input stride */,
+    16 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #1" << std::endl;
@@ -3111,6 +3051,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op36,
     /*batch_size=*/784,
+    240 /* channels */,
+    240 /* input stride */,
+    240 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #36" << std::endl;
@@ -3130,6 +3073,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op38,
     /*batch_size=*/196,
+    240 /* channels */,
+    240 /* input stride */,
+    240 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #38" << std::endl;
@@ -3158,6 +3104,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f32(
     op41,
+    200 /* channels */,
+    200 /* input stride */,
+    200 /* output stride */,
     /*batch_size=*/196,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
@@ -3178,6 +3127,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op43,
     /*batch_size=*/196,
+    200 /* channels */,
+    200 /* input stride */,
+    200 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #43" << std::endl;
@@ -3220,6 +3172,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op47,
     /*batch_size=*/196,
+    184 /* channels */,
+    184 /* input stride */,
+    184 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #47" << std::endl;
@@ -3239,6 +3194,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op49,
     /*batch_size=*/196,
+    184 /* channels */,
+    184 /* input stride */,
+    184 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #49" << std::endl;
@@ -3281,6 +3239,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op53,
     /*batch_size=*/196,
+    184 /* channels */,
+    184 /* input stride */,
+    184 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #53" << std::endl;
@@ -3300,6 +3261,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op55,
     /*batch_size=*/196,
+    184 /* channels */,
+    184 /* input stride */,
+    184 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #55" << std::endl;
@@ -3342,6 +3306,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op59,
     /*batch_size=*/196,
+    480 /* channels */,
+    480 /* input stride */,
+    480 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #59" << std::endl;
@@ -3361,6 +3328,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op61,
     /*batch_size=*/196,
+    480 /* channels */,
+    480 /* input stride */,
+    480 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #61" << std::endl;
@@ -3432,6 +3402,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op68,
     /*batch_size=*/196,
+    672 /* channels */,
+    672 /* input stride */,
+    672 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #68" << std::endl;
@@ -3451,6 +3424,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op70,
     /*batch_size=*/196,
+    672 /* channels */,
+    672 /* input stride */,
+    672 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #70" << std::endl;
@@ -3535,6 +3511,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op78,
     /*batch_size=*/196,
+    672 /* channels */,
+    672 /* input stride */,
+    672 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #78" << std::endl;
@@ -3554,6 +3533,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op80,
     /*batch_size=*/49,
+    672 /* channels */,
+    672 /* input stride */,
+    672 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #80" << std::endl;
@@ -3625,6 +3607,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op87,
     /*batch_size=*/49,
+    960 /* channels */,
+    960 /* input stride */,
+    960 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #87" << std::endl;
@@ -3644,6 +3629,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op89,
     /*batch_size=*/49,
+    960 /* channels */,
+    960 /* input stride */,
+    960 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #89" << std::endl;
@@ -3728,6 +3716,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op97,
     /*batch_size=*/49,
+    960 /* channels */,
+    960 /* input stride */,
+    960 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #97" << std::endl;
@@ -3747,6 +3738,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op99,
     /*batch_size=*/49,
+    960 /* channels */,
+    960 /* input stride */,
+    960 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #99" << std::endl;
@@ -3831,6 +3825,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op107,
     /*batch_size=*/49,
+    960 /* channels */,
+    960 /* input stride */,
+    960 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #107" << std::endl;
@@ -3863,6 +3860,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_hardswish_nc_f32(
     op110,
     /*batch_size=*/1,
+    1280 /* channels */,
+    1280 /* input stride */,
+    1280 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #110" << std::endl;

@@ -107,7 +107,6 @@ class HardSwishOperatorTester {
       xnn_operator_t hardswish_op = nullptr;
 
       const xnn_status status = xnn_create_hardswish_nc_f16(
-          channels(), input_stride(), output_stride(),
           0, &hardswish_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -118,7 +117,8 @@ class HardSwishOperatorTester {
       // Smart pointer to automatically delete hardswish_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_hardswish_op(hardswish_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_hardswish_nc_f16(hardswish_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_hardswish_nc_f16(hardswish_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_hardswish_nc_f16(hardswish_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(hardswish_op, /*threadpool=*/nullptr));
 
@@ -160,14 +160,14 @@ class HardSwishOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_hardswish_nc_f32(
-          channels(), input_stride(), output_stride(),
           0, &hardswish_op));
       ASSERT_NE(nullptr, hardswish_op);
 
       // Smart pointer to automatically delete hardswish_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_hardswish_op(hardswish_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_hardswish_nc_f32(hardswish_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_hardswish_nc_f32(hardswish_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_hardswish_nc_f32(hardswish_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(hardswish_op, /*threadpool=*/nullptr));
 

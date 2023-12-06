@@ -12,6 +12,7 @@
 #include <memory>
 #include <numeric>
 #include <random>
+#include <vector>
 
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
@@ -268,13 +269,13 @@ TEST_F(EvenSplit2TestQS8, matches_operator_api)
   xnn_operator_t op2 = nullptr;
 
   // Call operator API.
-  ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x8(channels, input_stride, channels, /*flags=*/0, &op1));
+  ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x8(/*flags=*/0, &op1));
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op1(op1, xnn_delete_operator);
-  ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x8(channels, input_stride, channels, /*flags=*/0, &op2));
+  ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x8(/*flags=*/0, &op2));
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op2(op2, xnn_delete_operator);
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op1, batch_size, /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op2, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op1, batch_size, channels, input_stride, channels, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op2, batch_size, channels, input_stride, channels, /*threadpool=*/nullptr));
 
   ASSERT_EQ(
     xnn_status_success,
@@ -347,13 +348,13 @@ TEST_F(EvenSplit2TestQU8, matches_operator_api)
   xnn_operator_t op2 = nullptr;
 
   // Call operator API.
-  ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x8(channels, input_stride, channels, /*flags=*/0, &op1));
+  ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x8(/*flags=*/0, &op1));
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op1(op1, xnn_delete_operator);
-  ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x8(channels, input_stride, channels, /*flags=*/0, &op2));
+  ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x8(/*flags=*/0, &op2));
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op2(op2, xnn_delete_operator);
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op1, batch_size, /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op2, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op1, batch_size, channels, input_stride, channels, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op2, batch_size, channels, input_stride, channels, /*threadpool=*/nullptr));
 
   ASSERT_EQ(
     xnn_status_success,
@@ -426,13 +427,13 @@ TEST_F(EvenSplit2TestF32, matches_operator_api)
   xnn_operator_t op2 = nullptr;
 
   // Call operator API.
-  ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x32(channels, input_stride, channels, /*flags=*/0, &op1));
+  ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x32(/*flags=*/0, &op1));
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op1(op1, xnn_delete_operator);
-  ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x32(channels, input_stride, channels, /*flags=*/0, &op2));
+  ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x32(/*flags=*/0, &op2));
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op2(op2, xnn_delete_operator);
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x32(op1, batch_size, /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x32(op2, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x32(op1, batch_size, channels, input_stride, channels, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x32(op2, batch_size, channels, input_stride, channels, /*threadpool=*/nullptr));
 
   ASSERT_EQ(
     xnn_status_success,

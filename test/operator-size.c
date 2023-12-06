@@ -61,9 +61,10 @@ int main(int argc, char** argv) {
       break;
     case 7:
       xnn_create_clamp_nc_f32(
-        0, 0, 0,
         0.0f, 0.0f,
         0, &op);
+      xnn_reshape_clamp_nc_f32(
+        op, 0, 0, 0, 0, NULL);
       break;
     case 8:
       xnn_setup_clamp_nc_f32(
@@ -130,8 +131,9 @@ int main(int argc, char** argv) {
       break;
     case 19:
       xnn_create_hardswish_nc_f32(
-        0, 0, 0,
         0, &op);
+      xnn_reshape_hardswish_nc_f32(
+        op, 0, 0, 0, 0, NULL);
       break;
     case 20:
       xnn_setup_hardswish_nc_f32(
@@ -197,8 +199,9 @@ int main(int argc, char** argv) {
       break;
     case 33:
       xnn_create_sigmoid_nc_f32(
-        0, 0, 0,
         0, &op);
+      xnn_reshape_sigmoid_nc_f32(
+        op, 0, 0, 0, 0, NULL);
       break;
     case 34:
       xnn_setup_sigmoid_nc_f32(

@@ -49,14 +49,14 @@ static void xnnpack_bankers_rounding_f16(benchmark::State& state) {
 
   xnn_operator_t bankers_rounding_op = nullptr;
   status = xnn_create_bankers_rounding_nc_f16(
-    1 /* channels */, 1 /* input stride */, 1 /* output stride */,
     0 /* flags */, &bankers_rounding_op);
   if (status != xnn_status_success || bankers_rounding_op == nullptr) {
     state.SkipWithError("failed to create Bankers' Rounding operator");
     return;
   }
 
-  status = xnn_reshape_bankers_rounding_nc_f16(bankers_rounding_op, batch_size, /*threadpool=*/nullptr);
+  status = xnn_reshape_bankers_rounding_nc_f16(bankers_rounding_op, batch_size,
+    /*channels=*/1, /*input_stride=*/1, /*output_stride=*/1, /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Bankers' Rounding operator");
     return;
@@ -115,14 +115,14 @@ static void xnnpack_bankers_rounding_f32(benchmark::State& state) {
 
   xnn_operator_t bankers_rounding_op = nullptr;
   status = xnn_create_bankers_rounding_nc_f32(
-    1 /* channels */, 1 /* input stride */, 1 /* output stride */,
     0 /* flags */, &bankers_rounding_op);
   if (status != xnn_status_success || bankers_rounding_op == nullptr) {
     state.SkipWithError("failed to create Bankers' Rounding operator");
     return;
   }
 
-  status = xnn_reshape_bankers_rounding_nc_f32(bankers_rounding_op, batch_size, /*threadpool=*/nullptr);
+  status = xnn_reshape_bankers_rounding_nc_f32(bankers_rounding_op, batch_size,
+    /*channels=*/1, /*input_stride=*/1, /*output_stride=*/1, /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Bankers' Rounding operator");
     return;

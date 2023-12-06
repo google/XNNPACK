@@ -36,14 +36,14 @@ static void xnnpack_truncation_f32(benchmark::State& state) {
 
   xnn_operator_t truncation_op = nullptr;
   status = xnn_create_truncation_nc_f32(
-    1 /* channels */, 1 /* input stride */, 1 /* output stride */,
     0 /* flags */, &truncation_op);
   if (status != xnn_status_success || truncation_op == nullptr) {
     state.SkipWithError("failed to create Truncation operator");
     return;
   }
 
-  status = xnn_reshape_truncation_nc_f32(truncation_op, batch_size, /*threadpool=*/nullptr);
+  status = xnn_reshape_truncation_nc_f32(truncation_op, batch_size,
+    /*channels=*/1, /*input_stride=*/1, /*output_stride=*/1, /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Truncation operator");
     return;

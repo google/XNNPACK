@@ -48,7 +48,6 @@ static void xnnpack_leaky_relu_f16(benchmark::State& state) {
 
   xnn_operator_t leaky_relu_op = nullptr;
   status = xnn_create_leaky_relu_nc_f16(
-    1 /* channels */, 1 /* input stride */, 1 /* output stride */,
     0.01f /* negative slope */,
     0 /* flags */, &leaky_relu_op);
   if (status != xnn_status_success || leaky_relu_op == nullptr) {
@@ -56,7 +55,8 @@ static void xnnpack_leaky_relu_f16(benchmark::State& state) {
     return;
   }
 
-  status = xnn_reshape_leaky_relu_nc_f16(leaky_relu_op, batch_size, /*threadpool=*/nullptr);
+  status = xnn_reshape_leaky_relu_nc_f16(leaky_relu_op, batch_size,
+    /*channels=*/1, /*input_stride=*/1, /*output_stride=*/1, /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Leaky ReLU operator");
     return;
@@ -115,7 +115,6 @@ static void xnnpack_leaky_relu_f32(benchmark::State& state) {
 
   xnn_operator_t leaky_relu_op = nullptr;
   status = xnn_create_leaky_relu_nc_f32(
-    1 /* channels */, 1 /* input stride */, 1 /* output stride */,
     0.01f /* negative slope */,
     0 /* flags */, &leaky_relu_op);
   if (status != xnn_status_success || leaky_relu_op == nullptr) {
@@ -123,7 +122,8 @@ static void xnnpack_leaky_relu_f32(benchmark::State& state) {
     return;
   }
 
-  status = xnn_reshape_leaky_relu_nc_f32(leaky_relu_op, batch_size, /*threadpool=*/nullptr);
+  status = xnn_reshape_leaky_relu_nc_f32(leaky_relu_op, batch_size,
+    /*channels=*/1, /*input_stride=*/1, /*output_stride=*/1, /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Leaky ReLU operator");
     return;
@@ -184,7 +184,6 @@ static void xnnpack_leaky_relu_qs8(benchmark::State& state) {
 
   xnn_operator_t leaky_relu_op = nullptr;
   status = xnn_create_leaky_relu_nc_qs8(
-    1 /* channels */, 1 /* input stride */, 1 /* output stride */,
     0.1f /* negative slope */,
     5 /* input zero point */, 0.75f /* input scale */,
     -5 /* output zero point */, 0.5f /* output scale */,
@@ -194,7 +193,8 @@ static void xnnpack_leaky_relu_qs8(benchmark::State& state) {
     return;
   }
 
-  status = xnn_reshape_leaky_relu_nc_qs8(leaky_relu_op, batch_size, /*threadpool=*/nullptr);
+  status = xnn_reshape_leaky_relu_nc_qs8(leaky_relu_op, batch_size,
+    /*channels=*/1, /*input_stride=*/1, /*output_stride=*/1, /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Leaky ReLU operator");
     return;
@@ -255,7 +255,6 @@ static void xnnpack_leaky_relu_qu8(benchmark::State& state) {
 
   xnn_operator_t leaky_relu_op = nullptr;
   status = xnn_create_leaky_relu_nc_qu8(
-    1 /* channels */, 1 /* input stride */, 1 /* output stride */,
     0.1f /* negative slope */,
     5 /* input zero point */, 0.75f /* input scale */,
     -5 /* output zero point */, 0.5f /* output scale */,
@@ -265,7 +264,8 @@ static void xnnpack_leaky_relu_qu8(benchmark::State& state) {
     return;
   }
 
-  status = xnn_reshape_leaky_relu_nc_qu8(leaky_relu_op, batch_size, /*threadpool=*/nullptr);
+  status = xnn_reshape_leaky_relu_nc_qu8(leaky_relu_op, batch_size,
+    /*channels=*/1, /*input_stride=*/1, /*output_stride=*/1, /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Leaky ReLU operator");
     return;

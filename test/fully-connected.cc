@@ -2014,14 +2014,14 @@ TEST_F(FullyConnectedTestQD8F16QC4W, internally_allocated_dynamic_quantization_p
   xnn_operator_t convert_op = nullptr;
   xnn_operator_t fc_op = nullptr;
   xnn_status status = xnn_create_convert_nc_f16_qd8(
-    input_channels, input_channels, input_channels, /*flags=*/0, &convert_op);
+    /*flags=*/0, &convert_op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, convert_op);
-  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f16_qd8(convert_op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f16_qd8(convert_op, batch_size, input_channels, input_channels, input_channels, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f16_qd8(convert_op, convert_input.data(),
                                                              operator_dq_data.data(), quantization_params.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(convert_op, /*threadpool=*/nullptr));
@@ -2177,14 +2177,14 @@ TEST_F(FullyConnectedTestQD8F16QC8W, internally_allocated_dynamic_quantization_p
   xnn_operator_t convert_op = nullptr;
   xnn_operator_t fc_op = nullptr;
   xnn_status status = xnn_create_convert_nc_f16_qd8(
-    input_channels, input_channels, input_channels, /*flags=*/0, &convert_op);
+    /*flags=*/0, &convert_op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, convert_op);
-  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f16_qd8(convert_op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f16_qd8(convert_op, batch_size, input_channels, input_channels, input_channels, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f16_qd8(convert_op, convert_input.data(),
                                                              operator_dq_data.data(), quantization_params.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(convert_op, /*threadpool=*/nullptr));
@@ -2338,14 +2338,14 @@ TEST_F(FullyConnectedTestQD8F32QC8W, internally_allocated_dynamic_quantization_p
   xnn_operator_t convert_op = nullptr;
   xnn_operator_t fc_op = nullptr;
   xnn_status status = xnn_create_convert_nc_f32_qd8(
-    input_channels, input_channels, input_channels, /*flags=*/0, &convert_op);
+    /*flags=*/0, &convert_op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, convert_op);
-  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qd8(convert_op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qd8(convert_op, batch_size, input_channels, input_channels, input_channels, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f32_qd8(convert_op, convert_input.data(),
                                                              operator_dq_data.data(), quantization_params.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(convert_op, /*threadpool=*/nullptr));
@@ -2512,14 +2512,14 @@ TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_p
   xnn_operator_t convert_op = nullptr;
   xnn_operator_t fc_op = nullptr;
   xnn_status status = xnn_create_convert_nc_f32_qd8(
-    input_channels, input_channels, input_channels, /*flags=*/0, &convert_op);
+    /*flags=*/0, &convert_op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, convert_op);
-  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qd8(convert_op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qd8(convert_op, batch_size, input_channels, input_channels, input_channels, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f32_qd8(convert_op, convert_input.data(),
                                                              operator_dq_data.data(), quantization_params.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(convert_op, /*threadpool=*/nullptr));
@@ -2621,14 +2621,14 @@ TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_p
   xnn_operator_t convert_op = nullptr;
   xnn_operator_t fc_op = nullptr;
   xnn_status status = xnn_create_convert_nc_f32_qd8(
-    input_channels, input_channels, input_channels, /*flags=*/0, &convert_op);
+    /*flags=*/0, &convert_op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, convert_op);
-  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qd8(convert_op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qd8(convert_op, batch_size, input_channels, input_channels, input_channels, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f32_qd8(convert_op, convert_input.data(),
                                                              operator_dq_data.data(), quantization_params.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(convert_op, /*threadpool=*/nullptr));

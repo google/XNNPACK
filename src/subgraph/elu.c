@@ -26,7 +26,6 @@ static enum xnn_status create_elu_operator(
 {
   assert(node->num_inputs == 1);
   const uint32_t input_id = node->inputs[0];
-  assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
 
   assert(node->num_outputs == 1);
@@ -34,28 +33,22 @@ static enum xnn_status create_elu_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const size_t num_input_dims = values[input_id].shape.num_dims;
-  const size_t channel_dim = num_input_dims == 0 ? 1 : values[input_id].shape.dim[num_input_dims - 1];
-
   enum xnn_status status;
   switch (node->compute_type) {
     case xnn_compute_type_fp16:
       status = xnn_create_elu_nc_f16(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->params.elu.alpha,
         node->flags,
         &opdata->operator_objects[0]);
       break;
     case xnn_compute_type_fp32:
       status = xnn_create_elu_nc_f32(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->params.elu.alpha,
         node->flags,
         &opdata->operator_objects[0]);
       break;
     case xnn_compute_type_qs8:
       status = xnn_create_elu_nc_qs8(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->params.elu.alpha,
         (int8_t) values[input_id].quantization.zero_point,
         values[input_id].quantization.scale,
@@ -80,21 +73,27 @@ static enum xnn_status reshape_elu_operator(
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
   const size_t batch_size = xnn_shape_multiply_non_channel_dims(&values[input_id].shape);
+  const size_t num_input_dims = values[input_id].shape.num_dims;
+  const size_t channel_dim = num_input_dims == 0 ? 1 : values[input_id].shape.dim[num_input_dims - 1];
+
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_elu_nc_f16:
       return xnn_reshape_elu_nc_f16(
         opdata->operator_objects[0],
         batch_size,
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         threadpool);
     case xnn_operator_type_elu_nc_f32:
       return xnn_reshape_elu_nc_f32(
         opdata->operator_objects[0],
         batch_size,
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         threadpool);
     case xnn_operator_type_elu_nc_qs8:
       return xnn_reshape_elu_nc_qs8(
         opdata->operator_objects[0],
         batch_size,
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         threadpool);
     default:
       XNN_UNREACHABLE;

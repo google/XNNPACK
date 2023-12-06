@@ -105,7 +105,6 @@ class NegateOperatorTester {
       xnn_operator_t negate_op = nullptr;
 
       const xnn_status status = xnn_create_negate_nc_f16(
-        channels(), input_stride(), output_stride(),
         0, &negate_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -116,7 +115,8 @@ class NegateOperatorTester {
       // Smart pointer to automatically delete negate_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_negate_op(negate_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_negate_nc_f16(negate_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_negate_nc_f16(negate_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_negate_nc_f16(negate_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(negate_op, /*threadpool=*/nullptr));
 
@@ -156,14 +156,14 @@ class NegateOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_negate_nc_f32(
-          channels(), input_stride(), output_stride(),
           0, &negate_op));
       ASSERT_NE(nullptr, negate_op);
 
       // Smart pointer to automatically delete negate_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_negate_op(negate_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_negate_nc_f32(negate_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_negate_nc_f32(negate_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_negate_nc_f32(negate_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(negate_op, /*threadpool=*/nullptr));
 

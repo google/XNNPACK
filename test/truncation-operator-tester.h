@@ -106,7 +106,6 @@ class TruncationOperatorTester {
       xnn_operator_t truncation_op = nullptr;
 
       const xnn_status status = xnn_create_truncation_nc_f16(
-          channels(), input_stride(), output_stride(),
           0, &truncation_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -117,7 +116,8 @@ class TruncationOperatorTester {
       // Smart pointer to automatically delete truncation_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_truncation_op(truncation_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_truncation_nc_f16(truncation_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_truncation_nc_f16(truncation_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_truncation_nc_f16(truncation_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(truncation_op, /*threadpool=*/nullptr));
 
@@ -157,14 +157,14 @@ class TruncationOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_truncation_nc_f32(
-          channels(), input_stride(), output_stride(),
           0, &truncation_op));
       ASSERT_NE(nullptr, truncation_op);
 
       // Smart pointer to automatically delete truncation_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_truncation_op(truncation_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_truncation_nc_f32(truncation_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_truncation_nc_f32(truncation_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_truncation_nc_f32(truncation_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(truncation_op, /*threadpool=*/nullptr));
 

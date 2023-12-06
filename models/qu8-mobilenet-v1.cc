@@ -1064,9 +1064,6 @@ ExecutionPlan QU8MobileNetV1(pthreadpool_t threadpool) {
 
   xnn_operator_t op29 = nullptr;
   status = xnn_create_copy_nc_x8(
-    1 /* channels */,
-    1 /* input stride */,
-    1 /* output stride */,
     0 /* flags */,
     &op29);
   if (status != xnn_status_success) {
@@ -1499,6 +1496,9 @@ ExecutionPlan QU8MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_reshape_copy_nc_x8(
     op29,
     /*batch_size=*/1001,
+    1 /* channels */,
+    1 /* input stride */,
+    1 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #29" << std::endl;

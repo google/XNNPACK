@@ -299,14 +299,15 @@ TEST_F(ConvolutionTestQD8F16QC8W, internally_allocated_dynamic_quantization_para
   xnn_operator_t convolution_op = nullptr;
   const size_t quantized_batch_size = input_height * input_width * group_input_channels * groups;
   xnn_status status = xnn_create_convert_nc_f16_qd8(
-    quantized_batch_size, quantized_batch_size, quantized_batch_size, /*flags=*/0, &convert_op);
+    /*flags=*/0, &convert_op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, convert_op);
-  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f16_qd8(convert_op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f16_qd8(convert_op, batch_size, quantized_batch_size,
+                                                               quantized_batch_size, quantized_batch_size, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f16_qd8(convert_op, convert_input.data(),
                                                              operator_dq_data.data(), quantization_params.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(convert_op, /*threadpool=*/nullptr));
@@ -326,8 +327,7 @@ TEST_F(ConvolutionTestQD8F16QC8W, internally_allocated_dynamic_quantization_para
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, convolution_op);
   ASSERT_EQ( xnn_status_success, xnn_reshape_convolution2d_nhwc_qd8_f16_qc8w(
-                          convolution_op, batch_size, input_height, input_width,
-                          &workspace_size, &workspace_alignment,
+                          convolution_op, batch_size, input_height, input_width, &workspace_size, &workspace_alignment,
                           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                           /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success,
@@ -472,14 +472,15 @@ TEST_F(ConvolutionTestQD8F32QC8W, internally_allocated_dynamic_quantization_para
   xnn_operator_t convolution_op = nullptr;
   const size_t quantized_batch_size = input_height * input_width * group_input_channels * groups;
   xnn_status status = xnn_create_convert_nc_f32_qd8(
-    quantized_batch_size, quantized_batch_size, quantized_batch_size, /*flags=*/0, &convert_op);
+    /*flags=*/0, &convert_op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, convert_op);
-  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qd8(convert_op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qd8(convert_op, batch_size, quantized_batch_size,
+                                                               quantized_batch_size, quantized_batch_size, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f32_qd8(convert_op, convert_input.data(),
                                                              operator_dq_data.data(), quantization_params.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(convert_op, /*threadpool=*/nullptr));

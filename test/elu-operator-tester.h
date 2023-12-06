@@ -175,7 +175,6 @@ class ELUOperatorTester {
       xnn_operator_t elu_op = nullptr;
 
       const xnn_status status = xnn_create_elu_nc_f16(
-          channels(), input_stride(), output_stride(),
           alpha(),
           0, &elu_op);
       if (status == xnn_status_unsupported_hardware) {
@@ -187,7 +186,8 @@ class ELUOperatorTester {
       // Smart pointer to automatically delete elu_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_elu_op(elu_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_elu_nc_f16(elu_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_elu_nc_f16(elu_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_elu_nc_f16(elu_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(elu_op, /*threadpool=*/nullptr));
 
@@ -229,7 +229,6 @@ class ELUOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_elu_nc_f32(
-          channels(), input_stride(), output_stride(),
           alpha(),
           0, &elu_op));
       ASSERT_NE(nullptr, elu_op);
@@ -237,7 +236,8 @@ class ELUOperatorTester {
       // Smart pointer to automatically delete elu_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_elu_op(elu_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_elu_nc_f32(elu_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_elu_nc_f32(elu_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_elu_nc_f32(elu_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(elu_op, /*threadpool=*/nullptr));
 
@@ -287,7 +287,6 @@ class ELUOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_elu_nc_qs8(
-          channels(), input_stride(), output_stride(),
           alpha(),
           int8_t(input_zero_point() - 0x80), input_scale(),
           int8_t(output_zero_point() - 0x80), output_scale(),
@@ -298,7 +297,8 @@ class ELUOperatorTester {
       // Smart pointer to automatically delete elu_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_elu_op(elu_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_elu_nc_qs8(elu_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_elu_nc_qs8(elu_op, batch_size(),
+          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_elu_nc_qs8(elu_op, input.data(), output.data()));
       ASSERT_EQ(xnn_status_success, xnn_run_operator(elu_op, /*threadpool=*/nullptr));
 

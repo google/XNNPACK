@@ -268,7 +268,7 @@ TEST_F(ConvertTestF32ToQS8, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status = xnn_create_convert_nc_f32_qs8(
-    channels, channels, channels, scale, signed_zero_point, INT8_MIN, INT8_MAX, /*flags=*/0, &op);
+    scale, signed_zero_point, INT8_MIN, INT8_MAX, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -277,7 +277,7 @@ TEST_F(ConvertTestF32ToQS8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qs8(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qs8(op, batch_size, channels, channels, channels, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f32_qs8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -325,7 +325,7 @@ TEST_F(ConvertTestF32ToQU8, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status = xnn_create_convert_nc_f32_qu8(
-    channels, channels, channels, scale, unsigned_zero_point, 0, UINT8_MAX, /*flags=*/0, &op);
+    scale, unsigned_zero_point, 0, UINT8_MAX, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -334,7 +334,7 @@ TEST_F(ConvertTestF32ToQU8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qu8(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qu8(op, batch_size, channels, channels, channels, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f32_qu8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -381,7 +381,7 @@ TEST_F(ConvertTestQS8ToF32, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status =
-    xnn_create_convert_nc_qs8_f32(channels, channels, channels, scale, signed_zero_point, /*flags=*/0, &op);
+    xnn_create_convert_nc_qs8_f32(scale, signed_zero_point, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -390,7 +390,7 @@ TEST_F(ConvertTestQS8ToF32, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_qs8_f32(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_qs8_f32(op, batch_size, channels, channels, channels, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_qs8_f32(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -442,7 +442,7 @@ TEST_F(ConvertTestQS8ToQS8, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status =
-    xnn_create_convert_nc_qs8(channels, channels, channels, input_scale, input_zero_point, output_scale, output_zero_point, /*flags=*/0, &op);
+    xnn_create_convert_nc_qs8(input_scale, input_zero_point, output_scale, output_zero_point, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -451,7 +451,7 @@ TEST_F(ConvertTestQS8ToQS8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_qs8(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_qs8(op, batch_size, channels, channels, channels, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_qs8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -502,7 +502,7 @@ TEST_F(ConvertTestQU8ToF32, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status =
-    xnn_create_convert_nc_qu8_f32(channels, channels, channels, scale, unsigned_zero_point, /*flags=*/0, &op);
+    xnn_create_convert_nc_qu8_f32(scale, unsigned_zero_point, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -511,7 +511,7 @@ TEST_F(ConvertTestQU8ToF32, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_qu8_f32(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_qu8_f32(op, batch_size, channels, channels, channels, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_qu8_f32(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -564,7 +564,7 @@ TEST_F(ConvertTestQU8ToQU8, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status =
-    xnn_create_convert_nc_qu8(channels, channels, channels, input_scale, input_zero_point, output_scale, output_zero_point, /*flags=*/0, &op);
+    xnn_create_convert_nc_qu8(input_scale, input_zero_point, output_scale, output_zero_point, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -573,7 +573,7 @@ TEST_F(ConvertTestQU8ToQU8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_qu8(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_qu8(op, batch_size, channels, channels, channels, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_qu8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

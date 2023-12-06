@@ -26,23 +26,15 @@ static enum xnn_status create_clamp_operator(
   struct xnn_weights_cache* weights_cache)
 {
   assert(node->num_inputs == 1);
-  const uint32_t input_id = node->inputs[0];
-  assert(input_id != XNN_INVALID_VALUE_ID);
-  assert(input_id < num_values);
-
   assert(node->num_outputs == 1);
   const uint32_t output_id = node->outputs[0];
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const size_t num_input_dims = values[input_id].shape.num_dims;
-  const size_t channel_dim = num_input_dims == 0 ? 1 : values[input_id].shape.dim[num_input_dims - 1];
-
   enum xnn_status status;
   switch (node->compute_type) {
     case xnn_compute_type_fp16:
       status = xnn_create_clamp_nc_f16(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->activation.output_min,
         node->activation.output_max,
         node->flags,
@@ -50,7 +42,6 @@ static enum xnn_status create_clamp_operator(
       break;
     case xnn_compute_type_fp32:
       status = xnn_create_clamp_nc_f32(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->activation.output_min,
         node->activation.output_max,
         node->flags,
@@ -63,7 +54,6 @@ static enum xnn_status create_clamp_operator(
       const int8_t output_min = xnn_qs8_quantize(node->activation.output_min, output_scale, output_zero_point);
       const int8_t output_max = xnn_qs8_quantize(node->activation.output_max, output_scale, output_zero_point);
       status = xnn_create_clamp_nc_s8(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         output_min,
         output_max,
         node->flags,
@@ -77,7 +67,6 @@ static enum xnn_status create_clamp_operator(
       const uint8_t output_min = xnn_qu8_quantize(node->activation.output_min, output_scale, output_zero_point);
       const uint8_t output_max = xnn_qu8_quantize(node->activation.output_max, output_scale, output_zero_point);
       status = xnn_create_clamp_nc_u8(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         output_min,
         output_max,
         node->flags,
@@ -99,26 +88,33 @@ static enum xnn_status reshape_clamp_operator(
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
   const size_t batch_size = xnn_shape_multiply_non_channel_dims(&values[input_id].shape);
+  const size_t num_input_dims = values[input_id].shape.num_dims;
+  const size_t channel_dim = num_input_dims == 0 ? 1 : values[input_id].shape.dim[num_input_dims - 1];
+
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_clamp_nc_f16:
       return xnn_reshape_clamp_nc_f16(
         opdata->operator_objects[0],
         batch_size,
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         threadpool);
     case xnn_operator_type_clamp_nc_f32:
       return xnn_reshape_clamp_nc_f32(
         opdata->operator_objects[0],
         batch_size,
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         threadpool);
     case xnn_operator_type_clamp_nc_s8:
       return xnn_reshape_clamp_nc_s8(
         opdata->operator_objects[0],
         batch_size,
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         threadpool);
     case xnn_operator_type_clamp_nc_u8:
       return xnn_reshape_clamp_nc_u8(
         opdata->operator_objects[0],
         batch_size,
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         threadpool);
       break;
     default:
