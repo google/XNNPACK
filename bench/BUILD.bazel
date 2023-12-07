@@ -174,12 +174,13 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "qs8_gemm_bench",
     srcs = [
-        "gemm.h",
         "qs8-gemm.cc",
     ],
     copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
         "//:enable_jit",
+        "//:isa_checks",
         "//:math",
     ] + xnnpack_optional_ruy_deps() + xnnpack_optional_gemmlowp_deps(),
 )
