@@ -46,6 +46,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__avx512skx_prfm(
   const __m512i vinput_zero_point0 = _mm512_set1_epi32((int) quantization_params[0].zero_point);
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+
   do {
     const __m512i vksum0123 = _mm512_maskz_expandloadu_epi32(vbias_mask, w);
     const __m512i vksum4567 = _mm512_maskz_expandloadu_epi32(vbias_mask, (const int32_t*) w + 4);
@@ -83,28 +84,31 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__avx512skx_prfm(
       k -= 8 * sizeof(int8_t);
     }
 
+    // Add 4 adjacent sums
     const __m512i vacc0x04152637 = _mm512_add_epi32(_mm512_unpacklo_epi32(vacc0x0123, vacc0x4567), _mm512_unpackhi_epi32(vacc0x0123, vacc0x4567));
     const __m512i vacc0x8C9DAEBF = _mm512_add_epi32(_mm512_unpacklo_epi32(vacc0x89AB, vacc0xCDEF), _mm512_unpackhi_epi32(vacc0x89AB, vacc0xCDEF));
 
-    __m512i vacc0x084C195D2A6E3B7F = _mm512_add_epi32(_mm512_unpacklo_epi32(vacc0x04152637, vacc0x8C9DAEBF), _mm512_unpackhi_epi32(vacc0x04152637, vacc0x8C9DAEBF));
+    const __m512i vacc0x084C195D2A6E3B7F = _mm512_add_epi32(_mm512_unpacklo_epi32(vacc0x04152637, vacc0x8C9DAEBF), _mm512_unpackhi_epi32(vacc0x04152637, vacc0x8C9DAEBF));
 
-    __m512 vscaled0x084C195D2A6E3B7F = _mm512_cvtepi32_ps(vacc0x084C195D2A6E3B7F);
+    const __m512i vidx = _mm512_set_epi32(15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0);
+    __m512i vacc0x0123456789ABCDEF = _mm512_permutexvar_epi32(vidx, vacc0x084C195D2A6E3B7F);
 
-    __m512 vout0x0123456789ABCDEF = _mm512_permutexvar_ps(_mm512_set_epi32(15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0), vscaled0x084C195D2A6E3B7F);
+    __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
 
-    vout0x0123456789ABCDEF = _mm512_mul_ps(vout0x0123456789ABCDEF, _mm512_set1_ps(quantization_params[0].inv_scale));
+    vscaled0x0123456789ABCDEF = _mm512_mul_ps(vscaled0x0123456789ABCDEF, _mm512_set1_ps(quantization_params[0].inv_scale));
 
     const __m512 vfilter_output_scale0123456789ABCDEF = _mm512_load_ps((const float*) w);
     const __m512 vbias0123456789ABCDEF = _mm512_load_ps((const float*) w + 16);
     w = (const float*) w + 32;
-    vout0x0123456789ABCDEF = _mm512_fmadd_ps(vout0x0123456789ABCDEF, vfilter_output_scale0123456789ABCDEF, vbias0123456789ABCDEF);
 
-    vout0x0123456789ABCDEF = _mm512_max_ps(vout0x0123456789ABCDEF, voutput_min);
+    vscaled0x0123456789ABCDEF = _mm512_fmadd_ps(vscaled0x0123456789ABCDEF, vfilter_output_scale0123456789ABCDEF, vbias0123456789ABCDEF);
 
-    vout0x0123456789ABCDEF = _mm512_min_ps(vout0x0123456789ABCDEF, voutput_max);
+    vscaled0x0123456789ABCDEF = _mm512_max_ps(vscaled0x0123456789ABCDEF, voutput_min);
 
-    if (nc >= 16) {
-      _mm512_storeu_ps(c0, vout0x0123456789ABCDEF);
+    vscaled0x0123456789ABCDEF = _mm512_min_ps(vscaled0x0123456789ABCDEF, voutput_max);
+
+    if(nc >= 16) {
+      _mm512_storeu_ps(c0, vscaled0x0123456789ABCDEF);
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
 
@@ -114,8 +118,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__avx512skx_prfm(
     } else {
       // Prepare mask for valid 32-bit elements (depends on nc).
       const __mmask16 vmask = _cvtu32_mask16((UINT32_C(1) << nc) - 1);
-      _mm512_mask_storeu_ps(c0, vmask, vout0x0123456789ABCDEF);
-
+      _mm512_mask_storeu_ps(c0, vmask, vscaled0x0123456789ABCDEF);
       nc = 0;
     }
   } while (nc != 0);
