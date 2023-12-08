@@ -248,9 +248,12 @@ class ConvertOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convert_op = nullptr;
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_create_convert_nc_f16_qd8(
-          0, &convert_op));
+      xnn_status status = xnn_create_convert_nc_f16_qd8(
+          0, &convert_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, convert_op);
 
       // Smart pointer to automatically delete convert op.

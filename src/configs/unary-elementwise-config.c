@@ -594,17 +594,13 @@ static void init_f16_to_f32_cvt_config(void) {
 }
 
 static void init_f16_to_qs8_cvt_config(void) {
-  #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_ARM_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_qs8_vcvt_ukernel__neonfp16arith_u32;
       f16_to_qs8_cvt_config.init.f16_qs8_cvt = xnn_init_f16_qs8_cvt_neonfp16arith_params;
-      f16_to_qs8_cvt_config.element_tile = 64;
-    } else {
-      f16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u4;
-      f16_to_qs8_cvt_config.init.f16_qs8_cvt = xnn_init_f16_qs8_cvt_scalar_imagic_params;
-      f16_to_qs8_cvt_config.element_tile = 4;
+      f16_to_qs8_cvt_config.element_tile = 32;
     }
   #else
     f16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u4;
@@ -2711,7 +2707,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_to_f32_cvt_config() {
 
 const struct xnn_unary_elementwise_config* xnn_init_f16_to_qs8_cvt_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL) {
+  if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
   #if XNN_PLATFORM_WINDOWS

@@ -4022,7 +4022,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
   ADD_EXECUTABLE(qs8-gemm-bench bench/qs8-gemm.cc)
   TARGET_INCLUDE_DIRECTORIES(qs8-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-gemm-bench PRIVATE benchmark pthreadpool jit microparams-init)
+  TARGET_LINK_LIBRARIES(qs8-gemm-bench PRIVATE benchmark fp16 pthreadpool jit microparams-init)
   TARGET_LINK_LIBRARIES(qs8-gemm-bench PRIVATE bench-utils jit hardware-config logging microkernels-all microparams-init packing)
 
   ADD_EXECUTABLE(qs8-gemm-rndnu-bench bench/qs8-gemm-rndnu.cc)
