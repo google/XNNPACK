@@ -869,3 +869,12 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_conv_goki_w
   k-block: 1
+# RISC-V
+- name: xnn_f32_igemm_minmax_ukernel_1x4v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_7x4v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
