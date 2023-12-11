@@ -47,7 +47,7 @@ static enum xnn_status create_square_root_operator(
 
 static enum xnn_status reshape_square_root_operator(
   struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  struct xnn_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {

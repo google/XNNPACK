@@ -106,6 +106,7 @@ enum xnn_status {
   xnn_status_unsupported_parameter = 4,
   xnn_status_unsupported_hardware = 5,
   xnn_status_out_of_memory = 6,
+  xnn_status_reallocation_required = 7,
 };
 
 struct xnn_allocator {
@@ -1827,6 +1828,20 @@ struct xnn_external_value {
   uint32_t id;
   void* data;
 };
+
+/// Reshape an external value.
+///
+/// @param external_id - external ID for the Value. The ID must be within the range of reversed Value IDs specified on
+///                      the Subgraph creation. If the external ID is XNN_INVALID_VALUE_ID, an internal ID will be
+///                      created for the Value.
+/// @param num_dims - number of dimensions in the shape.
+/// @param dims - pointer to an array of @a num_dims shape dimensions. If num_dims is 0, this pointer can be NULL.
+///               XNNPACK does not keep any pointers to this array after the function returns.
+enum xnn_status xnn_reshape_external_value(
+  xnn_runtime_t runtime,
+  uint32_t external_id,
+  size_t num_dims,
+  const size_t* dims);
 
 /// Setup data pointers for external inputs and outputs in a Runtime object.
 ///

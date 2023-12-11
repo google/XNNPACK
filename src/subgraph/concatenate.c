@@ -147,7 +147,7 @@ static enum xnn_status reshape_concatenate_operator_helper(
 
 static enum xnn_status reshape_concatenate2_operator(
   struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  struct xnn_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -186,7 +186,7 @@ static enum xnn_status reshape_concatenate2_operator(
 
 static enum xnn_status reshape_concatenate3_operator(
   struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  struct xnn_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -232,7 +232,7 @@ static enum xnn_status reshape_concatenate3_operator(
 
 static enum xnn_status reshape_concatenate4_operator(
   struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  struct xnn_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {

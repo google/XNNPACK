@@ -1353,45 +1353,5 @@ enum xnn_status xnn_delete_subgraph(
 
 enum xnn_status xnn_subgraph_infer_shape(xnn_subgraph_t subgraph, uint32_t flags)
 {
-  enum xnn_shape_inference_status forward_status = xnn_shape_inference_status_no_change;
-  enum xnn_shape_inference_status backward_status = xnn_shape_inference_status_no_change;
-
-  do {
-    // Forward pass.
-    for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
-      struct xnn_node* node = &subgraph->nodes[n];
-      if (node->type == xnn_node_type_invalid) {
-        continue;
-      }
-
-      if (node->infer_shape_forward != NULL) {
-        forward_status = node->infer_shape_forward(node, subgraph->values);
-        if (forward_status == xnn_shape_inference_status_error) {
-          xnn_log_error("failed to infer shape (forward pass) for node ID #%" PRIu32 " of type %s",
-                        node->id, xnn_node_type_to_string(node->type));
-          return xnn_status_invalid_state;
-        }
-      }
-    }
-
-    // Backward pass.
-    for (uint32_t n = subgraph->num_nodes; n > 0; n--) {
-      struct xnn_node* node = &subgraph->nodes[n-1];
-      if (node->type == xnn_node_type_invalid) {
-        continue;
-      }
-
-      if (node->infer_shape_backward != NULL) {
-        backward_status = node->infer_shape_backward(node, subgraph->values);
-        if (backward_status == xnn_shape_inference_status_error) {
-          xnn_log_error("failed to infer shape (backward pass) for node ID #%" PRIu32 " of type %s",
-                        node->id, xnn_node_type_to_string(node->type));
-          return xnn_status_invalid_state;
-        }
-      }
-    }
-  } while (forward_status == xnn_shape_inference_status_changed ||
-           backward_status == xnn_shape_inference_status_changed);
-
   return xnn_status_success;
 }

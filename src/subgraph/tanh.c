@@ -78,7 +78,7 @@ static enum xnn_status create_tanh_operator(
 
 static enum xnn_status reshape_tanh_operator(
   struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  struct xnn_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {

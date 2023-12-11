@@ -324,7 +324,7 @@ static enum xnn_status create_fully_connected_operator(
 
 static enum xnn_status reshape_fully_connected_operator(
   struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  struct xnn_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -1045,8 +1045,6 @@ enum xnn_status xnn_define_fully_connected(
   node->create = create_fully_connected_operator;
   node->reshape = reshape_fully_connected_operator;
   node->setup = setup_fully_connected_operator;
-  node->infer_shape_forward = infer_shape_forward;
-  node->infer_shape_backward = infer_shape_backward;
 
   return xnn_status_success;
 }

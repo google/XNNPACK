@@ -541,22 +541,9 @@ enum xnn_shape_inference_status xnn_tensor_propagate_dimension(
     return xnn_shape_inference_status_no_change;
   }
 
-  if (inferred_dim < to->shape.minimum_dim[to_dim]) {
-    xnn_log_error(
-      "failed to infer dimension of tensor id %" PRIu32 ": inferred dimension (%zu) from tensor id %" PRIu32
-      " is less than minimum dimension (%zu)", to->id, inferred_dim, from->id, to->shape.minimum_dim[to_dim]);
-    return xnn_shape_inference_status_error;
-  }
-
-  if (inferred_dim > to->shape.maximum_dim[to_dim]) {
-    xnn_log_error(
-      "failed to infer dimension of tensor id %" PRIu32 ": inferred dimension (%zu) from tensor id %" PRIu32
-      " is more than maximum dimension (%zu)", to->id, inferred_dim, from->id, to->shape.maximum_dim[to_dim]);
-    return xnn_shape_inference_status_error;
-  }
-
   to->shape.dim[to_dim] = inferred_dim;
-  to->shape.minimum_dim[to_dim] = from->shape.minimum_dim[from_dim];
-  to->shape.maximum_dim[to_dim] = from->shape.maximum_dim[from_dim];
+  if (inferred_dim > to->shape.maximum_dim[to_dim]) {
+    to->shape.maximum_dim[to_dim] = inferred_dim;
+  }
   return xnn_shape_inference_status_changed;
 }
