@@ -1431,8 +1431,60 @@ typedef void (*xnn_packw_gemm_gio_ukernel_fn)(
   size_t extra_bytes,
   const void* params);
 
-// PACKX: PACK X (input) tensor for pre-packed matrix multiplication
+// PACK: PACK for IGEMM matrix multiplication
+// Weights in GOKI layout: Groups, Output channels, Kernel channels, Input channels.
+typedef void (*xnn_pack_conv_goki_w_fn)(
+  size_t g,
+  size_t nc,
+  size_t ks,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const void* kernel,
+  const void* bias,
+  const void* scale,
+  void* packed_weights,
+  size_t extra_bytes,
+  const void* params);
 
+// PACK: PACK for IGEMM matrix multiplication
+// Weights in KGO layout: Kernel channels, groups, Output channels.
+typedef void (*xnn_pack_conv_kgo_w_fn)(
+  size_t g,
+  size_t nc,
+  size_t ks,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const void* kernel,
+  const void* bias,
+  const void* scale,
+  void* packed_weights,
+  size_t extra_bytes,
+  const void* params);
+
+// PACK: PACK for DECONV SubConv matrix multiplication
+// Weights in GOKI layout: Groups, Output channels, Kernel channels, Input channels.
+typedef void (*xnn_pack_deconv_goki_w_fn)(
+  size_t g,
+  size_t nc,
+  size_t kh,
+  size_t kw,
+  size_t kc,
+  size_t sh,
+  size_t sw,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const void* kernel,
+  const void* bias,
+  const void* scale,
+  void* packed_weights,
+  const void* subconv_params,
+  const void* params);
+
+// PACKX: PACK X (input) tensor for pre-packed matrix multiplication
 typedef void (*xnn_packx_ukernel_fn)(
     size_t m,
     size_t k,

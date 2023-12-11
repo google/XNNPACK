@@ -723,6 +723,9 @@ struct xnn_gemm_config {
   } init;
   xnn_packw_gemm_gio_ukernel_fn pack_gemm_gio;
   xnn_packw_gemm_goi_ukernel_fn pack_gemm_goi;
+  xnn_pack_conv_goki_w_fn pack_igemm_goki;
+  xnn_pack_conv_kgo_w_fn pack_igemm_kgo;
+  xnn_pack_deconv_goki_w_fn pack_deconv_goki;
   uint8_t mr;
   uint8_t nr;
   uint8_t log2_kr;

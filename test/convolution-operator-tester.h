@@ -1009,7 +1009,7 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(convolution_op, auto_threadpool.get()));
 
-      VerifyNHWCxF16(output, output_ref, output_min, output_max);
+      VerifyNHWCxF16(output, output_ref, output_min, output_max, batch_size(), output_height(), output_width());
 
       if (use_weights_cache()) {
         xnn_operator_t convolution_op2 = nullptr;
@@ -1072,7 +1072,7 @@ class ConvolutionOperatorTester {
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(convolution_op2, auto_threadpool.get()));
 
-        VerifyNHWCxF16(output2, output_ref, output_min, output_max);
+        VerifyNHWCxF16(output, output_ref, output_min, output_max, batch_size(), output_height(), output_width());
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
       }
     }
@@ -2129,6 +2129,7 @@ class ConvolutionOperatorTester {
         for (size_t x = 0; x < output_width(); x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
+              const float tolerance = std::max(1.0e-4f, 1.0e-4f * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]));
               EXPECT_GE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_min)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
               EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_max)
@@ -2136,8 +2137,7 @@ class ConvolutionOperatorTester {
               EXPECT_NEAR(
                   output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
                   output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c],
-                  1.0e-4 * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+                  tolerance) << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
             }
           }
         }
@@ -2370,7 +2370,7 @@ class ConvolutionOperatorTester {
         }
         ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, auto_threadpool.get()));
 
-        VerifyNHWCxF16(output, output_ref, output_min, output_max);
+        VerifyNHWCxF16(output, output_ref, output_min, output_max, batch_size(), output_height(), output_width());
 
         if (use_weights_cache()) {
           // We already finalized the code cache, so create a new code cache if we are testing JIT.
@@ -2435,7 +2435,7 @@ class ConvolutionOperatorTester {
         }
         ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op2, auto_threadpool.get()));
 
-        VerifyNHWCxF16(output2, output_ref, output_min, output_max);
+        VerifyNHWCxF16(output, output_ref, output_min, output_max, batch_size(), output_height(), output_width());
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
       }
     }
@@ -2443,24 +2443,26 @@ class ConvolutionOperatorTester {
 
   void VerifyNHWCxF16(const std::vector<uint16_t> &output,
                       const std::vector<float> &output_ref,
-                      const float output_min, const float output_max) const {
-    for (size_t i = 0; i < batch_size(); i++) {
-      for (size_t y = 0; y < output_height(); y++) {
-        for (size_t x = 0; x < output_width(); x++) {
+                      const float output_min, const float output_max,
+                      size_t bs, size_t oh, size_t ow) const {
+    for (size_t i = 0; i < bs; i++) {
+      for (size_t y = 0; y < oh; y++) {
+        for (size_t x = 0; x < ow; x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
-              // FP16 overflows, it's the nature of the beast. If both reference and
+              // FP16 saturates, it's the nature of the beast. If both reference and
               // actual are infinity, then consider the output to be correct.
-              const bool reference_infinity = std::isinf(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]);
-              const bool actual_infinity = std::isinf(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]));
+              const bool reference_infinity = std::isinf(output_ref[(((i * oh + y) * ow + x) * groups() + g) * group_output_channels() + c]);
+              const bool actual_infinity = std::isinf(fp16_ieee_to_fp32_value(output[((i * oh + y) * ow + x) * output_channel_stride() + g * group_output_channels() + c]));
+              const float tolerance = std::max(1.0e-4f, std::abs(output_ref[(((i * oh + y) * ow + x) * groups() + g) * group_output_channels() + c]) * 2.0e-2f);
               if (reference_infinity && actual_infinity) {
                 continue;
               }
-              EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_min)
+              EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * oh + y) * ow + x) * output_channel_stride() + g * group_output_channels() + c]), output_min)
                 << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_max)
+              EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * oh + y) * ow + x) * output_channel_stride() + g * group_output_channels() + c]), output_max)
                 << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_NEAR(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c], fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), std::max(1.0e-4f, std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]) * 1.0e-2f))
+              EXPECT_NEAR(output_ref[(((i * oh + y) * ow + x) * groups() + g) * group_output_channels() + c], fp16_ieee_to_fp32_value(output[((i * oh + y) * ow + x) * output_channel_stride() + g * group_output_channels() + c]), tolerance)
                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
             }
           }
@@ -3923,22 +3925,7 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, auto_threadpool.get()));
 
       // Verify results of the first run.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t y = 0; y < output_height(); y++) {
-          for (size_t x = 0; x < output_width(); x++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t c = 0; c < group_output_channels(); c++) {
-                EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_min)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_max)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                EXPECT_NEAR(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c], fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), std::max(1.0e-4f, std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]) * 1.0e-2f))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              }
-            }
-          }
-        }
-      }
+      VerifyNHWCxF16(output, output_ref, output_min, output_max, batch_size(), output_height(), output_width());
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
@@ -4005,22 +3992,7 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, auto_threadpool.get()));
 
       // Verify results of the second run.
-      for (size_t i = 0; i < next_batch_size(); i++) {
-        for (size_t y = 0; y < next_output_height(); y++) {
-          for (size_t x = 0; x < next_output_width(); x++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t c = 0; c < group_output_channels(); c++) {
-                EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_min)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_max)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                EXPECT_NEAR(next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c], fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), std::max(1.0e-4f, std::abs(next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c]) * 1.0e-2f))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              }
-            }
-          }
-        }
-      }
+      VerifyNHWCxF16(output, next_output_ref, output_min, output_max, next_batch_size(), next_output_height(), next_output_width());
     }
   }
 

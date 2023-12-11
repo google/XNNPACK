@@ -392,21 +392,6 @@ XNN_INTERNAL void xnn_pack_f32_qs8w_gemm_gio_w(
   size_t extra_bytes,
   const void* params);
 
-typedef void (*xnn_pack_conv_goki_w_fn)(
-  size_t g,
-  size_t nc,
-  size_t ks,
-  size_t kc,
-  size_t nr,
-  size_t kr,
-  size_t sr,
-  const void* kernel,
-  const void* bias,
-  const void* scale,
-  void* packed_weights,
-  size_t extra_bytes,
-  const void* params);
-
 typedef void (*xnn_pack_f32_igemm_fn)(
   size_t g,
   size_t nc,
@@ -557,20 +542,6 @@ XNN_INTERNAL void xnn_pack_qs8_to_qu8_conv_goki_w(
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params);
 
-typedef void (*xnn_pack_conv_kgo_w_fn)(
-  size_t g,
-  size_t nc,
-  size_t ks,
-  size_t nr,
-  size_t kr,
-  size_t sr,
-  const void* kernel,
-  const void* bias,
-  const void* scale,
-  void* packed_weights,
-  size_t extra_bytes,
-  const void* params);
-
 XNN_INTERNAL void xnn_pack_f32_conv_kgo_w(
   size_t g,
   size_t nc,
@@ -641,24 +612,19 @@ XNN_INTERNAL void xnn_pack_qs8_conv_kgo_w(
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params);
 
-
-typedef void (*xnn_pack_deconv_goki_w_fn)(
+XNN_INTERNAL void xnn_pack_qs8_to_qu8_conv_kgo_w(
   size_t g,
   size_t nc,
-  size_t kh,
-  size_t kw,
-  size_t kc,
-  size_t sh,
-  size_t sw,
+  size_t ks,
   size_t nr,
   size_t kr,
   size_t sr,
-  const void* kernel,
-  const void* bias,
-  const void* scale,
+  const int8_t* kernel,
+  const int32_t* bias,
+  const float* scale,
   void* packed_weights,
-  struct subconvolution_params* subconv_params,
-  const void* params);
+  size_t extra_bytes,
+  const struct xnn_qs8_packing_params* params);
 
 XNN_INTERNAL void xnn_pack_f32_deconv_goki_w(
   size_t g,
@@ -715,6 +681,42 @@ XNN_INTERNAL void xnn_pack_f32_to_f16_deconv_goki_w(
   const void* params);
 
 XNN_INTERNAL void xnn_pack_qs8_deconv_goki_w(
+  size_t g,
+  size_t nc,
+  size_t kh,
+  size_t kw,
+  size_t kc,
+  size_t sh,
+  size_t sw,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const int8_t* kernel,
+  const int32_t* bias,
+  const float* scale,
+  void* packed_weights,
+  struct subconvolution_params* subconv_params,
+  const struct xnn_qs8_packing_params* params);
+
+XNN_INTERNAL void xnn_pack_qs8_to_qu8_deconv_goki_w(
+  size_t g,
+  size_t nc,
+  size_t kh,
+  size_t kw,
+  size_t kc,
+  size_t sh,
+  size_t sw,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const int8_t* kernel,
+  const int32_t* bias,
+  const float* scale,
+  void* packed_weights,
+  struct subconvolution_params* subconv_params,
+  const struct xnn_qs8_packing_params* params);
+
+XNN_INTERNAL void xnn_pack_qs8_to_qu8_deconv_goki_w(
   size_t g,
   size_t nc,
   size_t kh,
