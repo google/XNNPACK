@@ -1101,8 +1101,10 @@ xnnpack_benchmark(
 
 xnnpack_cc_library(
     name = "gemm_benchmark",
-    srcs = ["gemm.h"],
-    hdrs = ["gemm-benchmark.h"],
+    hdrs = [
+        "gemm.h",
+        "gemm-benchmark.h",
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
