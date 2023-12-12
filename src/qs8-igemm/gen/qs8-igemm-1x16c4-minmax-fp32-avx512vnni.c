@@ -97,32 +97,26 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x16c4__avx512vnni(
 
     vacc0x0123456789ABCDEF = _mm512_cvtps_epi32(vscaled0x0123456789ABCDEF);
 
-    __m256i vacc0x012389AB4567CDEF = _mm256_packs_epi32(_mm512_castsi512_si256(vacc0x0123456789ABCDEF), _mm512_extracti32x8_epi32(vacc0x0123456789ABCDEF, 1));
+    __m256i vacc0x0123456789AB4567CDEF = _mm256_packs_epi32(_mm512_castsi512_si256(vacc0x0123456789ABCDEF), _mm512_extracti32x8_epi32(vacc0x0123456789ABCDEF, 1));
 
-    vacc0x012389AB4567CDEF = _mm256_adds_epi16(vacc0x012389AB4567CDEF, voutput_zero_point);
+    vacc0x0123456789AB4567CDEF = _mm256_adds_epi16(vacc0x0123456789AB4567CDEF, voutput_zero_point);
 
-    const __m128i vout0x012389AB4567CDEF = _mm_packs_epi16(_mm256_castsi256_si128(vacc0x012389AB4567CDEF), _mm256_extracti128_si256(vacc0x012389AB4567CDEF, 1));
+    const __m128i vout0x0123456789AB4567CDEF = _mm_packs_epi16(_mm256_castsi256_si128(vacc0x0123456789AB4567CDEF), _mm256_extracti128_si256(vacc0x0123456789AB4567CDEF, 1));
 
-    __m128i vout0x0123456789ABCDEF = _mm_shuffle_epi8(vout0x012389AB4567CDEF, vshuffle_control_mask);
+    __m128i vout0x0123456789ABCDEF = _mm_shuffle_epi8(vout0x0123456789AB4567CDEF, vshuffle_control_mask);
 
     vout0x0123456789ABCDEF = _mm_max_epi8(vout0x0123456789ABCDEF, voutput_min);
 
     if (nc >= 16) {
       _mm_storeu_si128((__m128i*) c0, vout0x0123456789ABCDEF);
-
-      a = (const int8_t**restrict) ((uintptr_t) a - ks);
-
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
-
+      a = (const int8_t**restrict) ((uintptr_t) a - ks);
       nc -= 16;
     } else {
       // Prepare mask for valid 8-bit elements (depends on nc).
       const __mmask16 vmask = _cvtu32_mask16((UINT32_C(1) << nc) - UINT32_C(1));
-
       _mm_mask_storeu_epi8(c0, vmask, vout0x0123456789ABCDEF);
-
       nc = 0;
     }
   } while (nc != 0);
 }
-

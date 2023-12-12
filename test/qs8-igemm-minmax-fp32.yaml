@@ -737,6 +737,7 @@
   init: xnn_init_qs8_conv_minmax_fp32_avx2_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 8
+
 # x86 AVX512
 - name: xnn_qs8_igemm_minmax_fp32_ukernel_1x16c8__avx512skx
   init: xnn_init_qs8_conv_minmax_fp32_avx512_params
@@ -754,6 +755,56 @@
   init: xnn_init_qs8_conv_minmax_fp32_avx512_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 8
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_5x16c8__avx512skx
+  init: xnn_init_qs8_conv_minmax_fp32_avx512_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_6x16c8__avx512skx
+  init: xnn_init_qs8_conv_minmax_fp32_avx512_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_7x16c8__avx512skx
+  init: xnn_init_qs8_conv_minmax_fp32_avx512_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_8x16c8__avx512skx
+  init: xnn_init_qs8_conv_minmax_fp32_avx512_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_1x16c8__avx512skx_prfm
+  init: xnn_init_qs8_conv_minmax_fp32_avx512_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_2x16c8__avx512skx_prfm
+  init: xnn_init_qs8_conv_minmax_fp32_avx512_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_3x16c8__avx512skx_prfm
+  init: xnn_init_qs8_conv_minmax_fp32_avx512_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_4x16c8__avx512skx_prfm
+  init: xnn_init_qs8_conv_minmax_fp32_avx512_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_5x16c8__avx512skx_prfm
+  init: xnn_init_qs8_conv_minmax_fp32_avx512_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_6x16c8__avx512skx_prfm
+  init: xnn_init_qs8_conv_minmax_fp32_avx512_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_7x16c8__avx512skx_prfm
+  init: xnn_init_qs8_conv_minmax_fp32_avx512_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_8x16c8__avx512skx_prfm
+  init: xnn_init_qs8_conv_minmax_fp32_avx512_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+
 # x86 AVX512VNNI
 - name: xnn_qs8_igemm_minmax_fp32_ukernel_1x16c4__avx512vnni
   init: xnn_init_qs8_conv_minmax_fp32_avx512vnni_params

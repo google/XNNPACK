@@ -46,7 +46,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512vnni(
   float* c0 = c;
 
   const __m512i vinput_zero_point = _mm512_set1_epi32((int) quantization_params->zero_point + 128);
-  const __m512 vinput_scale = _mm512_set1_ps(quantization_params->inv_scale);
+  const __m512 vinput_inv_scale = _mm512_set1_ps(quantization_params->inv_scale);
   const __m512 voutput_min = _mm512_set1_ps(params->avx512vnni.min);
   const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
   const __m512i vsign_mask = _mm512_set1_epi8(params->avx512vnni.sign_mask);  // 0x80
@@ -95,7 +95,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512vnni(
 
     __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
 
-    vscaled0x0123456789ABCDEF = _mm512_mul_ps(vscaled0x0123456789ABCDEF, vinput_scale);
+    vscaled0x0123456789ABCDEF = _mm512_mul_ps(vscaled0x0123456789ABCDEF, vinput_inv_scale);
 
     const __m512 vfilter_output_scale0123456789ABCDEF = _mm512_load_ps((const float*) w);
     const __m512 vbias0123456789ABCDEF = _mm512_load_ps((const float*) w + 16);
@@ -109,11 +109,8 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512vnni(
 
     if(nc >= 16) {
       _mm512_storeu_ps(c0, vscaled0x0123456789ABCDEF);
-
-      a = (const int8_t**restrict) ((uintptr_t) a - ks);
-
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
-
+      a = (const int8_t**restrict) ((uintptr_t) a - ks);
       nc -= 16;
     } else {
       // Prepare mask for valid 32-bit elements (depends on nc).
@@ -123,4 +120,3 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512vnni(
     }
   } while (nc != 0);
 }
-
