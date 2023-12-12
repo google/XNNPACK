@@ -2355,7 +2355,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(f32-rminmax-test test/f32-rminmax.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-rminmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-rminmax-test PRIVATE fp16 pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(f32-rminmax-test PRIVATE fp16 pthreadpool gtest gtest_main microparams-init)
   TARGET_LINK_LIBRARIES(f32-rminmax-test PRIVATE hardware-config logging microkernels-all)
   ADD_TEST(NAME f32-rminmax-test COMMAND f32-rminmax-test)
 
