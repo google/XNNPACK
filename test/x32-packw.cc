@@ -128,7 +128,7 @@
       for (size_t k = 1; k < 4; k++) {
         for (size_t n = 3; n < 4; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(2)
@@ -147,7 +147,7 @@
         for (size_t n = 3; n < 4; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(2)
@@ -272,7 +272,7 @@
       for (size_t k = 1; k < 4; k++) {
         for (size_t n = 3; n < 4; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(2)
@@ -291,7 +291,7 @@
         for (size_t n = 3; n < 4; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(2)
@@ -416,7 +416,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -435,7 +435,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -560,7 +560,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -579,7 +579,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -704,7 +704,7 @@
       for (size_t k = 1; k < 16; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -723,7 +723,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -848,7 +848,7 @@
       for (size_t k = 1; k < 16; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -867,7 +867,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -992,7 +992,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -1011,7 +1011,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -1136,7 +1136,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -1155,7 +1155,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -1280,7 +1280,7 @@
       for (size_t k = 1; k < 16; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -1299,7 +1299,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -1424,7 +1424,7 @@
       for (size_t k = 1; k < 16; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -1443,7 +1443,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -1568,7 +1568,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 13; n < 24; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(12)
@@ -1587,7 +1587,7 @@
         for (size_t n = 13; n < 24; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(12)
@@ -1712,7 +1712,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 13; n < 24; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(12)
@@ -1731,7 +1731,7 @@
         for (size_t n = 13; n < 24; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(12)
@@ -1856,7 +1856,7 @@
       for (size_t k = 1; k < 16; k++) {
         for (size_t n = 13; n < 24; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(12)
@@ -1875,7 +1875,7 @@
         for (size_t n = 13; n < 24; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(12)
@@ -2000,7 +2000,7 @@
       for (size_t k = 1; k < 16; k++) {
         for (size_t n = 13; n < 24; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(12)
@@ -2019,7 +2019,7 @@
         for (size_t n = 13; n < 24; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(12)
@@ -2144,7 +2144,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -2163,7 +2163,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -2288,7 +2288,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -2307,7 +2307,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -2432,7 +2432,7 @@
       for (size_t k = 1; k < 16; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -2451,7 +2451,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -2576,7 +2576,7 @@
       for (size_t k = 1; k < 16; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -2595,7 +2595,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -2720,7 +2720,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 3; n < 4; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(2)
@@ -2739,7 +2739,7 @@
         for (size_t n = 3; n < 4; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(2)
@@ -2864,7 +2864,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 3; n < 4; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(2)
@@ -2883,7 +2883,7 @@
         for (size_t n = 3; n < 4; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(2)
@@ -3008,7 +3008,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -3027,7 +3027,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -3152,7 +3152,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -3171,7 +3171,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -3296,7 +3296,7 @@
       for (size_t k = 1; k < 16; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -3315,7 +3315,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -3440,7 +3440,7 @@
       for (size_t k = 1; k < 16; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -3459,7 +3459,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -3584,7 +3584,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -3603,7 +3603,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -3728,7 +3728,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -3747,7 +3747,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -3872,7 +3872,7 @@
       for (size_t k = 1; k < 16; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -3891,7 +3891,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -4016,7 +4016,7 @@
       for (size_t k = 1; k < 16; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -4035,7 +4035,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -4160,7 +4160,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -4179,7 +4179,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -4304,7 +4304,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -4323,7 +4323,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -4448,7 +4448,7 @@
       for (size_t k = 1; k < 16; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -4467,7 +4467,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -4592,7 +4592,7 @@
       for (size_t k = 1; k < 16; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -4611,7 +4611,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -4736,7 +4736,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -4755,7 +4755,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -4880,7 +4880,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -4899,7 +4899,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -5024,7 +5024,7 @@
       for (size_t k = 1; k < 16; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -5043,7 +5043,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -5168,7 +5168,7 @@
       for (size_t k = 1; k < 16; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -5187,7 +5187,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -5312,7 +5312,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -5331,7 +5331,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -5456,7 +5456,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -5475,7 +5475,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -5600,7 +5600,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -5619,7 +5619,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -5744,7 +5744,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -5763,7 +5763,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -5888,7 +5888,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -5907,7 +5907,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -6032,7 +6032,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -6051,7 +6051,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -6176,7 +6176,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -6195,7 +6195,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -6320,7 +6320,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -6339,7 +6339,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -6464,7 +6464,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -6483,7 +6483,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -6608,7 +6608,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -6627,7 +6627,7 @@
         for (size_t n = 17; n < 32; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(16)
@@ -6743,7 +6743,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 3; n < 4; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(2)
@@ -6761,7 +6761,7 @@
         for (size_t n = 3; n < 4; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(2)
@@ -6877,7 +6877,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -6895,7 +6895,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -7011,7 +7011,7 @@
       for (size_t k = 1; k < 8; k++) {
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -7029,7 +7029,7 @@
         for (size_t n = 9; n < 16; n++) {
           PackWMicrokernelTester()
             .nullbias(true)
-            .g(2)
+            .g(g)
             .n(n)
             .k(k)
             .nr(8)
@@ -7144,7 +7144,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_FLOAT_U4, g_gt_1) {
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 3; n < 4; n++) {
         PackWMicrokernelTester()
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(2)
@@ -7162,7 +7162,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_FLOAT_U4, null_bias) {
       for (size_t n = 3; n < 4; n++) {
         PackWMicrokernelTester()
           .nullbias(true)
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(2)
@@ -7276,7 +7276,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_INT_U4, g_gt_1) {
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 3; n < 4; n++) {
         PackWMicrokernelTester()
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(2)
@@ -7294,7 +7294,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_INT_U4, null_bias) {
       for (size_t n = 3; n < 4; n++) {
         PackWMicrokernelTester()
           .nullbias(true)
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(2)
@@ -7408,7 +7408,7 @@ TEST(X32_PACKW_GEMM_GOI_X3__SCALAR_FLOAT_U4, g_gt_1) {
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 4; n < 6; n++) {
         PackWMicrokernelTester()
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(3)
@@ -7426,7 +7426,7 @@ TEST(X32_PACKW_GEMM_GOI_X3__SCALAR_FLOAT_U4, null_bias) {
       for (size_t n = 4; n < 6; n++) {
         PackWMicrokernelTester()
           .nullbias(true)
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(3)
@@ -7540,7 +7540,7 @@ TEST(X32_PACKW_GEMM_GOI_X3__SCALAR_INT_U4, g_gt_1) {
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 4; n < 6; n++) {
         PackWMicrokernelTester()
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(3)
@@ -7558,7 +7558,7 @@ TEST(X32_PACKW_GEMM_GOI_X3__SCALAR_INT_U4, null_bias) {
       for (size_t n = 4; n < 6; n++) {
         PackWMicrokernelTester()
           .nullbias(true)
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(3)
@@ -7672,7 +7672,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT_U4, g_gt_1) {
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 5; n < 8; n++) {
         PackWMicrokernelTester()
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(4)
@@ -7690,7 +7690,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT_U4, null_bias) {
       for (size_t n = 5; n < 8; n++) {
         PackWMicrokernelTester()
           .nullbias(true)
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(4)
@@ -7804,7 +7804,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_INT_U4, g_gt_1) {
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 5; n < 8; n++) {
         PackWMicrokernelTester()
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(4)
@@ -7822,7 +7822,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_INT_U4, null_bias) {
       for (size_t n = 5; n < 8; n++) {
         PackWMicrokernelTester()
           .nullbias(true)
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(4)
@@ -7936,7 +7936,7 @@ TEST(X32_PACKW_GEMM_GOI_X8__SCALAR_FLOAT_U4, g_gt_1) {
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 9; n < 16; n++) {
         PackWMicrokernelTester()
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(8)
@@ -7954,7 +7954,7 @@ TEST(X32_PACKW_GEMM_GOI_X8__SCALAR_FLOAT_U4, null_bias) {
       for (size_t n = 9; n < 16; n++) {
         PackWMicrokernelTester()
           .nullbias(true)
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(8)
@@ -8068,7 +8068,7 @@ TEST(X32_PACKW_GEMM_GOI_X8__SCALAR_INT_U4, g_gt_1) {
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 9; n < 16; n++) {
         PackWMicrokernelTester()
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(8)
@@ -8086,7 +8086,7 @@ TEST(X32_PACKW_GEMM_GOI_X8__SCALAR_INT_U4, null_bias) {
       for (size_t n = 9; n < 16; n++) {
         PackWMicrokernelTester()
           .nullbias(true)
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(8)
@@ -8200,7 +8200,7 @@ TEST(X32_PACKW_GEMM_GOI_X16__SCALAR_FLOAT_U4, g_gt_1) {
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 17; n < 32; n++) {
         PackWMicrokernelTester()
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(16)
@@ -8218,7 +8218,7 @@ TEST(X32_PACKW_GEMM_GOI_X16__SCALAR_FLOAT_U4, null_bias) {
       for (size_t n = 17; n < 32; n++) {
         PackWMicrokernelTester()
           .nullbias(true)
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(16)
@@ -8332,7 +8332,7 @@ TEST(X32_PACKW_GEMM_GOI_X16__SCALAR_INT_U4, g_gt_1) {
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 17; n < 32; n++) {
         PackWMicrokernelTester()
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(16)
@@ -8350,7 +8350,7 @@ TEST(X32_PACKW_GEMM_GOI_X16__SCALAR_INT_U4, null_bias) {
       for (size_t n = 17; n < 32; n++) {
         PackWMicrokernelTester()
           .nullbias(true)
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(16)
