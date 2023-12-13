@@ -39,6 +39,36 @@
   #error "XNN_ENABLE_JIT is not defined"
 #endif
 
+enum xnn_status xnn_reshape_external_value(
+    xnn_runtime_t runtime,
+    uint32_t external_id,
+    size_t num_dims,
+    const size_t* dims) {
+  if (external_id >= runtime->num_values) {
+    xnn_log_error("failed to setup runtime: out-of-bounds ID %" PRIu32 " in external value",
+                  external_id);
+    return xnn_status_invalid_parameter;
+  }
+  struct xnn_value* value = &runtime->values[external_id];
+  if (value->allocation_type != xnn_allocation_type_external) {
+    xnn_log_error("failed to setup runtime: Value %" PRIu32 " is not external (%d)", external_id, value->allocation_type);
+    return xnn_status_invalid_parameter;
+  }
+  if (num_dims != value->shape.num_dims) {
+    xnn_log_error("failed to reshape runtime: new rank (%zu) is not equal to current rank (%zu)", num_dims, value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
+  struct xnn_shape* shape = &value->shape;
+  for (size_t i = 0; i < num_dims; ++i) {
+    if (dims[i] > shape->maximum_dim[i]) {
+      shape->maximum_dim[i] = dims[i];
+    }
+    shape->dim[i] = dims[i];
+  }
+  value->size = xnn_tensor_get_size(value);
+  return xnn_status_success;
+}
+
 enum xnn_status xnn_create_workspace(xnn_workspace_t* workspace_out)
 {
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -556,7 +586,7 @@ enum xnn_status track_operator_workspace(
     if (opdata->reshape != NULL) {
       // Get operator workspace size.
       enum xnn_status status = opdata->reshape(opdata, runtime->values, runtime->num_values, runtime->threadpool);
-      if (status != xnn_status_success) {
+      if (status != xnn_status_success && status != xnn_status_reallocation_required) {
         xnn_log_error("failed to reshape node #%" PRIu32, opdata_id);
         return status;
       }
@@ -652,7 +682,7 @@ enum xnn_status xnn_setup_runtime(
       assert(opdata->setup != NULL);
       if (opdata->reshape != NULL) {
         enum xnn_status status = opdata->reshape(opdata, runtime->values, runtime->num_values, runtime->threadpool);
-        if (status != xnn_status_success) {
+        if (status != xnn_status_success && status != xnn_status_reallocation_required) {
           xnn_log_error("failed to setup runtime: error in reshaping operator #%zu", i);
           return status;
         }
