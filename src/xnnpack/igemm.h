@@ -1053,6 +1053,15 @@ DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax
 DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512vnni)
 DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_8x16c4__avx512vnni)
 
+DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512vnni_prfm)
+DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x16c4__avx512vnni_prfm)
+DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_3x16c4__avx512vnni_prfm)
+DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__avx512vnni_prfm)
+DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_5x16c4__avx512vnni_prfm)
+DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_6x16c4__avx512vnni_prfm)
+DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512vnni_prfm)
+DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_8x16c4__avx512vnni_prfm)
+
 #define DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                               \
       size_t mr,                                           \
@@ -1693,6 +1702,15 @@ DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_fp32_ukernel_6x16
 DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_fp32_ukernel_7x16c4__avx512vnni)
 DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_fp32_ukernel_8x16c4__avx512vnni)
 
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_fp32_ukernel_1x16c4__avx512vnni_prfm)
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_fp32_ukernel_2x16c4__avx512vnni_prfm)
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_fp32_ukernel_3x16c4__avx512vnni_prfm)
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_fp32_ukernel_4x16c4__avx512vnni_prfm)
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_fp32_ukernel_5x16c4__avx512vnni_prfm)
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_fp32_ukernel_6x16c4__avx512vnni_prfm)
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_fp32_ukernel_7x16c4__avx512vnni_prfm)
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_fp32_ukernel_8x16c4__avx512vnni_prfm)
+
 #define DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                    \
       size_t mr,                                                \
@@ -2096,6 +2114,15 @@ DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_uk
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_6x16c4__avx512vnni)
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_7x16c4__avx512vnni)
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_8x16c4__avx512vnni)
+
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x16c4__avx512vnni_prfm)
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x16c4__avx512vnni_prfm)
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_3x16c4__avx512vnni_prfm)
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__avx512vnni_prfm)
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_5x16c4__avx512vnni_prfm)
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_6x16c4__avx512vnni_prfm)
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_7x16c4__avx512vnni_prfm)
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_8x16c4__avx512vnni_prfm)
 
 #define DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL xnn_status_t fn_name(                     \

@@ -142,6 +142,8 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4_
           a${M} += 4;
 
         const __m512i vb0123456789ABCDEFx0123 = _mm512_load_si512(w);
+        $if PREFETCH:
+          xnn_prefetch_to_l1((const ${XINT8_T}*) w + 960);
 
         $for M in range(MR):
           vacc${M}x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc${M}x0123456789ABCDEF, va${M}x0123, vb0123456789ABCDEFx0123);
