@@ -106,6 +106,7 @@ enum xnn_status {
   xnn_status_unsupported_parameter = 4,
   xnn_status_unsupported_hardware = 5,
   xnn_status_out_of_memory = 6,
+  xnn_status_reallocation_required = 7,
 };
 
 struct xnn_allocator {
