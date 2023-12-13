@@ -94,7 +94,7 @@ tools/xngen src/x32-transposec/avx.c.in -D SIZE=64 ARCH=AVX IN_PTRS=MULTI OUT_PT
 tools/xngen src/x32-transposec/avx2.c.in -D SIZE=8  IN_PTRS=REUSE OUT_PTRS=MOV    -o src/x8-transposec/gen/x8-transposec-32x32-reuse-mov-avx2.c &
 tools/xngen src/x32-transposec/avx2.c.in -D SIZE=8  IN_PTRS=REUSE OUT_PTRS=SWITCH -o src/x8-transposec/gen/x8-transposec-32x32-reuse-switch-avx2.c &
 tools/xngen src/x32-transposec/avx2.c.in -D SIZE=16 IN_PTRS=REUSE OUT_PTRS=MOV    -o src/x16-transposec/gen/x16-transposec-16x16-reuse-mov-avx2.c &
-tools/xngen src/x32-transposec/avx2.c.in -D SIZE=16 IN_PTRS=REUSE OUT_PTRS=SWITCH -o src/x16-transposec/gen/x16-transposec-16x16-reuse-switch-avx2.c &:
+tools/xngen src/x32-transposec/avx2.c.in -D SIZE=16 IN_PTRS=REUSE OUT_PTRS=SWITCH -o src/x16-transposec/gen/x16-transposec-16x16-reuse-switch-avx2.c &
 
 #################################### ARM NEON ###############################
 tools/xngen src/x32-transposec/neon-zip.c.in -D SIZE=8 VECTOR_SIZE=64  IN_PTRS=MULTI OUT_PTRS=DEC    -o src/x8-transposec/gen/x8-transposec-8x8-multi-dec-zip-neon.c &
