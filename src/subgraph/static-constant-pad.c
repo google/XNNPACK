@@ -69,7 +69,7 @@ static enum xnn_status create_constant_pad_operator(
 
 static enum xnn_status reshape_constant_pad_operator(
   struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  struct xnn_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {

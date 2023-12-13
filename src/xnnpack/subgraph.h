@@ -190,7 +190,7 @@ typedef enum xnn_status (*xnn_create_operator_fn)(
 
 typedef enum xnn_status (*xnn_reshape_operator_fn)(
   struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  struct xnn_value* values,
   size_t num_values,
   pthreadpool_t threadpool);
 
