@@ -182,7 +182,7 @@ TEST(${TEST_NAME}, g_gt_1) {
     for (size_t k = 1; k < ${4 if KBLOCK == 1 else KBLOCK*2}; k++) {
       for (size_t n = ${NR+1}; n < ${4 if NR == 1 else NR*2}; n++) {
         PackWMicrokernelTester()
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(${NR})
@@ -202,7 +202,7 @@ TEST(${TEST_NAME}, null_bias) {
       for (size_t n = ${NR+1}; n < ${4 if NR == 1 else NR*2}; n++) {
         PackWMicrokernelTester()
           .nullbias(true)
-          .g(2)
+          .g(g)
           .n(n)
           .k(k)
           .nr(${NR})
