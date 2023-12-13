@@ -112,7 +112,7 @@ $if OP_TYPE == "Clamp":
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (uint8_t qmin = 1; qmin < 255; qmin++) {
-      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}${BATCH_SCALE}; batch_size += ${max(1, BATCH_TILE-1)}) {
+      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}${BATCH_SCALE}; batch_size += ${max(1, BATCH_TILE-1 if BATCH_SCALE == "" else (BATCH_TILE * 10 - 1))}) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmin(qmin)
@@ -125,7 +125,7 @@ $if OP_TYPE == "Clamp":
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (uint8_t qmax = 1; qmax < 255; qmax++) {
-      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}${BATCH_SCALE}; batch_size += ${max(1, BATCH_TILE-1)}) {
+      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}${BATCH_SCALE}; batch_size += ${max(1, BATCH_TILE-1 if BATCH_SCALE == "" else (BATCH_TILE * 10 - 1))}) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmax(qmax)
