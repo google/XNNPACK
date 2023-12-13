@@ -117,16 +117,9 @@ static enum xnn_status reshape_unary_elementwise_nc(
   }
   unary_elementwise_op->state = xnn_run_state_invalid;
 
-  if (batch_size == 0) {
+  if (batch_size == 0 || channels == 0) {
     unary_elementwise_op->state = xnn_run_state_skip;
     return xnn_status_success;
-  }
-
-  if (channels == 0) {
-    xnn_log_error(
-      "failed to create %s operator with %zu channels: number of channels must be non-zero",
-      xnn_operator_type_to_string(unary_elementwise_op->type), channels);
-    return xnn_status_invalid_parameter;
   }
 
   if (input_stride < channels) {
