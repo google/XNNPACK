@@ -84,6 +84,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/negate.c",
     "src/subgraph/prelu.c",
     "src/subgraph/rope.c",
+    "src/subgraph/reshape-helpers.c",
     "src/subgraph/scaled-dot-product-attention.c",
     "src/subgraph/sigmoid.c",
     "src/subgraph/softmax.c",
@@ -3353,6 +3354,7 @@ xnnpack_cc_library(
     srcs = SUBGRAPH_SRCS,
     hdrs = [
         "src/xnnpack/memory-planner.h",
+        "src/xnnpack/reshape-helpers.h",
         "src/xnnpack/subgraph.h",
         "src/xnnpack/subgraph-validation.h",
     ],
@@ -3384,6 +3386,7 @@ xnnpack_cc_library(
     srcs = SUBGRAPH_SRCS,
     hdrs = [
         "src/xnnpack/memory-planner.h",
+        "src/xnnpack/reshape-helpers.h",
         "src/xnnpack/subgraph.h",
         "src/xnnpack/subgraph-validation.h",
     ],

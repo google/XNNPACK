@@ -513,8 +513,7 @@ XNN_INLINE static size_t xnn_tensor_get_rounded_size(const struct xnn_value* val
 enum xnn_shape_inference_status xnn_tensor_propagate_dimension(
   struct xnn_value* to,
   uint32_t to_dim,
-  const struct xnn_value* from,
-  uint32_t from_dim);
+  size_t infer_dim);
 
 // Product of all shape dimensions
 size_t xnn_shape_multiply_all_dims(
