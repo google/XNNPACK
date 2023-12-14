@@ -30,7 +30,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(f16|f16_f32acc|f32|u8)_r(minmax|max|min|sum)_ukernel__(.+)_u(\d+)(_acc\d+)?", name)
+  match = re.fullmatch(r"xnn_(f16|f16_f32acc|f32|u8)_r(minmax|max|min|sum)_ukernel__(.+)_u(\d+)(v)?(_acc\d+)?", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
@@ -40,49 +40,76 @@ def split_ukernel_name(name):
     "sum": "Sum",
   }[match.group(2)]
   batch_tile = int(match.group(4))
-
+  vector_tile = bool(match.group(5))
   arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(3))
-  return op_type, batch_tile, arch, isa
+  return op_type, batch_tile, vector_tile, arch, isa
 
 
 REDUCE_TEST_TEMPLATE = """\
-TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}) {
+TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}${BATCH_SUFFIX}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   ${TESTER}()
-    .batch_size(${BATCH_TILE})
+    .batch_size(${BATCH_TILE}${BATCH_SCALE})
     .Test(${", ".join(TEST_ARGS)});
 }
 
 $if BATCH_TILE > 1:
-  TEST(${TEST_NAME}, batch_div_${BATCH_TILE}) {
+  TEST(${TEST_NAME}, batch_div_${BATCH_TILE}${BATCH_SUFFIX}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t batch_size = ${BATCH_TILE*2}; batch_size < ${BATCH_TILE*10}; batch_size += ${BATCH_TILE}) {
-      ${TESTER}()
-        .batch_size(batch_size)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    $if BATCH_SCALE == "":
+      for (size_t batch_size = ${BATCH_TILE*2}; batch_size < ${BATCH_TILE*10}; batch_size += ${BATCH_TILE}) {
+        ${TESTER}()
+          .batch_size(batch_size)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    $else:
+      for (size_t batch_size = ${BATCH_TILE*2}${BATCH_SCALE};
+                  batch_size < ${BATCH_TILE*10}${BATCH_SCALE};
+                  batch_size += ${BATCH_TILE}${BATCH_SCALE}) {
+        ${TESTER}()
+          .batch_size(batch_size)
+          .Test(${", ".join(TEST_ARGS)});
+      }
   }
 
-  TEST(${TEST_NAME}, batch_lt_${BATCH_TILE}) {
+  TEST(${TEST_NAME}, batch_lt_${BATCH_TILE}${BATCH_SUFFIX}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t batch_size = 1; batch_size < ${BATCH_TILE}; batch_size++) {
-      ${TESTER}()
-        .batch_size(batch_size)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    $if BATCH_SCALE == "":
+      for (size_t batch_size = 1; batch_size < ${BATCH_TILE}; batch_size++) {
+        ${TESTER}()
+          .batch_size(batch_size)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    $else:
+      for (size_t batch_size = 1;
+                  batch_size < ${BATCH_TILE}${BATCH_SCALE};
+                  batch_size++) {
+        ${TESTER}()
+          .batch_size(batch_size)
+          .Test(${", ".join(TEST_ARGS)});
+      }
   }
 
-TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
+TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}${BATCH_SUFFIX}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t batch_size = ${BATCH_TILE+1}; batch_size < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch_size++) {
-    ${TESTER}()
-      .batch_size(batch_size)
-      .Test(${", ".join(TEST_ARGS)});
-  }
+  $if BATCH_SCALE == "":
+    for (size_t batch_size = ${BATCH_TILE+1}; batch_size < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch_size++) {
+      ${TESTER}()
+        .batch_size(batch_size)
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  $else:
+    for (size_t batch_size = ${BATCH_TILE}${BATCH_SCALE} + 1;
+                batch_size < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}${BATCH_SCALE};
+                batch_size += ${BATCH_TILE*2}) {
+      ${TESTER}()
+        .batch_size(batch_size)
+        .Test(${", ".join(TEST_ARGS)});
+    }
 }
 
 $if TESTER == "RSumMicrokernelTester":
@@ -91,7 +118,10 @@ $if TESTER == "RSumMicrokernelTester":
       ${ISA_CHECK};
     for (float scale = 0.3f; scale < 5.0f; scale *= 3.0f) {
       ${TESTER}()
-        .batch_size(${BATCH_TILE+1})
+        $if BATCH_SCALE == "":
+          .batch_size(${BATCH_TILE+1})
+        $else:
+          .batch_size(${BATCH_TILE}${BATCH_SCALE} + 1)
         .scale(scale)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -99,7 +129,7 @@ $if TESTER == "RSumMicrokernelTester":
 """
 
 
-def generate_test_cases(ukernel, op_type, init_fn, tester, batch_tile, isa):
+def generate_test_cases(ukernel, op_type, init_fn, tester, batch_tile, vector_tile, isa):
   """Generates all tests cases for a Vector Binary Operation micro-kernel.
 
   Args:
@@ -109,6 +139,8 @@ def generate_test_cases(ukernel, op_type, init_fn, tester, batch_tile, isa):
     tester: C++ name of the tester class.
     batch_tile: Number of batch elements processed per one iteration of the
                 inner loop of the micro-kernel.
+    vector_tile: Indicates if batch tile is specified in vectors rather than
+                 elements.
     isa: instruction set required to run the micro-kernel. Generated unit test
          will skip execution if the host processor doesn't support this ISA.
 
@@ -122,12 +154,18 @@ def generate_test_cases(ukernel, op_type, init_fn, tester, batch_tile, isa):
     test_args.append("ReduceMicrokernelTester::OpType::%s" % op_type)
   if init_fn:
     test_args.append(init_fn)
+  batch_scale = ""
+  if vector_tile:
+    ctype = {"u8": "uint8_t", "f16": "uint16_t", "f32": "float"}[datatype]
+    batch_scale = {"rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype}[isa]
   return xngen.preprocess(REDUCE_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
       "TESTER": tester,
       "DATATYPE": datatype.upper(),
       "BATCH_TILE": batch_tile,
+      "BATCH_SCALE": batch_scale,
+      "BATCH_SUFFIX": "v" if vector_tile else "",
       "OP_TYPE": op_type,
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
     })
@@ -171,10 +209,10 @@ def main(args):
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       init_fn = ukernel_spec.get("init")
-      op_type, batch_tile, arch, isa = split_ukernel_name(name)
+      op_type, batch_tile, vector_tile, arch, isa = split_ukernel_name(name)
 
       test_case = generate_test_cases(name, op_type, init_fn, options.tester,
-                                      batch_tile, isa)
+                                      batch_tile, vector_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     xnncommon.overwrite_if_changed(options.output, tests)
