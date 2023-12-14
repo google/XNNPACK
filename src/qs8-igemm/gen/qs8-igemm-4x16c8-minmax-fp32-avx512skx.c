@@ -59,7 +59,6 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_4x16c8__avx512skx(
   const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->fp32_avx512.output_max_less_zero_point);
   const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx512.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx512.output_min);
-  const __m128i vshuffle_control_mask = _mm_set_epi8(15, 14, 13, 12, 7, 6, 5, 4, 11, 10, 9, 8, 3, 2, 1, 0);
   do {
     __m512i vacc0x0123 = _mm512_maskz_expandloadu_epi32(vbias_mask, w);
     __m512i vacc0x4567 = _mm512_maskz_expandloadu_epi32(vbias_mask, (const int32_t*) w + 4);
@@ -196,10 +195,10 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_4x16c8__avx512skx(
     const __m128i vout2x0123456789AB4567CDEF = _mm_packs_epi16(_mm256_castsi256_si128(vacc2x0123456789AB4567CDEF), _mm256_extracti128_si256(vacc2x0123456789AB4567CDEF, 1));
     const __m128i vout3x0123456789AB4567CDEF = _mm_packs_epi16(_mm256_castsi256_si128(vacc3x0123456789AB4567CDEF), _mm256_extracti128_si256(vacc3x0123456789AB4567CDEF, 1));
 
-    __m128i vout0x0123456789ABCDEF = _mm_shuffle_epi8(vout0x0123456789AB4567CDEF, vshuffle_control_mask);
-    __m128i vout1x0123456789ABCDEF = _mm_shuffle_epi8(vout1x0123456789AB4567CDEF, vshuffle_control_mask);
-    __m128i vout2x0123456789ABCDEF = _mm_shuffle_epi8(vout2x0123456789AB4567CDEF, vshuffle_control_mask);
-    __m128i vout3x0123456789ABCDEF = _mm_shuffle_epi8(vout3x0123456789AB4567CDEF, vshuffle_control_mask);
+    __m128i vout0x0123456789ABCDEF = _mm_shuffle_epi32(vout0x0123456789AB4567CDEF, _MM_SHUFFLE(3, 1, 2, 0));
+    __m128i vout1x0123456789ABCDEF = _mm_shuffle_epi32(vout1x0123456789AB4567CDEF, _MM_SHUFFLE(3, 1, 2, 0));
+    __m128i vout2x0123456789ABCDEF = _mm_shuffle_epi32(vout2x0123456789AB4567CDEF, _MM_SHUFFLE(3, 1, 2, 0));
+    __m128i vout3x0123456789ABCDEF = _mm_shuffle_epi32(vout3x0123456789AB4567CDEF, _MM_SHUFFLE(3, 1, 2, 0));
 
     vout0x0123456789ABCDEF = _mm_max_epi8(vout0x0123456789ABCDEF, voutput_min);
     vout1x0123456789ABCDEF = _mm_max_epi8(vout1x0123456789ABCDEF, voutput_min);

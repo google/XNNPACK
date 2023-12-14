@@ -87,7 +87,6 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8_
     const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
     $if DATATYPE == "QU8":
       const __m512i vb_zero_point = _mm512_load_si512(params->${PARAMS_STRUCT}.kernel_zero_point);
-    const __m128i vshuffle_control_mask = _mm_set_epi8(15, 14, 13, 12, 7, 6, 5, 4, 11, 10, 9, 8, 3, 2, 1, 0);
   do {
     $if DATATYPE in ["QD8", "QC4"]:
       const __m512i vksum0123 = _mm512_maskz_expandloadu_epi32(vbias_mask, w);
@@ -258,7 +257,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8_
         const __m128i vout${M}x0123456789AB4567CDEF = ${_MM_PACKXS_EPI16}(_mm256_castsi256_si128(vacc${M}x0123456789AB4567CDEF), _mm256_extracti128_si256(vacc${M}x0123456789AB4567CDEF, 1));
 
       $for M in range(MR):
-        __m128i vout${M}x0123456789ABCDEF = _mm_shuffle_epi8(vout${M}x0123456789AB4567CDEF, vshuffle_control_mask);
+        __m128i vout${M}x0123456789ABCDEF = _mm_shuffle_epi32(vout${M}x0123456789AB4567CDEF, _MM_SHUFFLE(3, 1, 2, 0));
 
       $for M in range(MR):
         vout${M}x0123456789ABCDEF = ${_MM_MAX_EPX8}(vout${M}x0123456789ABCDEF, voutput_min);
