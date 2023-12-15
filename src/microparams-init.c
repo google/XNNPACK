@@ -395,10 +395,6 @@ size_t xnn_init_qs8_qc8w_conv_minmax_fp32_avx512vnni_params(
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx512vnni.output_zero_point[i] = output_zero_point;
   }
-  const int8_t control_mask[16] = {0, 1, 2, 3, 8, 9, 10, 11, 4, 5, 6, 7, 12, 13, 14, 15};
-  for (uint32_t i = 0; i < 16; i++) {
-    params->fp32_avx512vnni.shuffle_control_mask[i] = control_mask[i];
-  }
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx512vnni.output_min[i] = output_min;
   }
@@ -424,10 +420,6 @@ size_t xnn_init_qs8_conv_minmax_fp32_avx512vnni_params(
   }
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx512vnni.output_zero_point[i] = output_zero_point;
-  }
-  const int8_t control_mask[16] = {0, 1, 2, 3, 8, 9, 10, 11, 4, 5, 6, 7, 12, 13, 14, 15};
-  for (uint32_t i = 0; i < 16; i++) {
-    params->fp32_avx512vnni.shuffle_control_mask[i] = control_mask[i];
   }
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx512vnni.output_min[i] = output_min;
