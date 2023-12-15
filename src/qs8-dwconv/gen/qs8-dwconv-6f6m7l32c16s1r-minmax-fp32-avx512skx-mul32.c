@@ -34,9 +34,9 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_6f6m7l32c16s1r__avx512skx_mul32(
   assert(kernel_size > 6);
 
   const __m512 vscale = _mm512_load_ps(params->fp32_avx512.scale);
-  const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->fp32_avx512.output_max_less_zero_point);
-  const __m512i voutput_zero_point = _mm512_load_si512(params->fp32_avx512.output_zero_point);
-  const __m256i voutput_min = _mm256_load_si256((const __m256i*) params->fp32_avx512.output_min);
+  const __m512 voutput_max_less_zero_point = _mm512_set1_ps(params->fp32_avx512.output_max_less_zero_point);
+  const __m512i voutput_zero_point = _mm512_set1_epi16((int16_t) params->fp32_avx512.output_zero_point);
+  const __m256i voutput_min = _mm256_broadcastb_epi8(_mm_load_si128((const __m128i*) params->fp32_avx512.output_min));
   const __m256i vpermute_mask = _mm256_set_epi32(7, 3, 5, 1, 6, 2, 4, 0);
 
 

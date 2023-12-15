@@ -380,17 +380,17 @@ union xnn_qs8_conv_minmax_params {
     XNN_ALIGN(32) int8_t output_min[32];
   } fp32_avx2;
   struct {
+    float output_max_less_zero_point;
+    int32_t output_zero_point;
     XNN_ALIGN(64) float scale[16];
-    XNN_ALIGN(64) float output_max_less_zero_point[16];
-    XNN_ALIGN(64) int16_t output_zero_point[32];
-    XNN_ALIGN(64) int8_t output_min[64];
+    XNN_ALIGN(16) int8_t output_min[16];
   } fp32_avx512;
   struct {
     int8_t sign_mask;
     int8_t mask;
+    float output_max_less_zero_point;
+    int32_t output_zero_point;
     XNN_ALIGN(64) float scale[16];
-    XNN_ALIGN(64) float output_max_less_zero_point[16];
-    XNN_ALIGN(64) int16_t output_zero_point[16];
     XNN_ALIGN(16) int8_t output_min[16];
   } fp32_avx512vnni;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -461,16 +461,15 @@ union xnn_qs8_qc8w_conv_minmax_params {
     XNN_ALIGN(32) int8_t output_min[32];
   } fp32_avx2;
   struct {
-    XNN_ALIGN(64) float output_max_less_zero_point[16];
-    XNN_ALIGN(64) int16_t output_zero_point[32];
-    XNN_ALIGN(64) int8_t output_min[64];
+    float output_max_less_zero_point;
+    int32_t output_zero_point;
+    XNN_ALIGN(16) int8_t output_min[16];
   } fp32_avx512;
   struct {
     int8_t sign_mask;
-    XNN_ALIGN(64) float output_max_less_zero_point[16];
-    XNN_ALIGN(64) int16_t output_zero_point[32];
-    XNN_ALIGN(16) int8_t shuffle_control_mask[16];
-    XNN_ALIGN(64) int8_t output_min[64];
+    float output_max_less_zero_point;
+    int32_t output_zero_point;
+    XNN_ALIGN(16) int8_t output_min[16];
   } fp32_avx512vnni;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -568,11 +567,11 @@ union xnn_qu8_conv_minmax_params {
     XNN_ALIGN(32) uint8_t output_min[32];
   } fp32_avx2;
   struct {
+    float output_max_less_zero_point;
+    int32_t output_zero_point;
     XNN_ALIGN(64) int16_t kernel_zero_point[32];
     XNN_ALIGN(64) float scale[16];
-    XNN_ALIGN(64) float output_max_less_zero_point[16];
-    XNN_ALIGN(64) int16_t output_zero_point[32];
-    XNN_ALIGN(64) uint8_t output_min[64];
+    XNN_ALIGN(16) uint8_t output_min[16];
   } fp32_avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
