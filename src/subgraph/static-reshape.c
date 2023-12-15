@@ -237,7 +237,9 @@ enum xnn_status xnn_define_static_reshape(
   }
 
   node->params.static_reshape.new_shape.num_dims = num_dims;
-  memcpy(&node->params.static_reshape.new_shape.dim, new_shape, num_dims * sizeof(size_t));
+  if (num_dims != 0) {
+    memcpy(&node->params.static_reshape.new_shape.dim, new_shape, num_dims * sizeof(size_t));
+  }
 
   node->type = xnn_node_type_static_reshape;
   node->compute_type = compute_type;
