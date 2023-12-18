@@ -205,13 +205,16 @@ enum xnn_shape_inference_status {
   xnn_shape_inference_status_no_change,
   // Shape inference change some dimension.
   xnn_shape_inference_status_changed,
+  // A tensor's new size is larger than its max size.
+  xnn_shape_inference_status_reallocation_required,
   // Shape inference met an error.
   xnn_shape_inference_status_error,
 };
 
 typedef enum xnn_shape_inference_status (*xnn_infer_shape_fn)(
-  const struct xnn_node* node,
-  struct xnn_value* values);
+  const struct xnn_operator_data* opdata,
+  struct xnn_value* values,
+  size_t num_values);
 
 enum xnn_compute_type {
   xnn_compute_type_invalid = 0,
@@ -395,6 +398,7 @@ struct xnn_operator_data {
   xnn_operator_t operator_objects[XNN_MAX_OPERATOR_OBJECTS];
   xnn_reshape_operator_fn reshape;
   xnn_setup_operator_fn setup;
+  xnn_infer_shape_fn infer_shape_forward;
   size_t batch_size;
   size_t sequence_size;
   size_t heads;

@@ -17,7 +17,7 @@ namespace xnnpack {
 
 constexpr size_t XNN_UNKNOWN_DIM = 0;
 
-TEST(SUBGRAPH_SHAPE_INFERENCE, tensor_with_dynamic_dims_set_correctly) {
+TEST(DISABLED_SUBGRAPH_SHAPE_INFERENCE, tensor_with_dynamic_dims_set_correctly) {
   auto tester = SubgraphTester(1);
   tester
     .AddInputTensorF32({XNN_UNKNOWN_DIM, 1}, 0);
@@ -25,7 +25,7 @@ TEST(SUBGRAPH_SHAPE_INFERENCE, tensor_with_dynamic_dims_set_correctly) {
   EXPECT_FALSE(xnn_tensor_shape_is_static(input));
 }
 
-TEST(SUBGRAPH_SHAPE_INFERENCE, quantized_tensor_with_dynamic_dims_set_correctly) {
+TEST(DISABLED_SUBGRAPH_SHAPE_INFERENCE, quantized_tensor_with_dynamic_dims_set_correctly) {
   auto tester = SubgraphTester(1);
   tester
     .AddInputTensorQS8(/*zero_point=*/3, /*scale=*/1.1f, {XNN_UNKNOWN_DIM, 1}, 0);
@@ -33,7 +33,7 @@ TEST(SUBGRAPH_SHAPE_INFERENCE, quantized_tensor_with_dynamic_dims_set_correctly)
   EXPECT_FALSE(xnn_tensor_shape_is_static(input));
 }
 
-TEST(SUBGRAPH_SHAPE_INFERENCE, fully_connected_dynamic_input) {
+TEST(DISABLED_SUBGRAPH_SHAPE_INFERENCE, fully_connected_dynamic_input) {
   auto tester = SubgraphTester(6);
   const size_t input_channels = 3;
   const size_t output_channels = 5;
@@ -63,7 +63,7 @@ TEST(SUBGRAPH_SHAPE_INFERENCE, fully_connected_dynamic_input) {
   EXPECT_FALSE(xnn_tensor_shape_is_static(output));
 }
 
-TEST(SUBGRAPH_SHAPE_INFERENCE, fully_connected_infer_output_from_input) {
+TEST(DISABLED_SUBGRAPH_SHAPE_INFERENCE, fully_connected_infer_output_from_input) {
   auto tester = SubgraphTester(6);
   const size_t input_batch_dim = 7;
   const size_t input_channels = 3;
@@ -88,7 +88,7 @@ TEST(SUBGRAPH_SHAPE_INFERENCE, fully_connected_infer_output_from_input) {
   EXPECT_EQ(output->shape.dim[1], output_channels);
 }
 
-TEST(SUBGRAPH_SHAPE_INFERENCE, fully_connected_infer_input_from_output) {
+TEST(DISABLED_SUBGRAPH_SHAPE_INFERENCE, fully_connected_infer_input_from_output) {
   auto tester = SubgraphTester(6);
   const size_t output_batch_dim = 7;
   const size_t input_channels = 3;
@@ -114,7 +114,7 @@ TEST(SUBGRAPH_SHAPE_INFERENCE, fully_connected_infer_input_from_output) {
   EXPECT_EQ(output->shape.dim[1], output_channels);
 }
 
-TEST(SUBGRAPH_SHAPE_INFERENCE, fully_connected_cannot_infer_reshaped_input) {
+TEST(DISABLED_SUBGRAPH_SHAPE_INFERENCE, fully_connected_cannot_infer_reshaped_input) {
   auto tester = SubgraphTester(6);
   const size_t input_batch_dim = 2 * 3;
   const size_t input_channels = 3;

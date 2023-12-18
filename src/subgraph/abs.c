@@ -53,24 +53,53 @@ static enum xnn_status reshape_abs_operator(
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
   const size_t batch_size = xnn_shape_multiply_non_channel_dims(&values[input_id].shape);
+  const size_t old_workspace_size = opdata->workspace_size;
+  enum xnn_status status = xnn_status_invalid_state;
   const size_t num_input_dims = values[input_id].shape.num_dims;
   const size_t channel_dim = num_input_dims == 0 ? 1 : values[input_id].shape.dim[num_input_dims - 1];
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_abs_nc_f32:
-      return xnn_reshape_abs_nc_f32(
+      status = xnn_reshape_abs_nc_f32(
         opdata->operator_objects[0],
         batch_size,
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         threadpool);
+      break;
     case xnn_operator_type_abs_nc_f16:
-      return xnn_reshape_abs_nc_f16(
+      status = xnn_reshape_abs_nc_f16(
         opdata->operator_objects[0],
         batch_size,
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         threadpool);
+      break;
     default:
       XNN_UNREACHABLE;
   }
+  if (status != xnn_status_success) {
+    return status;
+  }
+  const uint32_t output_id = opdata->outputs[0];
+  struct xnn_value* output = &values[output_id];
+
+  // Propagate input shape to output.
+  bool changed = !(opdata->workspace_size > old_workspace_size);
+  const struct xnn_value* input = &values[opdata->inputs[0]];
+  for (size_t cur_dim = 0; cur_dim < input->shape.num_dims; cur_dim++) {
+    const enum xnn_shape_inference_status shape_status = xnn_tensor_propagate_dimension(output, cur_dim, input, cur_dim);
+    if (shape_status == xnn_shape_inference_status_error) {
+      return xnn_status_invalid_parameter;
+    }
+    changed |= true;
+  }
+  if (!changed) {
+    return xnn_status_success;
+  }
+  const size_t new_size = xnn_tensor_get_size(output);
+  if (new_size > output->size || old_workspace_size > opdata->workspace_size) {
+    output->size = new_size;
+    return xnn_status_reallocation_required;
+  }
+  return xnn_status_success;
 }
 
 static enum xnn_status setup_abs_operator(

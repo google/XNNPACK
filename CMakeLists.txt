@@ -1473,6 +1473,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(abs-test PRIVATE XNNPACK gtest gtest_main fp16)
     ADD_TEST(NAME abs-test COMMAND abs-test)
 
+    ADD_EXECUTABLE(abs-reshape-test test/abs-reshape.cc)
+    TARGET_INCLUDE_DIRECTORIES(abs-reshape-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(abs-reshape-test PRIVATE XNNPACK gtest gtest_main fp16)
+    ADD_TEST(NAME abs-reshape-test COMMAND abs-reshape-test)
+
     ADD_EXECUTABLE(add2-test test/add2.cc)
     TARGET_INCLUDE_DIRECTORIES(add2-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(add2-test PRIVATE XNNPACK gtest gtest_main)
