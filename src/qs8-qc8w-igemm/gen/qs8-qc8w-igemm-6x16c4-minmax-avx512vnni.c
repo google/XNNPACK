@@ -64,8 +64,8 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_6x16c4__avx512vnni(
   }
 
   const __m512i vsign_mask = _mm512_set1_epi8(params->fp32_avx512vnni.sign_mask);  // 0x80
-  const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->fp32_avx512vnni.output_max_less_zero_point);
-  const __m512i voutput_zero_point = _mm512_set1_epi32((int32_t) params->fp32_avx512vnni.output_zero_point[0]);
+  const __m512 voutput_max_less_zero_point = _mm512_set1_ps(params->fp32_avx512vnni.output_max_less_zero_point);
+  const __m512i voutput_zero_point = _mm512_set1_epi32(params->fp32_avx512vnni.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx512vnni.output_min);
   do {
     __m512i vacc0x0123456789ABCDEF = _mm512_load_epi32(w);
