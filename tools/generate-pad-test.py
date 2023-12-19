@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_xx_pad_ukernel_p(\d+)__(.+)_u(\d+)", name)
+  match = re.fullmatch(r"xnn_xx_pad_ukernel_p(\d+)__(.+)_u(\d+)(v)?", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   padding_tile = int(match.group(1))
