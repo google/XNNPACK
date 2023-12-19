@@ -3378,6 +3378,7 @@ xnnpack_unit_test(
     ],
 )
 
+# copybara:comment_begin
 xnnpack_unit_test(
     name = "batch_matrix_multiply_test",
     srcs = [
@@ -3391,6 +3392,7 @@ xnnpack_unit_test(
         "//:subgraph_test_mode",
     ],
 )
+# copybara:comment_end
 
 xnnpack_unit_test(
     name = "ceiling_test",
