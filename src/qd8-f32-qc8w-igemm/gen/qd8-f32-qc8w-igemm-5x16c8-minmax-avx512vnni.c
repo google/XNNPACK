@@ -196,6 +196,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_5x16c8__avx512vnni(
       p -= 5 * sizeof(void*);
     } while (p != 0);
 
+
     // Add adjacent pairs
     const __m512i vidx = _mm512_set_epi32(30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0);
     const __m512i vsum0x01234567 = _mm512_add_epi32(vacc0x01234567, _mm512_srai_epi64(vacc0x01234567, 32));

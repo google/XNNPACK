@@ -61,6 +61,10 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x16c8__avx512vnni(
     __m512i vacc0x89ABCDEF = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64(vsum0x0123456789ABCDEF, 1));
     __m512i vacc1x01234567 = vacc0x01234567;
     __m512i vacc1x89ABCDEF = vacc0x89ABCDEF;
+    __m512i vacc1x0x01234567 = _mm512_setzero_epi32();
+    __m512i vacc1x0x89ABCDEF = _mm512_setzero_epi32();
+    __m512i vacc1x1x01234567 = _mm512_setzero_epi32();
+    __m512i vacc1x1x89ABCDEF = _mm512_setzero_epi32();
     w = (const int32_t*) w + 16;
 
     size_t p = ks;
@@ -97,10 +101,10 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x16c8__avx512vnni(
         vacc0x89ABCDEF = _mm512_dpbusd_epi32(vacc0x89ABCDEF, va0x01234567, vb89ABCDEFx01234567);
         vacc1x01234567 = _mm512_dpbusd_epi32(vacc1x01234567, va1x01234567, vb01234567x01234567);
         vacc1x89ABCDEF = _mm512_dpbusd_epi32(vacc1x89ABCDEF, va1x01234567, vb89ABCDEFx01234567);
-        vacc0x01234567 = _mm512_dpbusd_epi32(vacc0x01234567, va0x89ABCDEF, vb01234567x89ABCDEF);
-        vacc0x89ABCDEF = _mm512_dpbusd_epi32(vacc0x89ABCDEF, va0x89ABCDEF, vb89ABCDEFx89ABCDEF);
-        vacc1x01234567 = _mm512_dpbusd_epi32(vacc1x01234567, va1x89ABCDEF, vb01234567x89ABCDEF);
-        vacc1x89ABCDEF = _mm512_dpbusd_epi32(vacc1x89ABCDEF, va1x89ABCDEF, vb89ABCDEFx89ABCDEF);
+        vacc1x0x01234567 = _mm512_dpbusd_epi32(vacc1x0x01234567, va0x89ABCDEF, vb01234567x89ABCDEF);
+        vacc1x0x89ABCDEF = _mm512_dpbusd_epi32(vacc1x0x89ABCDEF, va0x89ABCDEF, vb89ABCDEFx89ABCDEF);
+        vacc1x1x01234567 = _mm512_dpbusd_epi32(vacc1x1x01234567, va1x89ABCDEF, vb01234567x89ABCDEF);
+        vacc1x1x89ABCDEF = _mm512_dpbusd_epi32(vacc1x1x89ABCDEF, va1x89ABCDEF, vb89ABCDEFx89ABCDEF);
 
         w = (const int8_t*) w + 256;
         k -= 16 * sizeof(int8_t);
@@ -126,6 +130,11 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x16c8__avx512vnni(
 
       p -= 2 * sizeof(void*);
     } while (p != 0);
+
+    vacc0x01234567 = _mm512_add_epi32(vacc0x01234567, vacc1x0x01234567);
+    vacc0x89ABCDEF = _mm512_add_epi32(vacc0x89ABCDEF, vacc1x0x89ABCDEF);
+    vacc1x01234567 = _mm512_add_epi32(vacc1x01234567, vacc1x1x01234567);
+    vacc1x89ABCDEF = _mm512_add_epi32(vacc1x89ABCDEF, vacc1x1x89ABCDEF);
 
     // Add adjacent pairs
     const __m512i vidx = _mm512_set_epi32(30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0);

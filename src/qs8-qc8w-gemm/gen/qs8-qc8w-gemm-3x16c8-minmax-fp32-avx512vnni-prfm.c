@@ -66,6 +66,12 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x16c8__avx512vnni_prfm(
     __m512i vacc1x89ABCDEF = vacc0x89ABCDEF;
     __m512i vacc2x01234567 = vacc0x01234567;
     __m512i vacc2x89ABCDEF = vacc0x89ABCDEF;
+    __m512i vacc1x0x01234567 = _mm512_setzero_epi32();
+    __m512i vacc1x0x89ABCDEF = _mm512_setzero_epi32();
+    __m512i vacc1x1x01234567 = _mm512_setzero_epi32();
+    __m512i vacc1x1x89ABCDEF = _mm512_setzero_epi32();
+    __m512i vacc1x2x01234567 = _mm512_setzero_epi32();
+    __m512i vacc1x2x89ABCDEF = _mm512_setzero_epi32();
     w = (const int32_t*) w + 16;
 
     size_t k = kc;
@@ -95,12 +101,12 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x16c8__avx512vnni_prfm(
       vacc2x89ABCDEF = _mm512_dpbusd_epi32(vacc2x89ABCDEF, va2x01234567, vb89ABCDEFx01234567);
       xnn_prefetch_to_l1((const int8_t*) w + 896);
       xnn_prefetch_to_l1((const int8_t*) w + 960);
-      vacc0x01234567 = _mm512_dpbusd_epi32(vacc0x01234567, va0x89ABCDEF, vb01234567x89ABCDEF);
-      vacc0x89ABCDEF = _mm512_dpbusd_epi32(vacc0x89ABCDEF, va0x89ABCDEF, vb89ABCDEFx89ABCDEF);
-      vacc1x01234567 = _mm512_dpbusd_epi32(vacc1x01234567, va1x89ABCDEF, vb01234567x89ABCDEF);
-      vacc1x89ABCDEF = _mm512_dpbusd_epi32(vacc1x89ABCDEF, va1x89ABCDEF, vb89ABCDEFx89ABCDEF);
-      vacc2x01234567 = _mm512_dpbusd_epi32(vacc2x01234567, va2x89ABCDEF, vb01234567x89ABCDEF);
-      vacc2x89ABCDEF = _mm512_dpbusd_epi32(vacc2x89ABCDEF, va2x89ABCDEF, vb89ABCDEFx89ABCDEF);
+      vacc1x0x01234567 = _mm512_dpbusd_epi32(vacc1x0x01234567, va0x89ABCDEF, vb01234567x89ABCDEF);
+      vacc1x0x89ABCDEF = _mm512_dpbusd_epi32(vacc1x0x89ABCDEF, va0x89ABCDEF, vb89ABCDEFx89ABCDEF);
+      vacc1x1x01234567 = _mm512_dpbusd_epi32(vacc1x1x01234567, va1x89ABCDEF, vb01234567x89ABCDEF);
+      vacc1x1x89ABCDEF = _mm512_dpbusd_epi32(vacc1x1x89ABCDEF, va1x89ABCDEF, vb89ABCDEFx89ABCDEF);
+      vacc1x2x01234567 = _mm512_dpbusd_epi32(vacc1x2x01234567, va2x89ABCDEF, vb01234567x89ABCDEF);
+      vacc1x2x89ABCDEF = _mm512_dpbusd_epi32(vacc1x2x89ABCDEF, va2x89ABCDEF, vb89ABCDEFx89ABCDEF);
 
       w = (const int8_t*) w + 256;
       k -= 16 * sizeof(int8_t);
@@ -129,6 +135,12 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x16c8__avx512vnni_prfm(
       w = (const int8_t*) w + 128;
       k -= 8 * sizeof(int8_t);
     }
+    vacc0x01234567 = _mm512_add_epi32(vacc0x01234567, vacc1x0x01234567);
+    vacc0x89ABCDEF = _mm512_add_epi32(vacc0x89ABCDEF, vacc1x0x89ABCDEF);
+    vacc1x01234567 = _mm512_add_epi32(vacc1x01234567, vacc1x1x01234567);
+    vacc1x89ABCDEF = _mm512_add_epi32(vacc1x89ABCDEF, vacc1x1x89ABCDEF);
+    vacc2x01234567 = _mm512_add_epi32(vacc2x01234567, vacc1x2x01234567);
+    vacc2x89ABCDEF = _mm512_add_epi32(vacc2x89ABCDEF, vacc1x2x89ABCDEF);
 
     // Add adjacent pairs
     const __m512i vidx = _mm512_set_epi32(30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0);

@@ -101,6 +101,10 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8_
     $for M in range(1, MR):
       __m512i vacc${M}x01234567 = vacc0x01234567;
       __m512i vacc${M}x89ABCDEF = vacc0x89ABCDEF;
+    $if MR < 4:
+      $for M in range(MR):
+        __m512i vacc1x${M}x01234567 = _mm512_setzero_epi32();
+        __m512i vacc1x${M}x89ABCDEF = _mm512_setzero_epi32();
     w = (const int32_t*) w + 16;
 
     size_t p = ks;
@@ -127,10 +131,10 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8_
           const __m512i vbb89ABCDEFx01234567 = _mm512_load_si512((const ${XINT8_T}*) w + 64);
           const __m512i vbs01234567x01234567 = _mm512_slli_epi32(vbb01234567x01234567, 4);
           const __m512i vbs89ABCDEFx01234567 = _mm512_slli_epi32(vbb89ABCDEFx01234567, 4);
-          const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbb01234567x01234567, vmask);
-          const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbb89ABCDEFx01234567, vmask);
-          const __m512i vb01234567x01234567 = _mm512_and_si512(vbs01234567x01234567, vmask);
-          const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbs89ABCDEFx01234567, vmask);
+          const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbb01234567x01234567, vvalue_mask);
+          const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbb89ABCDEFx01234567, vvalue_mask);
+          const __m512i vb01234567x01234567 = _mm512_and_si512(vbs01234567x01234567, vvalue_mask);
+          const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbs89ABCDEFx01234567, vvalue_mask);
         $else:
           const __m512i vb01234567x01234567 = _mm512_load_si512(w);
           const __m512i vb89ABCDEFx01234567 = _mm512_load_si512((const ${XINT8_T}*) w + 64);
@@ -147,8 +151,12 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8_
           xnn_prefetch_to_l1((const ${XINT8_T}*) w + 896);
           xnn_prefetch_to_l1((const ${XINT8_T}*) w + 960);
         $for M in range(MR):
-          vacc${M}x01234567 = _mm512_dpbusd_epi32(vacc${M}x01234567, va${M}x89ABCDEF, vb01234567x89ABCDEF);
-          vacc${M}x89ABCDEF = _mm512_dpbusd_epi32(vacc${M}x89ABCDEF, va${M}x89ABCDEF, vb89ABCDEFx89ABCDEF);
+          $if MR < 4:
+            vacc1x${M}x01234567 = _mm512_dpbusd_epi32(vacc1x${M}x01234567, va${M}x89ABCDEF, vb01234567x89ABCDEF);
+            vacc1x${M}x89ABCDEF = _mm512_dpbusd_epi32(vacc1x${M}x89ABCDEF, va${M}x89ABCDEF, vb89ABCDEFx89ABCDEF);
+          $else:
+            vacc${M}x01234567 = _mm512_dpbusd_epi32(vacc${M}x01234567, va${M}x89ABCDEF, vb01234567x89ABCDEF);
+            vacc${M}x89ABCDEF = _mm512_dpbusd_epi32(vacc${M}x89ABCDEF, va${M}x89ABCDEF, vb89ABCDEFx89ABCDEF);
 
         $if DATATYPE == "QC4":
           w = (const ${XINT8_T}*) w + 128;
@@ -186,6 +194,11 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8_
 
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
+
+    $if MR < 4:
+      $for M in range(MR):
+        vacc${M}x01234567 = _mm512_add_epi32(vacc${M}x01234567, vacc1x${M}x01234567);
+        vacc${M}x89ABCDEF = _mm512_add_epi32(vacc${M}x89ABCDEF, vacc1x${M}x89ABCDEF);
 
     // Add adjacent pairs
     const __m512i vidx = _mm512_set_epi32(30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0);
