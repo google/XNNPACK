@@ -119,13 +119,9 @@ size_t xnn_init_qs8_qc8w_conv_minmax_fp32_avx512_params(
   int8_t output_max)
 {
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->fp32_avx512.output_max_less_zero_point = output_max_less_zero_point;
+  params->fp32_avx512.output_zero_point = (int32_t) output_zero_point;
   for (uint32_t i = 0; i < 16; i++) {
-    params->fp32_avx512.output_max_less_zero_point[i] = output_max_less_zero_point;
-  }
-  for (uint32_t i = 0; i < 32; i++) {
-    params->fp32_avx512.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  for (uint32_t i = 0; i < 64; i++) {
     params->fp32_avx512.output_min[i] = output_min;
   }
   return sizeof(params->fp32_avx512);
@@ -368,14 +364,10 @@ size_t xnn_init_qs8_conv_minmax_fp32_avx512_params(
   assert(scale < 256.0f);
 
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->fp32_avx512.output_max_less_zero_point = output_max_less_zero_point;
+  params->fp32_avx512.output_zero_point = (int32_t) output_zero_point;
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx512.scale[i] = scale;
-    params->fp32_avx512.output_max_less_zero_point[i] = output_max_less_zero_point;
-  }
-  for (uint32_t i = 0; i < 32; i++) {
-    params->fp32_avx512.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  for (uint32_t i = 0; i < 64; i++) {
     params->fp32_avx512.output_min[i] = output_min;
   }
   return sizeof(params->fp32_avx512);
@@ -389,12 +381,8 @@ size_t xnn_init_qs8_qc8w_conv_minmax_fp32_avx512vnni_params(
 {
   params->fp32_avx512vnni.sign_mask = 0x80;
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  for (uint32_t i = 0; i < 16; i++) {
-    params->fp32_avx512vnni.output_max_less_zero_point[i] = output_max_less_zero_point;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
-    params->fp32_avx512vnni.output_zero_point[i] = output_zero_point;
-  }
+  params->fp32_avx512vnni.output_max_less_zero_point = output_max_less_zero_point;
+  params->fp32_avx512vnni.output_zero_point = (int32_t) output_zero_point;
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx512vnni.output_min[i] = output_min;
   }
@@ -414,14 +402,10 @@ size_t xnn_init_qs8_conv_minmax_fp32_avx512vnni_params(
   params->fp32_avx512vnni.sign_mask = 0x80;
   params->fp32_avx512vnni.mask = 0xF0;
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->fp32_avx512vnni.output_max_less_zero_point = output_max_less_zero_point;
+  params->fp32_avx512vnni.output_zero_point = (int32_t) output_zero_point;
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx512vnni.scale[i] = scale;
-    params->fp32_avx512vnni.output_max_less_zero_point[i] = output_max_less_zero_point;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
-    params->fp32_avx512vnni.output_zero_point[i] = output_zero_point;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx512vnni.output_min[i] = output_min;
   }
   return sizeof(params->fp32_avx512vnni);
@@ -712,16 +696,14 @@ size_t xnn_init_qu8_conv_minmax_fp32_avx512_params(
   assert(scale < 256.0f);
 
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->fp32_avx512.output_max_less_zero_point = output_max_less_zero_point;
+  params->fp32_avx512.output_zero_point = (int32_t) (uint32_t) output_zero_point;
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx512.scale[i] = scale;
-    params->fp32_avx512.output_max_less_zero_point[i] = output_max_less_zero_point;
+    params->fp32_avx512.output_min[i] = output_min;
   }
   for (uint32_t i = 0; i < 32; i++) {
     params->fp32_avx512.kernel_zero_point[i] = (int16_t) (uint16_t) kernel_zero_point;
-    params->fp32_avx512.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
-  }
-  for (uint32_t i = 0; i < 64; i++) {
-    params->fp32_avx512.output_min[i] = output_min;
   }
   return sizeof(params->fp32_avx512);
 }
