@@ -118,8 +118,8 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8_
       size_t k = kc;
       while (k >= 16 * sizeof(int8_t)) {
         $for M in range(MR):
-          const __m512i va${M}x01234567 = _mm512_xor_epi64(_mm512_broadcast_i32x2(_mm_loadl_epi64((const __m128i*) a${M})), vsign_mask);
-          const __m512i va${M}x89ABCDEF = _mm512_xor_epi64(_mm512_broadcast_i32x2(_mm_loadl_epi64((const __m128i*) (a${M} + 8))), vsign_mask);
+          const __m512i va${M}x01234567 = _mm512_xor_epi64(_mm512_set1_epi64((int64_t) unaligned_load_u64(a${M})), vsign_mask);
+          const __m512i va${M}x89ABCDEF = _mm512_xor_epi64(_mm512_set1_epi64((int64_t) unaligned_load_u64(a${M} + 8)), vsign_mask);
           a${M} += 16;
 
         $if DATATYPE == "QC4":
@@ -159,7 +159,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8_
 
       if (k != 0) {
         $for M in range(MR):
-          const __m512i va${M}x01234567 = _mm512_xor_epi64(_mm512_broadcast_i32x2(_mm_loadl_epi64((const __m128i*) a${M})), vsign_mask);
+          const __m512i va${M}x01234567 = _mm512_xor_epi64(_mm512_set1_epi64((int64_t) unaligned_load_u64(a${M})), vsign_mask);
           a${M} += 8;
 
         $if DATATYPE == "QC4":
