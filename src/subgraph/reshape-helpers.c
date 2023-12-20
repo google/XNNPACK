@@ -1,6 +1,37 @@
 #include <xnnpack/log.h>
 #include <xnnpack/reshape-helpers.h>
 
+enum xnn_status resize_unary_elementwise_output_tensor(
+  const struct xnn_operator_data* opdata,
+  struct xnn_value* values,
+  size_t num_values,
+  size_t old_workspace_size,
+  pthreadpool_t threadpool)
+{
+  const uint32_t output_id = opdata->outputs[0];
+  struct xnn_value* output = &values[output_id];
+
+  // Propagate input shape to output.
+  bool changed = opdata->workspace_size > old_workspace_size;
+  const struct xnn_value* input = &values[opdata->inputs[0]];
+  for (size_t cur_dim = 0; cur_dim < input->shape.num_dims; cur_dim++) {
+    const enum xnn_shape_inference_status shape_status = xnn_tensor_propagate_dimension(output, cur_dim, input->shape.dim[cur_dim]);
+    if (shape_status == xnn_shape_inference_status_error) {
+      return xnn_status_invalid_parameter;
+    }
+    changed |= true;
+  }
+  if (!changed) {
+    return xnn_status_success;
+  }
+  const size_t new_size = xnn_tensor_get_size(output);
+  if (new_size > output->size || old_workspace_size > opdata->workspace_size) {
+    output->size = new_size;
+    return xnn_status_reallocation_required;
+  }
+  return xnn_status_success;
+}
+
 enum xnn_status resize_binary_elementwise_output_tensor(
   const struct xnn_operator_data* opdata,
   struct xnn_value* values,
