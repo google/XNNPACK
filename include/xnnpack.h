@@ -1829,6 +1829,20 @@ struct xnn_external_value {
   void* data;
 };
 
+/// Reshape an external value.
+///
+/// @param external_id - external ID for the Value. The ID must be within the range of reversed Value IDs specified on
+///                      the Subgraph creation. If the external ID is XNN_INVALID_VALUE_ID, an internal ID will be
+///                      created for the Value.
+/// @param num_dims - number of dimensions in the shape.
+/// @param dims - pointer to an array of @a num_dims shape dimensions. If num_dims is 0, this pointer can be NULL.
+///               XNNPACK does not keep any pointers to this array after the function returns.
+enum xnn_status xnn_reshape_external_value(
+  xnn_runtime_t runtime,
+  uint32_t external_id,
+  size_t num_dims,
+  const size_t* dims);
+
 /// Setup data pointers for external inputs and outputs in a Runtime object.
 ///
 /// @param runtime - a Runtime object created with @ref xnn_create_runtime or @ref xnn_create_runtime_v2.

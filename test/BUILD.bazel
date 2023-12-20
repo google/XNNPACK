@@ -3387,6 +3387,20 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "add2_reshape_test",
+    srcs = [
+        "add2-reshape.cc",
+    ],
+    deps = [
+        ":subgraph_unary_tester",
+        "//:XNNPACK_test_mode",
+        "//:node_type",
+        "//:operators_test_mode",
+        "//:subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "argmax_pooling_2d_test",
     srcs = [
         "argmax-pooling-2d.cc",

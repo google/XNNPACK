@@ -529,34 +529,18 @@ bool xnn_tensor_shape_is_static(const struct xnn_value* value)
 enum xnn_shape_inference_status xnn_tensor_propagate_dimension(
   struct xnn_value* to,
   uint32_t to_dim,
-  const struct xnn_value* from,
-  uint32_t from_dim)
+  size_t inferred_dim)
 {
   assert(to_dim < to->shape.num_dims);
-  assert(from_dim < from->shape.num_dims);
-  size_t inferred_dim = from->shape.dim[from_dim];
 
   // If inferred_dim is dynamic, then we don't have useful information to propagate.
   if (to->shape.dim[to_dim] == inferred_dim || inferred_dim == 0) {
     return xnn_shape_inference_status_no_change;
   }
 
-  if (inferred_dim < to->shape.minimum_dim[to_dim]) {
-    xnn_log_error(
-      "failed to infer dimension of tensor id %" PRIu32 ": inferred dimension (%zu) from tensor id %" PRIu32
-      " is less than minimum dimension (%zu)", to->id, inferred_dim, from->id, to->shape.minimum_dim[to_dim]);
-    return xnn_shape_inference_status_error;
-  }
-
-  if (inferred_dim > to->shape.maximum_dim[to_dim]) {
-    xnn_log_error(
-      "failed to infer dimension of tensor id %" PRIu32 ": inferred dimension (%zu) from tensor id %" PRIu32
-      " is more than maximum dimension (%zu)", to->id, inferred_dim, from->id, to->shape.maximum_dim[to_dim]);
-    return xnn_shape_inference_status_error;
-  }
-
   to->shape.dim[to_dim] = inferred_dim;
-  to->shape.minimum_dim[to_dim] = from->shape.minimum_dim[from_dim];
-  to->shape.maximum_dim[to_dim] = from->shape.maximum_dim[from_dim];
+  if (inferred_dim > to->shape.maximum_dim[to_dim]) {
+    to->shape.maximum_dim[to_dim] = inferred_dim;
+  }
   return xnn_shape_inference_status_changed;
 }
