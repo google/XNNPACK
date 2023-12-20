@@ -29,7 +29,11 @@ void xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8(
 
   uint16_t* o = (uint16_t*) output;
   const int16x8_t vminus_zero_point = vreinterpretq_s16_u16(vld1q_dup_u16((const void*) &params->neon.minus_zero_point));
-  const float16x8_t vscale = vld1q_dup_f16(&params->neon.scale);
+#ifdef XNN_COMPILER_MSVC
+  const float16x8_t vscale = vreinterpretq_f16_u16(vdupq_n_u16(params->neon.scale));
+#else
+  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.scale));
+#endif
   for (; batch >= 8 * sizeof(int8_t); batch -= 8 * sizeof(int8_t)) {
     const int8x8_t vx = vld1_s8(input); input += 8;
 
