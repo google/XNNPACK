@@ -13,6 +13,7 @@
 #include <xnnpack/log.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/params.h>
+#include <xnnpack/reshape-helpers.h>
 #include <xnnpack/subgraph.h>
 #include <xnnpack/subgraph-validation.h>
 
@@ -82,26 +83,34 @@ static enum xnn_status reshape_minimum_operator(
     memcpy(opdata->shape2.dim, values[input2_id].shape.dim, values[input2_id].shape.num_dims * sizeof(size_t));
   }
 
+  const size_t old_workspace_size = opdata->workspace_size;
+  enum xnn_status status = xnn_status_invalid_state;
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_minimum_nd_f16:
-      return xnn_reshape_minimum_nd_f16(
+      status = xnn_reshape_minimum_nd_f16(
         opdata->operator_objects[0],
         opdata->shape1.num_dims,
         opdata->shape1.dim,
         opdata->shape2.num_dims,
         opdata->shape2.dim,
         threadpool);
+      break;
     case xnn_operator_type_minimum_nd_f32:
-      return xnn_reshape_minimum_nd_f32(
+      status = xnn_reshape_minimum_nd_f32(
         opdata->operator_objects[0],
         opdata->shape1.num_dims,
         opdata->shape1.dim,
         opdata->shape2.num_dims,
         opdata->shape2.dim,
         threadpool);
+      break;
     default:
       XNN_UNREACHABLE;
   }
+  if (status != xnn_status_success) {
+    return status;
+  }
+  return resize_binary_elementwise_output_tensor(opdata, values, num_values, old_workspace_size, threadpool);
 }
 
 static enum xnn_status setup_minimum_operator(

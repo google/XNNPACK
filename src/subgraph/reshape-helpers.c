@@ -69,6 +69,7 @@ enum xnn_status resize_binary_elementwise_output_tensor(
       return xnn_status_invalid_parameter;
     }
   }
+
   const size_t new_size = xnn_tensor_get_size(output);
   if (new_size > output->size || old_workspace_size < opdata->workspace_size) {
     output->size = new_size;
