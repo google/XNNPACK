@@ -68,21 +68,18 @@ static enum xnn_status reshape_copy_operator(
         batch_size,
         1 /* channels */, 1 /* input stride */, 1 /* output stride */,
         threadpool);
-      break;
     case xnn_operator_type_copy_nc_x16:
       return xnn_reshape_copy_nc_x16(
         opdata->operator_objects[0],
         batch_size,
         1 /* channels */, 1 /* input stride */, 1 /* output stride */,
         threadpool);
-      break;
     case xnn_operator_type_copy_nc_x32:
       return xnn_reshape_copy_nc_x32(
         opdata->operator_objects[0],
         batch_size,
         1 /* channels */, 1 /* input stride */, 1 /* output stride */,
         threadpool);
-      break;
     default:
       XNN_UNREACHABLE;
   }
