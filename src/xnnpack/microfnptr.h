@@ -1481,6 +1481,7 @@ typedef void (*xnn_pack_deconv_goki_w_fn)(
   const void* bias,
   const void* scale,
   void* packed_weights,
+  size_t extra_bytes,
   const void* subconv_params,
   const void* params);
 

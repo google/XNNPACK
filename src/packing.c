@@ -1819,6 +1819,7 @@ void xnn_pack_f32_deconv_goki_w(
   const float* b,
   const void* scale,
   float* packed_weights,
+  size_t extra_bytes,
   struct subconvolution_params* subconv_params,
   const void* params)
 {
@@ -1858,6 +1859,7 @@ void xnn_pack_f32_deconv_goki_w(
               }
             }
           }
+          packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
         }
       }
     }
@@ -1883,6 +1885,7 @@ void xnn_pack_f16_deconv_goki_w(
   const uint16_t* b,
   const void* scale,
   uint16_t* packed_weights,
+  size_t extra_bytes,
   struct subconvolution_params* subconv_params,
   const void* params)
 {
@@ -1922,6 +1925,7 @@ void xnn_pack_f16_deconv_goki_w(
               }
             }
           }
+          packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
         }
       }
     }
@@ -1947,6 +1951,7 @@ void xnn_pack_f32_to_f16_deconv_goki_w(
   const float* b,
   const void* scale,
   uint16_t* packed_weights,
+  size_t extra_bytes,
   struct subconvolution_params* subconv_params,
   const void* params)
 {
@@ -1986,6 +1991,7 @@ void xnn_pack_f32_to_f16_deconv_goki_w(
               }
             }
           }
+          packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
         }
       }
     }
@@ -1997,7 +2003,7 @@ void xnn_pack_f32_to_f16_deconv_goki_w(
 }
 
 void pack_qs8_deconv_goki_w(
-  size_t g,
+  size_t groups,
   size_t nc,
   size_t kh,
   size_t kw,
@@ -2011,18 +2017,19 @@ void pack_qs8_deconv_goki_w(
   const int32_t* b,
   const float* scale,
   void* packed_weights,
+  size_t extra_bytes,
   int32_t zero_point_offset,
   struct subconvolution_params* subconv_params,
   const struct xnn_qs8_packing_params* params)
 {
-  assert(g != 0);
+  assert(groups != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
 
   const size_t skr = sr * kr;
   const uint32_t izp = (uint32_t) params->input_zero_point + zero_point_offset;
-  for (size_t i = 0; i < g; i++) {
+  for (size_t i = 0; i < groups; i++) {
     for (size_t oy = 0; oy < sh; oy++) {
       for (size_t ox = 0; ox < sw; ox++) {
         if (i == 0) {
@@ -2064,6 +2071,7 @@ void pack_qs8_deconv_goki_w(
               }
             }
           }
+          packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
         }
       }
     }
@@ -2089,11 +2097,12 @@ void xnn_pack_qs8_deconv_goki_w(
   const int32_t* b,
   const float* scale,
   void* packed_weights,
+  size_t extra_bytes,
   struct subconvolution_params* subconv_params,
   const struct xnn_qs8_packing_params* params)
 {
   return pack_qs8_deconv_goki_w(g, nc, kh, kw, kc, sh, sw, nr, kr, sr, k, b, scale,
-                                packed_weights, /*zero_point_offset=*/0, subconv_params, params);
+                                packed_weights, extra_bytes, /*zero_point_offset=*/0, subconv_params, params);
 }
 
 void xnn_pack_qs8_to_qu8_deconv_goki_w(
@@ -2111,11 +2120,12 @@ void xnn_pack_qs8_to_qu8_deconv_goki_w(
   const int32_t* b,
   const float* scale,
   void* packed_weights,
+  size_t extra_bytes,
   struct subconvolution_params* subconv_params,
   const struct xnn_qs8_packing_params* params)
 {
   return pack_qs8_deconv_goki_w(g, nc, kh, kw, kc, sh, sw, nr, kr, sr, k, b, scale,
-                                packed_weights, /*zero_point_offset=*/128, subconv_params, params);
+                                packed_weights, extra_bytes, /*zero_point_offset=*/128, subconv_params, params);
 }
 
 void xnn_pack_qu8_deconv_goki_w(
@@ -2133,6 +2143,7 @@ void xnn_pack_qu8_deconv_goki_w(
   const int32_t* b,
   const void* scale,
   void* packed_weights,
+  size_t extra_bytes,
   struct subconvolution_params* subconv_params,
   const struct xnn_qu8_packing_params* params)
 {
@@ -2187,6 +2198,7 @@ void xnn_pack_qu8_deconv_goki_w(
               }
             }
           }
+          packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
         }
       }
     }

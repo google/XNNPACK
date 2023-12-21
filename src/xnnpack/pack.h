@@ -641,6 +641,7 @@ XNN_INTERNAL void xnn_pack_f32_deconv_goki_w(
   const float* bias,
   const void* scale,
   float* packed_weights,
+  size_t extra_bytes,
   struct subconvolution_params* subconv_params,
   const void* params);
 
@@ -659,6 +660,7 @@ XNN_INTERNAL void xnn_pack_f16_deconv_goki_w(
   const uint16_t* bias,
   const void* scale,
   uint16_t* packed_weights,
+  size_t extra_bytes,
   struct subconvolution_params* subconv_params,
   const void* params);
 
@@ -677,6 +679,7 @@ XNN_INTERNAL void xnn_pack_f32_to_f16_deconv_goki_w(
   const float* bias,
   const void* scale,
   uint16_t* packed_weights,
+  size_t extra_bytes,
   struct subconvolution_params* subconv_params,
   const void* params);
 
@@ -695,6 +698,7 @@ XNN_INTERNAL void xnn_pack_qs8_deconv_goki_w(
   const int32_t* bias,
   const float* scale,
   void* packed_weights,
+  size_t extra_bytes,
   struct subconvolution_params* subconv_params,
   const struct xnn_qs8_packing_params* params);
 
@@ -713,6 +717,7 @@ XNN_INTERNAL void xnn_pack_qs8_to_qu8_deconv_goki_w(
   const int32_t* bias,
   const float* scale,
   void* packed_weights,
+  size_t extra_bytes,
   struct subconvolution_params* subconv_params,
   const struct xnn_qs8_packing_params* params);
 
@@ -731,6 +736,7 @@ XNN_INTERNAL void xnn_pack_qs8_to_qu8_deconv_goki_w(
   const int32_t* bias,
   const float* scale,
   void* packed_weights,
+  size_t extra_bytes,
   struct subconvolution_params* subconv_params,
   const struct xnn_qs8_packing_params* params);
 
@@ -749,6 +755,7 @@ XNN_INTERNAL void xnn_pack_qu8_deconv_goki_w(
   const int32_t* bias,
   const void* scale,
   void* packed_weights,
+  size_t extra_bytes,
   struct subconvolution_params* subconv_params,
   const struct xnn_qu8_packing_params* params);
 
