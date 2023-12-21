@@ -150,28 +150,6 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "qs8_gemm_fp32_bench",
-    srcs = [
-        "qs8-gemm-fp32.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":gemm_benchmark",
-        "//:isa_checks",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "qs8_gemm_rndnu_bench",
-    srcs = [
-        "qs8-gemm-rndnu.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":gemm_benchmark",
-        "//:isa_checks",
-    ],
-)
-
-xnnpack_benchmark(
     name = "qs8_gemm_bench",
     srcs = [
         "qs8-gemm.cc",

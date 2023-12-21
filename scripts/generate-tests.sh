@@ -68,15 +68,6 @@ tools/generate-gemm-test.py --spec test/f32-qc8w-gemm.yaml        --output-test 
 tools/generate-gemm-test.py --spec test/f32-qc8w-gemm-relu.yaml   --output-test test/f32-qc8w-gemm-relu.cc   &
 tools/generate-gemm-test.py --spec test/f32-qc8w-gemm-minmax.yaml --output-test test/f32-qc8w-gemm-minmax.cc &
 
-tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-fp32.yaml \
-  --output-test test/qs8-gemm-minmax-fp32.cc --output-test test/qs8-gemm-minmax-fp32-2.cc \
-  --output-test test/qs8-gemm-minmax-fp32-3.cc --output-test test/qs8-gemm-minmax-fp32-4.cc \
-  --output-bench bench/qs8-gemm-fp32.cc &
-tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-rndnu.yaml \
-  --output-test test/qs8-gemm-minmax-rndnu.cc --output-test test/qs8-gemm-minmax-rndnu-2.cc --output-test test/qs8-gemm-minmax-rndnu-3.cc \
-  --output-test test/qs8-gemm-minmax-rndnu-4.cc --output-test test/qs8-gemm-minmax-rndnu-5.cc \
-  --output-bench bench/qs8-gemm-rndnu.cc &
-tools/generate-gemm-test.py --spec test/qs8-gemm-jit-rndnu.yaml --output-test test/qs8-gemm-jit-rndnu.cc &
 tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-fp32.yaml \
   --output-test test/qu8-gemm-minmax-fp32.cc --output-test test/qu8-gemm-minmax-fp32-2.cc \
   --output-bench bench/qu8-gemm-fp32.cc &
@@ -106,10 +97,6 @@ tools/generate-gemm-test.py --spec test/f32-igemm-jit.yaml --output-test test/f3
 
 tools/generate-gemm-test.py --spec test/qd8-f16-qc8w-igemm-minmax.yaml --output-test test/qd8-f16-qc8w-igemm-minmax.cc --output-test test/qd8-f16-qc8w-igemm-minmax-2.cc --output-test test/qd8-f16-qc8w-igemm-minmax-3.cc --output-test test/qd8-f16-qc8w-igemm-minmax-4.cc &
 tools/generate-gemm-test.py --spec test/qd8-f32-qc8w-igemm-minmax.yaml --output-test test/qd8-f32-qc8w-igemm-minmax.cc --output-test test/qd8-f32-qc8w-igemm-minmax-2.cc --output-test test/qd8-f32-qc8w-igemm-minmax-3.cc &
-
-tools/generate-gemm-test.py --spec test/qs8-igemm-minmax-fp32.yaml --output-test test/qs8-igemm-minmax-fp32.cc --output-test test/qs8-igemm-minmax-fp32-2.cc &
-tools/generate-gemm-test.py --spec test/qs8-igemm-minmax-rndnu.yaml --output-test test/qs8-igemm-minmax-rndnu.cc --output-test test/qs8-igemm-minmax-rndnu-2.cc --output-test test/qs8-igemm-minmax-rndnu-3.cc --output-test test/qs8-igemm-minmax-rndnu-4.cc &
-tools/generate-gemm-test.py --spec test/qs8-igemm-jit-rndnu.yaml --output-test test/qs8-igemm-jit-rndnu.cc &
 
 tools/generate-gemm-test.py --spec test/qu8-igemm-minmax-fp32.yaml --output-test test/qu8-igemm-minmax-fp32.cc --output-test test/qu8-igemm-minmax-fp32-2.cc &
 tools/generate-gemm-test.py --spec test/qu8-igemm-minmax-rndnu.yaml --output-test test/qu8-igemm-minmax-rndnu.cc --output-test test/qu8-igemm-minmax-rndnu-2.cc &
