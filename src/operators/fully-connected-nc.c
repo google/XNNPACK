@@ -1010,6 +1010,12 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     return xnn_status_invalid_parameter;
   }
 
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qs8_qc8w));
+    return xnn_status_uninitialized;
+  }
+
   const float requantization_scale = input_scale * kernel_scale / output_scale;
   if (requantization_scale >= 256.0f) {
     xnn_log_error(
@@ -1020,12 +1026,12 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     return xnn_status_unsupported_parameter;
   }
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_qs8_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc8w_gemm_config();
   assert(gemm_config != NULL);
 
-  union xnn_qs8_conv_minmax_params params;
-  if XNN_LIKELY(gemm_config->init.qs8 != NULL) {
-    gemm_config->init.qs8(&params, requantization_scale, output_zero_point, output_min, output_max);
+  union xnn_qs8_qc8w_conv_minmax_params params;
+  if XNN_LIKELY(gemm_config->init.qs8_qc8w != NULL) {
+    gemm_config->init.qs8_qc8w(&params, output_zero_point, output_min, output_max);
   }
   const struct xnn_qs8_packing_params packing_params = {
     .input_zero_point = input_zero_point,
@@ -1042,8 +1048,9 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     &packing_params,
     /*packed_weights_padding_byte=*/0,
-    /*extra_weights_bytes=*/0,
-    /*init_scale_params=*/NULL, /*scale_params=*/NULL,
+    /*extra_weights_bytes=*/sizeof(float),
+    /*init_scale_params=*/xnn_init_qs8_to_qs8_qc8w_scale_fp32_params,
+    /*scale_params=*/&requantization_scale,
     /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL,
     &params, sizeof(params),
     gemm_config, &gemm_config->minmax,
@@ -1550,10 +1557,10 @@ enum xnn_status xnn_reshape_fully_connected_nc_qs8(
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*filter_is_nibble=*/false,
     /*dynamic_quantization=*/false,
-    /*extra_weights_elements_size=*/sizeof(int32_t),
+    /*extra_weights_elements_size=*/sizeof(int32_t) + sizeof(float),  // For bias and scale.
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    &fully_connected_op->params.qs8_conv_minmax,
-    sizeof(fully_connected_op->params.qs8_conv_minmax),
+    &fully_connected_op->params.qs8_qc8w_conv_minmax,
+    sizeof(fully_connected_op->params.qs8_qc8w_conv_minmax),
     threadpool);
 }
 
