@@ -119,7 +119,6 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_6x16c4__avx512vnni_prfm(
       const __m512i va5x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a5)), vsign_mask);
       const __m512i va5x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a5 + 4)), vsign_mask);
       a5 += 8;
-
       const __m512i vb0123456789ABCDEFx0123 = _mm512_load_si512(w);
       const __m512i vb0123456789ABCDEFx4567 = _mm512_load_si512((const int8_t*) w + 64);
       xnn_prefetch_to_l1((const int8_t*) w + 896);
