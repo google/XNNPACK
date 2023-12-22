@@ -119,8 +119,9 @@ static void ruy_st(benchmark::State& state, const char* net)
   RuyBenchmark(state, 1);
 }
 BENCHMARK_GEMM(ruy_st)
+
+#endif  // BENCHMARK_RUY
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif
-
-#endif  // BENCHMARK_RUY
