@@ -33,6 +33,9 @@ XNN_INTERNAL void xnn_generate_igemms_up_to_max_mr(
   size_t kernel_size,
   xnn_operator_t convolution_op);
 
+void xnn_set_igemm_gemm_cases_codegen(
+  size_t max_mr,
+  xnn_operator_t op);
 // Overwrite function pointer to GEMM microkernels with generated code if available.
 XNN_INTERNAL void xnn_overwrite_gemm_cases_with_generated_code(
   xnn_operator_t convolution_op,

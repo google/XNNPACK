@@ -63,6 +63,16 @@ error:
   return status;
 }
 
+void xnn_set_igemm_gemm_cases_codegen(
+  size_t max_mr,
+  xnn_operator_t op)
+{
+  for (size_t mr = 1; mr <= max_mr; mr++) {
+    for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; i++) {
+      op->ukernel.igemm.gemm_cases[mr - 1].generated_code_chunk[i] = op->ukernel.gemm.gemm_cases[mr - 1].generated_code_chunk[i];
+    }
+  }
+}
 
 void xnn_generate_gemms_up_to_max_mr(
   size_t max_mr,
