@@ -78,7 +78,6 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x16c4__avx512vnni(
       const __m512i va2x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a2)), vsign_mask);
       const __m512i va2x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a2 + 4)), vsign_mask);
       a2 += 8;
-
       const __m512i vb0123456789ABCDEFx0123 = _mm512_load_si512(w);
       const __m512i vb0123456789ABCDEFx4567 = _mm512_load_si512((const int8_t*) w + 64);
 

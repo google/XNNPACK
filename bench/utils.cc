@@ -452,6 +452,17 @@ void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark) {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  bool CheckAVX512VNNIGFNI(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_x86_avx512vnnigfni) {
+      state.SkipWithError("no GFNI extension");
+      return false;
+    }
+    return true;
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   bool CheckAVXVNNI(benchmark::State& state) {
     const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     if (hardware_config == nullptr || !hardware_config->use_x86_avxvnni) {

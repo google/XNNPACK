@@ -27,7 +27,7 @@ $OUT_T = "float" if DATATYPE in ["QD8", "QC4"] else XINT8_T
 $_MM_PACKXS_EPI16 = "_mm_packus_epi16" if DATATYPE == "QU8" else "_mm_packs_epi16"
 $_MM_MAX_EPX8 = "_mm_max_epu8" if DATATYPE == "QU8" else "_mm_max_epi8"
 $_MM512_CVTXEPI32_EPI8 = "_mm512_cvtusepi32_epi8" if DATATYPE == "QU8" else "_mm512_cvtsepi32_epi8"
-void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__avx512vnni${"_prfm" if PREFETCH else ""}(
+void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__avx512vnni${"gfni" if GFNI else ""}${"_prfm" if PREFETCH else ""}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -82,6 +82,8 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
     const __m512i vsign_mask = _mm512_set1_epi8(params->avx512vnni.sign_mask);  // 0x80
     $if DATATYPE == "QC4":
       const __m512i vmask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0xF0
+      $if GFNI:
+        const __m512i vshl4 = _mm512_set1_epi64(0x0102040810204080 >> (4 * 8));
   $else:
     const __m512i vsign_mask =_mm512_set1_epi8(params->${PARAMS_STRUCT}.sign_mask);  // 0x80
     $if DATATYPE != "QC8":
@@ -111,12 +113,15 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
         const __m512i va${M}x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a${M})), vsign_mask);
         const __m512i va${M}x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a${M} + 4)), vsign_mask);
         a${M} += 8;
-
       $if DATATYPE == "QC4":
         const __m512i vbb0123456789ABCDEFx01234567 = _mm512_load_si512(w);
-        const __m512i vbs0123456789ABCDEFx0123 = _mm512_slli_epi32(vbb0123456789ABCDEFx01234567, 4);
-        const __m512i vb0123456789ABCDEFx4567 = _mm512_and_si512(vbb0123456789ABCDEFx01234567, vmask);
-        const __m512i vb0123456789ABCDEFx0123 = _mm512_and_si512(vbs0123456789ABCDEFx0123, vmask);
+        $if GFNI:
+          const __m512i vb0123456789ABCDEFx0123 = _mm512_gf2p8affine_epi64_epi8(vbb0123456789ABCDEFx01234567, vshl4, 0);
+          const __m512i vb0123456789ABCDEFx4567 = _mm512_and_si512(vbb0123456789ABCDEFx01234567, vmask);
+        $else:
+          const __m512i vbs0123456789ABCDEFx0123 = _mm512_slli_epi32(vbb0123456789ABCDEFx01234567, 4);
+          const __m512i vb0123456789ABCDEFx4567 = _mm512_and_si512(vbb0123456789ABCDEFx01234567, vmask);
+          const __m512i vb0123456789ABCDEFx0123 = _mm512_and_si512(vbs0123456789ABCDEFx0123, vmask);
       $else:
         const __m512i vb0123456789ABCDEFx0123 = _mm512_load_si512(w);
         const __m512i vb0123456789ABCDEFx4567 = _mm512_load_si512((const ${XINT8_T}*) w + 64);

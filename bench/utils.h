@@ -190,6 +190,10 @@ bool CheckAVX512VBMI(benchmark::State& state);
 // If VNNI or SKX-level AVX512 extensions are unsupported, report error in benchmark state, and return false.
 bool CheckAVX512VNNI(benchmark::State& state);
 
+// Check if x86 VNNI + GFNI + SKX-level AVX512 extensions (AVX512F, AVX512CD, AVX512BW, AVX512DQ, and AVX512VL) are supported.
+// If VNNI or GFNI or SKX-level AVX512 extensions are unsupported, report error in benchmark state, and return false.
+bool CheckAVX512VNNIGFNI(benchmark::State& state);
+
 // Check if x86 AVX-VNNI extension is supported.
 // If AVX-VNNI extension is unsupported, report error in benchmark state, and return false.
 bool CheckAVXVNNI(benchmark::State& state);
