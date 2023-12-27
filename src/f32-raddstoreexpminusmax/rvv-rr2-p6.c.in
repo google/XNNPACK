@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert LMUL >= 1
-$LMUL_HALF = {1: "f2", 2: "1", 4: "2", 8: "4"}[LMUL]
+$assert LMUL in [2, 4]
+$LMUL_HALF = {2: "1", 4: "2"}[LMUL]
 #include <assert.h>
 
 #include <riscv_vector.h>

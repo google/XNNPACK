@@ -58,7 +58,6 @@ tools/xngen src/f32-raddstoreexpminusmax/neon-lut64-p2.c.in -D BATCH_TILE=20 -D 
 tools/xngen src/f32-raddstoreexpminusmax/neon-lut64-p2.c.in -D BATCH_TILE=20 -D ACCUMULATORS=5 -D FMA=1 -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neonfma-rr1-lut64-p2-u20-acc5.c &
 
 ################################ RISC-V Vector ################################
-tools/xngen src/f32-raddstoreexpminusmax/rvv-rr2-p6.c.in -D LMUL=1 -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-rvv-rr2-p6-u1v.c &
 tools/xngen src/f32-raddstoreexpminusmax/rvv-rr2-p6.c.in -D LMUL=2 -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-rvv-rr2-p6-u2v.c &
 tools/xngen src/f32-raddstoreexpminusmax/rvv-rr2-p6.c.in -D LMUL=4 -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-rvv-rr2-p6-u4v.c &
 

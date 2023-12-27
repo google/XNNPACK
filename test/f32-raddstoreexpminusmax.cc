@@ -1794,27 +1794,6 @@
 
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
-  TEST(F32_RADDSTOREEXPMINUSMAX__RVV_RR2_P6_U1V, elements_eq_1v) {
-    TEST_REQUIRES_RISCV_VECTOR;
-    RAddStoreExpMinusMaxMicrokernelTester()
-      .elements(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
-      .Test(xnn_f32_raddstoreexpminusmax_ukernel__rvv_rr2_p6_u1v, xnn_init_f32_expminus_rvv_rr2_p6_params);
-  }
-
-  TEST(F32_RADDSTOREEXPMINUSMAX__RVV_RR2_P6_U1V, elements_gt_1v) {
-    TEST_REQUIRES_RISCV_VECTOR;
-    for (size_t elements = 1 * xnn_init_hardware_config()->vlenb / sizeof(float) + 1;
-                elements < 10 * xnn_init_hardware_config()->vlenb / sizeof(float);
-                elements += 2) {
-      RAddStoreExpMinusMaxMicrokernelTester()
-        .elements(elements)
-        .Test(xnn_f32_raddstoreexpminusmax_ukernel__rvv_rr2_p6_u1v, xnn_init_f32_expminus_rvv_rr2_p6_params);
-    }
-  }
-#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
-
-
-#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   TEST(F32_RADDSTOREEXPMINUSMAX__RVV_RR2_P6_U2V, elements_eq_2v) {
     TEST_REQUIRES_RISCV_VECTOR;
     RAddStoreExpMinusMaxMicrokernelTester()
