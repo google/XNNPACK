@@ -71,13 +71,13 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__avx512vnni_prfm(
   const __m512i vsign_mask = _mm512_set1_epi8(params->avx512vnni.sign_mask);  // 0x80
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_load_epi32(w);
-    __m512i vacc0x0x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point0);
+    __m512i vacc0x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point0);
     __m512i vacc1x0x0123456789ABCDEF = _mm512_setzero_epi32();
-    __m512i vacc0x1x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point1);
+    __m512i vacc1x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point1);
     __m512i vacc1x1x0123456789ABCDEF = _mm512_setzero_epi32();
-    __m512i vacc0x2x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point2);
+    __m512i vacc2x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point2);
     __m512i vacc1x2x0123456789ABCDEF = _mm512_setzero_epi32();
-    __m512i vacc0x3x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point3);
+    __m512i vacc3x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point3);
     __m512i vacc1x3x0123456789ABCDEF = _mm512_setzero_epi32();
     w = (const int32_t*) w + 16;
 
@@ -95,14 +95,15 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__avx512vnni_prfm(
       const __m512i va3x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a3)), vsign_mask);
       const __m512i va3x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a3 + 4)), vsign_mask);
       a3 += 8;
+
       const __m512i vb0123456789ABCDEFx0123 = _mm512_load_si512(w);
       const __m512i vb0123456789ABCDEFx4567 = _mm512_load_si512((const int8_t*) w + 64);
       xnn_prefetch_to_l1((const int8_t*) w + 896);
 
-      vacc0x0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEFx0123);
-      vacc0x1x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x1x0123456789ABCDEF, va1x0123, vb0123456789ABCDEFx0123);
-      vacc0x2x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x2x0123456789ABCDEF, va2x0123, vb0123456789ABCDEFx0123);
-      vacc0x3x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x3x0123456789ABCDEF, va3x0123, vb0123456789ABCDEFx0123);
+      vacc0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc0x0123456789ABCDEF, va0x0123, vb0123456789ABCDEFx0123);
+      vacc1x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc1x0123456789ABCDEF, va1x0123, vb0123456789ABCDEFx0123);
+      vacc2x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc2x0123456789ABCDEF, va2x0123, vb0123456789ABCDEFx0123);
+      vacc3x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc3x0123456789ABCDEF, va3x0123, vb0123456789ABCDEFx0123);
       xnn_prefetch_to_l1((const int8_t*) w + 960);
       vacc1x0x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc1x0x0123456789ABCDEF, va0x4567, vb0123456789ABCDEFx4567);
       vacc1x1x0123456789ABCDEF = _mm512_dpbusd_epi32(vacc1x1x0123456789ABCDEF, va1x4567, vb0123456789ABCDEFx4567);
@@ -112,10 +113,10 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__avx512vnni_prfm(
       w = (const int8_t*) w + 128;
       k -= 8 * sizeof(int8_t);
     }
-    __m512i vacc0x0123456789ABCDEF = _mm512_add_epi32(vacc0x0x0123456789ABCDEF, vacc1x0x0123456789ABCDEF);
-    __m512i vacc1x0123456789ABCDEF = _mm512_add_epi32(vacc0x1x0123456789ABCDEF, vacc1x1x0123456789ABCDEF);
-    __m512i vacc2x0123456789ABCDEF = _mm512_add_epi32(vacc0x2x0123456789ABCDEF, vacc1x2x0123456789ABCDEF);
-    __m512i vacc3x0123456789ABCDEF = _mm512_add_epi32(vacc0x3x0123456789ABCDEF, vacc1x3x0123456789ABCDEF);
+    vacc0x0123456789ABCDEF = _mm512_add_epi32(vacc0x0123456789ABCDEF, vacc1x0x0123456789ABCDEF);
+    vacc1x0123456789ABCDEF = _mm512_add_epi32(vacc1x0123456789ABCDEF, vacc1x1x0123456789ABCDEF);
+    vacc2x0123456789ABCDEF = _mm512_add_epi32(vacc2x0123456789ABCDEF, vacc1x2x0123456789ABCDEF);
+    vacc3x0123456789ABCDEF = _mm512_add_epi32(vacc3x0123456789ABCDEF, vacc1x3x0123456789ABCDEF);
 
     if (k != 0) {
       const __m512i va0x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a0)), vsign_mask);
