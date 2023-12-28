@@ -56,7 +56,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x16c8__avx512vnnigfni_prfm(
   const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
   const __m512i vsign_mask = _mm512_set1_epi8(params->avx512vnni.sign_mask);  // 0x80
   const __m512i vvalue_mask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0xF0
-  const __m512i vshl4 = _mm512_set1_epi64(0x0102040810204080 >> (4 * 8));
+  const int64_t vshl4_value = 0x01020408;
+  const __m512i vshl4 = _mm512_set1_epi64(vshl4_value);
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_load_epi32(w);
     __m512i vsum0x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point0);

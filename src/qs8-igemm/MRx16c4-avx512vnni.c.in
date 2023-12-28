@@ -82,7 +82,8 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4_
     $if DATATYPE == "QC4":
       const __m256i vmask = _mm256_set1_epi8(params->avx512vnni.mask);  // 0xF0
       $if GFNI:
-        const __m512i vshl4 = _mm512_set1_epi64(0x0102040810204080 >> (4 * 8));
+        const int64_t vshl4_value = 0x01020408;
+        const __m512i vshl4 = _mm512_set1_epi64(vshl4_value);
   $else:
     const __m512i vsign_mask = _mm512_set1_epi8(params->${PARAMS_STRUCT}.sign_mask);  // 0x80
     $if DATATYPE != "QC8":
@@ -151,8 +152,6 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4_
           w = (const ${XINT8_T}*) w + 128;
         k -= 8 * sizeof(${XINT8_T});
       }
-      $for M in range(MR):
-        vacc${M}x0123456789ABCDEF = _mm512_add_epi32(vacc${M}x0123456789ABCDEF, vacc1x${M}x0123456789ABCDEF);
 
       if (k != 0) {
         $for M in range(MR):
@@ -180,6 +179,9 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4_
 
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
+
+    $for M in range(MR):
+      vacc${M}x0123456789ABCDEF = _mm512_add_epi32(vacc${M}x0123456789ABCDEF, vacc1x${M}x0123456789ABCDEF);
 
     $if DATATYPE == "QC4":
       $for M in range(MR):
