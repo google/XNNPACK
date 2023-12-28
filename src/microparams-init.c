@@ -401,6 +401,7 @@ size_t xnn_init_qs8_conv_minmax_fp32_avx512vnni_params(
 
   params->fp32_avx512vnni.sign_mask = 0x80;
   params->fp32_avx512vnni.mask = 0xF0;
+  params->fp32_avx512vnni.gfni_shl4 = INT64_C(0x01020408);
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   params->fp32_avx512vnni.output_max_less_zero_point = output_max_less_zero_point;
   params->fp32_avx512vnni.output_zero_point = (int32_t) output_zero_point;
@@ -2165,6 +2166,7 @@ size_t xnn_init_f32_qc4w_minmax_avx512vnni_params(
   params->avx512vnni.max = output_max;
   params->avx512vnni.sign_mask = 0x80;
   params->avx512vnni.mask = 0xF0;
+  params->avx512vnni.gfni_shl4 = INT64_C(0x01020408);
   return sizeof(params->avx512vnni);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

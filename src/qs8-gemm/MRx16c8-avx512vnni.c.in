@@ -83,8 +83,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
     $if DATATYPE == "QC4":
       const __m512i vvalue_mask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0xF0
       $if GFNI:
-        const int64_t vshl4_value = 0x01020408;
-        const __m512i vshl4 = _mm512_set1_epi64(vshl4_value);
+        const __m512i vshl4 = _mm512_set1_epi64(params->avx512vnni.gfni_shl4);  // 0x01020408
   $else:
     const __m512i vsign_mask =_mm512_set1_epi8(params->${PARAMS_STRUCT}.sign_mask);  // 0x80
     $if DATATYPE != "QC8":
