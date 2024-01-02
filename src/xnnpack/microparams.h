@@ -2019,7 +2019,7 @@ union xnn_f32_expminus_params {
     float denorm_cutoff;
   } neonfma_rr1_lut64_p2;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#if XNN_ARCH_RISCV
   struct {
     float x_min;
     float log2e;
@@ -2031,7 +2031,7 @@ union xnn_f32_expminus_params {
     float c3;
     float c2;
   } rvv_rr2_p6;
-#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#endif  // XNN_ARCH_RISCV
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float log2e[4];
