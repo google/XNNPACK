@@ -28,7 +28,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x16c8__avx512vnnigfni(
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
-    const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= 4);
