@@ -26,6 +26,18 @@
 
 
 #ifdef BENCHMARK_INTEL_DNNL
+
+// Macros to help transition from oneDNN v2 to v3.
+#if DNNL_VERSION_MAJOR == 2
+#define DNNL_MEMORY_DESC_INIT dnnl_memory_desc_init_by_tag
+#define DNNL_MEMORY_CREATE(mem, mem_desc, engine, handle) \
+  dnnl_memory_create(&mem, &mem_desc, engine, handle)
+#else   // DNNL_VERSION_MAJOR == 3
+#define DNNL_MEMORY_DESC_INIT dnnl_memory_desc_create_with_tag
+#define DNNL_MEMORY_CREATE(mem, mem_desc, engine, handle) \
+  dnnl_memory_create(&mem, mem_desc, engine, handle)
+#endif  // DNNL_VERSION_MAJOR == 2
+
 static void DNNLSoftArgMax(
   benchmark::State& state)
 {
@@ -53,7 +65,7 @@ static void DNNLSoftArgMax(
   dnnl_dim_t input_output_shape[1] = { static_cast<int>(elements) };
 
   dnnl_memory_desc_t memory_descriptor = { 0 };
-  if (dnnl_memory_desc_init_by_tag(
+  if (DNNL_MEMORY_DESC_INIT(
     &memory_descriptor, 1, input_output_shape, dnnl_f32, dnnl_x) != dnnl_success)
   {
     state.SkipWithError("failed to create input memory descriptor");
@@ -61,21 +73,22 @@ static void DNNLSoftArgMax(
   }
 
   dnnl_memory_t input_memory = nullptr;
-  if (dnnl_memory_create(
-    &input_memory, &memory_descriptor, engine, x.data()) != dnnl_success)
+  if (DNNL_MEMORY_CREATE(
+    input_memory, memory_descriptor, engine, x.data()) != dnnl_success)
   {
     state.SkipWithError("failed to create input memory");
     return;
   }
 
   dnnl_memory_t output_memory = nullptr;
-  if (dnnl_memory_create(
-    &output_memory, &memory_descriptor, engine, y.data()) != dnnl_success)
+  if (DNNL_MEMORY_CREATE(
+    output_memory, memory_descriptor, engine, y.data()) != dnnl_success)
   {
     state.SkipWithError("failed to create output memory");
     return;
   }
 
+#if DNNL_VERSION_MAJOR == 2
   dnnl_softmax_desc_t softmax_forward_descriptor = {};
   if (dnnl_softmax_forward_desc_init(
     &softmax_forward_descriptor, dnnl_forward_inference,
@@ -84,11 +97,20 @@ static void DNNLSoftArgMax(
     state.SkipWithError("failed to create SoftMax forward descriptor");
     return;
   }
+#endif  // DNNL_VERSION_MAJOR == 2
 
   dnnl_primitive_desc_t softmax_primitive_descriptor = nullptr;
+#if DNNL_VERSION_MAJOR == 2
   if (dnnl_primitive_desc_create(
     &softmax_primitive_descriptor, &softmax_forward_descriptor,
     nullptr /* primitive attributes */, engine, nullptr /* hint */) != dnnl_success)
+#else   // DNNL_VERSION_MAJOR == 3
+  if (dnnl_softmax_forward_primitive_desc_create(
+    &softmax_primitive_descriptor, engine, dnnl_forward_inference,
+    dnnl_softmax_accurate, /*src_desc=*/ memory_descriptor,
+    /*dst_dsc=*/ memory_descriptor, /*softmax_axis=*/ 0,
+    /*attr=*/ nullptr) != dnnl_success)
+#endif  // DNNL_VERSION_MAJOR == 2
   {
     state.SkipWithError("failed to create SoftMax primitive descriptor");
     return;
