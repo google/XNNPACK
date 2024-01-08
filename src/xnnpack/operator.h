@@ -440,7 +440,7 @@ struct xnn_operator {
   } context;
 
   struct xnn_code_cache* code_cache;
-  struct xnn_weights_cache* weights_cache;
+  xnn_weights_cache_t weights_cache;
   enum xnn_run_state state;
 };
 

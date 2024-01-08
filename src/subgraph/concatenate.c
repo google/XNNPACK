@@ -37,7 +37,7 @@ static enum xnn_status create_concatenate2_operator(
   size_t num_values,
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
-  struct xnn_weights_cache* weights_cache)
+  xnn_weights_cache_t weights_cache)
 {
   enum xnn_status status;
   const size_t axis = node->params.concatenate.axis;
@@ -60,7 +60,7 @@ static enum xnn_status create_concatenate3_operator(
   size_t num_values,
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
-  struct xnn_weights_cache* weights_cache)
+  xnn_weights_cache_t weights_cache)
 {
   const size_t axis = node->params.concatenate.axis;
   opdata->axis = axis;
@@ -88,7 +88,7 @@ static enum xnn_status create_concatenate4_operator(
   size_t num_values,
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
-  struct xnn_weights_cache* weights_cache)
+  xnn_weights_cache_t weights_cache)
 {
   const size_t axis = node->params.concatenate.axis;
   opdata->axis = axis;

@@ -303,11 +303,11 @@ enum xnn_status xnn_release_code_cache(struct xnn_code_cache* cache)
 }
 
 enum xnn_status xnn_internal_init_weights_cache(
-  struct xnn_weights_cache* cache,
+  struct xnn_internal_weights_cache* cache,
   size_t num_buckets,
   size_t buffer_size)
 {
-  memset(cache, 0, sizeof(struct xnn_weights_cache));
+  memset(cache, 0, sizeof(struct xnn_internal_weights_cache));
 
   enum xnn_status status = xnn_status_success;
   status = xnn_init_cache_with_size(&cache->cache, num_buckets, xnn_cache_type_weights);
@@ -328,23 +328,17 @@ enum xnn_status xnn_internal_init_weights_cache(
   return xnn_status_success;
 
 error:
-  xnn_release_weights_cache(cache);
+  xnn_internal_release_weights_cache(cache);
   return status;
 }
 
-enum xnn_status xnn_init_weights_cache_with_size(struct xnn_weights_cache* cache, size_t size)
+enum xnn_status xnn_internal_init_weights_cache_with_size(struct xnn_internal_weights_cache* cache, size_t size)
 {
   return xnn_internal_init_weights_cache(cache, XNN_CACHE_INITIAL_BUCKETS, size);
 }
 
-enum xnn_status xnn_init_weights_cache(struct xnn_weights_cache* cache)
-{
-  return xnn_init_weights_cache_with_size(cache, XNN_DEFAULT_WEIGHTS_BUFFER_SIZE);
-}
-
-enum xnn_status xnn_finalize_weights_cache(
-  struct xnn_weights_cache* cache,
-  enum xnn_weights_cache_finalization_kind finalization_kind)
+enum xnn_status xnn_internal_finalize_weights_cache(
+  struct xnn_internal_weights_cache* cache, enum xnn_weights_cache_finalization_kind finalization_kind)
 {
   switch (cache->finalization_state) {
     case xnn_cache_state_hard_finalized:
@@ -385,7 +379,7 @@ enum xnn_status xnn_finalize_weights_cache(
   }
 }
 
-enum xnn_status xnn_release_weights_cache(struct xnn_weights_cache* cache)
+enum xnn_status xnn_internal_release_weights_cache(struct xnn_internal_weights_cache* cache)
 {
   if XNN_LIKELY(cache != NULL) {
     assert(cache->cache.type == xnn_cache_type_weights);
@@ -401,13 +395,15 @@ enum xnn_status xnn_release_weights_cache(struct xnn_weights_cache* cache)
   return xnn_status_success;
 }
 
-static inline bool cache_has_space(struct xnn_weights_cache* cache, size_t n)
+static inline bool cache_has_space(
+  struct xnn_internal_weights_cache* cache, size_t n)
 {
   const struct xnn_weights_buffer buf = cache->cache.weights;
   return buf.size + n <= buf.capacity;
 }
 
-void* xnn_reserve_space_in_weights_cache(struct xnn_weights_cache* cache, size_t n) {
+void* xnn_internal_reserve_space_in_weights_cache(struct xnn_internal_weights_cache* cache, size_t n)
+{
   switch (cache->finalization_state) {
     case xnn_cache_state_hard_finalized:
       xnn_log_error("cannot reserve additional space in a finalized compact weights cache");
@@ -439,7 +435,8 @@ void* xnn_reserve_space_in_weights_cache(struct xnn_weights_cache* cache, size_t
   return (void*) ((uintptr_t) buffer->start + buffer->size);
 }
 
-size_t xnn_get_or_insert_weights_cache(struct xnn_weights_cache* cache, void* ptr, size_t size)
+size_t xnn_internal_get_or_insert_weights_cache(
+  struct xnn_internal_weights_cache* cache, const struct xnn_weights_cache_look_up_key* cache_key, void* ptr, size_t size)
 {
   size_t offset = XNN_CACHE_NOT_FOUND;
 
@@ -486,6 +483,46 @@ size_t xnn_get_or_insert_weights_cache(struct xnn_weights_cache* cache, void* pt
   return offset;
 }
 
-bool xnn_weights_cache_is_finalized(struct xnn_weights_cache* cache) {
+bool xnn_internal_weights_cache_is_finalized(struct xnn_internal_weights_cache* cache)
+{
   return cache->finalization_state != xnn_cache_state_not_finalized;
+}
+
+size_t xnn_internal_weights_cache_look_up(
+  struct xnn_internal_weights_cache* cache, const struct xnn_weights_cache_look_up_key* cache_key)
+{
+  // The default implementation does not support this query.
+  return XNN_CACHE_NOT_FOUND;
+}
+
+void* xnn_internal_weights_cache_offset_to_addr(struct xnn_internal_weights_cache* weights_cache, size_t offset)
+{
+  return (void*) ((uintptr_t)weights_cache->cache.weights.start + offset);
+}
+
+enum xnn_status xnn_internal_delete_weights_cache(struct xnn_internal_weights_cache* weights_cache)
+{
+  enum xnn_status status = xnn_internal_release_weights_cache(weights_cache);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  xnn_release_memory(weights_cache);
+  return xnn_status_success;
+}
+
+bool xnn_weights_cache_is_finalized(xnn_weights_cache_t cache)
+{
+  return cache->is_finalized(cache->context);
+}
+
+size_t xnn_look_up_or_insert_weights_cache(
+  xnn_weights_cache_t cache, const struct xnn_weights_cache_look_up_key* cache_key, void* ptr, size_t size)
+{
+  return cache->look_up_or_insert(cache->context, cache_key, ptr, size);
+}
+
+enum xnn_status xnn_finalize_weights_cache(
+  xnn_weights_cache_t weights_cache, enum xnn_weights_cache_finalization_kind finalization_kind)
+{
+  return xnn_internal_finalize_weights_cache(weights_cache->context, finalization_kind);
 }

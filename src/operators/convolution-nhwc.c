@@ -114,8 +114,8 @@ static enum xnn_status create_vmulcaddc_path(
   pack_vmulcaddc_w(groups, vmulcaddc_config->channel_tile, kernel, bias, weights_ptr, packing_params);
 
   if (use_weights_cache(convolution_op)) {
-    convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
-        convolution_op->weights_cache, weights_ptr, aligned_total_weights_size);
+    convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
+        convolution_op->weights_cache, NULL, weights_ptr, aligned_total_weights_size);
   }
 
   memcpy(&convolution_op->params, vmulcaddc_params, vmulcaddc_params_size);
@@ -244,8 +244,8 @@ static enum xnn_status create_dwconv_path(
   }
 
   if (use_weights_cache(convolution_op)) {
-    convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
-        convolution_op->weights_cache, weights_ptr, aligned_total_weights_size);
+    convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
+        convolution_op->weights_cache, NULL, weights_ptr, aligned_total_weights_size);
   }
 
   const union xnn_dwconv_ukernel* ukernels = &dwconv_ukernel->minmax;
@@ -436,8 +436,8 @@ static enum xnn_status create_gemm_or_igemm(
   }
 
   if (use_weights_cache(convolution_op)) {
-    convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
-        convolution_op->weights_cache, weights_ptr, aligned_total_weights_size);
+    convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
+        convolution_op->weights_cache, NULL, weights_ptr, aligned_total_weights_size);
   }
 
   *zero_size = XNN_EXTRA_BYTES + (k_stride << log2_input_element_size);

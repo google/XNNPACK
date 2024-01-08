@@ -224,7 +224,7 @@ void* xnn_get_pointer_to_write_weights(
   assert(aligned_weights_size % XNN_ALLOCATION_ALIGNMENT == 0);
   void* weights_ptr = NULL;
   if (use_weights_cache(op)) {
-    weights_ptr = xnn_reserve_space_in_weights_cache(op->weights_cache, aligned_weights_size);
+    weights_ptr = op->weights_cache->reserve_space(op->weights_cache->context, aligned_weights_size);
     if (weights_ptr == NULL) {
       return NULL;
     }

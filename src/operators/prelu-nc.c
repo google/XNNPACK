@@ -92,8 +92,8 @@ static enum xnn_status create_prelu_nc(
   pack_prelu_w(channels, negative_slope, weights_ptr);
 
   if (use_weights_cache(prelu_op)) {
-    prelu_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
-        prelu_op->weights_cache, weights_ptr, aligned_total_weights_size);
+    prelu_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
+        prelu_op->weights_cache, NULL, weights_ptr, aligned_total_weights_size);
   }
 
   prelu_op->channels = channels;

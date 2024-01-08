@@ -13,7 +13,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
+#include <memory>
 #include <random>
 #include <vector>
 
@@ -144,12 +144,16 @@ class PReLUOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t prelu_op = nullptr;
 
-      xnn_weights_cache weights_cache;
-      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
-        nullptr, xnn_release_weights_cache);
+      struct xnn_internal_weights_cache* internal_weights_cache = nullptr;
+      std::unique_ptr<xnn_weights_cache_provider, decltype(&xnn_delete_weights_cache)> auto_weights_cache(
+        nullptr, xnn_delete_weights_cache);
       if (use_weights_cache()) {
-        xnn_init_weights_cache(&weights_cache);
-        auto_weights_cache.reset(&weights_cache);
+        xnn_weights_cache_t weights_cache = nullptr;
+        xnn_create_weights_cache(&weights_cache);
+        auto_weights_cache.reset(weights_cache);
+        if (weights_cache) {
+          internal_weights_cache = (struct xnn_internal_weights_cache*) weights_cache->context;
+        }
       }
 
       const void* negative_slope_data = w.data();
@@ -168,7 +172,7 @@ class PReLUOperatorTester {
       ASSERT_NE(nullptr, prelu_op);
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
-                  xnn_finalize_weights_cache(&weights_cache, xnn_weights_cache_finalization_kind_soft));
+                  xnn_finalize_weights_cache(auto_weights_cache.get(), xnn_weights_cache_finalization_kind_soft));
       }
 
       // Smart pointer to automatically delete prelu_op.
@@ -192,7 +196,7 @@ class PReLUOperatorTester {
 
       if (use_weights_cache()) {
         xnn_operator_t prelu_op2 = nullptr;
-        const size_t old_weights_cache_size = weights_cache.cache.weights.size;
+        const size_t old_weights_cache_size = internal_weights_cache->cache.weights.size;
 
         ASSERT_EQ(xnn_status_success,
                   xnn_create_prelu_nc_f16(
@@ -219,7 +223,7 @@ class PReLUOperatorTester {
                   xnn_run_operator(prelu_op2, /*threadpool=*/nullptr));
 
         VerifyF16(y2, y_ref);
-        VerifyWeightsCache(weights_cache, old_weights_cache_size);
+        VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
       }
     }
   }
@@ -264,12 +268,16 @@ class PReLUOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t prelu_op = nullptr;
 
-      xnn_weights_cache weights_cache;
-      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
-        nullptr, xnn_release_weights_cache);
+     struct xnn_internal_weights_cache* internal_weights_cache = nullptr;
+      std::unique_ptr<xnn_weights_cache_provider, decltype(&xnn_delete_weights_cache)> auto_weights_cache(
+        nullptr, xnn_delete_weights_cache);
       if (use_weights_cache()) {
-        xnn_init_weights_cache(&weights_cache);
-        auto_weights_cache.reset(&weights_cache);
+        xnn_weights_cache_t weights_cache = nullptr;
+        xnn_create_weights_cache(&weights_cache);
+        auto_weights_cache.reset(weights_cache);
+        if (weights_cache) {
+          internal_weights_cache = (struct xnn_internal_weights_cache*) weights_cache->context;
+        }
       }
 
       ASSERT_EQ(xnn_status_success,
@@ -280,7 +288,7 @@ class PReLUOperatorTester {
       ASSERT_NE(nullptr, prelu_op);
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
-                  xnn_finalize_weights_cache(&weights_cache, xnn_weights_cache_finalization_kind_soft));
+                  xnn_finalize_weights_cache(auto_weights_cache.get(), xnn_weights_cache_finalization_kind_soft));
       }
 
       // Smart pointer to automatically delete prelu_op.
@@ -304,7 +312,7 @@ class PReLUOperatorTester {
 
       if (use_weights_cache()) {
         xnn_operator_t prelu_op2 = nullptr;
-        const size_t old_weights_cache_size = weights_cache.cache.weights.size;
+        const size_t old_weights_cache_size = internal_weights_cache->cache.weights.size;
 
         ASSERT_EQ(xnn_status_success,
                   xnn_create_prelu_nc_f32(
@@ -332,7 +340,7 @@ class PReLUOperatorTester {
                   xnn_run_operator(prelu_op2, /*threadpool=*/nullptr));
 
         VerifyF32(y, y_ref);
-        VerifyWeightsCache(weights_cache, old_weights_cache_size);
+        VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
       }
     }
   }
@@ -349,7 +357,7 @@ class PReLUOperatorTester {
     }
   }
 
-  void VerifyWeightsCache(const xnn_weights_cache& weights_cache, size_t old_size) const {
+  void VerifyWeightsCache(const xnn_internal_weights_cache& weights_cache, size_t old_size) const {
     ASSERT_EQ(weights_cache.cache.hits, 1);
     // Ensure that we did not write more weights to the cache because it was a cache hit.
     ASSERT_EQ(old_size, weights_cache.cache.weights.size);

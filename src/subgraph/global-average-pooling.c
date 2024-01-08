@@ -23,7 +23,7 @@ static enum xnn_status create_global_average_pooling_operator(
   size_t num_values,
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
-  struct xnn_weights_cache* weights_cache)
+  xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs == 1);
   const uint32_t input_id = node->inputs[0];

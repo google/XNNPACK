@@ -49,7 +49,7 @@ static inline void* packed_weights(struct xnn_operator* op) {
   if (op->weights_cache == NULL) {
     return op->packed_weights.pointer;
   } else {
-    return (void*) ((uintptr_t) op->weights_cache->cache.weights.start + op->packed_weights.offset);
+    return op->weights_cache->offset_to_addr(op->weights_cache->context, op->packed_weights.offset);
   }
 }
 

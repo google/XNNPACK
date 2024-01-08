@@ -104,7 +104,7 @@ enum xnn_status xnn_release_workspace(xnn_workspace_t workspace)
 
 enum xnn_status xnn_create_weights_cache_with_size(size_t size, xnn_weights_cache_t* weights_cache_out)
 {
-  struct xnn_weights_cache* weights_cache = NULL;
+  struct xnn_weights_cache_provider* cache_provider = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -112,21 +112,33 @@ enum xnn_status xnn_create_weights_cache_with_size(size_t size, xnn_weights_cach
     goto error;
   }
 
-  weights_cache = xnn_allocate_zero_memory(sizeof(struct xnn_weights_cache));
-  if (weights_cache == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for weights cache descriptor", sizeof(struct xnn_weights_cache));
+  cache_provider = xnn_allocate_zero_memory(sizeof(struct xnn_weights_cache_provider));
+  if (cache_provider == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for weights cache provider descriptor", sizeof(struct xnn_weights_cache_provider));
     goto error;
   }
 
-  status = xnn_init_weights_cache_with_size(weights_cache, size);
+  cache_provider->context = xnn_allocate_zero_memory(sizeof(struct xnn_internal_weights_cache));
+  if (cache_provider->context == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for weights cache descriptor", sizeof(struct xnn_internal_weights_cache));
+    goto error;
+  }
+
+  status = xnn_internal_init_weights_cache_with_size(cache_provider->context, size);
   if (status != xnn_status_success) {
     goto error;
   }
-  *weights_cache_out = weights_cache;
+  cache_provider->look_up = (size_t(*)(void*, const struct xnn_weights_cache_look_up_key*))xnn_internal_weights_cache_look_up;
+  cache_provider->reserve_space = (void*(*)(void*, size_t))xnn_internal_reserve_space_in_weights_cache;
+  cache_provider->look_up_or_insert = (size_t (*)(void*, const struct xnn_weights_cache_look_up_key*, void*, size_t))xnn_internal_get_or_insert_weights_cache;
+  cache_provider->is_finalized = (bool (*)(void*))xnn_internal_weights_cache_is_finalized;
+  cache_provider->offset_to_addr = (void*(*)(void*, size_t))xnn_internal_weights_cache_offset_to_addr;
+  cache_provider->delete_cache = (enum xnn_status (*)(void*))xnn_internal_delete_weights_cache;
+  *weights_cache_out = cache_provider;
   return xnn_status_success;
 
 error:
-  xnn_release_weights_cache(weights_cache);
+  xnn_internal_release_weights_cache(cache_provider->context);
   return status;
 }
 
@@ -137,11 +149,14 @@ enum xnn_status xnn_create_weights_cache(xnn_weights_cache_t* weights_cache_out)
 
 enum xnn_status xnn_delete_weights_cache(xnn_weights_cache_t weights_cache)
 {
-  enum xnn_status status = xnn_release_weights_cache(weights_cache);
-  if (status != xnn_status_success) {
-    return status;
+  if XNN_LIKELY(weights_cache != NULL) {
+    enum xnn_status status = xnn_internal_release_weights_cache(weights_cache->context);
+    if (status != xnn_status_success) {
+      return status;
+    }
+    xnn_release_memory(weights_cache->context);
+    xnn_release_memory(weights_cache);
   }
-  xnn_release_memory(weights_cache);
   return xnn_status_success;
 }
 

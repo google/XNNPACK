@@ -186,7 +186,7 @@ typedef enum xnn_status (*xnn_create_operator_fn)(
   size_t num_values,
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
-  struct xnn_weights_cache* weights_cache);
+  xnn_weights_cache_t weights_cache);
 
 typedef enum xnn_status (*xnn_reshape_operator_fn)(
   struct xnn_operator_data* opdata,

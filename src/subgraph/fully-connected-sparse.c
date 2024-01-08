@@ -22,7 +22,7 @@ static enum xnn_status create_fully_connected_operator(
   size_t num_values,
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
-  struct xnn_weights_cache* weights_cache)
+  xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs >= 2);
   assert(node->num_inputs <= 3);
