@@ -422,6 +422,23 @@ static void f32_raddstoreexpminusmax(
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, rvv_rr2_p6_u2v,
+                    xnn_f32_rmax_ukernel__rvv_u8v,
+                    xnn_f32_raddstoreexpminusmax_ukernel__rvv_rr2_p6_u2v,
+                    xnn_init_f32_expminus_rvv_rr2_p6_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, rvv_rr2_p6_u4v,
+                    xnn_f32_rmax_ukernel__rvv_u8v,
+                    xnn_f32_raddstoreexpminusmax_ukernel__rvv_rr2_p6_u4v,
+                    xnn_init_f32_expminus_rvv_rr2_p6_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, avx512f_rr1_p5_scalef_u128,
                     xnn_f32_rmax_ukernel__avx_u32_acc4,
