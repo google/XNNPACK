@@ -401,6 +401,7 @@ size_t xnn_init_qs8_conv_minmax_fp32_avx512vnni_params(
 
   params->fp32_avx512vnni.sign_mask = 0x80;
   params->fp32_avx512vnni.mask = 0xF0;
+  params->fp32_avx512vnni.gfni_shl4 = INT64_C(0x01020408);
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   params->fp32_avx512vnni.output_max_less_zero_point = output_max_less_zero_point;
   params->fp32_avx512vnni.output_zero_point = (int32_t) output_zero_point;
@@ -2165,6 +2166,7 @@ size_t xnn_init_f32_qc4w_minmax_avx512vnni_params(
   params->avx512vnni.max = output_max;
   params->avx512vnni.sign_mask = 0x80;
   params->avx512vnni.mask = 0xF0;
+  params->avx512vnni.gfni_shl4 = INT64_C(0x01020408);
   return sizeof(params->avx512vnni);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -4039,6 +4041,23 @@ size_t xnn_init_f16_expminus_fp16arith_rr2_p2_params(
   return sizeof(params->fp16arith_rr2_p2);
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_RISCV
+size_t xnn_init_f32_expminus_rvv_rr2_p6_params(
+  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->rvv_rr2_p6.x_min = -0x1.5ebb82p6;
+  params->rvv_rr2_p6.log2e = 0x1.715476p+0f;
+  params->rvv_rr2_p6.ln2_hi = 0x1.62E400p-1f;
+  params->rvv_rr2_p6.ln2_lo = 0x1.7F7D1Cp-20f;
+  params->rvv_rr2_p6.c6 = 0x1.6850e4p-10f;
+  params->rvv_rr2_p6.c5 = 0x1.123bccp-7;
+  params->rvv_rr2_p6.c4 = 0x1.555b98p-5f;
+  params->rvv_rr2_p6.c3 = 0x1.55548ep-3f;
+  params->rvv_rr2_p6.c2 = 0x1.fffff8p-2f;
+  return sizeof(params->rvv_rr2_p6);
+}
+#endif  // XNN_ARCH_RISCV
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_f16_expminus_avx2_rr1_p2_params(

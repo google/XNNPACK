@@ -100,6 +100,11 @@
   init: xnn_init_f32_expminus_neonfma_rr1_p5_params
 - name: xnn_f32_raddstoreexpminusmax_ukernel__neonfma_rr1_p5_u20_acc5
   init: xnn_init_f32_expminus_neonfma_rr1_p5_params
+# RISC-V Vector
+- name: xnn_f32_raddstoreexpminusmax_ukernel__rvv_rr2_p6_u2v
+  init: xnn_init_f32_expminus_rvv_rr2_p6_params
+- name: xnn_f32_raddstoreexpminusmax_ukernel__rvv_rr2_p6_u4v
+  init: xnn_init_f32_expminus_rvv_rr2_p6_params
 # x86 SSE
 - name: xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_u4
   init: xnn_init_f32_expminus_sse2_rr2_p5_params
