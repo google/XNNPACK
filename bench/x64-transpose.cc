@@ -62,6 +62,9 @@ static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
   b->Args({32, 32});
   b->Args({64, 64});
   b->Args({117, 117});
+  b->Args({128, 128});
+  b->Args({256, 256});
+  b->Args({512, 512});
   b->Args({1024, 1024});
 }
 
