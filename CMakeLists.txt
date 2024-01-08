@@ -1498,7 +1498,7 @@ IF(XNNPACK_BUILD_TESTS)
 
     ADD_EXECUTABLE(abs-reshape-test test/abs-reshape.cc)
     TARGET_INCLUDE_DIRECTORIES(abs-reshape-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(abs-reshape-test PRIVATE XNNPACK gtest gtest_main fp16)
+    TARGET_LINK_LIBRARIES(abs-reshape-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main fp16)
     ADD_TEST(NAME abs-reshape-test COMMAND abs-reshape-test)
 
     ADD_EXECUTABLE(add2-test test/add2.cc)
@@ -1508,7 +1508,7 @@ IF(XNNPACK_BUILD_TESTS)
 
     ADD_EXECUTABLE(add2-reshape-test test/add2-reshape.cc)
     TARGET_INCLUDE_DIRECTORIES(add2-reshape-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(add2-reshape-test PRIVATE XNNPACK gtest gtest_main)
+    TARGET_LINK_LIBRARIES(add2-reshape-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME add2-reshape-test COMMAND add2-reshape-test)
 
     ADD_EXECUTABLE(argmax-pooling-2d-test test/argmax-pooling-2d.cc)
