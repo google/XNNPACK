@@ -7,7 +7,7 @@
 #include <vector>
 
 #include <benchmark/benchmark.h>
-#ifdef BENCHMARK_INTEL_DNNL
+#ifdef BENCHMARK_INTEL_DNNL  // Test
 #include <dnnl.h>
 #endif  // BENCHMARK_INTEL_DNNL
 #include "bench/utils.h"
