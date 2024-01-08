@@ -6,6 +6,9 @@
 # ARM NEON
 - name: xnn_f32_vmaxc_ukernel__neon_u4
 - name: xnn_f32_vmaxc_ukernel__neon_u8
+# RISC-V Vector
+- name: xnn_f32_vmaxc_ukernel__rvv_u4v
+- name: xnn_f32_vmaxc_ukernel__rvv_u8v
 # x86 SSE
 - name: xnn_f32_vmaxc_ukernel__sse_u4
 - name: xnn_f32_vmaxc_ukernel__sse_u8
