@@ -134,10 +134,18 @@ static void init_f32_rminmax_config(void) {
       .element_tile = 4,
     };
   #elif XNN_ARCH_RISCV
-    f32_rminmax_config = (struct xnn_reduce_config) {
-      .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__scalar_u4_acc4,
-      .element_tile = 4,
-    };
+    #if XNN_ENABLE_RISCV_VECTOR
+      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      f32_rminmax_config = (struct xnn_reduce_config) {
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__rvv_u8v,
+        .element_tile = hardware_config->vlenb * 2,  // VLENB * (8 / sizeof(float))
+      };
+    #else
+      f32_rminmax_config = (struct xnn_reduce_config) {
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__scalar_u4_acc4,
+        .element_tile = 4,
+      };
+    #endif
   #elif XNN_ARCH_PPC64
     f32_rminmax_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__scalar_u4_acc4,
