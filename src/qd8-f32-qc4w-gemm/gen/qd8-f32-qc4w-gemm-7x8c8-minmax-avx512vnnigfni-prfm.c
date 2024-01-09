@@ -224,21 +224,20 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x8c8__avx512vnnigfni_prfm(
     }
 
     // Add adjacent pairs
-    const __m256i vpermute_mask = _mm256_set_epi32(7, 6, 3, 2, 5, 4, 1, 0);
     const __m256i vsum0x02134657 = _mm256_hadd_epi32(vacc0x0123, vacc0x4567);
-    __m256i vacc0x01234567 = _mm256_permutevar8x32_epi32(vsum0x02134657, vpermute_mask);
+    __m256i vacc0x01234567 = _mm256_permute4x64_epi64(vsum0x02134657, _MM_SHUFFLE(3, 1, 2, 0));
     const __m256i vsum1x02134657 = _mm256_hadd_epi32(vacc1x0123, vacc1x4567);
-    __m256i vacc1x01234567 = _mm256_permutevar8x32_epi32(vsum1x02134657, vpermute_mask);
+    __m256i vacc1x01234567 = _mm256_permute4x64_epi64(vsum1x02134657, _MM_SHUFFLE(3, 1, 2, 0));
     const __m256i vsum2x02134657 = _mm256_hadd_epi32(vacc2x0123, vacc2x4567);
-    __m256i vacc2x01234567 = _mm256_permutevar8x32_epi32(vsum2x02134657, vpermute_mask);
+    __m256i vacc2x01234567 = _mm256_permute4x64_epi64(vsum2x02134657, _MM_SHUFFLE(3, 1, 2, 0));
     const __m256i vsum3x02134657 = _mm256_hadd_epi32(vacc3x0123, vacc3x4567);
-    __m256i vacc3x01234567 = _mm256_permutevar8x32_epi32(vsum3x02134657, vpermute_mask);
+    __m256i vacc3x01234567 = _mm256_permute4x64_epi64(vsum3x02134657, _MM_SHUFFLE(3, 1, 2, 0));
     const __m256i vsum4x02134657 = _mm256_hadd_epi32(vacc4x0123, vacc4x4567);
-    __m256i vacc4x01234567 = _mm256_permutevar8x32_epi32(vsum4x02134657, vpermute_mask);
+    __m256i vacc4x01234567 = _mm256_permute4x64_epi64(vsum4x02134657, _MM_SHUFFLE(3, 1, 2, 0));
     const __m256i vsum5x02134657 = _mm256_hadd_epi32(vacc5x0123, vacc5x4567);
-    __m256i vacc5x01234567 = _mm256_permutevar8x32_epi32(vsum5x02134657, vpermute_mask);
+    __m256i vacc5x01234567 = _mm256_permute4x64_epi64(vsum5x02134657, _MM_SHUFFLE(3, 1, 2, 0));
     const __m256i vsum6x02134657 = _mm256_hadd_epi32(vacc6x0123, vacc6x4567);
-    __m256i vacc6x01234567 = _mm256_permutevar8x32_epi32(vsum6x02134657, vpermute_mask);
+    __m256i vacc6x01234567 = _mm256_permute4x64_epi64(vsum6x02134657, _MM_SHUFFLE(3, 1, 2, 0));
 
     vacc0x01234567 = _mm256_srai_epi32(vacc0x01234567, 4);
     vacc1x01234567 = _mm256_srai_epi32(vacc1x01234567, 4);
