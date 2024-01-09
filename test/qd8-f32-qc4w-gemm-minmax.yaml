@@ -2,6 +2,7 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+
 # ARM NEONDOT
 - name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c4__neondot
   init: xnn_init_f32_qc4w_minmax_scalar_params
@@ -380,7 +381,74 @@
   pack: xnn_pack_qs8_qc4w_gemm_goi_w
   k-block: 16
 
-# AVX512VNNI
+# AVXV512VNNI VL
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx512vnni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c8__avx512vnni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x8c8__avx512vnni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x8c8__avx512vnni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x8c8__avx512vnni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x8c8__avx512vnni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x8c8__avx512vnni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_8x8c8__avx512vnni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx512vnni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c8__avx512vnni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x8c8__avx512vnni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x8c8__avx512vnni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x8c8__avx512vnni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x8c8__avx512vnni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x8c8__avx512vnni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_8x8c8__avx512vnni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+
+# AVX512VNNIGFNI
 - name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__avx512vnnigfni
   init: xnn_init_f32_qc4w_minmax_avx512vnni_params
   pack: xnn_pack_qs8_qc4w_gemm_goi_w
@@ -510,6 +578,140 @@
   k-block: 16
 - name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_8x16c8__avx512vnnigfni_prfm
   init: xnn_init_f32_qc4w_minmax_avx512vnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+
+# AVXV512VNNIGFNI VL
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx512vnnigfni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c8__avx512vnnigfni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x8c8__avx512vnnigfni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x8c8__avx512vnnigfni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x8c8__avx512vnnigfni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x8c8__avx512vnnigfni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x8c8__avx512vnnigfni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_8x8c8__avx512vnnigfni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx512vnnigfni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c8__avx512vnnigfni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x8c8__avx512vnnigfni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x8c8__avx512vnnigfni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x8c8__avx512vnnigfni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x8c8__avx512vnnigfni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x8c8__avx512vnnigfni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_8x8c8__avx512vnnigfni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+
+# AVXVNNI
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avxvnni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c8__avxvnni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x8c8__avxvnni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x8c8__avxvnni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x8c8__avxvnni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x8c8__avxvnni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x8c8__avxvnni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_8x8c8__avxvnni
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avxvnni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c8__avxvnni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x8c8__avxvnni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x8c8__avxvnni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x8c8__avxvnni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x8c8__avxvnni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x8c8__avxvnni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 16
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_8x8c8__avxvnni_prfm
+  init: xnn_init_f32_qc4w_minmax_avxvnni_params
   pack: xnn_pack_qs8_qc4w_gemm_goi_w
   k-block: 16
 

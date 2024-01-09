@@ -389,6 +389,22 @@ size_t xnn_init_qs8_qc8w_conv_minmax_fp32_avx512vnni_params(
   return sizeof(params->fp32_avx512vnni);
 }
 
+size_t xnn_init_qs8_qc8w_conv_minmax_fp32_avxvnni_params(
+  union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  params->fp32_avxvnni.sign_mask = 0x80;
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->fp32_avxvnni.output_max_less_zero_point = output_max_less_zero_point;
+  params->fp32_avxvnni.output_zero_point = (int32_t) output_zero_point;
+  for (uint32_t i = 0; i < 16; i++) {
+    params->fp32_avxvnni.output_min[i] = output_min;
+  }
+  return sizeof(params->fp32_avxvnni);
+}
+
 size_t xnn_init_qs8_conv_minmax_fp32_avx512vnni_params(
   union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
@@ -2029,6 +2045,16 @@ size_t xnn_init_f32_minmax_avx512vnni_params(
   params->avx512vnni.sign_mask = 0x80;
   return sizeof(params->avx512vnni);
 }
+
+size_t xnn_init_f32_minmax_avxvnni_params(
+  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float output_min,
+  float output_max) {
+  params->avxvnni.min = output_min;
+  params->avxvnni.max = output_max;
+  params->avxvnni.sign_mask = 0x80;
+  return sizeof(params->avxvnni);
+}
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -2169,6 +2195,23 @@ size_t xnn_init_f32_qc4w_minmax_avx512vnni_params(
   params->avx512vnni.gfni_shl4 = INT64_C(0x01020408);
   return sizeof(params->avx512vnni);
 }
+
+
+size_t xnn_init_f32_qc4w_minmax_avxvnni_params(
+  union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float output_min,
+  float output_max,
+  uint8_t kernel_zero_point)
+{
+  assert(kernel_zero_point <= 15);
+  params->avxvnni.min = output_min;
+  params->avxvnni.max = output_max;
+  params->avxvnni.sign_mask = 0x80;
+  params->avxvnni.mask = 0xF0;
+  params->avxvnni.gfni_shl4 = INT64_C(0x01020408);
+  return sizeof(params->avxvnni);
+}
+
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

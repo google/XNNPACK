@@ -1847,6 +1847,7 @@ xnnpack_cc_library(
     gcc_x86_copts = [
         "-mavx2",
         "-mavxvnni",
+        "-mfma",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
@@ -1869,6 +1870,7 @@ xnnpack_cc_library(
     gcc_x86_copts = [
         "-mavx2",
         "-mavxvnni",
+        "-mfma",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
@@ -1895,6 +1897,7 @@ xnnpack_cc_library(
     gcc_x86_copts = [
         "-mavx2",
         "-mavxvnni",
+        "-mfma",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
