@@ -4044,6 +4044,20 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "transpose_reshape_test",
+    srcs = [
+        "transpose-reshape.cc",
+    ],
+    deps = [
+        ":subgraph_unary_tester",
+        "//:XNNPACK_test_mode",
+        "//:node_type",
+        "//:operators_test_mode",
+        "//:subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "unpooling_2d_test",
     srcs = [
         "unpooling-2d.cc",

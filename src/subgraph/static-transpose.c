@@ -24,10 +24,6 @@ static enum xnn_status create_transpose_operator(
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs == 1);
-  const uint32_t input_id = node->inputs[0];
-  assert(input_id != XNN_INVALID_VALUE_ID);
-  assert(input_id < num_values);
-
   assert(node->num_outputs == 1);
 
   enum xnn_status status;
@@ -49,7 +45,6 @@ static enum xnn_status create_transpose_operator(
   if (status == xnn_status_success) {
     opdata->shape1.num_dims = node->params.transpose.num_dims;
     opdata->shape2.num_dims = node->params.transpose.num_dims;
-    memcpy(opdata->shape1.dim, values[input_id].shape.dim, opdata->shape1.num_dims * sizeof(size_t));
     memcpy(opdata->shape2.dim, node->params.transpose.perm, opdata->shape2.num_dims * sizeof(size_t));
   }
 
@@ -63,7 +58,17 @@ static enum xnn_status reshape_transpose_operator(
   pthreadpool_t threadpool)
 {
   enum xnn_status status;
-   switch (opdata->operator_objects[0]->type) {
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_values);
+
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_values);
+
+  memcpy(opdata->shape1.dim, values[input_id].shape.dim, opdata->shape1.num_dims * sizeof(size_t));
+
+  switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_transpose_nd_x16: {
       status = xnn_reshape_transpose_nd_x16(
         opdata->operator_objects[0],
@@ -95,7 +100,25 @@ static enum xnn_status reshape_transpose_operator(
       XNN_UNREACHABLE;
   }
 
-  return status;
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  const struct xnn_value* input = &values[input_id];
+  struct xnn_value* output = &values[output_id];
+
+  for (size_t cur_dim = 0; cur_dim < input->shape.num_dims; cur_dim++) {
+    const enum xnn_shape_inference_status shape_status = xnn_tensor_propagate_dimension(output, cur_dim, opdata->shape1.dim[opdata->shape2.dim[cur_dim]]);
+    if (shape_status == xnn_shape_inference_status_error) {
+      return xnn_status_invalid_parameter;
+    }
+  }
+  const size_t new_size = xnn_tensor_get_size(output);
+  if (new_size > output->size) {
+    output->size = new_size;
+    return xnn_status_reallocation_required;
+  }
+  return xnn_status_success;
 }
 
 static enum xnn_status setup_transpose_operator(

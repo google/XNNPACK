@@ -1765,6 +1765,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(tanh-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME tanh-test COMMAND tanh-test)
 
+    ADD_EXECUTABLE(transpose-reshape-test test/transpose-reshape.cc)
+    TARGET_INCLUDE_DIRECTORIES(transpose-reshape-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(transpose-reshape-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME transpose-reshape-test COMMAND transpose-reshape-test)
+
     ADD_EXECUTABLE(unpooling-2d-test test/unpooling-2d.cc)
     TARGET_INCLUDE_DIRECTORIES(unpooling-2d-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(unpooling-2d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
