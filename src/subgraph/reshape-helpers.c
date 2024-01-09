@@ -19,7 +19,9 @@ enum xnn_status resize_unary_elementwise_output_tensor(
     if (shape_status == xnn_shape_inference_status_error) {
       return xnn_status_invalid_parameter;
     }
-    changed |= true;
+    if (shape_status == xnn_shape_inference_status_changed) {
+      changed |= true;
+    }
   }
   if (!changed) {
     return xnn_status_success;
