@@ -157,9 +157,9 @@ static enum xnn_status create_binary_elementwise_nd_f32(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(operator_type), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -222,9 +222,9 @@ enum xnn_status xnn_create_add_nd_qs8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be below upper bound",
+      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_add_nd_qs8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -306,9 +306,9 @@ enum xnn_status xnn_create_add_nd_qu8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be below upper bound",
+      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_add_nd_qu8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -565,9 +565,9 @@ enum xnn_status xnn_create_multiply_nd_qs8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be below upper bound",
+      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_multiply_nd_qs8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -642,9 +642,9 @@ enum xnn_status xnn_create_multiply_nd_qu8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be below upper bound",
+      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_multiply_nd_qu8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -791,9 +791,9 @@ enum xnn_status xnn_create_subtract_nd_qs8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be below upper bound",
+      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_subtract_nd_qs8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -875,9 +875,9 @@ enum xnn_status xnn_create_subtract_nd_qu8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be below upper bound",
+      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_subtract_nd_qu8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -1842,9 +1842,9 @@ static enum xnn_status run_binary_elementwise_nd_f32(
       return xnn_status_invalid_parameter;
     }
 
-  if (output_min >= output_max) {
-      xnn_log_error(
-        "failed to run %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+  if (output_min > output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be less than or equal to upper bound",
         xnn_operator_type_to_string(operator_type), output_min, output_max);
       return xnn_status_invalid_parameter;
     }
@@ -2135,9 +2135,9 @@ enum xnn_status xnn_run_add_nd_qs8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be below upper bound",
+      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_add_nd_qs8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -2232,9 +2232,9 @@ enum xnn_status xnn_run_multiply_nd_qs8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be below upper bound",
+      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_multiply_nd_qs8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -2323,9 +2323,9 @@ enum xnn_status xnn_run_subtract_nd_qs8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be below upper bound",
+      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_subtract_nd_qs8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -2419,9 +2419,9 @@ enum xnn_status xnn_run_add_nd_qu8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be below upper bound",
+      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_add_nd_qu8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -2515,9 +2515,9 @@ enum xnn_status xnn_run_multiply_nd_qu8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be below upper bound",
+      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_multiply_nd_qu8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -2605,9 +2605,9 @@ enum xnn_status xnn_run_subtract_nd_qu8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be below upper bound",
+      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_subtract_nd_qu8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }

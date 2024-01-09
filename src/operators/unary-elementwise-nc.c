@@ -350,9 +350,9 @@ enum xnn_status xnn_create_clamp_nc_f16(
   const uint16_t output_max_as_half = fp16_ieee_from_fp32_value(output_max);
   output_min = fp16_ieee_to_fp32_value(output_min_as_half);
   output_max = fp16_ieee_to_fp32_value(output_max_as_half);
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f16), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -391,9 +391,9 @@ enum xnn_status xnn_create_clamp_nc_f32(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -425,9 +425,9 @@ enum xnn_status xnn_create_clamp_nc_s8(
     uint32_t flags,
     xnn_operator_t* clamp_op_out)
 {
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: range min must be below range max",
+      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_clamp_nc_s8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -451,9 +451,9 @@ enum xnn_status xnn_create_clamp_nc_u8(
     uint32_t flags,
     xnn_operator_t* clamp_op_out)
 {
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: range min must be below range max",
+      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_clamp_nc_u8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -520,9 +520,9 @@ enum xnn_status xnn_create_convert_nc_f32_qs8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: range min must be below range max",
+      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qs8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -602,9 +602,9 @@ enum xnn_status xnn_create_convert_nc_f32_qu8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: range min must be below range max",
+      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qu8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
@@ -2986,9 +2986,9 @@ enum xnn_status xnn_run_clamp_nc_f32(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32), output_min, output_max);
     return xnn_status_invalid_parameter;
   }

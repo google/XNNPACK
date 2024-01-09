@@ -167,9 +167,9 @@ enum xnn_status xnn_subgraph_check_output_min_max(enum xnn_node_type node_type, 
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min >= output_max) {
+  if (output_min > output_max) {
     xnn_log_error(
-      "failed to define %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      "failed to define %s operator with [%.7g, %.7g] output range: lower bound must be less than or equal to upper bound",
       xnn_node_type_to_string(node_type), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
