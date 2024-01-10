@@ -577,47 +577,6 @@ static enum xnn_status setup_fully_connected_operator(
   }
 }
 
-static enum xnn_shape_inference_status infer_shape_forward(
-  const struct xnn_node* node,
-  struct xnn_value* values)
-{
-  // Assert that filter tensor has static shape.
-  const uint32_t filter_id = node->inputs[1];
-  const struct xnn_value* filter = &values[filter_id];
-  assert(xnn_tensor_shape_is_static(filter));
-
-  enum xnn_shape_inference_status status = xnn_shape_inference_status_no_change;
-
-  // Infer output channels.
-  const uint32_t output_channel_index = (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) ? 1 : 0;
-  const uint32_t output_id = node->outputs[0];
-  struct xnn_value* output = &values[output_id];
-  status = xnn_tensor_propagate_dimension(output, output->shape.num_dims - 1, filter->shape.dim[output_channel_index]);
-  if (status == xnn_shape_inference_status_error) {
-    return status;
-  }
-
-  if (node->flags & XNN_FLAG_TENSORFLOW_RESHAPE_2D) {
-    // No inference for input/output shape possible.
-    return status;
-  }
-
-  // Propagate input shape to output.
-  const struct xnn_value* input = &values[node->inputs[0]];
-  for (size_t cur_dim = 0; cur_dim < input->shape.num_dims - 1; cur_dim++) {
-    const enum xnn_shape_inference_status changed = xnn_tensor_propagate_dimension(output, cur_dim, input->shape.dim[cur_dim]);
-    if (changed == xnn_shape_inference_status_error) {
-      return changed;
-    } else if (changed == xnn_shape_inference_status_changed) {
-      // Only overwrite status if inference on this dimension changed. We could have changed something above, and not
-      // changed anything here, then overwriting status to be no_change will be incorrect.
-      status = changed;
-    }
-  }
-
-  return status;
-}
-
 static enum xnn_shape_inference_status infer_shape_backward(
   const struct xnn_node* node,
   struct xnn_value* values)
@@ -1045,7 +1004,7 @@ enum xnn_status xnn_define_fully_connected(
   node->create = create_fully_connected_operator;
   node->reshape = reshape_fully_connected_operator;
   node->setup = setup_fully_connected_operator;
-  node->infer_shape_forward = infer_shape_forward;
+
   node->infer_shape_backward = infer_shape_backward;
 
   return xnn_status_success;
