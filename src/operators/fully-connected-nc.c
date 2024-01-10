@@ -140,64 +140,83 @@ static enum xnn_status create_fully_connected_nc(
   const size_t packed_weights_size =
     n_stride * (bias_element_size + (k_stride << log2_filter_element_size) + extra_weights_bytes);
   size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
-  void* weights_ptr = xnn_get_pointer_to_write_weights(
-      fully_connected_op, aligned_total_weights_size, packed_weights_padding_byte);
-  if (weights_ptr == NULL) {
-    xnn_log_error(
-      "failed to allocate %zu bytes for %s operator packed weights",
-      packed_weights_size, xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-  xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
-    aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
 
+  uint32_t cache_seed = output_channels ^ input_channels ^ nr ^ kr ^ sr ^ extra_weights_bytes ^ operator_type;
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
-    pack_gemm_gio_w(
-      /*groups=*/1, output_channels, input_channels,
-      nr, kr, sr,
-      output_channels,
-      kernel, bias, /*scale=*/NULL,
-      weights_ptr,
-      gemm_config->nr * extra_weights_bytes,
-      packing_params);
-  } else {
-    pack_gemm_goi_w(
-      /*groups=*/1, output_channels, input_channels,
-      nr, kr, sr,
-      kernel, bias, /*scale=*/NULL,
-      weights_ptr,
-      gemm_config->nr * extra_weights_bytes,
-      packing_params);
+    cache_seed = ~cache_seed;
   }
-  if (kernel_scale_params != NULL) {
-    assert(init_kernel_scale_params != NULL);
-
-    void* weights = (void*) ((uintptr_t) weights_ptr +
-      gemm_config->nr * ((k_stride << log2_filter_element_size) + bias_element_size));
-    const size_t weights_stride = (k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
-    init_kernel_scale_params(
-        output_channels, gemm_config->nr, gemm_config->nr,
-        gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
-        kernel_scale_params, weights);
-  }
-
-  if (scale_params != NULL) {
-    assert(init_scale_params != NULL);
-    void* weights = (void*) ((uintptr_t) weights_ptr +
-      gemm_config->nr * ((k_stride << log2_filter_element_size) + bias_element_size));
-    if (kernel_scale_params != NULL) {
-      weights = (void*) ((uintptr_t) weights + gemm_config->nr * sizeof(float));
-    }
-    const size_t weights_stride = (k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
-    init_scale_params(
-        output_channels, gemm_config->nr, gemm_config->nr,
-        gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
-        scale_params, weights);
-  }
-
+  size_t cache_offset = XNN_CACHE_NOT_FOUND;
+  struct xnn_weights_cache_look_up_key cache_key;
+  cache_key.seed = cache_seed;
+  cache_key.kernel = kernel;
+  cache_key.bias = bias;
   if (use_weights_cache(fully_connected_op)) {
-    fully_connected_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
-        fully_connected_op->weights_cache, NULL, weights_ptr, aligned_total_weights_size);
+    cache_offset = xnn_weights_cache_look_up(
+      fully_connected_op->weights_cache, &cache_key);
+  }
+
+  if (cache_offset == XNN_CACHE_NOT_FOUND) {
+    void* weights_ptr = xnn_get_pointer_to_write_weights(
+        fully_connected_op, aligned_total_weights_size, packed_weights_padding_byte);
+    if (weights_ptr == NULL) {
+      xnn_log_error(
+        "failed to allocate %zu bytes for %s operator packed weights",
+        packed_weights_size, xnn_operator_type_to_string(operator_type));
+      goto error;
+    }
+    xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
+      aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
+
+    if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+      pack_gemm_gio_w(
+        /*groups=*/1, output_channels, input_channels,
+        nr, kr, sr,
+        output_channels,
+        kernel, bias, /*scale=*/NULL,
+        weights_ptr,
+        gemm_config->nr * extra_weights_bytes,
+        packing_params);
+    } else {
+      pack_gemm_goi_w(
+        /*groups=*/1, output_channels, input_channels,
+        nr, kr, sr,
+        kernel, bias, /*scale=*/NULL,
+        weights_ptr,
+        gemm_config->nr * extra_weights_bytes,
+        packing_params);
+    }
+    if (kernel_scale_params != NULL) {
+      assert(init_kernel_scale_params != NULL);
+
+      void* weights = (void*) ((uintptr_t) weights_ptr +
+        gemm_config->nr * ((k_stride << log2_filter_element_size) + bias_element_size));
+      const size_t weights_stride = (k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
+      init_kernel_scale_params(
+          output_channels, gemm_config->nr, gemm_config->nr,
+          gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+          kernel_scale_params, weights);
+    }
+
+    if (scale_params != NULL) {
+      assert(init_scale_params != NULL);
+      void* weights = (void*) ((uintptr_t) weights_ptr +
+        gemm_config->nr * ((k_stride << log2_filter_element_size) + bias_element_size));
+      if (kernel_scale_params != NULL) {
+        weights = (void*) ((uintptr_t) weights + gemm_config->nr * sizeof(float));
+      }
+      const size_t weights_stride = (k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
+      init_scale_params(
+          output_channels, gemm_config->nr, gemm_config->nr,
+          gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+          scale_params, weights);
+    }
+
+    if (use_weights_cache(fully_connected_op)) {
+      fully_connected_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
+          fully_connected_op->weights_cache, &cache_key, weights_ptr, aligned_total_weights_size);
+    }
+  } else {
+    fully_connected_op->packed_weights.offset = cache_offset;
   }
 
   fully_connected_op->group_input_channels = input_channels;

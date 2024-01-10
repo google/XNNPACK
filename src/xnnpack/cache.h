@@ -19,6 +19,9 @@ extern "C" {
 #define XNN_CACHE_NOT_FOUND \
   SIZE_MAX  // Return value when code is not found in the cache.
 
+// Murmur hash (https://en.wikipedia.org/wiki/MurmurHash) on the buffer specified by `key` and `size`.
+uint32_t murmur_hash3(const void* key, size_t len, uint32_t seed);
+
 // A cache for arbitrary bytes.
 // The implementation is similar to a hash table with open addressing and linear
 // probing, but restricted to our use cases.
@@ -130,6 +133,9 @@ bool xnn_weights_cache_is_finalized(xnn_weights_cache_t cache);
 
 size_t xnn_look_up_or_insert_weights_cache(
   xnn_weights_cache_t cache, const struct xnn_weights_cache_look_up_key* cache_key, void* ptr, size_t size);
+
+size_t xnn_weights_cache_look_up(
+  xnn_weights_cache_t cache, const struct xnn_weights_cache_look_up_key* cache_key);
 
 #ifdef __cplusplus
 }  // extern "C"

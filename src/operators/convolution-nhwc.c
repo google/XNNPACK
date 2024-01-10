@@ -114,8 +114,12 @@ static enum xnn_status create_vmulcaddc_path(
   pack_vmulcaddc_w(groups, vmulcaddc_config->channel_tile, kernel, bias, weights_ptr, packing_params);
 
   if (use_weights_cache(convolution_op)) {
+    struct xnn_weights_cache_look_up_key cache_key;
+    cache_key.seed = groups ^ vmulcaddc_config->channel_tile;
+    cache_key.kernel = kernel;
+    cache_key.bias = bias;
     convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
-        convolution_op->weights_cache, NULL, weights_ptr, aligned_total_weights_size);
+        convolution_op->weights_cache, &cache_key, weights_ptr, aligned_total_weights_size);
   }
 
   memcpy(&convolution_op->params, vmulcaddc_params, vmulcaddc_params_size);
@@ -243,9 +247,18 @@ static enum xnn_status create_dwconv_path(
                dwconv_ukernel->channel_tile * ((primary_tile << log2_filter_element_size) + bias_element_size)));
   }
 
+  uint32_t cache_seed = primary_tile ^ dwconv_ukernel->middle_tile ^ dwconv_ukernel->last_tile ^ kernel_height ^ kernel_width
+      ^ groups ^ dwconv_ukernel->channel_tile ^ dwconv_ukernel->channel_subtile ^ dwconv_ukernel->channel_round ^ extra_weights_bytes;
+  if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
+    cache_seed = ~cache_seed;
+  }
   if (use_weights_cache(convolution_op)) {
+    struct xnn_weights_cache_look_up_key cache_key;
+    cache_key.seed = cache_seed;
+    cache_key.kernel = kernel;
+    cache_key.bias = bias;
     convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
-        convolution_op->weights_cache, NULL, weights_ptr, aligned_total_weights_size);
+        convolution_op->weights_cache, &cache_key, weights_ptr, aligned_total_weights_size);
   }
 
   const union xnn_dwconv_ukernel* ukernels = &dwconv_ukernel->minmax;
@@ -336,6 +349,7 @@ static enum xnn_status create_gemm_or_igemm(
   } else if (relu_activation && gemm_config->relu.gemm[mr - 1].function[XNN_UARCH_DEFAULT] != NULL) {
     gemm_ukernels = &gemm_config->relu;
   }
+  uint32_t cache_seed = groups ^ group_input_channels ^ group_output_channels ^ nr ^ kr ^ sr ^ ukernel_type;
   switch (ukernel_type) {
     case xnn_microkernel_type_gemm:
       pack_gemm_goi_w(
@@ -368,6 +382,7 @@ static enum xnn_status create_gemm_or_igemm(
             nr, kr, sr,
             kernel, bias, /*scale=*/NULL, weights_ptr, gemm_config->nr * extra_weights_bytes, packing_params);
       } else {
+        cache_seed = ~cache_seed;
         pack_conv_goki_w(
             groups, group_output_channels, kernel_size, group_input_channels,
             nr, kr, sr,
@@ -436,8 +451,12 @@ static enum xnn_status create_gemm_or_igemm(
   }
 
   if (use_weights_cache(convolution_op)) {
+    struct xnn_weights_cache_look_up_key cache_key;
+    cache_key.seed = cache_seed;
+    cache_key.kernel = kernel;
+    cache_key.bias = bias;
     convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
-        convolution_op->weights_cache, NULL, weights_ptr, aligned_total_weights_size);
+        convolution_op->weights_cache, &cache_key, weights_ptr, aligned_total_weights_size);
   }
 
   *zero_size = XNN_EXTRA_BYTES + (k_stride << log2_input_element_size);

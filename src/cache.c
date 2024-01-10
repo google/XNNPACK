@@ -36,7 +36,7 @@ static inline uint32_t fmix32(uint32_t h)
   return h;
 }
 
-static uint32_t murmur_hash3(const void* key, size_t len, uint32_t seed)
+uint32_t murmur_hash3(const void* key, size_t len, uint32_t seed)
 {
   const uint8_t* data = (const uint8_t*) key;
 
@@ -525,4 +525,10 @@ enum xnn_status xnn_finalize_weights_cache(
   xnn_weights_cache_t weights_cache, enum xnn_weights_cache_finalization_kind finalization_kind)
 {
   return xnn_internal_finalize_weights_cache(weights_cache->context, finalization_kind);
+}
+
+size_t xnn_weights_cache_look_up(
+  xnn_weights_cache_t cache, const struct xnn_weights_cache_look_up_key* cache_key)
+{
+  return cache->look_up(cache->context, cache_key);
 }

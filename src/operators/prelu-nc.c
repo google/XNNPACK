@@ -92,8 +92,12 @@ static enum xnn_status create_prelu_nc(
   pack_prelu_w(channels, negative_slope, weights_ptr);
 
   if (use_weights_cache(prelu_op)) {
+    struct xnn_weights_cache_look_up_key cache_key;
+    cache_key.seed = murmur_hash3(weights_ptr, aligned_total_weights_size, /*seed=*/7);
+    cache_key.kernel = negative_slope;
+    cache_key.bias = NULL;
     prelu_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
-        prelu_op->weights_cache, NULL, weights_ptr, aligned_total_weights_size);
+        prelu_op->weights_cache, &cache_key, weights_ptr, aligned_total_weights_size);
   }
 
   prelu_op->channels = channels;
