@@ -1477,12 +1477,12 @@ typedef void (*xnn_pack_deconv_goki_w_fn)(
   size_t nr,
   size_t kr,
   size_t sr,
-  const void* kernel,
-  const void* bias,
+  const float* kernel,
+  const float* bias,
   const void* scale,
-  void* packed_weights,
+  float* packed_weights,
   size_t extra_bytes,
-  const void* subconv_params,
+  const struct subconvolution_params* subconv_params,
   const void* params);
 
 // PACKX: PACK X (input) tensor for pre-packed matrix multiplication
