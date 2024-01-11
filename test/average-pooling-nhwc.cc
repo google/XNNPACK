@@ -3083,6 +3083,28 @@ TEST(AVERAGE_POOLING_NHWC_QU8, setup_changing_width) {
     .TestSetupQU8();
 }
 
+TEST(AVERAGE_POOLING_NHWC_QU8, setup_changing_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  AveragePoolingOperatorTester()
+    .batch_size(2)
+    .input_height(8)
+    .input_width(8)
+    .next_channels(7)
+    .pooling_height(5)
+    .pooling_width(3)
+    .channels(24)
+    .TestSetupQU8();
+  AveragePoolingOperatorTester()
+    .batch_size(2)
+    .input_height(8)
+    .input_width(8)
+    .next_channels(9)
+    .pooling_height(5)
+    .pooling_width(3)
+    .channels(24)
+    .TestSetupQU8();
+}
+
 TEST(AVERAGE_POOLING_NHWC_QU8, setup_swap_height_and_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   AveragePoolingOperatorTester()
@@ -5382,6 +5404,28 @@ TEST(AVERAGE_POOLING_NHWC_F16, setup_changing_width) {
     .TestSetupF16();
 }
 
+TEST(AVERAGE_POOLING_NHWC_F16, setup_changing_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  AveragePoolingOperatorTester()
+    .batch_size(2)
+    .input_height(8)
+    .input_width(8)
+    .next_channels(9)
+    .pooling_height(5)
+    .pooling_width(3)
+    .channels(24)
+    .TestSetupF16();
+  AveragePoolingOperatorTester()
+    .batch_size(2)
+    .input_height(8)
+    .input_width(8)
+    .next_channels(7)
+    .pooling_height(5)
+    .pooling_width(3)
+    .channels(24)
+    .TestSetupF16();
+}
+
 TEST(AVERAGE_POOLING_NHWC_F16, setup_swap_height_and_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   AveragePoolingOperatorTester()
@@ -7624,6 +7668,28 @@ TEST(AVERAGE_POOLING_NHWC_F32, setup_changing_width) {
     .input_height(8)
     .input_width(8)
     .next_input_width(7)
+    .pooling_height(5)
+    .pooling_width(3)
+    .channels(24)
+    .TestSetupF32();
+}
+
+TEST(AVERAGE_POOLING_NHWC_F32, setup_changing_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  AveragePoolingOperatorTester()
+    .batch_size(2)
+    .input_height(8)
+    .input_width(8)
+    .next_channels(25)
+    .pooling_height(5)
+    .pooling_width(3)
+    .channels(24)
+    .TestSetupF32();
+  AveragePoolingOperatorTester()
+    .batch_size(2)
+    .input_height(8)
+    .input_width(8)
+    .next_channels(7)
     .pooling_height(5)
     .pooling_width(3)
     .channels(24)

@@ -153,7 +153,7 @@ TEST_F(AveragePoolingTestF32, matches_operator_api)
   xnn_operator_t op = nullptr;
   const xnn_status status = xnn_create_average_pooling2d_nhwc_f32(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left, pooling_height, pooling_width,
-    stride_height, stride_width, channels, channels, channels, output_min, output_max, /*flags=*/0, &op);
+    stride_height, stride_width, output_min, output_max, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -168,6 +168,7 @@ TEST_F(AveragePoolingTestF32, matches_operator_api)
     xnn_status_success,
     xnn_reshape_average_pooling2d_nhwc_f32(
       op, batch_size, input_height, input_width,
+      channels, /*input_pixel_stride=*/channels, /*output_pixel_stride=*/channels,
       &workspace_size, &workspace_alignment,
       /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
       /*threadpool=*/nullptr));

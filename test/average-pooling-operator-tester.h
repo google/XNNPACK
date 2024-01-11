@@ -301,10 +301,28 @@ class AveragePoolingOperatorTester {
     }
   }
 
+  inline size_t next_input_pixel_stride() const {
+    if (this->next_input_pixel_stride_ == 0) {
+      return next_channels();
+    } else {
+      assert(this->next_input_pixel_stride_ >= next_channels());
+      return this->next_input_pixel_stride_;
+    }
+  }
+
   inline AveragePoolingOperatorTester& output_pixel_stride(size_t output_pixel_stride) {
     assert(output_pixel_stride != 0);
     this->output_pixel_stride_ = output_pixel_stride;
     return *this;
+  }
+
+  inline size_t next_output_pixel_stride() const {
+    if (this->next_output_pixel_stride_ == 0) {
+      return next_channels();
+    } else {
+      assert(this->next_output_pixel_stride_ >= next_channels());
+      return this->next_output_pixel_stride_;
+    }
   }
 
   inline size_t output_pixel_stride() const {
@@ -316,12 +334,18 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  inline AveragePoolingOperatorTester& next_input_size(uint32_t next_input_height, uint32_t next_input_width) {
-    assert(next_input_height >= 1);
-    assert(next_input_width >= 1);
-    this->next_input_height_ = next_input_height;
-    this->next_input_width_ = next_input_width;
+  inline AveragePoolingOperatorTester& next_channels(uint32_t next_channels) {
+    assert(next_channels >= 1);
+    this->next_channels_ = next_channels;
     return *this;
+  }
+
+  inline uint32_t next_channels() const {
+    if (this->next_channels_ == 0) {
+      return channels();
+    } else {
+      return this->next_channels_;
+    }
   }
 
   inline AveragePoolingOperatorTester& next_input_height(uint32_t next_input_height) {
@@ -542,7 +566,6 @@ class AveragePoolingOperatorTester {
           padding_top(), padding_right(), padding_bottom(), padding_left(),
           pooling_height(), pooling_width(),
           stride_height(), stride_width(),
-          channels(), input_pixel_stride(), output_pixel_stride(),
           output_min, output_max,
           0, &average_pooling_op);
       if (status == xnn_status_unsupported_hardware) {
@@ -560,6 +583,7 @@ class AveragePoolingOperatorTester {
         xnn_reshape_average_pooling2d_nhwc_f16(
           average_pooling_op,
           batch_size(), input_height(), input_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           &workspace_size, &workspace_alignment,
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           auto_threadpool.get()));
@@ -666,7 +690,6 @@ class AveragePoolingOperatorTester {
           padding_top(), padding_right(), padding_bottom(), padding_left(),
           pooling_height(), pooling_width(),
           stride_height(), stride_width(),
-          channels(), input_pixel_stride(), output_pixel_stride(),
           output_min, output_max,
           0, &average_pooling_op));
       ASSERT_NE(nullptr, average_pooling_op);
@@ -680,6 +703,7 @@ class AveragePoolingOperatorTester {
         xnn_reshape_average_pooling2d_nhwc_f32(
           average_pooling_op,
           batch_size(), input_height(), input_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           &workspace_size, &workspace_alignment,
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           auto_threadpool.get()));
@@ -773,7 +797,6 @@ class AveragePoolingOperatorTester {
           padding_top(), padding_right(), padding_bottom(), padding_left(),
           pooling_height(), pooling_width(),
           stride_height(), stride_width(),
-          channels(), input_pixel_stride(), output_pixel_stride(),
           input_zero_point(), input_scale(),
           output_zero_point(), output_scale(),
           qmin(), qmax(),
@@ -789,6 +812,7 @@ class AveragePoolingOperatorTester {
         xnn_reshape_average_pooling2d_nhwc_qu8(
           average_pooling_op,
           batch_size(), input_height(), input_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           &workspace_size, &workspace_alignment,
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           auto_threadpool.get()));
@@ -830,12 +854,12 @@ class AveragePoolingOperatorTester {
 
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + std::max<size_t>(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
-      (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + channels()));
+      (next_batch_size() * next_input_height() * next_input_width() - 1) * next_input_pixel_stride() + next_channels()));
     std::vector<uint16_t> output(std::max<size_t>(
       (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
-      (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() + channels()));
+      (next_batch_size() * next_output_height() * next_output_width() - 1) * next_output_pixel_stride() + next_channels()));
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
-    std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
+    std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * next_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
@@ -905,7 +929,6 @@ class AveragePoolingOperatorTester {
           padding_top(), padding_right(), padding_bottom(), padding_left(),
           pooling_height(), pooling_width(),
           stride_height(), stride_width(),
-          channels(), input_pixel_stride(), output_pixel_stride(),
           output_min, output_max,
           0, &average_pooling_op);
       if (status == xnn_status_unsupported_hardware) {
@@ -920,6 +943,7 @@ class AveragePoolingOperatorTester {
         xnn_reshape_average_pooling2d_nhwc_f16(
           average_pooling_op,
           batch_size(), input_height(), input_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           &workspace_size, &workspace_alignment,
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           auto_threadpool.get()));
@@ -962,7 +986,7 @@ class AveragePoolingOperatorTester {
       for (size_t i = 0; i < next_batch_size(); i++) {
         for (size_t oy = 0; oy < next_output_height(); oy++) {
           for (size_t ox = 0; ox < next_output_width(); ox++) {
-            for (size_t c = 0; c < channels(); c++) {
+            for (size_t c = 0; c < next_channels(); c++) {
               float acc = 0.0f;
               int32_t n = 0;
               for (size_t py = 0; py < pooling_height(); py++) {
@@ -970,12 +994,12 @@ class AveragePoolingOperatorTester {
                 for (size_t px = 0; px < pooling_width(); px++) {
                   const size_t ix = ox * stride_width() + px - padding_left();
                   if (ix < next_input_width() && iy < next_input_height()) {
-                    acc += fp16_ieee_to_fp32_value(input[((i * next_input_height() + iy) * next_input_width() + ix) * input_pixel_stride() + c]);
+                    acc += fp16_ieee_to_fp32_value(input[((i * next_input_height() + iy) * next_input_width() + ix) * next_input_pixel_stride() + c]);
                     n += 1;
                   }
                 }
               }
-              next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * channels() + c] =
+              next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * next_channels() + c] =
                 std::max(std::min(acc / float(n), output_max), output_min);
             }
           }
@@ -989,6 +1013,7 @@ class AveragePoolingOperatorTester {
         xnn_reshape_average_pooling2d_nhwc_f16(
           average_pooling_op,
           next_batch_size(), next_input_height(), next_input_width(),
+          next_channels(), next_input_pixel_stride(), next_output_pixel_stride(),
           &next_workspace_size, &next_workspace_alignment,
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           auto_threadpool.get()));
@@ -1014,13 +1039,13 @@ class AveragePoolingOperatorTester {
       for (size_t i = 0; i < next_batch_size(); i++) {
         for (size_t y = 0; y < next_output_height(); y++) {
           for (size_t x = 0; x < next_output_width(); x++) {
-            for (size_t c = 0; c < channels(); c++) {
-              EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), output_max);
-              EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), output_min);
+            for (size_t c = 0; c < next_channels(); c++) {
+              EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c]), output_max);
+              EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c]), output_min);
               EXPECT_NEAR(
-                  fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]),
-                  next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c],
-                  std::max(1.0e-3f, std::abs(next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c]) * 1.0e-2f)) <<
+                  fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c]),
+                  next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * next_channels() + c],
+                  std::max(1.0e-3f, std::abs(next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * next_channels() + c]) * 1.0e-2f)) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
           }
@@ -1036,12 +1061,12 @@ class AveragePoolingOperatorTester {
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max<size_t>(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
-      (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + channels()));
+      (next_batch_size() * next_input_height() * next_input_width() - 1) * next_input_pixel_stride() + next_channels()));
     std::vector<float> output(std::max<size_t>(
       (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
-      (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() + channels()));
+      (next_batch_size() * next_output_height() * next_output_width() - 1) * next_output_pixel_stride() + next_channels()));
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
-    std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
+    std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * next_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
@@ -1104,7 +1129,6 @@ class AveragePoolingOperatorTester {
           padding_top(), padding_right(), padding_bottom(), padding_left(),
           pooling_height(), pooling_width(),
           stride_height(), stride_width(),
-          channels(), input_pixel_stride(), output_pixel_stride(),
           output_min, output_max,
           0, &average_pooling_op));
       ASSERT_NE(nullptr, average_pooling_op);
@@ -1115,6 +1139,7 @@ class AveragePoolingOperatorTester {
         xnn_reshape_average_pooling2d_nhwc_f32(
           average_pooling_op,
           batch_size(), input_height(), input_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           &workspace_size, &workspace_alignment,
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           auto_threadpool.get()));
@@ -1156,7 +1181,7 @@ class AveragePoolingOperatorTester {
       for (size_t i = 0; i < next_batch_size(); i++) {
         for (size_t oy = 0; oy < next_output_height(); oy++) {
           for (size_t ox = 0; ox < next_output_width(); ox++) {
-            for (size_t c = 0; c < channels(); c++) {
+            for (size_t c = 0; c < next_channels(); c++) {
               float acc = 0.0f;
               int32_t n = 0;
               for (size_t py = 0; py < pooling_height(); py++) {
@@ -1164,12 +1189,12 @@ class AveragePoolingOperatorTester {
                 for (size_t px = 0; px < pooling_width(); px++) {
                   const size_t ix = ox * stride_width() + px - padding_left();
                   if (ix < next_input_width() && iy < next_input_height()) {
-                    acc += input[((i * next_input_height() + iy) * next_input_width() + ix) * input_pixel_stride() + c];
+                    acc += input[((i * next_input_height() + iy) * next_input_width() + ix) * next_input_pixel_stride() + c];
                     n += 1;
                   }
                 }
               }
-              next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * channels() + c] =
+              next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * next_channels() + c] =
                 std::max(std::min(acc / float(n), output_max), output_min);
             }
           }
@@ -1183,6 +1208,7 @@ class AveragePoolingOperatorTester {
         xnn_reshape_average_pooling2d_nhwc_f32(
           average_pooling_op,
           next_batch_size(), next_input_height(), next_input_width(),
+          next_channels(), next_input_pixel_stride(), next_output_pixel_stride(),
           &next_workspace_size, &next_workspace_alignment,
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           auto_threadpool.get()));
@@ -1206,12 +1232,12 @@ class AveragePoolingOperatorTester {
       for (size_t i = 0; i < next_batch_size(); i++) {
         for (size_t y = 0; y < next_output_height(); y++) {
           for (size_t x = 0; x < next_output_width(); x++) {
-            for (size_t c = 0; c < channels(); c++) {
-              EXPECT_LE(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c], output_max);
-              EXPECT_GE(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c], output_min);
-              EXPECT_NEAR(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c],
-                  next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c],
-                  std::abs(next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c]) * 1.0e-6f) <<
+            for (size_t c = 0; c < next_channels(); c++) {
+              EXPECT_LE(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c], output_max);
+              EXPECT_GE(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c], output_min);
+              EXPECT_NEAR(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c],
+                  next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * next_channels() + c],
+                  std::abs(next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * next_channels() + c]) * 1.0e-6f) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
           }
@@ -1228,10 +1254,10 @@ class AveragePoolingOperatorTester {
 
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + std::max<size_t>(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
-      (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + channels()));
+      (next_batch_size() * next_input_height() * next_input_width() - 1) * next_input_pixel_stride() + next_channels()));
     std::vector<uint8_t> output(std::max<size_t>(
       (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
-      (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() + channels()));
+      (next_batch_size() * next_output_height() * next_output_width() - 1) * next_output_pixel_stride() + channels()));
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
     std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -1283,7 +1309,6 @@ class AveragePoolingOperatorTester {
           padding_top(), padding_right(), padding_bottom(), padding_left(),
           pooling_height(), pooling_width(),
           stride_height(), stride_width(),
-          channels(), input_pixel_stride(), output_pixel_stride(),
           input_zero_point(), input_scale(),
           output_zero_point(), output_scale(),
           qmin(), qmax(),
@@ -1296,6 +1321,7 @@ class AveragePoolingOperatorTester {
         xnn_reshape_average_pooling2d_nhwc_qu8(
           average_pooling_op,
           batch_size(), input_height(), input_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           &workspace_size, &workspace_alignment,
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           auto_threadpool.get()));
@@ -1336,22 +1362,22 @@ class AveragePoolingOperatorTester {
       for (size_t i = 0; i < next_batch_size(); i++) {
         for (size_t oy = 0; oy < next_output_height(); oy++) {
           for (size_t ox = 0; ox < next_output_width(); ox++) {
-            for (size_t c = 0; c < channels(); c++) {
+            for (size_t c = 0; c < next_channels(); c++) {
               double acc = 0.0f;
               for (size_t py = 0; py < pooling_height(); py++) {
                 const size_t iy = oy * stride_height() + py - padding_top();
                 for (size_t px = 0; px < pooling_width(); px++) {
                   const size_t ix = ox * stride_width() + px - padding_left();
                   if (ix < next_input_width() && iy < next_input_height()) {
-                    acc += double(int32_t(input[((i * next_input_height() + iy) * next_input_width() + ix) * input_pixel_stride() + c]) - int32_t(input_zero_point()));
+                    acc += double(int32_t(input[((i * next_input_height() + iy) * next_input_width() + ix) * next_input_pixel_stride() + c]) - int32_t(input_zero_point()));
                   }
                 }
               }
-              next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * channels() + c] = float(acc * scale + double(output_zero_point()));
-              next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * channels() + c] =
-                std::min<float>(next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * channels() + c], float(qmax()));
-              next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * channels() + c] =
-                std::max<float>(next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * channels() + c], float(qmin()));
+              next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * next_channels() + c] = float(acc * scale + double(output_zero_point()));
+              next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * next_channels() + c] =
+                std::min<float>(next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * next_channels() + c], float(qmax()));
+              next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * next_channels() + c] =
+                std::max<float>(next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * next_channels() + c], float(qmin()));
             }
           }
         }
@@ -1364,6 +1390,7 @@ class AveragePoolingOperatorTester {
         xnn_reshape_average_pooling2d_nhwc_qu8(
           average_pooling_op,
           next_batch_size(), next_input_height(), next_input_width(),
+          next_channels(), next_input_pixel_stride(), next_output_pixel_stride(),
           &next_workspace_size, &next_workspace_alignment,
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           auto_threadpool.get()));
@@ -1389,11 +1416,11 @@ class AveragePoolingOperatorTester {
       for (size_t i = 0; i < next_batch_size(); i++) {
         for (size_t y = 0; y < next_output_height(); y++) {
           for (size_t x = 0; x < next_output_width(); x++) {
-            for (size_t c = 0; c < channels(); c++) {
-              EXPECT_LE(uint32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), uint32_t(qmax()));
-              EXPECT_GE(uint32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), uint32_t(qmin()));
-              EXPECT_NEAR(float(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c])),
-                next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c], 0.80f) <<
+            for (size_t c = 0; c < next_channels(); c++) {
+              EXPECT_LE(uint32_t(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c]), uint32_t(qmax()));
+              EXPECT_GE(uint32_t(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c]), uint32_t(qmin()));
+              EXPECT_NEAR(float(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c])),
+                next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * next_channels() + c], 0.80f) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
           }
@@ -1414,10 +1441,13 @@ class AveragePoolingOperatorTester {
   size_t batch_size_{1};
   size_t input_pixel_stride_{0};
   size_t output_pixel_stride_{0};
+  size_t next_input_pixel_stride_{0};
+  size_t next_output_pixel_stride_{0};
   uint32_t pooling_height_{1};
   uint32_t pooling_width_{1};
   uint32_t stride_height_{1};
   uint32_t stride_width_{1};
+  size_t next_channels_{0};
   size_t next_input_height_{0};
   size_t next_input_width_{0};
   size_t next_batch_size_{0};

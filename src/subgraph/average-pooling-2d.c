@@ -24,14 +24,8 @@ static enum xnn_status create_average_pooling_operator(
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs == 1);
-  const uint32_t input_id = node->inputs[0];
-  assert(input_id != XNN_INVALID_VALUE_ID);
-  assert(input_id < num_values);
 
   assert(node->num_outputs == 1);
-
-  const size_t channel_dim = values[input_id].shape.dim[3];
-  assert(channel_dim == values[node->outputs[0]].shape.dim[3]);
 
   enum xnn_status status;
   switch (node->compute_type) {
@@ -45,7 +39,6 @@ static enum xnn_status create_average_pooling_operator(
         node->params.pooling_2d.pooling_width,
         node->params.pooling_2d.stride_height,
         node->params.pooling_2d.stride_width,
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->activation.output_min,
         node->activation.output_max,
         node->flags,
@@ -61,7 +54,6 @@ static enum xnn_status create_average_pooling_operator(
         node->params.pooling_2d.pooling_width,
         node->params.pooling_2d.stride_height,
         node->params.pooling_2d.stride_width,
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->activation.output_min,
         node->activation.output_max,
         node->flags,
@@ -84,6 +76,9 @@ static enum xnn_status reshape_average_pooling_operator(
   const size_t batch_size = values[input_id].shape.dim[0];
   const size_t input_height = values[input_id].shape.dim[1];
   const size_t input_width = values[input_id].shape.dim[2];
+  const size_t channel_dim = values[input_id].shape.dim[3];
+  assert(channel_dim == values[opdata->outputs[0]].shape.dim[3]);
+
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_average_pooling_nhwc_f16:
       return xnn_reshape_average_pooling2d_nhwc_f16(
@@ -91,6 +86,7 @@ static enum xnn_status reshape_average_pooling_operator(
         batch_size,
         input_height,
         input_width,
+        /*channels=*/channel_dim, /*input_pixel_stride=*/channel_dim, /*output_pixel_stride=*/channel_dim,
         &opdata->workspace_size,
         &opdata->workspace_alignment,
         /*output_height_out=*/NULL,
@@ -102,6 +98,7 @@ static enum xnn_status reshape_average_pooling_operator(
         batch_size,
         input_height,
         input_width,
+        /*channels=*/channel_dim, /*input_pixel_stride=*/channel_dim, /*output_pixel_stride=*/channel_dim,
         &opdata->workspace_size,
         &opdata->workspace_alignment,
         /*output_height_out=*/NULL,

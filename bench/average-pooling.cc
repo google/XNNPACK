@@ -62,7 +62,6 @@ static void xnnpack_average_pooling_qu8(benchmark::State& state, const char* net
     padding_size, padding_size, padding_size, padding_size,
     pooling_size, pooling_size,
     stride, stride,
-    channels, channels /* input pixel stride */, channels /* output pixel stride */,
     127 /* input zero point */, 0.75f /* input scale */,
     127 /* output zero point */, 1.25f /* output scale */,
     0, 255,
@@ -77,6 +76,7 @@ static void xnnpack_average_pooling_qu8(benchmark::State& state, const char* net
   status = xnn_reshape_average_pooling2d_nhwc_qu8(
     pooling_op,
     batch_size, input_height, input_width,
+    channels, /*input_pixel_stride=*/channels, /*output_pixel_stride=*/channels,
     &workspace_size, &workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/nullptr);
@@ -154,7 +154,6 @@ static void xnnpack_average_pooling_f32(benchmark::State& state, const char* net
     padding_size, padding_size, padding_size, padding_size,
     pooling_size, pooling_size,
     stride, stride,
-    channels, channels /* input pixel stride */, channels /* output pixel stride */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */, &pooling_op);
   if (status != xnn_status_success) {
@@ -167,6 +166,7 @@ static void xnnpack_average_pooling_f32(benchmark::State& state, const char* net
   status = xnn_reshape_average_pooling2d_nhwc_f32(
     pooling_op,
     batch_size, input_height, input_width,
+    channels, /*input_pixel_stride=*/channels, /*output_pixel_stride=*/channels,
     &workspace_size, &workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/nullptr);

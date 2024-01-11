@@ -200,6 +200,7 @@ struct xnn_operator {
   size_t valid_batch_size;
   size_t last_input_height;
   size_t last_input_width;
+  size_t last_input_channels;
   const void* last_input;
   size_t last_output_height;
   size_t last_output_width;
