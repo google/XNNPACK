@@ -155,8 +155,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
         $if GFNI:
           const __m512i vb0123456789ABCDEF = _mm512_gf2p8affine_epi64_epi8(vbb0123456789ABCDEF, vshl4, 0);
         $else:
-          const __m512i vbs0123456789ABCDEF = _mm512_slli_epi32(vbb0123456789ABCDEF, 4);
-          const __m512i vb0123456789ABCDEF = _mm512_and_si512(vbs0123456789ABCDEF, vmask);
+          const __m512i vb0123456789ABCDEF = _mm512_slli_epi32(vbb0123456789ABCDEF, 4);
       $else:
         const __m512i vb0123456789ABCDEF = _mm512_load_si512(w);
       $if PREFETCH:

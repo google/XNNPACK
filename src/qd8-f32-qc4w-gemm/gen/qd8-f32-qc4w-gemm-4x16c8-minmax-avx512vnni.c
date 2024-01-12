@@ -142,10 +142,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x16c8__avx512vnni(
 
       const __m512i vbb01234567x01234567 = _mm512_load_si512(w);
       const __m512i vbb89ABCDEFx01234567 = _mm512_load_si512((const int8_t*) w + 64);
-      const __m512i vbs01234567x01234567 = _mm512_slli_epi32(vbb01234567x01234567, 4);
-      const __m512i vbs89ABCDEFx01234567 = _mm512_slli_epi32(vbb89ABCDEFx01234567, 4);
-      const __m512i vb01234567x01234567 = _mm512_and_si512(vbs01234567x01234567, vvalue_mask);
-      const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbs89ABCDEFx01234567, vvalue_mask);
+      const __m512i vb01234567x01234567 = _mm512_slli_epi32(vbb01234567x01234567, 4);
+      const __m512i vb89ABCDEFx01234567 = _mm512_slli_epi32(vbb89ABCDEFx01234567, 4);
 
       vacc0x01234567 = _mm512_dpbusd_epi32(vacc0x01234567, va0x01234567, vb01234567x01234567);
       vacc0x89ABCDEF = _mm512_dpbusd_epi32(vacc0x89ABCDEF, va0x01234567, vb89ABCDEFx01234567);
