@@ -19,7 +19,7 @@ void xnn_f32_vclamp_ukernel__neon_u4(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -39,17 +39,17 @@ void xnn_f32_vclamp_ukernel__neon_u4(
     vst1q_f32(output, vacc0123); output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
-    float32x4_t vacc = vld1q_f32(input);
-    vacc = vmaxq_f32(vacc, vy_min);
-    vacc = vminq_f32(vacc, vy_max);
-
-    float32x2_t vacc_lo = vget_low_f32(vacc);
     if (batch & (2 * sizeof(float))) {
-      vst1_f32(output, vacc_lo); output += 2;
-      vacc_lo = vget_high_f32(vacc);
+      float32x2_t vacc = vld1_f32(input); input += 2;
+      vacc = vmax_f32(vacc, vget_low_f32(vy_min));
+      vacc = vmin_f32(vacc, vget_low_f32(vy_max));
+      vst1_f32(output, vacc); output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      vst1_lane_f32(output, vacc_lo, 0);
+      float32x2_t vacc = vld1_dup_f32(input);
+      vacc = vmax_f32(vacc, vget_low_f32(vy_min));
+      vacc = vmin_f32(vacc, vget_low_f32(vy_max));
+      vst1_lane_f32(output, vacc, 0);
     }
   }
 }
