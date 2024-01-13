@@ -2865,6 +2865,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsubc-minmax-neon-u8.c
   src/f32-vclamp/gen/f32-vclamp-neon-u4.c
   src/f32-vclamp/gen/f32-vclamp-neon-u8.c
+  src/f32-vclamp/gen/f32-vclamp-neon-u16.c
   src/f32-vcmul/gen/f32-vcmul-neon-u4.c
   src/f32-vcmul/gen/f32-vcmul-neon-u8.c
   src/f32-vcmul/gen/f32-vcmul-neon-u12.c

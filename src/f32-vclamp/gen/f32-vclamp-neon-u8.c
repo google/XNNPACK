@@ -26,39 +26,46 @@ void xnn_f32_vclamp_ukernel__neon_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vy_min = vld1q_dup_f32(&params->scalar.min);
-  const float32x4_t vy_max = vld1q_dup_f32(&params->scalar.max);
+  #if XNN_ARCH_ARM64
+    const float32x4x2_t vminmax = vld2q_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vminmax.val[0];
+    const float32x4_t vmax = vminmax.val[1];
+  #else
+    const float32x2x2_t vminmax = vld2_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vcombine_f32(vminmax.val[0], vminmax.val[0]);
+    const float32x4_t vmax = vcombine_f32(vminmax.val[1], vminmax.val[1]);
+  #endif
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     float32x4_t vacc0123 = vld1q_f32(input); input += 4;
     float32x4_t vacc4567 = vld1q_f32(input); input += 4;
 
-    vacc0123 = vmaxq_f32(vacc0123, vy_min);
-    vacc4567 = vmaxq_f32(vacc4567, vy_min);
+    vacc0123 = vmaxq_f32(vacc0123, vmin);
+    vacc4567 = vmaxq_f32(vacc4567, vmin);
 
-    vacc0123 = vminq_f32(vacc0123, vy_max);
-    vacc4567 = vminq_f32(vacc4567, vy_max);
+    vacc0123 = vminq_f32(vacc0123, vmax);
+    vacc4567 = vminq_f32(vacc4567, vmax);
 
     vst1q_f32(output, vacc0123); output += 4;
     vst1q_f32(output, vacc4567); output += 4;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     float32x4_t vacc = vld1q_f32(input); input += 4;
-    vacc = vmaxq_f32(vacc, vy_min);
-    vacc = vminq_f32(vacc, vy_max);
+    vacc = vmaxq_f32(vacc, vmin);
+    vacc = vminq_f32(vacc, vmax);
     vst1q_f32(output, vacc); output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
     if (batch & (2 * sizeof(float))) {
       float32x2_t vacc = vld1_f32(input); input += 2;
-      vacc = vmax_f32(vacc, vget_low_f32(vy_min));
-      vacc = vmin_f32(vacc, vget_low_f32(vy_max));
+      vacc = vmax_f32(vacc, vget_low_f32(vmin));
+      vacc = vmin_f32(vacc, vget_low_f32(vmax));
       vst1_f32(output, vacc); output += 2;
     }
     if (batch & (1 * sizeof(float))) {
       float32x2_t vacc = vld1_dup_f32(input);
-      vacc = vmax_f32(vacc, vget_low_f32(vy_min));
-      vacc = vmin_f32(vacc, vget_low_f32(vy_max));
+      vacc = vmax_f32(vacc, vget_low_f32(vmin));
+      vacc = vmin_f32(vacc, vget_low_f32(vmax));
       vst1_lane_f32(output, vacc, 0);
     }
   }

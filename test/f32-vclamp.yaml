@@ -8,6 +8,9 @@
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vclamp_ukernel__neon_u8
   init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_vclamp_ukernel__neon_u16
+  init: xnn_init_f32_minmax_scalar_params
+
 # RISC-V Vector
 - name: xnn_f32_vclamp_ukernel__rvv_u1v
   init: xnn_init_f32_minmax_scalar_params
@@ -17,21 +20,25 @@
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vclamp_ukernel__rvv_u8v
   init: xnn_init_f32_minmax_scalar_params
+
 # x86 SSE
 - name: xnn_f32_vclamp_ukernel__sse_u4
   init: xnn_init_f32_minmax_sse_params
 - name: xnn_f32_vclamp_ukernel__sse_u8
   init: xnn_init_f32_minmax_sse_params
+
 # x86 AVX
 - name: xnn_f32_vclamp_ukernel__avx_u8
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_vclamp_ukernel__avx_u16
   init: xnn_init_f32_minmax_avx_params
+
 # x86 AVX512
 - name: xnn_f32_vclamp_ukernel__avx512f_u16
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vclamp_ukernel__avx512f_u32
   init: xnn_init_f32_minmax_scalar_params
+
 # WAsm SIMD
 - name: xnn_f32_vclamp_ukernel__wasmsimd_arm_u4
   init: xnn_init_f32_minmax_wasmsimd_params
@@ -41,6 +48,7 @@
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_vclamp_ukernel__wasmsimd_x86_u8
   init: xnn_init_f32_minmax_wasmsimd_params
+
 # WAsm
 - name: xnn_f32_vclamp_ukernel__wasm_u1
   init: xnn_init_f32_minmax_scalar_params
@@ -48,6 +56,7 @@
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vclamp_ukernel__wasm_u4
   init: xnn_init_f32_minmax_scalar_params
+
 # Scalar
 - name: xnn_f32_vclamp_ukernel__scalar_u1
   init: xnn_init_f32_minmax_scalar_params

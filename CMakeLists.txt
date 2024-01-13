@@ -4009,6 +4009,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f32-vsqrt-bench PRIVATE benchmark::benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(f32-vsqrt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
+  ADD_EXECUTABLE(f32-vclamp-bench bench/f32-vclamp.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-vclamp-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f32-vclamp-bench PRIVATE benchmark::benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-vclamp-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
   ADD_EXECUTABLE(f32-vtanh-bench bench/f32-vtanh.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-vtanh-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-vtanh-bench PRIVATE benchmark::benchmark pthreadpool)

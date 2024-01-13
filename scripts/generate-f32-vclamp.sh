@@ -23,8 +23,9 @@ tools/xngen src/f32-vclamp/wasmsimd.c.in -D BATCH_TILE=4 -D X86=1 -o src/f32-vcl
 tools/xngen src/f32-vclamp/wasmsimd.c.in -D BATCH_TILE=8 -D X86=1 -o src/f32-vclamp/gen/f32-vclamp-wasmsimd-x86-u8.c &
 
 ################################### ARM NEON ##################################
-tools/xngen src/f32-vclamp/neon.c.in -D BATCH_TILE=4 -o src/f32-vclamp/gen/f32-vclamp-neon-u4.c &
-tools/xngen src/f32-vclamp/neon.c.in -D BATCH_TILE=8 -o src/f32-vclamp/gen/f32-vclamp-neon-u8.c &
+tools/xngen src/f32-vclamp/neon.c.in -D BATCH_TILE=4  -o src/f32-vclamp/gen/f32-vclamp-neon-u4.c &
+tools/xngen src/f32-vclamp/neon.c.in -D BATCH_TILE=8  -o src/f32-vclamp/gen/f32-vclamp-neon-u8.c &
+tools/xngen src/f32-vclamp/neon.c.in -D BATCH_TILE=16 -o src/f32-vclamp/gen/f32-vclamp-neon-u16.c &
 
 ################################ RISC-V Vector ################################
 tools/xngen src/f32-vclamp/rvv.c.in -D LMUL=1 -o src/f32-vclamp/gen/f32-vclamp-rvv-u1v.c &

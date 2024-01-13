@@ -15,7 +15,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vclamp_ukernel__neon_u4(
+void xnn_f32_vclamp_ukernel__neon_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -36,14 +36,32 @@ void xnn_f32_vclamp_ukernel__neon_u4(
     const float32x4_t vmax = vcombine_f32(vminmax.val[1], vminmax.val[1]);
   #endif
 
-  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     float32x4_t vacc0123 = vld1q_f32(input); input += 4;
+    float32x4_t vacc4567 = vld1q_f32(input); input += 4;
+    float32x4_t vacc89AB = vld1q_f32(input); input += 4;
+    float32x4_t vaccCDEF = vld1q_f32(input); input += 4;
 
     vacc0123 = vmaxq_f32(vacc0123, vmin);
+    vacc4567 = vmaxq_f32(vacc4567, vmin);
+    vacc89AB = vmaxq_f32(vacc89AB, vmin);
+    vaccCDEF = vmaxq_f32(vaccCDEF, vmin);
 
     vacc0123 = vminq_f32(vacc0123, vmax);
+    vacc4567 = vminq_f32(vacc4567, vmax);
+    vacc89AB = vminq_f32(vacc89AB, vmax);
+    vaccCDEF = vminq_f32(vaccCDEF, vmax);
 
     vst1q_f32(output, vacc0123); output += 4;
+    vst1q_f32(output, vacc4567); output += 4;
+    vst1q_f32(output, vacc89AB); output += 4;
+    vst1q_f32(output, vaccCDEF); output += 4;
+  }
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    float32x4_t vacc = vld1q_f32(input); input += 4;
+    vacc = vmaxq_f32(vacc, vmin);
+    vacc = vminq_f32(vacc, vmax);
+    vst1q_f32(output, vacc); output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
     if (batch & (2 * sizeof(float))) {

@@ -660,18 +660,18 @@ static void init_f32_clamp_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
-      f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__neon_u8;
+      f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__neon_u16;
       f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
-      f32_clamp_config.element_tile = 8;
+      f32_clamp_config.element_tile = 16;
     } else if (!XNN_PLATFORM_MOBILE) {
       f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__scalar_u4;
       f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_clamp_config.element_tile = 4;
     }
   #elif XNN_ARCH_ARM64
-    f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__neon_u8;
+    f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__neon_u16;
     f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
-    f32_clamp_config.element_tile = 8;
+    f32_clamp_config.element_tile = 16;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
