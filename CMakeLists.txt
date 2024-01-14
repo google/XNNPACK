@@ -1523,6 +1523,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(average-pooling-2d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME average-pooling-2d-test COMMAND average-pooling-2d-test)
 
+    ADD_EXECUTABLE(average-pooling-2d-reshape-test test/average-pooling-2d-reshape.cc)
+    TARGET_INCLUDE_DIRECTORIES(average-pooling-2d-reshape-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(average-pooling-2d-reshape-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME average-pooling-2d-reshape-test COMMAND average-pooling-2d-reshape-test)
+
     ADD_EXECUTABLE(bankers-rounding-test test/bankers-rounding.cc)
     TARGET_INCLUDE_DIRECTORIES(bankers-rounding-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(bankers-rounding-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)

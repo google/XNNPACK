@@ -3365,6 +3365,22 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "average_pooling_2d_reshape_test",
+    srcs = [
+        "average-pooling-2d-reshape.cc",
+    ],
+    deps = [
+        "//:XNNPACK_test_mode",
+        "//:aligned_allocator",
+        "//:common",
+        "//:node_type",
+        "//:operator_utils",
+        "//:operators_test_mode",
+        "//:subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "bankers_rounding_test",
     srcs = [
         "bankers-rounding.cc",
