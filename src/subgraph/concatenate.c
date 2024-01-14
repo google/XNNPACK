@@ -31,6 +31,28 @@ static enum xnn_status create_concatenate_operator_helper(
   }
 }
 
+static enum xnn_status create_concatenate_n_operator(
+  const struct xnn_node* node,
+  const struct xnn_value* values,
+  size_t num_values,
+  size_t num_inputs,
+  struct xnn_operator_data* opdata,
+  struct xnn_code_cache* code_cache,
+  xnn_weights_cache_t weights_cache)
+{
+  enum xnn_status status;
+  const size_t axis = node->params.concatenate.axis;
+  opdata->axis = axis;
+  for (size_t i = 0; i < num_inputs; ++i) {
+    status = create_concatenate_operator_helper(node, opdata, i);
+    if (status != xnn_status_success) {
+      return status;
+    }
+  }
+
+  return status;
+}
+
 static enum xnn_status create_concatenate2_operator(
   const struct xnn_node* node,
   const struct xnn_value* values,
@@ -39,19 +61,7 @@ static enum xnn_status create_concatenate2_operator(
   struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
-  enum xnn_status status;
-  const size_t axis = node->params.concatenate.axis;
-  opdata->axis = axis;
-  status = create_concatenate_operator_helper(node, opdata, 0);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  status = create_concatenate_operator_helper(node, opdata, 1);
-  if (status != xnn_status_success) {
-    return status;
-  }
-
-  return status;
+  return create_concatenate_n_operator(node, values, num_values, /*num_inputs=*/2, opdata, code_cache, weights_cache);
 }
 
 static enum xnn_status create_concatenate3_operator(
@@ -62,24 +72,7 @@ static enum xnn_status create_concatenate3_operator(
   struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
-  const size_t axis = node->params.concatenate.axis;
-  opdata->axis = axis;
-
-  enum xnn_status status;
-  status = create_concatenate_operator_helper(node, opdata, 0);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  status = create_concatenate_operator_helper(node, opdata, 1);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  status = create_concatenate_operator_helper(node, opdata, 2);
-  if (status != xnn_status_success) {
-    return status;
-  }
-
-  return status;
+  return create_concatenate_n_operator(node, values, num_values, /*num_inputs=*/3, opdata, code_cache, weights_cache);
 }
 
 static enum xnn_status create_concatenate4_operator(
@@ -90,27 +83,18 @@ static enum xnn_status create_concatenate4_operator(
   struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
-  const size_t axis = node->params.concatenate.axis;
-  opdata->axis = axis;
-  enum xnn_status status;
-  status = create_concatenate_operator_helper(node, opdata, 0);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  status = create_concatenate_operator_helper(node, opdata, 1);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  status = create_concatenate_operator_helper(node, opdata, 2);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  status = create_concatenate_operator_helper(node, opdata, 3);
-  if (status != xnn_status_success) {
-    return status;
-  }
+  return create_concatenate_n_operator(node, values, num_values, /*num_inputs=*/4, opdata, code_cache, weights_cache);
+}
 
-  return status;
+static enum xnn_status create_concatenate5_operator(
+  const struct xnn_node* node,
+  const struct xnn_value* values,
+  size_t num_values,
+  struct xnn_operator_data* opdata,
+  struct xnn_code_cache* code_cache,
+  xnn_weights_cache_t weights_cache)
+{
+  return create_concatenate_n_operator(node, values, num_values, /*num_inputs=*/5, opdata, code_cache, weights_cache);
 }
 
 static enum xnn_status reshape_concatenate_operator_helper(
@@ -145,30 +129,36 @@ static enum xnn_status reshape_concatenate_operator_helper(
   }
 }
 
-static enum xnn_status reshape_concatenate2_operator(
+static enum xnn_status reshape_concatenate_n_operator(
   struct xnn_operator_data* opdata,
   struct xnn_value* values,
   size_t num_values,
+  size_t num_inputs,
   pthreadpool_t threadpool)
 {
   enum xnn_status status;
 
-  assert(opdata->num_inputs == 2);
-  const uint32_t input1_id = opdata->inputs[0];
-  assert(input1_id != XNN_INVALID_VALUE_ID);
-  assert(input1_id < num_values);
-  const uint32_t input2_id = opdata->inputs[1];
-  assert(input2_id != XNN_INVALID_VALUE_ID);
-  assert(input2_id < num_values);
+  assert(opdata->num_inputs == num_inputs);
+  uint32_t input_id[XNN_MAX_OPERATOR_OBJECTS];
+  for (size_t i = 0; i < num_inputs; ++i) {
+    input_id[i] = opdata->inputs[i];
+    assert(input_id[i] != XNN_INVALID_VALUE_ID);
+    assert(input_id[i] < num_values);
+  }
 
-  size_t input1_channels = 1, input2_channels = 1;
+  size_t input_channels[XNN_MAX_OPERATOR_OBJECTS];
+  for (size_t i = 0; i < num_inputs; ++i) {
+    input_channels[i] = 1;
+  }
 
   const size_t axis = opdata->axis;
-  for (size_t i = axis; i < values[input1_id].shape.num_dims; i++) {
-    input1_channels *= values[input1_id].shape.dim[i];
-    input2_channels *= values[input2_id].shape.dim[i];
+  size_t output_stride = 0;
+  for (size_t i = 0; i < num_inputs; ++i) {
+    for (size_t j = axis; j < values[input_id[0]].shape.num_dims; j++) {
+      input_channels[i] *= values[input_id[i]].shape.dim[j];
+    }
+    output_stride += input_channels[i];
   }
-  const size_t output_stride = input1_channels + input2_channels;
 
   assert(opdata->num_outputs == 1);
   const uint32_t output_id = opdata->outputs[0];
@@ -177,11 +167,22 @@ static enum xnn_status reshape_concatenate2_operator(
 
   opdata->batch_size = xnn_shape_multiply_leading_dims(&values[output_id].shape, opdata->axis);
 
-  status = reshape_concatenate_operator_helper(opdata, 0, input1_channels, input1_channels, output_stride, threadpool);
-  if (status != xnn_status_success) {
-    return status;
+  for (size_t i = 0; i < num_inputs; ++i) {
+    status = reshape_concatenate_operator_helper(opdata, i, input_channels[i], input_channels[i], output_stride, threadpool);
+    if (status != xnn_status_success) {
+      return status;
+    }
   }
-  return reshape_concatenate_operator_helper(opdata, 1, input2_channels, input2_channels, output_stride, threadpool);
+  return status;
+}
+
+static enum xnn_status reshape_concatenate2_operator(
+  struct xnn_operator_data* opdata,
+  struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  return reshape_concatenate_n_operator(opdata, values, num_values, /*num_inputs=*/2, threadpool);
 }
 
 static enum xnn_status reshape_concatenate3_operator(
@@ -190,44 +191,7 @@ static enum xnn_status reshape_concatenate3_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
-  enum xnn_status status;
-
-  assert(opdata->num_inputs == 3);
-  const uint32_t input1_id = opdata->inputs[0];
-  assert(input1_id != XNN_INVALID_VALUE_ID);
-  assert(input1_id < num_values);
-  const uint32_t input2_id = opdata->inputs[1];
-  assert(input2_id != XNN_INVALID_VALUE_ID);
-  assert(input2_id < num_values);
-  const uint32_t input3_id = opdata->inputs[2];
-  assert(input3_id != XNN_INVALID_VALUE_ID);
-  assert(input3_id < num_values);
-
-  size_t input1_channels = 1, input2_channels = 1, input3_channels = 1;
-
-  const size_t axis = opdata->axis;
-  for (size_t i = axis; i < values[input1_id].shape.num_dims; i++) {
-    input1_channels *= values[input1_id].shape.dim[i];
-    input2_channels *= values[input2_id].shape.dim[i];
-    input3_channels *= values[input3_id].shape.dim[i];
-  }
-  const size_t output_stride = input1_channels + input2_channels + input3_channels;
-  assert(opdata->num_outputs == 1);
-  const uint32_t output_id = opdata->outputs[0];
-  assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_values);
-
-  opdata->batch_size = xnn_shape_multiply_leading_dims(&values[output_id].shape, opdata->axis);
-
-  status = reshape_concatenate_operator_helper(opdata, 0, input1_channels, input1_channels, output_stride, threadpool);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  status = reshape_concatenate_operator_helper(opdata, 1, input2_channels, input2_channels, output_stride, threadpool);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  return reshape_concatenate_operator_helper(opdata, 2, input3_channels, input3_channels, output_stride, threadpool);
+  return reshape_concatenate_n_operator(opdata, values, num_values, /*num_inputs=*/3, threadpool);
 }
 
 static enum xnn_status reshape_concatenate4_operator(
@@ -236,53 +200,16 @@ static enum xnn_status reshape_concatenate4_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
-  enum xnn_status status;
+  return reshape_concatenate_n_operator(opdata, values, num_values, /*num_inputs=*/4, threadpool);
+}
 
-  assert(opdata->num_inputs == 4);
-  const uint32_t input1_id = opdata->inputs[0];
-  assert(input1_id != XNN_INVALID_VALUE_ID);
-  assert(input1_id < num_values);
-  const uint32_t input2_id = opdata->inputs[1];
-  assert(input2_id != XNN_INVALID_VALUE_ID);
-  assert(input2_id < num_values);
-  const uint32_t input3_id = opdata->inputs[2];
-  assert(input3_id != XNN_INVALID_VALUE_ID);
-  assert(input3_id < num_values);
-  const uint32_t input4_id = opdata->inputs[3];
-  assert(input4_id != XNN_INVALID_VALUE_ID);
-  assert(input4_id < num_values);
-
-  size_t input1_channels = 1, input2_channels = 1, input3_channels = 1, input4_channels = 1;
-
-  const size_t axis = opdata->axis;
-  for (size_t i = axis; i < values[input1_id].shape.num_dims; i++) {
-    input1_channels *= values[input1_id].shape.dim[i];
-    input2_channels *= values[input2_id].shape.dim[i];
-    input3_channels *= values[input3_id].shape.dim[i];
-    input4_channels *= values[input4_id].shape.dim[i];
-  }
-  const size_t output_stride = input1_channels + input2_channels + input3_channels + input4_channels;
-
-  assert(opdata->num_outputs == 1);
-  const uint32_t output_id = opdata->outputs[0];
-  assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_values);
-
-  opdata->batch_size = xnn_shape_multiply_leading_dims(&values[output_id].shape, opdata->axis);
-
-  status = reshape_concatenate_operator_helper(opdata, 0, input1_channels, input1_channels, output_stride, threadpool);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  status = reshape_concatenate_operator_helper(opdata, 1, input2_channels, input2_channels, output_stride, threadpool);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  status = reshape_concatenate_operator_helper(opdata, 2, input3_channels, input3_channels, output_stride, threadpool);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  return reshape_concatenate_operator_helper(opdata, 3, input4_channels, input4_channels, output_stride, threadpool);
+static enum xnn_status reshape_concatenate5_operator(
+  struct xnn_operator_data* opdata,
+  struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  return reshape_concatenate_n_operator(opdata, values, num_values, /*num_inputs=*/5, threadpool);
 }
 
 static enum xnn_status setup_concatenate_operator_helper(
@@ -319,43 +246,53 @@ static enum xnn_status setup_concatenate_operator_helper(
   }
 }
 
-static enum xnn_status setup_concatenate2_operator(
+static enum xnn_status setup_concatenate_n_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
   size_t num_values,
+  size_t num_inputs,
   pthreadpool_t threadpool)
 {
-  const uint32_t input1_id = opdata->inputs[0];
-  assert(input1_id != XNN_INVALID_VALUE_ID);
-  assert(input1_id < num_values);
-
-  const uint32_t input2_id = opdata->inputs[1];
-  assert(input2_id != XNN_INVALID_VALUE_ID);
-  assert(input2_id < num_values);
+  uint32_t input_id[XNN_MAX_OPERATOR_OBJECTS];
+  for (size_t i = 0; i < num_inputs; ++i) {
+    input_id[i] = opdata->inputs[i];
+    assert(input_id[i] != XNN_INVALID_VALUE_ID);
+    assert(input_id[i] < num_values);
+  }
 
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input1_value = values + input1_id;
-  const void* input1_data = input1_value->data;
-  assert(input1_data != NULL);
-
-  const struct xnn_value* input2_value = values + input2_id;
-  const void* input2_data = input2_value->data;
-  assert(input2_data != NULL);
+  const struct xnn_value* input_value[XNN_MAX_OPERATOR_OBJECTS];
+  const void * input_data[XNN_MAX_OPERATOR_OBJECTS];
+  for (size_t i = 0; i < num_inputs; ++i) {
+    input_value[i] = values + input_id[i];
+    input_data[i] = input_value[i]->data;
+    assert(input_data[i] != NULL);
+  }
 
   const struct xnn_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 
   enum xnn_status status;
-
-  status = setup_concatenate_operator_helper(input1_data, output_data, opdata, 0, threadpool);
-  if (status != xnn_status_success) {
-    return status;
+  for (size_t i = 0; i < num_inputs; ++i) {
+    status = setup_concatenate_operator_helper(input_data[i], output_data, opdata, i, threadpool);
+    if (status != xnn_status_success) {
+      return status;
+    }
   }
-  return setup_concatenate_operator_helper(input2_data, output_data, opdata, 1, threadpool);
+  return xnn_status_success;
+}
+
+static enum xnn_status setup_concatenate2_operator(
+  const struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  return setup_concatenate_n_operator(opdata, values, num_values, /*num_inputs=*/2, threadpool);
 }
 
 static enum xnn_status setup_concatenate3_operator(
@@ -364,49 +301,7 @@ static enum xnn_status setup_concatenate3_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
-  const uint32_t input1_id = opdata->inputs[0];
-  assert(input1_id != XNN_INVALID_VALUE_ID);
-  assert(input1_id < num_values);
-
-  const uint32_t input2_id = opdata->inputs[1];
-  assert(input2_id != XNN_INVALID_VALUE_ID);
-  assert(input2_id < num_values);
-
-  const uint32_t input3_id = opdata->inputs[2];
-  assert(input3_id != XNN_INVALID_VALUE_ID);
-  assert(input3_id < num_values);
-
-  const uint32_t output_id = opdata->outputs[0];
-  assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_values);
-
-  const struct xnn_value* input1_value = values + input1_id;
-  const void* input1_data = input1_value->data;
-  assert(input1_data != NULL);
-
-  const struct xnn_value* input2_value = values + input2_id;
-  const void* input2_data = input2_value->data;
-  assert(input2_data != NULL);
-
-  const struct xnn_value* input3_value = values + input3_id;
-  const void* input3_data = input3_value->data;
-  assert(input3_data != NULL);
-
-  const struct xnn_value* output_value = values + output_id;
-  void* output_data = output_value->data;
-  assert(output_data != NULL);
-
-  enum xnn_status status;
-
-  status = setup_concatenate_operator_helper(input1_data, output_data, opdata, 0, threadpool);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  status = setup_concatenate_operator_helper(input2_data, output_data, opdata, 1, threadpool);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  return setup_concatenate_operator_helper(input3_data, output_data, opdata, 2, threadpool);
+  return setup_concatenate_n_operator(opdata, values, num_values, /*num_inputs=*/3, threadpool);
 }
 
 static enum xnn_status setup_concatenate4_operator(
@@ -415,61 +310,16 @@ static enum xnn_status setup_concatenate4_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
-  const uint32_t input1_id = opdata->inputs[0];
-  assert(input1_id != XNN_INVALID_VALUE_ID);
-  assert(input1_id < num_values);
+  return setup_concatenate_n_operator(opdata, values, num_values, /*num_inputs=*/4, threadpool);
+}
 
-  const uint32_t input2_id = opdata->inputs[1];
-  assert(input2_id != XNN_INVALID_VALUE_ID);
-  assert(input2_id < num_values);
-
-  const uint32_t input3_id = opdata->inputs[2];
-  assert(input3_id != XNN_INVALID_VALUE_ID);
-  assert(input3_id < num_values);
-
-  const uint32_t input4_id = opdata->inputs[3];
-  assert(input4_id != XNN_INVALID_VALUE_ID);
-  assert(input4_id < num_values);
-
-  const uint32_t output_id = opdata->outputs[0];
-  assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_values);
-
-  const struct xnn_value* input1_value = values + input1_id;
-  const void* input1_data = input1_value->data;
-  assert(input1_data != NULL);
-
-  const struct xnn_value* input2_value = values + input2_id;
-  const void* input2_data = input2_value->data;
-  assert(input2_data != NULL);
-
-  const struct xnn_value* input3_value = values + input3_id;
-  const void* input3_data = input3_value->data;
-  assert(input3_data != NULL);
-
-  const struct xnn_value* input4_value = values + input4_id;
-  const void* input4_data = input4_value->data;
-  assert(input4_data != NULL);
-
-  const struct xnn_value* output_value = values + output_id;
-  void* output_data = output_value->data;
-  assert(output_data != NULL);
-
-  enum xnn_status status;
-
-  status = setup_concatenate_operator_helper(input1_data, output_data, opdata, 0, threadpool);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  status = setup_concatenate_operator_helper(input2_data, output_data, opdata, 1, threadpool);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  status = setup_concatenate_operator_helper(input3_data, output_data, opdata, 2, threadpool);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  return setup_concatenate_operator_helper(input4_data, output_data, opdata, 3, threadpool);
+static enum xnn_status setup_concatenate5_operator(
+  const struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  return setup_concatenate_n_operator(opdata, values, num_values, /*num_inputs=*/5, threadpool);
 }
 
 enum xnn_status check_input_value(
@@ -558,7 +408,7 @@ enum xnn_status xnn_define_concatenate_n(
   uint32_t flags)
 {
   assert(num_inputs >= 2);
-  assert(num_inputs <= 4);
+  assert(num_inputs <= 5);
 
   enum xnn_status status;
   if ((status = xnn_subgraph_check_xnnpack_initialized(node_type)) != xnn_status_success) {
@@ -650,6 +500,12 @@ enum xnn_status xnn_define_concatenate_n(
       return status;
     }
   }
+  if (num_inputs > 4) {
+    status = check_input_compute_type(subgraph, input_ids[4], output_id, "fifth", node_type);
+    if (status !=  xnn_status_success) {
+      return status;
+    }
+  }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
   if (node == NULL) {
@@ -660,8 +516,6 @@ enum xnn_status xnn_define_concatenate_n(
   node->type = node_type;
   node->compute_type = compute_type;
   node->num_inputs = num_inputs;
-  node->inputs[0] = input_ids[0];
-  node->inputs[1] = input_ids[1];
   node->num_outputs = 1;
   node->outputs[0] = output_id;
   node->flags = flags;
@@ -676,17 +530,23 @@ enum xnn_status xnn_define_concatenate_n(
       node->create = create_concatenate3_operator;
       node->reshape = reshape_concatenate3_operator;
       node->setup = setup_concatenate3_operator;
-      node->inputs[2] = input_ids[2];
       break;
     case 4:
       node->create = create_concatenate4_operator;
       node->reshape = reshape_concatenate4_operator;
       node->setup = setup_concatenate4_operator;
-      node->inputs[2] = input_ids[2];
-      node->inputs[3] = input_ids[3];
+      break;
+    case 5:
+      node->create = create_concatenate5_operator;
+      node->reshape = reshape_concatenate5_operator;
+      node->setup = setup_concatenate5_operator;
       break;
     default:
       XNN_UNREACHABLE;
+  }
+
+  for (size_t i = 0; i < num_inputs; ++i) {
+    node->inputs[i] = input_ids[i];
   }
 
   return xnn_status_success;
@@ -732,4 +592,20 @@ enum xnn_status xnn_define_concatenate4(
   uint32_t input_ids[4] = { input1_id, input2_id, input3_id, input4_id };
   return xnn_define_concatenate_n(
     xnn_node_type_concatenate4, subgraph, axis, XNN_COUNT_OF(input_ids), input_ids, output_id, flags);
+}
+
+enum xnn_status xnn_define_concatenate5(
+  xnn_subgraph_t subgraph,
+  size_t axis,
+  uint32_t input1_id,
+  uint32_t input2_id,
+  uint32_t input3_id,
+  uint32_t input4_id,
+  uint32_t input5_id,
+  uint32_t output_id,
+  uint32_t flags)
+{
+  uint32_t input_ids[5] = { input1_id, input2_id, input3_id, input4_id, input5_id };
+  return xnn_define_concatenate_n(
+    xnn_node_type_concatenate5, subgraph, axis, XNN_COUNT_OF(input_ids), input_ids, output_id, flags);
 }

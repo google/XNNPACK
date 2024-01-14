@@ -29,6 +29,7 @@ enum xnn_node_type {
   xnn_node_type_concatenate2,
   xnn_node_type_concatenate3,
   xnn_node_type_concatenate4,
+  xnn_node_type_concatenate5,
   xnn_node_type_convert,
   xnn_node_type_convolution_2d,
   xnn_node_type_copy,

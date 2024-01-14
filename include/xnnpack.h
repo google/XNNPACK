@@ -1247,6 +1247,17 @@ enum xnn_status xnn_define_concatenate4(
   uint32_t output_id,
   uint32_t flags);
 
+enum xnn_status xnn_define_concatenate5(
+  xnn_subgraph_t subgraph,
+  size_t axis,
+  uint32_t input1_id,
+  uint32_t input2_id,
+  uint32_t input3_id,
+  uint32_t input4_id,
+  uint32_t input5_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a Copy Node and add it to a Subgraph.
 ///
 /// The Copy Node copies an input tensor to an output tensor.

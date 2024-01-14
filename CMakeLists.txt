@@ -1563,6 +1563,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(concatenate4-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME concatenate4-test COMMAND concatenate4-test)
 
+    ADD_EXECUTABLE(concatenate5-test test/concatenate5.cc)
+    TARGET_INCLUDE_DIRECTORIES(concatenate5-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(concatenate5-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME concatenate5-test COMMAND concatenate5-test)
+
     ADD_EXECUTABLE(convert-test test/convert.cc)
     TARGET_INCLUDE_DIRECTORIES(convert-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(convert-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)

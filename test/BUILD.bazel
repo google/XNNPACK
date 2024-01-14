@@ -3476,6 +3476,19 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "concatenate5_test",
+    srcs = [
+        "concatenate5.cc",
+    ],
+    deps = [
+        "//:XNNPACK_test_mode",
+        "//:node_type",
+        "//:operators_test_mode",
+        "//:subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "convert_test",
     srcs = [
         "convert.cc",

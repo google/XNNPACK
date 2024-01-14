@@ -29,6 +29,8 @@
   string: "Concatenate3"
 - name: xnn_node_type_concatenate4
   string: "Concatenate4"
+- name: xnn_node_type_concatenate5
+  string: "Concatenate5"
 - name: xnn_node_type_convert
   string: "Convert"
 - name: xnn_node_type_convolution_2d
