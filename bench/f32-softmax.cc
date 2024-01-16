@@ -439,6 +439,16 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
     benchmark::utils::CheckAVX512F)->Apply(CharacteristicArguments)->UseManualTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, rvv_p6_rmax_m8_exp_m4_vmulc_m8,
+    xnn_f32_rmax_ukernel__rvv_u8v,
+    xnn_f32_raddstoreexpminusmax_ukernel__rvv_rr2_p6_u4v,
+    xnn_init_f32_expminus_rvv_rr2_p6_params,
+    xnn_f32_vmulc_minmax_ukernel__rvv_u8v,
+    xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckRVV)->Apply(CharacteristicArguments)->UseManualTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif

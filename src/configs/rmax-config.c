@@ -81,7 +81,11 @@ static void init_f32_rmax_config(void) {
   #elif XNN_ARCH_WASM
     f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__scalar_u4_acc4;
   #elif XNN_ARCH_RISCV
-    f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__scalar_u4_acc4;
+    #if XNN_ENABLE_RISCV_VECTOR
+      f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__rvv_u8v;
+    #else
+      f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__scalar_u4_acc4;
+    #endif
   #elif XNN_ARCH_PPC64
     f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__scalar_u4_acc4;
   #endif
