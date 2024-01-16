@@ -336,6 +336,18 @@
   #define TEST_REQUIRES_RISCV_VECTOR
 #endif
 
+#if XNN_ARCH_RISCV
+  #define TEST_REQUIRES_RISCV_VECTOR_FP16_ARITH \
+    do { \
+      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config(); \
+      if (hardware_config == nullptr || !hardware_config->use_riscv_vector_fp16_arith) { \
+        GTEST_SKIP(); \
+      } \
+    } while (0)
+#else
+  #define TEST_REQUIRES_RISCV_VECTOR_FP16_ARITH
+#endif
+
 #if XNN_ARCH_WASMRELAXEDSIMD
   #define TEST_REQUIRES_WASM_PSHUFB \
     do { \

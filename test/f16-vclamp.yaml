@@ -9,6 +9,16 @@
 - name: xnn_f16_vclamp_ukernel__neonfp16arith_u16
   init: xnn_init_f16_minmax_fp16arith_params
 
+# RISC-V Vector
+- name: xnn_f16_vclamp_ukernel__rvvfp16arith_u1v
+  init: xnn_init_f16_minmax_fp16arith_params
+- name: xnn_f16_vclamp_ukernel__rvvfp16arith_u2v
+  init: xnn_init_f16_minmax_fp16arith_params
+- name: xnn_f16_vclamp_ukernel__rvvfp16arith_u4v
+  init: xnn_init_f16_minmax_fp16arith_params
+- name: xnn_f16_vclamp_ukernel__rvvfp16arith_u8v
+  init: xnn_init_f16_minmax_fp16arith_params
+
 # x86 F16C
 - name: xnn_f16_vclamp_ukernel__f16c_u8
   init: xnn_init_f16_minmax_avx_params

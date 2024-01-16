@@ -51,6 +51,7 @@ struct xnn_hardware_config {
 #endif
 #if XNN_ARCH_RISCV
   bool use_riscv_vector;
+  bool use_riscv_vector_fp16_arith;
   // vlenb CSR (VLEN/8). 0 if vector extension is unsupported.
   uint32_t vlenb;
 #endif

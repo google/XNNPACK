@@ -5031,6 +5031,12 @@ SET(ALL_RVV_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u1v.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u2v.c)
 
+SET(ALL_RVVFP16ARITH_MICROKERNEL_SRCS
+  src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u1v.c
+  src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u2v.c
+  src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u4v.c
+  src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u8v.c)
+
 SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/cs16-bfly4/cs16-bfly4-samples1-scalar.c
   src/cs16-bfly4/cs16-bfly4-samples4-scalar.c

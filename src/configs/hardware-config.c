@@ -114,6 +114,9 @@ static void init_hardware_config(void) {
     xnn_log_debug("getauxval(AT_HWCAP) = %08lX", hwcap);
     hardware_config.use_riscv_vector = (hwcap & COMPAT_HWCAP_ISA_V) != 0;
 
+    /* There is no HWCAP for fp16 so disable by default */
+    hardware_config.use_riscv_vector_fp16_arith = false;
+
     if (hardware_config.use_riscv_vector) {
       register uint32_t vlenb __asm__ ("t0");
       __asm__(".word 0xC22022F3"  /* CSRR t0, vlenb */ : "=r" (vlenb));

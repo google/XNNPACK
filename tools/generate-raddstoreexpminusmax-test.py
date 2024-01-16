@@ -127,7 +127,12 @@ def generate_test_cases(ukernel, init_fn, elements_tile, vector_tile, isa):
   elements_scale = ""
   if vector_tile:
     ctype = {"f16": "uint16_t", "f32": "float"}[datatype]
-    elements_scale = {"rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype}[isa]
+    elements_scale = {
+      "rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype,
+      "rvvfp16arith": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype,
+    }[isa]
+
+
   return xngen.preprocess(RADDSTOREEXPMINUSMAX_TEST_TEMPLATE, {
       "TEST_FUNCTION": ukernel,
       "INIT_FUNCTION": init_fn,

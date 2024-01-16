@@ -116,13 +116,10 @@ union xnn_bf16_minmax_params {
 };
 
 union xnn_f16_minmax_params {
-  char _; // Dummy member variable to comply with the C standard
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t min;
     uint16_t max;
   } fp16arith;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(32) float min[8];

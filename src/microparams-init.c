@@ -1950,7 +1950,6 @@ size_t xnn_init_bf16_minmax_scalar_params(
   return sizeof(params->scalar);
 }
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_f16_minmax_fp16arith_params(
   union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t min,
@@ -1961,6 +1960,7 @@ size_t xnn_init_f16_minmax_fp16arith_params(
   return sizeof(params->fp16arith);
 }
 
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_f16_qc4w_minmax_scalar_params(
   union xnn_f16_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t output_min,

@@ -157,7 +157,10 @@ def generate_test_cases(ukernel, op_type, init_fn, tester, batch_tile, vector_ti
   batch_scale = ""
   if vector_tile:
     ctype = {"u8": "uint8_t", "f16": "uint16_t", "f32": "float"}[datatype]
-    batch_scale = {"rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype}[isa]
+    batch_scale = {
+      "rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype,
+      "rvvfp16arith": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype,
+    }[isa]
   return xngen.preprocess(REDUCE_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
