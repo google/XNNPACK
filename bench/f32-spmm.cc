@@ -16,6 +16,486 @@
 #include <xnnpack/microparams-init.h>
 
 
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm, 4, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm_pipelined(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm_pipelined, 4, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm_pipelined)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm_pipelined_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm_pipelined_x2, 4, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm_pipelined_x2)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm_x2, 4, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm_x2)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm_x4(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm_x4, 4, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm_x4)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_x86(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_x86, 4, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_x86)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_x86_pipelined(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_x86_pipelined, 4, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_x86_pipelined)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_x86_pipelined_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_x86_pipelined_x2, 4, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_x86_pipelined_x2)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_x86_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_x86_x2, 4, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_x86_x2)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_x86_x4(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_x86_x4, 4, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_x86_x4)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_arm(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_arm, 8, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_arm)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_arm_pipelined(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_arm_pipelined, 8, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_arm_pipelined)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_arm_pipelined_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_arm_pipelined_x2, 8, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_arm_pipelined_x2)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_arm_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_arm_x2, 8, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_arm_x2)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_arm_x4(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_arm_x4, 8, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_arm_x4)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_x86(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_x86, 8, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_x86)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_x86_pipelined(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_x86_pipelined, 8, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_x86_pipelined)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_x86_pipelined_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_x86_pipelined_x2, 8, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_x86_pipelined_x2)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_x86_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_x86_x2, 8, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_x86_x2)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_x86_x4(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_x86_x4, 8, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_8x1__wasmrelaxedsimd_x86_x4)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_arm(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_arm, 16, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_arm)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_arm_pipelined(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_arm_pipelined, 16, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_arm_pipelined)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_arm_pipelined_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_arm_pipelined_x2, 16, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_arm_pipelined_x2)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_arm_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_arm_x2, 16, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_arm_x2)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_arm_x4(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_arm_x4, 16, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_arm_x4)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_x86(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_x86, 16, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_x86)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_x86_pipelined(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_x86_pipelined, 16, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_x86_pipelined)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_x86_pipelined_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_x86_pipelined_x2, 16, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_x86_pipelined_x2)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_x86_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_x86_x2, 16, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_x86_x2)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_x86_x4(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_x86_x4, 16, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_16x1__wasmrelaxedsimd_x86_x4)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_arm(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_arm, 32, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_arm)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_arm_pipelined(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_arm_pipelined, 32, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_arm_pipelined)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_arm_pipelined_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_arm_pipelined_x2, 32, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_arm_pipelined_x2)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_arm_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_arm_x2, 32, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_arm_x2)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_arm_x4(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_arm_x4, 32, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_arm_x4)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_x86(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_x86, 32, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_x86)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_x86_pipelined(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_x86_pipelined, 32, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_x86_pipelined)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_x86_pipelined_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_x86_pipelined_x2, 32, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_x86_pipelined_x2)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_x86_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_x86_x2, 32, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_x86_x2)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_x86_x4(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_x86_x4, 32, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_wasmsimd_params,
+    /*isa_check=*/nullptr
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_x86_x4)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   static void f32_spmm_minmax_ukernel_4x1__wasmsimd_arm(benchmark::State& state, const char* net) {
     f32_spmm(state, xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm, 4, 1,

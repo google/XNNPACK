@@ -15,8 +15,9 @@ $assert MINMAX in ["MINMAX", "PMINMAX"]
 
 $WASM_F32X4_MIN={"MINMAX": "wasm_f32x4_min", "PMINMAX": "wasm_f32x4_pmin"}[MINMAX]
 $WASM_F32X4_MAX={"MINMAX": "wasm_f32x4_max", "PMINMAX": "wasm_f32x4_pmax"}[MINMAX]
+$ISA = "wasmrelaxedsimd" if ARCH == "RELAXED" else "wasmsimd"
 $ARCH_SUFFIX = "_x86" if MINMAX == "PMINMAX" else "_arm"
-void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}${"_x" + str(UNROLL) if UNROLL > 1 else ""}(
+void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${ISA}${ARCH_SUFFIX}${"_x" + str(UNROLL) if UNROLL > 1 else ""}(
     size_t mc,
     size_t nc,
     const float* input,
@@ -62,7 +63,10 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}${"_x" + str
             const v128_t vw${K} = wasm_v128_load32_splat(w);
             w += 1;
             $for M in range(0, MR, 4):
-              vacc${ABC[M:M+4]}x${K} = wasm_f32x4_add(vacc${ABC[M:M+4]}x${K}, wasm_f32x4_mul(vi${ABC[M:M+4]}x${K}, vw${K}));
+              $if ARCH == "RELAXED":
+                vacc${ABC[M:M+4]}x${K} = wasm_f32x4_relaxed_madd(vi${ABC[M:M+4]}x${K}, vw${K}, vacc${ABC[M:M+4]}x${K});
+              $else:
+                vacc${ABC[M:M+4]}x${K} = wasm_f32x4_add(vacc${ABC[M:M+4]}x${K}, wasm_f32x4_mul(vi${ABC[M:M+4]}x${K}, vw${K}));
         }
         $for M in range(0, MR, 4):
           v128_t vacc${ABC[M:M+4]} = vacc${ABC[M:M+4]}x0;
@@ -82,7 +86,10 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}${"_x" + str
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
           const v128_t vw = wasm_v128_load32_splat(w); w += 1;
           $for M in range(0, MR, 4):
-            vacc${ABC[M:M+4]} = wasm_f32x4_add(vacc${ABC[M:M+4]}, wasm_f32x4_mul(vi${ABC[M:M+4]}, vw));
+            $if ARCH == "RELAXED":
+              vacc${ABC[M:M+4]} = wasm_f32x4_relaxed_madd(vi${ABC[M:M+4]}, vw, vacc${ABC[M:M+4]});
+            $else:
+              vacc${ABC[M:M+4]} = wasm_f32x4_add(vacc${ABC[M:M+4]}, wasm_f32x4_mul(vi${ABC[M:M+4]}, vw));
         } while (--nnz != 0);
       }
       $for M in range(0, MR, 4):
@@ -134,10 +141,16 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}${"_x" + str
               input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
               const v128_t vw = wasm_v128_load32_splat(w); w += 1;
               $if SUBMR == 1:
-                vacc${ABC[0]} = wasm_f32x4_add(vacc${ABC[0]}, wasm_f32x4_mul(vi${ABC[0]}, vw));
+                $if ARCH == "RELAXED":
+                  vacc${ABC[0]} = wasm_f32x4_relaxed_madd(vi${ABC[0]}, vw, vacc${ABC[0]});
+                $else:
+                  vacc${ABC[0]} = wasm_f32x4_add(vacc${ABC[0]}, wasm_f32x4_mul(vi${ABC[0]}, vw));
               $else:
                 $for M in range(0, SUBMR, 4):
-                  vacc${ABC[M:min(M+4,SUBMR)]} = wasm_f32x4_add(vacc${ABC[M:min(M+4,SUBMR)]}, wasm_f32x4_mul(vi${ABC[M:min(M+4,SUBMR)]}, vw));
+                  $if ARCH == "RELAXED":
+                    vacc${ABC[M:min(M+4,SUBMR)]} = wasm_f32x4_relaxed_madd(vi${ABC[M:min(M+4,SUBMR)]}, vw, vacc${ABC[M:min(M+4,SUBMR)]});
+                  $else:
+                    vacc${ABC[M:min(M+4,SUBMR)]} = wasm_f32x4_add(vacc${ABC[M:min(M+4,SUBMR)]}, wasm_f32x4_mul(vi${ABC[M:min(M+4,SUBMR)]}, vw));
             } while (--nnz != 0);
           }
           $if SUBMR == 1:

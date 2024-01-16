@@ -1022,6 +1022,9 @@ xnnpack_unit_test(
     name = "f32_spmm_minmax_test",
     srcs = [
         "f32-spmm-minmax.cc",
+        "f32-spmm-minmax-2.cc",
+        "f32-spmm-minmax-3.cc",
+        "f32-spmm-minmax-4.cc",
         "spmm-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,

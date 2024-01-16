@@ -108,8 +108,8 @@ tools/generate-gemm-test.py --spec test/qs8-qc8w-igemm-jit-fp32.yaml --output-te
 tools/generate-gemm-test.py --spec test/f32-ppmm-minmax.yaml --output-test test/f32-ppmm-minmax.cc &
 
 ### Tests for SPMM micro-kernels
-tools/generate-spmm-test.py --spec test/f16-spmm-minmax.yaml --output test/f16-spmm-minmax.cc &
-tools/generate-spmm-test.py --spec test/f32-spmm-minmax.yaml --output test/f32-spmm-minmax.cc --output-bench bench/f32-spmm.cc &
+tools/generate-spmm-test.py --spec test/f16-spmm-minmax.yaml --output-test test/f16-spmm-minmax.cc &
+tools/generate-spmm-test.py --spec test/f32-spmm-minmax.yaml --output-test test/f32-spmm-minmax.cc  --output-test test/f32-spmm-minmax-2.cc  --output-test test/f32-spmm-minmax-3.cc  --output-test test/f32-spmm-minmax-4.cc --output-bench bench/f32-spmm.cc &
 
 ### Tests for VBinary micro-kernels
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f16-vadd-minmax.yaml --output test/f16-vadd-minmax.cc &

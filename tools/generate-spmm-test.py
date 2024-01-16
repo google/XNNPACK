@@ -11,6 +11,7 @@ import collections
 import os
 import sys
 import yaml
+import zlib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from primes import next_prime
@@ -21,8 +22,13 @@ import xnncommon
 parser = argparse.ArgumentParser(description='XNNPACK generator')
 parser.add_argument("-s", "--spec", metavar="FILE", required=True,
                     help="Spec (YAML) file")
-parser.add_argument("-o", "--output", metavar="FILE", required=True,
-                    help='Output (C++ source) file')
+parser.add_argument(
+    "-o",
+    "--output-test",
+    action="append",
+    metavar="FILE",
+    required=True,
+    help="Test output (C++ source) file(s)")
 parser.add_argument( "-b", "--output-bench",
                     metavar="FILE", required=False,
                     help="Benchmark output (C++ source) file(s)")
@@ -444,6 +450,7 @@ def generate_test_cases(ukernel, init_fn, mr, nr, k_block, is_pipelined, isa):
 
 def main(args):
   options = parser.parse_args(args)
+  num_output_files = len(options.output_test)
 
   with codecs.open(options.spec, "r", encoding="utf-8") as spec_file:
     spec_yaml = yaml.safe_load(spec_file)
@@ -489,6 +496,7 @@ def main(args):
 #include <xnnpack/microparams-init.h>
 """.format(specification=options.spec, generator=sys.argv[0])
 
+    test_outputs = collections.defaultdict(lambda: tests)
     bench_outputs = benches
     sorted_spec_yaml = collections.defaultdict(list)
     isa_hierarchy = xnncommon._ISA_HIERARCHY_MAP
@@ -503,7 +511,11 @@ def main(args):
 
       test_case, bench_case = generate_test_cases(name, init_fn, mr, nr, k_block,
                                       pipelined, isa)
-      tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
+      # Hash the name of each microkernel and figure out which output file to
+      # write it to.
+      output_index = zlib.crc32(bytes(name, "utf-8")) % num_output_files
+      test_outputs[options.output_test[output_index]] += "\n\n" + xnncommon.postprocess_test_case(
+          test_case, arch, isa)
       benches[isa_hierarchy.get(isa, 0)] +=  "\n\n" + xnncommon.postprocess_test_case(bench_case, arch, isa)
 
     for arch_idx in reversed(range(len(isa_hierarchy))):
@@ -514,7 +526,8 @@ def main(args):
 BENCHMARK_MAIN();
 #endif
 """
-    xnncommon.overwrite_if_changed(options.output, tests)
+    for output_name in options.output_test:
+      xnncommon.overwrite_if_changed(output_name, test_outputs[output_name])
 
     if options.output_bench:
       output_name = options.output_bench

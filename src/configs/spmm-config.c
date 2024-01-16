@@ -82,7 +82,21 @@ static void init_f32_spmm_config(void) {
     f32_spmm_config.init.f32 = xnn_init_f32_minmax_sse_params;
     f32_spmm_config.mr = 32;
     f32_spmm_config.nr = 1;
-  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  #elif XNN_ARCH_WASMRELAXEDSIMD
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->is_x86) {
+      f32_spmm_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_x86;
+      f32_spmm_config.init.f32 = xnn_init_f32_minmax_wasmsimd_params;
+      f32_spmm_config.mr = 32;
+      f32_spmm_config.nr = 1;
+    } else {
+      f32_spmm_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_arm;
+      f32_spmm_config.init.f32 = xnn_init_f32_minmax_wasmsimd_params;
+      f32_spmm_config.mr = 32;
+      f32_spmm_config.nr = 1;
+    }
+  #elif XNN_ARCH_WASMSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {

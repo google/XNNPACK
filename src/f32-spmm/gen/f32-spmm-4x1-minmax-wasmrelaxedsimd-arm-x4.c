@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-spmm/wasmsimd-pipelined.c.in
+//   Template: src/f32-spmm/wasmsimd.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -14,7 +14,7 @@
 #include <xnnpack/spmm.h>
 
 
-void xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm_pipelined_x2(
+void xnn_f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm_x4(
     size_t mc,
     size_t nc,
     const float* input,
@@ -36,36 +36,52 @@ void xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm_pipelined_x2(
     const float* w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
-    v128_t vw = wasm_v128_load32_splat(w); w += 1;
-    intptr_t diff = *dmap++;
-    v128_t vi0123 = wasm_v128_load(input + 0);
     size_t n = nc;
     do {
       uint32_t nnz = *nnzmap++;
-       v128_t vacc0123 = vw;
-      vw = wasm_v128_load32_splat(w); w += 1;
-
-      for (; nnz >= 2; nnz -= 2) {
-        vacc0123 = wasm_f32x4_add(vacc0123, wasm_f32x4_mul(vi0123, vw));
-        input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-        diff = *dmap++;
-        vw = wasm_v128_load32_splat(w); w += 1;
-        vi0123 = wasm_v128_load(input + 0);
-        vacc0123 = wasm_f32x4_add(vacc0123, wasm_f32x4_mul(vi0123, vw));
-        input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-        diff = *dmap++;
-        vw = wasm_v128_load32_splat(w); w += 1;
-        vi0123 = wasm_v128_load(input + 0);
+      v128_t vacc0123x0 = wasm_v128_load32_splat(w);
+      w += 1;
+      v128_t vacc0123x1 = wasm_f32x4_const_splat(0.0f);
+      v128_t vacc0123x2 = wasm_f32x4_const_splat(0.0f);
+      v128_t vacc0123x3 = wasm_f32x4_const_splat(0.0f);
+      for (; nnz >= 4; nnz -= 4) {
+        const intptr_t diff0 = dmap[0];
+        const intptr_t diff1 = dmap[1];
+        const intptr_t diff2 = dmap[2];
+        const intptr_t diff3 = dmap[3];
+        dmap += 4;
+        const v128_t vi0123x0 = wasm_v128_load(input);
+        input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff0);
+        const v128_t vw0 = wasm_v128_load32_splat(w);
+        w += 1;
+        vacc0123x0 = wasm_f32x4_relaxed_madd(vi0123x0, vw0, vacc0123x0);
+        const v128_t vi0123x1 = wasm_v128_load(input);
+        input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff1);
+        const v128_t vw1 = wasm_v128_load32_splat(w);
+        w += 1;
+        vacc0123x1 = wasm_f32x4_relaxed_madd(vi0123x1, vw1, vacc0123x1);
+        const v128_t vi0123x2 = wasm_v128_load(input);
+        input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff2);
+        const v128_t vw2 = wasm_v128_load32_splat(w);
+        w += 1;
+        vacc0123x2 = wasm_f32x4_relaxed_madd(vi0123x2, vw2, vacc0123x2);
+        const v128_t vi0123x3 = wasm_v128_load(input);
+        input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff3);
+        const v128_t vw3 = wasm_v128_load32_splat(w);
+        w += 1;
+        vacc0123x3 = wasm_f32x4_relaxed_madd(vi0123x3, vw3, vacc0123x3);
       }
-
+      v128_t vacc0123 = vacc0123x0;
+      vacc0123 = wasm_f32x4_add(vacc0123, vacc0123x1);
+      vacc0123 = wasm_f32x4_add(vacc0123, vacc0123x2);
+      vacc0123 = wasm_f32x4_add(vacc0123, vacc0123x3);
       if XNN_LIKELY(nnz != 0) {
         do {
-          vacc0123 = wasm_f32x4_add(vacc0123, wasm_f32x4_mul(vi0123, vw));
+          const intptr_t diff = *dmap++;
+          const v128_t vi0123 = wasm_v128_load(input);
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-
-          diff = *dmap++;
-          vw = wasm_v128_load32_splat(w); w += 1;
-          vi0123 = wasm_v128_load(input + 0);
+          const v128_t vw = wasm_v128_load32_splat(w); w += 1;
+          vacc0123 = wasm_f32x4_relaxed_madd(vi0123, vw, vacc0123);
         } while (--nnz != 0);
       }
       v128_t vout0123 = wasm_f32x4_min(vmax, vacc0123);
@@ -93,7 +109,7 @@ void xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm_pipelined_x2(
             const v128_t vi01 = wasm_v128_load64_splat(input);
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
             const v128_t vw = wasm_v128_load32_splat(w); w += 1;
-            vacc01 = wasm_f32x4_add(vacc01, wasm_f32x4_mul(vi01, vw));
+            vacc01 = wasm_f32x4_relaxed_madd(vi01, vw, vacc01);
           } while (--nnz != 0);
         }
         v128_t vout01 = wasm_f32x4_min(vmax, vacc01);
@@ -120,7 +136,7 @@ void xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm_pipelined_x2(
             const v128_t vi0 = wasm_v128_load32_splat(input);
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
             const v128_t vw = wasm_v128_load32_splat(w); w += 1;
-            vacc0 = wasm_f32x4_add(vacc0, wasm_f32x4_mul(vi0, vw));
+            vacc0 = wasm_f32x4_relaxed_madd(vi0, vw, vacc0);
           } while (--nnz != 0);
         }
         v128_t vout0 = wasm_f32x4_min(vmax, vacc0);

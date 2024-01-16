@@ -2415,7 +2415,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-rsum-test PRIVATE hardware-config logging microkernels-all)
   ADD_TEST(NAME f32-rsum-test COMMAND f32-rsum-test)
 
-  ADD_EXECUTABLE(f32-spmm-minmax-test test/f32-spmm-minmax.cc)
+  ADD_EXECUTABLE(f32-spmm-minmax-test test/f32-spmm-minmax.cc test/f32-spmm-minmax-2.cc test/f32-spmm-minmax-3.cc test/f32-spmm-minmax-4.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-spmm-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f32-spmm-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
   TARGET_LINK_LIBRARIES(f32-spmm-minmax-test PRIVATE hardware-config logging microkernels-all microparams-init)
