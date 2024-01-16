@@ -17,6 +17,36 @@
 #include <xnnpack/packw.h>
 
 
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  static void x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_u4(benchmark::State& state, const char* net) {
+    x32_packw(state,
+      xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_u4,
+      /*nr=*/2, /*kr=*/4, /*sr=*/1);
+  }
+  BENCHMARK_BGEMM(x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_u4)
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  static void x32_packw_gemm_goi_ukernel_x8__wasmsimd_u4(benchmark::State& state, const char* net) {
+    x32_packw(state,
+      xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_u4,
+      /*nr=*/8, /*kr=*/1, /*sr=*/1);
+  }
+  BENCHMARK_BGEMM(x32_packw_gemm_goi_ukernel_x8__wasmsimd_u4)
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  static void x32_packw_gemm_goi_ukernel_x8s4__wasmsimd_u4(benchmark::State& state, const char* net) {
+    x32_packw(state,
+      xnn_x32_packw_gemm_goi_ukernel_x8s4__wasmsimd_u4,
+      /*nr=*/8, /*kr=*/1, /*sr=*/4);
+  }
+  BENCHMARK_BGEMM(x32_packw_gemm_goi_ukernel_x8s4__wasmsimd_u4)
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   static void x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_u2(benchmark::State& state, const char* net) {
     x32_packw(state,
@@ -503,36 +533,6 @@
   }
   BENCHMARK_BGEMM(x32_packw_gemm_goi_ukernel_x16s4__sse2_u8_prfm)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  static void x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_u4(benchmark::State& state, const char* net) {
-    x32_packw(state,
-      xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_u4,
-      /*nr=*/2, /*kr=*/4, /*sr=*/1);
-  }
-  BENCHMARK_BGEMM(x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_u4)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  static void x32_packw_gemm_goi_ukernel_x8__wasmsimd_u4(benchmark::State& state, const char* net) {
-    x32_packw(state,
-      xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_u4,
-      /*nr=*/8, /*kr=*/1, /*sr=*/1);
-  }
-  BENCHMARK_BGEMM(x32_packw_gemm_goi_ukernel_x8__wasmsimd_u4)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  static void x32_packw_gemm_goi_ukernel_x8s4__wasmsimd_u4(benchmark::State& state, const char* net) {
-    x32_packw(state,
-      xnn_x32_packw_gemm_goi_ukernel_x8s4__wasmsimd_u4,
-      /*nr=*/8, /*kr=*/1, /*sr=*/4);
-  }
-  BENCHMARK_BGEMM(x32_packw_gemm_goi_ukernel_x8s4__wasmsimd_u4)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 static void x32_packw_gemm_goi_ukernel_x2__scalar_float_u4(benchmark::State& state, const char* net) {

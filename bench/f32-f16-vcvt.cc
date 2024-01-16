@@ -19,6 +19,78 @@
 #include <xnnpack/vcvt.h>
 
 
+#if XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmrelaxedsimd_u8,
+                    xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_u8,
+                    xnn_init_f32_f16_cvt_wasmsimd_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmrelaxedsimd_u16,
+                    xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_u16,
+                    xnn_init_f32_f16_cvt_wasmsimd_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmrelaxedsimd_u24,
+                    xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_u24,
+                    xnn_init_f32_f16_cvt_wasmsimd_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmrelaxedsimd_u32,
+                    xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_u32,
+                    xnn_init_f32_f16_cvt_wasmsimd_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmsimd_u8,
+                    xnn_f32_f16_vcvt_ukernel__wasmsimd_u8,
+                    xnn_init_f32_f16_cvt_wasmsimd_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmsimd_u16,
+                    xnn_f32_f16_vcvt_ukernel__wasmsimd_u16,
+                    xnn_init_f32_f16_cvt_wasmsimd_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmsimd_u24,
+                    xnn_f32_f16_vcvt_ukernel__wasmsimd_u24,
+                    xnn_init_f32_f16_cvt_wasmsimd_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmsimd_u32,
+                    xnn_f32_f16_vcvt_ukernel__wasmsimd_u32,
+                    xnn_init_f32_f16_cvt_wasmsimd_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   BENCHMARK_CAPTURE(f32_f16_vcvt, neon_u8,
                     xnn_f32_f16_vcvt_ukernel__neon_u8,
@@ -233,78 +305,6 @@
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmsimd_u8,
-                    xnn_f32_f16_vcvt_ukernel__wasmsimd_u8,
-                    xnn_init_f32_f16_cvt_wasmsimd_params)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
-    ->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmsimd_u16,
-                    xnn_f32_f16_vcvt_ukernel__wasmsimd_u16,
-                    xnn_init_f32_f16_cvt_wasmsimd_params)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
-    ->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmsimd_u24,
-                    xnn_f32_f16_vcvt_ukernel__wasmsimd_u24,
-                    xnn_init_f32_f16_cvt_wasmsimd_params)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
-    ->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmsimd_u32,
-                    xnn_f32_f16_vcvt_ukernel__wasmsimd_u32,
-                    xnn_init_f32_f16_cvt_wasmsimd_params)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
-    ->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
-#if XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmrelaxedsimd_u8,
-                    xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_u8,
-                    xnn_init_f32_f16_cvt_wasmsimd_params)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
-    ->UseRealTime();
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
-
-
-#if XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmrelaxedsimd_u16,
-                    xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_u16,
-                    xnn_init_f32_f16_cvt_wasmsimd_params)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
-    ->UseRealTime();
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
-
-
-#if XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmrelaxedsimd_u24,
-                    xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_u24,
-                    xnn_init_f32_f16_cvt_wasmsimd_params)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
-    ->UseRealTime();
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
-
-
-#if XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmrelaxedsimd_u32,
-                    xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_u32,
-                    xnn_init_f32_f16_cvt_wasmsimd_params)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
-    ->UseRealTime();
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
 
 BENCHMARK_CAPTURE(f32_f16_vcvt, scalar_bitcast_u1,
