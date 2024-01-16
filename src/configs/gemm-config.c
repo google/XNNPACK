@@ -1751,15 +1751,17 @@ static void init_qd8_f32_qc4w_gemm_config(void) {
       qd8_f32_qc4w_gemm_config.log2_kr = 3;
       qd8_f32_qc4w_gemm_config.planes = 2;
     } else if (hardware_config->use_x86_avxvnni) {
-      qd8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avxvnni_prfm);
-      qd8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(5)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x8c8__avxvnni_prfm);
-      qd8_f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_avxvnni_params;
-      qd8_f32_qc4w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_qc4w_gemm_gio_w;
-      qd8_f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_qc4w_gemm_goi_w;
-      qd8_f32_qc4w_gemm_config.mr = 5;
-      qd8_f32_qc4w_gemm_config.nr = 8;
-      qd8_f32_qc4w_gemm_config.log2_kr = 3;
-      qd8_f32_qc4w_gemm_config.planes = 2;
+      #if XNN_ENABLE_AVXVNNI
+        qd8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avxvnni_prfm);
+        qd8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(5)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x8c8__avxvnni_prfm);
+        qd8_f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_avxvnni_params;
+        qd8_f32_qc4w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_qc4w_gemm_gio_w;
+        qd8_f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_qc4w_gemm_goi_w;
+        qd8_f32_qc4w_gemm_config.mr = 5;
+        qd8_f32_qc4w_gemm_config.nr = 8;
+        qd8_f32_qc4w_gemm_config.log2_kr = 3;
+        qd8_f32_qc4w_gemm_config.planes = 2;
+      #endif
     } else if (hardware_config->use_x86_xop) {
       // XOP should be checked before AVX2: AMD Excavator supports both, but performs better with XOP microkernels
       qd8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4c8__xop_ld128);
