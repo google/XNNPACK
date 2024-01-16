@@ -102,11 +102,7 @@ static void init_hardware_config(void) {
     hardware_config.use_x86_avx512vbmi = hardware_config.use_x86_avx512skx && cpuinfo_has_x86_avx512vbmi();
     hardware_config.use_x86_avx512vnni = hardware_config.use_x86_avx512skx && cpuinfo_has_x86_avx512vnni();
     hardware_config.use_x86_avx512vnnigfni = hardware_config.use_x86_avx512vnni && cpuinfo_has_x86_gfni();
-#if XNN_ENABLE_AVXVNNI
-    hardware_config.use_x86_avxvnni = hardware_config.use_x86_avx2 && cpuinfo_has_x86_avxvnni();
-#else
-    hardware_config.use_x86_avxvnni = 0;
-#endif
+    hardware_config.use_x86_avxvnni = XNN_ENABLE_AVXVNNI && hardware_config.use_x86_avx2 && cpuinfo_has_x86_avxvnni();
   #endif  // !XNN_ARCH_X86 && !XNN_ARCH_X86_64
 
   #if XNN_ARCH_RISCV
