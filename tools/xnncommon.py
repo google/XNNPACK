@@ -224,6 +224,9 @@ _ISA_HIERARCHY = [
   "neondot",
   "neondotfp16",
   "neoni8mm",
+  "wasm",
+  "wasmsimd",
+  "wasmrelaxedsimd",
 ]
 
 _ISA_HIERARCHY_MAP = {isa: v for v, isa in enumerate(_ISA_HIERARCHY)}

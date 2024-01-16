@@ -7,6 +7,7 @@
 import argparse
 import bisect
 import codecs
+import collections
 import os
 import sys
 import yaml
@@ -22,6 +23,9 @@ parser.add_argument("-s", "--spec", metavar="FILE", required=True,
                     help="Spec (YAML) file")
 parser.add_argument("-o", "--output", metavar="FILE", required=True,
                     help='Output (C++ source) file')
+parser.add_argument( "-b", "--output-bench",
+                    metavar="FILE", required=False,
+                    help="Benchmark output (C++ source) file(s)")
 parser.set_defaults(defines=list())
 
 
@@ -33,6 +37,18 @@ def split_ukernel_name(name):
   arch, isa, assembly = xnncommon.parse_target_name(target_name)
   return mr, nr, arch, isa
 
+SPMM_BENCH_CODE = """\
+static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
+  f32_spmm(state, ${SPMM}, ${MR}, ${NR},
+    /*sparsity=*/0.8f, ${INIT_PARAMS},
+  $if ISA_CHECK:
+    benchmark::utils::${ISA_CHECK}
+  $else:
+    /*isa_check=*/nullptr
+  );
+}\n
+BENCHMARK_SPMM(${UKERNEL_NAME})
+"""
 
 TEST_TEMPLATE = """\
 TEST(${TEST_NAME}, k_eq_${KBLOCK}) {
@@ -396,10 +412,11 @@ def generate_test_cases(ukernel, init_fn, mr, nr, k_block, is_pipelined, isa):
   Returns:
     Code for the test case.
   """
+  _, ukernel_name = ukernel.split("_", 1)
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
   test_args = [ukernel, init_fn]
-  return xngen.preprocess(TEST_TEMPLATE, {
+  test_case = xngen.preprocess(TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
       "UKERNEL_TYPE": ukernel_type.upper(),
@@ -412,6 +429,17 @@ def generate_test_cases(ukernel, init_fn, mr, nr, k_block, is_pipelined, isa):
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
     })
+
+  benchmark = xngen.preprocess(SPMM_BENCH_CODE, {
+      "UKERNEL_NAME": ukernel_name,
+      "SPMM": ukernel,
+      "MR": mr,
+      "NR": nr,
+      "INIT_PARAMS": init_fn,
+      "ISA_CHECK": xnncommon.generate_isa_utilcheck_macro(isa),
+      "next_prime": next_prime,
+    })
+  return test_case, benchmark
 
 
 def main(args):
@@ -442,6 +470,30 @@ def main(args):
 #include "spmm-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
+    benches = """\
+// Copyright 2023 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Specification: {specification}
+//   Generator: {generator}
+
+#include <benchmark/benchmark.h>
+#include "bench/spmm-benchmark.h"
+#include "bench/utils.h"
+
+#include <xnnpack/gemm.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
+""".format(specification=options.spec, generator=sys.argv[0])
+
+    bench_outputs = benches
+    sorted_spec_yaml = collections.defaultdict(list)
+    isa_hierarchy = xnncommon._ISA_HIERARCHY_MAP
+
+    benches = [""] * len(isa_hierarchy)
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       init_fn = ukernel_spec["init"]
@@ -449,11 +501,24 @@ def main(args):
       pipelined = bool(ukernel_spec.get("pipelined", False))
       mr, nr, arch, isa = split_ukernel_name(name)
 
-      test_case = generate_test_cases(name, init_fn, mr, nr, k_block,
+      test_case, bench_case = generate_test_cases(name, init_fn, mr, nr, k_block,
                                       pipelined, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
+      benches[isa_hierarchy.get(isa, 0)] +=  "\n\n" + xnncommon.postprocess_test_case(bench_case, arch, isa)
 
+    for arch_idx in reversed(range(len(isa_hierarchy))):
+      bench_outputs += benches[arch_idx]
+
+    bench_outputs += """\n
+#ifndef XNNPACK_BENCHMARK_NO_MAIN
+BENCHMARK_MAIN();
+#endif
+"""
     xnncommon.overwrite_if_changed(options.output, tests)
+
+    if options.output_bench:
+      output_name = options.output_bench
+      xnncommon.overwrite_if_changed(output_name, bench_outputs)
 
 
 if __name__ == "__main__":

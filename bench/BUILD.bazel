@@ -806,7 +806,9 @@ xnnpack_benchmark(
         "f32-spmm.cc",
         "spmm.h",
     ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":spmm_benchmark",
+    ],
 )
 
 xnnpack_benchmark(
@@ -1092,6 +1094,18 @@ xnnpack_cc_library(
         "gemm-benchmark.h",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_cc_library(
+    name = "spmm_benchmark",
+    hdrs = [
+        "gemm.h",
+        "google/gemm.h",
+        "spmm-benchmark.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:isa_checks",
+    ],
 )
 
 ########################### Benchmarks for operators ###########################
