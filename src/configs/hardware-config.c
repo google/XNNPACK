@@ -129,7 +129,7 @@ static void init_hardware_config(void) {
       hardware_config.use_vsx = 1;
     }
     #if defined PPC_FEATURE2_ARCH_3_1
-      if (HWCAPs_2 &  PPC_FEATURE2_ARCH_3_1) {
+      if (HWCAPs_2 & PPC_FEATURE2_ARCH_3_1) {
         hardware_config.use_vsx3 = 1;
       }
       if (HWCAPs_2 & PPC_FEATURE2_MMA) {
