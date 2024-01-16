@@ -37,14 +37,6 @@ $  return f"vacc{M}x{K}" if UNROLL > 1 else f"vacc{M}"
 $
 $ACC_POSTFIX=f"_acc{ACCUMULATORS}" if ACCUMULATORS > 1 else ""
 
-#if defined(__AVXVNNI__) && __AVXVNNI__
-#define MM256_DPBUSD_EPI32 _mm256_dpbusd_avx_epi32
-#elif defined(__AVX512VNNI__) && __AVX512VNNI__
-#define MM256_DPBUSD_EPI32 _mm256_dpbusd_epi32
-#else
-#error "No Intel VNNI extension detected."
-#endif
-
 void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c4__avxvnni_u${UNROLL}${ACC_POSTFIX}(
     size_t mr,
     size_t nc,
@@ -97,7 +89,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c4__a
       const __m256i vinput_zero_point${M} = _mm256_set1_epi32((int) quantization_params[${M}].zero_point + 128);
     const __m256 voutput_min = _mm256_set1_ps(params->avxvnni.min);
     const __m256 voutput_max = _mm256_set1_ps(params->avxvnni.max);
-    const __m256i vsign_mask = _mm256_set1_epi8(0x80);
+    const __m256i vsign_mask = _mm256_set1_epi8(params->avxvnni.sign_mask);
     $for M in range(MR):
       const __m256 vinv_scale${M} = _mm256_set1_ps(quantization_params[${M}].inv_scale);
     $if DATATYPE == "QC4":
@@ -156,11 +148,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c4__a
         $if ACCUMULATORS > 1:
           $for M in range(MR):
             $for K in range(UNROLL):
-              ${VACC(M,K)}x01234567 = MM256_DPBUSD_EPI32(${VACC(M,K)}x01234567, va${M}x${K}x0123, vb${K}x01234567);
+              ${VACC(M,K)}x01234567 = _mm256_dpbusd_avx_epi32(${VACC(M,K)}x01234567, va${M}x${K}x0123, vb${K}x01234567);
         $else:
           $for K in range(UNROLL):
             $for M in range(MR):
-              ${VACC(M)}x01234567 = MM256_DPBUSD_EPI32(${VACC(M)}x01234567, va${M}x${K}x0123, vb${K}x01234567);
+              ${VACC(M)}x01234567 = _mm256_dpbusd_avx_epi32(${VACC(M)}x01234567, va${M}x${K}x0123, vb${K}x01234567);
 
         k -= ${UNROLL * 4} * sizeof(${XINT8_T});
       }
@@ -191,7 +183,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c4__a
         __m256i vb01234567 = _mm256_permutex2var_epi64(_mm256_castsi128_si256(vb012389AB), vpermute_mask, _mm256_castsi128_si256(vb4567CDEF));
 
       $for M in range(MR):
-        ${VACC(M)}x01234567 = MM256_DPBUSD_EPI32(${VACC(M)}x01234567, va${M}x0123, vb01234567);
+        ${VACC(M)}x01234567 = _mm256_dpbusd_avx_epi32(${VACC(M)}x01234567, va${M}x0123, vb01234567);
 
       $if DATATYPE in ["QS8", "QD8"]:
         w = (const ${XINT8_T}*) w + 32;
