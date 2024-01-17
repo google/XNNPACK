@@ -73,7 +73,7 @@ enum xnn_status resize_binary_elementwise_output_tensor(
   }
 
   const size_t new_size = xnn_tensor_get_size(output);
-  if (new_size > output->size || old_workspace_size < opdata->workspace_size) {
+  if (new_size > output->size || opdata->workspace_size > old_workspace_size) {
     output->size = new_size;
     return xnn_status_reallocation_required;
   }

@@ -53,9 +53,13 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
   const uint32_t input2_id = opdata->inputs[1];
   assert(input2_id != XNN_INVALID_VALUE_ID);
   assert(input2_id < num_values);
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_values);
 
   const struct xnn_value* input1 = values + input1_id;
   const struct xnn_value* input2 = values + input2_id;
+  struct xnn_value* output = values + output_id;
   // input1: [B, M, K]
   // input2: [B, K, N] or [B, N, K] (transpose_b)
   const size_t m = input1->shape.dim[input1->shape.num_dims - 2];
@@ -64,24 +68,40 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
   const size_t n = input2->shape.dim[transpose_b ? input2->shape.num_dims - 2 : input2->shape.num_dims - 1];
   const size_t batch_size = xnn_shape_multiply_batch_dims(&input1->shape, 2);
 
+  const size_t old_workspace_size = opdata->workspace_size;
+  enum xnn_status status = xnn_status_invalid_state;
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_batch_matrix_multiply_nc_f16:
-      return xnn_reshape_batch_matrix_multiply_nc_f16(
+      status = xnn_reshape_batch_matrix_multiply_nc_f16(
         opdata->operator_objects[0],
         batch_size,
         m, k, n,
         &opdata->workspace_size, &opdata->workspace_alignment,
         threadpool);
+      break;
     case xnn_operator_type_batch_matrix_multiply_nc_f32:
-      return xnn_reshape_batch_matrix_multiply_nc_f32(
+      status = xnn_reshape_batch_matrix_multiply_nc_f32(
         opdata->operator_objects[0],
         batch_size,
         m, k, n,
         &opdata->workspace_size, &opdata->workspace_alignment,
         threadpool);
+      break;
     default:
       XNN_UNREACHABLE;
   }
+  if (status != xnn_status_success) {
+    return status;
+  }
+  memcpy(output->shape.dim, input1->shape.dim, (input1->shape.num_dims - 2) * sizeof(size_t));
+  output->shape.dim[output->shape.num_dims - 2] = m;
+  output->shape.dim[output->shape.num_dims - 1] = n;
+  const size_t new_size = xnn_tensor_get_size(output);
+  if (new_size > output->size || opdata->workspace_size > old_workspace_size) {
+    output->size = new_size;
+    return xnn_status_reallocation_required;
+  }
+  return xnn_status_success;
 }
 
 static enum xnn_status setup_batch_matrix_multiply_operator(

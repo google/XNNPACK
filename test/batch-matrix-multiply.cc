@@ -357,16 +357,16 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api_transposed)
 // Define a subgraph with a single batch matrix multiply node with 2 inputs and 1 output of the specified dimensions.
 // Returns the result of defining the node, a xnn_status.
 namespace {
-void DefineBatchMatrixMultiplySubgraph(
+void DefineBatchMatrixMultiplySubgraphHelper(
     xnn_status* status_out,
     std::vector<size_t> input1_dims,
     std::vector<size_t> input2_dims,
     std::vector<size_t> output_dims,
+    xnn_subgraph_t *subgraph_out,
     uint32_t batch_matrix_multiply_flags = 0) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
 
   uint32_t input1_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
@@ -390,8 +390,80 @@ void DefineBatchMatrixMultiplySubgraph(
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
   *status_out = xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id, output_id, batch_matrix_multiply_flags);
+  *subgraph_out = subgraph;
+}
+
+void DefineBatchMatrixMultiplySubgraph(
+    xnn_status* status_out,
+    std::vector<size_t> input1_dims,
+    std::vector<size_t> input2_dims,
+    std::vector<size_t> output_dims,
+    uint32_t batch_matrix_multiply_flags = 0) {
+  xnn_subgraph_t subgraph = nullptr;
+  DefineBatchMatrixMultiplySubgraphHelper(status_out, input1_dims, input2_dims, output_dims,
+                                     &subgraph, batch_matrix_multiply_flags);
+  xnn_delete_subgraph(subgraph);
 }
 }  // namespace
+
+TEST(BatchMatrixMultiplyTest, reshape_input1) {
+  std::vector<size_t> input1_dims = {2, 3, 4};
+  std::vector<size_t> input2_dims = {2, 4, 5};
+  std::vector<size_t> output_dims = {2, 3, 5};
+  xnn_status status = xnn_status_success;
+  xnn_subgraph_t subgraph;
+  DefineBatchMatrixMultiplySubgraphHelper(&status, input1_dims, input2_dims, output_dims, &subgraph);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  ASSERT_EQ(xnn_status_success, status);
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+
+  ASSERT_EQ(subgraph->num_nodes, 1);
+  struct xnn_node* node = &subgraph->nodes[0];
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
+
+  input1_dims[2] = 7;
+  input2_dims[1] = 7;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, /*external_id=*/0, input1_dims.size(), input1_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, /*external_id=*/1, input2_dims.size(), input2_dims.data()));
+
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
+  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
+  ASSERT_EQ(output_shape->dim[0], input1_dims[0]);
+  ASSERT_EQ(output_shape->dim[1], input1_dims[1]);
+  ASSERT_EQ(output_shape->dim[2], input2_dims[2]);
+
+  input1_dims[1] = 19;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, /*external_id=*/0, input1_dims.size(), input1_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, /*external_id=*/1, input2_dims.size(), input2_dims.data()));
+
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
+  ASSERT_EQ(output_shape->dim[0], input1_dims[0]);
+  ASSERT_EQ(output_shape->dim[1], input1_dims[1]);
+  ASSERT_EQ(output_shape->dim[2], input2_dims[2]);
+
+  input2_dims[2] = 4;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, /*external_id=*/0, input1_dims.size(), input1_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, /*external_id=*/1, input2_dims.size(), input2_dims.data()));
+
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
+  ASSERT_EQ(output_shape->dim[0], input1_dims[0]);
+  ASSERT_EQ(output_shape->dim[1], input1_dims[1]);
+  ASSERT_EQ(output_shape->dim[2], input2_dims[2]);
+
+  input1_dims[0] = 4;
+  input2_dims[0] = 4;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, /*external_id=*/0, input1_dims.size(), input1_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, /*external_id=*/1, input2_dims.size(), input2_dims.data()));
+
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
+  ASSERT_EQ(output_shape->dim[0], input1_dims[0]);
+  ASSERT_EQ(output_shape->dim[1], input1_dims[1]);
+  ASSERT_EQ(output_shape->dim[2], input2_dims[2]);
+}
 
 TEST(BatchMatrixMultiplyTest, input1_num_dim_less_than_3_fails) {
   std::vector<size_t> input1_dims = {2, 3};
