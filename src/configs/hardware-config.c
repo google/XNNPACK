@@ -39,6 +39,21 @@
 #include <xnnpack/config.h>
 #include <xnnpack/log.h>
 
+#if XNN_ARCH_ARM && XNN_PLATFORM_ANDROID
+static void KernelVersion(int* version) {
+  struct utsname buffer;
+  int i = 0;
+
+  version[0] = version[1] = 0;
+  if (uname(&buffer) == 0) {
+    char *v = buffer.release;
+    for (i = 0; *v && i < 2; ++v) {
+      if (isdigit(*v)) {
+        version[i++] = (int) strtol(v, &v, 10);
+      }
+    }
+  }
+}
 
 static struct xnn_hardware_config hardware_config = {0};
 
@@ -84,6 +99,16 @@ static void init_hardware_config(void) {
       hardware_config.use_arm_neon_dot = cpuinfo_has_arm_neon_dot();
     #endif
   #endif
+
+  #if XNN_ARCH_ARM && XNN_PLATFORM_ANDROID
+    int kernelversion[2];
+    KernelVersion(kernelversion);
+    xnn_log_debug("udot is disabled in linux kernel 4.6 and earlier");
+    if (kernelversion[0] < 4 || (kernelversion[0] == 4 && kernelversion[1] < 7) {
+      hardware_config.use_arm_neon_dot = false;
+    }
+  #endif
+
   #if XNN_ARCH_ARM64
     hardware_config.use_arm_neon_i8mm = cpuinfo_has_arm_i8mm();
   #endif
