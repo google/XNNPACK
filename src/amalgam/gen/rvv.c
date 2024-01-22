@@ -12,9 +12,35 @@
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/raddstoreexpminusmax.h>
+#include <xnnpack/reduce.h>
 #include <xnnpack/vbinary.h>
 #include <xnnpack/vunary.h>
 
+
+void xnn_f32_rsum_ukernel__rvv_u4v(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  batch >>= XNN_LOG2_SIZEOF_FLOAT;
+  int32_t n = __riscv_vsetvl_e32m4(batch);
+  vfloat32m1_t acc_f32v = __riscv_vfmv_s_f_f32m1(0.f, n);
+  do {
+    n = __riscv_vsetvl_e32m4(batch);
+
+    vfloat32m4_t in_f32v = __riscv_vle32_v_f32m4(input, n); input += n;
+    acc_f32v = __riscv_vfredosum_vs_f32m4_f32m1(in_f32v, acc_f32v, n);
+    batch -= n;
+  } while (batch != 0);
+  vfloat32m1_t out_f32v = __riscv_vfmul_vf_f32m1(acc_f32v, params->scalar.scale, 1);
+  __riscv_vse32_v_f32m1(output, out_f32v, 1);
+}
 
 static inline vfloat32m4_t eval_poly_horner(vfloat32m4_t x,
                                                   float c6, float c5,

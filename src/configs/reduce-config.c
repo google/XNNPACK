@@ -212,11 +212,19 @@ static void init_f32_rsum_config(void) {
       .element_tile = 4,
     };
   #elif XNN_ARCH_RISCV
-    f32_rsum_config = (struct xnn_reduce_config) {
-      .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__scalar_u4_acc4,
-      .init.f32_scale = xnn_init_f32_scale_scalar_params,
-      .element_tile = 4,
-    };
+    #if XNN_ENABLE_RISCV_VECTOR
+      f32_rsum_config = (struct xnn_reduce_config) {
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__rvv_u4v,
+        .init.f32_scale = xnn_init_f32_scale_scalar_params,
+        .element_tile = 16,
+      };
+    #else
+      f32_rsum_config = (struct xnn_reduce_config) {
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__scalar_u4_acc4,
+        .init.f32_scale = xnn_init_f32_scale_scalar_params,
+        .element_tile = 4,
+      };
+    #endif
   #elif XNN_ARCH_PPC64
     f32_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__scalar_u4_acc4,
