@@ -187,6 +187,31 @@ def amalgamate_microkernel_sources(source_paths, include_header):
 
   amalgam_text = AMALGAMATION_HEADER
 
+  # Multi-line sequence for `rsqrt` definition.
+  if '#define HAVE_SYSTEM_RSQRTF 1' in amalgam_includes:
+    amalgam_includes.discard('#ifndef __STDC_WANT_IEC_60559_FUNCS_EXT__')
+    amalgam_includes.discard('#define __STDC_WANT_IEC_60559_FUNCS_EXT__ 1')
+    amalgam_includes.discard('#include <math.h>')
+    amalgam_includes.discard(
+        '#if defined(__STDC_IEC_60559_FUNCS__) && __STDC_IEC_60559_FUNCS__ >='
+        ' 201506L',
+    )
+    amalgam_includes.discard('#define rsqrtf(x) (1.0f / sqrtf(x))')
+    amalgam_includes.discard('#define HAVE_SYSTEM_RSQRTF 1')
+    amalgam_text += """\
+#ifndef __STDC_WANT_IEC_60559_FUNCS_EXT__
+#define __STDC_WANT_IEC_60559_FUNCS_EXT__ 1
+#endif
+#include <math.h>
+
+#if defined(__STDC_IEC_60559_FUNCS__) && __STDC_IEC_60559_FUNCS__ >= 201506L
+#define HAVE_SYSTEM_RSQRTF 1
+#else
+#define rsqrtf(x) (1.0f / sqrtf(x))
+#endif
+
+"""
+
   amalgam_text += "\n".join(sorted(inc for inc in amalgam_includes if
                                    not inc.startswith('#include <xnnpack/')))
   if include_header:
