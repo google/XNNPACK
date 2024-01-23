@@ -2735,6 +2735,12 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vsqrt-test PRIVATE hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME f32-vsqrt-test COMMAND f32-vsqrt-test)
 
+  ADD_EXECUTABLE(f32-vrsqrt-test test/f32-vrsqrt.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-vrsqrt-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f32-vrsqrt-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(f32-vrsqrt-test PRIVATE hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME f32-vrsqrt-test COMMAND f32-vrsqrt-test)
+
   ADD_EXECUTABLE(f32-vsub-test test/f32-vsub.cc)
   SET_TARGET_PROPERTIES(f32-vsub-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f32-vsub-test PRIVATE include src test)

@@ -5,20 +5,22 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
-
-#include <algorithm>
-#include <cassert>
-#include <cstddef>
-#include <cstdlib>
-#include <random>
-#include <vector>
-
-#include <fp16/fp16.h>
-
 #include <xnnpack.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
+#include <xnnpack/microparams.h>
+
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <cstddef>
+#include <cstdlib>
+#include <limits>
+#include <random>
+#include <vector>
+
+#include <gtest/gtest.h>
+#include <fp16/fp16.h>
 
 #if XNN_PLATFORM_JIT
   #include <xnnpack/memory.h>
@@ -936,6 +938,49 @@ class VUnaryMicrokernelTester {
       for (size_t i = 0; i < batch_size(); i++) {
         EXPECT_EQ(y[i], y_ref[i])
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
+      }
+    }
+  }
+
+  void Test(xnn_f32_vrsqrt_ukernel_fn vrsqrt,
+            xnn_init_f32_rsqrt_params_fn init_params = nullptr) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_real_distribution<float> f32dist(
+        std::numeric_limits<float>::epsilon(), 10.0f);
+
+    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> y(batch_size() +
+                         (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    std::vector<float> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
+      } else {
+        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
+        std::fill(y.begin(), y.end(), nanf(""));
+      }
+      const float* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        y_ref[i] = 1.0f / std::sqrt(x_data[i]);
+      }
+
+      // Prepare parameters.
+      union xnn_f32_rsqrt_params params;
+      if (init_params != nullptr) {
+        init_params(&params);
+      }
+
+      // Call optimized micro-kernel.
+      vrsqrt(batch_size() * sizeof(float), x_data, y.data(),
+             init_params != nullptr ? &params : nullptr);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        EXPECT_EQ(y[i], y_ref[i]) << "at " << i << " / " << batch_size()
+                                  << ", x[" << i << "] = " << x[i];
       }
     }
   }

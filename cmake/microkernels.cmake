@@ -5626,6 +5626,9 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-vrnd/gen/f32-vrndz-scalar-libm-u1.c
   src/f32-vrnd/gen/f32-vrndz-scalar-libm-u2.c
   src/f32-vrnd/gen/f32-vrndz-scalar-libm-u4.c
+  src/f32-vrsqrt/gen/f32-vrsqrt-scalar-recip-sqrt-u1.c
+  src/f32-vrsqrt/gen/f32-vrsqrt-scalar-recip-sqrt-u2.c
+  src/f32-vrsqrt/gen/f32-vrsqrt-scalar-recip-sqrt-u4.c
   src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-lut64-p2-div-u1.c
   src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-lut64-p2-div-u2.c
   src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-lut64-p2-div-u4.c

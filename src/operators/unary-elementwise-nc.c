@@ -8,17 +8,19 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
-
-#include <fp16/fp16.h>
-
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/config.h>
 #include <xnnpack/log.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/operator-utils.h>
 #include <xnnpack/microparams-init.h>
+#include <xnnpack/microparams.h>
+#include <xnnpack/operator-type.h>
+#include <xnnpack/operator-utils.h>
+#include <xnnpack/operator.h>
 
+#include "pthreadpool.h"
+#include <fp16/fp16.h>
 
 static void init_unary_elementwise_nc(
     uint32_t flags,
@@ -1292,6 +1294,22 @@ enum xnn_status xnn_create_square_root_nc_f32(
     xnn_operator_type_square_root_nc_f32, sqrt_op_out);
 }
 
+enum xnn_status xnn_create_reciprocal_square_root_nc_f32(
+    uint32_t flags, xnn_operator_t* rsqrt_op_out) {
+  const struct xnn_unary_elementwise_config* f32_rsqrt_config =
+      xnn_init_f32_rsqrt_config();
+
+  union xnn_f32_rsqrt_params params;
+  if XNN_LIKELY (f32_rsqrt_config != NULL &&
+                 f32_rsqrt_config->init.f32_rsqrt != NULL) {
+    f32_rsqrt_config->init.f32_rsqrt(&params);
+  }
+
+  return create_unary_elementwise_nc(
+      flags, f32_rsqrt_config, /*rminmax_config=*/NULL, &params, sizeof(params),
+      xnn_operator_type_reciprocal_square_root_nc_f32, rsqrt_op_out);
+}
+
 enum xnn_status xnn_create_tanh_nc_f16(
     uint32_t flags,
     xnn_operator_t* tanh_op_out)
@@ -2101,6 +2119,24 @@ enum xnn_status xnn_reshape_negate_nc_f32(
     threadpool);
 }
 
+enum xnn_status xnn_reshape_reciprocal_square_root_nc_f32(
+    xnn_operator_t rsqrt_op,
+    size_t batch_size,
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    pthreadpool_t threadpool)
+{
+  return reshape_unary_elementwise_nc(
+    rsqrt_op, xnn_operator_type_reciprocal_square_root_nc_f32,
+    batch_size,
+    channels, input_stride, output_stride,
+    /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    &rsqrt_op->params.f32_rsqrt, sizeof(rsqrt_op->params.f32_rsqrt),
+    threadpool);
+}
+
 enum xnn_status xnn_reshape_sigmoid_nc_f16(
     xnn_operator_t sigmoid_op,
     size_t batch_size,
@@ -2700,6 +2736,16 @@ enum xnn_status xnn_setup_negate_nc_f32(
 {
   return setup_unary_elementwise_nc(
     negate_op, xnn_operator_type_negate_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_reciprocal_square_root_nc_f32(
+    xnn_operator_t rsqrt_op,
+    const float* input,
+    float* output)
+{
+  return setup_unary_elementwise_nc(
+    rsqrt_op, xnn_operator_type_reciprocal_square_root_nc_f32,
     input, output);
 }
 

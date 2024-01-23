@@ -83,6 +83,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/multiply2.c",
     "src/subgraph/negate.c",
     "src/subgraph/prelu.c",
+    "src/subgraph/reciprocal-square-root.c",
     "src/subgraph/reshape-helpers.c",
     "src/subgraph/rope.c",
     "src/subgraph/scaled-dot-product-attention.c",
