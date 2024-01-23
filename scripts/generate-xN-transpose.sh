@@ -101,7 +101,6 @@ tools/xngen src/x32-transposec/rvv.c.in -D SIZE=32 VLEN=1024 -o src/x32-transpos
 tools/xngen src/x32-transposec/rvv.c.in -D SIZE=32 VLEN=512 -o src/x32-transposec/gen/x32-transposec-16x8-rvv.c &
 tools/xngen src/x32-transposec/rvv.c.in -D SIZE=32 VLEN=256 -o src/x32-transposec/gen/x32-transposec-8x8-rvv.c &
 tools/xngen src/x32-transposec/rvv.c.in -D SIZE=32 VLEN=128 -o src/x32-transposec/gen/x32-transposec-4x4-rvv.c &
-tools/xngen src/x32-transposec/rvv.c.in -D SIZE=32 VLEN=64  -o src/x32-transposec/gen/x32-transposec-2x2-rvv.c &
 
 #################################### ARM NEON ###############################
 tools/xngen src/x32-transposec/neon-zip.c.in -D SIZE=8 VECTOR_SIZE=64  IN_PTRS=MULTI OUT_PTRS=DEC    -o src/x8-transposec/gen/x8-transposec-8x8-multi-dec-zip-neon.c &

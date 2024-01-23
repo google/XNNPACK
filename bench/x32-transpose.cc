@@ -118,8 +118,6 @@ void transpose_rvv(
   transpose(state, transpose_uk, init_params, isa_check);
 }
 
-BENCHMARK_CAPTURE(transpose_rvv, 2x2_rvv, xnn_x32_transposec_ukernel__2x2_rvv, 2)
-    ->Apply(BenchmarkKernelSize)->UseRealTime();
 BENCHMARK_CAPTURE(transpose_rvv, 4x4_rvv, xnn_x32_transposec_ukernel__4x4_rvv, 4)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
 BENCHMARK_CAPTURE(transpose_rvv, 8x8_rvv, xnn_x32_transposec_ukernel__8x8_rvv, 8)
