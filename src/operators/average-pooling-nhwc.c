@@ -465,8 +465,9 @@ static enum xnn_status reshape_average_pooling2d(
   const bool input_size_changed =  (input_height != last_input_height || input_width != last_input_width || channels != last_input_channels);
   void* zero_buffer = average_pooling_op->zero_buffer;
   if (input_size_changed) {
+    xnn_release_simd_memory(zero_buffer);
     zero_buffer =
-      (void*) xnn_reallocate_memory((void*) average_pooling_op->zero_buffer, zero_bytes);
+      (void*) xnn_allocate_simd_memory(zero_bytes);
     average_pooling_op->zero_buffer = zero_buffer;
     memset(average_pooling_op->zero_buffer, (uint8_t) average_pooling_op->input_zero_point, zero_bytes);
   }
