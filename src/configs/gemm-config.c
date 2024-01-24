@@ -3517,7 +3517,7 @@ static void init_qu8_gemm_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       #if XNN_ENABLE_ASSEMBLY
-        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
+        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_udot) {
           #if XNN_ENABLE_ARM_DOTPROD
             qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_1x8c4__neondot);
             qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__neondot);
@@ -3645,7 +3645,7 @@ static void init_qu8_gemm_config(void) {
         }
         #endif  // XNN_MAX_UARCH_TYPES > 1
       #else  // XNN_ENABLE_ASSEMBLY
-        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
+        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_udot) {
           #if XNN_ENABLE_ARM_DOTPROD
             qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_1x8c4__neondot);
             qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__neondot);
