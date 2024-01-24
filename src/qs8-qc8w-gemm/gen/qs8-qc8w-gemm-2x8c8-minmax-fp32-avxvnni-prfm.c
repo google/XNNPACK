@@ -125,10 +125,10 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x8c8__avxvnni_prfm(
     __m256 vout0x01234567 = _mm256_cvtepi32_ps(vacc0x01234567);
     __m256 vout1x01234567 = _mm256_cvtepi32_ps(vacc1x01234567);
 
-    const __m256 vscale012345678ABCDEF = _mm256_load_ps(w);
+    const __m256 vscale01234567 = _mm256_load_ps(w);
     w = (const float*) w + 8;
-    vout0x01234567 = _mm256_mul_ps(vout0x01234567, vscale012345678ABCDEF);
-    vout1x01234567 = _mm256_mul_ps(vout1x01234567, vscale012345678ABCDEF);
+    vout0x01234567 = _mm256_mul_ps(vout0x01234567, vscale01234567);
+    vout1x01234567 = _mm256_mul_ps(vout1x01234567, vscale01234567);
 
     vout0x01234567 = _mm256_min_ps(vout0x01234567, voutput_max_less_zero_point);
     vout1x01234567 = _mm256_min_ps(vout1x01234567, voutput_max_less_zero_point);
