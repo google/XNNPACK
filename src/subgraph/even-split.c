@@ -5,6 +5,7 @@
 
 #include <assert.h>
 #include <stdint.h>  // For size_t.
+#include <string.h>
 
 #include <xnnpack.h>
 #include <xnnpack/log.h>
@@ -160,14 +161,37 @@ static enum xnn_status reshape_even_split_n_operator(
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
+  const struct xnn_value* input_value = values + input_id;
 
-  opdata->batch_size = xnn_shape_multiply_leading_dims(&values[input_id].shape, opdata->axis);
+  opdata->batch_size = xnn_shape_multiply_leading_dims(&input_value->shape, opdata->axis);
 
+  const size_t axis = opdata->axis;
+  const size_t axis_elements = input_value->shape.dim[axis] / num_splits;
+  const size_t old_workspace_size = opdata->workspace_size;
+  bool reallocation_required = false;
   for (size_t i = 0; i < num_splits; ++i) {
     status = reshape_even_split_operator_helper(values, num_values, opdata, i, num_splits, threadpool);
     if (status != xnn_status_success) {
       return status;
     }
+    const uint32_t output_n_id = opdata->outputs[i];
+    assert(output_n_id != XNN_INVALID_VALUE_ID);
+    assert(output_n_id < num_values);
+    struct xnn_value* output_n_value = values + output_n_id;
+    if (output_n_value->allocation_type == xnn_allocation_type_invalid) {
+      // output_id was removed during optimization.
+      continue;
+    }
+    memcpy(output_n_value->shape.dim, input_value->shape.dim, input_value->shape.num_dims * sizeof(size_t));
+    output_n_value->shape.dim[axis] = axis_elements;
+    const size_t new_size = xnn_tensor_get_size(output_n_value);
+    if (new_size > output_n_value->size) {
+      output_n_value->size = new_size;
+      reallocation_required = true;
+    }
+  }
+  if (reallocation_required || old_workspace_size > opdata->workspace_size) {
+    return xnn_status_reallocation_required;
   }
   return status;
 }
