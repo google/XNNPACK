@@ -109,8 +109,11 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
     $if DATATYPE in ["QC4_F16", "QC4_F32"]:
       while (k >= 16 * sizeof(${XINT8_T})) {
         $for M in range(MR):
-          __m128i va${M} = ${_MM_CVTEPX8_EPI16}(_mm_loadl_epi64((const __m128i*) a${M}));
-          __m256i vxa${M} = _mm256_inserti128_si256(_mm256_castsi128_si256(va${M}), va${M}, 1);
+          __m128i va${M} = _mm_broadcastq_epi64(_mm_loadl_epi64((const __m128i*) a${M}));
+          $if DATATYPE == "QU8":
+            __m256i vxa${M} = _mm256_cvtepu8_epi16(va${M});
+          $else:
+            __m256i vxa${M} = _mm256_cvtepi8_epi16(va${M});
           a${M} += 8;
 
         $for N in range(0, 8, 2):
@@ -126,8 +129,11 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
             vacc${M}x${ABC[N:N+2]} = _mm256_add_epi32(vacc${M}x${ABC[N:N+2]}, _mm256_madd_epi16(vxa${M}, vxb${ABC[N:N+2]}));
 
         $for M in range(MR):
-          va${M} = ${_MM_CVTEPX8_EPI16}(_mm_loadl_epi64((const __m128i*) a${M}));
-          vxa${M} = _mm256_inserti128_si256(_mm256_castsi128_si256(va${M}), va${M}, 1);
+          va${M} = _mm_broadcastq_epi64(_mm_loadl_epi64((const __m128i*) a${M}));
+          $if DATATYPE == "QU8":
+            vxa${M} = _mm256_cvtepu8_epi16(va${M});
+          $else:
+            vxa${M} = _mm256_cvtepi8_epi16(va${M});
           a${M} += 8;
 
         $for N in range(0, 8, 2):
@@ -143,8 +149,11 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
 
     while (k >= 8 * sizeof(${XINT8_T})) {
       $for M in range(MR):
-        const __m128i va${M} = ${_MM_CVTEPX8_EPI16}(_mm_loadl_epi64((const __m128i*) a${M}));
-        const __m256i vxa${M} = _mm256_inserti128_si256(_mm256_castsi128_si256(va${M}), va${M}, 1);
+        const __m128i va${M} = _mm_broadcastq_epi64(_mm_loadl_epi64((const __m128i*) a${M}));
+        $if DATATYPE == "QU8":
+          const __m256i vxa${M} = _mm256_cvtepu8_epi16(va${M});
+        $else:
+          const __m256i vxa${M} = _mm256_cvtepi8_epi16(va${M});
         a${M} += 8;
 
       $for N in range(0, 8, 2):
