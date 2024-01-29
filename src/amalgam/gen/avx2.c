@@ -4122,7 +4122,6 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c8__avx2(
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
 
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
-
       nc -= 8;
     } else {
       if (nc & 4) {
@@ -4331,7 +4330,6 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_3x8c8__avx2(
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
 
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
-
       nc -= 8;
     } else {
       if (nc & 4) {
@@ -5310,7 +5308,6 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x8c8__avx2(
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
 
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
-
       nc -= 8;
     } else {
       __m128 vout0x0123 = _mm256_castps256_ps128(vout0x01234567);
@@ -5518,7 +5515,6 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_3x8c8__avx2(
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
 
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
-
       nc -= 8;
     } else {
       __m128 vout2x0123 = _mm256_castps256_ps128(vout2x01234567);
