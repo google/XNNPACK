@@ -1175,9 +1175,6 @@ enum xnn_status xnn_setup_depth_to_space_nhwc_x32(
 }
 
 static enum xnn_status create_space_to_depth_nhwc(
-    size_t input_channels,
-    size_t input_channel_stride,
-    size_t output_channel_stride,
     uint32_t block_size,
     uint32_t flags,
     enum xnn_operator_type operator_type,
@@ -1194,35 +1191,10 @@ static enum xnn_status create_space_to_depth_nhwc(
 
   status = xnn_status_invalid_parameter;
 
-  if (input_channels == 0) {
-    xnn_log_error("failed to create %s operator with %zu input channels: number of channels must be non-zero",
-      xnn_operator_type_to_string(operator_type), input_channels);
-    goto error;
-  }
-
-  if (input_channel_stride < input_channels) {
-    xnn_log_error(
-      "failed to create %s operator with input channel stride of %zu: "
-      "stride must be at least as large as the number of input channels (%zu)",
-      xnn_operator_type_to_string(operator_type),
-      input_channel_stride, input_channels);
-    goto error;
-  }
-
   if (block_size <= 1) {
     xnn_log_error("failed to create %s operator with %" PRIu32 " block size: block size must be greater than 1",
       xnn_operator_type_to_string(operator_type),
       block_size);
-    goto error;
-  }
-
-  const size_t output_channels = input_channels * block_size * block_size;
-  if (output_channel_stride < output_channels) {
-    xnn_log_error(
-      "failed to create %s operator with output channel stride of %zu: "
-      "stride must be at least as large as the number of output channels (%" PRIu32 "x%" PRIu32 "x%zu)",
-      xnn_operator_type_to_string(operator_type),
-      output_channel_stride, block_size, block_size, input_channels);
     goto error;
   }
 
@@ -1239,9 +1211,6 @@ static enum xnn_status create_space_to_depth_nhwc(
   const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
   assert(transpose_config != NULL);
 
-  space_to_depth_op->channels = input_channels;
-  space_to_depth_op->input_pixel_stride = input_channel_stride;
-  space_to_depth_op->output_pixel_stride = output_channel_stride;
   space_to_depth_op->block_size = block_size;
 
   space_to_depth_op->type = operator_type;
@@ -1259,17 +1228,11 @@ error:
 }
 
 enum xnn_status xnn_create_space_to_depth_nhwc_x8(
-    size_t input_channels,
-    size_t input_channel_stride,
-    size_t output_channel_stride,
     uint32_t block_size,
     uint32_t flags,
     xnn_operator_t* space_to_depth_op_out)
 {
   return create_space_to_depth_nhwc(
-    input_channels,
-    input_channel_stride,
-    output_channel_stride,
     block_size,
     flags,
     xnn_operator_type_space_to_depth_nhwc_x8,
@@ -1277,17 +1240,11 @@ enum xnn_status xnn_create_space_to_depth_nhwc_x8(
 }
 
 enum xnn_status xnn_create_space_to_depth_nhwc_x16(
-    size_t input_channels,
-    size_t input_channel_stride,
-    size_t output_channel_stride,
     uint32_t block_size,
     uint32_t flags,
     xnn_operator_t* space_to_depth_op_out)
 {
   return create_space_to_depth_nhwc(
-    input_channels,
-    input_channel_stride,
-    output_channel_stride,
     block_size,
     flags,
     xnn_operator_type_space_to_depth_nhwc_x16,
@@ -1295,17 +1252,11 @@ enum xnn_status xnn_create_space_to_depth_nhwc_x16(
 }
 
 enum xnn_status xnn_create_space_to_depth_nhwc_x32(
-    size_t input_channels,
-    size_t input_channel_stride,
-    size_t output_channel_stride,
     uint32_t block_size,
     uint32_t flags,
     xnn_operator_t* space_to_depth_op_out)
 {
   return create_space_to_depth_nhwc(
-    input_channels,
-    input_channel_stride,
-    output_channel_stride,
     block_size,
     flags,
     xnn_operator_type_space_to_depth_nhwc_x32,
@@ -1318,6 +1269,7 @@ static enum xnn_status reshape_space_to_depth_nhwc(
     size_t batch_size,
     size_t input_height,
     size_t input_width,
+    size_t input_channels,
     uint32_t element_size,
     size_t* output_height_out,
     size_t* output_width_out,
@@ -1337,13 +1289,15 @@ static enum xnn_status reshape_space_to_depth_nhwc(
     return xnn_status_uninitialized;
   }
 
-  if (input_width == 0 || input_height == 0) {
-    xnn_log_error("failed to reshape %s operator with %zux%zu input: input dimensions must be non-zero",
-      xnn_operator_type_to_string(expected_operator_type), input_width, input_height);
+  if (input_width == 0 || input_height == 0 || input_channels == 0) {
+    xnn_log_error("failed to reshape %s operator with %zux%zux%zu input: input dimensions must be non-zero",
+      xnn_operator_type_to_string(expected_operator_type), input_width, input_height, input_channels);
     return xnn_status_invalid_parameter;
   }
 
   const uint32_t block_size = space_to_depth_op->block_size;
+  const size_t output_channels = input_channels * block_size * block_size;
+
   if (input_width % block_size != 0) {
     xnn_log_error(
         "failed to reshape %s operator with %zu input width and %u block size: input width must be divisible by block "
@@ -1365,13 +1319,12 @@ static enum xnn_status reshape_space_to_depth_nhwc(
     return xnn_status_success;
   }
 
-  const size_t channels = space_to_depth_op->channels;
   const size_t input_shape[5] = {
     batch_size * (input_height / block_size),
     block_size,
     input_width / block_size,
     block_size,
-    channels
+    input_channels
   };
   const size_t perm[5] = {0, 2, 1, 3, 4};
 
@@ -1382,21 +1335,21 @@ static enum xnn_status reshape_space_to_depth_nhwc(
     *output_width_out = input_width / block_size;
   }
   if (output_channels_out != NULL) {
-    *output_channels_out = channels * block_size * block_size;
+    *output_channels_out = output_channels;
   }
 
   const size_t input_stride[5] = {
-    block_size * input_width * space_to_depth_op->input_pixel_stride,
-    input_width * space_to_depth_op->input_pixel_stride,
-    block_size * space_to_depth_op->input_pixel_stride,
-    space_to_depth_op->input_pixel_stride,
+    block_size * input_width * input_channels,
+    input_width * input_channels,
+    block_size * input_channels,
+    input_channels,
     1
   };
   const size_t output_stride[5] = {
-    (input_width/block_size) * space_to_depth_op->output_pixel_stride,
-    space_to_depth_op->output_pixel_stride,
-    block_size * channels,
-    channels,
+    (input_width/block_size) * output_channels,
+    output_channels,
+    block_size * input_channels,
+    input_channels,
     1
   };
 
@@ -1411,6 +1364,7 @@ enum xnn_status xnn_reshape_space_to_depth_nhwc_x8(
     size_t batch_size,
     size_t input_height,
     size_t input_width,
+    size_t input_channels,
     size_t* output_height_out,
     size_t* output_width_out,
     size_t* output_channels_out,
@@ -1419,7 +1373,7 @@ enum xnn_status xnn_reshape_space_to_depth_nhwc_x8(
   return reshape_space_to_depth_nhwc(
     space_to_depth_op,
     xnn_operator_type_space_to_depth_nhwc_x8,
-    batch_size, input_height, input_width,
+    batch_size, input_height, input_width, input_channels,
     sizeof(uint8_t),
     output_height_out, output_width_out, output_channels_out);
 }
@@ -1429,6 +1383,7 @@ enum xnn_status xnn_reshape_space_to_depth_nhwc_x16(
     size_t batch_size,
     size_t input_height,
     size_t input_width,
+    size_t input_channels,
     size_t* output_height_out,
     size_t* output_width_out,
     size_t* output_channels_out,
@@ -1437,7 +1392,7 @@ enum xnn_status xnn_reshape_space_to_depth_nhwc_x16(
   return reshape_space_to_depth_nhwc(
     space_to_depth_op,
     xnn_operator_type_space_to_depth_nhwc_x16,
-    batch_size, input_height, input_width,
+    batch_size, input_height, input_width, input_channels,
     sizeof(uint16_t),
     output_height_out, output_width_out, output_channels_out);
 }
@@ -1447,6 +1402,7 @@ enum xnn_status xnn_reshape_space_to_depth_nhwc_x32(
     size_t batch_size,
     size_t input_height,
     size_t input_width,
+    size_t input_channels,
     size_t* output_height_out,
     size_t* output_width_out,
     size_t* output_channels_out,
@@ -1455,7 +1411,7 @@ enum xnn_status xnn_reshape_space_to_depth_nhwc_x32(
   return reshape_space_to_depth_nhwc(
     space_to_depth_op,
     xnn_operator_type_space_to_depth_nhwc_x32,
-    batch_size, input_height, input_width,
+    batch_size, input_height, input_width, input_channels,
     sizeof(uint32_t),
     output_height_out, output_width_out, output_channels_out);
 }
