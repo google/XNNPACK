@@ -5,7 +5,7 @@
 //
 // Auto-generated file. Do not edit!
 //   Specification: test/f32-vrsqrt.yaml
-//   Generator: ./tools/generate-vunary-test.py
+//   Generator: tools/generate-vunary-test.py
 
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>

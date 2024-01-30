@@ -969,13 +969,9 @@ DECLARE_F32_VSQRT_UKERNEL_FUNCTION(xnn_f32_vsqrt_ukernel__scalar_sqrt_u4)
 
 DECLARE_F32_VRSQRT_UKERNEL_FUNCTION(
     xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u1)
-DECLARE_F32_VRSQRT_UKERNEL_FUNCTION(
     xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u2)
-DECLARE_F32_VRSQRT_UKERNEL_FUNCTION(
     xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u4)
-DECLARE_F32_VRSQRT_UKERNEL_FUNCTION(
     xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u8)
-DECLARE_F32_VRSQRT_UKERNEL_FUNCTION(
     xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u16)
 
 #define DECLARE_F32_VSIGMOID_UKERNEL_FUNCTION(fn_name) \
