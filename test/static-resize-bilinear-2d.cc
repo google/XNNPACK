@@ -213,7 +213,7 @@ TEST_F(StaticResizeBilinear2DTestQS8, matches_operator_api)
 
   // Call operator API.
   xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_resize_bilinear2d_nhwc_s8(channels, channels, channels, /*flags=*/0, &op);
+  const xnn_status status = xnn_create_resize_bilinear2d_nhwc_s8(output_height, output_width, /*flags=*/0, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -227,7 +227,7 @@ TEST_F(StaticResizeBilinear2DTestQS8, matches_operator_api)
   ASSERT_EQ(
     xnn_status_success,
     xnn_reshape_resize_bilinear2d_nhwc_s8(
-      op, batch_size, input_height, input_width, output_height, output_width,
+      op, batch_size, input_height, input_width, channels, channels, channels,
       &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_EQ(workspace_size, 0);
   ASSERT_EQ(workspace_alignment, 1);
@@ -282,7 +282,7 @@ TEST_F(StaticResizeBilinear2DTestQU8, matches_operator_api)
 
   // Call operator API.
   xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_resize_bilinear2d_nhwc_u8(channels, channels, channels, /*flags=*/0, &op);
+  const xnn_status status = xnn_create_resize_bilinear2d_nhwc_u8(output_height, output_width, /*flags=*/0, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -296,7 +296,7 @@ TEST_F(StaticResizeBilinear2DTestQU8, matches_operator_api)
   ASSERT_EQ(
     xnn_status_success,
     xnn_reshape_resize_bilinear2d_nhwc_u8(
-      op, batch_size, input_height, input_width, output_height, output_width,
+      op, batch_size, input_height, input_width, channels, channels, channels,
       &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_EQ(workspace_size, 0);
   ASSERT_EQ(workspace_alignment, 1);
@@ -347,7 +347,7 @@ TEST_F(StaticResizeBilinear2DTestF32, matches_operator_api)
 
   // Call operator API.
   xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_resize_bilinear2d_nhwc_f32(channels, channels, channels, /*flags=*/0, &op);
+  const xnn_status status = xnn_create_resize_bilinear2d_nhwc_f32(output_height, output_width, /*flags=*/0, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -361,7 +361,7 @@ TEST_F(StaticResizeBilinear2DTestF32, matches_operator_api)
   ASSERT_EQ(
     xnn_status_success,
     xnn_reshape_resize_bilinear2d_nhwc_f32(
-      op, batch_size, input_height, input_width, output_height, output_width,
+      op, batch_size, input_height, input_width, channels, channels, channels,
       &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_EQ(workspace_size, 0);
   ASSERT_EQ(workspace_alignment, 1);
