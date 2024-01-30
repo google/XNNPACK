@@ -3546,9 +3546,6 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_qu8(
   uint8_t* output);
 
 enum xnn_status xnn_create_depth_to_space_nchw2nhwc_x16(
-  size_t output_channels,
-  size_t input_channel_stride,
-  size_t output_channel_stride,
   uint32_t block_size,
   uint32_t flags,
   xnn_operator_t* depth_to_space_op_out);
@@ -3558,6 +3555,7 @@ enum xnn_status xnn_reshape_depth_to_space_nchw2nhwc_x16(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  size_t input_channels,
   size_t* output_height_out,
   size_t* output_width_out,
   size_t* output_channels_out,
@@ -3569,9 +3567,6 @@ enum xnn_status xnn_setup_depth_to_space_nchw2nhwc_x16(
   void* output);
 
 enum xnn_status xnn_create_depth_to_space_nchw2nhwc_x32(
-  size_t output_channels,
-  size_t input_channel_stride,
-  size_t output_channel_stride,
   uint32_t block_size,
   uint32_t flags,
   xnn_operator_t* depth_to_space_op_out);
@@ -3581,6 +3576,7 @@ enum xnn_status xnn_reshape_depth_to_space_nchw2nhwc_x32(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  size_t input_channels,
   size_t* output_height_out,
   size_t* output_width_out,
   size_t* output_channels_out,
@@ -3592,9 +3588,6 @@ enum xnn_status xnn_setup_depth_to_space_nchw2nhwc_x32(
   void* output);
 
 enum xnn_status xnn_create_depth_to_space_nhwc_x8(
-  size_t output_channels,
-  size_t input_channel_stride,
-  size_t output_channel_stride,
   uint32_t block_size,
   uint32_t flags,
   xnn_operator_t* depth_to_space_op_out);
@@ -3604,6 +3597,7 @@ enum xnn_status xnn_reshape_depth_to_space_nhwc_x8(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  size_t input_channels,
   size_t* output_height_out,
   size_t* output_width_out,
   size_t* output_channels_out,
@@ -3615,9 +3609,6 @@ enum xnn_status xnn_setup_depth_to_space_nhwc_x8(
   void* output);
 
 enum xnn_status xnn_create_depth_to_space_nhwc_x16(
-  size_t output_channels,
-  size_t input_channel_stride,
-  size_t output_channel_stride,
   uint32_t block_size,
   uint32_t flags,
   xnn_operator_t* depth_to_space_op_out);
@@ -3627,6 +3618,7 @@ enum xnn_status xnn_reshape_depth_to_space_nhwc_x16(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  size_t input_channels,
   size_t* output_height_out,
   size_t* output_width_out,
   size_t* output_channels_out,
@@ -3638,9 +3630,6 @@ enum xnn_status xnn_setup_depth_to_space_nhwc_x16(
   void* output);
 
 enum xnn_status xnn_create_depth_to_space_nhwc_x32(
-  size_t output_channels,
-  size_t input_channel_stride,
-  size_t output_channel_stride,
   uint32_t block_size,
   uint32_t flags,
   xnn_operator_t* depth_to_space_op_out);
@@ -3650,6 +3639,7 @@ enum xnn_status xnn_reshape_depth_to_space_nhwc_x32(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  size_t input_channels,
   size_t* output_height_out,
   size_t* output_width_out,
   size_t* output_channels_out,

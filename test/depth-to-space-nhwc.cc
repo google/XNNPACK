@@ -79,26 +79,6 @@ TEST(DEPTH_TO_SPACE_NHWC_X8, varying_batch_size) {
   }
 }
 
-TEST(DEPTH_TO_SPACE_NHWC_X8, input_channels_stride) {
-  DepthToSpaceOperatorTester()
-    .batch_size(2)
-    .input_size(7, 5)
-    .block_size(3)
-    .input_channels_stride(157)
-    .output_channels(17)
-    .TestNHWCxX8();
-}
-
-TEST(DEPTH_TO_SPACE_NHWC_X8, output_channels_stride) {
-  DepthToSpaceOperatorTester()
-    .batch_size(2)
-    .input_size(7, 5)
-    .block_size(3)
-    .output_channels_stride(19)
-    .output_channels(17)
-    .TestNHWCxX8();
-}
-
 TEST(DEPTH_TO_SPACE_NHWC_X16, one_pixel) {
   DepthToSpaceOperatorTester()
     .input_size(1, 1)
@@ -170,27 +150,6 @@ TEST(DEPTH_TO_SPACE_NHWC_X16, varying_batch_size) {
   }
 }
 
-TEST(DEPTH_TO_SPACE_NHWC_X16, input_channels_stride) {
-  DepthToSpaceOperatorTester()
-    .batch_size(2)
-    .input_size(7, 5)
-    .block_size(3)
-    .input_channels_stride(157)
-    .output_channels(17)
-    .TestNHWCxX16();
-}
-
-TEST(DEPTH_TO_SPACE_NHWC_X16, output_channels_stride) {
-  DepthToSpaceOperatorTester()
-    .batch_size(2)
-    .input_size(7, 5)
-    .block_size(3)
-    .output_channels_stride(19)
-    .output_channels(17)
-    .TestNHWCxX16();
-}
-
-
 TEST(DEPTH_TO_SPACE_NHWC_X32, one_pixel) {
   DepthToSpaceOperatorTester()
     .input_size(1, 1)
@@ -260,24 +219,4 @@ TEST(DEPTH_TO_SPACE_NHWC_X32, varying_batch_size) {
       .output_channels(17)
       .TestNHWCxX32();
   }
-}
-
-TEST(DEPTH_TO_SPACE_NHWC_X32, input_channels_stride) {
-  DepthToSpaceOperatorTester()
-    .batch_size(2)
-    .input_size(7, 5)
-    .block_size(3)
-    .input_channels_stride(157)
-    .output_channels(17)
-    .TestNHWCxX32();
-}
-
-TEST(DEPTH_TO_SPACE_NHWC_X32, output_channels_stride) {
-  DepthToSpaceOperatorTester()
-    .batch_size(2)
-    .input_size(7, 5)
-    .block_size(3)
-    .output_channels_stride(19)
-    .output_channels(17)
-    .TestNHWCxX32();
 }
