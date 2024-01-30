@@ -27,31 +27,35 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"(?:xnn_|xnn_generate_)(s8|u8|f16|f32|u32|u64)(_(s8|u8|f16|f32|u32|u64))*_v(abs|clamp|elu|hswish|lrelu|neg|relu|rndd|rndne|rndu|rndz|sigmoid|sqr|sqrt|sqrtshift|tanh)_(fact_)?ukernel__(.+)_u(\d+)(v)?", name)
+  match = re.fullmatch(
+      r"(?:xnn_|xnn_generate_)(s8|u8|f16|f32|u32|u64)(_(s8|u8|f16|f32|u32|u64))*_v(abs|clamp|elu|hswish|lrelu|neg|relu|rndd|rndne|rndu|rndz|rsqrt|sigmoid|sqr|sqrt|sqrtshift|tanh)_(fact_)?ukernel__(.+)_u(\d+)(v)?",
+      name,
+  )
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
-    "abs": "Abs",
-    "clamp": "Clamp",
-    "elu": "ELU",
-    "hswish": "HardSwish",
-    "lrelu": "LeakyReLU",
-    "neg": "Negate",
-    "relu": "ReLU",
-    "rndd": "RoundDown",
-    "rndne": "RoundToNearestEven",
-    "rndz": "RoundTowardsZero",
-    "rndu": "RoundUp",
-    "sigmoid": "Sigmoid",
-    "sqr": "Square",
-    "sqrt": "SquareRoot",
-    "sqrtshift": "SquareRootShift",
-    "tanh": "TanH",
+      "abs": "Abs",
+      "clamp": "Clamp",
+      "elu": "ELU",
+      "hswish": "HardSwish",
+      "lrelu": "LeakyReLU",
+      "neg": "Negate",
+      "relu": "ReLU",
+      "rndd": "RoundDown",
+      "rndne": "RoundToNearestEven",
+      "rndz": "RoundTowardsZero",
+      "rndu": "RoundUp",
+      "rsqrt": "ReciprocalSquareRoot",
+      "sigmoid": "Sigmoid",
+      "sqr": "Square",
+      "sqrt": "SquareRoot",
+      "sqrtshift": "SquareRootShift",
+      "tanh": "TanH",
   }[match.group(4)]
   batch_tile = int(match.group(7))
   vector_tile = bool(match.group(8))
 
-  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(6))
+  arch, isa, _ = xnncommon.parse_target_name(target_name=match.group(6))
   return op_type, batch_tile, vector_tile, arch, isa
 
 
@@ -265,15 +269,14 @@ def main(args):
 //   Specification: {specification}
 //   Generator: {generator}
 
-
-#include <vector>
-
-#include <gtest/gtest.h>
-
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 #include <xnnpack/vunary.h>
 
+#include <cstddef>
+#include <vector>
+
+#include <gtest/gtest.h>
 #include "vunary-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 

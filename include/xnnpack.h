@@ -1657,6 +1657,21 @@ enum xnn_status xnn_define_square_root(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Reciprocal Square Root Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input_id - Value ID for the input tensor. The input tensor must be
+/// defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be
+/// defined in the @a subgraph, and its
+///                    shape must match the shape of the input tensor.
+/// @param flags - binary features of the Square Root Node. No supported flags
+/// are currently defined.
+enum xnn_status xnn_define_reciprocal_square_root(xnn_subgraph_t subgraph,
+                                                  uint32_t input_id,
+                                                  uint32_t output_id,
+                                                  uint32_t flags);
+
 /// Define a Static Slice Node add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
@@ -5557,6 +5572,22 @@ enum xnn_status xnn_run_square_root_nc_f32(
   float* output,
   uint32_t flags,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_reciprocal_square_root_nc_f32(
+    uint32_t flags, xnn_operator_t* sqrt_op_out);
+
+enum xnn_status xnn_reshape_reciprocal_square_root_nc_f32(
+    xnn_operator_t sqrt_op, size_t batch_size, size_t channels,
+    size_t input_stride, size_t output_stride, pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_reciprocal_square_root_nc_f32(xnn_operator_t sqrt_op,
+                                                        const float* input,
+                                                        float* output);
+
+enum xnn_status xnn_run_reciprocal_square_root_nc_f32(
+    size_t channels, size_t input_stride, size_t output_stride,
+    size_t batch_size, const float* input, float* output, uint32_t flags,
+    pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_squared_difference_nd_f16(
   uint32_t flags,

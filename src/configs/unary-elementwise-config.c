@@ -13,6 +13,7 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/vcvt.h>
 #include <xnnpack/vlrelu.h>
@@ -46,6 +47,7 @@ static struct xnn_unary_elementwise_config f32_rndd_config = {0};
 static struct xnn_unary_elementwise_config f32_rndne_config = {0};
 static struct xnn_unary_elementwise_config f32_rndu_config = {0};
 static struct xnn_unary_elementwise_config f32_rndz_config = {0};
+static struct xnn_unary_elementwise_config f32_rsqrt_config = {0};
 static struct xnn_unary_elementwise_config f32_sigmoid_config = {0};
 static struct xnn_unary_elementwise_config f32_sqr_config = {0};
 static struct xnn_unary_elementwise_config f32_sqrt_config = {0};
@@ -94,6 +96,7 @@ static struct xnn_unary_elementwise_config xx_copy_config = {0};
   static INIT_ONCE init_guard_f32_rndne = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_rndu = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_rndz = INIT_ONCE_STATIC_INIT;
+  static INIT_ONCE init_guard_f32_rsqrt = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_sigmoid = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_sqr = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_sqrt = INIT_ONCE_STATIC_INIT;
@@ -140,6 +143,7 @@ static struct xnn_unary_elementwise_config xx_copy_config = {0};
   static pthread_once_t init_guard_f32_rndne = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_rndu = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_rndz = PTHREAD_ONCE_INIT;
+  static pthread_once_t init_guard_f32_rsqrt = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_sigmoid = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_sqr = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_sqrt = PTHREAD_ONCE_INIT;
@@ -1359,6 +1363,12 @@ static void init_f32_sqrt_config(void) {
   #endif
 }
 
+static void init_f32_rsqrt_config(void) {
+  f32_rsqrt_config.ukernel =
+      (xnn_vunary_ukernel_fn)xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u4;
+  f32_rsqrt_config.element_tile = 4;
+}
+
 static void init_f32_tanh_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -2408,6 +2418,13 @@ static void init_xx_copy_config(void) {
     return TRUE;
   }
 
+  static BOOL CALLBACK init_f32_rsqrt_config_windows(PINIT_ONCE init_once,
+                                                     PVOID parameter,
+                                                     PVOID* context) {
+    init_f32_rsqrt_config();
+    return TRUE;
+  }
+
   static BOOL CALLBACK init_f32_sigmoid_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
     init_f32_sigmoid_config();
     return TRUE;
@@ -2859,6 +2876,21 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_rndz_config() {
     pthread_once(&init_guard_f32_rndz, &init_f32_rndz_config);
   #endif
   return &f32_rndz_config;
+}
+
+const struct xnn_unary_elementwise_config* xnn_init_f32_rsqrt_config() {
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+#if XNN_PLATFORM_WINDOWS
+  InitOnceExecuteOnce(&init_guard_f32_rsqrt, &init_f32_rsqrt_config_windows,
+                      NULL, NULL);
+#else
+  pthread_once(&init_guard_f32_rsqrt, &init_f32_rsqrt_config);
+#endif
+  return &f32_rsqrt_config;
 }
 
 const struct xnn_unary_elementwise_config* xnn_init_f32_sigmoid_config() {

@@ -933,6 +933,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f32_vrsqrt_bench",
+    srcs = [
+        "f32-vrsqrt.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f32_vclamp_bench",
     srcs = [
         "f32-vclamp.cc",

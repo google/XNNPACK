@@ -1373,6 +1373,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_vrsqrt_test",
+    srcs = [
+        "f32-vrsqrt.cc",
+        "vunary-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_vscaleexpminusmax_test",
     srcs = [
         "f32-vscaleexpminusmax.cc",
