@@ -158,8 +158,6 @@ TEST_F(SoftmaxTestF32, reshape_output)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   dims[0] += 4;
-  dims[2] += 4;
-  dims[3] += 4;
   ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, dims.size(), dims.data()));
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
@@ -168,7 +166,7 @@ TEST_F(SoftmaxTestF32, reshape_output)
     ASSERT_EQ(dims[i], output_shape->dim[i]);
   }
 
-  dims[3] -= 4;
+  dims[0] -= 4;
   ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, dims.size(), dims.data()));
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
   output_shape = &runtime->values[node->outputs[0]].shape;
