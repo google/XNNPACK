@@ -12,7 +12,6 @@
 #include <numeric>
 #include <random>
 #include <vector>
-#include <iostream>
 
 #include <gtest/gtest.h>
 
