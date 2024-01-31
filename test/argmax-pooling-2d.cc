@@ -154,7 +154,7 @@ TEST_F(ArgmaxPoolingTestF32, matches_operator_api)
   xnn_operator_t op = nullptr;
   const xnn_status status = xnn_create_argmax_pooling2d_nhwc_f32(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left, pooling_height, pooling_width,
-    channels, channels, channels, /*flags=*/0, &op);
+    /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -168,7 +168,11 @@ TEST_F(ArgmaxPoolingTestF32, matches_operator_api)
   ASSERT_EQ(
     xnn_status_success,
     xnn_reshape_argmax_pooling2d_nhwc_f32(
-      op, batch_size, input_height, input_width, &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+      op, batch_size, input_height, input_width,
+      /*channels=*/channels,
+      /*input_pixel_stride=*/channels,
+      /*output_pixel_stride=*/channels,
+      &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
 
   std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
   ASSERT_EQ(

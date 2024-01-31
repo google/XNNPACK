@@ -30,12 +30,9 @@ static enum xnn_status create_argmax_pooling_operator(
   const uint32_t input_id = node->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
+  (void) input_id;  // Silence unused warning, only use in asserts.
 
   assert(node->num_outputs == 2);
-
-  const size_t channel_dim = values[input_id].shape.dim[3];
-  assert(channel_dim == values[node->outputs[0]].shape.dim[3]);
-  assert(channel_dim == values[node->outputs[1]].shape.dim[3]);
 
   const enum xnn_status status = xnn_create_argmax_pooling2d_nhwc_f32(
     node->params.pooling_2d.padding_top,
@@ -44,7 +41,6 @@ static enum xnn_status create_argmax_pooling_operator(
     node->params.pooling_2d.padding_left,
     node->params.pooling_2d.pooling_height,
     node->params.pooling_2d.pooling_width,
-    channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
     node->flags,
     &opdata->operator_objects[0]);
   return status;
@@ -61,11 +57,16 @@ static enum xnn_status reshape_argmax_pooling_operator(
   const size_t batch_size = values[input_id].shape.dim[0];
   const size_t input_height = values[input_id].shape.dim[1];
   const size_t input_width = values[input_id].shape.dim[2];
+  const size_t channel_dim = values[input_id].shape.dim[3];
+
   return xnn_reshape_argmax_pooling2d_nhwc_f32(
     opdata->operator_objects[0],
     batch_size,
     input_height,
     input_width,
+    /*channels=*/channel_dim,
+    /*input_pixel_stride=*/channel_dim,
+    /*output_pixel_stride=*/channel_dim,
     &opdata->workspace_size,
     &opdata->workspace_alignment,
     threadpool);

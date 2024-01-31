@@ -2143,9 +2143,6 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
   uint32_t input_padding_left,
   uint32_t pooling_height,
   uint32_t pooling_width,
-  size_t channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
   uint32_t flags,
   xnn_operator_t* argmax_pooling_op_out);
 
@@ -2154,6 +2151,9 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  size_t channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
   size_t* workspace_size,
   size_t* workspace_alignment,
   pthreadpool_t threadpool);
@@ -4972,9 +4972,8 @@ enum xnn_status xnn_setup_prelu_nc_f32(
   float* output);
 
 enum xnn_status xnn_create_resize_bilinear2d_nchw_f32(
-  size_t channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
+  size_t output_height,
+  size_t output_width,
   uint32_t flags,
   xnn_operator_t* resize_op_out);
 
@@ -4983,8 +4982,9 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nchw_f32(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
-  size_t output_height,
-  size_t output_width,
+  size_t channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_resize_bilinear2d_nchw_f32(
@@ -4993,9 +4993,8 @@ enum xnn_status xnn_setup_resize_bilinear2d_nchw_f32(
   float* output);
 
 enum xnn_status xnn_create_resize_bilinear2d_nchw_f16(
-  size_t channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
+  size_t output_height,
+  size_t output_width,
   uint32_t flags,
   xnn_operator_t* resize_op_out);
 
@@ -5004,8 +5003,9 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nchw_f16(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
-  size_t output_height,
-  size_t output_width,
+  size_t channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_resize_bilinear2d_nchw_f16(
@@ -5014,9 +5014,8 @@ enum xnn_status xnn_setup_resize_bilinear2d_nchw_f16(
   void* output);
 
 enum xnn_status xnn_create_resize_bilinear2d_nhwc_f16(
-  size_t channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
+  size_t output_height,
+  size_t output_width,
   uint32_t flags,
   xnn_operator_t* resize_op_out);
 
@@ -5025,8 +5024,9 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc_f16(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
-  size_t output_height,
-  size_t output_width,
+  size_t channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
   size_t* workspace_size,
   size_t* workspace_alignment,
   pthreadpool_t threadpool);
@@ -5038,9 +5038,8 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f16(
   void* output);
 
 enum xnn_status xnn_create_resize_bilinear2d_nhwc_f32(
-  size_t channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
+  size_t output_height,
+  size_t output_width,
   uint32_t flags,
   xnn_operator_t* resize_op_out);
 
@@ -5049,8 +5048,9 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc_f32(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
-  size_t output_height,
-  size_t output_width,
+  size_t channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
   size_t* workspace_size,
   size_t* workspace_alignment,
   pthreadpool_t threadpool);
@@ -5062,9 +5062,8 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f32(
   float* output);
 
 enum xnn_status xnn_create_resize_bilinear2d_nhwc_s8(
-  size_t channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
+  size_t output_height,
+  size_t output_width,
   uint32_t flags,
   xnn_operator_t* resize_op_out);
 
@@ -5073,8 +5072,9 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc_s8(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
-  size_t output_height,
-  size_t output_width,
+  size_t channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
   size_t* workspace_size,
   size_t* workspace,
   pthreadpool_t threadpool);
@@ -5086,9 +5086,8 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_s8(
   int8_t* output);
 
 enum xnn_status xnn_create_resize_bilinear2d_nhwc_u8(
-  size_t channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
+  size_t output_height,
+  size_t output_width,
   uint32_t flags,
   xnn_operator_t* resize_op_out);
 
@@ -5097,8 +5096,9 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc_u8(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
-  size_t output_height,
-  size_t output_width,
+  size_t channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
   size_t* workspace_size,
   size_t* workspace_alignment,
   pthreadpool_t threadpool);
