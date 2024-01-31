@@ -189,8 +189,7 @@ int main(int argc, char** argv) {
       break;
     case 31:
       xnn_create_resize_bilinear2d_nhwc_f32(
-        0, 0, 0,
-        0, &op);
+        0, 0, 0, &op);
       break;
     case 32:
       xnn_setup_resize_bilinear2d_nhwc_f32(
