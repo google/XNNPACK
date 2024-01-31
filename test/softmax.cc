@@ -11,13 +11,14 @@
 #include <memory>
 #include <random>
 
+#include <gtest/gtest.h>
+
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/subgraph.h>
 
 #include "subgraph-unary-tester.h"
-#include <gtest/gtest.h>
 
 using SoftmaxTestF32 =
   UnaryTest<float, /*OutputType=*/float, /*min_dim=*/1, /*max_dim=*/XNN_MAX_TENSOR_DIMS, /*pad_output=*/true>;
@@ -70,7 +71,7 @@ TEST_F(SoftmaxTestF32, matches_operator_api)
 
   // Call operator API.
   xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_softmax_nc_f32(channels, channels, channels, /*flags=*/0, &op);
+  const xnn_status status = xnn_create_softmax_nc_f32(/*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -79,7 +80,9 @@ TEST_F(SoftmaxTestF32, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_softmax_nc_f32(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_reshape_softmax_nc_f32(op, channels, channels, channels, batch_size, /*threadpool=*/nullptr));
 
   ASSERT_EQ(xnn_status_success, xnn_setup_softmax_nc_f32(op, input.data(), operator_output.data()));
 
@@ -148,10 +151,8 @@ TEST_F(SoftmaxTestF32, reshape_output)
 
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
 
-  const std::array<xnn_external_value, 2> external{{
-    xnn_external_value{input_id, input.data()},
-    xnn_external_value{output_id, subgraph_output.data()}
-  }};
+  const std::array<xnn_external_value, 2> external{
+    {xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}}};
 
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
 
@@ -160,7 +161,9 @@ TEST_F(SoftmaxTestF32, reshape_output)
   dims[0] += 4;
   ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, dims.size(), dims.data()));
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
+  ASSERT_EQ(
+    node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr),
+    xnn_status_reallocation_required);
   const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
   for (size_t i = 0; i < dims.size(); ++i) {
     ASSERT_EQ(dims[i], output_shape->dim[i]);
@@ -168,7 +171,9 @@ TEST_F(SoftmaxTestF32, reshape_output)
 
   dims[0] -= 4;
   ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, dims.size(), dims.data()));
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
+  ASSERT_EQ(
+    node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr),
+    xnn_status_success);
   output_shape = &runtime->values[node->outputs[0]].shape;
   for (size_t i = 0; i < dims.size(); ++i) {
     ASSERT_EQ(dims[i], output_shape->dim[i]);

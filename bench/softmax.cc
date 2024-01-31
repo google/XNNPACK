@@ -11,10 +11,10 @@
 #include <random>
 #include <vector>
 
-#include <xnnpack.h>
-
-#include <benchmark/benchmark.h>
 #include "bench/utils.h"
+#include <benchmark/benchmark.h>
+
+#include <xnnpack.h>
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "tensorflow/lite/interpreter.h"
@@ -24,13 +24,15 @@
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
-static void xnnpack_softmax_qu8(benchmark::State& state) {
+static void xnnpack_softmax_qu8(benchmark::State& state)
+{
   const size_t batch_size = static_cast<size_t>(state.range(0));
   const size_t channels = static_cast<size_t>(state.range(1));
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
+  auto u8rng =
+    std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
   std::vector<uint8_t> input(batch_size * channels);
   std::vector<uint8_t> output(batch_size * channels);
@@ -45,27 +47,21 @@ static void xnnpack_softmax_qu8(benchmark::State& state) {
 
   xnn_operator_t softmax_op = nullptr;
   status = xnn_create_softmax_nc_qu8(
-    channels, channels /* input stride */, channels /* output stride */,
-    1.0f /* input scale */,
-    0 /* output zero point */, 1.0f / 256.0f /* output scale */,
-    0 /* flags */, &softmax_op);
+    1.0f /* input scale */, 0 /* output zero point */, 1.0f / 256.0f /* output scale */, 0 /* flags */, &softmax_op);
   if (status != xnn_status_success || softmax_op == nullptr) {
     state.SkipWithError("failed to create SoftMax operator");
     return;
   }
 
   status = xnn_reshape_softmax_nc_qu8(
-    softmax_op,
-    batch_size,
+    softmax_op, channels, channels /* input stride */, channels /* output stride */, batch_size,
     /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape SoftMax operator");
     return;
   }
 
-  status = xnn_setup_softmax_nc_qu8(
-    softmax_op,
-    input.data(), output.data());
+  status = xnn_setup_softmax_nc_qu8(softmax_op, input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup SoftMax operator");
     return;
@@ -99,7 +95,8 @@ static void xnnpack_softmax_qu8(benchmark::State& state) {
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-static void xnnpack_softmax_f32(benchmark::State& state) {
+static void xnnpack_softmax_f32(benchmark::State& state)
+{
   const size_t batch_size = static_cast<size_t>(state.range(0));
   const size_t channels = static_cast<size_t>(state.range(1));
 
@@ -119,26 +116,21 @@ static void xnnpack_softmax_f32(benchmark::State& state) {
   }
 
   xnn_operator_t softmax_op = nullptr;
-  status = xnn_create_softmax_nc_f32(
-    channels, channels /* input stride */, channels /* output stride */,
-    0 /* flags */, &softmax_op);
+  status = xnn_create_softmax_nc_f32(0 /* flags */, &softmax_op);
   if (status != xnn_status_success || softmax_op == nullptr) {
     state.SkipWithError("failed to create SoftMax operator");
     return;
   }
 
   status = xnn_reshape_softmax_nc_f32(
-    softmax_op,
-    batch_size,
+    softmax_op, channels, channels /* input stride */, channels /* output stride */, batch_size,
     /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape SoftMax operator");
     return;
   }
 
-  status = xnn_setup_softmax_nc_f32(
-    softmax_op,
-    input.data(), output.data());
+  status = xnn_setup_softmax_nc_f32(softmax_op, input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup SoftMax operator");
     return;
@@ -173,7 +165,8 @@ static void xnnpack_softmax_f32(benchmark::State& state) {
 }
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
-static void tflite_softmax_f32(benchmark::State& state) {
+static void tflite_softmax_f32(benchmark::State& state)
+{
   const size_t batch_size = state.range(0);
   const size_t channels = state.range(1);
 
@@ -185,61 +178,41 @@ static void tflite_softmax_f32(benchmark::State& state) {
   flatbuffers::Offset<tflite::OperatorCode> operator_code =
     tflite::CreateOperatorCode(builder, tflite::BuiltinOperator_SOFTMAX);
 
-  flatbuffers::Offset<tflite::SoftmaxOptions> softmax_options =
-    tflite::CreateSoftmaxOptions(builder, 1.0f /* beta */);
+  flatbuffers::Offset<tflite::SoftmaxOptions> softmax_options = tflite::CreateSoftmaxOptions(builder, 1.0f /* beta */);
 
   flatbuffers::Offset<tflite::Buffer> buffers[1] = {
     tflite::CreateBuffer(builder, builder.CreateVector({})),
   };
 
   const int32_t input_shape[4] = {
-    static_cast<int32_t>(batch_size),
-    static_cast<int32_t>(1 /* height */),
-    static_cast<int32_t>(1 /* width */),
-    static_cast<int32_t>(channels)
-  };
+    static_cast<int32_t>(batch_size), static_cast<int32_t>(1 /* height */), static_cast<int32_t>(1 /* width */),
+    static_cast<int32_t>(channels)};
   const int32_t output_shape[4] = {
-    static_cast<int32_t>(batch_size),
-    static_cast<int32_t>(1 /* height */),
-    static_cast<int32_t>(1 /* width */),
-    static_cast<int32_t>(channels)
-  };
+    static_cast<int32_t>(batch_size), static_cast<int32_t>(1 /* height */), static_cast<int32_t>(1 /* width */),
+    static_cast<int32_t>(channels)};
 
   flatbuffers::Offset<tflite::Tensor> tensors[2] = {
-    tflite::CreateTensor(builder,
-                         builder.CreateVector<int32_t>(input_shape, 4),
-                         tflite::TensorType_FLOAT32),
-    tflite::CreateTensor(builder,
-                         builder.CreateVector<int32_t>(output_shape, 4),
-                         tflite::TensorType_FLOAT32),
+    tflite::CreateTensor(builder, builder.CreateVector<int32_t>(input_shape, 4), tflite::TensorType_FLOAT32),
+    tflite::CreateTensor(builder, builder.CreateVector<int32_t>(output_shape, 4), tflite::TensorType_FLOAT32),
   };
 
-  const int32_t op_inputs[1] = { 0 };
-  const int32_t op_outputs[1] = { 1 };
+  const int32_t op_inputs[1] = {0};
+  const int32_t op_outputs[1] = {1};
   flatbuffers::Offset<tflite::Operator> op = tflite::CreateOperator(
-      builder,
-      0 /* opcode_index */,
-      builder.CreateVector<int32_t>(op_inputs, 1),
-      builder.CreateVector<int32_t>(op_outputs, 1),
-      tflite::BuiltinOptions_SoftmaxOptions, softmax_options.Union());
+    builder, 0 /* opcode_index */, builder.CreateVector<int32_t>(op_inputs, 1),
+    builder.CreateVector<int32_t>(op_outputs, 1), tflite::BuiltinOptions_SoftmaxOptions, softmax_options.Union());
 
-  const int32_t graph_inputs[1] = { 0 };
-  const int32_t graph_outputs[1] = { 1 };
+  const int32_t graph_inputs[1] = {0};
+  const int32_t graph_outputs[1] = {1};
   flatbuffers::Offset<tflite::SubGraph> subgraph = tflite::CreateSubGraph(
-      builder,
-      builder.CreateVector(tensors, 2),
-      builder.CreateVector<int32_t>(graph_inputs, 1),
-      builder.CreateVector<int32_t>(graph_outputs, 1),
-      builder.CreateVector(&op, 1));
+    builder, builder.CreateVector(tensors, 2), builder.CreateVector<int32_t>(graph_inputs, 1),
+    builder.CreateVector<int32_t>(graph_outputs, 1), builder.CreateVector(&op, 1));
 
   flatbuffers::Offset<flatbuffers::String> description = builder.CreateString("Softmax model");
 
-  flatbuffers::Offset<tflite::Model> model_buffer = tflite::CreateModel(builder,
-      TFLITE_SCHEMA_VERSION,
-      builder.CreateVector(&operator_code, 1),
-      builder.CreateVector(&subgraph, 1),
-      description,
-      builder.CreateVector(buffers, 1));
+  flatbuffers::Offset<tflite::Model> model_buffer = tflite::CreateModel(
+    builder, TFLITE_SCHEMA_VERSION, builder.CreateVector(&operator_code, 1), builder.CreateVector(&subgraph, 1),
+    description, builder.CreateVector(buffers, 1));
 
   builder.Finish(model_buffer);
 
@@ -263,9 +236,7 @@ static void tflite_softmax_f32(benchmark::State& state) {
   }
 
   std::generate(
-    interpreter->typed_tensor<float>(0),
-    interpreter->typed_tensor<float>(0) + batch_size * channels,
-    std::ref(f32rng));
+    interpreter->typed_tensor<float>(0), interpreter->typed_tensor<float>(0) + batch_size * channels, std::ref(f32rng));
 
   for (auto _ : state) {
     if (interpreter->Invoke() != kTfLiteOk) {
@@ -313,7 +284,7 @@ BENCHMARK(xnnpack_softmax_qu8)->Apply(CharacteristicArguments)->UseRealTime();
 BENCHMARK(xnnpack_softmax_f32)->Apply(CharacteristicArguments)->UseRealTime();
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
-  BENCHMARK(tflite_softmax_f32)->Apply(CharacteristicArguments)->UseRealTime();
+BENCHMARK(tflite_softmax_f32)->Apply(CharacteristicArguments)->UseRealTime();
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
