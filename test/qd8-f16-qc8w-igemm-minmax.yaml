@@ -152,3 +152,41 @@
   init: xnn_init_f16_minmax_avx_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 8
+- name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x8c8__avx2
+  init: xnn_init_f16_minmax_avx_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+
+# x86 AVX512VL
+- name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c8__avx512skx
+  init: xnn_init_f16_minmax_avx_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_2x8c8__avx512skx
+  init: xnn_init_f16_minmax_avx_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_3x8c8__avx512skx
+  init: xnn_init_f16_minmax_avx_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x8c8__avx512skx
+  init: xnn_init_f16_minmax_avx_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_5x8c8__avx512skx
+  init: xnn_init_f16_minmax_avx_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_6x8c8__avx512skx
+  init: xnn_init_f16_minmax_avx_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_7x8c8__avx512skx
+  init: xnn_init_f16_minmax_avx_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
+- name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_8x8c8__avx512skx
+  init: xnn_init_f16_minmax_avx_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 8
