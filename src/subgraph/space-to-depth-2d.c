@@ -24,36 +24,20 @@ static enum xnn_status create_space_to_depth_operator(
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs == 1);
-  const uint32_t input_id = node->inputs[0];
-  assert(input_id != XNN_INVALID_VALUE_ID);
-  assert(input_id < num_values);
-
   assert(node->num_outputs == 1);
-  const uint32_t output_id = node->outputs[0];
-  assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_values);
-
-  const size_t input_channel_dim = values[input_id].shape.dim[3];
-  const size_t output_channel_dim = values[output_id].shape.dim[3];
 
   enum xnn_status status;
-  assert(values[input_id].layout == xnn_layout_type_nhwc);
-  assert(values[output_id].layout == xnn_layout_type_nhwc);
+  assert(values[node->inputs[0]].layout == xnn_layout_type_nhwc);
+  assert(values[node->outputs[0]].layout == xnn_layout_type_nhwc);
   switch (node->compute_type) {
     case xnn_compute_type_fp16:
       status = xnn_create_space_to_depth_nhwc_x16(
-          input_channel_dim /* output channels */,
-          input_channel_dim /* input stride */,
-          output_channel_dim /* output stride */,
           node->params.space_to_depth_2d.block_size,
           node->flags,
           &opdata->operator_objects[0]);
       break;
     case xnn_compute_type_fp32:
       status = xnn_create_space_to_depth_nhwc_x32(
-          input_channel_dim /* output channels */,
-          input_channel_dim /* input stride */,
-          output_channel_dim /* output stride */,
           node->params.space_to_depth_2d.block_size,
           node->flags,
           &opdata->operator_objects[0]);
@@ -61,9 +45,6 @@ static enum xnn_status create_space_to_depth_operator(
     case xnn_compute_type_qs8:
     case xnn_compute_type_qu8:
       status = xnn_create_space_to_depth_nhwc_x8(
-          input_channel_dim /* output channels */,
-          input_channel_dim /* input stride */,
-          output_channel_dim /* output stride */,
           node->params.space_to_depth_2d.block_size,
           node->flags,
           &opdata->operator_objects[0]);
@@ -83,43 +64,71 @@ static enum xnn_status reshape_space_to_depth_operator(
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
-  const size_t batch_size = values[input_id].shape.dim[0];
-  const size_t input_height = values[input_id].shape.dim[1];
-  const size_t input_width = values[input_id].shape.dim[2];
+  const struct xnn_value* input_value = values + input_id;
+  const size_t batch_size = input_value->shape.dim[0];
+  const size_t input_height = input_value->shape.dim[1];
+  const size_t input_width = input_value->shape.dim[2];
+  const size_t input_channels = input_value->shape.dim[3];
+  enum xnn_status status = xnn_status_invalid_state;
+  const size_t old_workspace_size = opdata->workspace_size;
+  size_t output_height, output_width, output_channels;
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_space_to_depth_nhwc_x16:
-      return xnn_reshape_space_to_depth_nhwc_x16(
+      status = xnn_reshape_space_to_depth_nhwc_x16(
           opdata->operator_objects[0],
           batch_size,
           input_height,
           input_width,
-          /*output_height_out=*/NULL,
-          /*output_width_out=*/NULL,
-          /*output_channels_out=*/NULL,
+          input_channels,
+          &output_height,
+          &output_width,
+          &output_channels,
           threadpool);
+      break;
     case xnn_operator_type_space_to_depth_nhwc_x32:
-      return xnn_reshape_space_to_depth_nhwc_x32(
+      status = xnn_reshape_space_to_depth_nhwc_x32(
           opdata->operator_objects[0],
           batch_size,
           input_height,
           input_width,
-          /*output_height_out=*/NULL,
-          /*output_width_out=*/NULL,
-          /*output_channels_out=*/NULL,
+          input_channels,
+          &output_height,
+          &output_width,
+          &output_channels,
           threadpool);
+      break;
     case xnn_operator_type_space_to_depth_nhwc_x8:
-      return xnn_reshape_space_to_depth_nhwc_x8(
+      status = xnn_reshape_space_to_depth_nhwc_x8(
           opdata->operator_objects[0],
           batch_size,
           input_height,
           input_width,
-          /*output_height_out=*/NULL,
-          /*output_width_out=*/NULL,
-          /*output_channels_out=*/NULL,
+          input_channels,
+          &output_height,
+          &output_width,
+          &output_channels,
           threadpool);
+      break;
     default:
       XNN_UNREACHABLE;
   }
+  if (status != xnn_status_success) {
+    return status;
+  }
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id < num_values);
+  struct xnn_value* output_value = values + output_id;
+  output_value->shape.dim[0] = batch_size;
+  output_value->shape.dim[1] = output_height;
+  output_value->shape.dim[2] = output_width;
+  output_value->shape.dim[3] = output_channels;
+
+  const size_t new_size = xnn_tensor_get_size(output_value);
+  if (new_size > output_value->size || old_workspace_size > opdata->workspace_size) {
+    output_value->size = new_size;
+    return xnn_status_reallocation_required;
+  }
+  return xnn_status_success;
 }
 
 static enum xnn_status setup_space_to_depth_operator(

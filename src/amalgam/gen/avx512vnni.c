@@ -1975,7 +1975,6 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x8c8__avx512vnni_prfm(
 
     if(nc >= 8) {
       _mm256_storeu_ps(c0, vout0x01234567);
-
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
       nc -= 8;
@@ -2611,25 +2610,18 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x8c8__avx512vnni_prfm(
 
     if(nc >= 8) {
       _mm256_storeu_ps(c6, vout6x01234567);
-
       c6 = (float*) ((uintptr_t) c6 + cn_stride);
       _mm256_storeu_ps(c5, vout5x01234567);
-
       c5 = (float*) ((uintptr_t) c5 + cn_stride);
       _mm256_storeu_ps(c4, vout4x01234567);
-
       c4 = (float*) ((uintptr_t) c4 + cn_stride);
       _mm256_storeu_ps(c3, vout3x01234567);
-
       c3 = (float*) ((uintptr_t) c3 + cn_stride);
       _mm256_storeu_ps(c2, vout2x01234567);
-
       c2 = (float*) ((uintptr_t) c2 + cn_stride);
       _mm256_storeu_ps(c1, vout1x01234567);
-
       c1 = (float*) ((uintptr_t) c1 + cn_stride);
       _mm256_storeu_ps(c0, vout0x01234567);
-
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
       nc -= 8;
@@ -3711,11 +3703,11 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c8__avx512vnni_prfm(
 
     vout0x01234567 = _mm256_min_ps(vout0x01234567, voutput_max_less_zero_point);
 
-    vacc0x0123 = _mm256_cvtps_epi32(vout0x01234567);
+    vacc0x01234567 = _mm256_cvtps_epi32(vout0x01234567);
 
-    vacc0x0123 = _mm256_add_epi32(vacc0x0123, voutput_zero_point);
+    vacc0x01234567 = _mm256_add_epi32(vacc0x01234567, voutput_zero_point);
 
-    __m128i voutb0x01234567 = _mm256_cvtsepi32_epi8(vacc0x0123);
+    __m128i voutb0x01234567 = _mm256_cvtsepi32_epi8(vacc0x01234567);
 
     voutb0x01234567 = _mm_max_epi8(voutb0x01234567, voutput_min);
 
@@ -4312,29 +4304,29 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_7x8c8__avx512vnni_prfm(
     vout5x01234567 = _mm256_min_ps(vout5x01234567, voutput_max_less_zero_point);
     vout6x01234567 = _mm256_min_ps(vout6x01234567, voutput_max_less_zero_point);
 
-    vacc0x0123 = _mm256_cvtps_epi32(vout0x01234567);
-    vacc1x0123 = _mm256_cvtps_epi32(vout1x01234567);
-    vacc2x0123 = _mm256_cvtps_epi32(vout2x01234567);
-    vacc3x0123 = _mm256_cvtps_epi32(vout3x01234567);
-    vacc4x0123 = _mm256_cvtps_epi32(vout4x01234567);
-    vacc5x0123 = _mm256_cvtps_epi32(vout5x01234567);
-    vacc6x0123 = _mm256_cvtps_epi32(vout6x01234567);
+    vacc0x01234567 = _mm256_cvtps_epi32(vout0x01234567);
+    vacc1x01234567 = _mm256_cvtps_epi32(vout1x01234567);
+    vacc2x01234567 = _mm256_cvtps_epi32(vout2x01234567);
+    vacc3x01234567 = _mm256_cvtps_epi32(vout3x01234567);
+    vacc4x01234567 = _mm256_cvtps_epi32(vout4x01234567);
+    vacc5x01234567 = _mm256_cvtps_epi32(vout5x01234567);
+    vacc6x01234567 = _mm256_cvtps_epi32(vout6x01234567);
 
-    vacc0x0123 = _mm256_add_epi32(vacc0x0123, voutput_zero_point);
-    vacc1x0123 = _mm256_add_epi32(vacc1x0123, voutput_zero_point);
-    vacc2x0123 = _mm256_add_epi32(vacc2x0123, voutput_zero_point);
-    vacc3x0123 = _mm256_add_epi32(vacc3x0123, voutput_zero_point);
-    vacc4x0123 = _mm256_add_epi32(vacc4x0123, voutput_zero_point);
-    vacc5x0123 = _mm256_add_epi32(vacc5x0123, voutput_zero_point);
-    vacc6x0123 = _mm256_add_epi32(vacc6x0123, voutput_zero_point);
+    vacc0x01234567 = _mm256_add_epi32(vacc0x01234567, voutput_zero_point);
+    vacc1x01234567 = _mm256_add_epi32(vacc1x01234567, voutput_zero_point);
+    vacc2x01234567 = _mm256_add_epi32(vacc2x01234567, voutput_zero_point);
+    vacc3x01234567 = _mm256_add_epi32(vacc3x01234567, voutput_zero_point);
+    vacc4x01234567 = _mm256_add_epi32(vacc4x01234567, voutput_zero_point);
+    vacc5x01234567 = _mm256_add_epi32(vacc5x01234567, voutput_zero_point);
+    vacc6x01234567 = _mm256_add_epi32(vacc6x01234567, voutput_zero_point);
 
-    __m128i voutb0x01234567 = _mm256_cvtsepi32_epi8(vacc0x0123);
-    __m128i voutb1x01234567 = _mm256_cvtsepi32_epi8(vacc1x0123);
-    __m128i voutb2x01234567 = _mm256_cvtsepi32_epi8(vacc2x0123);
-    __m128i voutb3x01234567 = _mm256_cvtsepi32_epi8(vacc3x0123);
-    __m128i voutb4x01234567 = _mm256_cvtsepi32_epi8(vacc4x0123);
-    __m128i voutb5x01234567 = _mm256_cvtsepi32_epi8(vacc5x0123);
-    __m128i voutb6x01234567 = _mm256_cvtsepi32_epi8(vacc6x0123);
+    __m128i voutb0x01234567 = _mm256_cvtsepi32_epi8(vacc0x01234567);
+    __m128i voutb1x01234567 = _mm256_cvtsepi32_epi8(vacc1x01234567);
+    __m128i voutb2x01234567 = _mm256_cvtsepi32_epi8(vacc2x01234567);
+    __m128i voutb3x01234567 = _mm256_cvtsepi32_epi8(vacc3x01234567);
+    __m128i voutb4x01234567 = _mm256_cvtsepi32_epi8(vacc4x01234567);
+    __m128i voutb5x01234567 = _mm256_cvtsepi32_epi8(vacc5x01234567);
+    __m128i voutb6x01234567 = _mm256_cvtsepi32_epi8(vacc6x01234567);
 
     voutb0x01234567 = _mm_max_epi8(voutb0x01234567, voutput_min);
     voutb1x01234567 = _mm_max_epi8(voutb1x01234567, voutput_min);

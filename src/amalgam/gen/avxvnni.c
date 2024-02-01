@@ -935,7 +935,6 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x8c8__avxvnni_prfm(
 
     if(nc >= 8) {
       _mm256_storeu_ps(c0, vout0x01234567);
-
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
       nc -= 8;
@@ -1190,19 +1189,14 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_5x8c8__avxvnni_prfm(
 
     if(nc >= 8) {
       _mm256_storeu_ps(c4, vout4x01234567);
-
       c4 = (float*) ((uintptr_t) c4 + cn_stride);
       _mm256_storeu_ps(c3, vout3x01234567);
-
       c3 = (float*) ((uintptr_t) c3 + cn_stride);
       _mm256_storeu_ps(c2, vout2x01234567);
-
       c2 = (float*) ((uintptr_t) c2 + cn_stride);
       _mm256_storeu_ps(c1, vout1x01234567);
-
       c1 = (float*) ((uintptr_t) c1 + cn_stride);
       _mm256_storeu_ps(c0, vout0x01234567);
-
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
       nc -= 8;
@@ -1752,12 +1746,12 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c8__avxvnni_prfm(
 
     vout0x01234567 = _mm256_min_ps(vout0x01234567, voutput_max_less_zero_point);
 
-    vacc0x0123 = _mm256_cvtps_epi32(vout0x01234567);
+    vacc0x01234567 = _mm256_cvtps_epi32(vout0x01234567);
 
-    vacc0x0123 = _mm256_add_epi32(vacc0x0123, voutput_zero_point);
+    vacc0x01234567 = _mm256_add_epi32(vacc0x01234567, voutput_zero_point);
 
-    vacc0x0123 = _mm256_packs_epi32(vacc0x0123, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc0x0123, 1)));
-    __m128i voutb0x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc0x0123, vacc0x0123));
+    vacc0x01234567 = _mm256_packs_epi32(vacc0x01234567, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc0x01234567, 1)));
+    __m128i voutb0x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc0x01234567, vacc0x01234567));
 
     voutb0x01234567 = _mm_max_epi8(voutb0x01234567, voutput_min);
 
@@ -1985,28 +1979,28 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_5x8c8__avxvnni_prfm(
     vout3x01234567 = _mm256_min_ps(vout3x01234567, voutput_max_less_zero_point);
     vout4x01234567 = _mm256_min_ps(vout4x01234567, voutput_max_less_zero_point);
 
-    vacc0x0123 = _mm256_cvtps_epi32(vout0x01234567);
-    vacc1x0123 = _mm256_cvtps_epi32(vout1x01234567);
-    vacc2x0123 = _mm256_cvtps_epi32(vout2x01234567);
-    vacc3x0123 = _mm256_cvtps_epi32(vout3x01234567);
-    vacc4x0123 = _mm256_cvtps_epi32(vout4x01234567);
+    vacc0x01234567 = _mm256_cvtps_epi32(vout0x01234567);
+    vacc1x01234567 = _mm256_cvtps_epi32(vout1x01234567);
+    vacc2x01234567 = _mm256_cvtps_epi32(vout2x01234567);
+    vacc3x01234567 = _mm256_cvtps_epi32(vout3x01234567);
+    vacc4x01234567 = _mm256_cvtps_epi32(vout4x01234567);
 
-    vacc0x0123 = _mm256_add_epi32(vacc0x0123, voutput_zero_point);
-    vacc1x0123 = _mm256_add_epi32(vacc1x0123, voutput_zero_point);
-    vacc2x0123 = _mm256_add_epi32(vacc2x0123, voutput_zero_point);
-    vacc3x0123 = _mm256_add_epi32(vacc3x0123, voutput_zero_point);
-    vacc4x0123 = _mm256_add_epi32(vacc4x0123, voutput_zero_point);
+    vacc0x01234567 = _mm256_add_epi32(vacc0x01234567, voutput_zero_point);
+    vacc1x01234567 = _mm256_add_epi32(vacc1x01234567, voutput_zero_point);
+    vacc2x01234567 = _mm256_add_epi32(vacc2x01234567, voutput_zero_point);
+    vacc3x01234567 = _mm256_add_epi32(vacc3x01234567, voutput_zero_point);
+    vacc4x01234567 = _mm256_add_epi32(vacc4x01234567, voutput_zero_point);
 
-    vacc0x0123 = _mm256_packs_epi32(vacc0x0123, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc0x0123, 1)));
-    __m128i voutb0x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc0x0123, vacc0x0123));
-    vacc1x0123 = _mm256_packs_epi32(vacc1x0123, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc1x0123, 1)));
-    __m128i voutb1x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc1x0123, vacc1x0123));
-    vacc2x0123 = _mm256_packs_epi32(vacc2x0123, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc2x0123, 1)));
-    __m128i voutb2x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc2x0123, vacc2x0123));
-    vacc3x0123 = _mm256_packs_epi32(vacc3x0123, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc3x0123, 1)));
-    __m128i voutb3x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc3x0123, vacc3x0123));
-    vacc4x0123 = _mm256_packs_epi32(vacc4x0123, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc4x0123, 1)));
-    __m128i voutb4x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc4x0123, vacc4x0123));
+    vacc0x01234567 = _mm256_packs_epi32(vacc0x01234567, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc0x01234567, 1)));
+    __m128i voutb0x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc0x01234567, vacc0x01234567));
+    vacc1x01234567 = _mm256_packs_epi32(vacc1x01234567, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc1x01234567, 1)));
+    __m128i voutb1x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc1x01234567, vacc1x01234567));
+    vacc2x01234567 = _mm256_packs_epi32(vacc2x01234567, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc2x01234567, 1)));
+    __m128i voutb2x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc2x01234567, vacc2x01234567));
+    vacc3x01234567 = _mm256_packs_epi32(vacc3x01234567, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc3x01234567, 1)));
+    __m128i voutb3x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc3x01234567, vacc3x01234567));
+    vacc4x01234567 = _mm256_packs_epi32(vacc4x01234567, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc4x01234567, 1)));
+    __m128i voutb4x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc4x01234567, vacc4x01234567));
 
     voutb0x01234567 = _mm_max_epi8(voutb0x01234567, voutput_min);
     voutb1x01234567 = _mm_max_epi8(voutb1x01234567, voutput_min);

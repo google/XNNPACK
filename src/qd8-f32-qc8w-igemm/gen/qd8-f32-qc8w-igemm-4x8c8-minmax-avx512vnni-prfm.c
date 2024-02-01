@@ -219,16 +219,12 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x8c8__avx512vnni_prfm(
 
     if(nc >= 8) {
       _mm256_storeu_ps(c3, vout3x01234567);
-
       c3 = (float*) ((uintptr_t) c3 + cn_stride);
       _mm256_storeu_ps(c2, vout2x01234567);
-
       c2 = (float*) ((uintptr_t) c2 + cn_stride);
       _mm256_storeu_ps(c1, vout1x01234567);
-
       c1 = (float*) ((uintptr_t) c1 + cn_stride);
       _mm256_storeu_ps(c0, vout0x01234567);
-
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
       nc -= 8;

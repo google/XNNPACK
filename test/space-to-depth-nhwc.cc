@@ -85,28 +85,6 @@ TEST(SPACE_TO_DEPTH_NHWC_X8, varying_batch_size) {
   }
 }
 
-TEST(SPACE_TO_DEPTH_NHWC_X8, input_channels_stride) {
-  size_t block_size = 3;
-  SpaceToDepthOperatorTester()
-    .batch_size(1)
-    .input_size(7 * block_size, 5 * block_size)
-    .block_size(block_size)
-    .input_channels_stride(10)
-    .input_channels(9)
-    .TestNHWCxX8();
-}
-
-TEST(SPACE_TO_DEPTH_NHWC_X8, output_channels_stride) {
-  size_t block_size = 3;
-  SpaceToDepthOperatorTester()
-    .batch_size(2)
-    .input_size(7 * block_size, 5 * block_size)
-    .block_size(block_size)
-    .output_channels_stride(171)
-    .input_channels(17)
-    .TestNHWCxX8();
-}
-
 TEST(SPACE_TO_DEPTH_NHWC_X16, one_output_pixel) {
   size_t block_size = 3;
   SpaceToDepthOperatorTester()
@@ -184,28 +162,6 @@ TEST(SPACE_TO_DEPTH_NHWC_X16, varying_batch_size) {
   }
 }
 
-TEST(SPACE_TO_DEPTH_NHWC_X16, input_channels_stride) {
-  size_t block_size = 3;
-  SpaceToDepthOperatorTester()
-    .batch_size(1)
-    .input_size(7 * block_size, 5 * block_size)
-    .block_size(block_size)
-    .input_channels_stride(10)
-    .input_channels(9)
-    .TestNHWCxX16();
-}
-
-TEST(SPACE_TO_DEPTH_NHWC_X16, output_channels_stride) {
-  size_t block_size = 3;
-  SpaceToDepthOperatorTester()
-    .batch_size(2)
-    .input_size(7 * block_size, 5 * block_size)
-    .block_size(block_size)
-    .output_channels_stride(171)
-    .input_channels(17)
-    .TestNHWCxX32();
-}
-
 TEST(SPACE_TO_DEPTH_NHWC_X32, one_output_pixel) {
   size_t block_size = 3;
   SpaceToDepthOperatorTester()
@@ -281,26 +237,4 @@ TEST(SPACE_TO_DEPTH_NHWC_X32, varying_batch_size) {
       .input_channels(17)
       .TestNHWCxX32();
   }
-}
-
-TEST(SPACE_TO_DEPTH_NHWC_X32, input_channels_stride) {
-  size_t block_size = 3;
-  SpaceToDepthOperatorTester()
-    .batch_size(1)
-    .input_size(7 * block_size, 5 * block_size)
-    .block_size(block_size)
-    .input_channels_stride(10)
-    .input_channels(9)
-    .TestNHWCxX32();
-}
-
-TEST(SPACE_TO_DEPTH_NHWC_X32, output_channels_stride) {
-  size_t block_size = 3;
-  SpaceToDepthOperatorTester()
-    .batch_size(2)
-    .input_size(7 * block_size, 5 * block_size)
-    .block_size(block_size)
-    .output_channels_stride(171)
-    .input_channels(17)
-    .TestNHWCxX32();
 }

@@ -167,10 +167,8 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x8c8__avxvnni_prfm(
 
     if(nc >= 8) {
       _mm256_storeu_ps(c1, vout1x01234567);
-
       c1 = (float*) ((uintptr_t) c1 + cn_stride);
       _mm256_storeu_ps(c0, vout0x01234567);
-
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
       nc -= 8;

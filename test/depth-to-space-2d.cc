@@ -227,7 +227,7 @@ TEST_F(DepthToSpaceTestQS8, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status = xnn_create_depth_to_space_nhwc_x8(
-    output_channel(), input_channel(), output_channel(), block_size, /*flags=*/0, &op);
+    block_size, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -237,7 +237,7 @@ TEST_F(DepthToSpaceTestQS8, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success, xnn_reshape_depth_to_space_nhwc_x8(
-                          op, batch_size(), input_height(), input_width(),
+                          op, batch_size(), input_height(), input_width(), input_channel(),
                           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, /*output_channels_out=*/nullptr,
                           /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_depth_to_space_nhwc_x8(op, input.data(), operator_output.data()));
@@ -293,7 +293,7 @@ TEST_F(DepthToSpaceTestQU8, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status = xnn_create_depth_to_space_nhwc_x8(
-    output_channel(), input_channel(), output_channel(), block_size, /*flags=*/0, &op);
+    block_size, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -303,7 +303,7 @@ TEST_F(DepthToSpaceTestQU8, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success, xnn_reshape_depth_to_space_nhwc_x8(
-                          op, batch_size(), input_height(), input_width(),
+                          op, batch_size(), input_height(), input_width(), input_channel(),
                           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, /*output_channels_out=*/nullptr,
                           /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_depth_to_space_nhwc_x8(op, input.data(), operator_output.data()));
@@ -356,7 +356,7 @@ TEST_F(DepthToSpaceTestF32, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status = xnn_create_depth_to_space_nhwc_x32(
-    output_channel(), input_channel(), output_channel(), block_size, /*flags=*/0, &op);
+    block_size, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -367,7 +367,7 @@ TEST_F(DepthToSpaceTestF32, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success, xnn_reshape_depth_to_space_nhwc_x32(
-                          op, batch_size(), input_height(), input_width(),
+                          op, batch_size(), input_height(), input_width(), input_channel(),
                           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, /*output_channels_out=*/nullptr,
                           /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_depth_to_space_nhwc_x32(op, input.data(), operator_output.data()));
@@ -404,4 +404,57 @@ TEST_F(DepthToSpaceTestF32, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   ASSERT_EQ(subgraph_output, operator_output);
+}
+
+TEST_F(DepthToSpaceTestF32, reshape_output)
+{
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  // Call subgraph API.
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  input_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr, /*external_id=*/0,
+                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+
+  output_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_define_tensor_value(
+      subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr, /*external_id=*/1,
+      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_define_depth_to_space_2d(subgraph, block_size, input_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+  std::array<xnn_external_value, 2> external = {
+    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  input_dims[0] += 2;
+  input_dims[3] += (block_size * block_size);
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  const struct xnn_node* node = &subgraph->nodes[0];
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
+  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
+  ASSERT_EQ(output_shape->dim[0], input_dims[0]);
+  ASSERT_EQ(output_shape->dim[1], input_dims[1] * block_size);
+  ASSERT_EQ(output_shape->dim[2], input_dims[2] * block_size);
+  ASSERT_EQ(output_shape->dim[3], input_dims[3] / block_size / block_size);
+
+  input_dims[0] -= 1;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
+  ASSERT_EQ(output_shape->dim[0], input_dims[0]);
+  ASSERT_EQ(output_shape->dim[1], input_dims[1] * block_size);
+  ASSERT_EQ(output_shape->dim[2], input_dims[2] * block_size);
+  ASSERT_EQ(output_shape->dim[3], input_dims[3] / block_size / block_size);
 }
