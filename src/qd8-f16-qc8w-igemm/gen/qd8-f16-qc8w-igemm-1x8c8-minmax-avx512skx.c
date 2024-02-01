@@ -17,7 +17,7 @@
 #include <xnnpack/unaligned.h>
 
 
-void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c8__avx2(
+void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c8__avx512skx(
     size_t mr,
     size_t nc,
     size_t kc,
