@@ -2156,6 +2156,8 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
   size_t output_pixel_stride,
   size_t* workspace_size,
   size_t* workspace_alignment,
+  size_t* output_height_out,
+  size_t* output_width_out,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(

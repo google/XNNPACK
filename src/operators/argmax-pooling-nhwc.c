@@ -146,6 +146,8 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
     size_t output_pixel_stride,
     size_t* workspace_size,
     size_t* workspace_alignment,
+    size_t* output_height_out,
+    size_t* output_width_out,
     pthreadpool_t threadpool)
 {
   if (argmax_pooling_op->type != xnn_operator_type_argmax_pooling_nhwc_f32) {
@@ -226,9 +228,15 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
         argmax_pooling_op->kernel_width);
   }
 
-  const size_t pooling_size = pooling_height * pooling_width;
   const size_t output_height = argmax_pooling_op->output_height;
   const size_t output_width = argmax_pooling_op->output_width;
+  if (output_height_out != NULL) {
+    *output_height_out = output_height;
+  }
+  if (output_width_out != NULL) {
+    *output_width_out = output_width;
+  }
+  const size_t pooling_size = pooling_height * pooling_width;
   const struct xnn_argmaxpool_config* argmaxpool_config = argmax_pooling_op->argmaxpool_config;
   const struct xnn_argmaxpool_config* ukernel = select_ukernel(pooling_size, argmaxpool_config);
   const uint32_t first_pass_tile_size = ukernel->first_pass_tile_size;

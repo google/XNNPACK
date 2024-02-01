@@ -59,7 +59,9 @@ static enum xnn_status reshape_argmax_pooling_operator(
   const size_t input_width = values[input_id].shape.dim[2];
   const size_t channel_dim = values[input_id].shape.dim[3];
 
-  return xnn_reshape_argmax_pooling2d_nhwc_f32(
+  size_t output_height, output_width;
+  const size_t old_workspace_size = opdata->workspace_size;
+  enum xnn_status status = xnn_reshape_argmax_pooling2d_nhwc_f32(
     opdata->operator_objects[0],
     batch_size,
     input_height,
@@ -69,7 +71,27 @@ static enum xnn_status reshape_argmax_pooling_operator(
     /*output_pixel_stride=*/channel_dim,
     &opdata->workspace_size,
     &opdata->workspace_alignment,
+    &output_height,
+    &output_width,
     threadpool);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id < num_values);
+
+  struct xnn_value* output_value = values + output_id;
+  output_value->shape.dim[0] = batch_size;
+  output_value->shape.dim[1] = output_height;
+  output_value->shape.dim[2] = output_width;
+  output_value->shape.dim[3] = channel_dim;
+
+  const size_t new_size = xnn_tensor_get_size(output_value);
+  if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
+    output_value->size = new_size;
+    return xnn_status_reallocation_required;
+  }
+  return xnn_status_success;
 }
 
 static enum xnn_status setup_argmax_pooling_operator(

@@ -422,6 +422,7 @@ class ArgmaxPoolingOperatorTester {
           batch_size(), input_height(), input_width(),
           channels(), input_pixel_stride(), output_pixel_stride(),
           &workspace_size, &workspace_alignment,
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           auto_threadpool.get()));
 
       ASSERT_NE(workspace_size, SIZE_MAX);
@@ -536,6 +537,7 @@ class ArgmaxPoolingOperatorTester {
           batch_size(), input_height(), input_width(),
           channels(), input_pixel_stride(), output_pixel_stride(),
           &workspace_size, &workspace_alignment,
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           auto_threadpool.get()));
 
       ASSERT_NE(workspace_size, SIZE_MAX);
@@ -609,6 +611,7 @@ class ArgmaxPoolingOperatorTester {
           next_batch_size(), next_input_height(), next_input_width(),
           channels(), input_pixel_stride(), output_pixel_stride(),
           &next_workspace_size, &next_workspace_alignment,
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           auto_threadpool.get()));
 
       ASSERT_NE(workspace_size, SIZE_MAX);
