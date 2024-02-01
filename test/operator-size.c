@@ -208,7 +208,6 @@ int main(int argc, char** argv) {
       break;
     case 35:
       xnn_create_softmax_nc_f32(
-        0, 0, 0,
         0, &op);
       break;
     case 36:

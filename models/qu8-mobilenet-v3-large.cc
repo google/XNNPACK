@@ -3342,9 +3342,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op130 = nullptr;
   status = xnn_create_softmax_nc_qu8(
-    /*channels=*/1001,
-    /*input_stride=*/1001,
-    /*output_stride=*/1001,
     /*input_scale=*/0.0765276700258255,
     /*output_zero_point=*/0,
     /*output_scale=*/0.00390625,
@@ -5090,6 +5087,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   status = xnn_reshape_softmax_nc_qu8(
     op130,
+    /*channels=*/1001,
+    /*input_stride=*/1001,
+    /*output_stride=*/1001,
     /*batch_size=*/1,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {

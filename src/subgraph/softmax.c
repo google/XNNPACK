@@ -85,6 +85,10 @@ static enum xnn_status reshape_softmax_operator(
     default:
       XNN_UNREACHABLE;
   }
+  if (status != xnn_status_success) {
+    return status;
+  }
+  return resize_unary_elementwise_output_tensor(opdata, values, num_values, old_workspace_size, threadpool);
 }
 
 static enum xnn_status setup_softmax_operator(

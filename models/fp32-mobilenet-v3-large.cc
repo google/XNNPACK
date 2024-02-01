@@ -2595,9 +2595,6 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op114 = nullptr;
   status = xnn_create_softmax_nc_f32(
-    /*channels=*/1001,
-    /*input_stride=*/1001,
-    /*output_stride=*/1001,
     /*flags=*/0,
     &op114);
   if (status != xnn_status_success) {
@@ -4132,6 +4129,9 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   status = xnn_reshape_softmax_nc_f32(
     op114,
+    /*channels=*/1001,
+    /*input_stride=*/1001,
+    /*output_stride=*/1001,
     /*batch_size=*/1,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
