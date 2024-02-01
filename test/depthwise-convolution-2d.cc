@@ -128,13 +128,12 @@ protected:
 
     input_scale = scale_dist(this->rng);
     kernel_scale = scale_dist(this->rng);
+    kernel_zero_point = 0;
     if (std::is_same<T, int8_t>::value) {
       input_zero_point = i8dist(this->rng);
-      kernel_zero_point = i8dist(this->rng);
     }
     else {
       input_zero_point = u8dist(this->rng);
-      kernel_zero_point = 0;
     }
   }
 

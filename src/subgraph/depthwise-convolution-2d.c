@@ -698,6 +698,7 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
           "failed to define %s operator with filter ID #%" PRIu32 ": unsupported quantization zero point %" PRId32 " for datatype %s",
           xnn_node_type_to_string(xnn_node_type_depthwise_convolution_2d), filter_id,
           filter_value->quantization.zero_point, xnn_datatype_to_string(filter_value->datatype));
+        return xnn_status_invalid_parameter;
       }
       break;
     case xnn_datatype_qcint8:
