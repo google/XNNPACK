@@ -407,7 +407,6 @@ class ArgmaxPoolingOperatorTester {
           padding_tf_same() ? 0 : padding_top(), padding_tf_same() ? 0 : padding_right(),
           padding_tf_same() ? 0 : padding_bottom(), padding_tf_same() ? 0 : padding_left(),
           pooling_height(), pooling_width(),
-          channels(), input_pixel_stride(), output_pixel_stride(),
           padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0,
           &argmax_pooling_op));
       ASSERT_NE(nullptr, argmax_pooling_op);
@@ -421,6 +420,7 @@ class ArgmaxPoolingOperatorTester {
         xnn_reshape_argmax_pooling2d_nhwc_f32(
           argmax_pooling_op,
           batch_size(), input_height(), input_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           &workspace_size, &workspace_alignment,
           auto_threadpool.get()));
 
@@ -525,7 +525,6 @@ class ArgmaxPoolingOperatorTester {
         xnn_create_argmax_pooling2d_nhwc_f32(
           padding_top(), padding_right(), padding_bottom(), padding_left(),
           pooling_height(), pooling_width(),
-          channels(), input_pixel_stride(), output_pixel_stride(),
           0, &argmax_pooling_op));
       ASSERT_NE(nullptr, argmax_pooling_op);
 
@@ -535,6 +534,7 @@ class ArgmaxPoolingOperatorTester {
         xnn_reshape_argmax_pooling2d_nhwc_f32(
           argmax_pooling_op,
           batch_size(), input_height(), input_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           &workspace_size, &workspace_alignment,
           auto_threadpool.get()));
 
@@ -607,6 +607,7 @@ class ArgmaxPoolingOperatorTester {
         xnn_reshape_argmax_pooling2d_nhwc_f32(
           argmax_pooling_op,
           next_batch_size(), next_input_height(), next_input_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           &next_workspace_size, &next_workspace_alignment,
           auto_threadpool.get()));
 

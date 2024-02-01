@@ -39,7 +39,6 @@ int main(int argc, char** argv) {
       xnn_create_argmax_pooling2d_nhwc_f32(
         0, 0, 0, 0,
         0, 0,
-        0, 0, 0,
         0, &op);
       break;
     case 4:
