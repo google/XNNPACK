@@ -45,7 +45,6 @@ static void xnnpack_softmax_qu8(benchmark::State& state) {
 
   xnn_operator_t softmax_op = nullptr;
   status = xnn_create_softmax_nc_qu8(
-    channels, channels /* input stride */, channels /* output stride */,
     1.0f /* input scale */,
     0 /* output zero point */, 1.0f / 256.0f /* output scale */,
     0 /* flags */, &softmax_op);
@@ -56,6 +55,7 @@ static void xnnpack_softmax_qu8(benchmark::State& state) {
 
   status = xnn_reshape_softmax_nc_qu8(
     softmax_op,
+    channels, channels /* input stride */, channels /* output stride */,
     batch_size,
     /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
@@ -119,9 +119,7 @@ static void xnnpack_softmax_f32(benchmark::State& state) {
   }
 
   xnn_operator_t softmax_op = nullptr;
-  status = xnn_create_softmax_nc_f32(
-    channels, channels /* input stride */, channels /* output stride */,
-    0 /* flags */, &softmax_op);
+  status = xnn_create_softmax_nc_f32(0 /* flags */, &softmax_op);
   if (status != xnn_status_success || softmax_op == nullptr) {
     state.SkipWithError("failed to create SoftMax operator");
     return;
@@ -129,6 +127,7 @@ static void xnnpack_softmax_f32(benchmark::State& state) {
 
   status = xnn_reshape_softmax_nc_f32(
     softmax_op,
+    channels, channels /* input stride */, channels /* output stride */,
     batch_size,
     /*threadpool=*/nullptr);
   if (status != xnn_status_success) {

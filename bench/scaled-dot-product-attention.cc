@@ -93,7 +93,7 @@ void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::Stat
   }
 
   xnn_operator_t softmax_op = nullptr;
-  status = xnn_create_softmax_nc_f32(key_value_tokens, key_value_tokens, key_value_tokens, /*flags=*/0, &softmax_op);
+  status = xnn_create_softmax_nc_f32(/*flags=*/0, &softmax_op);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to create Softmax operator");
   }
@@ -143,7 +143,7 @@ void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::Stat
   }
 
   status = xnn_reshape_softmax_nc_f32(
-    softmax_op, batch_size * heads * query_tokens, /*threadpool=*/nullptr);
+    softmax_op, key_value_tokens, key_value_tokens, key_value_tokens, batch_size * heads * query_tokens, /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Softmax operator");
   }
