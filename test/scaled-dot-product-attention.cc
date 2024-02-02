@@ -570,6 +570,17 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_no_r
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
+  // Check output shape.
+  size_t observed_output_num_dims = 0;
+  std::vector<size_t> observed_output_dims(XNN_MAX_TENSOR_DIMS, 0);
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_get_external_value_shape(runtime, output_id, &observed_output_num_dims, observed_output_dims.data()));
+  ASSERT_EQ(op_output_dims.size(), observed_output_num_dims);
+  for (size_t i = 0; i < observed_output_num_dims; i++) {
+    ASSERT_EQ(op_output_dims[i], observed_output_dims[i]);
+  }
+
   // Check outputs match.
   for (size_t i = 0; i < operator_output.size(); i++) {
     EXPECT_EQ(subgraph_output[i], operator_output[i]) << i;
@@ -753,6 +764,17 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_requ
     node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, nullptr /* thradpool*/));
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  // Check output shape.
+  size_t observed_output_num_dims = 0;
+  std::vector<size_t> observed_output_dims(XNN_MAX_TENSOR_DIMS, 0);
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_get_external_value_shape(runtime, output_id, &observed_output_num_dims, observed_output_dims.data()));
+  ASSERT_EQ(op_output_dims.size(), observed_output_num_dims);
+  for (size_t i = 0; i < observed_output_num_dims; i++) {
+    ASSERT_EQ(op_output_dims[i], observed_output_dims[i]);
+  }
 
   // Check outputs match.
   for (size_t i = 0; i < operator_output.size(); i++) {
