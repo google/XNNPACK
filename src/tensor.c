@@ -464,42 +464,37 @@ size_t xnn_shape_multiply_trailing_dims(
   return product;
 }
 
-size_t xnn_tensor_get_size(const struct xnn_value* value)
+size_t xnn_datatype_get_size_bits(enum xnn_datatype type)
 {
-  assert(value->type == xnn_value_type_dense_tensor);
-  assert(value->datatype != xnn_datatype_invalid);
-
-  size_t size = 0;
-  switch (value->datatype) {
+  assert(type != xnn_datatype_invalid);
+  switch (type) {
     case xnn_datatype_fp16:
-      size = 2;
-      break;
+      return 16;
     case xnn_datatype_fp32:
-      size = 4;
-      break;
+      return 32;
     case xnn_datatype_qcint4:
+      return 4;
     case xnn_datatype_qdint8:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
     case xnn_datatype_qcint8:
-      size = 1;
-      break;
+      return 8;
     case xnn_datatype_qint32:
     case xnn_datatype_qcint32:
-      size = 4;
-      break;
+      return 32;
     case xnn_datatype_invalid:
       XNN_UNREACHABLE;
   }
+}
 
-  size *= xnn_shape_multiply_all_dims(&value->shape);
+size_t xnn_tensor_get_size(const struct xnn_value* value)
+{
+  assert(value->type == xnn_value_type_dense_tensor);
 
-  // Adjustments for nibbles, assume that we can't have sizes are byte-aligned (rounded up).
-  if (value->datatype == xnn_datatype_qcint4) {
-    size = round_up_po2(size, 2) >> 1;
-  }
+  size_t size_bits = xnn_datatype_get_size_bits(value->datatype);
+  size_bits *= xnn_shape_multiply_all_dims(&value->shape);
 
-  return size;
+  return round_up_po2(size_bits, 8) >> 3;
 }
 
 size_t xnn_tensor_get_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id)

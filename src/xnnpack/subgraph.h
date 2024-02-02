@@ -36,6 +36,13 @@
 extern "C" {
 #endif
 
+struct xnn_value;
+struct slinky_pipeline;
+typedef struct slinky_pipeline* slinky_pipeline_t;
+slinky_pipeline_t xnn_subgraph_to_slinky_pipeline(xnn_subgraph_t subgraph);
+void destroy_slinky_pipeline(slinky_pipeline_t pipeline);
+void evaluate(slinky_pipeline_t p, const struct xnn_value* input_values, size_t num_inputs, const struct xnn_value* output_values, size_t num_outputs);
+
 struct xnn_shape {
   size_t num_dims;
   // Currently inferred dimensions.
@@ -105,6 +112,7 @@ struct xnn_value {
   /// Tensor shape.
   struct xnn_shape shape;
   /// Size of tensor.
+  /// TODO(dsharlet): What does this mean?
   size_t size;
   /// Type of allocation for this tensors' data.
   enum xnn_allocation_type allocation_type;
@@ -480,6 +488,11 @@ struct xnn_runtime {
   // True if runtime has ever been setup. If it has been setup, the pointers inside of opdata need to be updated if
   // workspace changes.
   bool has_been_setup;
+  slinky_pipeline_t slinky_pipeline;
+  size_t num_inputs;
+  size_t num_outputs;
+  struct xnn_value* input_values[XNN_MAX_OPERATOR_OBJECTS];
+  struct xnn_value* output_values[XNN_MAX_OPERATOR_OBJECTS];
 };
 
 struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph);
@@ -487,6 +500,8 @@ struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph);
 struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph);
 
 enum xnn_status xnn_subgraph_add_nodes(xnn_subgraph_t subgraph, size_t num_nodes);
+
+size_t xnn_datatype_get_size_bits(enum xnn_datatype type);
 
 // Get size of the tensor in bytes (based on dimensions of tensor).
 size_t xnn_tensor_get_size(const struct xnn_value* value);
@@ -569,6 +584,13 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph);
 // Infer shape information across subgraph.
 // No flags currently supported, in the future it can be used to configure how shape inference is done.
 enum xnn_status xnn_subgraph_infer_shape(xnn_subgraph_t subgraph, uint32_t flags);
+
+enum xnn_status resize_fully_connected_output_tensor(
+  const struct xnn_operator_data* opdata,
+  struct xnn_value* values,
+  size_t num_values,
+  size_t old_workspace_size,
+  pthreadpool_t threadpool);
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -5,16 +5,17 @@
 //
 // Auto-generated file. Do not edit!
 //   Specification: test/f32-vrsqrt.yaml
-//   Generator: ./tools/generate-vunary-test.py
+//   Generator: tools/generate-vunary-test.py
+
+
+#include <vector>
+
+#include <gtest/gtest.h>
 
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 #include <xnnpack/vunary.h>
 
-#include <cstddef>
-#include <vector>
-
-#include <gtest/gtest.h>
 #include "vunary-microkernel-tester.h"
 
 

@@ -74,21 +74,44 @@ static enum xnn_status reshape_prelu_operator(
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
-  const size_t batch_size = xnn_shape_multiply_non_channel_dims(&values[input_id].shape);
+  const struct xnn_value* input_value = values + input_id;
+  const size_t batch_size = xnn_shape_multiply_non_channel_dims(&input_value->shape);
+
+  const size_t old_workspace_size = opdata->workspace_size;
+  enum xnn_status status = xnn_status_invalid_state;
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_prelu_nc_f16:
-      return xnn_reshape_prelu_nc_f16(
+      status = xnn_reshape_prelu_nc_f16(
         opdata->operator_objects[0],
         batch_size,
         threadpool);
+        break;
     case xnn_operator_type_prelu_nc_f32:
-      return xnn_reshape_prelu_nc_f32(
+      status = xnn_reshape_prelu_nc_f32(
         opdata->operator_objects[0],
         batch_size,
         threadpool);
+        break;
     default:
       XNN_UNREACHABLE;
   }
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id < num_values);
+  struct xnn_value* output_value = values + output_id;
+
+  memcpy(output_value->shape.dim, input_value->shape.dim, input_value->shape.num_dims * sizeof(size_t));
+  const size_t new_size = xnn_tensor_get_size(output_value);
+  if (new_size > output_value->size || old_workspace_size > opdata->workspace_size) {
+    output_value->size = new_size;
+    return xnn_status_reallocation_required;
+  }
+
+  return xnn_status_success;
+
 }
 
 static enum xnn_status setup_prelu_operator(
