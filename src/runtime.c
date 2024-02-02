@@ -70,6 +70,29 @@ enum xnn_status xnn_reshape_external_value(
   return xnn_status_success;
 }
 
+enum xnn_status
+xnn_get_external_value_shape(xnn_runtime_t runtime, uint32_t external_id, size_t* num_dims, size_t* dims)
+{
+  if (external_id >= runtime->num_values) {
+    xnn_log_error("failed to get external value shape: out-of-bounds ID %" PRIu32 " in external value", external_id);
+    return xnn_status_invalid_parameter;
+  }
+  struct xnn_value* value = &runtime->values[external_id];
+  if (value->allocation_type != xnn_allocation_type_external) {
+    xnn_log_error(
+      "failed to get external value shape: Value %" PRIu32 " is not external (%d)", external_id,
+      value->allocation_type);
+    return xnn_status_invalid_parameter;
+  }
+  if (num_dims == NULL || dims == NULL) {
+    xnn_log_error("failed to get external value shape: null pointer");
+    return xnn_status_invalid_parameter;
+  }
+  *num_dims = value->shape.num_dims;
+  memcpy(dims, value->shape.dim, value->shape.num_dims * sizeof(size_t));
+  return xnn_status_success;
+}
+
 enum xnn_status xnn_create_workspace(xnn_workspace_t* workspace_out)
 {
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {

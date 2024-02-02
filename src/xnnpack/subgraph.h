@@ -570,6 +570,13 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph);
 // No flags currently supported, in the future it can be used to configure how shape inference is done.
 enum xnn_status xnn_subgraph_infer_shape(xnn_subgraph_t subgraph, uint32_t flags);
 
+enum xnn_status resize_fully_connected_output_tensor(
+  const struct xnn_operator_data* opdata,
+  struct xnn_value* values,
+  size_t num_values,
+  size_t old_workspace_size,
+  pthreadpool_t threadpool);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

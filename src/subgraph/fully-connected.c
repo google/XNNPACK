@@ -322,7 +322,7 @@ static enum xnn_status create_fully_connected_operator(
   return status;
 }
 
-static enum xnn_status resize_fully_connected_output_tensor(
+enum xnn_status resize_fully_connected_output_tensor(
   const struct xnn_operator_data* opdata,
   struct xnn_value* values,
   size_t num_values,
