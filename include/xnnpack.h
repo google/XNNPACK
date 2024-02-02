@@ -1934,7 +1934,7 @@ enum xnn_status xnn_reshape_external_value(
 ///
 /// @param external_id - external ID for the Value. The ID must be within the range of reversed Value IDs specified on
 ///                      the Subgraph creation. The external ID can not be XNN_INVALID_VALUE_ID.
-/// @param num_dims -  A valid pointer into which the number of dimensions in the shape will be written.
+/// @param num_dims -  A valid pointer into which the number of dimensions in the shape will be written. It can not be larger than XNN_MAX_TENSOR_DIMS.
 /// @param dims - pointer to an array of @a num_dims shape dimensions. This pointer can't be NULL. It must be large enough to hold
 ///               at least @a num_dims elements. XNNPACK does not keep any pointers to this array after the function returns.
 enum xnn_status xnn_get_external_value_shape(
