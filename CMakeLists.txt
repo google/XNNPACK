@@ -1523,7 +1523,7 @@ IF(XNNPACK_BUILD_TESTS)
 
     ADD_EXECUTABLE(add2-test test/add2.cc)
     TARGET_INCLUDE_DIRECTORIES(add2-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(add2-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
+    TARGET_LINK_LIBRARIES(add2-test PRIVATE fp16 XNNPACK GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME add2-test COMMAND add2-test)
 
     ADD_EXECUTABLE(add2-reshape-test test/add2-reshape.cc)
