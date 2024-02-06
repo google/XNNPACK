@@ -3309,6 +3309,7 @@ xnnpack_unit_test(
         "abs.cc",
     ],
     deps = [
+        "@fp16",
         ":subgraph_unary_tester",
         "//:XNNPACK_test_mode",
         "//:node_type",
