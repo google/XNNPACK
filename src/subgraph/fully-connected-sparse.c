@@ -203,6 +203,11 @@ static inline enum xnn_compute_type validate_datatypes_with_bias(
           output_datatype == xnn_datatype_fp32)
       {
         return xnn_compute_type_fp32;
+      } else if (input_datatype == xnn_datatype_fp16 &&
+          bias_datatype == xnn_datatype_fp32 &&
+          output_datatype == xnn_datatype_fp16) {
+        // Flag: XNN_FLAG_FP32_STATIC_WEIGHTS
+        return xnn_compute_type_fp16;
       }
       break;
     default:
@@ -220,6 +225,9 @@ static inline enum xnn_compute_type validate_datatypes_without_bias(
     case xnn_datatype_fp32:
       if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp32) {
         return xnn_compute_type_fp32;
+      } else if (input_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_fp16) {
+        // Flag: XNN_FLAG_FP32_STATIC_WEIGHTS
+        return xnn_compute_type_fp16;
       }
       break;
     default:
@@ -260,6 +268,7 @@ enum xnn_status xnn_define_fully_connected_sparse(
   }
 
   switch (input_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;
     default:
@@ -293,6 +302,7 @@ enum xnn_status xnn_define_fully_connected_sparse(
   }
 
   switch (kernel_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;
     default:
@@ -328,6 +338,7 @@ enum xnn_status xnn_define_fully_connected_sparse(
     }
 
     switch (bias_value->datatype) {
+      case xnn_datatype_fp16:
       case xnn_datatype_fp32:
         break;
       default:
@@ -351,6 +362,7 @@ enum xnn_status xnn_define_fully_connected_sparse(
   }
 
   switch (output_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;
     default:
