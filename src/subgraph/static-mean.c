@@ -203,6 +203,7 @@ enum xnn_status xnn_define_static_mean(
   }
 
   switch (input_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;
     default:
@@ -224,8 +225,13 @@ enum xnn_status xnn_define_static_mean(
     return status;
   }
 
+  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
+    case xnn_datatype_fp16:
+      compute_type = xnn_compute_type_fp16;
+      break;
     case xnn_datatype_fp32:
+      compute_type = xnn_compute_type_fp32;
       break;
     default:
       xnn_log_error(
@@ -276,7 +282,7 @@ enum xnn_status xnn_define_static_mean(
   }
 
   node->type = xnn_node_type_static_mean;
-  node->compute_type = xnn_compute_type_fp32;
+  node->compute_type = compute_type;
   node->params.reduce.num_reduction_axes = num_reduction_axes;
   memcpy(node->params.reduce.reduction_axes, reduction_axes, num_reduction_axes * sizeof(size_t));
   node->num_inputs = 1;
