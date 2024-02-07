@@ -362,6 +362,8 @@ static inline enum xnn_compute_type validate_datatypes(
       break;
     case xnn_datatype_qint8:
       switch (output_datatype) {
+        case xnn_datatype_fp16:
+          return xnn_compute_type_qs8_to_fp16;
         case xnn_datatype_fp32:
           return xnn_compute_type_qs8_to_fp32;
         case xnn_datatype_qint8:
