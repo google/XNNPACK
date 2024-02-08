@@ -119,7 +119,6 @@ int main(int argc, char** argv) {
       break;
     case 17:
       xnn_create_global_average_pooling_nwc_f32(
-        0, 0, 0,
         0.0f, 0.0f,
         0, &op);
       break;

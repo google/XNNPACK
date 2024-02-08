@@ -43,7 +43,6 @@ static void global_average_pooling_qu8(benchmark::State& state) {
 
   xnn_operator_t global_pooling_op = nullptr;
   status = xnn_create_global_average_pooling_nwc_qu8(
-    channels, channels /* input stride */, channels /* output stride */,
     127 /* input zero point */, 0.75f /* input scale */,
     127 /* output zero point */, 1.25f /* output scale */,
     0, 255,
@@ -57,6 +56,7 @@ static void global_average_pooling_qu8(benchmark::State& state) {
   status = xnn_reshape_global_average_pooling_nwc_qu8(
     global_pooling_op,
     batch_size, input_height * input_width,
+    channels, channels /* input stride */, channels /* output stride */,
     &workspace_size, &workspace_alignment,
     /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
@@ -116,7 +116,6 @@ static void global_average_pooling_qs8(benchmark::State& state) {
 
   xnn_operator_t global_pooling_op = nullptr;
   status = xnn_create_global_average_pooling_nwc_qs8(
-    channels, channels /* input stride */, channels /* output stride */,
     -1 /* input zero point */, 0.75f /* input scale */,
     -1 /* output zero point */, 1.25f /* output scale */,
     -128, 127,
@@ -130,6 +129,7 @@ static void global_average_pooling_qs8(benchmark::State& state) {
   status = xnn_reshape_global_average_pooling_nwc_qs8(
     global_pooling_op,
     batch_size, input_height * input_width,
+    channels, channels /* input stride */, channels /* output stride */,
     &workspace_size, &workspace_alignment,
     /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
@@ -188,7 +188,6 @@ static void global_average_pooling_f16(benchmark::State& state) {
 
   xnn_operator_t global_pooling_op = nullptr;
   status = xnn_create_global_average_pooling_nwc_f16(
-    channels, channels /* input stride */, channels /* output stride */,
     -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity(),
     0 /* flags */, &global_pooling_op);
   if (status != xnn_status_success) {
@@ -200,6 +199,7 @@ static void global_average_pooling_f16(benchmark::State& state) {
   status = xnn_reshape_global_average_pooling_nwc_f16(
     global_pooling_op,
     batch_size, input_height * input_width,
+    channels, channels /* input stride */, channels /* output stride */,
     &workspace_size, &workspace_alignment,
     /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
@@ -257,7 +257,6 @@ static void global_average_pooling_f32(benchmark::State& state) {
 
   xnn_operator_t global_pooling_op = nullptr;
   status = xnn_create_global_average_pooling_nwc_f32(
-    channels, channels /* input stride */, channels /* output stride */,
     -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity(),
     0 /* flags */, &global_pooling_op);
   if (status != xnn_status_success) {
@@ -269,6 +268,7 @@ static void global_average_pooling_f32(benchmark::State& state) {
   status = xnn_reshape_global_average_pooling_nwc_f32(
     global_pooling_op,
     batch_size, input_height * input_width,
+    channels, channels /* input stride */, channels /* output stride */,
     &workspace_size, &workspace_alignment,
     /*threadpool=*/nullptr);
   if (status != xnn_status_success) {

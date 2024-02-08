@@ -212,7 +212,6 @@ class GlobalAveragePoolingOperatorTester {
       xnn_operator_t global_average_pooling_op = nullptr;
 
       xnn_status status = xnn_create_global_average_pooling_nwc_qu8(
-          channels(), input_stride(), output_stride(),
           input_zero_point(), input_scale(),
           output_zero_point(), output_scale(),
           qmin(), qmax(),
@@ -232,6 +231,7 @@ class GlobalAveragePoolingOperatorTester {
         xnn_reshape_global_average_pooling_nwc_qu8(
           global_average_pooling_op,
           batch_size(), width(),
+          channels(), input_stride(), output_stride(),
           &workspace_size, &workspace_alignment,
           auto_threadpool.get()));
 
@@ -302,7 +302,6 @@ class GlobalAveragePoolingOperatorTester {
       xnn_operator_t global_average_pooling_op = nullptr;
 
       xnn_status status = xnn_create_global_average_pooling_nwc_qs8(
-          channels(), input_stride(), output_stride(),
           int8_t(input_zero_point() - 0x80), input_scale(),
           int8_t(output_zero_point() - 0x80), output_scale(),
           int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
@@ -322,6 +321,7 @@ class GlobalAveragePoolingOperatorTester {
         xnn_reshape_global_average_pooling_nwc_qs8(
           global_average_pooling_op,
           batch_size(), width(),
+          channels(), input_stride(), output_stride(),
           &workspace_size, &workspace_alignment,
           auto_threadpool.get()));
 
@@ -402,7 +402,6 @@ class GlobalAveragePoolingOperatorTester {
       xnn_operator_t global_average_pooling_op = nullptr;
 
       xnn_status status = xnn_create_global_average_pooling_nwc_f16(
-          channels(), input_stride(), output_stride(),
           output_min, output_max,
           0, &global_average_pooling_op);
       if (status == xnn_status_unsupported_hardware) {
@@ -420,6 +419,7 @@ class GlobalAveragePoolingOperatorTester {
         xnn_reshape_global_average_pooling_nwc_f16(
           global_average_pooling_op,
           batch_size(), width(),
+          channels(), input_stride(), output_stride(),
           &workspace_size, &workspace_alignment,
           auto_threadpool.get()));
 
@@ -502,7 +502,6 @@ class GlobalAveragePoolingOperatorTester {
       xnn_operator_t global_average_pooling_op = nullptr;
 
       xnn_status status = xnn_create_global_average_pooling_nwc_f32(
-          channels(), input_stride(), output_stride(),
           output_min, output_max,
           0, &global_average_pooling_op);
       if (status == xnn_status_unsupported_hardware) {
@@ -520,6 +519,7 @@ class GlobalAveragePoolingOperatorTester {
         xnn_reshape_global_average_pooling_nwc_f32(
           global_average_pooling_op,
           batch_size(), width(),
+          channels(), input_stride(), output_stride(),
           &workspace_size, &workspace_alignment,
           auto_threadpool.get()));
 
@@ -600,8 +600,7 @@ class GlobalAveragePoolingOperatorTester {
       xnn_operator_t global_average_pooling_op = nullptr;
 
       xnn_status status = xnn_create_global_average_pooling_ncw_f16(
-        channels(), output_min, output_max,
-        0, &global_average_pooling_op);
+        output_min, output_max, 0, &global_average_pooling_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -613,7 +612,7 @@ class GlobalAveragePoolingOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_reshape_global_average_pooling_ncw_f16(
           global_average_pooling_op,
-          batch_size(), width(),
+          batch_size(), width(), channels(),
           auto_threadpool.get()));
 
       ASSERT_EQ(xnn_status_success,
@@ -691,8 +690,7 @@ class GlobalAveragePoolingOperatorTester {
       xnn_operator_t global_average_pooling_op = nullptr;
 
       xnn_status status = xnn_create_global_average_pooling_ncw_f32(
-        channels(), output_min, output_max,
-        0, &global_average_pooling_op);
+        output_min, output_max, 0, &global_average_pooling_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -704,7 +702,7 @@ class GlobalAveragePoolingOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_reshape_global_average_pooling_ncw_f32(
           global_average_pooling_op,
-          batch_size(), width(),
+          batch_size(), width(), channels(),
           auto_threadpool.get()));
 
       ASSERT_EQ(xnn_status_success,

@@ -817,7 +817,6 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op14 = nullptr;
   status = xnn_create_global_average_pooling_nwc_f32(
-    72 /* channels */, 72 /* input stride */, 72 /* output stride */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op14);
@@ -960,7 +959,6 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op21 = nullptr;
   status = xnn_create_global_average_pooling_nwc_f32(
-    120 /* channels */, 120 /* input stride */, 120 /* output stride */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op21);
@@ -1114,7 +1112,6 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op29 = nullptr;
   status = xnn_create_global_average_pooling_nwc_f32(
-    120 /* channels */, 120 /* input stride */, 120 /* output stride */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op29);
@@ -1689,7 +1686,6 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op62 = nullptr;
   status = xnn_create_global_average_pooling_nwc_f32(
-    480 /* channels */, 480 /* input stride */, 480 /* output stride */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op62);
@@ -1852,7 +1848,6 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op71 = nullptr;
   status = xnn_create_global_average_pooling_nwc_f32(
-    672 /* channels */, 672 /* input stride */, 672 /* output stride */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op71);
@@ -2026,7 +2021,6 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op81 = nullptr;
   status = xnn_create_global_average_pooling_nwc_f32(
-    672 /* channels */, 672 /* input stride */, 672 /* output stride */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op81);
@@ -2189,7 +2183,6 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op90 = nullptr;
   status = xnn_create_global_average_pooling_nwc_f32(
-    960 /* channels */, 960 /* input stride */, 960 /* output stride */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op90);
@@ -2363,7 +2356,6 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op100 = nullptr;
   status = xnn_create_global_average_pooling_nwc_f32(
-    960 /* channels */, 960 /* input stride */, 960 /* output stride */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op100);
@@ -2503,7 +2495,6 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op108 = nullptr;
   status = xnn_create_global_average_pooling_nwc_f32(
-    960 /* channels */, 960 /* input stride */, 960 /* output stride */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op108);
@@ -2549,7 +2540,6 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op111 = nullptr;
   status = xnn_create_global_average_pooling_nwc_f32(
-    1280 /* channels */, 1280 /* input stride */, 1280 /* output stride */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op111);
@@ -2800,6 +2790,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_f32(
     op14,
     /*batch_size=*/1, 784 /* width */,
+    72 /* channels */, 72 /* input stride */, 72 /* output stride */,
     &op14_workspace_size, &op14_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op14_workspace_size);
@@ -2896,6 +2887,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_f32(
     op21,
     /*batch_size=*/1, 784 /* width */,
+    120 /* channels */, 120 /* input stride */, 120 /* output stride */,
     &op21_workspace_size, &op21_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op21_workspace_size);
@@ -3005,6 +2997,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_f32(
     op29,
     /*batch_size=*/1, 784 /* width */,
+    120 /* channels */, 120 /* input stride */, 120 /* output stride */,
     &op29_workspace_size, &op29_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op29_workspace_size);
@@ -3441,6 +3434,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_f32(
     op62,
     /*batch_size=*/1, 196 /* width */,
+    480 /* channels */, 480 /* input stride */, 480 /* output stride */,
     &op62_workspace_size, &op62_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op62_workspace_size);
@@ -3561,6 +3555,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_f32(
     op71,
     /*batch_size=*/1, 196 /* width */,
+    672 /* channels */, 672 /* input stride */, 672 /* output stride */,
     &op71_workspace_size, &op71_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op71_workspace_size);
@@ -3694,6 +3689,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_f32(
     op81,
     /*batch_size=*/1, 49 /* width */,
+    672 /* channels */, 672 /* input stride */, 672 /* output stride */,
     &op81_workspace_size, &op81_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op81_workspace_size);
@@ -3814,6 +3810,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_f32(
     op90,
     /*batch_size=*/1, 49 /* width */,
+    960 /* channels */, 960 /* input stride */, 960 /* output stride */,
     &op90_workspace_size, &op90_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op90_workspace_size);
@@ -3947,6 +3944,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_f32(
     op100,
     /*batch_size=*/1, 49 /* width */,
+    960 /* channels */, 960 /* input stride */, 960 /* output stride */,
     &op100_workspace_size, &op100_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op100_workspace_size);
@@ -4054,6 +4052,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_f32(
     op108,
     /*batch_size=*/1, 49 /* width */,
+    960 /* channels */, 960 /* input stride */, 960 /* output stride */,
     &op108_workspace_size, &op108_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op108_workspace_size);
@@ -4093,6 +4092,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_f32(
     op111,
     /*batch_size=*/1, 1 /* width */,
+    1280 /* channels */, 1280 /* input stride */, 1280 /* output stride */,
     &op111_workspace_size, &op111_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op111_workspace_size);

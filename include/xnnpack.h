@@ -4177,7 +4177,6 @@ enum xnn_status xnn_setup_fully_connected_nc_qu8(
   uint8_t* output);
 
 enum xnn_status xnn_create_global_average_pooling_ncw_f16(
-  size_t channels,
   float output_min,
   float output_max,
   uint32_t flags,
@@ -4187,6 +4186,7 @@ enum xnn_status xnn_reshape_global_average_pooling_ncw_f16(
   xnn_operator_t global_average_pooling_op,
   size_t batch_size,
   size_t width,
+  size_t channels,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_global_average_pooling_ncw_f16(
@@ -4195,7 +4195,6 @@ enum xnn_status xnn_setup_global_average_pooling_ncw_f16(
   void* output);
 
 enum xnn_status xnn_create_global_average_pooling_ncw_f32(
-  size_t channels,
   float output_min,
   float output_max,
   uint32_t flags,
@@ -4205,6 +4204,7 @@ enum xnn_status xnn_reshape_global_average_pooling_ncw_f32(
   xnn_operator_t global_average_pooling_op,
   size_t batch_size,
   size_t width,
+  size_t channels,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_global_average_pooling_ncw_f32(
@@ -4213,9 +4213,6 @@ enum xnn_status xnn_setup_global_average_pooling_ncw_f32(
   float* output);
 
 enum xnn_status xnn_create_global_average_pooling_nwc_f16(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
   float output_min,
   float output_max,
   uint32_t flags,
@@ -4225,6 +4222,9 @@ enum xnn_status xnn_reshape_global_average_pooling_nwc_f16(
   xnn_operator_t global_average_pooling_op,
   size_t batch_size,
   size_t width,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
   size_t* workspace_size,
   size_t* workspace_alignment,
   pthreadpool_t threadpool);
@@ -4236,9 +4236,6 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_f16(
   void* output);
 
 enum xnn_status xnn_create_global_average_pooling_nwc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
   float output_min,
   float output_max,
   uint32_t flags,
@@ -4248,6 +4245,9 @@ enum xnn_status xnn_reshape_global_average_pooling_nwc_f32(
   xnn_operator_t global_average_pooling_op,
   size_t batch_size,
   size_t width,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
   size_t* workspace_size,
   size_t* workspace_alignment,
   pthreadpool_t threadpool);
@@ -4259,9 +4259,6 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_f32(
   float* output);
 
 enum xnn_status xnn_create_global_average_pooling_nwc_qs8(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
   int8_t input_zero_point,
   float input_scale,
   int8_t output_zero_point,
@@ -4275,6 +4272,9 @@ enum xnn_status xnn_reshape_global_average_pooling_nwc_qs8(
   xnn_operator_t global_average_pooling_op,
   size_t batch_size,
   size_t width,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
   size_t* workspace_size,
   size_t* workspace_alignment,
   pthreadpool_t threadpool);
@@ -4286,9 +4286,6 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_qs8(
   int8_t* output);
 
 enum xnn_status xnn_create_global_average_pooling_nwc_qu8(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
   uint8_t input_zero_point,
   float input_scale,
   uint8_t output_zero_point,
@@ -4302,6 +4299,9 @@ enum xnn_status xnn_reshape_global_average_pooling_nwc_qu8(
   xnn_operator_t global_average_pooling_op,
   size_t batch_size,
   size_t width,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
   size_t* workspace_size,
   size_t* workspace_alignment,
   pthreadpool_t threadpool);
@@ -4313,9 +4313,6 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_qu8(
   uint8_t* output);
 
 enum xnn_status xnn_create_global_sum_pooling_nwc_f16(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
   float output_min,
   float output_max,
   uint32_t flags,
@@ -4325,6 +4322,9 @@ enum xnn_status xnn_reshape_global_sum_pooling_nwc_f16(
   xnn_operator_t global_sum_pooling_op,
   size_t batch_size,
   size_t width,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
   size_t* workspace_size,
   size_t* workspace_alignment,
   pthreadpool_t threadpool);
@@ -4336,9 +4336,6 @@ enum xnn_status xnn_setup_global_sum_pooling_nwc_f16(
   void* output);
 
 enum xnn_status xnn_create_global_sum_pooling_nwc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
   float output_min,
   float output_max,
   uint32_t flags,
@@ -4348,6 +4345,9 @@ enum xnn_status xnn_reshape_global_sum_pooling_nwc_f32(
   xnn_operator_t global_sum_pooling_op,
   size_t batch_size,
   size_t width,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
   size_t* workspace_size,
   size_t* workspace_alignment,
   pthreadpool_t threadpool);

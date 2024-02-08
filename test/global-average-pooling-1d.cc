@@ -222,9 +222,8 @@ TEST_F(GlobalAveragePooling1DTestQS8, matches_operator_api)
 
   xnn_operator_t op = nullptr;
   const xnn_status status = xnn_create_global_average_pooling_nwc_qs8(
-    channels, channels, channels, input_zero_point, input_scale, output_zero_point, output_scale, quantized_output_min,
-    quantized_output_max,
-    /*flags=*/0, &op);
+    input_zero_point, input_scale, output_zero_point, output_scale, quantized_output_min,
+    quantized_output_max, /*flags=*/0, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -237,7 +236,10 @@ TEST_F(GlobalAveragePooling1DTestQS8, matches_operator_api)
   size_t workspace_alignment = 0;
   ASSERT_EQ(
     xnn_status_success, xnn_reshape_global_average_pooling_nwc_qs8(
-                          op, batch_size, input_width, &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+                          op, batch_size, input_width, channels,
+                          /*input_stride=*/channels,
+                          /*output_stride=*/channels,
+                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
   std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
@@ -296,9 +298,8 @@ TEST_F(GlobalAveragePooling1DTestQU8, matches_operator_api)
 
   xnn_operator_t op = nullptr;
   const xnn_status status = xnn_create_global_average_pooling_nwc_qu8(
-    channels, channels, channels, input_zero_point, input_scale, output_zero_point, output_scale, quantized_output_min,
-    quantized_output_max,
-    /*flags=*/0, &op);
+    input_zero_point, input_scale, output_zero_point, output_scale, quantized_output_min,
+    quantized_output_max, /*flags=*/0, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -311,7 +312,10 @@ TEST_F(GlobalAveragePooling1DTestQU8, matches_operator_api)
   size_t workspace_alignment = 0;
   ASSERT_EQ(
     xnn_status_success, xnn_reshape_global_average_pooling_nwc_qu8(
-                          op, batch_size, input_width, &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+                          op, batch_size, input_width, channels,
+                          /*input_stride=*/channels,
+                          /*output_stride=*/channels,
+                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
   std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
@@ -369,8 +373,7 @@ TEST_F(GlobalAveragePooling1DTestF32, matches_operator_api)
 
   // Call operator API.
   const xnn_status status = xnn_create_global_average_pooling_nwc_f32(
-    channels, channels, channels, output_min, output_max,
-    /*flags=*/0, &op);
+    output_min, output_max, /*flags=*/0, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -383,7 +386,10 @@ TEST_F(GlobalAveragePooling1DTestF32, matches_operator_api)
   size_t workspace_alignment = 0;
   ASSERT_EQ(
     xnn_status_success, xnn_reshape_global_average_pooling_nwc_f32(
-                          op, batch_size, input_width, &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+                          op, batch_size, input_width, channels,
+                          /*input_stride=*/channels,
+                          /*output_stride=*/channels,
+                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
   std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);

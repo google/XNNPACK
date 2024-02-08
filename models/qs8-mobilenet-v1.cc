@@ -878,7 +878,6 @@ ExecutionPlan QS8MobileNetV1(pthreadpool_t threadpool) {
 
   xnn_operator_t op27 = nullptr;
   status = xnn_create_global_average_pooling_nwc_qs8(
-    1024 /* channels */, 1024 /* input stride */, 1024 /* output stride */,
     -1 /* input zero point */, 0.5f /* input scale */,
     -1 /* output zero point */, 0.5f /* output scale */,
     -126 /* output min */, 126 /* output max */,
@@ -1298,6 +1297,7 @@ ExecutionPlan QS8MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_qs8(
     op27,
     /*batch_size=*/1, 49 /* width */,
+    1024 /* channels */, 1024 /* input stride */, 1024 /* output stride */,
     &op27_workspace_size, &op27_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op27_workspace_size);

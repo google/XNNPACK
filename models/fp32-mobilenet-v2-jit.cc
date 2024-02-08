@@ -1749,7 +1749,6 @@ ExecutionPlan FP32MobileNetV2Jit(pthreadpool_t threadpool) {
 
   xnn_operator_t op62 = nullptr;
   status = xnn_create_global_average_pooling_nwc_f32(
-    1280 /* channels */, 1280 /* input stride */, 1280 /* output stride */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op62);
@@ -2670,6 +2669,7 @@ ExecutionPlan FP32MobileNetV2Jit(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_f32(
     op62,
     /*batch_size=*/1, 49 /* width */,
+    1280 /* channels */, 1280 /* input stride */, 1280 /* output stride */,
     &op62_workspace_size, &op62_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op62_workspace_size);

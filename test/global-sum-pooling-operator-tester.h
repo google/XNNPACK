@@ -156,7 +156,6 @@ class GlobalSumPoolingOperatorTester {
       xnn_operator_t global_sum_pooling_op = nullptr;
 
       xnn_status status = xnn_create_global_sum_pooling_nwc_f16(
-          channels(), input_stride(), output_stride(),
           output_min, output_max,
           0, &global_sum_pooling_op);
       if (status == xnn_status_unsupported_hardware) {
@@ -174,6 +173,7 @@ class GlobalSumPoolingOperatorTester {
         xnn_reshape_global_sum_pooling_nwc_f16(
           global_sum_pooling_op,
           batch_size(), width(),
+          channels(), input_stride(), output_stride(),
           &workspace_size, &workspace_alignment,
           /*threadpool=*/nullptr));
 
@@ -246,7 +246,6 @@ class GlobalSumPoolingOperatorTester {
       xnn_operator_t global_sum_pooling_op = nullptr;
 
       xnn_status status = xnn_create_global_sum_pooling_nwc_f32(
-          channels(), input_stride(), output_stride(),
           output_min, output_max,
           0, &global_sum_pooling_op);
       if (status == xnn_status_unsupported_hardware) {
@@ -264,6 +263,7 @@ class GlobalSumPoolingOperatorTester {
         xnn_reshape_global_sum_pooling_nwc_f32(
           global_sum_pooling_op,
           batch_size(), width(),
+          channels(), input_stride(), output_stride(),
           &workspace_size, &workspace_alignment,
           /*threadpool=*/nullptr));
 

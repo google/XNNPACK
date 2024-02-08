@@ -1803,7 +1803,6 @@ ExecutionPlan FP16SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
 
   xnn_operator_t op62 = nullptr;
   status = xnn_create_global_average_pooling_ncw_f16(
-    1280 /* channels */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op62);
@@ -2490,6 +2489,7 @@ ExecutionPlan FP16SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_ncw_f16(
     op62,
     /*batch_size=*/1, 49 /* width */,
+    1280 /* channels */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #62" << std::endl;

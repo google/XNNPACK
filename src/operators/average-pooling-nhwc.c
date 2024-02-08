@@ -468,14 +468,14 @@ static enum xnn_status reshape_average_pooling2d(
     xnn_release_simd_memory(zero_buffer);
     zero_buffer =
       (void*) xnn_allocate_simd_memory(zero_bytes);
+    if (zero_buffer == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for %s operator zero padding",
+          zero_bytes, xnn_operator_type_to_string(operator_type));
+      return xnn_status_out_of_memory;
+    }
     average_pooling_op->zero_buffer = zero_buffer;
     memset(average_pooling_op->zero_buffer, (uint8_t) average_pooling_op->input_zero_point, zero_bytes);
-  }
-  if (zero_buffer == NULL) {
-    xnn_log_error(
-      "failed to allocate %zu bytes for %s operator zero padding",
-      zero_bytes, xnn_operator_type_to_string(operator_type));
-    return xnn_status_out_of_memory;
   }
   average_pooling_op->channels = channels;
   average_pooling_op->input_pixel_stride = input_pixel_stride;
@@ -644,7 +644,7 @@ static enum xnn_status reshape_average_pooling2d(
 
       average_pooling_op->last_input_height = input_height;
       average_pooling_op->last_input_width = input_width;
-      average_pooling_op->channels = channels;
+      average_pooling_op->last_input_channels = channels;
     }
 
     const size_t indirect_input_height_stride = step_height * sizeof(void*);

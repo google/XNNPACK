@@ -26,15 +26,7 @@ static enum xnn_status create_global_sum_pooling_operator(
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs == 1);
-  const uint32_t input_id = node->inputs[0];
-  assert(input_id != XNN_INVALID_VALUE_ID);
-  assert(input_id < num_values);
-
   assert(node->num_outputs == 1);
-
-  const size_t num_input_dims = values[input_id].shape.num_dims;
-  assert(num_input_dims >= 1);
-  const size_t channel_dim = values[input_id].shape.dim[num_input_dims - 1];
 
   enum xnn_status status;
   assert(values[node->inputs[0]].layout == xnn_layout_type_nhwc);
@@ -42,7 +34,6 @@ static enum xnn_status create_global_sum_pooling_operator(
   switch (node->compute_type) {
     case xnn_compute_type_fp32:
       status = xnn_create_global_sum_pooling_nwc_f32(
-          channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
           node->activation.output_min,
           node->activation.output_max,
           node->flags,
@@ -50,7 +41,6 @@ static enum xnn_status create_global_sum_pooling_operator(
       break;
     case xnn_compute_type_fp16:
       status = xnn_create_global_sum_pooling_nwc_f16(
-          channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
           node->activation.output_min,
           node->activation.output_max,
           node->flags,
@@ -71,6 +61,7 @@ static enum xnn_status reshape_global_sum_pooling_operator(
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
   const size_t num_input_dims = values[input_id].shape.num_dims;
+  assert(num_input_dims >= 1);
   size_t batch_size, input_width;
   switch (opdata->type) {
     case xnn_node_type_global_sum_pooling_1d:
@@ -84,12 +75,16 @@ static enum xnn_status reshape_global_sum_pooling_operator(
     default:
       XNN_UNREACHABLE;
   }
+  const size_t channel_dim = values[input_id].shape.dim[num_input_dims - 1];
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_global_sum_pooling_nwc_f32:
       return xnn_reshape_global_sum_pooling_nwc_f32(
         opdata->operator_objects[0],
         batch_size,
         input_width,
+        /*channels=*/channel_dim,
+        /*input_stride=*/channel_dim,
+        /*output_stride=*/channel_dim,
         &opdata->workspace_size, &opdata->workspace_alignment,
         threadpool);
       break;
@@ -98,6 +93,9 @@ static enum xnn_status reshape_global_sum_pooling_operator(
         opdata->operator_objects[0],
         batch_size,
         input_width,
+        /*channels=*/channel_dim,
+        /*input_stride=*/channel_dim,
+        /*output_stride=*/channel_dim,
         &opdata->workspace_size, &opdata->workspace_alignment,
         threadpool);
       break;
