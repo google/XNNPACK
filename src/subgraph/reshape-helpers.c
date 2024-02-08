@@ -26,6 +26,7 @@ enum xnn_status resize_unary_elementwise_output_tensor(
   if (!changed) {
     return xnn_status_success;
   }
+  output->shape.num_dims = input->shape.num_dims;
   const size_t new_size = xnn_tensor_get_size(output);
   if (new_size > output->size || old_workspace_size > opdata->workspace_size) {
     output->size = new_size;
@@ -73,6 +74,7 @@ enum xnn_status resize_binary_elementwise_output_tensor(
   }
 
   const size_t new_size = xnn_tensor_get_size(output);
+  output->shape.num_dims = max(input0->shape.num_dims, input1->shape.num_dims);
   if (new_size > output->size || opdata->workspace_size > old_workspace_size) {
     output->size = new_size;
     return xnn_status_reallocation_required;
