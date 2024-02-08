@@ -759,9 +759,7 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_requ
     xnn_status_success, xnn_reshape_external_value(runtime, output_id, op_output_dims.size(), op_output_dims.data()));
 
   // We will need more memory to run with the larger shape.
-  ASSERT_EQ(
-    xnn_status_reallocation_required,
-    node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, nullptr /* thradpool*/));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 

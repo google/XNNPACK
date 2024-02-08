@@ -480,6 +480,9 @@ struct xnn_runtime {
   // True if runtime has ever been setup. If it has been setup, the pointers inside of opdata need to be updated if
   // workspace changes.
   bool has_been_setup;
+
+  // True if memory planning is up to date. Memory planning is necessary when a runtime has been created or reshaped.
+  bool memory_planning_ready;
 };
 
 struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph);

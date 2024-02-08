@@ -1936,6 +1936,9 @@ enum xnn_status xnn_setup_runtime(
   size_t num_external_values,
   const struct xnn_external_value* external_values);
 
+enum xnn_status xnn_reshape_runtime(
+  xnn_runtime_t runtime);
+
 /// Execute forward pass for all operators in the runtime.
 ///
 /// @param runtime - the Runtime object with the execution plan to invoke.
