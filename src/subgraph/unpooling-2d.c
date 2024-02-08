@@ -84,6 +84,7 @@ static enum xnn_status reshape_unpooling_operator(
     return status;
   }
 
+  output_value->shape.num_dims = 4;
   output_value->shape.dim[0] = batch_size;
   output_value->shape.dim[1] = output_height;
   output_value->shape.dim[2] = output_width;

@@ -129,6 +129,7 @@ static enum xnn_status reshape_mean_operator(
         output_value->shape.dim[idx - num_skip_axis] = input_value->shape.dim[idx];
       }
     }
+    output_value->shape.num_dims = input_value->shape.num_dims - num_skip_axis;
   }
   const size_t new_size = xnn_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {

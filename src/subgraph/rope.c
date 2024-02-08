@@ -95,6 +95,7 @@ static enum xnn_status reshape_rope_operator(
   assert(output_id < num_values);
   struct xnn_value* output_value = values + output_id;
 
+  output_value->shape.num_dims = input_value->shape.num_dims;
   memcpy(output_value->shape.dim, input_value->shape.dim, input_value->shape.num_dims * sizeof(size_t));
   const size_t new_size = xnn_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
