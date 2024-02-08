@@ -105,7 +105,7 @@ static enum xnn_status reshape_prelu_operator(
 
   memcpy(output_value->shape.dim, input_value->shape.dim, input_value->shape.num_dims * sizeof(size_t));
   const size_t new_size = xnn_tensor_get_size(output_value);
-  if (new_size > output_value->size || old_workspace_size > opdata->workspace_size) {
+  if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
   }

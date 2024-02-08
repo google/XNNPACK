@@ -190,7 +190,7 @@ static enum xnn_status reshape_even_split_n_operator(
       reallocation_required = true;
     }
   }
-  if (reallocation_required || old_workspace_size > opdata->workspace_size) {
+  if (reallocation_required || opdata->workspace_size > old_workspace_size) {
     return xnn_status_reallocation_required;
   }
   return status;

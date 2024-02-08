@@ -119,7 +119,7 @@ static enum xnn_status reshape_constant_pad_operator(
     output_value->shape.dim[i] = input_value->shape.dim[i] + opdata->pre_paddings[i] + opdata->post_paddings[i];
   }
   const size_t new_size = xnn_tensor_get_size(output_value);
-  if (new_size > output_value->size || old_workspace_size > opdata->workspace_size) {
+  if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
   }
