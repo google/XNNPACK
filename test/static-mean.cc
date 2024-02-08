@@ -198,4 +198,170 @@ TEST_F(MeanTestF32, matches_operator_api)
   }
 }
 
+TEST_F(MeanTestF32, reshape_output_keep_dims)
+{
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  // Call subgraph API.
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(xnn_status_success,
+    xnn_define_tensor_value(subgraph, xnn_datatype_fp32, input_shape.size(), input_shape.data(),
+                            nullptr, /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+
+  uint32_t output_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(xnn_status_success,
+    xnn_define_tensor_value(subgraph, xnn_datatype_fp32, output_shape.size(), output_shape.data(),
+                            nullptr, /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+
+  ASSERT_EQ(xnn_status_success,
+    xnn_define_static_mean(
+      subgraph,
+      reduction_axes.size(), reduction_axes.data(),
+      input_id, output_id,
+      /*flags=*/XNN_FLAG_KEEP_DIMS));
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+
+  const std::array<xnn_external_value, 2> external = {
+    xnn_external_value{input_id, input.data()},
+    xnn_external_value{output_id, subgraph_output.data()}
+  };
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  input_shape[0] += 2;
+  input_shape[1] += 4;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_shape.size(), input_shape.data()));
+  const struct xnn_node* node = &subgraph->nodes[0];
+  std::vector<size_t> unique_reduction_axes = reduction_axes;
+  std::sort(unique_reduction_axes.begin(), unique_reduction_axes.end());
+  auto end = std::unique(unique_reduction_axes.begin(), unique_reduction_axes.end());
+  unique_reduction_axes.erase(end, unique_reduction_axes.end());
+  // There are too many parameters which influence the workspace size so
+  // knowing if reallocation is required or not is messy.
+  node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr);
+  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
+  size_t current_axes = 0;
+  for (size_t i = 0; i < output_shape->num_dims; ++i) {
+    if (unique_reduction_axes[current_axes] == i) {
+      ASSERT_EQ(output_shape->dim[i], 1);
+      ++current_axes;
+      if (current_axes == unique_reduction_axes.size()) {
+        break;
+      }
+    } else {
+      ASSERT_EQ(output_shape->dim[i], input_shape[i]);
+    }
+  }
+
+  input_shape[0] -= 1;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_shape.size(), input_shape.data()));
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
+  current_axes = 0;
+  for (size_t i = 0; i < output_shape->num_dims; ++i) {
+    if (unique_reduction_axes[current_axes] == i) {
+      ASSERT_EQ(output_shape->dim[i], 1);
+      ++current_axes;
+      if (current_axes == unique_reduction_axes.size()) {
+        break;
+      }
+    } else {
+      ASSERT_EQ(output_shape->dim[i], input_shape[i]);
+    }
+  }
+}
+
+TEST_F(MeanTestF32, reshape_output_no_keep_dims)
+{
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  // Call subgraph API.
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(xnn_status_success,
+    xnn_define_tensor_value(subgraph, xnn_datatype_fp32, input_shape.size(), input_shape.data(),
+                            nullptr, /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+
+  uint32_t output_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(xnn_status_success,
+    xnn_define_tensor_value(subgraph, xnn_datatype_fp32, output_shape.size(), output_shape.data(),
+                            nullptr, /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+
+  ASSERT_EQ(xnn_status_success,
+    xnn_define_static_mean(
+      subgraph,
+      reduction_axes.size(), reduction_axes.data(),
+      input_id, output_id,
+      /*flags=*/0));
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+
+  const std::array<xnn_external_value, 2> external = {
+    xnn_external_value{input_id, input.data()},
+    xnn_external_value{output_id, subgraph_output.data()}
+  };
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  input_shape[0] += 2;
+  input_shape[1] += 4;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_shape.size(), input_shape.data()));
+  const struct xnn_node* node = &subgraph->nodes[0];
+  std::vector<size_t> unique_reduction_axes = reduction_axes;
+  std::sort(unique_reduction_axes.begin(), unique_reduction_axes.end());
+  auto end = std::unique(unique_reduction_axes.begin(), unique_reduction_axes.end());
+  unique_reduction_axes.erase(end, unique_reduction_axes.end());
+  // There are too many parameters which influence the workspace size so
+  // knowing if reallocation is required or not is messy.
+  node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr);
+  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
+  size_t current_axes = 0;
+  size_t current_dim = 0;
+  for (size_t i = 0; i < input_shape.size(); ++i) {
+    if (unique_reduction_axes[current_axes] == i) {
+      ++current_axes;
+      if (current_axes == unique_reduction_axes.size()) {
+        break;
+      }
+    } else {
+      ASSERT_EQ(output_shape->dim[current_dim], input_shape[i]);
+      ++current_dim;
+    }
+  }
+
+  input_shape[0] -= 1;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_shape.size(), input_shape.data()));
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
+  current_axes = 0;
+  current_dim = 0;
+  for (size_t i = 0; i < input_shape.size(); ++i) {
+    if (unique_reduction_axes[current_axes] == i) {
+      ++current_axes;
+      if (current_axes == unique_reduction_axes.size()) {
+        break;
+      }
+    } else {
+      ASSERT_EQ(output_shape->dim[current_dim], input_shape[i]);
+      ++current_dim;
+    }
+  }
+}
+
 }  // namespace xnnpack

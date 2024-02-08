@@ -85,6 +85,9 @@ extern "C" {
 /// Use transient indirection buffer to reduce memory footprint
 #define XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER 0x00000020
 
+/// Retain reduced dimensions with length 1.
+#define XNN_FLAG_KEEP_DIMS 0x00000040
+
 /// The number of entries in an array of xnn_dynamic_quantization_params that XNNPACK may read beyond array bounds.
 /// The caller must allocate at least this many extra xnn_dynamic_quantization_params before passing the array to XNNPACK.
 ///
@@ -1155,6 +1158,7 @@ enum xnn_status xnn_define_static_constant_pad(
 /// @param output_id - Value ID for the output tensor. The output tensor must be a dense tensor defined in the
 ///                    @a subgraph with @a num_reduction_axes fewer dimensions than the input tensor.
 /// @param flags - binary features of the Mean Node. No supported flags are currently defined.
+/// @param flags - binary features of the Mean Node. The only currently supported value is XNN_FLAG_KEEP_DIMS
 enum xnn_status xnn_define_static_mean(
   xnn_subgraph_t subgraph,
   size_t num_reduction_axes,
