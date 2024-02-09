@@ -1677,6 +1677,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(max-pooling-2d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME max-pooling-2d-test COMMAND max-pooling-2d-test)
 
+    ADD_EXECUTABLE(max-pooling-2d-reshape-test test/max-pooling-2d-reshape.cc)
+    TARGET_INCLUDE_DIRECTORIES(max-pooling-2d-reshape-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(max-pooling-2d-reshape-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME max-pooling-2d-reshape-test COMMAND max-pooling-2d-reshape-test)
+
     ADD_EXECUTABLE(maximum2-test test/maximum2.cc)
     TARGET_INCLUDE_DIRECTORIES(maximum2-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(maximum2-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)

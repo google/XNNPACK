@@ -3789,6 +3789,21 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "max_pooling_2d_reshape_test",
+    srcs = [
+        "max-pooling-2d-reshape.cc",
+    ],
+    deps = [
+        "//:XNNPACK_test_mode",
+        "//:node_type",
+        "//:operator_utils",
+        "//:operators_test_mode",
+        "//:requantization",
+        "//:subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "maximum2_test",
     srcs = [
         "maximum2.cc",
