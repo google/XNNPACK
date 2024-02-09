@@ -1380,6 +1380,12 @@ enum xnn_status xnn_define_static_reshape(
   uint32_t output_id,
   uint32_t flags);
 
+enum xnn_status xnn_define_reshape_2d(
+  xnn_subgraph_t subgraph,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a 2D Resize Bilinear Node with static output height & width specification and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.

@@ -4015,6 +4015,20 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "reshape_2d_test",
+    srcs = [
+        "reshape-2d.cc",
+    ],
+    deps = [
+        ":subgraph_unary_tester",
+        "//:XNNPACK_test_mode",
+        "//:node_type",
+        "//:operators_test_mode",
+        "//:subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "static_resize_bilinear_2d_test",
     srcs = [
         "static-resize-bilinear-2d.cc",
