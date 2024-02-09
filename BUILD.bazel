@@ -4261,15 +4261,17 @@ alias(
 selects.config_setting_group(
     name = "riscv_vector_enabled_by_default",
     match_any = [
-        "//build_config:mpu64",
+        "//build_config:riscv",
     ],
 )
 
+# Temporary disable vectors on Android
 alias(
     name = "riscv_vector_enabled",
     actual = select({
         ":xnn_enable_riscv_vector_explicit_true": ":xnn_enable_riscv_vector_explicit_true",
         ":xnn_enable_riscv_vector_explicit_false": ":xnn_enable_riscv_vector_explicit_true",
+        "//build_config:android": ":xnn_enable_riscv_vector_explicit_false",
         "//conditions:default": ":riscv_vector_enabled_by_default",
     }),
 )
@@ -4277,10 +4279,11 @@ alias(
 selects.config_setting_group(
     name = "riscv_fp16_vector_enabled_by_default",
     match_any = [
-        "//build_config:mpu64",
+        "//build_config:riscv",
     ],
 )
 
+# Temporary disable fp16 vectors on Android
 alias(
     name = "riscv_fp16_vector_enabled",
     actual = select({
