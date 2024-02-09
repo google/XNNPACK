@@ -40,7 +40,7 @@ class FullyConnectedTestBase : public ::testing::Test {
     f32dist = std::uniform_real_distribution<float>(0.1f, 1.0f);
     scale_dist = std::uniform_real_distribution<float>(1.0f, 5.0f);
     i32dist = std::uniform_int_distribution<int32_t>(-10000, 10000);
-    auto shape_dist = std::uniform_int_distribution<size_t>(2, XNN_MAX_TENSOR_DIMS);
+    auto kernel_shape_dist = std::uniform_int_distribution<size_t>(2, 3);
     dim_dist = std::uniform_int_distribution<size_t>(5, 15);
     i8dist =
       std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
@@ -50,15 +50,22 @@ class FullyConnectedTestBase : public ::testing::Test {
     output_min = -std::numeric_limits<float>::infinity();
     output_max = std::numeric_limits<float>::infinity();
 
+    size_t num_kernel_dims = kernel_shape_dist(rng);
+    kernel_dims = RandomShape(num_kernel_dims);
+    auto shape_dist = std::uniform_int_distribution<size_t>(2, XNN_MAX_TENSOR_DIMS + 2 - num_kernel_dims);
+
     size_t num_input_dims = shape_dist(rng);
     input_dims = RandomShape(num_input_dims);
     assert(input_dims.size() >= 2);
-    output_channels = dim_dist(rng);
     input_channels = input_dims.back();
-    kernel_dims = {output_channels, input_channels};
-    kernel_dims_tranposed = {input_channels, output_channels};
+    kernel_dims.back() = input_channels;
+    output_channels = NumElements(kernel_dims) / input_channels;
+    kernel_dims_tranposed = decltype(kernel_dims_tranposed){kernel_dims.begin(), kernel_dims.end()};
     output_dims = input_dims;
-    output_dims[output_dims.size() - 1] = output_channels;
+    output_dims.pop_back();
+    for (size_t i = 0; i < kernel_dims.size() - 1; i++) {
+      output_dims.push_back(kernel_dims[i]);
+    }
 
     batch_size = NumElements(input_dims) / input_channels;
 
@@ -2779,11 +2786,18 @@ TEST_F(FullyConnectedTestF32, reshape)
 
   ASSERT_EQ(xnn_status_success, node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, nullptr /*threadpool*/));
 
+  size_t num_dims_from_input = 0;
+  if (kernel_shape->num_dims == 2) {
+    ASSERT_EQ(output_shape->dim[output_shape->num_dims-1], kernel_shape->dim[0]);
+    num_dims_from_input = output_shape->num_dims - 1;
+  } else {
+    ASSERT_EQ(output_shape->dim[output_shape->num_dims-1] * output_shape->dim[output_shape->num_dims-2], kernel_shape->dim[0] * kernel_shape->dim[1]);
+    num_dims_from_input = output_shape->num_dims - 2;
+  }
   // Check that the output shape is correct
-  for (size_t i=0; i<output_shape->num_dims - 1; ++i) {
+  for (size_t i=0; i<num_dims_from_input; ++i) {
     ASSERT_EQ(output_shape->dim[i], new_input_dims[i]);
   }
-  ASSERT_EQ(output_shape->dim[output_shape->num_dims-1], kernel_shape->dim[0]);
 
   // case 3: Resize input to a larger size. This should require memory planning
   for (size_t i=0; i<new_input_dims.size() - 1; ++i) {
@@ -2794,11 +2808,17 @@ TEST_F(FullyConnectedTestF32, reshape)
 
   ASSERT_EQ(xnn_status_reallocation_required, node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, nullptr /*threadpool*/));
 
+  if (kernel_shape->num_dims == 2) {
+    ASSERT_EQ(output_shape->dim[output_shape->num_dims-1], kernel_shape->dim[0]);
+    num_dims_from_input = output_shape->num_dims - 1;
+  } else {
+    ASSERT_EQ(output_shape->dim[output_shape->num_dims-1] * output_shape->dim[output_shape->num_dims-2], kernel_shape->dim[0] * kernel_shape->dim[1]);
+    num_dims_from_input = output_shape->num_dims - 2;
+  }
   // Check that the output shape is correct
-  for (size_t i=0; i<output_shape->num_dims - 1; ++i) {
+  for (size_t i=0; i<num_dims_from_input; ++i) {
     ASSERT_EQ(output_shape->dim[i], new_input_dims[i]);
   }
-  ASSERT_EQ(output_shape->dim[output_shape->num_dims-1], kernel_shape->dim[0]);
 
   size_t num_output_elements = std::accumulate(new_input_dims.begin(), new_input_dims.end() - 1, size_t{1}, std::multiplies<size_t>()) * kernel_shape->dim[0];
   ASSERT_EQ(runtime->values[node->outputs[0]].size, num_output_elements * sizeof(float));

@@ -41,14 +41,13 @@ static enum xnn_status create_fully_connected_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  size_t output_channels, input_channels;
+  size_t input_channels;
   if (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
-    input_channels = values[node->inputs[1]].shape.dim[0];
-    output_channels = values[node->inputs[1]].shape.dim[1];
+    input_channels = values[filter_id].shape.dim[0];
   } else {
-    output_channels = values[node->inputs[1]].shape.dim[0];
-    input_channels = values[node->inputs[1]].shape.dim[1];
+    input_channels = values[filter_id].shape.dim[values[filter_id].shape.num_dims - 1];
   }
+  const size_t output_channels = xnn_shape_multiply_all_dims(&values[filter_id].shape) / input_channels;
 
   const void* kernel_data = values[filter_id].fp32_data != NULL ? values[filter_id].fp32_data : values[filter_id].data;
   bool has_non_static_weights = (kernel_data == NULL);
@@ -337,32 +336,37 @@ enum xnn_status resize_fully_connected_output_tensor(
 
   const uint32_t input_id = opdata->inputs[0];
   const struct xnn_value* input = &values[input_id];
+  const size_t equivalent_input_shape_num_dims =
+      (opdata->flags & XNN_FLAG_TENSORFLOW_RESHAPE_2D) ? 2 : input->shape.num_dims;
+
+  enum xnn_shape_inference_status status = xnn_shape_inference_status_no_change;
+
+  assert(equivalent_input_shape_num_dims + filter->shape.num_dims - 2 == output->shape.num_dims);
+  assert(output->shape.num_dims <= XNN_MAX_TENSOR_DIMS);
 
   // Infer output channels.
-  const uint32_t filter_output_channel_index = (opdata->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) ? 1 : 0;
-  enum xnn_shape_inference_status status =
-    xnn_tensor_propagate_dimension(output, output->shape.num_dims - 1, filter->shape.dim[filter_output_channel_index]);
-  if (status == xnn_shape_inference_status_error) {
-    return xnn_status_invalid_parameter;
-  }
-
-  if (opdata->flags & XNN_FLAG_TENSORFLOW_RESHAPE_2D) {
-    const uint32_t filter_input_channel_index = (opdata->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) ? 0 : 1;
-    const size_t num_input_elements = xnn_shape_multiply_all_dims(&input->shape);
-    assert(output->shape.num_dims == 2);
-    // propogate the input shape to output.
-    status =
-      xnn_tensor_propagate_dimension(output, 0, num_input_elements / filter->shape.dim[filter_input_channel_index]);
+  const uint32_t filter_output_channel_propagate_begin = (opdata->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) ? 1 : 0;
+  for (uint32_t i = 0; i < filter->shape.num_dims - 1; ++i) {
+    status = xnn_tensor_propagate_dimension(
+        output, equivalent_input_shape_num_dims - 1 + i, filter->shape.dim[i + filter_output_channel_propagate_begin]);
     if (status == xnn_shape_inference_status_error) {
       return xnn_status_invalid_parameter;
     }
   }
-  else {
-    // Make sure the input and output tensors have same number of dimensions.
-    assert(input->shape.num_dims == output->shape.num_dims);
 
+  if (opdata->flags & XNN_FLAG_TENSORFLOW_RESHAPE_2D) {
+    const uint32_t input_channel_index = input->shape.num_dims - 1;
+    const size_t num_input_elements = xnn_shape_multiply_all_dims(&input->shape);
+    assert(output->shape.num_dims == 2);
+    // propagate the input shape to output.
+    status =
+      xnn_tensor_propagate_dimension(output, 0, num_input_elements / input->shape.dim[input_channel_index]);
+    if (status == xnn_shape_inference_status_error) {
+      return xnn_status_invalid_parameter;
+    }
+  } else {
     // Propagate input shape to output.
-    for (size_t cur_dim = 0; cur_dim < input->shape.num_dims - 1; cur_dim++) {
+    for (size_t cur_dim = 0; cur_dim < equivalent_input_shape_num_dims - 1; cur_dim++) {
       status = xnn_tensor_propagate_dimension(output, cur_dim, input->shape.dim[cur_dim]);
       if (status == xnn_shape_inference_status_error) {
         return xnn_status_invalid_parameter;
