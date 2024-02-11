@@ -188,30 +188,36 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__
           a = (const ${XINT8_T}**restrict) ((uintptr_t) a - ks);
           nc -= 8;
         } else {
-          if (nc & 4) {
-            $for M in reversed(range(MR)):
-              _mm_storel_epi64((__m128i*) c${M}, vfp16out${M}x01234567);
+          $if AVX:
+            if (nc & 4) {
+              $for M in reversed(range(MR)):
+                _mm_storel_epi64((__m128i*) c${M}, vfp16out${M}x01234567);
 
-            $for M in reversed(range(MR)):
-              vfp16out${M}x01234567 = _mm_unpackhi_epi64(vfp16out${M}x01234567, vfp16out${M}x01234567);
+              $for M in reversed(range(MR)):
+                vfp16out${M}x01234567 = _mm_unpackhi_epi64(vfp16out${M}x01234567, vfp16out${M}x01234567);
 
-            $for M in reversed(range(MR)):
-              c${M} += 4;
-          }
-          if (nc & 2) {
-            $for M in reversed(range(MR)):
-              _mm_storeu_si32(c${M}, vfp16out${M}x01234567);
+              $for M in reversed(range(MR)):
+                c${M} += 4;
+            }
+            if (nc & 2) {
+              $for M in reversed(range(MR)):
+                _mm_storeu_si32(c${M}, vfp16out${M}x01234567);
 
-            $for M in reversed(range(MR)):
-              vfp16out${M}x01234567 = _mm_srli_epi64(vfp16out${M}x01234567, 32);
+              $for M in reversed(range(MR)):
+                vfp16out${M}x01234567 = _mm_srli_epi64(vfp16out${M}x01234567, 32);
 
+              $for M in reversed(range(MR)):
+                c${M} += 2;
+            }
+            if (nc & 1) {
+              $for M in reversed(range(MR)):
+                *c${M} = (uint16_t) _mm_extract_epi16(vfp16out${M}x01234567, 0);
+            }
+          $else:
+            // Prepare mask for valid 16-bit elements (depends on nc).
+            const __mmask8 vmask = _cvtu32_mask8((UINT32_C(1) << nc) - 1);
             $for M in reversed(range(MR)):
-              c${M} += 2;
-          }
-          if (nc & 1) {
-            $for M in reversed(range(MR)):
-              *c${M} = (uint16_t) _mm_extract_epi16(vfp16out${M}x01234567, 0);
-          }
+              _mm_mask_storeu_epi16(c${M}, vmask, vfp16out${M}x01234567);
           nc = 0;
         }
       $else:
@@ -231,32 +237,38 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__
           a = (const ${XINT8_T}**restrict) ((uintptr_t) a - ks);
           nc -= 8;
         } else {
-          $for M in reversed(range(MR)):
-            __m128 vout${M}x0123 = _mm256_castps256_ps128(vout${M}x01234567);
-          if (nc & 4) {
+          $if AVX:
             $for M in reversed(range(MR)):
-              _mm_storeu_ps(c${M}, vout${M}x0123);
+              __m128 vout${M}x0123 = _mm256_castps256_ps128(vout${M}x01234567);
+            if (nc & 4) {
+              $for M in reversed(range(MR)):
+                _mm_storeu_ps(c${M}, vout${M}x0123);
 
-            $for M in reversed(range(MR)):
-              vout${M}x0123 = _mm256_extractf128_ps(vout${M}x01234567, 1);
+              $for M in reversed(range(MR)):
+                vout${M}x0123 = _mm256_extractf128_ps(vout${M}x01234567, 1);
 
-            $for M in reversed(range(MR)):
-              c${M} += 4;
-          }
-          if (nc & 2) {
-            $for M in reversed(range(MR)):
-              _mm_storel_pi((__m64*) c${M}, vout${M}x0123);
+              $for M in reversed(range(MR)):
+                c${M} += 4;
+            }
+            if (nc & 2) {
+              $for M in reversed(range(MR)):
+                _mm_storel_pi((__m64*) c${M}, vout${M}x0123);
 
-            $for M in reversed(range(MR)):
-              vout${M}x0123 = _mm_movehl_ps(vout${M}x0123, vout${M}x0123);
+              $for M in reversed(range(MR)):
+                vout${M}x0123 = _mm_movehl_ps(vout${M}x0123, vout${M}x0123);
 
+              $for M in reversed(range(MR)):
+                c${M} += 2;
+            }
+            if (nc & 1) {
+              $for M in reversed(range(MR)):
+                _mm_store_ss(c${M}, vout${M}x0123);
+            }
+          $else:
+            // Prepare mask for valid 32-bit elements (depends on nc).
+            const __mmask8 vmask = _cvtu32_mask8((UINT32_C(1) << nc) - 1);
             $for M in reversed(range(MR)):
-              c${M} += 2;
-          }
-          if (nc & 1) {
-            $for M in reversed(range(MR)):
-              _mm_store_ss(c${M}, vout${M}x0123);
-          }
+              _mm256_mask_storeu_ps(c${M}, vmask, vout${M}x01234567);
           nc = 0;
         }
     $else:

@@ -247,51 +247,13 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_5x8c8__avx512skx(
 
       nc -= 8;
     } else {
-      if (nc & 4) {
-        _mm_storel_epi64((__m128i*) c0, vfp16out0x01234567);
-        _mm_storel_epi64((__m128i*) c1, vfp16out1x01234567);
-        _mm_storel_epi64((__m128i*) c2, vfp16out2x01234567);
-        _mm_storel_epi64((__m128i*) c3, vfp16out3x01234567);
-        _mm_storel_epi64((__m128i*) c4, vfp16out4x01234567);
-
-        vfp16out0x01234567 = _mm_unpackhi_epi64(vfp16out0x01234567, vfp16out0x01234567);
-        vfp16out1x01234567 = _mm_unpackhi_epi64(vfp16out1x01234567, vfp16out1x01234567);
-        vfp16out2x01234567 = _mm_unpackhi_epi64(vfp16out2x01234567, vfp16out2x01234567);
-        vfp16out3x01234567 = _mm_unpackhi_epi64(vfp16out3x01234567, vfp16out3x01234567);
-        vfp16out4x01234567 = _mm_unpackhi_epi64(vfp16out4x01234567, vfp16out4x01234567);
-
-        c0 += 4;
-        c1 += 4;
-        c2 += 4;
-        c3 += 4;
-        c4 += 4;
-      }
-      if (nc & 2) {
-        _mm_storeu_si32(c0, vfp16out0x01234567);
-        _mm_storeu_si32(c1, vfp16out1x01234567);
-        _mm_storeu_si32(c2, vfp16out2x01234567);
-        _mm_storeu_si32(c3, vfp16out3x01234567);
-        _mm_storeu_si32(c4, vfp16out4x01234567);
-
-        vfp16out0x01234567 = _mm_srli_epi64(vfp16out0x01234567, 32);
-        vfp16out1x01234567 = _mm_srli_epi64(vfp16out1x01234567, 32);
-        vfp16out2x01234567 = _mm_srli_epi64(vfp16out2x01234567, 32);
-        vfp16out3x01234567 = _mm_srli_epi64(vfp16out3x01234567, 32);
-        vfp16out4x01234567 = _mm_srli_epi64(vfp16out4x01234567, 32);
-
-        c0 += 2;
-        c1 += 2;
-        c2 += 2;
-        c3 += 2;
-        c4 += 2;
-      }
-      if (nc & 1) {
-        *c0 = (uint16_t) _mm_extract_epi16(vfp16out0x01234567, 0);
-        *c1 = (uint16_t) _mm_extract_epi16(vfp16out1x01234567, 0);
-        *c2 = (uint16_t) _mm_extract_epi16(vfp16out2x01234567, 0);
-        *c3 = (uint16_t) _mm_extract_epi16(vfp16out3x01234567, 0);
-        *c4 = (uint16_t) _mm_extract_epi16(vfp16out4x01234567, 0);
-      }
+      // Prepare mask for valid 16-bit elements (depends on nc).
+      const __mmask8 vmask = _cvtu32_mask8((UINT32_C(1) << nc) - 1);
+      _mm_mask_storeu_epi16(c0, vmask, vfp16out0x01234567);
+      _mm_mask_storeu_epi16(c1, vmask, vfp16out1x01234567);
+      _mm_mask_storeu_epi16(c2, vmask, vfp16out2x01234567);
+      _mm_mask_storeu_epi16(c3, vmask, vfp16out3x01234567);
+      _mm_mask_storeu_epi16(c4, vmask, vfp16out4x01234567);
       nc = 0;
     }
   } while (nc != 0);
