@@ -412,6 +412,11 @@ struct xnn_operator_data {
       size_t num_reduction_axes;
       size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
     };
+    // Used for reshape.
+    struct {
+      size_t num_reshape_dims;
+      size_t reshape_dims[XNN_MAX_TENSOR_DIMS];
+    };
     // Used for concatenate.
     size_t axis;
     // Used for static constant pad.

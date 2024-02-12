@@ -8,6 +8,7 @@
 #include <cstddef>     // For size_t.
 #include <functional>  // For std::multiplies.
 #include <memory>      // For std::unique_ptr.
+#include <numeric>     // For std::accumulate.
 #include <random>      // For std::random_device, std::mt19937, std::uniform_real_distribution.
 #include <vector>      // For std::vector.
 
@@ -19,9 +20,36 @@
 #include "subgraph-unary-tester.h"
 #include <gtest/gtest.h>
 
-using StaticReshapeTestInt8 = UnaryTest<int8_t>;
-using StaticReshapeTestUint8 = UnaryTest<uint8_t>;
-using StaticReshapeTestF32= UnaryTest<float>;
+template <typename InputType, typename OutputType = InputType,
+          size_t min_dim = 0, size_t max_dim = XNN_MAX_TENSOR_DIMS,
+          bool pad_output = false>
+class StaticReshapeTest
+    : public UnaryTest<InputType, OutputType, min_dim, max_dim, pad_output> {
+ protected:
+  void SetUp() override {
+    new_dims_hint = RandomSetOneDimsionToZero(this->dims);
+  }
+
+  std::vector<size_t> RandomSetOneDimsionToZero(
+      const std::vector<size_t> given_dims) {
+    std::vector<size_t> result = given_dims;
+    // Randomly set one dimension to zero.
+    auto dynamic_axis_dist =
+        std::uniform_int_distribution<size_t>(0, result.size());
+    const size_t dynamic_axis = dynamic_axis_dist(this->rng);
+    if (dynamic_axis == result.size()) {
+      return result;
+    }
+    result[dynamic_axis] = 0;
+    return result;
+  }
+
+  std::vector<size_t> new_dims_hint;
+};
+
+using StaticReshapeTestInt8 = StaticReshapeTest<int8_t>;
+using StaticReshapeTestUint8 = StaticReshapeTest<uint8_t>;
+using StaticReshapeTestF32 = StaticReshapeTest<float>;
 
 TEST_F(StaticReshapeTestInt8, define)
 {
@@ -48,7 +76,7 @@ TEST_F(StaticReshapeTestInt8, define)
                           nullptr, 1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
-  ASSERT_EQ(xnn_status_success, xnn_define_static_reshape(subgraph, dims.size(), dims.data(), input_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_static_reshape(subgraph, new_dims_hint.size(), new_dims_hint.data(), input_id, output_id, /*flags=*/0));
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
@@ -86,7 +114,7 @@ TEST_F(StaticReshapeTestUint8, define)
                           nullptr, 1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
-  ASSERT_EQ(xnn_status_success, xnn_define_static_reshape(subgraph, dims.size(), dims.data(), input_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_static_reshape(subgraph, new_dims_hint.size(), new_dims_hint.data(), input_id, output_id, /*flags=*/0));
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
@@ -120,7 +148,7 @@ TEST_F(StaticReshapeTestF32, define)
       subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
-  ASSERT_EQ(xnn_status_success, xnn_define_static_reshape(subgraph, dims.size(), dims.data(), input_id, output_id, 0));
+  ASSERT_EQ(xnn_status_success, xnn_define_static_reshape(subgraph, new_dims_hint.size(), new_dims_hint.data(), input_id, output_id, 0));
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
@@ -143,6 +171,7 @@ TEST_F(StaticReshapeTestInt8, matches_operator_api)
 
   std::vector<size_t> output_dims = dims;
   std::shuffle(output_dims.begin(), output_dims.end(), rng);
+  new_dims_hint = RandomSetOneDimsionToZero(output_dims);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -180,7 +209,7 @@ TEST_F(StaticReshapeTestInt8, matches_operator_api)
                           nullptr, /*external_id=*/1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
-  ASSERT_EQ(xnn_status_success, xnn_define_static_reshape(subgraph, output_dims.size(), output_dims.data(), input_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_static_reshape(subgraph, new_dims_hint.size(), new_dims_hint.data(), input_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -205,6 +234,7 @@ TEST_F(StaticReshapeTestUint8, matches_operator_api)
 
   std::vector<size_t> output_dims = dims;
   std::shuffle(output_dims.begin(), output_dims.end(), rng);
+  new_dims_hint = RandomSetOneDimsionToZero(output_dims);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -242,7 +272,7 @@ TEST_F(StaticReshapeTestUint8, matches_operator_api)
                           nullptr, /*external_id=*/1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
-  ASSERT_EQ(xnn_status_success, xnn_define_static_reshape(subgraph, output_dims.size(), output_dims.data(), input_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_static_reshape(subgraph, new_dims_hint.size(), new_dims_hint.data(), input_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -265,6 +295,7 @@ TEST_F(StaticReshapeTestF32, matches_operator_api)
 
   std::vector<size_t> output_dims = dims;
   std::shuffle(output_dims.begin(), output_dims.end(), rng);
+  new_dims_hint = RandomSetOneDimsionToZero(output_dims);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -302,7 +333,7 @@ TEST_F(StaticReshapeTestF32, matches_operator_api)
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_static_reshape(subgraph, output_dims.size(), output_dims.data(), input_id, output_id, /*flags=*/0));
+    xnn_define_static_reshape(subgraph, new_dims_hint.size(), new_dims_hint.data(), input_id, output_id, /*flags=*/0));
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
   ASSERT_NE(nullptr, runtime);
@@ -313,4 +344,79 @@ TEST_F(StaticReshapeTestF32, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   ASSERT_EQ(subgraph_output, operator_output);
+}
+
+TEST_F(StaticReshapeTestF32, reshape_output) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  std::vector<size_t> output_dims = dims;
+  std::shuffle(output_dims.begin(), output_dims.end(), rng);
+  new_dims_hint = RandomSetOneDimsionToZero(output_dims);
+
+  // Call subgraph API.
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2,
+                                                    /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+  input_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, dims.size(),
+                dims.data(), nullptr, /*external_id=*/0,
+                /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+
+  output_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, output_dims.size(),
+                output_dims.data(), nullptr, /*external_id=*/1,
+                /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_static_reshape(subgraph, new_dims_hint.size(),
+                                      new_dims_hint.data(), input_id, output_id,
+                                      /*flags=*/0));
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+  std::array<xnn_external_value, 2> external = {
+      xnn_external_value{input_id, input.data()},
+      xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  // Change the input shape (make it large enough to trigger a reallocation).
+  dims.front() *= 2;
+  dims.back() *= 3;
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, input_id, dims.size(),
+                                       dims.data()));
+  const struct xnn_node* node = &subgraph->nodes[0];
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values,
+                          runtime->num_values, /*threadpool=*/nullptr),
+            xnn_status_reallocation_required);
+  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
+  EXPECT_EQ(xnn_shape_multiply_all_dims(output_shape),
+            std::accumulate(dims.begin(), dims.end(), size_t(1),
+                            std::multiplies<size_t>()));
+
+  // Change the input shape (make it a bit smaller again).
+  dims.front() /= 2;
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, input_id, dims.size(),
+                                       dims.data()));
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values,
+                          runtime->num_values, /*threadpool=*/nullptr),
+            xnn_status_success);
+  EXPECT_EQ(xnn_shape_multiply_all_dims(output_shape),
+            std::accumulate(dims.begin(), dims.end(), size_t(1),
+                            std::multiplies<size_t>()));
 }
