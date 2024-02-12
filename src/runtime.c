@@ -649,6 +649,7 @@ enum xnn_status xnn_reshape_runtime(
     if (status == xnn_status_reallocation_required) {
       runtime->memory_planning_ready = false;
     } else if (status != xnn_status_success) {
+      xnn_log_error("Operator #%zu: %s failed reshape", i, xnn_operator_type_to_string(runtime->opdata[i].operator_objects[0]->type));
       return status;
     }
   }
