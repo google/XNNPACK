@@ -225,13 +225,6 @@ TEST_F(Unpooling2DTestX32, matches_operator_api)
 
 TEST_F(Unpooling2DTestX32, reshape_output)
 {
-  xnn_operator_t op = nullptr;
-
-  std::generate(input.begin(), input.end(), [&]() { return u32dist(rng); });
-  std::generate(input_index.begin(), input_index.end(), [&]() { return index_dist(rng); });
-  std::generate(operator_output.begin(), operator_output.end(), [&]() { return u32dist(rng); });
-  std::generate(subgraph_output.begin(), subgraph_output.end(), [&]() { return u32dist(rng); });
-
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   // Call subgraph API.
