@@ -315,9 +315,12 @@ TEST_F(StaticReshapeTestF32, matches_operator_api)
   ASSERT_EQ(subgraph_output, operator_output);
 }
 
-TEST(StaticReshapeTestF32, reshape_output)
+TEST_F(StaticReshapeTestF32, reshape_output)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  std::vector<size_t> input_dims{2, 3, 4, 5};
+  std::vector<size_t> output_dims{1, 2, 3, 4, 5, 1};
 
   // Call subgraph API.
   xnn_subgraph_t subgraph = nullptr;
@@ -327,7 +330,7 @@ TEST(StaticReshapeTestF32, reshape_output)
   uint32_t input_id = XNN_INVALID_NODE_ID;
   ASSERT_EQ(
     xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, /*external_id=*/0,
+                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr, /*external_id=*/0,
                           XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
   ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
   uint32_t output_id = XNN_INVALID_NODE_ID;
@@ -344,11 +347,21 @@ TEST(StaticReshapeTestF32, reshape_output)
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
-  dims[0] += 1;
+  input_dims[0] = 4;
+  input_dims[2] = 2;
 
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  const struct xnn_node* node = &subgraph->nodes[0];
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
+  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
+  ASSERT_EQ(output_dims.size(), output_shape->num_dims);
+  for (size_t i = 0; i < input_dims.size(); ++i) {
+    ASSERT_EQ(output_dims[i], output_shape->dim[i]);
+  }
+
+  input_dims[0] += 2;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  node = &subgraph->nodes[0];
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_invalid_parameter);
 }

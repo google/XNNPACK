@@ -60,24 +60,39 @@ static enum xnn_status reshape_copy_operator(
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
-  const size_t batch_size = xnn_shape_multiply_all_dims(&values[input_id].shape);
+
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id < num_values);
+
+  const size_t input_batch_size = xnn_shape_multiply_all_dims(&values[input_id].shape);
+  const size_t output_batch_size = xnn_shape_multiply_all_dims(&values[output_id].shape);
+
+  if (input_batch_size != output_batch_size) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
+      ": number of input elements, %zu, does not match number of output elements %zu",
+      xnn_node_type_to_string(xnn_node_type_static_reshape), input_id, output_id, input_batch_size,
+      output_batch_size);
+    return xnn_status_invalid_parameter;
+  }
+
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_copy_nc_x8:
       return xnn_reshape_copy_nc_x8(
         opdata->operator_objects[0],
-        batch_size,
+        input_batch_size,
         1 /* channels */, 1 /* input stride */, 1 /* output stride */,
         threadpool);
     case xnn_operator_type_copy_nc_x16:
       return xnn_reshape_copy_nc_x16(
         opdata->operator_objects[0],
-        batch_size,
+        input_batch_size,
         1 /* channels */, 1 /* input stride */, 1 /* output stride */,
         threadpool);
     case xnn_operator_type_copy_nc_x32:
       return xnn_reshape_copy_nc_x32(
         opdata->operator_objects[0],
-        batch_size,
+        input_batch_size,
         1 /* channels */, 1 /* input stride */, 1 /* output stride */,
         threadpool);
     default:
