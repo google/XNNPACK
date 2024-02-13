@@ -27,10 +27,23 @@ class StaticReshapeTest
     : public UnaryTest<InputType, OutputType, min_dim, max_dim, pad_output> {
  protected:
   void SetUp() override {
-    new_dims_hint = RandomSetOneDimsionToZero(this->dims);
+    new_dims_hint = PosiblySetOneDimsionToZero(this->dims);
   }
 
+  // Set exactly one element of `given_dims` to zero.
   std::vector<size_t> RandomSetOneDimsionToZero(
+      const std::vector<size_t> given_dims) {
+    std::vector<size_t> result = given_dims;
+    // Randomly set one dimension to zero.
+    auto dynamic_axis_dist =
+        std::uniform_int_distribution<size_t>(0, result.size() - 1);
+    const size_t dynamic_axis = dynamic_axis_dist(this->rng);
+    result[dynamic_axis] = 0;
+    return result;
+  }
+
+  // Set at most one element of `given_dims` to zero.
+  std::vector<size_t> PosiblySetOneDimsionToZero(
       const std::vector<size_t> given_dims) {
     std::vector<size_t> result = given_dims;
     // Randomly set one dimension to zero.
@@ -171,7 +184,7 @@ TEST_F(StaticReshapeTestInt8, matches_operator_api)
 
   std::vector<size_t> output_dims = dims;
   std::shuffle(output_dims.begin(), output_dims.end(), rng);
-  new_dims_hint = RandomSetOneDimsionToZero(output_dims);
+  new_dims_hint = PosiblySetOneDimsionToZero(output_dims);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -234,7 +247,7 @@ TEST_F(StaticReshapeTestUint8, matches_operator_api)
 
   std::vector<size_t> output_dims = dims;
   std::shuffle(output_dims.begin(), output_dims.end(), rng);
-  new_dims_hint = RandomSetOneDimsionToZero(output_dims);
+  new_dims_hint = PosiblySetOneDimsionToZero(output_dims);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -295,7 +308,7 @@ TEST_F(StaticReshapeTestF32, matches_operator_api)
 
   std::vector<size_t> output_dims = dims;
   std::shuffle(output_dims.begin(), output_dims.end(), rng);
-  new_dims_hint = RandomSetOneDimsionToZero(output_dims);
+  new_dims_hint = PosiblySetOneDimsionToZero(output_dims);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
