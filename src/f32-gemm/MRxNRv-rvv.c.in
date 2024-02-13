@@ -1,0 +1,109 @@
+// Copyright 2024 SiFive, Inc.
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert DATATYPE in ["F32"]
+$assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
+$assert MR >= 1
+$assert NR in ["m1", "m2", "m4", "m8"]
+$LMUL = NR[1]
+#include <assert.h>
+
+#include <riscv_vector.h>
+
+#include <xnnpack/gemm.h>
+
+
+$DATATYPE_SPEC = {"F32": "f32"}[DATATYPE]
+$SUFFIX = {"LINEAR": "", "RELU": "_relu", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "xnn_f32_default_params", "RELU": "xnn_f32_relu_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
+void xnn_${DATATYPE_SPEC}_gemm${SUFFIX}_ukernel_${MR}x${LMUL}v__rvv(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    const float* restrict a,
+    size_t a_stride,
+    const float* restrict w,
+    float* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  $if ACTIVATION == "MINMAX":
+    const float vmin = params->scalar.min;
+    const float vmax = params->scalar.max;
+  $elif ACTIVATION == "RELU":
+    const float vmin = 0.0f;
+  const float* a0 = a;
+  float* c0 = c;
+  $for M in range(1, MR):
+    const float* a${M} = (const float*) ((uintptr_t) a${M-1} + a_stride);
+    float* c${M} = (float*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+
+  const size_t nr = __riscv_vsetvlmax_e32m${LMUL}();
+  size_t vl = nr;
+  do {
+    if XNN_UNLIKELY(nc < nr) {
+      vl = __riscv_vsetvl_e32m${LMUL}(nc);
+    }
+    nc = nc - vl;
+
+    vfloat32m${LMUL}_t vacc0 =  __riscv_vle32_v_f32m${LMUL}(w, vl);
+    w = w + nr;
+    $for M in range(1, MR):  
+      vfloat32m${LMUL}_t vacc${M} =  __riscv_vmv_v_v_f32m${LMUL}(vacc0, vl);
+
+    size_t k = kc;
+    do {
+      $for M in range(MR):
+        const float va${M} = *a${M}++;
+      vfloat32m${LMUL}_t vb = __riscv_vle32_v_f32m${LMUL}(w, vl);
+      w = w + nr;
+      $for M in range(MR):
+        vacc${M} = __riscv_vfmacc_vf_f32m${LMUL}(vacc${M}, va${M}, vb, vl);
+      k -= sizeof(float);
+    } while (k != 0);
+    $if ACTIVATION == "MINMAX":
+      // clamp results with min & max
+      $for M in range(MR):
+        vacc${M} = __riscv_vfmax_vf_f32m${LMUL}(vacc${M}, vmin, vl);
+
+      $for M in range(MR):
+        vacc${M} = __riscv_vfmin_vf_f32m${LMUL}(vacc${M}, vmax, vl);
+    $elif ACTIVATION == "RELU":
+      // apply ReLU to results
+      $for M in range(MR):
+        vacc${M} = __riscv_vfmax_vf_f32m${LMUL}(vacc${M}, vmin, vl);
+    // store ${MR} x vl results to c
+    $for M in range(MR):  
+      __riscv_vse32_v_f32m${LMUL}(c${M}, vacc${M}, vl);
+      c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
+    $for M in range(MR):  
+      a${M} = (const float*) ((uintptr_t) a${M} - kc);
+  } while (nc != 0);
+}
