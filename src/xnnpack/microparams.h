@@ -125,6 +125,11 @@ union xnn_f16_minmax_params {
     XNN_ALIGN(32) float min[8];
     XNN_ALIGN(32) float max[8];
   } avx;
+  struct {
+    float min;
+    float max;
+    int8_t sign_mask;
+  } avxvnni;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
@@ -174,6 +179,13 @@ union xnn_f16_qc4w_minmax_params {
     XNN_ALIGN(32) float max[8];
     XNN_ALIGN(32) uint8_t mask[16];
   } avx;
+  struct {
+    float min;
+    float max;
+    int8_t sign_mask;   // 0x80
+    int8_t mask;        // 0xF0
+    int64_t gfni_shl4;  // 0x01020408
+  } avxvnni;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 

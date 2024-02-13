@@ -135,23 +135,13 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c8__avxvnni(
     __m256 vout0x01234567 = _mm256_cvtepi32_ps(vacc0x01234567);
     __m256 vout1x01234567 = _mm256_cvtepi32_ps(vacc1x01234567);
 
-    vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(quantization_params[0].inv_scale));
-    vout1x01234567 = _mm256_mul_ps(vout1x01234567, _mm256_set1_ps(quantization_params[1].inv_scale));
-
-    const __m256 vfilter_output_scale01234567 = _mm256_load_ps((const float*) w);
-    const __m256 vbias01234567 = _mm256_load_ps((const float*) w + 8);
-    w = (const float*) w + 16;
-
-    vout0x01234567 = _mm256_fmadd_ps(vout0x01234567, vfilter_output_scale01234567, vbias01234567);
-    vout1x01234567 = _mm256_fmadd_ps(vout1x01234567, vfilter_output_scale01234567, vbias01234567);
-
     vout0x01234567 = _mm256_max_ps(vout0x01234567, voutput_min);
     vout1x01234567 = _mm256_max_ps(vout1x01234567, voutput_min);
 
     vout0x01234567 = _mm256_min_ps(vout0x01234567, voutput_max);
     vout1x01234567 = _mm256_min_ps(vout1x01234567, voutput_max);
 
-    if(nc >= 8) {
+    if XNN_LIKELY(nc >= 8) {
       _mm256_storeu_ps(c0, vout0x01234567);
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
@@ -165,17 +155,17 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c8__avxvnni(
       if (nc & 4) {
         _mm_storeu_ps(c0, vout0x0123);
         c0 += 4;
+        vout0x0123 = _mm256_extractf128_ps(vout0x01234567, 1);
         _mm_storeu_ps(c1, vout1x0123);
         c1 += 4;
-        vout0x0123 = _mm256_extractf128_ps(vout0x01234567, 1);
         vout1x0123 = _mm256_extractf128_ps(vout1x01234567, 1);
       }
       if (nc & 2) {
         _mm_storel_pi((__m64*) c0, vout0x0123);
         c0 += 2;
+        vout0x0123 = _mm_movehl_ps(vout0x0123, vout0x0123);
         _mm_storel_pi((__m64*) c1, vout1x0123);
         c1 += 2;
-        vout0x0123 = _mm_movehl_ps(vout0x0123, vout0x0123);
         vout1x0123 = _mm_movehl_ps(vout1x0123, vout1x0123);
       }
       if (nc & 1) {

@@ -108,19 +108,11 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx512vnnigfni_prfm(
     vacc0x01234567 = _mm256_srai_epi32(vacc0x01234567, 4);
     __m256 vout0x01234567 = _mm256_cvtepi32_ps(vacc0x01234567);
 
-    vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(quantization_params[0].inv_scale));
-
-    const __m256 vfilter_output_scale01234567 = _mm256_load_ps((const float*) w);
-    const __m256 vbias01234567 = _mm256_load_ps((const float*) w + 8);
-    w = (const float*) w + 16;
-
-    vout0x01234567 = _mm256_fmadd_ps(vout0x01234567, vfilter_output_scale01234567, vbias01234567);
-
     vout0x01234567 = _mm256_max_ps(vout0x01234567, voutput_min);
 
     vout0x01234567 = _mm256_min_ps(vout0x01234567, voutput_max);
 
-    if(nc >= 8) {
+    if XNN_LIKELY(nc >= 8) {
       _mm256_storeu_ps(c0, vout0x01234567);
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
