@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <memory>
 #include <random>
+#include <tuple>
 #include <vector>
 
 #include "subgraph-unary-tester.h"
@@ -21,7 +22,7 @@ public:
       : UnaryTest<T, T, /*min_dim=*/1>{}
   {
     offsets = RandomOffsets(this->dims);
-    sizes = RandomSizes(this->dims, offsets);
+    std::tie(sizes, inferrable_sizes) = RandomSizes(this->dims, offsets);
     // Overwrite outputs since slice output size is different from input.
     this->operator_output = std::vector<T>(this->NumElements(sizes));
     this->subgraph_output = std::vector<T>(this->NumElements(sizes));
@@ -38,19 +39,29 @@ private:
     return offsets;
   }
 
-  std::vector<size_t> RandomSizes(const std::vector<size_t>& input_dims, const std::vector<size_t>& offsets)
+  std::tuple<std::vector<size_t>, std::vector<size_t>> RandomSizes(
+      const std::vector<size_t>& input_dims, const std::vector<size_t>& offsets)
   {
     std::vector<size_t> sizes(input_dims.size());
-    for (size_t i = 0; i < input_dims.size(); i++) {
-      auto size_dist = std::uniform_int_distribution<size_t>(1, input_dims[i] - offsets[i]);
-      sizes[i] = size_dist(this->rng);
+    sizes[0] = std::uniform_int_distribution<size_t>(1, input_dims[0] - offsets[0])(this->rng);
+    std::vector<size_t> inferrable_sizes = sizes;
+    for (size_t i = 1; i < input_dims.size(); i++) {
+      auto size_dist =
+          std::uniform_int_distribution<size_t>(offsets[i] == 0 ? 0 : 1, input_dims[i] - offsets[i]);
+      inferrable_sizes[i] = size_dist(this->rng);
+      if (inferrable_sizes[i] == 0) {
+        sizes[i] = input_dims[i];
+      } else {
+        sizes[i] = inferrable_sizes[i];
+      }
     }
-    return sizes;
+    return {sizes, inferrable_sizes};
   }
 
 protected:
   std::vector<size_t> offsets;
   std::vector<size_t> sizes;
+  std::vector<size_t> inferrable_sizes;
 };
 
 using StaticSliceTestQS8 = StaticSliceTest<int8_t>;
@@ -84,7 +95,7 @@ TEST_F(StaticSliceTestQS8, define)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_static_slice(subgraph, dims.size(), offsets.data(), sizes.data(), input_id, output_id, /*flags=*/0));
+    xnn_define_static_slice(subgraph, dims.size(), offsets.data(), inferrable_sizes.data(), input_id, output_id, /*flags=*/0));
 
   EXPECT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
@@ -127,7 +138,7 @@ TEST_F(StaticSliceTestQU8, define)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_static_slice(subgraph, dims.size(), offsets.data(), sizes.data(), input_id, output_id, /*flags=*/0));
+    xnn_define_static_slice(subgraph, dims.size(), offsets.data(), inferrable_sizes.data(), input_id, output_id, /*flags=*/0));
 
   EXPECT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
@@ -168,7 +179,7 @@ TEST_F(StaticSliceTestF32, define)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_static_slice(subgraph, dims.size(), offsets.data(), sizes.data(), input_id, output_id, /*flags=*/0));
+    xnn_define_static_slice(subgraph, dims.size(), offsets.data(), inferrable_sizes.data(), input_id, output_id, /*flags=*/0));
 
   EXPECT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
@@ -232,7 +243,7 @@ TEST_F(StaticSliceTestQS8, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_static_slice(subgraph, dims.size(), offsets.data(), sizes.data(), input_id, output_id, /*flags=*/0));
+    xnn_define_static_slice(subgraph, dims.size(), offsets.data(), inferrable_sizes.data(), input_id, output_id, /*flags=*/0));
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
   ASSERT_NE(nullptr, runtime);
@@ -293,7 +304,7 @@ TEST_F(StaticSliceTestQU8, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_static_slice(subgraph, dims.size(), offsets.data(), sizes.data(), input_id, output_id, /*flags=*/0));
+    xnn_define_static_slice(subgraph, dims.size(), offsets.data(), inferrable_sizes.data(), input_id, output_id, /*flags=*/0));
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
   ASSERT_NE(nullptr, runtime);
@@ -350,7 +361,7 @@ TEST_F(StaticSliceTestF32, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_static_slice(subgraph, dims.size(), offsets.data(), sizes.data(), input_id, output_id, /*flags=*/0));
+    xnn_define_static_slice(subgraph, dims.size(), offsets.data(), inferrable_sizes.data(), input_id, output_id, /*flags=*/0));
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
   ASSERT_NE(nullptr, runtime);
@@ -388,7 +399,7 @@ TEST_F(StaticSliceTestF32, reshape_output)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_static_slice(subgraph, dims.size(), offsets.data(), sizes.data(), input_id, output_id, /*flags=*/0));
+    xnn_define_static_slice(subgraph, dims.size(), offsets.data(), inferrable_sizes.data(), input_id, output_id, /*flags=*/0));
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
   ASSERT_NE(nullptr, runtime);

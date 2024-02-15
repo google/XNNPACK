@@ -32,8 +32,8 @@ void xnn_normalize_slice(
   size_t num_size_one = 0;
   for (size_t i = 0; i < num_dims; i++) {
     const size_t offset = offsets[num_dims - 1 - i];
-    const size_t size = sizes[num_dims - 1 - i];
     const size_t input_dim = input_shape[num_dims - 1 - i];
+    const size_t size = sizes[num_dims - 1 - i] > 0 ? sizes[num_dims - 1 - i] : input_dim;
 
     // If the innermost dimension is size 1, we can't merge it anywhere, so skip it.
     if (size == 1 && i != 0) {

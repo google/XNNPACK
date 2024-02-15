@@ -87,11 +87,18 @@ static enum xnn_status reshape_slice_operator(
     return status;
   }
   const uint32_t output_id = opdata->outputs[0];
+  const uint32_t input_id = opdata->inputs[0];
   assert(output_id < num_values);
+  assert(input_id < num_values);
   struct xnn_value* output_value = values + output_id;
+  struct xnn_value* input_value = values + input_id;
   output_value->shape.num_dims = num_dims;
   for (size_t i = 0; i < num_dims; ++i) {
-    output_value->shape.dim[i] = opdata->sizes[i];
+    if (opdata->sizes[i] == 0) {
+      output_value->shape.dim[i] = input_value->shape.dim[i];
+    } else {
+      output_value->shape.dim[i] = opdata->sizes[i];
+    }
   }
   const size_t new_size = xnn_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
@@ -231,7 +238,7 @@ enum xnn_status xnn_define_static_slice(
         xnn_node_type_to_string(xnn_node_type_static_slice), input_id, output_id, offsets[i], input_value->shape.dim[i], i);
       return xnn_status_invalid_parameter;
     }
-    if (sizes[i] != output_value->shape.dim[i]) {
+    if (sizes[i] > 0 && sizes[i] != output_value->shape.dim[i]) {
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
         ": size %zu does not match output size %zu in dimension %zu",
