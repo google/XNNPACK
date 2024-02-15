@@ -104,6 +104,7 @@
   #define XNN_PLATFORM_MAC 0
 #endif
 
+// Mobile build x86 versions for debugging
 #if XNN_PLATFORM_ANDROID || XNN_PLATFORM_IOS
   #define XNN_PLATFORM_MOBILE 1
 #else
