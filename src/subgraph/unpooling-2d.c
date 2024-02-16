@@ -71,7 +71,7 @@ static enum xnn_status reshape_unpooling_operator(
   const size_t old_workspace_size = opdata->workspace_size;
   size_t output_height, output_width;
 
-  status =  xnn_reshape_unpooling2d_nhwc_x32(
+  status = xnn_reshape_unpooling2d_nhwc_x32(
     opdata->operator_objects[0],
     batch_size,
     input_height,
