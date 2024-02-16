@@ -121,6 +121,20 @@ XNN_INTERNAL void xnn_init_qs8_qc8w_scale_fp32_params(
   const float scale[XNN_MIN_ELEMENTS(1)],
   void* packed_w);
 
+XNN_INTERNAL void xnn_init_qs8_qc8w_bl_scale_fp32_params(
+  size_t channels,
+  size_t channels_tile,
+  size_t channels_subtile,
+  size_t stride,
+  size_t substride,
+  size_t num_blocks,
+  size_t block_stride,
+  // How much offset to subtract from packed_w pointer when moving from channels_tile to channels_subtile.
+  size_t stride_offset,
+  const float scale[XNN_MIN_ELEMENTS(1)],
+  void* packed_w);
+
+
 XNN_INTERNAL void xnn_init_qs8_to_qs8_qc8w_scale_fp32_params(
   size_t channels,
   size_t channels_tile,
