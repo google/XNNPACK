@@ -121,7 +121,7 @@ XNN_INTERNAL void xnn_init_qs8_qc8w_scale_fp32_params(
   const float scale[XNN_MIN_ELEMENTS(1)],
   void* packed_w);
 
-XNN_INTERNAL void xnn_init_qs8_qb8w_scale_fp32_params(
+XNN_INTERNAL void xnn_init_blockwise_scale_fp32_params(
   size_t channels,
   size_t channels_tile,
   size_t channels_subtile,

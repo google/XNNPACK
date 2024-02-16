@@ -487,13 +487,13 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
   size_t nr,
   size_t kr,
   size_t sr,
-  size_t bl,
-  const uint8_t* k,
-  const int32_t* b,
+  size_t bl,             // blocksize
+  const uint8_t* k,      // kernel
+  const float* bias,
   const float* scale,
   void* packed_weights,
-  size_t extra_bytes_bl,
-  size_t extra_bytes_n,
+  size_t extra_bytes_bl, // extra bytes per block
+  size_t extra_bytes_n,  // extra bytes per n
   const struct xnn_qs8_qc4w_packing_params* params)
 {
   assert(g != 0);
@@ -506,6 +506,7 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
   assert(packed_weights != NULL);
   assert(params != NULL);
   assert(params->kernel_zero_point == 8);
+  assert(bias == NULL); // Not used here. Must be updated outside.
 
   const size_t skr = sr * kr;
 
@@ -514,8 +515,8 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
   assert(bl != 0);
   assert(round_up_po2(kc, skr) % bl == 0); // must be round number of blocks inside a column
   assert(bl % skr == 0); // must be round number of kr * sr
-  assert(bl <= round_up_po2(kc, skr)); // must be larger than K
-  assert(2 * skr <= bl); // must be at least two skr to avoid back-to-back empty_bytes
+  assert(bl <= round_up_po2(kc, skr)); // must not be larger than K
+  assert(2 * skr <= bl); // must be at least two skr to avoid back-to-back extra_bytes
 
   const size_t num_blocks = round_up_po2(kc, skr) / bl;
   const int32_t izp = (int32_t) params->input_zero_point;
@@ -525,19 +526,8 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_weights;
-      if XNN_LIKELY(b != NULL) {
-        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
-          packed_weights = (int32_t*) packed_weights + 1;
-        }
-      } else {
-        size_t n = nr_block_size;
-        do {
-          unaligned_store_s32(packed_weights, 0);
-          packed_weights = (int32_t*) packed_weights + 1;
-        } while (--n != 0);
-      }
-      packed_weights = (int32_t*) packed_weights + (nr - nr_block_size);
+      packed_weights = (float*) packed_weights + nr_block_size;
+      packed_weights = (float*) packed_weights + (nr - nr_block_size);
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr * 2); kr_block_start += kr * 2) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
@@ -574,9 +564,6 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
       nr_block_start += nr;
     } while (nr_block_start < nc);
     k += nc * kc;  // kc * 2 nibbles
-    if XNN_UNPREDICTABLE(b != NULL) {
-      b += nc;
-    }
   } while (--g != 0);
 }
 

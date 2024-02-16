@@ -158,8 +158,6 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_eq_kc) {
   size_t bl = kc;
   size_t k_num_blocks = round_up_po2(kc, kr) / bl;
 
-  std::vector<int32_t> b(g * nc);
-  std::iota(b.begin(), b.end(), 0);
   std::vector<uint8_t> k(g * nc * kc / 2);
   k[0] = 0x98; k[1] = 0xBA; k[2] = 0xDC; k[3] = 0xFE; k[4] = 0x10; k[5] = 0x32; k[6] = 0x54; k[7] = 0x76;
   size_t extra_bytes_bl = sizeof(float);
@@ -171,7 +169,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_eq_kc) {
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
 
   xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl,
-    k.data(), b.data(), /*scale=*/scale.data(), packed_weights.data(), extra_bytes_bl, extra_bytes_n, /*params=*/&a);
+    k.data(), /*bias=*/nullptr, /*scale=*/scale.data(), packed_weights.data(), extra_bytes_bl, extra_bytes_n, /*params=*/&a);
 
   size_t k_stride = round_up_po2(kc, kr * sr * 2 /* planes */);
 
@@ -187,7 +185,8 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_eq_kc) {
   size_t stride = ksum_bytes + k_bytes + block_bytes + bias_bytes;
   size_t block_stride = (bl * nr) / 2 +  (sizeof(float) * nr);
 
-  xnn_init_qs8_qb8w_scale_fp32_params(
+  // Fill in scales.
+  xnn_init_blockwise_scale_fp32_params(
     /*channels=*/ nc,
     /*channels_tile=*/ nr,
     /*channel_stride=*/ nr,
@@ -208,7 +207,8 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_eq_kc) {
     0xC8, 0xD9, 0xEA, 0xFB, // kr2 | kr3
     // extra bytes bl
     0x77, 0x66, 0x55, 0x44,
-    // extra bytes n
+
+    // extra bytes n - no bias for this test
     0, 0, 0, 0
   };
   EXPECT_EQ(expected, packed_weights);
@@ -224,8 +224,6 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_lt_kc) {
   size_t bl = 8;
   size_t k_num_blocks = kc / bl;
 
-  std::vector<int32_t> b(g * nc);
-  std::iota(b.begin(), b.end(), 0);
   std::vector<uint8_t> k(g * nc * kc / 2);
   k[0] = 0x98; k[1] = 0xBA; k[2] = 0xDC; k[3] = 0xFE; k[4] = 0x10; k[5] = 0x32; k[6] = 0x54; k[7] = 0x76;
   size_t extra_bytes_n = sizeof(float);
@@ -238,7 +236,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_lt_kc) {
 
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
   xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl,
-    k.data(), b.data(), /*scale=*/scale.data(), packed_weights.data(), extra_bytes_bl, extra_bytes_n, /*params=*/&a);
+    k.data(), /*bias=*/nullptr, /*scale=*/scale.data(), packed_weights.data(), extra_bytes_bl, extra_bytes_n, /*params=*/&a);
 
     size_t k_stride = round_up_po2(kc, kr * sr * 2 /* planes */);
 
@@ -253,7 +251,8 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_lt_kc) {
   size_t stride = ksum_bytes + k_bytes + block_bytes + bias_bytes;
   size_t block_stride = (bl * nr) / 2 +  (sizeof(float) * nr);
 
-  xnn_init_qs8_qb8w_scale_fp32_params(
+  // Fill in scales.
+  xnn_init_blockwise_scale_fp32_params(
     /*channels=*/ nc,
     /*channels_tile=*/ nr,
     /*channel_stride=*/ nr,
@@ -264,6 +263,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_lt_kc) {
     /*stride_offset=*/ 0,
     /*scale=*/ scale.data(),
     /*packed_weight=*/ packed_weights.data() + start_offset);
+
 
   const std::vector<uint8_t> expected = {
     // kscaledsum
@@ -279,7 +279,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_lt_kc) {
     // extra bytes bl
     0x77, 0x66, 0x55, 0x44,
 
-    // extra bytes n
+    // extra bytes n - no bias for this test
     0, 0, 0, 0
   };
   EXPECT_EQ(expected, packed_weights);

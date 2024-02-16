@@ -214,7 +214,7 @@ typedef void (*xnn_pack_qs8_qb4w_gemm_fn)(
   size_t sr,
   size_t block_size, // number of K elements in a block
   const uint8_t* kernel,
-  const int32_t* bias,
+  const float* bias,
   const float* scale,
   void* packed_weights,
   size_t extra_bytes_per_block,
@@ -230,7 +230,7 @@ XNN_INTERNAL void xnn_pack_qs8_qb4w_gemm_goi_w(
   size_t sr,
   size_t bl,
   const uint8_t* kernel,
-  const int32_t* bias,
+  const float* bias,
   const float* scale,
   void* packed_weights,
   size_t extra_bytes_bl,
