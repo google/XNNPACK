@@ -63,9 +63,15 @@ static enum xnn_status reshape_mean_operator(
   const struct xnn_value* input_value = values + input_id;
   assert(input_value->type == xnn_value_type_dense_tensor);
 
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_values);
+
+  const size_t old_workspace_size = opdata->workspace_size;
+  enum xnn_status status = xnn_status_invalid_state;
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_mean_nd_f16:
-      return xnn_reshape_mean_nd_f16(
+      status = xnn_reshape_mean_nd_f16(
         opdata->operator_objects[0],
         opdata->num_reduction_axes,
         opdata->reduction_axes,
@@ -74,8 +80,9 @@ static enum xnn_status reshape_mean_operator(
         &opdata->workspace_size,
         &opdata->workspace_alignment,
         threadpool);
+      break;
     case xnn_operator_type_mean_nd_f32:
-      return xnn_reshape_mean_nd_f32(
+      status = xnn_reshape_mean_nd_f32(
         opdata->operator_objects[0],
         opdata->num_reduction_axes,
         opdata->reduction_axes,
@@ -84,9 +91,51 @@ static enum xnn_status reshape_mean_operator(
         &opdata->workspace_size,
         &opdata->workspace_alignment,
         threadpool);
+      break;
     default:
       XNN_UNREACHABLE;
   }
+  struct xnn_value* output_value = values + output_id;
+  size_t input_num_dims = input_value->shape.num_dims;
+  size_t num_reduction_axes = opdata->num_reduction_axes;
+  if (opdata->operator_objects[0]->flags & XNN_FLAG_KEEP_DIMS) {
+    output_value->shape.num_dims = input_value->shape.num_dims;
+    for (size_t idx = 0; idx < input_num_dims; ++idx) {
+      bool is_axis = false;
+      for (size_t axis_idx = 0; axis_idx < num_reduction_axes; ++axis_idx) {
+        if (opdata->reduction_axes[axis_idx] == idx) {
+          is_axis = true;
+          break;
+        }
+      }
+      if (is_axis) {
+        output_value->shape.dim[idx] = 1;
+      } else {
+        output_value->shape.dim[idx] = input_value->shape.dim[idx];
+      }
+    }
+  } else {
+    size_t num_skip_axis = 0;
+    for (size_t idx = 0; idx < input_num_dims; ++idx) {
+      bool is_axis = false;
+      for (size_t axis_idx = 0; axis_idx < num_reduction_axes; ++axis_idx) {
+        if (opdata->reduction_axes[axis_idx] == idx) {
+          ++num_skip_axis;
+          is_axis = true;
+          break;
+        }
+      }
+      if (!is_axis) {
+        output_value->shape.dim[idx - num_skip_axis] = input_value->shape.dim[idx];
+      }
+    }
+  }
+  const size_t new_size = xnn_tensor_get_size(output_value);
+  if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
+    output_value->size = new_size;
+    return xnn_status_reallocation_required;
+  }
+  return status;
 }
 
 static enum xnn_status setup_mean_operator(

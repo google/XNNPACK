@@ -26,9 +26,6 @@
 
 
 static enum xnn_status create_global_average_pooling_nwc(
-    size_t channels,
-    size_t input_stride,
-    size_t output_stride,
     uint32_t flags,
     uint32_t log2_element_size,
     size_t params_offset,
@@ -47,31 +44,6 @@ static enum xnn_status create_global_average_pooling_nwc(
     goto error;
   }
 
-  status = xnn_status_invalid_parameter;
-
-  if (channels == 0) {
-    xnn_log_error(
-      "failed to create %s operator with %zu channels: number of channels must be non-zero",
-      xnn_operator_type_to_string(operator_type), channels);
-    goto error;
-  }
-
-  if (input_stride < channels) {
-    xnn_log_error(
-      "failed to create %s operator with input element stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(operator_type), input_stride, channels);
-    goto error;
-  }
-
-  if (output_stride < channels) {
-    xnn_log_error(
-      "failed to create %s operator with output element stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(operator_type), output_stride, channels);
-    goto error;
-  }
-
   status = xnn_status_out_of_memory;
 
   global_average_pooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
@@ -82,19 +54,6 @@ static enum xnn_status create_global_average_pooling_nwc(
     goto error;
   }
 
-  const size_t zero_size = (channels << log2_element_size) + XNN_EXTRA_BYTES;
-  void* zero_buffer = xnn_allocate_zero_simd_memory(zero_size);
-  if (zero_buffer == NULL) {
-    xnn_log_error(
-      "failed to allocate %zu bytes for %s operator zero padding",
-      zero_size, xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-  global_average_pooling_op->zero_buffer = zero_buffer;
-
-  global_average_pooling_op->channels = channels;
-  global_average_pooling_op->input_pixel_stride = input_stride;
-  global_average_pooling_op->output_pixel_stride = output_stride;
   memcpy((void*) ((uintptr_t) global_average_pooling_op + params_offset), params, params_size);
 
   global_average_pooling_op->type = operator_type;
@@ -112,9 +71,6 @@ error:
 }
 
 enum xnn_status xnn_create_global_average_pooling_nwc_qu8(
-    size_t channels,
-    size_t input_stride,
-    size_t output_stride,
     uint8_t input_zero_point,
     float input_scale,
     uint8_t output_zero_point,
@@ -161,8 +117,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_qu8(
     gavgpool_config->init.qu8(&params, 0 /* bias */, 1.0f /* scale */, output_zero_point, output_min, output_max);
   }
   const enum xnn_status status = create_global_average_pooling_nwc(
-    channels, input_stride, output_stride, flags,
-    /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+    flags, /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     offsetof(struct xnn_operator, params.qu8_gavgpool),
     &params, sizeof(params),
     xnn_operator_type_global_average_pooling_nwc_qu8,
@@ -178,9 +133,6 @@ enum xnn_status xnn_create_global_average_pooling_nwc_qu8(
 }
 
 enum xnn_status xnn_create_global_average_pooling_nwc_qs8(
-    size_t channels,
-    size_t input_stride,
-    size_t output_stride,
     int8_t input_zero_point,
     float input_scale,
     int8_t output_zero_point,
@@ -227,8 +179,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_qs8(
     gavgpool_config->init.qs8(&params, 0 /* bias */, 1.0f /* scale */, output_zero_point, output_min, output_max);
   }
   const enum xnn_status status = create_global_average_pooling_nwc(
-    channels, input_stride, output_stride, flags,
-    /*log2_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    flags, /*log2_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     offsetof(struct xnn_operator, params.qs8_gavgpool),
     &params, sizeof(params),
     xnn_operator_type_global_average_pooling_nwc_qs8,
@@ -244,9 +195,6 @@ enum xnn_status xnn_create_global_average_pooling_nwc_qs8(
 }
 
 enum xnn_status xnn_create_global_average_pooling_nwc_f16(
-    size_t channels,
-    size_t input_stride,
-    size_t output_stride,
     float output_min,
     float output_max,
     uint32_t flags,
@@ -288,8 +236,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f16(
       &params, 0 /* scale */, fp16_ieee_from_fp32_value(output_min), fp16_ieee_from_fp32_value(output_max));
   }
   return create_global_average_pooling_nwc(
-    channels, input_stride, output_stride, flags,
-    /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    flags, /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
     offsetof(struct xnn_operator, params.f16_scaleminmax),
     &params, sizeof(params),
     xnn_operator_type_global_average_pooling_nwc_f16,
@@ -298,9 +245,6 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f16(
 }
 
 enum xnn_status xnn_create_global_average_pooling_nwc_f32(
-    size_t channels,
-    size_t input_stride,
-    size_t output_stride,
     float output_min,
     float output_max,
     uint32_t flags,
@@ -339,8 +283,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f32(
     gavgpool_config->init.f32(&params, 0.0f /* scale */, output_min, output_max);
   }
   return create_global_average_pooling_nwc(
-    channels, input_stride, output_stride, flags,
-    /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    flags, /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     offsetof(struct xnn_operator, params.f32_scaleminmax),
     &params, sizeof(params),
     xnn_operator_type_global_average_pooling_nwc_f32,
@@ -349,9 +292,6 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f32(
 }
 
 enum xnn_status xnn_create_global_sum_pooling_nwc_f16(
-    size_t channels,
-    size_t input_stride,
-    size_t output_stride,
     float output_min,
     float output_max,
     uint32_t flags,
@@ -396,8 +336,7 @@ enum xnn_status xnn_create_global_sum_pooling_nwc_f16(
       fp16_ieee_from_fp32_value(output_max));
   }
   return create_global_average_pooling_nwc(
-    channels, input_stride, output_stride, flags,
-    /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    flags, /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
     offsetof(struct xnn_operator, params.f16_scaleminmax),
     &params, sizeof(params),
     xnn_operator_type_global_sum_pooling_nwc_f16,
@@ -406,9 +345,6 @@ enum xnn_status xnn_create_global_sum_pooling_nwc_f16(
 }
 
 enum xnn_status xnn_create_global_sum_pooling_nwc_f32(
-    size_t channels,
-    size_t input_stride,
-    size_t output_stride,
     float output_min,
     float output_max,
     uint32_t flags,
@@ -447,8 +383,7 @@ enum xnn_status xnn_create_global_sum_pooling_nwc_f32(
     gavgpool_config->init.f32(&params, /*scale=*/1.0f, output_min, output_max);
   }
   return create_global_average_pooling_nwc(
-    channels, input_stride, output_stride, flags,
-    /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    flags, /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     offsetof(struct xnn_operator, params.f32_scaleminmax),
     &params, sizeof(params),
     xnn_operator_type_global_sum_pooling_nwc_f32,
@@ -460,6 +395,9 @@ static enum xnn_status reshape_global_average_pooling_nwc(
     xnn_operator_t global_average_pooling_op,
     size_t batch_size,
     size_t width,
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
     size_t* workspace_size,
     size_t* workspace_alignment,
     size_t log2_data_element_size,
@@ -485,6 +423,33 @@ static enum xnn_status reshape_global_average_pooling_nwc(
     return xnn_status_uninitialized;
   }
 
+  if (channels == 0) {
+    xnn_log_error(
+      "failed to create %s operator with %zu channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(expected_operator_type), channels);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (input_stride < channels) {
+    xnn_log_error(
+      "failed to create %s operator with input element stride of %zu: "
+      "stride must be at least as large as the number of channels (%zu)",
+      xnn_operator_type_to_string(expected_operator_type), input_stride, channels);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_stride < channels) {
+    xnn_log_error(
+      "failed to create %s operator with output element stride of %zu: "
+      "stride must be at least as large as the number of channels (%zu)",
+      xnn_operator_type_to_string(expected_operator_type), output_stride, channels);
+    return xnn_status_invalid_parameter;
+  }
+
+  global_average_pooling_op->channels = channels;
+  global_average_pooling_op->input_pixel_stride = input_stride;
+  global_average_pooling_op->output_pixel_stride = output_stride;
+
   if (width == 0) {
     xnn_log_error("failed to reshape %s operator with width %zu: width must be non-zero",
       xnn_operator_type_to_string(global_average_pooling_op->type), width);
@@ -503,10 +468,27 @@ static enum xnn_status reshape_global_average_pooling_nwc(
     update_params(global_average_pooling_op, width);
   }
 
+  const bool input_size_changed =  (channels != global_average_pooling_op->last_input_channels);
+  if (input_size_changed) {
+    const size_t zero_bytes = (channels << log2_data_element_size) + XNN_EXTRA_BYTES;
+    void* zero_buffer = global_average_pooling_op->zero_buffer;
+    xnn_release_simd_memory(zero_buffer);
+    zero_buffer =
+      (void*) xnn_allocate_zero_simd_memory(zero_bytes);
+    global_average_pooling_op->zero_buffer = zero_buffer;
+    if (zero_buffer == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for %s operator zero padding",
+          zero_bytes, xnn_operator_type_to_string(expected_operator_type));
+      return xnn_status_out_of_memory;
+    }
+    global_average_pooling_op->zero_buffer = zero_buffer;
+    global_average_pooling_op->last_input_channels = channels;
+  }
+
   assert(gavgpool->row_tile != 0);
 
   const size_t input_stride_in_bytes = global_average_pooling_op->input_pixel_stride << log2_data_element_size;
-  const size_t channels = global_average_pooling_op->channels;
   global_average_pooling_op->context.global_average_pooling_nwc = (struct global_average_pooling_nwc_context) {
       .zero = global_average_pooling_op->zero_buffer,
       .input_pixel_stride = input_stride_in_bytes,
@@ -568,13 +550,16 @@ enum xnn_status xnn_reshape_global_average_pooling_nwc_qu8(
     xnn_operator_t global_average_pooling_op,
     size_t batch_size,
     size_t width,
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
     size_t* workspace_size,
     size_t* workspace_alignment,
     pthreadpool_t threadpool)
 {
   return reshape_global_average_pooling_nwc(
     global_average_pooling_op,
-    batch_size, width,
+    batch_size, width, channels, input_stride, output_stride,
     workspace_size, workspace_alignment,
     /*log2_data_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_INT32_T,
@@ -599,13 +584,16 @@ enum xnn_status xnn_reshape_global_average_pooling_nwc_qs8(
     xnn_operator_t global_average_pooling_op,
     size_t batch_size,
     size_t width,
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
     size_t* workspace_size,
     size_t* workspace_alignment,
     pthreadpool_t threadpool)
 {
   return reshape_global_average_pooling_nwc(
     global_average_pooling_op,
-    batch_size, width,
+    batch_size, width, channels, input_stride, output_stride,
     workspace_size, workspace_alignment,
     /*log2_data_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_INT32_T,
@@ -630,13 +618,16 @@ enum xnn_status xnn_reshape_global_average_pooling_nwc_f16(
     xnn_operator_t global_average_pooling_op,
     size_t batch_size,
     size_t width,
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
     size_t* workspace_size,
     size_t* workspace_alignment,
     pthreadpool_t threadpool)
 {
   return reshape_global_average_pooling_nwc(
     global_average_pooling_op,
-    batch_size, width,
+    batch_size, width, channels, input_stride, output_stride,
     workspace_size, workspace_alignment,
     /*log2_data_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_HALF,
@@ -660,13 +651,16 @@ enum xnn_status xnn_reshape_global_average_pooling_nwc_f32(
     xnn_operator_t global_average_pooling_op,
     size_t batch_size,
     size_t width,
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
     size_t* workspace_size,
     size_t* workspace_alignment,
     pthreadpool_t threadpool)
 {
   return reshape_global_average_pooling_nwc(
     global_average_pooling_op,
-    batch_size, width,
+    batch_size, width, channels, input_stride, output_stride,
     workspace_size, workspace_alignment,
     /*log2_data_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
@@ -780,13 +774,16 @@ enum xnn_status xnn_reshape_global_sum_pooling_nwc_f16(
   xnn_operator_t global_sum_pooling_op,
   size_t batch_size,
   size_t width,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
   size_t* workspace_size,
   size_t* workspace_alignment,
   pthreadpool_t threadpool)
 {
   return reshape_global_average_pooling_nwc(
     global_sum_pooling_op,
-    batch_size, width,
+    batch_size, width, channels, input_stride, output_stride,
     workspace_size, workspace_alignment,
     /*log2_data_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_HALF,
@@ -802,13 +799,16 @@ enum xnn_status xnn_reshape_global_sum_pooling_nwc_f32(
   xnn_operator_t global_sum_pooling_op,
   size_t batch_size,
   size_t width,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
   size_t* workspace_size,
   size_t* workspace_alignment,
   pthreadpool_t threadpool)
 {
   return reshape_global_average_pooling_nwc(
     global_sum_pooling_op,
-    batch_size, width,
+    batch_size, width, channels, input_stride, output_stride,
     workspace_size, workspace_alignment,
     /*log2_data_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT,

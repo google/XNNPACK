@@ -934,6 +934,7 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 8
+
 # x86 AVX
 - name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c8__avx_ld128
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params
@@ -959,6 +960,7 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 8
+
 # x86 AVX2
 - name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avx2
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params
@@ -972,17 +974,27 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 8
-- name: xnn_qs8_qc8w_gemm_xw_minmax_fp32_ukernel_1x8c8__avx2
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8c8__avx2
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params
-  pack: xnn_pack_qs8_gemm_xw_goi_w
+  pack: xnn_pack_qs8_gemm_goi_w
   k-block: 8
-- name: xnn_qs8_qc8w_gemm_xw_minmax_fp32_ukernel_2x8c8__avx2
+
+# x86 AVX512VL
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avx512skx
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params
-  pack: xnn_pack_qs8_gemm_xw_goi_w
+  pack: xnn_pack_qs8_gemm_goi_w
   k-block: 8
-- name: xnn_qs8_qc8w_gemm_xw_minmax_fp32_ukernel_3x8c8__avx2
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x8c8__avx512skx
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params
-  pack: xnn_pack_qs8_gemm_xw_goi_w
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x8c8__avx512skx
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8c8__avx512skx
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params
+  pack: xnn_pack_qs8_gemm_goi_w
   k-block: 8
 
 # x86 AVX512

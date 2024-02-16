@@ -12,6 +12,8 @@
 #include <xnnpack/log.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/params.h>
+#include <xnnpack/subgraph-validation.h>
+#include <xnnpack/reshape-helpers.h>
 #include <xnnpack/subgraph.h>
 #include <xnnpack/subgraph-validation.h>
 
@@ -25,27 +27,17 @@ static enum xnn_status create_softmax_operator(
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs == 1);
-  const uint32_t input_id = node->inputs[0];
-  assert(input_id != XNN_INVALID_VALUE_ID);
-  assert(input_id < num_values);
-
   assert(node->num_outputs == 1);
-
-  const size_t num_input_dims = values[input_id].shape.num_dims;
-  assert(num_input_dims > 0);
-  const size_t channel_dim = values[input_id].shape.dim[num_input_dims - 1];
 
   enum xnn_status status;
   switch (node->compute_type) {
     case xnn_datatype_fp32:
       status = xnn_create_softmax_nc_f32(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->flags,
         &opdata->operator_objects[0]);
       break;
     case xnn_datatype_fp16:
       status = xnn_create_softmax_nc_f16(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->flags,
         &opdata->operator_objects[0]);
       break;
@@ -63,21 +55,40 @@ static enum xnn_status reshape_softmax_operator(
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
+
+  const size_t num_input_dims = values[input_id].shape.num_dims;
+  assert(num_input_dims > 0);
+  const size_t channel_dim = values[input_id].shape.dim[num_input_dims - 1];
   const size_t batch_size = xnn_shape_multiply_non_channel_dims(&values[input_id].shape);
+
+  const size_t old_workspace_size = opdata->workspace_size;
+  enum xnn_status status = xnn_status_invalid_state;
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_softmax_nc_f32:
-      return xnn_reshape_softmax_nc_f32(
+      status = xnn_reshape_softmax_nc_f32(
         opdata->operator_objects[0],
+        /*channels=*/channel_dim,
+        /*input_stride=*/channel_dim,
+        /*output_stride=*/channel_dim,
         batch_size,
         threadpool);
+        break;
     case xnn_operator_type_softmax_nc_f16:
-      return xnn_reshape_softmax_nc_f16(
+      status = xnn_reshape_softmax_nc_f16(
         opdata->operator_objects[0],
+        /*channels=*/channel_dim,
+        /*input_stride=*/channel_dim,
+        /*output_stride=*/channel_dim,
         batch_size,
         threadpool);
+        break;
     default:
       XNN_UNREACHABLE;
   }
+  if (status != xnn_status_success) {
+    return status;
+  }
+  return resize_unary_elementwise_output_tensor(opdata, values, num_values, old_workspace_size, threadpool);
 }
 
 static enum xnn_status setup_softmax_operator(

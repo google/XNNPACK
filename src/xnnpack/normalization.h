@@ -16,8 +16,9 @@ extern "C" {
 
 // Calculates normalized offsets, input_shape, and output_shape.
 // Each value in offsets must be less than the corresponding dimension of input_shape.
-// Each value in sizes must be > 0 and less than or equals to the corresponding dimension of input_shape.
+// Each value in sizes must be >= 0 and less than or equals to the corresponding dimension of input_shape.
 // This function merges dimensions dimensions that are full slices into the outermost dimension possible.
+// If value in sizes is 0, it will be treated as value at same index from input_shape.
 // E.g. Given input shape { 4, 5, 3 }, with offsets { 0, 2, 0 }, and sizes { 4, 1, 3 }, the innermost dimension is a
 // full slice, and so can be merged with its outer dimension, to give normalized input shape of { 4, 15 },
 // output shape { 4, 3 } with offsets { 0, 6 }.

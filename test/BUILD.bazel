@@ -1373,6 +1373,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_vrsqrt_test",
+    srcs = [
+        "f32-vrsqrt.cc",
+        "vunary-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_vscaleexpminusmax_test",
     srcs = [
         "f32-vscaleexpminusmax.cc",
@@ -3995,6 +4004,20 @@ xnnpack_unit_test(
     name = "static_reshape_test",
     srcs = [
         "static-reshape.cc",
+    ],
+    deps = [
+        ":subgraph_unary_tester",
+        "//:XNNPACK_test_mode",
+        "//:node_type",
+        "//:operators_test_mode",
+        "//:subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "reshape_2d_test",
+    srcs = [
+        "reshape-2d.cc",
     ],
     deps = [
         ":subgraph_unary_tester",

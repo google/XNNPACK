@@ -412,6 +412,11 @@ struct xnn_operator_data {
       size_t num_reduction_axes;
       size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
     };
+    // Used for reshape.
+    struct {
+      size_t num_reshape_dims;
+      size_t reshape_dims[XNN_MAX_TENSOR_DIMS];
+    };
     // Used for concatenate.
     size_t axis;
     // Used for static constant pad.
@@ -480,6 +485,9 @@ struct xnn_runtime {
   // True if runtime has ever been setup. If it has been setup, the pointers inside of opdata need to be updated if
   // workspace changes.
   bool has_been_setup;
+
+  // True if memory planning is up to date. Memory planning is necessary when a runtime has been created or reshaped.
+  bool memory_planning_ready;
 };
 
 struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph);
@@ -569,6 +577,13 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph);
 // Infer shape information across subgraph.
 // No flags currently supported, in the future it can be used to configure how shape inference is done.
 enum xnn_status xnn_subgraph_infer_shape(xnn_subgraph_t subgraph, uint32_t flags);
+
+enum xnn_status resize_fully_connected_output_tensor(
+  const struct xnn_operator_data* opdata,
+  struct xnn_value* values,
+  size_t num_values,
+  size_t old_workspace_size,
+  pthreadpool_t threadpool);
 
 #ifdef __cplusplus
 }  // extern "C"

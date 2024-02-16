@@ -589,7 +589,6 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op3 = nullptr;
   status = xnn_create_global_average_pooling_ncw_f16(
-    16 /* channels */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op3);
@@ -907,7 +906,6 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op19 = nullptr;
   status = xnn_create_global_average_pooling_ncw_f16(
-    96 /* channels */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op19);
@@ -1070,7 +1068,6 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op28 = nullptr;
   status = xnn_create_global_average_pooling_ncw_f16(
-    240 /* channels */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op28);
@@ -1244,7 +1241,6 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op38 = nullptr;
   status = xnn_create_global_average_pooling_ncw_f16(
-    240 /* channels */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op38);
@@ -1418,7 +1414,6 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op48 = nullptr;
   status = xnn_create_global_average_pooling_ncw_f16(
-    120 /* channels */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op48);
@@ -1581,7 +1576,6 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op57 = nullptr;
   status = xnn_create_global_average_pooling_ncw_f16(
-    144 /* channels */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op57);
@@ -1755,7 +1749,6 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op67 = nullptr;
   status = xnn_create_global_average_pooling_ncw_f16(
-    288 /* channels */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op67);
@@ -1918,7 +1911,6 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op76 = nullptr;
   status = xnn_create_global_average_pooling_ncw_f16(
-    576 /* channels */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op76);
@@ -2092,7 +2084,6 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op86 = nullptr;
   status = xnn_create_global_average_pooling_ncw_f16(
-    576 /* channels */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op86);
@@ -2232,7 +2223,6 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op94 = nullptr;
   status = xnn_create_global_average_pooling_ncw_f16(
-    576 /* channels */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op94);
@@ -2278,7 +2268,6 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
 
   xnn_operator_t op97 = nullptr;
   status = xnn_create_global_average_pooling_nwc_f16(
-    1024 /* channels */, 1024 /* input stride */, 1024 /* output stride */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op97);
@@ -2347,6 +2336,7 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_global_average_pooling_ncw_f16(
     op3,
     /*batch_size=*/1, 3136 /* width */,
+    16 /* channels */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #3" << std::endl;
@@ -2516,6 +2506,7 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_global_average_pooling_ncw_f16(
     op19,
     /*batch_size=*/1, 196 /* width */,
+    96 /* channels */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #19" << std::endl;
@@ -2612,6 +2603,7 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_global_average_pooling_ncw_f16(
     op28,
     /*batch_size=*/1, 196 /* width */,
+    240 /* channels */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #28" << std::endl;
@@ -2721,6 +2713,7 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_global_average_pooling_ncw_f16(
     op38,
     /*batch_size=*/1, 196 /* width */,
+    240 /* channels */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #38" << std::endl;
@@ -2830,6 +2823,7 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_global_average_pooling_ncw_f16(
     op48,
     /*batch_size=*/1, 196 /* width */,
+    120 /* channels */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #48" << std::endl;
@@ -2926,6 +2920,7 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_global_average_pooling_ncw_f16(
     op57,
     /*batch_size=*/1, 196 /* width */,
+    144 /* channels */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #57" << std::endl;
@@ -3035,6 +3030,7 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_global_average_pooling_ncw_f16(
     op67,
     /*batch_size=*/1, 49 /* width */,
+    288 /* channels */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #67" << std::endl;
@@ -3131,6 +3127,7 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_global_average_pooling_ncw_f16(
     op76,
     /*batch_size=*/1, 49 /* width */,
+    576 /* channels */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #76" << std::endl;
@@ -3240,6 +3237,7 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_global_average_pooling_ncw_f16(
     op86,
     /*batch_size=*/1, 49 /* width */,
+    576 /* channels */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #86" << std::endl;
@@ -3327,6 +3325,7 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_global_average_pooling_ncw_f16(
     op94,
     /*batch_size=*/1, 49 /* width */,
+    576 /* channels */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #94" << std::endl;
@@ -3364,6 +3363,7 @@ ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
   status = xnn_reshape_global_average_pooling_nwc_f16(
     op97,
     /*batch_size=*/1, 1 /* width */,
+    1024 /* channels */, 1024 /* input stride */, 1024 /* output stride */,
     &op97_workspace_size, &op97_workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {

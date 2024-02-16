@@ -290,8 +290,7 @@ class ResizeBilinearOperatorTester {
         flags |= XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
       }
       const xnn_status status = xnn_create_resize_bilinear2d_nhwc_f16(
-          channels(), input_pixel_stride(), output_pixel_stride(),
-          flags,
+          output_height(), output_width(), flags,
           &resize_bilinear_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -308,7 +307,7 @@ class ResizeBilinearOperatorTester {
         xnn_reshape_resize_bilinear2d_nhwc_f16(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
-          output_height(), output_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           &workspace_size, &workspace_alignment,
           /*threadpool=*/nullptr));
       std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
@@ -405,8 +404,7 @@ class ResizeBilinearOperatorTester {
       }
       ASSERT_EQ(xnn_status_success,
         xnn_create_resize_bilinear2d_nhwc_f32(
-          channels(), input_pixel_stride(), output_pixel_stride(),
-          flags,
+          output_height(), output_width(), flags,
           &resize_bilinear_op));
       ASSERT_NE(nullptr, resize_bilinear_op);
 
@@ -419,7 +417,7 @@ class ResizeBilinearOperatorTester {
         xnn_reshape_resize_bilinear2d_nhwc_f32(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
-          output_height(), output_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           &workspace_size, &workspace_alignment,
           /*threadpool=*/nullptr));
 
@@ -517,8 +515,7 @@ class ResizeBilinearOperatorTester {
       }
       ASSERT_EQ(xnn_status_success,
         xnn_create_resize_bilinear2d_nhwc_s8(
-          channels(), input_pixel_stride(), output_pixel_stride(),
-          flags,
+          output_height(), output_width(), flags,
           &resize_bilinear_op));
       ASSERT_NE(nullptr, resize_bilinear_op);
 
@@ -531,7 +528,7 @@ class ResizeBilinearOperatorTester {
         xnn_reshape_resize_bilinear2d_nhwc_s8(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
-          output_height(), output_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           &workspace_size, &workspace_alignment,
           /*threadpool=*/nullptr));
 
@@ -630,8 +627,7 @@ class ResizeBilinearOperatorTester {
       }
       ASSERT_EQ(xnn_status_success,
         xnn_create_resize_bilinear2d_nhwc_u8(
-          channels(), input_pixel_stride(), output_pixel_stride(),
-          flags,
+          output_height(), output_width(), flags,
           &resize_bilinear_op));
       ASSERT_NE(nullptr, resize_bilinear_op);
 
@@ -644,7 +640,7 @@ class ResizeBilinearOperatorTester {
         xnn_reshape_resize_bilinear2d_nhwc_u8(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
-          output_height(), output_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           &workspace_size, &workspace_alignment,
           /*threadpool=*/nullptr));
 
@@ -735,7 +731,7 @@ class ResizeBilinearOperatorTester {
       xnn_operator_t resize_bilinear_op = nullptr;
 
       const xnn_status status = xnn_create_resize_bilinear2d_nchw_f16(
-          channels(), input_pixel_stride(), output_pixel_stride(),
+          output_height(), output_width(),
           (align_corners() ? XNN_FLAG_ALIGN_CORNERS : 0) | (tf_legacy_mode() ? XNN_FLAG_TENSORFLOW_LEGACY_MODE : 0),
           &resize_bilinear_op);
       if (status == xnn_status_unsupported_hardware) {
@@ -751,7 +747,7 @@ class ResizeBilinearOperatorTester {
         xnn_reshape_resize_bilinear2d_nchw_f16(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
-          output_height(), output_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
@@ -828,7 +824,7 @@ class ResizeBilinearOperatorTester {
 
       const xnn_status status =
         xnn_create_resize_bilinear2d_nchw_f32(
-          channels(), input_pixel_stride(), output_pixel_stride(),
+          output_height(), output_width(),
           (align_corners() ? XNN_FLAG_ALIGN_CORNERS : 0) | (tf_legacy_mode() ? XNN_FLAG_TENSORFLOW_LEGACY_MODE : 0),
           &resize_bilinear_op);
       if (status == xnn_status_unsupported_hardware) {
@@ -843,7 +839,7 @@ class ResizeBilinearOperatorTester {
         xnn_reshape_resize_bilinear2d_nchw_f32(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
-          output_height(), output_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,

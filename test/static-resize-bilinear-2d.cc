@@ -213,7 +213,7 @@ TEST_F(StaticResizeBilinear2DTestQS8, matches_operator_api)
 
   // Call operator API.
   xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_resize_bilinear2d_nhwc_s8(channels, channels, channels, /*flags=*/0, &op);
+  const xnn_status status = xnn_create_resize_bilinear2d_nhwc_s8(output_height, output_width, /*flags=*/0, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -227,7 +227,7 @@ TEST_F(StaticResizeBilinear2DTestQS8, matches_operator_api)
   ASSERT_EQ(
     xnn_status_success,
     xnn_reshape_resize_bilinear2d_nhwc_s8(
-      op, batch_size, input_height, input_width, output_height, output_width,
+      op, batch_size, input_height, input_width, channels, channels, channels,
       &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_EQ(workspace_size, 0);
   ASSERT_EQ(workspace_alignment, 1);
@@ -282,7 +282,7 @@ TEST_F(StaticResizeBilinear2DTestQU8, matches_operator_api)
 
   // Call operator API.
   xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_resize_bilinear2d_nhwc_u8(channels, channels, channels, /*flags=*/0, &op);
+  const xnn_status status = xnn_create_resize_bilinear2d_nhwc_u8(output_height, output_width, /*flags=*/0, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -296,7 +296,7 @@ TEST_F(StaticResizeBilinear2DTestQU8, matches_operator_api)
   ASSERT_EQ(
     xnn_status_success,
     xnn_reshape_resize_bilinear2d_nhwc_u8(
-      op, batch_size, input_height, input_width, output_height, output_width,
+      op, batch_size, input_height, input_width, channels, channels, channels,
       &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_EQ(workspace_size, 0);
   ASSERT_EQ(workspace_alignment, 1);
@@ -347,7 +347,7 @@ TEST_F(StaticResizeBilinear2DTestF32, matches_operator_api)
 
   // Call operator API.
   xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_resize_bilinear2d_nhwc_f32(channels, channels, channels, /*flags=*/0, &op);
+  const xnn_status status = xnn_create_resize_bilinear2d_nhwc_f32(output_height, output_width, /*flags=*/0, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -361,7 +361,7 @@ TEST_F(StaticResizeBilinear2DTestF32, matches_operator_api)
   ASSERT_EQ(
     xnn_status_success,
     xnn_reshape_resize_bilinear2d_nhwc_f32(
-      op, batch_size, input_height, input_width, output_height, output_width,
+      op, batch_size, input_height, input_width, channels, channels, channels,
       &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_EQ(workspace_size, 0);
   ASSERT_EQ(workspace_alignment, 1);
@@ -401,4 +401,62 @@ TEST_F(StaticResizeBilinear2DTestF32, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   ASSERT_EQ(subgraph_output, operator_output);
+}
+
+TEST_F(StaticResizeBilinear2DTestF32, reshape_output)
+{
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+
+  // Call subgraph API.
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr, /*external_id=*/0,
+                          XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+
+  uint32_t output_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
+                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_define_static_resize_bilinear_2d(subgraph, output_height, output_width, input_id, output_id, /*flags=*/0));
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+  std::array<xnn_external_value, 2> external = {
+    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  // Channels and batch size can change.
+  input_dims[0] += 2;
+  input_dims[3] += 7;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  const struct xnn_node* node = &subgraph->nodes[0];
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
+  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
+  ASSERT_EQ(output_shape->dim[0], input_dims[0]);
+  ASSERT_EQ(output_shape->dim[1], output_dims[1]);
+  ASSERT_EQ(output_shape->dim[2], output_dims[2]);
+  ASSERT_EQ(output_shape->dim[3], input_dims[3]);
+
+  input_dims[0] -= 1;
+  input_dims[1] -= 1;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
+  ASSERT_EQ(output_shape->dim[0], input_dims[0]);
+  ASSERT_EQ(output_shape->dim[1], output_dims[1]);
+  ASSERT_EQ(output_shape->dim[2], output_dims[2]);
+  ASSERT_EQ(output_shape->dim[3], input_dims[3]);
 }

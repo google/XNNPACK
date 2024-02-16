@@ -1,0 +1,11 @@
+# Copyright 2024 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Scalar
+- name: xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u1
+- name: xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u2
+- name: xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u4
+- name: xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u8
+- name: xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u16

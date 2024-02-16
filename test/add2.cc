@@ -254,6 +254,17 @@ TEST_F(Add2TestQS8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
+  // Check output shape matches.
+  size_t observed_output_num_dims = 0;
+  std::vector<size_t> observed_output_dims(XNN_MAX_TENSOR_DIMS, 0);
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_get_external_value_shape(runtime, output_id, &observed_output_num_dims, observed_output_dims.data()));
+  ASSERT_EQ(output_dims.size(), observed_output_num_dims);
+  for (size_t i = 0; i < observed_output_num_dims; i++) {
+    ASSERT_EQ(output_dims[i], observed_output_dims[i]);
+  }
+
   // Check outputs match.
   ASSERT_EQ(subgraph_output, operator_output);
 }
@@ -338,6 +349,17 @@ TEST_F(Add2TestQU8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
+  // Check output shape matches.
+  size_t observed_output_num_dims = 0;
+  std::vector<size_t> observed_output_dims(XNN_MAX_TENSOR_DIMS, 0);
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_get_external_value_shape(runtime, output_id, &observed_output_num_dims, observed_output_dims.data()));
+  ASSERT_EQ(output_dims.size(), observed_output_num_dims);
+  for (size_t i = 0; i < observed_output_num_dims; i++) {
+    ASSERT_EQ(output_dims[i], observed_output_dims[i]);
+  }
+
   // Check outputs match.
   ASSERT_EQ(subgraph_output, operator_output);
 }
@@ -407,6 +429,29 @@ TEST_F(Add2TestF32, matches_operator_api)
     xnn_external_value{output_id, subgraph_output.data()}};
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  // Check output shape matches.
+  size_t observed_output_num_dims = 0;
+  std::vector<size_t> observed_output_dims(XNN_MAX_TENSOR_DIMS, 0);
+
+  // Check Invalid calls for this API
+  ASSERT_EQ(xnn_status_invalid_parameter,
+    xnn_get_external_value_shape(runtime, XNN_INVALID_VALUE_ID, &observed_output_num_dims, observed_output_dims.data()));
+
+  ASSERT_EQ(xnn_status_invalid_parameter,
+    xnn_get_external_value_shape(runtime, output_id, nullptr, observed_output_dims.data()));
+
+  ASSERT_EQ(xnn_status_invalid_parameter,
+    xnn_get_external_value_shape(runtime, output_id, &observed_output_num_dims, nullptr));
+
+  // Actually get the valid shape and check it matches
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_get_external_value_shape(runtime, output_id, &observed_output_num_dims, observed_output_dims.data()));
+  ASSERT_EQ(output_dims.size(), observed_output_num_dims);
+  for (size_t i = 0; i < observed_output_num_dims; i++) {
+    ASSERT_EQ(output_dims[i], observed_output_dims[i]);
+  }
 
   // Check outputs match.
   ASSERT_EQ(subgraph_output, operator_output);

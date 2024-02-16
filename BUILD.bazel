@@ -84,6 +84,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/negate.c",
     "src/subgraph/prelu.c",
     "src/subgraph/reshape-helpers.c",
+    "src/subgraph/reshape-2d.c",
     "src/subgraph/rope.c",
     "src/subgraph/scaled-dot-product-attention.c",
     "src/subgraph/sigmoid.c",
@@ -1847,6 +1848,7 @@ xnnpack_cc_library(
     gcc_x86_copts = [
         "-mavx2",
         "-mavxvnni",
+        "-mf16c",
         "-mfma",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -1870,6 +1872,7 @@ xnnpack_cc_library(
     gcc_x86_copts = [
         "-mavx2",
         "-mavxvnni",
+        "-mf16c",
         "-mfma",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -1897,6 +1900,7 @@ xnnpack_cc_library(
     gcc_x86_copts = [
         "-mavx2",
         "-mavxvnni",
+        "-mf16c",
         "-mfma",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -2268,6 +2272,8 @@ xnnpack_cc_library(
     name = "avx512skx_bench_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
+        "-mf16c",
+        "-mfma",
         "-mavx512f",
         "-mavx512cd",
         "-mavx512bw",
@@ -2295,6 +2301,8 @@ xnnpack_cc_library(
     name = "avx512skx_prod_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
+        "-mf16c",
+        "-mfma",
         "-mavx512f",
         "-mavx512cd",
         "-mavx512bw",
@@ -2326,6 +2334,8 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
+        "-mf16c",
+        "-mfma",
         "-mavx512f",
         "-mavx512cd",
         "-mavx512bw",
@@ -2353,6 +2363,8 @@ xnnpack_cc_library(
     name = "avx512vbmi_bench_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
+        "-mf16c",
+        "-mfma",
         "-mavx512f",
         "-mavx512cd",
         "-mavx512bw",
@@ -2381,6 +2393,8 @@ xnnpack_cc_library(
     name = "avx512vbmi_prod_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
+        "-mf16c",
+        "-mfma",
         "-mavx512f",
         "-mavx512cd",
         "-mavx512bw",
@@ -2413,6 +2427,8 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
+        "-mf16c",
+        "-mfma",
         "-mavx512f",
         "-mavx512cd",
         "-mavx512bw",
@@ -2441,13 +2457,14 @@ xnnpack_cc_library(
     name = "avx512vnni_bench_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
+        "-mf16c",
+        "-mfma",
         "-mavx512f",
         "-mavx512cd",
         "-mavx512bw",
         "-mavx512dq",
         "-mavx512vl",
         "-mavx512vnni",
-        "-mfma",
     ],
     mingw_copts = ["-fno-asynchronous-unwind-tables"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -2470,13 +2487,14 @@ xnnpack_cc_library(
     name = "avx512vnni_prod_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
+        "-mf16c",
+        "-mfma",
         "-mavx512f",
         "-mavx512cd",
         "-mavx512bw",
         "-mavx512dq",
         "-mavx512vl",
         "-mavx512vnni",
-        "-mfma",
     ],
     mingw_copts = ["-fno-asynchronous-unwind-tables"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -2503,13 +2521,14 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
+        "-mf16c",
+        "-mfma",
         "-mavx512f",
         "-mavx512cd",
         "-mavx512bw",
         "-mavx512dq",
         "-mavx512vl",
         "-mavx512vnni",
-        "-mfma",
     ],
     mingw_copts = ["-fno-asynchronous-unwind-tables"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -2532,6 +2551,8 @@ xnnpack_cc_library(
     name = "avx512vnnigfni_bench_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
+        "-mf16c",
+        "-mfma",
         "-mavx512f",
         "-mavx512cd",
         "-mavx512bw",
@@ -2539,7 +2560,6 @@ xnnpack_cc_library(
         "-mavx512vl",
         "-mavx512vnni",
         "-mgfni",
-        "-mfma",
     ],
     mingw_copts = ["-fno-asynchronous-unwind-tables"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -2562,6 +2582,8 @@ xnnpack_cc_library(
     name = "avx512vnnigfni_prod_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
+        "-mf16c",
+        "-mfma",
         "-mavx512f",
         "-mavx512cd",
         "-mavx512bw",
@@ -2569,7 +2591,6 @@ xnnpack_cc_library(
         "-mavx512vl",
         "-mavx512vnni",
         "-mgfni",
-        "-mfma",
     ],
     mingw_copts = ["-fno-asynchronous-unwind-tables"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -2596,6 +2617,8 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
+        "-mf16c",
+        "-mfma",
         "-mavx512f",
         "-mavx512cd",
         "-mavx512bw",
@@ -2603,7 +2626,6 @@ xnnpack_cc_library(
         "-mavx512vl",
         "-mavx512vnni",
         "-mgfni",
-        "-mfma",
     ],
     mingw_copts = ["-fno-asynchronous-unwind-tables"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -4246,6 +4268,7 @@ selects.config_setting_group(
     ],
 )
 
+# Temporary disable vectors on Android
 alias(
     name = "riscv_vector_enabled",
     actual = select({
@@ -4263,11 +4286,13 @@ selects.config_setting_group(
     ],
 )
 
+# Temporary disable fp16 vectors on Android
 alias(
     name = "riscv_fp16_vector_enabled",
     actual = select({
         ":xnn_enable_riscv_fp16_vector_explicit_true": ":xnn_enable_riscv_fp16_vector_explicit_true",
         ":xnn_enable_riscv_fp16_vector_explicit_false": ":xnn_enable_riscv_fp16_vector_explicit_true",
+        "//build_config:android": ":xnn_enable_riscv_fp16_vector_explicit_false",
         "//conditions:default": ":riscv_fp16_vector_enabled_by_default",
     }),
 )

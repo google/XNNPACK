@@ -63,14 +63,14 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x8c8__avx512vnni_prfm(
   const __m256 voutput_max = _mm256_set1_ps(params->avxvnni.max);
   const __m256i vsign_mask = _mm256_set1_epi8(params->avxvnni.sign_mask);  // 0x80
   do {
-    const __m256i vksum0123456789ABCDEF = _mm256_load_si256(w);
-    __m256i vsum0x01234567 = _mm256_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point0);
+    const __m256i vksum01234567 = _mm256_load_si256(w);
+    __m256i vsum0x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point0);
     __m256i vacc0x0123 = _mm256_cvtepu32_epi64(_mm256_extracti128_si256(vsum0x01234567, 0));
     __m256i vacc0x4567 = _mm256_cvtepu32_epi64(_mm256_extracti128_si256(vsum0x01234567, 1));
-    __m256i vsum1x01234567 = _mm256_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point1);
+    __m256i vsum1x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point1);
     __m256i vacc1x0123 = _mm256_cvtepu32_epi64(_mm256_extracti128_si256(vsum1x01234567, 0));
     __m256i vacc1x4567 = _mm256_cvtepu32_epi64(_mm256_extracti128_si256(vsum1x01234567, 1));
-    __m256i vsum2x01234567 = _mm256_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point2);
+    __m256i vsum2x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point2);
     __m256i vacc2x0123 = _mm256_cvtepu32_epi64(_mm256_extracti128_si256(vsum2x01234567, 0));
     __m256i vacc2x4567 = _mm256_cvtepu32_epi64(_mm256_extracti128_si256(vsum2x01234567, 1));
     w = (const int32_t*) w + 8;
@@ -146,18 +146,6 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x8c8__avx512vnni_prfm(
     __m256 vout1x01234567 = _mm256_cvtepi32_ps(vacc1x01234567);
     __m256 vout2x01234567 = _mm256_cvtepi32_ps(vacc2x01234567);
 
-    vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(quantization_params[0].inv_scale));
-    vout1x01234567 = _mm256_mul_ps(vout1x01234567, _mm256_set1_ps(quantization_params[1].inv_scale));
-    vout2x01234567 = _mm256_mul_ps(vout2x01234567, _mm256_set1_ps(quantization_params[2].inv_scale));
-
-    const __m256 vfilter_output_scale0123456789ABCDEF = _mm256_load_ps((const float*) w);
-    const __m256 vbias0123456789ABCDEF = _mm256_load_ps((const float*) w + 8);
-    w = (const float*) w + 16;
-
-    vout0x01234567 = _mm256_fmadd_ps(vout0x01234567, vfilter_output_scale0123456789ABCDEF, vbias0123456789ABCDEF);
-    vout1x01234567 = _mm256_fmadd_ps(vout1x01234567, vfilter_output_scale0123456789ABCDEF, vbias0123456789ABCDEF);
-    vout2x01234567 = _mm256_fmadd_ps(vout2x01234567, vfilter_output_scale0123456789ABCDEF, vbias0123456789ABCDEF);
-
     vout0x01234567 = _mm256_max_ps(vout0x01234567, voutput_min);
     vout1x01234567 = _mm256_max_ps(vout1x01234567, voutput_min);
     vout2x01234567 = _mm256_max_ps(vout2x01234567, voutput_min);
@@ -166,7 +154,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x8c8__avx512vnni_prfm(
     vout1x01234567 = _mm256_min_ps(vout1x01234567, voutput_max);
     vout2x01234567 = _mm256_min_ps(vout2x01234567, voutput_max);
 
-    if(nc >= 8) {
+    if XNN_LIKELY(nc >= 8) {
       _mm256_storeu_ps(c0, vout0x01234567);
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);

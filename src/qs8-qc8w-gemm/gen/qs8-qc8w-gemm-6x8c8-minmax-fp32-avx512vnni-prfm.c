@@ -205,14 +205,14 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_6x8c8__avx512vnni_prfm(
     __m256 vout4x01234567 = _mm256_cvtepi32_ps(vacc4x01234567);
     __m256 vout5x01234567 = _mm256_cvtepi32_ps(vacc5x01234567);
 
-    const __m256 vscale012345678ABCDEF = _mm256_load_ps(w);
+    const __m256 vscale01234567 = _mm256_load_ps(w);
     w = (const float*) w + 8;
-    vout0x01234567 = _mm256_mul_ps(vout0x01234567, vscale012345678ABCDEF);
-    vout1x01234567 = _mm256_mul_ps(vout1x01234567, vscale012345678ABCDEF);
-    vout2x01234567 = _mm256_mul_ps(vout2x01234567, vscale012345678ABCDEF);
-    vout3x01234567 = _mm256_mul_ps(vout3x01234567, vscale012345678ABCDEF);
-    vout4x01234567 = _mm256_mul_ps(vout4x01234567, vscale012345678ABCDEF);
-    vout5x01234567 = _mm256_mul_ps(vout5x01234567, vscale012345678ABCDEF);
+    vout0x01234567 = _mm256_mul_ps(vout0x01234567, vscale01234567);
+    vout1x01234567 = _mm256_mul_ps(vout1x01234567, vscale01234567);
+    vout2x01234567 = _mm256_mul_ps(vout2x01234567, vscale01234567);
+    vout3x01234567 = _mm256_mul_ps(vout3x01234567, vscale01234567);
+    vout4x01234567 = _mm256_mul_ps(vout4x01234567, vscale01234567);
+    vout5x01234567 = _mm256_mul_ps(vout5x01234567, vscale01234567);
 
     vout0x01234567 = _mm256_min_ps(vout0x01234567, voutput_max_less_zero_point);
     vout1x01234567 = _mm256_min_ps(vout1x01234567, voutput_max_less_zero_point);

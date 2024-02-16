@@ -146,13 +146,13 @@ static enum xnn_status reshape_slice_nd(
           xnn_operator_type_to_string(slice_op->type), offsets[i], i, input_shape[i]);
       return xnn_status_unsupported_parameter;
     }
-    if (sizes[i] == 0 || sizes[i] > input_shape[i]) {
+    if (sizes[i] > input_shape[i]) {
       xnn_log_error(
-          "failed to create %s operator with %zu sizes[%zu]: 0 < size <= %zu",
+          "failed to create %s operator with %zu sizes[%zu]: 0 <= size <= %zu",
           xnn_operator_type_to_string(slice_op->type), sizes[i], i, input_shape[i]);
       return xnn_status_unsupported_parameter;
     }
-    if (offsets[i] + sizes[i] > input_shape[i]) {
+    if (sizes[i] > 0 && offsets[i] + sizes[i] > input_shape[i]) {
       xnn_log_error(
           "failed to create %s operator with %zu offsets[%zu] and %zu sizes[%zu]: offset + size <= %zu",
           xnn_operator_type_to_string(slice_op->type), offsets[i], i, sizes[i], i, input_shape[i]);

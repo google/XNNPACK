@@ -954,7 +954,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op14 = nullptr;
   status = xnn_create_global_average_pooling_nwc_qu8(
-    72 /* channels */, 72 /* input stride */, 72 /* output stride */,
     0 /* input zero point */, 0.17515037953853607 /* input scale */,
     0 /* output zero point */, 0.17515037953853607 /* output scale */,
     0 /* output min */, 255 /* output max */,
@@ -1160,7 +1159,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op23 = nullptr;
   status = xnn_create_global_average_pooling_nwc_qu8(
-    120 /* channels */, 120 /* input stride */, 120 /* output stride */,
     0 /* input zero point */, 0.29763659834861755 /* input scale */,
     0 /* output zero point */, 0.29763659834861755 /* output scale */,
     0 /* output min */, 255 /* output max */,
@@ -1380,7 +1378,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op33 = nullptr;
   status = xnn_create_global_average_pooling_nwc_qu8(
-    120 /* channels */, 120 /* input stride */, 120 /* output stride */,
     0 /* input zero point */, 0.47602489590644836 /* input scale */,
     0 /* output zero point */, 0.47602489590644836 /* output scale */,
     0 /* output min */, 255 /* output max */,
@@ -2102,7 +2099,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op68 = nullptr;
   status = xnn_create_global_average_pooling_nwc_qu8(
-    480 /* channels */, 480 /* input stride */, 480 /* output stride */,
     3 /* input zero point */, 0.11743443459272385 /* input scale */,
     3 /* output zero point */, 0.11743443459272385 /* output scale */,
     0 /* output min */, 255 /* output max */,
@@ -2328,7 +2324,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op79 = nullptr;
   status = xnn_create_global_average_pooling_nwc_qu8(
-    672 /* channels */, 672 /* input stride */, 672 /* output stride */,
     3 /* input zero point */, 0.13992221653461456 /* input scale */,
     3 /* output zero point */, 0.13992221653461456 /* output scale */,
     0 /* output min */, 255 /* output max */,
@@ -2568,7 +2563,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op91 = nullptr;
   status = xnn_create_global_average_pooling_nwc_qu8(
-    672 /* channels */, 672 /* input stride */, 672 /* output stride */,
     3 /* input zero point */, 0.12238067388534546 /* input scale */,
     3 /* output zero point */, 0.12238067388534546 /* output scale */,
     0 /* output min */, 255 /* output max */,
@@ -2794,7 +2788,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op102 = nullptr;
   status = xnn_create_global_average_pooling_nwc_qu8(
-    960 /* channels */, 960 /* input stride */, 960 /* output stride */,
     2 /* input zero point */, 0.16568607091903687 /* input scale */,
     2 /* output zero point */, 0.16568607091903687 /* output scale */,
     0 /* output min */, 255 /* output max */,
@@ -3034,7 +3027,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op114 = nullptr;
   status = xnn_create_global_average_pooling_nwc_qu8(
-    960 /* channels */, 960 /* input stride */, 960 /* output stride */,
     1 /* input zero point */, 0.37250789999961853 /* input scale */,
     1 /* output zero point */, 0.37250789999961853 /* output scale */,
     0 /* output min */, 255 /* output max */,
@@ -3234,7 +3226,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op124 = nullptr;
   status = xnn_create_global_average_pooling_nwc_qu8(
-    960 /* channels */, 960 /* input stride */, 960 /* output stride */,
     1 /* input zero point */, 0.2900834381580353 /* input scale */,
     1 /* output zero point */, 0.2900834381580353 /* output scale */,
     0 /* output min */, 255 /* output max */,
@@ -3288,7 +3279,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op127 = nullptr;
   status = xnn_create_global_average_pooling_nwc_qu8(
-    1280 /* channels */, 1280 /* input stride */, 1280 /* output stride */,
     22 /* input zero point */, 0.017189515754580498 /* input scale */,
     22 /* output zero point */, 0.017189515754580498 /* output scale */,
     0 /* output min */, 255 /* output max */,
@@ -3342,9 +3332,6 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   xnn_operator_t op130 = nullptr;
   status = xnn_create_softmax_nc_qu8(
-    /*channels=*/1001,
-    /*input_stride=*/1001,
-    /*output_stride=*/1001,
     /*input_scale=*/0.0765276700258255,
     /*output_zero_point=*/0,
     /*output_scale=*/0.00390625,
@@ -3553,6 +3540,7 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_qu8(
     op14,
     /*batch_size=*/1, 784 /* width */,
+    72 /* channels */, 72 /* input stride */, 72 /* output stride */,
     &op14_workspace_size, &op14_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op14_workspace_size);
@@ -3675,6 +3663,7 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_qu8(
     op23,
     /*batch_size=*/1, 784 /* width */,
+    120 /* channels */, 120 /* input stride */, 120 /* output stride */,
     &op23_workspace_size, &op23_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op23_workspace_size);
@@ -3810,6 +3799,7 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_qu8(
     op33,
     /*batch_size=*/1, 784 /* width */,
+    120 /* channels */, 120 /* input stride */, 120 /* output stride */,
     &op33_workspace_size, &op33_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op33_workspace_size);
@@ -4272,6 +4262,7 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_qu8(
     op68,
     /*batch_size=*/1, 196 /* width */,
+    480 /* channels */, 480 /* input stride */, 480 /* output stride */,
     &op68_workspace_size, &op68_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op68_workspace_size);
@@ -4418,6 +4409,7 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_qu8(
     op79,
     /*batch_size=*/1, 196 /* width */,
+    672 /* channels */, 672 /* input stride */, 672 /* output stride */,
     &op79_workspace_size, &op79_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op79_workspace_size);
@@ -4577,6 +4569,7 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_qu8(
     op91,
     /*batch_size=*/1, 49 /* width */,
+    672 /* channels */, 672 /* input stride */, 672 /* output stride */,
     &op91_workspace_size, &op91_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op91_workspace_size);
@@ -4723,6 +4716,7 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_qu8(
     op102,
     /*batch_size=*/1, 49 /* width */,
+    960 /* channels */, 960 /* input stride */, 960 /* output stride */,
     &op102_workspace_size, &op102_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op102_workspace_size);
@@ -4882,6 +4876,7 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_qu8(
     op114,
     /*batch_size=*/1, 49 /* width */,
+    960 /* channels */, 960 /* input stride */, 960 /* output stride */,
     &op114_workspace_size, &op114_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op114_workspace_size);
@@ -5015,6 +5010,7 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_qu8(
     op124,
     /*batch_size=*/1, 49 /* width */,
+    960 /* channels */, 960 /* input stride */, 960 /* output stride */,
     &op124_workspace_size, &op124_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op124_workspace_size);
@@ -5054,6 +5050,7 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_reshape_global_average_pooling_nwc_qu8(
     op127,
     /*batch_size=*/1, 1 /* width */,
+    1280 /* channels */, 1280 /* input stride */, 1280 /* output stride */,
     &op127_workspace_size, &op127_workspace_alignment,
     /*threadpool=*/threadpool);
   max_workspace_size = std::max(max_workspace_size, op127_workspace_size);
@@ -5090,6 +5087,9 @@ ExecutionPlan QU8MobileNetV3Large(pthreadpool_t threadpool) {
 
   status = xnn_reshape_softmax_nc_qu8(
     op130,
+    /*channels=*/1001,
+    /*input_stride=*/1001,
+    /*output_stride=*/1001,
     /*batch_size=*/1,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {

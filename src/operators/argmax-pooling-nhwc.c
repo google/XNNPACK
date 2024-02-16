@@ -48,9 +48,6 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
     uint32_t input_padding_left,
     uint32_t pooling_height,
     uint32_t pooling_width,
-    size_t channels,
-    size_t input_pixel_stride,
-    size_t output_pixel_stride,
     uint32_t flags,
     xnn_operator_t* argmax_pooling_op_out)
 {
@@ -91,29 +88,6 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
     goto error;
   }
 
-  if (channels == 0) {
-    xnn_log_error(
-      "failed to create %s operator with %zu channels: number of channels must be non-zero",
-      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32), channels);
-    goto error;
-  }
-
-  if (input_pixel_stride < channels) {
-    xnn_log_error(
-      "failed to create %s operator with input pixel stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32), input_pixel_stride, channels);
-    goto error;
-  }
-
-  if (output_pixel_stride < channels) {
-    xnn_log_error(
-      "failed to create %s operator with output pixel stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32), output_pixel_stride, channels);
-    goto error;
-  }
-
   const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
   if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
     if (any_padding) {
@@ -147,9 +121,6 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
   argmax_pooling_op->stride_width = pooling_width;
   argmax_pooling_op->dilation_height = 1;
   argmax_pooling_op->dilation_width = 1;
-  argmax_pooling_op->channels = channels;
-  argmax_pooling_op->input_pixel_stride = input_pixel_stride;
-  argmax_pooling_op->output_pixel_stride = output_pixel_stride;
 
   argmax_pooling_op->type = xnn_operator_type_argmax_pooling_nhwc_f32;
   argmax_pooling_op->flags = flags;
@@ -170,8 +141,13 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
     size_t batch_size,
     size_t input_height,
     size_t input_width,
+    size_t channels,
+    size_t input_pixel_stride,
+    size_t output_pixel_stride,
     size_t* workspace_size,
     size_t* workspace_alignment,
+    size_t* output_height_out,
+    size_t* output_width_out,
     pthreadpool_t threadpool)
 {
   if (argmax_pooling_op->type != xnn_operator_type_argmax_pooling_nhwc_f32) {
@@ -195,11 +171,37 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
     return xnn_status_invalid_parameter;
   }
 
+  if (channels == 0) {
+    xnn_log_error(
+      "failed to create %s operator with %zu channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32), channels);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (input_pixel_stride < channels) {
+    xnn_log_error(
+      "failed to create %s operator with input pixel stride of %zu: "
+      "stride must be at least as large as the number of channels (%zu)",
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32), input_pixel_stride, channels);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_pixel_stride < channels) {
+    xnn_log_error(
+      "failed to create %s operator with output pixel stride of %zu: "
+      "stride must be at least as large as the number of channels (%zu)",
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32), output_pixel_stride, channels);
+    return xnn_status_invalid_parameter;
+  }
+
   if (batch_size == 0) {
     argmax_pooling_op->state = xnn_run_state_skip;
     return xnn_status_success;
   }
 
+  argmax_pooling_op->channels = channels;
+  argmax_pooling_op->input_pixel_stride = input_pixel_stride;
+  argmax_pooling_op->output_pixel_stride = output_pixel_stride;
   argmax_pooling_op->batch_size = batch_size;
   argmax_pooling_op->input_height = input_height;
   argmax_pooling_op->input_width = input_width;
@@ -226,9 +228,15 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
         argmax_pooling_op->kernel_width);
   }
 
-  const size_t pooling_size = pooling_height * pooling_width;
   const size_t output_height = argmax_pooling_op->output_height;
   const size_t output_width = argmax_pooling_op->output_width;
+  if (output_height_out != NULL) {
+    *output_height_out = output_height;
+  }
+  if (output_width_out != NULL) {
+    *output_width_out = output_width;
+  }
+  const size_t pooling_size = pooling_height * pooling_width;
   const struct xnn_argmaxpool_config* argmaxpool_config = argmax_pooling_op->argmaxpool_config;
   const struct xnn_argmaxpool_config* ukernel = select_ukernel(pooling_size, argmaxpool_config);
   const uint32_t first_pass_tile_size = ukernel->first_pass_tile_size;
@@ -252,10 +260,8 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
   xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
     indirection_buffer_size, xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
 
-  const size_t channels = argmax_pooling_op->channels;
-
   const size_t indirect_input_height_stride = step_height * sizeof(void*);
-  const size_t output_width_stride = argmax_pooling_op->output_pixel_stride * sizeof(float);
+  const size_t output_width_stride = output_pixel_stride * sizeof(float);
   const size_t output_height_stride = output_width * output_width_stride;
   const size_t index_height_stride = output_width * channels * sizeof(uint32_t);
 
@@ -264,7 +270,7 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
   argmax_pooling_op->context.argmax_pooling = (struct argmax_pooling_context) {
     .indirect_input = argmax_pooling_op->indirection_buffer,
     .indirect_input_height_stride = indirect_input_height_stride,
-    .input_batch_stride = input_height * input_width * argmax_pooling_op->input_pixel_stride * sizeof(float),
+    .input_batch_stride = input_height * input_width * input_pixel_stride * sizeof(float),
     .output_batch_stride = output_height * output_height_stride,
     .output_height_stride = output_height_stride,
     .output_height = output_height,

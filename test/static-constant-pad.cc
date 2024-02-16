@@ -402,3 +402,72 @@ TEST_F(StaticConstantPadTestF32, matches_operator_api)
 
   ASSERT_EQ(subgraph_output, operator_output);
 }
+
+TEST_F(StaticConstantPadTestF32, reshape_output)
+{
+  std::array<size_t, XNN_MAX_TENSOR_DIMS> pre_paddings;
+  std::array<size_t, XNN_MAX_TENSOR_DIMS> post_paddings;
+  std::fill(pre_paddings.begin(), pre_paddings.begin() + dims.size(), dim_dist(rng));
+  std::fill(post_paddings.begin(), post_paddings.begin() + dims.size(), dim_dist(rng));
+  float padding_value = f32dist(rng);
+  std::vector<size_t> output_dims = dims;
+  for (size_t i = 0; i < dims.size(); i++) {
+    output_dims[i] = pre_paddings[i] + output_dims[i] + post_paddings[i];
+  }
+  subgraph_output = std::vector<float>(NumElements(output_dims));
+  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
+
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  // Call subgraph API.
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+
+  input_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, 0,
+                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+
+  output_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_define_tensor_value(
+      subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr, 1,
+      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_define_static_constant_pad(
+      subgraph, pre_paddings.data(), post_paddings.data(), padding_value, input_id, output_id, /*flags=*/0));
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+  std::array<xnn_external_value, 2> external = {
+    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  if (!dims.empty()) {
+    dims[0] += 2;
+    ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, dims.size(), dims.data()));
+    ASSERT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));
+    const struct xnn_node* node = &subgraph->nodes[0];
+    const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
+    for (size_t i = 0; i < output_shape->num_dims; ++i) {
+      ASSERT_EQ(output_shape->dim[i], dims[i] + pre_paddings[i] + post_paddings[i]);
+    }
+
+    dims[0] -= 1;
+    ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, dims.size(), dims.data()));
+    ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
+    for (size_t i = 0; i < output_shape->num_dims; ++i) {
+      ASSERT_EQ(output_shape->dim[i], dims[i] + pre_paddings[i] + post_paddings[i]);
+    }
+  }
+}

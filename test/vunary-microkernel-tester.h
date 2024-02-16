@@ -5,20 +5,25 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+#include <xnnpack.h>
+#include <xnnpack/common.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
+#include <xnnpack/microparams.h>
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
+#include <functional>
+#include <limits>
 #include <random>
 #include <vector>
 
 #include <fp16/fp16.h>
-
-#include <xnnpack.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
+#include <gtest/gtest.h>
 
 #if XNN_PLATFORM_JIT
   #include <xnnpack/memory.h>
@@ -125,14 +130,31 @@ class VUnaryMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_vrelu_ukernel_fn vrelu) const {
+  // Generic test function for `fp32` `vunary` kernels.
+  //
+  // The function is templated on the type of the kernel parameters and takes
+  // the following arguments:
+  //
+  //  * `init_params`: A function that populates a given parameters data
+  //    structure or returns `nullptr` if there is no default initialization.
+  //  * `ref`: A function that computes the reference result for an input `x`.
+  //  * `tol`: A function that computes the absolute tolerance for a reference
+  //    result `y_ref`.
+  //  * `range_min`, `range_max`: Limits for the range of input values.
+  template <typename UKernelParamsType, typename InitParamsFunc,
+            typename ReferenceFunc, typename ToleranceFunc>
+  void TestFP32(void (*ukernel)(size_t, const float*, float*,
+                                const UKernelParamsType*),
+                InitParamsFunc init_params, ReferenceFunc ref,
+                ToleranceFunc tol, float range_min, float range_max) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
+    std::uniform_real_distribution<float> f32dist(range_min, range_max);
 
     std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
-    std::vector<double> y_ref(batch_size());
+    std::vector<float> y(batch_size() +
+                         (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    std::vector<float> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       if (inplace()) {
         std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
@@ -144,919 +166,359 @@ class VUnaryMicrokernelTester {
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = std::max(x_data[i], 0.0f);
+        y_ref[i] = ref(x_data[i]);
       }
 
+      // Initialize the params.
+      UKernelParamsType params;
+      const UKernelParamsType* params_ptr = init_params(&params);
+
       // Call optimized micro-kernel.
-      vrelu(batch_size() * sizeof(float), x_data, y.data(), nullptr);
+      ukernel(batch_size() * sizeof(float), x_data, y.data(), params_ptr);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_EQ(y[i], y_ref[i])
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
+        EXPECT_NEAR(y[i], y_ref[i], tol(y_ref[i]))
+            << "at " << i << " / " << batch_size() << ", x[" << i
+            << "] = " << x[i];
       }
     }
   }
 
-  void Test(xnn_f16_vabs_ukernel_fn vabs, xnn_init_f16_abs_params_fn init_params = nullptr) const {
+  // Generic test function for `fp16` `vunary` kernels.
+  //
+  // The function is templated on the type of the kernel parameters and takes
+  // the following arguments:
+  //
+  //  * `init_params`: A function that populates a given parameters data
+  //    structure or returns `nullptr` if there is no default initialization.
+  //  * `ref`: A function that computes the reference result for an input `x` of
+  //    type `float`, converted from the actual `fp16` input.
+  //  * `tol`: A function that computes the absolute tolerance for a reference
+  //    result `y_ref` of type `float`. Note that the computed result `y` will
+  //    be converted back to `float` for the comparison.
+  //  * `range_min`, `range_max`: Limits for the range of input values.
+  template <typename UKernelParamsType, typename InitParamsFunc,
+            typename ReferenceFunc, typename ToleranceFunc>
+  void TestFP16(void (*ukernel)(size_t, const void*, void*,
+                                const UKernelParamsType*),
+                InitParamsFunc init_params, ReferenceFunc ref,
+                ToleranceFunc tol, float range_min, float range_max) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
+    auto distribution =
+        std::uniform_real_distribution<float>(range_min, range_max);
+    auto f16rng = [&]() {
+      return fp16_ieee_from_fp32_value(distribution(rng));
+    };
 
     std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
-    std::vector<uint16_t> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      } else {
-        std::generate(x.begin(), x.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
-      }
-      const uint16_t* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = x_data[i] & UINT16_C(0x7FFF);
-      }
-
-      // Prepare parameters.
-      union xnn_f16_abs_params params;
-      if (init_params != nullptr) {
-        init_params(&params);
-      }
-
-      // Call optimized micro-kernel.
-      vabs(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_EQ(y[i], y_ref[i])
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
-      }
-    }
-  }
-
-  void Test(xnn_f32_vabs_ukernel_fn vabs, xnn_init_f32_abs_params_fn init_params = nullptr) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
-
-    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    std::vector<uint16_t> y(
+        batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
     std::vector<float> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
-      } else {
-        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
-        std::fill(y.begin(), y.end(), nanf(""));
-      }
-      const float* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = std::abs(x_data[i]);
-      }
-
-      // Prepare parameters.
-      union xnn_f32_abs_params params;
-      if (init_params != nullptr) {
-        init_params(&params);
-      }
-
-      // Call optimized micro-kernel.
-      vabs(batch_size() * sizeof(float), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_EQ(y[i], y_ref[i])
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
-      }
-    }
-  }
-
-  void Test(xnn_f32_vclamp_ukernel_fn vclamp, xnn_init_f32_minmax_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(0.0f, 255.0f);
-
-    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
-    std::vector<float> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
-      } else {
-        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
-        std::fill(y.begin(), y.end(), nanf(""));
-      }
-      const float* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = std::max(std::min(x_data[i], float(qmax())), float(qmin()));
-      }
-
-      // Prepare parameters.
-      union xnn_f32_minmax_params params;
-      init_params(&params, float(qmin()), float(qmax()));
-
-      // Call optimized micro-kernel.
-      vclamp(batch_size() * sizeof(float), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_EQ(y[i], y_ref[i])
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
-      }
-    }
-  }
-
-  void Test(xnn_f16_velu_ukernel_fn velu, xnn_init_f16_elu_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(-9.0f, 9.0f);
-
-    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
-    std::vector<float> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      } else {
-        std::generate(x.begin(), x.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
-      }
-      const uint16_t* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        const float x_value = fp16_ieee_to_fp32_value(x_data[i]);
-        y_ref[i] = std::signbit(x_value) ? alpha() * std::expm1(x_value * prescale()) : x_value * beta();
-      }
-
-      // Prepare parameters.
-      union xnn_f16_elu_params params;
-      init_params(&params, fp16_ieee_from_fp32_value(prescale()), fp16_ieee_from_fp32_value(alpha()), fp16_ieee_from_fp32_value(beta()));
-
-      // Call optimized micro-kernel.
-      velu(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(
-            fp16_ieee_to_fp32_value(y[i]),
-            y_ref[i],
-            std::max(1.0e-4f, std::abs(y_ref[i]) * 5.0e-3f))
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << fp16_ieee_to_fp32_value(x[i]);
-      }
-    }
-  }
-
-  void Test(xnn_f32_velu_ukernel_fn velu, xnn_init_f32_elu_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(-20.0f, 20.0f);
-
-    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
-    std::vector<double> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
-      } else {
-        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
-        std::fill(y.begin(), y.end(), nanf(""));
-      }
-      const float* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = std::signbit(x_data[i]) ? alpha() * std::expm1(double(x_data[i]) * prescale()) : double(x_data[i]) * beta();
-      }
-
-      // Prepare parameters.
-      union xnn_f32_elu_params params;
-      init_params(&params, prescale(), alpha(), beta());
-
-      // Call optimized micro-kernel.
-      velu(batch_size() * sizeof(float), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_NEAR(y[i], y_ref[i], std::max(5.0e-6, std::abs(y_ref[i]) * 1.0e-5))
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
-      }
-    }
-  }
-
-  void Test(xnn_f16_vhswish_ukernel_fn vhswish, xnn_init_f16_hswish_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-4.0f, 4.0f), std::ref(rng));
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
-
-    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
-    std::vector<float> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), std::ref(f16rng));
       if (inplace()) {
         std::generate(y.begin(), y.end(), std::ref(f16rng));
       } else {
+        std::generate(x.begin(), x.end(), std::ref(f16rng));
         std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
       }
       const uint16_t* x_data = inplace() ? y.data() : x.data();
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
-        const float x_value = fp16_ieee_to_fp32_value(x_data[i]);
-        y_ref[i] = (x_value / 6.0f) * std::max(std::min(x_value + 3.0f, 6.0f), 0.0f);
+        y_ref[i] = ref(fp16_ieee_to_fp32_value(x_data[i]));
       }
 
-      // Prepare parameters.
-      union xnn_f16_hswish_params params;
-      init_params(&params);
+      // Initialize the params.
+      UKernelParamsType params;
+      const UKernelParamsType* params_ptr = init_params(&params);
 
       // Call optimized micro-kernel.
-      vhswish(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
+      ukernel(batch_size() * sizeof(uint16_t), x_data, y.data(), params_ptr);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_NEAR(y_ref[i], fp16_ieee_to_fp32_value(y[i]), std::max(1.0e-3f, std::abs(y_ref[i]) * 1.0e-2f))
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << fp16_ieee_to_fp32_value(x[i]);
+        EXPECT_NEAR(fp16_ieee_to_fp32_value(y[i]), y_ref[i], tol(y_ref[i]))
+            << "at " << i << " / " << batch_size() << ", x[" << i
+            << "] = " << fp16_ieee_to_fp32_value(x[i]);
       }
     }
   }
 
-  void Test(xnn_f32_vhswish_ukernel_fn vhswish, xnn_init_f32_hswish_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(-4.0f, 4.0f);
-
-    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
-    std::vector<double> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
-      } else {
-        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
-        std::fill(y.begin(), y.end(), nanf(""));
+  // Wrapper that generate the `init_params` functions needed by `TestFP32` and
+  // `TestFP16` from the microkernel parameter initializer pointers, for
+  // different numbers of additional inputs.
+  template <typename UKernelParamsType, typename... Ts>
+  static std::function<UKernelParamsType*(UKernelParamsType*)>
+  InitParamsWrapper(size_t (*init_params)(UKernelParamsType*, Ts...),
+                    Ts... args) {
+    return [=](UKernelParamsType* params) -> UKernelParamsType* {
+      if (init_params != nullptr) {
+        init_params(params, args...);
+        return params;
       }
-      const float* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = (x_data[i] / 6.0f) * std::max(std::min(x_data[i] + 3.0f, 6.0f), 0.0f);
-      }
-
-      // Prepare parameters.
-      union xnn_f32_hswish_params params;
-      init_params(&params);
-
-      // Call optimized micro-kernel.
-      vhswish(batch_size() * sizeof(float), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_NEAR(y[i], y_ref[i], std::max(5.0e-6, std::abs(y_ref[i]) * 1.0e-5))
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
-      }
-    }
+      return nullptr;
+    };
   }
 
-  void Test(xnn_f16_vlrelu_ukernel_fn vlrelu, xnn_init_f16_lrelu_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-125.0f, 125.0f), std::ref(rng));
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+  // Tolerance functions for the `TestFP32` and `TestFP16` template functions.
+  static float TolExact(float) { return 0.0f; }
+  static float TolExact16(float y_ref) { return std::abs(y_ref) * 5.0e-4f; }
+  static std::function<float(float)> TolMixed(float abs_tol, float rel_tol) {
+    return [=](float y_ref) -> float {
+      return std::max(abs_tol, std::abs(y_ref) * rel_tol);
+    };
+  }
+  static std::function<float(float)> TolRelative(float rel_tol) {
+    return [=](float y_ref) -> float { return std::abs(y_ref) * rel_tol; };
+  }
 
-    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
-    std::vector<float> y_ref(batch_size());
+  void Test(xnn_f32_vrelu_ukernel_fn vrelu) const {
+    TestFP32(
+        vrelu, [](xnn_f32_relu_params*) { return nullptr; },
+        [](float x) { return std::max(x, 0.0f); }, TolExact, -1.0f, 1.0f);
+  }
+
+  void Test(xnn_f16_vabs_ukernel_fn vabs,
+            xnn_init_f16_abs_params_fn init_params = nullptr) const {
+    TestFP16(
+        vabs, InitParamsWrapper(init_params),
+        [](float x) { return std::abs(x); }, TolExact16, -1.0f, 1.0f);
+  }
+
+  void Test(xnn_f32_vabs_ukernel_fn vabs,
+            xnn_init_f32_abs_params_fn init_params = nullptr) const {
+    TestFP32(
+        vabs, InitParamsWrapper(init_params),
+        [](float x) { return std::abs(x); }, TolExact, -1.0f, 1.0f);
+  }
+
+  void Test(xnn_f32_vclamp_ukernel_fn vclamp,
+            xnn_init_f32_minmax_params_fn init_params) const {
+    TestFP32(
+        vclamp,
+        InitParamsWrapper(init_params, static_cast<float>(qmin()),
+                          static_cast<float>(qmax())),
+        [this](float x) {
+          return std::max(std::min(x, static_cast<float>(qmax())),
+                          static_cast<float>(qmin()));
+        },
+        TolExact, 0.0f, 255.0f);
+  }
+
+  void Test(xnn_f16_velu_ukernel_fn velu,
+            xnn_init_f16_elu_params_fn init_params) const {
+    TestFP16(
+        velu,
+        InitParamsWrapper(init_params, fp16_ieee_from_fp32_value(prescale()),
+                          fp16_ieee_from_fp32_value(alpha()),
+                          fp16_ieee_from_fp32_value(beta())),
+        [this](float x) {
+          return std::signbit(x) ? alpha() * std::expm1(x * prescale())
+                                 : x * beta();
+        },
+        TolMixed(1.0e-4f, 5.0e-3f), -9.0f, 9.0f);
+  }
+
+  void Test(xnn_f32_velu_ukernel_fn velu,
+            xnn_init_f32_elu_params_fn init_params) const {
+    TestFP32(
+        velu, InitParamsWrapper(init_params, prescale(), alpha(), beta()),
+        [this](float x) {
+          return std::signbit(x)
+                     ? alpha() * std::expm1(static_cast<double>(x) * prescale())
+                     : static_cast<double>(x) * beta();
+        },
+        TolMixed(5.0e-6f, 1.0e-5f), -20.0f, 20.0f);
+  }
+
+  void Test(xnn_f16_vhswish_ukernel_fn vhswish,
+            xnn_init_f16_hswish_params_fn init_params) const {
+    TestFP16(
+        vhswish, InitParamsWrapper(init_params),
+        [](float x) {
+          return (x / 6.0f) * std::max(std::min(x + 3.0f, 6.0f), 0.0f);
+        },
+        TolMixed(1.0e-3f, 1.0e-2f), -4.0f, 4.0f);
+  }
+
+  void Test(xnn_f32_vhswish_ukernel_fn vhswish,
+            xnn_init_f32_hswish_params_fn init_params) const {
+    TestFP32(
+        vhswish, InitParamsWrapper(init_params),
+        [](float x) {
+          return (x / 6.0f) * std::max(std::min(x + 3.0f, 6.0f), 0.0f);
+        },
+        TolMixed(5.0e-6f, 1.0e-5f), -4.0f, 4.0f);
+  }
+
+  void Test(xnn_f16_vlrelu_ukernel_fn vlrelu,
+            xnn_init_f16_lrelu_params_fn init_params) const {
     const uint16_t slope_as_half = fp16_ieee_from_fp32_value(slope());
     const float slope_as_float = fp16_ieee_to_fp32_value(slope_as_half);
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f16rng));
-      } else {
-        std::generate(x.begin(), x.end(), std::ref(f16rng));
-        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
-      }
-      const uint16_t* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        const float x_value = fp16_ieee_to_fp32_value(x_data[i]);
-        y_ref[i] = std::signbit(x_value) ? x_value * slope_as_float : x_value;
-      }
-
-      // Prepare parameters.
-      union xnn_f16_lrelu_params params;
-      init_params(&params, slope_as_half);
-
-      // Call optimized micro-kernel.
-      vlrelu(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(
-            fp16_ieee_to_fp32_value(y[i]),
-            y_ref[i],
-            std::max(1.0e-4f, std::abs(y_ref[i]) * 1.0e-3f))
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << fp16_ieee_to_fp32_value(x[i]);
-      }
-    }
+    TestFP16(
+        vlrelu, InitParamsWrapper(init_params, slope_as_half),
+        [slope_as_float](float x) {
+          return std::signbit(x) ? x * slope_as_float : x;
+        },
+        TolMixed(1.0e-4f, 1.0e-3f), -125.0f, 125.0f);
   }
 
-  void Test(xnn_f32_vlrelu_ukernel_fn vlrelu, xnn_init_f32_lrelu_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(-125.0f, 125.0f);
-
-    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
-    std::vector<double> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
-      } else {
-        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
-        std::fill(y.begin(), y.end(), nanf(""));
-      }
-      const float* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = std::signbit(x_data[i]) ? x_data[i] * slope() : x_data[i];
-      }
-
-      // Prepare parameters.
-      union xnn_f32_lrelu_params params;
-      init_params(&params, slope());
-
-      // Call optimized micro-kernel.
-      vlrelu(batch_size() * sizeof(float), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_EQ(y[i], y_ref[i])
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
-      }
-    }
+  void Test(xnn_f32_vlrelu_ukernel_fn vlrelu,
+            xnn_init_f32_lrelu_params_fn init_params) const {
+    TestFP32(
+        vlrelu, InitParamsWrapper(init_params, slope()),
+        [this](float x) { return std::signbit(x) ? x * slope() : x; }, TolExact,
+        -125.0f, 125.0f);
   }
 
-  void Test(xnn_f16_vneg_ukernel_fn vneg, xnn_init_f16_neg_params_fn init_params = nullptr) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
-
-    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
-    std::vector<uint16_t> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      } else {
-        std::generate(x.begin(), x.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
-      }
-      const uint16_t* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = x_data[i] ^ UINT16_C(0x8000);
-      }
-
-      // Prepare parameters.
-      union xnn_f16_neg_params params;
-      if (init_params != nullptr) {
-        init_params(&params);
-      }
-
-      // Call optimized micro-kernel.
-      vneg(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_EQ(y[i], y_ref[i])
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
-      }
-    }
+  void Test(xnn_f16_vneg_ukernel_fn vneg,
+            xnn_init_f16_neg_params_fn init_params = nullptr) const {
+    TestFP16(
+        vneg, InitParamsWrapper(init_params), [](float x) { return -x; },
+        TolExact16, -1.0f, 1.0f);
   }
 
-  void Test(xnn_f32_vneg_ukernel_fn vneg, xnn_init_f32_neg_params_fn init_params = nullptr) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
-
-    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
-    std::vector<float> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
-      } else {
-        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
-        std::fill(y.begin(), y.end(), nanf(""));
-      }
-      const float* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = -x_data[i];
-      }
-
-      // Prepare parameters.
-      union xnn_f32_neg_params params;
-      if (init_params != nullptr) {
-        init_params(&params);
-      }
-
-      // Call optimized micro-kernel.
-      vneg(batch_size() * sizeof(float), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_EQ(y[i], y_ref[i])
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
-      }
-    }
+  void Test(xnn_f32_vneg_ukernel_fn vneg,
+            xnn_init_f32_neg_params_fn init_params = nullptr) const {
+    TestFP32(
+        vneg, InitParamsWrapper(init_params), [](float x) { return -x; },
+        TolExact, -1.0f, 1.0f);
   }
 
-  void Test(xnn_f16_vround_ukernel_fn vrnd, OpType op_type, xnn_init_f16_rnd_params_fn init_params = nullptr) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(-5.0f, 5.0f);
-
-    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
-    std::vector<uint16_t> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      } else {
-        std::generate(x.begin(), x.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
-      }
-      const uint16_t* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        switch (op_type) {
-          case OpType::RoundToNearestEven:
-            y_ref[i] = fp16_ieee_from_fp32_value(std::nearbyint(fp16_ieee_to_fp32_value(x_data[i])));
-            break;
-          case OpType::RoundTowardsZero:
-            y_ref[i] = fp16_ieee_from_fp32_value(std::trunc(fp16_ieee_to_fp32_value(x_data[i])));
-            break;
-          case OpType::RoundUp:
-            y_ref[i] = fp16_ieee_from_fp32_value(std::ceil(fp16_ieee_to_fp32_value(x_data[i])));
-            break;
-          case OpType::RoundDown:
-            y_ref[i] = fp16_ieee_from_fp32_value(std::floor(fp16_ieee_to_fp32_value(x_data[i])));
-            break;
-          default:
-            GTEST_FAIL() << "Unexpected operation type";
-            return;
-        }
-      }
-
-      // Prepare parameters.
-      xnn_f16_rnd_params params;
-      if (init_params != nullptr) {
-        init_params(&params);
-      }
-
-      // Call optimized micro-kernel.
-      vrnd(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_EQ(y[i], y_ref[i])
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
-      }
-    }
+  void Test(xnn_f16_vround_ukernel_fn vrnd, OpType op_type,
+            xnn_init_f16_rnd_params_fn init_params = nullptr) const {
+    TestFP16(
+        vrnd, InitParamsWrapper(init_params),
+        [op_type](float x) -> float {
+          switch (op_type) {
+            case OpType::RoundToNearestEven:
+              return std::nearbyint(x);
+            case OpType::RoundTowardsZero:
+              return std::trunc(x);
+            case OpType::RoundUp:
+              return std::ceil(x);
+            case OpType::RoundDown:
+              return std::floor(x);
+            default:
+              []() { GTEST_FAIL() << "Unexpected operation type"; }();
+              return 0.0f;
+          }
+        },
+        TolExact16, -5.0f, 5.0f);
   }
 
-  void Test(xnn_f32_vround_ukernel_fn vrnd, OpType op_type, xnn_init_f32_rnd_params_fn init_params = nullptr) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(-5.0f, 5.0f);
-
-    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
-    std::vector<float> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
-      } else {
-        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
-        std::fill(y.begin(), y.end(), nanf(""));
-      }
-      const float* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        switch (op_type) {
-          case OpType::RoundToNearestEven:
-            y_ref[i] = std::nearbyint(x_data[i]);
-            break;
-          case OpType::RoundTowardsZero:
-            y_ref[i] = std::trunc(x_data[i]);
-            break;
-          case OpType::RoundUp:
-            y_ref[i] = std::ceil(x_data[i]);
-            break;
-          case OpType::RoundDown:
-            y_ref[i] = std::floor(x_data[i]);
-            break;
-          default:
-            GTEST_FAIL() << "Unexpected operation type";
-            return;
-        }
-      }
-
-      // Prepare parameters.
-      xnn_f32_rnd_params params;
-      if (init_params != nullptr) {
-        init_params(&params);
-      }
-
-      // Call optimized micro-kernel.
-      vrnd(batch_size() * sizeof(float), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_EQ(y[i], y_ref[i])
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
-      }
-    }
+  void Test(xnn_f32_vround_ukernel_fn vrnd, OpType op_type,
+            xnn_init_f32_rnd_params_fn init_params = nullptr) const {
+    TestFP32(
+        vrnd, InitParamsWrapper(init_params),
+        [op_type](float x) -> float {
+          switch (op_type) {
+            case OpType::RoundToNearestEven:
+              return std::nearbyint(x);
+            case OpType::RoundTowardsZero:
+              return std::trunc(x);
+            case OpType::RoundUp:
+              return std::ceil(x);
+            case OpType::RoundDown:
+              return std::floor(x);
+            default:
+              []() { GTEST_FAIL() << "Unexpected operation type"; }();
+              return 0.0f;
+          }
+        },
+        TolExact, -5.0f, 5.0f);
   }
 
-  void Test(xnn_f16_vsigmoid_ukernel_fn vsigmoid, xnn_init_f16_sigmoid_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto distribution = std::uniform_real_distribution<float>(-25.0f, 25.0f);
-    auto f32rng = std::bind(distribution, std::ref(rng));
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
-
-    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
-    std::vector<float> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f16rng));
-      } else {
-        std::generate(x.begin(), x.end(), std::ref(f16rng));
-        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
-      }
-      const uint16_t* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        const float e = std::exp(fp16_ieee_to_fp32_value(x_data[i]));
-        y_ref[i] = e / (1.0f + e);
-      }
-
-      // Prepare parameters.
-      union xnn_f16_sigmoid_params params;
-      init_params(&params);
-
-      // Call optimized micro-kernel.
-      vsigmoid(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(
-            fp16_ieee_to_fp32_value(y[i]),
-            y_ref[i],
-            std::max(1.0e-4f, std::abs(y_ref[i]) * 5.0e-3f))
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << fp16_ieee_to_fp32_value(x[i]);
-      }
-    }
+  void Test(xnn_f16_vsigmoid_ukernel_fn vsigmoid,
+            xnn_init_f16_sigmoid_params_fn init_params) const {
+    TestFP16(
+        vsigmoid, InitParamsWrapper(init_params),
+        [](float x) {
+          const float e = std::exp(x);
+          return e / (1.0f + e);
+        },
+        TolMixed(1.0e-4f, 5.0e-3f), -25.0f, 25.0f);
   }
 
-  void Test(xnn_f32_vsigmoid_ukernel_fn vsigmoid, xnn_init_f32_sigmoid_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(-125.0f, 125.0f);
-
-    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
-    std::vector<double> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
-      } else {
-        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
-        std::fill(y.begin(), y.end(), nanf(""));
-      }
-      const float* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        const double e = std::exp(double(x_data[i]));
-        y_ref[i] = e / (1.0 + e);
-      }
-
-      // Prepare parameters.
-      union xnn_f32_sigmoid_params params;
-      init_params(&params);
-
-      // Call optimized micro-kernel.
-      vsigmoid(batch_size() * sizeof(float), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_NEAR(y[i], y_ref[i], std::max(5.0e-6, std::abs(y_ref[i]) * 1.0e-5))
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
-      }
-    }
+  void Test(xnn_f32_vsigmoid_ukernel_fn vsigmoid,
+            xnn_init_f32_sigmoid_params_fn init_params) const {
+    TestFP32(
+        vsigmoid, InitParamsWrapper(init_params),
+        [](float x) {
+          const double e = std::exp(static_cast<double>(x));
+          return e / (1.0 + e);
+        },
+        TolMixed(5.0e-6f, 1.0e-5f), -125.0f, 125.0f);
   }
 
-  void Test(xnn_f16_vsqr_ukernel_fn vsqr, xnn_init_f16_default_params_fn init_params = nullptr) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
-
-    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
-    std::vector<float> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      } else {
-        std::generate(x.begin(), x.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
-      }
-      const uint16_t* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        const float x_value = fp16_ieee_to_fp32_value(x_data[i]);
-        y_ref[i] = x_value * x_value;
-      }
-
-      // Prepare parameters.
-      union xnn_f16_default_params params;
-      if (init_params != nullptr) {
-        init_params(&params);
-      }
-
-      // Call optimized micro-kernel.
-      vsqr(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(
-            fp16_ieee_to_fp32_value(y[i]),
-            y_ref[i],
-            std::max(1.0e-4f, std::abs(y_ref[i]) * 5.0e-3f))
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << fp16_ieee_to_fp32_value(x[i]);
-      }
-    }
+  void Test(xnn_f16_vsqr_ukernel_fn vsqr,
+            xnn_init_f16_default_params_fn init_params = nullptr) const {
+    TestFP16(
+        vsqr, InitParamsWrapper(init_params), [](float x) { return x * x; },
+        TolMixed(1.0e-4f, 5.0e-3f), -10.0f, 10.0f);
   }
 
-  void Test(xnn_f32_vsqr_ukernel_fn vsqr, xnn_init_f32_default_params_fn init_params = nullptr) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
-
-    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
-    std::vector<float> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
-      } else {
-        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
-        std::fill(y.begin(), y.end(), nanf(""));
-      }
-      const float* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = x_data[i] * x_data[i];
-      }
-
-      // Prepare parameters.
-      union xnn_f32_default_params params;
-      if (init_params != nullptr) {
-        init_params(&params);
-      }
-
-      // Call optimized micro-kernel.
-      vsqr(batch_size() * sizeof(float), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_EQ(y[i], y_ref[i])
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
-      }
-    }
+  void Test(xnn_f32_vsqr_ukernel_fn vsqr,
+            xnn_init_f32_default_params_fn init_params = nullptr) const {
+    TestFP32(
+        vsqr, InitParamsWrapper(init_params), [](float x) { return x * x; },
+        TolExact, -10.0f, 10.0f);
   }
 
-  void Test(xnn_f16_vsqrt_ukernel_fn vsqrt, xnn_init_f16_sqrt_params_fn init_params = nullptr) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(0.001f, 10.0f);
-
-    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
-    std::vector<float> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      } else {
-        std::generate(x.begin(), x.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
-      }
-      const uint16_t* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = std::sqrt(fp16_ieee_to_fp32_value(x_data[i]));
-      }
-
-      // Prepare parameters.
-      union xnn_f16_sqrt_params params;
-      if (init_params != nullptr) {
-        init_params(&params);
-      }
-
-      // Call optimized micro-kernel.
-      vsqrt(batch_size() * sizeof(uint16_t), x_data, y.data(), init_params != nullptr ? &params : nullptr);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(
-            fp16_ieee_to_fp32_value(y[i]),
-            y_ref[i],
-            std::max(1.0e-4f, std::abs(y_ref[i]) * 5.0e-3f))
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << fp16_ieee_to_fp32_value(x[i]);
-      }
-    }
+  void Test(xnn_f16_vsqrt_ukernel_fn vsqrt,
+            xnn_init_f16_sqrt_params_fn init_params = nullptr) const {
+    TestFP16(
+        vsqrt, InitParamsWrapper(init_params),
+        [](float x) { return std::sqrt(x); }, TolMixed(1.0e-4f, 5.0e-3f),
+        0.001f, 10.0f);
   }
 
-  void Test(xnn_f32_vsqrt_ukernel_fn vsqrt, xnn_init_f32_sqrt_params_fn init_params = nullptr) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(0.0f, 10.0f);
-
-    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
-    std::vector<float> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
-      } else {
-        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
-        std::fill(y.begin(), y.end(), nanf(""));
-      }
-      const float* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = std::sqrt(x_data[i]);
-      }
-
-      // Prepare parameters.
-      union xnn_f32_sqrt_params params;
-      if (init_params != nullptr) {
-        init_params(&params);
-      }
-
-      // Call optimized micro-kernel.
-      vsqrt(batch_size() * sizeof(float), x_data, y.data(), init_params != nullptr ? &params : nullptr);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_EQ(y[i], y_ref[i])
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
-      }
-    }
+  void Test(xnn_f32_vsqrt_ukernel_fn vsqrt,
+            xnn_init_f32_sqrt_params_fn init_params = nullptr) const {
+    TestFP32(
+        vsqrt, InitParamsWrapper(init_params),
+        [](float x) { return std::sqrt(x); }, TolExact, 0.0f, 10.0f);
   }
 
-  void Test(xnn_f16_vtanh_ukernel_fn vtanh, xnn_init_f16_tanh_params_fn init_params = nullptr) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto distribution = std::uniform_real_distribution<float>(-5.0f, 5.0f);
-    auto f32rng = std::bind(distribution, std::ref(rng));
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
-
-    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
-    std::vector<float> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f16rng));
-      } else {
-        std::generate(x.begin(), x.end(), std::ref(f16rng));
-        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
-      }
-      const uint16_t* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = std::tanh(fp16_ieee_to_fp32_value(x_data[i]));
-      }
-
-      // Prepare parameters.
-      union xnn_f16_tanh_params params;
-      if (init_params != nullptr) {
-        init_params(&params);
-      }
-
-      // Call optimized micro-kernel.
-      vtanh(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(
-            fp16_ieee_to_fp32_value(y[i]),
-            y_ref[i],
-            std::max(1.0e-4f, std::abs(y_ref[i]) * 5.0e-3f))
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << fp16_ieee_to_fp32_value(x[i]);
-      }
-    }
+  void Test(xnn_f32_vrsqrt_ukernel_fn vrsqrt,
+            xnn_init_f32_rsqrt_params_fn init_params = nullptr) const {
+    TestFP32(
+        vrsqrt, InitParamsWrapper(init_params),
+        [](float x) { return 1.0f / std::sqrt(x); },
+        TolRelative(4 * std::numeric_limits<float>::epsilon()),
+        std::numeric_limits<float>::epsilon(), 10.0f);
   }
 
-  void Test(xnn_f32_vtanh_ukernel_fn vtanh, xnn_init_f32_tanh_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
-
-    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
-    std::vector<double> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
-      } else {
-        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
-        std::fill(y.begin(), y.end(), nanf(""));
-      }
-      const float* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = std::tanh(double(x_data[i]));
-      }
-
-      // Prepare parameters.
-      union xnn_f32_tanh_params params;
-      init_params(&params);
-
-      // Call optimized micro-kernel.
-      vtanh(batch_size() * sizeof(float), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_NEAR(y[i], y_ref[i], std::max(5.0e-6, std::abs(y_ref[i]) * 1.0e-5))
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
-      }
-    }
+  void Test(xnn_f16_vtanh_ukernel_fn vtanh,
+            xnn_init_f16_tanh_params_fn init_params = nullptr) const {
+    TestFP16(
+        vtanh, InitParamsWrapper(init_params),
+        [](float x) { return std::tanh(x); },
+        TolMixed(/*abs_tol=*/1.0e-4f, /*rel_tol=*/5.0e-3f), -5.0f, 5.0f);
   }
 
-  void Test(xnn_f16_vclamp_ukernel_fn vclamp, xnn_init_f16_minmax_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 255.0f), std::ref(rng));
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+  void Test(xnn_f32_vtanh_ukernel_fn vtanh,
+            xnn_init_f32_tanh_params_fn init_params) const {
+    TestFP32(
+        vtanh, InitParamsWrapper(init_params),
+        [](float x) { return std::tanh(x); },
+        TolMixed(/*abs_tol=*/5.0e-6f, /*rel_tol=*/1.0e-5f), -10.0f, 10.0f);
+  }
 
-    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
-    std::vector<float> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), std::ref(f16rng));
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f16rng));
-      } else {
-        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
-      }
-      const uint16_t* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = std::max(std::min(fp16_ieee_to_fp32_value(x_data[i]), float(qmax())), float(qmin()));
-      }
-
-      // Prepare parameters.
-      union xnn_f16_minmax_params params;
-      init_params(&params, fp16_ieee_from_fp32_value(float(qmin())), fp16_ieee_from_fp32_value(float(qmax())));
-
-      // Call optimized micro-kernel.
-      vclamp(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_NEAR(y_ref[i], fp16_ieee_to_fp32_value(y[i]), std::max(1.0e-3f, std::abs(y_ref[i]) * 1.0e-2f))
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << fp16_ieee_to_fp32_value(x[i]);
-      }
-    }
+  void Test(xnn_f16_vclamp_ukernel_fn vclamp,
+            xnn_init_f16_minmax_params_fn init_params) const {
+    TestFP16(
+        vclamp,
+        InitParamsWrapper(
+            init_params, fp16_ieee_from_fp32_value(static_cast<float>(qmin())),
+            fp16_ieee_from_fp32_value(static_cast<float>(qmax()))),
+        [this](float x) {
+          return std::max(std::min(x, static_cast<float>(qmax())),
+                          static_cast<float>(qmin()));
+        },
+        TolExact16, 0.0f, 255.0f);
   }
 
   void Test(xnn_s8_vclamp_ukernel_fn vclamp, xnn_init_s8_minmax_params_fn init_params) const {

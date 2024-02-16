@@ -59,21 +59,23 @@ static enum xnn_status reshape_slice_operator(
     pthreadpool_t threadpool)
 {
   const size_t num_dims = opdata->shape1.num_dims;
+  enum xnn_status status = xnn_status_invalid_state;
+  const size_t old_workspace_size = opdata->workspace_size;
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_slice_nd_x8:
-      return xnn_reshape_slice_nd_x8(
+      status = xnn_reshape_slice_nd_x8(
           opdata->operator_objects[0], num_dims,
           opdata->shape1.dim, opdata->offsets, opdata->sizes,
           threadpool);
       break;
     case xnn_operator_type_slice_nd_x16:
-      return xnn_reshape_slice_nd_x16(
+      status = xnn_reshape_slice_nd_x16(
           opdata->operator_objects[0], num_dims,
           opdata->shape1.dim, opdata->offsets, opdata->sizes,
           threadpool);
       break;
     case xnn_operator_type_slice_nd_x32:
-      return xnn_reshape_slice_nd_x32(
+      status = xnn_reshape_slice_nd_x32(
           opdata->operator_objects[0], num_dims,
           opdata->shape1.dim, opdata->offsets, opdata->sizes,
           threadpool);
@@ -81,6 +83,29 @@ static enum xnn_status reshape_slice_operator(
     default:
       XNN_UNREACHABLE;
   }
+  if (status != xnn_status_success) {
+    return status;
+  }
+  const uint32_t output_id = opdata->outputs[0];
+  const uint32_t input_id = opdata->inputs[0];
+  assert(output_id < num_values);
+  assert(input_id < num_values);
+  struct xnn_value* output_value = values + output_id;
+  struct xnn_value* input_value = values + input_id;
+  output_value->shape.num_dims = num_dims;
+  for (size_t i = 0; i < num_dims; ++i) {
+    if (opdata->sizes[i] == 0) {
+      output_value->shape.dim[i] = input_value->shape.dim[i];
+    } else {
+      output_value->shape.dim[i] = opdata->sizes[i];
+    }
+  }
+  const size_t new_size = xnn_tensor_get_size(output_value);
+  if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
+    output_value->size = new_size;
+    return xnn_status_reallocation_required;
+  }
+  return xnn_status_success;
 }
 
 static enum xnn_status setup_slice_operator(
@@ -213,7 +238,7 @@ enum xnn_status xnn_define_static_slice(
         xnn_node_type_to_string(xnn_node_type_static_slice), input_id, output_id, offsets[i], input_value->shape.dim[i], i);
       return xnn_status_invalid_parameter;
     }
-    if (sizes[i] != output_value->shape.dim[i]) {
+    if (sizes[i] > 0 && sizes[i] != output_value->shape.dim[i]) {
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
         ": size %zu does not match output size %zu in dimension %zu",

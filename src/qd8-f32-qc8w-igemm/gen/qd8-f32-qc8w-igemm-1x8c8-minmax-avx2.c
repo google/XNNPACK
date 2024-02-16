@@ -135,7 +135,6 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x8c8__avx2(
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
 
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
-
       nc -= 8;
     } else {
       __m128 vout0x0123 = _mm256_castps256_ps128(vout0x01234567);

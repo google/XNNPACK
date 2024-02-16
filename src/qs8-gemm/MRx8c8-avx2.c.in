@@ -8,8 +8,6 @@ $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
 $assert DATATYPE in ["QC8", "QS8", "QU8", "QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 $assert not DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"] or not REQUANTIZATION
-$assert VARIANT in ["LD128", "EXTENDED"]
-$assert MR <= 4
 #include <assert.h>
 
 #include <immintrin.h>
@@ -18,17 +16,18 @@ $assert MR <= 4
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/unaligned.h>
+$if PREFETCH:
+  #include <xnnpack/prefetch.h>
 
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QU8": "qu8", "QD8_F16" : "qd8_f16_qc8w", "QD8_F32": "qd8_f32_qc8w", "QC4_F16": "qd8_f16_qc4w", "QC4_F32": "qd8_f32_qc4w"}[DATATYPE]
-$GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx2"
 $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params", "QD8_F16": "xnn_f16_minmax_params", "QD8_F32": "xnn_f32_minmax_params", "QC4_F16": "xnn_f16_qc4w_minmax_params", "QC4_F32": "xnn_f32_qc4w_minmax_params"}[DATATYPE]
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $OUT_T = {"QC8": "int8_t", "QD8_F16": "void", "QD8_F32": "float", "QC4_F16": "void", "QC4_F32": "float", "QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
-$_MM_CVTEPX8_EPI16 = "_mm_cvtepu8_epi16" if DATATYPE == "QU8" else "_mm_cvtepi8_epi16"
-void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__avx2(
+$ISA = "avx2" if AVX else "avx512skx"
+void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__${ISA}${"_prfm" if PREFETCH else ""}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -109,8 +108,11 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
     $if DATATYPE in ["QC4_F16", "QC4_F32"]:
       while (k >= 16 * sizeof(${XINT8_T})) {
         $for M in range(MR):
-          __m128i va${M} = ${_MM_CVTEPX8_EPI16}(_mm_loadl_epi64((const __m128i*) a${M}));
-          __m256i vxa${M} = _mm256_inserti128_si256(_mm256_castsi128_si256(va${M}), va${M}, 1);
+          __m128i va${M} = _mm_broadcastq_epi64(_mm_loadl_epi64((const __m128i*) a${M}));
+          $if DATATYPE == "QU8":
+            __m256i vxa${M} = _mm256_cvtepu8_epi16(va${M});
+          $else:
+            __m256i vxa${M} = _mm256_cvtepi8_epi16(va${M});
           a${M} += 8;
 
         $for N in range(0, 8, 2):
@@ -126,8 +128,11 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
             vacc${M}x${ABC[N:N+2]} = _mm256_add_epi32(vacc${M}x${ABC[N:N+2]}, _mm256_madd_epi16(vxa${M}, vxb${ABC[N:N+2]}));
 
         $for M in range(MR):
-          va${M} = ${_MM_CVTEPX8_EPI16}(_mm_loadl_epi64((const __m128i*) a${M}));
-          vxa${M} = _mm256_inserti128_si256(_mm256_castsi128_si256(va${M}), va${M}, 1);
+          va${M} = _mm_broadcastq_epi64(_mm_loadl_epi64((const __m128i*) a${M}));
+          $if DATATYPE == "QU8":
+            vxa${M} = _mm256_cvtepu8_epi16(va${M});
+          $else:
+            vxa${M} = _mm256_cvtepi8_epi16(va${M});
           a${M} += 8;
 
         $for N in range(0, 8, 2):
@@ -143,17 +148,15 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
 
     while (k >= 8 * sizeof(${XINT8_T})) {
       $for M in range(MR):
-        const __m128i va${M} = ${_MM_CVTEPX8_EPI16}(_mm_loadl_epi64((const __m128i*) a${M}));
-        const __m256i vxa${M} = _mm256_inserti128_si256(_mm256_castsi128_si256(va${M}), va${M}, 1);
+        const __m128i va${M} = _mm_broadcastq_epi64(_mm_loadl_epi64((const __m128i*) a${M}));
+        $if DATATYPE == "QU8":
+          const __m256i vxa${M} = _mm256_cvtepu8_epi16(va${M});
+        $else:
+          const __m256i vxa${M} = _mm256_cvtepi8_epi16(va${M});
         a${M} += 8;
 
       $for N in range(0, 8, 2):
-        $if VARIANT == "EXTENDED":
-          $if N == 0:
-            const __m256i vxb${ABC[N:N+2]} = _mm256_load_si256((const __m256i*) w);
-          $else:
-            const __m256i vxb${ABC[N:N+2]} = _mm256_load_si256((const __m256i*) ((const int16_t*) w + ${N * 8}));
-        $elif DATATYPE in ["QC4_F16", "QC4_F32"]:
+        $if DATATYPE in ["QC4_F16", "QC4_F32"]:
           $if N == 0:
             const __m128i vb${ABC[N:N+2]} = _mm_load_si128((const __m128i*) w);
           $else:
@@ -175,10 +178,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
         $for M in range(MR):
           vacc${M}x${ABC[N:N+2]} = _mm256_add_epi32(vacc${M}x${ABC[N:N+2]}, _mm256_madd_epi16(vxa${M}, vxb${ABC[N:N+2]}));
 
-      $if VARIANT == "EXTENDED":
-        w = (const int16_t*) w + 64;
-      $else:
-        w = (const ${XINT8_T}*) w + 64;
+      w = (const ${XINT8_T}*) w + 64;
       k -= 8 * sizeof(${XINT8_T});
     }
 
@@ -230,30 +230,36 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
 
           nc -= 8;
         } else {
-          if (nc & 4) {
-            $for M in range(MR):
-              _mm_storel_epi64((__m128i*) c${M}, vfp16out${M}x01234567);
+          $if AVX:
+            if (nc & 4) {
+              $for M in range(MR):
+                _mm_storel_epi64((__m128i*) c${M}, vfp16out${M}x01234567);
 
-            $for M in range(MR):
-              vfp16out${M}x01234567 = _mm_unpackhi_epi64(vfp16out${M}x01234567, vfp16out${M}x01234567);
+              $for M in range(MR):
+                vfp16out${M}x01234567 = _mm_unpackhi_epi64(vfp16out${M}x01234567, vfp16out${M}x01234567);
 
-            $for M in range(MR):
-              c${M} += 4;
-          }
-          if (nc & 2) {
-            $for M in range(MR):
-              _mm_storeu_si32(c${M}, vfp16out${M}x01234567);
+              $for M in range(MR):
+                c${M} += 4;
+            }
+            if (nc & 2) {
+              $for M in range(MR):
+                _mm_storeu_si32(c${M}, vfp16out${M}x01234567);
 
-            $for M in range(MR):
-              vfp16out${M}x01234567 = _mm_srli_epi64(vfp16out${M}x01234567, 32);
+              $for M in range(MR):
+                vfp16out${M}x01234567 = _mm_srli_epi64(vfp16out${M}x01234567, 32);
 
+              $for M in range(MR):
+                c${M} += 2;
+            }
+            if (nc & 1) {
+              $for M in range(MR):
+                *c${M} = (uint16_t) _mm_extract_epi16(vfp16out${M}x01234567, 0);
+            }
+          $else:
+            // Prepare mask for valid 16-bit elements (depends on nc).
+            const __mmask8 vmask = _cvtu32_mask8((UINT32_C(1) << nc) - 1);
             $for M in range(MR):
-              c${M} += 2;
-          }
-          if (nc & 1) {
-            $for M in range(MR):
-              *c${M} = (uint16_t) _mm_extract_epi16(vfp16out${M}x01234567, 0);
-          }
+              _mm_mask_storeu_epi16(c${M}, vmask, vfp16out${M}x01234567);
           nc = 0;
         }
       $else:
@@ -275,32 +281,38 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
 
           nc -= 8;
         } else {
-          $for M in range(MR):
-            __m128 vout${M}x0123 = _mm256_castps256_ps128(vout${M}x01234567);
-          if (nc & 4) {
+          $if AVX:
             $for M in range(MR):
-              _mm_storeu_ps(c${M}, vout${M}x0123);
+              __m128 vout${M}x0123 = _mm256_castps256_ps128(vout${M}x01234567);
+            if (nc & 4) {
+              $for M in range(MR):
+                _mm_storeu_ps(c${M}, vout${M}x0123);
 
-            $for M in range(MR):
-              vout${M}x0123 = _mm256_extractf128_ps(vout${M}x01234567, 1);
+              $for M in range(MR):
+                vout${M}x0123 = _mm256_extractf128_ps(vout${M}x01234567, 1);
 
-            $for M in range(MR):
-              c${M} += 4;
-          }
-          if (nc & 2) {
-            $for M in range(MR):
-              _mm_storel_pi((__m64*) c${M}, vout${M}x0123);
+              $for M in range(MR):
+                c${M} += 4;
+            }
+            if (nc & 2) {
+              $for M in range(MR):
+                _mm_storel_pi((__m64*) c${M}, vout${M}x0123);
 
-            $for M in range(MR):
-              vout${M}x0123 = _mm_movehl_ps(vout${M}x0123, vout${M}x0123);
+              $for M in range(MR):
+                vout${M}x0123 = _mm_movehl_ps(vout${M}x0123, vout${M}x0123);
 
+              $for M in range(MR):
+                c${M} += 2;
+            }
+            if (nc & 1) {
+              $for M in range(MR):
+                _mm_store_ss(c${M}, vout${M}x0123);
+            }
+          $else:
+            // Prepare mask for valid 32-bit elements (depends on nc).
+            const __mmask8 vmask = _cvtu32_mask8((UINT32_C(1) << nc) - 1);
             $for M in range(MR):
-              c${M} += 2;
-          }
-          if (nc & 1) {
-            $for M in range(MR):
-              _mm_store_ss(c${M}, vout${M}x0123);
-          }
+              _mm256_mask_storeu_ps(c${M}, vmask, vout${M}x01234567);
           nc = 0;
         }
     $else:
