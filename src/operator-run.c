@@ -455,6 +455,31 @@ void xnn_compute_dqgemm(
       (const void*) ((uintptr_t) &context->quantization_params[mr_block_start]));
 }
 
+void xnn_compute_dqgemm_bl(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t mr_block_start,
+    size_t nr_block_start,
+    size_t mr_block_size,
+    size_t nr_block_size)
+{
+  const size_t a_stride  = context->a_stride;
+  const size_t cm_stride = context->cm_stride;
+
+  context->dq_bl_ukernel.function[XNN_UARCH_DEFAULT](
+      mr_block_size,
+      nr_block_size,
+      context->k_scaled,
+      context->block_size,
+      (const void*) ((uintptr_t) context->a + mr_block_start * a_stride),
+      a_stride,
+      (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride),
+      (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
+      cm_stride,
+      context->cn_stride,
+      context->fused_params,
+      (const void*) ((uintptr_t) &context->quantization_params[mr_block_start]));
+}
+
 void xnn_compute_spmm(
     const struct spmm_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,
@@ -2182,6 +2207,32 @@ void xnn_compute_rope(
     context->dq_ukernel.function[uarch_index](
         mr_block_size,
         nr_block_size,
+        context->k_scaled,
+        (const void*) ((uintptr_t) context->a + mr_block_start * a_stride),
+        a_stride,
+        (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride),
+        (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
+        cm_stride,
+        context->cn_stride,
+        context->fused_params,
+       (const void*) ((uintptr_t) &context->quantization_params[mr_block_start]));
+  }
+
+  void xnn_compute_hmp_dqgemm_bl(
+      const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+      uint32_t uarch_index,
+      size_t mr_block_start,
+      size_t nr_block_start,
+      size_t mr_block_size,
+      size_t nr_block_size)
+  {
+    const size_t a_stride  = context->a_stride;
+    const size_t cm_stride = context->cm_stride;
+
+    context->dq_bl_ukernel.function[uarch_index](
+        mr_block_size,
+        nr_block_size,
+        context->block_size,
         context->k_scaled,
         (const void*) ((uintptr_t) context->a + mr_block_start * a_stride),
         a_stride,

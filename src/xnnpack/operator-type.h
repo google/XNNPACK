@@ -92,6 +92,7 @@ enum xnn_operator_type {
   xnn_operator_type_fully_connected_nc_qd8_f16_qc8w,
   xnn_operator_type_fully_connected_nc_qd8_f16_qc4w,
   xnn_operator_type_fully_connected_nc_qd8_f32_qc4w,
+  xnn_operator_type_fully_connected_nc_qd8_f32_qb4w,
   xnn_operator_type_fully_connected_nc_qd8_f32_qc8w,
   xnn_operator_type_fully_connected_nc_qs8,
   xnn_operator_type_fully_connected_nc_qs8_qc8w,

@@ -41,6 +41,7 @@ static struct xnn_gemm_config f32_qc8w_gemm_config = {0};
 static struct xnn_gemm_config qd8_f16_qc8w_gemm_config = {0};
 static struct xnn_gemm_config qd8_f16_qc4w_gemm_config = {0};
 static struct xnn_gemm_config qd8_f32_qc4w_gemm_config = {0};
+static struct xnn_gemm_config qd8_f32_qb4w_gemm_config = {0};
 static struct xnn_gemm_config qd8_f32_qc8w_gemm_config = {0};
 static struct xnn_gemm_config qs8_qc8w_gemm_config = {0};
 static struct xnn_gemm_config qu8_gemm_config = {0};
@@ -54,6 +55,7 @@ static struct xnn_gemm_config qu8_gemm_config = {0};
   static INIT_ONCE init_guard_qd8_f16_qc4w_gemm = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_qd8_f16_qc8w_gemm = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_qd8_f32_qc4w_gemm = INIT_ONCE_STATIC_INIT;
+  static INIT_ONCE init_guard_qd8_f32_qb4w_gemm = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_qd8_f32_qc8w_gemm = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_qs8_qc8w_gemm = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_qu8_gemm = INIT_ONCE_STATIC_INIT;
@@ -66,6 +68,7 @@ static struct xnn_gemm_config qu8_gemm_config = {0};
   static pthread_once_t init_guard_qd8_f16_qc4w_gemm = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_qd8_f16_qc8w_gemm = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_qd8_f32_qc4w_gemm = PTHREAD_ONCE_INIT;
+  static pthread_once_t init_guard_qd8_f32_qb4w_gemm = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_qd8_f32_qc8w_gemm = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_qs8_qc8w_gemm = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_qu8_gemm = PTHREAD_ONCE_INIT;
@@ -1928,6 +1931,17 @@ static void init_qd8_f32_qc4w_gemm_config(void) {
     qd8_f32_qc4w_gemm_config.nr = 4;
     qd8_f32_qc4w_gemm_config.planes = 2;
   #endif
+}
+
+static void init_qd8_f32_qb4w_gemm_config(void) {
+  // TODO more kernels
+  qd8_f32_qb4w_gemm_config.minmax.dqgemm_bl[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_bl_ukernel((xnn_dqgemm_bl_ukernel_fn) xnn_qd8_f32_qc4w_bl_gemm_minmax_ukernel_1x2__scalar);
+  qd8_f32_qb4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
+  qd8_f32_qb4w_gemm_config.pack_gemm_goi_bl = (xnn_packw_gemm_goi_bl_ukernel_fn) xnn_pack_qs8_qc4w_gemm_bl_goi_w;
+  qd8_f32_qb4w_gemm_config.mr = 1;
+  qd8_f32_qb4w_gemm_config.nr = 2;
+  qd8_f32_qb4w_gemm_config.log2_kr = 0;
+  qd8_f32_qb4w_gemm_config.planes = 2;
 }
 
 static void init_qd8_f16_qc8w_gemm_config(void) {
@@ -4170,6 +4184,11 @@ static void init_qu8_gemm_config(void) {
     return TRUE;
   }
 
+ static BOOL CALLBACK init_qd8_f32_qb4w_gemm_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
+    init_qd8_f32_qb4w_gemm_config();
+    return TRUE;
+  }
+
  static BOOL CALLBACK init_qd8_f32_qc8w_gemm_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
     init_qd8_f32_qc8w_gemm_config();
     return TRUE;
@@ -4288,6 +4307,19 @@ struct xnn_gemm_config* xnn_init_qd8_f32_qc4w_gemm_config() {
     pthread_once(&init_guard_qd8_f32_qc4w_gemm, &init_qd8_f32_qc4w_gemm_config);
   #endif
   return &qd8_f32_qc4w_gemm_config;
+}
+
+struct xnn_gemm_config* xnn_init_qd8_f32_qb4w_gemm_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+  #if XNN_PLATFORM_WINDOWS
+    InitOnceExecuteOnce(&init_guard_qd8_f32_qb4w_gemm, &init_qd8_f32_qb4w_gemm_config_windows, NULL, NULL);
+  #else
+    pthread_once(&init_guard_qd8_f32_qb4w_gemm, &init_qd8_f32_qb4w_gemm_config);
+  #endif
+  return &qd8_f32_qb4w_gemm_config;
 }
 
 struct xnn_gemm_config* xnn_init_qd8_f32_qc8w_gemm_config() {
