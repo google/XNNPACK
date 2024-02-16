@@ -233,6 +233,8 @@ enum xnn_datatype {
   xnn_datatype_qcint4 = 8,
   /// Dynamically quantized 8-bit signed integer with per-batch quantization parameters.
   xnn_datatype_qdint8 = 9,
+  /// Quantized 4-bit signed integer with shared per-channel-block quantization parametes.
+  xnn_datatype_qbint4 = 10,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.
@@ -370,6 +372,23 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
   const float* scale,
   size_t num_dims,
   size_t channel_dim,
+  const size_t* dims,
+  const void* data,
+  uint32_t external_id,
+  uint32_t flags,
+  uint32_t* id_out);
+
+/// @param block_size - size of a block in the tensor with blockwise quantization parameters. Block is defined as number of input channel element per output channel.
+///                     For Fully connected operators with 2d filters of size [output_channels, input_channels], expecting number of scale values to be,
+///                     = output_channels * (input_channels / block_size).
+enum xnn_status xnn_define_blockwise_quantized_tensor_value(
+  xnn_subgraph_t subgraph,
+  enum xnn_datatype datatype,
+  int32_t zero_point,
+  const float* scale,
+  size_t num_dims,
+  size_t channel_dim,
+  size_t block_size,
   const size_t* dims,
   const void* data,
   uint32_t external_id,
@@ -4134,6 +4153,34 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qc4w(
   const struct xnn_dynamic_quantization_params* quantization_params);
 
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qc4w(
+  xnn_operator_t fully_connected_op,
+  size_t batch_size,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
+  size_t input_channels,
+  size_t output_channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t block_size,
+  uint8_t kernel_zero_point,
+  const float* kernel_scale,
+  const void* kernel,
+  const float* bias,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* fully_connected_op_out);
+
+enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qb4w(
+  xnn_operator_t fully_connected_op,
+  const int8_t* input,
+  float* output,
+  const struct xnn_dynamic_quantization_params* quantization_params);
+
+enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qb4w(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
   pthreadpool_t threadpool);
