@@ -22,4 +22,9 @@ tools/xngen src/f16-vsqrt/fp16arith-sqrt.c.in -D BATCH_TILE=4 -o src/f16-vsqrt/g
 tools/xngen src/f16-vsqrt/f16c-sqrt.c.in -D BATCH_TILE=8  -o src/f16-vsqrt/gen/f16-vsqrt-f16c-sqrt-u8.c &
 tools/xngen src/f16-vsqrt/f16c-sqrt.c.in -D BATCH_TILE=16 -o src/f16-vsqrt/gen/f16-vsqrt-f16c-sqrt-u16.c &
 
+tools/xngen src/f16-vsqrt/f16c-rsqrt.c.in -D BATCH_TILE=8  -o src/f16-vsqrt/gen/f16-vsqrt-f16c-rsqrt-u8.c &
+tools/xngen src/f16-vsqrt/f16c-rsqrt.c.in -D BATCH_TILE=16  -o src/f16-vsqrt/gen/f16-vsqrt-f16c-rsqrt-u16.c &
+tools/xngen src/f16-vsqrt/f16c-rsqrt.c.in -D BATCH_TILE=32  -o src/f16-vsqrt/gen/f16-vsqrt-f16c-rsqrt-u32.c &
+tools/xngen src/f16-vsqrt/f16c-rsqrt.c.in -D BATCH_TILE=40  -o src/f16-vsqrt/gen/f16-vsqrt-f16c-rsqrt-u40.c &
+
 wait

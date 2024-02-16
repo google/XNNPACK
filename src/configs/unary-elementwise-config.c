@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
 
 #ifdef _WIN32
   #include <windows.h>
@@ -13,6 +14,7 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/vcvt.h>
 #include <xnnpack/vlrelu.h>
@@ -489,8 +491,8 @@ static void init_f16_sqrt_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_f16c) {
-      f16_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vsqrt_ukernel__f16c_sqrt_u8;
-      f16_sqrt_config.element_tile = 8;
+      f16_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vsqrt_ukernel__f16c_rsqrt_u40;
+      f16_sqrt_config.element_tile = 40;
     }
   #endif
 }
