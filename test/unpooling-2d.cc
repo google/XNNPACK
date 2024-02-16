@@ -276,7 +276,9 @@ TEST_F(Unpooling2DTestX32, reshape_output)
   std::array<xnn_external_value, 2> external = {
     xnn_external_value{input_value_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
 
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], subgraph->values, subgraph->num_values, /*threadpool=*/nullptr), xnn_status_success);
+  ASSERT_EQ(
+    node->reshape(&runtime->opdata[0], subgraph->values, subgraph->num_values, /*threadpool=*/nullptr),
+    xnn_status_success);
 
   input_value_dims[0] += 1;
   input_value_dims[1] += 1;
@@ -288,18 +290,23 @@ TEST_F(Unpooling2DTestX32, reshape_output)
   input_index_dims[2] += 1;
   input_index_dims[3] += 1;
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, 0, input_value_dims.size(), input_value_dims.data()));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, 1, input_index_dims.size(), input_index_dims.data()));
+  ASSERT_EQ(
+    xnn_status_success, xnn_reshape_external_value(runtime, 0, input_value_dims.size(), input_value_dims.data()));
+  ASSERT_EQ(
+    xnn_status_success, xnn_reshape_external_value(runtime, 1, input_index_dims.size(), input_index_dims.data()));
 
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
+  ASSERT_EQ(
+    node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr),
+    xnn_status_reallocation_required);
   const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
 
-  const size_t expected_height = xnn_compute_unpooling_output_dimension(input_value_dims[1], padding_top + padding_bottom, pooling_height);
-  const size_t expected_width = xnn_compute_unpooling_output_dimension(input_value_dims[2], padding_left + padding_right, pooling_width);
+  const size_t expected_height =
+    xnn_compute_unpooling_output_dimension(input_value_dims[1], padding_top + padding_bottom, pooling_height);
+  const size_t expected_width =
+    xnn_compute_unpooling_output_dimension(input_value_dims[2], padding_left + padding_right, pooling_width);
 
   ASSERT_EQ(output_shape->dim[0], input_value_dims[0]);
   ASSERT_EQ(output_shape->dim[1], expected_height);
   ASSERT_EQ(output_shape->dim[2], expected_width);
   ASSERT_EQ(output_shape->dim[3], input_value_dims[3]);
-
 }
