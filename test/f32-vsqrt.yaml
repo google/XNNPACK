@@ -6,76 +6,54 @@
 # ARM NEON
 - name: xnn_f32_vsqrt_ukernel__aarch64_neon_sqrt_u4
 - name: xnn_f32_vsqrt_ukernel__aarch64_neon_sqrt_u8
+- name: xnn_f32_vsqrt_ukernel__aarch64_neon_sqrt_u16
 - name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_u4
 - name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_u8
-- name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_u12
 - name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_u16
-- name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_u20
-- name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_u24
-- name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_u28
-- name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_u32
-- name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_u36
-- name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_u40
 - name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_u4
 - name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_u8
-- name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_u12
 - name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_u16
-- name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_u20
-- name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_u24
-- name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_u28
-- name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_u32
-- name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_u36
-- name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_u40
+
 # RISC-V Vector
 - name: xnn_f32_vsqrt_ukernel__rvv_sqrt_u1v
 - name: xnn_f32_vsqrt_ukernel__rvv_sqrt_u2v
 - name: xnn_f32_vsqrt_ukernel__rvv_sqrt_u4v
 - name: xnn_f32_vsqrt_ukernel__rvv_sqrt_u8v
+
 # x86 SSE
 - name: xnn_f32_vsqrt_ukernel__sse_sqrt_u4
 - name: xnn_f32_vsqrt_ukernel__sse_sqrt_u8
+- name: xnn_f32_vsqrt_ukernel__sse_sqrt_u16
+
 # x86 AVX
 - name: xnn_f32_vsqrt_ukernel__avx_sqrt_u8
   init: xnn_init_f32_sqrt_avx_params
 - name: xnn_f32_vsqrt_ukernel__avx_sqrt_u16
   init: xnn_init_f32_sqrt_avx_params
+- name: xnn_f32_vsqrt_ukernel__avx_sqrt_u32
+  init: xnn_init_f32_sqrt_avx_params
+
 # x86 FMA3
 - name: xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_u8
   init: xnn_init_f32_sqrt_fma_params
 - name: xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_u16
   init: xnn_init_f32_sqrt_fma_params
-- name: xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_u24
-  init: xnn_init_f32_sqrt_fma_params
 - name: xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_u32
   init: xnn_init_f32_sqrt_fma_params
-- name: xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_u40
-  init: xnn_init_f32_sqrt_fma_params
-- name: xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_u48
-  init: xnn_init_f32_sqrt_fma_params
-- name: xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_u56
-  init: xnn_init_f32_sqrt_fma_params
-- name: xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_u64
-  init: xnn_init_f32_sqrt_fma_params
+
 # x86 AVX512
 - name: xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_u16
   init: xnn_init_f32_sqrt_avx512_params
 - name: xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_u32
   init: xnn_init_f32_sqrt_avx512_params
-- name: xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_u48
-  init: xnn_init_f32_sqrt_avx512_params
 - name: xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_u64
   init: xnn_init_f32_sqrt_avx512_params
-- name: xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_u80
-  init: xnn_init_f32_sqrt_avx512_params
-- name: xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_u96
-  init: xnn_init_f32_sqrt_avx512_params
-- name: xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_u112
-  init: xnn_init_f32_sqrt_avx512_params
-- name: xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_u128
-  init: xnn_init_f32_sqrt_avx512_params
+
 # WAsm SIMD
 - name: xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_u4
 - name: xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_u8
+- name: xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_u16
+
 # Scalar
 - name: xnn_f32_vsqrt_ukernel__scalar_sqrt_u1
 - name: xnn_f32_vsqrt_ukernel__scalar_sqrt_u2

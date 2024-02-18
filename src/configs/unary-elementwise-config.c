@@ -491,8 +491,8 @@ static void init_f16_sqrt_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_f16c) {
-      f16_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vsqrt_ukernel__f16c_rsqrt_u40;
-      f16_sqrt_config.element_tile = 40;
+      f16_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vsqrt_ukernel__f16c_rsqrt_u32;
+      f16_sqrt_config.element_tile = 32;
     }
   #endif
 }

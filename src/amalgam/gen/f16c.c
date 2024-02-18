@@ -2959,7 +2959,7 @@ void xnn_f16_vrndz_ukernel__f16c_u16(
   }
 }
 
-void xnn_f16_vsqrt_ukernel__f16c_rsqrt_u40(
+void xnn_f16_vsqrt_ukernel__f16c_rsqrt_u32(
     size_t batch,
     const void* input,
     void* output,
@@ -2973,41 +2973,35 @@ void xnn_f16_vsqrt_ukernel__f16c_rsqrt_u40(
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
   const __m256 vinf = _mm256_set1_ps(UINT32_C(0x7F800000));
-  for (; batch >= 40 * sizeof(uint16_t); batch -= 40 * sizeof(uint16_t)) {
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
     __m256 vacc0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
     __m256 vacc1 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i + 8)));
     __m256 vacc2 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i + 16)));
     __m256 vacc3 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i + 24)));
-    __m256 vacc4 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i + 32)));
-    i += 40;
+    i += 32;
 
     const __m256 vt0_0 = _mm256_rsqrt_ps(vacc0);
     const __m256 vt0_1 = _mm256_rsqrt_ps(vacc1);
     const __m256 vt0_2 = _mm256_rsqrt_ps(vacc2);
     const __m256 vt0_3 = _mm256_rsqrt_ps(vacc3);
-    const __m256 vt0_4 = _mm256_rsqrt_ps(vacc4);
     const __m256 vt1_0 = _mm256_cmp_ps(vt0_0, vinf, _CMP_LT_OQ);
     const __m256 vt1_1 = _mm256_cmp_ps(vt0_1, vinf, _CMP_LT_OQ);
     const __m256 vt1_2 = _mm256_cmp_ps(vt0_2, vinf, _CMP_LT_OQ);
     const __m256 vt1_3 = _mm256_cmp_ps(vt0_3, vinf, _CMP_LT_OQ);
-    const __m256 vt1_4 = _mm256_cmp_ps(vt0_4, vinf, _CMP_LT_OQ);
     const __m256 vt2_0 = _mm256_and_ps(vt0_0, vt1_0);
     const __m256 vt2_1 = _mm256_and_ps(vt0_1, vt1_1);
     const __m256 vt2_2 = _mm256_and_ps(vt0_2, vt1_2);
     const __m256 vt2_3 = _mm256_and_ps(vt0_3, vt1_3);
-    const __m256 vt2_4 = _mm256_and_ps(vt0_4, vt1_4);
     vacc0 = _mm256_mul_ps(vacc0, vt2_0);
     vacc1 = _mm256_mul_ps(vacc1, vt2_1);
     vacc2 = _mm256_mul_ps(vacc2, vt2_2);
     vacc3 = _mm256_mul_ps(vacc3, vt2_3);
-    vacc4 = _mm256_mul_ps(vacc4, vt2_4);
 
     _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vacc0, _MM_FROUND_TO_NEAREST_INT));
     _mm_storeu_si128((__m128i*) (o + 8), _mm256_cvtps_ph(vacc1, _MM_FROUND_TO_NEAREST_INT));
     _mm_storeu_si128((__m128i*) (o + 16), _mm256_cvtps_ph(vacc2, _MM_FROUND_TO_NEAREST_INT));
     _mm_storeu_si128((__m128i*) (o + 24), _mm256_cvtps_ph(vacc3, _MM_FROUND_TO_NEAREST_INT));
-    _mm_storeu_si128((__m128i*) (o + 32), _mm256_cvtps_ph(vacc4, _MM_FROUND_TO_NEAREST_INT));
-    o += 40;
+    o += 32;
   }
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     __m256 vacc = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
