@@ -1753,83 +1753,83 @@ tools/xngen src/qs8-gemm/MRx4c8-sse.c.in -D MR=3 -D SSE=4 -D AVX=1 -D XOP=1 -D D
 
 ################################### x86 AVX2 ##################################
 ### C8 micro-kernels
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QD8_F16 -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-1x8c8-minmax-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QD8_F16 -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-2x8c8-minmax-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QD8_F16 -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-3x8c8-minmax-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QD8_F16 -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-4x8c8-minmax-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QD8_F16 -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-1x8c8-minmax-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QD8_F16 -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-2x8c8-minmax-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QD8_F16 -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-3x8c8-minmax-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QD8_F16 -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-4x8c8-minmax-avx2.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QD8_F32 -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QD8_F32 -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QD8_F32 -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c8-minmax-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QD8_F32 -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QD8_F32 -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QD8_F32 -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QD8_F32 -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c8-minmax-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QD8_F32 -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-avx2.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QC4_F16 -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QC4_F16 -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QC4_F16 -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QC4_F16 -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QC4_F16 -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QC4_F16 -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QC4_F16 -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QC4_F16 -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avx2.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QC4_F32 -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QC4_F32 -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8c8-minmax-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QC4_F32 -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8c8-minmax-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QC4_F32 -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8c8-minmax-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QC4_F32 -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QC4_F32 -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8c8-minmax-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QC4_F32 -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8c8-minmax-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QC4_F32 -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8c8-minmax-avx2.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QC8     -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QC8     -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QC8     -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x8c8-minmax-fp32-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QC8     -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QC8     -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QC8     -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QC8     -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x8c8-minmax-fp32-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QC8     -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-avx2.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QU8     -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-1x8c8-minmax-fp32-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QU8     -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-2x8c8-minmax-fp32-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QU8     -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-3x8c8-minmax-fp32-avx2.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QU8     -D AVX=1 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-4x8c8-minmax-fp32-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QU8     -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-1x8c8-minmax-fp32-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QU8     -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-2x8c8-minmax-fp32-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QU8     -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-3x8c8-minmax-fp32-avx2.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QU8     -D AVX=2 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-4x8c8-minmax-fp32-avx2.c &
 
 ################################### x86 AVX512VL ##################################
 ### C8 micro-kernels
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QD8_F16 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-1x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QD8_F16 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-2x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QD8_F16 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-3x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QD8_F16 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-4x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=5 -D DATATYPE=QD8_F16 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-5x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=6 -D DATATYPE=QD8_F16 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-6x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=7 -D DATATYPE=QD8_F16 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-7x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=8 -D DATATYPE=QD8_F16 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-8x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QD8_F16 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-1x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QD8_F16 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-2x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QD8_F16 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-3x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QD8_F16 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-4x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=5 -D DATATYPE=QD8_F16 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-5x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=6 -D DATATYPE=QD8_F16 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-6x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=7 -D DATATYPE=QD8_F16 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-7x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=8 -D DATATYPE=QD8_F16 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-8x8c8-minmax-avx512skx.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QD8_F32 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QD8_F32 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QD8_F32 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QD8_F32 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=5 -D DATATYPE=QD8_F32 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=6 -D DATATYPE=QD8_F32 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=7 -D DATATYPE=QD8_F32 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=8 -D DATATYPE=QD8_F32 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QD8_F32 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QD8_F32 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QD8_F32 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QD8_F32 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=5 -D DATATYPE=QD8_F32 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=6 -D DATATYPE=QD8_F32 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=7 -D DATATYPE=QD8_F32 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=8 -D DATATYPE=QD8_F32 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x8c8-minmax-avx512skx.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QC4_F16 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QC4_F16 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QC4_F16 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QC4_F16 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=5 -D DATATYPE=QC4_F16 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=6 -D DATATYPE=QC4_F16 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=7 -D DATATYPE=QC4_F16 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-7x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=8 -D DATATYPE=QC4_F16 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-8x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QC4_F16 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QC4_F16 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QC4_F16 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QC4_F16 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=5 -D DATATYPE=QC4_F16 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=6 -D DATATYPE=QC4_F16 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=7 -D DATATYPE=QC4_F16 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-7x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=8 -D DATATYPE=QC4_F16 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-8x8c8-minmax-avx512skx.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QC4_F32 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QC4_F32 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QC4_F32 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QC4_F32 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=5 -D DATATYPE=QC4_F32 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=6 -D DATATYPE=QC4_F32 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-6x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=7 -D DATATYPE=QC4_F32 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-7x8c8-minmax-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=8 -D DATATYPE=QC4_F32 -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-8x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QC4_F32 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QC4_F32 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QC4_F32 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QC4_F32 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=5 -D DATATYPE=QC4_F32 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=6 -D DATATYPE=QC4_F32 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-6x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=7 -D DATATYPE=QC4_F32 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-7x8c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=8 -D DATATYPE=QC4_F32 -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=     -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-8x8c8-minmax-avx512skx.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QC8     -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QC8     -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QC8     -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x8c8-minmax-fp32-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QC8     -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QC8     -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QC8     -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QC8     -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x8c8-minmax-fp32-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QC8     -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-avx512skx.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QU8     -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-1x8c8-minmax-fp32-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QU8     -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-2x8c8-minmax-fp32-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QU8     -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-3x8c8-minmax-fp32-avx512skx.c &
-tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QU8     -D AVX=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-4x8c8-minmax-fp32-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QU8     -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-1x8c8-minmax-fp32-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QU8     -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-2x8c8-minmax-fp32-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QU8     -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-3x8c8-minmax-fp32-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx8c8-avx2.c.in -D MR=4 -D DATATYPE=QU8     -D AVX=10 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-4x8c8-minmax-fp32-avx512skx.c &
 
 
 ################################## x86 AVX512 #################################
@@ -2058,225 +2058,225 @@ tools/xngen src/qs8-gemm/MRx16c8-avx512vnni.c.in -D MR=8 -D DATATYPE=QC4 -D GFNI
 
 ################################## x86 AVX512VL VNNI EVEX #################################
 ### C8 micro-kernels
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC8     -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC8     -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC8     -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x8c8-minmax-fp32-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC8     -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC8     -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-5x8c8-minmax-fp32-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC8     -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x8c8-minmax-fp32-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC8     -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-7x8c8-minmax-fp32-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC8     -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x8c8-minmax-fp32-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC8     -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC8     -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC8     -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x8c8-minmax-fp32-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC8     -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC8     -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-5x8c8-minmax-fp32-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC8     -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x8c8-minmax-fp32-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC8     -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-7x8c8-minmax-fp32-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC8     -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x8c8-minmax-fp32-avx512vnni.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QD8_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QD8_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QD8_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QD8_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QD8_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QD8_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QD8_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QD8_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QD8_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QD8_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QD8_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QD8_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QD8_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QD8_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QD8_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QD8_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x8c8-minmax-avx512vnni.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-6x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-7x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-8x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-6x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-7x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-8x8c8-minmax-avx512vnni.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QD8_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-1x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QD8_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-2x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QD8_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-3x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QD8_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-4x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QD8_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-5x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QD8_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-6x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QD8_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-7x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QD8_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-8x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QD8_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-1x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QD8_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-2x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QD8_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-3x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QD8_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-4x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QD8_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-5x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QD8_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-6x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QD8_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-7x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QD8_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-8x8c8-minmax-avx512vnni.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-7x8c8-minmax-avx512vnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-8x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-7x8c8-minmax-avx512vnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-8x8c8-minmax-avx512vnni.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC8     -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC8     -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC8     -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x8c8-minmax-fp32-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC8     -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC8     -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-5x8c8-minmax-fp32-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC8     -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x8c8-minmax-fp32-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC8     -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-7x8c8-minmax-fp32-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC8     -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x8c8-minmax-fp32-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC8     -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC8     -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC8     -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x8c8-minmax-fp32-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC8     -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC8     -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-5x8c8-minmax-fp32-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC8     -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x8c8-minmax-fp32-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC8     -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-7x8c8-minmax-fp32-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC8     -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x8c8-minmax-fp32-avx512vnni-prfm.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QD8_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QD8_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QD8_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QD8_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QD8_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QD8_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QD8_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QD8_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QD8_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QD8_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QD8_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QD8_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QD8_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QD8_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QD8_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QD8_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x8c8-minmax-avx512vnni-prfm.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-6x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-7x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-8x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-6x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-7x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-8x8c8-minmax-avx512vnni-prfm.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QD8_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-1x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QD8_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-2x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QD8_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-3x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QD8_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-4x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QD8_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-5x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QD8_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-6x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QD8_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-7x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QD8_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-8x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QD8_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-1x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QD8_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-2x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QD8_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-3x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QD8_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-4x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QD8_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-5x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QD8_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-6x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QD8_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-7x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QD8_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-8x8c8-minmax-avx512vnni-prfm.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-7x8c8-minmax-avx512vnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-8x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-7x8c8-minmax-avx512vnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-8x8c8-minmax-avx512vnni-prfm.c &
 
 ################################## x86 AVX512VL VNNI GFNI EVEX #################################
 ### C8 micro-kernels
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-avx512vnnigfni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8c8-minmax-avx512vnnigfni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8c8-minmax-avx512vnnigfni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8c8-minmax-avx512vnnigfni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x8c8-minmax-avx512vnnigfni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-6x8c8-minmax-avx512vnnigfni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-7x8c8-minmax-avx512vnnigfni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-8x8c8-minmax-avx512vnnigfni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-avx512vnnigfni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8c8-minmax-avx512vnnigfni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8c8-minmax-avx512vnnigfni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8c8-minmax-avx512vnnigfni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x8c8-minmax-avx512vnnigfni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-6x8c8-minmax-avx512vnnigfni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-7x8c8-minmax-avx512vnnigfni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-8x8c8-minmax-avx512vnnigfni.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-avx512vnnigfni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8c8-minmax-avx512vnnigfni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8c8-minmax-avx512vnnigfni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8c8-minmax-avx512vnnigfni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x8c8-minmax-avx512vnnigfni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-6x8c8-minmax-avx512vnnigfni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-7x8c8-minmax-avx512vnnigfni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F32 -D AVX=0 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-8x8c8-minmax-avx512vnnigfni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-avx512vnnigfni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8c8-minmax-avx512vnnigfni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8c8-minmax-avx512vnnigfni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8c8-minmax-avx512vnnigfni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x8c8-minmax-avx512vnnigfni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-6x8c8-minmax-avx512vnnigfni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-7x8c8-minmax-avx512vnnigfni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F32 -D AVX=10 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-8x8c8-minmax-avx512vnnigfni-prfm.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx512vnnigfni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avx512vnnigfni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avx512vnnigfni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avx512vnnigfni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avx512vnnigfni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x8c8-minmax-avx512vnnigfni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-7x8c8-minmax-avx512vnnigfni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-8x8c8-minmax-avx512vnnigfni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx512vnnigfni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avx512vnnigfni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avx512vnnigfni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avx512vnnigfni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avx512vnnigfni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x8c8-minmax-avx512vnnigfni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-7x8c8-minmax-avx512vnnigfni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=1 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-8x8c8-minmax-avx512vnnigfni.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx512vnnigfni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avx512vnnigfni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avx512vnnigfni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avx512vnnigfni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avx512vnnigfni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x8c8-minmax-avx512vnnigfni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-7x8c8-minmax-avx512vnnigfni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F16 -D AVX=0 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-8x8c8-minmax-avx512vnnigfni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx512vnnigfni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avx512vnnigfni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avx512vnnigfni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avx512vnnigfni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avx512vnnigfni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x8c8-minmax-avx512vnnigfni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-7x8c8-minmax-avx512vnnigfni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F16 -D AVX=10 -D GFNI=1 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-8x8c8-minmax-avx512vnnigfni-prfm.c &
 
 ################################## x86 AVXVNNI #################################
 ### C8 micro-kernels
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC8     -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC8     -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC8     -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x8c8-minmax-fp32-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC8     -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC8     -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-5x8c8-minmax-fp32-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC8     -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x8c8-minmax-fp32-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC8     -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-7x8c8-minmax-fp32-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC8     -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x8c8-minmax-fp32-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC8     -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC8     -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC8     -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x8c8-minmax-fp32-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC8     -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC8     -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-5x8c8-minmax-fp32-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC8     -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x8c8-minmax-fp32-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC8     -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-7x8c8-minmax-fp32-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC8     -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x8c8-minmax-fp32-avxvnni.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QD8_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QD8_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QD8_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QD8_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QD8_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QD8_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QD8_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QD8_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QD8_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QD8_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QD8_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QD8_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QD8_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QD8_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QD8_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QD8_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x8c8-minmax-avxvnni.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-6x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-7x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-8x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-6x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-7x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-8x8c8-minmax-avxvnni.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QD8_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-1x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QD8_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-2x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QD8_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-3x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QD8_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-4x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QD8_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-5x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QD8_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-6x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QD8_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-7x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QD8_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-8x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QD8_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-1x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QD8_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-2x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QD8_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-3x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QD8_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-4x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QD8_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-5x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QD8_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-6x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QD8_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-7x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QD8_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-8x8c8-minmax-avxvnni.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-7x8c8-minmax-avxvnni.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-8x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-7x8c8-minmax-avxvnni.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-8x8c8-minmax-avxvnni.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC8     -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC8     -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC8     -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x8c8-minmax-fp32-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC8     -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC8     -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-5x8c8-minmax-fp32-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC8     -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x8c8-minmax-fp32-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC8     -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-7x8c8-minmax-fp32-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC8     -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x8c8-minmax-fp32-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC8     -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC8     -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC8     -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x8c8-minmax-fp32-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC8     -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC8     -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-5x8c8-minmax-fp32-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC8     -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x8c8-minmax-fp32-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC8     -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-7x8c8-minmax-fp32-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC8     -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x8c8-minmax-fp32-avxvnni-prfm.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QD8_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QD8_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QD8_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QD8_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QD8_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QD8_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QD8_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QD8_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QD8_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QD8_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QD8_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QD8_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QD8_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QD8_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QD8_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QD8_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x8c8-minmax-avxvnni-prfm.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-6x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-7x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F32 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-8x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-6x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-7x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F32 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-8x8c8-minmax-avxvnni-prfm.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QD8_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-1x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QD8_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-2x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QD8_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-3x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QD8_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-4x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QD8_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-5x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QD8_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-6x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QD8_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-7x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QD8_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-8x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QD8_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-1x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QD8_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-2x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QD8_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-3x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QD8_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-4x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QD8_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-5x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QD8_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-6x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QD8_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-7x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QD8_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-8x8c8-minmax-avxvnni-prfm.c &
 
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-7x8c8-minmax-avxvnni-prfm.c &
-tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F16 -D AVX=1 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-8x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1 -D DATATYPE=QC4_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=2 -D DATATYPE=QC4_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=3 -D DATATYPE=QC4_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-3x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=4 -D DATATYPE=QC4_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=5 -D DATATYPE=QC4_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=6 -D DATATYPE=QC4_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-6x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=7 -D DATATYPE=QC4_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-7x8c8-minmax-avxvnni-prfm.c &
+tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=8 -D DATATYPE=QC4_F16 -D AVX=2 -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-8x8c8-minmax-avxvnni-prfm.c &
 
 ### C4 micro-kernels
 tools/xngen src/qs8-gemm/MRx8c4-avxvnni.c.in -D UNROLL=1 -D ACCUMULATORS=1 -D MR=1 -D DATATYPE=QD8 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c4-minmax-avxvnni-u1.c

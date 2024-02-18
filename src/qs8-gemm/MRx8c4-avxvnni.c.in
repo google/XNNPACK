@@ -32,8 +32,8 @@ $OUT_T = "float" if DATATYPE in ["QD8", "QC4"] else XINT8_T
 $def VACC(M,K=0):
 $  return f"vacc{M}x{K}" if UNROLL > 1 else f"vacc{M}"
 $ACC_POSTFIX=f"_acc{ACCUMULATORS}" if ACCUMULATORS > 1 else ""
-$_MM256_DPBUSD_EPI32 = "_mm256_dpbusd_avx_epi32" if AVX else "_mm256_dpbusd_epi32"
-$ISA = "avxvnni" if AVX else "avx512vnnigfni" if GFNI else "avx512vnni"
+$_MM256_DPBUSD_EPI32 = "_mm256_dpbusd_avx_epi32" if AVX == 2 else "_mm256_dpbusd_epi32"
+$ISA = "avxvnni" if AVX == 2 else "avx512vnnigfni" if GFNI else "avx512vnni"
 void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c4__${ISA}_u${UNROLL}${ACC_POSTFIX}(
     size_t mr,
     size_t nc,
@@ -218,7 +218,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c4__$
           c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
         nc -= 8;
       } else {
-        $if AVX:
+        $if AVX == 2:
           $for M in range(MR):
             __m128 vout${M}x0123 = _mm256_castps256_ps128(vout${M}x01234567);
           if (nc & 4) {
@@ -265,7 +265,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c4__$
       $for M in range(MR):
         vacc${M}x01234567 = _mm256_add_epi32(vacc${M}x01234567, voutput_zero_point);
 
-      $if AVX:
+      $if AVX == 2:
         $for M in range(MR):
           vacc${M}x01234567 = _mm256_packs_epi32(vacc${M}x01234567, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc${M}x01234567, 1)));
           __m128i voutb${M}x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc${M}x01234567, vacc${M}x01234567));
@@ -284,7 +284,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c4__$
 
         nc -= 8;
       } else {
-        $if AVX:
+        $if AVX == 2:
           if (nc & 4) {
             $for M in range(MR):
               _mm_storeu_si32(c${M}, voutb${M}x01234567);
