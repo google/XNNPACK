@@ -276,7 +276,7 @@ TEST(SUBGRAPH_FP16, convolution_weights_used_by_another_node) {
             Dilation{1, 1},
             /*groups=*/ 1,
             /*group_input_channels=*/3,
-            /*groups_output_channels*/32
+            /*group_output_channels*/2
           }, input_id, filter_id, bias_id, convolution_out_id)
       .AddSubtract(filter_id, subtract_input_id, out_id2)
       .Optimize()
@@ -354,7 +354,7 @@ TEST(SUBGRAPH_FP16, convolution_bias_used_by_another_node) {
             Dilation{1, 1},
             /*groups=*/ 1,
             /*group_input_channels=*/3,
-            /*groups_output_channels*/32
+            /*group_output_channels*/2
           }, input_id, filter_id, bias_id, convolution_out_id)
       .AddSubtract(bias_id, subtract_input_id, out_id2)
       .Optimize()

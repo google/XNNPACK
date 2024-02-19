@@ -908,6 +908,14 @@ enum xnn_status xnn_define_convolution_2d(
     return status;
   }
 
+  if (filter_value->shape.dim[0] != group_output_channels * groups) {
+    xnn_log_error(
+        "failed to define %s operator with filter output channels %zu, groups #%" PRIu32 " and group_output_channels %zu:"
+        "mismatching shapes, filter output channels must be equal to groups * group_output_channels.",
+        xnn_node_type_to_string(xnn_node_type_convolution_2d), filter_value->shape.dim[0], groups, group_output_channels);
+    return xnn_status_invalid_parameter;
+  }
+
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
     case xnn_datatype_qint8:
