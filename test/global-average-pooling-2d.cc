@@ -27,7 +27,7 @@ protected:
   {
     random_device = std::make_unique<std::random_device>();
     rng = std::mt19937((*random_device)());
-    shape_dist = std::uniform_int_distribution<size_t>(1, XNN_MAX_TENSOR_DIMS);
+    shape_dist = std::uniform_int_distribution<size_t>(3, XNN_MAX_TENSOR_DIMS);
     dim_dist = std::uniform_int_distribution<size_t>(1, 9);
     f32dist = std::uniform_real_distribution<float>();
     i8dist =
@@ -36,19 +36,24 @@ protected:
       std::uniform_int_distribution<int32_t>(std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
     scale_dist = std::uniform_real_distribution<float>(0.1f, 5.0f);
 
-    input_dims = RandomShape(4);
-    output_dims = {input_dims[0], 1, 1, input_dims[3]};
+    input_dims = RandomShape();
+    output_dims = input_dims;
+    output_dims[output_dims.size() - 3] = 1;
+    output_dims[output_dims.size() - 2] = 1;
     input = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + NumElements(input_dims));
     operator_output = std::vector<T>(NumElements(output_dims));
     subgraph_output = std::vector<T>(operator_output.size());
-    batch_size = input_dims[0];
-    input_width = input_dims[1] * input_dims[2];
-    channels = input_dims[3];
+    batch_size = 1;
+    for (size_t i = 0; i < input_dims.size() - 3; i++) {
+      batch_size *= input_dims[i];
+    }
+    input_width = input_dims[input_dims.size() - 3] * input_dims[input_dims.size() - 2];
+    channels = input_dims[input_dims.size() - 1];
   }
 
-  std::vector<size_t> RandomShape(size_t num_dims)
+  std::vector<size_t> RandomShape()
   {
-    std::vector<size_t> dims(num_dims);
+    std::vector<size_t> dims(shape_dist(rng));
     std::generate(dims.begin(), dims.end(), [&] { return dim_dist(rng); });
     return dims;
   }
@@ -424,4 +429,139 @@ TEST_F(GlobalAveragePooling2DTestF32, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   ASSERT_EQ(subgraph_output, operator_output);
+}
+
+TEST_F(GlobalAveragePooling2DTestF32, reshape_output_no_keep_dims)
+{
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  // Call subgraph API.
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr,
+                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+
+  uint32_t output_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
+                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_define_global_average_pooling_2d(subgraph, output_min, output_max, input_id, output_id, /*flags=*/0));
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+  std::array<xnn_external_value, 2> external = {
+    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  const size_t num_input_dims = input_dims.size();
+  const size_t num_batch_dims = num_input_dims - 3;
+  const struct xnn_node* node = &subgraph->nodes[0];
+  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
+  for (size_t i = 0; i < num_batch_dims; ++i) {
+    ASSERT_EQ(output_shape->dim[i], input_dims[i]);
+  }
+  ASSERT_EQ(output_shape->dim[num_input_dims - 3], input_dims[num_input_dims - 1]);
+
+  input_dims[0] += 2;
+  input_dims[num_input_dims - 1] += 3;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
+  for (size_t i = 0; i < num_batch_dims; ++i) {
+    ASSERT_EQ(output_shape->dim[i], input_dims[i]);
+  }
+  ASSERT_EQ(output_shape->dim[num_input_dims - 3], input_dims[num_input_dims - 1]);
+
+  input_dims[0] -= 2;
+  input_dims[num_input_dims - 1] -= 3;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
+  for (size_t i = 0; i < num_batch_dims; ++i) {
+    ASSERT_EQ(output_shape->dim[i], input_dims[i]);
+  }
+  ASSERT_EQ(output_shape->dim[num_input_dims - 3], input_dims[num_input_dims - 1]);
+}
+
+TEST_F(GlobalAveragePooling2DTestF32, reshape_output_keep_dims)
+{
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  // Call subgraph API.
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr,
+                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+
+  uint32_t output_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
+                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_define_global_average_pooling_2d(subgraph, output_min, output_max, input_id, output_id, XNN_FLAG_KEEP_DIMS));
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+  std::array<xnn_external_value, 2> external = {
+    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  const size_t num_input_dims = input_dims.size();
+  const size_t num_batch_dims = num_input_dims - 3;
+  const struct xnn_node* node = &subgraph->nodes[0];
+  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
+  for (size_t i = 0; i < num_batch_dims; ++i) {
+    ASSERT_EQ(output_shape->dim[i], input_dims[i]);
+  }
+  for (size_t i = num_batch_dims; i < num_input_dims - 1; ++i) {
+    ASSERT_EQ(output_shape->dim[i], 1);
+  }
+  ASSERT_EQ(output_shape->dim[num_input_dims - 1], input_dims[num_input_dims - 1]);
+  input_dims[0] += 2;
+  input_dims[num_input_dims - 1] += 3;
+
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
+  for (size_t i = 0; i < num_batch_dims; ++i) {
+    ASSERT_EQ(output_shape->dim[i], input_dims[i]);
+  }
+  for (size_t i = num_batch_dims; i < num_input_dims - 1; ++i) {
+    ASSERT_EQ(output_shape->dim[i], 1);
+  }
+  ASSERT_EQ(output_shape->dim[num_input_dims - 1], input_dims[num_input_dims - 1]);
+
+  input_dims[0] -= 2;
+  input_dims[num_input_dims - 1] -= 3;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
+  for (size_t i = 0; i < num_batch_dims; ++i) {
+    ASSERT_EQ(output_shape->dim[i], input_dims[i]);
+  }
+  for (size_t i = num_batch_dims; i < num_input_dims - 1; ++i) {
+    ASSERT_EQ(output_shape->dim[i], 1);
+  }
+  ASSERT_EQ(output_shape->dim[num_input_dims - 1], input_dims[num_input_dims - 1]);
 }
