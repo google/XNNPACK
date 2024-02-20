@@ -155,7 +155,6 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x8c8__avx512vnni_prfm(
     const __m256 vfilter_output_scale01234567 = _mm256_load_ps((const float*) w);
     const __m256 vbias01234567 = _mm256_load_ps((const float*) w + 8);
     w = (const float*) w + 16;
-
     vout0x01234567 = _mm256_fmadd_ps(vout0x01234567, vfilter_output_scale01234567, vbias01234567);
     vout1x01234567 = _mm256_fmadd_ps(vout1x01234567, vfilter_output_scale01234567, vbias01234567);
 
@@ -165,16 +164,17 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x8c8__avx512vnni_prfm(
     vout0x01234567 = _mm256_min_ps(vout0x01234567, voutput_max);
     vout1x01234567 = _mm256_min_ps(vout1x01234567, voutput_max);
 
-    if(nc >= 8) {
+    if XNN_LIKELY(nc >= 8) {
       _mm256_storeu_ps(c1, vout1x01234567);
       c1 = (float*) ((uintptr_t) c1 + cn_stride);
       _mm256_storeu_ps(c0, vout0x01234567);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
+
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
       nc -= 8;
     } else {
       // Prepare mask for valid 32-bit elements (depends on nc).
-      const __mmask16 vmask = _cvtu32_mask16((UINT32_C(1) << nc) - 1);
+      const __mmask8 vmask = _cvtu32_mask8((UINT32_C(1) << nc) - 1);
       _mm256_mask_storeu_ps(c1, vmask, vout1x01234567);
       _mm256_mask_storeu_ps(c0, vmask, vout0x01234567);
       nc = 0;
