@@ -57,17 +57,44 @@ static enum xnn_status reshape_unpooling_operator(
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
+
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id < num_values);
+
   const size_t batch_size = values[input_id].shape.dim[0];
   const size_t input_height = values[input_id].shape.dim[1];
   const size_t input_width = values[input_id].shape.dim[2];
-  return xnn_reshape_unpooling2d_nhwc_x32(
+  const size_t channel_dim = values[input_id].shape.dim[3];
+
+  struct xnn_value* output_value = values + output_id;
+  enum xnn_status status = xnn_status_invalid_state;
+  const size_t old_workspace_size = opdata->workspace_size;
+  size_t output_height, output_width;
+
+  status = xnn_reshape_unpooling2d_nhwc_x32(
     opdata->operator_objects[0],
     batch_size,
     input_height,
     input_width,
-    /*output_height_out=*/NULL,
-    /*output_width_out=*/NULL,
+    &output_height,
+    &output_width,
     threadpool);
+
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  output_value->shape.dim[0] = batch_size;
+  output_value->shape.dim[1] = output_height;
+  output_value->shape.dim[2] = output_width;
+  output_value->shape.dim[3] = channel_dim;
+
+  const size_t new_size = xnn_tensor_get_size(output_value);
+  if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
+    output_value->size = new_size;
+    return xnn_status_reallocation_required;
+  }
+  return xnn_status_success;
 }
 
 static enum xnn_status setup_unpooling_operator(
