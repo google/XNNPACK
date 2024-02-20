@@ -8,7 +8,8 @@ $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
 $assert DATATYPE in ["QD8", "QS8", "QC4"]
 $UNROLL = locals().get("UNROLL", 1)
 $assert ACCUMULATORS == UNROLL or ACCUMULATORS == 1
-$AVX = 1
+$AVX = 2
+$GFNI = 1
 $PREFETCH = 1
 #include <assert.h>
 #include <stdint.h>
