@@ -212,7 +212,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c4__$
       $for M in range(MR):
         vout${M}x01234567 = _mm256_min_ps(vout${M}x01234567, voutput_max);
 
-      if(nc >= 8) {
+      if XNN_LIKELY(nc >= 8) {
         $for M in range(MR):
           _mm256_storeu_ps(c${M}, vout${M}x01234567);
           a${M} = (const int8_t*) ((uintptr_t) a${M} - kc);

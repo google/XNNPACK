@@ -83,7 +83,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c4__avxvnni_u1(
 
     vout0x01234567 = _mm256_min_ps(vout0x01234567, voutput_max);
 
-    if(nc >= 8) {
+    if XNN_LIKELY(nc >= 8) {
       _mm256_storeu_ps(c0, vout0x01234567);
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);

@@ -227,7 +227,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
       $for M in range(MR):
         vscaled${M}x0123456789ABCDEF = _mm512_min_ps(vscaled${M}x0123456789ABCDEF, voutput_max);
 
-      if(nc >= 16) {
+      if XNN_LIKELY(nc >= 16) {
         $for M in range(MR):
           _mm512_storeu_ps(c${M}, vscaled${M}x0123456789ABCDEF);
 
