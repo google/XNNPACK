@@ -623,7 +623,8 @@ enum xnn_status xnn_define_global_average_pooling_2d(
 ///                   defined in the @a subgraph. Averaging is performed across the second-innermost dimension.
 /// @param output_id - Value ID for the output tensor. The output tensor must be a dense tensor with 2 or more
 ///                    dimensions defined in the @a subgraph.
-/// @param flags - binary features of the 1D Global Sum Pooling Node. No supported flags are currently defined.
+/// @param flags - binary features of the 1D Global Sum Pooling Node. The only currently supported value is
+///                XNN_FLAG_KEEP_DIMS.
 enum xnn_status xnn_define_global_sum_pooling_1d(
   xnn_subgraph_t subgraph,
   float output_min,
@@ -642,7 +643,8 @@ enum xnn_status xnn_define_global_sum_pooling_1d(
 ///                   dimensions.
 /// @param output_id - Value ID for the output tensor. The output tensor must be a dense tensor with 3 or more
 ///                    dimensions defined in the @a subgraph.
-/// @param flags - binary features of the 2D Global Sum Pooling Node. No supported flags are currently defined.
+/// @param flags - binary features of the 2D Global Sum Pooling Node. The only currently supported value is
+///                XNN_FLAG_KEEP_DIMS.
 enum xnn_status xnn_define_global_sum_pooling_2d(
   xnn_subgraph_t subgraph,
   float output_min,
