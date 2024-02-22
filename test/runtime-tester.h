@@ -40,6 +40,15 @@ class RuntimeTester : public SubgraphTester {
     return output;
   }
 
+  template<typename T>
+  inline std::vector<T> RepeatRun() {
+    std::vector<char>& tensor = this->external_tensors_.at(this->output_id_);
+    xnn_invoke_runtime(Runtime());
+    std::vector<float> output = std::vector<float>(tensor.size() / sizeof(float));
+    memcpy(output.data(), tensor.data(), tensor.size());
+    return output;
+  }
+
   void CreateRuntime(uint32_t flags = 0) {
     xnn_runtime_t runtime = nullptr;
     ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(this->subgraph_.get(), nullptr, nullptr, flags, &runtime));
@@ -73,6 +82,27 @@ class RuntimeTester : public SubgraphTester {
 
   xnn_runtime_t Runtime() const {
     return runtime_.get();
+  }
+
+  inline void ReshapeInput(const std::vector<size_t>& dims, uint32_t external_id) {
+    xnn_status status = xnn_reshape_external_value(Runtime(), external_id, dims.size(), dims.data());
+    EXPECT_EQ(status, xnn_status_success);
+    size_t num_elements = NumElements(dims);
+    auto input = std::vector<char>(num_elements * sizeof(float) + XNN_EXTRA_BYTES * sizeof(char));
+    float* data = reinterpret_cast<float*>(input.data());
+    std::generate(data, data + num_elements, [&]() { return f32dist(rng_); });
+    external_tensors_[external_id] = input;
+  }
+
+  inline void ReshapeRuntime() {
+    xnn_status status = xnn_reshape_runtime(Runtime());
+    EXPECT_EQ(status, xnn_status_success);
+    std::vector<size_t> output_dims(XNN_MAX_TENSOR_DIMS);
+    size_t num_dims;
+    status = xnn_get_external_value_shape(Runtime(), output_id_, &num_dims, output_dims.data());
+    output_dims.resize(num_dims);
+    EXPECT_EQ(status, xnn_status_success);
+    external_tensors_[output_id_].resize(NumElements(output_dims) * sizeof(float));
   }
 
  private:

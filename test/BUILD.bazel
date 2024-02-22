@@ -4143,6 +4143,19 @@ xnnpack_unit_test(
 ############################### Misc unit tests ###############################
 
 xnnpack_unit_test(
+    name = "runtime_test",
+    srcs = [
+        "runtime.cc",
+        "runtime-tester.h",
+        "subgraph-tester.h",
+    ],
+    deps = [
+        "//:XNNPACK_test_mode",
+        "//:subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "subgraph_test",
     srcs = [
         "runtime-tester.h",

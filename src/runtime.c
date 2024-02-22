@@ -616,42 +616,77 @@ error:
   return status;
 }
 
-enum xnn_status track_operator_workspace(
-  xnn_runtime_t runtime,
-  struct xnn_value_allocation_tracker* mem_alloc_tracker)
-{
-  for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
-    struct xnn_operator_data* opdata = &runtime->opdata[opdata_id];
-    if (opdata->reshape != NULL) {
-      // Get operator workspace size.
-      enum xnn_status status = opdata->reshape(opdata, runtime->values, runtime->num_values, runtime->threadpool);
-      if (status != xnn_status_success && status != xnn_status_reallocation_required) {
-        xnn_log_error("failed to reshape node #%" PRIu32, opdata_id);
-        return status;
+enum xnn_status xnn_plan_memory(
+    xnn_runtime_t runtime) {
+  enum xnn_status status = xnn_status_invalid_state;
+  struct xnn_value_allocation_tracker mem_alloc_tracker;
+  xnn_init_value_allocation_tracker(&mem_alloc_tracker, runtime);
+
+  size_t persistent_size = 0;
+
+  for (uint32_t i = 0; i < runtime->num_values; i++) {
+    const struct xnn_value* value = &runtime->values[i];
+    if (!xnn_value_is_valid(value)) {
+      continue;
+    }
+
+    if (value->allocation_type == xnn_allocation_type_workspace) {
+      // Value is purely internal to the runtime, and must be allocated in its workspace.
+      size_t tensor_size = xnn_tensor_get_rounded_size(value);
+      if (value->datatype == xnn_datatype_qdint8) {
+        const size_t batch_dims_size = xnn_shape_multiply_batch_dims(&value->shape, value->quantization.num_nonbatch_dims);
+        tensor_size += xnn_get_rounded_size((batch_dims_size + XNN_EXTRA_QUANTIZATION_PARAMS)
+                                    * sizeof(struct xnn_dynamic_quantization_params));
       }
-      xnn_add_operator_workspace_allocation_tracker(
-        mem_alloc_tracker, runtime->num_values + opdata_id, xnn_get_rounded_size(opdata->workspace_size),
-        opdata_id);
+      xnn_add_value_allocation_tracker(&mem_alloc_tracker, i, tensor_size);
+    } else if (value->allocation_type == xnn_allocation_type_persistent) {
+      persistent_size += xnn_tensor_get_rounded_size(value);
     }
   }
+  size_t old_persistent_size = runtime->workspace->persistent_size;
+  runtime->workspace->persistent_size = persistent_size;
+
+  for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
+    struct xnn_operator_data* opdata = &runtime->opdata[opdata_id];
+    xnn_add_operator_workspace_allocation_tracker(
+        &mem_alloc_tracker, runtime->num_values + opdata_id, xnn_get_rounded_size(opdata->workspace_size),
+        opdata_id);
+  }
+
+  optimize_tensor_allocation_for_in_place_operations(&mem_alloc_tracker, runtime);
+  xnn_plan_value_allocation_tracker(&mem_alloc_tracker);
+
+  status = initialize_workspace_values(runtime, &mem_alloc_tracker, old_persistent_size);
+  if (status != xnn_status_success) {
+    goto error;
+  }
+
+  xnn_release_value_allocation_tracker(&mem_alloc_tracker);
+
   return xnn_status_success;
+
+error:
+  xnn_release_value_allocation_tracker(&mem_alloc_tracker);
+  return status;
 }
 
 enum xnn_status xnn_reshape_runtime(
   xnn_runtime_t runtime)
 {
-  for (size_t i = 0; i < runtime->num_ops; i++) {
-    if (runtime->opdata[i].reshape == NULL) {
-      xnn_log_error("Operator %s does not support shape inference", xnn_operator_type_to_string(runtime->opdata[i].operator_objects[0]->type));
-      return xnn_status_invalid_parameter;
-    }
-    enum xnn_status status = runtime->opdata[i].reshape(&runtime->opdata[i], runtime->values, runtime->num_values, /*threadpool=*/NULL);
+  bool reallocation_required = false;
+
+  for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
+    struct xnn_operator_data* opdata = &runtime->opdata[opdata_id];
+    enum xnn_status status = opdata->reshape(opdata, runtime->values, runtime->num_values, /*threadpool=*/NULL);
     if (status == xnn_status_reallocation_required) {
-      runtime->memory_planning_ready = false;
+      reallocation_required = true;
     } else if (status != xnn_status_success) {
-      xnn_log_error("Operator #%zu: %s failed reshape", i, xnn_operator_type_to_string(runtime->opdata[i].operator_objects[0]->type));
+      xnn_log_error("Operator #%u: %s failed reshape", opdata_id, xnn_operator_type_to_string(opdata->operator_objects[0]->type));
       return status;
     }
+  }
+  if (reallocation_required) {
+    return xnn_plan_memory(runtime);
   }
   return xnn_status_success;
 }
@@ -661,52 +696,6 @@ enum xnn_status xnn_setup_runtime(
   size_t num_external_values,
   const struct xnn_external_value* external_values)
 {
-  enum xnn_status status = xnn_status_invalid_state;
-  struct xnn_value_allocation_tracker mem_alloc_tracker;
-  if (!runtime->memory_planning_ready) {
-    size_t persistent_size = 0;
-
-    xnn_init_value_allocation_tracker(&mem_alloc_tracker, runtime);
-
-    for (uint32_t i = 0; i < runtime->num_values; i++) {
-      const struct xnn_value* value = &runtime->values[i];
-      if (!xnn_value_is_valid(value)) {
-        continue;
-      }
-
-      if (value->allocation_type == xnn_allocation_type_workspace) {
-        // Value is purely internal to the runtime, and must be allocated in its workspace.
-        size_t tensor_size = xnn_tensor_get_rounded_size(value);
-        if (value->datatype == xnn_datatype_qdint8) {
-          const size_t batch_dims_size = xnn_shape_multiply_batch_dims(&value->shape, value->quantization.num_nonbatch_dims);
-          tensor_size += xnn_get_rounded_size((batch_dims_size + XNN_EXTRA_QUANTIZATION_PARAMS)
-                                      * sizeof(struct xnn_dynamic_quantization_params));
-        }
-        xnn_add_value_allocation_tracker(&mem_alloc_tracker, i, tensor_size);
-      } else if (value->allocation_type == xnn_allocation_type_persistent) {
-        persistent_size += xnn_tensor_get_rounded_size(value);
-      }
-    }
-    size_t old_persistent_size = runtime->workspace->persistent_size;
-    runtime->workspace->persistent_size = persistent_size;
-
-    status = track_operator_workspace(runtime, &mem_alloc_tracker);
-    if (status != xnn_status_success) {
-      goto error;
-    }
-
-    optimize_tensor_allocation_for_in_place_operations(&mem_alloc_tracker, runtime);
-    xnn_plan_value_allocation_tracker(&mem_alloc_tracker);
-
-    status = initialize_workspace_values(runtime, &mem_alloc_tracker, old_persistent_size);
-    if (status != xnn_status_success) {
-      goto error;
-    }
-
-    xnn_release_value_allocation_tracker(&mem_alloc_tracker);
-    runtime->memory_planning_ready = true;
-  }
-
   // Validate inputs without changing internal state.
   // This ensures that runtime stays in consistent state in case validation fails midway.
   for (size_t i = 0; i < num_external_values; i++) {
@@ -733,8 +722,27 @@ enum xnn_status xnn_setup_runtime(
     value->data = external_value->data;
   }
 
-  for (size_t i = 0; i < runtime->num_ops; i++) {
-    struct xnn_operator_data* opdata = &runtime->opdata[i];
+  for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
+    struct xnn_operator_data* opdata = &runtime->opdata[opdata_id];
+    for (size_t j = 0; j < XNN_MAX_OPERATOR_OBJECTS; j++) {
+      if (opdata->operator_objects[j] == NULL) {
+        // Operator was removed during optimization
+        continue;
+      }
+
+      assert(opdata->reshape != NULL);
+      enum xnn_status status = opdata->reshape(opdata, runtime->values, runtime->num_values, runtime->threadpool);
+      if (status != xnn_status_success && status != xnn_status_reallocation_required) {
+        xnn_log_error("failed to setup runtime: error in reshaping operator #%u", opdata_id);
+        return status;
+      }
+    }
+  }
+
+  enum xnn_status status = status = xnn_plan_memory(runtime);
+
+  for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
+    struct xnn_operator_data* opdata = &runtime->opdata[opdata_id];
     for (size_t j = 0; j < XNN_MAX_OPERATOR_OBJECTS; j++) {
       if (opdata->operator_objects[j] == NULL) {
         // Operator was removed during optimization
@@ -742,26 +750,10 @@ enum xnn_status xnn_setup_runtime(
       }
 
       assert(opdata->setup != NULL);
-      if (opdata->reshape != NULL) {
-        enum xnn_status status = opdata->reshape(opdata, runtime->values, runtime->num_values, runtime->threadpool);
-        if (status != xnn_status_success && status != xnn_status_reallocation_required) {
-          xnn_log_error("failed to setup runtime: error in reshaping operator #%zu", i);
-          return status;
-        }
-        assert(
-          opdata->operator_objects[j]->state == xnn_run_state_skip ||
-          opdata->operator_objects[j]->state == xnn_run_state_needs_setup);
-        status = opdata->setup(opdata, runtime->values, runtime->num_values, runtime->threadpool);
-        if (status != xnn_status_success) {
-          xnn_log_error("failed to setup runtime: error in setting pointers of operator #%zu", i);
-          return status;
-        }
-      } else {
-        const enum xnn_status status = opdata->setup(opdata, runtime->values, runtime->num_values, runtime->threadpool);
-        if (status != xnn_status_success) {
-          xnn_log_error("failed to setup runtime: error in operator #%zu", i);
-          return status;
-        }
+      enum xnn_status status = opdata->setup(opdata, runtime->values, runtime->num_values, runtime->threadpool);
+      if (status != xnn_status_success) {
+        xnn_log_error("failed to setup runtime: error in setting pointers of operator #%u", opdata_id);
+        return status;
       }
     }
   }
@@ -769,10 +761,6 @@ enum xnn_status xnn_setup_runtime(
   runtime->has_been_setup = true;
 
   return xnn_status_success;
-
-error:
-  xnn_release_value_allocation_tracker(&mem_alloc_tracker);
-  return status;
 }
 
 static xnn_timestamp xnn_read_timer() {
