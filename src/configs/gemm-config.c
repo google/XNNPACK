@@ -171,6 +171,10 @@ static void init_f16_gemm_config(void) {
             case cpuinfo_uarch_cortex_x1:
             case cpuinfo_uarch_cortex_x2:
             case cpuinfo_uarch_cortex_x3:
+            case cpuinfo_uarch_neoverse_n1:
+            case cpuinfo_uarch_neoverse_n2:
+            case cpuinfo_uarch_neoverse_v1:
+            case cpuinfo_uarch_neoverse_v2:
               f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64);
               f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a75);
               f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64);
@@ -464,6 +468,7 @@ static void init_f32_gemm_config(void) {
         case cpuinfo_uarch_cortex_a76:
         case cpuinfo_uarch_exynos_m3:
         case cpuinfo_uarch_exynos_m4:
+        case cpuinfo_uarch_neoverse_n1:
           f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a75_prfm);
           f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a75_prfm);
           f32_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a75_prfm);
@@ -576,6 +581,7 @@ static void init_f32_gemm_config(void) {
           f32_gemm_config.nr = 8;
           break;
         case cpuinfo_uarch_cortex_x3:
+        case cpuinfo_uarch_neoverse_v2:
           // TODO(fbarchard): Implement asm with indexed inputs
           f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc2);
           f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_lane_ld128);
@@ -593,6 +599,8 @@ static void init_f32_gemm_config(void) {
         case cpuinfo_uarch_cortex_a715:
         case cpuinfo_uarch_cortex_x1:
         case cpuinfo_uarch_cortex_x2:
+        case cpuinfo_uarch_neoverse_n2:
+        case cpuinfo_uarch_neoverse_v1:
         default:
           f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4);
           f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128);
@@ -1179,6 +1187,10 @@ static void init_f32_qc4w_gemm_config(void) {
         case cpuinfo_uarch_cortex_x1:
         case cpuinfo_uarch_cortex_x2:
         case cpuinfo_uarch_cortex_x3:
+        case cpuinfo_uarch_neoverse_n1:
+        case cpuinfo_uarch_neoverse_n2:
+        case cpuinfo_uarch_neoverse_v1:
+        case cpuinfo_uarch_neoverse_v2:
         default:
           f32_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_qc4w_gemm_minmax_ukernel_1x8__aarch64_neonfma_lane_ld128);
           f32_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_qc4w_gemm_minmax_ukernel_4x8__aarch64_neonfma_lane_ld128);
@@ -1351,6 +1363,8 @@ static void init_f32_qc8w_gemm_config(void) {
         case cpuinfo_uarch_exynos_m5:
         case cpuinfo_uarch_cortex_a78:
         case cpuinfo_uarch_cortex_x1:
+        case cpuinfo_uarch_neoverse_n1:
+        case cpuinfo_uarch_neoverse_v1:
         default:
           f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4);
           f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128);
@@ -3874,6 +3888,7 @@ static void init_qu8_gemm_config(void) {
           case cpuinfo_uarch_exynos_m2:
           case cpuinfo_uarch_exynos_m3:
           case cpuinfo_uarch_exynos_m4:
+          case cpuinfo_uarch_neoverse_n1:
             qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane);
             qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a75_prfm);
             qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane);
