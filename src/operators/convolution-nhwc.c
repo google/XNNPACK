@@ -2495,7 +2495,7 @@ static enum xnn_status reshape_convolution2d_nhwc(
   pthreadpool_t threadpool)
 {
   if (convolution_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
       xnn_operator_type_to_string(expected_operator_type),
       xnn_operator_type_to_string(convolution_op->type));
     return xnn_status_invalid_parameter;
@@ -2503,14 +2503,14 @@ static enum xnn_status reshape_convolution2d_nhwc(
   convolution_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+    xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(convolution_op->type));
     return xnn_status_uninitialized;
   }
 
   if (input_width == 0 || input_height == 0) {
     xnn_log_error(
-      "failed to setup %s operator with %zux%zu input: input dimensions must be non-zero",
+      "failed to reshape %s operator with %zux%zu input: input dimensions must be non-zero",
       xnn_operator_type_to_string(convolution_op->type), input_width, input_height);
     return xnn_status_invalid_parameter;
   }
@@ -2518,12 +2518,6 @@ static enum xnn_status reshape_convolution2d_nhwc(
   if (batch_size == 0) {
     convolution_op->state = xnn_run_state_skip;
     return xnn_status_success;
-  }
-
-  if (convolution_op->weights_cache != NULL && !xnn_weights_cache_is_finalized(convolution_op->weights_cache)) {
-    xnn_log_error("failed to setup %s operator: weights cache is not finalized",
-      xnn_operator_type_to_string(convolution_op->type));
-    return xnn_status_invalid_state;
   }
 
   convolution_op->batch_size = batch_size;
@@ -2919,6 +2913,12 @@ static enum xnn_status setup_convolution2d_nhwc(
     case xnn_run_state_ready:
       // Operator has been reshaped, and we are setting up with different pointers.
       break;
+  }
+
+  if (convolution_op->weights_cache != NULL && !xnn_weights_cache_is_finalized(convolution_op->weights_cache)) {
+    xnn_log_error("failed to setup %s operator: weights cache is not finalized",
+      xnn_operator_type_to_string(convolution_op->type));
+    return xnn_status_invalid_state;
   }
 
   convolution_op->input = input;
