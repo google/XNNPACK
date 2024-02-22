@@ -1975,6 +1975,7 @@ DECLARE_QD8_F32_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc4w_gemm_minmax_u
       const struct xnn_qd8_quantization_params quantization_params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_QD8_F32_QC4W_BL_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc4w_bl_gemm_minmax_ukernel_1x2__scalar)
+DECLARE_QD8_F32_QC4W_BL_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qc4w_bl_gemm_minmax_ukernel_1x16c4__neondot)
 
 #define DECLARE_QD8_F16_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name)                                     \
   XNN_INTERNAL void fn_name(                                                                           \

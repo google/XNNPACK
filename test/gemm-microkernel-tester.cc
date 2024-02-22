@@ -1412,7 +1412,6 @@ void GemmMicrokernelTester::Test(
       kernel_scale2d.data(),
       (void*) start);
 
-    // Fill in packed bias - TODO
     start = (uintptr_t) packed_w.data() + stride - sizeof(float) * nr();
     xnn_init_qs8_qc8w_scale_fp32_params(
       n(), nr(), nr(),
@@ -1443,7 +1442,7 @@ void GemmMicrokernelTester::Test(
           kfsum += scale * ksum;
         }
         c_ref[m_index * n() + n_index] -= (quantization_params[m_index].zero_point * kfsum);
-        c_ref[m_index * n() + n_index] *= quantization_params[m_index].inv_scale; // * kernel_scale[n_index];
+        c_ref[m_index * n() + n_index] *= quantization_params[m_index].inv_scale;
         c_ref[m_index * n() + n_index] += bias[n_index];
       }
     }
@@ -4693,4 +4692,3 @@ void GemmMicrokernelTester::Test(
 
 #endif  // XNN_PLATFORM_JIT
 #endif  // !XNN_PLATFORM_WEB
-
