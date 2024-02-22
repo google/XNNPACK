@@ -1947,7 +1947,19 @@ enum xnn_status xnn_get_external_value_shape(
   size_t* num_dims,
   size_t* dims);
 
-/// Setup data pointers for external inputs and outputs in a Runtime object.
+/// Reshape the XNNPACK runtime.
+///
+/// Propgates the shapes of input tensors through the graph to determine the shapes of intermediate and output tensors.
+/// Memory is allocated if required. Output tensor shapes are returned by xnn_get_external_value_shape.
+///
+/// @param runtime - a Runtime object created with @ref xnn_create_runtime or @ref xnn_create_runtime_v2.
+enum xnn_status xnn_reshape_runtime(
+  xnn_runtime_t runtime);
+
+/// Deprecated. Use xnn_reshape_runtime and xnn_setup_runtime_v2.
+///
+/// Setup data pointers for external inputs and outputs in a Runtime object and
+/// allocate memory.
 ///
 /// @param runtime - a Runtime object created with @ref xnn_create_runtime or @ref xnn_create_runtime_v2.
 /// @param num_external_values - the number of external inputs and outputs specified in this call. This number must
@@ -1959,8 +1971,18 @@ enum xnn_status xnn_setup_runtime(
   size_t num_external_values,
   const struct xnn_external_value* external_values);
 
-enum xnn_status xnn_reshape_runtime(
-  xnn_runtime_t runtime);
+/// Setup data pointers for external inputs and outputs in a Runtime object.
+/// Should be called after xnn_reshape_runtime.
+///
+/// @param runtime - a Runtime object created with @ref xnn_create_runtime or @ref xnn_create_runtime_v2.
+/// @param num_external_values - the number of external inputs and outputs specified in this call. This number must
+///                              match the number of external inputs and outputs in the runtime, i.e. all external
+///                              inputs and outputs in the runtime must be specified in one call.
+/// @param external_values - array with location information for all external inputs and outputs in the runtime.
+enum xnn_status xnn_setup_runtime_v2(
+  xnn_runtime_t runtime,
+  size_t num_external_values,
+  const struct xnn_external_value* external_values);
 
 /// Execute forward pass for all operators in the runtime.
 ///

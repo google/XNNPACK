@@ -49,7 +49,7 @@ enum xnn_status xnn_reshape_external_value(
     return xnn_status_invalid_parameter;
   }
   struct xnn_value* value = &runtime->values[external_id];
-  if (value->allocation_type != xnn_allocation_type_external && value->allocation_type != xnn_allocation_type_static) {
+  if (value->flags & XNN_VALUE_FLAG_EXTERNAL_INPUT && value->allocation_type != xnn_allocation_type_external && value->allocation_type != xnn_allocation_type_static) {
     xnn_log_error("failed to reshape runtime: Value %" PRIu32 " is neither external nor static (%d)",
                   external_id, value->allocation_type);
     return xnn_status_invalid_parameter;
@@ -61,9 +61,6 @@ enum xnn_status xnn_reshape_external_value(
   }
   struct xnn_shape* shape = &value->shape;
   for (size_t i = 0; i < num_dims; ++i) {
-    if (dims[i] > shape->maximum_dim[i]) {
-      shape->maximum_dim[i] = dims[i];
-    }
     shape->dim[i] = dims[i];
   }
   value->size = xnn_tensor_get_size(value);
@@ -299,9 +296,9 @@ static enum xnn_status initialize_workspace_values(
       if (rt == runtime) {
         continue;
       }
-      // This runtime has not ever been setup yet, so it doesn't have any pointers into workspace, so does not need to
+      // This memory for this runtime has not yet been planned, so it doesn't have any pointers into workspace, so does not need to
       // be updated.
-      if (!rt->has_been_setup) {
+      if (!rt->memory_planned) {
         continue;
       }
 
@@ -321,6 +318,11 @@ static enum xnn_status initialize_workspace_values(
         }
       }
 
+      // This runtime has not ever been setup yet, so it doesn't have any pointers into workspace, so does not need to
+      // be updated.
+      if (!rt->has_been_setup) {
+        continue;
+      }
       // Re-setup all the nodes to adjust input/output pointers.
       for (size_t i = 0; i < rt->num_ops; i++) {
         struct xnn_operator_data* opdata = &rt->opdata[i];
@@ -334,6 +336,7 @@ static enum xnn_status initialize_workspace_values(
             opdata->workspace = (void*) ((uintptr_t) opdata->workspace + workspace_data_delta);
           }
 
+          printf("SETUp0\n");fflush(stdout);
           assert(opdata->setup != NULL);
           const enum xnn_status status = opdata->setup(opdata, rt->values, rt->num_values, rt->threadpool);
           if (status != xnn_status_success) {
@@ -685,8 +688,10 @@ enum xnn_status xnn_reshape_runtime(
       return status;
     }
   }
-  if (reallocation_required) {
+  if (reallocation_required || !runtime->memory_planned) {
+    runtime->memory_planned = true;
     return xnn_plan_memory(runtime);
+  } else {
   }
   return xnn_status_success;
 }
@@ -740,6 +745,7 @@ enum xnn_status xnn_setup_runtime(
   }
 
   enum xnn_status status = status = xnn_plan_memory(runtime);
+  runtime->memory_planned = true;
 
   for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
     struct xnn_operator_data* opdata = &runtime->opdata[opdata_id];
@@ -755,6 +761,53 @@ enum xnn_status xnn_setup_runtime(
         xnn_log_error("failed to setup runtime: error in setting pointers of operator #%u", opdata_id);
         return status;
       }
+    }
+  }
+
+  runtime->has_been_setup = true;
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_setup_runtime_v2(
+  xnn_runtime_t runtime,
+  size_t num_external_values,
+  const struct xnn_external_value* external_values)
+{
+  // Validate inputs without changing internal state.
+  // This ensures that runtime stays in consistent state in case validation fails midway.
+  for (size_t i = 0; i < num_external_values; i++) {
+    const struct xnn_external_value* external_value = &external_values[i];
+    const uint32_t value_id = external_value->id;
+    if (value_id >= runtime->num_values) {
+      xnn_log_error("failed to setup runtime: out-of-bounds ID %" PRIu32 " in external value #%zu",
+                    value_id, i);
+      return xnn_status_invalid_parameter;
+    }
+
+    const struct xnn_value* value = &runtime->values[value_id];
+    if (value->allocation_type != xnn_allocation_type_external) {
+      xnn_log_error("failed to setup runtime: Value %" PRIu32 " is not external (%d)", value_id, value->allocation_type);
+      return xnn_status_invalid_parameter;
+    }
+  }
+
+  // Apply runtime state changes.
+  for (size_t i = 0; i < num_external_values; i++) {
+    const struct xnn_external_value* external_value = &external_values[i];
+    const uint32_t value_id = external_value->id;
+    struct xnn_value* value = &runtime->values[value_id];
+    value->data = external_value->data;
+  }
+
+  for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
+    struct xnn_operator_data* opdata = &runtime->opdata[opdata_id];
+
+    assert(opdata->setup != NULL);
+    enum xnn_status status = opdata->setup(opdata, runtime->values, runtime->num_values, runtime->threadpool);
+    if (status != xnn_status_success) {
+      xnn_log_error("failed to setup runtime: error in setting pointers of operator #%u", opdata_id);
+      return status;
     }
   }
 

@@ -38,7 +38,7 @@ TEST(RUNTIME, reshape_runtime) {
   tester.ReshapeInput({new_dim0}, input2_id);
 
   tester.ReshapeRuntime();
-  tester.SetupRuntime();
+  tester.SetupRuntimeV2();
 
   output = tester.RepeatRun<float>();
   expected.resize(new_dim0);
