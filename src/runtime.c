@@ -679,6 +679,11 @@ enum xnn_status xnn_reshape_runtime(
 
   for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
     struct xnn_operator_data* opdata = &runtime->opdata[opdata_id];
+    if (opdata->operator_objects[0] == NULL) {
+      // Operator was removed during optimization
+      continue;
+    }
+    assert(opdata->reshape != NULL);
     enum xnn_status status = opdata->reshape(opdata, runtime->values, runtime->num_values, /*threadpool=*/NULL);
     if (status == xnn_status_reallocation_required) {
       reallocation_required = true;
@@ -802,6 +807,10 @@ enum xnn_status xnn_setup_runtime_v2(
   for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
     struct xnn_operator_data* opdata = &runtime->opdata[opdata_id];
 
+    if (opdata->operator_objects[0] == NULL) {
+      // Operator was removed during optimization
+      continue;
+    }
     assert(opdata->setup != NULL);
     enum xnn_status status = opdata->setup(opdata, runtime->values, runtime->num_values, runtime->threadpool);
     if (status != xnn_status_success) {
