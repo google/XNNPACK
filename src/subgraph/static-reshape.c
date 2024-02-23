@@ -103,6 +103,18 @@ static enum xnn_status resize_copy_output_tensor(
     }
   }
 
+  const size_t num_input_elements = xnn_shape_multiply_all_dims(&input->shape);
+  const size_t num_output_elements = xnn_shape_multiply_all_dims(&output->shape);
+
+  if (num_input_elements != num_output_elements) {
+    xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
+        ": number of input elements, %zu, does not match number of output elements %zu",
+        xnn_node_type_to_string(xnn_node_type_static_reshape), input_id, output_id, num_input_elements,
+        num_output_elements);
+      return xnn_status_invalid_parameter;
+  }
+
   const size_t new_size = xnn_tensor_get_size(output);
   if (new_size > output->size || old_workspace_size < opdata->workspace_size) {
     output->size = new_size;
@@ -121,6 +133,7 @@ static enum xnn_status reshape_copy_operator(
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
   const size_t batch_size = xnn_shape_multiply_all_dims(&values[input_id].shape);
+
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;
 
@@ -248,18 +261,6 @@ enum xnn_status xnn_define_static_reshape(
   status = xnn_subgraph_check_output_type_dense(xnn_node_type_static_reshape, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
-  }
-
-  const size_t num_input_elements = xnn_shape_multiply_all_dims(&input_value->shape);
-  const size_t num_output_elements = xnn_shape_multiply_all_dims(&output_value->shape);
-
-  if (num_input_elements != num_output_elements) {
-    xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
-        ": number of input elements, %zu, does not match number of output elements %zu",
-        xnn_node_type_to_string(xnn_node_type_static_reshape), input_id, output_id, num_input_elements,
-        num_output_elements);
-      return xnn_status_invalid_parameter;
   }
 
   enum xnn_compute_type compute_type = xnn_compute_type_invalid;
