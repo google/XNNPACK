@@ -336,7 +336,6 @@ static enum xnn_status initialize_workspace_values(
             opdata->workspace = (void*) ((uintptr_t) opdata->workspace + workspace_data_delta);
           }
 
-          printf("SETUp0\n");fflush(stdout);
           assert(opdata->setup != NULL);
           const enum xnn_status status = opdata->setup(opdata, rt->values, rt->num_values, rt->threadpool);
           if (status != xnn_status_success) {
