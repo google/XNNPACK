@@ -94,6 +94,7 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
     return status;
   }
   memcpy(output->shape.dim, input1->shape.dim, (input1->shape.num_dims - 2) * sizeof(size_t));
+  output->shape.num_dims = max(input1->shape.num_dims, input2->shape.num_dims);
   output->shape.dim[output->shape.num_dims - 2] = m;
   output->shape.dim[output->shape.num_dims - 1] = n;
   const size_t new_size = xnn_tensor_get_size(output);

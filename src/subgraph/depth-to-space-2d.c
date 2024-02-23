@@ -170,6 +170,7 @@ static enum xnn_status reshape_depth_to_space_operator(
   output_value->shape.dim[2] = output_width;
   output_value->shape.dim[3] = output_channels;
 
+  output_value->shape.num_dims = 4;
   const size_t new_size = xnn_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;

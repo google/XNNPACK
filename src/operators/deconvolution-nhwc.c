@@ -1245,12 +1245,6 @@ static enum xnn_status reshape_deconvolution2d_nhwc(
     return xnn_status_success;
   }
 
-  if (deconvolution_op->weights_cache != NULL && !xnn_weights_cache_is_finalized(deconvolution_op->weights_cache)) {
-    xnn_log_error("failed to reshape %s operator: weights cache is not finalized",
-                  xnn_operator_type_to_string(deconvolution_op->type));
-    return xnn_status_invalid_state;
-  }
-
   deconvolution_op->batch_size = batch_size;
   deconvolution_op->input_height = input_height;
   deconvolution_op->input_width = input_width;

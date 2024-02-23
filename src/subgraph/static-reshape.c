@@ -70,6 +70,7 @@ static enum xnn_status resize_copy_output_tensor(
   size_t output_axis_dynamic = XNN_MAX_TENSOR_DIMS;
 
   // Propagate output channels.
+  output->shape.num_dims = num_output_dims;
   for (size_t dim_idx = 0; dim_idx < num_output_dims; ++dim_idx) {
     size_t hint_cur_dim = opdata->reshape_dims[dim_idx];
     if (hint_cur_dim == 0) {

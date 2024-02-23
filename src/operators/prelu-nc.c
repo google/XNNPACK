@@ -208,12 +208,6 @@ static enum xnn_status reshape_prelu_nc(
     return xnn_status_success;
   }
 
-  if (prelu_op->weights_cache != NULL && !xnn_weights_cache_is_finalized(prelu_op->weights_cache)) {
-    xnn_log_error("failed to reshape %s operator: weights cache is not finalized",
-      xnn_operator_type_to_string(expected_operator_type));
-    return xnn_status_invalid_state;
-  }
-
   const struct xnn_prelu_config* prelu = prelu_op->prelu_config;
 
   const size_t channels = prelu_op->channels;
