@@ -54,12 +54,8 @@ enum xnn_status xnn_reshape_external_value(
                   external_id, value->allocation_type);
     return xnn_status_invalid_parameter;
   }
-  if (num_dims != value->shape.num_dims) {
-    xnn_log_error("failed to reshape external value (%d): new rank (%zu) is not equal to current rank (%zu)",
-            external_id, num_dims, value->shape.num_dims);
-    return xnn_status_invalid_parameter;
-  }
   struct xnn_shape* shape = &value->shape;
+  shape->num_dims = num_dims;
   for (size_t i = 0; i < num_dims; ++i) {
     shape->dim[i] = dims[i];
   }
