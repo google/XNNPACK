@@ -53,7 +53,6 @@ void max_pooling_u8(benchmark::State& state, const char* net) {
     pooling_size, pooling_size,
     stride, stride,
     1 /* dilation height */, 1 /* dilation width */,
-    channels, channels /* input pixel stride */, channels /* output pixel stride */,
     0, 255,
     0 /* flags */, &pooling_op);
   if (status != xnn_status_success) {
@@ -64,6 +63,7 @@ void max_pooling_u8(benchmark::State& state, const char* net) {
   status = xnn_reshape_max_pooling2d_nhwc_u8(
     pooling_op,
     batch_size, input_height, input_width,
+    channels, /*input_pixel_stride=*/channels, /*output_pixel_stride=*/channels,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
@@ -138,7 +138,6 @@ void max_pooling_f32(benchmark::State& state, const char* net) {
     pooling_size, pooling_size,
     stride, stride,
     1 /* dilation height */, 1 /* dilation width */,
-    channels, channels /* input pixel stride */, channels /* output pixel stride */,
     -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity(),
     0 /* flags */, &pooling_op);
   if (status != xnn_status_success) {
@@ -149,6 +148,7 @@ void max_pooling_f32(benchmark::State& state, const char* net) {
   status = xnn_reshape_max_pooling2d_nhwc_f32(
     pooling_op,
     batch_size, input_height, input_width,
+    channels, /*input_pixel_stride=*/channels, /*output_pixel_stride=*/channels,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/nullptr);
   if (status != xnn_status_success) {

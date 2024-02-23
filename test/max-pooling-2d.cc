@@ -283,8 +283,7 @@ TEST_F(MaxPooling2DTestQS8, matches_operator_api)
   xnn_operator_t op = nullptr;
   const xnn_status status = xnn_create_max_pooling2d_nhwc_s8(
     padding_top, padding_right, padding_bottom, padding_left, pooling_height, pooling_width, stride_height,
-    stride_width, dilation_height, dilation_width, channels, channels, channels, quantized_output_min,
-    quantized_output_max, /*flags=*/0, &op);
+    stride_width, dilation_height, dilation_width, quantized_output_min, quantized_output_max, /*flags=*/0, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -295,8 +294,8 @@ TEST_F(MaxPooling2DTestQS8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
     xnn_status_success, xnn_reshape_max_pooling2d_nhwc_s8(
-                          op, batch_size, input_height, input_width,
-                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                          op, batch_size, input_height, input_width, channels, /*input_pixel_stride=*/channels,
+                          /*output_pixel_stride=*/channels, /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                           /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_max_pooling2d_nhwc_s8(op, input.data(), operator_output.data()));
 
@@ -357,8 +356,7 @@ TEST_F(MaxPooling2DTestQU8, matches_operator_api)
   xnn_operator_t op = nullptr;
   const xnn_status status = xnn_create_max_pooling2d_nhwc_u8(
     padding_top, padding_right, padding_bottom, padding_left, pooling_height, pooling_width, stride_height,
-    stride_width, dilation_height, dilation_width, channels, channels, channels, quantized_output_min,
-    quantized_output_max, /*flags=*/0, &op);
+    stride_width, dilation_height, dilation_width, quantized_output_min, quantized_output_max, /*flags=*/0, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -369,8 +367,8 @@ TEST_F(MaxPooling2DTestQU8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
     xnn_status_success, xnn_reshape_max_pooling2d_nhwc_u8(
-                          op, batch_size, input_height, input_width,
-                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                          op, batch_size, input_height, input_width, channels, /*input_pixel_stride=*/channels,
+                          /*output_pixel_stride=*/channels, /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                           /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_max_pooling2d_nhwc_u8(op, input.data(), operator_output.data()));
 
@@ -425,8 +423,7 @@ TEST_F(MaxPooling2DTestF32, matches_operator_api)
   xnn_operator_t op = nullptr;
   const xnn_status status = xnn_create_max_pooling2d_nhwc_f32(
     padding_top, padding_right, padding_bottom, padding_left, pooling_height, pooling_width, stride_height,
-    stride_width, dilation_height, dilation_width, channels, channels, channels, output_min, output_max, /*flags=*/0,
-    &op);
+    stride_width, dilation_height, dilation_width, output_min, output_max, /*flags=*/0, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -437,8 +434,8 @@ TEST_F(MaxPooling2DTestF32, matches_operator_api)
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
     xnn_status_success, xnn_reshape_max_pooling2d_nhwc_f32(
-                          op, batch_size, input_height, input_width,
-                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                          op, batch_size, input_height, input_width, channels, /*input_pixel_stride=*/channels,
+                          /*output_pixel_stride=*/channels, /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                           /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_max_pooling2d_nhwc_f32(op, input.data(), operator_output.data()));
 
