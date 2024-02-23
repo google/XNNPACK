@@ -86,8 +86,8 @@ static enum xnn_status resize_copy_output_tensor(
     }
   }
 
+  const size_t input_num_elements = xnn_shape_multiply_all_dims(&input->shape);
   if (output_axis_dynamic < XNN_MAX_TENSOR_DIMS) {
-    const size_t input_num_elements = xnn_shape_multiply_all_dims(&input->shape);
     const size_t output_num_elements = xnn_shape_multiply_all_dims(&output->shape);
     const size_t inferred_dim = input_num_elements / output_num_elements;
     if (inferred_dim * output_num_elements != input_num_elements) {
@@ -101,18 +101,17 @@ static enum xnn_status resize_copy_output_tensor(
     if (status == xnn_shape_inference_status_error) {
       return xnn_status_invalid_parameter;
     }
-  }
+  } else {
+    const size_t output_num_elements = xnn_shape_multiply_all_dims(&output->shape);
 
-  const size_t num_input_elements = xnn_shape_multiply_all_dims(&input->shape);
-  const size_t num_output_elements = xnn_shape_multiply_all_dims(&output->shape);
-
-  if (num_input_elements != num_output_elements) {
-    xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
-        ": number of input elements, %zu, does not match number of output elements %zu",
-        xnn_node_type_to_string(xnn_node_type_static_reshape), input_id, output_id, num_input_elements,
-        num_output_elements);
-      return xnn_status_invalid_parameter;
+    if (input_num_elements != output_num_elements) {
+      xnn_log_error(
+          "failed to reshape %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
+          ": number of input elements, %zu, does not match number of output elements %zu",
+          xnn_node_type_to_string(xnn_node_type_static_reshape), input_id, output_id, input_num_elements,
+          output_num_elements);
+        return xnn_status_invalid_parameter;
+    }
   }
 
   const size_t new_size = xnn_tensor_get_size(output);
