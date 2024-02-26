@@ -21,10 +21,6 @@ static enum xnn_status create_slice_operator(
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs == 1);
-  const uint32_t input_id = node->inputs[0];
-  assert(input_id != XNN_INVALID_VALUE_ID);
-  assert(input_id < num_values);
-
   assert(node->num_outputs == 1);
 
   enum xnn_status status;
@@ -46,7 +42,6 @@ static enum xnn_status create_slice_operator(
   if (status == xnn_status_success) {
     memcpy(opdata->offsets, node->params.slice.offsets, sizeof(opdata->offsets));
     memcpy(opdata->sizes, node->params.slice.sizes, sizeof(opdata->sizes));
-    opdata->shape1 = values[input_id].shape;
   }
 
   return status;
@@ -58,26 +53,32 @@ static enum xnn_status reshape_slice_operator(
     size_t num_values,
     pthreadpool_t threadpool)
 {
-  const size_t num_dims = opdata->shape1.num_dims;
+  const uint32_t input_id = opdata->inputs[0];
+  const uint32_t output_id = opdata->outputs[0];
+  assert(input_id < num_values);
+  assert(output_id < num_values);
+  struct xnn_value* output_value = values + output_id;
+  struct xnn_value* input_value = values + input_id;
+  const size_t num_dims = input_value->shape.num_dims;
   enum xnn_status status = xnn_status_invalid_state;
   const size_t old_workspace_size = opdata->workspace_size;
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_slice_nd_x8:
       status = xnn_reshape_slice_nd_x8(
           opdata->operator_objects[0], num_dims,
-          opdata->shape1.dim, opdata->offsets, opdata->sizes,
+          input_value->shape.dim, opdata->offsets, opdata->sizes,
           threadpool);
       break;
     case xnn_operator_type_slice_nd_x16:
       status = xnn_reshape_slice_nd_x16(
           opdata->operator_objects[0], num_dims,
-          opdata->shape1.dim, opdata->offsets, opdata->sizes,
+          input_value->shape.dim, opdata->offsets, opdata->sizes,
           threadpool);
       break;
     case xnn_operator_type_slice_nd_x32:
       status = xnn_reshape_slice_nd_x32(
           opdata->operator_objects[0], num_dims,
-          opdata->shape1.dim, opdata->offsets, opdata->sizes,
+          input_value->shape.dim, opdata->offsets, opdata->sizes,
           threadpool);
       break;
     default:
@@ -86,12 +87,6 @@ static enum xnn_status reshape_slice_operator(
   if (status != xnn_status_success) {
     return status;
   }
-  const uint32_t output_id = opdata->outputs[0];
-  const uint32_t input_id = opdata->inputs[0];
-  assert(output_id < num_values);
-  assert(input_id < num_values);
-  struct xnn_value* output_value = values + output_id;
-  struct xnn_value* input_value = values + input_id;
   output_value->shape.num_dims = num_dims;
   for (size_t i = 0; i < num_dims; ++i) {
     if (opdata->sizes[i] == 0) {
