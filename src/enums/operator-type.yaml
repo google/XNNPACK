@@ -227,6 +227,8 @@
   string: "PReLU (NC, F16)"
 - name: xnn_operator_type_prelu_nc_f32
   string: "PReLU (NC, F32)"
+- name: xnn_operator_type_reciprocal_square_root_nc_f32
+  string: "Reciprocal Square Root (NC, F32)"
 - name: xnn_operator_type_resize_bilinear_nchw_f16
   string: "Resize Bilinear (NCHW, F16)"
 - name: xnn_operator_type_resize_bilinear_nchw_f32
