@@ -1,7 +1,14 @@
-// Copyright 2020 Google LLC
+// Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Specification: test/f32-vhswish.yaml
+//   Generator: tools/generate-vunary-benchmark.py
+
+#include <stddef.h>
+#include <stdint.h>
 
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
@@ -15,13 +22,15 @@
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
-void f32_vhswish(benchmark::State& state, xnn_f32_vhswish_ukernel_fn vhswish,
-                 xnn_init_f32_hswish_params_fn init_params = nullptr,
-                 benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  f32_vunary_benchmark<xnn_f32_hswish_params>(state, vhswish, init_params,
-                                              isa_check,
-                                              /*range_min=*/-10.0f,
-                                              /*range_max=*/10.0f);
+void f32_vhswish(benchmark::State& state, xnn_f32_vhswish_ukernel_fn ukernel,
+              xnn_init_f32_hswish_params_fn init_params = nullptr,
+              benchmark::utils::IsaCheckFunction isa_check = nullptr) {
+  f32_vunary_benchmark<xnn_f32_hswish_params>(
+      state, ukernel,
+      init_params,
+      isa_check,
+      /*range_min=*/-10.0,
+      /*range_max=*/10.0);
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -83,7 +92,6 @@ void f32_vhswish(benchmark::State& state, xnn_f32_vhswish_ukernel_fn vhswish,
                     xnn_init_f32_hswish_sse_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-
   BENCHMARK_CAPTURE(f32_vhswish, avx_u8,
                     xnn_f32_vhswish_ukernel__avx_u8,
                     xnn_init_f32_hswish_avx_params,
@@ -96,7 +104,6 @@ void f32_vhswish(benchmark::State& state, xnn_f32_vhswish_ukernel_fn vhswish,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-
   BENCHMARK_CAPTURE(f32_vhswish, fma3_u8,
                     xnn_f32_vhswish_ukernel__fma3_u8,
                     xnn_init_f32_hswish_avx_params,
@@ -109,7 +116,6 @@ void f32_vhswish(benchmark::State& state, xnn_f32_vhswish_ukernel_fn vhswish,
                     benchmark::utils::CheckFMA3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-
   BENCHMARK_CAPTURE(f32_vhswish, avx512f_u16,
                     xnn_f32_vhswish_ukernel__avx512f_u16,
                     xnn_init_f32_hswish_avx512_params,
