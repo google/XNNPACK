@@ -183,6 +183,7 @@ static enum xnn_status reshape_even_split_n_operator(
       continue;
     }
     memcpy(output_n_value->shape.dim, input_value->shape.dim, input_value->shape.num_dims * sizeof(size_t));
+    output_n_value->shape.num_dims = input_value->shape.num_dims;
     output_n_value->shape.dim[axis] = axis_elements;
     const size_t new_size = xnn_tensor_get_size(output_n_value);
     if (new_size > output_n_value->size) {

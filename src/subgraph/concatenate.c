@@ -176,6 +176,7 @@ static enum xnn_status reshape_concatenate_n_operator(
       return status;
     }
   }
+  output_value->shape.num_dims = input0_value->shape.num_dims;
   memcpy(output_value->shape.dim, input0_value->shape.dim, input0_value->shape.num_dims * sizeof(size_t));
   size_t concatenated_elements = 0;
   for (size_t i = 0; i < num_inputs; ++i) {
