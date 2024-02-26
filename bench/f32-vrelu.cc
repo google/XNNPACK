@@ -3,57 +3,24 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
-#include <cmath>
-#include <functional>
-#include <random>
-#include <vector>
-
-#include <benchmark/benchmark.h>
-#include "bench/utils.h"
-
+#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
+#include <xnnpack/microparams.h>
 #include <xnnpack/vunary.h>
 
+#include "bench/f32-vunary-benchmark.h"
+#include "bench/utils.h"
+#include <benchmark/benchmark.h>
 
-static void f32_vrelu(
-  benchmark::State& state,
-  xnn_f32_vrelu_ukernel_fn f32_vrelu,
-  benchmark::utils::IsaCheckFunction isa_check = nullptr)
-{
-  if (isa_check != nullptr && !isa_check(state)) {
-    return;
-  }
-
-  const size_t num_elements = state.range(0);
-
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
-
-  std::vector<float, AlignedAllocator<float, 64>> x(num_elements);
-  std::generate(x.begin(), x.end(), std::ref(f32rng));
-  std::vector<float, AlignedAllocator<float, 64>> y(num_elements);
-  std::generate(x.begin(), x.end(), std::ref(f32rng));
-
-  for (auto _ : state) {
-    f32_vrelu(num_elements * sizeof(float), x.data(), y.data(), nullptr);
-  }
-
-  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
-  if (cpu_frequency != 0) {
-    state.counters["cpufreq"] = cpu_frequency;
-  }
-
-  const size_t elements_per_iteration = num_elements;
-  state.counters["elements"] =
-    benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
-
-  const size_t bytes_per_iteration = 2 * num_elements * sizeof(float);
-  state.counters["bytes"] =
-    benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
+void f32_vrelu(benchmark::State& state, xnn_f32_vrelu_ukernel_fn vrelu,
+               benchmark::utils::IsaCheckFunction isa_check = nullptr) {
+  f32_vunary_benchmark<xnn_f32_relu_params>(state, vrelu,
+                                            /*init_params=*/nullptr, isa_check,
+                                            /*range_min=*/-10.0f,
+                                            /*range_max=*/10.0f);
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

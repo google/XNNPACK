@@ -3,63 +3,24 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
-#include <cmath>
-#include <functional>
-#include <random>
-#include <vector>
-
-#include <benchmark/benchmark.h>
-#include "bench/utils.h"
-
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
+#include <xnnpack/microparams.h>
 #include <xnnpack/vunary.h>
 
+#include "bench/f32-vunary-benchmark.h"
+#include "bench/utils.h"
+#include <benchmark/benchmark.h>
 
-static void f32_vrndu(
-  benchmark::State& state,
-  xnn_f32_vround_ukernel_fn vrndu,
-  xnn_init_f32_rnd_params_fn init_params = nullptr,
-  benchmark::utils::IsaCheckFunction isa_check = nullptr)
-{
-  if (isa_check != nullptr && !isa_check(state)) {
-    return;
-  }
-
-  const size_t elements = state.range(0);
-  std::vector<float, AlignedAllocator<float, 64>> input(elements + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<float, AlignedAllocator<float, 64>> output(elements);
-
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
-  std::generate(input.begin(), input.end(), std::ref(f32rng));
-  std::fill(output.begin(), output.end(), std::nanf(""));
-
-  union xnn_f32_rnd_params params;
-  if (init_params) {
-    init_params(&params);
-  }
-  for (auto _ : state) {
-    vrndu(elements * sizeof(float), input.data(), output.data(), &params);
-  }
-
-  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
-  if (cpu_frequency != 0) {
-    state.counters["cpufreq"] = cpu_frequency;
-  }
-
-  const size_t elements_per_iteration = elements;
-  state.counters["elements"] =
-    benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
-
-  const size_t bytes_per_iteration = 2 * elements * sizeof(float);
-  state.counters["bytes"] =
-    benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
+void f32_vrndu(benchmark::State& state, xnn_f32_vround_ukernel_fn vrndu,
+               xnn_init_f32_rnd_params_fn init_params = nullptr,
+               benchmark::utils::IsaCheckFunction isa_check = nullptr) {
+  f32_vunary_benchmark<xnn_f32_rnd_params>(state, vrndu, init_params, isa_check,
+                                           /*range_min=*/-10.0f,
+                                           /*range_max=*/10.0f);
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
