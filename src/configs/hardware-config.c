@@ -133,6 +133,9 @@ static void init_hardware_config(void) {
     hardware_config.use_x86_avx512vbmi = hardware_config.use_x86_avx512skx && cpuinfo_has_x86_avx512vbmi();
     hardware_config.use_x86_avx512vnni = hardware_config.use_x86_avx512skx && cpuinfo_has_x86_avx512vnni();
     hardware_config.use_x86_avx512vnnigfni = hardware_config.use_x86_avx512vnni && cpuinfo_has_x86_gfni();
+    // TODO(fbarchard): Use cpuinfo_has_x86_amx_int8 when available.
+    // Infer AMX support from Sapphire Rapids having fp16 and amx.
+    hardware_config.use_x86_avx512amx = hardware_config.use_x86_avx512vnnigfni && cpuinfo_has_x86_avx512fp16();
 #if XNN_ENABLE_AVXVNNI
     hardware_config.use_x86_avxvnni = hardware_config.use_x86_avx2 && cpuinfo_has_x86_avxvnni();
 #else

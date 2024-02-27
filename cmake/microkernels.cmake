@@ -1152,6 +1152,8 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/x16-transposec/gen/x16-transposec-16x16-reuse-mov-avx2.c
   src/x16-transposec/gen/x16-transposec-16x16-reuse-switch-avx2.c)
 
+SET(ALL_AVX512AMX_MICROKERNEL_SRCS)
+
 SET(ALL_AVX512F_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-avx512f-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-avx512f.c

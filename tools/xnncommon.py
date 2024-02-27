@@ -51,6 +51,7 @@ _ISA_TO_MACRO_MAP = {
   "rvvfp16arith": "XNN_ENABLE_RISCV_FP16_VECTOR",
   "avxvnni": "XNN_ENABLE_AVXVNNI",
   "avx512vnnigfni": "XNN_ENABLE_AVX512VNNIGFNI",
+  "avx512amx": "XNN_ENABLE_AVX512AMX",
 }
 
 _ISA_TO_ARCH_MAP = {
@@ -79,6 +80,7 @@ _ISA_TO_ARCH_MAP = {
   "avx512vbmi": ["x86-32", "x86-64"],
   "avx512vnni": ["x86-32", "x86-64"],
   "avx512vnnigfni": ["x86-32", "x86-64"],
+  "avx512amx": ["x86-32", "x86-64"],
   "avxvnni": ["x86-32", "x86-64"],
   "rvv": ["riscv"],
   "rvvfp16arith": ["riscv"],
@@ -115,6 +117,7 @@ _ISA_TO_UTILCHECK_MAP = {
   "avx512vbmi": "CheckAVX512VBMI",
   "avx512vnni": "CheckAVX512VNNI",
   "avx512vnnigfni": "CheckAVX512VNNIGFNI",
+  "avx512amx": "CheckAVX512AMX",
   "avxvnni": "CheckAVXVNNI",
   "rvv": "CheckRVV",
   "rvvfp16arith": "CheckRVVFP16ARITH",
@@ -149,6 +152,7 @@ _ISA_TO_CHECK_MAP = {
   "avx512vbmi": "TEST_REQUIRES_X86_AVX512VBMI",
   "avx512vnni": "TEST_REQUIRES_X86_AVX512VNNI",
   "avx512vnnigfni": "TEST_REQUIRES_X86_AVX512VNNIGFNI",
+  "avx512amx": "TEST_REQUIRES_X86_AVX512AMX",
   "avxvnni": "TEST_REQUIRES_X86_AVXVNNI",
   "rvv": "TEST_REQUIRES_RISCV_VECTOR",
   "rvvfp16arith": "TEST_REQUIRES_RISCV_VECTOR_FP16_ARITH",
@@ -219,9 +223,10 @@ _ISA_HIERARCHY = [
   "avx512f",
   "avx512skx",
   "avx512vbmi",
+  "avxvnni",
   "avx512vnni",
   "avx512vnnigfni",
-  "avxvnni",
+  "avx512amx",
   "armsimd32",
   "neon",
   "neonv8",
