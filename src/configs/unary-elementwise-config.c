@@ -1372,18 +1372,18 @@ static void init_f32_rsqrt_config(void) {
       f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32;
       f32_sqrt_config.init.f32_rsqrt = xnn_init_f32_rsqrt_avx512_params;
       f32_sqrt_config.element_tile = 32;
-    } else if (hardware_config->use_x86_fma3) {
-      f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u48;
+    } else if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_fma3) {
+      f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16;
       f32_sqrt_config.init.f32_rsqrt = xnn_init_f32_rsqrt_fma3_params;
-      f32_sqrt_config.element_tile = 48;
+      f32_sqrt_config.element_tile = 16;
     } else if (hardware_config->use_x86_avx) {
-      f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__avx_rsqrt_u56;
+      f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__avx_rsqrt_u16;
       f32_sqrt_config.init.f32_rsqrt = xnn_init_f32_rsqrt_avx_params;
-      f32_sqrt_config.element_tile = 56;
+      f32_sqrt_config.element_tile = 16;
     } else {
-      f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__sse_rsqrt_u12;
+      f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8;
       f32_sqrt_config.init.f32_rsqrt = xnn_init_f32_rsqrt_sse_params;
-      f32_sqrt_config.element_tile = 12;
+      f32_sqrt_config.element_tile = 8;
     }
   #else
     f32_rsqrt_config.ukernel =

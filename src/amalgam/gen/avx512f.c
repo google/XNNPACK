@@ -3633,10 +3633,10 @@ void xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32(
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
-  
+
   // Constants for the Newton-Raphson iteration.
-  const __m512 kThree = _mm512_set1_ps(3.0f);
-  const __m512 kNegHalf = _mm512_set1_ps(-0.5f);
+  const __m512 kThree = _mm512_load_ps(params->avx512.three);
+  const __m512 kNegHalf = _mm512_load_ps(params->avx512.neg_half);
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     const __m512 va0 = _mm512_loadu_ps(input);
@@ -3685,7 +3685,7 @@ void xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32(
     batch >>= XNN_LOG2_SIZEOF_FLOAT;
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
     const __m512 va = _mm512_maskz_loadu_ps(vmask, input);
-    
+
     // Generate the initial 14-bit approximation.
     const __m512 vt0 = _mm512_rsqrt14_ps(va);
 

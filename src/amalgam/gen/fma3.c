@@ -5363,7 +5363,7 @@ void xnn_f32_vhswish_ukernel__fma3_u16(
   }
 }
 
-void xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u48(
+void xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16(
     size_t batch, const float* input, float* output,
     const union xnn_f32_rsqrt_params params[restrict XNN_MIN_ELEMENTS(1)])
     XNN_OOB_READS {
@@ -5371,62 +5371,34 @@ void xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u48(
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
-  
-  // Constants for the Newton-Raphson iteration.
-  const __m256 kThree = _mm256_set1_ps(3.0f);
-  const __m256 kNegHalf = _mm256_set1_ps(-0.5f);
 
-  for (; batch >= 48 * sizeof(float); batch -= 48 * sizeof(float)) {
+  // Constants for the Newton-Raphson iteration.
+  const __m256 kThree = _mm256_load_ps(params->fma3.three);
+  const __m256 kNegHalf = _mm256_load_ps(params->fma3.neg_half);
+
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m256 va0 = _mm256_loadu_ps(input);
     const __m256 va1 = _mm256_loadu_ps(input + 8);
-    const __m256 va2 = _mm256_loadu_ps(input + 16);
-    const __m256 va3 = _mm256_loadu_ps(input + 24);
-    const __m256 va4 = _mm256_loadu_ps(input + 32);
-    const __m256 va5 = _mm256_loadu_ps(input + 40);
-    input += 48;
+    input += 16;
 
     // Generate the initial 12-bit approximation.
     const __m256 vt0_0 = _mm256_rsqrt_ps(va0);
     const __m256 vt0_1 = _mm256_rsqrt_ps(va1);
-    const __m256 vt0_2 = _mm256_rsqrt_ps(va2);
-    const __m256 vt0_3 = _mm256_rsqrt_ps(va3);
-    const __m256 vt0_4 = _mm256_rsqrt_ps(va4);
-    const __m256 vt0_5 = _mm256_rsqrt_ps(va5);
 
     // Do a single Newton-Raphson step as described above.
     const __m256 vt1_0 = _mm256_mul_ps(vt0_0, vt0_0);
     const __m256 vt1_1 = _mm256_mul_ps(vt0_1, vt0_1);
-    const __m256 vt1_2 = _mm256_mul_ps(vt0_2, vt0_2);
-    const __m256 vt1_3 = _mm256_mul_ps(vt0_3, vt0_3);
-    const __m256 vt1_4 = _mm256_mul_ps(vt0_4, vt0_4);
-    const __m256 vt1_5 = _mm256_mul_ps(vt0_5, vt0_5);
     const __m256 vt3_0 = _mm256_fmsub_ps(va0, vt1_0, kThree);
     const __m256 vt3_1 = _mm256_fmsub_ps(va1, vt1_1, kThree);
-    const __m256 vt3_2 = _mm256_fmsub_ps(va2, vt1_2, kThree);
-    const __m256 vt3_3 = _mm256_fmsub_ps(va3, vt1_3, kThree);
-    const __m256 vt3_4 = _mm256_fmsub_ps(va4, vt1_4, kThree);
-    const __m256 vt3_5 = _mm256_fmsub_ps(va5, vt1_5, kThree);
     const __m256 vt4_0 = _mm256_mul_ps(kNegHalf, vt0_0);
     const __m256 vt4_1 = _mm256_mul_ps(kNegHalf, vt0_1);
-    const __m256 vt4_2 = _mm256_mul_ps(kNegHalf, vt0_2);
-    const __m256 vt4_3 = _mm256_mul_ps(kNegHalf, vt0_3);
-    const __m256 vt4_4 = _mm256_mul_ps(kNegHalf, vt0_4);
-    const __m256 vt4_5 = _mm256_mul_ps(kNegHalf, vt0_5);
     const __m256 vy0 = _mm256_mul_ps(vt3_0, vt4_0);
     const __m256 vy1 = _mm256_mul_ps(vt3_1, vt4_1);
-    const __m256 vy2 = _mm256_mul_ps(vt3_2, vt4_2);
-    const __m256 vy3 = _mm256_mul_ps(vt3_3, vt4_3);
-    const __m256 vy4 = _mm256_mul_ps(vt3_4, vt4_4);
-    const __m256 vy5 = _mm256_mul_ps(vt3_5, vt4_5);
 
     // Store the results.
     _mm256_storeu_ps(output, vy0);
     _mm256_storeu_ps(output + 8, vy1);
-    _mm256_storeu_ps(output + 16, vy2);
-    _mm256_storeu_ps(output + 24, vy3);
-    _mm256_storeu_ps(output + 32, vy4);
-    _mm256_storeu_ps(output + 40, vy5);
-    output += 48;
+    output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m256 va = _mm256_loadu_ps(input);
@@ -5448,7 +5420,7 @@ void xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u48(
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256(
-        (const __m256i*)((uintptr_t)&params->avx.mask_table[7] - batch));
+        (const __m256i*)((uintptr_t)&params->fma3.mask_table[7] - batch));
 
     const __m256 va = _mm256_maskload_ps(input, vmask);
 

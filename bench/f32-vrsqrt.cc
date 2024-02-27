@@ -48,11 +48,6 @@ BENCHMARK_CAPTURE(f32_vrsqrt, scalar_rsqrt_u4,
                   /*init_params=*/nullptr)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vrsqrt, scalar_rsqrt_u8,
-                  xnn_f32_vrsqrt_ukernel__scalar_rsqrt_u8,
-                  /*init_params=*/nullptr)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-  ->UseRealTime();
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_vrsqrt, sse_rsqrt_u4,
                     xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4,
@@ -64,33 +59,8 @@ BENCHMARK_CAPTURE(f32_vrsqrt, scalar_rsqrt_u8,
                     xnn_init_f32_rsqrt_sse_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, sse_rsqrt_u12,
-                    xnn_f32_vrsqrt_ukernel__sse_rsqrt_u12,
-                    xnn_init_f32_rsqrt_sse_params)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vrsqrt, sse_rsqrt_u16,
                     xnn_f32_vrsqrt_ukernel__sse_rsqrt_u16,
-                    xnn_init_f32_rsqrt_sse_params)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, sse_rsqrt_u20,
-                    xnn_f32_vrsqrt_ukernel__sse_rsqrt_u20,
-                    xnn_init_f32_rsqrt_sse_params)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, sse_rsqrt_u24,
-                    xnn_f32_vrsqrt_ukernel__sse_rsqrt_u24,
-                    xnn_init_f32_rsqrt_sse_params)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, sse_rsqrt_u28,
-                    xnn_f32_vrsqrt_ukernel__sse_rsqrt_u28,
-                    xnn_init_f32_rsqrt_sse_params)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, sse_rsqrt_u32,
-                    xnn_f32_vrsqrt_ukernel__sse_rsqrt_u32,
                     xnn_init_f32_rsqrt_sse_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
@@ -106,38 +76,8 @@ BENCHMARK_CAPTURE(f32_vrsqrt, scalar_rsqrt_u8,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, avx_rsqrt_u24,
-                    xnn_f32_vrsqrt_ukernel__avx_rsqrt_u24,
-                    xnn_init_f32_rsqrt_avx_params,
-                    benchmark::utils::CheckAVX)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vrsqrt, avx_rsqrt_u32,
                     xnn_f32_vrsqrt_ukernel__avx_rsqrt_u32,
-                    xnn_init_f32_rsqrt_avx_params,
-                    benchmark::utils::CheckAVX)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, avx_rsqrt_u40,
-                    xnn_f32_vrsqrt_ukernel__avx_rsqrt_u40,
-                    xnn_init_f32_rsqrt_avx_params,
-                    benchmark::utils::CheckAVX)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, avx_rsqrt_u48,
-                    xnn_f32_vrsqrt_ukernel__avx_rsqrt_u48,
-                    xnn_init_f32_rsqrt_avx_params,
-                    benchmark::utils::CheckAVX)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, avx_rsqrt_u56,
-                    xnn_f32_vrsqrt_ukernel__avx_rsqrt_u56,
-                    xnn_init_f32_rsqrt_avx_params,
-                    benchmark::utils::CheckAVX)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, avx_rsqrt_u64,
-                    xnn_f32_vrsqrt_ukernel__avx_rsqrt_u64,
                     xnn_init_f32_rsqrt_avx_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
@@ -154,38 +94,8 @@ BENCHMARK_CAPTURE(f32_vrsqrt, scalar_rsqrt_u8,
                     benchmark::utils::CheckFMA3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, fma3_rsqrt_u24,
-                    xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u24,
-                    xnn_init_f32_rsqrt_fma3_params,
-                    benchmark::utils::CheckFMA3)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vrsqrt, fma3_rsqrt_u32,
                     xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u32,
-                    xnn_init_f32_rsqrt_fma3_params,
-                    benchmark::utils::CheckFMA3)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, fma3_rsqrt_u40,
-                    xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u40,
-                    xnn_init_f32_rsqrt_fma3_params,
-                    benchmark::utils::CheckFMA3)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, fma3_rsqrt_u48,
-                    xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u48,
-                    xnn_init_f32_rsqrt_fma3_params,
-                    benchmark::utils::CheckFMA3)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, fma3_rsqrt_u56,
-                    xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u56,
-                    xnn_init_f32_rsqrt_fma3_params,
-                    benchmark::utils::CheckFMA3)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, fma3_rsqrt_u64,
-                    xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u64,
                     xnn_init_f32_rsqrt_fma3_params,
                     benchmark::utils::CheckFMA3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
@@ -202,38 +112,8 @@ BENCHMARK_CAPTURE(f32_vrsqrt, scalar_rsqrt_u8,
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, avx512f_rsqrt_u48,
-                    xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u48,
-                    xnn_init_f32_rsqrt_avx512_params,
-                    benchmark::utils::CheckAVX512F)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vrsqrt, avx512f_rsqrt_u64,
                     xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64,
-                    xnn_init_f32_rsqrt_avx512_params,
-                    benchmark::utils::CheckAVX512F)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, avx512f_rsqrt_u80,
-                    xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u80,
-                    xnn_init_f32_rsqrt_avx512_params,
-                    benchmark::utils::CheckAVX512F)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, avx512f_rsqrt_u96,
-                    xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u96,
-                    xnn_init_f32_rsqrt_avx512_params,
-                    benchmark::utils::CheckAVX512F)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, avx512f_rsqrt_u112,
-                    xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u112,
-                    xnn_init_f32_rsqrt_avx512_params,
-                    benchmark::utils::CheckAVX512F)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrsqrt, avx512f_rsqrt_u128,
-                    xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u128,
                     xnn_init_f32_rsqrt_avx512_params,
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
