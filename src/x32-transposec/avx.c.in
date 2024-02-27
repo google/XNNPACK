@@ -111,23 +111,25 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
         ${XFLOAT}* oN = (${XFLOAT}*) ((uintptr_t) o + oN_stride);
         switch (rem) {
           default:
-            XNN_UNREACHABLE;
           $for N in reversed(range(TILE_SIZE>>1, TILE_SIZE)):
             case ${N}: {
               const ${__M256X} v0_${N} = ${_MM256_PERMUTE2F128_PX}(v1_${N-(TILE_SIZE>>1)}, v1_${N}, 0x31);
               ${_MM256_STOREU_PX}(oN, v0_${N});
               oN = (${XFLOAT}*) ((uintptr_t) oN + minus_output_stride);
             }
+            XNN_FALLTHROUGH
           $for N in reversed(range(2, TILE_SIZE>>1)):
             case ${N}: {
               const ${__M256X} v0_${(N)} = ${_MM256_INSERTF128_PX}(v1_${N}, ${_MM256_CASTPX256_PX128}(v1_${N+(TILE_SIZE>>1)}), 1);
               ${_MM256_STOREU_PX}(oN, v0_${N});
               oN = (${XFLOAT}*) ((uintptr_t) oN + minus_output_stride);
             }
+            XNN_FALLTHROUGH
           case 1: {
             const ${__M256X} v0_1 = ${_MM256_INSERTF128_PX}(v1_1, ${_MM256_CASTPX256_PX128}(v1_${(TILE_SIZE>>1)+1}), 1);
             ${_MM256_STOREU_PX}( oN, v0_1);
           }
+          XNN_FALLTHROUGH
           case 0: {
             const ${__M256X} v0_0 = ${_MM256_INSERTF128_PX}(v1_0, ${_MM256_CASTPX256_PX128}(v1_${(TILE_SIZE>>1)}), 1);
             ${_MM256_STOREU_PX}(o, v0_0);
@@ -209,9 +211,11 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
                 ${_MM_STOREU_PX}(oN, v0_${N}_lo);
                  v0_${N}_lo = ${_MM256_EXTRACTF128_PX}(v0_${N}, 1);
                 oN = (${XFLOAT}*) ((uintptr_t) oN + minus_output_stride);
+                XNN_FALLTHROUGH
             case 1:
               ${_MM_STOREU_PX}(oN, v0_1_lo);
               v0_1_lo = ${_MM256_EXTRACTF128_PX}(v0_1, 1);
+              XNN_FALLTHROUGH
             case 0:
               ${_MM_STOREU_PX}(o, v0_0_lo);
               v0_0_lo = ${_MM256_EXTRACTF128_PX}(v0_0, 1);
@@ -259,8 +263,10 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
               case ${N}:
                 ${_MM_STOREL_PX}(${CASTX}oN, v0_${N}_lo);
                 oN = (${XFLOAT}*) ((uintptr_t) oN + minus_output_stride);
+                XNN_FALLTHROUGH
             case 1:
               ${_MM_STOREL_PX}(${CASTX}oN, v0_1_lo);
+              XNN_FALLTHROUGH
             case 0:
               ${_MM_STOREL_PX}(${CASTX}o, v0_0_lo);
               break;
@@ -308,8 +314,10 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
                 case ${N}:
                   _mm_store_ss(oN, v0_${N}_lo);
                   oN = (${XFLOAT}*) ((uintptr_t) oN + minus_output_stride);
+                  XNN_FALLTHROUGH
               case 1:
                 _mm_store_ss(oN, v0_1_lo);
+                XNN_FALLTHROUGH
               case 0:
                 _mm_store_ss(o, v0_0_lo);
                 break;

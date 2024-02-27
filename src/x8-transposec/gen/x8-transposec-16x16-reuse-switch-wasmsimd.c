@@ -146,47 +146,62 @@ void xnn_x8_transposec_ukernel__16x16_reuse_switch_wasmsimd(
         case 15:
           wasm_v128_store(oN, v0_15);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 14:
           wasm_v128_store(oN, v0_14);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 13:
           wasm_v128_store(oN, v0_13);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 12:
           wasm_v128_store(oN, v0_12);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 11:
           wasm_v128_store(oN, v0_11);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 10:
           wasm_v128_store(oN, v0_10);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 9:
           wasm_v128_store(oN, v0_9);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 8:
           wasm_v128_store(oN, v0_8);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 7:
           wasm_v128_store(oN, v0_7);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 6:
           wasm_v128_store(oN, v0_6);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 5:
           wasm_v128_store(oN, v0_5);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 4:
           wasm_v128_store(oN, v0_4);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 3:
           wasm_v128_store(oN, v0_3);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 2:
           wasm_v128_store(oN, v0_2);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 1:
           wasm_v128_store(oN, v0_1);
+          XNN_FALLTHROUGH
         case 0:
           wasm_v128_store(o, v0_0);
           o = (uint8_t*) ((uintptr_t) o + tile_hbytes);
@@ -342,47 +357,62 @@ void xnn_x8_transposec_ukernel__16x16_reuse_switch_wasmsimd(
           case 15:
             wasm_v128_store64_lane(oN, v0_15, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 14:
             wasm_v128_store64_lane(oN, v0_14, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 13:
             wasm_v128_store64_lane(oN, v0_13, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 12:
             wasm_v128_store64_lane(oN, v0_12, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 11:
             wasm_v128_store64_lane(oN, v0_11, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 10:
             wasm_v128_store64_lane(oN, v0_10, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 9:
             wasm_v128_store64_lane(oN, v0_9, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 8:
             wasm_v128_store64_lane(oN, v0_8, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 7:
             wasm_v128_store64_lane(oN, v0_7, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 6:
             wasm_v128_store64_lane(oN, v0_6, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 5:
             wasm_v128_store64_lane(oN, v0_5, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 4:
             wasm_v128_store64_lane(oN, v0_4, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 3:
             wasm_v128_store64_lane(oN, v0_3, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             wasm_v128_store64_lane(oN, v0_2, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             wasm_v128_store64_lane(oN, v0_1, 0);
+            XNN_FALLTHROUGH
           case 0:
             wasm_v128_store64_lane(o, v0_0, 0);
             o += 8;
@@ -414,47 +444,62 @@ void xnn_x8_transposec_ukernel__16x16_reuse_switch_wasmsimd(
           case 15:
             wasm_v128_store32_lane(oN, v0_15, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 14:
             wasm_v128_store32_lane(oN, v0_14, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 13:
             wasm_v128_store32_lane(oN, v0_13, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 12:
             wasm_v128_store32_lane(oN, v0_12, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 11:
             wasm_v128_store32_lane(oN, v0_11, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 10:
             wasm_v128_store32_lane(oN, v0_10, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 9:
             wasm_v128_store32_lane(oN, v0_9, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 8:
             wasm_v128_store32_lane(oN, v0_8, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 7:
             wasm_v128_store32_lane(oN, v0_7, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 6:
             wasm_v128_store32_lane(oN, v0_6, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 5:
             wasm_v128_store32_lane(oN, v0_5, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 4:
             wasm_v128_store32_lane(oN, v0_4, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 3:
             wasm_v128_store32_lane(oN, v0_3, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             wasm_v128_store32_lane(oN, v0_2, 0);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             wasm_v128_store32_lane(oN, v0_1, 0);
+            XNN_FALLTHROUGH
           case 0:
             wasm_v128_store32_lane(o, v0_0, 0);
             o += 4;

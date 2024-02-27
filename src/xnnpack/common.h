@@ -284,6 +284,12 @@
 #define XNN_OOB_READS XNN_DISABLE_TSAN XNN_DISABLE_MSAN XNN_DISABLE_HWASAN
 
 #if defined(__GNUC__)
+  #define XNN_FALLTHROUGH __attribute__((fallthrough));
+#else
+  #define XNN_FALLTHROUGH /* fall through */
+#endif
+
+#if defined(__GNUC__)
   #define XNN_INTRINSIC inline __attribute__((__always_inline__, __artificial__))
 #elif defined(_MSC_VER)
   #define XNN_INTRINSIC __forceinline

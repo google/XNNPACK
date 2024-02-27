@@ -120,8 +120,10 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
             case ${N}:
               _mm_storeu_si128((__m128i*) oN, v0_${N});
               oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+              XNN_FALLTHROUGH
           case 1:
             _mm_storeu_si128((__m128i*) oN, v0_1);
+            XNN_FALLTHROUGH
           case 0:
             _mm_storeu_si128((__m128i*) o, v0_0);
             o = (uint${SIZE}_t*) ((uintptr_t) o + tile_hbytes);
@@ -219,8 +221,10 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
               case ${N}:
                 _mm_storel_epi64((__m128i*) oN, v0_${N});
                 oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+                XNN_FALLTHROUGH
             case 1:
               _mm_storel_epi64((__m128i*) oN, v0_1);
+              XNN_FALLTHROUGH
             case 0:
               _mm_storel_epi64((__m128i*) o, v0_0);
               break;
@@ -269,8 +273,10 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
                 case ${N}:
                   unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_${N}));
                   oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+                  XNN_FALLTHROUGH
               case 1:
                 unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_1));
+                XNN_FALLTHROUGH
               case 0:
                 unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_0));
                 break;
@@ -318,8 +324,10 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
                 case ${N}:
                   unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_${N}));
                   oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+                  XNN_FALLTHROUGH
               case 1:
                 unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_1));
+                XNN_FALLTHROUGH
               case 0:
                 unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_0));
                 break;
@@ -367,8 +375,10 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
                 case ${N}:
                   *oN = (uint8_t) _mm_cvtsi128_si32(v0_${N});
                   oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+                  XNN_FALLTHROUGH
               case 1:
                 *oN = (uint8_t) _mm_cvtsi128_si32(v0_1);
+                XNN_FALLTHROUGH
               case 0:
                 *o = (uint8_t) _mm_cvtsi128_si32(v0_0);
                 break;

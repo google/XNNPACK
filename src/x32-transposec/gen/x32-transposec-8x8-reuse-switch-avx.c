@@ -86,41 +86,47 @@ void xnn_x32_transposec_ukernel__8x8_reuse_switch_avx(
       float* oN = (float*) ((uintptr_t) o + oN_stride);
       switch (rem) {
         default:
-          XNN_UNREACHABLE;
         case 7: {
           const __m256 v0_7 = _mm256_permute2f128_ps(v1_3, v1_7, 0x31);
           _mm256_storeu_ps(oN, v0_7);
           oN = (float*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 6: {
           const __m256 v0_6 = _mm256_permute2f128_ps(v1_2, v1_6, 0x31);
           _mm256_storeu_ps(oN, v0_6);
           oN = (float*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 5: {
           const __m256 v0_5 = _mm256_permute2f128_ps(v1_1, v1_5, 0x31);
           _mm256_storeu_ps(oN, v0_5);
           oN = (float*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 4: {
           const __m256 v0_4 = _mm256_permute2f128_ps(v1_0, v1_4, 0x31);
           _mm256_storeu_ps(oN, v0_4);
           oN = (float*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 3: {
           const __m256 v0_3 = _mm256_insertf128_ps(v1_3, _mm256_castps256_ps128(v1_7), 1);
           _mm256_storeu_ps(oN, v0_3);
           oN = (float*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 2: {
           const __m256 v0_2 = _mm256_insertf128_ps(v1_2, _mm256_castps256_ps128(v1_6), 1);
           _mm256_storeu_ps(oN, v0_2);
           oN = (float*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 1: {
           const __m256 v0_1 = _mm256_insertf128_ps(v1_1, _mm256_castps256_ps128(v1_5), 1);
           _mm256_storeu_ps( oN, v0_1);
         }
+        XNN_FALLTHROUGH
         case 0: {
           const __m256 v0_0 = _mm256_insertf128_ps(v1_0, _mm256_castps256_ps128(v1_4), 1);
           _mm256_storeu_ps(o, v0_0);
@@ -204,29 +210,36 @@ void xnn_x32_transposec_ukernel__8x8_reuse_switch_avx(
             _mm_storeu_ps(oN, v0_7_lo);
              v0_7_lo = _mm256_extractf128_ps(v0_7, 1);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 6:
             _mm_storeu_ps(oN, v0_6_lo);
              v0_6_lo = _mm256_extractf128_ps(v0_6, 1);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 5:
             _mm_storeu_ps(oN, v0_5_lo);
              v0_5_lo = _mm256_extractf128_ps(v0_5, 1);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 4:
             _mm_storeu_ps(oN, v0_4_lo);
              v0_4_lo = _mm256_extractf128_ps(v0_4, 1);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 3:
             _mm_storeu_ps(oN, v0_3_lo);
              v0_3_lo = _mm256_extractf128_ps(v0_3, 1);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             _mm_storeu_ps(oN, v0_2_lo);
              v0_2_lo = _mm256_extractf128_ps(v0_2, 1);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             _mm_storeu_ps(oN, v0_1_lo);
             v0_1_lo = _mm256_extractf128_ps(v0_1, 1);
+            XNN_FALLTHROUGH
           case 0:
             _mm_storeu_ps(o, v0_0_lo);
             v0_0_lo = _mm256_extractf128_ps(v0_0, 1);
@@ -243,23 +256,30 @@ void xnn_x32_transposec_ukernel__8x8_reuse_switch_avx(
           case 7:
             _mm_storel_pi((__m64*) oN, v0_7_lo);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 6:
             _mm_storel_pi((__m64*) oN, v0_6_lo);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 5:
             _mm_storel_pi((__m64*) oN, v0_5_lo);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 4:
             _mm_storel_pi((__m64*) oN, v0_4_lo);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 3:
             _mm_storel_pi((__m64*) oN, v0_3_lo);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             _mm_storel_pi((__m64*) oN, v0_2_lo);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             _mm_storel_pi((__m64*) oN, v0_1_lo);
+            XNN_FALLTHROUGH
           case 0:
             _mm_storel_pi((__m64*) o, v0_0_lo);
             break;
@@ -282,23 +302,30 @@ void xnn_x32_transposec_ukernel__8x8_reuse_switch_avx(
           case 7:
             _mm_store_ss(oN, v0_7_lo);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 6:
             _mm_store_ss(oN, v0_6_lo);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 5:
             _mm_store_ss(oN, v0_5_lo);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 4:
             _mm_store_ss(oN, v0_4_lo);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 3:
             _mm_store_ss(oN, v0_3_lo);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             _mm_store_ss(oN, v0_2_lo);
             oN = (float*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             _mm_store_ss(oN, v0_1_lo);
+            XNN_FALLTHROUGH
           case 0:
             _mm_store_ss(o, v0_0_lo);
             break;

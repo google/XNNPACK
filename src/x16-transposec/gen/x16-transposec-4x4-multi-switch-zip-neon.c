@@ -62,10 +62,13 @@ void xnn_x16_transposec_ukernel__4x4_multi_switch_zip_neon(
       switch (rem) {
         case 3:
           vst1_u16(oN, v0_1.val[1]); oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 2:
           vst1_u16(oN, v0_1.val[0]); oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 1:
           vst1_u16(oN, v0_0.val[1]);
+          XNN_FALLTHROUGH
         case 0:
           vst1_u16(o, v0_0.val[0]); o = (uint16_t*) ((uintptr_t) o + tile_hbytes);
           break;
@@ -102,10 +105,13 @@ void xnn_x16_transposec_ukernel__4x4_multi_switch_zip_neon(
         switch (rem) {
           case 3:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u16(v3_low), 0); oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 2:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u16(v2_low), 0); oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 1:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u16(v1_low), 0);
+            XNN_FALLTHROUGH
           case 0:
             vst1_lane_u32((void*) o, vreinterpret_u32_u16(v0_low), 0); o += 2;
             break;
@@ -122,10 +128,13 @@ void xnn_x16_transposec_ukernel__4x4_multi_switch_zip_neon(
         switch (rem) {
           case 3:
             vst1_lane_u16(oN, v3_low, 0); oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             vst1_lane_u16(oN, v2_low, 0); oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             vst1_lane_u16(oN, v1_low, 0);
+            XNN_FALLTHROUGH
           case 0:
             vst1_lane_u16(o, v0_low, 0);
             break;

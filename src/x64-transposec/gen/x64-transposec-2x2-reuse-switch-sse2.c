@@ -59,6 +59,7 @@ void xnn_x64_transposec_ukernel__2x2_reuse_switch_sse2(
       switch (rem) {
         case 1:
           _mm_storeu_si128((__m128i*) oN, v0_1);
+          XNN_FALLTHROUGH
         case 0:
           _mm_storeu_si128((__m128i*) o, v0_0);
           o = (uint64_t*) ((uintptr_t) o + tile_hbytes);
@@ -82,6 +83,7 @@ void xnn_x64_transposec_ukernel__2x2_reuse_switch_sse2(
         switch (rem) {
           case 1:
             _mm_storel_epi64((__m128i*) oN, v0_1);
+            XNN_FALLTHROUGH
           case 0:
             _mm_storel_epi64((__m128i*) o, v0_0);
             break;
