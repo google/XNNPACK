@@ -16,7 +16,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u16(
+void xnn_f32_vrsqrt_ukernel__scalar_rsqrt_u8(
     size_t batch, const float* input, float* output,
     const union xnn_f32_rsqrt_params params[restrict XNN_MIN_ELEMENTS(1)]) {
   assert(batch != 0);
@@ -24,7 +24,7 @@ void xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const float vx0 = input[0];
     const float vx1 = input[1];
     const float vx2 = input[2];
@@ -33,15 +33,7 @@ void xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u16(
     const float vx5 = input[5];
     const float vx6 = input[6];
     const float vx7 = input[7];
-    const float vx8 = input[8];
-    const float vx9 = input[9];
-    const float vxA = input[10];
-    const float vxB = input[11];
-    const float vxC = input[12];
-    const float vxD = input[13];
-    const float vxE = input[14];
-    const float vxF = input[15];
-    input += 16;
+    input += 8;
 
     const float vt0 = sqrtf(vx0);
     const float vt1 = sqrtf(vx1);
@@ -51,14 +43,6 @@ void xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u16(
     const float vt5 = sqrtf(vx5);
     const float vt6 = sqrtf(vx6);
     const float vt7 = sqrtf(vx7);
-    const float vt8 = sqrtf(vx8);
-    const float vt9 = sqrtf(vx9);
-    const float vtA = sqrtf(vxA);
-    const float vtB = sqrtf(vxB);
-    const float vtC = sqrtf(vxC);
-    const float vtD = sqrtf(vxD);
-    const float vtE = sqrtf(vxE);
-    const float vtF = sqrtf(vxF);
     const float vy0 = 1.0f / vt0;
     const float vy1 = 1.0f / vt1;
     const float vy2 = 1.0f / vt2;
@@ -67,14 +51,6 @@ void xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u16(
     const float vy5 = 1.0f / vt5;
     const float vy6 = 1.0f / vt6;
     const float vy7 = 1.0f / vt7;
-    const float vy8 = 1.0f / vt8;
-    const float vy9 = 1.0f / vt9;
-    const float vyA = 1.0f / vtA;
-    const float vyB = 1.0f / vtB;
-    const float vyC = 1.0f / vtC;
-    const float vyD = 1.0f / vtD;
-    const float vyE = 1.0f / vtE;
-    const float vyF = 1.0f / vtF;
 
     output[0] = vy0;
     output[1] = vy1;
@@ -84,15 +60,7 @@ void xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u16(
     output[5] = vy5;
     output[6] = vy6;
     output[7] = vy7;
-    output[8] = vy8;
-    output[9] = vy9;
-    output[10] = vyA;
-    output[11] = vyB;
-    output[12] = vyC;
-    output[13] = vyD;
-    output[14] = vyE;
-    output[15] = vyF;
-    output += 16;
+    output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
     do {

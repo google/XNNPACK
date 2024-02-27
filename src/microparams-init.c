@@ -8,13 +8,13 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-
-#include <fp16/fp16.h>
-
+#include <xnnpack/common.h>
 #include <xnnpack/math.h>
+#include <xnnpack/microparams.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/unaligned.h>
 
+#include <fp16/fp16.h>
 
 size_t xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_fmagic_params(
   union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -4940,6 +4940,61 @@ size_t xnn_init_f32_sqrt_avx512_params(
   union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)])
 {
   params->avx512.half = 0.5f;
+  return sizeof(params->avx512);
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+size_t xnn_init_f32_rsqrt_sse_params(
+    union xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]) {
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse.three[i] = 3.0f;
+  }
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse.half[i] = 0.5f;
+  }
+  return sizeof(params->sse);
+}
+size_t xnn_init_f32_rsqrt_avx_params(
+    union xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]) {
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.three[i] = 3.0f;
+  }
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.half[i] = 0.5f;
+  }
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx.mask_table[i] = 0;
+  }
+  return sizeof(params->avx);
+}
+size_t xnn_init_f32_rsqrt_fma3_params(
+    union xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]) {
+  for (uint32_t i = 0; i < 8; i++) {
+    params->fma3.three[i] = 3.0f;
+  }
+  for (uint32_t i = 0; i < 8; i++) {
+    params->fma3.neg_half[i] = -0.5f;
+  }
+  for (uint32_t i = 0; i < 7; i++) {
+    params->fma3.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->fma3.mask_table[i] = 0;
+  }
+  return sizeof(params->avx);
+}
+size_t xnn_init_f32_rsqrt_avx512_params(
+    union xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]) {
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx512.three[i] = 3.0f;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx512.neg_half[i] = -0.5f;
+  }
   return sizeof(params->avx512);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

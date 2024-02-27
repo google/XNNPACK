@@ -16,7 +16,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vrsqrt_ukernel__scalar_recip_sqrt_u4(
+void xnn_f32_vrsqrt_ukernel__scalar_rsqrt_u4(
     size_t batch, const float* input, float* output,
     const union xnn_f32_rsqrt_params params[restrict XNN_MIN_ELEMENTS(1)]) {
   assert(batch != 0);
