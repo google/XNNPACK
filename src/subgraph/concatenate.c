@@ -167,15 +167,7 @@ static enum xnn_status reshape_concatenate_n_operator(
 
   const struct xnn_value* input0_value = values + input_id[0];
   struct xnn_value* output_value = values + output_id;
-  opdata->batch_size = xnn_shape_multiply_leading_dims(&output_value->shape, opdata->axis);
 
-  const size_t old_workspace_size = opdata->workspace_size;
-  for (size_t i = 0; i < num_inputs; ++i) {
-    status = reshape_concatenate_operator_helper(opdata, i, input_channels[i], input_channels[i], output_stride, threadpool);
-    if (status != xnn_status_success) {
-      return status;
-    }
-  }
   output_value->shape.num_dims = input0_value->shape.num_dims;
   if (axis >= output_value->shape.num_dims) {
     xnn_log_error(
@@ -191,6 +183,14 @@ static enum xnn_status reshape_concatenate_n_operator(
     concatenated_elements += values[input_id[i]].shape.dim[axis];
   }
   output_value->shape.dim[axis] = concatenated_elements;
+  opdata->batch_size = xnn_shape_multiply_leading_dims(&output_value->shape, opdata->axis);
+  const size_t old_workspace_size = opdata->workspace_size;
+  for (size_t i = 0; i < num_inputs; ++i) {
+    status = reshape_concatenate_operator_helper(opdata, i, input_channels[i], input_channels[i], output_stride, threadpool);
+    if (status != xnn_status_success) {
+      return status;
+    }
+  }
   const size_t new_size = xnn_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;
