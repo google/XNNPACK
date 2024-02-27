@@ -167,8 +167,8 @@ static enum xnn_status reshape_transpose_nd(
     for (size_t j = i + 1; j < num_dims; ++j) {
       if (perm[i] == perm[j]) {
         xnn_log_error(
-            "failed to create %s operator with duplicate entries in perm",
-            xnn_operator_type_to_string(transpose_op->type));
+            "failed to create %s operator with duplicate entries in perm %zu %zu",
+            xnn_operator_type_to_string(transpose_op->type), perm[i], perm[j]);
         goto error;
       }
     }
