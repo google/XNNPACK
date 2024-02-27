@@ -2917,7 +2917,7 @@ static enum xnn_status setup_convolution2d_nhwc(
 
   if (convolution_op->weights_cache != NULL && !xnn_weights_cache_is_finalized(convolution_op->weights_cache)) {
     xnn_log_error("failed to setup %s operator: weights cache is not finalized",
-      xnn_operator_type_to_string(convolution_op->type));
+      xnn_operator_type_to_string(expected_operator_type));
     return xnn_status_invalid_state;
   }
 
