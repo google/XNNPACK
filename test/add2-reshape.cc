@@ -73,8 +73,8 @@ TEST(Add2TestF32, Reshape)
   ASSERT_EQ(node->reshape(&runtime->opdata[0], subgraph->values, subgraph->num_values, /*threadpool=*/nullptr), xnn_status_success);
 
   dims[0] = 7;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input0_id, dims.size(), dims.data()));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input1_id, dims.size(), dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input0_id, dims.size(), dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input1_id, dims.size(), dims.data()));
 
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
@@ -138,8 +138,8 @@ TEST(Add2TestF32, ReshapeBroadcastDim0)
 
   dim0[0] = 7;
   dim1[0] = 1;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input0_id, dim0.size(), dim0.data()));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input1_id, dim1.size(), dim1.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input0_id, dim0.size(), dim0.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input1_id, dim1.size(), dim1.data()));
 
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
@@ -202,8 +202,8 @@ TEST(Add2TestF32, ReshapeBroadcast1D)
 
   dim0[0] = 7;
   dim1[0] = 1;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input0_id, dim0.size(), dim0.data()));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input1_id, dim1.size(), dim1.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input0_id, dim0.size(), dim0.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input1_id, dim1.size(), dim1.data()));
 
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
@@ -266,8 +266,8 @@ TEST(Add2TestF32, ReshapeBroadcast2D)
 
   dim0[0] = 7;
   dim1[0] = 1;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input0_id, dim0.size(), dim0.data()));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input1_id, dim1.size(), dim1.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input0_id, dim0.size(), dim0.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input1_id, dim1.size(), dim1.data()));
 
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;

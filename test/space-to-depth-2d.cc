@@ -557,7 +557,7 @@ TEST_F(SpaceToDepth2DTestF32, reshape_output)
   dims[0] += 2;
   dims[1] += block_size;
   dims[2] += block_size;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, dims.size(), dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, dims.size(), dims.data()));
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
@@ -568,7 +568,7 @@ TEST_F(SpaceToDepth2DTestF32, reshape_output)
   ASSERT_EQ(output_shape->dim[3], dims[3] * block_size * block_size);
 
   dims[0] -= 1;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, dims.size(), dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, dims.size(), dims.data()));
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
   ASSERT_EQ(output_shape->dim[0], dims[0]);
   ASSERT_EQ(output_shape->dim[1], dims[1] / block_size);

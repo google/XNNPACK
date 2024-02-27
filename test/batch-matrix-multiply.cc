@@ -559,8 +559,8 @@ TEST(BatchMatrixMultiplyTest, reshape_input1) {
 
   input1_dims[2] = 7;
   input2_dims[1] = 7;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, /*external_id=*/0, input1_dims.size(), input1_dims.data()));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, /*external_id=*/1, input2_dims.size(), input2_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, /*external_id=*/0, input1_dims.size(), input1_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, /*external_id=*/1, input2_dims.size(), input2_dims.data()));
 
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
@@ -569,8 +569,8 @@ TEST(BatchMatrixMultiplyTest, reshape_input1) {
   ASSERT_EQ(output_shape->dim[2], input2_dims[2]);
 
   input1_dims[1] = 19;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, /*external_id=*/0, input1_dims.size(), input1_dims.data()));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, /*external_id=*/1, input2_dims.size(), input2_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, /*external_id=*/0, input1_dims.size(), input1_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, /*external_id=*/1, input2_dims.size(), input2_dims.data()));
 
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   ASSERT_EQ(output_shape->dim[0], input1_dims[0]);
@@ -578,8 +578,8 @@ TEST(BatchMatrixMultiplyTest, reshape_input1) {
   ASSERT_EQ(output_shape->dim[2], input2_dims[2]);
 
   input2_dims[2] = 4;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, /*external_id=*/0, input1_dims.size(), input1_dims.data()));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, /*external_id=*/1, input2_dims.size(), input2_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, /*external_id=*/0, input1_dims.size(), input1_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, /*external_id=*/1, input2_dims.size(), input2_dims.data()));
 
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
   ASSERT_EQ(output_shape->dim[0], input1_dims[0]);
@@ -588,8 +588,8 @@ TEST(BatchMatrixMultiplyTest, reshape_input1) {
 
   input1_dims[0] = 4;
   input2_dims[0] = 4;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, /*external_id=*/0, input1_dims.size(), input1_dims.data()));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, /*external_id=*/1, input2_dims.size(), input2_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, /*external_id=*/0, input1_dims.size(), input1_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, /*external_id=*/1, input2_dims.size(), input2_dims.data()));
 
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   ASSERT_EQ(output_shape->dim[0], input1_dims[0]);

@@ -63,7 +63,7 @@ TEST(AbsTestF32, Reshape)
   ASSERT_EQ(node->reshape(&runtime->opdata[0], subgraph->values, subgraph->num_values, /*threadpool=*/nullptr), xnn_status_success);
 
   dims[0] = 7;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, 0, dims.size(), dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, 0, dims.size(), dims.data()));
 
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;

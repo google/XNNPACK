@@ -515,7 +515,6 @@ TEST_F(StaticSliceTestF32, reshape_output)
   for (int i = 0; i < dims.size(); ++i) {
     dynamic |= (inferrable_sizes[i] == 0 && sizes[i] != dims[i]);
   }
-  ASSERT_EQ(xnn_reshape_external_value(runtime, input_id, dims.size(), dims.data()), xnn_status_success);
   const struct xnn_node* node = &subgraph->nodes[0];
   if (dynamic) {
     ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
@@ -536,7 +535,7 @@ TEST_F(StaticSliceTestF32, reshape_output)
   if (dims.size() > 1) {
     dims[1] -= 3;
   }
-  ASSERT_EQ(xnn_reshape_external_value(runtime, input_id, dims.size(), dims.data()), xnn_status_success);
+  ASSERT_EQ(xnn_reshape_external_input(runtime, input_id, dims.size(), dims.data()), xnn_status_success);
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
   for (size_t i = 0; i < dims.size(); ++i) {
     if (inferrable_sizes[i] == 0) {

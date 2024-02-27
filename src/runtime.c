@@ -38,7 +38,7 @@
   #error "XNN_ENABLE_JIT is not defined"
 #endif
 
-enum xnn_status xnn_reshape_external_value(
+enum xnn_status xnn_reshape_external_input(
     xnn_runtime_t runtime,
     uint32_t external_id,
     size_t num_dims,
