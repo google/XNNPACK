@@ -314,6 +314,18 @@ static enum xnn_status initialize_workspace_values(
         }
       }
 
+      // Adjust offsets of op workspaces.
+      for (size_t i = 0; i < rt->num_ops; i++) {
+        struct xnn_operator_data* opdata = &rt->opdata[i];
+        if (opdata->operator_objects[0] == NULL) {
+          // Operator was removed during optimization
+          continue;
+        }
+
+        if (opdata->workspace != NULL) {
+          opdata->workspace = (void*) ((uintptr_t) opdata->workspace + workspace_data_delta);
+        }
+      }
       // This runtime has not ever been setup yet, so it doesn't have any pointers into workspace, so does not need to
       // be updated.
       if (!rt->has_been_setup) {
@@ -327,11 +339,6 @@ static enum xnn_status initialize_workspace_values(
             // Operator was removed during optimization
             continue;
           }
-
-          if (opdata->workspace != NULL) {
-            opdata->workspace = (void*) ((uintptr_t) opdata->workspace + workspace_data_delta);
-          }
-
           assert(opdata->setup != NULL);
           const enum xnn_status status = opdata->setup(opdata, rt->values, rt->num_values, rt->threadpool);
           if (status != xnn_status_success) {
