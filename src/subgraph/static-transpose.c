@@ -66,11 +66,15 @@ static enum xnn_status reshape_transpose_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
+  const size_t num_dims = opdata->shape2.num_dims;
+  assert(input->shape.num_dims == num_dims);
+  memcpy(opdata->shape1.dim, input->shape.dim, num_dims * sizeof(size_t));
+
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_transpose_nd_x16: {
       status = xnn_reshape_transpose_nd_x16(
         opdata->operator_objects[0],
-        opdata->shape2.num_dims,
+        num_dims,
         input->shape.dim,
         opdata->shape2.dim,
         threadpool);
@@ -79,7 +83,7 @@ static enum xnn_status reshape_transpose_operator(
     case xnn_operator_type_transpose_nd_x32: {
       status = xnn_reshape_transpose_nd_x32(
         opdata->operator_objects[0],
-        opdata->shape2.num_dims,
+        num_dims,
         input->shape.dim,
         opdata->shape2.dim,
         threadpool);
@@ -88,7 +92,7 @@ static enum xnn_status reshape_transpose_operator(
     case xnn_operator_type_transpose_nd_x8: {
       status = xnn_reshape_transpose_nd_x8(
         opdata->operator_objects[0],
-        opdata->shape2.num_dims,
+        num_dims,
         input->shape.dim,
         opdata->shape2.dim,
         threadpool);
@@ -104,8 +108,8 @@ static enum xnn_status reshape_transpose_operator(
 
   struct xnn_value* output = &values[output_id];
 
-  output->shape.num_dims = input->shape.num_dims;
-  for (size_t cur_dim = 0; cur_dim < input->shape.num_dims; cur_dim++) {
+  output->shape.num_dims = num_dims;
+  for (size_t cur_dim = 0; cur_dim < num_dims; cur_dim++) {
     const enum xnn_shape_inference_status shape_status = xnn_tensor_propagate_dimension(output, cur_dim, input->shape.dim[opdata->shape2.dim[cur_dim]]);
     if (shape_status == xnn_shape_inference_status_error) {
       return xnn_status_invalid_parameter;
@@ -186,14 +190,14 @@ enum xnn_status xnn_define_static_transpose(
 
   if (num_dims == 0) {
     xnn_log_error(
-      "failed to create %s operator with %zu num_dims: num_dims must be non-zero",
+      "failed to define %s operator with %zu num_dims: num_dims must be non-zero",
       xnn_node_type_to_string(xnn_node_type_static_transpose), num_dims);
     return xnn_status_invalid_parameter;
   }
 
   if (num_dims > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
-      "failed to create %s operator with %zu num_dims: num_dims must be <= %d",
+      "failed to define %s operator with %zu num_dims: num_dims must be <= %d",
       xnn_node_type_to_string(xnn_node_type_static_transpose), num_dims, XNN_MAX_TENSOR_DIMS);
     return xnn_status_invalid_parameter;
   }
@@ -201,7 +205,7 @@ enum xnn_status xnn_define_static_transpose(
   for (size_t i = 0; i < num_dims; ++i) {
     if (perm[i] >= num_dims) {
       xnn_log_error(
-          "failed to create %s operator with %zu perm and %zu num_dims: 0 <= perm < num_dims",
+          "failed to define %s operator with %zu perm and %zu num_dims: 0 <= perm < num_dims",
           xnn_node_type_to_string(xnn_node_type_static_transpose), perm[i], num_dims);
       return xnn_status_invalid_parameter;
     }
@@ -211,7 +215,7 @@ enum xnn_status xnn_define_static_transpose(
     for (size_t j = i + 1; j < num_dims; ++j) {
       if (perm[i] == perm[j]) {
         xnn_log_error(
-            "failed to create %s operator with duplicate entries in perm",
+            "failed to define %s operator with duplicate entries in perm",
             xnn_node_type_to_string(xnn_node_type_static_transpose));
         return xnn_status_invalid_parameter;
       }
