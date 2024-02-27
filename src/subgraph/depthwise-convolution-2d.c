@@ -483,6 +483,11 @@ static inline enum xnn_compute_type validate_datatypes_with_bias(
           output_datatype == xnn_datatype_fp32)
       {
         return xnn_compute_type_fp32;
+      } else if (input_datatype == xnn_datatype_fp16 &&
+          bias_datatype == xnn_datatype_fp32 &&
+          output_datatype == xnn_datatype_fp16) {
+        // Flag: XNN_FLAG_FP32_STATIC_WEIGHTS
+        return xnn_compute_type_fp16;
       }
       break;
     case xnn_datatype_qint8:
@@ -524,6 +529,9 @@ static inline enum xnn_compute_type validate_datatypes_without_bias(
     case xnn_datatype_fp32:
       if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp32) {
         return xnn_compute_type_fp32;
+      } else if (input_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_fp16) {
+        // Flag: XNN_FLAG_FP32_STATIC_WEIGHTS
+        return xnn_compute_type_fp16;
       }
       break;
     case xnn_datatype_qint8:
@@ -656,6 +664,7 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
   }
 
   switch (input_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
@@ -691,6 +700,7 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
   }
 
   switch (filter_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;
     case xnn_datatype_qint8:
@@ -739,6 +749,7 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
     }
 
     switch (bias_value->datatype) {
+      case xnn_datatype_fp16:
       case xnn_datatype_fp32:
       case xnn_datatype_qint32:
       case xnn_datatype_qcint32:
@@ -764,6 +775,7 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
   }
 
   switch (output_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:

@@ -3310,6 +3310,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3324,6 +3325,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_binary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3351,6 +3353,7 @@ xnnpack_unit_test(
         "argmax-pooling-2d.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
         "//:common",
@@ -3366,6 +3369,7 @@ xnnpack_unit_test(
         "average-pooling-2d.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
         "//:common",
@@ -3399,6 +3403,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3412,6 +3417,7 @@ xnnpack_unit_test(
         "batch-matrix-multiply.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
         "//:common",
@@ -3427,6 +3433,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3441,6 +3448,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3454,6 +3462,7 @@ xnnpack_unit_test(
         "concatenate2.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3467,6 +3476,7 @@ xnnpack_unit_test(
         "concatenate3.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3480,6 +3490,7 @@ xnnpack_unit_test(
         "concatenate4.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3493,6 +3504,7 @@ xnnpack_unit_test(
         "concatenate5.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3507,6 +3519,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3521,6 +3534,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":convolution_test_helpers",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
         "//:operator_utils",
@@ -3537,6 +3551,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3552,6 +3567,7 @@ xnnpack_unit_test(
     ],
     shard_count = 5,
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:operator_utils",
         "//:operators_test_mode",
@@ -3566,6 +3582,7 @@ xnnpack_unit_test(
         "depth-to-space-2d.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3580,6 +3597,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":convolution_test_helpers",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
         "//:operator_utils",
@@ -3596,6 +3614,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_binary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3610,6 +3629,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3623,6 +3643,7 @@ xnnpack_unit_test(
         "even-split2.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3636,6 +3657,7 @@ xnnpack_unit_test(
         "even-split3.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3649,6 +3671,7 @@ xnnpack_unit_test(
         "even-split4.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3663,6 +3686,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3693,6 +3717,7 @@ xnnpack_unit_test(
         "global-average-pooling-1d.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
         "//:node_type",
@@ -3708,6 +3733,7 @@ xnnpack_unit_test(
         "global-average-pooling-2d.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
         "//:node_type",
@@ -3723,6 +3749,7 @@ xnnpack_unit_test(
         "global-sum-pooling-1d.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
         "//:node_type",
@@ -3737,6 +3764,7 @@ xnnpack_unit_test(
         "global-sum-pooling-2d.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
         "//:node_type",
@@ -3752,6 +3780,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3766,6 +3795,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3779,6 +3809,7 @@ xnnpack_unit_test(
         "max-pooling-2d.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operator_utils",
@@ -3795,6 +3826,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_binary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3809,6 +3841,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_binary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3823,6 +3856,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_binary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3837,6 +3871,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3850,6 +3885,7 @@ xnnpack_unit_test(
         "prelu.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3863,6 +3899,7 @@ xnnpack_unit_test(
         "rope.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3877,6 +3914,7 @@ xnnpack_unit_test(
         "scaled-dot-product-attention.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
         "//:common",
@@ -3893,6 +3931,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3907,6 +3946,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3921,6 +3961,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3935,6 +3976,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3949,6 +3991,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3963,6 +4006,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_binary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -3991,6 +4035,7 @@ xnnpack_unit_test(
         "static-mean.cc",
     ],
     deps = [
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
         "//:common",
@@ -4007,6 +4052,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -4021,6 +4067,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -4035,6 +4082,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -4049,6 +4097,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -4063,6 +4112,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -4077,6 +4127,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_binary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -4091,6 +4142,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",
@@ -4105,6 +4157,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":subgraph_unary_tester",
+        "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operators_test_mode",

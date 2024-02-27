@@ -142,6 +142,7 @@ enum xnn_status xnn_define_abs(
   }
 
   switch (input_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;
     default:
@@ -163,8 +164,13 @@ enum xnn_status xnn_define_abs(
     return status;
   }
 
+  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
+    case xnn_datatype_fp16:
+      compute_type = xnn_compute_type_fp16;
+      break;
     case xnn_datatype_fp32:
+      compute_type = xnn_compute_type_fp32;
       break;
     default:
       xnn_log_error(
@@ -180,7 +186,7 @@ enum xnn_status xnn_define_abs(
   }
 
   node->type = xnn_node_type_abs;
-  node->compute_type = xnn_compute_type_fp32;
+  node->compute_type = compute_type;
   node->num_inputs = 1;
   node->inputs[0] = input_id;
   node->num_outputs = 1;

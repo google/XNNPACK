@@ -1523,7 +1523,7 @@ IF(XNNPACK_BUILD_TESTS)
 
     ADD_EXECUTABLE(add2-test test/add2.cc)
     TARGET_INCLUDE_DIRECTORIES(add2-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(add2-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
+    TARGET_LINK_LIBRARIES(add2-test PRIVATE fp16 XNNPACK GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME add2-test COMMAND add2-test)
 
     ADD_EXECUTABLE(add2-reshape-test test/add2-reshape.cc)
@@ -1568,22 +1568,22 @@ IF(XNNPACK_BUILD_TESTS)
 
     ADD_EXECUTABLE(concatenate2-test test/concatenate2.cc)
     TARGET_INCLUDE_DIRECTORIES(concatenate2-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(concatenate2-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main subgraph)
+    TARGET_LINK_LIBRARIES(concatenate2-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main subgraph fp16)
     ADD_TEST(NAME concatenate2-test COMMAND concatenate2-test)
 
     ADD_EXECUTABLE(concatenate3-test test/concatenate3.cc)
     TARGET_INCLUDE_DIRECTORIES(concatenate3-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(concatenate3-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main subgraph)
+    TARGET_LINK_LIBRARIES(concatenate3-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main subgraph fp16)
     ADD_TEST(NAME concatenate3-test COMMAND concatenate3-test)
 
     ADD_EXECUTABLE(concatenate4-test test/concatenate4.cc)
     TARGET_INCLUDE_DIRECTORIES(concatenate4-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(concatenate4-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main subgraph)
+    TARGET_LINK_LIBRARIES(concatenate4-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main subgraph fp16)
     ADD_TEST(NAME concatenate4-test COMMAND concatenate4-test)
 
     ADD_EXECUTABLE(concatenate5-test test/concatenate5.cc)
     TARGET_INCLUDE_DIRECTORIES(concatenate5-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(concatenate5-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main subgraph)
+    TARGET_LINK_LIBRARIES(concatenate5-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main subgraph fp16)
     ADD_TEST(NAME concatenate5-test COMMAND concatenate5-test)
 
     ADD_EXECUTABLE(convert-test test/convert.cc)
