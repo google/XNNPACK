@@ -99,7 +99,7 @@ Benchmarked on Feb 8, 2022 with `end2end-bench --benchmark_min_time=5` on a Rasp
 ## Minimum build requirements
 
 - C11
-- C++14
+- C++17
 - Python 3
 
 ## Publications
