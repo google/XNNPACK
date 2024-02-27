@@ -305,6 +305,41 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value(
   uint32_t flags,
   uint32_t* id_out);
 
+/// Validate the dimensions, channel_dim, zero point, datatype, and scale of a quantized tensor-type.
+///
+/// @param datatype - type of the tensor elements.
+/// @param zero_point - offset from zero to subtract from the quantized elements in the Value.
+/// @param scale - multiplication factor to convert quantized elements to real representation.
+/// @param num_dims - number of dimensions in the shape.
+/// @param dims - pointer to an array of @a num_dims shape dimensions. If num_dims is 0, this pointer can be NULL.
+///               XNNPACK does not keep any pointers to this array after the function returns.
+enum xnn_status xnn_validate_quantized_tensor(
+  enum xnn_datatype datatype,
+  int32_t zero_point,
+  float scale,
+  size_t num_dims,
+  const size_t* dims);
+
+/// Validate the dimensions, channel_dim, zero point, datatype, and scales of a channelwise quantized tensor-type.
+///
+/// @param datatype - type of the tensor elements.
+/// @param zero_point - offset from zero to subtract from the quantized elements in the Value.
+/// @param scale - per-channel multiplication factors to convert quantized elements to real representation.
+/// @param num_dims - number of dimensions in the shape.
+/// @param channel_dim - index of the channel dimension in the tensor with per-channel quantization parameters.
+///                      Typically this is the first dimension (dimension #0) of the filter tensors in the Convolution,
+///                      Deconvolution, and Fully Connected operators and the last dimension of the filter tensors in
+///                      the Depthwise Convolution operators.
+/// @param dims - pointer to an array of @a num_dims shape dimensions. If num_dims is 0, this pointer can be NULL.
+///               XNNPACK does not keep any pointers to this array after the function returns.
+enum xnn_status xnn_validate_channelwise_quantized_tensor(
+  enum xnn_datatype datatype,
+  int32_t zero_point,
+  const float* scale,
+  size_t num_dims,
+  size_t channel_dim,
+  const size_t* dims);
+
 /// Define a channelwise quantized tensor-type Value and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Value.
