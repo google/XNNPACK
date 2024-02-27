@@ -85,8 +85,8 @@ extern "C" {
 /// Use transient indirection buffer to reduce memory footprint
 #define XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER 0x00000020
 
-/// Retain reduced dimensions with length 1.
-#define XNN_FLAG_KEEP_DIMS 0x00000040
+/// Reduce the dimensions.
+#define XNN_FLAG_REDUCE_DIMS 0x00000040
 
 /// The number of entries in an array of xnn_dynamic_quantization_params that XNNPACK may read beyond array bounds.
 /// The caller must allocate at least this many extra xnn_dynamic_quantization_params before passing the array to XNNPACK.
@@ -620,7 +620,7 @@ enum xnn_status xnn_define_depth_to_space(
 /// @param output_id - Value ID for the output tensor. The output tensor must be a dense tensor with 2 or more
 ///                    dimensions defined in the @a subgraph.
 /// @param flags - binary features of the 1D Global Average Pooling Node. The only currently supported value is
-///                XNN_FLAG_KEEP_DIMS.
+///                XNN_FLAG_REDUCE_DIMS.
 enum xnn_status xnn_define_global_average_pooling_1d(
   xnn_subgraph_t subgraph,
   float output_min,
@@ -640,7 +640,7 @@ enum xnn_status xnn_define_global_average_pooling_1d(
 /// @param output_id - Value ID for the output tensor. The output tensor must be a dense tensor with 3 or more
 ///                    dimensions defined in the @a subgraph.
 /// @param flags - binary features of the 2D Global Average Pooling Node. The only currently supported value is
-///                XNN_FLAG_KEEP_DIMS.
+///                XNN_FLAG_REDUCE_DIMS.
 enum xnn_status xnn_define_global_average_pooling_2d(
   xnn_subgraph_t subgraph,
   float output_min,
@@ -659,7 +659,7 @@ enum xnn_status xnn_define_global_average_pooling_2d(
 /// @param output_id - Value ID for the output tensor. The output tensor must be a dense tensor with 2 or more
 ///                    dimensions defined in the @a subgraph.
 /// @param flags - binary features of the 1D Global Sum Pooling Node. The only currently supported value is
-///                XNN_FLAG_KEEP_DIMS.
+///                XNN_FLAG_REDUCE_DIMS.
 enum xnn_status xnn_define_global_sum_pooling_1d(
   xnn_subgraph_t subgraph,
   float output_min,
@@ -679,7 +679,7 @@ enum xnn_status xnn_define_global_sum_pooling_1d(
 /// @param output_id - Value ID for the output tensor. The output tensor must be a dense tensor with 3 or more
 ///                    dimensions defined in the @a subgraph.
 /// @param flags - binary features of the 2D Global Sum Pooling Node. The only currently supported value is
-///                XNN_FLAG_KEEP_DIMS.
+///                XNN_FLAG_REDUCE_DIMS.
 enum xnn_status xnn_define_global_sum_pooling_2d(
   xnn_subgraph_t subgraph,
   float output_min,
@@ -1196,9 +1196,9 @@ enum xnn_status xnn_define_static_constant_pad(
 ///                   @a num_reduction_axes dimensions defined in the @a subgraph.
 /// @param output_id - Value ID for the output tensor. The output tensor must be a dense tensor defined in the
 ///                    @a subgraph with @a num_reduction_axes fewer dimensions than the input tensor (if
-///                    XNN_FLAG_KEEP_DIMS is not specified), or has same dimension rank but the dimension at
-///                    @a reduction_axes reduced to 1 (if XNN_FLAG_KEEP_DIMS is specified).
-/// @param flags - binary features of the Mean Node. The only currently supported value is XNN_FLAG_KEEP_DIMS
+///                    XNN_FLAG_REDUCE_DIMS isspecified), or has same dimension rank but the dimension at
+///                    @a reduction_axes reduced to 1 (if XNN_FLAG_REDUCE_DIMS is not specified).
+/// @param flags - binary features of the Mean Node. The only currently supported value is XNN_FLAG_REDUCE_DIMS
 enum xnn_status xnn_define_static_mean(
   xnn_subgraph_t subgraph,
   size_t num_reduction_axes,
