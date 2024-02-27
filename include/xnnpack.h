@@ -1196,7 +1196,7 @@ enum xnn_status xnn_define_static_constant_pad(
 ///                   @a num_reduction_axes dimensions defined in the @a subgraph.
 /// @param output_id - Value ID for the output tensor. The output tensor must be a dense tensor defined in the
 ///                    @a subgraph with @a num_reduction_axes fewer dimensions than the input tensor (if
-///                    XNN_FLAG_REDUCE_DIMS isspecified), or has same dimension rank but the dimension at
+///                    XNN_FLAG_REDUCE_DIMS is specified), or has same dimension rank but the dimension at
 ///                    @a reduction_axes reduced to 1 (if XNN_FLAG_REDUCE_DIMS is not specified).
 /// @param flags - binary features of the Mean Node. The only currently supported value is XNN_FLAG_REDUCE_DIMS
 enum xnn_status xnn_define_static_mean(
