@@ -181,25 +181,15 @@ enum xnn_status xnn_define_quantized_tensor_value(
     return xnn_status_invalid_parameter;
   }
 
-  if (num_dims > XNN_MAX_TENSOR_DIMS) {
-    xnn_log_error(
-      "failed to create Quantized Dense Tensor value: num of dimensions exceeds XNNPACK limit (%d)",
-      XNN_MAX_TENSOR_DIMS);
-    return xnn_status_unsupported_parameter;
-  }
-
-  enum xnn_status status = check_zero_point(datatype, zero_point);
+  enum xnn_status status = xnn_validate_quantized_tensor(
+      datatype,
+      zero_point,
+      scale,
+      num_dims,
+      dims);
   if (status != xnn_status_success) {
     return status;
   }
-
-  if (scale <= 0.0f || !isnormal(scale)) {
-    xnn_log_error(
-      "failed to create Quantized Dense Tensor value with %.7g scale: scale must be finite, normalized, and positive",
-      scale);
-    return xnn_status_invalid_parameter;
-  }
-
   struct xnn_value* value = subgraph->values + external_id;
   if (external_id == XNN_INVALID_VALUE_ID) {
     value = xnn_subgraph_new_internal_value(subgraph);
@@ -315,32 +305,42 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value(
     id_out);
 }
 
-enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
-    xnn_subgraph_t subgraph,
+enum xnn_status xnn_validate_quantized_tensor(
+    enum xnn_datatype datatype,
+    int32_t zero_point,
+    float scale,
+    size_t num_dims,
+    const size_t* dims)
+{
+  if (num_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+      "failed to create Quantized Dense Tensor value: num of dimensions exceeds XNNPACK limit (%d)",
+      XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
+  }
+
+  enum xnn_status status = check_zero_point(datatype, zero_point);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  if (scale <= 0.0f || !isnormal(scale)) {
+    xnn_log_error(
+      "failed to create Quantized Dense Tensor value with %.7g scale: scale must be finite, normalized, and positive",
+      scale);
+    return xnn_status_invalid_parameter;
+  }
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_validate_channelwise_quantized_tensor(
     enum xnn_datatype datatype,
     int32_t zero_point,
     const float* scale,
     size_t num_dims,
     size_t channel_dim,
-    const size_t* dims,
-    const void* data,
-    uint32_t external_id,
-    uint32_t flags,
-    uint32_t* id_out)
+    const size_t* dims)
 {
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to create Channelwise Quantized Dense Tensor value: XNNPACK is not initialized");
-    return xnn_status_uninitialized;
-  }
-
-  if (external_id != XNN_INVALID_VALUE_ID && external_id >= subgraph->external_value_ids) {
-    xnn_log_error(
-      "failed to create Channelwise Quantized Dense Tensor value: "
-      "external ID %" PRIu32 " exceeds the number of reserved external IDs in subgraph (%" PRIu32 ")",
-      external_id, subgraph->external_value_ids);
-    return xnn_status_invalid_parameter;
-  }
-
   if (num_dims == 0) {
     xnn_log_error(
       "failed to create Channelwise Quantized Dense Tensor value: no channel dimension exists");
@@ -387,6 +387,45 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
         scale[channel], channel);
       return xnn_status_invalid_parameter;
     }
+  }
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
+    xnn_subgraph_t subgraph,
+    enum xnn_datatype datatype,
+    int32_t zero_point,
+    const float* scale,
+    size_t num_dims,
+    size_t channel_dim,
+    const size_t* dims,
+    const void* data,
+    uint32_t external_id,
+    uint32_t flags,
+    uint32_t* id_out)
+{
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to create Channelwise Quantized Dense Tensor value: XNNPACK is not initialized");
+    return xnn_status_uninitialized;
+  }
+
+  if (external_id != XNN_INVALID_VALUE_ID && external_id >= subgraph->external_value_ids) {
+    xnn_log_error(
+      "failed to create Channelwise Quantized Dense Tensor value: "
+      "external ID %" PRIu32 " exceeds the number of reserved external IDs in subgraph (%" PRIu32 ")",
+      external_id, subgraph->external_value_ids);
+    return xnn_status_invalid_parameter;
+  }
+
+  enum xnn_status status = xnn_validate_channelwise_quantized_tensor(
+      datatype,
+      zero_point,
+      scale,
+      num_dims,
+      channel_dim,
+      dims);
+  if (status != xnn_status_success) {
+    return status;
   }
 
   struct xnn_value* value = subgraph->values + external_id;

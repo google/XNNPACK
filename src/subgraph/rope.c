@@ -221,11 +221,6 @@ enum xnn_status xnn_define_rope(
     return status;
   }
 
-  status = xnn_subgraph_check_all_dims_match(xnn_node_type_rope, input_id, input_value, output_id, output_value);
-  if (status != xnn_status_success) {
-    return status;
-  }
-
   if (output_value->datatype != xnn_datatype_fp32) {
     xnn_log_error(
       "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
