@@ -366,25 +366,6 @@ enum xnn_status check_input_value(
   }
 
   const struct xnn_value* output_value = &subgraph->values[output_id];
-  if (input_value->shape.num_dims != output_value->shape.num_dims) {
-    xnn_log_error(
-      "failed to define %s operator with input %zu ID #%" PRIu32
-      ": mismatch number of dimensions, input %zu has %zu, output has %zu",
-      xnn_node_type_to_string(node_type), nth, input_id, nth, input_value->shape.num_dims,
-      output_value->shape.num_dims);
-    return xnn_status_invalid_parameter;
-  }
-
-  for (size_t i = 0; i < input_value->shape.num_dims; i++) {
-    if (i != axis && input_value->shape.dim[i] != output_value->shape.dim[i]) {
-      xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32
-        ": mismatch dimension %zu, input %zu has %zu, output has %zu",
-        xnn_node_type_to_string(node_type), input_id, i, nth, input_value->shape.dim[i], output_value->shape.dim[i]);
-      return xnn_status_invalid_parameter;
-    }
-  }
-
   status = xnn_subgraph_check_datatype_matches(node_type, input_id, input_value, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
