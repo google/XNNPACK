@@ -4989,12 +4989,8 @@ size_t xnn_init_f32_rsqrt_fma3_params(
 }
 size_t xnn_init_f32_rsqrt_avx512_params(
     union xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]) {
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx512.three[i] = 3.0f;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx512.neg_half[i] = -0.5f;
-  }
+  params->avx512.three = 3.0f;
+  params->avx512.neg_half = -0.5f;
   return sizeof(params->avx512);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

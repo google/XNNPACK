@@ -2754,8 +2754,8 @@ union xnn_f32_rsqrt_params {
     int32_t mask_table[14];
   } fma3;
   struct {
-    XNN_ALIGN(64) float three[16];
-    XNN_ALIGN(64) float neg_half[16];
+    float three;
+    float neg_half;
   } avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
