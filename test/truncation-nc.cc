@@ -3,118 +3,34 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <gtest/gtest.h>
+#include <xnnpack.h>
 
-#include "truncation-operator-tester.h"
+#include <cmath>
 
+#include "unary-operator-tester.h"
 
+namespace xnnpack {
+
+class TruncationOperatorTester : public UnaryOperatorTester {
+ public:
+  TruncationOperatorTester() : UnaryOperatorTester() {
+    range_f32_ = {0.0f, 5.0f};
+    range_f16_ = {0.0f, 5.0f};
+  }
+
+ protected:
+  // Computes the expected result for some input `x`. Subclasses should override
+  // this function with their own reference function.
+  float RefFunc(float x) const override { return std::trunc(x); }
+
+  CREATE_OP_OVERRIDES_F32(truncation);
+  CREATE_OP_OVERRIDES_F16(truncation);
+};
+
+CREATE_UNARY_FLOAT_TESTS(F32, TruncationOperatorTester);
+CREATE_UNARY_FLOAT_TESTS(RunF32, TruncationOperatorTester);
 #ifndef XNN_EXCLUDE_F16_TESTS
-TEST(TRUNCATION_NC_F16, unit_batch) {
-  for (size_t channels = 1; channels < 100; channels++) {
-    TruncationOperatorTester()
-      .batch_size(1)
-      .channels(channels)
-      .iterations(3)
-      .TestF16();
-  }
-}
-
-TEST(TRUNCATION_NC_F16, small_batch) {
-  for (size_t channels = 1; channels < 100; channels++) {
-    TruncationOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .iterations(3)
-      .TestF16();
-  }
-}
-
-TEST(TRUNCATION_NC_F16, small_batch_with_input_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    TruncationOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .input_stride(129)
-      .iterations(3)
-      .TestF16();
-  }
-}
-
-TEST(TRUNCATION_NC_F16, small_batch_with_output_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    TruncationOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .output_stride(117)
-      .iterations(3)
-      .TestF16();
-  }
-}
-
-TEST(TRUNCATION_NC_F16, small_batch_with_input_and_output_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    TruncationOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .input_stride(129)
-      .output_stride(117)
-      .iterations(3)
-      .TestF16();
-  }
-}
+CREATE_UNARY_FLOAT_TESTS(F16, TruncationOperatorTester);
 #endif  // XNN_EXCLUDE_F16_TESTS
 
-
-TEST(TRUNCATION_NC_F32, unit_batch) {
-  for (size_t channels = 1; channels < 100; channels++) {
-    TruncationOperatorTester()
-      .batch_size(1)
-      .channels(channels)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(TRUNCATION_NC_F32, small_batch) {
-  for (size_t channels = 1; channels < 100; channels++) {
-    TruncationOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(TRUNCATION_NC_F32, small_batch_with_input_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    TruncationOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .input_stride(129)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(TRUNCATION_NC_F32, small_batch_with_output_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    TruncationOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .output_stride(117)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(TRUNCATION_NC_F32, small_batch_with_input_and_output_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    TruncationOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .input_stride(129)
-      .output_stride(117)
-      .iterations(3)
-      .TestF32();
-  }
-}
+};  // namespace xnnpack

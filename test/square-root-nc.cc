@@ -3,118 +3,44 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <gtest/gtest.h>
+#include <xnnpack.h>
 
-#include "square-root-operator-tester.h"
+#include <cmath>
+#include <cstdlib>
 
+#include "unary-operator-tester.h"
 
+namespace xnnpack {
+
+class SquareRootOperatorTester : public UnaryOperatorTester {
+ public:
+  SquareRootOperatorTester() : UnaryOperatorTester() {
+    range_f32_ = {0.0f, 0.5f};
+    range_f16_ = {0.1f, 5.0f};
+  }
+
+ protected:
+  // Computes the expected result for some input `x`. Subclasses should override
+  // this function with their own reference function.
+  float RefFunc(float x) const override { return std::sqrt(x); }
+
+  // Computes the absolute tolerance for a reference value `y_ref`. Tests will
+  // fail when `std::abs(y - y_ref) > AbsTol32(y_ref)`. Note that for `fp16`
+  // tests, both `y` and `y_ref` will be converted to `float` for the tolerance
+  // evaluation.
+  float AbsTolF32(float y_ref) const override { return 0.0f; }
+  float AbsTolF16(float y_ref) const override {
+    return std::abs(y_ref) * 5.0e-3f;
+  }
+
+  CREATE_OP_OVERRIDES_F32(square_root);
+  CREATE_OP_OVERRIDES_F16(square_root);
+};
+
+CREATE_UNARY_FLOAT_TESTS(F32, SquareRootOperatorTester);
+CREATE_UNARY_FLOAT_TESTS(RunF32, SquareRootOperatorTester);
 #ifndef XNN_EXCLUDE_F16_TESTS
-TEST(SQUARE_ROOT_NC_F16, unit_batch) {
-  for (size_t channels = 1; channels < 100; channels++) {
-    SquareRootOperatorTester()
-      .batch_size(1)
-      .channels(channels)
-      .iterations(3)
-      .TestF16();
-  }
-}
-
-TEST(SQUARE_ROOT_NC_F16, small_batch) {
-  for (size_t channels = 1; channels < 100; channels++) {
-    SquareRootOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .iterations(3)
-      .TestF16();
-  }
-}
-
-TEST(SQUARE_ROOT_NC_F16, small_batch_with_input_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    SquareRootOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .input_stride(129)
-      .iterations(3)
-      .TestF16();
-  }
-}
-
-TEST(SQUARE_ROOT_NC_F16, small_batch_with_output_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    SquareRootOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .output_stride(117)
-      .iterations(3)
-      .TestF16();
-  }
-}
-
-TEST(SQUARE_ROOT_NC_F16, small_batch_with_input_and_output_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    SquareRootOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .input_stride(129)
-      .output_stride(117)
-      .iterations(3)
-      .TestF16();
-  }
-}
+CREATE_UNARY_FLOAT_TESTS(F16, SquareRootOperatorTester);
 #endif  // XNN_EXCLUDE_F16_TESTS
 
-
-TEST(SQUARE_ROOT_NC_F32, unit_batch) {
-  for (size_t channels = 1; channels < 100; channels++) {
-    SquareRootOperatorTester()
-      .batch_size(1)
-      .channels(channels)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(SQUARE_ROOT_NC_F32, small_batch) {
-  for (size_t channels = 1; channels < 100; channels++) {
-    SquareRootOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(SQUARE_ROOT_NC_F32, small_batch_with_input_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    SquareRootOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .input_stride(129)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(SQUARE_ROOT_NC_F32, small_batch_with_output_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    SquareRootOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .output_stride(117)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(SQUARE_ROOT_NC_F32, small_batch_with_input_and_output_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    SquareRootOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .input_stride(129)
-      .output_stride(117)
-      .iterations(3)
-      .TestF32();
-  }
-}
+};  // namespace xnnpack

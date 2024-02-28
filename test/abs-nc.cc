@@ -1,120 +1,35 @@
-// Copyright 2020 Google LLC
+// Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <gtest/gtest.h>
+#include <cmath>
+#include <cstdlib>
 
-#include "abs-operator-tester.h"
+#include "unary-operator-tester.h"
 
+namespace xnnpack {
 
+class AbsOperatorTester : public UnaryOperatorTester {
+ public:
+  AbsOperatorTester() : UnaryOperatorTester() {
+    range_f32_ = {-1.0f, 1.0f};
+    range_f16_ = {-1.0f, 1.0f};
+  }
+
+ protected:
+  // Computes the expected result for some input `x`. Subclasses should override
+  // this function with their own reference function.
+  float RefFunc(float x) const override { return std::abs(x); }
+
+  CREATE_OP_OVERRIDES_F32(abs);
+  CREATE_OP_OVERRIDES_F16(abs);
+};
+
+CREATE_UNARY_FLOAT_TESTS(F32, AbsOperatorTester);
+CREATE_UNARY_FLOAT_TESTS(RunF32, AbsOperatorTester);
 #ifndef XNN_EXCLUDE_F16_TESTS
-TEST(ABS_NC_F16, unit_batch) {
-  for (size_t channels = 1; channels < 100; channels++) {
-    AbsOperatorTester()
-      .batch_size(1)
-      .channels(channels)
-      .iterations(3)
-      .TestF16();
-  }
-}
-
-TEST(ABS_NC_F16, small_batch) {
-  for (size_t channels = 1; channels < 100; channels++) {
-    AbsOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .iterations(3)
-      .TestF16();
-  }
-}
-
-TEST(ABS_NC_F16, small_batch_with_input_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    AbsOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .input_stride(129)
-      .iterations(3)
-      .TestF16();
-  }
-}
-
-TEST(ABS_NC_F16, small_batch_with_output_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    AbsOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .output_stride(117)
-      .iterations(3)
-      .TestF16();
-  }
-}
-
-TEST(ABS_NC_F16, small_batch_with_input_and_output_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    AbsOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .input_stride(129)
-      .output_stride(117)
-      .iterations(3)
-      .TestF16();
-  }
-}
+CREATE_UNARY_FLOAT_TESTS(F16, AbsOperatorTester);
 #endif  // XNN_EXCLUDE_F16_TESTS
 
-
-TEST(ABS_NC_F32, unit_batch) {
-  for (size_t channels = 1; channels < 100; channels++) {
-    AbsOperatorTester()
-      .batch_size(1)
-      .channels(channels)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(ABS_NC_F32, small_batch) {
-  for (size_t channels = 1; channels < 100; channels++) {
-    AbsOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(ABS_NC_F32, small_batch_with_input_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    AbsOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .input_stride(129)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(ABS_NC_F32, small_batch_with_output_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    AbsOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .output_stride(117)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(ABS_NC_F32, small_batch_with_input_and_output_stride) {
-  for (size_t channels = 1; channels < 100; channels += 15) {
-    AbsOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .input_stride(129)
-      .output_stride(117)
-      .iterations(3)
-      .TestF32();
-  }
-}
+};  // namespace xnnpack
