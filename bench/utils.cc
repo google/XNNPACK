@@ -323,7 +323,18 @@ void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark) {
   bool CheckRVV(benchmark::State& state) {
     const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     if (hardware_config == nullptr || !hardware_config->use_riscv_vector) {
-      state.SkipWithError("no V extension");
+      state.SkipWithError("no RVV extension");
+      return false;
+    }
+    return true;
+  }
+#endif  // XNN_ARCH_RISCV
+
+#if XNN_ARCH_RISCV
+  bool CheckRVVFP16ARITH(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_riscv_vector_fp16_arith) {
+      state.SkipWithError("no RVV-FP16-ARITH extension");
       return false;
     }
     return true;
