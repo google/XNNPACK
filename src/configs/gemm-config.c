@@ -1936,11 +1936,13 @@ static void init_qd8_f32_qc4w_gemm_config(void) {
 static void init_qd8_f32_qb4w_gemm_config(void) {
   // TODO more kernels
   #if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_DOTPROD
-    qd8_f32_qb4w_gemm_config.minmax.dqgemm_bl[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_bl_ukernel((xnn_dqgemm_bl_ukernel_fn) xnn_qd8_f32_qc4w_bl_gemm_minmax_ukernel_1x16c4__neondot);
+    // TODO Add 1x8c4[8?] kernel
+    /// qd8_f32_qb4w_gemm_config.minmax.dqgemm_bl[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_bl_ukernel((xnn_dqgemm_bl_ukernel_fn) xnn_qd8_f32_qc4w_bl_gemm_minmax_ukernel_1x16c4__neondot);
+    qd8_f32_qb4w_gemm_config.minmax.dqgemm_bl[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_dqgemm_bl_ukernel((xnn_dqgemm_bl_ukernel_fn) xnn_qd8_f32_qc4w_bl_gemm_minmax_ukernel_4x8c4__neondot);
     qd8_f32_qb4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
     qd8_f32_qb4w_gemm_config.pack_gemm_goi_bl = (xnn_packw_gemm_goi_bl_ukernel_fn) xnn_pack_qs8_qc4w_gemm_bl_goi_w;
-    qd8_f32_qb4w_gemm_config.mr = 1;
-    qd8_f32_qb4w_gemm_config.nr = 16;
+    qd8_f32_qb4w_gemm_config.mr = 4;
+    qd8_f32_qb4w_gemm_config.nr = 8;
     qd8_f32_qb4w_gemm_config.log2_kr = 2;
     qd8_f32_qb4w_gemm_config.planes = 2;
   #else

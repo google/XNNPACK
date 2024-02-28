@@ -579,7 +579,7 @@ class FullyConnectedOperatorTester {
         ASSERT_EQ(xnn_status_success, xnn_create_fully_connected_nc_qd8_f32_qb4w(
             input_channels(), output_channels(),
             input_stride(), output_stride(),
-            /*batch_size=*/ block_size(),
+            /*block_size=*/ block_size(),
             kernel_zero_point(),
             kernel_scale2d.data(),
             kernel.data(), has_bias() ? bias.data() : nullptr,
