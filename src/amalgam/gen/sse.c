@@ -9202,9 +9202,11 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c4__sse_2x(
 }
 
 void xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8(
-    size_t batch, const float* input, float* output,
-    const union xnn_f32_rsqrt_params params[restrict XNN_MIN_ELEMENTS(1)])
-    XNN_OOB_READS {
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_rsqrt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
@@ -9215,19 +9217,19 @@ void xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8(
   const __m128 kHalf = _mm_load_ps(params->sse.half);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m128 va0123 = _mm_loadu_ps(input);
-    const __m128 va4567 = _mm_loadu_ps(input + 4);
+    const __m128 vx0123 = _mm_loadu_ps(input);
+    const __m128 vx4567 = _mm_loadu_ps(input + 4);
     input += 8;
 
     // Generate the initial 12-bit approximation.
-    const __m128 vt0_0123 = _mm_rsqrt_ps(va0123);
-    const __m128 vt0_4567 = _mm_rsqrt_ps(va4567);
+    const __m128 vt0_0123 = _mm_rsqrt_ps(vx0123);
+    const __m128 vt0_4567 = _mm_rsqrt_ps(vx4567);
 
     // Do a single Newton-Raphson step as described above.
     const __m128 vt1_0123 = _mm_mul_ps(vt0_0123, vt0_0123);
     const __m128 vt1_4567 = _mm_mul_ps(vt0_4567, vt0_4567);
-    const __m128 vt2_0123 = _mm_mul_ps(va0123, vt1_0123);
-    const __m128 vt2_4567 = _mm_mul_ps(va4567, vt1_4567);
+    const __m128 vt2_0123 = _mm_mul_ps(vx0123, vt1_0123);
+    const __m128 vt2_4567 = _mm_mul_ps(vx4567, vt1_4567);
     const __m128 vt3_0123 = _mm_sub_ps(kThree, vt2_0123);
     const __m128 vt3_4567 = _mm_sub_ps(kThree, vt2_4567);
     const __m128 vt4_0123 = _mm_mul_ps(kHalf, vt0_0123);
@@ -9241,15 +9243,15 @@ void xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8(
     output += 8;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const __m128 va = _mm_loadu_ps(input);
+    const __m128 vx = _mm_loadu_ps(input);
     input += 4;
 
     // Generate the initial 12-bit approximation.
-    const __m128 vt0 = _mm_rsqrt_ps(va);
+    const __m128 vt0 = _mm_rsqrt_ps(vx);
 
     // Do a single Newton-Raphson step as described above.
     const __m128 vt1 = _mm_mul_ps(vt0, vt0);
-    const __m128 vt2 = _mm_mul_ps(va, vt1);
+    const __m128 vt2 = _mm_mul_ps(vx, vt1);
     const __m128 vt3 = _mm_sub_ps(kThree, vt2);
     const __m128 vt4 = _mm_mul_ps(kHalf, vt0);
     const __m128 vy = _mm_mul_ps(vt3, vt4);
@@ -9258,14 +9260,14 @@ void xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8(
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
-    const __m128 va = _mm_loadu_ps(input);
+    const __m128 vx = _mm_loadu_ps(input);
 
     // Generate the initial 12-bit approximation.
-    const __m128 vt0 = _mm_rsqrt_ps(va);
+    const __m128 vt0 = _mm_rsqrt_ps(vx);
 
     // Do a single Newton-Raphson step as described above.
     const __m128 vt1 = _mm_mul_ps(vt0, vt0);
-    const __m128 vt2 = _mm_mul_ps(va, vt1);
+    const __m128 vt2 = _mm_mul_ps(vx, vt1);
     const __m128 vt3 = _mm_sub_ps(kThree, vt2);
     const __m128 vt4 = _mm_mul_ps(kHalf, vt0);
     __m128 vy = _mm_mul_ps(vt3, vt4);

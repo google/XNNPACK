@@ -8,14 +8,11 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include <immintrin.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <xmmintrin.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vunary.h>
 
+#include <immintrin.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vunary.h>
 
 // In the following, we do a single Newton-Raphson step on the equation
 // $x^{-2} - a$, which expands to:
@@ -33,10 +30,13 @@
 // Where $x_k$ is the original 14-bit approximation and `y` contains the final
 // 23-bit approximation $x_{k+1}$.
 
+
 void xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64(
-    size_t batch, const float* input, float* output,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_rsqrt_params params[restrict XNN_MIN_ELEMENTS(1)])
-    XNN_OOB_READS {
+{
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
@@ -47,27 +47,27 @@ void xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64(
   const __m512 kNegHalf = _mm512_load_ps(params->avx512.neg_half);
 
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
-    const __m512 va0 = _mm512_loadu_ps(input);
-    const __m512 va1 = _mm512_loadu_ps(input + 16);
-    const __m512 va2 = _mm512_loadu_ps(input + 32);
-    const __m512 va3 = _mm512_loadu_ps(input + 48);
+    const __m512 vx0 = _mm512_loadu_ps(input);
+    const __m512 vx1 = _mm512_loadu_ps(input + 16);
+    const __m512 vx2 = _mm512_loadu_ps(input + 32);
+    const __m512 vx3 = _mm512_loadu_ps(input + 48);
     input += 64;
 
     // Generate the initial 14-bit approximation.
-    const __m512 vt0_0 = _mm512_rsqrt14_ps(va0);
-    const __m512 vt0_1 = _mm512_rsqrt14_ps(va1);
-    const __m512 vt0_2 = _mm512_rsqrt14_ps(va2);
-    const __m512 vt0_3 = _mm512_rsqrt14_ps(va3);
+    const __m512 vt0_0 = _mm512_rsqrt14_ps(vx0);
+    const __m512 vt0_1 = _mm512_rsqrt14_ps(vx1);
+    const __m512 vt0_2 = _mm512_rsqrt14_ps(vx2);
+    const __m512 vt0_3 = _mm512_rsqrt14_ps(vx3);
 
     // Do a single Newton-Raphson step as described above.
     const __m512 vt1_0 = _mm512_mul_ps(vt0_0, vt0_0);
     const __m512 vt1_1 = _mm512_mul_ps(vt0_1, vt0_1);
     const __m512 vt1_2 = _mm512_mul_ps(vt0_2, vt0_2);
     const __m512 vt1_3 = _mm512_mul_ps(vt0_3, vt0_3);
-    const __m512 vt3_0 = _mm512_fmsub_ps(va0, vt1_0, kThree);
-    const __m512 vt3_1 = _mm512_fmsub_ps(va1, vt1_1, kThree);
-    const __m512 vt3_2 = _mm512_fmsub_ps(va2, vt1_2, kThree);
-    const __m512 vt3_3 = _mm512_fmsub_ps(va3, vt1_3, kThree);
+    const __m512 vt3_0 = _mm512_fmsub_ps(vx0, vt1_0, kThree);
+    const __m512 vt3_1 = _mm512_fmsub_ps(vx1, vt1_1, kThree);
+    const __m512 vt3_2 = _mm512_fmsub_ps(vx2, vt1_2, kThree);
+    const __m512 vt3_3 = _mm512_fmsub_ps(vx3, vt1_3, kThree);
     const __m512 vt4_0 = _mm512_mul_ps(kNegHalf, vt0_0);
     const __m512 vt4_1 = _mm512_mul_ps(kNegHalf, vt0_1);
     const __m512 vt4_2 = _mm512_mul_ps(kNegHalf, vt0_2);
@@ -85,15 +85,15 @@ void xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64(
     output += 64;
   }
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(input);
+    const __m512 vx = _mm512_loadu_ps(input);
     input += 16;
 
     // Generate the initial 14-bit approximation.
-    const __m512 vt0 = _mm512_rsqrt14_ps(va);
+    const __m512 vt0 = _mm512_rsqrt14_ps(vx);
 
     // Do a single Newton-Raphson step as described above.
     const __m512 vt1 = _mm512_mul_ps(vt0, vt0);
-    const __m512 vt3 = _mm512_fmsub_ps(va, vt1, kThree);
+    const __m512 vt3 = _mm512_fmsub_ps(vx, vt1, kThree);
     const __m512 vt4 = _mm512_mul_ps(kNegHalf, vt0);
     const __m512 vy = _mm512_mul_ps(vt3, vt4);
 
@@ -106,17 +106,16 @@ void xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64(
     // Prepare mask for valid 32-bit elements (depends on batch).
     batch >>= XNN_LOG2_SIZEOF_FLOAT;
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, input);
+    const __m512 vx = _mm512_maskz_loadu_ps(vmask, input);
 
     // Generate the initial 14-bit approximation.
-    const __m512 vt0 = _mm512_rsqrt14_ps(va);
+    const __m512 vt0 = _mm512_rsqrt14_ps(vx);
 
     // Do a single Newton-Raphson step as described above.
     const __m512 vt1 = _mm512_mul_ps(vt0, vt0);
-    const __m512 vt3 = _mm512_fmsub_ps(va, vt1, kThree);
+    const __m512 vt3 = _mm512_fmsub_ps(vx, vt1, kThree);
     const __m512 vt4 = _mm512_mul_ps(kNegHalf, vt0);
     __m512 vy = _mm512_mul_ps(vt3, vt4);
-
 
     _mm512_mask_storeu_ps(output, vmask, vy);
   }

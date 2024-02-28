@@ -8,10 +8,11 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+
 #include <xmmintrin.h>
+
 #include <xnnpack/common.h>
 #include <xnnpack/vunary.h>
-
 
 // In the following, we do a single Newton-Raphson step on the equation
 // $x^{-2} - a$, which expands to:
@@ -30,10 +31,13 @@
 // Where $x_k$ is the original 12-bit approximation and `y` contains the final
 // 24-bit approximation $x_{k+1}$.
 
+
 void xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4(
-    size_t batch, const float* input, float* output,
-    const union xnn_f32_rsqrt_params params[restrict XNN_MIN_ELEMENTS(1)])
-    XNN_OOB_READS {
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_rsqrt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
@@ -44,15 +48,15 @@ void xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4(
   const __m128 kHalf = _mm_load_ps(params->sse.half);
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const __m128 va = _mm_loadu_ps(input);
+    const __m128 vx = _mm_loadu_ps(input);
     input += 4;
 
     // Generate the initial 12-bit approximation.
-    const __m128 vt0 = _mm_rsqrt_ps(va);
+    const __m128 vt0 = _mm_rsqrt_ps(vx);
 
     // Do a single Newton-Raphson step as described above.
     const __m128 vt1 = _mm_mul_ps(vt0, vt0);
-    const __m128 vt2 = _mm_mul_ps(va, vt1);
+    const __m128 vt2 = _mm_mul_ps(vx, vt1);
     const __m128 vt3 = _mm_sub_ps(kThree, vt2);
     const __m128 vt4 = _mm_mul_ps(kHalf, vt0);
     const __m128 vy = _mm_mul_ps(vt3, vt4);
@@ -61,14 +65,14 @@ void xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4(
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
-    const __m128 va = _mm_loadu_ps(input);
+    const __m128 vx = _mm_loadu_ps(input);
 
     // Generate the initial 12-bit approximation.
-    const __m128 vt0 = _mm_rsqrt_ps(va);
+    const __m128 vt0 = _mm_rsqrt_ps(vx);
 
     // Do a single Newton-Raphson step as described above.
     const __m128 vt1 = _mm_mul_ps(vt0, vt0);
-    const __m128 vt2 = _mm_mul_ps(va, vt1);
+    const __m128 vt2 = _mm_mul_ps(vx, vt1);
     const __m128 vt3 = _mm_sub_ps(kThree, vt2);
     const __m128 vt4 = _mm_mul_ps(kHalf, vt0);
     __m128 vy = _mm_mul_ps(vt3, vt4);
