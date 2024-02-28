@@ -91,7 +91,7 @@ void xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32(
     assert(batch <= 15 * sizeof(float));
     // Prepare mask for valid 32-bit elements (depends on batch).
     batch >>= XNN_LOG2_SIZEOF_FLOAT;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
+    const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
     const __m512 vx = _mm512_maskz_loadu_ps(vmask, input);
 
     // Generate the initial 14-bit approximation.
