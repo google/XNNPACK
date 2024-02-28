@@ -73,7 +73,7 @@ void xnn_qu8_f32_vcvt_ukernel__avx512skx_u64(
     assert(batch <= 15 * sizeof(uint8_t));
 
     // Prepare mask for valid elements (depends on batch).
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
+    const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
     __m512i vx = _mm512_cvtepu8_epi32(_mm_maskz_loadu_epi8(vmask, input));
     vx = _mm512_add_epi32(vx, vminus_zero_point);
