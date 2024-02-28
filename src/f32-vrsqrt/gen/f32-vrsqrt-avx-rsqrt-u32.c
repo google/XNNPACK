@@ -44,8 +44,8 @@ void xnn_f32_vrsqrt_ukernel__avx_rsqrt_u32(
   assert(output != NULL);
 
   // Constants for the Newton-Raphson iteration.
-  const __m256 kThree = _mm256_load_ps(params->avx.three);
-  const __m256 kHalf = _mm256_load_ps(params->avx.half);
+  const __m256 vthree = _mm256_load_ps(params->avx.three);
+  const __m256 vhalf = _mm256_load_ps(params->avx.half);
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     const __m256 vx0 = _mm256_loadu_ps(input);
@@ -69,14 +69,14 @@ void xnn_f32_vrsqrt_ukernel__avx_rsqrt_u32(
     const __m256 vt2_1 = _mm256_mul_ps(vx1, vt1_1);
     const __m256 vt2_2 = _mm256_mul_ps(vx2, vt1_2);
     const __m256 vt2_3 = _mm256_mul_ps(vx3, vt1_3);
-    const __m256 vt3_0 = _mm256_sub_ps(kThree, vt2_0);
-    const __m256 vt3_1 = _mm256_sub_ps(kThree, vt2_1);
-    const __m256 vt3_2 = _mm256_sub_ps(kThree, vt2_2);
-    const __m256 vt3_3 = _mm256_sub_ps(kThree, vt2_3);
-    const __m256 vt4_0 = _mm256_mul_ps(kHalf, vt0_0);
-    const __m256 vt4_1 = _mm256_mul_ps(kHalf, vt0_1);
-    const __m256 vt4_2 = _mm256_mul_ps(kHalf, vt0_2);
-    const __m256 vt4_3 = _mm256_mul_ps(kHalf, vt0_3);
+    const __m256 vt3_0 = _mm256_sub_ps(vthree, vt2_0);
+    const __m256 vt3_1 = _mm256_sub_ps(vthree, vt2_1);
+    const __m256 vt3_2 = _mm256_sub_ps(vthree, vt2_2);
+    const __m256 vt3_3 = _mm256_sub_ps(vthree, vt2_3);
+    const __m256 vt4_0 = _mm256_mul_ps(vhalf, vt0_0);
+    const __m256 vt4_1 = _mm256_mul_ps(vhalf, vt0_1);
+    const __m256 vt4_2 = _mm256_mul_ps(vhalf, vt0_2);
+    const __m256 vt4_3 = _mm256_mul_ps(vhalf, vt0_3);
     const __m256 vy0 = _mm256_mul_ps(vt3_0, vt4_0);
     const __m256 vy1 = _mm256_mul_ps(vt3_1, vt4_1);
     const __m256 vy2 = _mm256_mul_ps(vt3_2, vt4_2);
@@ -99,8 +99,8 @@ void xnn_f32_vrsqrt_ukernel__avx_rsqrt_u32(
     // Do a single Newton-Raphson step as described above.
     const __m256 vt1 = _mm256_mul_ps(vt0, vt0);
     const __m256 vt2 = _mm256_mul_ps(vx, vt1);
-    const __m256 vt3 = _mm256_sub_ps(kThree, vt2);
-    const __m256 vt4 = _mm256_mul_ps(kHalf, vt0);
+    const __m256 vt3 = _mm256_sub_ps(vthree, vt2);
+    const __m256 vt4 = _mm256_mul_ps(vhalf, vt0);
     const __m256 vy = _mm256_mul_ps(vt3, vt4);
 
     _mm256_storeu_ps(output, vy);
@@ -119,8 +119,8 @@ void xnn_f32_vrsqrt_ukernel__avx_rsqrt_u32(
     // Do a single Newton-Raphson step as described above.
     const __m256 vt1 = _mm256_mul_ps(vt0, vt0);
     const __m256 vt2 = _mm256_mul_ps(vx, vt1);
-    const __m256 vt3 = _mm256_sub_ps(kThree, vt2);
-    const __m256 vt4 = _mm256_mul_ps(kHalf, vt0);
+    const __m256 vt3 = _mm256_sub_ps(vthree, vt2);
+    const __m256 vt4 = _mm256_mul_ps(vhalf, vt0);
     __m256 vy = _mm256_mul_ps(vt3, vt4);
 
     __m128 vy_lo = _mm256_castps256_ps128(vy);

@@ -45,8 +45,8 @@ void xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16(
   assert(output != NULL);
 
   // Constants for the Newton-Raphson iteration.
-  const __m256 kThree = _mm256_load_ps(params->fma3.three);
-  const __m256 kNegHalf = _mm256_load_ps(params->fma3.neg_half);
+  const __m256 vthree = _mm256_load_ps(params->fma3.three);
+  const __m256 vneg_half = _mm256_load_ps(params->fma3.neg_half);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m256 vx0 = _mm256_loadu_ps(input);
@@ -60,10 +60,10 @@ void xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16(
     // Do a single Newton-Raphson step as described above.
     const __m256 vt1_0 = _mm256_mul_ps(vt0_0, vt0_0);
     const __m256 vt1_1 = _mm256_mul_ps(vt0_1, vt0_1);
-    const __m256 vt3_0 = _mm256_fmsub_ps(vx0, vt1_0, kThree);
-    const __m256 vt3_1 = _mm256_fmsub_ps(vx1, vt1_1, kThree);
-    const __m256 vt4_0 = _mm256_mul_ps(kNegHalf, vt0_0);
-    const __m256 vt4_1 = _mm256_mul_ps(kNegHalf, vt0_1);
+    const __m256 vt3_0 = _mm256_fmsub_ps(vx0, vt1_0, vthree);
+    const __m256 vt3_1 = _mm256_fmsub_ps(vx1, vt1_1, vthree);
+    const __m256 vt4_0 = _mm256_mul_ps(vneg_half, vt0_0);
+    const __m256 vt4_1 = _mm256_mul_ps(vneg_half, vt0_1);
     const __m256 vy0 = _mm256_mul_ps(vt3_0, vt4_0);
     const __m256 vy1 = _mm256_mul_ps(vt3_1, vt4_1);
 
@@ -81,8 +81,8 @@ void xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16(
 
     // Do a single Newton-Raphson step as described above.
     const __m256 vt1 = _mm256_mul_ps(vt0, vt0);
-    const __m256 vt3 = _mm256_fmsub_ps(vx, vt1, kThree);
-    const __m256 vt4 = _mm256_mul_ps(kNegHalf, vt0);
+    const __m256 vt3 = _mm256_fmsub_ps(vx, vt1, vthree);
+    const __m256 vt4 = _mm256_mul_ps(vneg_half, vt0);
     const __m256 vy = _mm256_mul_ps(vt3, vt4);
 
     _mm256_storeu_ps(output, vy);
@@ -100,8 +100,8 @@ void xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16(
 
     // Do a single Newton-Raphson step as described above.
     const __m256 vt1 = _mm256_mul_ps(vt0, vt0);
-    const __m256 vt3 = _mm256_fmsub_ps(vx, vt1, kThree);
-    const __m256 vt4 = _mm256_mul_ps(kNegHalf, vt0);
+    const __m256 vt3 = _mm256_fmsub_ps(vx, vt1, vthree);
+    const __m256 vt4 = _mm256_mul_ps(vneg_half, vt0);
     __m256 vy = _mm256_mul_ps(vt3, vt4);
 
     __m128 vy_lo = _mm256_castps256_ps128(vy);

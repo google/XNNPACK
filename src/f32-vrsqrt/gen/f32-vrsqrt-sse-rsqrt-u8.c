@@ -44,8 +44,8 @@ void xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8(
   assert(output != NULL);
 
   // Constants for the Newton-Raphson iteration.
-  const __m128 kThree = _mm_load_ps(params->sse.three);
-  const __m128 kHalf = _mm_load_ps(params->sse.half);
+  const __m128 vthree = _mm_load_ps(params->sse.three);
+  const __m128 vhalf = _mm_load_ps(params->sse.half);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m128 vx0123 = _mm_loadu_ps(input);
@@ -61,10 +61,10 @@ void xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8(
     const __m128 vt1_4567 = _mm_mul_ps(vt0_4567, vt0_4567);
     const __m128 vt2_0123 = _mm_mul_ps(vx0123, vt1_0123);
     const __m128 vt2_4567 = _mm_mul_ps(vx4567, vt1_4567);
-    const __m128 vt3_0123 = _mm_sub_ps(kThree, vt2_0123);
-    const __m128 vt3_4567 = _mm_sub_ps(kThree, vt2_4567);
-    const __m128 vt4_0123 = _mm_mul_ps(kHalf, vt0_0123);
-    const __m128 vt4_4567 = _mm_mul_ps(kHalf, vt0_4567);
+    const __m128 vt3_0123 = _mm_sub_ps(vthree, vt2_0123);
+    const __m128 vt3_4567 = _mm_sub_ps(vthree, vt2_4567);
+    const __m128 vt4_0123 = _mm_mul_ps(vhalf, vt0_0123);
+    const __m128 vt4_4567 = _mm_mul_ps(vhalf, vt0_4567);
     const __m128 vy0123 = _mm_mul_ps(vt3_0123, vt4_0123);
     const __m128 vy4567 = _mm_mul_ps(vt3_4567, vt4_4567);
 
@@ -83,8 +83,8 @@ void xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8(
     // Do a single Newton-Raphson step as described above.
     const __m128 vt1 = _mm_mul_ps(vt0, vt0);
     const __m128 vt2 = _mm_mul_ps(vx, vt1);
-    const __m128 vt3 = _mm_sub_ps(kThree, vt2);
-    const __m128 vt4 = _mm_mul_ps(kHalf, vt0);
+    const __m128 vt3 = _mm_sub_ps(vthree, vt2);
+    const __m128 vt4 = _mm_mul_ps(vhalf, vt0);
     const __m128 vy = _mm_mul_ps(vt3, vt4);
 
     _mm_storeu_ps(output, vy);
@@ -99,8 +99,8 @@ void xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8(
     // Do a single Newton-Raphson step as described above.
     const __m128 vt1 = _mm_mul_ps(vt0, vt0);
     const __m128 vt2 = _mm_mul_ps(vx, vt1);
-    const __m128 vt3 = _mm_sub_ps(kThree, vt2);
-    const __m128 vt4 = _mm_mul_ps(kHalf, vt0);
+    const __m128 vt3 = _mm_sub_ps(vthree, vt2);
+    const __m128 vt4 = _mm_mul_ps(vhalf, vt0);
     __m128 vy = _mm_mul_ps(vt3, vt4);
 
     if (batch & (2 * sizeof(float))) {

@@ -43,8 +43,8 @@ void xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u16(
   assert(output != NULL);
 
   // Constants for the Newton-Raphson iteration.
-  const __m512 kThree = _mm512_load_ps(params->avx512.three);
-  const __m512 kNegHalf = _mm512_load_ps(params->avx512.neg_half);
+  const __m512 vthree = _mm512_load_ps(params->avx512.three);
+  const __m512 vneg_half = _mm512_load_ps(params->avx512.neg_half);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m512 vx = _mm512_loadu_ps(input);
@@ -55,8 +55,8 @@ void xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u16(
 
     // Do a single Newton-Raphson step as described above.
     const __m512 vt1 = _mm512_mul_ps(vt0, vt0);
-    const __m512 vt3 = _mm512_fmsub_ps(vx, vt1, kThree);
-    const __m512 vt4 = _mm512_mul_ps(kNegHalf, vt0);
+    const __m512 vt3 = _mm512_fmsub_ps(vx, vt1, vthree);
+    const __m512 vt4 = _mm512_mul_ps(vneg_half, vt0);
     const __m512 vy = _mm512_mul_ps(vt3, vt4);
 
     _mm512_storeu_ps(output, vy);
@@ -75,8 +75,8 @@ void xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u16(
 
     // Do a single Newton-Raphson step as described above.
     const __m512 vt1 = _mm512_mul_ps(vt0, vt0);
-    const __m512 vt3 = _mm512_fmsub_ps(vx, vt1, kThree);
-    const __m512 vt4 = _mm512_mul_ps(kNegHalf, vt0);
+    const __m512 vt3 = _mm512_fmsub_ps(vx, vt1, vthree);
+    const __m512 vt4 = _mm512_mul_ps(vneg_half, vt0);
     __m512 vy = _mm512_mul_ps(vt3, vt4);
 
     _mm512_mask_storeu_ps(output, vmask, vy);

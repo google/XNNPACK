@@ -44,8 +44,8 @@ void xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4(
   assert(output != NULL);
 
   // Constants for the Newton-Raphson iteration.
-  const __m128 kThree = _mm_load_ps(params->sse.three);
-  const __m128 kHalf = _mm_load_ps(params->sse.half);
+  const __m128 vthree = _mm_load_ps(params->sse.three);
+  const __m128 vhalf = _mm_load_ps(params->sse.half);
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const __m128 vx = _mm_loadu_ps(input);
@@ -57,8 +57,8 @@ void xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4(
     // Do a single Newton-Raphson step as described above.
     const __m128 vt1 = _mm_mul_ps(vt0, vt0);
     const __m128 vt2 = _mm_mul_ps(vx, vt1);
-    const __m128 vt3 = _mm_sub_ps(kThree, vt2);
-    const __m128 vt4 = _mm_mul_ps(kHalf, vt0);
+    const __m128 vt3 = _mm_sub_ps(vthree, vt2);
+    const __m128 vt4 = _mm_mul_ps(vhalf, vt0);
     const __m128 vy = _mm_mul_ps(vt3, vt4);
 
     _mm_storeu_ps(output, vy);
@@ -73,8 +73,8 @@ void xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4(
     // Do a single Newton-Raphson step as described above.
     const __m128 vt1 = _mm_mul_ps(vt0, vt0);
     const __m128 vt2 = _mm_mul_ps(vx, vt1);
-    const __m128 vt3 = _mm_sub_ps(kThree, vt2);
-    const __m128 vt4 = _mm_mul_ps(kHalf, vt0);
+    const __m128 vt3 = _mm_sub_ps(vthree, vt2);
+    const __m128 vt4 = _mm_mul_ps(vhalf, vt0);
     __m128 vy = _mm_mul_ps(vt3, vt4);
 
     if (batch & (2 * sizeof(float))) {
