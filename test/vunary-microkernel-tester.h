@@ -479,7 +479,8 @@ class VUnaryMicrokernelTester {
             xnn_init_f32_sqrt_params_fn init_params = nullptr) const {
     TestFP32(
         vsqrt, InitParamsWrapper(init_params),
-        [](float x) { return std::sqrt(x); }, TolExact, 0.0f, 10.0f);
+        [](float x) { return std::sqrt(x); },
+        TolRelative(3 * std::numeric_limits<float>::epsilon()), 0.0f, 10.0f);
   }
 
   void Test(xnn_f32_vrsqrt_ukernel_fn vrsqrt,

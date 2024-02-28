@@ -2722,13 +2722,23 @@ union xnn_f32_sqrt_params {
   char _; // Dummy member variable to comply with the C standard
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
+    XNN_ALIGN(16) float three[4];
+    XNN_ALIGN(16) float half[4];
+  } sse;
+  struct {
+    XNN_ALIGN(32) float three[8];
+    XNN_ALIGN(32) float half[8];
     int32_t mask_table[14];
   } avx;
   struct {
+    XNN_ALIGN(32) float three[8];
+    XNN_ALIGN(32) float neg_half[8];
     XNN_ALIGN(32) float half[8];
     int32_t mask_table[14];
   } fma;
   struct {
+    XNN_ALIGN(64) float three[16];
+    XNN_ALIGN(64) float neg_half[16];
     float half;
   } avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

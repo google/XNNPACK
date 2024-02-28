@@ -5,19 +5,18 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+#include <xnnpack.h>
 
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
+#include <limits>
 #include <random>
 #include <vector>
 
+#include <gtest/gtest.h>
 #include <fp16/fp16.h>
-
-#include <xnnpack.h>
-
 
 class SquareRootOperatorTester {
  public:
@@ -174,9 +173,13 @@ class SquareRootOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
-            << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels()
-            << ", input " << input[i * input_stride() + c];
+          const float y_ref = output_ref[i * channels() + c];
+          EXPECT_NEAR(
+              y_ref, output[i * output_stride() + c],
+              std::abs(y_ref) * 3 * std::numeric_limits<float>::epsilon())
+              << "at batch " << i << " / " << batch_size() << ", channel " << c
+              << " / " << channels() << ", input "
+              << input[i * input_stride() + c];
         }
       }
     }
@@ -219,9 +222,13 @@ class SquareRootOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
-            << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels()
-            << ", input " << input[i * input_stride() + c];
+          const float y_ref = output_ref[i * channels() + c];
+          EXPECT_NEAR(
+              y_ref, output[i * output_stride() + c],
+              std::abs(y_ref) * 3 * std::numeric_limits<float>::epsilon())
+              << "at batch " << i << " / " << batch_size() << ", channel " << c
+              << " / " << channels() << ", input "
+              << input[i * input_stride() + c];
         }
       }
     }

@@ -38,6 +38,10 @@ tools/xngen src/f32-vsqrt/sse-sqrt.c.in -D BATCH_TILE=4  -o src/f32-vsqrt/gen/f3
 tools/xngen src/f32-vsqrt/sse-sqrt.c.in -D BATCH_TILE=8  -o src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u8.c &
 tools/xngen src/f32-vsqrt/sse-sqrt.c.in -D BATCH_TILE=16 -o src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u16.c &
 
+for b in 8 16 24 32 40 48 56 64; do
+  tools/xngen src/f32-vsqrt/sse-rsqrt.c.in -D BATCH_TILE=${b} -o src/f32-vsqrt/gen/f32-vsqrt-sse-rsqrt-u${b}.c &
+done
+
 ################################# x86 256-bit #################################
 tools/xngen src/f32-vsqrt/avx-sqrt.c.in -D BATCH_TILE=8  -o src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt-u8.c &
 tools/xngen src/f32-vsqrt/avx-sqrt.c.in -D BATCH_TILE=16 -o src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt-u16.c &
@@ -47,9 +51,18 @@ tools/xngen src/f32-vsqrt/fma3-nr1fma1adj.c.in -D BATCH_TILE=8  -o src/f32-vsqrt
 tools/xngen src/f32-vsqrt/fma3-nr1fma1adj.c.in -D BATCH_TILE=16 -o src/f32-vsqrt/gen/f32-vsqrt-fma3-nr1fma1adj-u16.c &
 tools/xngen src/f32-vsqrt/fma3-nr1fma1adj.c.in -D BATCH_TILE=32 -o src/f32-vsqrt/gen/f32-vsqrt-fma3-nr1fma1adj-u32.c &
 
+for b in 8 16 24 32 40 48 56 64; do
+  tools/xngen src/f32-vsqrt/avx-rsqrt.c.in -D BATCH_TILE=${b} -o src/f32-vsqrt/gen/f32-vsqrt-avx-rsqrt-u${b}.c &
+  tools/xngen src/f32-vsqrt/fma3-rsqrt.c.in -D BATCH_TILE=${b} -o src/f32-vsqrt/gen/f32-vsqrt-fma3-rsqrt-u${b}.c &
+done
+
 ################################# x86 512-bit #################################
 tools/xngen src/f32-vsqrt/avx512f-nr1fma1adj.c.in -D BATCH_TILE=16  -o src/f32-vsqrt/gen/f32-vsqrt-avx512f-nr1fma1adj-u16.c &
 tools/xngen src/f32-vsqrt/avx512f-nr1fma1adj.c.in -D BATCH_TILE=32  -o src/f32-vsqrt/gen/f32-vsqrt-avx512f-nr1fma1adj-u32.c &
 tools/xngen src/f32-vsqrt/avx512f-nr1fma1adj.c.in -D BATCH_TILE=64  -o src/f32-vsqrt/gen/f32-vsqrt-avx512f-nr1fma1adj-u64.c &
+
+for b in 16 32 48 64 80 96 112 128; do
+  tools/xngen src/f32-vsqrt/avx512f-rsqrt.c.in -D BATCH_TILE=${b} -o src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt-u${b}.c &
+done
 
 wait
