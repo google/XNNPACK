@@ -319,7 +319,7 @@ TEST_F(MeanTestF32, matches_operator_api)
   }
 }
 
-TEST_F(MeanTestF32, reshape_output_no_reduce_dims)
+TEST_F(MeanTestF32, reshape_output_keep_dims)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -345,7 +345,7 @@ TEST_F(MeanTestF32, reshape_output_no_reduce_dims)
       subgraph,
       reduction_axes.size(), reduction_axes.data(),
       input_id, output_id,
-      /*flags=*/0));
+      /*flags=*/XNN_FLAG_KEEP_DIMS));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -401,7 +401,7 @@ TEST_F(MeanTestF32, reshape_output_no_reduce_dims)
   }
 }
 
-TEST_F(MeanTestF32, reshape_output_reduce_dims)
+TEST_F(MeanTestF32, reshape_output_no_keep_dims)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -427,7 +427,7 @@ TEST_F(MeanTestF32, reshape_output_reduce_dims)
       subgraph,
       reduction_axes.size(), reduction_axes.data(),
       input_id, output_id,
-      /*flags=*/XNN_FLAG_REDUCE_DIMS));
+      /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
