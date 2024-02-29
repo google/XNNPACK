@@ -289,9 +289,9 @@ TEST_F(Unpooling2DTestX32, reshape_output)
   input_index_dims[3] += 1;
 
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, 0, input_value_dims.size(), input_value_dims.data()));
+    xnn_status_success, xnn_reshape_external_input(runtime, 0, input_value_dims.size(), input_value_dims.data()));
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, 1, input_index_dims.size(), input_index_dims.data()));
+    xnn_status_success, xnn_reshape_external_input(runtime, 1, input_index_dims.size(), input_index_dims.data()));
 
   ASSERT_EQ(
     node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr),

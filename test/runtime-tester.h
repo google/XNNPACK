@@ -99,7 +99,7 @@ class RuntimeTester : public SubgraphTester {
   }
 
   inline void ReshapeInput(const std::vector<size_t>& dims, uint32_t external_id) {
-    xnn_status status = xnn_reshape_external_value(Runtime(), external_id, dims.size(), dims.data());
+    xnn_status status = xnn_reshape_external_input(Runtime(), external_id, dims.size(), dims.data());
     EXPECT_EQ(status, xnn_status_success);
     size_t num_elements = NumElements(dims);
     auto input = std::vector<char>(num_elements * sizeof(float) + XNN_EXTRA_BYTES * sizeof(char));

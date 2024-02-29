@@ -590,7 +590,7 @@ TEST_F(GlobalAveragePooling2DTestF32, reshape_output_no_keep_dims)
 
   input_dims[0] += 2;
   input_dims[num_input_dims - 1] += 3;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, input_dims.size(), input_dims.data()));
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   for (size_t i = 0; i < num_batch_dims; ++i) {
     ASSERT_EQ(output_shape->dim[i], input_dims[i]);
@@ -599,7 +599,7 @@ TEST_F(GlobalAveragePooling2DTestF32, reshape_output_no_keep_dims)
 
   input_dims[0] -= 2;
   input_dims[num_input_dims - 1] -= 3;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, input_dims.size(), input_dims.data()));
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
   for (size_t i = 0; i < num_batch_dims; ++i) {
     ASSERT_EQ(output_shape->dim[i], input_dims[i]);
@@ -656,7 +656,7 @@ TEST_F(GlobalAveragePooling2DTestF32, reshape_output_keep_dims)
   input_dims[0] += 2;
   input_dims[num_input_dims - 1] += 3;
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, input_dims.size(), input_dims.data()));
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   for (size_t i = 0; i < num_batch_dims; ++i) {
     ASSERT_EQ(output_shape->dim[i], input_dims[i]);
@@ -668,7 +668,7 @@ TEST_F(GlobalAveragePooling2DTestF32, reshape_output_keep_dims)
 
   input_dims[0] -= 2;
   input_dims[num_input_dims - 1] -= 3;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, input_dims.size(), input_dims.data()));
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
   for (size_t i = 0; i < num_batch_dims; ++i) {
     ASSERT_EQ(output_shape->dim[i], input_dims[i]);

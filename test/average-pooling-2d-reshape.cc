@@ -75,7 +75,7 @@ TEST(AveragePooling2DTestF32, Reshape)
 
   dims[0] = 7;
   dims[3] = 9;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, 0, dims.size(), dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, 0, dims.size(), dims.data()));
 
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
@@ -141,7 +141,7 @@ TEST(AveragePooling2DTestF32, ReshapeWithPadding)
   dims[1] = 2;
   dims[2] = 8;
   dims[3] = 17;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, 0, dims.size(), dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, 0, dims.size(), dims.data()));
 
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;

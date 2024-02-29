@@ -2906,7 +2906,7 @@ TEST_F(FullyConnectedTestF32, reshape)
     new_input_dims[i] = input_dims[i] - 1;
   }
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, new_input_dims.size(), new_input_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, new_input_dims.size(), new_input_dims.data()));
 
   ASSERT_EQ(xnn_status_success, node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, nullptr /*threadpool*/));
 
@@ -2921,7 +2921,7 @@ TEST_F(FullyConnectedTestF32, reshape)
     new_input_dims[i] = input_dims[i] + 1;
   }
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, new_input_dims.size(), new_input_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, new_input_dims.size(), new_input_dims.data()));
 
   ASSERT_EQ(xnn_status_reallocation_required, node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, nullptr /*threadpool*/));
 

@@ -746,15 +746,15 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_no_r
   // Reshape the external tensors to the subgraph with the same shape as the ones used in the
   // operator API, which are smaller than the ones supplied at subgraph creation time.
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, query_id, op_query_dims.size(), op_query_dims.data()));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, key_id, op_key_dims.size(), op_key_dims.data()));
+    xnn_status_success, xnn_reshape_external_input(runtime, query_id, op_query_dims.size(), op_query_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, key_id, op_key_dims.size(), op_key_dims.data()));
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, value_id, op_value_dims.size(), op_value_dims.data()));
+    xnn_status_success, xnn_reshape_external_input(runtime, value_id, op_value_dims.size(), op_value_dims.data()));
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, scale_id, op_scale_dims.size(), op_scale_dims.data()));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, mask_id, op_mask_dims.size(), op_mask_dims.data()));
+    xnn_status_success, xnn_reshape_external_input(runtime, scale_id, op_scale_dims.size(), op_scale_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, mask_id, op_mask_dims.size(), op_mask_dims.data()));
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, output_id, op_output_dims.size(), op_output_dims.data()));
+    xnn_status_success, xnn_reshape_external_input(runtime, output_id, op_output_dims.size(), op_output_dims.data()));
 
   // Resize again to remove those extra elements we added earlier
   ResizeTensors(
@@ -946,15 +946,15 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_requ
   // Reshape the external tensors to the subgraph with the same shape as the ones used in the
   // operator API, which are larger than the ones supplied at subgraph creation time.
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, query_id, op_query_dims.size(), op_query_dims.data()));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, key_id, op_key_dims.size(), op_key_dims.data()));
+    xnn_status_success, xnn_reshape_external_input(runtime, query_id, op_query_dims.size(), op_query_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, key_id, op_key_dims.size(), op_key_dims.data()));
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, value_id, op_value_dims.size(), op_value_dims.data()));
+    xnn_status_success, xnn_reshape_external_input(runtime, value_id, op_value_dims.size(), op_value_dims.data()));
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, scale_id, op_scale_dims.size(), op_scale_dims.data()));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, mask_id, op_mask_dims.size(), op_mask_dims.data()));
+    xnn_status_success, xnn_reshape_external_input(runtime, scale_id, op_scale_dims.size(), op_scale_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, mask_id, op_mask_dims.size(), op_mask_dims.data()));
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, output_id, op_output_dims.size(), op_output_dims.data()));
+    xnn_status_success, xnn_reshape_external_input(runtime, output_id, op_output_dims.size(), op_output_dims.data()));
 
   // We will need more memory to run with the larger shape.
   ASSERT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));

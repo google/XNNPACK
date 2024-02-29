@@ -579,7 +579,7 @@ TEST_F(StaticConstantPadTestF32, reshape_output)
 
   if (!dims.empty()) {
     dims[0] += 2;
-    ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, dims.size(), dims.data()));
+    ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, dims.size(), dims.data()));
     ASSERT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));
     const struct xnn_node* node = &subgraph->nodes[0];
     const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
@@ -588,7 +588,7 @@ TEST_F(StaticConstantPadTestF32, reshape_output)
     }
 
     dims[0] -= 1;
-    ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, dims.size(), dims.data()));
+    ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, dims.size(), dims.data()));
     ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
     for (size_t i = 0; i < output_shape->num_dims; ++i) {
       ASSERT_EQ(output_shape->dim[i], dims[i] + pre_paddings[i] + post_paddings[i]);

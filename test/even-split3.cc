@@ -802,7 +802,7 @@ TEST_F(EvenSplit3TestF32, reshape_output)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   input_dims[axis] += 3;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, input_dims.size(), input_dims.data()));
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   for (size_t i = 0; i < 3; ++i) {
@@ -815,7 +815,7 @@ TEST_F(EvenSplit3TestF32, reshape_output)
   }
 
   input_dims[axis] -= 6;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, input_dims.size(), input_dims.data()));
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
   for (size_t i = 0; i < 3; ++i) {
     const xnn_shape* output_n_shape = &runtime->values[node->outputs[i]].shape;

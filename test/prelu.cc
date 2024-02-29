@@ -350,7 +350,7 @@ TEST_F(PreluTestF32, reshape_output)
   input_dims[1] += 2;
   input_dims[2] += 2;
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, input_dims.size(), input_dims.data()));
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
@@ -359,7 +359,7 @@ TEST_F(PreluTestF32, reshape_output)
   }
 
   input_dims[1] -= 1;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, input_dims.size(), input_dims.data()));
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
   for (size_t i = 0; i < input_dims.size(); ++i) {
     ASSERT_EQ(input_dims[i], output_shape->dim[i]);

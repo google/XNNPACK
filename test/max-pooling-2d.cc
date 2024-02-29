@@ -661,7 +661,7 @@ TEST_F(MaxPooling2DTestF32, Reshape)
   input_dims[1] += 1;
   input_dims[2] += 1;
   input_dims[3] += 1;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, 0, input_dims.size(), input_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, 0, input_dims.size(), input_dims.data()));
 
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
@@ -734,7 +734,7 @@ TEST_F(MaxPooling2DTestF32, ReshapeWithPadding)
   input_dims[1] = 2;
   input_dims[2] = 8;
   input_dims[3] = 17;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, 0, input_dims.size(), input_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, 0, input_dims.size(), input_dims.data()));
 
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
@@ -806,7 +806,7 @@ TEST_F(MaxPooling2DTestF32, ReshapeWithPaddingAndDilation)
   input_dims[1] = 2;
   input_dims[2] = 8;
   input_dims[3] = 17;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, 0, input_dims.size(), input_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, 0, input_dims.size(), input_dims.data()));
 
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
   const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;

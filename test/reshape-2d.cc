@@ -442,7 +442,7 @@ TEST_F(Reshape2dTestF32, reshape_output) {
   input_dims[0] += 2;
   input_dims[3] += 10;
   ASSERT_EQ(xnn_status_success,
-            xnn_reshape_external_value(runtime, input_id, input_dims.size(),
+            xnn_reshape_external_input(runtime, input_id, input_dims.size(),
                                        input_dims.data()));
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values,
@@ -456,7 +456,7 @@ TEST_F(Reshape2dTestF32, reshape_output) {
   // Change the input shape (make it a bit smaller again).
   input_dims[0] -= 1;
   ASSERT_EQ(xnn_status_success,
-            xnn_reshape_external_value(runtime, input_id, input_dims.size(),
+            xnn_reshape_external_input(runtime, input_id, input_dims.size(),
                                        input_dims.data()));
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values,
                           runtime->num_values, /*threadpool=*/nullptr),

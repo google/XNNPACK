@@ -361,7 +361,7 @@ TEST_F(MeanTestF32, reshape_output_keep_dims)
 
   input_shape[0] += 2;
   input_shape[1] += 4;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_shape.size(), input_shape.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, input_shape.size(), input_shape.data()));
   const struct xnn_node* node = &subgraph->nodes[0];
   std::vector<size_t> unique_reduction_axes = reduction_axes;
   std::sort(unique_reduction_axes.begin(), unique_reduction_axes.end());
@@ -385,7 +385,7 @@ TEST_F(MeanTestF32, reshape_output_keep_dims)
   }
 
   input_shape[0] -= 1;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_shape.size(), input_shape.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, input_shape.size(), input_shape.data()));
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
   current_axes = 0;
   for (size_t i = 0; i < output_shape->num_dims; ++i) {
@@ -443,7 +443,7 @@ TEST_F(MeanTestF32, reshape_output_no_keep_dims)
 
   input_shape[0] += 2;
   input_shape[1] += 4;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_shape.size(), input_shape.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, input_shape.size(), input_shape.data()));
   const struct xnn_node* node = &subgraph->nodes[0];
   std::vector<size_t> unique_reduction_axes = reduction_axes;
   std::sort(unique_reduction_axes.begin(), unique_reduction_axes.end());
@@ -468,7 +468,7 @@ TEST_F(MeanTestF32, reshape_output_no_keep_dims)
   }
 
   input_shape[0] -= 1;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_shape.size(), input_shape.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_input(runtime, input_id, input_shape.size(), input_shape.data()));
   ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
   current_axes = 0;
   current_dim = 0;
