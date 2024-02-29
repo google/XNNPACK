@@ -213,7 +213,10 @@ static enum xnn_status reshape_global_average_pooling_operator(
   struct xnn_value* output_value = values + output_id;
 
   memcpy(&output_value->shape.dim[0], &values[input_id].shape.dim[0], num_batch_dims);
-  if (opdata->operator_objects[0]->flags & XNN_FLAG_KEEP_DIMS) {
+  if (opdata->operator_objects[0]->flags & XNN_FLAG_REDUCE_DIMS) {
+    output_value->shape.dim[num_batch_dims] = channel_dim;
+    output_value->shape.num_dims = num_batch_dims + 1;
+  } else {
     output_value->shape.num_dims = num_input_dims;
     output_value->shape.dim[num_input_dims - 1] = channel_dim;
     switch (opdata->type) {
@@ -227,9 +230,6 @@ static enum xnn_status reshape_global_average_pooling_operator(
       default:
         XNN_UNREACHABLE;
     }
-  } else {
-    output_value->shape.dim[num_batch_dims] = channel_dim;
-    output_value->shape.num_dims = num_batch_dims + 1;
   }
   const size_t new_size = xnn_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {

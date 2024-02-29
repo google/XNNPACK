@@ -98,23 +98,7 @@ static enum xnn_status reshape_mean_operator(
   struct xnn_value* output_value = values + output_id;
   size_t input_num_dims = input_value->shape.num_dims;
   size_t num_reduction_axes = opdata->num_reduction_axes;
-  if (opdata->operator_objects[0]->flags & XNN_FLAG_KEEP_DIMS) {
-    output_value->shape.num_dims = input_value->shape.num_dims;
-    for (size_t idx = 0; idx < input_num_dims; ++idx) {
-      bool is_axis = false;
-      for (size_t axis_idx = 0; axis_idx < num_reduction_axes; ++axis_idx) {
-        if (opdata->reduction_axes[axis_idx] == idx) {
-          is_axis = true;
-          break;
-        }
-      }
-      if (is_axis) {
-        output_value->shape.dim[idx] = 1;
-      } else {
-        output_value->shape.dim[idx] = input_value->shape.dim[idx];
-      }
-    }
-  } else {
+  if (opdata->operator_objects[0]->flags & XNN_FLAG_REDUCE_DIMS) {
     size_t num_skip_axis = 0;
     for (size_t idx = 0; idx < input_num_dims; ++idx) {
       bool is_axis = false;
@@ -130,6 +114,22 @@ static enum xnn_status reshape_mean_operator(
       }
     }
     output_value->shape.num_dims = input_value->shape.num_dims - num_skip_axis;
+  } else {
+    output_value->shape.num_dims = input_value->shape.num_dims;
+    for (size_t idx = 0; idx < input_num_dims; ++idx) {
+      bool is_axis = false;
+      for (size_t axis_idx = 0; axis_idx < num_reduction_axes; ++axis_idx) {
+        if (opdata->reduction_axes[axis_idx] == idx) {
+          is_axis = true;
+          break;
+        }
+      }
+      if (is_axis) {
+        output_value->shape.dim[idx] = 1;
+      } else {
+        output_value->shape.dim[idx] = input_value->shape.dim[idx];
+      }
+    }
   }
   const size_t new_size = xnn_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
