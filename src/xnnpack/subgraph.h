@@ -36,6 +36,15 @@
 extern "C" {
 #endif
 
+#ifdef XNN_SLINKY_ENABLED
+struct xnn_value;
+struct slinky_pipeline;
+typedef struct slinky_pipeline* slinky_pipeline_t;
+slinky_pipeline_t xnn_runtime_to_slinky_pipeline(xnn_runtime_t runtime);
+void destroy_slinky_pipeline(slinky_pipeline_t pipeline);
+enum xnn_status evaluate(slinky_pipeline_t p, struct xnn_value* const* input_values, size_t num_inputs, struct xnn_value* const* output_values, size_t num_outputs);
+#endif
+
 struct xnn_shape {
   size_t num_dims;
   // Currently inferred dimensions.
@@ -486,6 +495,14 @@ struct xnn_runtime {
   // workspace changes.
   bool has_been_setup;
   bool memory_planned;
+
+#ifdef XNN_SLINKY_ENABLED
+  slinky_pipeline_t slinky_pipeline;
+  size_t num_inputs;
+  size_t num_outputs;
+  struct xnn_value* input_values[XNN_MAX_OPERATOR_OBJECTS];
+  struct xnn_value* output_values[XNN_MAX_OPERATOR_OBJECTS];
+#endif
 };
 
 struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph);

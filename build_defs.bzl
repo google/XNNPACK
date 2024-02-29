@@ -58,6 +58,15 @@ def xnnpack_optional_dnnl_deps():
     """Optional Intel DNNL dependencies."""
     return []
 
+def xnnpack_slinky_srcs():
+    return []
+
+def xnnpack_slinky_deps():
+    return []
+
+def xnnpack_slinky_defines():
+    return []
+
 def xnnpack_cc_library(
         name,
         srcs = [],
