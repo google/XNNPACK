@@ -3120,6 +3120,9 @@ xnnpack_aggregate_library(
     }) + select({
         ":avxvnni_enabled": [":avxvnni_prod_microkernels"],
         "//conditions:default": [],
+    }) + select({
+        ":avx512amx_enabled": [":avx512amx_prod_microkernels"],
+        "//conditions:default": [],
     }),
     wasm_deps = [
         ":wasm_prod_microkernels",
@@ -3147,7 +3150,6 @@ xnnpack_aggregate_library(
         ":avx512vbmi_prod_microkernels",
         ":avx512vnni_prod_microkernels",
         ":avx512vnnigfni_prod_microkernels",
-        ":avx512amx_prod_microkernels",
     ],
 )
 
