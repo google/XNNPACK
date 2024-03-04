@@ -249,7 +249,7 @@ struct xnn_node {
   /// Static parameters of the operator node.
   union {
     struct {
-      size_t axis;
+      int32_t axis;
     } concatenate;
     struct {
       uint32_t input_padding_top;
@@ -301,7 +301,7 @@ struct xnn_node {
       uint32_t block_size;
     } depth_to_space_2d;
     struct {
-      size_t axis;
+      int32_t axis;
     } even_split;
     struct {
       uint32_t padding_top;
@@ -427,7 +427,7 @@ struct xnn_operator_data {
       size_t reshape_dims[XNN_MAX_TENSOR_DIMS];
     };
     // Used for concatenate.
-    size_t axis;
+    int32_t axis;
     // Used for static constant pad.
     struct {
       size_t post_paddings[XNN_MAX_TENSOR_DIMS];
