@@ -151,13 +151,6 @@ enum xnn_status xnn_define_softmax(
     return status;
   }
 
-  if (input_value->shape.num_dims < 1) {
-    xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 ": number of dimensions must be at least 1",
-      xnn_node_type_to_string(xnn_node_type_softmax), input_id);
-    return xnn_status_invalid_parameter;
-  }
-
   switch (input_value->datatype) {
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
