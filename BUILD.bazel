@@ -265,6 +265,9 @@ xnnpack_cc_library(
     }) + select({
         ":avxvnni_enabled": ["-DXNN_ENABLE_AVXVNNI=1"],
         "//conditions:default": ["-DXNN_ENABLE_AVXVNNI=0"],
+    }) + select({
+        ":avx512amx_enabled": ["-DXNN_ENABLE_AVX512AMX=1"],
+        "//conditions:default": ["-DXNN_ENABLE_AVX512AMX=0"],
     }),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -349,6 +352,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":enable_assembly",
+        ":enable_avx512amx",
         ":enable_avxvnni",
         ":enable_dwconv_multipass",
         ":enable_gemm_m_specialization",
@@ -3355,6 +3359,15 @@ cc_library(
     defines = select({
         ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
         "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
+    }),
+    visibility = xnnpack_visibility(),
+)
+
+cc_library(
+    name = "enable_avx512amx",
+    defines = select({
+        ":avx512amx_enabled": ["XNN_ENABLE_AVX512AMX=1"],
+        "//conditions:default": ["XNN_ENABLE_AVX512AMX=0"],
     }),
     visibility = xnnpack_visibility(),
 )
