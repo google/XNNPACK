@@ -3610,6 +3610,7 @@ xnnpack_unit_test(
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
         "//:common",
+        "//:math",
         "//:node_type",
         "//:operators_test_mode",
         "//:requantization",

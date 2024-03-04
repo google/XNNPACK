@@ -5,6 +5,7 @@
 
 #include <algorithm>  // For std::generate, std::min.
 #include <array>      // For std::array.
+#include <cassert>    // For std::cassert.
 #include <cmath>      // For std::lrintf.
 #include <cstddef>    // For size_t.
 #include <cstdint>    // For uint32_t.
@@ -19,6 +20,7 @@
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/requantization.h>
