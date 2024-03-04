@@ -1212,7 +1212,8 @@ enum xnn_status xnn_define_static_mean(
 /// The 2-Input Concatenate Node concatenates two tensors along a specified axis.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param axis - the axis to concatenate the two input tensors along
+/// @param axis - the axis to concatenate the two input tensors along. If this is less than zero, the number of
+///               dimensions is added to it.
 /// @param input1_id - Value ID for the first input tensor. The input tensor must be an N-dimensional tensor defined in
 ///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
 ///                    second input.
@@ -1225,7 +1226,7 @@ enum xnn_status xnn_define_static_mean(
 /// @param flags - binary features of the Concatenate Node. No supported flags are currently defined.
 enum xnn_status xnn_define_concatenate2(
   xnn_subgraph_t subgraph,
-  size_t axis,
+  int32_t axis,
   uint32_t input1_id,
   uint32_t input2_id,
   uint32_t output_id,
@@ -1236,7 +1237,8 @@ enum xnn_status xnn_define_concatenate2(
 /// The 3-Input Concatenate Node concatenates three tensors along a specified axis.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param axis - the axis to concatenate the three input tensors along
+/// @param axis - the axis to concatenate the two input tensors along. If this is less than zero, the number of
+///               dimensions is added to it.
 /// @param input1_id - Value ID for the first input tensor. The input tensor must be an N-dimensional tensor defined in
 ///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
 ///                    other inputs.
@@ -1252,7 +1254,7 @@ enum xnn_status xnn_define_concatenate2(
 /// @param flags - binary features of the Concatenate Node. No supported flags are currently defined.
 enum xnn_status xnn_define_concatenate3(
   xnn_subgraph_t subgraph,
-  size_t axis,
+  int32_t axis,
   uint32_t input1_id,
   uint32_t input2_id,
   uint32_t input3_id,
@@ -1264,7 +1266,8 @@ enum xnn_status xnn_define_concatenate3(
 /// The 4-Input Concatenate Node concatenates four tensors along a specified axis.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param axis - the axis to concatenate the four input tensors along
+/// @param axis - the axis to concatenate the two input tensors along. If this is less than zero, the number of
+///               dimensions is added to it.
 /// @param input1_id - Value ID for the first input tensor. The input tensor must be an N-dimensional tensor defined in
 ///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
 ///                    other inputs.
@@ -1283,7 +1286,7 @@ enum xnn_status xnn_define_concatenate3(
 /// @param flags - binary features of the Concatenate Node. No supported flags are currently defined.
 enum xnn_status xnn_define_concatenate4(
   xnn_subgraph_t subgraph,
-  size_t axis,
+  int32_t axis,
   uint32_t input1_id,
   uint32_t input2_id,
   uint32_t input3_id,
@@ -1291,9 +1294,34 @@ enum xnn_status xnn_define_concatenate4(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a 5-Input Concatenate Node and add it to a Subgraph.
+///
+/// The 5-Input Concatenate Node concatenates four tensors along a specified axis.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param axis - the axis to concatenate the two input tensors along. If this is less than zero, the number of
+///               dimensions is added to it.
+/// @param input1_id - Value ID for the first input tensor. The input tensor must be an N-dimensional tensor defined in
+///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
+///                    other inputs.
+/// @param input2_id - Value ID for the second input tensor. The input tensor must be an N-dimensional tensor defined in
+///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
+///                    other inputs.
+/// @param input3_id - Value ID for the third input tensor. The input tensor must be an N-dimensional tensor defined in
+///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
+///                    other inputs.
+/// @param input4_id - Value ID for the fourth input tensor. The input tensor must be an N-dimensional tensor defined in
+///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
+///                    other inputs.
+/// @param input5_id - Value ID for the fourth input tensor. The input tensor must be an N-dimensional tensor defined in
+///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
+///                    other inputs.
+/// @param output_id - Value ID for the output tensor. The output tensor must be a N-dimensional tensor defined
+///                    in the @a subgraph with each dimension equal to the dimension of all inputs, except the axis
+///                    dimension, where it is the sum of the corresponding dimensions of all inputs.
 enum xnn_status xnn_define_concatenate5(
   xnn_subgraph_t subgraph,
-  size_t axis,
+  int32_t axis,
   uint32_t input1_id,
   uint32_t input2_id,
   uint32_t input3_id,
@@ -1322,7 +1350,8 @@ enum xnn_status xnn_define_copy(
 /// The 2-Output Split Node splits an input tensor into two output tensors along a specified axis evenly.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param split_dim - the dimension to split the input tensor along
+/// @param split_dim - the dimension to split the input tensor along. If this is less than zero, the number of
+///                    dimensions is added to it.
 /// @param input_id - Value ID for the input tensor. The input tensor must be an N-dimensional tensor defined in the @a
 ///                   subgraph.
 /// @param output1_id - Value ID for the first output tensor. The output tensor must be an N-dimensional tensor defined
@@ -1334,7 +1363,7 @@ enum xnn_status xnn_define_copy(
 /// @param flags - binary features of the Split Node. No supported flags are currently defined.
 enum xnn_status xnn_define_even_split2(
   xnn_subgraph_t subgraph,
-  size_t split_dim,
+  int32_t split_dim,
   uint32_t input_id,
   uint32_t output1_id,
   uint32_t output2_id,
@@ -1345,7 +1374,8 @@ enum xnn_status xnn_define_even_split2(
 /// The 3-Output Split Node splits an input tensor into three output tensors along a specified axis evenly.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param split_dim - the dimension to split the input tensor along
+/// @param split_dim - the dimension to split the input tensor along. If this is less than zero, the number of
+///                    dimensions is added to it.
 /// @param input_id - Value ID for the input tensor. The input tensor must be an N-dimensional tensor defined in the @a
 ///                   subgraph.
 /// @param output1_id - Value ID for the first output tensor. The output tensor must be an N-dimensional tensor defined
@@ -1362,7 +1392,7 @@ enum xnn_status xnn_define_even_split2(
 /// @param flags - binary features of the Split Node. No supported flags are currently defined.
 enum xnn_status xnn_define_even_split3(
   xnn_subgraph_t subgraph,
-  size_t split_dim,
+  int32_t split_dim,
   uint32_t input_id,
   uint32_t output1_id,
   uint32_t output2_id,
@@ -1374,7 +1404,8 @@ enum xnn_status xnn_define_even_split3(
 /// The 4-Output Split Node splits an input tensor into four output tensors along a specified axis evenly.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param split_dim - the dimension to split the input tensor along
+/// @param split_dim - the dimension to split the input tensor along. If this is less than zero, the number of
+///                    dimensions is added to it.
 /// @param input_id - Value ID for the input tensor. The input tensor must be an N-dimensional tensor defined in the @a
 ///                   subgraph.
 /// @param output1_id - Value ID for the first output tensor. The output tensor must be an N-dimensional tensor defined
@@ -1395,7 +1426,7 @@ enum xnn_status xnn_define_even_split3(
 /// @param flags - binary features of the Split Node. No supported flags are currently defined.
 enum xnn_status xnn_define_even_split4(
   xnn_subgraph_t subgraph,
-  size_t split_dim,
+  int32_t split_dim,
   uint32_t input_id,
   uint32_t output1_id,
   uint32_t output2_id,
