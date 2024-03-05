@@ -20,7 +20,10 @@
 
 static void set_allocation_type(struct xnn_value* value)
 {
-  if (value->data != NULL) {
+   if ((value->flags & XNN_VALUE_FLAG_EXTERNAL_INPUT) != 0 &&
+       (value->flags & XNN_VALUE_FLAG_EXTERNALLY_ALLOCATED) != 0) {
+    value->allocation_type = xnn_allocation_type_external;
+   } else if (value->data != NULL) {
     value->allocation_type = xnn_allocation_type_static;
   } else if ((value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) != 0) {
     value->allocation_type = xnn_allocation_type_external;

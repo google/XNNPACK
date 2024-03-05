@@ -331,10 +331,11 @@ TEST_F(RoPETestF32, reshape_output)
   ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
 
   uint32_t weights_id = XNN_INVALID_NODE_ID;
-  const std::array<size_t, 2> weights_dims{{max_tokens, channels}};
+  const std::array<size_t, 2> weights_dims{{tokens, channels}};
   ASSERT_EQ(xnn_status_success,
     xnn_define_tensor_value(subgraph, xnn_datatype_fp32, weights_dims.size(), weights_dims.data(),
-                            weights.data(), /*external_id=*/1, /*flags=*/0, &weights_id));
+                            weights.data(), /*external_id=*/1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT
+                            | XNN_VALUE_FLAG_EXTERNALLY_ALLOCATED, &weights_id));
 
   uint32_t output_id = XNN_INVALID_NODE_ID;
   const std::array<size_t, 4> output_dims{{batch_size, tokens, heads, channels}};
@@ -353,9 +354,10 @@ TEST_F(RoPETestF32, reshape_output)
 
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
 
-  const std::array<xnn_external_value, 2> external{{
+  const std::array<xnn_external_value, 3> external{{
     xnn_external_value{input_id, input.data()},
-    xnn_external_value{output_id, subgraph_output.data()}
+    xnn_external_value{output_id, subgraph_output.data()},
+    xnn_external_value{weights_id, weights.data()}
   }};
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
 
