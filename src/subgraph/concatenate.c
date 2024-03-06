@@ -248,6 +248,9 @@ static enum xnn_status setup_concatenate_operator_helper(
   // The output pointer of this operator is the sum of all channels of the earlier operators.
   size_t channels = 0;
   for (size_t i = 0; i < index; i++) {
+    if (opdata->operator_objects[i]->state == xnn_run_state_skip) {
+      continue;
+    }
     channels += opdata->operator_objects[i]->channels;
   }
 
