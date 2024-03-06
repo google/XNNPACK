@@ -102,8 +102,10 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
             case ${N}:
               wasm_v128_store(oN, v0_${N});
               oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+              XNN_FALLTHROUGH
           case 1:
             wasm_v128_store(oN, v0_1);
+            XNN_FALLTHROUGH
           case 0:
             wasm_v128_store(o, v0_0);
             o = (uint${SIZE}_t*) ((uintptr_t) o + tile_hbytes);
@@ -194,8 +196,10 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
               case ${N}:
                 wasm_v128_store64_lane(oN, v0_${N}, 0);
                 oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+                XNN_FALLTHROUGH
             case 1:
               wasm_v128_store64_lane(oN, v0_1, 0);
+              XNN_FALLTHROUGH
             case 0:
               wasm_v128_store64_lane(o, v0_0, 0);
               $if NUM_ITERS > 1:
@@ -256,8 +260,10 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
                 case ${N}:
                   wasm_v128_store32_lane(oN, v0_${N}, 0);
                   oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+                  XNN_FALLTHROUGH
               case 1:
                 wasm_v128_store32_lane(oN, v0_1, 0);
+                XNN_FALLTHROUGH
               case 0:
                 wasm_v128_store32_lane(o, v0_0, 0);
                 $if SIZE < 32:

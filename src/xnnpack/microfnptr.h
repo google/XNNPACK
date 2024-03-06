@@ -2534,6 +2534,9 @@ typedef size_t (*xnn_init_f32_lrelu_params_fn)(
   union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float slope);
 
+typedef size_t (*xnn_init_f32_relu_params_fn)(
+  union xnn_f32_relu_params params[XNN_MIN_ELEMENTS(1)]);
+
 typedef size_t (*xnn_init_qs8_lrelu_params_fn)(
   union xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float positive_slope,

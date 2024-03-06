@@ -172,7 +172,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
           $if NR > 16:
             if (nc & 15) {
               // Prepare mask for valid 32-bit elements (depends on nc).
-              const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << (nc & 15)) - UINT32_C(1)));
+              const __mmask16 vmask = _cvtu32_mask16((uint32_t) (UINT32_C(1) << (nc & 15)) - UINT32_C(1));
               $for M in RANGE_MR:
                 _mm512_mask_storeu_ps(c${M}, vmask, vacc${M}x${ABC[0:16]});
             }
@@ -180,7 +180,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
             assert(nc != 0);
             assert(nc < ${NR});
             // Prepare mask for valid 32-bit elements (depends on nc).
-            const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << nc) - UINT32_C(1)));
+            const __mmask16 vmask = _cvtu32_mask16((uint32_t) (UINT32_C(1) << nc) - UINT32_C(1));
             $for M in RANGE_MR:
               _mm512_mask_storeu_ps(c${M}, vmask, vacc${M}x${ABC[0:16]});
       nc = 0;

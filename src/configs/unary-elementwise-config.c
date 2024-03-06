@@ -48,6 +48,7 @@ static struct xnn_unary_elementwise_config f32_rndd_config = {0};
 static struct xnn_unary_elementwise_config f32_rndne_config = {0};
 static struct xnn_unary_elementwise_config f32_rndu_config = {0};
 static struct xnn_unary_elementwise_config f32_rndz_config = {0};
+static struct xnn_unary_elementwise_config f32_rsqrt_config = {0};
 static struct xnn_unary_elementwise_config f32_sigmoid_config = {0};
 static struct xnn_unary_elementwise_config f32_sqr_config = {0};
 static struct xnn_unary_elementwise_config f32_sqrt_config = {0};
@@ -96,6 +97,7 @@ static struct xnn_unary_elementwise_config xx_copy_config = {0};
   static INIT_ONCE init_guard_f32_rndne = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_rndu = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_rndz = INIT_ONCE_STATIC_INIT;
+  static INIT_ONCE init_guard_f32_rsqrt = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_sigmoid = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_sqr = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_sqrt = INIT_ONCE_STATIC_INIT;
@@ -142,6 +144,7 @@ static struct xnn_unary_elementwise_config xx_copy_config = {0};
   static pthread_once_t init_guard_f32_rndne = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_rndu = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_rndz = PTHREAD_ONCE_INIT;
+  static pthread_once_t init_guard_f32_rsqrt = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_sigmoid = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_sqr = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_sqrt = PTHREAD_ONCE_INIT;
@@ -491,8 +494,8 @@ static void init_f16_sqrt_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_f16c) {
-      f16_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vsqrt_ukernel__f16c_rsqrt_u40;
-      f16_sqrt_config.element_tile = 40;
+      f16_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vsqrt_ukernel__f16c_rsqrt_u32;
+      f16_sqrt_config.element_tile = 32;
     }
   #endif
 }
@@ -1358,6 +1361,34 @@ static void init_f32_sqrt_config(void) {
   #elif XNN_ARCH_PPC64
     f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__scalar_sqrt_u1;
     f32_sqrt_config.element_tile = 1;
+  #endif
+}
+
+static void init_f32_rsqrt_config(void) {
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      f32_rsqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32;
+      f32_rsqrt_config.init.f32_rsqrt = xnn_init_f32_rsqrt_avx512_params;
+      f32_rsqrt_config.element_tile = 32;
+    } else if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_fma3) {
+      f32_rsqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16;
+      f32_rsqrt_config.init.f32_rsqrt = xnn_init_f32_rsqrt_fma3_params;
+      f32_rsqrt_config.element_tile = 16;
+    } else if (hardware_config->use_x86_avx) {
+      f32_rsqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__avx_rsqrt_u16;
+      f32_rsqrt_config.init.f32_rsqrt = xnn_init_f32_rsqrt_avx_params;
+      f32_rsqrt_config.element_tile = 16;
+    } else {
+      f32_rsqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8;
+      f32_rsqrt_config.init.f32_rsqrt = xnn_init_f32_rsqrt_sse_params;
+      f32_rsqrt_config.element_tile = 8;
+    }
+  #else
+    f32_rsqrt_config.ukernel =
+        (xnn_vunary_ukernel_fn)xnn_f32_vrsqrt_ukernel__scalar_rsqrt_u4;
+    f32_rsqrt_config.element_tile = 4;
   #endif
 }
 
@@ -2410,6 +2441,13 @@ static void init_xx_copy_config(void) {
     return TRUE;
   }
 
+  static BOOL CALLBACK init_f32_rsqrt_config_windows(PINIT_ONCE init_once,
+                                                     PVOID parameter,
+                                                     PVOID* context) {
+    init_f32_rsqrt_config();
+    return TRUE;
+  }
+
   static BOOL CALLBACK init_f32_sigmoid_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
     init_f32_sigmoid_config();
     return TRUE;
@@ -2861,6 +2899,21 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_rndz_config() {
     pthread_once(&init_guard_f32_rndz, &init_f32_rndz_config);
   #endif
   return &f32_rndz_config;
+}
+
+const struct xnn_unary_elementwise_config* xnn_init_f32_rsqrt_config() {
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+#if XNN_PLATFORM_WINDOWS
+  InitOnceExecuteOnce(&init_guard_f32_rsqrt, &init_f32_rsqrt_config_windows,
+                      NULL, NULL);
+#else
+  pthread_once(&init_guard_f32_rsqrt, &init_f32_rsqrt_config);
+#endif
+  return &f32_rsqrt_config;
 }
 
 const struct xnn_unary_elementwise_config* xnn_init_f32_sigmoid_config() {

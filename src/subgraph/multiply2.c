@@ -265,6 +265,7 @@ enum xnn_status xnn_define_multiply2(
   }
 
   switch (input1_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
@@ -289,6 +290,7 @@ enum xnn_status xnn_define_multiply2(
   }
 
   switch (input2_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
@@ -314,6 +316,9 @@ enum xnn_status xnn_define_multiply2(
 
   enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
+    case xnn_datatype_fp16:
+      compute_type = xnn_compute_type_fp16;
+      break;
     case xnn_datatype_fp32:
       compute_type = xnn_compute_type_fp32;
       break;

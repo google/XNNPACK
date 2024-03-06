@@ -54,7 +54,7 @@ void xnn_f32_vabs_ukernel__avx512f_u32(
     assert(batch <= 15 * sizeof(float));
     // Prepare mask for valid 32-bit elements (depends on batch).
     batch >>= XNN_LOG2_SIZEOF_FLOAT;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
+    const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
     const __m512i vx = _mm512_maskz_loadu_epi32(vmask, input);
     const __m512i vy = _mm512_and_epi32(vx, vnonsign_mask);

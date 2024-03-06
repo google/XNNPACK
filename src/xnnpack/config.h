@@ -48,6 +48,7 @@ struct xnn_hardware_config {
   bool use_x86_avx512skx;
   bool use_x86_avx512vnni;
   bool use_x86_avx512vnnigfni;
+  bool use_x86_avx512amx;
   bool use_x86_avxvnni;
 #endif
 #if XNN_ARCH_RISCV
@@ -228,6 +229,7 @@ struct xnn_unary_elementwise_config {
     xnn_init_f32_qs8_cvt_params_fn f32_qs8_cvt;
     xnn_init_f32_qu8_cvt_params_fn f32_qu8_cvt;
     xnn_init_f32_rnd_params_fn f32_rnd;
+    xnn_init_f32_rsqrt_params_fn f32_rsqrt;
     xnn_init_f32_sigmoid_params_fn f32_sigmoid;
     xnn_init_f32_sqrt_params_fn f32_sqrt;
     xnn_init_f32_tanh_params_fn f32_tanh;
@@ -278,6 +280,8 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_rndd_config
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_rndne_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_rndu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_rndz_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config*
+xnn_init_f32_rsqrt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_sigmoid_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_sqr_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_sqrt_config();

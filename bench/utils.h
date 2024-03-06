@@ -146,6 +146,10 @@ bool CheckNEONI8MM(benchmark::State& state);
 // If V is unsupported, report error in benchmark state, and return false.
 bool CheckRVV(benchmark::State& state);
 
+// Check if RISC-V V (vector) FP16-ARITH extension is supported.
+// If RVV-FP16-ARITH is unsupported, report error in benchmark state, and return false.
+bool CheckRVVFP16ARITH(benchmark::State& state);
+
 // Check if x86 SSSE3 extension is supported.
 // If SSSE3 is unsupported, report error in benchmark state, and return false.
 bool CheckSSSE3(benchmark::State& state);
@@ -190,9 +194,13 @@ bool CheckAVX512VBMI(benchmark::State& state);
 // If VNNI or SKX-level AVX512 extensions are unsupported, report error in benchmark state, and return false.
 bool CheckAVX512VNNI(benchmark::State& state);
 
-// Check if x86 VNNI + GFNI + SKX-level AVX512 extensions (AVX512F, AVX512CD, AVX512BW, AVX512DQ, and AVX512VL) are supported.
+// Check if x86 VNNI + GFNI + SKX-level AVX512 extensions (AVX512F, AVX512CD, AVX512BW, AVX512DQ, AVX512VL, and GFNI) are supported.
 // If VNNI or GFNI or SKX-level AVX512 extensions are unsupported, report error in benchmark state, and return false.
 bool CheckAVX512VNNIGFNI(benchmark::State& state);
+
+// Check if x86 VNNI + GFNI + SKX-level + AMX AVX512 extensions (AAVX512F, AVX512CD, AVX512BW, AVX512DQ, AVX512VL, GFNI and AMX) are supported.
+// If AVX512 or AMX are unsupported, report error in benchmark state, and return false.
+bool CheckAVX512AMX(benchmark::State& state);
 
 // Check if x86 AVX-VNNI extension is supported.
 // If AVX-VNNI extension is unsupported, report error in benchmark state, and return false.

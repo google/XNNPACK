@@ -59,6 +59,7 @@ void xnn_x64_transposec_ukernel__2x2_reuse_switch_zip_neon(
       switch (rem) {
         case 1:
           vst1q_u64(oN, v0_0.val[1]);
+          XNN_FALLTHROUGH
         case 0:
           vst1q_u64(o, v0_0.val[0]); o = (uint64_t*) ((uintptr_t) o + tile_hbytes);
           break;
@@ -89,6 +90,7 @@ void xnn_x64_transposec_ukernel__2x2_reuse_switch_zip_neon(
         switch (rem) {
           case 1:
             vst1_u64(oN, v1_low);
+            XNN_FALLTHROUGH
           case 0:
             vst1_u64(o, v0_low);
             break;

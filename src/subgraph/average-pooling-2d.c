@@ -127,6 +127,7 @@ static enum xnn_status reshape_average_pooling_operator(
   output_value->shape.dim[2] = output_width;
   output_value->shape.dim[3] = channel_dim;
 
+  output_value->shape.num_dims = 4;
   const size_t new_size = xnn_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;
@@ -263,6 +264,7 @@ enum xnn_status xnn_define_average_pooling_2d(
   }
 
   switch (input_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;
     default:
@@ -284,8 +286,13 @@ enum xnn_status xnn_define_average_pooling_2d(
     return status;
   }
 
+  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
+    case xnn_datatype_fp16:
+      compute_type = xnn_compute_type_fp16;
+      break;
     case xnn_datatype_fp32:
+      compute_type = xnn_compute_type_fp32;
       break;
     default:
       xnn_log_error(
@@ -301,7 +308,7 @@ enum xnn_status xnn_define_average_pooling_2d(
   }
 
   node->type = xnn_node_type_average_pooling_2d;
-  node->compute_type = xnn_compute_type_fp32;
+  node->compute_type = compute_type;
   node->params.pooling_2d.padding_top = input_padding_top;
   node->params.pooling_2d.padding_right = input_padding_right;
   node->params.pooling_2d.padding_bottom = input_padding_bottom;

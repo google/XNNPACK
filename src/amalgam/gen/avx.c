@@ -5600,6 +5600,98 @@ void xnn_f32_vrndz_ukernel__avx_u16(
   }
 }
 
+void xnn_f32_vrsqrt_ukernel__avx_rsqrt_u16(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_rsqrt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  // Constants for the Newton-Raphson iteration.
+  const __m256 vthree = _mm256_load_ps(params->avx.three);
+  const __m256 vhalf = _mm256_load_ps(params->avx.half);
+
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m256 vx0 = _mm256_loadu_ps(input);
+    const __m256 vx1 = _mm256_loadu_ps(input + 8);
+    input += 16;
+
+    // Generate the initial 12-bit approximation.
+    const __m256 vt0_0 = _mm256_rsqrt_ps(vx0);
+    const __m256 vt0_1 = _mm256_rsqrt_ps(vx1);
+
+    // Do a single Newton-Raphson step as described above.
+    const __m256 vt1_0 = _mm256_mul_ps(vt0_0, vt0_0);
+    const __m256 vt1_1 = _mm256_mul_ps(vt0_1, vt0_1);
+    const __m256 vt2_0 = _mm256_mul_ps(vx0, vt1_0);
+    const __m256 vt2_1 = _mm256_mul_ps(vx1, vt1_1);
+    const __m256 vt3_0 = _mm256_sub_ps(vthree, vt2_0);
+    const __m256 vt3_1 = _mm256_sub_ps(vthree, vt2_1);
+    const __m256 vt4_0 = _mm256_mul_ps(vhalf, vt0_0);
+    const __m256 vt4_1 = _mm256_mul_ps(vhalf, vt0_1);
+    const __m256 vy0 = _mm256_mul_ps(vt3_0, vt4_0);
+    const __m256 vy1 = _mm256_mul_ps(vt3_1, vt4_1);
+
+    // Store the results.
+    _mm256_storeu_ps(output, vy0);
+    _mm256_storeu_ps(output + 8, vy1);
+    output += 16;
+  }
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+    const __m256 vx = _mm256_loadu_ps(input);
+    input += 8;
+
+    // Generate the initial 12-bit approximation.
+    const __m256 vt0 = _mm256_rsqrt_ps(vx);
+
+    // Do a single Newton-Raphson step as described above.
+    const __m256 vt1 = _mm256_mul_ps(vt0, vt0);
+    const __m256 vt2 = _mm256_mul_ps(vx, vt1);
+    const __m256 vt3 = _mm256_sub_ps(vthree, vt2);
+    const __m256 vt4 = _mm256_mul_ps(vhalf, vt0);
+    const __m256 vy = _mm256_mul_ps(vt3, vt4);
+
+    _mm256_storeu_ps(output, vy);
+    output += 8;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 7 * sizeof(float));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*)((uintptr_t) &params->avx.mask_table[7] - batch));
+
+    const __m256 vx = _mm256_maskload_ps(input, vmask);
+
+    // Generate the initial 12-bit approximation.
+    const __m256 vt0 = _mm256_rsqrt_ps(vx);
+
+    // Do a single Newton-Raphson step as described above.
+    const __m256 vt1 = _mm256_mul_ps(vt0, vt0);
+    const __m256 vt2 = _mm256_mul_ps(vx, vt1);
+    const __m256 vt3 = _mm256_sub_ps(vthree, vt2);
+    const __m256 vt4 = _mm256_mul_ps(vhalf, vt0);
+    __m256 vy = _mm256_mul_ps(vt3, vt4);
+
+    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    if (batch & (4 * sizeof(float))) {
+      _mm_storeu_ps(output, vy_lo);
+      vy_lo = _mm256_extractf128_ps(vy, 1);
+      output += 4;
+    }
+    if (batch & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) output, vy_lo);
+      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      output += 2;
+    }
+    if (batch & (1 * sizeof(float))) {
+      _mm_store_ss(output, vy_lo);
+    }
+  }
+}
+
 void xnn_f32_vsigmoid_ukernel__avx_rr2_p5_nr2_u40(
     size_t batch,
     const float* input,

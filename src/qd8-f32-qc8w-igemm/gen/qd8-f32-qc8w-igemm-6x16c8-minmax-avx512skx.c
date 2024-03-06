@@ -261,7 +261,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_6x16c8__avx512skx(
     vscaled4x0123456789ABCDEF = _mm512_min_ps(vscaled4x0123456789ABCDEF, voutput_max);
     vscaled5x0123456789ABCDEF = _mm512_min_ps(vscaled5x0123456789ABCDEF, voutput_max);
 
-    if(nc >= 16) {
+    if XNN_LIKELY(nc >= 16) {
       _mm512_storeu_ps(c5, vscaled5x0123456789ABCDEF);
       c5 = (float*) ((uintptr_t) c5 + cn_stride);
       _mm512_storeu_ps(c4, vscaled4x0123456789ABCDEF);

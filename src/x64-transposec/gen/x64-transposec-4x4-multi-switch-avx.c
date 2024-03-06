@@ -70,21 +70,23 @@ void xnn_x64_transposec_ukernel__4x4_multi_switch_avx(
       double* oN = (double*) ((uintptr_t) o + oN_stride);
       switch (rem) {
         default:
-          XNN_UNREACHABLE;
         case 3: {
           const __m256d v0_3 = _mm256_permute2f128_pd(v1_1, v1_3, 0x31);
           _mm256_storeu_pd(oN, v0_3);
           oN = (double*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 2: {
           const __m256d v0_2 = _mm256_permute2f128_pd(v1_0, v1_2, 0x31);
           _mm256_storeu_pd(oN, v0_2);
           oN = (double*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 1: {
           const __m256d v0_1 = _mm256_insertf128_pd(v1_1, _mm256_castpd256_pd128(v1_3), 1);
           _mm256_storeu_pd( oN, v0_1);
         }
+        XNN_FALLTHROUGH
         case 0: {
           const __m256d v0_0 = _mm256_insertf128_pd(v1_0, _mm256_castpd256_pd128(v1_2), 1);
           _mm256_storeu_pd(o, v0_0);
@@ -126,13 +128,16 @@ void xnn_x64_transposec_ukernel__4x4_multi_switch_avx(
             _mm_storeu_pd(oN, v0_3_lo);
              v0_3_lo = _mm256_extractf128_pd(v0_3, 1);
             oN = (double*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             _mm_storeu_pd(oN, v0_2_lo);
              v0_2_lo = _mm256_extractf128_pd(v0_2, 1);
             oN = (double*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             _mm_storeu_pd(oN, v0_1_lo);
             v0_1_lo = _mm256_extractf128_pd(v0_1, 1);
+            XNN_FALLTHROUGH
           case 0:
             _mm_storeu_pd(o, v0_0_lo);
             v0_0_lo = _mm256_extractf128_pd(v0_0, 1);
@@ -149,11 +154,14 @@ void xnn_x64_transposec_ukernel__4x4_multi_switch_avx(
           case 3:
             _mm_storel_pd(oN, v0_3_lo);
             oN = (double*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             _mm_storel_pd(oN, v0_2_lo);
             oN = (double*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             _mm_storel_pd(oN, v0_1_lo);
+            XNN_FALLTHROUGH
           case 0:
             _mm_storel_pd(o, v0_0_lo);
             break;

@@ -87,16 +87,19 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_reuse_${OUT_PTRS
               _mm256_storeu_si256((__m256i*) oN, v0_${N});
               oN = (${XINT}*) ((uintptr_t) oN + minus_output_stride);
             }
+            XNN_FALLTHROUGH
           $for N in reversed(range(2, TILE_SIZE>>1)):
             case ${N}: {
               const __m256i v0_${(N)} = _mm256_insertf128_si256(v1_${N}, _mm256_castsi256_si128(v1_${N+(TILE_SIZE>>1)}), 1);
               _mm256_storeu_si256((__m256i*) oN, v0_${N});
               oN = (${XINT}*) ((uintptr_t) oN + minus_output_stride);
             }
+            XNN_FALLTHROUGH
           case 1: {
             const __m256i v0_1 = _mm256_insertf128_si256(v1_1, _mm256_castsi256_si128(v1_${(TILE_SIZE>>1)+1}), 1);
             _mm256_storeu_si256((__m256i*) oN, v0_1);
           }
+          XNN_FALLTHROUGH
           case 0: {
             const __m256i v0_0 = _mm256_insertf128_si256(v1_0, _mm256_castsi256_si128(v1_${(TILE_SIZE>>1)}), 1);
             _mm256_storeu_si256((__m256i*) o, v0_0);
@@ -160,14 +163,17 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_reuse_${OUT_PTRS
                 _mm_storeu_si128((__m128i*) oN, v0_${N}_lo);
                  v0_${N}_lo = _mm256_extractf128_si256(v1_${N}, 0x1);
                 oN = (${XINT}*) ((uintptr_t) oN + minus_output_stride);
+                XNN_FALLTHROUGH
             $for N in reversed(range(2, TILE_SIZE>>1)):
               case ${N}:
                 _mm_storeu_si128((__m128i*) oN, v0_${N}_lo);
                  v0_${N}_lo = _mm256_castsi256_si128(v1_${N+(TILE_SIZE>>1)});
                 oN = (${XINT}*) ((uintptr_t) oN + minus_output_stride);
+                XNN_FALLTHROUGH
             case 1:
               _mm_storeu_si128((__m128i*) oN, v0_1_lo);
               v0_1_lo = _mm256_castsi256_si128(v1_${1+(TILE_SIZE>>1)});
+              XNN_FALLTHROUGH
             case 0:
               _mm_storeu_si128((__m128i*) o, v0_0_lo);
               v0_0_lo = _mm256_castsi256_si128(v1_${TILE_SIZE>>1});
@@ -232,9 +238,11 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_reuse_${OUT_PTRS
                 _mm_storel_epi64((__m128i*) oN, v0_${N}_lo);
                 v0_${N}_lo = _mm_unpackhi_epi64(v0_${N}_lo, v0_${N}_lo);
                 oN = (${XINT}*) ((uintptr_t) oN + minus_output_stride);
+                XNN_FALLTHROUGH
             case 1:
               _mm_storel_epi64((__m128i*) oN, v0_1_lo);
               v0_1_lo = _mm_unpackhi_epi64(v0_1_lo, v0_1_lo);
+              XNN_FALLTHROUGH
             case 0:
               _mm_storel_epi64((__m128i*) o, v0_0_lo);
               v0_0_lo = _mm_unpackhi_epi64(v0_0_lo, v0_0_lo);
@@ -278,10 +286,12 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_reuse_${OUT_PTRS
                 $if NUM_ITERS>3:
                   v0_${N}_lo = _mm_srli_epi64(v0_${N}_lo, 32);
                 oN = (${XINT}*) ((uintptr_t) oN + minus_output_stride);
+                XNN_FALLTHROUGH
             case 1:
               _mm_storeu_si32(oN, v0_1_lo);
               $if NUM_ITERS>3:
                 v0_1_lo = _mm_srli_epi64(v0_1_lo, 32);
+              XNN_FALLTHROUGH
             case 0:
               _mm_storeu_si32(o, v0_0_lo);
               $if NUM_ITERS>3:
@@ -331,10 +341,12 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_reuse_${OUT_PTRS
                    $if NUM_ITERS > 4:
                      v0_${N}_lo = _mm_srli_epi32(v0_${N}_lo, 16);
                   oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+                  XNN_FALLTHROUGH
               case 1:
                  unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_1_lo));
                  $if NUM_ITERS > 4:
                    v0_1_lo = _mm_srli_epi32(v0_1_lo, 16);
+                 XNN_FALLTHROUGH
               case 0:
                  unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_0_lo));
                  $if NUM_ITERS > 4:
@@ -384,8 +396,10 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_reuse_${OUT_PTRS
                 case ${N}:
                   *oN = (uint8_t) _mm_cvtsi128_si32(v0_${N}_lo);
                   oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+                  XNN_FALLTHROUGH
               case 1:
                   *oN = (uint8_t) _mm_cvtsi128_si32(v0_1_lo);
+                  XNN_FALLTHROUGH
               case 0:
                 *o = (uint8_t) _mm_cvtsi128_si32(v0_0_lo);
                 break;

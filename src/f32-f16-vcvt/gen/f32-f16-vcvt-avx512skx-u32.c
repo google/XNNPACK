@@ -50,7 +50,7 @@ void xnn_f32_f16_vcvt_ukernel__avx512skx_u32(
 
     // Prepare mask for valid elements (depends on batch).
     batch >>= XNN_LOG2_SIZEOF_FLOAT;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
+    const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
     const __m512 vf = _mm512_maskz_loadu_ps(vmask, input);
     const __m256i vh = _mm512_cvtps_ph(vf, _MM_FROUND_NO_EXC | _MM_FROUND_TO_NEAREST_INT);

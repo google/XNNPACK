@@ -1315,13 +1315,6 @@ static enum xnn_status reshape_fully_connected_nc(
     return xnn_status_success;
   }
 
-  if (fully_connected_op->weights_cache != NULL &&
-      !xnn_weights_cache_is_finalized(fully_connected_op->weights_cache)) {
-    xnn_log_error("failed to reshape %s operator: weights cache is not finalized",
-      xnn_operator_type_to_string(fully_connected_op->type));
-    return xnn_status_invalid_state;
-  }
-
   size_t input_channels = fully_connected_op->group_input_channels;
   const size_t output_channels = fully_connected_op->group_output_channels;
 
@@ -1633,6 +1626,13 @@ static enum xnn_status setup_fully_connected_nc(
       xnn_operator_type_to_string(expected_operator_type),
       xnn_operator_type_to_string(fully_connected_op->type));
     return xnn_status_invalid_parameter;
+  }
+
+  if (fully_connected_op->weights_cache != NULL &&
+      !xnn_weights_cache_is_finalized(fully_connected_op->weights_cache)) {
+    xnn_log_error("failed to setup %s operator: weights cache is not finalized",
+      xnn_operator_type_to_string(expected_operator_type));
+    return xnn_status_invalid_state;
   }
 
   switch (fully_connected_op->state) {

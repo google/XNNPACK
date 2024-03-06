@@ -172,7 +172,7 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u80(
   if (batch != 0) {
     // Prepare mask for valid 32-bit batch (depends on batch).
     batch >>= XNN_LOG2_SIZEOF_FLOAT;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
+    const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
     // Load up to 15 inputs at a time.
     const __m512 vi = _mm512_mask_loadu_ps(_mm512_undefined_ps(), vmask, input);

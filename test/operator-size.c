@@ -139,9 +139,7 @@ int main(int argc, char** argv) {
     case 21:
       xnn_create_max_pooling2d_nhwc_f32(
         0, 0, 0, 0,
-        0, 0,
-        0, 0,
-        0, 0,
+        0, 0, 0,
         0, 0, 0,
         0.0f, 0.0f,
         0, &op);

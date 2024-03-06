@@ -171,7 +171,7 @@ void xnn_f32_igemm_minmax_ukernel_6x16__avx512f_broadcast(
     } else {
       if (nc & 15) {
         // Prepare mask for valid 32-bit elements (depends on nc).
-        const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << nc) - UINT32_C(1)));
+        const __mmask16 vmask = _cvtu32_mask16((uint32_t) (UINT32_C(1) << nc) - UINT32_C(1));
 
         _mm512_mask_storeu_ps(c5, vmask, vacc5x0123456789ABCDEF);
         _mm512_mask_storeu_ps(c4, vmask, vacc4x0123456789ABCDEF);

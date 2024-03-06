@@ -329,7 +329,7 @@ void xnn_f32_dwconv_minmax_ukernel_25p16c__avx512f(
       assert(c >= 1);
       assert(c <= 16);
       // Prepare mask for valid 32-bit elements (depends on nc).
-      const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << c) - UINT32_C(1)));
+      const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << c) - UINT32_C(1)));
 
       __m512 vacc0123456789ABCDEFp0 = _mm512_maskz_loadu_ps(vmask, w);
 

@@ -253,155 +253,186 @@ void xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2(
           _mm256_storeu_si256((__m256i*) oN, v0_31);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 30: {
           const __m256i v0_30 = _mm256_permute2f128_si256(v1_14, v1_30, 0x31);
           _mm256_storeu_si256((__m256i*) oN, v0_30);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 29: {
           const __m256i v0_29 = _mm256_permute2f128_si256(v1_13, v1_29, 0x31);
           _mm256_storeu_si256((__m256i*) oN, v0_29);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 28: {
           const __m256i v0_28 = _mm256_permute2f128_si256(v1_12, v1_28, 0x31);
           _mm256_storeu_si256((__m256i*) oN, v0_28);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 27: {
           const __m256i v0_27 = _mm256_permute2f128_si256(v1_11, v1_27, 0x31);
           _mm256_storeu_si256((__m256i*) oN, v0_27);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 26: {
           const __m256i v0_26 = _mm256_permute2f128_si256(v1_10, v1_26, 0x31);
           _mm256_storeu_si256((__m256i*) oN, v0_26);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 25: {
           const __m256i v0_25 = _mm256_permute2f128_si256(v1_9, v1_25, 0x31);
           _mm256_storeu_si256((__m256i*) oN, v0_25);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 24: {
           const __m256i v0_24 = _mm256_permute2f128_si256(v1_8, v1_24, 0x31);
           _mm256_storeu_si256((__m256i*) oN, v0_24);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 23: {
           const __m256i v0_23 = _mm256_permute2f128_si256(v1_7, v1_23, 0x31);
           _mm256_storeu_si256((__m256i*) oN, v0_23);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 22: {
           const __m256i v0_22 = _mm256_permute2f128_si256(v1_6, v1_22, 0x31);
           _mm256_storeu_si256((__m256i*) oN, v0_22);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 21: {
           const __m256i v0_21 = _mm256_permute2f128_si256(v1_5, v1_21, 0x31);
           _mm256_storeu_si256((__m256i*) oN, v0_21);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 20: {
           const __m256i v0_20 = _mm256_permute2f128_si256(v1_4, v1_20, 0x31);
           _mm256_storeu_si256((__m256i*) oN, v0_20);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 19: {
           const __m256i v0_19 = _mm256_permute2f128_si256(v1_3, v1_19, 0x31);
           _mm256_storeu_si256((__m256i*) oN, v0_19);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 18: {
           const __m256i v0_18 = _mm256_permute2f128_si256(v1_2, v1_18, 0x31);
           _mm256_storeu_si256((__m256i*) oN, v0_18);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 17: {
           const __m256i v0_17 = _mm256_permute2f128_si256(v1_1, v1_17, 0x31);
           _mm256_storeu_si256((__m256i*) oN, v0_17);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 16: {
           const __m256i v0_16 = _mm256_permute2f128_si256(v1_0, v1_16, 0x31);
           _mm256_storeu_si256((__m256i*) oN, v0_16);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 15: {
           const __m256i v0_15 = _mm256_insertf128_si256(v1_15, _mm256_castsi256_si128(v1_31), 1);
           _mm256_storeu_si256((__m256i*) oN, v0_15);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 14: {
           const __m256i v0_14 = _mm256_insertf128_si256(v1_14, _mm256_castsi256_si128(v1_30), 1);
           _mm256_storeu_si256((__m256i*) oN, v0_14);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 13: {
           const __m256i v0_13 = _mm256_insertf128_si256(v1_13, _mm256_castsi256_si128(v1_29), 1);
           _mm256_storeu_si256((__m256i*) oN, v0_13);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 12: {
           const __m256i v0_12 = _mm256_insertf128_si256(v1_12, _mm256_castsi256_si128(v1_28), 1);
           _mm256_storeu_si256((__m256i*) oN, v0_12);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 11: {
           const __m256i v0_11 = _mm256_insertf128_si256(v1_11, _mm256_castsi256_si128(v1_27), 1);
           _mm256_storeu_si256((__m256i*) oN, v0_11);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 10: {
           const __m256i v0_10 = _mm256_insertf128_si256(v1_10, _mm256_castsi256_si128(v1_26), 1);
           _mm256_storeu_si256((__m256i*) oN, v0_10);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 9: {
           const __m256i v0_9 = _mm256_insertf128_si256(v1_9, _mm256_castsi256_si128(v1_25), 1);
           _mm256_storeu_si256((__m256i*) oN, v0_9);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 8: {
           const __m256i v0_8 = _mm256_insertf128_si256(v1_8, _mm256_castsi256_si128(v1_24), 1);
           _mm256_storeu_si256((__m256i*) oN, v0_8);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 7: {
           const __m256i v0_7 = _mm256_insertf128_si256(v1_7, _mm256_castsi256_si128(v1_23), 1);
           _mm256_storeu_si256((__m256i*) oN, v0_7);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 6: {
           const __m256i v0_6 = _mm256_insertf128_si256(v1_6, _mm256_castsi256_si128(v1_22), 1);
           _mm256_storeu_si256((__m256i*) oN, v0_6);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 5: {
           const __m256i v0_5 = _mm256_insertf128_si256(v1_5, _mm256_castsi256_si128(v1_21), 1);
           _mm256_storeu_si256((__m256i*) oN, v0_5);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 4: {
           const __m256i v0_4 = _mm256_insertf128_si256(v1_4, _mm256_castsi256_si128(v1_20), 1);
           _mm256_storeu_si256((__m256i*) oN, v0_4);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 3: {
           const __m256i v0_3 = _mm256_insertf128_si256(v1_3, _mm256_castsi256_si128(v1_19), 1);
           _mm256_storeu_si256((__m256i*) oN, v0_3);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 2: {
           const __m256i v0_2 = _mm256_insertf128_si256(v1_2, _mm256_castsi256_si128(v1_18), 1);
           _mm256_storeu_si256((__m256i*) oN, v0_2);
           oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
         }
+        XNN_FALLTHROUGH
         case 1: {
           const __m256i v0_1 = _mm256_insertf128_si256(v1_1, _mm256_castsi256_si128(v1_17), 1);
           _mm256_storeu_si256((__m256i*) oN, v0_1);
         }
+        XNN_FALLTHROUGH
         case 0: {
           const __m256i v0_0 = _mm256_insertf128_si256(v1_0, _mm256_castsi256_si128(v1_16), 1);
           _mm256_storeu_si256((__m256i*) o, v0_0);
@@ -732,125 +763,156 @@ void xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2(
             _mm_storeu_si128((__m128i*) oN, v0_31_lo);
              v0_31_lo = _mm256_extractf128_si256(v1_31, 0x1);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 30:
             _mm_storeu_si128((__m128i*) oN, v0_30_lo);
              v0_30_lo = _mm256_extractf128_si256(v1_30, 0x1);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 29:
             _mm_storeu_si128((__m128i*) oN, v0_29_lo);
              v0_29_lo = _mm256_extractf128_si256(v1_29, 0x1);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 28:
             _mm_storeu_si128((__m128i*) oN, v0_28_lo);
              v0_28_lo = _mm256_extractf128_si256(v1_28, 0x1);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 27:
             _mm_storeu_si128((__m128i*) oN, v0_27_lo);
              v0_27_lo = _mm256_extractf128_si256(v1_27, 0x1);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 26:
             _mm_storeu_si128((__m128i*) oN, v0_26_lo);
              v0_26_lo = _mm256_extractf128_si256(v1_26, 0x1);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 25:
             _mm_storeu_si128((__m128i*) oN, v0_25_lo);
              v0_25_lo = _mm256_extractf128_si256(v1_25, 0x1);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 24:
             _mm_storeu_si128((__m128i*) oN, v0_24_lo);
              v0_24_lo = _mm256_extractf128_si256(v1_24, 0x1);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 23:
             _mm_storeu_si128((__m128i*) oN, v0_23_lo);
              v0_23_lo = _mm256_extractf128_si256(v1_23, 0x1);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 22:
             _mm_storeu_si128((__m128i*) oN, v0_22_lo);
              v0_22_lo = _mm256_extractf128_si256(v1_22, 0x1);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 21:
             _mm_storeu_si128((__m128i*) oN, v0_21_lo);
              v0_21_lo = _mm256_extractf128_si256(v1_21, 0x1);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 20:
             _mm_storeu_si128((__m128i*) oN, v0_20_lo);
              v0_20_lo = _mm256_extractf128_si256(v1_20, 0x1);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 19:
             _mm_storeu_si128((__m128i*) oN, v0_19_lo);
              v0_19_lo = _mm256_extractf128_si256(v1_19, 0x1);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 18:
             _mm_storeu_si128((__m128i*) oN, v0_18_lo);
              v0_18_lo = _mm256_extractf128_si256(v1_18, 0x1);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 17:
             _mm_storeu_si128((__m128i*) oN, v0_17_lo);
              v0_17_lo = _mm256_extractf128_si256(v1_17, 0x1);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 16:
             _mm_storeu_si128((__m128i*) oN, v0_16_lo);
              v0_16_lo = _mm256_extractf128_si256(v1_16, 0x1);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 15:
             _mm_storeu_si128((__m128i*) oN, v0_15_lo);
              v0_15_lo = _mm256_castsi256_si128(v1_31);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 14:
             _mm_storeu_si128((__m128i*) oN, v0_14_lo);
              v0_14_lo = _mm256_castsi256_si128(v1_30);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 13:
             _mm_storeu_si128((__m128i*) oN, v0_13_lo);
              v0_13_lo = _mm256_castsi256_si128(v1_29);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 12:
             _mm_storeu_si128((__m128i*) oN, v0_12_lo);
              v0_12_lo = _mm256_castsi256_si128(v1_28);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 11:
             _mm_storeu_si128((__m128i*) oN, v0_11_lo);
              v0_11_lo = _mm256_castsi256_si128(v1_27);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 10:
             _mm_storeu_si128((__m128i*) oN, v0_10_lo);
              v0_10_lo = _mm256_castsi256_si128(v1_26);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 9:
             _mm_storeu_si128((__m128i*) oN, v0_9_lo);
              v0_9_lo = _mm256_castsi256_si128(v1_25);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 8:
             _mm_storeu_si128((__m128i*) oN, v0_8_lo);
              v0_8_lo = _mm256_castsi256_si128(v1_24);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 7:
             _mm_storeu_si128((__m128i*) oN, v0_7_lo);
              v0_7_lo = _mm256_castsi256_si128(v1_23);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 6:
             _mm_storeu_si128((__m128i*) oN, v0_6_lo);
              v0_6_lo = _mm256_castsi256_si128(v1_22);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 5:
             _mm_storeu_si128((__m128i*) oN, v0_5_lo);
              v0_5_lo = _mm256_castsi256_si128(v1_21);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 4:
             _mm_storeu_si128((__m128i*) oN, v0_4_lo);
              v0_4_lo = _mm256_castsi256_si128(v1_20);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 3:
             _mm_storeu_si128((__m128i*) oN, v0_3_lo);
              v0_3_lo = _mm256_castsi256_si128(v1_19);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             _mm_storeu_si128((__m128i*) oN, v0_2_lo);
              v0_2_lo = _mm256_castsi256_si128(v1_18);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             _mm_storeu_si128((__m128i*) oN, v0_1_lo);
             v0_1_lo = _mm256_castsi256_si128(v1_17);
+            XNN_FALLTHROUGH
           case 0:
             _mm_storeu_si128((__m128i*) o, v0_0_lo);
             v0_0_lo = _mm256_castsi256_si128(v1_16);
@@ -868,125 +930,156 @@ void xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2(
             _mm_storel_epi64((__m128i*) oN, v0_31_lo);
             v0_31_lo = _mm_unpackhi_epi64(v0_31_lo, v0_31_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 30:
             _mm_storel_epi64((__m128i*) oN, v0_30_lo);
             v0_30_lo = _mm_unpackhi_epi64(v0_30_lo, v0_30_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 29:
             _mm_storel_epi64((__m128i*) oN, v0_29_lo);
             v0_29_lo = _mm_unpackhi_epi64(v0_29_lo, v0_29_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 28:
             _mm_storel_epi64((__m128i*) oN, v0_28_lo);
             v0_28_lo = _mm_unpackhi_epi64(v0_28_lo, v0_28_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 27:
             _mm_storel_epi64((__m128i*) oN, v0_27_lo);
             v0_27_lo = _mm_unpackhi_epi64(v0_27_lo, v0_27_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 26:
             _mm_storel_epi64((__m128i*) oN, v0_26_lo);
             v0_26_lo = _mm_unpackhi_epi64(v0_26_lo, v0_26_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 25:
             _mm_storel_epi64((__m128i*) oN, v0_25_lo);
             v0_25_lo = _mm_unpackhi_epi64(v0_25_lo, v0_25_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 24:
             _mm_storel_epi64((__m128i*) oN, v0_24_lo);
             v0_24_lo = _mm_unpackhi_epi64(v0_24_lo, v0_24_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 23:
             _mm_storel_epi64((__m128i*) oN, v0_23_lo);
             v0_23_lo = _mm_unpackhi_epi64(v0_23_lo, v0_23_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 22:
             _mm_storel_epi64((__m128i*) oN, v0_22_lo);
             v0_22_lo = _mm_unpackhi_epi64(v0_22_lo, v0_22_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 21:
             _mm_storel_epi64((__m128i*) oN, v0_21_lo);
             v0_21_lo = _mm_unpackhi_epi64(v0_21_lo, v0_21_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 20:
             _mm_storel_epi64((__m128i*) oN, v0_20_lo);
             v0_20_lo = _mm_unpackhi_epi64(v0_20_lo, v0_20_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 19:
             _mm_storel_epi64((__m128i*) oN, v0_19_lo);
             v0_19_lo = _mm_unpackhi_epi64(v0_19_lo, v0_19_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 18:
             _mm_storel_epi64((__m128i*) oN, v0_18_lo);
             v0_18_lo = _mm_unpackhi_epi64(v0_18_lo, v0_18_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 17:
             _mm_storel_epi64((__m128i*) oN, v0_17_lo);
             v0_17_lo = _mm_unpackhi_epi64(v0_17_lo, v0_17_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 16:
             _mm_storel_epi64((__m128i*) oN, v0_16_lo);
             v0_16_lo = _mm_unpackhi_epi64(v0_16_lo, v0_16_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 15:
             _mm_storel_epi64((__m128i*) oN, v0_15_lo);
             v0_15_lo = _mm_unpackhi_epi64(v0_15_lo, v0_15_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 14:
             _mm_storel_epi64((__m128i*) oN, v0_14_lo);
             v0_14_lo = _mm_unpackhi_epi64(v0_14_lo, v0_14_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 13:
             _mm_storel_epi64((__m128i*) oN, v0_13_lo);
             v0_13_lo = _mm_unpackhi_epi64(v0_13_lo, v0_13_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 12:
             _mm_storel_epi64((__m128i*) oN, v0_12_lo);
             v0_12_lo = _mm_unpackhi_epi64(v0_12_lo, v0_12_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 11:
             _mm_storel_epi64((__m128i*) oN, v0_11_lo);
             v0_11_lo = _mm_unpackhi_epi64(v0_11_lo, v0_11_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 10:
             _mm_storel_epi64((__m128i*) oN, v0_10_lo);
             v0_10_lo = _mm_unpackhi_epi64(v0_10_lo, v0_10_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 9:
             _mm_storel_epi64((__m128i*) oN, v0_9_lo);
             v0_9_lo = _mm_unpackhi_epi64(v0_9_lo, v0_9_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 8:
             _mm_storel_epi64((__m128i*) oN, v0_8_lo);
             v0_8_lo = _mm_unpackhi_epi64(v0_8_lo, v0_8_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 7:
             _mm_storel_epi64((__m128i*) oN, v0_7_lo);
             v0_7_lo = _mm_unpackhi_epi64(v0_7_lo, v0_7_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 6:
             _mm_storel_epi64((__m128i*) oN, v0_6_lo);
             v0_6_lo = _mm_unpackhi_epi64(v0_6_lo, v0_6_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 5:
             _mm_storel_epi64((__m128i*) oN, v0_5_lo);
             v0_5_lo = _mm_unpackhi_epi64(v0_5_lo, v0_5_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 4:
             _mm_storel_epi64((__m128i*) oN, v0_4_lo);
             v0_4_lo = _mm_unpackhi_epi64(v0_4_lo, v0_4_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 3:
             _mm_storel_epi64((__m128i*) oN, v0_3_lo);
             v0_3_lo = _mm_unpackhi_epi64(v0_3_lo, v0_3_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             _mm_storel_epi64((__m128i*) oN, v0_2_lo);
             v0_2_lo = _mm_unpackhi_epi64(v0_2_lo, v0_2_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             _mm_storel_epi64((__m128i*) oN, v0_1_lo);
             v0_1_lo = _mm_unpackhi_epi64(v0_1_lo, v0_1_lo);
+            XNN_FALLTHROUGH
           case 0:
             _mm_storel_epi64((__m128i*) o, v0_0_lo);
             v0_0_lo = _mm_unpackhi_epi64(v0_0_lo, v0_0_lo);
@@ -1003,125 +1096,156 @@ void xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2(
             _mm_storeu_si32(oN, v0_31_lo);
             v0_31_lo = _mm_srli_epi64(v0_31_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 30:
             _mm_storeu_si32(oN, v0_30_lo);
             v0_30_lo = _mm_srli_epi64(v0_30_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 29:
             _mm_storeu_si32(oN, v0_29_lo);
             v0_29_lo = _mm_srli_epi64(v0_29_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 28:
             _mm_storeu_si32(oN, v0_28_lo);
             v0_28_lo = _mm_srli_epi64(v0_28_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 27:
             _mm_storeu_si32(oN, v0_27_lo);
             v0_27_lo = _mm_srli_epi64(v0_27_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 26:
             _mm_storeu_si32(oN, v0_26_lo);
             v0_26_lo = _mm_srli_epi64(v0_26_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 25:
             _mm_storeu_si32(oN, v0_25_lo);
             v0_25_lo = _mm_srli_epi64(v0_25_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 24:
             _mm_storeu_si32(oN, v0_24_lo);
             v0_24_lo = _mm_srli_epi64(v0_24_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 23:
             _mm_storeu_si32(oN, v0_23_lo);
             v0_23_lo = _mm_srli_epi64(v0_23_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 22:
             _mm_storeu_si32(oN, v0_22_lo);
             v0_22_lo = _mm_srli_epi64(v0_22_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 21:
             _mm_storeu_si32(oN, v0_21_lo);
             v0_21_lo = _mm_srli_epi64(v0_21_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 20:
             _mm_storeu_si32(oN, v0_20_lo);
             v0_20_lo = _mm_srli_epi64(v0_20_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 19:
             _mm_storeu_si32(oN, v0_19_lo);
             v0_19_lo = _mm_srli_epi64(v0_19_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 18:
             _mm_storeu_si32(oN, v0_18_lo);
             v0_18_lo = _mm_srli_epi64(v0_18_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 17:
             _mm_storeu_si32(oN, v0_17_lo);
             v0_17_lo = _mm_srli_epi64(v0_17_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 16:
             _mm_storeu_si32(oN, v0_16_lo);
             v0_16_lo = _mm_srli_epi64(v0_16_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 15:
             _mm_storeu_si32(oN, v0_15_lo);
             v0_15_lo = _mm_srli_epi64(v0_15_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 14:
             _mm_storeu_si32(oN, v0_14_lo);
             v0_14_lo = _mm_srli_epi64(v0_14_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 13:
             _mm_storeu_si32(oN, v0_13_lo);
             v0_13_lo = _mm_srli_epi64(v0_13_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 12:
             _mm_storeu_si32(oN, v0_12_lo);
             v0_12_lo = _mm_srli_epi64(v0_12_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 11:
             _mm_storeu_si32(oN, v0_11_lo);
             v0_11_lo = _mm_srli_epi64(v0_11_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 10:
             _mm_storeu_si32(oN, v0_10_lo);
             v0_10_lo = _mm_srli_epi64(v0_10_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 9:
             _mm_storeu_si32(oN, v0_9_lo);
             v0_9_lo = _mm_srli_epi64(v0_9_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 8:
             _mm_storeu_si32(oN, v0_8_lo);
             v0_8_lo = _mm_srli_epi64(v0_8_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 7:
             _mm_storeu_si32(oN, v0_7_lo);
             v0_7_lo = _mm_srli_epi64(v0_7_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 6:
             _mm_storeu_si32(oN, v0_6_lo);
             v0_6_lo = _mm_srli_epi64(v0_6_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 5:
             _mm_storeu_si32(oN, v0_5_lo);
             v0_5_lo = _mm_srli_epi64(v0_5_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 4:
             _mm_storeu_si32(oN, v0_4_lo);
             v0_4_lo = _mm_srli_epi64(v0_4_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 3:
             _mm_storeu_si32(oN, v0_3_lo);
             v0_3_lo = _mm_srli_epi64(v0_3_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             _mm_storeu_si32(oN, v0_2_lo);
             v0_2_lo = _mm_srli_epi64(v0_2_lo, 32);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             _mm_storeu_si32(oN, v0_1_lo);
             v0_1_lo = _mm_srli_epi64(v0_1_lo, 32);
+            XNN_FALLTHROUGH
           case 0:
             _mm_storeu_si32(o, v0_0_lo);
             v0_0_lo = _mm_srli_epi64(v0_0_lo, 32);
@@ -1138,125 +1262,156 @@ void xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2(
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_31_lo));
              v0_31_lo = _mm_srli_epi32(v0_31_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 30:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_30_lo));
              v0_30_lo = _mm_srli_epi32(v0_30_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 29:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_29_lo));
              v0_29_lo = _mm_srli_epi32(v0_29_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 28:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_28_lo));
              v0_28_lo = _mm_srli_epi32(v0_28_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 27:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_27_lo));
              v0_27_lo = _mm_srli_epi32(v0_27_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 26:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_26_lo));
              v0_26_lo = _mm_srli_epi32(v0_26_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 25:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_25_lo));
              v0_25_lo = _mm_srli_epi32(v0_25_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 24:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_24_lo));
              v0_24_lo = _mm_srli_epi32(v0_24_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 23:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_23_lo));
              v0_23_lo = _mm_srli_epi32(v0_23_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 22:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_22_lo));
              v0_22_lo = _mm_srli_epi32(v0_22_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 21:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_21_lo));
              v0_21_lo = _mm_srli_epi32(v0_21_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 20:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_20_lo));
              v0_20_lo = _mm_srli_epi32(v0_20_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 19:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_19_lo));
              v0_19_lo = _mm_srli_epi32(v0_19_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 18:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_18_lo));
              v0_18_lo = _mm_srli_epi32(v0_18_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 17:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_17_lo));
              v0_17_lo = _mm_srli_epi32(v0_17_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 16:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_16_lo));
              v0_16_lo = _mm_srli_epi32(v0_16_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 15:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_15_lo));
              v0_15_lo = _mm_srli_epi32(v0_15_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 14:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_14_lo));
              v0_14_lo = _mm_srli_epi32(v0_14_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 13:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_13_lo));
              v0_13_lo = _mm_srli_epi32(v0_13_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 12:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_12_lo));
              v0_12_lo = _mm_srli_epi32(v0_12_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 11:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_11_lo));
              v0_11_lo = _mm_srli_epi32(v0_11_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 10:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_10_lo));
              v0_10_lo = _mm_srli_epi32(v0_10_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 9:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_9_lo));
              v0_9_lo = _mm_srli_epi32(v0_9_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 8:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_8_lo));
              v0_8_lo = _mm_srli_epi32(v0_8_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 7:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_7_lo));
              v0_7_lo = _mm_srli_epi32(v0_7_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 6:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_6_lo));
              v0_6_lo = _mm_srli_epi32(v0_6_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 5:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_5_lo));
              v0_5_lo = _mm_srli_epi32(v0_5_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 4:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_4_lo));
              v0_4_lo = _mm_srli_epi32(v0_4_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 3:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_3_lo));
              v0_3_lo = _mm_srli_epi32(v0_3_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_2_lo));
              v0_2_lo = _mm_srli_epi32(v0_2_lo, 16);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
              unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_1_lo));
              v0_1_lo = _mm_srli_epi32(v0_1_lo, 16);
+             XNN_FALLTHROUGH
           case 0:
              unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_0_lo));
              v0_0_lo = _mm_srli_epi32(v0_0_lo, 16);
@@ -1272,95 +1427,126 @@ void xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2(
           case 31:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_31_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 30:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_30_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 29:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_29_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 28:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_28_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 27:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_27_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 26:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_26_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 25:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_25_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 24:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_24_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 23:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_23_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 22:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_22_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 21:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_21_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 20:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_20_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 19:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_19_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 18:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_18_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 17:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_17_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 16:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_16_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 15:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_15_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 14:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_14_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 13:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_13_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 12:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_12_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 11:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_11_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 10:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_10_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 9:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_9_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 8:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_8_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 7:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_7_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 6:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_6_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 5:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_5_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 4:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_4_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 3:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_3_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             *oN = (uint8_t) _mm_cvtsi128_si32(v0_2_lo);
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
               *oN = (uint8_t) _mm_cvtsi128_si32(v0_1_lo);
+              XNN_FALLTHROUGH
           case 0:
             *o = (uint8_t) _mm_cvtsi128_si32(v0_0_lo);
             break;

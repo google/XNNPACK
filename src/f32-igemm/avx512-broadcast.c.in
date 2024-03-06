@@ -133,7 +133,7 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__avx512f_broadcast(
         $if LOG2N == 4:
           if (nc & 15) {
             // Prepare mask for valid 32-bit elements (depends on nc).
-            const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << nc) - UINT32_C(1)));
+            const __mmask16 vmask = _cvtu32_mask16((uint32_t) (UINT32_C(1) << nc) - UINT32_C(1));
 
             $for M in reversed(range(MR)):
               _mm512_mask_storeu_ps(c${M}, vmask, vacc${M}x${ABC[0:16]});

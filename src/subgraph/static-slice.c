@@ -21,10 +21,6 @@ static enum xnn_status create_slice_operator(
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs == 1);
-  const uint32_t input_id = node->inputs[0];
-  assert(input_id != XNN_INVALID_VALUE_ID);
-  assert(input_id < num_values);
-
   assert(node->num_outputs == 1);
 
   enum xnn_status status;
@@ -44,9 +40,10 @@ static enum xnn_status create_slice_operator(
   }
 
   if (status == xnn_status_success) {
-    memcpy(opdata->offsets, node->params.slice.offsets, sizeof(opdata->offsets));
-    memcpy(opdata->sizes, node->params.slice.sizes, sizeof(opdata->sizes));
-    opdata->shape1 = values[input_id].shape;
+    const int num_dims = node->params.slice.num_dims;
+    opdata->shape2.num_dims = num_dims;
+    memcpy(opdata->offsets, node->params.slice.offsets, num_dims * sizeof(size_t));
+    memcpy(opdata->sizes, node->params.slice.sizes, num_dims * sizeof(size_t));
   }
 
   return status;
@@ -58,26 +55,33 @@ static enum xnn_status reshape_slice_operator(
     size_t num_values,
     pthreadpool_t threadpool)
 {
-  const size_t num_dims = opdata->shape1.num_dims;
+  const uint32_t input_id = opdata->inputs[0];
+  const uint32_t output_id = opdata->outputs[0];
+  assert(input_id < num_values);
+  assert(output_id < num_values);
+  struct xnn_value* output_value = values + output_id;
+  struct xnn_value* input_value = values + input_id;
+  const size_t num_dims = input_value->shape.num_dims;
+  assert(num_dims == opdata->shape2.num_dims);
   enum xnn_status status = xnn_status_invalid_state;
   const size_t old_workspace_size = opdata->workspace_size;
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_slice_nd_x8:
       status = xnn_reshape_slice_nd_x8(
           opdata->operator_objects[0], num_dims,
-          opdata->shape1.dim, opdata->offsets, opdata->sizes,
+          input_value->shape.dim, opdata->offsets, opdata->sizes,
           threadpool);
       break;
     case xnn_operator_type_slice_nd_x16:
       status = xnn_reshape_slice_nd_x16(
           opdata->operator_objects[0], num_dims,
-          opdata->shape1.dim, opdata->offsets, opdata->sizes,
+          input_value->shape.dim, opdata->offsets, opdata->sizes,
           threadpool);
       break;
     case xnn_operator_type_slice_nd_x32:
       status = xnn_reshape_slice_nd_x32(
           opdata->operator_objects[0], num_dims,
-          opdata->shape1.dim, opdata->offsets, opdata->sizes,
+          input_value->shape.dim, opdata->offsets, opdata->sizes,
           threadpool);
       break;
     default:
@@ -86,12 +90,6 @@ static enum xnn_status reshape_slice_operator(
   if (status != xnn_status_success) {
     return status;
   }
-  const uint32_t output_id = opdata->outputs[0];
-  const uint32_t input_id = opdata->inputs[0];
-  assert(output_id < num_values);
-  assert(input_id < num_values);
-  struct xnn_value* output_value = values + output_id;
-  struct xnn_value* input_value = values + input_id;
   output_value->shape.num_dims = num_dims;
   for (size_t i = 0; i < num_dims; ++i) {
     if (opdata->sizes[i] == 0) {
@@ -176,28 +174,8 @@ enum xnn_status xnn_define_static_slice(
     return status;
   }
 
-  if (num_dims == 0) {
-    xnn_log_error(
-      "failed to create %s operator with %zu dimensions: number of dimensions must be non-zero",
-      xnn_node_type_to_string(xnn_node_type_static_slice), num_dims);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (num_dims > XNN_MAX_TENSOR_DIMS) {
-    xnn_log_error(
-      "failed to create %s operator with %zu dimensions: number of dimensions must not exceed %d",
-      xnn_node_type_to_string(xnn_node_type_static_slice), num_dims, XNN_MAX_TENSOR_DIMS);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (num_dims != input_value->shape.num_dims) {
-    xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32
-      ": number of dimensions %zu must match number of dimensions of input value %zu",
-      xnn_node_type_to_string(xnn_node_type_static_slice), input_id, num_dims, input_value->shape.num_dims);
-  }
-
   switch (input_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
@@ -221,42 +199,11 @@ enum xnn_status xnn_define_static_slice(
     return status;
   }
 
-  if (input_value->shape.num_dims != output_value->shape.num_dims) {
-    xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
-      ": number of dimensions of input, %zu, does not match number of dimensions of output %zu",
-      xnn_node_type_to_string(xnn_node_type_static_slice), input_id, output_id, input_value->shape.num_dims,
-      output_value->shape.num_dims);
-    return xnn_status_invalid_parameter;
-  }
-
-  for (size_t i = 0; i < num_dims; i++) {
-    if (offsets[i] >= input_value->shape.dim[i]) {
-      xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
-        ": offset %zu exceeds input size %zu in dimension %zu",
-        xnn_node_type_to_string(xnn_node_type_static_slice), input_id, output_id, offsets[i], input_value->shape.dim[i], i);
-      return xnn_status_invalid_parameter;
-    }
-    if (sizes[i] > 0 && sizes[i] != output_value->shape.dim[i]) {
-      xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
-        ": size %zu does not match output size %zu in dimension %zu",
-        xnn_node_type_to_string(xnn_node_type_static_slice), input_id, output_id, output_value->shape.dim[i], sizes[i], i);
-      return xnn_status_invalid_parameter;
-    }
-    if (offsets[i] + sizes[i] > input_value->shape.dim[i]) {
-      xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
-        ": size of dimension slice %zu, %zu + %zu = %zu, exceeds input dimension size %zu",
-        xnn_node_type_to_string(xnn_node_type_static_slice), input_id, output_id, i, offsets[i], sizes[i],
-        offsets[i] + sizes[i], output_value->shape.dim[i]);
-      return xnn_status_invalid_parameter;
-    }
-  }
-
   enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
+    case xnn_datatype_fp16:
+      compute_type = xnn_compute_type_fp16;
+      break;
     case xnn_datatype_fp32:
       compute_type = xnn_compute_type_fp32;
       break;

@@ -115,7 +115,7 @@ TEST(SUBGRAPH_NCHW, bottleneck) {
     .AddStaticTensorF32({1, 3, 3, 4}, TensorType::kDense, 7)
     .AddStaticTensorF32({4}, TensorType::kDense, 8)
     .AddDynamicTensorF32({1, 128, 128, 4}, 9)
-    .AddStaticTensorF32({8, 1, 1, 4}, TensorType::kSparse, 10)
+    .AddStaticTensorF32({4, 1, 1, 4}, TensorType::kSparse, 10)
     .AddStaticTensorF32({8}, TensorType::kDense, 11)
     .AddDynamicTensorF32({1, 128, 128, 8}, 12)
     .AddDynamicTensorF32({1, 128, 128, 8}, 13)

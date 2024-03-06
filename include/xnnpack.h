@@ -305,6 +305,41 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value(
   uint32_t flags,
   uint32_t* id_out);
 
+/// Validate the dimensions, channel_dim, zero point, datatype, and scale of a quantized tensor-type.
+///
+/// @param datatype - type of the tensor elements.
+/// @param zero_point - offset from zero to subtract from the quantized elements in the Value.
+/// @param scale - multiplication factor to convert quantized elements to real representation.
+/// @param num_dims - number of dimensions in the shape.
+/// @param dims - pointer to an array of @a num_dims shape dimensions. If num_dims is 0, this pointer can be NULL.
+///               XNNPACK does not keep any pointers to this array after the function returns.
+enum xnn_status xnn_validate_quantized_tensor(
+  enum xnn_datatype datatype,
+  int32_t zero_point,
+  float scale,
+  size_t num_dims,
+  const size_t* dims);
+
+/// Validate the dimensions, channel_dim, zero point, datatype, and scales of a channelwise quantized tensor-type.
+///
+/// @param datatype - type of the tensor elements.
+/// @param zero_point - offset from zero to subtract from the quantized elements in the Value.
+/// @param scale - per-channel multiplication factors to convert quantized elements to real representation.
+/// @param num_dims - number of dimensions in the shape.
+/// @param channel_dim - index of the channel dimension in the tensor with per-channel quantization parameters.
+///                      Typically this is the first dimension (dimension #0) of the filter tensors in the Convolution,
+///                      Deconvolution, and Fully Connected operators and the last dimension of the filter tensors in
+///                      the Depthwise Convolution operators.
+/// @param dims - pointer to an array of @a num_dims shape dimensions. If num_dims is 0, this pointer can be NULL.
+///               XNNPACK does not keep any pointers to this array after the function returns.
+enum xnn_status xnn_validate_channelwise_quantized_tensor(
+  enum xnn_datatype datatype,
+  int32_t zero_point,
+  const float* scale,
+  size_t num_dims,
+  size_t channel_dim,
+  const size_t* dims);
+
 /// Define a channelwise quantized tensor-type Value and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Value.
@@ -584,7 +619,8 @@ enum xnn_status xnn_define_depth_to_space(
 ///                   defined in the @a subgraph. Averaging is performed across the second-innermost dimension.
 /// @param output_id - Value ID for the output tensor. The output tensor must be a dense tensor with 2 or more
 ///                    dimensions defined in the @a subgraph.
-/// @param flags - binary features of the 1D Global Average Pooling Node. No supported flags are currently defined.
+/// @param flags - binary features of the 1D Global Average Pooling Node. The only currently supported value is
+///                XNN_FLAG_KEEP_DIMS.
 enum xnn_status xnn_define_global_average_pooling_1d(
   xnn_subgraph_t subgraph,
   float output_min,
@@ -603,7 +639,8 @@ enum xnn_status xnn_define_global_average_pooling_1d(
 ///                   dimensions.
 /// @param output_id - Value ID for the output tensor. The output tensor must be a dense tensor with 3 or more
 ///                    dimensions defined in the @a subgraph.
-/// @param flags - binary features of the 2D Global Average Pooling Node. No supported flags are currently defined.
+/// @param flags - binary features of the 2D Global Average Pooling Node. The only currently supported value is
+///                XNN_FLAG_KEEP_DIMS.
 enum xnn_status xnn_define_global_average_pooling_2d(
   xnn_subgraph_t subgraph,
   float output_min,
@@ -621,7 +658,8 @@ enum xnn_status xnn_define_global_average_pooling_2d(
 ///                   defined in the @a subgraph. Averaging is performed across the second-innermost dimension.
 /// @param output_id - Value ID for the output tensor. The output tensor must be a dense tensor with 2 or more
 ///                    dimensions defined in the @a subgraph.
-/// @param flags - binary features of the 1D Global Sum Pooling Node. No supported flags are currently defined.
+/// @param flags - binary features of the 1D Global Sum Pooling Node. The only currently supported value is
+///                XNN_FLAG_KEEP_DIMS.
 enum xnn_status xnn_define_global_sum_pooling_1d(
   xnn_subgraph_t subgraph,
   float output_min,
@@ -640,7 +678,8 @@ enum xnn_status xnn_define_global_sum_pooling_1d(
 ///                   dimensions.
 /// @param output_id - Value ID for the output tensor. The output tensor must be a dense tensor with 3 or more
 ///                    dimensions defined in the @a subgraph.
-/// @param flags - binary features of the 2D Global Sum Pooling Node. No supported flags are currently defined.
+/// @param flags - binary features of the 2D Global Sum Pooling Node. The only currently supported value is
+///                XNN_FLAG_KEEP_DIMS.
 enum xnn_status xnn_define_global_sum_pooling_2d(
   xnn_subgraph_t subgraph,
   float output_min,
@@ -1173,7 +1212,8 @@ enum xnn_status xnn_define_static_mean(
 /// The 2-Input Concatenate Node concatenates two tensors along a specified axis.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param axis - the axis to concatenate the two input tensors along
+/// @param axis - the axis to concatenate the two input tensors along. If this is less than zero, the number of
+///               dimensions is added to it.
 /// @param input1_id - Value ID for the first input tensor. The input tensor must be an N-dimensional tensor defined in
 ///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
 ///                    second input.
@@ -1186,7 +1226,7 @@ enum xnn_status xnn_define_static_mean(
 /// @param flags - binary features of the Concatenate Node. No supported flags are currently defined.
 enum xnn_status xnn_define_concatenate2(
   xnn_subgraph_t subgraph,
-  size_t axis,
+  int32_t axis,
   uint32_t input1_id,
   uint32_t input2_id,
   uint32_t output_id,
@@ -1197,7 +1237,8 @@ enum xnn_status xnn_define_concatenate2(
 /// The 3-Input Concatenate Node concatenates three tensors along a specified axis.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param axis - the axis to concatenate the three input tensors along
+/// @param axis - the axis to concatenate the two input tensors along. If this is less than zero, the number of
+///               dimensions is added to it.
 /// @param input1_id - Value ID for the first input tensor. The input tensor must be an N-dimensional tensor defined in
 ///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
 ///                    other inputs.
@@ -1213,7 +1254,7 @@ enum xnn_status xnn_define_concatenate2(
 /// @param flags - binary features of the Concatenate Node. No supported flags are currently defined.
 enum xnn_status xnn_define_concatenate3(
   xnn_subgraph_t subgraph,
-  size_t axis,
+  int32_t axis,
   uint32_t input1_id,
   uint32_t input2_id,
   uint32_t input3_id,
@@ -1225,7 +1266,8 @@ enum xnn_status xnn_define_concatenate3(
 /// The 4-Input Concatenate Node concatenates four tensors along a specified axis.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param axis - the axis to concatenate the four input tensors along
+/// @param axis - the axis to concatenate the two input tensors along. If this is less than zero, the number of
+///               dimensions is added to it.
 /// @param input1_id - Value ID for the first input tensor. The input tensor must be an N-dimensional tensor defined in
 ///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
 ///                    other inputs.
@@ -1244,7 +1286,7 @@ enum xnn_status xnn_define_concatenate3(
 /// @param flags - binary features of the Concatenate Node. No supported flags are currently defined.
 enum xnn_status xnn_define_concatenate4(
   xnn_subgraph_t subgraph,
-  size_t axis,
+  int32_t axis,
   uint32_t input1_id,
   uint32_t input2_id,
   uint32_t input3_id,
@@ -1252,9 +1294,34 @@ enum xnn_status xnn_define_concatenate4(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a 5-Input Concatenate Node and add it to a Subgraph.
+///
+/// The 5-Input Concatenate Node concatenates four tensors along a specified axis.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param axis - the axis to concatenate the two input tensors along. If this is less than zero, the number of
+///               dimensions is added to it.
+/// @param input1_id - Value ID for the first input tensor. The input tensor must be an N-dimensional tensor defined in
+///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
+///                    other inputs.
+/// @param input2_id - Value ID for the second input tensor. The input tensor must be an N-dimensional tensor defined in
+///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
+///                    other inputs.
+/// @param input3_id - Value ID for the third input tensor. The input tensor must be an N-dimensional tensor defined in
+///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
+///                    other inputs.
+/// @param input4_id - Value ID for the fourth input tensor. The input tensor must be an N-dimensional tensor defined in
+///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
+///                    other inputs.
+/// @param input5_id - Value ID for the fourth input tensor. The input tensor must be an N-dimensional tensor defined in
+///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
+///                    other inputs.
+/// @param output_id - Value ID for the output tensor. The output tensor must be a N-dimensional tensor defined
+///                    in the @a subgraph with each dimension equal to the dimension of all inputs, except the axis
+///                    dimension, where it is the sum of the corresponding dimensions of all inputs.
 enum xnn_status xnn_define_concatenate5(
   xnn_subgraph_t subgraph,
-  size_t axis,
+  int32_t axis,
   uint32_t input1_id,
   uint32_t input2_id,
   uint32_t input3_id,
@@ -1283,7 +1350,8 @@ enum xnn_status xnn_define_copy(
 /// The 2-Output Split Node splits an input tensor into two output tensors along a specified axis evenly.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param split_dim - the dimension to split the input tensor along
+/// @param split_dim - the dimension to split the input tensor along. If this is less than zero, the number of
+///                    dimensions is added to it.
 /// @param input_id - Value ID for the input tensor. The input tensor must be an N-dimensional tensor defined in the @a
 ///                   subgraph.
 /// @param output1_id - Value ID for the first output tensor. The output tensor must be an N-dimensional tensor defined
@@ -1295,7 +1363,7 @@ enum xnn_status xnn_define_copy(
 /// @param flags - binary features of the Split Node. No supported flags are currently defined.
 enum xnn_status xnn_define_even_split2(
   xnn_subgraph_t subgraph,
-  size_t split_dim,
+  int32_t split_dim,
   uint32_t input_id,
   uint32_t output1_id,
   uint32_t output2_id,
@@ -1306,7 +1374,8 @@ enum xnn_status xnn_define_even_split2(
 /// The 3-Output Split Node splits an input tensor into three output tensors along a specified axis evenly.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param split_dim - the dimension to split the input tensor along
+/// @param split_dim - the dimension to split the input tensor along. If this is less than zero, the number of
+///                    dimensions is added to it.
 /// @param input_id - Value ID for the input tensor. The input tensor must be an N-dimensional tensor defined in the @a
 ///                   subgraph.
 /// @param output1_id - Value ID for the first output tensor. The output tensor must be an N-dimensional tensor defined
@@ -1323,7 +1392,7 @@ enum xnn_status xnn_define_even_split2(
 /// @param flags - binary features of the Split Node. No supported flags are currently defined.
 enum xnn_status xnn_define_even_split3(
   xnn_subgraph_t subgraph,
-  size_t split_dim,
+  int32_t split_dim,
   uint32_t input_id,
   uint32_t output1_id,
   uint32_t output2_id,
@@ -1335,7 +1404,8 @@ enum xnn_status xnn_define_even_split3(
 /// The 4-Output Split Node splits an input tensor into four output tensors along a specified axis evenly.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param split_dim - the dimension to split the input tensor along
+/// @param split_dim - the dimension to split the input tensor along. If this is less than zero, the number of
+///                    dimensions is added to it.
 /// @param input_id - Value ID for the input tensor. The input tensor must be an N-dimensional tensor defined in the @a
 ///                   subgraph.
 /// @param output1_id - Value ID for the first output tensor. The output tensor must be an N-dimensional tensor defined
@@ -1356,7 +1426,7 @@ enum xnn_status xnn_define_even_split3(
 /// @param flags - binary features of the Split Node. No supported flags are currently defined.
 enum xnn_status xnn_define_even_split4(
   xnn_subgraph_t subgraph,
-  size_t split_dim,
+  int32_t split_dim,
   uint32_t input_id,
   uint32_t output1_id,
   uint32_t output2_id,
@@ -1680,6 +1750,21 @@ enum xnn_status xnn_define_square_root(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Reciprocal Square Root Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input_id - Value ID for the input tensor. The input tensor must be
+/// defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be
+/// defined in the @a subgraph, and its
+///                    shape must match the shape of the input tensor.
+/// @param flags - binary features of the Square Root Node. No supported flags
+/// are currently defined.
+enum xnn_status xnn_define_reciprocal_square_root(xnn_subgraph_t subgraph,
+                                                  uint32_t input_id,
+                                                  uint32_t output_id,
+                                                  uint32_t flags);
+
 /// Define a Static Slice Node add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
@@ -1934,7 +2019,7 @@ enum xnn_status xnn_reshape_external_value(
 ///
 /// @param external_id - external ID for the Value. The ID must be within the range of reversed Value IDs specified on
 ///                      the Subgraph creation. The external ID can not be XNN_INVALID_VALUE_ID.
-/// @param num_dims -  A valid pointer into which the number of dimensions in the shape will be written.
+/// @param num_dims -  A valid pointer into which the number of dimensions in the shape will be written. It can not be larger than XNN_MAX_TENSOR_DIMS.
 /// @param dims - pointer to an array of @a num_dims shape dimensions. This pointer can't be NULL. It must be large enough to hold
 ///               at least @a num_dims elements. XNNPACK does not keep any pointers to this array after the function returns.
 enum xnn_status xnn_get_external_value_shape(
@@ -1943,7 +2028,19 @@ enum xnn_status xnn_get_external_value_shape(
   size_t* num_dims,
   size_t* dims);
 
-/// Setup data pointers for external inputs and outputs in a Runtime object.
+/// Reshape the XNNPACK runtime.
+///
+/// Propgates the shapes of input tensors through the graph to determine the shapes of intermediate and output tensors.
+/// Memory is allocated if required. Output tensor shapes are returned by xnn_get_external_value_shape.
+///
+/// @param runtime - a Runtime object created with @ref xnn_create_runtime or @ref xnn_create_runtime_v2.
+enum xnn_status xnn_reshape_runtime(
+  xnn_runtime_t runtime);
+
+/// Deprecated. Use xnn_reshape_runtime and xnn_setup_runtime_v2.
+///
+/// Setup data pointers for external inputs and outputs in a Runtime object and
+/// allocate memory.
 ///
 /// @param runtime - a Runtime object created with @ref xnn_create_runtime or @ref xnn_create_runtime_v2.
 /// @param num_external_values - the number of external inputs and outputs specified in this call. This number must
@@ -1955,8 +2052,18 @@ enum xnn_status xnn_setup_runtime(
   size_t num_external_values,
   const struct xnn_external_value* external_values);
 
-enum xnn_status xnn_reshape_runtime(
-  xnn_runtime_t runtime);
+/// Setup data pointers for external inputs and outputs in a Runtime object.
+/// Should be called after xnn_reshape_runtime.
+///
+/// @param runtime - a Runtime object created with @ref xnn_create_runtime or @ref xnn_create_runtime_v2.
+/// @param num_external_values - the number of external inputs and outputs specified in this call. This number must
+///                              match the number of external inputs and outputs in the runtime, i.e. all external
+///                              inputs and outputs in the runtime must be specified in one call.
+/// @param external_values - array with location information for all external inputs and outputs in the runtime.
+enum xnn_status xnn_setup_runtime_v2(
+  xnn_runtime_t runtime,
+  size_t num_external_values,
+  const struct xnn_external_value* external_values);
 
 /// Execute forward pass for all operators in the runtime.
 ///
@@ -4530,9 +4637,6 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f16(
   uint32_t stride_width,
   uint32_t dilation_height,
   uint32_t dilation_width,
-  size_t channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
   float output_min,
   float output_max,
   uint32_t flags,
@@ -4543,6 +4647,9 @@ enum xnn_status xnn_reshape_max_pooling2d_nhwc_f16(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  size_t channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
   size_t* output_height_out,
   size_t* output_width_out,
   pthreadpool_t threadpool);
@@ -4563,9 +4670,6 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
   uint32_t stride_width,
   uint32_t dilation_height,
   uint32_t dilation_width,
-  size_t channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
   float output_min,
   float output_max,
   uint32_t flags,
@@ -4576,6 +4680,9 @@ enum xnn_status xnn_reshape_max_pooling2d_nhwc_f32(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  size_t channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
   size_t* output_height_out,
   size_t* output_width_out,
   pthreadpool_t threadpool);
@@ -4596,9 +4703,6 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_s8(
   uint32_t stride_width,
   uint32_t dilation_height,
   uint32_t dilation_width,
-  size_t channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
   int8_t output_min,
   int8_t output_max,
   uint32_t flags,
@@ -4609,6 +4713,9 @@ enum xnn_status xnn_reshape_max_pooling2d_nhwc_s8(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  size_t channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
   size_t* output_height_out,
   size_t* output_width_out,
   pthreadpool_t threadpool);
@@ -4629,9 +4736,6 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_u8(
   uint32_t stride_width,
   uint32_t dilation_height,
   uint32_t dilation_width,
-  size_t channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
   uint8_t output_min,
   uint8_t output_max,
   uint32_t flags,
@@ -4642,6 +4746,9 @@ enum xnn_status xnn_reshape_max_pooling2d_nhwc_u8(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  size_t channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
   size_t* output_height_out,
   size_t* output_width_out,
   pthreadpool_t threadpool);
@@ -5584,6 +5691,22 @@ enum xnn_status xnn_run_square_root_nc_f32(
   float* output,
   uint32_t flags,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_reciprocal_square_root_nc_f32(
+    uint32_t flags, xnn_operator_t* sqrt_op_out);
+
+enum xnn_status xnn_reshape_reciprocal_square_root_nc_f32(
+    xnn_operator_t sqrt_op, size_t batch_size, size_t channels,
+    size_t input_stride, size_t output_stride, pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_reciprocal_square_root_nc_f32(xnn_operator_t sqrt_op,
+                                                        const float* input,
+                                                        float* output);
+
+enum xnn_status xnn_run_reciprocal_square_root_nc_f32(
+    size_t channels, size_t input_stride, size_t output_stride,
+    size_t batch_size, const float* input, float* output, uint32_t flags,
+    pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_squared_difference_nd_f16(
   uint32_t flags,

@@ -98,34 +98,49 @@ void xnn_x8_transposec_ukernel__16x16_reuse_switch_zip_neon(
       switch (rem) {
         case 15:
           vst1q_u8(oN, v0_7.val[1]); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 14:
           vst1q_u8(oN, v0_7.val[0]); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 13:
           vst1q_u8(oN, v0_6.val[1]); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 12:
           vst1q_u8(oN, v0_6.val[0]); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 11:
           vst1q_u8(oN, v0_5.val[1]); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 10:
           vst1q_u8(oN, v0_5.val[0]); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 9:
           vst1q_u8(oN, v0_4.val[1]); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 8:
           vst1q_u8(oN, v0_4.val[0]); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 7:
           vst1q_u8(oN, v0_3.val[1]); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 6:
           vst1q_u8(oN, v0_3.val[0]); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 5:
           vst1q_u8(oN, v0_2.val[1]); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 4:
           vst1q_u8(oN, v0_2.val[0]); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 3:
           vst1q_u8(oN, v0_1.val[1]); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 2:
           vst1q_u8(oN, v0_1.val[0]); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 1:
           vst1q_u8(oN, v0_0.val[1]);
+          XNN_FALLTHROUGH
         case 0:
           vst1q_u8(o, v0_0.val[0]); o = (uint8_t*) ((uintptr_t) o + tile_hbytes);
           break;
@@ -264,34 +279,49 @@ void xnn_x8_transposec_ukernel__16x16_reuse_switch_zip_neon(
         switch (rem) {
           case 15:
             vst1_u8(oN, v15_low); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 14:
             vst1_u8(oN, v14_low); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 13:
             vst1_u8(oN, v13_low); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 12:
             vst1_u8(oN, v12_low); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 11:
             vst1_u8(oN, v11_low); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 10:
             vst1_u8(oN, v10_low); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 9:
             vst1_u8(oN, v9_low); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 8:
             vst1_u8(oN, v8_low); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 7:
             vst1_u8(oN, v7_low); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 6:
             vst1_u8(oN, v6_low); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 5:
             vst1_u8(oN, v5_low); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 4:
             vst1_u8(oN, v4_low); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 3:
             vst1_u8(oN, v3_low); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             vst1_u8(oN, v2_low); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             vst1_u8(oN, v1_low);
+            XNN_FALLTHROUGH
           case 0:
             vst1_u8(o, v0_low); o += 8;
             break;
@@ -321,34 +351,49 @@ void xnn_x8_transposec_ukernel__16x16_reuse_switch_zip_neon(
         switch (rem) {
           case 15:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u8(v15_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 14:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u8(v14_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 13:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u8(v13_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 12:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u8(v12_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 11:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u8(v11_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 10:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u8(v10_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 9:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u8(v9_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 8:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u8(v8_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 7:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u8(v7_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 6:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u8(v6_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 5:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u8(v5_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 4:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u8(v4_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 3:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u8(v3_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 2:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u8(v2_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 1:
             vst1_lane_u32((void*) oN, vreinterpret_u32_u8(v1_low), 0);
+            XNN_FALLTHROUGH
           case 0:
             vst1_lane_u32((void*) o, vreinterpret_u32_u8(v0_low), 0); o += 4;
             break;
@@ -377,34 +422,49 @@ void xnn_x8_transposec_ukernel__16x16_reuse_switch_zip_neon(
         switch (rem) {
           case 15:
             vst1_lane_u16((void*) oN, vreinterpret_u16_u8(v15_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 14:
             vst1_lane_u16((void*) oN, vreinterpret_u16_u8(v14_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 13:
             vst1_lane_u16((void*) oN, vreinterpret_u16_u8(v13_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 12:
             vst1_lane_u16((void*) oN, vreinterpret_u16_u8(v12_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 11:
             vst1_lane_u16((void*) oN, vreinterpret_u16_u8(v11_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 10:
             vst1_lane_u16((void*) oN, vreinterpret_u16_u8(v10_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 9:
             vst1_lane_u16((void*) oN, vreinterpret_u16_u8(v9_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 8:
             vst1_lane_u16((void*) oN, vreinterpret_u16_u8(v8_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 7:
             vst1_lane_u16((void*) oN, vreinterpret_u16_u8(v7_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 6:
             vst1_lane_u16((void*) oN, vreinterpret_u16_u8(v6_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 5:
             vst1_lane_u16((void*) oN, vreinterpret_u16_u8(v5_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 4:
             vst1_lane_u16((void*) oN, vreinterpret_u16_u8(v4_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 3:
             vst1_lane_u16((void*) oN, vreinterpret_u16_u8(v3_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             vst1_lane_u16((void*) oN, vreinterpret_u16_u8(v2_low), 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             vst1_lane_u16((void*) oN, vreinterpret_u16_u8(v1_low), 0);
+            XNN_FALLTHROUGH
           case 0:
             vst1_lane_u16((void*) o, vreinterpret_u16_u8(v0_low), 0); o += 2;
             break;
@@ -433,34 +493,49 @@ void xnn_x8_transposec_ukernel__16x16_reuse_switch_zip_neon(
         switch (rem) {
           case 15:
             vst1_lane_u8(oN, v15_low, 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 14:
             vst1_lane_u8(oN, v14_low, 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 13:
             vst1_lane_u8(oN, v13_low, 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 12:
             vst1_lane_u8(oN, v12_low, 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 11:
             vst1_lane_u8(oN, v11_low, 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 10:
             vst1_lane_u8(oN, v10_low, 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 9:
             vst1_lane_u8(oN, v9_low, 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 8:
             vst1_lane_u8(oN, v8_low, 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 7:
             vst1_lane_u8(oN, v7_low, 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 6:
             vst1_lane_u8(oN, v6_low, 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 5:
             vst1_lane_u8(oN, v5_low, 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 4:
             vst1_lane_u8(oN, v4_low, 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 3:
             vst1_lane_u8(oN, v3_low, 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             vst1_lane_u8(oN, v2_low, 0); oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             vst1_lane_u8(oN, v1_low, 0);
+            XNN_FALLTHROUGH
           case 0:
             vst1_lane_u8(o, v0_low, 0);
             break;

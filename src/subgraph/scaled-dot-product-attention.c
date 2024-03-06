@@ -445,6 +445,7 @@ static enum xnn_status check_inputs(
   }
 
   switch (input_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;
     default:
@@ -727,6 +728,9 @@ enum xnn_status xnn_define_scaled_dot_product_attention(
 
   enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output->datatype) {
+    case xnn_datatype_fp16:
+      compute_type = xnn_compute_type_fp16;
+      break;
     case xnn_datatype_fp32:
       compute_type = xnn_compute_type_fp32;
       break;

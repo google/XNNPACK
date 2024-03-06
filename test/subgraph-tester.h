@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include <unordered_map>
+#include <memory>
 #include <numeric>
 #include <random>
 #include <vector>
@@ -90,6 +91,17 @@ class SubgraphTester {
 
     std::random_device random_device;
     rng_ = std::mt19937(random_device());
+  }
+
+  inline SubgraphTester& AddInternalDynamicTensorF32(const std::vector<size_t>& dims,
+                                   uint32_t* id_out,
+                                   uint32_t flags = 0) {
+    const xnn_status status =
+        xnn_define_tensor_value(subgraph_.get(), xnn_datatype_fp32, dims.size(),
+                                dims.data(), nullptr, XNN_INVALID_VALUE_ID, flags, id_out);
+    EXPECT_EQ(status, xnn_status_success);
+
+    return *this;
   }
 
   inline SubgraphTester& AddDynamicTensorF32(const std::vector<size_t>& dims,
@@ -203,7 +215,6 @@ class SubgraphTester {
     EXPECT_EQ(id_out, external_id);
     return *this;
   }
-
 
   inline SubgraphTester& AddInputTensorF32(const std::vector<size_t>& dims, uint32_t external_id) {
     AddDynamicTensorF32(dims, external_id, XNN_VALUE_FLAG_EXTERNAL_INPUT);
@@ -555,20 +566,24 @@ class SubgraphTester {
     return subgraph_.get();
   }
 
- protected:
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> subgraph_{nullptr, xnn_delete_subgraph};
-  std::unordered_map<uint32_t, std::vector<char>> external_tensors_;
-  uint32_t output_id_;
+  float* GetExternalTensorDataF32(uint32_t external_id) {
+    return reinterpret_cast<float*>(external_tensors_[external_id].data());
+  }
 
- private:
   static inline size_t NumElements(const std::vector<size_t>& dims) {
     return std::accumulate(std::begin(dims), std::end(dims), size_t(1), std::multiplies<size_t>());
   }
 
-  std::vector<std::vector<char>> static_data_;
+ protected:
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> subgraph_{nullptr, xnn_delete_subgraph};
+  std::unordered_map<uint32_t, std::vector<char>> external_tensors_;
+  uint32_t output_id_;
   std::mt19937 rng_;
   std::uniform_real_distribution<float> f32dist = std::uniform_real_distribution<float>(-1.0f, +1.0f);
   std::uniform_int_distribution<int32_t> w8dist = std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max());
+
+ private:
+  std::vector<std::vector<char>> static_data_;
 };
 
 }  // namespace xnnpack

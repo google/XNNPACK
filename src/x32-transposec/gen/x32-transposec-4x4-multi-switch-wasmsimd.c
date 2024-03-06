@@ -70,11 +70,14 @@ void xnn_x32_transposec_ukernel__4x4_multi_switch_wasmsimd(
         case 3:
           wasm_v128_store(oN, v0_3);
           oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 2:
           wasm_v128_store(oN, v0_2);
           oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 1:
           wasm_v128_store(oN, v0_1);
+          XNN_FALLTHROUGH
         case 0:
           wasm_v128_store(o, v0_0);
           o = (uint32_t*) ((uintptr_t) o + tile_hbytes);
@@ -112,11 +115,14 @@ void xnn_x32_transposec_ukernel__4x4_multi_switch_wasmsimd(
           case 3:
             wasm_v128_store64_lane(oN, v0_3, 0);
             oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             wasm_v128_store64_lane(oN, v0_2, 0);
             oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             wasm_v128_store64_lane(oN, v0_1, 0);
+            XNN_FALLTHROUGH
           case 0:
             wasm_v128_store64_lane(o, v0_0, 0);
             o += 2;
@@ -136,11 +142,14 @@ void xnn_x32_transposec_ukernel__4x4_multi_switch_wasmsimd(
           case 3:
             wasm_v128_store32_lane(oN, v0_3, 0);
             oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             wasm_v128_store32_lane(oN, v0_2, 0);
             oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             wasm_v128_store32_lane(oN, v0_1, 0);
+            XNN_FALLTHROUGH
           case 0:
             wasm_v128_store32_lane(o, v0_0, 0);
             break;

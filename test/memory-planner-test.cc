@@ -388,6 +388,48 @@ TEST(MemoryPlanner, CannotReuseStaticValues) {
             xnn_tensor_get_rounded_size(&runtime->values[clamp_out_id]) + MEMORY_ARENA_EXTRA_BYTES);
 }
 
+TEST(MemoryPlanner, Add2WithLHSConstantInPlace) {
+  uint32_t input_id = 0;
+  uint32_t filter_id = 1;
+  uint32_t bias_id = XNN_INVALID_VALUE_ID;  // No bias tensor.
+  uint32_t conv_out = 2;
+  uint32_t add_constant_input_id = 3;
+  uint32_t add_out_id = 4;
+  uint32_t output_id = 5;
+
+  // Conv -> Add -> LeakyRelu
+  RuntimeTester tester(6);
+  tester
+    .AddInputTensorF32({1, 5, 5, 3}, input_id)
+    .AddStaticTensorF32({3, 3, 3, 3}, TensorType::kDense, filter_id)
+    .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)  // 108 bytes.
+    .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, add_constant_input_id)
+    .AddDynamicTensorF32({1, 3, 3, 3}, add_out_id)  // 108 bytes.
+    .AddOutputTensorF32({1, 3, 3, 3}, output_id)
+    .AddConvolution2D(
+        ConvolutionParams{
+            Padding{0, 0, 0, 0},
+            Kernel{3, 3},
+            Subsampling{1, 1},
+            Dilation{1, 1},
+            /*groups=*/1,
+            /*group_input_channels=*/3,
+            /*group_output_channels=*/3,
+        },
+        input_id, filter_id, bias_id, conv_out)
+    .AddAddition(add_constant_input_id, conv_out, add_out_id)
+    .AddLeakyRelu(1.0f, add_out_id, output_id);
+  tester.CreateRuntime();
+  tester.SetupRuntime();
+  xnn_runtime_t runtime = tester.Runtime();
+
+  // Need space for conv_out tensor and add out as add cannot be done in-place.
+  ASSERT_EQ(runtime->workspace->size,
+            xnn_tensor_get_rounded_size(&runtime->values[conv_out])
+            + MEMORY_ARENA_EXTRA_BYTES);
+  ASSERT_EQ(runtime->values[conv_out].data, runtime->values[add_out_id].data);
+}
+
 TEST(MemoryPlanner, Add2WithLHSConstant) {
   uint32_t input_id = 0;
   uint32_t filter_id = 1;
@@ -423,13 +465,14 @@ TEST(MemoryPlanner, Add2WithLHSConstant) {
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
-  // Should only need space for conv_out tensor.
+  // Need space for conv_out tensor and add out as add cannot be done in-place.
   ASSERT_EQ(runtime->workspace->size,
-            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) + MEMORY_ARENA_EXTRA_BYTES);
-  ASSERT_EQ(runtime->values[conv_out].data, runtime->values[add_out_id].data);
+            xnn_tensor_get_rounded_size(&runtime->values[conv_out])
+            + xnn_tensor_get_rounded_size(&runtime->values[add_out_id])
+            + MEMORY_ARENA_EXTRA_BYTES);
 }
 
-TEST(MemoryPlanner, Add2WithRHSConstant) {
+TEST(MemoryPlanner, Add2WithRHSConstantInPlace) {
   uint32_t input_id = 0;
   uint32_t filter_id = 1;
   uint32_t bias_id = XNN_INVALID_VALUE_ID;  // No bias tensor.
@@ -442,7 +485,7 @@ TEST(MemoryPlanner, Add2WithRHSConstant) {
   RuntimeTester tester(6);
   tester
     .AddInputTensorF32({1, 5, 5, 3}, input_id)
-    .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, filter_id)
+    .AddStaticTensorF32({3, 3, 3, 3}, TensorType::kDense, filter_id)
     .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)  // 108 bytes.
     .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, add_constant_input_id)
     .AddDynamicTensorF32({1, 3, 3, 3}, add_out_id)  // 108 bytes.
@@ -455,7 +498,7 @@ TEST(MemoryPlanner, Add2WithRHSConstant) {
             Dilation{1, 1},
             /*groups=*/1,
             /*group_input_channels=*/3,
-            /*group_output_channels=*/1,
+            /*group_output_channels=*/3,
         },
         input_id, filter_id, bias_id, conv_out)
     .AddAddition(conv_out, add_constant_input_id, add_out_id)
@@ -483,7 +526,7 @@ TEST(MemoryPlanner, Mul2WithLHSConstant) {
   RuntimeTester tester(6);
   tester
     .AddInputTensorF32({1, 5, 5, 3}, input_id)
-    .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, filter_id)
+    .AddStaticTensorF32({3, 3, 3, 3}, TensorType::kDense, filter_id)
     .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)  // 108 bytes.
     .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, mul_constant_input_id)
     .AddDynamicTensorF32({1, 3, 3, 3}, mul_out_id)  // 108 bytes.
@@ -496,7 +539,7 @@ TEST(MemoryPlanner, Mul2WithLHSConstant) {
             Dilation{1, 1},
             /*groups=*/1,
             /*group_input_channels=*/3,
-            /*group_output_channels=*/1,
+            /*group_output_channels=*/3,
         },
         input_id, filter_id, bias_id, conv_out)
     .AddMultiply(mul_constant_input_id, conv_out, mul_out_id)
@@ -524,7 +567,7 @@ TEST(MemoryPlanner, Mul2WithRHSConstant) {
   RuntimeTester tester(6);
   tester
     .AddInputTensorF32({1, 5, 5, 3}, input_id)
-    .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, filter_id)
+    .AddStaticTensorF32({3, 3, 3, 3}, TensorType::kDense, filter_id)
     .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)  // 108 bytes.
     .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, mul_constant_input_id)
     .AddDynamicTensorF32({1, 3, 3, 3}, mul_out_id)  // 108 bytes.
@@ -537,7 +580,7 @@ TEST(MemoryPlanner, Mul2WithRHSConstant) {
             Dilation{1, 1},
             /*groups=*/1,
             /*group_input_channels=*/3,
-            /*group_output_channels=*/1,
+            /*group_output_channels=*/3,
         },
         input_id, filter_id, bias_id, conv_out)
     .AddMultiply(conv_out, mul_constant_input_id, mul_out_id)
@@ -576,7 +619,7 @@ TEST(MemoryPlanner, Add2WithImplicitBroadcast) {
   tester
     .AddInputTensorF32({1, 1, 1, 3}, input1_id) // intentionally smaller
     .AddInputTensorF32({1, 5, 5, 3}, input2_id)
-    .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, filter_id)
+    .AddStaticTensorF32({3, 3, 3, 3}, TensorType::kDense, filter_id)
     .AddDynamicTensorF32({1, 1, 1, 3}, hard_swish_out)  // 108 bytes.
     .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)  // 108 bytes.
     .AddDynamicTensorF32({1, 3, 3, 3}, add_out)  // 108 bytes.
@@ -590,7 +633,7 @@ TEST(MemoryPlanner, Add2WithImplicitBroadcast) {
             Dilation{1, 1},
             /*groups=*/1,
             /*group_input_channels=*/3,
-            /*group_output_channels=*/1,
+            /*group_output_channels=*/3,
         },
         input2_id, filter_id, bias_id, conv_out)
     .AddAddition(hard_swish_out, conv_out, add_out)

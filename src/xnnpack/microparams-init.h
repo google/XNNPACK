@@ -816,6 +816,18 @@ DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_scalar_select_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
+#define DECLARE_INIT_F32_RSQRT_PARAMS_FUNCTION(fn_name)      \
+  XNN_INTERNAL size_t fn_name(                              \
+    union xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]);
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_F32_RSQRT_PARAMS_FUNCTION(xnn_init_f32_rsqrt_sse_params)
+  DECLARE_INIT_F32_RSQRT_PARAMS_FUNCTION(xnn_init_f32_rsqrt_avx_params)
+  DECLARE_INIT_F32_RSQRT_PARAMS_FUNCTION(xnn_init_f32_rsqrt_fma3_params)
+  DECLARE_INIT_F32_RSQRT_PARAMS_FUNCTION(xnn_init_f32_rsqrt_avx512_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
 #define DECLARE_INIT_F16_CHW_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                            \
     union xnn_f16_chw_params params[XNN_MIN_ELEMENTS(1)], \

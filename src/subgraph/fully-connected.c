@@ -338,6 +338,12 @@ enum xnn_status resize_fully_connected_output_tensor(
   const uint32_t input_id = opdata->inputs[0];
   const struct xnn_value* input = &values[input_id];
 
+  bool reshape_2d = opdata->flags & XNN_FLAG_TENSORFLOW_RESHAPE_2D;
+  if (reshape_2d) {
+    output->shape.num_dims = 2;
+  } else {
+    output->shape.num_dims = input->shape.num_dims;
+  }
   // Infer output channels.
   const uint32_t filter_output_channel_index = (opdata->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) ? 1 : 0;
   enum xnn_shape_inference_status status =
@@ -346,10 +352,9 @@ enum xnn_status resize_fully_connected_output_tensor(
     return xnn_status_invalid_parameter;
   }
 
-  if (opdata->flags & XNN_FLAG_TENSORFLOW_RESHAPE_2D) {
+  if (reshape_2d) {
     const uint32_t filter_input_channel_index = (opdata->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) ? 0 : 1;
     const size_t num_input_elements = xnn_shape_multiply_all_dims(&input->shape);
-    assert(output->shape.num_dims == 2);
     // propogate the input shape to output.
     status =
       xnn_tensor_propagate_dimension(output, 0, num_input_elements / filter->shape.dim[filter_input_channel_index]);
@@ -358,9 +363,6 @@ enum xnn_status resize_fully_connected_output_tensor(
     }
   }
   else {
-    // Make sure the input and output tensors have same number of dimensions.
-    assert(input->shape.num_dims == output->shape.num_dims);
-
     // Propagate input shape to output.
     for (size_t cur_dim = 0; cur_dim < input->shape.num_dims - 1; cur_dim++) {
       status = xnn_tensor_propagate_dimension(output, cur_dim, input->shape.dim[cur_dim]);
@@ -709,6 +711,11 @@ static inline enum xnn_compute_type validate_datatypes_with_bias(
           output_datatype == xnn_datatype_fp32)
       {
         return xnn_compute_type_fp32;
+      } else if (input_datatype == xnn_datatype_fp16 &&
+          bias_datatype == xnn_datatype_fp32 &&
+          output_datatype == xnn_datatype_fp16) {
+        // Flag: XNN_FLAG_FP32_STATIC_WEIGHTS
+        return xnn_compute_type_fp16;
       }
       break;
     case xnn_datatype_qcint4:
@@ -776,6 +783,9 @@ static inline enum xnn_compute_type validate_datatypes_without_bias(
     case xnn_datatype_fp32:
       if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp32) {
         return xnn_compute_type_fp32;
+      } else if (input_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_fp16) {
+        // Flag: XNN_FLAG_FP32_STATIC_WEIGHTS
+        return xnn_compute_type_fp16;
       }
       break;
     case xnn_datatype_qcint4:
@@ -842,6 +852,7 @@ enum xnn_status xnn_define_fully_connected(
   }
 
   switch (input_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
@@ -994,6 +1005,7 @@ enum xnn_status xnn_define_fully_connected(
     }
 
     switch (bias_value->datatype) {
+      case xnn_datatype_fp16:
       case xnn_datatype_fp32:
       case xnn_datatype_qint32:
         break;
@@ -1018,8 +1030,8 @@ enum xnn_status xnn_define_fully_connected(
   }
 
   switch (output_value->datatype) {
-    case xnn_datatype_fp32:
     case xnn_datatype_fp16:
+    case xnn_datatype_fp32:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
       break;

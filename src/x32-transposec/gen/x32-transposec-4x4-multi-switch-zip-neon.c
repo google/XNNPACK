@@ -62,10 +62,13 @@ void xnn_x32_transposec_ukernel__4x4_multi_switch_zip_neon(
       switch (rem) {
         case 3:
           vst1q_u32(oN, v0_1.val[1]); oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 2:
           vst1q_u32(oN, v0_1.val[0]); oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 1:
           vst1q_u32(oN, v0_0.val[1]);
+          XNN_FALLTHROUGH
         case 0:
           vst1q_u32(o, v0_0.val[0]); o = (uint32_t*) ((uintptr_t) o + tile_hbytes);
           break;
@@ -102,10 +105,13 @@ void xnn_x32_transposec_ukernel__4x4_multi_switch_zip_neon(
         switch (rem) {
           case 3:
             vst1_u32(oN, v3_low); oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             vst1_u32(oN, v2_low); oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             vst1_u32(oN, v1_low);
+            XNN_FALLTHROUGH
           case 0:
             vst1_u32(o, v0_low); o += 2;
             break;
@@ -123,10 +129,13 @@ void xnn_x32_transposec_ukernel__4x4_multi_switch_zip_neon(
         switch (rem) {
           case 3:
             vst1_lane_u32(oN, v3_low, 0); oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 2:
             vst1_lane_u32(oN, v2_low, 0); oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
           case 1:
             vst1_lane_u32(oN, v1_low, 0);
+            XNN_FALLTHROUGH
           case 0:
             vst1_lane_u32(o, v0_low, 0);
             break;

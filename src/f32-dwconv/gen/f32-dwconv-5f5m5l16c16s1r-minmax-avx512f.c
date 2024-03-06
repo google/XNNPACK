@@ -116,7 +116,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s1r__avx512f(
       if (c != 0) {
         assert(c >= 1);
         assert(c <= 15);
-        const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << c) - UINT32_C(1)));
+        const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << c) - UINT32_C(1)));
         __m512 vaccp0 = _mm512_load_ps(w);
 
 
@@ -228,7 +228,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s1r__avx512f(
       if (c != 0) {
         assert(c >= 1);
         assert(c <= 15);
-        const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << c) - UINT32_C(1)));
+        const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << c) - UINT32_C(1)));
         __m512 vaccp0 = _mm512_load_ps(b);
 
 
@@ -352,7 +352,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s1r__avx512f(
         assert(c >= 1);
         assert(c <= 15);
         __m512 vaccp0 = _mm512_load_ps(b);
-        const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << c) - UINT32_C(1)));
+        const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << c) - UINT32_C(1)));
 
         const __m512 vi0x0 = _mm512_maskz_loadu_ps(vmask, i0);
         __m512 vk0x0 = _mm512_load_ps(w);

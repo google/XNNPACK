@@ -134,7 +134,7 @@ void xnn_f32_dwconv_minmax_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST
       if (c != 0) {
         assert(c >= 1);
         assert(c <= ${CHANNEL_SUBTILE-1});
-        const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << c) - UINT32_C(1)));
+        const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << c) - UINT32_C(1)));
         __m512 vaccp0 = _mm512_load_ps(w);
 
         $for K in range(FIRST_PASS_TILE):
@@ -257,7 +257,7 @@ void xnn_f32_dwconv_minmax_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST
       if (c != 0) {
         assert(c >= 1);
         assert(c <= ${CHANNEL_SUBTILE-1});
-        const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << c) - UINT32_C(1)));
+        const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << c) - UINT32_C(1)));
         __m512 vaccp0 = _mm512_load_ps(b);
 
         $for K in range(MIDDLE_PASS_TILE):
@@ -402,7 +402,7 @@ void xnn_f32_dwconv_minmax_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST
         assert(c >= 1);
         assert(c <= ${CHANNEL_SUBTILE-1});
         __m512 vaccp0 = _mm512_load_ps(b);
-        const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << c) - UINT32_C(1)));
+        const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << c) - UINT32_C(1)));
         $for K in range(LAST_PASS_TILE):
 
           const __m512 vi${K}x0 = _mm512_maskz_loadu_ps(vmask, i${K});

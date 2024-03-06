@@ -222,3 +222,89 @@ TEST_F(Unpooling2DTestX32, matches_operator_api)
 
   ASSERT_EQ(subgraph_output, operator_output);
 }
+
+TEST_F(Unpooling2DTestX32, reshape_output)
+{
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  // Call subgraph API.
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+
+  uint32_t input_value_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, input_value_dims.size(), input_value_dims.data(), nullptr,
+                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_value_id));
+  ASSERT_NE(input_value_id, XNN_INVALID_NODE_ID);
+
+  uint32_t input_index_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, input_index_dims.size(), input_index_dims.data(),
+                          input_index.data(), XNN_INVALID_VALUE_ID, /*flags=*/0, &input_index_id));
+
+  uint32_t output_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
+                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_unpooling_2d(
+                          subgraph, padding_top, padding_right, padding_bottom, padding_left, pooling_height,
+                          pooling_width, input_value_id, input_index_id, output_id,
+                          /*flags=*/0));
+
+  ASSERT_EQ(subgraph->num_nodes, 1);
+  struct xnn_node* node = &subgraph->nodes[0];
+  ASSERT_EQ(node->type, xnn_node_type_unpooling_2d);
+  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
+  ASSERT_EQ(node->num_inputs, 2);
+  ASSERT_EQ(node->inputs[0], input_value_id);
+  ASSERT_EQ(node->inputs[1], input_index_id);
+  ASSERT_EQ(node->num_outputs, 1);
+  ASSERT_EQ(node->outputs[0], output_id);
+  ASSERT_EQ(node->flags, 0);
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+
+  ASSERT_EQ(
+    node->reshape(&runtime->opdata[0], subgraph->values, subgraph->num_values, /*threadpool=*/nullptr),
+    xnn_status_success);
+
+  input_value_dims[0] += 1;
+  input_value_dims[1] += 1;
+  input_value_dims[2] += 1;
+  input_value_dims[3] += 1;
+
+  input_index_dims[0] += 1;
+  input_index_dims[1] += 1;
+  input_index_dims[2] += 1;
+  input_index_dims[3] += 1;
+
+  ASSERT_EQ(
+    xnn_status_success, xnn_reshape_external_value(runtime, 0, input_value_dims.size(), input_value_dims.data()));
+  ASSERT_EQ(
+    xnn_status_success, xnn_reshape_external_value(runtime, 1, input_index_dims.size(), input_index_dims.data()));
+
+  ASSERT_EQ(
+    node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr),
+    xnn_status_reallocation_required);
+  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
+
+  const size_t expected_height =
+    xnn_compute_unpooling_output_dimension(input_value_dims[1], padding_top + padding_bottom, pooling_height);
+  const size_t expected_width =
+    xnn_compute_unpooling_output_dimension(input_value_dims[2], padding_left + padding_right, pooling_width);
+
+  ASSERT_EQ(output_shape->dim[0], input_value_dims[0]);
+  ASSERT_EQ(output_shape->dim[1], expected_height);
+  ASSERT_EQ(output_shape->dim[2], expected_width);
+  ASSERT_EQ(output_shape->dim[3], input_value_dims[3]);
+}

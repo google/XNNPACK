@@ -71,11 +71,14 @@ void xnn_x32_transposec_ukernel__4x4_reuse_switch_sse2(
         case 3:
           _mm_storeu_si128((__m128i*) oN, v0_3);
           oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 2:
           _mm_storeu_si128((__m128i*) oN, v0_2);
           oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+          XNN_FALLTHROUGH
         case 1:
           _mm_storeu_si128((__m128i*) oN, v0_1);
+          XNN_FALLTHROUGH
         case 0:
           _mm_storeu_si128((__m128i*) o, v0_0);
           o = (uint32_t*) ((uintptr_t) o + tile_hbytes);
@@ -116,11 +119,14 @@ void xnn_x32_transposec_ukernel__4x4_reuse_switch_sse2(
           case 3:
             _mm_storel_epi64((__m128i*) oN, v0_3);
             oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             _mm_storel_epi64((__m128i*) oN, v0_2);
             oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             _mm_storel_epi64((__m128i*) oN, v0_1);
+            XNN_FALLTHROUGH
           case 0:
             _mm_storel_epi64((__m128i*) o, v0_0);
             break;
@@ -140,11 +146,14 @@ void xnn_x32_transposec_ukernel__4x4_reuse_switch_sse2(
           case 3:
             unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_3));
             oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_2));
             oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_1));
+            XNN_FALLTHROUGH
           case 0:
             unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_0));
             break;

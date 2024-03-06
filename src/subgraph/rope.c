@@ -95,6 +95,7 @@ static enum xnn_status reshape_rope_operator(
   assert(output_id < num_values);
   struct xnn_value* output_value = values + output_id;
 
+  output_value->shape.num_dims = input_value->shape.num_dims;
   memcpy(output_value->shape.dim, input_value->shape.dim, input_value->shape.num_dims * sizeof(size_t));
   const size_t new_size = xnn_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
@@ -188,12 +189,16 @@ enum xnn_status xnn_define_rope(
     return status;
   }
 
-  if (input_value->datatype != xnn_datatype_fp32) {
-    xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-      xnn_node_type_to_string(xnn_node_type_rope), input_id,
-      xnn_datatype_to_string(input_value->datatype), input_value->datatype);
-    return xnn_status_invalid_parameter;
+  switch (input_value->datatype) {
+    case xnn_datatype_fp16:
+    case xnn_datatype_fp32:
+      break;
+    default:
+      xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+        xnn_node_type_to_string(xnn_node_type_rope), input_id,
+        xnn_datatype_to_string(input_value->datatype), input_value->datatype);
+      return xnn_status_invalid_parameter;
   }
 
   const struct xnn_value* weights_value = &subgraph->values[weights_id];
@@ -202,12 +207,16 @@ enum xnn_status xnn_define_rope(
     return status;
   }
 
-  if (weights_value->datatype != xnn_datatype_fp32) {
-    xnn_log_error(
-      "failed to define %s operator with weights ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-      xnn_node_type_to_string(xnn_node_type_rope), weights_id,
-      xnn_datatype_to_string(weights_value->datatype), weights_value->datatype);
-    return xnn_status_invalid_parameter;
+  switch (weights_value->datatype) {
+    case xnn_datatype_fp16:
+    case xnn_datatype_fp32:
+      break;
+    default:
+      xnn_log_error(
+        "failed to define %s operator with weights ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+        xnn_node_type_to_string(xnn_node_type_rope), weights_id,
+        xnn_datatype_to_string(weights_value->datatype), weights_value->datatype);
+      return xnn_status_invalid_parameter;
   }
 
   status = xnn_subgraph_check_output_node_id(xnn_node_type_rope, output_id, subgraph->num_values);
@@ -221,17 +230,20 @@ enum xnn_status xnn_define_rope(
     return status;
   }
 
-  status = xnn_subgraph_check_all_dims_match(xnn_node_type_rope, input_id, input_value, output_id, output_value);
-  if (status != xnn_status_success) {
-    return status;
-  }
-
-  if (output_value->datatype != xnn_datatype_fp32) {
-    xnn_log_error(
-      "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-      xnn_node_type_to_string(xnn_node_type_rope), output_id,
-      xnn_datatype_to_string(output_value->datatype), output_value->datatype);
-    return xnn_status_invalid_parameter;
+  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
+  switch (output_value->datatype) {
+    case xnn_datatype_fp16:
+      compute_type = xnn_compute_type_fp16;
+      break;
+    case xnn_datatype_fp32:
+      compute_type = xnn_compute_type_fp32;
+      break;
+    default:
+      xnn_log_error(
+        "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+        xnn_node_type_to_string(xnn_node_type_rope), output_id,
+        xnn_datatype_to_string(output_value->datatype), output_value->datatype);
+      return xnn_status_invalid_parameter;
   }
 
   status = xnn_subgraph_check_datatype_matches(xnn_node_type_subtract, input_id, input_value, output_id, output_value);
@@ -245,7 +257,7 @@ enum xnn_status xnn_define_rope(
   }
 
   node->type = xnn_node_type_rope;
-  node->compute_type = xnn_compute_type_fp32;
+  node->compute_type = compute_type;
   node->params.rope.max_tokens = max_tokens;
   node->num_inputs = 2;
   node->inputs[0] = input_id;

@@ -107,7 +107,7 @@ void xnn_f32_qs8_vcvt_ukernel__avx512skx_u96(
 
     // Prepare mask for valid elements (depends on batch).
     batch >>= XNN_LOG2_SIZEOF_FLOAT;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
+    const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
     __m512 vx0123 = _mm512_maskz_loadu_ps(vmask, input);
     vx0123 = _mm512_mul_ps(vx0123, vscale);

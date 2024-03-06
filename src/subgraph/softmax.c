@@ -151,14 +151,8 @@ enum xnn_status xnn_define_softmax(
     return status;
   }
 
-  if (input_value->shape.num_dims < 1) {
-    xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 ": number of dimensions must be at least 1",
-      xnn_node_type_to_string(xnn_node_type_softmax), input_id);
-    return xnn_status_invalid_parameter;
-  }
-
   switch (input_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;
     default:
@@ -180,13 +174,13 @@ enum xnn_status xnn_define_softmax(
     return status;
   }
 
-  status = xnn_subgraph_check_all_dims_match(xnn_node_type_softmax, input_id, input_value, output_id, output_value);
-  if (status != xnn_status_success) {
-    return status;
-  }
-
+  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
+    case xnn_datatype_fp16:
+      compute_type = xnn_compute_type_fp16;
+      break;
     case xnn_datatype_fp32:
+      compute_type = xnn_compute_type_fp32;
       break;
     default:
       xnn_log_error(
@@ -202,7 +196,7 @@ enum xnn_status xnn_define_softmax(
   }
 
   node->type = xnn_node_type_softmax;
-  node->compute_type = xnn_compute_type_fp32;
+  node->compute_type = compute_type;
   node->num_inputs = 1;
   node->inputs[0] = input_id;
   node->num_outputs = 1;
