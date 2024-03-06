@@ -100,10 +100,12 @@ std::vector<BatchMatMulTesterParams> CreateBatchTestParams() {
           }
 
           // Add the test parameters.
-          params.push_back({.name = oss.str(),
-                            .batch_dims_a = batch_dims_a,
-                            .batch_dims_b = batch_dims_b,
-                            .transpose_b = transpose_b > 0});
+          BatchMatMulTesterParams p;
+          p.name = oss.str();
+          p.batch_dims_a = batch_dims_a;
+          p.batch_dims_b = batch_dims_b;
+          p.transpose_b = transpose_b > 0;
+          params.push_back(std::move(p));
         }
       }
     }
@@ -130,19 +132,23 @@ std::vector<BatchMatMulTesterParams> CreateRegularTestParams() {
       }
 
       // Add the test parameters.
-      params.push_back({.name = std::string(batch.second) +
-                                (transpose_b ? "_transpose_b" : ""),
-                        .batch_dims_a = {batch.first},
-                        .batch_dims_b = {batch.first},
-                        .transpose_b = transpose_b > 0});
-      params.push_back({.name = std::string(batch.second) + "_bigger_matrices" +
-                                (transpose_b ? "_transpose_b" : ""),
-                        .batch_dims_a = {batch.first},
-                        .batch_dims_b = {batch.first},
-                        .m = 37,
-                        .k = 101,
-                        .n = 71,
-                        .transpose_b = transpose_b > 0});
+      BatchMatMulTesterParams p1;
+      p1.name = std::string(batch.second) +
+                                (transpose_b ? "_transpose_b" : "");
+      p1.batch_dims_a = {batch.first};
+      p1.batch_dims_b = {batch.first};
+      p1.transpose_b = transpose_b > 0;
+      params.push_back(std::move(p1));
+      BatchMatMulTesterParams p2;
+      p2.name = std::string(batch.second) + "_bigger_matrices" +
+                                (transpose_b ? "_transpose_b" : "");
+      p2.batch_dims_a = {batch.first};
+      p2.batch_dims_b = {batch.first};
+      p2.m = 37;
+      p2.k = 101;
+      p2.n = 71;
+      p2.transpose_b = transpose_b > 0;
+      params.push_back(std::move(p2));
     }
   }
 
