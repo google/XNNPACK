@@ -155,6 +155,8 @@
   string: "Fully Connected (NC, QD8, F16, QC4W)"
 - name: xnn_operator_type_fully_connected_nc_qd8_f32_qc4w
   string: "Fully Connected (NC, QD8, F32, QC4W)"
+- name: xnn_operator_type_fully_connected_nc_qd8_f32_qb4w
+  string: "Fully Connected (NC, QD8, F32, QB4W)"
 - name: xnn_operator_type_fully_connected_nc_qd8_f32_qc8w
   string: "Fully Connected (NC, QD8, F32, QC8W)"
 - name: xnn_operator_type_fully_connected_nc_qs8
