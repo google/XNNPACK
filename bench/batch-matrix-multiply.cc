@@ -65,8 +65,10 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state, const char* net)
   for (xnn_operator_t& op : ops) {
     size_t workspace_size = 0;
     size_t workspace_alignment = 0;
-    status =
-      xnn_reshape_batch_matrix_multiply_nc_f32(op, batch_size, m, k, n, &workspace_size, &workspace_alignment, nullptr);
+    status = xnn_reshape_batch_matrix_multiply_nc_f32(
+        op, /*num_batch_dims=*/1, /*batch_dims_a=*/&batch_size,
+        /*batch_dims_b=*/&batch_size, m, k, n, &workspace_size,
+        &workspace_alignment, nullptr);
 
     auto workspace = std::make_unique<std::vector<char>>(workspace_size);
     char* workspace_ptr = workspace->data();

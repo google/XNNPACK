@@ -3,23 +3,26 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>  // For std::generate.
-#include <array>      // For std::array.
-#include <cstddef>    // For size_t.
-#include <cstdint>    // For uint32_t.
-#include <memory>     // For std::unique_ptr.
-#include <numeric>    // For std::accumulate.
-#include <random>     // For std::random_device, std::mt19937, std::uniform_real_distribution.
-#include <vector>     // For std::vector.
-
-#include <fp16/fp16.h>
-#include <gtest/gtest.h>
-
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/subgraph.h>
+
+#include <algorithm>  // For std::generate.
+#include <array>      // For std::array.
+#include <cstddef>    // For size_t.
+#include <cstdint>    // For uint32_t.
+#include <iterator>
+#include <memory>     // For std::unique_ptr.
+#include <numeric>    // For std::accumulate.
+#include <ostream>
+#include <random>  // For std::random_device, std::mt19937, std::uniform_real_distribution.
+#include <string>
+#include <vector>  // For std::vector.
+
+#include <gtest/gtest.h>
+#include <fp16/fp16.h>
 
 template <class T, class BiasType = T> class BatchMatrixMultiplyTestBase : public ::testing::Test {
 protected:
@@ -76,7 +79,7 @@ protected:
   std::uniform_real_distribution<float> f32dist;
   std::uniform_int_distribution<size_t> dim_dist;
 
-  uint32_t batch_size;
+  size_t batch_size;
   size_t m;
   size_t k;
   size_t n;
@@ -259,9 +262,11 @@ TEST_F(BatchMatrixMultiplyTestF16, matches_operator_api)
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_batch_matrix_multiply_nc_f16(
-                          op, batch_size, m, k, n,
-                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+      xnn_status_success,
+      xnn_reshape_batch_matrix_multiply_nc_f16(
+          op, /*num_batch_dims=*/1,
+          /*batch_dims_a=*/&batch_size, /*batch_dims_b=*/&batch_size, m, k, n,
+          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
@@ -343,9 +348,11 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api)
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_batch_matrix_multiply_nc_f32(
-                          op, batch_size, m, k, n,
-                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+      xnn_status_success,
+      xnn_reshape_batch_matrix_multiply_nc_f32(
+          op, /*num_batch_dims=*/1,
+          /*batch_dims_a=*/&batch_size, /*batch_dims_b=*/&batch_size, m, k, n,
+          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
@@ -427,9 +434,11 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api_transposed)
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_batch_matrix_multiply_nc_f32(
-                          op, batch_size, m, k, n,
-                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+      xnn_status_success,
+      xnn_reshape_batch_matrix_multiply_nc_f32(
+          op, /*num_batch_dims=*/1,
+          /*batch_dims_a=*/&batch_size, /*batch_dims_b=*/&batch_size, m, k, n,
+          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
@@ -489,13 +498,11 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api_transposed)
 // Define a subgraph with a single batch matrix multiply node with 2 inputs and 1 output of the specified dimensions.
 // Returns the result of defining the node, a xnn_status.
 namespace {
+
 void DefineBatchMatrixMultiplySubgraphHelper(
-    xnn_status* status_out,
-    std::vector<size_t> input1_dims,
-    std::vector<size_t> input2_dims,
-    std::vector<size_t> output_dims,
-    xnn_subgraph_t *subgraph_out,
-    uint32_t batch_matrix_multiply_flags = 0) {
+    xnn_status* status_out, std::vector<size_t> input1_dims,
+    std::vector<size_t> input2_dims, std::vector<size_t> output_dims,
+    xnn_subgraph_t* subgraph_out, uint32_t batch_matrix_multiply_flags = 0) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, /*flags=*/0, &subgraph));
@@ -525,20 +532,43 @@ void DefineBatchMatrixMultiplySubgraphHelper(
   *subgraph_out = subgraph;
 }
 
-void DefineBatchMatrixMultiplySubgraph(
-    xnn_status* status_out,
-    std::vector<size_t> input1_dims,
-    std::vector<size_t> input2_dims,
-    std::vector<size_t> output_dims,
+void DefineAndReshapeBatchMatrixMultiplySubgraph(
+    xnn_status* status_out, std::vector<size_t> input1_dims,
+    std::vector<size_t> input2_dims, std::vector<size_t> expected_output_dims,
     uint32_t batch_matrix_multiply_flags = 0) {
   xnn_subgraph_t subgraph = nullptr;
-  DefineBatchMatrixMultiplySubgraphHelper(status_out, input1_dims, input2_dims, output_dims,
-                                     &subgraph, batch_matrix_multiply_flags);
-  xnn_delete_subgraph(subgraph);
+  DefineBatchMatrixMultiplySubgraphHelper(status_out, input1_dims, input2_dims,
+                                          expected_output_dims, &subgraph,
+                                          batch_matrix_multiply_flags);
+  if (*status_out != xnn_status_success) {
+    return;
+  }
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)>
+      clean_up_subgraph(subgraph, xnn_delete_subgraph);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> clean_up_runtime(
+      runtime, xnn_delete_runtime);
+
+  *status_out = xnn_reshape_runtime(runtime);
+
+  // Check whether the output shape is as expected.
+  const xnn_shape* output_shape =
+      &runtime->values[subgraph->nodes[0].outputs[0]].shape;
+  std::vector<size_t> output_dims_vector(
+      output_shape->dim, output_shape->dim + output_shape->num_dims);
+  EXPECT_EQ(output_dims_vector.size(), expected_output_dims.size());
+  for (size_t i = 0; i < output_dims_vector.size(); i++) {
+    EXPECT_EQ(output_dims_vector[i], expected_output_dims[i]);
+  }
 }
 }  // namespace
 
-TEST(BatchMatrixMultiplyTest, reshape_input1) {
+TEST(BatchMatrixMultiplyReshapeTest, reshape_input1) {
   std::vector<size_t> input1_dims = {2, 3, 4};
   std::vector<size_t> input2_dims = {2, 4, 5};
   std::vector<size_t> output_dims = {2, 3, 5};
@@ -597,102 +627,156 @@ TEST(BatchMatrixMultiplyTest, reshape_input1) {
   ASSERT_EQ(output_shape->dim[2], input2_dims[2]);
 }
 
-TEST(BatchMatrixMultiplyTest, input1_num_dim_less_than_3_fails) {
-  std::vector<size_t> input1_dims = {2, 3};
-  std::vector<size_t> input2_dims = {2, 7, 5};
-  std::vector<size_t> output_dims = {2, 3, 7};
-  xnn_status status = xnn_status_success;
-  DefineBatchMatrixMultiplySubgraph(&status, input1_dims, input2_dims, output_dims);
-  ASSERT_EQ(xnn_status_invalid_parameter, status);
+struct BatchMatrixMultiplyTestParams {
+  std::string name;
+  std::vector<size_t> input_a_dims;
+  std::vector<size_t> input_b_dims;
+  std::vector<size_t> expected_output_dims;
+  uint32_t flags = 0;
+  enum xnn_status expected_status = xnn_status_success;
+};
+
+template <typename T>
+std::ostream& PrintVector(std::ostream& os, const std::vector<T>& v) {
+  os << "[";
+  std::copy(v.begin(), v.end() - 1, std::ostream_iterator<T>(os, ", "));
+  os << v.back() << "]";
+  return os;
 }
 
-TEST(BatchMatrixMultiplyTest, input2_num_dim_less_than_3_fails) {
-  std::vector<size_t> input1_dims = {2, 3, 5};
-  std::vector<size_t> input2_dims = {2, 7};
-  std::vector<size_t> output_dims = {2, 3, 7};
-  xnn_status status = xnn_status_success;
-  DefineBatchMatrixMultiplySubgraph(&status, input1_dims, input2_dims, output_dims);
-  ASSERT_EQ(xnn_status_invalid_parameter, status);
+std::ostream& operator<<(std::ostream& os,
+                         const BatchMatrixMultiplyTestParams& params) {
+  os << "{input_a_dims=";
+  PrintVector(os, params.input_a_dims);
+  os << ", input_b_dims=";
+  PrintVector(os, params.input_b_dims);
+  os << ", expected_output_dims=";
+  PrintVector(os, params.input_a_dims);
+  os << ", flags=" << params.flags
+     << ", expected_status=" << params.expected_status << "}";
+  return os;
 }
 
-TEST(BatchMatrixMultiplyTest, output_num_dim_less_than_3_fails)
-{
-  std::vector<size_t> input1_dims = {2, 3, 5};
-  std::vector<size_t> input2_dims = {2, 7, 5};
-  std::vector<size_t> output_dims = {2, 3};
+using BatchMatrixMultiplyTest =
+    testing::TestWithParam<BatchMatrixMultiplyTestParams>;
+
+TEST_P(BatchMatrixMultiplyTest, DefineAndReshape) {
+  const BatchMatrixMultiplyTestParams& params = GetParam();
   xnn_status status = xnn_status_success;
-  DefineBatchMatrixMultiplySubgraph(&status, input1_dims, input2_dims, output_dims);
-  ASSERT_EQ(xnn_status_invalid_parameter, status);
+  DefineAndReshapeBatchMatrixMultiplySubgraph(
+      &status, params.input_a_dims, params.input_b_dims,
+      params.expected_output_dims, params.flags);
+  ASSERT_EQ(params.expected_status, status);
 }
 
-TEST(BatchMatrixMultiplyTest, input1_num_dim_ne_input2_num_dim) {
-  std::vector<size_t> input1_dims = {2, 3, 5};
-  std::vector<size_t> input2_dims = {2, 7, 5, 5};
-  std::vector<size_t> output_dims = {2, 3, 7};
-  xnn_status status = xnn_status_success;
-  DefineBatchMatrixMultiplySubgraph(&status, input1_dims, input2_dims, output_dims);
-  ASSERT_EQ(xnn_status_invalid_parameter, status);
-}
+INSTANTIATE_TEST_SUITE_P(
+    BMM, BatchMatrixMultiplyTest,
+    testing::ValuesIn<BatchMatrixMultiplyTestParams>({
+        {.name = "input_a_num_dim_less_than_3",
+         .input_a_dims = {3, 7},
+         .input_b_dims = {2, 7, 5},
+         .expected_output_dims = {2, 3, 5}},
 
-TEST(BatchMatrixMultiplyTest, input1_batch_dim_ne_input2_dim) {
-  std::vector<size_t> input1_dims = {3, 3, 5};
-  std::vector<size_t> input2_dims = {2, 7, 5};
-  std::vector<size_t> output_dims = {2, 3, 7};
-  xnn_status status = xnn_status_success;
-  DefineBatchMatrixMultiplySubgraph(&status, input1_dims, input2_dims, output_dims);
-  ASSERT_EQ(xnn_status_invalid_parameter, status);
-}
+        {.name = "input_b_num_dim_less_than_3",
+         .input_a_dims = {2, 3, 5},
+         .input_b_dims = {5, 7},
+         .expected_output_dims = {2, 3, 7}},
 
-TEST(BatchMatrixMultiplyTest, input1_k_dim_ne_input2_dim) {
-  std::vector<size_t> input1_dims = {2, 3, 7};
-  std::vector<size_t> input2_dims = {2, 5, 7};
-  std::vector<size_t> output_dims = {2, 3, 7};
-  xnn_status status = xnn_status_success;
-  DefineBatchMatrixMultiplySubgraph(&status, input1_dims, input2_dims, output_dims);
-  ASSERT_EQ(xnn_status_invalid_parameter, status);
-}
+        {.name = "output_num_dim_less_than_3_fails",
+         .input_a_dims = {2, 3, 5},
+         .input_b_dims = {2, 7, 5},
+         .expected_output_dims = {2, 3},
+         .expected_status = xnn_status_invalid_parameter},
 
-TEST(BatchMatrixMultiplyTest, input1_k_dim_ne_transposed_input2_dim) {
-  std::vector<size_t> input1_dims = {2, 3, 7};
-  std::vector<size_t> input2_dims = {2, 7, 5};
-  std::vector<size_t> output_dims = {2, 3, 7};
-  xnn_status status = xnn_status_success;
-  DefineBatchMatrixMultiplySubgraph(&status, input1_dims, input2_dims, output_dims, XNN_FLAG_TRANSPOSE_B);
-  ASSERT_EQ(xnn_status_invalid_parameter, status);
-}
+        {.name = "input_a_num_dim_ne_input2_num_dim",
+         .input_a_dims = {2, 3, 5},
+         .input_b_dims = {2, 7, 5, 5},
+         .expected_output_dims = {2, 3, 7},
+         .expected_status = xnn_status_invalid_parameter},
 
-TEST(BatchMatrixMultiplyTest, output_num_dim_ne_input1_num_dim) {
-  std::vector<size_t> input1_dims = {2, 3, 5};
-  std::vector<size_t> input2_dims = {2, 7, 5};
-  std::vector<size_t> output_dims = {2, 3, 7, 5};
-  xnn_status status = xnn_status_success;
-  DefineBatchMatrixMultiplySubgraph(&status, input1_dims, input2_dims, output_dims);
-  ASSERT_EQ(xnn_status_invalid_parameter, status);
-}
+        {.name = "input_a_k_dim_ne_input2_dim",
+         .input_a_dims = {2, 3, 7},
+         .input_b_dims = {2, 5, 7},
+         .expected_output_dims = {2, 3, 7},
+         .expected_status = xnn_status_invalid_parameter},
 
-TEST(BatchMatrixMultiplyTest, output_m_ne_input_m) {
-  std::vector<size_t> input1_dims = {2, 3, 5};
-  std::vector<size_t> input2_dims = {2, 7, 5};
-  std::vector<size_t> output_dims = {2, 5, 7};
-  xnn_status status = xnn_status_success;
-  DefineBatchMatrixMultiplySubgraph(&status, input1_dims, input2_dims, output_dims);
-  ASSERT_EQ(xnn_status_invalid_parameter, status);
-}
+        {.name = "input_a_k_dim_ne_transposed_input2_dim",
+         .input_a_dims = {2, 3, 7},
+         .input_b_dims = {2, 7, 5},
+         .expected_output_dims = {2, 3, 7},
+         .flags = XNN_FLAG_TRANSPOSE_B,
+         .expected_status = xnn_status_invalid_parameter},
 
-TEST(BatchMatrixMultiplyTest, output_n_ne_input1_n) {
-  std::vector<size_t> input1_dims = {2, 3, 5};
-  std::vector<size_t> input2_dims = {2, 5, 7};
-  std::vector<size_t> output_dims = {2, 3, 5};
-  xnn_status status = xnn_status_success;
-  DefineBatchMatrixMultiplySubgraph(&status, input1_dims, input2_dims, output_dims);
-  ASSERT_EQ(xnn_status_invalid_parameter, status);
-}
+        {.name = "output_num_dim_ne_input1_num_dim",
+         .input_a_dims = {2, 3, 5},
+         .input_b_dims = {2, 7, 5},
+         .expected_output_dims = {2, 3, 7, 5},
+         .expected_status = xnn_status_invalid_parameter},
 
-TEST(BatchMatrixMultiplyTest, output_n_ne_transposed_input2_n) {
-  std::vector<size_t> input1_dims = {2, 3, 5};
-  std::vector<size_t> input2_dims = {2, 7, 5};
-  std::vector<size_t> output_dims = {2, 3, 5};
-  xnn_status status = xnn_status_success;
-  DefineBatchMatrixMultiplySubgraph(&status, input1_dims, input2_dims, output_dims, XNN_FLAG_TRANSPOSE_B);
-  ASSERT_EQ(xnn_status_invalid_parameter, status);
-}
+        {.name = "output_m_ne_input_m",
+         .input_a_dims = {2, 3, 5},
+         .input_b_dims = {2, 7, 5},
+         .expected_output_dims = {2, 5, 7},
+         .expected_status = xnn_status_invalid_parameter},
+
+        {.name = "output_shape",
+         .input_a_dims = {2, 3, 5},
+         .input_b_dims = {2, 5, 7},
+         .expected_output_dims = {2, 3, 7}},
+
+        {.name = "output_shape_transposed",
+         .input_a_dims = {2, 3, 5},
+         .input_b_dims = {2, 7, 5},
+         .expected_output_dims = {2, 3, 7},
+         .flags = XNN_FLAG_TRANSPOSE_B},
+
+        // Test broadcasting in the batch dimensions of the first input.
+        {.name = "input_a_batch_dim_ne_input2_dim",
+         .input_a_dims = {3, 3, 5},
+         .input_b_dims = {2, 7, 5},
+         .expected_output_dims = {2, 3, 7},
+         .expected_status = xnn_status_invalid_parameter},
+
+        {.name = "input_a_batch_dim_bcast_one",
+         .input_a_dims = {1, 3, 5},
+         .input_b_dims = {2, 5, 7},
+         .expected_output_dims = {2, 3, 7}},
+
+        {.name = "input_a_batch_dim_bcast_mult",
+         .input_a_dims = {2, 3, 5},
+         .input_b_dims = {6, 5, 7},
+         .expected_output_dims = {6, 3, 7}},
+
+        {.name = "input_b_batch_dim_bcast_one",
+         .input_a_dims = {2, 3, 5},
+         .input_b_dims = {1, 5, 7},
+         .expected_output_dims = {2, 3, 7}},
+
+        {.name = "input_b_batch_dim_bcast_mult",
+         .input_a_dims = {6, 3, 5},
+         .input_b_dims = {2, 5, 7},
+         .expected_output_dims = {6, 3, 7}},
+
+        {.name = "both_inputs_batch_dim_bcast_mult",
+         .input_a_dims = {2, 6, 3, 5},
+         .input_b_dims = {4, 2, 5, 7},
+         .expected_output_dims = {4, 6, 3, 7}},
+
+        {.name = "both_inputs_batch_dim_bcast_one",
+         .input_a_dims = {1, 6, 3, 5},
+         .input_b_dims = {4, 1, 5, 7},
+         .expected_output_dims = {4, 6, 3, 7}},
+
+        {.name = "input_a_missing_batch_dim",
+         .input_a_dims = {6, 3, 5},
+         .input_b_dims = {4, 1, 5, 7},
+         .expected_output_dims = {4, 6, 3, 7}},
+
+        {.name = "input_b_missing_batch_dim",
+         .input_a_dims = {4, 1, 3, 5},
+         .input_b_dims = {6, 5, 7},
+         .expected_output_dims = {4, 6, 3, 7}},
+    }),
+    [](const testing::TestParamInfo<BatchMatrixMultiplyTest::ParamType>& info) {
+      return info.param.name;
+    });

@@ -2541,11 +2541,15 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "batch_matrix_multiply_nc_test",
+    timeout = "moderate",
     srcs = [
         "batch-matrix-multiply-nc.cc",
         "batch-matrix-multiply-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS + ["//:aligned_allocator"],
+    shard_count = 2,
+    deps = OPERATOR_TEST_DEPS + [
+        "//:aligned_allocator",
+    ],
 )
 
 xnnpack_unit_test(

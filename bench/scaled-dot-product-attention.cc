@@ -114,9 +114,11 @@ void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::Stat
 
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
+  const size_t batch_dims = batch_size * heads;
   status = xnn_reshape_batch_matrix_multiply_nc_f32(
-    qk_bmm_op, batch_size * heads, query_tokens, channels, key_value_tokens,
-    &workspace_size, &workspace_alignment, /*threadpool=*/nullptr);
+      qk_bmm_op, /*num_batch_dims=*/1, /*batch_dims_a=*/&batch_dims,
+      /*batch_dims_b=*/&batch_dims, query_tokens, channels, key_value_tokens,
+      &workspace_size, &workspace_alignment, /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Batch Matrix Multiply operator");
   }
@@ -151,8 +153,9 @@ void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::Stat
   size_t workspace_size2 = 0;
   size_t workspace_alignment2 = 0;
   status = xnn_reshape_batch_matrix_multiply_nc_f32(
-    attn_value_bmm_op, batch_size * heads, query_tokens, key_value_tokens, channels,
-    &workspace_size2, &workspace_alignment2, /*threadpool=*/nullptr);
+      attn_value_bmm_op, /*num_batch_dims=*/1, /*batch_dims_a=*/&batch_dims,
+      /*batch_dims_b=*/&batch_dims, query_tokens, key_value_tokens, channels,
+      &workspace_size2, &workspace_alignment2, /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Batch Matrix Multiply operator");
   }
