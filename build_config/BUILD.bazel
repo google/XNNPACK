@@ -234,6 +234,12 @@ config_setting(
     },
 )
 
+# Duummy lexan config to avoid bazel errors.
+config_setting(
+    name = "windows_lexan",
+    values = {"cpu": "x64_windows"},
+)
+
 ######################## Composite build configurations #######################
 
 selects.config_setting_group(
