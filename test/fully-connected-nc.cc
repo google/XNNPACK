@@ -1328,6 +1328,34 @@ TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, small_batch_bl_eq_kr_no_bias) {
 //     }
 // }
 
+TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, small_batch_bl_eq_kr_no_bias_opt_packing) {
+  for (size_t ic=16; ic<=32; ic+=8){
+    FullyConnectedOperatorTester()
+      .has_bias(false)
+      .batch_size(13)
+      .output_channels(24)
+      .input_channels(ic)
+      .block_size(8)
+      .kernel_zero_point(8)
+      .iterations(3)
+      .TestQD8F32QB4W();
+    }
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, small_batch_bl_eq_kr_with_bias_opt_packing) {
+  for (size_t ic=16; ic<=32; ic+=8){
+    FullyConnectedOperatorTester()
+      .has_bias(true)
+      .batch_size(14)
+      .output_channels(32)
+      .input_channels(ic)
+      .block_size(8)
+      .kernel_zero_point(8)
+      .iterations(3)
+      .TestQD8F32QB4W();
+    }
+}
+
 TEST(FULLY_CONNECTED_NC_QD8_F32_QC4W, unit_batch) {
   FullyConnectedOperatorTester()
     .batch_size(1)

@@ -159,8 +159,7 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, bl_eq_kc) {
   size_t bl = kc;
   size_t k_num_blocks = round_up_po2(kc, kr) / bl;
 
-  std::vector<int32_t> b(g * nc);
-  std::iota(b.begin(), b.end(), 0);
+  std::vector<float> b(g * nc);
   std::vector<uint8_t> k(g * nc * kc / 2);
   k[0] = 0x98; k[1] = 0xBA; k[2] = 0xDC; k[3] = 0xFE; k[4] = 0x10; k[5] = 0x32; k[6] = 0x54; k[7] = 0x76;
   size_t extra_bytes_bl = sizeof(float);
@@ -172,7 +171,7 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, bl_eq_kc) {
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
 
   xnn_pack_qs8_qc4w_gemm_bl_goi_w(g, nc, kc, nr, kr, sr, bl,
-    k.data(), b.data(), /*scale=*/scale.data(), packed_weights.data(), extra_bytes_bl, extra_bytes_n, /*params=*/&a);
+    k.data(), nullptr, /*scale=*/scale.data(), packed_weights.data(), extra_bytes_bl, extra_bytes_n, /*params=*/&a);
 
   size_t k_stride = round_up_po2(kc, kr * sr * 2 /* planes */);
 
@@ -187,7 +186,6 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, bl_eq_kc) {
   size_t start_offset = ksum_bytes + k_bytes / k_num_blocks;
   size_t stride = ksum_bytes + k_bytes + block_bytes + bias_bytes;
   size_t block_stride = (bl * nr) / 2 +  (sizeof(float) * nr);
-
   xnn_init_qs8_qc8w_bl_scale_fp32_params(
     /*channels=*/ nc,
     /*channels_tile=*/ nr,
@@ -225,8 +223,7 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, bl_lt_kc) {
   size_t bl = 8;
   size_t k_num_blocks = kc / bl;
 
-  std::vector<int32_t> b(g * nc);
-  std::iota(b.begin(), b.end(), 0);
+  std::vector<float> b(g * nc);
   std::vector<uint8_t> k(g * nc * kc / 2);
   k[0] = 0x98; k[1] = 0xBA; k[2] = 0xDC; k[3] = 0xFE; k[4] = 0x10; k[5] = 0x32; k[6] = 0x54; k[7] = 0x76;
   size_t extra_bytes_n = sizeof(float);
@@ -238,10 +235,11 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, bl_lt_kc) {
 
 
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
-  xnn_pack_qs8_qc4w_gemm_bl_goi_w(g, nc, kc, nr, kr, sr, bl,
-    k.data(), b.data(), /*scale=*/scale.data(), packed_weights.data(), extra_bytes_bl, extra_bytes_n, /*params=*/&a);
 
-    size_t k_stride = round_up_po2(kc, kr * sr * 2 /* planes */);
+  xnn_pack_qs8_qc4w_gemm_bl_goi_w(g, nc, kc, nr, kr, sr, bl,
+    k.data(), nullptr, /*scale=*/scale.data(), packed_weights.data(), extra_bytes_bl, extra_bytes_n, /*params=*/&a);
+
+  size_t k_stride = round_up_po2(kc, kr * sr * 2 /* planes */);
 
   k_stride = round_up_po2(k_stride, 2) >> 1;
 
@@ -253,6 +251,7 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, bl_lt_kc) {
   size_t start_offset = ksum_bytes + k_bytes / k_num_blocks;
   size_t stride = ksum_bytes + k_bytes + block_bytes + bias_bytes;
   size_t block_stride = (bl * nr) / 2 +  (sizeof(float) * nr);
+
 
   xnn_init_qs8_qc8w_bl_scale_fp32_params(
     /*channels=*/ nc,
@@ -282,6 +281,119 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, bl_lt_kc) {
 
     // extra bytes n
     0, 0, 0, 0
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, nr8_bl_lt_kc) {
+  size_t g = 1;
+  size_t nc = 8;
+  size_t kc = 16;
+  size_t nr = 8;
+  size_t kr = 4;
+  size_t sr = 1;
+  size_t bl = 8;
+  size_t k_num_blocks = kc / bl;
+
+  std::vector<float> b(g * nc);
+  std::fill(b.begin(), b.end(), 2.0);
+  std::vector<uint8_t> k(g * nc * kc / 2);
+
+  k[0+8*0] = 0x98; k[1+8*0] = 0xBA; k[2+8*0] = 0xDC; k[3+8*0] = 0xFE; k[4+8*0] = 0x10; k[5+8*0] = 0x32; k[6+8*0] = 0x54; k[7+8*0] = 0x76;
+  k[0+8*1] = 0x98; k[1+8*1] = 0xBA; k[2+8*1] = 0xDC; k[3+8*1] = 0xFE; k[4+8*1] = 0x10; k[5+8*1] = 0x32; k[6+8*1] = 0x54; k[7+8*1] = 0x76;
+  k[0+8*2] = 0x98; k[1+8*2] = 0xBA; k[2+8*2] = 0xDC; k[3+8*2] = 0xFE; k[4+8*2] = 0x10; k[5+8*2] = 0x32; k[6+8*2] = 0x54; k[7+8*2] = 0x76;
+  k[0+8*3] = 0x98; k[1+8*3] = 0xBA; k[2+8*3] = 0xDC; k[3+8*3] = 0xFE; k[4+8*3] = 0x10; k[5+8*3] = 0x32; k[6+8*3] = 0x54; k[7+8*3] = 0x76;
+  k[0+8*4] = 0x98; k[1+8*4] = 0xBA; k[2+8*4] = 0xDC; k[3+8*4] = 0xFE; k[4+8*4] = 0x10; k[5+8*4] = 0x32; k[6+8*4] = 0x54; k[7+8*4] = 0x76;
+  k[0+8*5] = 0x98; k[1+8*5] = 0xBA; k[2+8*5] = 0xDC; k[3+8*5] = 0xFE; k[4+8*5] = 0x10; k[5+8*5] = 0x32; k[6+8*5] = 0x54; k[7+8*5] = 0x76;
+  k[0+8*6] = 0x98; k[1+8*6] = 0xBA; k[2+8*6] = 0xDC; k[3+8*6] = 0xFE; k[4+8*6] = 0x10; k[5+8*6] = 0x32; k[6+8*6] = 0x54; k[7+8*6] = 0x76;
+  k[0+8*7] = 0x98; k[1+8*7] = 0xBA; k[2+8*7] = 0xDC; k[3+8*7] = 0xFE; k[4+8*7] = 0x10; k[5+8*7] = 0x32; k[6+8*7] = 0x54; k[7+8*7] = 0x76;
+
+  size_t extra_bytes_n = sizeof(float);
+  size_t extra_bytes_bl = sizeof(float);
+  std::vector<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2)
+    + k_num_blocks * round_up(nc, nr) * extra_bytes_bl + round_up(nc, nr) * extra_bytes_n);
+  std::vector<float> scale(nc * k_num_blocks, 0);
+  std::fill(scale.begin(), scale.end(), 853.6010);
+
+  auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
+
+  assert(can_use_xnn_pack_qs8_qc4w_gemm_bl_goi_w_nr8_kr4(nc, nr, kr, sr, nr * extra_bytes_bl, nr * extra_bytes_n) == true);
+
+  xnn_pack_qs8_qc4w_gemm_bl_goi_w(g, nc, kc, nr, kr, sr, bl,
+    k.data(), b.data(), /*scale=*/scale.data(), packed_weights.data(), nr * extra_bytes_bl, nr * extra_bytes_n, /*params=*/&a);
+
+  size_t k_stride = round_up_po2(kc, kr * sr * 2 /* planes */);
+
+  k_stride = round_up_po2(k_stride, 2) >> 1;
+
+  size_t k_bytes = sizeof(int8_t) * k_stride * nr;
+  size_t bias_bytes = sizeof(float) * nr;
+  size_t ksum_bytes = sizeof(float) * nr;
+  size_t block_bytes = sizeof(float) * k_num_blocks * nr;
+
+  size_t start_offset = ksum_bytes + k_bytes / k_num_blocks;
+  size_t stride = ksum_bytes + k_bytes + block_bytes + bias_bytes;
+  size_t block_stride = (bl * nr) / 2 +  (sizeof(float) * nr);
+
+  const std::vector<uint8_t> expected = {
+    // kscaledsum
+    0x78, 0x66, 0xd5, 0xc7, // nr=0: -1 * 853.6010 * (sum(-8..+7) = -109260.9297 = 0xc7d56678
+    0x78, 0x66, 0xd5, 0xc7, // nr=1
+    0x78, 0x66, 0xd5, 0xc7, // nr=2
+    0x78, 0x66, 0xd5, 0xc7, // nr=3
+    0x78, 0x66, 0xd5, 0xc7, // nr=4
+    0x78, 0x66, 0xd5, 0xc7, // nr=5
+    0x78, 0x66, 0xd5, 0xc7, // nr=6
+    0x78, 0x66, 0xd5, 0xc7, // nr=7
+
+    // weights bl0
+    0x40, 0x51, 0x62, 0x73, // nr=0, kr0 | kr1
+    0x40, 0x51, 0x62, 0x73, // nr=1, kr0 | kr1
+    0x40, 0x51, 0x62, 0x73, // nr=2, kr0 | kr1
+    0x40, 0x51, 0x62, 0x73, // nr=3, kr0 | kr1
+    0x40, 0x51, 0x62, 0x73, // nr=4, kr0 | kr1
+    0x40, 0x51, 0x62, 0x73, // nr=5, kr0 | kr1
+    0x40, 0x51, 0x62, 0x73, // nr=6, kr0 | kr1
+    0x40, 0x51, 0x62, 0x73, // nr=7, kr0 | kr1
+
+    // extra bytes bl
+    0x77, 0x66, 0x55, 0x44, // nr=0
+    0x77, 0x66, 0x55, 0x44, // nr=1
+    0x77, 0x66, 0x55, 0x44, // nr=2
+    0x77, 0x66, 0x55, 0x44, // nr=3
+    0x77, 0x66, 0x55, 0x44, // nr=4
+    0x77, 0x66, 0x55, 0x44, // nr=5
+    0x77, 0x66, 0x55, 0x44, // nr=6
+    0x77, 0x66, 0x55, 0x44, // nr=7
+
+    // weights bl1
+    0xC8, 0xD9, 0xEA, 0xFB, // kr2 | kr3
+    0xC8, 0xD9, 0xEA, 0xFB, // kr2 | kr3
+    0xC8, 0xD9, 0xEA, 0xFB, // kr2 | kr3
+    0xC8, 0xD9, 0xEA, 0xFB, // kr2 | kr3
+    0xC8, 0xD9, 0xEA, 0xFB, // kr2 | kr3
+    0xC8, 0xD9, 0xEA, 0xFB, // kr2 | kr3
+    0xC8, 0xD9, 0xEA, 0xFB, // kr2 | kr3
+    0xC8, 0xD9, 0xEA, 0xFB, // kr2 | kr3
+
+    // extra bytes bl
+    0x77, 0x66, 0x55, 0x44, // nr=0
+    0x77, 0x66, 0x55, 0x44, // nr=1
+    0x77, 0x66, 0x55, 0x44, // nr=2
+    0x77, 0x66, 0x55, 0x44, // nr=3
+    0x77, 0x66, 0x55, 0x44, // nr=4
+    0x77, 0x66, 0x55, 0x44, // nr=5
+    0x77, 0x66, 0x55, 0x44, // nr=6
+    0x77, 0x66, 0x55, 0x44, // nr=7
+
+    // extra bytes n = bias
+    0, 0, 0, 0x40, // nr=0
+    0, 0, 0, 0x40, // nr=1
+    0, 0, 0, 0x40, // nr=2
+    0, 0, 0, 0x40, // nr=3
+    0, 0, 0, 0x40, // nr=4
+    0, 0, 0, 0x40, // nr=5
+    0, 0, 0, 0x40, // nr=6
+    0, 0, 0, 0x40  // nr=7
   };
   EXPECT_EQ(expected, packed_weights);
 }

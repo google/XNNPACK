@@ -727,45 +727,52 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
     xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
       aligned_total_weights_size, xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qd8_f32_qb4w));
 
+
+    // TODO create a proper ukernel which can handle odd NC
+    // This is for temporary testing and exprimentation
+    bool use_optimized_packing_routine = can_use_xnn_pack_qs8_qc4w_gemm_bl_goi_w_nr8_kr4(output_channels, nr, kr, sr, nr * sizeof(float), nr * sizeof(float));
+
     // Pack weights
     gemm_config->pack_gemm_goi_bl(
       /*groups=*/1, output_channels, input_channels,
       nr, kr, sr,
       block_size,
-      kernel, /*bias=*/NULL, /*scale=*/kernel_scale,
+      kernel, /*bias=*/bias, /*scale=*/kernel_scale,
       weights_ptr,
       /* extra_bytes_bl */ gemm_config->nr * sizeof(float), /* TODO: get this from the op */
       /* extra_bytes_n */ gemm_config->nr * sizeof(float),
       &packing_params);
 
 
-    // Fill in kernel scale
-    // Start
-    void* weights = (void*) ((uintptr_t) weights_ptr +
-      gemm_config->nr * (sizeof(float) + (block_size * sizeof(int8_t) / 2)));
+    if (!use_optimized_packing_routine) {
+      // Fill in kernel scale
+      // Start
+      void* weights = (void*) ((uintptr_t) weights_ptr +
+        gemm_config->nr * (sizeof(float) + (block_size * sizeof(int8_t) / 2)));
 
-    const size_t block_stride = /* weights */ block_size / 2 + sizeof(float);
-    const size_t weights_stride = /* weights */ k_stride * sizeof(int8_t) +
-        /* scales= */ num_blocks * sizeof(float) +
-        /* ksum= */ sizeof(float) +
-        /* bias= */ sizeof(float);
+      const size_t block_stride = /* weights */ block_size / 2 + sizeof(float);
+      const size_t weights_stride = /* weights */ k_stride * sizeof(int8_t) +
+          /* scales= */ num_blocks * sizeof(float) +
+          /* ksum= */ sizeof(float) +
+          /* bias= */ sizeof(float);
 
-    xnn_init_qs8_qc8w_bl_scale_fp32_params(
-        output_channels, gemm_config->nr, gemm_config->nr,
-        gemm_config->nr * weights_stride,
-        gemm_config->nr * weights_stride,
-        /* num_blocks=*/ num_blocks,
-        /* block_stride=*/ gemm_config->nr * block_stride,
-        0,
-        kernel_scale, weights);
+      xnn_init_qs8_qc8w_bl_scale_fp32_params(
+          output_channels, gemm_config->nr, gemm_config->nr,
+          gemm_config->nr * weights_stride,
+          gemm_config->nr * weights_stride,
+          /* num_blocks=*/ num_blocks,
+          /* block_stride=*/ gemm_config->nr * block_stride,
+          0,
+          kernel_scale, weights);
 
-    // Fill in bias
-    if (bias != NULL) {
-      weights = (void*) ((uintptr_t) weights_ptr + gemm_config->nr * (weights_stride - sizeof(float))) ;
-      xnn_init_qs8_qc8w_scale_fp32_params(
-            output_channels, gemm_config->nr, gemm_config->nr,
-            gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
-            bias, weights);
+      // Fill in bias
+      if (bias != NULL) {
+        weights = (void*) ((uintptr_t) weights_ptr + gemm_config->nr * (weights_stride - sizeof(float))) ;
+        xnn_init_qs8_qc8w_scale_fp32_params(
+              output_channels, gemm_config->nr, gemm_config->nr,
+              gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+              bias, weights);
+      }
     }
 
     if (use_weights_cache(fully_connected_op)) {

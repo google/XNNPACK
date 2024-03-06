@@ -1387,39 +1387,43 @@ void GemmMicrokernelTester::Test(
     std::generate(b.begin(), b.end(), std::ref(w8rng));
     std::generate(bias.begin(), bias.end(), std::ref(f32rng));
     std::generate(kernel_scale2d.begin(), kernel_scale2d.end(), std::ref(scalerng));
+
     std::fill(c.begin(), c.end(), nanf(""));
     std::fill(packed_w.begin(), packed_w.end(), 0);
     // Row sums are multiplied by input zero point, since we don't know it
     // until runtime, set it to 1.
     const xnn_qs8_qc4w_packing_params packing_params = { /*input_zero_point=*/1, b_zero_point()};
+    bool can_use_optimized_packing = can_use_xnn_pack_qs8_qc4w_gemm_bl_goi_w_nr8_kr4(n(), nr(), kr(), sr(), nr() * sizeof(float), nr() * sizeof(float));
     pack(/*g=*/1, n(), k2, nr(), kr(), sr(), bl(),
-      b.data(), /*bias=*/nullptr, /*scale=*/kernel_scale2d.data(),
+      b.data(), /*bias=*/bias.data(), /*scale=*/kernel_scale2d.data(),
       packed_w.data(), sizeof(float) * nr(), sizeof(float) * nr(), &packing_params);
 
-    // Fill in packed kernel scale
-    size_t num_blocks = packed_k() / bl();
-    size_t stride =  nr() * (packed_k_bytes + /* scales= */ num_blocks * sizeof(float) + /* ksum= */ sizeof(float) + /* bias= */ sizeof(float));
-    size_t block_stride = (bl() / 2 + sizeof(float)) * nr();
-    size_t start_offset = nr() * (packed_k_bytes / num_blocks + sizeof(float));
-    uintptr_t start = (uintptr_t) packed_w.data() + start_offset;
-    xnn_init_qs8_qc8w_bl_scale_fp32_params(
-      n(), nr(), nr(),
-      stride,
-      stride,
-      /*num_blocks=*/ num_blocks,
-      /*block_stride=*/ block_stride,
-      0,
-      kernel_scale2d.data(),
-      (void*) start);
+    if (!can_use_optimized_packing) {
+      // Fill in packed kernel scale
+      size_t num_blocks = packed_k() / bl();
+      size_t stride =  nr() * (packed_k_bytes + /* scales= */ num_blocks * sizeof(float) + /* ksum= */ sizeof(float) + /* bias= */ sizeof(float));
+      size_t block_stride = (bl() / 2 + sizeof(float)) * nr();
+      size_t start_offset = nr() * (packed_k_bytes / num_blocks + sizeof(float));
+      uintptr_t start = (uintptr_t) packed_w.data() + start_offset;
+      xnn_init_qs8_qc8w_bl_scale_fp32_params(
+        n(), nr(), nr(),
+        stride,
+        stride,
+        /*num_blocks=*/ num_blocks,
+        /*block_stride=*/ block_stride,
+        0,
+        kernel_scale2d.data(),
+        (void*) start);
 
-    start = (uintptr_t) packed_w.data() + stride - sizeof(float) * nr();
-    xnn_init_qs8_qc8w_scale_fp32_params(
-      n(), nr(), nr(),
-      stride,
-      stride,
-      0,
-      bias.data(),
-      (void*) start);
+      start = (uintptr_t) packed_w.data() + stride - sizeof(float) * nr();
+      xnn_init_qs8_qc8w_scale_fp32_params(
+        n(), nr(), nr(),
+        stride,
+        stride,
+        0,
+        bias.data(),
+        (void*) start);
+    }
 
     // Compute 32-bit results and output quantization arguments.
     std::fill(c_ref.begin(), c_ref.end(), 0);
