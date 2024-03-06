@@ -573,7 +573,7 @@ enum xnn_shape_inference_status xnn_tensor_propagate_dimension(
   assert(to_dim < to->shape.num_dims);
 
   // If inferred_dim is dynamic, then we don't have useful information to propagate.
-  if (to->shape.dim[to_dim] == inferred_dim || inferred_dim == 0) {
+  if (to->shape.dim[to_dim] == inferred_dim) {
     return xnn_shape_inference_status_no_change;
   }
 
