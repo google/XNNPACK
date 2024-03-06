@@ -32,7 +32,7 @@
 using testing::ElementsAreArray;
 
 template <class InputType, class KernelType = InputType,
-          class BiasType = InputType, class OutputType = InputType>
+          class BiasType = InputType, class OutputType = InputType, bool even_channels = false>
 class FullyConnectedTestBase : public ::testing::Test {
  protected:
   FullyConnectedTestBase()
@@ -57,6 +57,11 @@ class FullyConnectedTestBase : public ::testing::Test {
     assert(input_dims.size() >= 2);
     output_channels = dim_dist(rng);
     input_channels = input_dims.back();
+    // Adjust number of kernel elements for QC4W. input_channels should be padded to byte boundary, hence even.
+    if (even_channels) {
+      input_channels = round_up_po2(input_channels, 2);
+      input_dims.back() = input_channels;
+    }
     kernel_dims = {output_channels, input_channels};
     kernel_dims_tranposed = {input_channels, output_channels};
     output_dims = input_dims;
@@ -2056,7 +2061,7 @@ TEST_F(FullyConnectedTestF32QC8W, transposed_weights_invalid_channel_dimension)
       subgraph, output_min, output_max, input_id, kernel_id, bias_id, output_id, XNN_FLAG_TRANSPOSE_WEIGHTS));
 }
 
-class FullyConnectedTestQD8F16QC4W : public FullyConnectedTestBase<int8_t, int8_t, float, uint16_t> {
+class FullyConnectedTestQD8F16QC4W : public FullyConnectedTestBase<int8_t, int8_t, float, uint16_t, true> {
 };
 
 TEST_F(FullyConnectedTestQD8F16QC4W, define)
@@ -2544,7 +2549,7 @@ TEST_F(FullyConnectedTestQD8F32QC8W, internally_allocated_dynamic_quantization_p
   EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
-class FullyConnectedTestQD8F32QC4W : public FullyConnectedTestBase<int8_t, uint8_t, float, float> {
+class FullyConnectedTestQD8F32QC4W : public FullyConnectedTestBase<int8_t, uint8_t, float, float, true> {
 };
 
 TEST_F(FullyConnectedTestQD8F32QC4W, define)
