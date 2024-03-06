@@ -233,10 +233,10 @@ void xnn_qd8_f32_qc4w_bl_gemm_minmax_ukernel_1x16c4__neondot(
     const int32x4_t vinput_zero_point0_int = vld1q_dup_s32(&quantization_params[0].zero_point);
     const float32x4_t vinput_zero_point0 = vcvtq_f32_s32(vinput_zero_point0_int); // TODO - change izp dtype to float
 
-    const float32x4_t vksum0123 = vld1q_f32(w); w = (const int32_t*) w + 4;
-    const float32x4_t vksum4567 = vld1q_f32(w); w = (const int32_t*) w + 4;
-    const float32x4_t vksum89AB = vld1q_f32(w); w = (const int32_t*) w + 4;
-    const float32x4_t vksumCDEF = vld1q_f32(w); w = (const int32_t*) w + 4;
+    const float32x4_t vksum0123 = vld1q_f32(w); w = (const float*) w + 4;
+    const float32x4_t vksum4567 = vld1q_f32(w); w = (const float*) w + 4;
+    const float32x4_t vksum89AB = vld1q_f32(w); w = (const float*) w + 4;
+    const float32x4_t vksumCDEF = vld1q_f32(w); w = (const float*) w + 4;
 
     float32x4_t vout0x0123 = vmulq_f32(vksum0123, vinput_zero_point0);
     float32x4_t vout0x4567 = vmulq_f32(vksum4567, vinput_zero_point0);
