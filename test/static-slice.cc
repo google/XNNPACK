@@ -512,7 +512,7 @@ TEST_F(StaticSliceTestF32, reshape_output)
   if (dims.size() > 1) {
     dims[1] += 4;
   }
-  for (int i = 0; i < dims.size(); ++i) {
+  for (size_t i = 0; i < dims.size(); ++i) {
     dynamic |= (inferrable_sizes[i] == 0 && sizes[i] != dims[i]);
   }
   ASSERT_EQ(xnn_reshape_external_value(runtime, input_id, dims.size(), dims.data()), xnn_status_success);
