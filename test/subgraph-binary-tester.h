@@ -59,10 +59,13 @@ protected:
     if (input2_broadcast_dim < input2_shape.size()) {
       input2_shape[input2_broadcast_dim] = 1;
     }
+    input1_dims.resize(XNN_MAX_TENSOR_DIMS);
+    input2_dims.resize(XNN_MAX_TENSOR_DIMS);
+    output_dims.resize(XNN_MAX_TENSOR_DIMS);
+
     // Calculate generalized shapes.
     std::fill(input1_dims.begin(), input1_dims.end(), 1);
     std::fill(input2_dims.begin(), input2_dims.end(), 1);
-    std::fill(output_dims.begin(), output_dims.end(), 1);
     std::copy_backward(input1_shape.cbegin(), input1_shape.cend(), input1_dims.end());
     std::copy_backward(input2_shape.cbegin(), input2_shape.cend(), input2_dims.end());
     for (size_t i = 0; i < XNN_MAX_TENSOR_DIMS; i++) {
@@ -70,6 +73,16 @@ protected:
         ASSERT_EQ(input1_dims[i], input2_dims[i]) << "i: " << i;
       }
       output_dims[i] = std::max(input1_dims[i], input2_dims[i]);
+    }
+
+    if (f32dist(rng) < 0.5f) {
+      RemoveLeadingOnes(input1_dims);
+    }
+    if (f32dist(rng) < 0.5f) {
+      RemoveLeadingOnes(input2_dims);
+    }
+    while (output_dims.size() > std::max(input1_dims.size(), input2_dims.size())) {
+      output_dims.erase(output_dims.begin());
     }
 
     input1 = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + NumElements(input1_shape));
@@ -97,6 +110,16 @@ protected:
     return std::accumulate(dims.begin(), dims.end(), size_t(1), std::multiplies<size_t>());
   }
 
+  void RemoveLeadingOnes(std::vector<size_t>& dims) {
+    while (!dims.empty()) {
+      if (dims.front() == 1) {
+        dims.erase(dims.begin());
+      } else {
+        break;
+      }
+    }
+  }
+
   std::unique_ptr<std::random_device> random_device;
   std::mt19937 rng;
   std::uniform_int_distribution<size_t> shape_dist;
@@ -109,9 +132,9 @@ protected:
   float output_min = -std::numeric_limits<float>::infinity();
   float output_max = std::numeric_limits<float>::infinity();
 
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_dims;
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> input2_dims;
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> output_dims;
+  std::vector<size_t> input1_dims;
+  std::vector<size_t> input2_dims;
+  std::vector<size_t> output_dims;
 
   std::vector<T> input1;
   std::vector<T> input2;
