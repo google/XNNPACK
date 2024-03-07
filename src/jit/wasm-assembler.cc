@@ -21,11 +21,11 @@ namespace internal {
 std::array<uint8_t, 16> MakeLanesForI8x16Shuffle(const uint8_t* lanes, size_t num_lanes) {
   std::array<uint8_t, 16> i8x16_lanes;
   auto it = i8x16_lanes.begin();
-  for (int lane_index = 0; lane_index < num_lanes; lane_index++) {
+  for (size_t lane_index = 0; lane_index < num_lanes; lane_index++) {
     const uint8_t lane = lanes[lane_index];
     assert((lane < num_lanes * 2) && "Lane index is too large");
     const size_t i8x16_lanes_per_original_lane = 16 / num_lanes;
-    for (int i = 0; i < i8x16_lanes_per_original_lane; i++) *it++ = i + lane * i8x16_lanes_per_original_lane;
+    for (size_t i = 0; i < i8x16_lanes_per_original_lane; i++) *it++ = i + lane * i8x16_lanes_per_original_lane;
   }
   return i8x16_lanes;
 }
@@ -133,7 +133,7 @@ void WasmAssembler::EmitFunctionSection() {
 void WasmAssembler::EmitExport(const Function& func) {
   constexpr static byte kFunctionExportCode = 0x0;
   EmitEncodedU32(func.name_length);
-  for (int i = 0; i < func.name_length; i++) {
+  for (size_t i = 0; i < func.name_length; i++) {
     emit8(func.name[i]);
   }
   emit8(kFunctionExportCode);
