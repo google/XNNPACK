@@ -25,29 +25,23 @@ void xnn_f32_rsum_ukernel__rvv_u8v(
   assert(output != NULL);
 
   batch >>= XNN_LOG2_SIZEOF_FLOAT;
-  size_t n = __riscv_vsetvl_e32m1(batch);
+  size_t n = __riscv_vsetvlmax_e32m1();
   vfloat32m1_t acc_f32v = __riscv_vfmv_s_f_f32m1(0.f, n);
   n = __riscv_vsetvl_e32m8(batch);
-  vfloat32m8_t sum0_f32v = __riscv_vfmv_s_f_f32m8(0.f, n);
-  vfloat32m8_t sum1_f32v = __riscv_vfmv_s_f_f32m8(0.f, n);
-  if (batch >= n * 2) {
-    for (; batch >= n * 2; batch -= n * 2) {
-      vfloat32m8_t in0_f32v = __riscv_vle32_v_f32m8(input, n); input += n;
-      vfloat32m8_t in1_f32v = __riscv_vle32_v_f32m8(input, n); input += n;
-      sum0_f32v = __riscv_vfadd_vv_f32m8(sum0_f32v, in0_f32v, n);
-      sum1_f32v = __riscv_vfadd_vv_f32m8(sum1_f32v, in1_f32v, n);
-    }
+  vfloat32m8_t sum_f32v = __riscv_vfmv_s_f_f32m8(0.f, n);
+  for (; batch >= n * 2; batch -= n * 2) {
+    vfloat32m8_t in0_f32v = __riscv_vle32_v_f32m8(input, n); input += n;
+    vfloat32m8_t in1_f32v = __riscv_vle32_v_f32m8(input, n); input += n;
+    sum_f32v = __riscv_vfadd_vv_f32m8(sum_f32v, in0_f32v, n);
+    sum_f32v = __riscv_vfadd_vv_f32m8(sum_f32v, in1_f32v, n);
   }
-  vfloat32m8_t sum_f32v = __riscv_vfadd_vv_f32m8(sum0_f32v, sum1_f32v, n);
-  if (batch > 0) {
-    for (; batch > 0;) {
-      size_t n1 = __riscv_vsetvl_e32m8(batch);
-      vfloat32m8_t in_f32v = __riscv_vle32_v_f32m8(input, n1); input += n1;
-      sum_f32v = __riscv_vfadd_vv_f32m8(sum_f32v, in_f32v, n1);
-      batch -= n1;
-    }
+  for (; batch > 0;) {
+    size_t n1 = __riscv_vsetvl_e32m8(batch);
+    vfloat32m8_t in_f32v = __riscv_vle32_v_f32m8(input, n1); input += n1;
+    sum_f32v = __riscv_vfadd_vv_f32m8(sum_f32v, in_f32v, n1);
+    batch -= n1;
   }
-  vfloat32m8_t out_f32v = __riscv_vfmul_vf_f32m8(sum_f32v, params->scalar.scale, n);
-  acc_f32v = __riscv_vfredosum_vs_f32m8_f32m1(out_f32v, acc_f32v, n);
-  __riscv_vse32_v_f32m1(output, acc_f32v, 1);
+  acc_f32v = __riscv_vfredosum_vs_f32m8_f32m1(sum_f32v, acc_f32v, n);
+  vfloat32m1_t out_f32v = __riscv_vfmul_vf_f32m1(acc_f32v, params->scalar.scale, 1);
+  __riscv_vse32_v_f32m1(output, out_f32v, 1);
 }
