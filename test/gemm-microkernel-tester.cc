@@ -1565,7 +1565,7 @@ void GemmMicrokernelTester::Test(
     std::generate(a.begin(), a.end(), [&] { return fp32_to_bits(f32rng(rng)) >> 16; });
     std::generate(b.begin(), b.end(), [&] { return fp32_to_bits(f32rng(rng)) >> 16; });
     std::generate(bias.begin(), bias.end(), [&] { return fp32_to_bits(f32rng(rng)) >> 16; });
-    std::fill(c.begin(), c.end(), UINT32_C(0x7FC0) /* NaN */);
+    std::fill(c.begin(), c.end(), UINT16_C(0x7FC0) /* NaN */);
     std::fill(c_ref.begin(), c_ref.end(), 0.0f);
 
     std::fill(packed_w.begin(), packed_w.end(), 0);
