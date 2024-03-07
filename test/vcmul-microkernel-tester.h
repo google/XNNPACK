@@ -74,8 +74,8 @@ class VCMulMicrokernelTester {
     std::vector<uint16_t> b(2 * batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> y(2 * batch_size() + (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
     std::vector<float> y_ref(2 * batch_size());
-    std::fill(a.begin(), a.end(), std::nanf(""));
-    std::fill(b.begin(), b.end(), std::nanf(""));
+    std::fill(a.begin(), a.end(), fp16_ieee_from_fp32_value(std::nanf("")));
+    std::fill(b.begin(), b.end(), fp16_ieee_from_fp32_value(std::nanf("")));
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate_n(a.begin(), batch_size(), [&]() { return fp16_ieee_from_fp32_value(f32rdist(rng)); });
       std::generate_n(a.begin() + batch_size(), batch_size(), [&]() { return fp16_ieee_from_fp32_value(f32idist(rng)); });

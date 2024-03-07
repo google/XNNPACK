@@ -1853,7 +1853,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile) {
   const size_t cr = 2;
 
   std::vector<int32_t> b(c);
-  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1]
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
   std::vector<uint8_t> k(c * h * w);  // k = [2, 3,
                                     //      4, 5,
                                     //      6, 7,

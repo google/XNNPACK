@@ -953,8 +953,8 @@ TEST_F(DepthwiseConvolutionTestF16, matches_operator_api)
   xnn_operator_t op = nullptr;
 
   std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-  std::generate(filter.begin(), filter.end(), [&]() { return f32dist(rng); });
-  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+  std::generate(filter.begin(), filter.end(), [&]() { return  fp16_ieee_from_fp32_value(f32dist(rng)); });
+  std::generate(bias.begin(), bias.end(), [&]() { return  f32dist(rng); });
   std::fill(operator_output.begin(), operator_output.end(), fp16_ieee_from_fp32_value(nanf("")));
   std::fill(subgraph_output.begin(), subgraph_output.end(), fp16_ieee_from_fp32_value(nanf("")));
 

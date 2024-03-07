@@ -170,7 +170,7 @@ class SubgraphTester {
         // 1. Generate non-zero elements in the beginning of the vector
         // 2. Randomize positions of non-zero elements
         const size_t num_nonzero_elements = num_elements / 10;
-        std::generate(data, data + num_nonzero_elements, [&]() { return f32dist(rng_); });
+        std::generate(data, data + num_nonzero_elements, [&]() { return w8dist(rng_); });
         std::shuffle(data, data + num_elements, rng_);
       }
     }

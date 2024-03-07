@@ -119,7 +119,7 @@ class IndirectionTester {
         kernel_size + (output_width - 1) * step_width * kernel_height_;
 
     input_ = std::vector<float>(channels_ * input_height_ * input_width_);
-    std::iota(input_.begin(), input_.end(), 0);
+    std::iota(input_.begin(), input_.end(), 0.0f);
     zero_buffer_ = std::vector<float>(channels_);
 
     const size_t num_indirection_elements = (primary_tile_ - kernel_size) + output_height * step_height;

@@ -243,7 +243,7 @@ class FullyConnectedOperatorTester {
       std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));
 
       // Compute reference results, without renormalization.
-      std::fill(output_ref.begin(), output_ref.end(), 0);
+      std::fill(output_ref.begin(), output_ref.end(), 0.0f);
 
       if (transpose_weights()) {
         for (size_t mi = 0; mi < batch_size(); mi++) {

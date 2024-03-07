@@ -460,7 +460,7 @@ TEST_F(EvenSplit2TestQU8, matches_operator_api)
 
 TEST_F(EvenSplit2TestF16, matches_operator_api)
 {
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+  std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
   std::fill(operator_output1.begin(), operator_output1.end(), fp16_ieee_from_fp32_value(std::nanf("")));
   std::fill(operator_output2.begin(), operator_output2.end(), fp16_ieee_from_fp32_value(std::nanf("")));
   std::fill(subgraph_output1.begin(), subgraph_output1.end(), fp16_ieee_from_fp32_value(std::nanf("")));

@@ -1080,7 +1080,7 @@ void GemmMicrokernelTester::Test(
                                                                packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
   std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
-  std::vector<float> c_ref(m() * n(), 0);
+  std::vector<float> c_ref(m() * n(), 0.0f);
 
   {//for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), std::ref(f32rng));
@@ -1133,7 +1133,7 @@ void GemmMicrokernelTester::Test(
       (void*) ((uintptr_t) packed_w.data() + nr() * (ks() * packed_k_bytes + 2 * sizeof(float))));
 
     // Compute 32-bit results and output quantization arguments.
-    std::fill(c_ref.begin(), c_ref.end(), 0);
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
         int32_t ksum = 0;
