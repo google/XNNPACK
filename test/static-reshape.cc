@@ -36,6 +36,9 @@ class StaticReshapeTest
   std::vector<size_t> RandomSetOneDimsionToZero(
       const std::vector<size_t> given_dims) {
     std::vector<size_t> result = given_dims;
+    if (result.empty()) {
+      return result;
+    }
     // Randomly set one dimension to zero.
     auto dynamic_axis_dist =
         std::uniform_int_distribution<size_t>(0, result.size() - 1);
@@ -502,22 +505,28 @@ TEST_F(StaticReshapeTestF32, reshape_output) {
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Change the input shape (make it large enough to trigger a reallocation).
-  dims.front() *= 2;
-  dims.back() *= 3;
+  if (!dims.empty()) {
+    dims.front() *= 2;
+    dims.back() *= 3;
+  }
   ASSERT_EQ(xnn_status_success,
             xnn_reshape_external_value(runtime, input_id, dims.size(),
                                        dims.data()));
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values,
-                          runtime->num_values, /*threadpool=*/nullptr),
-            xnn_status_reallocation_required);
+  xnn_status status =
+      node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values,
+                    /*threadpool=*/nullptr);
+  ASSERT_EQ(status, dims.empty() ? xnn_status_success
+                                 : xnn_status_reallocation_required);
   const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
   EXPECT_EQ(xnn_shape_multiply_all_dims(output_shape),
             std::accumulate(dims.begin(), dims.end(), size_t(1),
                             std::multiplies<size_t>()));
 
   // Change the input shape (make it a bit smaller again).
-  dims.front() /= 2;
+  if (!dims.empty()) {
+    dims.front() /= 2;
+  }
   ASSERT_EQ(xnn_status_success,
             xnn_reshape_external_value(runtime, input_id, dims.size(),
                                        dims.data()));
