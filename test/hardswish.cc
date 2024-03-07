@@ -100,7 +100,7 @@ TEST_F(HardSwishTestF16, matches_operator_api)
   std::vector<uint16_t> input(num_output_elements + XNN_EXTRA_BYTES / sizeof(uint16_t), UINT16_C(0x7E00));
   std::uniform_real_distribution<float> f32dist(-4.0f, 4.0f);
   std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-  std::vector<uint16_t> subgraph_output(num_output_elements, fp16_ieee_from_fp32_value(std::nanf("")));
+  std::vector<uint16_t> subgraph_output(num_output_elements, UINT16_C(0x7E00) /* NaN */);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

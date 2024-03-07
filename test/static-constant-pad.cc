@@ -396,8 +396,8 @@ TEST_F(StaticConstantPadTestF16, matches_operator_api)
   // Output sizes
   operator_output = std::vector<uint16_t>(NumElements(output_dims));
   subgraph_output = std::vector<uint16_t>(operator_output.size());
-  std::fill(operator_output.begin(), operator_output.end(), fp16_ieee_from_fp32_value(std::nanf("")));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), fp16_ieee_from_fp32_value(std::nanf("")));
+  std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
+  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

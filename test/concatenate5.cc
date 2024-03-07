@@ -715,8 +715,8 @@ TEST_F(Concatenate5TestF16, matches_operator_api)
   std::generate(input3.begin(), input3.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
   std::generate(input4.begin(), input4.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
   std::generate(input5.begin(), input5.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-  std::fill(operator_output.begin(), operator_output.end(), fp16_ieee_from_fp32_value(std::nanf("")));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), fp16_ieee_from_fp32_value(std::nanf("")));
+  std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
+  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
