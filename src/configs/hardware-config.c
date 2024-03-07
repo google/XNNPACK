@@ -277,12 +277,12 @@ static void init_hardware_config(void) {
 #endif
 
 const struct xnn_hardware_config* xnn_init_hardware_config() {
-  #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !XNN_ARCH_PPC64 && !(XNN_ARCH_ARM64 && XNN_PLATFORM_WINDOWS)
+  #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !XNN_ARCH_PPC64
     if (!cpuinfo_initialize()) {
       xnn_log_error("failed to initialize cpuinfo");
       return NULL;
     }
-  #endif  // !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !(XNN_ARCH_ARM64 && XNN_PLATFORM_WINDOWS)
+  #endif  // !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !XNN_ARCH_PPC64
   #if XNN_ARCH_ARM
     #if XNN_PLATFORM_MOBILE
       if (!cpuinfo_has_arm_neon()) {
