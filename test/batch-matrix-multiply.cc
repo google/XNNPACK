@@ -31,12 +31,13 @@ protected:
     random_device = std::make_unique<std::random_device>();
     rng = std::mt19937((*random_device)());
     f32dist = std::uniform_real_distribution<float>(0.1f, 1.0f);
-    auto shape_dist = std::uniform_int_distribution<size_t>(3, XNN_MAX_TENSOR_DIMS);
+    auto shape_dist = std::uniform_int_distribution<size_t>(4, XNN_MAX_TENSOR_DIMS);
     dim_dist = std::uniform_int_distribution<size_t>(5, 15);
 
-    // input1: B x M x K
-    // input2: B x K x N or B x N x K (transposed)
-    // output: B x M x N
+    // input1: B x G x M x K
+    // input2: B x H x K x N or B x H x N x K (transposed)
+    // output: B x G x M x N
+    // where G is an integer multiple of H.
     size_t num_input_dims = shape_dist(rng);
     input1_dims = RandomShape(num_input_dims);
     assert(input1_dims.size() >= 3);
@@ -50,11 +51,16 @@ protected:
     input2_t_dims = input1_dims;
     input2_t_dims[num_input_dims - 2] = n;
 
+    // Allow G to be multiple of H (broadcasting), even if H != 1.
+    auto multiply_dist = std::uniform_int_distribution<size_t>(1, 8);
+    input1_dims[num_input_dims - 3] *= multiply_dist(rng);
+
     output_dims = input1_dims;
     output_dims[num_input_dims - 2] = m;
     output_dims[num_input_dims - 1] = n;
+    size_t g = input1_dims[num_input_dims - 3];
 
-    batch_size = NumElements(input1_dims) / k / m;
+    batch_size = NumElements(input1_dims) / g / k / m;
 
     input1 = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + NumElements(input1_dims));
     input2 = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + NumElements(input2_dims));
@@ -264,8 +270,9 @@ TEST_F(BatchMatrixMultiplyTestF16, matches_operator_api)
   ASSERT_EQ(
       xnn_status_success,
       xnn_reshape_batch_matrix_multiply_nc_f16(
-          op, /*num_batch_dims=*/1,
-          /*batch_dims_a=*/&batch_size, /*batch_dims_b=*/&batch_size, m, k, n,
+          op, /*num_batch_dims=*/input1_dims.size() - 2,
+          /*batch_dims_a=*/input1_dims.data(),
+          /*batch_dims_b=*/input2_dims.data(), m, k, n,
           &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
@@ -350,8 +357,9 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api)
   ASSERT_EQ(
       xnn_status_success,
       xnn_reshape_batch_matrix_multiply_nc_f32(
-          op, /*num_batch_dims=*/1,
-          /*batch_dims_a=*/&batch_size, /*batch_dims_b=*/&batch_size, m, k, n,
+          op, /*num_batch_dims=*/input1_dims.size() - 2,
+          /*batch_dims_a=*/input1_dims.data(),
+          /*batch_dims_b=*/input2_dims.data(), m, k, n,
           &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
@@ -436,8 +444,9 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api_transposed)
   ASSERT_EQ(
       xnn_status_success,
       xnn_reshape_batch_matrix_multiply_nc_f32(
-          op, /*num_batch_dims=*/1,
-          /*batch_dims_a=*/&batch_size, /*batch_dims_b=*/&batch_size, m, k, n,
+          op, /*num_batch_dims=*/input1_dims.size() - 2,
+          /*batch_dims_a=*/input1_dims.data(),
+          /*batch_dims_b=*/input2_dims.data(), m, k, n,
           &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
