@@ -105,6 +105,14 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_1x8c8__avxvnni_prfm(
     vacc0x01234567 = _mm256_srai_epi32(vacc0x01234567, 4);
     __m256 vout0x01234567 = _mm256_cvtepi32_ps(vacc0x01234567);
 
+    vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(quantization_params[0].inv_scale));
+
+    const __m256 vfilter_output_scale01234567 = _mm256_load_ps((const float*) w);
+    const __m256 vbias01234567 = _mm256_load_ps((const float*) w + 8);
+    w = (const float*) w + 16;
+
+    vout0x01234567 = _mm256_fmadd_ps(vout0x01234567, vfilter_output_scale01234567, vbias01234567);
+
     vout0x01234567 = _mm256_max_ps(vout0x01234567, voutput_min);
 
     vout0x01234567 = _mm256_min_ps(vout0x01234567, voutput_max);
@@ -321,6 +329,22 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_5x8c8__avxvnni_prfm(
     __m256 vout3x01234567 = _mm256_cvtepi32_ps(vacc3x01234567);
     __m256 vout4x01234567 = _mm256_cvtepi32_ps(vacc4x01234567);
 
+    vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(quantization_params[0].inv_scale));
+    vout1x01234567 = _mm256_mul_ps(vout1x01234567, _mm256_set1_ps(quantization_params[1].inv_scale));
+    vout2x01234567 = _mm256_mul_ps(vout2x01234567, _mm256_set1_ps(quantization_params[2].inv_scale));
+    vout3x01234567 = _mm256_mul_ps(vout3x01234567, _mm256_set1_ps(quantization_params[3].inv_scale));
+    vout4x01234567 = _mm256_mul_ps(vout4x01234567, _mm256_set1_ps(quantization_params[4].inv_scale));
+
+    const __m256 vfilter_output_scale01234567 = _mm256_load_ps((const float*) w);
+    const __m256 vbias01234567 = _mm256_load_ps((const float*) w + 8);
+    w = (const float*) w + 16;
+
+    vout0x01234567 = _mm256_fmadd_ps(vout0x01234567, vfilter_output_scale01234567, vbias01234567);
+    vout1x01234567 = _mm256_fmadd_ps(vout1x01234567, vfilter_output_scale01234567, vbias01234567);
+    vout2x01234567 = _mm256_fmadd_ps(vout2x01234567, vfilter_output_scale01234567, vbias01234567);
+    vout3x01234567 = _mm256_fmadd_ps(vout3x01234567, vfilter_output_scale01234567, vbias01234567);
+    vout4x01234567 = _mm256_fmadd_ps(vout4x01234567, vfilter_output_scale01234567, vbias01234567);
+
     vout0x01234567 = _mm256_max_ps(vout0x01234567, voutput_min);
     vout1x01234567 = _mm256_max_ps(vout1x01234567, voutput_min);
     vout2x01234567 = _mm256_max_ps(vout2x01234567, voutput_min);
@@ -485,6 +509,14 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8c8__avxvnni_prfm(
     __m256i vacc0x01234567 = _mm256_permute4x64_epi64(vsum0x02134657, _MM_SHUFFLE(3, 1, 2, 0));
 
     __m256 vout0x01234567 = _mm256_cvtepi32_ps(vacc0x01234567);
+
+    vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(quantization_params[0].inv_scale));
+
+    const __m256 vfilter_output_scale01234567 = _mm256_load_ps((const float*) w);
+    const __m256 vbias01234567 = _mm256_load_ps((const float*) w + 8);
+    w = (const float*) w + 16;
+
+    vout0x01234567 = _mm256_fmadd_ps(vout0x01234567, vfilter_output_scale01234567, vbias01234567);
 
     vout0x01234567 = _mm256_max_ps(vout0x01234567, voutput_min);
 
@@ -690,6 +722,22 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_5x8c8__avxvnni_prfm(
     __m256 vout2x01234567 = _mm256_cvtepi32_ps(vacc2x01234567);
     __m256 vout3x01234567 = _mm256_cvtepi32_ps(vacc3x01234567);
     __m256 vout4x01234567 = _mm256_cvtepi32_ps(vacc4x01234567);
+
+    vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(quantization_params[0].inv_scale));
+    vout1x01234567 = _mm256_mul_ps(vout1x01234567, _mm256_set1_ps(quantization_params[1].inv_scale));
+    vout2x01234567 = _mm256_mul_ps(vout2x01234567, _mm256_set1_ps(quantization_params[2].inv_scale));
+    vout3x01234567 = _mm256_mul_ps(vout3x01234567, _mm256_set1_ps(quantization_params[3].inv_scale));
+    vout4x01234567 = _mm256_mul_ps(vout4x01234567, _mm256_set1_ps(quantization_params[4].inv_scale));
+
+    const __m256 vfilter_output_scale01234567 = _mm256_load_ps((const float*) w);
+    const __m256 vbias01234567 = _mm256_load_ps((const float*) w + 8);
+    w = (const float*) w + 16;
+
+    vout0x01234567 = _mm256_fmadd_ps(vout0x01234567, vfilter_output_scale01234567, vbias01234567);
+    vout1x01234567 = _mm256_fmadd_ps(vout1x01234567, vfilter_output_scale01234567, vbias01234567);
+    vout2x01234567 = _mm256_fmadd_ps(vout2x01234567, vfilter_output_scale01234567, vbias01234567);
+    vout3x01234567 = _mm256_fmadd_ps(vout3x01234567, vfilter_output_scale01234567, vbias01234567);
+    vout4x01234567 = _mm256_fmadd_ps(vout4x01234567, vfilter_output_scale01234567, vbias01234567);
 
     vout0x01234567 = _mm256_max_ps(vout0x01234567, voutput_min);
     vout1x01234567 = _mm256_max_ps(vout1x01234567, voutput_min);
@@ -1295,6 +1343,14 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avxvnni_prfm(
     vacc0x01234567 = _mm256_srai_epi32(vacc0x01234567, 4);
     __m256 vout0x01234567 = _mm256_cvtepi32_ps(vacc0x01234567);
 
+    vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(quantization_params[0].inv_scale));
+
+    const __m256 vfilter_output_scale01234567 = _mm256_load_ps((const float*) w);
+    const __m256 vbias01234567 = _mm256_load_ps((const float*) w + 8);
+    w = (const float*) w + 16;
+
+    vout0x01234567 = _mm256_fmadd_ps(vout0x01234567, vfilter_output_scale01234567, vbias01234567);
+
     vout0x01234567 = _mm256_max_ps(vout0x01234567, voutput_min);
 
     vout0x01234567 = _mm256_min_ps(vout0x01234567, voutput_max);
@@ -1511,6 +1567,22 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x8c8__avxvnni_prfm(
     __m256 vout3x01234567 = _mm256_cvtepi32_ps(vacc3x01234567);
     __m256 vout4x01234567 = _mm256_cvtepi32_ps(vacc4x01234567);
 
+    vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(quantization_params[0].inv_scale));
+    vout1x01234567 = _mm256_mul_ps(vout1x01234567, _mm256_set1_ps(quantization_params[1].inv_scale));
+    vout2x01234567 = _mm256_mul_ps(vout2x01234567, _mm256_set1_ps(quantization_params[2].inv_scale));
+    vout3x01234567 = _mm256_mul_ps(vout3x01234567, _mm256_set1_ps(quantization_params[3].inv_scale));
+    vout4x01234567 = _mm256_mul_ps(vout4x01234567, _mm256_set1_ps(quantization_params[4].inv_scale));
+
+    const __m256 vfilter_output_scale01234567 = _mm256_load_ps((const float*) w);
+    const __m256 vbias01234567 = _mm256_load_ps((const float*) w + 8);
+    w = (const float*) w + 16;
+
+    vout0x01234567 = _mm256_fmadd_ps(vout0x01234567, vfilter_output_scale01234567, vbias01234567);
+    vout1x01234567 = _mm256_fmadd_ps(vout1x01234567, vfilter_output_scale01234567, vbias01234567);
+    vout2x01234567 = _mm256_fmadd_ps(vout2x01234567, vfilter_output_scale01234567, vbias01234567);
+    vout3x01234567 = _mm256_fmadd_ps(vout3x01234567, vfilter_output_scale01234567, vbias01234567);
+    vout4x01234567 = _mm256_fmadd_ps(vout4x01234567, vfilter_output_scale01234567, vbias01234567);
+
     vout0x01234567 = _mm256_max_ps(vout0x01234567, voutput_min);
     vout1x01234567 = _mm256_max_ps(vout1x01234567, voutput_min);
     vout2x01234567 = _mm256_max_ps(vout2x01234567, voutput_min);
@@ -1675,6 +1747,14 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c8__avxvnni_prfm(
     __m256i vacc0x01234567 = _mm256_permute4x64_epi64(vsum0x02134657, _MM_SHUFFLE(3, 1, 2, 0));
 
     __m256 vout0x01234567 = _mm256_cvtepi32_ps(vacc0x01234567);
+
+    vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(quantization_params[0].inv_scale));
+
+    const __m256 vfilter_output_scale01234567 = _mm256_load_ps((const float*) w);
+    const __m256 vbias01234567 = _mm256_load_ps((const float*) w + 8);
+    w = (const float*) w + 16;
+
+    vout0x01234567 = _mm256_fmadd_ps(vout0x01234567, vfilter_output_scale01234567, vbias01234567);
 
     vout0x01234567 = _mm256_max_ps(vout0x01234567, voutput_min);
 
@@ -1880,6 +1960,22 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x8c8__avxvnni_prfm(
     __m256 vout2x01234567 = _mm256_cvtepi32_ps(vacc2x01234567);
     __m256 vout3x01234567 = _mm256_cvtepi32_ps(vacc3x01234567);
     __m256 vout4x01234567 = _mm256_cvtepi32_ps(vacc4x01234567);
+
+    vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(quantization_params[0].inv_scale));
+    vout1x01234567 = _mm256_mul_ps(vout1x01234567, _mm256_set1_ps(quantization_params[1].inv_scale));
+    vout2x01234567 = _mm256_mul_ps(vout2x01234567, _mm256_set1_ps(quantization_params[2].inv_scale));
+    vout3x01234567 = _mm256_mul_ps(vout3x01234567, _mm256_set1_ps(quantization_params[3].inv_scale));
+    vout4x01234567 = _mm256_mul_ps(vout4x01234567, _mm256_set1_ps(quantization_params[4].inv_scale));
+
+    const __m256 vfilter_output_scale01234567 = _mm256_load_ps((const float*) w);
+    const __m256 vbias01234567 = _mm256_load_ps((const float*) w + 8);
+    w = (const float*) w + 16;
+
+    vout0x01234567 = _mm256_fmadd_ps(vout0x01234567, vfilter_output_scale01234567, vbias01234567);
+    vout1x01234567 = _mm256_fmadd_ps(vout1x01234567, vfilter_output_scale01234567, vbias01234567);
+    vout2x01234567 = _mm256_fmadd_ps(vout2x01234567, vfilter_output_scale01234567, vbias01234567);
+    vout3x01234567 = _mm256_fmadd_ps(vout3x01234567, vfilter_output_scale01234567, vbias01234567);
+    vout4x01234567 = _mm256_fmadd_ps(vout4x01234567, vfilter_output_scale01234567, vbias01234567);
 
     vout0x01234567 = _mm256_max_ps(vout0x01234567, voutput_min);
     vout1x01234567 = _mm256_max_ps(vout1x01234567, voutput_min);

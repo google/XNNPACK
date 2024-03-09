@@ -5,7 +5,7 @@
 
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
-$assert DATATYPE in ["QC8", "QU8", "QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]
+$assert DATATYPE in ["QC8", "QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]
 #include <assert.h>
 
 #include <immintrin.h>
@@ -94,13 +94,9 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
         const __m256i vshl4 = _mm256_set1_epi64x(params->avxvnni.gfni_shl4);  // 0x01020408
   $else:
     const __m256i vsign_mask =_mm256_set1_epi8(params->${PARAMS_STRUCT}.sign_mask);  // 0x80
-    $if DATATYPE != "QC8":
-      const __m256 vscale = _mm256_load_ps(params->${PARAMS_STRUCT}.scale);
     const __m256 voutput_max_less_zero_point = _mm256_set1_ps(params->${PARAMS_STRUCT}.output_max_less_zero_point);
     const __m256i voutput_zero_point = _mm256_set1_epi32(params->${PARAMS_STRUCT}.output_zero_point);
     const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);  // *** check params
-    $if DATATYPE == "QU8":
-      const __m256i vb_zero_point = _mm256_load_si256(params->${PARAMS_STRUCT}.kernel_zero_point);
   do {
     $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
       const __m256i vksum01234567 = _mm256_load_si256(w);
@@ -214,6 +210,16 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
       __m256 vout${M}x01234567 = _mm256_cvtepi32_ps(vacc${M}x01234567);
 
     $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+      $for M in range(MR):
+        vout${M}x01234567 = _mm256_mul_ps(vout${M}x01234567, _mm256_set1_ps(quantization_params[${M}].inv_scale));
+
+      const __m256 vfilter_output_scale01234567 = _mm256_load_ps((const float*) w);
+      const __m256 vbias01234567 = _mm256_load_ps((const float*) w + 8);
+      w = (const float*) w + 16;
+
+      $for M in range(MR):
+        vout${M}x01234567 = _mm256_fmadd_ps(vout${M}x01234567, vfilter_output_scale01234567, vbias01234567);
+
       $for M in range(MR):
         vout${M}x01234567 = _mm256_max_ps(vout${M}x01234567, voutput_min);
 
