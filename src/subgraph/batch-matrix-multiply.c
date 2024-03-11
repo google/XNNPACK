@@ -87,7 +87,7 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
   // dimensions in `input_a` and `input_b` differ, we left-pad the shorter of
   // the two with ones.
   const size_t num_output_dims =
-      max(3, max(input_a->shape.num_dims, input_b->shape.num_dims));
+      max(input_a->shape.num_dims, input_b->shape.num_dims);
   const size_t num_batch_dims = num_output_dims - 2;
   size_t padded_dims_a[XNN_MAX_TENSOR_DIMS];
   size_t padded_dims_b[XNN_MAX_TENSOR_DIMS];
