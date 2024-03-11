@@ -35,4 +35,4 @@ CMAKE_ARGS+=($@)
 cd build/linux/armhf && cmake ../../.. \
     "${CMAKE_ARGS[@]}"
 
-cmake --build . -- "-j$(nproc)"
+cmake --build . -- "-j$((2*$(nproc)))"

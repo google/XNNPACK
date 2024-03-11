@@ -35,4 +35,4 @@ CMAKE_ARGS+=($@)
 cd build/linux/riscv64 && cmake ../../.. \
     "${CMAKE_ARGS[@]}"
 
-cmake --build . -- "-j$(nproc)"
+cmake --build . -- "-j$((2*$(nproc)))"
