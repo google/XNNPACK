@@ -16,6 +16,10 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx512_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 64
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_16x16c4__avx512amx_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx512_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 64
 
 # AArch32 assembly
 - name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7

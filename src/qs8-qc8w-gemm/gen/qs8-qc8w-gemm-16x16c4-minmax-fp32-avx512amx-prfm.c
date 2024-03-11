@@ -15,6 +15,7 @@
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/unaligned.h>
+#include <xnnpack/prefetch.h>
 
 // Define tile config data structure
 typedef struct __tile_config {
@@ -27,7 +28,7 @@ typedef struct __tile_config {
   uint8_t reserved_2[8];
 } __tilecfg;
 
-void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_16x16c4__avx512amx(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_16x16c4__avx512amx_prfm(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -155,6 +156,22 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_16x16c4__avx512amx(
 
       // Multiply tiles
       _tile_dpbssd (0, 1, 2);
+      xnn_prefetch_to_l1((const int8_t*) w + 5120);
+      xnn_prefetch_to_l1((const int8_t*) w + 5184);
+      xnn_prefetch_to_l1((const int8_t*) w + 5248);
+      xnn_prefetch_to_l1((const int8_t*) w + 5312);
+      xnn_prefetch_to_l1((const int8_t*) w + 5376);
+      xnn_prefetch_to_l1((const int8_t*) w + 5440);
+      xnn_prefetch_to_l1((const int8_t*) w + 5504);
+      xnn_prefetch_to_l1((const int8_t*) w + 5568);
+      xnn_prefetch_to_l1((const int8_t*) w + 5632);
+      xnn_prefetch_to_l1((const int8_t*) w + 5696);
+      xnn_prefetch_to_l1((const int8_t*) w + 5760);
+      xnn_prefetch_to_l1((const int8_t*) w + 5824);
+      xnn_prefetch_to_l1((const int8_t*) w + 5888);
+      xnn_prefetch_to_l1((const int8_t*) w + 5952);
+      xnn_prefetch_to_l1((const int8_t*) w + 6016);
+      xnn_prefetch_to_l1((const int8_t*) w + 6080);
 
       a += 64;
       w = (const int8_t*) w + 1024;
@@ -167,6 +184,22 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_16x16c4__avx512amx(
 
       // Multiply tiles
       _tile_dpbssd (0, 3, 4);
+      xnn_prefetch_to_l1((const int8_t*) w + 5120);
+      xnn_prefetch_to_l1((const int8_t*) w + 5184);
+      xnn_prefetch_to_l1((const int8_t*) w + 5248);
+      xnn_prefetch_to_l1((const int8_t*) w + 5312);
+      xnn_prefetch_to_l1((const int8_t*) w + 5376);
+      xnn_prefetch_to_l1((const int8_t*) w + 5440);
+      xnn_prefetch_to_l1((const int8_t*) w + 5504);
+      xnn_prefetch_to_l1((const int8_t*) w + 5568);
+      xnn_prefetch_to_l1((const int8_t*) w + 5632);
+      xnn_prefetch_to_l1((const int8_t*) w + 5696);
+      xnn_prefetch_to_l1((const int8_t*) w + 5760);
+      xnn_prefetch_to_l1((const int8_t*) w + 5824);
+      xnn_prefetch_to_l1((const int8_t*) w + 5888);
+      xnn_prefetch_to_l1((const int8_t*) w + 5952);
+      xnn_prefetch_to_l1((const int8_t*) w + 6016);
+      xnn_prefetch_to_l1((const int8_t*) w + 6080);
 
       a += kremainder;
       w = (const int8_t*) w + kremainder * 16;

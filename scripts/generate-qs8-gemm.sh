@@ -2302,5 +2302,6 @@ tools/xngen src/qs8-gemm/MRx8c4-avxvnni.c.in -D UNROLL=4 -D ACCUMULATORS=4 -D MR
 tools/xngen src/qs8-gemm/MRx16c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=0 -D MR=1  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x16c4-minmax-fp32-avx512amx.c &
 tools/xngen src/qs8-gemm/MRx16c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=0 -D MR=7  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-7x16c4-minmax-fp32-avx512amx.c &
 tools/xngen src/qs8-gemm/MRx16c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=0 -D MR=16 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-16x16c4-minmax-fp32-avx512amx.c &
+tools/xngen src/qs8-gemm/MRx16c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=1 -D MR=16 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-16x16c4-minmax-fp32-avx512amx-prfm.c &
 
 wait

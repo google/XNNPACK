@@ -80,6 +80,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
   const __m512 voutput_max_less_zero_point = _mm512_set1_ps(params->fp32_avx512.output_max_less_zero_point);
   const __m512i voutput_zero_point = _mm512_set1_epi32(params->fp32_avx512.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx512.output_min);
+
   do {
     __m512i vacc0123456789ABCDEF = _mm512_load_epi32(w);
     w = (const int32_t*) w + 16;
@@ -89,8 +90,8 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
 
     size_t k = kc;
     while (k >= 64 * sizeof(int8_t)) {
-      _tile_loadd(1, a, a_stride);
-      _tile_loadd(2, w, 64);
+      _tile_stream_loadd(1, a, a_stride);
+      _tile_stream_loadd(2, w, 64);
 
       // Multiply tiles
       _tile_dpbssd (0, 1, 2);
@@ -101,8 +102,8 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
     }
 
     if XNN_UNLIKELY(k != 0) {
-      _tile_loadd(3, a, a_stride);
-      _tile_loadd(4, w, 64);
+      _tile_stream_loadd(3, a, a_stride);
+      _tile_stream_loadd(4, w, 64);
 
       // Multiply tiles
       _tile_dpbssd (0, 3, 4);
