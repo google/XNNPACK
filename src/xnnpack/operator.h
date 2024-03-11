@@ -283,23 +283,10 @@ struct xnn_operator {
       union xnn_qs8_avgpool_minmax_params qs8_avgpool;
       union xnn_qs8_avgpool_minmax_params qs8_gavgpool;
     };
-    // Quantized Add parameters are sensitive to order of inputs, so we initialize an extra copy with the reversed order.
-    struct {
-      union xnn_qs8_add_minmax_params qs8_add;
-      union xnn_qs8_add_minmax_params qs8_radd;
-    };
-    struct {
-      union xnn_qs8_mul_minmax_params qs8_mul;
-      union xnn_qs8_mul_minmax_params qs8_rmul;
-    };
-    struct {
-      union xnn_qu8_add_minmax_params qu8_add;
-      union xnn_qu8_add_minmax_params qu8_radd;
-    };
-    struct {
-      union xnn_qu8_mul_minmax_params qu8_mul;
-      union xnn_qu8_mul_minmax_params qu8_rmul;
-    };
+    union xnn_qs8_add_minmax_params qs8_add;
+    union xnn_qs8_mul_minmax_params qs8_mul;
+    union xnn_qu8_add_minmax_params qu8_add;
+    union xnn_qu8_mul_minmax_params qu8_mul;
     union xnn_qu8_conv_minmax_params qu8_conv_minmax;
     // Average Pooling normally use qu8_avgpool_params, but also initialize qu8_gavgpool_params in case it needs to switch
     // to Global Average Pooling operation.
@@ -316,10 +303,19 @@ struct xnn_operator {
   } params;
   // Second set of params. Operators like Dynamic Fully Connected only decides on the specific config to use during
   // reshape, so it needs to keep two sets of params around. Configs can have different initialization functions.
+  // We also use this to store parameters to binary operators. For most such operators, this is a copy of params,
+  // but params need to be swapped for commutative ops with per-operand params.
   union {
     union xnn_f16_expminus_params f16_expminus_params;
     union xnn_f32_minmax_params f32_minmax;
     union xnn_f32_expminus_params f32_expminus_params;
+    union xnn_f32_default_params f32_default;
+    union xnn_qs8_add_minmax_params qs8_add;
+    union xnn_qs8_mul_minmax_params qs8_mul;
+    union xnn_qu8_add_minmax_params qu8_add;
+    union xnn_qu8_mul_minmax_params qu8_mul;
+    union xnn_s8_minmax_params s8_minmax;
+    union xnn_u8_minmax_params u8_minmax;
   } params2;
   // Third set of params. Used by scaled dot attention operator.
   union {

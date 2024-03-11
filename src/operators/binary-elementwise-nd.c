@@ -20,6 +20,7 @@
 
 static void init_binary_elementwise_nd(
   const void* params,
+  const void* params2,
   size_t params_size,
   uint32_t flags,
   enum xnn_operator_type operator_type,
@@ -28,6 +29,7 @@ static void init_binary_elementwise_nd(
 {
   if (params_size != 0) {
     memcpy(&binary_elementwise_op->params, params, params_size);
+    memcpy(&binary_elementwise_op->params2, params2, params_size);
   }
 
   binary_elementwise_op->binary_elementwise_subconfig = binary_elementwise_subconfig;
@@ -41,6 +43,7 @@ static void init_binary_elementwise_nd(
 static enum xnn_status create_binary_elementwise_nd(
     uint32_t flags,
     const void* params,
+    const void* params2,
     size_t params_size,
     enum xnn_operator_type operator_type,
     const struct xnn_binary_elementwise_subconfig* binary_elementwise_subconfig,
@@ -68,6 +71,7 @@ static enum xnn_status create_binary_elementwise_nd(
 
   init_binary_elementwise_nd(
     params,
+    params2,
     params_size,
     flags,
     operator_type,
@@ -122,6 +126,7 @@ static enum xnn_status create_binary_elementwise_nd_f16(
 
   return create_binary_elementwise_nd(
     flags,
+    &params,
     &params,
     sizeof(params),
     operator_type,
@@ -182,6 +187,7 @@ static enum xnn_status create_binary_elementwise_nd_f32(
 
   return create_binary_elementwise_nd(
     flags,
+    &params,
     &params,
     sizeof(params),
     operator_type,
@@ -252,21 +258,20 @@ enum xnn_status xnn_create_add_nd_qs8(
     return xnn_status_unsupported_hardware;
   }
 
-  struct {
-    union xnn_qs8_add_minmax_params qs8_add;
-    union xnn_qs8_add_minmax_params qs8_radd;
-  } params;
+  union xnn_qs8_add_minmax_params params;
+  union xnn_qs8_add_minmax_params params2;
   assert(qs8_vadd_config->init.qs8_add != NULL);
   qs8_vadd_config->init.qs8_add(
-    &params.qs8_add, input1_zero_point, input2_zero_point, output_zero_point,
+    &params, input1_zero_point, input2_zero_point, output_zero_point,
     input1_output_scale, input2_output_scale, output_min, output_max);
   qs8_vadd_config->init.qs8_add(
-    &params.qs8_radd, input2_zero_point, input1_zero_point, output_zero_point,
+    &params2, input2_zero_point, input1_zero_point, output_zero_point,
     input2_output_scale, input1_output_scale, output_min, output_max);
 
   return create_binary_elementwise_nd(
     flags,
     &params,
+    &params2,
     sizeof(params),
     xnn_operator_type_add_nd_qs8,
     &qs8_vadd_config->minmax,
@@ -336,21 +341,20 @@ enum xnn_status xnn_create_add_nd_qu8(
     return xnn_status_unsupported_hardware;
   }
 
-  struct {
-    union xnn_qu8_add_minmax_params qu8_add;
-    union xnn_qu8_add_minmax_params qu8_radd;
-  } params;
+  union xnn_qu8_add_minmax_params params;
+  union xnn_qu8_add_minmax_params params2;
   assert(qu8_vadd_config->init.qu8_add != NULL);
   qu8_vadd_config->init.qu8_add(
-    &params.qu8_add, input1_zero_point, input2_zero_point, output_zero_point,
+    &params, input1_zero_point, input2_zero_point, output_zero_point,
     input1_output_scale, input2_output_scale, output_min, output_max);
   qu8_vadd_config->init.qu8_add(
-    &params.qu8_radd, input2_zero_point, input1_zero_point, output_zero_point,
+    &params2, input2_zero_point, input1_zero_point, output_zero_point,
     input2_output_scale, input1_output_scale, output_min, output_max);
 
   return create_binary_elementwise_nd(
     flags,
     &params,
+    &params2,
     sizeof(params),
     xnn_operator_type_add_nd_qu8,
     &qu8_vadd_config->minmax,
@@ -430,6 +434,7 @@ enum xnn_status xnn_create_maximum_nd_f16(
   return create_binary_elementwise_nd(
     flags,
     NULL,
+    NULL,
     0,
     xnn_operator_type_maximum_nd_f16,
     &f16_vmax_config->minmax,
@@ -454,6 +459,7 @@ enum xnn_status xnn_create_maximum_nd_f32(
   return create_binary_elementwise_nd(
     flags,
     &params,
+    &params,
     sizeof(params),
     xnn_operator_type_maximum_nd_f32,
     &f32_vmax_config->minmax,
@@ -471,6 +477,7 @@ enum xnn_status xnn_create_minimum_nd_f16(
   }
   return create_binary_elementwise_nd(
     flags,
+    NULL,
     NULL,
     0,
     xnn_operator_type_minimum_nd_f16,
@@ -495,6 +502,7 @@ enum xnn_status xnn_create_minimum_nd_f32(
   }
   return create_binary_elementwise_nd(
     flags,
+    &params,
     &params,
     sizeof(params),
     xnn_operator_type_minimum_nd_f32,
@@ -588,21 +596,20 @@ enum xnn_status xnn_create_multiply_nd_qs8(
     return xnn_status_unsupported_hardware;
   }
 
-  struct {
-    union xnn_qs8_mul_minmax_params qs8_mul;
-    union xnn_qs8_mul_minmax_params qs8_rmul;
-  } params;
+  union xnn_qs8_mul_minmax_params params;
+  union xnn_qs8_mul_minmax_params params2;
   assert(qs8_vmul_config->init.qs8_mul != NULL);
   qs8_vmul_config->init.qs8_mul(
-    &params.qs8_mul, input1_zero_point, input2_zero_point, output_zero_point,
+    &params, input1_zero_point, input2_zero_point, output_zero_point,
     product_output_scale, output_min, output_max);
   qs8_vmul_config->init.qs8_mul(
-    &params.qs8_rmul, input2_zero_point, input1_zero_point, output_zero_point,
+    &params2, input2_zero_point, input1_zero_point, output_zero_point,
     product_output_scale, output_min, output_max);
 
   return create_binary_elementwise_nd(
     flags,
     &params,
+    &params2,
     sizeof(params),
     xnn_operator_type_multiply_nd_qs8,
     &qs8_vmul_config->minmax,
@@ -665,20 +672,19 @@ enum xnn_status xnn_create_multiply_nd_qu8(
     return xnn_status_unsupported_hardware;
   }
 
-  struct {
-    union xnn_qu8_mul_minmax_params qu8_mul;
-    union xnn_qu8_mul_minmax_params qu8_rmul;
-  } params;
+  union xnn_qu8_mul_minmax_params params;
+  union xnn_qu8_mul_minmax_params params2;
   assert(qu8_vmul_config->init.qu8_mul != NULL);
   qu8_vmul_config->init.qu8_mul(
-    &params.qu8_mul, input1_zero_point, input2_zero_point, output_zero_point,
+    &params, input1_zero_point, input2_zero_point, output_zero_point,
     product_output_scale, output_min, output_max);
   qu8_vmul_config->init.qu8_mul(
-    &params.qu8_rmul, input2_zero_point, input1_zero_point, output_zero_point,
+    &params2, input2_zero_point, input1_zero_point, output_zero_point,
     product_output_scale, output_min, output_max);
   return create_binary_elementwise_nd(
     flags,
     &params,
+    &params2,
     sizeof(params),
     xnn_operator_type_multiply_nd_qu8,
     &qu8_vmul_config->minmax,
@@ -697,6 +703,7 @@ enum xnn_status xnn_create_squared_difference_nd_f16(
   }
   return create_binary_elementwise_nd(
     flags,
+    NULL,
     NULL,
     0,
     xnn_operator_type_squared_difference_nd_f16,
@@ -721,6 +728,7 @@ enum xnn_status xnn_create_squared_difference_nd_f32(
   }
   return create_binary_elementwise_nd(
     flags,
+    &params,
     &params,
     sizeof(params),
     xnn_operator_type_squared_difference_nd_f32,
@@ -821,21 +829,20 @@ enum xnn_status xnn_create_subtract_nd_qs8(
     return xnn_status_unsupported_hardware;
   }
 
-  struct {
-    union xnn_qs8_add_minmax_params qs8_add;
-    union xnn_qs8_add_minmax_params qs8_radd;
-  } params;
+  union xnn_qs8_add_minmax_params params;
+  union xnn_qs8_add_minmax_params params2;
   assert(qs8_vadd_config->init.qs8_add != NULL);
   qs8_vadd_config->init.qs8_add(
-    &params.qs8_add, input1_zero_point, input2_zero_point, output_zero_point,
+    &params, input1_zero_point, input2_zero_point, output_zero_point,
     input1_output_scale, -input2_output_scale, output_min, output_max);
   qs8_vadd_config->init.qs8_add(
-    &params.qs8_radd, input2_zero_point, input1_zero_point, output_zero_point,
+    &params2, input2_zero_point, input1_zero_point, output_zero_point,
     -input2_output_scale, input1_output_scale, output_min, output_max);
 
   return create_binary_elementwise_nd(
     flags,
     &params,
+    &params2,
     sizeof(params),
     xnn_operator_type_subtract_nd_qs8,
     &qs8_vadd_config->minmax,
@@ -905,21 +912,20 @@ enum xnn_status xnn_create_subtract_nd_qu8(
     return xnn_status_unsupported_hardware;
   }
 
-  struct {
-    union xnn_qu8_add_minmax_params qu8_add;
-    union xnn_qu8_add_minmax_params qu8_radd;
-  } params;
+  union xnn_qu8_add_minmax_params params;
+  union xnn_qu8_add_minmax_params params2;
   assert(qu8_vadd_config->init.qu8_add != NULL);
   qu8_vadd_config->init.qu8_add(
-    &params.qu8_add, input1_zero_point, input2_zero_point, output_zero_point,
+    &params, input1_zero_point, input2_zero_point, output_zero_point,
     input1_output_scale, -input2_output_scale, output_min, output_max);
   qu8_vadd_config->init.qu8_add(
-    &params.qu8_radd, input2_zero_point, input1_zero_point, output_zero_point,
+    &params2, input2_zero_point, input1_zero_point, output_zero_point,
     -input2_output_scale, input1_output_scale, output_min, output_max);
 
   return create_binary_elementwise_nd(
     flags,
     &params,
+    &params2,
     sizeof(params),
     xnn_operator_type_subtract_nd_qu8,
     &qu8_vadd_config->minmax,
@@ -1220,7 +1226,7 @@ enum xnn_status xnn_reshape_add_nd_qs8(
     num_input2_dims, input2_shape,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     &add_op->params.qs8_add, sizeof(add_op->params.qs8_add),
-    &add_op->params.qs8_radd, sizeof(add_op->params.qs8_radd),
+    &add_op->params2.qs8_add, sizeof(add_op->params2.qs8_add),
     threadpool);
 }
 
@@ -1238,7 +1244,7 @@ enum xnn_status xnn_reshape_add_nd_qu8(
     num_input2_dims, input2_shape,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     &add_op->params.qu8_add, sizeof(add_op->params.qu8_add),
-    &add_op->params.qu8_radd, sizeof(add_op->params.qu8_radd),
+    &add_op->params2.qu8_add, sizeof(add_op->params2.qu8_add),
     threadpool);
 }
 
@@ -1377,7 +1383,7 @@ enum xnn_status xnn_reshape_multiply_nd_qs8(
     num_input2_dims, input2_shape,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     &multiply_op->params.qs8_mul, sizeof(multiply_op->params.qs8_mul),
-    &multiply_op->params.qs8_rmul, sizeof(multiply_op->params.qs8_rmul),
+    &multiply_op->params2.qs8_mul, sizeof(multiply_op->params2.qs8_mul),
     threadpool);
 }
 
@@ -1395,7 +1401,7 @@ enum xnn_status xnn_reshape_multiply_nd_qu8(
     num_input2_dims, input2_shape,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     &multiply_op->params.qu8_mul, sizeof(multiply_op->params.qu8_mul),
-    &multiply_op->params.qu8_rmul, sizeof(multiply_op->params.qu8_rmul),
+    &multiply_op->params2.qu8_mul, sizeof(multiply_op->params2.qu8_mul),
     threadpool);
 }
 
@@ -1473,7 +1479,7 @@ enum xnn_status xnn_reshape_subtract_nd_qs8(
     num_input2_dims, input2_shape,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     &subtract_op->params.qs8_add, sizeof(subtract_op->params.qs8_add),
-    &subtract_op->params.qs8_radd, sizeof(subtract_op->params.qs8_radd),
+    &subtract_op->params2.qs8_add, sizeof(subtract_op->params2.qs8_add),
     threadpool);
 }
 
@@ -1491,7 +1497,7 @@ enum xnn_status xnn_reshape_subtract_nd_qu8(
     num_input2_dims, input2_shape,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     &subtract_op->params.qu8_add, sizeof(subtract_op->params.qu8_add),
-    &subtract_op->params.qu8_radd, sizeof(subtract_op->params.qu8_radd),
+    &subtract_op->params2.qu8_add, sizeof(subtract_op->params2.qu8_add),
     threadpool);
 }
 
@@ -1774,6 +1780,7 @@ static enum xnn_status run_binary_elementwise_nd(
   size_t setup_reversed_params_size,
   const struct xnn_binary_elementwise_subconfig* binary_elementwise_subconfig,
   const void* create_params,
+  const void* create_params2,
   size_t create_params_size,
   uint32_t flags,
   pthreadpool_t threadpool)
@@ -1783,6 +1790,7 @@ static enum xnn_status run_binary_elementwise_nd(
 
   init_binary_elementwise_nd(
     create_params,
+    create_params2,
     create_params_size,
     flags,
     operator_type,
@@ -1872,8 +1880,9 @@ static enum xnn_status run_binary_elementwise_nd_f32(
     input1, input2, output,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
-    offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
+    offsetof(struct xnn_operator, params2.f32_minmax), sizeof(params),
     binary_elementwise_subconfig,
+    &params,
     &params,
     sizeof(params),
     flags,
@@ -1960,8 +1969,9 @@ enum xnn_status xnn_run_maximum_nd_f32(
     input1, input2, output,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
-    offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
+    offsetof(struct xnn_operator, params2.f32_minmax), sizeof(params),
     binary_elementwise_subconfig,
+    &params,
     &params,
     sizeof(params),
     flags,
@@ -1999,8 +2009,9 @@ enum xnn_status xnn_run_minimum_nd_f32(
     input1, input2, output,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
-    offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
+    offsetof(struct xnn_operator, params2.f32_minmax), sizeof(params),
     binary_elementwise_subconfig,
+    &params,
     &params,
     sizeof(params),
     flags,
@@ -2087,8 +2098,9 @@ enum xnn_status xnn_run_squared_difference_nd_f32(
     input1, input2, output,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
-    offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
+    offsetof(struct xnn_operator, params2.f32_minmax), sizeof(params),
     binary_elementwise_subconfig,
+    &params,
     &params,
     sizeof(params),
     flags,
@@ -2164,16 +2176,14 @@ enum xnn_status xnn_run_add_nd_qs8(
       xnn_operator_type_to_string(xnn_operator_type_add_nd_qs8));
     return xnn_status_unsupported_hardware;
   }
-  struct {
-    union xnn_qs8_add_minmax_params qs8_add;
-    union xnn_qs8_add_minmax_params qs8_radd;
-  } params;
+  union xnn_qs8_add_minmax_params params;
+  union xnn_qs8_add_minmax_params params2;
   assert(qs8_vadd_config->init.qs8_add != NULL);
   qs8_vadd_config->init.qs8_add(
-    &params.qs8_add, input1_zero_point, input2_zero_point, output_zero_point,
+    &params, input1_zero_point, input2_zero_point, output_zero_point,
     input1_output_scale, input2_output_scale, output_min, output_max);
   qs8_vadd_config->init.qs8_add(
-    &params.qs8_radd, input2_zero_point, input1_zero_point, output_zero_point,
+    &params2, input2_zero_point, input1_zero_point, output_zero_point,
     input2_output_scale, input1_output_scale, output_min, output_max);
 
 
@@ -2183,10 +2193,11 @@ enum xnn_status xnn_run_add_nd_qs8(
     num_input2_dims, input2_shape,
     input1, input2, output,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    offsetof(struct xnn_operator, params.qs8_add), sizeof(params.qs8_add),
-    offsetof(struct xnn_operator, params.qs8_radd),  sizeof(params.qs8_radd),
+    offsetof(struct xnn_operator, params.qs8_add), sizeof(params),
+    offsetof(struct xnn_operator, params2.qs8_add), sizeof(params2),
     &qs8_vadd_config->minmax,
     &params,
+    &params2,
     sizeof(params),
     flags,
     threadpool);
@@ -2255,17 +2266,15 @@ enum xnn_status xnn_run_multiply_nd_qs8(
       xnn_operator_type_to_string(xnn_operator_type_multiply_nd_qs8));
     return xnn_status_unsupported_hardware;
   }
-  struct {
-    union xnn_qs8_mul_minmax_params qs8_mul;
-    union xnn_qs8_mul_minmax_params qs8_rmul;
-  } params;
+  union xnn_qs8_mul_minmax_params params;
+  union xnn_qs8_mul_minmax_params params2;
 
   assert(qs8_vmul_config->init.qs8_mul != NULL);
   qs8_vmul_config->init.qs8_mul(
-    &params.qs8_mul, input1_zero_point, input2_zero_point, output_zero_point,
+    &params, input1_zero_point, input2_zero_point, output_zero_point,
     product_output_scale, output_min, output_max);
   qs8_vmul_config->init.qs8_mul(
-    &params.qs8_rmul, input2_zero_point, input1_zero_point, output_zero_point,
+    &params2, input2_zero_point, input1_zero_point, output_zero_point,
     product_output_scale, output_min, output_max);
 
   return run_binary_elementwise_nd(
@@ -2274,10 +2283,11 @@ enum xnn_status xnn_run_multiply_nd_qs8(
     num_input2_dims, input2_shape,
     input1, input2, output,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    offsetof(struct xnn_operator, params.qs8_mul), sizeof(params.qs8_mul),
-    offsetof(struct xnn_operator, params.qs8_rmul),  sizeof(params.qs8_rmul),
+    offsetof(struct xnn_operator, params.qs8_mul), sizeof(params),
+    offsetof(struct xnn_operator, params2.qs8_mul), sizeof(params2),
     &qs8_vmul_config->minmax,
     &params,
+    &params2,
     sizeof(params),
     flags,
     threadpool);
@@ -2352,16 +2362,14 @@ enum xnn_status xnn_run_subtract_nd_qs8(
       xnn_operator_type_to_string(xnn_operator_type_subtract_nd_qs8));
     return xnn_status_unsupported_hardware;
   }
-  struct {
-    union xnn_qs8_add_minmax_params qs8_add;
-    union xnn_qs8_add_minmax_params qs8_radd;
-  } params;
+  union xnn_qs8_add_minmax_params params;
+  union xnn_qs8_add_minmax_params params2;
   assert(qs8_vadd_config->init.qs8_add != NULL);
   qs8_vadd_config->init.qs8_add(
-    &params.qs8_add, input1_zero_point, input2_zero_point, output_zero_point,
+    &params, input1_zero_point, input2_zero_point, output_zero_point,
     input1_output_scale, -input2_output_scale, output_min, output_max);
   qs8_vadd_config->init.qs8_add(
-    &params.qs8_radd, input2_zero_point, input1_zero_point, output_zero_point,
+    &params2, input2_zero_point, input1_zero_point, output_zero_point,
     -input2_output_scale, input1_output_scale, output_min, output_max);
 
   return run_binary_elementwise_nd(
@@ -2370,10 +2378,11 @@ enum xnn_status xnn_run_subtract_nd_qs8(
     num_input2_dims, input2_shape,
     input1, input2, output,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    offsetof(struct xnn_operator, params.qs8_add), sizeof(params.qs8_add),
-    offsetof(struct xnn_operator, params.qs8_radd),  sizeof(params.qs8_radd),
+    offsetof(struct xnn_operator, params.qs8_add), sizeof(params),
+    offsetof(struct xnn_operator, params2.qs8_add), sizeof(params2),
     &qs8_vadd_config->minmax,
     &params,
+    &params2,
     sizeof(params),
     flags,
     threadpool);
@@ -2448,16 +2457,14 @@ enum xnn_status xnn_run_add_nd_qu8(
       xnn_operator_type_to_string(xnn_operator_type_add_nd_qu8));
     return xnn_status_unsupported_hardware;
   }
-  struct {
-    union xnn_qu8_add_minmax_params qu8_add;
-    union xnn_qu8_add_minmax_params qu8_radd;
-  } params;
+  union xnn_qu8_add_minmax_params params;
+  union xnn_qu8_add_minmax_params params2;
   assert(qu8_vadd_config->init.qu8_add != NULL);
   qu8_vadd_config->init.qu8_add(
-    &params.qu8_add, input1_zero_point, input2_zero_point, output_zero_point,
+    &params, input1_zero_point, input2_zero_point, output_zero_point,
     input1_output_scale, input2_output_scale, output_min, output_max);
   qu8_vadd_config->init.qu8_add(
-    &params.qu8_radd, input2_zero_point, input1_zero_point, output_zero_point,
+    &params2, input2_zero_point, input1_zero_point, output_zero_point,
     input2_output_scale, input1_output_scale, output_min, output_max);
 
   return run_binary_elementwise_nd(
@@ -2466,10 +2473,11 @@ enum xnn_status xnn_run_add_nd_qu8(
     num_input2_dims, input2_shape,
     input1, input2, output,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    offsetof(struct xnn_operator, params.qu8_add), sizeof(params.qu8_add),
-    offsetof(struct xnn_operator, params.qu8_radd),  sizeof(params.qu8_radd),
+    offsetof(struct xnn_operator, params.qu8_add), sizeof(params),
+    offsetof(struct xnn_operator, params2.qu8_add), sizeof(params2),
     &qu8_vadd_config->minmax,
     &params,
+    &params2,
     sizeof(params),
     flags,
     threadpool);
@@ -2538,16 +2546,14 @@ enum xnn_status xnn_run_multiply_nd_qu8(
     return xnn_status_unsupported_hardware;
   }
 
-  struct {
-    union xnn_qu8_mul_minmax_params qu8_mul;
-    union xnn_qu8_mul_minmax_params qu8_rmul;
-  } params;
+  union xnn_qu8_mul_minmax_params params;
+  union xnn_qu8_mul_minmax_params params2;
   assert(qu8_vmul_config->init.qu8_mul != NULL);
   qu8_vmul_config->init.qu8_mul(
-    &params.qu8_mul, input1_zero_point, input2_zero_point, output_zero_point,
+    &params, input1_zero_point, input2_zero_point, output_zero_point,
     product_output_scale, output_min, output_max);
   qu8_vmul_config->init.qu8_mul(
-    &params.qu8_rmul, input2_zero_point, input1_zero_point, output_zero_point,
+    &params2, input2_zero_point, input1_zero_point, output_zero_point,
     product_output_scale, output_min, output_max);
 
   return run_binary_elementwise_nd(
@@ -2556,10 +2562,11 @@ enum xnn_status xnn_run_multiply_nd_qu8(
     num_input2_dims, input2_shape,
     input1, input2, output,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    offsetof(struct xnn_operator, params.qu8_mul), sizeof(params.qu8_mul),
-    offsetof(struct xnn_operator, params.qu8_rmul),  sizeof(params.qu8_rmul),
+    offsetof(struct xnn_operator, params.qu8_mul), sizeof(params),
+    offsetof(struct xnn_operator, params2.qu8_mul), sizeof(params2),
     &qu8_vmul_config->minmax,
     &params,
+    &params2,
     sizeof(params),
     flags,
     threadpool);
@@ -2635,16 +2642,14 @@ enum xnn_status xnn_run_subtract_nd_qu8(
     return xnn_status_unsupported_hardware;
   }
 
-  struct {
-    union xnn_qu8_add_minmax_params qu8_add;
-    union xnn_qu8_add_minmax_params qu8_radd;
-  } params;
+  union xnn_qu8_add_minmax_params params;
+  union xnn_qu8_add_minmax_params params2;
   assert(qu8_vadd_config->init.qu8_add != NULL);
   qu8_vadd_config->init.qu8_add(
-    &params.qu8_add, input1_zero_point, input2_zero_point, output_zero_point,
+    &params, input1_zero_point, input2_zero_point, output_zero_point,
     input1_output_scale, -input2_output_scale, output_min, output_max);
   qu8_vadd_config->init.qu8_add(
-    &params.qu8_radd, input2_zero_point, input1_zero_point, output_zero_point,
+    &params2, input2_zero_point, input1_zero_point, output_zero_point,
     -input2_output_scale, input1_output_scale, output_min, output_max);
 
   return run_binary_elementwise_nd(
@@ -2653,10 +2658,11 @@ enum xnn_status xnn_run_subtract_nd_qu8(
     num_input2_dims, input2_shape,
     input1, input2, output,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    offsetof(struct xnn_operator, params.qu8_add), sizeof(params.qu8_add),
-    offsetof(struct xnn_operator, params.qu8_radd),  sizeof(params.qu8_radd),
+    offsetof(struct xnn_operator, params.qu8_add), sizeof(params),
+    offsetof(struct xnn_operator, params2.qu8_add), sizeof(params2),
     &qu8_vadd_config->minmax,
     &params,
+    &params2,
     sizeof(params),
     flags,
     threadpool);
