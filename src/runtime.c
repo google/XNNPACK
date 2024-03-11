@@ -667,6 +667,7 @@ enum xnn_status xnn_plan_memory(
 
   status = initialize_workspace_values(runtime, &mem_alloc_tracker, old_persistent_size);
   if (status != xnn_status_success) {
+    xnn_log_debug("failed to initialize_workspace_values");
     goto error;
   }
 
@@ -704,7 +705,6 @@ enum xnn_status xnn_reshape_runtime(
   if (reallocation_required || !runtime->memory_planned) {
     runtime->memory_planned = true;
     return xnn_plan_memory(runtime);
-  } else {
   }
   return xnn_status_success;
 }
