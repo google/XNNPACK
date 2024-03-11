@@ -149,7 +149,7 @@ static enum xnn_status reshape_convert_operator(
        assert(output_id < num_values);
        const struct xnn_value* output_value = values + output_id;
        const size_t num_nonbatch_dims = output_value->quantization.num_nonbatch_dims;
-       const size_t dq_batch_size = xnn_shape_multiply_batch_dims(&values[output_id].shape, num_nonbatch_dims);
+       const size_t dq_batch_size = xnn_shape_multiply_batch_dims(&values[input_id].shape, num_nonbatch_dims);
        const size_t dq_channel_stride = xnn_shape_multiply_trailing_dims(&values[input_id].shape, num_input_dims - num_nonbatch_dims);
       status = xnn_reshape_convert_nc_f16_qd8(
         opdata->operator_objects[0],
@@ -164,7 +164,7 @@ static enum xnn_status reshape_convert_operator(
        assert(output_id < num_values);
        const struct xnn_value* output_value = values + output_id;
        const size_t num_nonbatch_dims = output_value->quantization.num_nonbatch_dims;
-       const size_t dq_batch_size = xnn_shape_multiply_batch_dims(&values[output_id].shape, num_nonbatch_dims);
+       const size_t dq_batch_size = xnn_shape_multiply_batch_dims(&values[input_id].shape, num_nonbatch_dims);
        const size_t dq_channel_stride = xnn_shape_multiply_trailing_dims(&values[input_id].shape, num_input_dims - num_nonbatch_dims);
       status = xnn_reshape_convert_nc_f32_qd8(
         opdata->operator_objects[0],
