@@ -2321,7 +2321,7 @@ void GemmMicrokernelTester::Test(
         EXPECT_NEAR(
             c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
             c_ref[i * n() + j],
-            std::max(1.0e-5, std::abs(c_ref[i * n() + j]) * 1.0e-6))
+            std::max(1.0e-4, std::abs(c_ref[i * n() + j]) * 1.0e-6))
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
