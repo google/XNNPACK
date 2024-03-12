@@ -8,6 +8,13 @@
 
 #pragma once
 
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <functional>
+#include <string>
+
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
@@ -17,11 +24,7 @@
 #include <xnnpack/pack.h>
 #include <xnnpack/requantization.h>
 
-#include <cassert>
-#include <cstddef>
-#include <cstdint>
-#include <cstdlib>
-
+#include <gtest/gtest.h>
 
 class DWConvMicrokernelTester {
  public:
@@ -240,3 +243,68 @@ class DWConvMicrokernelTester {
   size_t middle_pass_tile_{0};
   size_t last_pass_tile_{0};
 };
+
+struct LoopParams {
+  LoopParams() = default;
+  explicit LoopParams(size_t from, size_t to, size_t step)
+      : is_set(true), from(from), to(to), step(step) {}
+  bool is_set = false;
+  size_t from = 1;
+  size_t to = 1;
+  size_t step = 1;
+};
+
+struct DWConvTestParams {
+  DWConvTestParams(std::string test_name, DWConvMicrokernelTester tester,
+                 std::function<void(DWConvMicrokernelTester& tester)> test_func,
+                 std::function<void(void)> isa_check = nullptr)
+      : test_name(test_name),
+        tester(tester),
+        test_func(test_func),
+        isa_check(isa_check) {}
+
+  // Setters for the loops over `k`, `m`, and `n`.
+  DWConvTestParams& loop_kernel_size(size_t from, size_t to, size_t step = 1) {
+    loop_kernel_size_ = LoopParams(from, to, step);
+    return *this;
+  }
+  DWConvTestParams& loop_channels(size_t from, size_t to, size_t step = 1) {
+    loop_channels_ = LoopParams(from, to, step);
+    return *this;
+  }
+  DWConvTestParams& loop_step(size_t from, size_t to, size_t step = 1) {
+    loop_step_ = LoopParams(from, to, step);
+    return *this;
+  }
+
+  std::string test_name;
+  DWConvMicrokernelTester tester;
+  std::function<void(DWConvMicrokernelTester& tester)> test_func;
+  std::function<void(void)> isa_check;
+  LoopParams loop_kernel_size_;
+  LoopParams loop_channels_;
+  LoopParams loop_step_;
+};
+
+using DWConvTest = testing::TestWithParam<DWConvTestParams>;
+
+inline bool IsPrime(size_t n) {
+    if (n == 1 || n == 2) {
+      return true;
+    }
+    for (size_t k = 3; k * k <= n; k += 2) {
+      if (n % k == 0) {
+        return false;
+      }
+    }
+    return true;
+}
+
+inline size_t NextPrime(size_t n) {
+    n = (n + 1) | static_cast<size_t>(1);
+    while (!IsPrime(n)) {
+      n++;
+    }
+    return n;
+}
+

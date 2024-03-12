@@ -8,6 +8,11 @@
 
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <string>
+
 #include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
@@ -20,16 +25,6 @@
 #include <xnnpack/ppmm.h>
 #include <xnnpack/requantization.h>
 
-#include <cstddef>
-#include <cstdint>
-#include <functional>
-#include <string>
-
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/requantization.h>
 #include <gtest/gtest.h>
 
 #if XNN_PLATFORM_JIT

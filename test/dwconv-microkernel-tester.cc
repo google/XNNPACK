@@ -32,6 +32,44 @@
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
+TEST_P(DWConvTest, Test) {
+  const DWConvTestParams& params = GetParam();
+  DWConvMicrokernelTester tester = params.tester;
+
+  // Make sure that we can execute this test.
+  if (params.isa_check) {
+    params.isa_check();
+    if (IsSkipped()) {
+      return;
+    }
+  }
+
+  // Loop over the kernel size and channels, if required.
+  for (size_t ks = params.loop_kernel_size_.from;
+       ks <= params.loop_kernel_size_.to; ks += params.loop_kernel_size_.step) {
+    if (params.loop_kernel_size_.is_set) {
+      tester.kernel_size(ks);
+    }
+    for (size_t c = params.loop_channels_.from; c <= params.loop_channels_.to;
+         c += params.loop_channels_.step) {
+      if (params.loop_channels_.is_set) {
+        tester.channels(c);
+      }
+      for (size_t s = params.loop_step_.from; s <= params.loop_step_.to;
+           s += params.loop_step_.step) {
+        if (params.loop_step_.is_set) {
+          tester.step(s);
+        }
+
+        // Call the test function.
+        params.test_func(tester);
+      }
+    }
+  }
+}
+
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DWConvTest);
+
 void DWConvMicrokernelTester::Test(
     xnn_qu8_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
     xnn_init_qu8_conv_minmax_params_fn init_params,
