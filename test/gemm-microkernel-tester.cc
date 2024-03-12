@@ -33,6 +33,54 @@
 #include <xnnpack/aarch32-assembler.h>
 #endif  // XNN_ARCH_ARM
 
+TEST_P(GemmTest, Test) {
+  const GemmTestParams& params = GetParam();
+  GemmMicrokernelTester tester = params.tester;
+
+  // Make sure that we can execute this test.
+  if (params.isa_check) {
+    params.isa_check();
+    if (IsSkipped()) {
+      return;
+    }
+  }
+
+  // Loop over the `k`, `m`, and `n` values, if required.
+  for (size_t k = params.loop_k_.from; k <= params.loop_k_.to;
+       k += params.loop_k_.step) {
+    if (params.loop_k_.is_set) {
+      tester.k(k);
+    }
+    for (size_t m = params.loop_m_.from; m <= params.loop_m_.to;
+         m += params.loop_m_.step) {
+      if (params.loop_m_.is_set) {
+        tester.m(m);
+      }
+      for (size_t n = params.loop_n_.from; n <= params.loop_n_.to;
+           n += params.loop_n_.step) {
+        if (params.loop_n_.is_set) {
+          tester.n(n);
+        }
+        for (size_t zi = params.loop_zi_.from; zi <= params.loop_zi_.to;
+             zi += params.loop_zi_.step) {
+          if (params.loop_zi_.is_set) {
+            tester.zero_index(zi);
+          }
+          for (size_t bzp = params.loop_bzp_.from; bzp <= params.loop_bzp_.to;
+               bzp += params.loop_bzp_.step) {
+            if (params.loop_bzp_.is_set) {
+              tester.b_zero_point(bzp);
+            }
+
+            // Call the test function.
+            params.test_func(tester);
+          }
+        }
+      }
+    }
+  }
+}
+
 void GemmMicrokernelTester::Test(
   xnn_qd8_f16_qc8w_igemm_ukernel_fn igemm,
   xnn_init_f16_minmax_params_fn init_params,

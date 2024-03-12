@@ -8,14 +8,29 @@
 
 #pragma once
 
+#include <xnnpack/allocator.h>
+#include <xnnpack/common.h>
+#include <xnnpack/gemm.h>
+#include <xnnpack/igemm.h>
+#include <xnnpack/isa-checks.h>
+#include <xnnpack/math.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
+#include <xnnpack/pack.h>
+#include <xnnpack/ppmm.h>
+#include <xnnpack/requantization.h>
+
 #include <cstddef>
 #include <cstdint>
+#include <functional>
+#include <string>
 
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/requantization.h>
+#include <gtest/gtest.h>
 
 #if XNN_PLATFORM_JIT
 #include <vector>
@@ -460,3 +475,78 @@ class GemmMicrokernelTester {
   bool known_nc_mod_nr_{true};
   bool relu_{false};
 };
+
+struct LoopParams {
+  LoopParams() = default;
+  explicit LoopParams(size_t from, size_t to, size_t step)
+      : is_set(true), from(from), to(to), step(step) {}
+  bool is_set = false;
+  size_t from = 1;
+  size_t to = 1;
+  size_t step = 1;
+};
+
+struct GemmTestParams {
+  GemmTestParams(std::string test_name, GemmMicrokernelTester tester,
+                 std::function<void(GemmMicrokernelTester& tester)> test_func,
+                 std::function<void(void)> isa_check = nullptr)
+      : test_name(test_name),
+        tester(tester),
+        test_func(test_func),
+        isa_check(isa_check) {}
+
+  // Setters for the loops over `k`, `m`, and `n`.
+  GemmTestParams& loop_k(size_t from, size_t to, size_t step = 1) {
+    loop_k_ = LoopParams(from, to, step);
+    return *this;
+  }
+  GemmTestParams& loop_m(size_t from, size_t to, size_t step = 1) {
+    loop_m_ = LoopParams(from, to, step);
+    return *this;
+  }
+  GemmTestParams& loop_n(size_t from, size_t to, size_t step = 1) {
+    loop_n_ = LoopParams(from, to, step);
+    return *this;
+  }
+  GemmTestParams& loop_zi(size_t from, size_t to, size_t step = 1) {
+    loop_zi_ = LoopParams(from, to, step);
+    return *this;
+  }
+  GemmTestParams& loop_bzp(size_t from, size_t to, size_t step = 1) {
+    loop_bzp_ = LoopParams(from, to, step);
+    return *this;
+  }
+
+  std::string test_name;
+  GemmMicrokernelTester tester;
+  std::function<void(GemmMicrokernelTester& tester)> test_func;
+  std::function<void(void)> isa_check;
+  LoopParams loop_k_;
+  LoopParams loop_m_;
+  LoopParams loop_n_;
+  LoopParams loop_zi_;
+  LoopParams loop_bzp_;
+};
+
+using GemmTest = testing::TestWithParam<GemmTestParams>;
+
+inline bool IsPrime(size_t n) {
+    if (n == 1 || n == 2) {
+      return true;
+    }
+    for (size_t k = 3; k * k <= n; k += 2) {
+      if (n % k == 0) {
+        return false;
+      }
+    }
+    return true;
+}
+
+inline size_t NextPrime(size_t n) {
+    n = (n + 1) | static_cast<size_t>(1);
+    while (!IsPrime(n)) {
+      n++;
+    }
+    return n;
+}
+
