@@ -517,13 +517,6 @@ class SubgraphTester {
     return *this;
   }
 
-  inline SubgraphTester& InferShape() {
-    const xnn_status status = xnn_subgraph_infer_shape(subgraph_.get(), /*flags=*/0);
-    EXPECT_EQ(status, xnn_status_success);
-
-    return *this;
-  }
-
   inline SubgraphTester& RewriteForNchw() {
     xnn_subgraph_rewrite_for_nchw(subgraph_.get());
 

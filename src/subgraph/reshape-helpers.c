@@ -12,21 +12,9 @@ enum xnn_status resize_unary_elementwise_output_tensor(
   struct xnn_value* output = &values[output_id];
 
   // Propagate input shape to output.
-  bool changed = opdata->workspace_size > old_workspace_size;
   const struct xnn_value* input = &values[opdata->inputs[0]];
   output->shape.num_dims = input->shape.num_dims;
-  for (size_t cur_dim = 0; cur_dim < input->shape.num_dims; cur_dim++) {
-    const enum xnn_shape_inference_status shape_status = xnn_tensor_propagate_dimension(output, cur_dim, input->shape.dim[cur_dim]);
-    if (shape_status == xnn_shape_inference_status_error) {
-      return xnn_status_invalid_parameter;
-    }
-    if (shape_status == xnn_shape_inference_status_changed) {
-      changed |= true;
-    }
-  }
-  if (!changed) {
-    return xnn_status_success;
-  }
+  memcpy(&output->shape.dim[0], &input->shape.dim[0], input->shape.num_dims * sizeof(size_t));
   const size_t new_size = xnn_tensor_get_size(output);
   if (new_size > output->size || opdata->workspace_size > old_workspace_size) {
     output->size = new_size;
@@ -68,10 +56,7 @@ enum xnn_status resize_binary_elementwise_output_tensor(
       output_dim = d1;
     }
     size_t cur_dim = out_dims - i - 1;
-    const enum xnn_shape_inference_status shape_status = xnn_tensor_propagate_dimension(output, cur_dim, output_dim);
-    if (shape_status == xnn_shape_inference_status_error) {
-      return xnn_status_invalid_parameter;
-    }
+    output->shape.dim[cur_dim] = output_dim;
   }
 
   const size_t new_size = xnn_tensor_get_size(output);

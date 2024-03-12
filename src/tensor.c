@@ -37,17 +37,6 @@ static void set_shape(struct xnn_value* value, size_t num_dims, const size_t* di
   if (num_dims != 0) {
     memcpy(value->shape.dim, dims, num_dims * sizeof(size_t));
   }
-  for (size_t i = 0; i < num_dims; i++) {
-    const size_t original_dim = value->shape.dim[i];
-    if (original_dim == 0) {
-      // Dimension of 0 implies an unknown dimension.
-      value->shape.minimum_dim[i] = 0;
-      value->shape.maximum_dim[i] = SIZE_MAX;
-    } else {
-      value->shape.minimum_dim[i] = original_dim;
-      value->shape.maximum_dim[i] = original_dim;
-    }
-  }
 }
 
 static enum xnn_status check_zero_point(
@@ -547,39 +536,4 @@ size_t xnn_tensor_get_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id)
 
   const struct xnn_value* value = subgraph->values + value_id;
   return xnn_tensor_get_size(value);
-}
-
-static bool tensor_dim_is_static(const struct xnn_value* value, uint32_t dim_index)
-{
-  return (value->shape.dim[dim_index] == value->shape.minimum_dim[dim_index] &&
-          value->shape.dim[dim_index] == value->shape.maximum_dim[dim_index]);
-}
-
-bool xnn_tensor_shape_is_static(const struct xnn_value* value)
-{
-  for (size_t i = 0; i < value->shape.num_dims; i++) {
-    if (!tensor_dim_is_static(value, i)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-enum xnn_shape_inference_status xnn_tensor_propagate_dimension(
-  struct xnn_value* to,
-  uint32_t to_dim,
-  size_t inferred_dim)
-{
-  assert(to_dim < to->shape.num_dims);
-
-  // If inferred_dim is dynamic, then we don't have useful information to propagate.
-  if (to->shape.dim[to_dim] == inferred_dim) {
-    return xnn_shape_inference_status_no_change;
-  }
-
-  to->shape.dim[to_dim] = inferred_dim;
-  if (inferred_dim > to->shape.maximum_dim[to_dim]) {
-    to->shape.maximum_dim[to_dim] = inferred_dim;
-  }
-  return xnn_shape_inference_status_changed;
 }

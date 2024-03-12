@@ -110,10 +110,7 @@ static enum xnn_status reshape_transpose_operator(
 
   output->shape.num_dims = num_dims;
   for (size_t cur_dim = 0; cur_dim < num_dims; cur_dim++) {
-    const enum xnn_shape_inference_status shape_status = xnn_tensor_propagate_dimension(output, cur_dim, input->shape.dim[opdata->shape2.dim[cur_dim]]);
-    if (shape_status == xnn_shape_inference_status_error) {
-      return xnn_status_invalid_parameter;
-    }
+    output->shape.dim[cur_dim] = input->shape.dim[opdata->shape2.dim[cur_dim]];
   }
   const size_t new_size = xnn_tensor_get_size(output);
   if (new_size > output->size) {

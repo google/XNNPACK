@@ -80,11 +80,7 @@ static enum xnn_status resize_copy_output_tensor(
       output_axis_dynamic = dim_idx;
       hint_cur_dim = 1;
     }
-    enum xnn_shape_inference_status status =
-      xnn_tensor_propagate_dimension(output, dim_idx, hint_cur_dim);
-    if (status == xnn_shape_inference_status_error) {
-      return xnn_status_invalid_parameter;
-    }
+    output->shape.dim[dim_idx] = hint_cur_dim;
   }
 
   const size_t input_num_elements = xnn_shape_multiply_all_dims(&input->shape);
@@ -97,11 +93,7 @@ static enum xnn_status resize_copy_output_tensor(
       return xnn_status_invalid_parameter;
     }
     // Infer dynamic dimension
-    enum xnn_shape_inference_status status =
-      xnn_tensor_propagate_dimension(output, output_axis_dynamic, inferred_dim);
-    if (status == xnn_shape_inference_status_error) {
-      return xnn_status_invalid_parameter;
-    }
+    output->shape.dim[output_axis_dynamic] = inferred_dim;
   } else {
     const size_t output_num_elements = xnn_shape_multiply_all_dims(&output->shape);
 
