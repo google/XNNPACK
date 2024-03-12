@@ -343,8 +343,8 @@ TEST_F(StaticReshapeTestUint8, matches_operator_api)
 TEST_F(StaticReshapeTestF16, matches_operator_api)
 {
   std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-  std::fill(operator_output.begin(), operator_output.end(), fp16_ieee_from_fp32_value(nanf("")));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), fp16_ieee_from_fp32_value(nanf("")));
+  std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
+  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
 
   std::vector<size_t> output_dims = dims;
   std::shuffle(output_dims.begin(), output_dims.end(), rng);
