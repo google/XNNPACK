@@ -2074,36 +2074,36 @@ void xnn_qd8_f32_qc4w_bl_gemm_minmax_ukernel_4x8c4__neondot(
 
       nc -= 8;
     } else {
-     if (nc & 4) {
-       vst1q_f32(c0, vout0x0123); c0 += 4;
-       vout0x0123 = vout0x4567;
-       vst1q_f32(c1, vout1x0123); c1 += 4;
-       vout1x0123 = vout1x4567;
-       vst1q_f32(c2, vout2x0123); c2 += 4;
-       vout2x0123 = vout2x4567;
-       vst1q_f32(c3, vout3x0123); c3 += 4;
-       vout3x0123 = vout3x4567;
-     }
-     float32x2_t vout0x01 = vget_low_f32(vout0x0123);
-     float32x2_t vout1x01 = vget_low_f32(vout1x0123);
-     float32x2_t vout2x01 = vget_low_f32(vout2x0123);
-     float32x2_t vout3x01 = vget_low_f32(vout3x0123);
-     if (nc & 2) {
-       vst1_f32(c0, vout0x01); c0 += 2;
-       vst1_f32(c1, vout1x01); c1 += 2;
-       vst1_f32(c2, vout2x01); c2 += 2;
-       vst1_f32(c3, vout3x01); c3 += 2;
-       vout0x01 = vget_high_f32(vout0x0123);
-       vout1x01 = vget_high_f32(vout1x0123);
-       vout2x01 = vget_high_f32(vout2x0123);
-       vout3x01 = vget_high_f32(vout3x0123);
-     }
-     if (nc & 1) {
-       vst1_lane_f32(c0, vout0x01, 0);
-       vst1_lane_f32(c1, vout1x01, 0);
-       vst1_lane_f32(c2, vout2x01, 0);
-       vst1_lane_f32(c3, vout3x01, 0);
-     }
+      if (nc & 4) {
+        vst1q_f32(c0, vout0x0123); c0 += 4;
+        vout0x0123 = vout0x4567;
+        vst1q_f32(c1, vout1x0123); c1 += 4;
+        vout1x0123 = vout1x4567;
+        vst1q_f32(c2, vout2x0123); c2 += 4;
+        vout2x0123 = vout2x4567;
+        vst1q_f32(c3, vout3x0123); c3 += 4;
+        vout3x0123 = vout3x4567;
+      }
+      float32x2_t vout0x01 = vget_low_f32(vout0x0123);
+      float32x2_t vout1x01 = vget_low_f32(vout1x0123);
+      float32x2_t vout2x01 = vget_low_f32(vout2x0123);
+      float32x2_t vout3x01 = vget_low_f32(vout3x0123);
+      if (nc & 2) {
+        vst1_f32(c0, vout0x01); c0 += 2;
+        vst1_f32(c1, vout1x01); c1 += 2;
+        vst1_f32(c2, vout2x01); c2 += 2;
+        vst1_f32(c3, vout3x01); c3 += 2;
+        vout0x01 = vget_high_f32(vout0x0123);
+        vout1x01 = vget_high_f32(vout1x0123);
+        vout2x01 = vget_high_f32(vout2x0123);
+        vout3x01 = vget_high_f32(vout3x0123);
+      }
+      if (nc & 1) {
+        vst1_lane_f32(c0, vout0x01, 0);
+        vst1_lane_f32(c1, vout1x01, 0);
+        vst1_lane_f32(c2, vout2x01, 0);
+        vst1_lane_f32(c3, vout3x01, 0);
+      }
       nc = 0;
     }
   } while (nc != 0);
