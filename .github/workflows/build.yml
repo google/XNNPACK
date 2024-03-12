@@ -46,7 +46,7 @@ jobs:
         run: scripts/build-linux-aarch64.sh -DCMAKE_BUILD_TYPE=Release
         working-directory: ${{ github.workspace }}
       - name: Run tests
-        run: ctest --output-on-failure --parallel $(nproc)
+        run: ctest --output-on-failure --parallel $((2*$(nproc)))
         working-directory: ${{ github.workspace }}/build/linux/aarch64
   cmake-linux-armhf:
     runs-on: ubuntu-22.04
@@ -65,7 +65,7 @@ jobs:
         run: scripts/build-linux-armhf.sh -DCMAKE_BUILD_TYPE=Release
         working-directory: ${{ github.workspace }}
       - name: Run tests
-        run: ctest --output-on-failure --parallel $(nproc)
+        run: ctest --output-on-failure --parallel $((2*$(nproc)))
         working-directory: ${{ github.workspace }}/build/linux/armhf
   cmake-linux-riscv64:
     runs-on: ubuntu-22.04
@@ -84,7 +84,7 @@ jobs:
         run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release -DXNNPACK_ENABLE_RISCV_VECTOR=OFF
         working-directory: ${{ github.workspace }}
       - name: Run tests
-        run: ctest --output-on-failure --parallel $(nproc)
+        run: ctest --output-on-failure --parallel $((2*$(nproc)))
         working-directory: ${{ github.workspace }}/build/linux/riscv64
   cmake-linux-riscv64-rvv:
     runs-on: ubuntu-22.04
@@ -105,7 +105,7 @@ jobs:
         run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release -DXNNPACK_ENABLE_RISCV_VECTOR=ON -DUSE_GNU_SOURCE=ON -DRISCV_TOOLCHAIN_ROOT=${{ github.workspace }}/riscv/ -DRISCV_QEMU_ROOT=${{ github.workspace }}/riscv/
         working-directory: ${{ github.workspace }}
       - name: Run tests
-        run: ctest --output-on-failure --parallel $(nproc)
+        run: ctest --output-on-failure --parallel $((2*$(nproc)))
         working-directory: ${{ github.workspace }}/build/linux/riscv64
   cmake-windows-arm64:
     runs-on: windows-latest
@@ -158,7 +158,7 @@ jobs:
         run: cmake -G Xcode -DCMAKE_OSX_ARCHITECTURES=arm64 -DHAVE_STD_REGEX=TRUE ../../..
         working-directory: ${{ github.workspace }}/build/macos/arm64
       - name: Build with Xcode
-        run: cmake --build build/macos/arm64 --parallel $(sysctl -n hw.ncpu) -- -quiet
+        run: cmake --build build/macos/arm64 --parallel $((2*$(sysctl -n hw.ncpu))) -- -quiet
         working-directory: ${{ github.workspace }}
   cmake-macos-x86_64:
     runs-on: macos-latest
@@ -172,10 +172,10 @@ jobs:
         run: cmake -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64 -DHAVE_STD_REGEX=TRUE ../../..
         working-directory: ${{ github.workspace }}/build/macos/x86_64
       - name: Build with Xcode
-        run: cmake --build build/macos/x86_64 --parallel $(sysctl -n hw.ncpu) -- -quiet
+        run: cmake --build build/macos/x86_64 --parallel $((2*$(sysctl -n hw.ncpu))) -- -quiet
         working-directory: ${{ github.workspace }}
       - name: Run tests
-        run: ctest --build-config Debug --output-on-failure --parallel $(sysctl -n hw.ncpu)
+        run: ctest --build-config Debug --output-on-failure --parallel $((2*$(sysctl -n hw.ncpu)))
         working-directory: ${{ github.workspace }}/build/macos/x86_64
   cmake-android:
     strategy:
@@ -212,7 +212,7 @@ jobs:
         run: cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64 -DXNNPACK_BUILD_BENCHMARKS=OFF -DXNNPACK_BUILD_TESTS=OFF ../../..
         working-directory: ${{ github.workspace }}/build/ios/arm64
       - name: Build with Xcode
-        run: cmake --build build/ios/arm64 --parallel $(sysctl -n hw.ncpu) -- -quiet
+        run: cmake --build build/ios/arm64 --parallel $((2*$(sysctl -n hw.ncpu))) -- -quiet
         working-directory: ${{ github.workspace }}
   cmake-ios-x86_64:
     runs-on: macos-latest
@@ -226,7 +226,7 @@ jobs:
         run: cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=x86_64 -DXNNPACK_BUILD_BENCHMARKS=OFF -DXNNPACK_BUILD_TESTS=OFF ../../..
         working-directory: ${{ github.workspace }}/build/ios/x86_64
       - name: Build with Xcode
-        run: cmake --build build/ios/x86_64 --parallel $(sysctl -n hw.ncpu) -- -sdk iphonesimulator -quiet
+        run: cmake --build build/ios/x86_64 --parallel $((2*$(sysctl -n hw.ncpu))) -- -sdk iphonesimulator -quiet
         working-directory: ${{ github.workspace }}
   bazel-linux:
     runs-on: ubuntu-latest
