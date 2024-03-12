@@ -998,7 +998,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
   }
 
   const size_t packed_weights_size =
-    n_stride * (sizeof(float) + (k_stride << sizeof(int8_t)) + sizeof(float) + block_scale_bytes);
+    n_stride * (sizeof(float) + k_stride + sizeof(float) + block_scale_bytes);
 
   size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
 
