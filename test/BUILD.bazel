@@ -3876,6 +3876,18 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "reshape_helpers_test",
+    srcs = [
+        "reshape-helpers.cc",
+    ],
+    deps = [
+        ":subgraph_unary_tester",
+        "//:XNNPACK_test_mode",
+        "//:subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "reshape_2d_test",
     srcs = [
         "reshape-2d.cc",

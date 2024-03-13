@@ -43,20 +43,29 @@ enum xnn_status resize_binary_elementwise_output_tensor(
   const size_t out_dims = max(dims0, dims1);
 
   output->shape.num_dims = max(input0->shape.num_dims, input1->shape.num_dims);
-  for (size_t i = 0; i < out_dims; ++i) {
-    const size_t d0 = i >= dims0 ? 1 : input0->shape.dim[dims0 - i - 1];
-    const size_t d1 = i >= dims1 ? 1 : input1->shape.dim[dims1 - i - 1];
-    if (!(d0 == d1 || d0 == 1 || d1 == 1)) {
-      xnn_log_error("Input dimensions %zu and %zu are not broadcastable.", d0, d1);
-      return xnn_status_invalid_parameter;
+  if (dims0 == 0) {
+    output->shape.num_dims = input1->shape.num_dims;
+    memcpy(&output->shape.dim[0], &input1->shape.dim[0], sizeof(size_t) * input1->shape.num_dims);
+  } else if (dims1 == 0) {
+    output->shape.num_dims = input0->shape.num_dims;
+    memcpy(&output->shape.dim[0], &input0->shape.dim[0], sizeof(size_t) * input0->shape.num_dims);
+  } else {
+    for (size_t i = 0; i < out_dims; ++i) {
+      const size_t d0 = i >= dims0 ? 1 : input0->shape.dim[dims0 - i - 1];
+      const size_t d1 = i >= dims1 ? 1 : input1->shape.dim[dims1 - i - 1];
+      if (!(d0 == d1 || d0 == 1 || d1 == 1)) {
+        xnn_log_error("Input dimensions %zu and %zu are not broadcastable.", d0, d1);
+        return xnn_status_invalid_parameter;
+      }
+      size_t output_dim = d0;
+      size_t cur_dim = out_dims - i - 1;
+      if (d0 == 0 || d1 == 0) {
+        output_dim = 0;
+      } else {
+        output_dim = max(d0, d1);
+      }
+      output->shape.dim[cur_dim] = output_dim;
     }
-
-    size_t output_dim = d0;
-    if (d1 > d0) {
-      output_dim = d1;
-    }
-    size_t cur_dim = out_dims - i - 1;
-    output->shape.dim[cur_dim] = output_dim;
   }
 
   const size_t new_size = xnn_tensor_get_size(output);

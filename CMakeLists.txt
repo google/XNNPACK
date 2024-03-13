@@ -1693,6 +1693,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(prelu-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME prelu-test COMMAND prelu-test)
 
+    ADD_EXECUTABLE(reshape-helpers-test test/reshape-helpers.cc)
+    TARGET_INCLUDE_DIRECTORIES(reshape-helpers-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(reshape-helpers-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME reshape-helpers-test COMMAND reshape-helpers-test)
+
     ADD_EXECUTABLE(scaled-dot-product-attention-test test/scaled-dot-product-attention.cc)
     SET_TARGET_PROPERTIES(scaled-dot-product-attention-test PROPERTIES CXX_EXTENSIONS YES)
     TARGET_INCLUDE_DIRECTORIES(scaled-dot-product-attention-test PRIVATE src test)

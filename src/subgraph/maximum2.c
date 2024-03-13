@@ -83,6 +83,16 @@ static enum xnn_status reshape_maximum_operator(
     memcpy(opdata->shape2.dim, values[input2_id].shape.dim, values[input2_id].shape.num_dims * sizeof(size_t));
   }
 
+  // Handle scalars. Although the output shape is dimensionless, the reshape
+  // function must be passed a valid shape to prevent skipping the op.
+  if (opdata->shape1.num_dims == 0) {
+    opdata->shape1.num_dims = 1;
+    opdata->shape1.dim[0] = 1;
+  }
+  if (opdata->shape2.num_dims == 0) {
+    opdata->shape2.num_dims = 1;
+    opdata->shape2.dim[0] = 1;
+  }
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;
   switch (opdata->operator_objects[0]->type) {
