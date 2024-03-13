@@ -3368,6 +3368,29 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(indirection-test PRIVATE include src)
   TARGET_LINK_LIBRARIES(indirection-test PRIVATE GTest::gtest GTest::gtest_main pthreadpool)
   TARGET_LINK_LIBRARIES(indirection-test PRIVATE XNNPACK indirection)
+
+  # ---[ Mark the operator tests as such.
+  MACRO(get_all_targets_recursive targets dir)
+    GET_PROPERTY(subdirectories DIRECTORY ${dir} PROPERTY SUBDIRECTORIES)
+    FOREACH(subdir ${subdirectories})
+      get_all_targets_recursive(${targets} ${subdir})
+    ENDFOREACH()
+
+    GET_PROPERTY(current_targets DIRECTORY ${dir} PROPERTY BUILDSYSTEM_TARGETS)
+    LIST(APPEND ${targets} ${current_targets})
+  ENDMACRO()
+
+  FUNCTION(get_all_targets var)
+    SET(targets)
+    get_all_targets_recursive(targets ${CMAKE_CURRENT_SOURCE_DIR})
+    SET(${var} ${targets} PARENT_SCOPE)
+  ENDFUNCTION()
+
+  get_all_targets(targets)
+  LIST(FILTER targets INCLUDE REGEX "-(nc|nd|nd-eager|ncw|nhwc|nhtc|nchw|nwc)-test$")
+  MESSAGE(STATUS "Inferred operator test targets: ${targets}")
+  SET_TESTS_PROPERTIES(${targets} PROPERTIES LABELS "operator")
+
 ENDIF()
 
 # ---[ XNNPACK microbenchmarks

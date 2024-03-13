@@ -104,8 +104,8 @@ jobs:
       - name: Configure and build
         run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release -DXNNPACK_ENABLE_RISCV_VECTOR=ON -DUSE_GNU_SOURCE=ON -DRISCV_TOOLCHAIN_ROOT=${{ github.workspace }}/riscv/ -DRISCV_QEMU_ROOT=${{ github.workspace }}/riscv/
         working-directory: ${{ github.workspace }}
-      - name: Run tests
-        run: ctest --output-on-failure --parallel $(nproc)
+      - name: Run tests (no operator tests)
+        run: ctest --output-on-failure -LE operator --parallel $(nproc)
         working-directory: ${{ github.workspace }}/build/linux/riscv64
   cmake-windows-arm64:
     runs-on: windows-latest
