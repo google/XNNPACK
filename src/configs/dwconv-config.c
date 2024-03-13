@@ -816,23 +816,6 @@ static void init_qs8_qc8w_dwconv_config(void) {
       qs8_qc8w_dwconv_config[2].channel_tile = 32;
       qs8_qc8w_dwconv_config[2].channel_subtile = 32;
       qs8_qc8w_dwconv_config[2].channel_round = 1;
-    } else if (hardware_config->use_x86_xop) {
-      // XOP should be checked before AVX2: AMD Excavator supports both, but performs better with XOP microkernels
-      qs8_qc8w_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p16c__xop_mul16_add16;
-      qs8_qc8w_dwconv_config[0].init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params;
-      qs8_qc8w_dwconv_config[0].channel_tile = 16;
-      qs8_qc8w_dwconv_config[0].channel_subtile = 16;
-      qs8_qc8w_dwconv_config[0].channel_round = 1;
-      qs8_qc8w_dwconv_config[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_9p16c__xop_mul16_add16;
-      qs8_qc8w_dwconv_config[1].init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params;
-      qs8_qc8w_dwconv_config[1].channel_tile = 16;
-      qs8_qc8w_dwconv_config[1].channel_subtile = 16;
-      qs8_qc8w_dwconv_config[1].channel_round = 1;
-      qs8_qc8w_dwconv_config[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_25p16c__xop_mul16_add16;
-      qs8_qc8w_dwconv_config[2].init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params;
-      qs8_qc8w_dwconv_config[2].channel_tile = 16;
-      qs8_qc8w_dwconv_config[2].channel_subtile = 16;
-      qs8_qc8w_dwconv_config[2].channel_round = 1;
     } else if (hardware_config->use_x86_avx2) {
       qs8_qc8w_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p16c__avx2_mul32;
       qs8_qc8w_dwconv_config[0].init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params;
@@ -1061,18 +1044,6 @@ static void init_qs8_dwconv_config(void) {
       qs8_dwconv_config[1].channel_tile = 32;
       qs8_dwconv_config[1].channel_subtile = 32;
       qs8_dwconv_config[1].channel_round = 1;
-    } else if (hardware_config->use_x86_xop) {
-      // XOP should be checked before AVX2: AMD Excavator supports both, but performs better with XOP microkernels
-      qs8_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__xop_mul16_add16;
-      qs8_dwconv_config[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_sse4_params;
-      qs8_dwconv_config[0].channel_tile = 16;
-      qs8_dwconv_config[0].channel_subtile = 16;
-      qs8_dwconv_config[0].channel_round = 1;
-      qs8_dwconv_config[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__xop_mul16_add16;
-      qs8_dwconv_config[1].init.qs8 = xnn_init_qs8_conv_minmax_fp32_sse4_params;
-      qs8_dwconv_config[1].channel_tile = 16;
-      qs8_dwconv_config[1].channel_subtile = 16;
-      qs8_dwconv_config[1].channel_round = 1;
     } else if (hardware_config->use_x86_avx2) {
       qs8_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32;
       qs8_dwconv_config[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_avx2_params;
@@ -1249,18 +1220,6 @@ static void init_qu8_dwconv_config(void) {
       qu8_dwconv_config[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_avx512_params;
       qu8_dwconv_config[1].channel_tile = 32;
       qu8_dwconv_config[1].channel_subtile = 32;
-      qu8_dwconv_config[1].channel_round = 1;
-    } else if (hardware_config->use_x86_xop) {
-      // XOP should be checked before AVX2: AMD Excavator supports both, but performs better with XOP microkernels
-      qu8_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__xop_mul32;
-      qu8_dwconv_config[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_sse2_params;
-      qu8_dwconv_config[0].channel_tile = 16;
-      qu8_dwconv_config[0].channel_subtile = 16;
-      qu8_dwconv_config[0].channel_round = 1;
-      qu8_dwconv_config[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__xop_mul32;
-      qu8_dwconv_config[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_sse2_params;
-      qu8_dwconv_config[1].channel_tile = 16;
-      qu8_dwconv_config[1].channel_subtile = 16;
       qu8_dwconv_config[1].channel_round = 1;
     } else if (hardware_config->use_x86_avx2) {
       qu8_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32;

@@ -1776,28 +1776,6 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   INSTANTIATE_TEST_SUITE_P(
-      QD8_F32_QC8W_IGEMM_MINMAX_1X4C8__XOP_LD128, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/8,
-          /*adj_k_block=*/8,
-          /*mr=*/1, /*nr=*/4, /*kr=*/8, /*sr=*/1,
-          /*is_igemm=*/true,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4c8__xop_ld128,
-                        xnn_init_f32_minmax_sse_params,
-                        xnn_pack_qs8_conv_goki_w);
-          },
-          []() {
-            TEST_REQUIRES_X86_XOP;
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  INSTANTIATE_TEST_SUITE_P(
       QD8_F32_QC8W_IGEMM_MINMAX_2X4C8__AVX_LD64, GemmTest,
       testing::ValuesIn(CreateTests1(
           /*k_block=*/8,

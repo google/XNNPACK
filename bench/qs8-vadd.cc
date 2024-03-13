@@ -147,31 +147,6 @@ static void qs8_vadd(
     ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(qs8_vadd, xop_mul32_ld32_u8,
-                    xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_u8,
-                    xnn_init_qs8_add_minmax_sse4_mul32_params,
-                    benchmark::utils::CheckXOP)
-    ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(qs8_vadd, xop_mul32_ld32_u16,
-                    xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_u16,
-                    xnn_init_qs8_add_minmax_sse4_mul32_params,
-                    benchmark::utils::CheckXOP)
-    ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(qs8_vadd, xop_mul32_ld32_u24,
-                    xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_u24,
-                    xnn_init_qs8_add_minmax_sse4_mul32_params,
-                    benchmark::utils::CheckXOP)
-    ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(qs8_vadd, xop_mul32_ld32_u32,
-                    xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_u32,
-                    xnn_init_qs8_add_minmax_sse4_mul32_params,
-                    benchmark::utils::CheckXOP)
-    ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
-    ->UseRealTime();
-
   BENCHMARK_CAPTURE(qs8_vadd, avx_mul16_ld64_u8,
                     xnn_qs8_vadd_minmax_ukernel__avx_mul16_ld64_u8,
                     xnn_init_qs8_add_minmax_sse4_mul16_params,

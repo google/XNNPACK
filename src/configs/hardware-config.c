@@ -142,7 +142,6 @@ static void init_hardware_config(void) {
     hardware_config.use_x86_avx = cpuinfo_has_x86_avx();
     hardware_config.use_x86_f16c = cpuinfo_has_x86_f16c();
     hardware_config.use_x86_fma3 = cpuinfo_has_x86_fma3();
-    hardware_config.use_x86_xop = cpuinfo_has_x86_xop();
     hardware_config.use_x86_avx2 = cpuinfo_has_x86_avx2();
     hardware_config.use_x86_avx512f = cpuinfo_has_x86_avx512f();
     hardware_config.use_x86_avx512skx = hardware_config.use_x86_avx512f &&
