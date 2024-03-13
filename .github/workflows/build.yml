@@ -160,23 +160,6 @@ jobs:
       - name: Build with Xcode
         run: cmake --build build/macos/arm64 --parallel $(sysctl -n hw.ncpu) -- -quiet
         working-directory: ${{ github.workspace }}
-  cmake-macos-x86_64:
-    runs-on: macos-latest
-    timeout-minutes: 90
-    steps:
-      - uses: actions/checkout@v4
-      - name: Create output directory
-        run: mkdir -p build/macos/x86_64
-        working-directory: ${{ github.workspace }}
-      - name: Generate CMake project
-        run: cmake -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64 -DHAVE_STD_REGEX=TRUE ../../..
-        working-directory: ${{ github.workspace }}/build/macos/x86_64
-      - name: Build with Xcode
-        run: cmake --build build/macos/x86_64 --parallel $(sysctl -n hw.ncpu) -- -quiet
-        working-directory: ${{ github.workspace }}
-      - name: Run tests
-        run: ctest --build-config Debug --output-on-failure --parallel $(sysctl -n hw.ncpu)
-        working-directory: ${{ github.workspace }}/build/macos/x86_64
   cmake-android:
     strategy:
       matrix:
