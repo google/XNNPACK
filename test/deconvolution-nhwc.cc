@@ -3,12 +3,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <gtest/gtest.h>
+#include <cstddef>
 
+#include <xnnpack.h>
+#include <xnnpack/common.h>
 #include <xnnpack/config.h>
 
 #include "deconvolution-operator-tester.h"
-
+#include <gtest/gtest.h>
 
 constexpr size_t kUnstridedInputHeight = 8;
 constexpr size_t kUnstridedInputWidth = 7;

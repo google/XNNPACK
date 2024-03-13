@@ -60,9 +60,15 @@ TEST_P(DWConvTest, Test) {
         if (params.loop_step_.is_set) {
           tester.step(s);
         }
+        for (size_t zi = params.loop_zi_.from; zi <= params.loop_zi_.to;
+             zi += params.loop_zi_.step) {
+          if (params.loop_zi_.is_set) {
+            tester.zero_index(zi);
+          }
 
-        // Call the test function.
-        params.test_func(tester);
+          // Call the test function.
+          params.test_func(tester);
+        }
       }
     }
   }
