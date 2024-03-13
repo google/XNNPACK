@@ -1064,36 +1064,6 @@ static void f32_igemm(benchmark::State& state,
       xnn_init_f32_minmax_sse_params,
       /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/4);
   }
-  static void f32_igemm_1x8__sse2_dup(benchmark::State& state, const char* net) {
-    f32_igemm(state,
-      xnn_f32_igemm_minmax_ukernel_1x8__sse2_dup,
-      xnn_init_f32_minmax_sse_params,
-      /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1);
-  }
-  static void f32_igemm_3x8__sse2_dup(benchmark::State& state, const char* net) {
-    f32_igemm(state,
-      xnn_f32_igemm_minmax_ukernel_3x8__sse2_dup,
-      xnn_init_f32_minmax_sse_params,
-      /*mr=*/3, /*nr=*/8, /*kr=*/1, /*sr=*/1);
-  }
-  static void f32_igemm_4x8__sse2_dup(benchmark::State& state, const char* net) {
-    f32_igemm(state,
-      xnn_f32_igemm_minmax_ukernel_4x8__sse2_dup,
-      xnn_init_f32_minmax_sse_params,
-      /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1);
-  }
-  static void f32_igemm_5x8__sse2_dup(benchmark::State& state, const char* net) {
-    f32_igemm(state,
-      xnn_f32_igemm_minmax_ukernel_5x8__sse2_dup,
-      xnn_init_f32_minmax_sse_params,
-      /*mr=*/5, /*nr=*/8, /*kr=*/1, /*sr=*/1);
-  }
-  static void f32_igemm_6x8__sse2_dup(benchmark::State& state, const char* net) {
-    f32_igemm(state,
-      xnn_f32_igemm_minmax_ukernel_6x8__sse2_dup,
-      xnn_init_f32_minmax_sse_params,
-      /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1);
-  }
   static void f32_igemm_1x8__avx_broadcast(benchmark::State& state, const char* net) {
     f32_igemm(state,
       xnn_f32_igemm_minmax_ukernel_1x8__avx_broadcast,
@@ -1282,11 +1252,6 @@ static void f32_igemm(benchmark::State& state,
   BENCHMARK_CONV(f32_igemm_4x8s4__sse)
   BENCHMARK_CONV(f32_igemm_5x8s4__sse)
   BENCHMARK_CONV(f32_igemm_6x8s4__sse)
-  BENCHMARK_CONV(f32_igemm_1x8__sse2_dup)
-  BENCHMARK_CONV(f32_igemm_3x8__sse2_dup)
-  BENCHMARK_CONV(f32_igemm_4x8__sse2_dup)
-  BENCHMARK_CONV(f32_igemm_5x8__sse2_dup)
-  BENCHMARK_CONV(f32_igemm_6x8__sse2_dup)
   BENCHMARK_CONV(f32_igemm_1x8__avx_broadcast)
   BENCHMARK_CONV(f32_igemm_4x8__avx_broadcast)
   BENCHMARK_CONV(f32_igemm_5x8__avx_broadcast)

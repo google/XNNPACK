@@ -1432,40 +1432,6 @@ BENCHMARK_FP32_END2END_JIT(f32_gemm_6x8_6x8__jit_aarch64_neonfma_cortex_a75_prfm
       benchmark::utils::CheckAVX);
   }
 
-  static void f32_gemm_3x8__sse2_dup(benchmark::State& state, models::ExecutionPlanFactory model) {
-    GEMMEnd2EndBenchmark(state, model,
-      xnn_f32_gemm_minmax_ukernel_3x8__sse2_dup,
-      xnn_f32_igemm_minmax_ukernel_3x8__sse2_dup,
-      xnn_f32_gemm_minmax_ukernel_1x8__sse2_dup,
-      xnn_f32_igemm_minmax_ukernel_1x8__sse2_dup,
-      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
-      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
-      xnn_init_f32_minmax_sse_params,
-      /*mr=*/3, /*nr=*/8);
-  }
-  static void f32_gemm_4x8__sse2_dup(benchmark::State& state, models::ExecutionPlanFactory model) {
-    GEMMEnd2EndBenchmark(state, model,
-      xnn_f32_gemm_minmax_ukernel_4x8__sse2_dup,
-      xnn_f32_igemm_minmax_ukernel_4x8__sse2_dup,
-      xnn_f32_gemm_minmax_ukernel_1x8__sse2_dup,
-      xnn_f32_igemm_minmax_ukernel_1x8__sse2_dup,
-      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
-      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
-      xnn_init_f32_minmax_sse_params,
-      /*mr=*/4, /*nr=*/8);
-  }
-  static void f32_gemm_5x8__sse2_dup(benchmark::State& state, models::ExecutionPlanFactory model) {
-    GEMMEnd2EndBenchmark(state, model,
-      xnn_f32_gemm_minmax_ukernel_5x8__sse2_dup,
-      xnn_f32_igemm_minmax_ukernel_5x8__sse2_dup,
-      xnn_f32_gemm_minmax_ukernel_1x8__sse2_dup,
-      xnn_f32_igemm_minmax_ukernel_1x8__sse2_dup,
-      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
-      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
-      xnn_init_f32_minmax_sse_params,
-      /*mr=*/5, /*nr=*/8);
-  }
-
   static void f32_gemm_3x8__sse_load1(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_f32_gemm_minmax_ukernel_3x8__sse_load1,
@@ -1592,10 +1558,6 @@ BENCHMARK_FP32_END2END_JIT(f32_gemm_6x8_6x8__jit_aarch64_neonfma_cortex_a75_prfm
   BENCHMARK_FP32_END2END(f32_gemm_3x16__avx_broadcast);
   BENCHMARK_FP32_END2END(f32_gemm_4x16__avx_broadcast);
   BENCHMARK_FP32_END2END(f32_gemm_5x16__avx_broadcast);
-
-  BENCHMARK_FP32_END2END(f32_gemm_3x8__sse2_dup);
-  BENCHMARK_FP32_END2END(f32_gemm_4x8__sse2_dup);
-  BENCHMARK_FP32_END2END(f32_gemm_5x8__sse2_dup);
 
   BENCHMARK_FP32_END2END(f32_gemm_3x8__sse_load1);
   BENCHMARK_FP32_END2END(f32_gemm_4x8__sse_load1);

@@ -520,16 +520,6 @@ tools/xngen src/f32-gemm/sse-dup.c.in -D MR=5 -D NR=8 -D INC=0 -D SSE=1 -D AVX=0
 tools/xngen src/f32-gemm/sse-dup.c.in -D MR=5 -D NR=8 -D INC=1 -D SSE=1 -D AVX=0 -D FMA=0 -D DATATYPE=F32 -o src/f32-gemminc/gen/f32-gemminc-5x8-minmax-sse-dup.c &
 tools/xngen src/f32-gemm/sse-dup.c.in -D MR=6 -D NR=8 -D INC=0 -D SSE=1 -D AVX=0 -D FMA=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x8-minmax-sse-dup.c &
 tools/xngen src/f32-gemm/sse-dup.c.in -D MR=6 -D NR=8 -D INC=1 -D SSE=1 -D AVX=0 -D FMA=0 -D DATATYPE=F32 -o src/f32-gemminc/gen/f32-gemminc-6x8-minmax-sse-dup.c &
-tools/xngen src/f32-gemm/sse-dup.c.in -D MR=1 -D NR=8 -D INC=0 -D SSE=2 -D AVX=0 -D FMA=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8-minmax-sse2-dup.c &
-tools/xngen src/f32-gemm/sse-dup.c.in -D MR=1 -D NR=8 -D INC=1 -D SSE=2 -D AVX=0 -D FMA=0 -D DATATYPE=F32 -o src/f32-gemminc/gen/f32-gemminc-1x8-minmax-sse2-dup.c &
-tools/xngen src/f32-gemm/sse-dup.c.in -D MR=3 -D NR=8 -D INC=0 -D SSE=2 -D AVX=0 -D FMA=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-3x8-minmax-sse2-dup.c &
-tools/xngen src/f32-gemm/sse-dup.c.in -D MR=3 -D NR=8 -D INC=1 -D SSE=2 -D AVX=0 -D FMA=0 -D DATATYPE=F32 -o src/f32-gemminc/gen/f32-gemminc-3x8-minmax-sse2-dup.c &
-tools/xngen src/f32-gemm/sse-dup.c.in -D MR=4 -D NR=8 -D INC=0 -D SSE=2 -D AVX=0 -D FMA=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x8-minmax-sse2-dup.c &
-tools/xngen src/f32-gemm/sse-dup.c.in -D MR=4 -D NR=8 -D INC=1 -D SSE=2 -D AVX=0 -D FMA=0 -D DATATYPE=F32 -o src/f32-gemminc/gen/f32-gemminc-4x8-minmax-sse2-dup.c &
-tools/xngen src/f32-gemm/sse-dup.c.in -D MR=5 -D NR=8 -D INC=0 -D SSE=2 -D AVX=0 -D FMA=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-5x8-minmax-sse2-dup.c &
-tools/xngen src/f32-gemm/sse-dup.c.in -D MR=5 -D NR=8 -D INC=1 -D SSE=2 -D AVX=0 -D FMA=0 -D DATATYPE=F32 -o src/f32-gemminc/gen/f32-gemminc-5x8-minmax-sse2-dup.c &
-tools/xngen src/f32-gemm/sse-dup.c.in -D MR=6 -D NR=8 -D INC=0 -D SSE=2 -D AVX=0 -D FMA=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x8-minmax-sse2-dup.c &
-tools/xngen src/f32-gemm/sse-dup.c.in -D MR=6 -D NR=8 -D INC=1 -D SSE=2 -D AVX=0 -D FMA=0 -D DATATYPE=F32 -o src/f32-gemminc/gen/f32-gemminc-6x8-minmax-sse2-dup.c &
 
 ### LOAD4+PERMUTE micro-kernels
 tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=1 -D NR=8 -D INC=0 -D SSE=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8s4-minmax-sse.c &

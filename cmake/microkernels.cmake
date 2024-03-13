@@ -6682,44 +6682,13 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/f32-f16-vcvt/gen/f32-f16-vcvt-sse2-u16.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-sse2-u24.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-sse2-u32.c
-  src/f32-gemm/gen/f32-gemm-1x8-minmax-sse2-dup.c
-  src/f32-gemm/gen/f32-gemm-3x8-minmax-sse2-dup.c
-  src/f32-gemm/gen/f32-gemm-4x8-minmax-sse2-dup.c
-  src/f32-gemm/gen/f32-gemm-5x8-minmax-sse2-dup.c
-  src/f32-gemm/gen/f32-gemm-6x8-minmax-sse2-dup.c
   src/f32-gemminc/gen/f32-gemminc-1x8-minmax-sse2-dup.c
   src/f32-gemminc/gen/f32-gemminc-3x8-minmax-sse2-dup.c
   src/f32-gemminc/gen/f32-gemminc-4x8-minmax-sse2-dup.c
   src/f32-gemminc/gen/f32-gemminc-5x8-minmax-sse2-dup.c
   src/f32-gemminc/gen/f32-gemminc-6x8-minmax-sse2-dup.c
-  src/f32-igemm/gen/f32-igemm-1x8-minmax-sse2-dup.c
-  src/f32-igemm/gen/f32-igemm-3x8-minmax-sse2-dup.c
-  src/f32-igemm/gen/f32-igemm-4x8-minmax-sse2-dup.c
-  src/f32-igemm/gen/f32-igemm-5x8-minmax-sse2-dup.c
-  src/f32-igemm/gen/f32-igemm-6x8-minmax-sse2-dup.c
   src/f32-prelu/gen/f32-prelu-sse2-2x4.c
   src/f32-prelu/gen/f32-prelu-sse2-2x8.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x8-minmax-sse2-dup.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x8-minmax-sse2-dup.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-sse2-dup.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x8-minmax-sse2-dup.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x8-minmax-sse2-dup.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-sse2-dup.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-sse2-load1.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8s4-minmax-sse2.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x8-minmax-sse2-dup.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x8-minmax-sse2-load1.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x8s4-minmax-sse2.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x2c4-minmax-sse2.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-sse2-dup.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-sse2-load1.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8s4-minmax-sse2.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8-minmax-sse2-dup.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8-minmax-sse2-load1.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8s4-minmax-sse2.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-sse2-dup.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-sse2-load1.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8s4-minmax-sse2.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse2-u8.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse2-u16.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse2-u24.c

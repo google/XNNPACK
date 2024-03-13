@@ -185,6 +185,7 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
   k-block: 2
+
 # ARM NEON Shuffle
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_1x8s4__neonfma
   init: xnn_init_f32_minmax_scalar_params
@@ -198,15 +199,8 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
   k-block: 4
-# x86 SSE
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_1x8__sse2_dup
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 4
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_1x8__sse2_load1
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 1
+
+# x86 SSE4.1
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_1x8__sse41_dup
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
@@ -215,22 +209,10 @@
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
   k-block: 1
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_1x8s4__sse2
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 4
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_1x8s4__sse41
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
   k-block: 4
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_3x8__sse2_dup
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 4
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_3x8__sse2_load1
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 1
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_3x8__sse41_dup
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
@@ -239,15 +221,7 @@
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
   k-block: 1
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_3x8s4__sse2
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 4
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_3x8s4__sse41
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 4
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_4x2c4__sse2
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
   k-block: 4
@@ -255,14 +229,6 @@
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
   k-block: 4
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_4x8__sse2_dup
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 4
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_4x8__sse2_load1
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 1
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_4x8__sse41_dup
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
@@ -271,22 +237,10 @@
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
   k-block: 1
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_4x8s4__sse2
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 4
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_4x8s4__sse41
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
   k-block: 4
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_5x8__sse2_dup
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 4
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_5x8__sse2_load1
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 1
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_5x8__sse41_dup
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
@@ -295,22 +249,10 @@
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
   k-block: 1
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_5x8s4__sse2
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 4
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_5x8s4__sse41
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
   k-block: 4
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_6x8__sse2_dup
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 4
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_6x8__sse2_load1
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 1
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_6x8__sse41_dup
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
@@ -319,10 +261,6 @@
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
   k-block: 1
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_6x8s4__sse2
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 4
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_6x8s4__sse41
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
