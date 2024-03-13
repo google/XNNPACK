@@ -184,6 +184,8 @@ struct xnn_operator {
     // Offset into the weights cache where the packed weights are. Only valid if weights_cache is not NULL.
     size_t offset;
   } packed_weights;
+  // Stride between each set of packed weights.
+  size_t weights_stride;
   // Total number of non-zero kernel elements when weights use sparse representation.
   size_t num_nonzero_values;
   // Total number of non-zero kernel blocks when weights use sparse representation.
