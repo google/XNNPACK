@@ -10,19 +10,21 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/log.h>
 #include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microkernel-type.h>
-#include <xnnpack/params.h>
 #include <xnnpack/compute.h>
 #include <xnnpack/indirection.h>
+#include <xnnpack/log.h>
+#include <xnnpack/math.h>
+#include <xnnpack/microkernel-type.h>
+#include <xnnpack/microparams.h>
+#include <xnnpack/operator-type.h>
+#include <xnnpack/operator.h>
+#include <xnnpack/params.h>
 #include <xnnpack/quantization.h>
 
+#include "pthreadpool.h"
 
 void xnn_compute_transposec_2d(
     const struct transpose_context* context,
@@ -394,18 +396,36 @@ void xnn_compute_grouped_gemm(
   const size_t k_scaled  = context->k_scaled;
   const size_t a_stride  = context->a_stride;
   const size_t cm_stride = context->cm_stride;
+  const size_t num_batch_dims = context->num_batch_dims;
+  const size_t group_index_c = group_index;
+
+  // Compute the group index offsets into A and B.
+  size_t group_index_a = 0;
+  size_t group_index_b = 0;
+  for (int k = 0; k < num_batch_dims; k++) {
+    // Extract the kth batch index from the group_index.
+    const size_t index = group_index / context->batch_strides_c[k];
+    group_index %= context->batch_strides_c[k];
+
+    // Compute the corresponding kth group index offsets into A and B.
+    group_index_a = (index % context->batch_dims_a[k]) +
+                    context->batch_dims_a[k] * group_index_a;
+    group_index_b = (index % context->batch_dims_b[k]) +
+                    context->batch_dims_b[k] * group_index_b;
+  }
 
   context->ukernel.function[XNN_UARCH_DEFAULT](
-      mr_block_size,
-      nr_block_size,
-      k_scaled,
-      (const void*) ((uintptr_t) context->a + mr_block_start * a_stride + group_index * context->ga_stride),
+      mr_block_size, nr_block_size, k_scaled,
+      (const void*)((uintptr_t)context->a + mr_block_start * a_stride +
+                    group_index_a * context->ga_stride),
       a_stride,
-      (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride + group_index * context->gw_stride),
-      (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize) + group_index * context->gc_stride),
-      cm_stride,
-      context->cn_stride,
-      &context->params);
+      (const void*)((uintptr_t)context->packed_w +
+                    nr_block_start * context->w_stride +
+                    group_index_b * context->gw_stride),
+      (void*)((uintptr_t)context->c + mr_block_start * cm_stride +
+              (nr_block_start << context->log2_csize) +
+              group_index_c * context->gc_stride),
+      cm_stride, context->cn_stride, &context->params);
 }
 
 void xnn_compute_gemm(

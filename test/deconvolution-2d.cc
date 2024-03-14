@@ -737,8 +737,8 @@ TEST_F(DeconvolutionTestF16, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
   std::generate(bias.begin(), bias.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-  std::fill(operator_output.begin(), operator_output.end(), fp16_ieee_from_fp32_value(nanf("")));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), fp16_ieee_from_fp32_value(nanf("")));
+  std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
+  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
 
   // Call operator API.
   const xnn_status status = xnn_create_deconvolution2d_nhwc_f16(

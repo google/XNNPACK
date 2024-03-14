@@ -166,10 +166,6 @@ bool CheckAVX(benchmark::State& state);
 // If F16C is unsupported, report error in benchmark state, and return false.
 bool CheckF16C(benchmark::State& state);
 
-// Check if x86 XOP extension is supported.
-// If XOP is unsupported, report error in benchmark state, and return false.
-bool CheckXOP(benchmark::State& state);
-
 // Check if x86 FMA3 extension is supported.
 // If FMA3 is unsupported, report error in benchmark state, and return false.
 bool CheckFMA3(benchmark::State& state);

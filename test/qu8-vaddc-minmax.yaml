@@ -36,10 +36,6 @@
   init: xnn_init_qu8_add_minmax_sse4_params
 - name: xnn_qu8_vaddc_minmax_ukernel__avx_mul32_ld32_u16
   init: xnn_init_qu8_add_minmax_sse4_params
-- name: xnn_qu8_vaddc_minmax_ukernel__xop_mul32_ld32_u8
-  init: xnn_init_qu8_add_minmax_sse4_params
-- name: xnn_qu8_vaddc_minmax_ukernel__xop_mul32_ld32_u16
-  init: xnn_init_qu8_add_minmax_sse4_params
 # x86 AVX
 - name: xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_u8
   init: xnn_init_qu8_add_minmax_avx2_params

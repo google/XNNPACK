@@ -1,30 +1,32 @@
 #include "gemm-microkernel-tester.h"
 
-#include <gtest/gtest.h>
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <functional>
 #include <limits>
-#include <numeric>
 #include <random>
 #include <vector>
 
-#include <fp16/fp16.h>
-
 #include <xnnpack.h>
-#include <xnnpack/allocator.h>
 #include <xnnpack/aligned-allocator.h>
+#include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
-#include <xnnpack/pack.h>
+#include <xnnpack/math.h>
 #include <xnnpack/memory.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
+#include <xnnpack/microparams.h>
+#include <xnnpack/pack.h>
 #include <xnnpack/quantization.h>
 #include <xnnpack/requantization.h>
+
+#include <gtest/gtest.h>
+#include <fp16/bitcasts.h>
+#include <fp16/fp16.h>
 
 #if XNN_ARCH_ARM64
 #include <xnnpack/aarch64-assembler.h>
@@ -32,6 +34,54 @@
 #if XNN_ARCH_ARM
 #include <xnnpack/aarch32-assembler.h>
 #endif  // XNN_ARCH_ARM
+
+TEST_P(GemmTest, Test) {
+  const GemmTestParams& params = GetParam();
+  GemmMicrokernelTester tester = params.tester;
+
+  // Make sure that we can execute this test.
+  if (params.isa_check) {
+    params.isa_check();
+    if (IsSkipped()) {
+      return;
+    }
+  }
+
+  // Loop over the `k`, `m`, and `n` values, if required.
+  for (size_t k = params.loop_k_.from; k <= params.loop_k_.to;
+       k += params.loop_k_.step) {
+    if (params.loop_k_.is_set) {
+      tester.k(k);
+    }
+    for (size_t m = params.loop_m_.from; m <= params.loop_m_.to;
+         m += params.loop_m_.step) {
+      if (params.loop_m_.is_set) {
+        tester.m(m);
+      }
+      for (size_t n = params.loop_n_.from; n <= params.loop_n_.to;
+           n += params.loop_n_.step) {
+        if (params.loop_n_.is_set) {
+          tester.n(n);
+        }
+        for (size_t zi = params.loop_zi_.from; zi <= params.loop_zi_.to;
+             zi += params.loop_zi_.step) {
+          if (params.loop_zi_.is_set) {
+            tester.zero_index(zi);
+          }
+          for (size_t bzp = params.loop_bzp_.from; bzp <= params.loop_bzp_.to;
+               bzp += params.loop_bzp_.step) {
+            if (params.loop_bzp_.is_set) {
+              tester.b_zero_point(bzp);
+            }
+
+            // Call the test function.
+            params.test_func(tester);
+          }
+        }
+      }
+    }
+  }
+}
 
 void GemmMicrokernelTester::Test(
   xnn_qd8_f16_qc8w_igemm_ukernel_fn igemm,
@@ -1080,7 +1130,7 @@ void GemmMicrokernelTester::Test(
                                                                packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
   std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
-  std::vector<float> c_ref(m() * n(), 0);
+  std::vector<float> c_ref(m() * n(), 0.0f);
 
   {//for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), std::ref(f32rng));
@@ -1133,7 +1183,7 @@ void GemmMicrokernelTester::Test(
       (void*) ((uintptr_t) packed_w.data() + nr() * (ks() * packed_k_bytes + 2 * sizeof(float))));
 
     // Compute 32-bit results and output quantization arguments.
-    std::fill(c_ref.begin(), c_ref.end(), 0);
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
         int32_t ksum = 0;
@@ -1565,7 +1615,7 @@ void GemmMicrokernelTester::Test(
     std::generate(a.begin(), a.end(), [&] { return fp32_to_bits(f32rng(rng)) >> 16; });
     std::generate(b.begin(), b.end(), [&] { return fp32_to_bits(f32rng(rng)) >> 16; });
     std::generate(bias.begin(), bias.end(), [&] { return fp32_to_bits(f32rng(rng)) >> 16; });
-    std::fill(c.begin(), c.end(), UINT32_C(0x7FC0) /* NaN */);
+    std::fill(c.begin(), c.end(), UINT16_C(0x7FC0) /* NaN */);
     std::fill(c_ref.begin(), c_ref.end(), 0.0f);
 
     std::fill(packed_w.begin(), packed_w.end(), 0);

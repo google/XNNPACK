@@ -49,8 +49,8 @@ enum xnn_status xnn_reshape_external_value(
     return xnn_status_invalid_parameter;
   }
   struct xnn_value* value = &runtime->values[external_id];
-  if (value->flags & XNN_VALUE_FLAG_EXTERNAL_INPUT && value->allocation_type != xnn_allocation_type_external && value->allocation_type != xnn_allocation_type_static) {
-    xnn_log_error("failed to reshape runtime: Value %" PRIu32 " is neither external nor static (%d)",
+  if (value->allocation_type != xnn_allocation_type_external) {
+    xnn_log_error("failed to reshape runtime: Value %" PRIu32 " is not external (%d)",
                   external_id, value->allocation_type);
     return xnn_status_invalid_parameter;
   }
@@ -667,6 +667,7 @@ enum xnn_status xnn_plan_memory(
 
   status = initialize_workspace_values(runtime, &mem_alloc_tracker, old_persistent_size);
   if (status != xnn_status_success) {
+    xnn_log_debug("failed to initialize_workspace_values");
     goto error;
   }
 
@@ -704,7 +705,6 @@ enum xnn_status xnn_reshape_runtime(
   if (reallocation_required || !runtime->memory_planned) {
     runtime->memory_planned = true;
     return xnn_plan_memory(runtime);
-  } else {
   }
   return xnn_status_success;
 }

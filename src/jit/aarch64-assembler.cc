@@ -322,7 +322,7 @@ void Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm) {
 
 void Assembler::ldr(XRegister xt, MemOperand xn) {
   const int32_t imm = xn.offset;
-  if (xn.mode != AddressingMode::kOffset || imm < 0 || imm > (kUint12Max << 3) || (imm & 7) != 0) {
+  if (xn.mode != AddressingMode::kOffset || imm < 0 || imm > int32_t(kUint12Max << 3) || (imm & 7) != 0) {
     error_ = Error::kInvalidOperand;
     return;
   }
@@ -777,7 +777,7 @@ void Assembler::stp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm) {
 
 void Assembler::str(HRegister ht, MemOperand xn) {
   const int32_t imm = xn.offset;
-  if (imm < 0 || imm > (kUint12Max << 1) || (imm & 0x1) != 0) {
+  if (imm < 0 || imm > int32_t(kUint12Max << 1) || (imm & 0x1) != 0) {
     error_ = Error::kInvalidOperand;
     return;
   }
@@ -787,7 +787,7 @@ void Assembler::str(HRegister ht, MemOperand xn) {
 
 void Assembler::str(SRegister st, MemOperand xn) {
   const int32_t imm = xn.offset;
-  if (imm < 0 || imm > (kUint12Max << 2) || (imm & 0x3) != 0) {
+  if (imm < 0 || imm > int32_t(kUint12Max << 2) || (imm & 0x3) != 0) {
     error_ = Error::kInvalidOperand;
     return;
   }

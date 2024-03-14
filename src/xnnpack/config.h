@@ -41,7 +41,6 @@ struct xnn_hardware_config {
   bool use_x86_avx;
   bool use_x86_f16c;
   bool use_x86_fma3;
-  bool use_x86_xop;
   bool use_x86_avx2;
   bool use_x86_avx512f;
   bool use_x86_avx512vbmi;

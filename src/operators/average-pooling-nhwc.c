@@ -481,7 +481,7 @@ static enum xnn_status reshape_average_pooling2d(
   average_pooling_op->input_pixel_stride = input_pixel_stride;
   average_pooling_op->output_pixel_stride = output_pixel_stride;
 
-  assert(!is_pixelwise || pavgpool != NULL && indirection_init_pavgpool2d != NULL);
+  assert(!is_pixelwise || (pavgpool != NULL && indirection_init_pavgpool2d != NULL));
 
   average_pooling_op->state = xnn_run_state_invalid;
 

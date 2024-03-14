@@ -168,7 +168,15 @@ static enum xnn_status reshape_even_split_n_operator(
   if (axis < 0) {
     axis += input_value->shape.num_dims;
   }
-  opdata->batch_size = xnn_shape_multiply_leading_dims(&input_value->shape, opdata->axis);
+  // Check that the split dimension can be evenly split into outputs.
+  if (axis >= input_value->shape.num_dims) {
+    xnn_log_error(
+      "failed to reshape Even Split operator with the input ID #%" PRIu32
+      ": split dimension (%d) exceeds the number of dimensions (%zu)",
+      input_id, axis, input_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
+  opdata->batch_size = xnn_shape_multiply_leading_dims(&input_value->shape, axis);
 
   const size_t axis_elements = input_value->shape.dim[axis] / num_splits;
   const size_t old_workspace_size = opdata->workspace_size;
@@ -346,26 +354,6 @@ enum xnn_status check_output_value(
     return status;
   }
 
-  if (input_value->shape.num_dims != output_value->shape.num_dims) {
-    xnn_log_error(
-      "failed to define %s operator with %s output ID #%" PRIu32
-      ": mismatch number of dimensions, input has %zu, %s output has %zu",
-      xnn_node_type_to_string(node_type), nth, output_id, input_value->shape.num_dims,
-      nth, output_value->shape.num_dims);
-    return xnn_status_invalid_parameter;
-  }
-
-  for (size_t i = 0; i < input_value->shape.num_dims; i++) {
-    if (i != split_dim && input_value->shape.dim[i] != output_value->shape.dim[i]) {
-      xnn_log_error(
-        "failed to define %s operator with %s output ID #%" PRIu32
-        ": mismatch dimension %zu, %s output has %zu, input has %zu",
-        xnn_node_type_to_string(node_type), nth, output_id, i, nth, output_value->shape.dim[i],
-        input_value->shape.dim[i]);
-      return xnn_status_invalid_parameter;
-    }
-  }
-
   status = xnn_subgraph_check_datatype_matches(node_type, input_id, input_value, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
@@ -429,46 +417,26 @@ enum xnn_status xnn_define_even_split_n(
     return status;
   }
 
-  check_output_value(subgraph, split_dim, input_id, output_ids[0], "first", node_type);
-  check_output_value(subgraph, split_dim, input_id, output_ids[1], "second", node_type);
+  status = check_output_value(subgraph, split_dim, input_id, output_ids[0], "first", node_type);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  status = check_output_value(subgraph, split_dim, input_id, output_ids[1], "second", node_type);
+  if (status != xnn_status_success) {
+    return status;
+  }
 
   if (num_outputs > 2) {
-    check_output_value(subgraph, split_dim, input_id, output_ids[2], "third", node_type);
+    status = check_output_value(subgraph, split_dim, input_id, output_ids[2], "third", node_type);
+    if (status != xnn_status_success) {
+      return status;
+    }
   }
   if (num_outputs > 3) {
-    check_output_value(subgraph, split_dim, input_id, output_ids[3], "fourth", node_type);
-  }
-
-  // Check that the split dimension can be evenly split into outputs.
-  if (split_dim >= input_value->shape.num_dims) {
-    xnn_log_error(
-      "failed to define %s operator with the input ID #%" PRIu32
-      ": split dimension (%d) exceeds the number of dimensions (%zu)",
-      xnn_node_type_to_string(node_type), input_id, split_dim, input_value->shape.num_dims);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (input_value->shape.dim[split_dim] % num_outputs != 0) {
-    xnn_log_error(
-      "failed to define %s operator with the input ID #%" PRIu32
-      ": split dimension %d has value %zu which cannot be evenly split into %zu",
-      xnn_node_type_to_string(node_type), input_id, split_dim, input_value->shape.dim[split_dim], num_outputs);
-    return xnn_status_invalid_parameter;
-  }
-
-  // Check that the split dimensions of output add up;
-  size_t output_dimensions_sum = 0;
-  for (size_t i = 0; i < num_outputs; i++) {
-    const struct xnn_value* output_value = &subgraph->values[output_ids[i]];
-    output_dimensions_sum += output_value->shape.dim[split_dim];
-  }
-
-  if (output_dimensions_sum != input_value->shape.dim[split_dim]) {
-    xnn_log_error(
-      "failed to define %s operator with the input ID #%" PRIu32
-      ": input split dimension value (%zu) does not match the sum of output split dimensions value %zu",
-      xnn_node_type_to_string(node_type), input_id, input_value->shape.dim[split_dim], output_dimensions_sum);
-    return xnn_status_invalid_parameter;
+    status = check_output_value(subgraph, split_dim, input_id, output_ids[3], "fourth", node_type);
+    if (status != xnn_status_success) {
+      return status;
+    }
   }
 
   enum xnn_compute_type compute_type = xnn_compute_type_invalid;

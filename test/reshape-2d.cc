@@ -156,7 +156,7 @@ TEST_F(Reshape2dTestInt8, matches_operator_api) {
 
   std::vector<size_t> output_dims(2, 1);
   if (!dims.empty()) {
-    for (int k = 0; k < dims.size() - 1; ++k) {
+    for (size_t k = 0; k < dims.size() - 1; ++k) {
       output_dims[0] *= dims[k];
     }
     output_dims.back() = dims.back();

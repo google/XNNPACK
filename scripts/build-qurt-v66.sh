@@ -32,4 +32,4 @@ CMAKE_ARGS+=($@)
 cd build/qurt/v66 && cmake ../../.. \
     "${CMAKE_ARGS[@]}"
 
-cmake --build . -- "-j$(nproc)"
+cmake --build . -- "-j$((2*$(nproc)))"

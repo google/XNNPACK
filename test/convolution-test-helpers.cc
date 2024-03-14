@@ -24,7 +24,7 @@ void compute_convolution_qd8_f32_qc8w_reference_results(
     const std::vector<float>& filter_scale,
     const std::vector<xnn_qd8_quantization_params>& quantization_params,
     std::vector<float>& output, bool has_bias, const std::vector<float>& bias) {
-  std::fill(output.begin(), output.end(), 0);
+  std::fill(output.begin(), output.end(), 0.0f);
 
   for (size_t i = 0; i < batch_size; i++) {
     int32_t zero_point = quantization_params[i].zero_point;

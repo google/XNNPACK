@@ -170,7 +170,7 @@ class SubgraphTester {
         // 1. Generate non-zero elements in the beginning of the vector
         // 2. Randomize positions of non-zero elements
         const size_t num_nonzero_elements = num_elements / 10;
-        std::generate(data, data + num_nonzero_elements, [&]() { return f32dist(rng_); });
+        std::generate(data, data + num_nonzero_elements, [&]() { return w8dist(rng_); });
         std::shuffle(data, data + num_elements, rng_);
       }
     }
@@ -512,13 +512,6 @@ class SubgraphTester {
 
   inline SubgraphTester& Optimize() {
     const xnn_status status = xnn_subgraph_optimize(subgraph_.get(), 0 /* flags */);
-    EXPECT_EQ(status, xnn_status_success);
-
-    return *this;
-  }
-
-  inline SubgraphTester& InferShape() {
-    const xnn_status status = xnn_subgraph_infer_shape(subgraph_.get(), /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;

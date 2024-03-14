@@ -228,10 +228,6 @@
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_gemminc_goi_w
   k-block: 1
-- name: xnn_f32_gemminc_minmax_ukernel_1x8__sse2_dup
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_gemminc_goi_w
-  k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_1x8s4__sse
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_gemminc_goi_w
@@ -244,10 +240,6 @@
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_gemminc_goi_w
   k-block: 1
-- name: xnn_f32_gemminc_minmax_ukernel_3x8__sse2_dup
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_gemminc_goi_w
-  k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_3x8s4__sse
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_gemminc_goi_w
@@ -260,10 +252,6 @@
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_gemminc_goi_w
   k-block: 1
-- name: xnn_f32_gemminc_minmax_ukernel_4x8__sse2_dup
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_gemminc_goi_w
-  k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_4x8s4__sse
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_gemminc_goi_w
@@ -276,10 +264,6 @@
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_gemminc_goi_w
   k-block: 1
-- name: xnn_f32_gemminc_minmax_ukernel_5x8__sse2_dup
-  init: xnn_init_f32_minmax_sse_params
-  pack: xnn_pack_f32_gemminc_goi_w
-  k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_5x8s4__sse
   init: xnn_init_f32_minmax_sse_params
   pack: xnn_pack_f32_gemminc_goi_w

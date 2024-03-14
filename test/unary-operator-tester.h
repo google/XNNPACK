@@ -294,10 +294,10 @@ class UnaryOperatorTester {
   // Input ranges for the different type-dependent tests.
   std::pair<float, float> range_f32_ = {-10.0f, 10.0f};
   std::pair<float, float> range_f16_ = {-10.0f, 10.0f};
-  std::pair<float, int32_t> range_qs8_ = {std::numeric_limits<int8_t>::min(),
+  std::pair<int8_t, int8_t> range_qs8_ = {std::numeric_limits<int8_t>::min(),
                                           std::numeric_limits<int8_t>::max()};
-  std::pair<float, int32_t> range_qu8_ = {0,
-                                          std::numeric_limits<uint8_t>::max()};
+  std::pair<uint8_t, uint8_t> range_qu8_ = {
+      0, std::numeric_limits<uint8_t>::max()};
 
  private:
   size_t batch_size_ = 1;

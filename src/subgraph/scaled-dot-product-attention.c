@@ -84,35 +84,21 @@ static enum xnn_status resize_scaled_dot_product_attention_output_tensor(
     return xnn_status_invalid_parameter;
   }
 
-  enum xnn_shape_inference_status shape_status = xnn_shape_inference_status_error;
-
   // Update output batch dim(s)
   if (query_batch_size != output_batch_size) {
     for (uint32_t i = 0; i < query_num_dims - 3; ++i) {
-      shape_status = xnn_tensor_propagate_dimension(output, i, query->shape.dim[i]);
-      if (shape_status == xnn_shape_inference_status_error) {
-        return xnn_status_invalid_parameter;
-      }
+      output->shape.dim[i] = query->shape.dim[i];
     }
   }
 
   // Update output head dim
-  shape_status = xnn_tensor_propagate_dimension(output, output_num_dims - 3, query_heads);
-  if (shape_status == xnn_shape_inference_status_error) {
-    return xnn_status_invalid_parameter;
-  }
+  output->shape.dim[output_num_dims - 3] = query_heads;
 
   // Update output token dim
-  shape_status = xnn_tensor_propagate_dimension(output, output_num_dims - 2, query_tokens);
-  if (shape_status == xnn_shape_inference_status_error) {
-    return xnn_status_invalid_parameter;
-  }
+  output->shape.dim[output_num_dims - 2] = query_tokens;
 
   // Update output channel dim
-  shape_status = xnn_tensor_propagate_dimension(output, output_num_dims - 1, value_channels);
-  if (shape_status == xnn_shape_inference_status_error) {
-    return xnn_status_invalid_parameter;
-  }
+  output->shape.dim[output_num_dims - 1] = value_channels;
 
   // Output size after resize
   const size_t new_output_size = xnn_tensor_get_size(output);

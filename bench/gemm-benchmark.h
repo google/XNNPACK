@@ -265,7 +265,7 @@ void GEMMBenchmark(benchmark::State& state,
   pack(1, nc, kc, nr, kr, sr, k.data(), /*bias=*/nullptr, /*scale=*/nullptr, w.data(),
        sizeof(float) * 2 * nr, &packing_params);
   std::vector<uint16_t> c(c_elements * num_buffers);
-  std::fill(c.begin(), c.end(), std::nanf(""));
+  std::fill(c.begin(), c.end(), UINT16_C(0x7E00) /* NaN */);
 
   // Prepare parameters.
   xnn_f16_minmax_params params;

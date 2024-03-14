@@ -307,15 +307,7 @@
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__xop_ld64
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
 - name: xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__avx_ld64
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__xop_ld64
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
@@ -323,15 +315,7 @@
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2__xop_ld64
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
 - name: xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__avx_ld64
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__xop_ld64
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
@@ -340,15 +324,7 @@
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__xop_ld128
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
 - name: xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__avx_ld128
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__xop_ld128
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
@@ -356,15 +332,7 @@
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2__xop_ld128
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
 - name: xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__avx_ld128
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__xop_ld128
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
@@ -373,15 +341,7 @@
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2s4__xop_ld64
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
 - name: xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2s4__avx_ld64
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2s4__xop_ld64
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
@@ -389,15 +349,7 @@
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2s4__xop_ld64
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
 - name: xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2s4__avx_ld64
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2s4__xop_ld64
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
@@ -406,15 +358,7 @@
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2s4__xop_ld128
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
 - name: xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2s4__avx_ld128
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2s4__xop_ld128
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
@@ -422,15 +366,7 @@
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2s4__xop_ld128
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
 - name: xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2s4__avx_ld128
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2s4__xop_ld128
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
@@ -439,23 +375,11 @@
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__xop_ld64
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
 - name: xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__avx_ld64
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__xop_ld64
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
 - name: xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__avx_ld64
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__xop_ld64
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
@@ -464,23 +388,11 @@
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__xop_ld128
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
 - name: xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__avx_ld128
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__xop_ld128
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
 - name: xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__avx_ld128
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
-  pack: xnn_pack_qu8_conv_goki_w
-  k-block: 8
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__xop_ld128
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
   pack: xnn_pack_qu8_conv_goki_w
   k-block: 8

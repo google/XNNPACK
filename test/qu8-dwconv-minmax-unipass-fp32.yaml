@@ -60,16 +60,12 @@
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_9p8c__avx2_mul32
   init: xnn_init_qu8_conv_minmax_fp32_avx2_params
-- name: xnn_qu8_dwconv_minmax_fp32_ukernel_9p8c__xop_mul32
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__avx_mul16
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__avx_mul32
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32
   init: xnn_init_qu8_conv_minmax_fp32_avx2_params
-- name: xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__xop_mul32
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_9p32c__avx2_mul32
   init: xnn_init_qu8_conv_minmax_fp32_avx2_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_25p8c__avx_mul16
@@ -78,16 +74,12 @@
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_25p8c__avx2_mul32
   init: xnn_init_qu8_conv_minmax_fp32_avx2_params
-- name: xnn_qu8_dwconv_minmax_fp32_ukernel_25p8c__xop_mul32
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__avx_mul16
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__avx_mul32
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul32
   init: xnn_init_qu8_conv_minmax_fp32_avx2_params
-- name: xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__xop_mul32
-  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_25p32c__avx2_mul32
   init: xnn_init_qu8_conv_minmax_fp32_avx2_params
 # x86 AVX512

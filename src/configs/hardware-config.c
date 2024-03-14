@@ -142,7 +142,6 @@ static void init_hardware_config(void) {
     hardware_config.use_x86_avx = cpuinfo_has_x86_avx();
     hardware_config.use_x86_f16c = cpuinfo_has_x86_f16c();
     hardware_config.use_x86_fma3 = cpuinfo_has_x86_fma3();
-    hardware_config.use_x86_xop = cpuinfo_has_x86_xop();
     hardware_config.use_x86_avx2 = cpuinfo_has_x86_avx2();
     hardware_config.use_x86_avx512f = cpuinfo_has_x86_avx512f();
     hardware_config.use_x86_avx512skx = hardware_config.use_x86_avx512f &&
@@ -277,12 +276,12 @@ static void init_hardware_config(void) {
 #endif
 
 const struct xnn_hardware_config* xnn_init_hardware_config() {
-  #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !XNN_ARCH_PPC64 && !(XNN_ARCH_ARM64 && XNN_PLATFORM_WINDOWS)
+  #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !XNN_ARCH_PPC64
     if (!cpuinfo_initialize()) {
       xnn_log_error("failed to initialize cpuinfo");
       return NULL;
     }
-  #endif  // !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !(XNN_ARCH_ARM64 && XNN_PLATFORM_WINDOWS)
+  #endif  // !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !XNN_ARCH_PPC64
   #if XNN_ARCH_ARM
     #if XNN_PLATFORM_MOBILE
       if (!cpuinfo_has_arm_neon()) {

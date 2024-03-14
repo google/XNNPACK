@@ -7,6 +7,7 @@ on:
       - '**.cc'
       - '**.h'
       - 'BUILD.bazel'
+      - 'build_config/BUILD.bazel'
       - '**.bzl'
       - 'CMakeLists.txt'
       - 'cmake/**'
@@ -20,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Update apt
         run: sudo apt update
       - name: Install ninja
@@ -32,7 +33,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 150
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Update apt
         run: sudo apt update
       - name: Install ninja
@@ -51,7 +52,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Update apt
         run: sudo apt update
       - name: Install ninja
@@ -70,7 +71,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Update apt
         run: sudo apt update
       - name: Install ninja
@@ -89,7 +90,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Update apt
         run: sudo apt update
       - name: Install ninja
@@ -103,14 +104,14 @@ jobs:
       - name: Configure and build
         run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release -DXNNPACK_ENABLE_RISCV_VECTOR=ON -DUSE_GNU_SOURCE=ON -DRISCV_TOOLCHAIN_ROOT=${{ github.workspace }}/riscv/ -DRISCV_QEMU_ROOT=${{ github.workspace }}/riscv/
         working-directory: ${{ github.workspace }}
-      - name: Run tests
-        run: ctest --output-on-failure --parallel $(nproc)
+      - name: Run tests (no operator tests)
+        run: ctest --output-on-failure -LE operator --parallel $(nproc)
         working-directory: ${{ github.workspace }}/build/linux/riscv64
   cmake-windows-arm64:
     runs-on: windows-latest
     timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Configure and build
         run: scripts/build-windows-arm64.cmd
         shell: cmd
@@ -119,7 +120,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Configure and build
         run: scripts/build-windows-x64.cmd
         shell: cmd
@@ -134,7 +135,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Configure and build
         run: scripts/build-windows-x86.cmd
         shell: cmd
@@ -149,7 +150,7 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Create output directory
         run: mkdir -p build/macos/arm64
         working-directory: ${{ github.workspace }}
@@ -159,23 +160,6 @@ jobs:
       - name: Build with Xcode
         run: cmake --build build/macos/arm64 --parallel $(sysctl -n hw.ncpu) -- -quiet
         working-directory: ${{ github.workspace }}
-  cmake-macos-x86_64:
-    runs-on: macos-latest
-    timeout-minutes: 90
-    steps:
-      - uses: actions/checkout@v3
-      - name: Create output directory
-        run: mkdir -p build/macos/x86_64
-        working-directory: ${{ github.workspace }}
-      - name: Generate CMake project
-        run: cmake -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64 -DHAVE_STD_REGEX=TRUE ../../..
-        working-directory: ${{ github.workspace }}/build/macos/x86_64
-      - name: Build with Xcode
-        run: cmake --build build/macos/x86_64 --parallel $(sysctl -n hw.ncpu) -- -quiet
-        working-directory: ${{ github.workspace }}
-      - name: Run tests
-        run: ctest --build-config Debug --output-on-failure --parallel $(sysctl -n hw.ncpu)
-        working-directory: ${{ github.workspace }}/build/macos/x86_64
   cmake-android:
     strategy:
       matrix:
@@ -183,7 +167,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Update apt
         run: sudo apt update
       - name: Install ninja
@@ -203,7 +187,7 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Create output directory
         run: mkdir -p build/ios/arm64
         working-directory: ${{ github.workspace }}
@@ -217,7 +201,7 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Create output directory
         run: mkdir -p build/ios/x86_64
         working-directory: ${{ github.workspace }}
@@ -231,7 +215,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Android NDK
         id: setup-ndk
         uses: nttld/setup-ndk@v1

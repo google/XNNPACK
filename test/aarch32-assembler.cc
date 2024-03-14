@@ -463,7 +463,7 @@ TEST(AArch32Assembler, CodeBufferOverflow) {
   // Requested memory is rounded to page size.
   xnn_allocate_code_memory(&b, 4);
   Assembler a(&b);
-  for (int i = 0; i < b.capacity; i += 1 << kInstructionSizeInBytesLog2) {
+  for (size_t i = 0; i < b.capacity; i += 1 << kInstructionSizeInBytesLog2) {
     a.add(r0, r0, 2);
   }
   EXPECT_EQ(Error::kNoError, a.error());
@@ -480,7 +480,7 @@ TEST(AArch32Assembler, BoundOverflow) {
   xnn_allocate_code_memory(&b, 4);
   Assembler a(&b);
   Label l1;
-  for (int i = 0; i < b.capacity; i += 1 << kInstructionSizeInBytesLog2) {
+  for (size_t i = 0; i < b.capacity; i += 1 << kInstructionSizeInBytesLog2) {
     a.add(r0, r0, 2);
   }
   EXPECT_EQ(Error::kNoError, a.error());

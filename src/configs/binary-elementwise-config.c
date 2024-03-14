@@ -925,12 +925,6 @@ static void init_qs8_vadd_config(void) {
       qs8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_u16;
       qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_avx512_params;
       qs8_vadd_config.minmax.element_tile = 16;
-    } else if (hardware_config->use_x86_xop) {
-      qs8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_u8;
-      qs8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__xop_mul32_ld32_u8;
-      qs8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__xop_mul32_ld32_u8;
-      qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_sse4_mul32_params;
-      qs8_vadd_config.minmax.element_tile = 8;
     } else if (hardware_config->use_x86_avx2) {
       qs8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_u16;
       qs8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16;
@@ -1099,12 +1093,6 @@ static void init_qu8_vadd_config(void) {
       qu8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_u16;
       qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_avx512_params;
       qu8_vadd_config.minmax.element_tile = 16;
-    } else if (hardware_config->use_x86_xop) {
-      qu8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__xop_mul32_ld32_u8;
-      qu8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__xop_mul32_ld32_u8;
-      qu8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__xop_mul32_ld32_u8;
-      qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_sse4_params;
-      qu8_vadd_config.minmax.element_tile = 8;
     } else if (hardware_config->use_x86_avx2) {
       qu8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__avx2_mul32_ld64_u16;
       qu8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16;

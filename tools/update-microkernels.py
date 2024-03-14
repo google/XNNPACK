@@ -53,7 +53,6 @@ ISA_LIST = frozenset({
   'wasmpshufb',
   'wasmsdot',
   'wasmsimd',
-  'xop',
 })
 
 ISA_MAP = {
@@ -101,7 +100,6 @@ ISA_TO_HEADER_MAP = {
   'ssse3': 'immintrin.h',
   'wasmrelaxedsimd': 'wasm_simd128.h',
   'wasmsimd': 'wasm_simd128.h',
-  'xop': 'xopintrin.h',
 }
 
 MICROKERNEL_NAME_REGEX = re.compile(
