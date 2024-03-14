@@ -117,8 +117,8 @@ class VHSwishMicrokernelTester {
         const int32_t input_value = int32_t(uint32_t(input_zero_point() - input[i]) << 7);
         int32_t in = input_value * input_scale_div;
         in -= 16384;  // subtract 0.5 in Q15
-        in = std::min<int32_t>(in, 0);
-        in = std::max<int32_t>(in, -32768);
+        in = std::min<uint32_t>(in, 0);
+        in = std::max<uint32_t>(in, -32768);
         const int32_t out = math_asr_s32(input_value * scale_ratio + INT32_C(0x4000), 15);
         int32_t output_value = math_asr_s32(in * out + INT32_C(0x4000), 15) + output_zero_point();
         output_value = std::min<int32_t>(output_value, std::numeric_limits<int8_t>::max());
@@ -167,8 +167,8 @@ class VHSwishMicrokernelTester {
         const int32_t input_value = int32_t(uint32_t(input_zero_point() - input[i]) << 7);
         int32_t in = input_value * input_scale_div;
         in -= 16384;  // subtract 0.5 in Q15
-        in = std::min<int32_t>(in, 0);
-        in = std::max<int32_t>(in, -32768);
+        in = std::min<uint32_t>(in, 0);
+        in = std::max<uint32_t>(in, -32768);
         const int32_t out = math_asr_s32(input_value * scale_ratio + INT32_C(0x4000), 15);
         int32_t output_value = math_asr_s32(in * out + INT32_C(0x4000), 15) + output_zero_point();
         output_value = std::min<int32_t>(output_value, std::numeric_limits<uint8_t>::max());
