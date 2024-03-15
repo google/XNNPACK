@@ -21,7 +21,7 @@
   #include <ctype.h>
   #include <sys/utsname.h>
 #endif
-#if XNN_ARCH_X86_64 && defined(__linux__)
+#if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)
 #include <sys/syscall.h>
 #include <unistd.h>
 #define XFEATURE_XTILEDATA 18
@@ -64,7 +64,7 @@ static void KernelVersion(int* version) {
 }
 #endif
 
-#if XNN_ARCH_X86_64 && defined(__linux__)
+#if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)
 ssize_t xnn_syscall(size_t rax, size_t rdi, size_t rsi, size_t rdx) {
   __asm (
     "syscall"
@@ -153,7 +153,7 @@ static void init_hardware_config(void) {
     // TODO(fbarchard): Use cpuinfo_has_x86_amx_int8 when available.
     // Infer AMX support from Sapphire Rapids having fp16 and amx.
     hardware_config.use_x86_avx512amx = hardware_config.use_x86_avx512vnnigfni && cpuinfo_has_x86_avx512fp16();
-#if XNN_ARCH_X86_64 && defined(__linux__)
+#if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)
     if (hardware_config.use_x86_avx512amx) {
       size_t status = xnn_syscall(SYS_arch_prctl, ARCH_REQ_XCOMP_PERM, XFEATURE_XTILEDATA, 0);
       if (status) {
