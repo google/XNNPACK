@@ -5,7 +5,7 @@
 
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
-$assert DATATYPE in ["QD8", "QC8"]
+$assert DATATYPE in ["QD8_F32", "QC8"]
 $assert ACCUMULATORS == 1 or ACCUMULATORS == 2
 #include <assert.h>
 
@@ -29,12 +29,12 @@ typedef struct __tile_config {
   uint8_t reserved_2[8];
 } __tilecfg;
 
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w", "QC4": "qd8_f32_qc4w"}[DATATYPE]
-$REQUANTIZATION_SPEC = "" if DATATYPE in ["QD8", "QC4"] else "_" + REQUANTIZATION.lower()
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8_F32": "qd8_f32_qc8w", "QC4_F32": "qd8_f32_qc4w"}[DATATYPE]
+$REQUANTIZATION_SPEC = "" if DATATYPE in ["QD8_F32", "QC4_F32"] else "_" + REQUANTIZATION.lower()
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx512"
-$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QC4": "xnn_f32_qc4w_minmax_params"}[DATATYPE]
+$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8_F32": "xnn_f32_minmax_params", "QC4_F32": "xnn_f32_qc4w_minmax_params"}[DATATYPE]
 $XINT8_T = "int8_t"
-$OUT_T = "float" if DATATYPE in ["QD8", "QC4"] else XINT8_T
+$OUT_T = "float" if DATATYPE in ["QD8_F32", "QC4_F32"] else XINT8_T
 $_MM_MAX_EPX8 = "_mm_max_epi8"
 $_MM512_CVTXEPI32_EPI8 = "_mm512_cvtsepi32_epi8"
 $ACC_POSTFIX=f"_acc{ACCUMULATORS}" if ACCUMULATORS > 1 else ""
@@ -48,7 +48,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
     ${OUT_T}* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    $if DATATYPE in ["QD8", "QC4"]:
+    $if DATATYPE in ["QD8_F32", "QC4_F32"]:
       const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)],
       const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
     $else:
@@ -66,8 +66,8 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
 // TODO: amxintrin.h only provide intrinsics for __x86_64__
 // Update if amxintrin changes
 #if defined(__x86_64__) && defined(__AMX_TILE__)
-  int32_t res0[${MR} * 16];
-  int32_t res1[${MR} * 16];
+  __attribute__((aligned(64))) int32_t res0[${MR} * 16];
+  __attribute__((aligned(64))) int32_t res1[${MR} * 16];
 
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   size_t kremainder = kc & 63;
@@ -76,7 +76,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
   }
 
   // Load tile configuration
-  __tilecfg tile_data = {0};
+  __attribute__((aligned(64))) __tilecfg tile_data = {0};
   tile_data.palette_id = 1;
   tile_data.rows[0] = mr;              // tmm0 = res 0
   tile_data.rows[1] = mr;              // tmm1 = res 1
@@ -114,25 +114,18 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
         c${M} = c${M-1};
       }
 
-  $if DATATYPE in ["QD8", "QC4"]:
-    $for M in range(MR):
-      const __m512i vinput_zero_point${M} = _mm512_set1_epi32((int) quantization_params[${M}].zero_point);
+  $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
     const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
     const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
-    $if DATATYPE == "QC4":
+    $if DATATYPE in ["QC4_F16", "QC4_F32"]:
       const __m256i vmask = _mm256_set1_epi8(params->scalar.mask);
   $else:
-    $if DATATYPE != "QC8":
-      const __m512 vscale = _mm512_load_ps(params->${PARAMS_STRUCT}.scale);
     const __m512 voutput_max_less_zero_point = _mm512_set1_ps(params->${PARAMS_STRUCT}.output_max_less_zero_point);
     const __m512i voutput_zero_point = _mm512_set1_epi32(params->${PARAMS_STRUCT}.output_zero_point);
     const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
 
   do {
-    $if DATATYPE in ["QD8", "QC4"]:
-      const __m512i vksum0123456789ABCDEF = _mm512_load_epi32(w);
-    $else:
-      __m512i vacc0123456789ABCDEF = _mm512_load_epi32(w);
+    const __m512i vksum0123456789ABCDEF = _mm512_load_epi32(w);
     w = (const int32_t*) w + 16;
 
     // Zero tile accumulator
@@ -208,25 +201,25 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
     // Add tile to bias
     _tile_stored(0, res0, 64);
     _tile_stored(1, res1, 64);
-    $if DATATYPE in ["QD8", "QC4"]:
+    $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
       $for M in range(MR):
-        __m512i vacc${M}x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point${M});
+        __m512i vacc${M}x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params[${M}].zero_point));
       $for M in range(MR):
         vacc${M}x0123456789ABCDEF = _mm512_add_epi32(vacc0x0123456789ABCDEF, _mm512_load_epi32(res0 + ${M * 16}));
     $else:
       $for M in range(MR):
-        __m512i vacc${M}x0123456789ABCDEF = _mm512_add_epi32(vacc0123456789ABCDEF, _mm512_load_epi32(res0 + ${M * 16}));
+        __m512i vacc${M}x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + ${M * 16}));
     $if ACCUMULATORS > 1:
       $for M in range(MR):
         vacc${M}x0123456789ABCDEF = _mm512_add_epi32(vacc${M}x0123456789ABCDEF, _mm512_load_epi32(res1 + ${M * 16}));
 
-    $if DATATYPE == "QC4":
+    $if DATATYPE == "QC4_F32":
       $for M in range(MR):
         vacc${M}x0123456789ABCDEF = _mm512_srai_epi32(vacc${M}x0123456789ABCDEF, 4);
     $for M in range(MR):
       __m512 vscaled${M}x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc${M}x0123456789ABCDEF);
 
-    $if DATATYPE in ["QD8", "QC4"]:
+    $if DATATYPE in ["QD8_F32", "QC4_F32"]:
       $for M in range(MR):
         vscaled${M}x0123456789ABCDEF = _mm512_mul_ps(vscaled${M}x0123456789ABCDEF, _mm512_set1_ps(quantization_params[${M}].inv_scale));
 
@@ -246,9 +239,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
       if XNN_LIKELY(nc >= 16) {
         $for M in reversed(range(MR)):
           _mm512_storeu_ps(c${M}, vscaled${M}x0123456789ABCDEF);
+
+        $for M in reversed(range(MR)):
           c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
-        a = (const int8_t*) ((uintptr_t) a - kc);
+        a -= kc;
         nc -= 16;
       } else {
         // Prepare mask for valid 32-bit elements (depends on nc).
@@ -257,7 +252,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
           _mm512_mask_storeu_ps(c${M}, vmask, vscaled${M}x0123456789ABCDEF);
         nc = 0;
       }
-    $else:
+    $elif DATATYPE in ["QS8", "QC8"]:
       $if DATATYPE == "QC8":
         const __m512 vscale012345678ABCDEF = _mm512_load_ps(w);
         w = (const float*) w + 16;
@@ -286,8 +281,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
         $for M in reversed(range(MR)):
           _mm_storeu_si128((__m128i*) c${M}, vout${M}x0123456789ABCDEF);
           c${M} = (${OUT_T}*) ((uintptr_t) c${M} + cn_stride);
-
-        a = (const int8_t*) ((uintptr_t) a - kc);
+        a -= kc;
         nc -= 16;
       } else {
         // Prepare mask for valid 8-bit elements (depends on nc).

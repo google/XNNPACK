@@ -51,8 +51,8 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
 // TODO: amxintrin.h only provide intrinsics for __x86_64__
 // Update if amxintrin changes
 #if defined(__x86_64__) && defined(__AMX_TILE__)
-  int32_t res0[1 * 16];
-  int32_t res1[1 * 16];
+  __attribute__((aligned(64))) int32_t res0[1 * 16];
+  __attribute__((aligned(64))) int32_t res1[1 * 16];
 
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   size_t kremainder = kc & 63;
@@ -61,7 +61,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
   }
 
   // Load tile configuration
-  __tilecfg tile_data = {0};
+  __attribute__((aligned(64))) __tilecfg tile_data = {0};
   tile_data.palette_id = 1;
   tile_data.rows[0] = mr;              // tmm0 = res 0
   tile_data.rows[1] = mr;              // tmm1 = res 1
@@ -90,7 +90,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx512.output_min);
 
   do {
-    __m512i vacc0123456789ABCDEF = _mm512_load_epi32(w);
+    const __m512i vksum0123456789ABCDEF = _mm512_load_epi32(w);
     w = (const int32_t*) w + 16;
 
     // Zero tile accumulator
@@ -124,7 +124,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
     // Add tile to bias
     _tile_stored(0, res0, 64);
     _tile_stored(1, res1, 64);
-    __m512i vacc0x0123456789ABCDEF = _mm512_add_epi32(vacc0123456789ABCDEF, _mm512_load_epi32(res0 + 0));
+    __m512i vacc0x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 0));
 
     __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
 
@@ -145,8 +145,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
     if (nc >= 16) {
       _mm_storeu_si128((__m128i*) c0, vout0x0123456789ABCDEF);
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
-
-      a = (const int8_t*) ((uintptr_t) a - kc);
+      a -= kc;
       nc -= 16;
     } else {
       // Prepare mask for valid 8-bit elements (depends on nc).
