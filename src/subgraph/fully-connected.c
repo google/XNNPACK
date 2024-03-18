@@ -856,10 +856,10 @@ enum xnn_status xnn_define_fully_connected(
     case xnn_datatype_fp32:
       break;
     case xnn_datatype_qcint4:
-      if (kernel_value->quantization.zero_point != 8) {
+      if (kernel_value->quantization.zero_point != 8 && kernel_value->quantization.zero_point != 0) {
         xnn_log_error(
           "failed to define %s operator with filter ID #%" PRIu32 ": unsupported quantization zero point %" PRId32
-          " for datatype %s, must be equals to 8",
+          " for datatype %s, must be equals to 8 (unsigned weights) or 0 (signed weights) ",
           xnn_node_type_to_string(xnn_node_type_fully_connected), filter_id, kernel_value->quantization.zero_point,
           xnn_datatype_to_string(kernel_value->datatype));
         return xnn_status_invalid_parameter;
