@@ -2186,7 +2186,7 @@ tools/xngen src/qs8-gemm/MRx8c4-avxvnni.c.in -D UNROLL=4 -D ACCUMULATORS=4 -D MR
 tools/xngen src/qs8-gemm/MRx8c4-avxvnni.c.in -D UNROLL=4 -D ACCUMULATORS=4 -D MR=8 -D DATATYPE=QD8 -D REQUANTIZATION= -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x8c4-minmax-avxvnni-u4-acc4.c &
 
 ################################## x86 AVX512 AMX #################################
-### C64 micro-kernels
+### C4 micro-kernels
 tools/xngen src/qs8-gemm/MRx16c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=0 -D MR=1  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -D ACCUMULATORS=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x16c4-minmax-fp32-avx512amx.c &
 tools/xngen src/qs8-gemm/MRx16c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=0 -D MR=7  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -D ACCUMULATORS=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-7x16c4-minmax-fp32-avx512amx.c &
 tools/xngen src/qs8-gemm/MRx16c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=0 -D MR=16 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -D ACCUMULATORS=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-16x16c4-minmax-fp32-avx512amx.c &

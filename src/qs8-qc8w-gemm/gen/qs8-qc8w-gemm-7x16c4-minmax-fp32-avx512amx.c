@@ -37,7 +37,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_7x16c4__avx512amx(
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_qc8w_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qs8_qc8w_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 7);
@@ -83,7 +83,6 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_7x16c4__avx512amx(
 
   _tile_loadconfig(&tile_data);
 
-  //const int8_t* a0 = a;
   int8_t* c0 = c;
   int8_t* c1 = (int8_t*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {

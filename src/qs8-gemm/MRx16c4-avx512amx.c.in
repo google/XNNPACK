@@ -50,9 +50,9 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
     size_t cn_stride,
     $if DATATYPE in ["QD8", "QC4"]:
       const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)],
-      const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+      const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
     $else:
-      const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+      const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -98,7 +98,6 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
 
   _tile_loadconfig(&tile_data);
 
-  //const ${XINT8_T}* a0 = a;
   ${OUT_T}* c0 = c;
   $for M in range(1, MR):
     ${OUT_T}* c${M} = (${OUT_T}*) ((uintptr_t) c${M-1} + cm_stride);
