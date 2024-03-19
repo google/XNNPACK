@@ -2591,7 +2591,6 @@ xnnpack_cc_library(
         "-mavx512vl",
         "-mavx512vnni",
         "-mgfni",
-        "-mamx-int8",
     ],
     mingw_copts = ["-fno-asynchronous-unwind-tables"],
     msvc_copts = xnnpack_msvc_std_copts(),
