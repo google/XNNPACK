@@ -25,9 +25,8 @@ void xnn_f32_rsum_ukernel__rvv_u4v(
   assert(output != NULL);
 
   batch >>= XNN_LOG2_SIZEOF_FLOAT;
-  size_t n = __riscv_vsetvlmax_e32m1();
-  vfloat32m1_t acc_f32v = __riscv_vfmv_s_f_f32m1(0.f, n);
-  n = __riscv_vsetvl_e32m4(batch);
+  vfloat32m1_t acc_f32v = __riscv_vfmv_s_f_f32m1(0.f, 1);
+  size_t n = __riscv_vsetvl_e32m4(batch);
   vfloat32m4_t sum0_f32v = __riscv_vfmv_s_f_f32m4(0.f, n);
   vfloat32m4_t sum1_f32v = __riscv_vfmv_s_f_f32m4(0.f, n);
   for (; batch >= n * 4; batch -= n * 4) {
@@ -41,13 +40,13 @@ void xnn_f32_rsum_ukernel__rvv_u4v(
     sum1_f32v = __riscv_vfadd_vv_f32m4(sum1_f32v, sum23_f32v, n);
   }
   vfloat32m4_t sum_f32v = __riscv_vfadd_vv_f32m4(sum0_f32v, sum1_f32v, n);
+  acc_f32v = __riscv_vfredosum_vs_f32m4_f32m1(sum_f32v, acc_f32v, n);
   for (; batch > 0;) {
     size_t n1 = __riscv_vsetvl_e32m4(batch);
     vfloat32m4_t in_f32v = __riscv_vle32_v_f32m4(input, n1); input += n1;
-    sum_f32v = __riscv_vfadd_vv_f32m4(sum_f32v, in_f32v, n1);
+    acc_f32v = __riscv_vfredosum_vs_f32m4_f32m1(in_f32v, acc_f32v, n1);
     batch -= n1;
   }
-  acc_f32v = __riscv_vfredosum_vs_f32m4_f32m1(sum_f32v, acc_f32v, n);
   vfloat32m1_t out_f32v = __riscv_vfmul_vf_f32m1(acc_f32v, params->scalar.scale, 1);
   __riscv_vse32_v_f32m1(output, out_f32v, 1);
 }
