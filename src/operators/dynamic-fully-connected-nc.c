@@ -330,6 +330,9 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
   const size_t n_stride = round_up(output_channels, nr);
   const size_t k_stride = round_up_po2(input_channels, kr * sr);
 
+  const size_t weights_stride = (k_stride << log2_filter_element_size) + bias_element_size;
+  dynamic_fully_connected_op->weights_stride = weights_stride;
+
   // TODO(zhin): fast path to query workspace size when workspace_size != NULL?
   *workspace_size = n_stride * bias_element_size + ((n_stride * k_stride) << log2_filter_element_size);
   *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
