@@ -544,7 +544,7 @@ TEST_F(GlobalAveragePooling2DTestF32, matches_operator_api)
   ASSERT_EQ(subgraph_output, operator_output);
 }
 
-TEST_F(GlobalAveragePooling2DTestF32, reshape_output_reduce_dims)
+TEST_F(GlobalAveragePooling2DTestF32, reshape_output_no_keep_dims)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -568,7 +568,7 @@ TEST_F(GlobalAveragePooling2DTestF32, reshape_output_reduce_dims)
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_global_average_pooling_2d(subgraph, output_min, output_max, input_id, output_id, /*flags=*/XNN_FLAG_REDUCE_DIMS));
+    xnn_define_global_average_pooling_2d(subgraph, output_min, output_max, input_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -607,7 +607,7 @@ TEST_F(GlobalAveragePooling2DTestF32, reshape_output_reduce_dims)
   ASSERT_EQ(output_shape->dim[num_input_dims - 3], input_dims[num_input_dims - 1]);
 }
 
-TEST_F(GlobalAveragePooling2DTestF32, reshape_output_no_reduce_dims)
+TEST_F(GlobalAveragePooling2DTestF32, reshape_output_keep_dims)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -631,7 +631,7 @@ TEST_F(GlobalAveragePooling2DTestF32, reshape_output_no_reduce_dims)
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_global_average_pooling_2d(subgraph, output_min, output_max, input_id, output_id, /*flags=*/0));
+    xnn_define_global_average_pooling_2d(subgraph, output_min, output_max, input_id, output_id, XNN_FLAG_KEEP_DIMS));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
