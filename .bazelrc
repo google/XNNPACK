@@ -63,3 +63,5 @@ common --enable_bzlmod=false
 build --cxxopt='-Wno-sign-compare'
 build --cxxopt='-Wno-comment'
 build --cxxopt='-Wno-psabi'
+build --cxxopt='-Wno-unused-but-set-variable'
+build --cxxopt='-Wno-unused-const-variable'
