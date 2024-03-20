@@ -669,7 +669,6 @@ xnnpack_benchmark(
     srcs = [
         "f32-gemm-minmax.cc",
         "gemm.h",
-        "google/gemm.h",
     ],
     copts = xnnpack_optional_ruy_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
@@ -685,7 +684,6 @@ xnnpack_benchmark(
     srcs = [
         "f32-gemm-goi-minmax.cc",
         "gemm.h",
-        "google/gemm.h",
     ],
     copts = xnnpack_optional_ruy_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
@@ -1242,7 +1240,6 @@ xnnpack_cc_library(
     name = "spmm_benchmark",
     hdrs = [
         "gemm.h",
-        "google/gemm.h",
         "spmm-benchmark.h",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
