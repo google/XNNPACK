@@ -58,7 +58,6 @@ class BatchMatMulOperatorTester {
 
   inline BatchMatMulOperatorTester& batch_dims_a(
       std::vector<size_t> batch_dims_a) {
-    assert(!batch_dims_a.empty());
     this->batch_dims_a_ = std::move(batch_dims_a);
     return *this;
   }
@@ -69,7 +68,6 @@ class BatchMatMulOperatorTester {
 
   inline BatchMatMulOperatorTester& batch_dims_b(
       std::vector<size_t> batch_dims_b) {
-    assert(!batch_dims_b.empty());
     this->batch_dims_b_ = std::move(batch_dims_b);
     return *this;
   }
@@ -176,7 +174,9 @@ class BatchMatMulOperatorTester {
     const int num_batch_dims = batch_dims_output.size();
 
     // Compute reference results.
-    if (num_batch_dims == 1) {
+    if (num_batch_dims == 0) {
+      ref_fun(m(), k(), n(), transpose_b(), input_a, input_b, output_ref);
+    } else if (num_batch_dims == 1) {
       for (size_t b = 0; b < batch_dims_output[0]; b++) {
         const size_t ba = b % batch_dims_a()[0];
         const size_t bb = b % batch_dims_b()[0];
@@ -241,7 +241,7 @@ class BatchMatMulOperatorTester {
         }
       }
     } else {
-      FAIL() << "Number of batch dims must be <= 2 (got " << num_batch_dims
+      FAIL() << "Number of batch dims must be <= 4 (got " << num_batch_dims
              << ")";
     }
   }
