@@ -64,6 +64,7 @@ class FullyConnectedTestBase : public ::testing::Test {
     }
     kernel_dims = {output_channels, input_channels};
     kernel_dims_tranposed = {input_channels, output_channels};
+    bias_dims = {output_channels};
     output_dims = input_dims;
     output_dims[output_dims.size() - 1] = output_channels;
 
