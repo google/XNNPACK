@@ -4567,17 +4567,10 @@ SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u96-acc6.c
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u96.c
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u8.c
-  src/f16-rminmax/gen/f16-rmax-neonfp16arith-u16-acc1.c
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u16-acc2.c
-  src/f16-rminmax/gen/f16-rmax-neonfp16arith-u24-acc2.c
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u24-acc3.c
-  src/f16-rminmax/gen/f16-rmax-neonfp16arith-u24.c
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u32-acc2.c
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u32-acc4.c
-  src/f16-rminmax/gen/f16-rmax-neonfp16arith-u32.c
-  src/f16-rminmax/gen/f16-rmax-neonfp16arith-u64-acc2.c
-  src/f16-rminmax/gen/f16-rmax-neonfp16arith-u64-acc4.c
-  src/f16-rminmax/gen/f16-rmax-neonfp16arith-u64.c
   src/f16-rminmax/gen/f16-rmin-neonfp16arith-u8.c
   src/f16-rminmax/gen/f16-rmin-neonfp16arith-u16-acc1.c
   src/f16-rminmax/gen/f16-rmin-neonfp16arith-u16-acc2.c
