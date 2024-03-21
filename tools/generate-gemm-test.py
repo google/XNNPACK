@@ -51,14 +51,18 @@ def split_ukernel_name(name):
     kr = int(kr)
   else:
     kr = 1
+  if "v" in param_spec:
+    vector_tile = True
+    param_spec, _ = param_spec.split("v", 1)
+  else:
+    vector_tile = False
   mr, nr = map(int, param_spec.split("x"))
   arch, isa, assembly = xnncommon.parse_target_name(target_name)
 
   requantization = common_parts[-3]
   if requantization not in ["fp32", "rndnu"]:
     requantization = None
-
-  return mr, nr, kr, sr, xw, requantization, arch, isa, assembly
+  return mr, nr, kr, sr, xw, vector_tile, requantization, arch, isa, assembly
 
 
 GEMM_BENCH_CODE_XW = """\
@@ -69,7 +73,7 @@ static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
       ${INIT_PARAMS},
     $if PACK_FN is not None:
       ${PACK_FN},
-    /*mr=*/${MR}, /*nr=*/${NR}, /*kr=*/${KR}, /*sr=*/${SR},
+    /*mr=*/${MR}, /*nr=*/${NR}${NR_SCALE}, /*kr=*/${KR}, /*sr=*/${SR},
     $if ISA_CHECK:
       benchmark::utils::${ISA_CHECK},
     $else:
@@ -87,7 +91,7 @@ static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
       ${INIT_PARAMS},
     $if PACK_FN is not None:
       ${PACK_FN},
-    /*mr=*/${MR}, /*nr=*/${NR}, /*kr=*/${KR}, /*sr=*/${SR},
+    /*mr=*/${MR}, /*nr=*/${NR}${NR_SCALE}, /*kr=*/${KR}, /*sr=*/${SR},
     $if ISA_CHECK:
       benchmark::utils::${ISA_CHECK});
     $else:
@@ -106,6 +110,8 @@ std::vector<GemmTestParams> CreateTests(
   std::string kbs = std::to_string(k_block);
   std::string kb2s = std::to_string(k_block * 2);
   std::string akbs = std::to_string(adj_k_block);
+  $if NR_SCALE != "":
+    nr = nr${NR_SCALE};
   std::string nrs = std::to_string(nr);
 
   std::vector<GemmTestParams> gemm_tests;
@@ -324,7 +330,10 @@ std::vector<GemmTestParams> CreateTests(
           $if KERNELTYPE == 'qc4w':
             .b_zero_point(8)
       , test_func, isa_check)
-      .loop_n(nr + 1, nr * 2 - 1)
+      $if NR_SCALE != "":
+        .loop_n(nr + 1, nr * 2 - 1, 4)
+      $else:
+        .loop_n(nr + 1, nr * 2 - 1)
       .loop_k(1, k_block * 5, k_block + 1));
   $if JIT:
     gemm_tests.push_back(GemmTestParams(
@@ -336,7 +345,10 @@ std::vector<GemmTestParams> CreateTests(
             $if KERNELTYPE == 'qc4w':
               .b_zero_point(8)
         , test_func, isa_check)
-        .loop_n(1, nr * 2 - 1)
+        $if NR_SCALE != "":
+          .loop_n(1, nr * 2 - 1, 4)
+        $else:
+          .loop_n(1, nr * 2 - 1)
         .loop_k(1, k_block * 5, k_block + 1));
     gemm_tests.push_back(GemmTestParams(
         "relu",
@@ -357,7 +369,10 @@ std::vector<GemmTestParams> CreateTests(
           $if KERNELTYPE == 'qc4w':
             .b_zero_point(8)
       , test_func, isa_check)
-      .loop_n(nr + 1, nr * 2 - 1)
+      $if NR_SCALE != "":
+        .loop_n(nr + 1, nr * 2 - 1, 4)
+      $else:
+        .loop_n(nr + 1, nr * 2 - 1)
       .loop_k(1, k_block * 5, k_block + 1));
   if (!is_igemm) {
     gemm_tests.push_back(GemmTestParams(
@@ -370,7 +385,10 @@ std::vector<GemmTestParams> CreateTests(
             $if KERNELTYPE == 'qc4w':
               .b_zero_point(8)
         , test_func, isa_check)
-        .loop_n(nr + 1, nr * 2 - 1)
+        $if NR_SCALE != "":
+          .loop_n(nr + 1, nr * 2 - 1, 4)
+        $else:
+          .loop_n(nr + 1, nr * 2 - 1)
         .loop_k(1, k_block * 5, k_block + 1));
   }
   gemm_tests.push_back(GemmTestParams(
@@ -382,7 +400,10 @@ std::vector<GemmTestParams> CreateTests(
           $if KERNELTYPE == 'qc4w':
             .b_zero_point(8)
       , test_func, isa_check)
-      .loop_n(nr + 1, nr * 2 - 1)
+      $if NR_SCALE != "":
+        .loop_n(nr + 1, nr * 2 - 1, 4)
+      $else:
+        .loop_n(nr + 1, nr * 2 - 1)
       .loop_k(1, k_block * 5, k_block + 1)
       .loop_m(1, mr));
   gemm_tests.push_back(GemmTestParams(
@@ -466,7 +487,10 @@ std::vector<GemmTestParams> CreateTests(
             $if KERNELTYPE == 'qc4w':
               .b_zero_point(8)
         , test_func, isa_check)
-        .loop_n(nr + 1, nr * 2 - 1)
+        $if NR_SCALE != "":
+          .loop_n(nr + 1, nr * 2 - 1, 4)
+        $else:
+          .loop_n(nr + 1, nr * 2 - 1)
         .loop_k(1, k_block * 5, k_block + 1));
     gemm_tests.push_back(GemmTestParams(
         "n_div_" + nrs + "_small_kernel",
@@ -719,8 +743,8 @@ $if TEST_NAME.startswith('GENERATE') and DATATYPE in ['f32', 'f16'] and PROTOTYP
 """
 
 
-def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn, pack_fn,
-                        requantization, is_pipelined, isa, jit, prototype, post_op):
+def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, vector_tile, init_fn,
+                        pack_fn, requantization, is_pipelined, isa, jit, prototype, post_op):
   """Generates all tests cases for a GEMM micro-kernel.
 
   Args:
@@ -732,6 +756,8 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn, pack_fn,
     xw: boolean indicator for microkernel with extended weights.
     k_block: Number of K values processed per one iteration of the main loop of
       the micro-kernel.
+    vector_tile: Indicates if vector tile for NR is specified in vectors rather
+                 than elements.
     init_fn: C name of the function to initialize microkernel parameters.
     pack_fn: C name of the function to pack the weights.
     requantization: name of the requantization scheme used by the microkernel.
@@ -791,6 +817,11 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn, pack_fn,
     if "minmax" in init_fn:
       activation = "minmax"
 
+  nr_scale = ""
+  if vector_tile:
+    ctype = {"qs8": "int8_t", "qd8":" int8_t", "qu8":" uint8_t",
+             "f16": "uint16_t", "f32": "float"}[datatype]
+    nr_scale = {"rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype}[isa]
   test_args = {
       "TEST_NAME": ukernel_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
@@ -804,6 +835,7 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn, pack_fn,
       "SR": sr,
       "EXTENDED_WEIGHTS": xw,
       "KBLOCK": k_block,
+      "NR_SCALE": nr_scale,
       "ADJKBLOCK": 2 * k_block if is_pipelined else k_block,
       "IS_PIPELINED": is_pipelined,
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
@@ -827,6 +859,7 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn, pack_fn,
           "NR": nr,
           "KR": kr,
           "SR": sr,
+          "NR_SCALE": nr_scale,
           "EXTENDED_WEIGHTS": xw,
           "ISA_CHECK": xnncommon.generate_isa_utilcheck_macro(isa),
       })
@@ -915,7 +948,7 @@ def main(args):
       jit = name.startswith("xnn_generate")
       prototype = ukernel_spec.get("prototype")
       post_op = ukernel_spec.get("post-op", True)
-      mr, nr, kr, sr, xw, requantization, arch, isa, assembly = \
+      mr, nr, kr, sr, xw, vector_tile, requantization, arch, isa, assembly = \
         split_ukernel_name(name)
 
       create_tests, test_case, bench_case = generate_test_cases(
@@ -926,6 +959,7 @@ def main(args):
           sr,
           xw,
           k_block,
+          vector_tile,
           init_fn,
           pack_fn,
           requantization,
