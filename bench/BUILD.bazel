@@ -438,6 +438,30 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f16_rmax_bench",
+    srcs = [
+        "f16-rmax.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f16_rminmax_bench",
+    srcs = [
+        "f16-rminmax.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f16_rmin_bench",
+    srcs = [
+        "f16-rmin.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f16_spmm_bench",
     srcs = [
         "f16-spmm.cc",
