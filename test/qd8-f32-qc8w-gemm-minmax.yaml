@@ -16,6 +16,10 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 64
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_16x16c4__avx512amx_acc2
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 128
 - name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_16x16c4__avx512amx_prfm
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w

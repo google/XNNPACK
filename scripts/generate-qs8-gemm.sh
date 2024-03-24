@@ -2196,6 +2196,7 @@ tools/xngen src/qs8-gemm/MRx16c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=1 -D MR=16
 tools/xngen src/qs8-gemm/MRx16c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=0 -D MR=1  -D DATATYPE=QD8_F32 -D REQUANTIZATION= -D ACCUMULATORS=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x16c4-minmax-avx512amx.c &
 tools/xngen src/qs8-gemm/MRx16c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=0 -D MR=7  -D DATATYPE=QD8_F32 -D REQUANTIZATION= -D ACCUMULATORS=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x16c4-minmax-avx512amx.c &
 tools/xngen src/qs8-gemm/MRx16c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=0 -D MR=16 -D DATATYPE=QD8_F32 -D REQUANTIZATION= -D ACCUMULATORS=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-16x16c4-minmax-avx512amx.c &
+tools/xngen src/qs8-gemm/MRx16c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=0 -D MR=16 -D DATATYPE=QD8_F32 -D REQUANTIZATION= -D ACCUMULATORS=2 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-16x16c4-minmax-avx512amx-acc2.c &
 tools/xngen src/qs8-gemm/MRx16c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=1 -D MR=16 -D DATATYPE=QD8_F32 -D REQUANTIZATION= -D ACCUMULATORS=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-16x16c4-minmax-avx512amx-prfm.c &
 
 wait
