@@ -25,22 +25,22 @@ tools/xngen src/f16-rminmax/neonfp16arith.c.in -D BATCH_TILE=32 -D ACCUMULATORS=
 
 #################################### Scalar ###################################
 ### Generic C micro-kernels
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=F16 -D ACCUMULATORS=1 -D OP=MINMAX -D WASM=0 -o src/f16-rminmax/gen/f16-rminmax-scalar-u1.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=2 -D DATATYPE=F16 -D ACCUMULATORS=2 -D OP=MINMAX -D WASM=0 -o src/f16-rminmax/gen/f16-rminmax-scalar-u2-acc2.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=3 -D DATATYPE=F16 -D ACCUMULATORS=3 -D OP=MINMAX -D WASM=0 -o src/f16-rminmax/gen/f16-rminmax-scalar-u3-acc3.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F16 -D ACCUMULATORS=2 -D OP=MINMAX -D WASM=0 -o src/f16-rminmax/gen/f16-rminmax-scalar-u4-acc2.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F16 -D ACCUMULATORS=4 -D OP=MINMAX -D WASM=0 -o src/f16-rminmax/gen/f16-rminmax-scalar-u4-acc4.c &
+tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=F16 -D ACCUMULATORS=1 -D OP=MINMAX -D WASM=0 -o src/f16-rminmax/gen/f16-rminmax-scalar-u1.c &
+tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=2 -D DATATYPE=F16 -D ACCUMULATORS=2 -D OP=MINMAX -D WASM=0 -o src/f16-rminmax/gen/f16-rminmax-scalar-u2-acc2.c &
+tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=3 -D DATATYPE=F16 -D ACCUMULATORS=3 -D OP=MINMAX -D WASM=0 -o src/f16-rminmax/gen/f16-rminmax-scalar-u3-acc3.c &
+tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F16 -D ACCUMULATORS=2 -D OP=MINMAX -D WASM=0 -o src/f16-rminmax/gen/f16-rminmax-scalar-u4-acc2.c &
+tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F16 -D ACCUMULATORS=4 -D OP=MINMAX -D WASM=0 -o src/f16-rminmax/gen/f16-rminmax-scalar-u4-acc4.c &
 
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=F16 -D ACCUMULATORS=1 -D OP=MAX -D WASM=0 -o src/f16-rminmax/gen/f16-rmax-scalar-u1.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=2 -D DATATYPE=F16 -D ACCUMULATORS=2 -D OP=MAX -D WASM=0 -o src/f16-rminmax/gen/f16-rmax-scalar-u2-acc2.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=3 -D DATATYPE=F16 -D ACCUMULATORS=3 -D OP=MAX -D WASM=0 -o src/f16-rminmax/gen/f16-rmax-scalar-u3-acc3.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F16 -D ACCUMULATORS=2 -D OP=MAX -D WASM=0 -o src/f16-rminmax/gen/f16-rmax-scalar-u4-acc2.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F16 -D ACCUMULATORS=4 -D OP=MAX -D WASM=0 -o src/f16-rminmax/gen/f16-rmax-scalar-u4-acc4.c &
+tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=F16 -D ACCUMULATORS=1 -D OP=MAX -D WASM=0 -o src/f16-rminmax/gen/f16-rmax-scalar-u1.c &
+tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=2 -D DATATYPE=F16 -D ACCUMULATORS=2 -D OP=MAX -D WASM=0 -o src/f16-rminmax/gen/f16-rmax-scalar-u2-acc2.c &
+tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=3 -D DATATYPE=F16 -D ACCUMULATORS=3 -D OP=MAX -D WASM=0 -o src/f16-rminmax/gen/f16-rmax-scalar-u3-acc3.c &
+tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F16 -D ACCUMULATORS=2 -D OP=MAX -D WASM=0 -o src/f16-rminmax/gen/f16-rmax-scalar-u4-acc2.c &
+tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F16 -D ACCUMULATORS=4 -D OP=MAX -D WASM=0 -o src/f16-rminmax/gen/f16-rmax-scalar-u4-acc4.c &
 
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=F16 -D ACCUMULATORS=1 -D OP=MIN -D WASM=0 -o src/f16-rminmax/gen/f16-rmin-scalar-u1.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=2 -D DATATYPE=F16 -D ACCUMULATORS=2 -D OP=MIN -D WASM=0 -o src/f16-rminmax/gen/f16-rmin-scalar-u2-acc2.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=3 -D DATATYPE=F16 -D ACCUMULATORS=3 -D OP=MIN -D WASM=0 -o src/f16-rminmax/gen/f16-rmin-scalar-u3-acc3.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F16 -D ACCUMULATORS=2 -D OP=MIN -D WASM=0 -o src/f16-rminmax/gen/f16-rmin-scalar-u4-acc2.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F16 -D ACCUMULATORS=4 -D OP=MIN -D WASM=0 -o src/f16-rminmax/gen/f16-rmin-scalar-u4-acc4.c &
+tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=F16 -D ACCUMULATORS=1 -D OP=MIN -D WASM=0 -o src/f16-rminmax/gen/f16-rmin-scalar-u1.c &
+tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=2 -D DATATYPE=F16 -D ACCUMULATORS=2 -D OP=MIN -D WASM=0 -o src/f16-rminmax/gen/f16-rmin-scalar-u2-acc2.c &
+tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=3 -D DATATYPE=F16 -D ACCUMULATORS=3 -D OP=MIN -D WASM=0 -o src/f16-rminmax/gen/f16-rmin-scalar-u3-acc3.c &
+tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F16 -D ACCUMULATORS=2 -D OP=MIN -D WASM=0 -o src/f16-rminmax/gen/f16-rmin-scalar-u4-acc2.c &
+tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F16 -D ACCUMULATORS=4 -D OP=MIN -D WASM=0 -o src/f16-rminmax/gen/f16-rmin-scalar-u4-acc4.c &
 
 wait
