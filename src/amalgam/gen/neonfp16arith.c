@@ -7902,7 +7902,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u40(
   vst1_lane_u16(sum, vreinterpret_u16_f16(vacc_lo), 0);
 }
 
-void xnn_f16_rmax_ukernel__neonfp16arith_u32_acc2(
+void xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4(
     size_t batch,
     const void* input,
     void* output,
@@ -7917,6 +7917,8 @@ void xnn_f16_rmax_ukernel__neonfp16arith_u32_acc2(
   uint16_t* o = (uint16_t*) output;
   float16x8_t vmax0 = vreinterpretq_f16_u16(vld1q_dup_u16(i));
   float16x8_t vmax1 = vmax0;
+  float16x8_t vmax2 = vmax0;
+  float16x8_t vmax3 = vmax0;
   for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
     const float16x8_t vt0 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
     const float16x8_t vt1 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
@@ -7925,10 +7927,12 @@ void xnn_f16_rmax_ukernel__neonfp16arith_u32_acc2(
 
     vmax0 = vmaxq_f16(vmax0, vt0);
     vmax1 = vmaxq_f16(vmax1, vt1);
-    vmax0 = vmaxq_f16(vmax0, vt2);
-    vmax1 = vmaxq_f16(vmax1, vt3);
+    vmax2 = vmaxq_f16(vmax2, vt2);
+    vmax3 = vmaxq_f16(vmax3, vt3);
   }
   vmax0 = vmaxq_f16(vmax0, vmax1);
+  vmax2 = vmaxq_f16(vmax2, vmax3);
+  vmax0 = vmaxq_f16(vmax0, vmax2);
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const float16x8_t vt = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
     vmax0 = vmaxq_f16(vmax0, vt);
@@ -7959,7 +7963,7 @@ void xnn_f16_rmax_ukernel__neonfp16arith_u32_acc2(
   #endif
 }
 
-void xnn_f16_rminmax_ukernel__neonfp16arith_u32_acc2(
+void xnn_f16_rminmax_ukernel__neonfp16arith_u32_acc4(
     size_t batch,
     const void* input,
     void* output,
@@ -7976,6 +7980,10 @@ void xnn_f16_rminmax_ukernel__neonfp16arith_u32_acc2(
   float16x8_t vmax0 = vmin0;
   float16x8_t vmin1 = vmin0;
   float16x8_t vmax1 = vmax0;
+  float16x8_t vmin2 = vmin0;
+  float16x8_t vmax2 = vmax0;
+  float16x8_t vmin3 = vmin0;
+  float16x8_t vmax3 = vmax0;
   for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
     const float16x8_t vt0 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
     const float16x8_t vt1 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
@@ -7986,13 +7994,17 @@ void xnn_f16_rminmax_ukernel__neonfp16arith_u32_acc2(
     vmax0 = vmaxq_f16(vmax0, vt0);
     vmin1 = vminq_f16(vmin1, vt1);
     vmax1 = vmaxq_f16(vmax1, vt1);
-    vmin0 = vminq_f16(vmin0, vt2);
-    vmax0 = vmaxq_f16(vmax0, vt2);
-    vmin1 = vminq_f16(vmin1, vt3);
-    vmax1 = vmaxq_f16(vmax1, vt3);
+    vmin2 = vminq_f16(vmin2, vt2);
+    vmax2 = vmaxq_f16(vmax2, vt2);
+    vmin3 = vminq_f16(vmin3, vt3);
+    vmax3 = vmaxq_f16(vmax3, vt3);
   }
   vmin0 = vminq_f16(vmin0, vmin1);
   vmax0 = vmaxq_f16(vmax0, vmax1);
+  vmin2 = vminq_f16(vmin2, vmin3);
+  vmax2 = vmaxq_f16(vmax2, vmax3);
+  vmin0 = vminq_f16(vmin0, vmin2);
+  vmax0 = vmaxq_f16(vmax0, vmax2);
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const float16x8_t vt = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
     vmin0 = vminq_f16(vmin0, vt);
