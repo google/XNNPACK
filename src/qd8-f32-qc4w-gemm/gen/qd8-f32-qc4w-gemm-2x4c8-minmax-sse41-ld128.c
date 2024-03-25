@@ -41,17 +41,20 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x4c8__sse41_ld128(
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const int8_t* a0 = a;
   float* c0 = c;
+  const struct xnn_qd8_quantization_params* qp0 = quantization_params;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
   float* c1 = (float*) ((uintptr_t) c0 + cm_stride);
+  const struct xnn_qd8_quantization_params* qp1 = &quantization_params[1];
   if XNN_UNPREDICTABLE(mr != 2) {
     a1 = a0;
     c1 = c0;
+    qp1 = qp0;
   }
 
   const __m128i vmask = _mm_load_si128((const __m128i*) params->sse.mask);  // 0xF0
   do {
     const __m128i vksum = _mm_load_si128((const __m128i*) w);
-    const __m128i vinput_zero_point01 = _mm_loadu_si128((const __m128i*) &quantization_params[0]);
+    const __m128i vinput_zero_point01 = _mm_loadu_si128((const __m128i*)qp0);
     const __m128i vinput_zero_point0 = _mm_shuffle_epi32(vinput_zero_point01, _MM_SHUFFLE(0, 0, 0, 0));
     const __m128i vinput_zero_point1 = _mm_shuffle_epi32(vinput_zero_point01, _MM_SHUFFLE(2, 2, 2, 2));
     const __m128i vzero = _mm_setzero_si128();
@@ -181,7 +184,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x4c8__sse41_ld128(
     __m128 vout0x0123 = _mm_cvtepi32_ps(vacc0x0123);
     __m128 vout1x0123 = _mm_cvtepi32_ps(vacc1x0123);
 
-    const __m128i vinput_scale01 = _mm_loadu_si128((const __m128i*) &quantization_params[0]);
+    const __m128i vinput_scale01 = _mm_loadu_si128((const __m128i*) qp0);
     const __m128 vinput_scale0 = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale01, _MM_SHUFFLE(1, 1, 1, 1)));
     const __m128 vinput_scale1 = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale01, _MM_SHUFFLE(3, 3, 3, 3)));
 

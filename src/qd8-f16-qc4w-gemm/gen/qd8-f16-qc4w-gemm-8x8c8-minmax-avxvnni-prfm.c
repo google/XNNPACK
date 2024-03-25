@@ -43,57 +43,72 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_8x8c8__avxvnni_prfm(
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const int8_t* a0 = a;
   uint16_t* c0 = (uint16_t*) c;
+  const struct xnn_qd8_quantization_params* qp0 = quantization_params;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
   uint16_t* c1 = (uint16_t*) ((uintptr_t) c0 + cm_stride);
+  const struct xnn_qd8_quantization_params* qp1 = &quantization_params[1];
   if XNN_UNPREDICTABLE(mr < 2) {
     a1 = a0;
     c1 = c0;
+    qp1 = qp0;
   }
   const int8_t* a2 = (const int8_t*) ((uintptr_t) a1 + a_stride);
   uint16_t* c2 = (uint16_t*) ((uintptr_t) c1 + cm_stride);
+  const struct xnn_qd8_quantization_params* qp2 = &quantization_params[2];
   if XNN_UNPREDICTABLE(mr <= 2) {
     a2 = a1;
     c2 = c1;
+    qp2 = qp1;
   }
   const int8_t* a3 = (const int8_t*) ((uintptr_t) a2 + a_stride);
   uint16_t* c3 = (uint16_t*) ((uintptr_t) c2 + cm_stride);
+  const struct xnn_qd8_quantization_params* qp3 = &quantization_params[3];
   if XNN_UNPREDICTABLE(mr < 4) {
     a3 = a2;
     c3 = c2;
+    qp3 = qp2;
   }
   const int8_t* a4 = (const int8_t*) ((uintptr_t) a3 + a_stride);
   uint16_t* c4 = (uint16_t*) ((uintptr_t) c3 + cm_stride);
+  const struct xnn_qd8_quantization_params* qp4 = &quantization_params[4];
   if XNN_UNPREDICTABLE(mr <= 4) {
     a4 = a3;
     c4 = c3;
+    qp4 = qp3;
   }
   const int8_t* a5 = (const int8_t*) ((uintptr_t) a4 + a_stride);
   uint16_t* c5 = (uint16_t*) ((uintptr_t) c4 + cm_stride);
+  const struct xnn_qd8_quantization_params* qp5 = &quantization_params[5];
   if XNN_UNPREDICTABLE(mr < 6) {
     a5 = a4;
     c5 = c4;
+    qp5 = qp4;
   }
   const int8_t* a6 = (const int8_t*) ((uintptr_t) a5 + a_stride);
   uint16_t* c6 = (uint16_t*) ((uintptr_t) c5 + cm_stride);
+  const struct xnn_qd8_quantization_params* qp6 = &quantization_params[6];
   if XNN_UNPREDICTABLE(mr <= 6) {
     a6 = a5;
     c6 = c5;
+    qp6 = qp5;
   }
   const int8_t* a7 = (const int8_t*) ((uintptr_t) a6 + a_stride);
   uint16_t* c7 = (uint16_t*) ((uintptr_t) c6 + cm_stride);
+  const struct xnn_qd8_quantization_params* qp7 = &quantization_params[7];
   if XNN_UNPREDICTABLE(mr != 8) {
     a7 = a6;
     c7 = c6;
+    qp7 = qp6;
   }
 
-  const __m256i vinput_zero_point0 = _mm256_set1_epi32((int) quantization_params[0].zero_point + 128);
-  const __m256i vinput_zero_point1 = _mm256_set1_epi32((int) quantization_params[1].zero_point + 128);
-  const __m256i vinput_zero_point2 = _mm256_set1_epi32((int) quantization_params[2].zero_point + 128);
-  const __m256i vinput_zero_point3 = _mm256_set1_epi32((int) quantization_params[3].zero_point + 128);
-  const __m256i vinput_zero_point4 = _mm256_set1_epi32((int) quantization_params[4].zero_point + 128);
-  const __m256i vinput_zero_point5 = _mm256_set1_epi32((int) quantization_params[5].zero_point + 128);
-  const __m256i vinput_zero_point6 = _mm256_set1_epi32((int) quantization_params[6].zero_point + 128);
-  const __m256i vinput_zero_point7 = _mm256_set1_epi32((int) quantization_params[7].zero_point + 128);
+  const __m256i vinput_zero_point0 = _mm256_set1_epi32((int) qp0->zero_point + 128);
+  const __m256i vinput_zero_point1 = _mm256_set1_epi32((int) qp1->zero_point + 128);
+  const __m256i vinput_zero_point2 = _mm256_set1_epi32((int) qp2->zero_point + 128);
+  const __m256i vinput_zero_point3 = _mm256_set1_epi32((int) qp3->zero_point + 128);
+  const __m256i vinput_zero_point4 = _mm256_set1_epi32((int) qp4->zero_point + 128);
+  const __m256i vinput_zero_point5 = _mm256_set1_epi32((int) qp5->zero_point + 128);
+  const __m256i vinput_zero_point6 = _mm256_set1_epi32((int) qp6->zero_point + 128);
+  const __m256i vinput_zero_point7 = _mm256_set1_epi32((int) qp7->zero_point + 128);
   const __m256 voutput_min = _mm256_set1_ps(params->avxvnni.min);
   const __m256 voutput_max = _mm256_set1_ps(params->avxvnni.max);
   const __m256i vsign_mask = _mm256_set1_epi8(params->avxvnni.sign_mask);  // 0x80
@@ -280,14 +295,14 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_8x8c8__avxvnni_prfm(
     __m256 vout6x01234567 = _mm256_cvtepi32_ps(vacc6x01234567);
     __m256 vout7x01234567 = _mm256_cvtepi32_ps(vacc7x01234567);
 
-    vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(quantization_params[0].inv_scale));
-    vout1x01234567 = _mm256_mul_ps(vout1x01234567, _mm256_set1_ps(quantization_params[1].inv_scale));
-    vout2x01234567 = _mm256_mul_ps(vout2x01234567, _mm256_set1_ps(quantization_params[2].inv_scale));
-    vout3x01234567 = _mm256_mul_ps(vout3x01234567, _mm256_set1_ps(quantization_params[3].inv_scale));
-    vout4x01234567 = _mm256_mul_ps(vout4x01234567, _mm256_set1_ps(quantization_params[4].inv_scale));
-    vout5x01234567 = _mm256_mul_ps(vout5x01234567, _mm256_set1_ps(quantization_params[5].inv_scale));
-    vout6x01234567 = _mm256_mul_ps(vout6x01234567, _mm256_set1_ps(quantization_params[6].inv_scale));
-    vout7x01234567 = _mm256_mul_ps(vout7x01234567, _mm256_set1_ps(quantization_params[7].inv_scale));
+    vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(qp0->inv_scale));
+    vout1x01234567 = _mm256_mul_ps(vout1x01234567, _mm256_set1_ps(qp1->inv_scale));
+    vout2x01234567 = _mm256_mul_ps(vout2x01234567, _mm256_set1_ps(qp2->inv_scale));
+    vout3x01234567 = _mm256_mul_ps(vout3x01234567, _mm256_set1_ps(qp3->inv_scale));
+    vout4x01234567 = _mm256_mul_ps(vout4x01234567, _mm256_set1_ps(qp4->inv_scale));
+    vout5x01234567 = _mm256_mul_ps(vout5x01234567, _mm256_set1_ps(qp5->inv_scale));
+    vout6x01234567 = _mm256_mul_ps(vout6x01234567, _mm256_set1_ps(qp6->inv_scale));
+    vout7x01234567 = _mm256_mul_ps(vout7x01234567, _mm256_set1_ps(qp7->inv_scale));
 
     const __m256 vfilter_output_scale01234567 = _mm256_load_ps((const float*) w);
     const __m256 vbias01234567 = _mm256_load_ps((const float*) w + 8);

@@ -44,10 +44,11 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4c8__avx_ld128(
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const int8_t* a0 = a;
   float* c0 = c;
+  const struct xnn_qd8_quantization_params* qp0 = quantization_params;
 
   do {
     const __m128i vksum = _mm_load_si128((const __m128i*) w);
-    const __m128i vinput_zero_point0 = _mm_castps_si128(_mm_broadcast_ss((const float*) &quantization_params[0].zero_point));
+    const __m128i vinput_zero_point0 = _mm_castps_si128(_mm_broadcast_ss((const float*) &qp0->zero_point));
     const __m128i vzero = _mm_setzero_si128();
     const __m128i vinit0 = _mm_mullo_epi32(vksum, vinput_zero_point0);
     __m128i vacc0x0 = _mm_blend_epi16(vinit0, vzero, 0xFC);
@@ -92,7 +93,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4c8__avx_ld128(
 
     __m128 vout0x0123 = _mm_cvtepi32_ps(vacc0x0123);
 
-    const __m128 vinput_scale0 = _mm_broadcast_ss(&quantization_params[0].inv_scale);
+    const __m128 vinput_scale0 = _mm_broadcast_ss(&qp0->inv_scale);
 
     vout0x0123 = _mm_mul_ps(vout0x0123, vinput_scale0);
 

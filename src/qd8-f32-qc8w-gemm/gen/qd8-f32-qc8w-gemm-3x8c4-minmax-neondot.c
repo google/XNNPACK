@@ -40,31 +40,36 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x8c4__neondot(
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   const int8_t* a0 = a;
   float* c0 = c;
+  const struct xnn_qd8_quantization_params* qp0 = quantization_params;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
   float* c1 = (float*) ((uintptr_t) c0 + cm_stride);
+  const struct xnn_qd8_quantization_params* qp1 = &quantization_params[1];
   if XNN_UNPREDICTABLE(mr < 2) {
     a1 = a0;
     c1 = c0;
+    qp1 = qp0;
   }
   const int8_t* a2 = (const int8_t*) ((uintptr_t) a1 + a_stride);
   float* c2 = (float*) ((uintptr_t) c1 + cm_stride);
+  const struct xnn_qd8_quantization_params* qp2 = &quantization_params[2];
   if XNN_UNPREDICTABLE(mr <= 2) {
     a2 = a1;
     c2 = c1;
+    qp2 = qp1;
   }
 
   // Loop over groups of 8 columns.
   do {
     // Initialize accumulators with bias. 8 bias values are loaded from the
     // weight matrix, at the start of the group of 8 columns.
-    const int32x4_t vinput_zero_point01 = vld1q_s32(&quantization_params[0].zero_point);
+    const int32x4_t vinput_zero_point01 = vld1q_s32(&qp0->zero_point);
     const int32x4_t vksum0123 = vld1q_s32(w); w = (const int32_t*) w + 4;
     int32x4_t vacc0x0123 = vmulq_lane_s32(vksum0123, vget_low_s32(vinput_zero_point01), 0);
     int32x4_t vacc1x0123 = vmulq_lane_s32(vksum0123, vget_high_s32(vinput_zero_point01), 0);
     const int32x4_t vksum4567 = vld1q_s32(w); w = (const int32_t*) w + 4;
     int32x4_t vacc0x4567 = vmulq_lane_s32(vksum4567, vget_low_s32(vinput_zero_point01), 0);
     int32x4_t vacc1x4567 = vmulq_lane_s32(vksum4567, vget_high_s32(vinput_zero_point01), 0);
-    const int32x4_t vinput_zero_point2 = vld1q_dup_s32(&quantization_params[2].zero_point);
+    const int32x4_t vinput_zero_point2 = vld1q_dup_s32(&qp2->zero_point);
     int32x4_t vacc2x0123 = vmulq_s32(vksum0123, vinput_zero_point2);
     int32x4_t vacc2x4567 = vmulq_s32(vksum4567, vinput_zero_point2);
 
@@ -125,12 +130,12 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x8c4__neondot(
     float32x4_t vout1x4567 = vcvtq_f32_s32(vacc1x4567);
     float32x4_t vout2x0123 = vcvtq_f32_s32(vacc2x0123);
     float32x4_t vout2x4567 = vcvtq_f32_s32(vacc2x4567);
-    const float32x4_t vinput_scale01 = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[0].zero_point));
+    const float32x4_t vinput_scale01 = vreinterpretq_f32_s32(vld1q_s32(&qp0->zero_point));
     vout0x0123 = vmulq_lane_f32(vout0x0123, vget_low_f32(vinput_scale01), 1);
     vout1x0123 = vmulq_lane_f32(vout1x0123, vget_high_f32(vinput_scale01), 1);
     vout0x4567 = vmulq_lane_f32(vout0x4567, vget_low_f32(vinput_scale01), 1);
     vout1x4567 = vmulq_lane_f32(vout1x4567, vget_high_f32(vinput_scale01), 1);
-    const float32x4_t vinput_scale2 = vld1q_dup_f32(&quantization_params[2].inv_scale);
+    const float32x4_t vinput_scale2 = vld1q_dup_f32(&qp2->inv_scale);
     vout2x0123 = vmulq_f32(vout2x0123, vinput_scale2);
     vout2x4567 = vmulq_f32(vout2x4567, vinput_scale2);
 

@@ -87,26 +87,36 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
     uint16_t* c0 = (uint16_t*) c;
   $else:
     ${OUT_T}* c0 = c;
+  $if DATATYPE in ["QD8", "QC4_F16", "QC4_F32"]:
+    const struct ${SCALING_PARAMS}* qp0 = quantization_params;
   $for M in range(1, MR):
     const ${XINT8_T}* a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M-1} + a_stride);
     $if DATATYPE in ["QC4_F16"]:
       uint16_t* c${M} = (uint16_t*) ((uintptr_t) c${M-1} + cm_stride);
     $else:
       ${OUT_T}* c${M} = (${OUT_T}*) ((uintptr_t) c${M-1} + cm_stride);
+    $if DATATYPE in ["QD8", "QC4_F16", "QC4_F32"]:
+      const struct ${SCALING_PARAMS}* qp${M} = &quantization_params[${M}];
     $if M % 2 == 0:
       if XNN_UNPREDICTABLE(mr <= ${M}) {
         a${M} = a${M-1};
         c${M} = c${M-1};
+        $if DATATYPE in ["QD8", "QC4_F16", "QC4_F32"]:
+          qp${M} = qp${M-1};
       }
     $elif M + 1 == MR:
       if XNN_UNPREDICTABLE(mr != ${M+1}) {
         a${M} = a${M-1};
         c${M} = c${M-1};
+        $if DATATYPE in ["QD8", "QC4_F16", "QC4_F32"]:
+          qp${M} = qp${M-1};
       }
     $else:
       if XNN_UNPREDICTABLE(mr < ${M+1}) {
         a${M} = a${M-1};
         c${M} = c${M-1};
+        $if DATATYPE in ["QD8", "QC4_F16", "QC4_F32"]:
+          qp${M} = qp${M-1};
       }
 
   $if DATATYPE == "QU8":
@@ -119,12 +129,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
       $for N in range(0, NR, 4):
         int32x4_t vksum${ABC[N:N+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
       $for M in range(0, MR - 1, 2):
-        const int32x4_t vzp${M}${M+1} = vld1q_s32(&quantization_params[${M}].zero_point);
+        const int32x4_t vzp${M}${M+1} = vld1q_s32(&qp${M}->zero_point);
         $for N in range(0, NR, 4):
           int32x4_t vacc${M}x${ABC[N:N+4]} = vmulq_lane_s32(vksum${ABC[N:N+4]}, vget_low_s32(vzp${M}${M+1}), 0);
           int32x4_t vacc${M+1}x${ABC[N:N+4]} = vmulq_lane_s32(vksum${ABC[N:N+4]}, vget_high_s32(vzp${M}${M+1}), 0);
       $if MR % 2 == 1:
-        const int32x4_t vzp${MR-1} = vld1q_dup_s32(&quantization_params[${MR-1}].zero_point);
+        const int32x4_t vzp${MR-1} = vld1q_dup_s32(&qp${MR-1}->zero_point);
         $for N in range(0, NR, 4):
           int32x4_t vacc${MR-1}x${ABC[N:N+4]} = vmulq_s32(vksum${ABC[N:N+4]}, vzp${MR-1});
     $else:
@@ -328,11 +338,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
 
       $for M in range(0, MR, 2):
         $if M + 1 == MR:
-          const float32x4_t vinput_scale${M} = vld1q_dup_f32(&quantization_params[${M}].inv_scale);
+          const float32x4_t vinput_scale${M} = vld1q_dup_f32(&qp${M}->inv_scale);
           $for N in range(0, NR, 4):
             vout${M}x${ABC[N:N+4]} = vmulq_f32(vout${M}x${ABC[N:N+4]}, vinput_scale${M});
         $else:
-          const float32x4_t vinput_scale${ABC[M:M+2]} = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[${M}].zero_point));
+          const float32x4_t vinput_scale${ABC[M:M+2]} = vreinterpretq_f32_s32(vld1q_s32(&qp${M}->zero_point));
           $for N in range(0, NR, 4):
             vout${M}x${ABC[N:N+4]} = vmulq_lane_f32(vout${M}x${ABC[N:N+4]}, vget_low_f32(vinput_scale${ABC[M:M+2]}), 1);
             vout${M+1}x${ABC[N:N+4]} = vmulq_lane_f32(vout${M+1}x${ABC[N:N+4]}, vget_high_f32(vinput_scale${ABC[M:M+2]}), 1);

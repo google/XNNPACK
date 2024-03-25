@@ -41,35 +41,46 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x16__neon_mlal_lane_prfm(
 
   const int8_t* a0 = a;
   float* c0 = c;
+  const struct xnn_qd8_quantization_params* qp0 = quantization_params;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
   float* c1 = (float*) ((uintptr_t) c0 + cm_stride);
+  const struct xnn_qd8_quantization_params* qp1 = &quantization_params[1];
   if XNN_UNPREDICTABLE(mr < 2) {
     a1 = a0;
     c1 = c0;
+    qp1 = qp0;
   }
   const int8_t* a2 = (const int8_t*) ((uintptr_t) a1 + a_stride);
   float* c2 = (float*) ((uintptr_t) c1 + cm_stride);
+  const struct xnn_qd8_quantization_params* qp2 = &quantization_params[2];
   if XNN_UNPREDICTABLE(mr <= 2) {
     a2 = a1;
     c2 = c1;
+    qp2 = qp1;
   }
   const int8_t* a3 = (const int8_t*) ((uintptr_t) a2 + a_stride);
   float* c3 = (float*) ((uintptr_t) c2 + cm_stride);
+  const struct xnn_qd8_quantization_params* qp3 = &quantization_params[3];
   if XNN_UNPREDICTABLE(mr < 4) {
     a3 = a2;
     c3 = c2;
+    qp3 = qp2;
   }
   const int8_t* a4 = (const int8_t*) ((uintptr_t) a3 + a_stride);
   float* c4 = (float*) ((uintptr_t) c3 + cm_stride);
+  const struct xnn_qd8_quantization_params* qp4 = &quantization_params[4];
   if XNN_UNPREDICTABLE(mr <= 4) {
     a4 = a3;
     c4 = c3;
+    qp4 = qp3;
   }
   const int8_t* a5 = (const int8_t*) ((uintptr_t) a4 + a_stride);
   float* c5 = (float*) ((uintptr_t) c4 + cm_stride);
+  const struct xnn_qd8_quantization_params* qp5 = &quantization_params[5];
   if XNN_UNPREDICTABLE(mr != 6) {
     a5 = a4;
     c5 = c4;
+    qp5 = qp4;
   }
 
   const int8x8_t vmask = vmov_n_s8(INT8_C(0xF0));
@@ -79,7 +90,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x16__neon_mlal_lane_prfm(
     int32x4_t vksum4567 = vld1q_s32(w); w = (const int32_t*) w + 4;
     int32x4_t vksum89AB = vld1q_s32(w); w = (const int32_t*) w + 4;
     int32x4_t vksumCDEF = vld1q_s32(w); w = (const int32_t*) w + 4;
-    const int32x4_t vzp01 = vld1q_s32(&quantization_params[0].zero_point);
+    const int32x4_t vzp01 = vld1q_s32(&qp0->zero_point);
     int32x4_t vacc0x0123 = vmulq_lane_s32(vksum0123, vget_low_s32(vzp01), 0);
     int32x4_t vacc1x0123 = vmulq_lane_s32(vksum0123, vget_high_s32(vzp01), 0);
     int32x4_t vacc0x4567 = vmulq_lane_s32(vksum4567, vget_low_s32(vzp01), 0);
@@ -88,7 +99,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x16__neon_mlal_lane_prfm(
     int32x4_t vacc1x89AB = vmulq_lane_s32(vksum89AB, vget_high_s32(vzp01), 0);
     int32x4_t vacc0xCDEF = vmulq_lane_s32(vksumCDEF, vget_low_s32(vzp01), 0);
     int32x4_t vacc1xCDEF = vmulq_lane_s32(vksumCDEF, vget_high_s32(vzp01), 0);
-    const int32x4_t vzp23 = vld1q_s32(&quantization_params[2].zero_point);
+    const int32x4_t vzp23 = vld1q_s32(&qp2->zero_point);
     int32x4_t vacc2x0123 = vmulq_lane_s32(vksum0123, vget_low_s32(vzp23), 0);
     int32x4_t vacc3x0123 = vmulq_lane_s32(vksum0123, vget_high_s32(vzp23), 0);
     int32x4_t vacc2x4567 = vmulq_lane_s32(vksum4567, vget_low_s32(vzp23), 0);
@@ -97,7 +108,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x16__neon_mlal_lane_prfm(
     int32x4_t vacc3x89AB = vmulq_lane_s32(vksum89AB, vget_high_s32(vzp23), 0);
     int32x4_t vacc2xCDEF = vmulq_lane_s32(vksumCDEF, vget_low_s32(vzp23), 0);
     int32x4_t vacc3xCDEF = vmulq_lane_s32(vksumCDEF, vget_high_s32(vzp23), 0);
-    const int32x4_t vzp45 = vld1q_s32(&quantization_params[4].zero_point);
+    const int32x4_t vzp45 = vld1q_s32(&qp4->zero_point);
     int32x4_t vacc4x0123 = vmulq_lane_s32(vksum0123, vget_low_s32(vzp45), 0);
     int32x4_t vacc5x0123 = vmulq_lane_s32(vksum0123, vget_high_s32(vzp45), 0);
     int32x4_t vacc4x4567 = vmulq_lane_s32(vksum4567, vget_low_s32(vzp45), 0);
@@ -601,7 +612,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x16__neon_mlal_lane_prfm(
     float32x4_t vout5x89AB = vcvtq_n_f32_s32(vacc5x89AB, 4);
     float32x4_t vout5xCDEF = vcvtq_n_f32_s32(vacc5xCDEF, 4);
 
-    const float32x4_t vinput_scale01 = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[0].zero_point));
+    const float32x4_t vinput_scale01 = vreinterpretq_f32_s32(vld1q_s32(&qp0->zero_point));
     vout0x0123 = vmulq_lane_f32(vout0x0123, vget_low_f32(vinput_scale01), 1);
     vout1x0123 = vmulq_lane_f32(vout1x0123, vget_high_f32(vinput_scale01), 1);
     vout0x4567 = vmulq_lane_f32(vout0x4567, vget_low_f32(vinput_scale01), 1);
@@ -610,7 +621,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x16__neon_mlal_lane_prfm(
     vout1x89AB = vmulq_lane_f32(vout1x89AB, vget_high_f32(vinput_scale01), 1);
     vout0xCDEF = vmulq_lane_f32(vout0xCDEF, vget_low_f32(vinput_scale01), 1);
     vout1xCDEF = vmulq_lane_f32(vout1xCDEF, vget_high_f32(vinput_scale01), 1);
-    const float32x4_t vinput_scale23 = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[2].zero_point));
+    const float32x4_t vinput_scale23 = vreinterpretq_f32_s32(vld1q_s32(&qp2->zero_point));
     vout2x0123 = vmulq_lane_f32(vout2x0123, vget_low_f32(vinput_scale23), 1);
     vout3x0123 = vmulq_lane_f32(vout3x0123, vget_high_f32(vinput_scale23), 1);
     vout2x4567 = vmulq_lane_f32(vout2x4567, vget_low_f32(vinput_scale23), 1);
@@ -619,7 +630,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x16__neon_mlal_lane_prfm(
     vout3x89AB = vmulq_lane_f32(vout3x89AB, vget_high_f32(vinput_scale23), 1);
     vout2xCDEF = vmulq_lane_f32(vout2xCDEF, vget_low_f32(vinput_scale23), 1);
     vout3xCDEF = vmulq_lane_f32(vout3xCDEF, vget_high_f32(vinput_scale23), 1);
-    const float32x4_t vinput_scale45 = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[4].zero_point));
+    const float32x4_t vinput_scale45 = vreinterpretq_f32_s32(vld1q_s32(&qp4->zero_point));
     vout4x0123 = vmulq_lane_f32(vout4x0123, vget_low_f32(vinput_scale45), 1);
     vout5x0123 = vmulq_lane_f32(vout5x0123, vget_high_f32(vinput_scale45), 1);
     vout4x4567 = vmulq_lane_f32(vout4x4567, vget_low_f32(vinput_scale45), 1);
