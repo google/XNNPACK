@@ -96,20 +96,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     // Initialize accumulators with bias. ${NR} bias values are loaded from the
     // weight matrix, at the start of the group of ${NR} columns.
     $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
-      $for M in range(0, MR, 2):
-        $if M + 1 == MR:
-          const int32x4_t vinput_zero_point${M} = vld1q_dup_s32(&qp${M}->zero_point);
-          $for N in range(0, NR, 4):
-            $if M == 0:
-              const int32x4_t vksum${ABC[N:N+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
-            int32x4_t vacc${M}x${ABC[N:N+4]} = vmulq_s32(vksum${ABC[N:N+4]}, vinput_zero_point${M});
-        $else:
-          const int32x4_t vinput_zero_point${ABC[M:M+2]} = vld1q_s32(&qp${M}->zero_point);
-          $for N in range(0, NR, 4):
-            $if M == 0:
-              const int32x4_t vksum${ABC[N:N+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
-            int32x4_t vacc${M}x${ABC[N:N+4]} = vmulq_lane_s32(vksum${ABC[N:N+4]}, vget_low_s32(vinput_zero_point${ABC[M:M+2]}), 0);
-            int32x4_t vacc${M+1}x${ABC[N:N+4]} = vmulq_lane_s32(vksum${ABC[N:N+4]}, vget_high_s32(vinput_zero_point${ABC[M:M+2]}), 0);
+      $for M in range(MR):
+        const int32x4_t vinput_zero_point${M} = vdupq_n_s32(qp${M}->zero_point);
+        $for N in range(0, NR, 4):
+          $if M == 0:
+            const int32x4_t vksum${ABC[N:N+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
+          int32x4_t vacc${M}x${ABC[N:N+4]} = vmulq_s32(vksum${ABC[N:N+4]}, vinput_zero_point${M});
     $else:
       $for N in range(0, NR, 4):
         int32x4_t vacc0x${ABC[N:N+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
@@ -177,16 +169,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
             float32x4_t vout${M}x${ABC[N:N+4]} = vcvtq_n_f32_s32(vacc${M}x${ABC[N:N+4]}, 4);
           $else:
             float32x4_t vout${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});
-      $for M in range(0, MR, 2):
-        $if M + 1 == MR:
-          const float32x4_t vinput_scale${M} = vld1q_dup_f32(&qp${M}->inv_scale);
-          $for N in range(0, NR, 4):
-            vout${M}x${ABC[N:N+4]} = vmulq_f32(vout${M}x${ABC[N:N+4]}, vinput_scale${M});
-        $else:
-          const float32x4_t vinput_scale${ABC[M:M+2]} = vreinterpretq_f32_s32(vld1q_s32(&qp${M}->zero_point));
-          $for N in range(0, NR, 4):
-            vout${M}x${ABC[N:N+4]} = vmulq_lane_f32(vout${M}x${ABC[N:N+4]}, vget_low_f32(vinput_scale${ABC[M:M+2]}), 1);
-            vout${M+1}x${ABC[N:N+4]} = vmulq_lane_f32(vout${M+1}x${ABC[N:N+4]}, vget_high_f32(vinput_scale${ABC[M:M+2]}), 1);
+      $for M in range(MR):
+        const float32x4_t vinput_scale${M} = vdupq_n_f32(qp${M}->inv_scale);
+        $for N in range(0, NR, 4):
+          vout${M}x${ABC[N:N+4]} = vmulq_f32(vout${M}x${ABC[N:N+4]}, vinput_scale${M});
 
       $for N in range(0, NR, 4):
         const float32x4_t vfilter_output_scale${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;

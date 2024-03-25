@@ -2135,7 +2135,7 @@ TEST_F(FullyConnectedTestQD8F16QC4W, internally_allocated_dynamic_quantization_p
   std::vector<uint16_t> operator_output(batch_size * output_channels);
   std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0xDEAD));
   std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0xDEAD));
-  std::vector<xnn_dynamic_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
+  std::vector<xnn_dynamic_quantization_params> quantization_params(batch_size);
 
   std::vector<float> kernel_scale(output_channels);
   std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });
@@ -2298,7 +2298,7 @@ TEST_F(FullyConnectedTestQD8F16QC8W, internally_allocated_dynamic_quantization_p
   std::vector<uint16_t> operator_output(batch_size * output_channels);
   std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0xDEAD));
   std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0xDEAD));
-  std::vector<xnn_dynamic_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
+  std::vector<xnn_dynamic_quantization_params> quantization_params(batch_size);
 
   std::vector<float> kernel_scale(output_channels);
   std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });
@@ -2459,7 +2459,7 @@ TEST_F(FullyConnectedTestQD8F32QC8W, internally_allocated_dynamic_quantization_p
   std::vector<float> operator_output(batch_size * output_channels);
   std::fill(operator_output.begin(), operator_output.end(), nanf(""));
   std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
-  std::vector<xnn_dynamic_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
+  std::vector<xnn_dynamic_quantization_params> quantization_params(batch_size);
 
   std::vector<float> kernel_scale(output_channels);
   std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });
@@ -2627,7 +2627,7 @@ TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_p
   std::vector<float> operator_output(batch_size * output_channels);
   std::fill(operator_output.begin(), operator_output.end(), nanf(""));
   std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
-  std::vector<xnn_dynamic_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
+  std::vector<xnn_dynamic_quantization_params> quantization_params(batch_size);
 
   std::vector<float> kernel_scale(output_channels);
   std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });
@@ -2736,7 +2736,7 @@ TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_p
   std::vector<float> operator_output(batch_size * output_channels);
   std::fill(operator_output.begin(), operator_output.end(), nanf(""));
   std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
-  std::vector<xnn_dynamic_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
+  std::vector<xnn_dynamic_quantization_params> quantization_params(batch_size);
 
   std::vector<float> kernel_scale(output_channels);
   std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });

@@ -250,7 +250,7 @@ void GEMMBenchmark(benchmark::State& state,
   std::vector<int8_t> k(nc * kc);
   std::generate(k.begin(), k.end(), std::ref(i8rng));
 
-  std::vector<xnn_qd8_quantization_params> quantization_params(mc + XNN_EXTRA_QUANTIZATION_PARAMS);
+  std::vector<xnn_qd8_quantization_params> quantization_params(mc);
   const size_t w_elements = nc_stride * (sizeof(float) * 2 + sizeof(int32_t)) + kc_stride * nc_stride;
 
   const size_t c_elements = mc * nc;
@@ -332,7 +332,7 @@ void GEMMBenchmark(benchmark::State& state,
   std::vector<int8_t> k(nc * kc);
   std::generate(k.begin(), k.end(), std::ref(i8rng));
 
-  std::vector<xnn_qd8_quantization_params> quantization_params(mc + XNN_EXTRA_QUANTIZATION_PARAMS);
+  std::vector<xnn_qd8_quantization_params> quantization_params(mc);
   const size_t w_elements = nc_stride * (sizeof(float) * 2 + sizeof(int32_t)) + kc_stride * nc_stride;
 
   const size_t c_elements = mc * nc;
@@ -414,7 +414,7 @@ void GEMMBenchmark(benchmark::State& state,
   std::vector<uint8_t> k(nc * kc / 2);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
 
-  std::vector<xnn_qd8_quantization_params> quantization_params(mc + XNN_EXTRA_QUANTIZATION_PARAMS);
+  std::vector<xnn_qd8_quantization_params> quantization_params(mc);
   const size_t w_elements = nc_stride * (sizeof(float) * 2 + sizeof(int32_t)) + kc_stride * nc_stride;
 
   const size_t c_elements = mc * nc;
@@ -498,7 +498,7 @@ void GEMMBenchmark(benchmark::State& state,
   std::vector<uint8_t> k(nc * kc / 2);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
 
-  std::vector<xnn_qd8_quantization_params> quantization_params(mc + XNN_EXTRA_QUANTIZATION_PARAMS);
+  std::vector<xnn_qd8_quantization_params> quantization_params(mc);
   const size_t w_elements = nc_stride * (sizeof(float) * 2 + sizeof(int32_t)) + kc_stride * nc_stride;
 
   const size_t c_elements = mc * nc;

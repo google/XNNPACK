@@ -100,7 +100,7 @@ void GemmMicrokernelTester::Test(
 
   std::vector<float> input(mr() * k());
   std::vector<int8_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::vector<xnn_qd8_quantization_params> quantization_params(1 + XNN_EXTRA_QUANTIZATION_PARAMS);
+  std::vector<xnn_qd8_quantization_params> quantization_params(1);
   std::vector<int8_t> b(n() * ks() * k());
   std::vector<float> bias(n());
   std::vector<float> kernel_scale(n());
@@ -252,7 +252,7 @@ void GemmMicrokernelTester::Test(
 
   std::vector<float> input(mr() * k());
   std::vector<int8_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::vector<xnn_qd8_quantization_params> quantization_params(1 + XNN_EXTRA_QUANTIZATION_PARAMS);
+  std::vector<xnn_qd8_quantization_params> quantization_params(1);
   std::vector<int8_t> b(n() * ks() * k());
   std::vector<float> bias(n());
   std::vector<float> kernel_scale(n());

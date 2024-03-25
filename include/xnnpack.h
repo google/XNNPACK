@@ -88,12 +88,6 @@ extern "C" {
 /// Retain reduced dimensions with length 1.
 #define XNN_FLAG_KEEP_DIMS 0x00000040
 
-/// The number of entries in an array of xnn_dynamic_quantization_params that XNNPACK may read beyond array bounds.
-/// The caller must allocate at least this many extra xnn_dynamic_quantization_params before passing the array to XNNPACK.
-///
-/// Note: XNNPACK reads, but never writes beyond array bounds.
-#define XNN_EXTRA_QUANTIZATION_PARAMS 8
-
 struct xnn_dynamic_quantization_params {
   int32_t zero_point;
   float scale;

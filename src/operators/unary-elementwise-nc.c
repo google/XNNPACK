@@ -1643,10 +1643,6 @@ enum xnn_status xnn_reshape_convert_nc_f16_qd8(
   convert_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_f16_qd8_convert;
   convert_op->compute[0].range[0] = batch_size;
 
-  convert_op->compute[1].type = xnn_parallelization_type_1d;
-  convert_op->compute[1].task_1d = (pthreadpool_task_1d_t) xnn_compute_pad_qd8_params;
-  convert_op->compute[1].range[0] = 1;
-
   convert_op->state = xnn_run_state_needs_setup;
 
   return xnn_status_success;
@@ -1695,10 +1691,6 @@ enum xnn_status xnn_reshape_convert_nc_f32_qd8(
   convert_op->compute[0].type = xnn_parallelization_type_1d;
   convert_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_f32_qd8_convert;
   convert_op->compute[0].range[0] = batch_size;
-
-  convert_op->compute[1].type = xnn_parallelization_type_1d;
-  convert_op->compute[1].task_1d = (pthreadpool_task_1d_t) xnn_compute_pad_qd8_params;
-  convert_op->compute[1].range[0] = 1;
 
   convert_op->state = xnn_run_state_needs_setup;
 

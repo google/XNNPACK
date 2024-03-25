@@ -818,7 +818,7 @@ TEST(WORKSPACE, internally_allocated_dynamic_quantization_parameters)
   std::vector<float> input(batch_size * input_channels + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> subgraph_output(batch_size * output_channels);
   std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
-  std::vector<xnn_dynamic_quantization_params> quantization_params(3 + XNN_EXTRA_QUANTIZATION_PARAMS);
+  std::vector<xnn_dynamic_quantization_params> quantization_params(3);
   std::vector<float> kernel_scale(output_channels);
   std::vector<float> bias(output_channels);
   std::vector<int8_t> kernel(input_channels * output_channels);
