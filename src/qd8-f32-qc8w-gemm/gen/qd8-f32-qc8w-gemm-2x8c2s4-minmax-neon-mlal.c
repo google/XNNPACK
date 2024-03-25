@@ -51,13 +51,14 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x8c2s4__neon_mlal(
 
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   do {
-    const int32x4_t vizp01 = vld1q_s32(&qp0->zero_point);
+    const int32x4_t vizp0 = vdupq_n_s32(qp0->zero_point);
     const int32x4_t vksum0123 = vld1q_s32(w); w = (const int32_t*) w + 4;
-    int32x4_t vacc0x0123 = vmulq_lane_s32(vksum0123, vget_low_s32(vizp01), 0);
-    int32x4_t vacc1x0123 = vmulq_lane_s32(vksum0123, vget_high_s32(vizp01), 0);
+    int32x4_t vacc0x0123 = vmulq_s32(vksum0123, vizp0);
     const int32x4_t vksum4567 = vld1q_s32(w); w = (const int32_t*) w + 4;
-    int32x4_t vacc0x4567 = vmulq_lane_s32(vksum4567, vget_low_s32(vizp01), 0);
-    int32x4_t vacc1x4567 = vmulq_lane_s32(vksum4567, vget_high_s32(vizp01), 0);
+    int32x4_t vacc0x4567 = vmulq_s32(vksum4567, vizp0);
+    const int32x4_t vizp1 = vdupq_n_s32(qp1->zero_point);
+    int32x4_t vacc1x0123 = vmulq_s32(vksum0123, vizp1);
+    int32x4_t vacc1x4567 = vmulq_s32(vksum4567, vizp1);
 
     size_t k = kc;
     while (k >= 16 * sizeof(int8_t)) {
@@ -205,11 +206,12 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x8c2s4__neon_mlal(
     float32x4_t vout1x0123 = vcvtq_f32_s32(vacc1x0123);
     float32x4_t vout1x4567 = vcvtq_f32_s32(vacc1x4567);
 
-    const float32x4_t vinput_scale01 = vreinterpretq_f32_s32(vld1q_s32(&qp0->zero_point));
-    vout0x0123 = vmulq_lane_f32(vout0x0123, vget_low_f32(vinput_scale01), 1);
-    vout1x0123 = vmulq_lane_f32(vout1x0123, vget_high_f32(vinput_scale01), 1);
-    vout0x4567 = vmulq_lane_f32(vout0x4567, vget_low_f32(vinput_scale01), 1);
-    vout1x4567 = vmulq_lane_f32(vout1x4567, vget_high_f32(vinput_scale01), 1);
+    const float32x4_t vinput_scale0 = vdupq_n_f32(qp0->inv_scale);
+    vout0x0123 = vmulq_f32(vout0x0123, vinput_scale0);
+    vout0x4567 = vmulq_f32(vout0x4567, vinput_scale0);
+    const float32x4_t vinput_scale1 = vdupq_n_f32(qp1->inv_scale);
+    vout1x0123 = vmulq_f32(vout1x0123, vinput_scale1);
+    vout1x4567 = vmulq_f32(vout1x4567, vinput_scale1);
 
     const float32x4_t vfilter_output_scale0123 = vld1q_f32(w); w = (const float*) w + 4;
     const float32x4_t vfilter_output_scale4567 = vld1q_f32(w); w = (const float*) w + 4;
