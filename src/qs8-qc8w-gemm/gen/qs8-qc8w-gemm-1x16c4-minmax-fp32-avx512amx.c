@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-gemm/MRx16c4-avx512amx.c.in
+//   Template: src/qs8-gemm/c4-avx512amx.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 Google LLC
@@ -52,7 +52,6 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
 // Update if amxintrin changes
 #if defined(__x86_64__) && defined(__AMX_TILE__)
   __attribute__((aligned(64))) int32_t res0[1 * 16];
-  __attribute__((aligned(64))) int32_t res1[1 * 16];
 
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   size_t kremainder = kc & 63;
@@ -90,47 +89,43 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx512.output_min);
 
   do {
-    const __m512i vksum0123456789ABCDEF = _mm512_load_epi32(w);
+    const __m512i vksum0123456789ABCDEF = _mm512_load_epi32((const int32_t*) w + 0);
     w = (const int32_t*) w + 16;
 
     // Zero tile accumulator
-    _tile_zero(0);  // tmm0 is accumulator
+    _tile_zero(0);
 
     size_t k = kc;
     while (k >= 64 * sizeof(int8_t)) {
       _tile_loadd(2, a, a_stride);
-      _tile_stream_loadd(4, w, 64);
-
-      // Multiply tiles
-      _tile_dpbssd (0, 2, 4);
-
       a += 64;
+      _tile_loadd(4, (const int8_t*) w + 0, 64);
       w = (const int8_t*) w + 1024;
+      _tile_dpbssd(0, 2, 4);
+
       k -= 64 * sizeof(int8_t);
     }
 
     if XNN_UNLIKELY(k != 0) {
       _tile_loadd(6, a, a_stride);
-      _tile_stream_loadd(7, w, 64);
-
-      // Multiply tiles
-      _tile_dpbssd (0, 6, 7);
-
       a += kremainder;
+      _tile_loadd(7, (const int8_t*) w + 0, 64);
+      _tile_dpbssd(0, 6, 7);
+
       w = (const int8_t*) w + kremainder * 16;
       k -= kremainder * sizeof(int8_t);
     }
 
     // Add tile to bias
     _tile_stored(0, res0, 64);
-    _tile_stored(1, res1, 64);
+
     __m512i vacc0x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 0));
 
     __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
 
-    const __m512 vscale012345678ABCDEF = _mm512_load_ps(w);
+    const __m512 vscale0123456789ABCDEF = _mm512_load_ps(w);
     w = (const float*) w + 16;
-    vscaled0x0123456789ABCDEF = _mm512_mul_ps(vscaled0x0123456789ABCDEF, vscale012345678ABCDEF);
+    vscaled0x0123456789ABCDEF = _mm512_mul_ps(vscaled0x0123456789ABCDEF, vscale0123456789ABCDEF);
 
     vscaled0x0123456789ABCDEF = _mm512_min_ps(vscaled0x0123456789ABCDEF, voutput_max_less_zero_point);
 
@@ -142,17 +137,16 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
 
     vout0x0123456789ABCDEF = _mm_max_epi8(vout0x0123456789ABCDEF, voutput_min);
 
-    if (nc >= 16) {
-      _mm_storeu_si128((__m128i*) c0, vout0x0123456789ABCDEF);
+    if XNN_LIKELY(nc >= 16) {
+      _mm_storeu_si128((__m128i*) (c0 + 0), vout0x0123456789ABCDEF);
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
       a -= kc;
       nc -= 16;
     } else {
       // Prepare mask for valid 8-bit elements (depends on nc).
-      const __mmask16 vmask = _cvtu32_mask16((UINT32_C(1) << nc) - UINT32_C(1));
+      const __mmask16 vmask0 = _cvtu32_mask16((((UINT32_C(1) << nc) - 1) >> 0) & 0xFFFF);
 
-      _mm_mask_storeu_epi8(c0, vmask, vout0x0123456789ABCDEF);
-
+      _mm_mask_storeu_epi8(c0 + 0, vmask0, vout0x0123456789ABCDEF);
       nc = 0;
     }
   } while (nc != 0);
