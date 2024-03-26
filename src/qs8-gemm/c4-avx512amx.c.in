@@ -20,16 +20,6 @@ $assert DATATYPE in ["QD8_F32", "QC8"]
 $if PREFETCH:
   #include <xnnpack/prefetch.h>
 
-// Define tile config data structure
-typedef struct __tile_config {
-  uint8_t palette_id;
-  uint8_t start_row;
-  uint8_t reserved_0[14];
-  uint16_t colsb[8];
-  uint16_t reserved_1[8];
-  uint8_t rows[8];
-  uint8_t reserved_2[8];
-} __tilecfg;
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8_F32": "qd8_f32_qc8w", "QC4_F32": "qd8_f32_qc4w"}[DATATYPE]
 $REQUANTIZATION_SPEC = "" if DATATYPE in ["QD8_F32", "QC4_F32"] else "_" + REQUANTIZATION.lower()
@@ -76,8 +66,19 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     kremainder = 64;
   }
 
+  // Define tile config data structure
+  struct __tile_config {
+    uint8_t palette_id;
+    uint8_t start_row;
+    uint8_t reserved_0[14];
+    uint16_t colsb[8];
+    uint16_t reserved_1[8];
+    uint8_t rows[8];
+    uint8_t reserved_2[8];
+  };
+
   // Load tile configuration
-  __attribute__((aligned(64))) __tilecfg tile_data = {0};
+  __attribute__((aligned(64))) struct __tile_config tile_data = {0};
   tile_data.palette_id = 1;
   tile_data.rows[0] = mr;              // tmm0 = res 0
   tile_data.rows[1] = mr;              // tmm1 = res 1
@@ -222,7 +223,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
       } else {
         // Prepare mask for valid 32-bit elements (depends on nc).
         $for N in range(0, NR, 16):
-          const __mmask16 vmask${N // 16} = _cvtu32_mask16((((UINT32_C(1) << nc) - 1) >> ${N}) & 0xFFFF);
+          const __mmask16 vmask${N // 16} = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> ${N}) & 0xFFFF));
         $for M in reversed(range(MR)):
           $for N in range(0, NR, 16):
             _mm512_mask_storeu_ps(c${M} + ${N}, vmask${N // 16}, vscaled${M}x${ABC[N:N+16]});
@@ -271,7 +272,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
       } else {
         // Prepare mask for valid 8-bit elements (depends on nc).
         $for N in range(0, NR, 16):
-          const __mmask16 vmask${N // 16} = _cvtu32_mask16((((UINT32_C(1) << nc) - 1) >> ${N}) & 0xFFFF);
+          const __mmask16 vmask${N // 16} = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> ${N}) & 0xFFFF));
 
         $for M in reversed(range(MR)):
           $for N in range(0, NR, 16):

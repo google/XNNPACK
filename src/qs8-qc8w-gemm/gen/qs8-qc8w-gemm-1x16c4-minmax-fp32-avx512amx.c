@@ -16,16 +16,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/unaligned.h>
 
-// Define tile config data structure
-typedef struct __tile_config {
-  uint8_t palette_id;
-  uint8_t start_row;
-  uint8_t reserved_0[14];
-  uint16_t colsb[8];
-  uint16_t reserved_1[8];
-  uint8_t rows[8];
-  uint8_t reserved_2[8];
-} __tilecfg;
 
 void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
     size_t mr,
@@ -59,8 +49,19 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
     kremainder = 64;
   }
 
+  // Define tile config data structure
+  struct __tile_config {
+    uint8_t palette_id;
+    uint8_t start_row;
+    uint8_t reserved_0[14];
+    uint16_t colsb[8];
+    uint16_t reserved_1[8];
+    uint8_t rows[8];
+    uint8_t reserved_2[8];
+  };
+
   // Load tile configuration
-  __attribute__((aligned(64))) __tilecfg tile_data = {0};
+  __attribute__((aligned(64))) struct __tile_config tile_data = {0};
   tile_data.palette_id = 1;
   tile_data.rows[0] = mr;              // tmm0 = res 0
   tile_data.rows[1] = mr;              // tmm1 = res 1
@@ -144,7 +145,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
       nc -= 16;
     } else {
       // Prepare mask for valid 8-bit elements (depends on nc).
-      const __mmask16 vmask0 = _cvtu32_mask16((((UINT32_C(1) << nc) - 1) >> 0) & 0xFFFF);
+      const __mmask16 vmask0 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 0) & 0xFFFF));
 
       _mm_mask_storeu_epi8(c0 + 0, vmask0, vout0x0123456789ABCDEF);
       nc = 0;
