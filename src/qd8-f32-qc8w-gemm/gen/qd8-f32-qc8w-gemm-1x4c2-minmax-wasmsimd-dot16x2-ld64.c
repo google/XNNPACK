@@ -40,11 +40,10 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4c2__wasmsimd_dot16x2_ld64(
   kc = round_up_po2(kc, 2 * sizeof(int8_t));
   const int8_t* a0 = a;
   float* c0 = c;
-  const struct xnn_qd8_quantization_params* qp0 = quantization_params;
 
   do {
     const v128_t vksum0123 = wasm_v128_load(w);
-    const v128_t vinput_zero_point0 = wasm_v128_load32_splat(&qp0->zero_point);
+    const v128_t vinput_zero_point0 = wasm_v128_load32_splat(&quantization_params[0].zero_point);
     v128_t vacc0x0123 = wasm_i32x4_mul(vksum0123, vinput_zero_point0);
     w = (const int32_t*) w + 4;
 
@@ -102,7 +101,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4c2__wasmsimd_dot16x2_ld64(
 
     vacc0x0123 = wasm_f32x4_convert_i32x4(vacc0x0123);
 
-    const v128_t vinput_scale0 = wasm_v128_load32_splat(&qp0->inv_scale);
+    const v128_t vinput_scale0 = wasm_v128_load32_splat(&quantization_params[0].inv_scale);
 
     vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vinput_scale0);
 

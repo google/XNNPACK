@@ -42,9 +42,8 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_1x8c8__avx512vnni(
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const int8_t* a0 = a;
   uint16_t* c0 = (uint16_t*) c;
-  const struct xnn_qd8_quantization_params* qp0 = quantization_params;
 
-  const __m256i vinput_zero_point0 = _mm256_set1_epi32((int) qp0->zero_point + 128);
+  const __m256i vinput_zero_point0 = _mm256_set1_epi32((int) quantization_params[0].zero_point + 128);
   const __m256 voutput_min = _mm256_set1_ps(params->avxvnni.min);
   const __m256 voutput_max = _mm256_set1_ps(params->avxvnni.max);
   const __m256i vsign_mask = _mm256_set1_epi8(params->avxvnni.sign_mask);  // 0x80
@@ -107,7 +106,7 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_1x8c8__avx512vnni(
     vacc0x01234567 = _mm256_srai_epi32(vacc0x01234567, 4);
     __m256 vout0x01234567 = _mm256_cvtepi32_ps(vacc0x01234567);
 
-    vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(qp0->inv_scale));
+    vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(quantization_params[0].inv_scale));
 
     const __m256 vfilter_output_scale01234567 = _mm256_load_ps((const float*) w);
     const __m256 vbias01234567 = _mm256_load_ps((const float*) w + 8);

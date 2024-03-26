@@ -40,14 +40,11 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4c16__wasmsdot(
   kc = round_up_po2(kc, 16 * sizeof(int8_t));
   const int8_t* a0 = a;
   float* c0 = c;
-  const struct xnn_qd8_quantization_params* qp0 = quantization_params;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
   float* c1 = (float*) ((uintptr_t) c0 + cm_stride);
-  const struct xnn_qd8_quantization_params* qp1 = &quantization_params[1];
   if XNN_UNPREDICTABLE(mr != 2) {
     a1 = a0;
     c1 = c0;
-    qp1 = qp0;
   }
 
   do {
@@ -55,8 +52,8 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4c16__wasmsdot(
     v128_t vksum1 = wasm_v128_load32_zero((const int32_t*) w + 1);
     v128_t vksum2 = wasm_v128_load32_zero((const int32_t*) w + 2);
     v128_t vksum3 = wasm_v128_load32_zero((const int32_t*) w + 3);
-    const v128_t vinput_zero_point0 = wasm_v128_load32_splat(&qp0->zero_point);
-    const v128_t vinput_zero_point1 = wasm_v128_load32_splat(&qp1->zero_point);
+    const v128_t vinput_zero_point0 = wasm_v128_load32_splat(&quantization_params[0].zero_point);
+    const v128_t vinput_zero_point1 = wasm_v128_load32_splat(&quantization_params[1].zero_point);
     v128_t vacc0x0 = wasm_i32x4_mul(vksum0, vinput_zero_point0);
     v128_t vacc0x1 = wasm_i32x4_mul(vksum1, vinput_zero_point0);
     v128_t vacc0x2 = wasm_i32x4_mul(vksum2, vinput_zero_point0);
@@ -106,8 +103,8 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4c16__wasmsdot(
     vacc0x0123 = wasm_f32x4_convert_i32x4(vacc0x0123);
     vacc1x0123 = wasm_f32x4_convert_i32x4(vacc1x0123);
 
-    const v128_t vinput_scale0 = wasm_v128_load32_splat(&qp0->inv_scale);
-    const v128_t vinput_scale1 = wasm_v128_load32_splat(&qp1->inv_scale);
+    const v128_t vinput_scale0 = wasm_v128_load32_splat(&quantization_params[0].inv_scale);
+    const v128_t vinput_scale1 = wasm_v128_load32_splat(&quantization_params[1].inv_scale);
 
     vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vinput_scale0);
     vacc1x0123 = wasm_f32x4_mul(vacc1x0123, vinput_scale1);

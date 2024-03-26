@@ -40,21 +40,18 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x16c4__neondotfp16arith(
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   const int8_t* a0 = a;
   uint16_t* c0 = (uint16_t*) c;
-  const struct xnn_qd8_quantization_params* qp0 = quantization_params;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
   uint16_t* c1 = (uint16_t*) ((uintptr_t) c0 + cm_stride);
-  const struct xnn_qd8_quantization_params* qp1 = &quantization_params[1];
   if XNN_UNPREDICTABLE(mr != 2) {
     a1 = a0;
     c1 = c0;
-    qp1 = qp0;
   }
 
   // Loop over groups of 16 columns.
   do {
     // Initialize accumulators with bias. 16 bias values are loaded from the
     // weight matrix, at the start of the group of 16 columns.
-    const int32x4_t vinput_zero_point01 = vld1q_s32(&qp0->zero_point);
+    const int32x4_t vinput_zero_point01 = vld1q_s32(&quantization_params[0].zero_point);
     const int32x4_t vksum0123 = vld1q_s32(w); w = (const int32_t*) w + 4;
     int32x4_t vacc0x0123 = vmulq_lane_s32(vksum0123, vget_low_s32(vinput_zero_point01), 0);
     int32x4_t vacc1x0123 = vmulq_lane_s32(vksum0123, vget_high_s32(vinput_zero_point01), 0);
@@ -137,7 +134,7 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x16c4__neondotfp16arith(
     float32x4_t vout1x4567 = vcvtq_f32_s32(vacc1x4567);
     float32x4_t vout1x89AB = vcvtq_f32_s32(vacc1x89AB);
     float32x4_t vout1xCDEF = vcvtq_f32_s32(vacc1xCDEF);
-    const float32x4_t vinput_scale01 = vreinterpretq_f32_s32(vld1q_s32(&qp0->zero_point));
+    const float32x4_t vinput_scale01 = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[0].zero_point));
     vout0x0123 = vmulq_lane_f32(vout0x0123, vget_low_f32(vinput_scale01), 1);
     vout1x0123 = vmulq_lane_f32(vout1x0123, vget_high_f32(vinput_scale01), 1);
     vout0x4567 = vmulq_lane_f32(vout0x4567, vget_low_f32(vinput_scale01), 1);

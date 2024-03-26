@@ -33,7 +33,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8__wasm(
 
   const int8_t* a0 = a;
   float* c0 = c;
-  const struct xnn_qd8_quantization_params* qp0 = quantization_params;
 
   kc = round_up_po2(kc, 2);
   do {
@@ -45,7 +44,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8__wasm(
     const int32_t vksum5 = ((const int32_t*) w)[5];
     const int32_t vksum6 = ((const int32_t*) w)[6];
     const int32_t vksum7 = ((const int32_t*) w)[7];
-    const int32_t vinput_zero_point0 = qp0->zero_point;
+    const int32_t vinput_zero_point0 = quantization_params[0].zero_point;
     int32_t vacc0x0 = vksum0 * vinput_zero_point0;
     int32_t vacc0x1 = vksum1 * vinput_zero_point0;
     int32_t vacc0x2 = vksum2 * vinput_zero_point0;
@@ -115,7 +114,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8__wasm(
     float vout0x6 = (float) math_asr_s32(vacc0x6, 4);
     float vout0x7 = (float) math_asr_s32(vacc0x7, 4);
 
-    const float vinput_scale0 = qp0->inv_scale;
+    const float vinput_scale0 = quantization_params[0].inv_scale;
     vout0x0 *= vinput_scale0;
     vout0x1 *= vinput_scale0;
     vout0x2 *= vinput_scale0;

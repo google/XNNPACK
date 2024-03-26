@@ -34,24 +34,21 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x2__wasm(
 
   const int8_t* a0 = a;
   float* c0 = c;
-  const struct xnn_qd8_quantization_params* qp0 = quantization_params;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
   float* c1 = (float*) ((uintptr_t) c0 + cm_stride);
-  const struct xnn_qd8_quantization_params* qp1 = &quantization_params[1];
   if XNN_UNPREDICTABLE(mr != 2) {
     a1 = a0;
     c1 = c0;
-    qp1 = qp0;
   }
 
   kc = round_up_po2(kc, 2);
   do {
     const int32_t vksum0 = unaligned_indexed_load_s32(w, 0);
     const int32_t vksum1 = unaligned_indexed_load_s32(w, 1);
-    const int32_t vinput_zero_point0 = qp0->zero_point;
+    const int32_t vinput_zero_point0 = quantization_params[0].zero_point;
     int32_t vacc0x0 = vksum0 * vinput_zero_point0;
     int32_t vacc0x1 = vksum1 * vinput_zero_point0;
-    const int32_t vinput_zero_point1 = qp1->zero_point;
+    const int32_t vinput_zero_point1 = quantization_params[1].zero_point;
     int32_t vacc1x0 = vksum0 * vinput_zero_point1;
     int32_t vacc1x1 = vksum1 * vinput_zero_point1;
     w = (const int32_t*) w + 2;
@@ -88,10 +85,10 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x2__wasm(
     float vout1x0 = (float) math_asr_s32(vacc1x0, 4);
     float vout1x1 = (float) math_asr_s32(vacc1x1, 4);
 
-    const float vinput_scale0 = qp0->inv_scale;
+    const float vinput_scale0 = quantization_params[0].inv_scale;
     vout0x0 *= vinput_scale0;
     vout0x1 *= vinput_scale0;
-    const float vinput_scale1 = qp1->inv_scale;
+    const float vinput_scale1 = quantization_params[1].inv_scale;
     vout1x0 *= vinput_scale1;
     vout1x1 *= vinput_scale1;
 
