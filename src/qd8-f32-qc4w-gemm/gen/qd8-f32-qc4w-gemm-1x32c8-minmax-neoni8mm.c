@@ -40,13 +40,14 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x32c8__neoni8mm(
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const int8_t* a0 = a;
   float* c0 = c;
+  const struct xnn_qd8_quantization_params* qp0 = quantization_params;
   const int8x16_t vmask = vmovq_n_s8(INT8_C(0xF0));
 
   // Loop over groups of 32 columns.
   do {
     // Initialize accumulators with bias. 32 bias values are loaded from the
     // weight matrix, at the start of the group of 32 columns.
-    const int32x4_t vinput_zero_point01 = vld1q_dup_s32(&quantization_params[0].zero_point);
+    const int32x4_t vinput_zero_point01 = vld1q_dup_s32(&qp0->zero_point);
     const int32x4_t vksum0123 = vld1q_s32(w); w = (const int32_t*) w + 4;
     const int32x4_t vksumzp0x0123 = vmulq_s32(vksum0123, vinput_zero_point01);
     const int32x4_t vksum4567 = vld1q_s32(w); w = (const int32_t*) w + 4;
@@ -292,7 +293,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x32c8__neoni8mm(
     float32x4_t vout0xOPQR = vcvtq_n_f32_s32(vacc0xOPQR, 4);
     float32x4_t vout0xSTUV = vcvtq_n_f32_s32(vacc0xSTUV, 4);
 
-    const float32x4_t vinput_scale0 = vld1q_dup_f32(&quantization_params[0].inv_scale);
+    const float32x4_t vinput_scale0 = vld1q_dup_f32(&qp0->inv_scale);
     vout0x0123 = vmulq_f32(vout0x0123, vinput_scale0);
     vout0x4567 = vmulq_f32(vout0x4567, vinput_scale0);
     vout0x89AB = vmulq_f32(vout0x89AB, vinput_scale0);

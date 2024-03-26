@@ -3805,6 +3805,21 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f16-f32acc-rsum-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
   TARGET_LINK_LIBRARIES(f16-f32acc-rsum-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
+  ADD_EXECUTABLE(f16-rmax-bench bench/f16-rmax.cc)
+  TARGET_INCLUDE_DIRECTORIES(f16-rmax-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f16-rmax-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(f16-rmax-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
+  ADD_EXECUTABLE(f16-rminmax-bench bench/f16-rminmax.cc)
+  TARGET_INCLUDE_DIRECTORIES(f16-rminmax-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f16-rminmax-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(f16-rminmax-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
+  ADD_EXECUTABLE(f16-rmin-bench bench/f16-rmin.cc)
+  TARGET_INCLUDE_DIRECTORIES(f16-rmin-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f16-rmin-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(f16-rmin-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
   ADD_EXECUTABLE(f16-spmm-bench bench/f16-spmm.cc)
   TARGET_INCLUDE_DIRECTORIES(f16-spmm-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f16-spmm-bench PRIVATE benchmark::benchmark fp16 pthreadpool)

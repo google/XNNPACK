@@ -74,8 +74,8 @@ void xnn_f16_rminmax_ukernel__neonfp16arith_u32(
   #if XNN_ARCH_ARM64 && defined(__GNUC__)
     *((__fp16*) o) = vminv_f16(vmin_lo);
   #else
-    vmin_lo = vpmax_f16(vmin_lo, vmin_lo);
-    vmin_lo = vpmax_f16(vmin_lo, vmin_lo);
+    vmin_lo = vpmin_f16(vmin_lo, vmin_lo);
+    vmin_lo = vpmin_f16(vmin_lo, vmin_lo);
     vst1_lane_u16(o, vreinterpret_u16_f16(vmin_lo), 0);
   #endif
   #if XNN_ARCH_ARM64 && defined(__GNUC__)

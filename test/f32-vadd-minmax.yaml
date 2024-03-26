@@ -8,6 +8,11 @@
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vadd_minmax_ukernel__neon_u8
   init: xnn_init_f32_minmax_scalar_params
+# RISC-V Vector
+- name: xnn_f32_vadd_minmax_ukernel__rvv_u4v
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_vadd_minmax_ukernel__rvv_u8v
+  init: xnn_init_f32_minmax_scalar_params
 # x86 SSE
 - name: xnn_f32_vadd_minmax_ukernel__sse_u4
   init: xnn_init_f32_minmax_sse_params

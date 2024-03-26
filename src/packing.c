@@ -377,6 +377,10 @@ void xnn_pack_qs8_to_qu8_gemm_goi_w(
   } while (--g != 0);
 }
 
+static int8_t sign_extend_int4(int8_t value) {
+  return (value ^ 0x8) - 8;
+}
+
 void xnn_pack_qs8_qc4w_gemm_goi_w(
   size_t g,
   size_t nc,
@@ -400,10 +404,11 @@ void xnn_pack_qs8_qc4w_gemm_goi_w(
   assert(k != NULL);
   assert(packed_weights != NULL);
   assert(params != NULL);
-  assert(params->kernel_zero_point == 8);
+  assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
 
   const size_t skr = sr * kr;
   const uint32_t izp = (uint32_t) params->input_zero_point;
+  const uint32_t kernel_zero_point = (uint32_t) params->kernel_zero_point;
   do {
     size_t nr_block_start = 0;
     do {
@@ -425,22 +430,38 @@ void xnn_pack_qs8_qc4w_gemm_goi_w(
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr * 2); kr_block_start += kr * 2) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          uint32_t ksum = 0;
+          int32_t ksum = 0;
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
             const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
             const size_t k_offset = (nr_block_start + nr_block_offset) * kc + kc_idx;
             const size_t kh_offset = k_offset + kr;
-            uint8_t kv_lo = 8;
-            if (kc_idx < kc) {
-              kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4) : (k[k_offset >> 1] & 0xF));
+            if (kernel_zero_point == 0) {
+              int8_t kv_lo = 0;
+              if (kc_idx < kc) {
+                kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4) : (k[k_offset >> 1] & 0xF));
+              }
+              int8_t kv_hi = 0;
+              if ((kc_idx + kr) < kc) {
+                kv_hi = ((kh_offset & 1) ? (k[kh_offset >> 1] >> 4) : (k[kh_offset >> 1] & 0xF));
+              }
+              const int8_t kv = (kv_lo | (kv_hi << 4));
+              kv_lo = sign_extend_int4(kv_lo);
+              kv_hi = sign_extend_int4(kv_hi);
+              ksum += kv_lo + kv_hi;
+              ((int8_t*) packed_weights)[kr_block_offset] = kv;
+            } else {
+              uint8_t kv_lo = kernel_zero_point;
+              if (kc_idx < kc) {
+                kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4) : (k[k_offset >> 1] & 0xF));
+              }
+              uint8_t kv_hi = kernel_zero_point;
+              if ((kc_idx + kr) < kc) {
+                kv_hi = ((kh_offset & 1) ? (k[kh_offset >> 1] >> 4) : (k[kh_offset >> 1] & 0xF));
+              }
+              const uint8_t kv = (kv_lo | (kv_hi << 4)) ^ 0x88;
+              ksum += kv_lo + kv_hi - 2 * kernel_zero_point;  // subtract 2 zero points
+              ((uint8_t*) packed_weights)[kr_block_offset] = kv;
             }
-            uint8_t kv_hi = 8;
-            if ((kc_idx + kr) < kc) {
-              kv_hi = ((kh_offset & 1) ? (k[kh_offset >> 1] >> 4) : (k[kh_offset >> 1] & 0xF));
-            }
-            ksum += kv_lo + kv_hi - 16;  // subtract 2 zero points (8)
-            const uint8_t kv = (kv_lo | (kv_hi << 4)) ^ 0x88;
-            ((uint8_t*) packed_weights)[kr_block_offset] = kv;
           }
           unaligned_indexed_store_u32(packed_b, nr_block_offset, unaligned_indexed_load_u32(packed_b, nr_block_offset) - ksum * izp * 16);
           packed_weights = (uint8_t*) packed_weights + kr;  // kr * 2 nibbles
@@ -481,10 +502,11 @@ void xnn_pack_qs8_qc4w_gemm_gio_w(
   assert(k != NULL);
   assert(packed_weights != NULL);
   assert(params != NULL);
-  assert(params->kernel_zero_point == 8);
+  assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
 
   const size_t skr = sr * kr;
   const uint32_t izp = (uint32_t) params->input_zero_point;
+  const uint32_t kernel_zero_point = (uint32_t) params->kernel_zero_point;
   do {
     size_t nr_block_start = 0;
     do {
@@ -506,22 +528,38 @@ void xnn_pack_qs8_qc4w_gemm_gio_w(
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr * 2); kr_block_start += kr * 2) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          uint32_t ksum = 0;
+          int32_t ksum = 0;
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
             const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
             const size_t k_offset = kc_idx * k_stride + (nr_block_start + nr_block_offset);
             const size_t kh_offset = (kc_idx + kr) * k_stride + (nr_block_start + nr_block_offset);
-            uint8_t kv_lo = 8;
-            if (kc_idx < kc) {
-              kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4) : (k[k_offset >> 1] & 0xF));
+            if (kernel_zero_point == 0) {
+              int8_t kv_lo = 0;
+              if (kc_idx < kc) {
+                kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4) : (k[k_offset >> 1] & 0xF));
+              }
+              int8_t kv_hi = 0;
+              if ((kc_idx + kr) < kc) {
+                kv_hi = ((kh_offset & 1) ? (k[kh_offset >> 1] >> 4) : (k[kh_offset >> 1] & 0xF));
+              }
+              const int8_t kv = (kv_lo | (kv_hi << 4));
+              kv_lo = sign_extend_int4(kv_lo);
+              kv_hi = sign_extend_int4(kv_hi);
+              ksum += kv_lo + kv_hi;
+              ((int8_t*) packed_weights)[kr_block_offset] = kv;
+            } else {
+              uint8_t kv_lo = kernel_zero_point;
+              if (kc_idx < kc) {
+                kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4) : (k[k_offset >> 1] & 0xF));
+              }
+              uint8_t kv_hi = kernel_zero_point;
+              if ((kc_idx + kr) < kc) {
+                kv_hi = ((kh_offset & 1) ? (k[kh_offset >> 1] >> 4) : (k[kh_offset >> 1] & 0xF));
+              }
+              ksum += kv_lo + kv_hi - 2 * kernel_zero_point;  // subtract 2 zero points
+              const uint8_t kv = (kv_lo | (kv_hi << 4)) ^ 0x88;
+              ((uint8_t*) packed_weights)[kr_block_offset] = kv;
             }
-            uint8_t kv_hi = 8;
-            if ((kc_idx + kr) < kc) {
-              kv_hi = ((kh_offset & 1) ? (k[kh_offset >> 1] >> 4) : (k[kh_offset >> 1] & 0xF));
-            }
-            ksum += kv_lo + kv_hi - 16;  // subtract 2 zero points (8)
-            const uint8_t kv = (kv_lo | (kv_hi << 4)) ^ 0x88;
-            ((uint8_t*) packed_weights)[kr_block_offset] = kv;
           }
           unaligned_indexed_store_u32(packed_b, nr_block_offset, unaligned_indexed_load_u32(packed_b, nr_block_offset) - ksum * izp * 16);
           packed_weights = (uint8_t*) packed_weights + kr;  // kr * 2 nibbles

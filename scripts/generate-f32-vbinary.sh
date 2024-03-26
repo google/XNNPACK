@@ -450,6 +450,21 @@ tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=SUB      -D BATCH_TILE=4 -D ACT
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=SUB      -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vsubc-minmax-neon-u8.c &
 
 ################################ RISC-V Vector ################################
+tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=ADD     -D LMUL=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vadd-minmax-rvv-u4v.c &
+tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=ADD     -D LMUL=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vadd-minmax-rvv-u8v.c &
+tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=DIV     -D LMUL=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vdiv-minmax-rvv-u4v.c &
+tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=DIV     -D LMUL=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vdiv-minmax-rvv-u8v.c &
+tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=MAX     -D LMUL=4 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmax-rvv-u4v.c &
+tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=MAX     -D LMUL=8 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmax-rvv-u8v.c &
+tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=MIN     -D LMUL=4 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmin-rvv-u4v.c &
+tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=MIN     -D LMUL=8 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmin-rvv-u8v.c &
+tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=MUL     -D LMUL=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vmul-minmax-rvv-u4v.c &
+tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=MUL     -D LMUL=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vmul-minmax-rvv-u8v.c &
+tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=SQRDIFF -D LMUL=4 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vsqrdiff-rvv-u4v.c &
+tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=SQRDIFF -D LMUL=8 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vsqrdiff-rvv-u8v.c &
+tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=SUB     -D LMUL=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vsub-minmax-rvv-u4v.c &
+tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=SUB     -D LMUL=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vsub-minmax-rvv-u8v.c &
+
 tools/xngen src/f32-vbinary/vopc-rvv.c.in -D OP=ADD      -D LMUL=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vaddc-minmax-rvv-u4v.c &
 tools/xngen src/f32-vbinary/vopc-rvv.c.in -D OP=ADD      -D LMUL=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vaddc-minmax-rvv-u8v.c &
 tools/xngen src/f32-vbinary/vopc-rvv.c.in -D OP=DIV      -D LMUL=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vdivc-minmax-rvv-u4v.c &

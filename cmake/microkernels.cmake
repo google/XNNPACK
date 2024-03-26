@@ -1156,8 +1156,14 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/x16-transposec/gen/x16-transposec-16x16-reuse-switch-avx2.c)
 
 SET(ALL_AVX512AMX_MICROKERNEL_SRCS
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x16c4-minmax-avx512amx.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x16c4-minmax-avx512amx.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-16x16c4-minmax-avx512amx-acc2.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-16x16c4-minmax-avx512amx-prfm.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-16x16c4-minmax-avx512amx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x16c4-minmax-fp32-avx512amx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-7x16c4-minmax-fp32-avx512amx.c
+  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-16x16c4-minmax-fp32-avx512amx-acc2.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-16x16c4-minmax-fp32-avx512amx-prfm.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-16x16c4-minmax-fp32-avx512amx.c)
 
@@ -4566,17 +4572,10 @@ SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u96-acc6.c
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u96.c
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u8.c
-  src/f16-rminmax/gen/f16-rmax-neonfp16arith-u16-acc1.c
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u16-acc2.c
-  src/f16-rminmax/gen/f16-rmax-neonfp16arith-u24-acc2.c
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u24-acc3.c
-  src/f16-rminmax/gen/f16-rmax-neonfp16arith-u24.c
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u32-acc2.c
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u32-acc4.c
-  src/f16-rminmax/gen/f16-rmax-neonfp16arith-u32.c
-  src/f16-rminmax/gen/f16-rmax-neonfp16arith-u64-acc2.c
-  src/f16-rminmax/gen/f16-rmax-neonfp16arith-u64-acc4.c
-  src/f16-rminmax/gen/f16-rmax-neonfp16arith-u64.c
   src/f16-rminmax/gen/f16-rmin-neonfp16arith-u8.c
   src/f16-rminmax/gen/f16-rmin-neonfp16arith-u16-acc1.c
   src/f16-rminmax/gen/f16-rmin-neonfp16arith-u16-acc2.c
@@ -5230,14 +5229,24 @@ SET(ALL_RVV_MICROKERNEL_SRCS
   src/f32-rsum/gen/f32-rsum-rvv-u2v.c
   src/f32-rsum/gen/f32-rsum-rvv-u4v.c
   src/f32-rsum/gen/f32-rsum-rvv-u8v.c
+  src/f32-vbinary/gen/f32-vadd-minmax-rvv-u4v.c
+  src/f32-vbinary/gen/f32-vadd-minmax-rvv-u8v.c
   src/f32-vbinary/gen/f32-vaddc-minmax-rvv-u4v.c
   src/f32-vbinary/gen/f32-vaddc-minmax-rvv-u8v.c
+  src/f32-vbinary/gen/f32-vdiv-minmax-rvv-u4v.c
+  src/f32-vbinary/gen/f32-vdiv-minmax-rvv-u8v.c
   src/f32-vbinary/gen/f32-vdivc-minmax-rvv-u4v.c
   src/f32-vbinary/gen/f32-vdivc-minmax-rvv-u8v.c
+  src/f32-vbinary/gen/f32-vmax-rvv-u4v.c
+  src/f32-vbinary/gen/f32-vmax-rvv-u8v.c
   src/f32-vbinary/gen/f32-vmaxc-rvv-u4v.c
   src/f32-vbinary/gen/f32-vmaxc-rvv-u8v.c
+  src/f32-vbinary/gen/f32-vmin-rvv-u4v.c
+  src/f32-vbinary/gen/f32-vmin-rvv-u8v.c
   src/f32-vbinary/gen/f32-vminc-rvv-u4v.c
   src/f32-vbinary/gen/f32-vminc-rvv-u8v.c
+  src/f32-vbinary/gen/f32-vmul-minmax-rvv-u4v.c
+  src/f32-vbinary/gen/f32-vmul-minmax-rvv-u8v.c
   src/f32-vbinary/gen/f32-vmulc-minmax-rvv-u4v.c
   src/f32-vbinary/gen/f32-vmulc-minmax-rvv-u8v.c
   src/f32-vbinary/gen/f32-vmulc-rvv-u4v.c
@@ -5246,8 +5255,12 @@ SET(ALL_RVV_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vrdivc-minmax-rvv-u8v.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-rvv-u4v.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-rvv-u8v.c
+  src/f32-vbinary/gen/f32-vsqrdiff-rvv-u4v.c
+  src/f32-vbinary/gen/f32-vsqrdiff-rvv-u8v.c
   src/f32-vbinary/gen/f32-vsqrdiffc-rvv-u4v.c
   src/f32-vbinary/gen/f32-vsqrdiffc-rvv-u8v.c
+  src/f32-vbinary/gen/f32-vsub-minmax-rvv-u4v.c
+  src/f32-vbinary/gen/f32-vsub-minmax-rvv-u8v.c
   src/f32-vbinary/gen/f32-vsubc-minmax-rvv-u4v.c
   src/f32-vbinary/gen/f32-vsubc-minmax-rvv-u8v.c
   src/f32-vclamp/gen/f32-vclamp-rvv-u1v.c

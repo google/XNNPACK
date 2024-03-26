@@ -206,9 +206,11 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
 
   // Compute the stride for each batch dimension of the output C.
   size_t batch_strides_c[XNN_MAX_TENSOR_DIMS];
-  batch_strides_c[num_batch_dims - 1] = 1;
-  for (int k = (int)num_batch_dims - 2; k >= 0; k--) {
-    batch_strides_c[k] = batch_strides_c[k + 1] * batch_dims_c[k + 1];
+  if (num_batch_dims > 0) {
+    batch_strides_c[num_batch_dims - 1] = 1;
+    for (int k = (int)num_batch_dims - 2; k >= 0; k--) {
+      batch_strides_c[k] = batch_strides_c[k + 1] * batch_dims_c[k + 1];
+    }
   }
 
   // Fail if the batch sizes for `A` and `B` are not compatible.
