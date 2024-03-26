@@ -92,7 +92,7 @@ void xnn_normalize_slice(
 }
 
 // Returns true if input stride and output stride are NULL or the expected input/output stride matches the actual input/output stride.
-static bool can_dimension_be_removed(
+bool can_dimension_be_removed(
     const size_t* input_stride,
     const size_t* output_stride,
     const size_t* shape,
@@ -117,7 +117,7 @@ static bool can_dimension_be_removed(
 }
 
 // Remove dimension perm[dim] from shape, perm, input & output strides.
-static void fold_into_previous_dim(
+void fold_into_previous_dim(
     size_t* shape,
     size_t* perm,
     size_t* inverted_perm,
