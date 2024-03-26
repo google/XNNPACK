@@ -17,17 +17,6 @@
 #include <xnnpack/unaligned.h>
 #include <xnnpack/prefetch.h>
 
-// Define tile config data structure
-typedef struct __tile_config {
-  uint8_t palette_id;
-  uint8_t start_row;
-  uint8_t reserved_0[14];
-  uint16_t colsb[8];
-  uint16_t reserved_1[8];
-  uint8_t rows[8];
-  uint8_t reserved_2[8];
-} __tilecfg;
-
 void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_16x32c4__avx512amx_prfm(
     size_t mr,
     size_t nc,
@@ -62,24 +51,35 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_16x32c4__avx512amx_prfm(
     kremainder = 64;
   }
 
+  // Define tile config data structure
+  struct __tile_config {
+    uint8_t palette_id;
+    uint8_t start_row;
+    uint8_t reserved_0[14];
+    uint16_t colsb[8];
+    uint16_t reserved_1[8];
+    uint8_t rows[8];
+    uint8_t reserved_2[8];
+  };
+
   // Load tile configuration
-  __attribute__((aligned(64))) __tilecfg tile_data = {0};
+  __attribute__((aligned(64))) struct __tile_config tile_data = {0};
   tile_data.palette_id = 1;
   tile_data.rows[0] = mr;              // tmm0 = res 0
   tile_data.rows[1] = mr;              // tmm1 = res 1
-  tile_data.rows[2] = mr;              // tmm2 = input 0
-  tile_data.rows[3] = mr;              // tmm3 = input 1
-  tile_data.rows[4] = 16;              // tmm4 = weights 0
-  tile_data.rows[5] = 16;              // tmm5 = weights 1
+  tile_data.rows[2] = mr;              // tmm2 = res 2
+  tile_data.rows[3] = mr;              // tmm3 = res 3
+  tile_data.rows[4] = mr;              // tmm4 = input
+  tile_data.rows[5] = 16;              // tmm5 = weights
   tile_data.rows[6] = mr;              // tmm6 = input remainder
   tile_data.rows[7] = kremainder >> 2; // tmm7 = weights remainder
 
   tile_data.colsb[0] = 64;          // tmm0 = res 0
   tile_data.colsb[1] = 64;          // tmm1 = res 1
-  tile_data.colsb[2] = 64;          // tmm2 = input 0
-  tile_data.colsb[3] = 64;          // tmm3 = input 1
-  tile_data.colsb[4] = 64;          // tmm4 = weights 0
-  tile_data.colsb[5] = 64;          // tmm5 = weights 1
+  tile_data.colsb[2] = 64;          // tmm2 = res 1
+  tile_data.colsb[3] = 64;          // tmm3 = res 1
+  tile_data.colsb[4] = 64;          // tmm4 = input
+  tile_data.colsb[5] = 64;          // tmm5 = weights
   tile_data.colsb[6] = kremainder;  // tmm6 = input remainder
   tile_data.colsb[7] = 64;          // tmm7 = weights remainder
 
@@ -161,13 +161,12 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_16x32c4__avx512amx_prfm(
 
     size_t k = kc;
     while (k >= 64 * sizeof(int8_t)) {
-      _tile_loadd(2, a, a_stride);
+      _tile_loadd(4, a, a_stride);
       a += 64;
-      _tile_loadd(4, (const int8_t*) w + 0, 128);
+      _tile_loadd(5, (const int8_t*) w + 0, 128);
+      _tile_dpbssd(0, 4, 5);
       _tile_loadd(5, (const int8_t*) w + 64, 128);
-      w = (const int8_t*) w + 2048;
-      _tile_dpbssd(0, 2, 4);
-      _tile_dpbssd(1, 2, 5);
+      _tile_dpbssd(1, 4, 5);
       xnn_prefetch_to_l1((const int8_t*) w + 4096);
       xnn_prefetch_to_l1((const int8_t*) w + 4160);
       xnn_prefetch_to_l1((const int8_t*) w + 4224);
@@ -217,6 +216,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_16x32c4__avx512amx_prfm(
       xnn_prefetch_to_l1((const int8_t*) w + 7040);
       xnn_prefetch_to_l1((const int8_t*) w + 7104);
 
+      w = (const int8_t*) w + 2048;
       k -= 64 * sizeof(int8_t);
     }
 
@@ -530,8 +530,8 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_16x32c4__avx512amx_prfm(
       nc -= 32;
     } else {
       // Prepare mask for valid 32-bit elements (depends on nc).
-      const __mmask16 vmask0 = _cvtu32_mask16((((UINT32_C(1) << nc) - 1) >> 0) & 0xFFFF);
-      const __mmask16 vmask1 = _cvtu32_mask16((((UINT32_C(1) << nc) - 1) >> 16) & 0xFFFF);
+      const __mmask16 vmask0 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 0) & 0xFFFF));
+      const __mmask16 vmask1 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 16) & 0xFFFF));
       _mm512_mask_storeu_ps(c15 + 0, vmask0, vscaled15x0123456789ABCDEF);
       _mm512_mask_storeu_ps(c15 + 16, vmask1, vscaled15xGHIJKLMNOPQRSTUV);
       _mm512_mask_storeu_ps(c14 + 0, vmask0, vscaled14x0123456789ABCDEF);
