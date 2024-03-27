@@ -702,6 +702,18 @@ union xnn_qs8_add_minmax_params {
     XNN_ALIGN(8) int8_t output_max[8];
   } wasmsimd;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  struct {
+    int8_t a_zero_point;
+    int8_t b_zero_point;
+    int32_t a_multiplier;
+    int32_t b_multiplier;
+    uint32_t shift;
+    int16_t output_zero_point;
+    int16_t output_min;
+    int16_t output_max;
+  } rvv;
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 };
 
 union xnn_qu8_add_minmax_params {
@@ -779,6 +791,18 @@ union xnn_qu8_add_minmax_params {
     XNN_ALIGN(8) uint8_t output_max[8];
   } wasmsimd;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  struct {
+    uint8_t a_zero_point;
+    uint8_t b_zero_point;
+    int32_t a_multiplier;
+    int32_t b_multiplier;
+    uint32_t shift;
+    int16_t output_zero_point;
+    int16_t output_min;
+    int16_t output_max;
+  } rvv;
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 };
 
 

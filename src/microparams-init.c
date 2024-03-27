@@ -5805,6 +5805,58 @@ size_t xnn_init_qu8_add_minmax_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+size_t xnn_init_qu8_add_minmax_rvv_params(
+  union xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t a_zero_point,
+  uint8_t b_zero_point,
+  uint8_t output_zero_point,
+  float a_output_scale,
+  float b_output_scale,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  const float abs_a_output_scale = fabsf(a_output_scale);
+  const float abs_b_output_scale = fabsf(b_output_scale);
+  assert(abs_a_output_scale >= 0x1.0p-10f);
+  assert(abs_b_output_scale >= 0x1.0p-10f);
+  assert(abs_a_output_scale < 0x1.0p+8f);
+  assert(abs_b_output_scale < 0x1.0p+8f);
+
+  // Compute requantization parameters.
+  const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
+  assert(max_abs_output_scale >= 0x1.0p-10f);
+  assert(max_abs_output_scale < 0x1.0p+8f);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
+  const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
+
+  // Shift is in [12, 30] range.
+  const uint32_t shift = (uint32_t) (20 /* multiplier bits */ - max_scale_exponent);
+  assert(shift <= 30);
+  assert(shift >= 12);
+
+  // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
+  assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
+  assert(abs_a_multiplier <= INT32_C(0x00200000));
+  assert(abs_b_multiplier <= INT32_C(0x00200000));
+
+  const int32_t a_multiplier = signbit(a_output_scale) ? -abs_a_multiplier : abs_a_multiplier;
+  const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
+
+  params->rvv.a_zero_point = a_zero_point;
+  params->rvv.b_zero_point = b_zero_point;
+  params->rvv.a_multiplier = a_multiplier;
+  params->rvv.b_multiplier = b_multiplier;
+  params->rvv.shift = shift;
+  params->rvv.output_zero_point = (int16_t) (uint16_t) output_zero_point;
+  params->rvv.output_min = (int16_t) (uint16_t) output_min;
+  params->rvv.output_max = (int16_t) (uint16_t) output_max;
+  return sizeof(params->rvv);
+}
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
 size_t xnn_init_qu8_add_minmax_scalar_params(
   union xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t a_zero_point,
@@ -6270,6 +6322,58 @@ size_t xnn_init_qs8_add_minmax_wasmsimd_params(
   return sizeof(params->wasmsimd);
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+size_t xnn_init_qs8_add_minmax_rvv_params(
+  union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t a_zero_point,
+  int8_t b_zero_point,
+  int8_t output_zero_point,
+  float a_output_scale,
+  float b_output_scale,
+  int8_t output_min,
+  int8_t output_max)
+{
+  const float abs_a_output_scale = fabsf(a_output_scale);
+  const float abs_b_output_scale = fabsf(b_output_scale);
+  assert(abs_a_output_scale >= 0x1.0p-10f);
+  assert(abs_b_output_scale >= 0x1.0p-10f);
+  assert(abs_a_output_scale < 0x1.0p+8f);
+  assert(abs_b_output_scale < 0x1.0p+8f);
+
+  // Compute requantization parameters.
+  const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
+  assert(max_abs_output_scale >= 0x1.0p-10f);
+  assert(max_abs_output_scale < 0x1.0p+8f);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
+  const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
+
+  // Shift is in [12, 30] range.
+  const uint32_t shift = (uint32_t) (20 /* multiplier bits */ - max_scale_exponent);
+  assert(shift <= 30);
+  assert(shift >= 12);
+
+  // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
+  assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
+  assert(abs_a_multiplier <= INT32_C(0x00200000));
+  assert(abs_b_multiplier <= INT32_C(0x00200000));
+
+  const int32_t a_multiplier = signbit(a_output_scale) ? -abs_a_multiplier : abs_a_multiplier;
+  const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
+
+  params->rvv.a_zero_point = a_zero_point;
+  params->rvv.b_zero_point = b_zero_point;
+  params->rvv.a_multiplier = a_multiplier;
+  params->rvv.b_multiplier = b_multiplier;
+  params->rvv.shift = shift;
+  params->rvv.output_zero_point = (int16_t) output_zero_point;
+  params->rvv.output_min = (int16_t) output_min;
+  params->rvv.output_max = (int16_t) output_max;
+  return sizeof(params->rvv);
+}
+#endif // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 size_t xnn_init_qs8_add_minmax_scalar_params(
   union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],

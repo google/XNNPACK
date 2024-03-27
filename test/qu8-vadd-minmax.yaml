@@ -53,6 +53,11 @@
   init: xnn_init_qu8_add_minmax_wasmsimd_params
 - name: xnn_qu8_vadd_minmax_ukernel__wasmsimd_u32
   init: xnn_init_qu8_add_minmax_wasmsimd_params
+# RISC-V Vector
+- name: xnn_qu8_vadd_minmax_ukernel__rvv_u1v
+  init: xnn_init_qu8_add_minmax_rvv_params
+- name: xnn_qu8_vadd_minmax_ukernel__rvv_u2v
+  init: xnn_init_qu8_add_minmax_rvv_params
 # Scalar
 - name: xnn_qu8_vadd_minmax_ukernel__scalar_u1
   init: xnn_init_qu8_add_minmax_scalar_params

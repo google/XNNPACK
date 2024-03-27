@@ -1,0 +1,71 @@
+// Copyright 2023 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+#include <riscv_vector.h>
+#include <xnnpack/vbinary.h>
+$assert DATATYPE in ["QS8", "QU8"]
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+$VSIZE1 = {1: "m1", 2: "m2"}[LMUL]
+$VSIZE2 = {1: "m2", 2: "m4"}[LMUL]
+$VSIZE4 = {1: "m4", 2: "m8"}[LMUL]
+
+void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__rvv_u${LMUL}v(
+    size_t batch,
+    const ${XINT8_T}* input_a,
+    const ${XINT8_T}* input_b,
+    ${XINT8_T}* output,
+    const union xnn_${DATATYPE.lower()}_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const ${XINT8_T} a_zero_point = params->rvv.a_zero_point;
+  const ${XINT8_T} b_zero_point = params->rvv.b_zero_point;
+  const int32_t a_multiplier = params->rvv.a_multiplier;
+  const int32_t b_multiplier = params->rvv.b_multiplier;
+  const uint32_t shift = params->rvv.shift;
+  const int16_t output_zero_point = params->rvv.output_zero_point;
+  const int16_t output_min = params->rvv.output_min;
+  const int16_t output_max = params->rvv.output_max;
+
+  do {
+    const size_t n = __riscv_vsetvl_e8${VSIZE1}(batch);
+
+    $if DATATYPE == "QS8":
+      vint8${VSIZE1}_t in_a_i8v = __riscv_vle8_v_i8${VSIZE1}(input_a, n); input_a += n;
+      vint8${VSIZE1}_t in_b_i8v = __riscv_vle8_v_i8${VSIZE1}(input_b, n); input_b += n;
+      vint16${VSIZE2}_t a_i16v = __riscv_vwsub_vx_i16${VSIZE2}(in_a_i8v, a_zero_point, n);
+      vint16${VSIZE2}_t b_i16v = __riscv_vwsub_vx_i16${VSIZE2}(in_b_i8v, b_zero_point, n);
+    $else:
+      vuint8${VSIZE1}_t in_a_u8v = __riscv_vle8_v_u8${VSIZE1}(input_a, n); input_a += n;
+      vuint8${VSIZE1}_t in_b_u8v = __riscv_vle8_v_u8${VSIZE1}(input_b, n); input_b += n;
+      vuint16${VSIZE2}_t a_u16v = __riscv_vwsubu_vx_u16${VSIZE2}(in_a_u8v, a_zero_point, n);
+      vuint16${VSIZE2}_t b_u16v = __riscv_vwsubu_vx_u16${VSIZE2}(in_b_u8v, b_zero_point, n);
+      vint16${VSIZE2}_t a_i16v = __riscv_vreinterpret_v_u16${VSIZE2}_i16${VSIZE2}(a_u16v);
+      vint16${VSIZE2}_t b_i16v = __riscv_vreinterpret_v_u16${VSIZE2}_i16${VSIZE2}(b_u16v);
+    vint32${VSIZE4}_t a_i32v = __riscv_vwcvt_x_x_v_i32${VSIZE4}(a_i16v, n);
+    vint32${VSIZE4}_t b_i32v = __riscv_vwcvt_x_x_v_i32${VSIZE4}(b_i16v, n);
+    a_i32v = __riscv_vmul_vx_i32${VSIZE4}(a_i32v, a_multiplier, n);
+    b_i32v = __riscv_vmul_vx_i32${VSIZE4}(b_i32v, b_multiplier, n);
+    vint32${VSIZE4}_t out_i32v = __riscv_vadd_vv_i32${VSIZE4}(a_i32v, b_i32v, n);
+    out_i32v = __riscv_vssra_vx_i32${VSIZE4}(out_i32v, shift, n);
+    vint16${VSIZE2}_t out_i16v = __riscv_vncvt_x_x_w_i16${VSIZE2}(out_i32v, n);
+    out_i16v = __riscv_vadd_vx_i16${VSIZE2}(out_i16v, output_zero_point, n);
+    out_i16v = __riscv_vmin_vx_i16${VSIZE2}(__riscv_vmax_vx_i16${VSIZE2}(out_i16v, output_min, n), output_max, n);
+    $if DATATYPE == "QS8":
+      vint8${VSIZE1}_t out_i8v = __riscv_vncvt_x_x_w_i8${VSIZE1}(out_i16v, n);
+      __riscv_vse8_v_i8${VSIZE1}(output, out_i8v, n); output += n;
+    $else:
+      a_u16v = __riscv_vreinterpret_v_i16${VSIZE2}_u16${VSIZE2}(out_i16v);
+      vuint8${VSIZE1}_t out_u8v = __riscv_vncvt_x_x_w_u8${VSIZE1}(a_u16v, n);
+      __riscv_vse8_v_u8${VSIZE1}(output, out_u8v, n); output += n;
+
+    batch -= n;
+  } while (batch != 0);
+}
