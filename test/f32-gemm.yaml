@@ -118,3 +118,10 @@
 - name: xnn_f32_gemm_ukernel_4x4__scalar
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
+# RISC-V
+- name: xnn_f32_gemm_ukernel_1x4v__rvv
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_ukernel_7x4v__rvv
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
