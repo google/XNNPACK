@@ -26,8 +26,9 @@
 
 
 namespace xnnpack {
-template <class T> class MeanTestBase : public ::testing::Test {
-protected:
+template <class T>
+class MeanTestBase : public ::testing::TestWithParam<bool> {
+ protected:
   MeanTestBase()
   {
     random_device = std::make_unique<std::random_device>();
@@ -35,7 +36,7 @@ protected:
     f32dist = std::uniform_real_distribution<float>(-1.0f, 1.0f);
 
     auto num_input_dim_dist = std::uniform_int_distribution<size_t>(2, XNN_MAX_TENSOR_DIMS);
-    const size_t num_input_dims = num_input_dim_dist(rng);
+    size_t num_input_dims = num_input_dim_dist(rng);
 
     auto reduction_axes_seq_start_dist = std::uniform_int_distribution<size_t>(0, num_input_dims - 1);
     const size_t reduction_axes_seq_start = reduction_axes_seq_start_dist(rng);
@@ -80,6 +81,9 @@ protected:
 
 using MeanTestF16 = MeanTestBase<uint16_t>;
 using MeanTestF32 = MeanTestBase<float>;
+
+INSTANTIATE_TEST_SUITE_P(KeepDims, MeanTestF16, testing::Bool());
+INSTANTIATE_TEST_SUITE_P(KeepDims, MeanTestF32, testing::Bool());
 
 TEST_F(MeanTestF16, define)
 {
@@ -165,8 +169,8 @@ TEST_F(MeanTestF32, define)
   ASSERT_EQ(node->flags, 0);
 }
 
-TEST_F(MeanTestF16, matches_operator_api)
-{
+TEST_P(MeanTestF16, matches_operator_api) {
+  bool keep_dims = GetParam();
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_operator_t op = nullptr;
@@ -175,8 +179,9 @@ TEST_F(MeanTestF16, matches_operator_api)
   std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
   std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
 
+  uint32_t flags = keep_dims ? XNN_FLAG_KEEP_DIMS : 0;
   // Call operator API.
-  const xnn_status status = xnn_create_mean_nd_f16(/*flags=*/XNN_FLAG_KEEP_DIMS, &op);
+  const xnn_status status = xnn_create_mean_nd_f16(flags, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -212,17 +217,21 @@ TEST_F(MeanTestF16, matches_operator_api)
   ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
 
   uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(xnn_status_success,
-    xnn_define_tensor_value(subgraph, xnn_datatype_fp16, output_shape.size(), output_shape.data(),
-                            nullptr, /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  int output_num_dims = input_shape.size();
+  if (!keep_dims) {
+    output_num_dims -= reduction_axes.size();
+  }
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, output_num_dims,
+                              output_shape.data(), nullptr, /*external_id=*/1,
+                              XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
   ASSERT_EQ(xnn_status_success,
-    xnn_define_static_mean(
-      subgraph,
-      reduction_axes.size(), reduction_axes.data(),
-      input_id, output_id,
-      /*flags=*/XNN_FLAG_KEEP_DIMS));
+            xnn_define_static_mean(subgraph, reduction_axes.size(),
+                                   reduction_axes.data(), input_id, output_id,
+                                   flags));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -238,12 +247,12 @@ TEST_F(MeanTestF16, matches_operator_api)
 
   // Check outputs match.
   for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
+    EXPECT_EQ(subgraph_output[i], operator_output[i]);
   }
 }
 
-TEST_F(MeanTestF32, matches_operator_api)
-{
+TEST_P(MeanTestF32, matches_operator_api) {
+  bool keep_dims = GetParam();
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_operator_t op = nullptr;
@@ -252,8 +261,9 @@ TEST_F(MeanTestF32, matches_operator_api)
   std::fill(operator_output.begin(), operator_output.end(), nanf(""));
   std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
+  uint32_t flags = keep_dims ? XNN_FLAG_KEEP_DIMS : 0;
   // Call operator API.
-  const xnn_status status = xnn_create_mean_nd_f32(/*flags=*/XNN_FLAG_KEEP_DIMS, &op);
+  const xnn_status status = xnn_create_mean_nd_f32(flags, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -289,17 +299,21 @@ TEST_F(MeanTestF32, matches_operator_api)
   ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
 
   uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(xnn_status_success,
-    xnn_define_tensor_value(subgraph, xnn_datatype_fp32, output_shape.size(), output_shape.data(),
-                            nullptr, /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  int output_num_dims = input_shape.size();
+  if (!keep_dims) {
+    output_num_dims -= reduction_axes.size();
+  }
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, output_num_dims,
+                              output_shape.data(), nullptr, /*external_id=*/1,
+                              XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
   ASSERT_EQ(xnn_status_success,
-    xnn_define_static_mean(
-      subgraph,
-      reduction_axes.size(), reduction_axes.data(),
-      input_id, output_id,
-      /*flags=*/XNN_FLAG_KEEP_DIMS));
+            xnn_define_static_mean(subgraph, reduction_axes.size(),
+                                   reduction_axes.data(), input_id, output_id,
+                                   flags));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -314,9 +328,7 @@ TEST_F(MeanTestF32, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
+  ASSERT_EQ(subgraph_output, operator_output);
 }
 
 TEST_F(MeanTestF32, reshape_output_keep_dims)
@@ -417,9 +429,12 @@ TEST_F(MeanTestF32, reshape_output_no_keep_dims)
   ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
 
   uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(xnn_status_success,
-    xnn_define_tensor_value(subgraph, xnn_datatype_fp32, output_shape.size(), output_shape.data(),
-                            nullptr, /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  int output_num_dims = input_shape.size() - reduction_axes.size();
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, output_num_dims,
+                              output_shape.data(), nullptr, /*external_id=*/1,
+                              XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
   ASSERT_EQ(xnn_status_success,
