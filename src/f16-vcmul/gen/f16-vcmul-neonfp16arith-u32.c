@@ -115,8 +115,8 @@ void xnn_f16_vcmul_ukernel__neonfp16arith_u32(
       vacci_lo = vget_high_f16(vacci);
     }
     if (batch & (2 * sizeof(uint16_t))) {
-      vst1_lane_u32((uint32_t*) or, vreinterpret_u32_f16(vaccr_lo), 0); or += 2;
-      vst1_lane_u32((uint32_t*) oi, vreinterpret_u32_f16(vacci_lo), 0); oi += 2;
+      vst1_lane_u32((void*) or, vreinterpret_u32_f16(vaccr_lo), 0); or += 2;
+      vst1_lane_u32((void*) oi, vreinterpret_u32_f16(vacci_lo), 0); oi += 2;
       vaccr_lo = vext_f16(vaccr_lo, vaccr_lo, 2);
       vacci_lo = vext_f16(vacci_lo, vacci_lo, 2);
     }
