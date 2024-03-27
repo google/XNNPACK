@@ -299,6 +299,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/multiply2.c
   src/subgraph/negate.c
   src/subgraph/prelu.c
+  src/subgraph/reciprocal-square-root.c
   src/subgraph/reshape-helpers.c
   src/subgraph/scaled-dot-product-attention.c
   src/subgraph/sigmoid.c
@@ -1732,7 +1733,7 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(square-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME square-test COMMAND square-test)
 
-    ADD_EXECUTABLE(square-root-test test/square.cc)
+    ADD_EXECUTABLE(square-root-test test/square-root.cc)
     TARGET_INCLUDE_DIRECTORIES(square-root-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(square-root-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME square-root-test COMMAND square-root-test)
