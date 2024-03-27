@@ -507,6 +507,13 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "allocation_type",
+    hdrs = ["src/xnnpack/allocation-type.h"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+)
+
+xnnpack_cc_library(
     name = "operator_type",
     hdrs = ["src/xnnpack/operator-type.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -2828,6 +2835,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "logging",
     srcs = [
+        "src/enums/allocation-type.c",
         "src/enums/datatype-strings.c",
         "src/enums/microkernel-type.c",
         "src/enums/node-type.c",
@@ -2863,6 +2871,7 @@ xnnpack_cc_library(
         ":xnn_log_level_explicit_debug": [],
         "//conditions:default": [":log_level_default"],
     }) + [
+        ":allocation_type",
         ":common",
         ":microkernel_type",
         ":node_type",
@@ -3648,6 +3657,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocation_type",
         ":allocator",
         ":cache",
         ":common",
@@ -3685,6 +3695,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocation_type",
         ":allocator",
         ":cache",
         ":common",

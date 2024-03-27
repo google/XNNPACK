@@ -3235,6 +3235,7 @@ xnnpack_unit_test(
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
         "//:common",
+        "//:node_type",
         "//:operators_test_mode",
         "//:subgraph_test_mode",
     ],

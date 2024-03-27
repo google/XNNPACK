@@ -32,6 +32,7 @@ enum xnn_operator_type {
   xnn_operator_type_bankers_rounding_nc_f32,
   xnn_operator_type_batch_matrix_multiply_nc_f16,
   xnn_operator_type_batch_matrix_multiply_nc_f32,
+  xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w,
   xnn_operator_type_ceiling_nc_f16,
   xnn_operator_type_ceiling_nc_f32,
   xnn_operator_type_channel_shuffle_nc_x8,

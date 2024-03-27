@@ -1,0 +1,21 @@
+# Copyright 2024 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# LINT.IfChange
+
+- name: xnn_allocation_type_invalid
+  string: "invalid"
+- name: xnn_allocation_type_static
+  string: "static"
+- name: xnn_allocation_type_workspace
+  string: "workspace"
+- name: xnn_allocation_type_external
+  string: "external"
+- name: xnn_allocation_type_persistent
+  string: "persistent"
+- name: xnn_allocation_type_dynamic
+  string: "dynamic"
+
+# LINT.ThenChange(allocation-type.c, ../xnnpack/allocation-type.h)

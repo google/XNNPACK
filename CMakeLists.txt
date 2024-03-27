@@ -320,6 +320,7 @@ SET(SUBGRAPH_SRCS
   src/tensor.c)
 
 SET(LOGGING_SRCS
+  src/enums/allocation-type.c
   src/enums/datatype-strings.c
   src/enums/microkernel-type.c
   src/enums/node-type.c

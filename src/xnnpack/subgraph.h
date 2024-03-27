@@ -9,8 +9,9 @@
 #include <stdint.h>
 
 #include <xnnpack.h>
-#include <xnnpack/common.h>
+#include <xnnpack/allocation-type.h>
 #include <xnnpack/cache.h>
+#include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/node-type.h>
 
@@ -58,20 +59,6 @@ enum xnn_value_type {
 enum xnn_layout_type {
   xnn_layout_type_nhwc = 0,
   xnn_layout_type_nchw = 1,
-};
-
-enum xnn_allocation_type {
-  xnn_allocation_type_invalid = 0,
-  /// Static data that is provided by caller, needs to outlive the xnn_runtime.
-  xnn_allocation_type_static,
-  /// Lives in XNNPACK-managed internal workspace.
-  xnn_allocation_type_workspace,
-  /// Non-static data that is external to the runtime, provided by caller, specified in xnn_setup_runtime.
-  xnn_allocation_type_external,
-  // Persistent data is internal to XNNPACK-managed workspace, but shared by multiple runtime/subgraph.
-  xnn_allocation_type_persistent,
-  /// Data allocated dynamically and managed by XNNPACK, not part of workspace.
-  xnn_allocation_type_dynamic,
 };
 
 /// Abstraction for a collections of elements produced and consumed by nodes.
