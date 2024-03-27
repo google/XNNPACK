@@ -977,6 +977,9 @@ def main(args):
         create_tests_from_idx[create_tests_idx] = create_tests.replace(
             "CreateTests(", f"CreateTests{create_tests_idx}("
         )
+        if isa == 'rvv':
+          create_tests_from_idx[create_tests_idx] = xnncommon.postprocess_test_case(
+            create_tests_from_idx[create_tests_idx], arch, isa, assembly, jit)
       test_case = test_case.replace(
           "CreateTests(", f"CreateTests{create_tests_idx}("
       )
