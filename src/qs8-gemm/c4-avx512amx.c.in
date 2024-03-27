@@ -56,7 +56,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
 
 // TODO: amxintrin.h only provide intrinsics for __x86_64__
 // Update if amxintrin changes
-#if defined(__x86_64__)
+#if defined(__x86_64__) && defined(__AMX_TILE__)
   $for N in range(0, NR, 16):
     __attribute__((aligned(64))) int32_t res${N // 16}[${MR} * 16];
 
@@ -285,5 +285,5 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
   // Release tile config
   //  _tile_release();
   __asm__ volatile ("tilerelease" ::);
-  #endif  // defined(__x86_64__)
+  #endif  // defined(__x86_64__) && defined(__AMX_TILE__)
 }
