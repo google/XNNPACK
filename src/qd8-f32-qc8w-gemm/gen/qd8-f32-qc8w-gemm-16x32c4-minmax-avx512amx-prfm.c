@@ -8,6 +8,8 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+// Disable gcc amxintrin header
+#define _AMXTILEINTRIN_H_INCLUDED
 
 #include <immintrin.h>
 
@@ -41,7 +43,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_16x32c4__avx512amx_prfm(
 
 // TODO: amxintrin.h only provide intrinsics for __x86_64__
 // Update if amxintrin changes
-#if defined(__x86_64__) && defined(__AMX_TILE__)
+#if defined(__x86_64__)
   __attribute__((aligned(64))) int32_t res0[16 * 16];
   __attribute__((aligned(64))) int32_t res1[16 * 16];
 
@@ -83,7 +85,8 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_16x32c4__avx512amx_prfm(
   tile_data.colsb[6] = kremainder;  // tmm6 = input remainder
   tile_data.colsb[7] = 64;          // tmm7 = weights remainder
 
-  _tile_loadconfig(&tile_data);
+  //_tile_loadconfig(&tile_data);
+  __asm__ volatile ("ldtilecfg %0" :: "m" (tile_data));
 
   float* c0 = c;
   float* c1 = (float*) ((uintptr_t) c0 + cm_stride);
@@ -156,8 +159,10 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_16x32c4__avx512amx_prfm(
     w = (const int32_t*) w + 32;
 
     // Zero tile accumulator
-    _tile_zero(0);
-    _tile_zero(1);
+    __asm__ volatile (
+      "tilezero %%tmm0\n"
+      "tilezero %%tmm1\n"
+      ::);
 
     size_t k = kc;
     while (k >= 64 * sizeof(int8_t)) {
@@ -568,6 +573,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_16x32c4__avx512amx_prfm(
     }
   } while (nc != 0);
   // Release tile config
-  _tile_release();
-#endif  // defined(__x86_64__) && defined(__AMX_TILE__)
+  //  _tile_release();
+  __asm__ volatile ("tilerelease" ::);
+  #endif  // defined(__x86_64__)
 }
