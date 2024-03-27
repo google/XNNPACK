@@ -15,6 +15,7 @@
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
+#include <xnnpack/config.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/transpose.h>
@@ -99,6 +100,33 @@ BENCHMARK_CAPTURE(transpose, 4x2_scalar_float, xnn_x32_transposec_ukernel__4x2_s
     ->Apply(BenchmarkKernelSize)->UseRealTime();
 BENCHMARK_CAPTURE(transpose, 4x4_scalar_float, xnn_x32_transposec_ukernel__4x4_scalar_float)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+void transpose_rvv(
+    benchmark::State& state,
+    xnn_x32_transposec_ukernel_fn transpose_uk,
+    size_t tile_height,
+    xnn_init_x32_transpose_params_fn init_params = nullptr,
+    benchmark::utils::IsaCheckFunction isa_check = nullptr)
+{
+  // Test case not supported by VLEN is skipped
+  if (xnn_init_hardware_config()->vlenb < tile_height * sizeof(uint32_t)) {
+    return;
+  }
+
+  transpose(state, transpose_uk, init_params, isa_check);
+}
+
+BENCHMARK_CAPTURE(transpose_rvv, 4x4_rvv, xnn_x32_transposec_ukernel__4x4_rvv, 4)
+    ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(transpose_rvv, 8x8_rvv, xnn_x32_transposec_ukernel__8x8_rvv, 8)
+    ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(transpose_rvv, 16x8_rvv, xnn_x32_transposec_ukernel__16x8_rvv, 16)
+    ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(transpose_rvv, 32x8_rvv, xnn_x32_transposec_ukernel__32x8_rvv, 32)
+    ->Apply(BenchmarkKernelSize)->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 #if XNN_ARCH_ARM64
   BENCHMARK_CAPTURE(transpose, 4x4_neon_tbl128, xnn_x32_transposec_ukernel__4x4_aarch64_neon_tbl128,
