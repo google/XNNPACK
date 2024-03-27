@@ -3,18 +3,21 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <xnnpack.h>
-#include <xnnpack/reshape-helpers.h>
-
 #include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
+#include <functional>
 #include <limits>
 #include <memory>
 #include <numeric>
 #include <random>
 #include <vector>
+
+#include <xnnpack.h>
+#include <xnnpack/reshape-helpers.h>
+#include <xnnpack/subgraph.h>
 
 #include <gtest/gtest.h>
 
@@ -161,7 +164,8 @@ TEST(ReshapeHelpersTest, UnaryScalar) {
   ASSERT_EQ(xnn_status_success,
             xnn_get_external_value_shape(runtime, /*external_id=*/1,
                                          &num_output_dims, &output_dims[0]));
-  std::vector<float> input{-7};
+  std::vector<float> input(1 + XNN_EXTRA_BYTES / sizeof(float));
+  input[0] = -7;
   std::vector<float> output(1);
   ASSERT_EQ(num_output_dims, 0);
   std::array<xnn_external_value, 2> external = {
@@ -187,8 +191,10 @@ TEST(ReshapeHelpersTest, BinaryScalarLHSRHS) {
   ASSERT_EQ(xnn_status_success,
             xnn_get_external_value_shape(runtime, /*external_id=*/1,
                                          &num_output_dims, &output_dims[0]));
-  std::vector<float> input0{2};
-  std::vector<float> input1{3};
+  std::vector<float> input0(1 + XNN_EXTRA_BYTES / sizeof(float));
+  input0[0] = 2;
+  std::vector<float> input1(1 + XNN_EXTRA_BYTES / sizeof(float));
+  input1[0] = 3;
   std::vector<float> output(1);
   ASSERT_EQ(num_output_dims, 0);
   std::array<xnn_external_value, 3> external = {
