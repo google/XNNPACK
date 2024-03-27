@@ -1417,6 +1417,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "reciprocal_square_root_bench",
+    srcs = ["reciprocal-square-root.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
     name = "scaled_dot_product_attention_bench",
     srcs = ["scaled-dot-product-attention.cc"],
     copts = xnnpack_optional_tflite_copts(),

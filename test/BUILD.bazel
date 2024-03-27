@@ -3710,6 +3710,21 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "reciprocal_square_root_test",
+    srcs = [
+        "reciprocal-square-root.cc",
+    ],
+    deps = [
+        ":subgraph_unary_tester",
+        "@FP16",
+        "//:XNNPACK_test_mode",
+        "//:node_type",
+        "//:operators_test_mode",
+        "//:subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "rope_test",
     srcs = [
         "rope.cc",
