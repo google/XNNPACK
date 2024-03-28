@@ -1384,6 +1384,28 @@ TEST(F32_RMIN__SCALAR_U4_ACC4, batch_gt_4) {
       .Test(xnn_f32_rmin_ukernel__rvv_u1v, ReduceMicrokernelTester::OpType::Min);
   }
 
+  TEST(F32_RMIN__RVV_U1V, batch_div_1v) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t batch_size = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+                batch_size < 10 * xnn_init_hardware_config()->vlenb / sizeof(float);
+                batch_size += 1 * xnn_init_hardware_config()->vlenb / sizeof(float)) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_rmin_ukernel__rvv_u1v, ReduceMicrokernelTester::OpType::Min);
+    }
+  }
+
+  TEST(F32_RMIN__RVV_U1V, batch_lt_1v) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t batch_size = 1;
+                batch_size < 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+                batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_rmin_ukernel__rvv_u1v, ReduceMicrokernelTester::OpType::Min);
+    }
+  }
+
   TEST(F32_RMIN__RVV_U1V, batch_gt_1v) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t batch_size = 1 * xnn_init_hardware_config()->vlenb / sizeof(float) + 1;
