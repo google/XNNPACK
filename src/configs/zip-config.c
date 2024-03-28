@@ -69,7 +69,7 @@ static void init_x8_zip_config(void) {
     x8_zip_config.x3 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x3_ukernel__scalar;
     x8_zip_config.x4 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x4_ukernel__scalar;
     x8_zip_config.xm = (xnn_zipv_ukernel_fn) xnn_x8_zip_xm_ukernel__scalar;
-  #elif XNN_ARCH_PPC64
+  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
     x8_zip_config.x2 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x2_ukernel__scalar;
     x8_zip_config.x3 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x3_ukernel__scalar;
     x8_zip_config.x4 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x4_ukernel__scalar;
@@ -117,7 +117,7 @@ static void init_x32_zip_config(void) {
     x32_zip_config.x3 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x3_ukernel__scalar;
     x32_zip_config.x4 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x4_ukernel__scalar;
     x32_zip_config.xm = (xnn_zipv_ukernel_fn) xnn_x32_zip_xm_ukernel__scalar;
-  #elif XNN_ARCH_PPC64
+  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
     x32_zip_config.x2 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x2_ukernel__scalar;
     x32_zip_config.x3 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x3_ukernel__scalar;
     x32_zip_config.x4 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x4_ukernel__scalar;

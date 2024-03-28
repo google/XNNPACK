@@ -146,7 +146,7 @@ static void init_f32_rminmax_config(void) {
         .element_tile = 4,
       };
     #endif
-  #elif XNN_ARCH_PPC64
+  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
     f32_rminmax_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__scalar_u4_acc4,
       .element_tile = 4,
@@ -217,7 +217,7 @@ static void init_f32_rsum_config(void) {
       .init.f32_scale = xnn_init_f32_scale_scalar_params,
       .element_tile = 4,
     };
-  #elif XNN_ARCH_PPC64
+  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
     f32_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__scalar_u4_acc4,
       .init.f32_scale = xnn_init_f32_scale_scalar_params,

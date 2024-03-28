@@ -120,7 +120,7 @@ static void init_f32_spmm_config(void) {
     f32_spmm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_spmm_config.mr = 8;
     f32_spmm_config.nr = 1;
-  #elif XNN_ARCH_PPC64
+  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
     f32_spmm_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_8x1__scalar;
     f32_spmm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_spmm_config.mr = 8;
@@ -153,7 +153,7 @@ static void init_f32_spmm2_config(void) {
     f32_spmm2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_spmm2_config.mr = 8;
     f32_spmm2_config.nr = 2;
-  #elif XNN_ARCH_PPC64
+  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
     f32_spmm2_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_8x2__scalar;
     f32_spmm2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_spmm2_config.mr = 8;
@@ -184,7 +184,7 @@ static void init_f32_spmm4_config(void) {
     f32_spmm4_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_spmm4_config.mr = 8;
     f32_spmm4_config.nr = 4;
-  #elif XNN_ARCH_PPC64
+  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
     f32_spmm4_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_8x4__scalar;
     f32_spmm4_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_spmm4_config.mr = 8;
