@@ -608,6 +608,14 @@ DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_scalar_expm1minus_rr1_p6
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
+#define DECLARE_INIT_BF16_ABS_PARAMS_FUNCTION(fn_name)      \
+  XNN_INTERNAL size_t fn_name(                             \
+    union xnn_bf16_abs_params params[XNN_MIN_ELEMENTS(1)]);
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  DECLARE_INIT_BF16_ABS_PARAMS_FUNCTION(xnn_init_bf16_abs_neon_params)
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
 #define DECLARE_INIT_F16_ABS_PARAMS_FUNCTION(fn_name)      \
   XNN_INTERNAL size_t fn_name(                             \
     union xnn_f16_abs_params params[XNN_MIN_ELEMENTS(1)]);

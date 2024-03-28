@@ -312,6 +312,14 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "bf16_vabs_test",
+    srcs = [
+        "bf16-vabs.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [":vunary_microkernel_tester"],
+)
+
+xnnpack_unit_test(
     name = "f16_vabs_test",
     srcs = [
         "f16-vabs.cc",
