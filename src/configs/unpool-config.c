@@ -45,7 +45,7 @@ static void init_x32_unpool_config(void) {
     x32_unpool_config.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__scalar;
   #elif XNN_ARCH_RISCV
     x32_unpool_config.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__scalar;
-  #elif XNN_ARCH_PPC64
+  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
     x32_unpool_config.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__scalar;
   #endif
 }

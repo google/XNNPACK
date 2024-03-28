@@ -96,7 +96,7 @@ static void init_f32_gavgpool_cw_config(void) {
     f32_gavgpool_cw_config.pixel_tile = 1;
     f32_gavgpool_cw_config.init.f32 = xnn_init_f32_gavgpool_scalar_params;
     f32_gavgpool_cw_config.update.f32 = xnn_update_f32_gavgpool_params;
-  #elif XNN_ARCH_PPC64
+  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
     f32_gavgpool_cw_config.ukernel = (xnn_gavgpool_cw_ukernel_fn) xnn_f32_gavgpool_cw_ukernel__scalar_u1;
     f32_gavgpool_cw_config.pixel_tile = 1;
     f32_gavgpool_cw_config.init.f32 = xnn_init_f32_gavgpool_scalar_params;
