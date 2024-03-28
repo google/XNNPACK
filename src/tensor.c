@@ -266,6 +266,7 @@ enum xnn_status xnn_define_dynamically_quantized_tensor_value(
   value->quantization.num_nonbatch_dims = num_nonbatch_dims;
   set_shape(value, num_dims, dims);
   value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
+  value->quantization.dynamic_params_size =  xnn_tensor_get_dynamic_quant_param_size(value);
   value->flags = flags;
   value->data = NULL;
   set_allocation_type(value);
@@ -528,6 +529,15 @@ size_t xnn_tensor_get_size(const struct xnn_value* value)
   }
 
   return size;
+}
+
+// Return size of the dynamic quantization params in this value
+size_t xnn_tensor_get_dynamic_quant_param_size(const struct xnn_value* value)
+{
+  assert (value->datatype == xnn_datatype_qdint8);
+
+  const size_t batch_dims_size = xnn_shape_multiply_batch_dims(&value->shape, value->quantization.num_nonbatch_dims);
+  return batch_dims_size * sizeof(struct xnn_dynamic_quantization_params);
 }
 
 size_t xnn_tensor_get_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id)
