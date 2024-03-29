@@ -68,7 +68,7 @@ static void init_f32_cmul_config(void) {
   #elif XNN_ARCH_RISCV
     f32_cmul_config.ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcmul_ukernel__scalar_u4;
     f32_cmul_config.element_tile = 4;
-  #elif XNN_ARCH_PPC64
+  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
     f32_cmul_config.ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcmul_ukernel__scalar_u4;
     f32_cmul_config.element_tile = 4;
   #endif

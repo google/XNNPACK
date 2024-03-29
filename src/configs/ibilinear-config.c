@@ -100,7 +100,7 @@ static void init_f32_ibilinear_config(void) {
     f32_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_f32_ibilinear_ukernel__scalar_c2;
     f32_ibilinear_config.pixel_tile = 1;
     f32_ibilinear_config.channel_tile = 2;
-  #elif XNN_ARCH_PPC64
+  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
     f32_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_f32_ibilinear_ukernel__scalar_c2;
     f32_ibilinear_config.pixel_tile = 1;
     f32_ibilinear_config.channel_tile = 2;
@@ -148,7 +148,7 @@ static void init_s8_ibilinear_config(void) {
     s8_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_s8_ibilinear_ukernel__scalar_c1;
     s8_ibilinear_config.pixel_tile = 1;
     s8_ibilinear_config.channel_tile = 1;
-  #elif XNN_ARCH_PPC64
+  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
     s8_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_s8_ibilinear_ukernel__scalar_c1;
     s8_ibilinear_config.pixel_tile = 1;
     s8_ibilinear_config.channel_tile = 1;
@@ -196,7 +196,7 @@ static void init_u8_ibilinear_config(void) {
     u8_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_u8_ibilinear_ukernel__scalar_c1;
     u8_ibilinear_config.pixel_tile = 1;
     u8_ibilinear_config.channel_tile = 1;
-  #elif XNN_ARCH_PPC64
+  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
     u8_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_u8_ibilinear_ukernel__scalar_c1;
     u8_ibilinear_config.pixel_tile = 1;
     u8_ibilinear_config.channel_tile = 1;

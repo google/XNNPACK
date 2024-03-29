@@ -129,7 +129,7 @@ static void init_f32_argmaxpool_config(void) {
       .first_pass_tile_size = 9,
       .remainder_pass_tile_size = 8,
     };
-  #elif XNN_ARCH_PPC64
+  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
     f32_argmaxpool_config[0] = (struct xnn_argmaxpool_config) {
       .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__scalar_c1,
       .first_pass_tile_size = 4,

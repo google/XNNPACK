@@ -51,7 +51,7 @@ static void init_xx_fill_config(void) {
   #elif XNN_ARCH_RISCV
     xx_fill_config.ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__scalar_u16;
     xx_fill_config.row_tile = 1;
-  #elif XNN_ARCH_PPC64
+  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
     xx_fill_config.ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__scalar_u16;
     xx_fill_config.row_tile = 1;
   #else
