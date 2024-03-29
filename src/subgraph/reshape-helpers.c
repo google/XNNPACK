@@ -28,11 +28,25 @@ enum xnn_status resize_unary_elementwise_output_tensor(
     return xnn_status_success;
   }
   const size_t new_size = xnn_tensor_get_size(output);
+
+  enum xnn_status status = xnn_status_success;
   if (new_size > output->size || opdata->workspace_size > old_workspace_size) {
     output->size = new_size;
-    return xnn_status_reallocation_required;
+    status = xnn_status_reallocation_required;
   }
-  return xnn_status_success;
+
+  // Alternatively you may have to trigger reallocation if you ran out of space for dynamic quantization params.
+  // Not applicable to values of other datatypes.
+  if (output->datatype == xnn_datatype_qdint8) {
+    const size_t new_dynamic_quant_param_size = xnn_tensor_get_dynamic_quant_param_size(output);
+    if (new_dynamic_quant_param_size > output->quantization.dynamic_params_size) {
+      // Update this, reallocation will use this to adjust memory needed for dynamic quant params.
+      output->quantization.dynamic_params_size = new_dynamic_quant_param_size;
+      status = xnn_status_reallocation_required;
+    }
+  }
+
+  return status;
 }
 
 enum xnn_status resize_binary_elementwise_output_tensor(
