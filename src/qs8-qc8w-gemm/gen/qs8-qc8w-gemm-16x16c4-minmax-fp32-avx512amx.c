@@ -40,8 +40,9 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_16x16c4__avx512amx(
   assert(c != NULL);
 
 // TODO: amxintrin.h only provide intrinsics for __x86_64__
+// amxintrin.h doesnt build with gcc sandbox enabled
 // Update if amxintrin changes
-#if defined(__x86_64__) && defined(__AMX_TILE__)
+#if defined(__x86_64__) && defined(__clang__)
   __attribute__((aligned(64))) int32_t res0[16 * 16];
 
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
@@ -383,5 +384,5 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_16x16c4__avx512amx(
   // Release tile config
   //  _tile_release();
   __asm__ volatile ("tilerelease" ::);
-  #endif  // defined(__x86_64__) && defined(__AMX_TILE__)
+#endif  // defined(__x86_64__) && defined(__clang__)
 }
