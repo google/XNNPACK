@@ -62,13 +62,7 @@ static void init_f32_cmul_config(void) {
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_cmul_config.ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcmul_ukernel__wasmsimd_u8;
     f32_cmul_config.element_tile = 8;
-  #elif XNN_ARCH_WASM
-    f32_cmul_config.ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcmul_ukernel__scalar_u4;
-    f32_cmul_config.element_tile = 4;
-  #elif XNN_ARCH_RISCV
-    f32_cmul_config.ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcmul_ukernel__scalar_u4;
-    f32_cmul_config.element_tile = 4;
-  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
+  #else
     f32_cmul_config.ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcmul_ukernel__scalar_u4;
     f32_cmul_config.element_tile = 4;
   #endif

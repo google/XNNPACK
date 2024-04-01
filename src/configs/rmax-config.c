@@ -86,7 +86,7 @@ static void init_f32_rmax_config(void) {
     #else
       f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__scalar_u4_acc4;
     #endif
-  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
+  #else
     f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__scalar_u4_acc4;
   #endif
 }
@@ -106,13 +106,10 @@ static void init_u8_rmax_config(void) {
     u8_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_u8_rmax_ukernel__sse2_u16;
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     u8_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_u8_rmax_ukernel__scalar_u2;
-  #elif XNN_ARCH_WASM
-    u8_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_u8_rmax_ukernel__scalar_u2;
-  #elif XNN_ARCH_RISCV
-    u8_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_u8_rmax_ukernel__scalar_u2;
-  #elif XNN_ARCH_PPC64 || XNN_ARCH_HEXAGON
+  #else
     u8_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_u8_rmax_ukernel__scalar_u2;
   #endif
+
 }
 
 #if XNN_PLATFORM_WINDOWS
