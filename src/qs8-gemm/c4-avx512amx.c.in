@@ -10,8 +10,6 @@ $assert 1 <= MR <= 16
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
 $assert DATATYPE in ["QD8_F32", "QC8"]
 #include <assert.h>
-// Disable gcc amxintrin header
-#define _AMXTILEINTRIN_H_INCLUDED
 
 #include <immintrin.h>
 
@@ -21,6 +19,7 @@ $assert DATATYPE in ["QD8_F32", "QC8"]
 #include <xnnpack/unaligned.h>
 $if PREFETCH:
   #include <xnnpack/prefetch.h>
+
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8_F32": "qd8_f32_qc8w", "QC4_F32": "qd8_f32_qc4w"}[DATATYPE]
 $REQUANTIZATION_SPEC = "" if DATATYPE in ["QD8_F32", "QC4_F32"] else "_" + REQUANTIZATION.lower()
@@ -56,7 +55,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
 
 // TODO: amxintrin.h only provide intrinsics for __x86_64__
 // Update if amxintrin changes
-#if defined(__x86_64__) && defined(__AMX_TILE__)
+#if defined(__x86_64__)
   $for N in range(0, NR, 16):
     __attribute__((aligned(64))) int32_t res${N // 16}[${MR} * 16];
 
@@ -285,5 +284,5 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
   // Release tile config
   //  _tile_release();
   __asm__ volatile ("tilerelease" ::);
-  #endif  // defined(__x86_64__) && defined(__AMX_TILE__)
+  #endif  // defined(__x86_64__)
 }
