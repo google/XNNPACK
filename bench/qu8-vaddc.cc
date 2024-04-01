@@ -122,19 +122,6 @@ static void qu8_vaddc(
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(qu8_vaddc, xop_mul32_ld32_u8,
-                    xnn_qu8_vaddc_minmax_ukernel__xop_mul32_ld32_u8,
-                    xnn_init_qu8_add_minmax_sse4_params,
-                    benchmark::utils::CheckXOP)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(qu8_vaddc, xop_mul32_ld32_u16,
-                    xnn_qu8_vaddc_minmax_ukernel__xop_mul32_ld32_u16,
-                    xnn_init_qu8_add_minmax_sse4_params,
-                    benchmark::utils::CheckXOP)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
-    ->UseRealTime();
-
   BENCHMARK_CAPTURE(qu8_vaddc, avx_mul16_ld64_u8,
                     xnn_qu8_vaddc_minmax_ukernel__avx_mul16_ld64_u8,
                     xnn_init_qu8_add_minmax_sse2_params,

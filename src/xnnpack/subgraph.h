@@ -9,8 +9,9 @@
 #include <stdint.h>
 
 #include <xnnpack.h>
-#include <xnnpack/common.h>
+#include <xnnpack/allocation-type.h>
 #include <xnnpack/cache.h>
+#include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/node-type.h>
 
@@ -60,20 +61,6 @@ enum xnn_layout_type {
   xnn_layout_type_nchw = 1,
 };
 
-enum xnn_allocation_type {
-  xnn_allocation_type_invalid = 0,
-  /// Static data that is provided by caller, needs to outlive the xnn_runtime.
-  xnn_allocation_type_static,
-  /// Lives in XNNPACK-managed internal workspace.
-  xnn_allocation_type_workspace,
-  /// Non-static data that is external to the runtime, provided by caller, specified in xnn_setup_runtime.
-  xnn_allocation_type_external,
-  // Persistent data is internal to XNNPACK-managed workspace, but shared by multiple runtime/subgraph.
-  xnn_allocation_type_persistent,
-  /// Data allocated dynamically and managed by XNNPACK, not part of workspace.
-  xnn_allocation_type_dynamic,
-};
-
 /// Abstraction for a collections of elements produced and consumed by nodes.
 struct xnn_value {
   /// Unique ID for the value.
@@ -103,6 +90,8 @@ struct xnn_value {
         size_t num_nonbatch_dims;
         /// Per-batch quantization parameters factor to convert quantized elements to real representation.
         struct xnn_dynamic_quantization_params* dynamic_params;
+        /// Number of (struct xnn_dynamic_quantization_params) * sizeof(struct xnn_dynamic_quantization_params)
+        size_t dynamic_params_size;
       };
     };
   } quantization;
@@ -531,6 +520,18 @@ size_t xnn_shape_multiply_leading_dims(
 size_t xnn_shape_multiply_trailing_dims(
   const struct xnn_shape shape[1],
   size_t start_dim);
+
+// Get the size in bytes to hold dynamic quant params
+size_t xnn_tensor_get_dynamic_quant_param_size(const struct xnn_value* value);
+
+XNN_INLINE static size_t xnn_tensor_get_rounded_dynamic_quant_param_size(const struct xnn_value *value) {
+  assert (value->datatype == xnn_datatype_qdint8);
+
+  // We may read out of bounds for qparams.
+  return xnn_get_rounded_size(value->quantization.dynamic_params_size
+    + XNN_EXTRA_QUANTIZATION_PARAMS * sizeof(struct xnn_dynamic_quantization_params));
+}
+
 
 enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph, uint32_t flags);
 

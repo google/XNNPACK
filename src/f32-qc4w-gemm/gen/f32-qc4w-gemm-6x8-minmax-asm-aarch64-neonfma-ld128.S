@@ -18,7 +18,7 @@
 #     const void* w,            x5
 #     float* c,                 x6
 #     size_t cm_stride,         x7
-#     size_t cn_stride,         [sp] -> (x0)
+#     size_t cn_stride,         [sp, 16] -> (x0)
 #     const xnn_f32_qc4w_minmax_params* params)  [sp + 8] -> (x8)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
@@ -219,7 +219,7 @@ BEGIN_FUNCTION xnn_f32_qc4w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
         # Clamp
         FMAX        v20.4s, v20.4s, v6.4s
         # Load cn_stride
-        LDR         x0, [sp]
+        LDR         x0, [sp, 16]
         FMAX        v21.4s, v21.4s, v6.4s
         FMAX        v22.4s, v22.4s, v6.4s
         FMAX        v23.4s, v23.4s, v6.4s

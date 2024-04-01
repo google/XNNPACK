@@ -137,8 +137,9 @@ static enum xnn_status create_fully_connected_nc(
     k_stride = round_up_po2(k_stride, 2) >> 1;
   }
 
-  const size_t packed_weights_size =
-    n_stride * (bias_element_size + (k_stride << log2_filter_element_size) + extra_weights_bytes);
+  const size_t weights_stride = (k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
+  const size_t packed_weights_size = n_stride * weights_stride;
+  fully_connected_op->weights_stride = weights_stride;
   size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
 
   uint32_t cache_seed = output_channels ^ input_channels ^ nr ^ kr ^ sr ^ extra_weights_bytes ^ operator_type;
@@ -190,7 +191,6 @@ static enum xnn_status create_fully_connected_nc(
 
       void* weights = (void*) ((uintptr_t) weights_ptr +
         gemm_config->nr * ((k_stride << log2_filter_element_size) + bias_element_size));
-      const size_t weights_stride = (k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
       init_kernel_scale_params(
           output_channels, gemm_config->nr, gemm_config->nr,
           gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
@@ -204,7 +204,6 @@ static enum xnn_status create_fully_connected_nc(
       if (kernel_scale_params != NULL) {
         weights = (void*) ((uintptr_t) weights + gemm_config->nr * sizeof(float));
       }
-      const size_t weights_stride = (k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
       init_scale_params(
           output_channels, gemm_config->nr, gemm_config->nr,
           gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
@@ -379,9 +378,10 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qc4w(
     return xnn_status_invalid_parameter;
   }
 
-  if (kernel_zero_point != 8) {
+  if (kernel_zero_point != 8 && kernel_zero_point != 0) {
     xnn_log_error(
-      "failed to create %s operator with %" PRIu8 " kernel zero point: kernel zero point must be equals to 8",
+      "failed to create %s operator with %" PRIu8 " kernel zero point: kernel zero point must be equals to 8 "
+      "(unsigned weights) or 0 (signed weights)",
       xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qd8_f16_qc4w), kernel_zero_point);
     return xnn_status_invalid_parameter;
   }
@@ -470,9 +470,10 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc4w(
     return xnn_status_invalid_parameter;
   }
 
-  if (kernel_zero_point != 8) {
+  if (kernel_zero_point != 8 && kernel_zero_point != 0) {
     xnn_log_error(
-      "failed to create %s operator with %" PRIu8 " kernel zero point: kernel zero point must be equals to 8",
+      "failed to create %s operator with %" PRIu8 " kernel zero point: kernel zero point must be equals to 8 "
+      "(unsigned weights) or 0 (signed weights)",
       xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qd8_f32_qc4w), kernel_zero_point);
     return xnn_status_invalid_parameter;
   }
@@ -1290,7 +1291,6 @@ static enum xnn_status reshape_fully_connected_nc(
   uint32_t log2_filter_element_size,
   bool filter_is_nibble,
   bool dynamic_quantization,
-  uint32_t extra_weights_elements_size,
   uint32_t log2_output_element_size,
   const void* params,
   size_t params_size,
@@ -1343,7 +1343,7 @@ static enum xnn_status reshape_fully_connected_nc(
 
   fully_connected_op->context.gemm = (struct gemm_context) {
     .k_scaled = input_channels << log2_input_element_size,
-    .w_stride = extra_weights_elements_size + (k_stride << log2_filter_element_size),
+    .w_stride = fully_connected_op->weights_stride,
     .a_stride = fully_connected_op->input_pixel_stride << log2_input_element_size,
     .packed_w = packed_weights(fully_connected_op),
     .cm_stride = fully_connected_op->output_pixel_stride << log2_output_element_size,
@@ -1413,7 +1413,6 @@ enum xnn_status xnn_reshape_fully_connected_nc_f16(
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*filter_is_nibble=*/false,
     /*dynamic_quantization=*/false,
-    /*extra_weights_elements_size=*/sizeof(uint16_t),
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
     &fully_connected_op->params.f16_minmax,
     sizeof(fully_connected_op->params.f16_minmax),
@@ -1432,7 +1431,6 @@ enum xnn_status xnn_reshape_fully_connected_nc_f32(
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*filter_is_nibble=*/false,
     /*dynamic_quantization=*/false,
-    /*extra_weights_elements_size=*/sizeof(float),
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &fully_connected_op->params.f32_minmax,
     sizeof(fully_connected_op->params.f32_minmax),
@@ -1452,7 +1450,6 @@ enum xnn_status xnn_reshape_fully_connected_nc_f32_qc4w(
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*filter_is_nibble=*/true,
     /*dynamic_quantization=*/false,
-    /*extra_weights_elements_size=*/sizeof(float) + sizeof(float),  // For bias and scale.
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &fully_connected_op->params.f32_qc4w_minmax,
     sizeof(fully_connected_op->params.f32_qc4w_minmax),
@@ -1471,7 +1468,6 @@ enum xnn_status xnn_reshape_fully_connected_nc_f32_qc8w(
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*filter_is_nibble=*/false,
     /*dynamic_quantization=*/false,
-    /*extra_weights_elements_size=*/sizeof(float) + sizeof(float),
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &fully_connected_op->params.f32_minmax,
     sizeof(fully_connected_op->params.f32_minmax),
@@ -1491,7 +1487,6 @@ enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qc4w(
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*filter_is_nibble=*/true,
     /*dynamic_quantization=*/true,
-    /*extra_weights_elements_size=*/sizeof(int32_t) + 2 * sizeof(float),
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
     &fully_connected_op->params.f32_qc4w_minmax,
     sizeof(fully_connected_op->params.f32_qc4w_minmax),
@@ -1511,7 +1506,6 @@ enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qc4w(
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*filter_is_nibble=*/true,
     /*dynamic_quantization=*/true,
-    /*extra_weights_elements_size=*/sizeof(float) + 2 * sizeof(float),
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &fully_connected_op->params.f32_qc4w_minmax,
     sizeof(fully_connected_op->params.f32_qc4w_minmax),
@@ -1531,7 +1525,6 @@ enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qc8w(
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*filter_is_nibble=*/false,
     /*dynamic_quantization=*/true,
-    /*extra_weights_elements_size=*/sizeof(int32_t) + 2 * sizeof(float),
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
     &fully_connected_op->params.f16_minmax,
     sizeof(fully_connected_op->params.f16_minmax),
@@ -1550,7 +1543,6 @@ enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qc8w(
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*filter_is_nibble=*/false,
     /*dynamic_quantization=*/true,
-    /*extra_weights_elements_size=*/sizeof(int32_t) + 2 * sizeof(float),
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &fully_connected_op->params.f32_minmax,
     sizeof(fully_connected_op->params.f32_minmax),
@@ -1569,7 +1561,6 @@ enum xnn_status xnn_reshape_fully_connected_nc_qs8(
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*filter_is_nibble=*/false,
     /*dynamic_quantization=*/false,
-    /*extra_weights_elements_size=*/sizeof(int32_t) + sizeof(float),  // For bias and scale.
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     &fully_connected_op->params.qs8_qc8w_conv_minmax,
     sizeof(fully_connected_op->params.qs8_qc8w_conv_minmax),
@@ -1588,7 +1579,6 @@ enum xnn_status xnn_reshape_fully_connected_nc_qs8_qc8w(
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*filter_is_nibble=*/false,
     /*dynamic_quantization=*/false,
-    /*extra_weights_elements_size=*/sizeof(int32_t) + sizeof(float),  // For bias and scale.
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     &fully_connected_op->params.qs8_qc8w_conv_minmax,
     sizeof(fully_connected_op->params.qs8_qc8w_conv_minmax),
@@ -1607,7 +1597,6 @@ enum xnn_status xnn_reshape_fully_connected_nc_qu8(
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*filter_is_nibble=*/false,
     /*dynamic_quantization=*/false,
-    /*extra_weights_elements_size=*/sizeof(int32_t),
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     &fully_connected_op->params.qu8_conv_minmax,
     sizeof(fully_connected_op->params.qu8_conv_minmax),

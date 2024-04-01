@@ -6,16 +6,19 @@
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
+#include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/subgraph.h>
 
 #include <algorithm>  // For std::generate.
 #include <array>      // For std::array.
-#include <cstddef>    // For size_t.
-#include <cstdint>    // For uint32_t.
+#include <cmath>
+#include <cstddef>  // For size_t.
+#include <cstdint>  // For uint32_t.
 #include <iterator>
-#include <memory>     // For std::unique_ptr.
-#include <numeric>    // For std::accumulate.
+#include <limits>
+#include <memory>   // For std::unique_ptr.
+#include <numeric>  // For std::accumulate.
 #include <ostream>
 #include <random>  // For std::random_device, std::mt19937, std::uniform_real_distribution.
 #include <string>
@@ -24,14 +27,21 @@
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
-template <class T, class BiasType = T> class BatchMatrixMultiplyTestBase : public ::testing::Test {
-protected:
+template <class InputType, class OutputType>
+class BatchMatrixMultiplyTestBase : public ::testing::Test {
+ protected:
   BatchMatrixMultiplyTestBase()
   {
     random_device = std::make_unique<std::random_device>();
     rng = std::mt19937((*random_device)());
     f32dist = std::uniform_real_distribution<float>(0.1f, 1.0f);
-    auto shape_dist = std::uniform_int_distribution<size_t>(4, XNN_MAX_TENSOR_DIMS);
+    i8dist = std::uniform_int_distribution<int32_t>(
+        std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+    w8dist = std::uniform_int_distribution<int32_t>(
+        -std::numeric_limits<uint8_t>::max(),
+        std::numeric_limits<uint8_t>::max());
+    auto shape_dist =
+        std::uniform_int_distribution<size_t>(4, XNN_MAX_TENSOR_DIMS);
     dim_dist = std::uniform_int_distribution<size_t>(5, 15);
 
     // input1: B x G x M x K
@@ -58,14 +68,13 @@ protected:
     output_dims = input1_dims;
     output_dims[num_input_dims - 2] = m;
     output_dims[num_input_dims - 1] = n;
-    size_t g = input1_dims[num_input_dims - 3];
 
-    batch_size = NumElements(input1_dims) / g / k / m;
-
-    input1 = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + NumElements(input1_dims));
-    input2 = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + NumElements(input2_dims));
-    operator_output = std::vector<T>(NumElements(output_dims));
-    subgraph_output = std::vector<T>(operator_output.size());
+    input1 = std::vector<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) +
+                                    NumElements(input1_dims));
+    input2 = std::vector<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) +
+                                    NumElements(input2_dims));
+    operator_output = std::vector<OutputType>(NumElements(output_dims));
+    subgraph_output = std::vector<OutputType>(operator_output.size());
   }
 
   std::vector<size_t> RandomShape(size_t num_dims)
@@ -83,27 +92,30 @@ protected:
   std::unique_ptr<std::random_device> random_device;
   std::mt19937 rng;
   std::uniform_real_distribution<float> f32dist;
+  std::uniform_int_distribution<int32_t> i8dist;
+  std::uniform_int_distribution<int32_t> w8dist;
   std::uniform_int_distribution<size_t> dim_dist;
 
-  size_t batch_size;
   size_t m;
   size_t k;
   size_t n;
-  size_t output_channels;
 
   std::vector<size_t> input1_dims;
   std::vector<size_t> input2_dims;
   std::vector<size_t> input2_t_dims;  // input2 transposed.
   std::vector<size_t> output_dims;
 
-  std::vector<T> input1;
-  std::vector<T> input2;
-  std::vector<T> operator_output;
-  std::vector<T> subgraph_output;
+  std::vector<InputType> input1;
+  std::vector<InputType> input2;
+  std::vector<OutputType> operator_output;
+  std::vector<OutputType> subgraph_output;
 };
 
-using BatchMatrixMultiplyTestF16 = BatchMatrixMultiplyTestBase<uint16_t>;
-using BatchMatrixMultiplyTestF32 = BatchMatrixMultiplyTestBase<float>;
+using BatchMatrixMultiplyTestF16 =
+    BatchMatrixMultiplyTestBase<uint16_t, uint16_t>;
+using BatchMatrixMultiplyTestF32 = BatchMatrixMultiplyTestBase<float, float>;
+using BatchMatrixMultiplyTestQD8ToF32 =
+    BatchMatrixMultiplyTestBase<int8_t, float>;
 
 TEST_F(BatchMatrixMultiplyTestF16, define)
 {
@@ -504,10 +516,204 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api_transposed)
   }
 }
 
-// Define a subgraph with a single batch matrix multiply node with 2 inputs and 1 output of the specified dimensions.
-// Returns the result of defining the node, a xnn_status.
+TEST_F(BatchMatrixMultiplyTestQD8ToF32, define) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input1_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_dynamically_quantized_tensor_value(
+                subgraph, xnn_datatype_qdint8, input1_dims.size(),
+                /*num_nonbatch_dims=*/2, input1_dims.data(),
+                /*external_id=*/0, /*flags=*/0, &input1_id));
+  ASSERT_NE(input1_id, XNN_INVALID_VALUE_ID);
+
+  uint32_t input2_id = XNN_INVALID_VALUE_ID;
+  std::vector<float> channelwise_scale(
+      NumElements(input2_dims) / input2_dims.back(),
+      1.0f / std::numeric_limits<int8_t>::max());
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_channelwise_quantized_tensor_value(
+                subgraph, xnn_datatype_qcint8, channelwise_scale.data(),
+                input2_dims.size(), /*channel_dim=*/input2_dims.size() - 1,
+                input2_dims.data(), input2.data(), /*external_id=*/1,
+                /*flags=*/0, &input2_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, output_dims.size(),
+                              output_dims.data(), nullptr,
+                              /*external_id=*/3, /*flags=*/0, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id,
+                                             output_id, /*flags=*/0));
+
+  ASSERT_EQ(subgraph->num_nodes, 1);
+  const struct xnn_node* node = &subgraph->nodes[0];
+  ASSERT_EQ(node->type, xnn_node_type_batch_matrix_multiply);
+  ASSERT_EQ(node->compute_type, xnn_compute_type_qd8_to_fp32);
+  ASSERT_EQ(node->num_inputs, 2);
+  ASSERT_EQ(node->inputs[0], input1_id);
+  ASSERT_EQ(node->inputs[1], input2_id);
+  ASSERT_EQ(node->num_outputs, 1);
+  ASSERT_EQ(node->outputs[0], output_id);
+  ASSERT_EQ(node->flags, 0);
+}
+
+TEST_F(BatchMatrixMultiplyTestQD8ToF32, matches_operator_api) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  std::vector<float> channelwise_scale(
+      NumElements(input2_dims) / input2_dims[input2_dims.size() - 2],
+      1.0f / std::numeric_limits<int8_t>::max());
+  std::generate(input2.begin(), input2.end(), [&]() { return i8dist(rng); });
+  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
+  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
+
+  // Create the dynamically quantized input data with the corresponding
+  // `quantization_params`.
+  const size_t input_batch_size = NumElements(input1_dims) / m / k;
+  std::vector<xnn_dynamic_quantization_params> quantization_params(
+      input_batch_size * m + XNN_EXTRA_QUANTIZATION_PARAMS);
+  std::vector<float> input1_f32(NumElements(input1_dims) +
+                                XNN_EXTRA_BYTES / sizeof(float));
+  std::generate(input1_f32.begin(), input1_f32.end(),
+                [&]() { return f32dist(rng); });
+
+  xnn_operator_t convert_op = nullptr;
+  xnn_status status = xnn_create_convert_nc_f32_qd8(
+      /*flags=*/0, &convert_op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(
+      convert_op, xnn_delete_operator);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, convert_op);
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_convert_nc_f32_qd8(convert_op, input_batch_size * m, k,
+                                           k, k, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f32_qd8(
+                                    convert_op, input1_f32.data(),
+                                    input1.data(), quantization_params.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_operator(convert_op, /*threadpool=*/nullptr));
+
+  // Create a BatchMatrixMultiply with the operator API.
+  xnn_operator_t batch_matrix_multiply_op = nullptr;
+  size_t batch_size_b = 1;
+  for (size_t i = 0; i < input2_dims.size() - 2; i++) {
+    batch_size_b *= input2_dims[i];
+  }
+  status = xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
+      batch_size_b, /*k=*/input2_dims[input2_dims.size() - 2],
+      /*n=*/input2_dims[input2_dims.size() - 1], input2.data(),
+      channelwise_scale.data(),
+      /*flags=*/0, &batch_matrix_multiply_op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      batch_matrix_multiply_op, xnn_delete_operator);
+
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, batch_matrix_multiply_op);
+
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
+          batch_matrix_multiply_op, /*num_batch_dims=*/input1_dims.size() - 2,
+          /*batch_dims_a=*/input1_dims.data(),
+          /*batch_dims_b=*/input2_dims.data(), m, k, n,
+          /*threadpool=*/nullptr));
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_batch_matrix_multiply_nc_qd8_f32_qc8w(
+                batch_matrix_multiply_op, input1.data(),
+                quantization_params.data(), operator_output.data()));
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_operator(batch_matrix_multiply_op, /*threadpool=*/nullptr));
+
+  // Create a BatchMatrixMultiply with the subgraph API.
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input1_f32_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, input1_dims.size(),
+                input1_dims.data(), nullptr, /*external_id=*/0,
+                /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input1_f32_id));
+  ASSERT_NE(input1_f32_id, XNN_INVALID_NODE_ID);
+
+  uint32_t input1_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_dynamically_quantized_tensor_value(
+                subgraph, xnn_datatype_qdint8, input1_dims.size(),
+                /*num_nonbatch_dims=*/1, input1_dims.data(),
+                /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &input1_id));
+  ASSERT_NE(input1_id, XNN_INVALID_VALUE_ID);
+
+  uint32_t input2_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_channelwise_quantized_tensor_value(
+                subgraph, xnn_datatype_qcint8, channelwise_scale.data(),
+                input2_dims.size(), /*channel_dim=*/input2_dims.size() - 1,
+                input2_dims.data(), input2.data(), /*external_id=*/1,
+                /*flags=*/0, &input2_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, output_dims.size(),
+                output_dims.data(), nullptr,
+                /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
+
+  // Define the ops.
+  ASSERT_EQ(xnn_status_success, xnn_define_convert(subgraph, input1_f32_id,
+                                                   input1_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id,
+                                             output_id, /*flags=*/0));
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+  std::array<xnn_external_value, 2> external = {
+      xnn_external_value{input1_f32_id, input1_f32.data()},
+      xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  // Check outputs match.
+  for (size_t i = 0; i < operator_output.size(); i++) {
+    ASSERT_EQ(subgraph_output[i], operator_output[i])
+        << " at index " << i << " of " << operator_output.size();
+  }
+}
+
 namespace {
 
+// Define a subgraph with a single batch matrix multiply node with 2 inputs and
+// 1 output of the specified dimensions.
+// Returns the result of defining the node, a xnn_status.
 void DefineBatchMatrixMultiplySubgraphHelper(
     xnn_status* status_out, std::vector<size_t> input1_dims,
     std::vector<size_t> input2_dims, std::vector<size_t> output_dims,
@@ -575,6 +781,7 @@ void DefineAndReshapeBatchMatrixMultiplySubgraph(
     EXPECT_EQ(output_dims_vector[i], expected_output_dims[i]);
   }
 }
+
 }  // namespace
 
 TEST(BatchMatrixMultiplyReshapeTest, reshape_input1) {

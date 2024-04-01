@@ -178,13 +178,9 @@
 # x86 AVX
 - name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_5f5m5l8c4s4r__avx_mul32
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params
-- name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_5f5m5l8c4s4r__xop_mul32
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params
 - name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_5f5m5l8c8s8r__avx2_mul32
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params
 - name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_5f5m5l16c4s4r__avx_mul32
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params
-- name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_5f5m5l16c4s4r__xop_mul32
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params
 - name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_5f5m5l16c8s8r__avx2_mul32
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params
@@ -204,13 +200,9 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params
 - name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_6f6m7l8c4s4r__avx_mul32
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params
-- name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_6f6m7l8c4s4r__xop_mul32
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params
 - name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_6f6m7l8c8s8r__avx2_mul32
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params
 - name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_6f6m7l16c4s4r__avx_mul32
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params
-- name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_6f6m7l16c4s4r__xop_mul32
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params
 - name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_6f6m7l16c8s8r__avx2_mul32
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params
@@ -230,13 +222,9 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params
 - name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_8f8m9l8c4s4r__avx_mul32
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params
-- name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_8f8m9l8c4s4r__xop_mul32
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params
 - name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_8f8m9l8c8s8r__avx2_mul32
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params
 - name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_8f8m9l16c4s4r__avx_mul32
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params
-- name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_8f8m9l16c4s4r__xop_mul32
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params
 - name: xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_8f8m9l16c8s8r__avx2_mul32
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params

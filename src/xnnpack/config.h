@@ -26,7 +26,6 @@ struct xnn_hardware_config {
   bool use_arm_neon_fp16;
   bool use_arm_neon_fma;
   bool use_arm_neon_v8;
-  bool use_arm_neon_udot;  // Allow udot for armv7 to be disabled.
 #endif  // XNN_ARCH_ARM
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   bool use_arm_fp16_arith;
@@ -41,7 +40,6 @@ struct xnn_hardware_config {
   bool use_x86_avx;
   bool use_x86_f16c;
   bool use_x86_fma3;
-  bool use_x86_xop;
   bool use_x86_avx2;
   bool use_x86_avx512f;
   bool use_x86_avx512vbmi;

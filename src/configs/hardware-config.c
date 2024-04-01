@@ -17,11 +17,7 @@
 #else
   #include <pthread.h>
 #endif
-#if XNN_ARCH_ARM && XNN_PLATFORM_ANDROID
-  #include <ctype.h>
-  #include <sys/utsname.h>
-#endif
-#if XNN_ARCH_X86_64 && defined(__linux__)
+#if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)
 #include <sys/syscall.h>
 #include <unistd.h>
 #define XFEATURE_XTILEDATA 18
@@ -48,23 +44,7 @@
 #include <xnnpack/config.h>
 #include <xnnpack/log.h>
 
-#if XNN_ARCH_ARM && XNN_PLATFORM_ANDROID
-static void KernelVersion(int* version) {
-  struct utsname buffer;
-  int i;
-  version[0] = version[1] = 0;
-  if (uname(&buffer) == 0) {
-    char* v = buffer.release;
-    for (i = 0; *v && i < 2; ++v) {
-      if (isdigit(*v)) {
-        version[i++] = (int) strtol(v, &v, 10);
-      }
-    }
-  }
-}
-#endif
-
-#if XNN_ARCH_X86_64 && defined(__linux__)
+#if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)
 ssize_t xnn_syscall(size_t rax, size_t rdi, size_t rsi, size_t rdx) {
   __asm (
     "syscall"
@@ -119,17 +99,6 @@ static void init_hardware_config(void) {
     hardware_config.use_arm_neon_fp16 = cpuinfo_has_arm_neon_fp16();
     hardware_config.use_arm_neon_fma = cpuinfo_has_arm_neon_fma();
     hardware_config.use_arm_neon_v8 = cpuinfo_has_arm_neon_v8();
-    hardware_config.use_arm_neon_udot = hardware_config.use_arm_neon_dot;
-    #if XNN_PLATFORM_ANDROID
-      if (hardware_config.use_arm_neon_dot) {
-        int kernelversion[2];
-        KernelVersion(kernelversion);
-        xnn_log_debug("udot is disabled in linux kernel earlier than 6.7");
-        if (kernelversion[0] < 6 || (kernelversion[0] == 6 && kernelversion[1] < 7)) {
-          hardware_config.use_arm_neon_dot = false;
-        }
-      }
-    #endif
   #endif
 
   #if XNN_ARCH_ARM64
@@ -142,7 +111,6 @@ static void init_hardware_config(void) {
     hardware_config.use_x86_avx = cpuinfo_has_x86_avx();
     hardware_config.use_x86_f16c = cpuinfo_has_x86_f16c();
     hardware_config.use_x86_fma3 = cpuinfo_has_x86_fma3();
-    hardware_config.use_x86_xop = cpuinfo_has_x86_xop();
     hardware_config.use_x86_avx2 = cpuinfo_has_x86_avx2();
     hardware_config.use_x86_avx512f = cpuinfo_has_x86_avx512f();
     hardware_config.use_x86_avx512skx = hardware_config.use_x86_avx512f &&
@@ -154,7 +122,7 @@ static void init_hardware_config(void) {
     // TODO(fbarchard): Use cpuinfo_has_x86_amx_int8 when available.
     // Infer AMX support from Sapphire Rapids having fp16 and amx.
     hardware_config.use_x86_avx512amx = hardware_config.use_x86_avx512vnnigfni && cpuinfo_has_x86_avx512fp16();
-#if XNN_ARCH_X86_64 && defined(__linux__)
+#if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)
     if (hardware_config.use_x86_avx512amx) {
       size_t status = xnn_syscall(SYS_arch_prctl, ARCH_REQ_XCOMP_PERM, XFEATURE_XTILEDATA, 0);
       if (status) {

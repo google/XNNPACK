@@ -65,28 +65,20 @@ static void init_x8_lut_config(void) {
           x8_lut_config.microkernel = xnn_x8_lut_ukernel__wasmpshufb_u32;
           x8_lut_config.tile_size = 32;
         } else {
-          x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_u1;
-          x8_lut_config.tile_size = 1;
+          x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_u4;
+          x8_lut_config.tile_size = 4;
         }
       #else
-        x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_u1;
-        x8_lut_config.tile_size = 1;
+        x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_u4;
+        x8_lut_config.tile_size = 4;
       #endif
     } else {
       x8_lut_config.microkernel = xnn_x8_lut_ukernel__wasmsimd_u32;
       x8_lut_config.tile_size = 32;
     }
-  #elif XNN_ARCH_WASM
-    x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_u1;
-    x8_lut_config.tile_size = 1;
-  #elif XNN_ARCH_RISCV
-    x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_u4;
-    x8_lut_config.tile_size = 4;
-  #elif XNN_ARCH_PPC64
-    x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_u4;
-    x8_lut_config.tile_size = 4;
   #else
-    #error "Unsupported architecture"
+    x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_u4;
+    x8_lut_config.tile_size = 4;
   #endif
 }
 

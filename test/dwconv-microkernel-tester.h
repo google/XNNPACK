@@ -276,6 +276,10 @@ struct DWConvTestParams {
     loop_step_ = LoopParams(from, to, step);
     return *this;
   }
+  DWConvTestParams& loop_zi(size_t from, size_t to, size_t step = 1) {
+    loop_zi_ = LoopParams(from, to, step);
+    return *this;
+  }
 
   std::string test_name;
   DWConvMicrokernelTester tester;
@@ -284,6 +288,7 @@ struct DWConvTestParams {
   LoopParams loop_kernel_size_;
   LoopParams loop_channels_;
   LoopParams loop_step_;
+  LoopParams loop_zi_;
 };
 
 using DWConvTest = testing::TestWithParam<DWConvTestParams>;

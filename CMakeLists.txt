@@ -304,6 +304,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/multiply2.c
   src/subgraph/negate.c
   src/subgraph/prelu.c
+  src/subgraph/reciprocal-square-root.c
   src/subgraph/reshape-helpers.c
   src/subgraph/scaled-dot-product-attention.c
   src/subgraph/sigmoid.c
@@ -325,6 +326,7 @@ SET(SUBGRAPH_SRCS
   src/tensor.c)
 
 SET(LOGGING_SRCS
+  src/enums/allocation-type.c
   src/enums/datatype-strings.c
   src/enums/microkernel-type.c
   src/enums/node-type.c
@@ -402,7 +404,6 @@ SET(PROD_SSSE3_MICROKERNEL_SRCS src/amalgam/gen/ssse3.c)
 SET(PROD_SSE41_MICROKERNEL_SRCS src/amalgam/gen/sse41.c)
 SET(PROD_AVX_MICROKERNEL_SRCS src/amalgam/gen/avx.c)
 SET(PROD_F16C_MICROKERNEL_SRCS src/amalgam/gen/f16c.c)
-SET(PROD_XOP_MICROKERNEL_SRCS src/amalgam/gen/xop.c)
 SET(PROD_FMA3_MICROKERNEL_SRCS src/amalgam/gen/fma3.c)
 SET(PROD_AVX2_MICROKERNEL_SRCS src/amalgam/gen/avx2.c)
 SET(PROD_AVX512F_MICROKERNEL_SRCS src/amalgam/gen/avx512f.c)
@@ -527,7 +528,6 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^x86(_64)?$")
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_SSE41_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_AVX_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_F16C_MICROKERNEL_SRCS})
-  LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_XOP_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_FMA3_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_AVX2_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_AVX512F_MICROKERNEL_SRCS})
@@ -547,7 +547,6 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^x86(_64)?$")
   LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_SSE41_MICROKERNEL_SRCS})
   LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_AVX_MICROKERNEL_SRCS})
   LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_F16C_MICROKERNEL_SRCS})
-  LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_XOP_MICROKERNEL_SRCS})
   LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_FMA3_MICROKERNEL_SRCS})
   LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_AVX2_MICROKERNEL_SRCS})
   LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_AVX512F_MICROKERNEL_SRCS})
@@ -736,8 +735,6 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^x86(_64)?$")
     SET_PROPERTY(SOURCE ${PROD_AVX_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " /arch:AVX ")
     SET_PROPERTY(SOURCE ${ALL_F16C_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " /arch:AVX ")
     SET_PROPERTY(SOURCE ${PROD_F16C_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " /arch:AVX ")
-    SET_PROPERTY(SOURCE ${ALL_XOP_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " /arch:AVX ")
-    SET_PROPERTY(SOURCE ${PROD_XOP_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " /arch:AVX ")
     SET_PROPERTY(SOURCE ${ALL_FMA3_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " /arch:AVX ")
     SET_PROPERTY(SOURCE ${PROD_FMA3_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " /arch:AVX ")
     SET_PROPERTY(SOURCE ${ALL_AVX2_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " /arch:AVX2 ")
@@ -765,8 +762,6 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^x86(_64)?$")
       SET_PROPERTY(SOURCE ${PROD_AVX_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mavx -clang:-mno-avx2 -clang:-mno-fma -clang:-mno-f16c ")
       SET_PROPERTY(SOURCE ${ALL_F16C_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mno-avx2 -clang:-mno-fma ")
       SET_PROPERTY(SOURCE ${PROD_F16C_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mno-avx2 -clang:-mno-fma ")
-      SET_PROPERTY(SOURCE ${ALL_XOP_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mxop -clang:-mno-avx2 ")
-      SET_PROPERTY(SOURCE ${PROD_XOP_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mxop -clang:-mno-avx2 ")
       SET_PROPERTY(SOURCE ${ALL_FMA3_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mno-avx2 ")
       SET_PROPERTY(SOURCE ${PROD_FMA3_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mno-avx2 ")
       SET_PROPERTY(SOURCE ${ALL_AVX2_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx2 ")
@@ -799,8 +794,6 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^x86(_64)?$")
     SET_PROPERTY(SOURCE ${PROD_AVX_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mavx -mno-avx2 -mno-fma -mno-f16c ")
     SET_PROPERTY(SOURCE ${ALL_F16C_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mf16c -mno-avx2 -mno-fma ")
     SET_PROPERTY(SOURCE ${PROD_F16C_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mf16c -mno-avx2 -mno-fma ")
-    SET_PROPERTY(SOURCE ${ALL_XOP_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mxop -mno-avx2 ")
-    SET_PROPERTY(SOURCE ${PROD_XOP_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mxop -mno-avx2 ")
     SET_PROPERTY(SOURCE ${ALL_FMA3_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mf16c -mfma -mno-avx2 ")
     SET_PROPERTY(SOURCE ${PROD_FMA3_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mf16c -mfma -mno-avx2 ")
     SET_PROPERTY(SOURCE ${ALL_AVX2_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mf16c -mfma -mavx2 ")
@@ -1707,6 +1700,16 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(prelu-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME prelu-test COMMAND prelu-test)
 
+    ADD_EXECUTABLE(reciprocal-square-root-test test/reciprocal-square-root.cc)
+    TARGET_INCLUDE_DIRECTORIES(reciprocal-square-root-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(reciprocal-square-root-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME reciprocal-square-root-test COMMAND reciprocal-square-root-test)
+
+    ADD_EXECUTABLE(reshape-helpers-test test/reshape-helpers.cc)
+    TARGET_INCLUDE_DIRECTORIES(reshape-helpers-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(reshape-helpers-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME reshape-helpers-test COMMAND reshape-helpers-test)
+
     ADD_EXECUTABLE(scaled-dot-product-attention-test test/scaled-dot-product-attention.cc)
     SET_TARGET_PROPERTIES(scaled-dot-product-attention-test PROPERTIES CXX_EXTENSIONS YES)
     TARGET_INCLUDE_DIRECTORIES(scaled-dot-product-attention-test PRIVATE src test)
@@ -1740,7 +1743,7 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(square-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME square-test COMMAND square-test)
 
-    ADD_EXECUTABLE(square-root-test test/square.cc)
+    ADD_EXECUTABLE(square-root-test test/square-root.cc)
     TARGET_INCLUDE_DIRECTORIES(square-root-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(square-root-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME square-root-test COMMAND square-root-test)
@@ -3377,6 +3380,29 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(indirection-test PRIVATE include src)
   TARGET_LINK_LIBRARIES(indirection-test PRIVATE GTest::gtest GTest::gtest_main pthreadpool)
   TARGET_LINK_LIBRARIES(indirection-test PRIVATE XNNPACK indirection)
+
+  # ---[ Mark the operator tests as such.
+  MACRO(get_all_targets_recursive targets dir)
+    GET_PROPERTY(subdirectories DIRECTORY ${dir} PROPERTY SUBDIRECTORIES)
+    FOREACH(subdir ${subdirectories})
+      get_all_targets_recursive(${targets} ${subdir})
+    ENDFOREACH()
+
+    GET_PROPERTY(current_targets DIRECTORY ${dir} PROPERTY BUILDSYSTEM_TARGETS)
+    LIST(APPEND ${targets} ${current_targets})
+  ENDMACRO()
+
+  FUNCTION(get_all_targets var)
+    SET(targets)
+    get_all_targets_recursive(targets ${CMAKE_CURRENT_SOURCE_DIR})
+    SET(${var} ${targets} PARENT_SCOPE)
+  ENDFUNCTION()
+
+  get_all_targets(targets)
+  LIST(FILTER targets INCLUDE REGEX "-(nc|nd|nd-eager|ncw|nhwc|nhtc|nchw|nwc)-test$")
+  MESSAGE(STATUS "Inferred operator test targets: ${targets}")
+  SET_TESTS_PROPERTIES(${targets} PROPERTIES LABELS "operator")
+
 ENDIF()
 
 # ---[ XNNPACK microbenchmarks
@@ -3705,6 +3731,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     TARGET_INCLUDE_DIRECTORIES(prelu-bench PRIVATE .)
     TARGET_LINK_LIBRARIES(prelu-bench PRIVATE XNNPACK benchmark::benchmark bench-utils)
 
+    ADD_EXECUTABLE(reciprocal-square-root-bench bench/reciprocal-square-root.cc)
+    TARGET_INCLUDE_DIRECTORIES(reciprocal-square-root-bench PRIVATE .)
+    TARGET_LINK_LIBRARIES(reciprocal-square-root-bench PRIVATE XNNPACK benchmark::benchmark bench-utils)
+
     ADD_EXECUTABLE(sigmoid-bench bench/sigmoid.cc)
     TARGET_INCLUDE_DIRECTORIES(sigmoid-bench PRIVATE .)
     TARGET_LINK_LIBRARIES(sigmoid-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
@@ -3790,6 +3820,21 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f16-f32acc-rsum-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f16-f32acc-rsum-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
   TARGET_LINK_LIBRARIES(f16-f32acc-rsum-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
+  ADD_EXECUTABLE(f16-rmax-bench bench/f16-rmax.cc)
+  TARGET_INCLUDE_DIRECTORIES(f16-rmax-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f16-rmax-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(f16-rmax-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
+  ADD_EXECUTABLE(f16-rminmax-bench bench/f16-rminmax.cc)
+  TARGET_INCLUDE_DIRECTORIES(f16-rminmax-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f16-rminmax-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(f16-rminmax-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
+  ADD_EXECUTABLE(f16-rmin-bench bench/f16-rmin.cc)
+  TARGET_INCLUDE_DIRECTORIES(f16-rmin-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f16-rmin-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(f16-rmin-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
   ADD_EXECUTABLE(f16-spmm-bench bench/f16-spmm.cc)
   TARGET_INCLUDE_DIRECTORIES(f16-spmm-bench PRIVATE . include src)

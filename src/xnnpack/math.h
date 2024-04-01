@@ -326,7 +326,7 @@ XNN_INLINE static uint32_t math_rotl_u32(uint32_t x, int8_t r)
 
 #ifndef __cplusplus
 XNN_INLINE static uint32_t math_cvt_sat_u32_f64(double x) {
-  #if defined(__GNUC__) && defined(__arm__)
+  #if defined(__GNUC__) && defined(__arm__) && (__GNUC__ >= 9)
     uint32_t i;
     __asm__ ("vcvt.u32.f64 %[i], %P[x]"
       : [i] "=t" (i)

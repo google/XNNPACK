@@ -35,8 +35,10 @@ struct BatchMatMulTesterParams {
 template <typename T>
 std::ostream& PrintVector(std::ostream& os, const std::vector<T>& v,
                           const char* separator = ", ") {
-  std::copy(v.begin(), v.end() - 1, std::ostream_iterator<T>(os, separator));
-  os << v.back();
+  if (!v.empty()) {
+    std::copy(v.begin(), v.end() - 1, std::ostream_iterator<T>(os, separator));
+    os << v.back();
+  }
   return os;
 }
 
@@ -58,7 +60,7 @@ std::vector<BatchMatMulTesterParams> CreateBatchTestParams() {
   std::vector<BatchMatMulTesterParams> params;
 
   // Iterate over all combinations of batch dimensions.
-  for (int num_batch_dims = 1; num_batch_dims < XNN_MAX_TENSOR_DIMS - 1;
+  for (int num_batch_dims = 0; num_batch_dims < XNN_MAX_TENSOR_DIMS - 1;
        ++num_batch_dims) {
     // Loop over the bitwise masks for the dimensions of the input `A`.
     for (uint32_t mask_dims_a = 0; mask_dims_a < (1U << num_batch_dims);
@@ -183,6 +185,20 @@ TEST_P(BatchMatMulTest, TestF16) {
       .iterations(params.iterations)
       .expected_status_reshape(params.expected_status_reshape)
       .TestF16();
+}
+
+TEST_P(BatchMatMulTest, TestQD8F32QC8W) {
+  const BatchMatMulTesterParams& params = GetParam();
+  BatchMatMulOperatorTester()
+      .batch_dims_a(params.batch_dims_a)
+      .batch_dims_b(params.batch_dims_b)
+      .m(params.m)
+      .k(params.k)
+      .n(params.n)
+      .transpose_b(params.transpose_b)
+      .iterations(params.iterations)
+      .expected_status_reshape(params.expected_status_reshape)
+      .TestQD8F32QC8W();
 }
 
 // Create tests for different batch sizes with different amounts of

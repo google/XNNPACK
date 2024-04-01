@@ -40,6 +40,32 @@ static enum xnn_status create_batch_matrix_multiply_operator(
     case xnn_compute_type_fp32:
       status = xnn_create_batch_matrix_multiply_nc_f32(node->flags, &opdata->operator_objects[0]);
       break;
+    case xnn_compute_type_qd8_to_fp32: {
+      // Get the shape and size of the second input.
+      const uint32_t input_b_id = opdata->inputs[1];
+      assert(input_b_id != XNN_INVALID_VALUE_ID);
+      assert(input_b_id < num_values);
+      const struct xnn_value* input_b = values + input_b_id;
+      if (input_b->shape.num_dims < 2) {
+        xnn_log_error(
+            "failed to create %s operator with input_b ID #%" PRIu32
+            ": unsupported number of dimension %zu, must be at least 2",
+            xnn_node_type_to_string(xnn_node_type_batch_matrix_multiply),
+            input_b_id, input_b->shape.num_dims);
+        return xnn_status_invalid_parameter;
+      }
+      size_t batch_size_b = 1;
+      for (size_t i = 0; i < input_b->shape.num_dims - 2; i++) {
+        batch_size_b *= input_b->shape.dim[i];
+      }
+
+      status = xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
+          batch_size_b, /*k=*/input_b->shape.dim[input_b->shape.num_dims - 2],
+          /*n=*/input_b->shape.dim[input_b->shape.num_dims - 1], input_b->data,
+          input_b->quantization.channelwise_scale, node->flags,
+          &opdata->operator_objects[0]);
+      break;
+    }
     default:
       XNN_UNREACHABLE;
   }
@@ -157,6 +183,11 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
           padded_dims_b, m, k, n, &opdata->workspace_size,
           &opdata->workspace_alignment, threadpool);
       break;
+    case xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w:
+      status = xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
+          opdata->operator_objects[0], num_batch_dims, padded_dims_a,
+          padded_dims_b, m, k, n, threadpool);
+      break;
     default:
       XNN_UNREACHABLE;
   }
@@ -185,25 +216,25 @@ static enum xnn_status setup_batch_matrix_multiply_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
-  const uint32_t input1_id = opdata->inputs[0];
-  assert(input1_id != XNN_INVALID_VALUE_ID);
-  assert(input1_id < num_values);
+  const uint32_t input_a_id = opdata->inputs[0];
+  assert(input_a_id != XNN_INVALID_VALUE_ID);
+  assert(input_a_id < num_values);
 
-  const uint32_t input2_id = opdata->inputs[1];
-  assert(input2_id != XNN_INVALID_VALUE_ID);
-  assert(input2_id < num_values);
+  const uint32_t input_b_id = opdata->inputs[1];
+  assert(input_b_id != XNN_INVALID_VALUE_ID);
+  assert(input_b_id < num_values);
 
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input1_value = values + input1_id;
-  const void* input1_data = input1_value->data;
-  assert(input1_data != NULL);
+  const struct xnn_value* input_a = values + input_a_id;
+  const void* input_a_data = input_a->data;
+  assert(input_a_data != NULL);
 
-  const struct xnn_value* input2_value = values + input2_id;
-  const void* input2_data = input2_value->data;
-  assert(input2_data != NULL);
+  const struct xnn_value* input_b = values + input_b_id;
+  const void* input_b_data = input_b->data;
+  assert(input_b_data != NULL);
 
   const struct xnn_value* output_value = values + output_id;
   void* output_data = output_value->data;
@@ -212,12 +243,16 @@ static enum xnn_status setup_batch_matrix_multiply_operator(
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_batch_matrix_multiply_nc_f16:
       return xnn_setup_batch_matrix_multiply_nc_f16(
-        opdata->operator_objects[0],
-        opdata->workspace, input1_data, input2_data, output_data);
+          opdata->operator_objects[0], opdata->workspace, input_a_data,
+          input_b_data, output_data);
     case xnn_operator_type_batch_matrix_multiply_nc_f32:
       return xnn_setup_batch_matrix_multiply_nc_f32(
-        opdata->operator_objects[0],
-        opdata->workspace, input1_data, input2_data, output_data);
+          opdata->operator_objects[0], opdata->workspace, input_a_data,
+          input_b_data, output_data);
+    case xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w:
+      return xnn_setup_batch_matrix_multiply_nc_qd8_f32_qc8w(
+          opdata->operator_objects[0], input_a_data,
+          input_a->quantization.dynamic_params, output_data);
     default:
       XNN_UNREACHABLE;
   }
@@ -237,6 +272,12 @@ static inline enum xnn_compute_type validate_datatypes(
     case xnn_datatype_fp32:
       if (input1_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp32) {
         return xnn_compute_type_fp32;
+      }
+      break;
+    case xnn_datatype_qcint8:
+      if (input1_datatype == xnn_datatype_qdint8 &&
+          output_datatype == xnn_datatype_fp32) {
+        return xnn_compute_type_qd8_to_fp32;
       }
       break;
     default:
@@ -272,6 +313,18 @@ enum xnn_status xnn_define_batch_matrix_multiply(
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;
+    case xnn_datatype_qdint8:
+      if (input1_value->quantization.num_nonbatch_dims >
+          input1_value->shape.num_dims) {
+        xnn_log_error(
+            "failed to define %s operator with input ID #%" PRIu32
+            ": num_nonbatch_dims (%zu) must be <= num_dims (%zu)",
+            xnn_node_type_to_string(xnn_node_type_batch_matrix_multiply),
+            input1_id, input1_value->quantization.num_nonbatch_dims,
+            input1_value->shape.num_dims);
+        return xnn_status_invalid_parameter;
+      }
+      break;
     default:
       xnn_log_error(
         "failed to define %s operator with input1 ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
@@ -296,11 +349,25 @@ enum xnn_status xnn_define_batch_matrix_multiply(
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;
+    case xnn_datatype_qcint8:
+      // Check that `input2` is static, which is required for this variant.
+      if (!xnn_value_is_static(input2_value)) {
+        xnn_log_error(
+            "failed to define %s operator with input ID #%" PRIu32
+            ": %s input must be static (got %s)",
+            xnn_node_type_to_string(xnn_node_type_batch_matrix_multiply),
+            input2_id, xnn_datatype_to_string(input2_value->datatype),
+            xnn_allocation_type_to_string(input2_value->allocation_type));
+        return xnn_status_invalid_parameter;
+      }
+      break;
     default:
       xnn_log_error(
-        "failed to define %s operator with input2 ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_batch_matrix_multiply), input2_id,
-        xnn_datatype_to_string(input2_value->datatype), input2_value->datatype);
+          "failed to define %s operator with input2 ID #%" PRIu32
+          ": unsupported Value datatype %s (%d)",
+          xnn_node_type_to_string(xnn_node_type_batch_matrix_multiply),
+          input2_id, xnn_datatype_to_string(input2_value->datatype),
+          input2_value->datatype);
       return xnn_status_invalid_parameter;
   }
 
