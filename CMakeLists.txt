@@ -1844,6 +1844,12 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_TEST(NAME transpose-normalization-test COMMAND transpose-normalization-test)
 
   # ---[ Build microkernel-level unit tests
+  ADD_EXECUTABLE(bf16-vabs-test test/bf16-vabs.cc)
+  TARGET_INCLUDE_DIRECTORIES(bf16-vabs-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(bf16-vabs-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(bf16-vabs-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME bf16-vabs-test COMMAND bf16-gemm-minmax-test)
+
   ADD_EXECUTABLE(bf16-gemm-minmax-test test/bf16-gemm-minmax.cc)
   TARGET_INCLUDE_DIRECTORIES(bf16-gemm-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(bf16-gemm-minmax-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)

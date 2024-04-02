@@ -1,0 +1,12 @@
+# Copyright 2024 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# ARM NEON+FP16ARITH
+- name: xnn_bf16_vabs_ukernel__neonbf16_u8
+  init: xnn_init_bf16_abs_neon_params
+- name: xnn_bf16_vabs_ukernel__neonbf16_u16
+  init: xnn_init_bf16_abs_neon_params
+- name: xnn_bf16_vabs_ukernel__neonbf16_u24
+  init: xnn_init_bf16_abs_neon_params

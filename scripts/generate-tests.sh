@@ -188,6 +188,8 @@ tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qu
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qu8-vmulc-minmax-rndnu.yaml --output test/qu8-vmulc-minmax-rndnu.cc &
 
 ### Tests for VUnary micro-kernels
+tools/generate-vunary-test.py --spec test/bf16-vabs.yaml --output test/bf16-vabs.cc &
+
 tools/generate-vunary-test.py --spec test/f16-vclamp.yaml --output test/f16-vclamp.cc &
 tools/generate-vunary-test.py --spec test/f16-velu.yaml --output test/f16-velu.cc &
 tools/generate-vunary-test.py --spec test/f16-vabs.yaml --output test/f16-vabs.cc &

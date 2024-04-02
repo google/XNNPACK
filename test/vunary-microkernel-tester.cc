@@ -36,6 +36,14 @@ void VUnaryMicrokernelTester::Test(xnn_f32_vrelu_ukernel_fn vrelu) const {
 }
 
 void VUnaryMicrokernelTester::Test(
+    xnn_bf16_vabs_ukernel_fn vabs,
+    xnn_init_bf16_abs_params_fn init_params) const {
+  TestBF16(
+      vabs, InitParamsWrapper(init_params), [](float x) { return std::abs(x); },
+      TolExact16, -1.0f, 1.0f);
+}
+
+void VUnaryMicrokernelTester::Test(
     xnn_f16_vabs_ukernel_fn vabs,
     xnn_init_f16_abs_params_fn init_params) const {
   TestFP16(

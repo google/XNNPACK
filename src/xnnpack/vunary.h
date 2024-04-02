@@ -16,6 +16,13 @@ extern "C" {
 #endif
 
 
+#define DECLARE_BF16_UKERNEL_FUNCTION(fn_name, params_union) \
+  XNN_INTERNAL void fn_name(                                 \
+      size_t n,                                              \
+      const void* x,                                         \
+      void* y,                                               \
+      const union params_union params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 #define DECLARE_F16_UKERNEL_FUNCTION(fn_name, params_union) \
   XNN_INTERNAL void fn_name(                                \
       size_t n,                                             \
@@ -30,6 +37,13 @@ extern "C" {
       float* y,                                             \
       const union params_union params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+
+#define DECLARE_BF16_VABS_UKERNEL_FUNCTION(fn_name) \
+  DECLARE_BF16_UKERNEL_FUNCTION(fn_name, xnn_bf16_abs_params);
+
+DECLARE_BF16_VABS_UKERNEL_FUNCTION(xnn_bf16_vabs_ukernel__neonbf16_u8)
+DECLARE_BF16_VABS_UKERNEL_FUNCTION(xnn_bf16_vabs_ukernel__neonbf16_u16)
+DECLARE_BF16_VABS_UKERNEL_FUNCTION(xnn_bf16_vabs_ukernel__neonbf16_u24)
 
 #define DECLARE_F16_VABS_UKERNEL_FUNCTION(fn_name) \
   DECLARE_F16_UKERNEL_FUNCTION(fn_name, xnn_f16_abs_params);

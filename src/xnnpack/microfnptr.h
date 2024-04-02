@@ -1630,6 +1630,12 @@ typedef void (*xnn_vunary_ukernel_fn)(
 
 // VABS: Vector ABSolute value elementwise
 
+typedef void (*xnn_bf16_vabs_ukernel_fn)(
+    size_t batch,
+    const void* input,
+    void* output,
+    const union xnn_bf16_abs_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 typedef void (*xnn_f16_vabs_ukernel_fn)(
     size_t batch,
     const void* input,
@@ -2475,6 +2481,9 @@ typedef size_t (*xnn_init_qu8_mul_minmax_params_fn)(
   float product_output_scale,
   uint8_t output_min,
   uint8_t output_max);
+
+typedef size_t (*xnn_init_bf16_abs_params_fn)(
+  union xnn_bf16_abs_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f16_abs_params_fn)(
   union xnn_f16_abs_params params[XNN_MIN_ELEMENTS(1)]);
