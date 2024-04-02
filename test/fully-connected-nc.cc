@@ -1240,6 +1240,19 @@ TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, unit_batch_bl_lt_ic) {
   }
 }
 
+TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, unit_batch_bl_eq_256) {
+  for (size_t ic=256; ic<=4096; ic*=2){
+    FullyConnectedOperatorTester()
+      .batch_size(1)
+      .output_channels(1)
+      .input_channels(ic)
+      .block_size(256)
+      .kernel_zero_point(8)
+      .iterations(3)
+      .TestQD8F32QB4W();
+  }
+}
+
 TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, unit_batch_bl_eq_kr) {
   for (size_t ic=16; ic<=32; ic+=8){
     FullyConnectedOperatorTester()
@@ -1247,6 +1260,19 @@ TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, unit_batch_bl_eq_kr) {
       .output_channels(21)
       .input_channels(ic)
       .block_size(8)
+      .kernel_zero_point(8)
+      .iterations(3)
+      .TestQD8F32QB4W();
+  }
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, unit_batch_bl_eq_kc) {
+  for (size_t ic=16; ic<=1024; ic*=2){
+    FullyConnectedOperatorTester()
+      .batch_size(1)
+      .output_channels(31)
+      .input_channels(ic)
+      .block_size(ic)
       .kernel_zero_point(8)
       .iterations(3)
       .TestQD8F32QB4W();
@@ -1279,11 +1305,9 @@ TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, small_batch_bl_lt_ic) {
         .input_channels(ic)
         .block_size(bs)
         .kernel_zero_point(8)
-        .iterations(1)
+        .iterations(3)
         .TestQD8F32QB4W();
-      break;
     }
-    break;
   }
 }
 
