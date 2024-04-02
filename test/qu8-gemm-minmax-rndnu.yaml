@@ -38,14 +38,6 @@
   k-block: 8
 
 # AArch64 assembly
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__asm_aarch64_neondot_cortex_a55
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__asm_aarch64_neondot_ld128
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 16
 - name: xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
   pack: xnn_pack_qu8_gemm_goi_w
@@ -70,75 +62,9 @@
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
   pack: xnn_pack_qu8_gemm_goi_w
   k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 16
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_ld128
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 16
-
-# ARM NEONI8MM
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_1x8c8__neoni8mm
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 16
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_1x16c8__neoni8mm
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 16
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_2x8c8__neoni8mm
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 16
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_2x16c8__neoni8mm
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 16
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_3x8c8__neoni8mm
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 16
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_3x16c8__neoni8mm
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 16
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__neondot
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 16
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c8__neoni8mm
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 16
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c8__neoni8mm
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 16
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_6x8c8__neoni8mm
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 16
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_6x16c8__neoni8mm
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 16
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_8x8c8__neoni8mm
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 16
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_8x16c8__neoni8mm
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 16
 
 # ARM NEON
 - name: xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_1x8c4__neondot
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
   pack: xnn_pack_qu8_gemm_goi_w
   k-block: 8
@@ -146,19 +72,7 @@
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
   pack: xnn_pack_qu8_gemm_goi_w
   k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_1x16c4__neondot
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_1x32c4__neondot
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 8
 - name: xnn_qu8_gemm_minmax_rndnu_ukernel_2x8__neon_mlal_lane
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_2x8c4__neondot
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
   pack: xnn_pack_qu8_gemm_goi_w
   k-block: 8
@@ -166,31 +80,11 @@
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
   pack: xnn_pack_qu8_gemm_goi_w
   k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_2x16c4__neondot
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_2x32c4__neondot
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 8
 - name: xnn_qu8_gemm_minmax_rndnu_ukernel_3x8__neon_mlal_lane
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
   pack: xnn_pack_qu8_gemm_goi_w
   k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_3x8c4__neondot
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 8
 - name: xnn_qu8_gemm_minmax_rndnu_ukernel_3x16__neon_mlal_lane
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_3x16c4__neondot
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_3x32c4__neondot
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
   pack: xnn_pack_qu8_gemm_goi_w
   k-block: 8
@@ -202,39 +96,11 @@
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
   pack: xnn_pack_qu8_gemm_goi_w
   k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__neondot
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_5x8c4__neondot
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_5x16c4__neondot
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 8
 - name: xnn_qu8_gemm_minmax_rndnu_ukernel_6x8__neon_mlal_lane
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
   pack: xnn_pack_qu8_gemm_goi_w
   k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_6x8c4__neondot
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 8
 - name: xnn_qu8_gemm_minmax_rndnu_ukernel_6x16__neon_mlal_lane
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_6x16c4__neondot
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_8x8c4__neondot
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-  pack: xnn_pack_qu8_gemm_goi_w
-  k-block: 8
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_8x16c4__neondot
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
   pack: xnn_pack_qu8_gemm_goi_w
   k-block: 8

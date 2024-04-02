@@ -2457,7 +2457,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "batch_matrix_multiply_nc_test",
-    timeout = "moderate",
+    timeout = "long",
     srcs = [
         "batch-matrix-multiply-nc.cc",
         "batch-matrix-multiply-operator-tester.h",
@@ -3235,6 +3235,7 @@ xnnpack_unit_test(
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
         "//:common",
+        "//:node_type",
         "//:operators_test_mode",
         "//:subgraph_test_mode",
     ],
@@ -3700,6 +3701,21 @@ xnnpack_unit_test(
         "prelu.cc",
     ],
     deps = [
+        "@FP16",
+        "//:XNNPACK_test_mode",
+        "//:node_type",
+        "//:operators_test_mode",
+        "//:subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "reciprocal_square_root_test",
+    srcs = [
+        "reciprocal-square-root.cc",
+    ],
+    deps = [
+        ":subgraph_unary_tester",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",

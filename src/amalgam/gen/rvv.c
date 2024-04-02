@@ -201,6 +201,487 @@ void xnn_f32_rminmax_ukernel__rvv_u8v(
   output[1] = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredmax_vs_f32m8_f32m1(t1, fmax, N));
 }
 
+void xnn_f32_vadd_minmax_ukernel__rvv_u8v(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const float output_min = params->scalar.min;
+  const float output_max = params->scalar.max;
+  size_t n = batch >> 2;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m8(n);
+    n -= vl;
+    vfloat32m8_t va = __riscv_vle32_v_f32m8(input_a, vl);
+    input_a += vl;
+    vfloat32m8_t vb = __riscv_vle32_v_f32m8(input_b, vl);
+    input_b += vl;
+    vfloat32m8_t vacc = __riscv_vfadd_vv_f32m8(va, vb, vl);
+    vacc = __riscv_vfmax_vf_f32m8(vacc, output_min, vl);
+    vacc = __riscv_vfmin_vf_f32m8(vacc, output_max, vl);
+    __riscv_vse32_v_f32m8(output, vacc, vl);
+    output += vl;
+  } while (n > 0);
+}
+
+void xnn_f32_vaddc_minmax_ukernel__rvv_u8v(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const float output_min = params->scalar.min;
+  const float output_max = params->scalar.max;
+  const float b = *input_b;
+  size_t n = batch >> 2;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m8(n);
+    n -= vl;
+    vfloat32m8_t va = __riscv_vle32_v_f32m8(input_a, vl);
+    input_a += vl;
+    vfloat32m8_t vacc = __riscv_vfadd_vf_f32m8(va, b, vl);
+    vacc = __riscv_vfmax_vf_f32m8(vacc, output_min, vl);
+    vacc = __riscv_vfmin_vf_f32m8(vacc, output_max, vl);
+    __riscv_vse32_v_f32m8(output, vacc, vl);
+    output += vl;
+  } while (n > 0);
+}
+
+void xnn_f32_vdiv_minmax_ukernel__rvv_u8v(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const float output_min = params->scalar.min;
+  const float output_max = params->scalar.max;
+  size_t n = batch >> 2;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m8(n);
+    n -= vl;
+    vfloat32m8_t va = __riscv_vle32_v_f32m8(input_a, vl);
+    input_a += vl;
+    vfloat32m8_t vb = __riscv_vle32_v_f32m8(input_b, vl);
+    input_b += vl;
+    vfloat32m8_t vacc = __riscv_vfdiv_vv_f32m8(va, vb, vl);
+    vacc = __riscv_vfmax_vf_f32m8(vacc, output_min, vl);
+    vacc = __riscv_vfmin_vf_f32m8(vacc, output_max, vl);
+    __riscv_vse32_v_f32m8(output, vacc, vl);
+    output += vl;
+  } while (n > 0);
+}
+
+void xnn_f32_vdivc_minmax_ukernel__rvv_u8v(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const float output_min = params->scalar.min;
+  const float output_max = params->scalar.max;
+  const float b = *input_b;
+  size_t n = batch >> 2;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m8(n);
+    n -= vl;
+    vfloat32m8_t va = __riscv_vle32_v_f32m8(input_a, vl);
+    input_a += vl;
+    vfloat32m8_t vacc = __riscv_vfdiv_vf_f32m8(va, b, vl);
+    vacc = __riscv_vfmax_vf_f32m8(vacc, output_min, vl);
+    vacc = __riscv_vfmin_vf_f32m8(vacc, output_max, vl);
+    __riscv_vse32_v_f32m8(output, vacc, vl);
+    output += vl;
+  } while (n > 0);
+}
+
+void xnn_f32_vmax_ukernel__rvv_u8v(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  size_t n = batch >> 2;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m8(n);
+    n -= vl;
+    vfloat32m8_t va = __riscv_vle32_v_f32m8(input_a, vl);
+    input_a += vl;
+    vfloat32m8_t vb = __riscv_vle32_v_f32m8(input_b, vl);
+    input_b += vl;
+    vfloat32m8_t vacc = __riscv_vfmax_vv_f32m8(va, vb, vl);
+    __riscv_vse32_v_f32m8(output, vacc, vl);
+    output += vl;
+  } while (n > 0);
+}
+
+void xnn_f32_vmaxc_ukernel__rvv_u8v(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const float b = *input_b;
+  size_t n = batch >> 2;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m8(n);
+    n -= vl;
+    vfloat32m8_t va = __riscv_vle32_v_f32m8(input_a, vl);
+    input_a += vl;
+    vfloat32m8_t vacc = __riscv_vfmax_vf_f32m8(va, b, vl);
+    __riscv_vse32_v_f32m8(output, vacc, vl);
+    output += vl;
+  } while (n > 0);
+}
+
+void xnn_f32_vmin_ukernel__rvv_u8v(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  size_t n = batch >> 2;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m8(n);
+    n -= vl;
+    vfloat32m8_t va = __riscv_vle32_v_f32m8(input_a, vl);
+    input_a += vl;
+    vfloat32m8_t vb = __riscv_vle32_v_f32m8(input_b, vl);
+    input_b += vl;
+    vfloat32m8_t vacc = __riscv_vfmin_vv_f32m8(va, vb, vl);
+    __riscv_vse32_v_f32m8(output, vacc, vl);
+    output += vl;
+  } while (n > 0);
+}
+
+void xnn_f32_vminc_ukernel__rvv_u8v(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const float b = *input_b;
+  size_t n = batch >> 2;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m8(n);
+    n -= vl;
+    vfloat32m8_t va = __riscv_vle32_v_f32m8(input_a, vl);
+    input_a += vl;
+    vfloat32m8_t vacc = __riscv_vfmin_vf_f32m8(va, b, vl);
+    __riscv_vse32_v_f32m8(output, vacc, vl);
+    output += vl;
+  } while (n > 0);
+}
+
+void xnn_f32_vmul_minmax_ukernel__rvv_u8v(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const float output_min = params->scalar.min;
+  const float output_max = params->scalar.max;
+  size_t n = batch >> 2;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m8(n);
+    n -= vl;
+    vfloat32m8_t va = __riscv_vle32_v_f32m8(input_a, vl);
+    input_a += vl;
+    vfloat32m8_t vb = __riscv_vle32_v_f32m8(input_b, vl);
+    input_b += vl;
+    vfloat32m8_t vacc = __riscv_vfmul_vv_f32m8(va, vb, vl);
+    vacc = __riscv_vfmax_vf_f32m8(vacc, output_min, vl);
+    vacc = __riscv_vfmin_vf_f32m8(vacc, output_max, vl);
+    __riscv_vse32_v_f32m8(output, vacc, vl);
+    output += vl;
+  } while (n > 0);
+}
+
+void xnn_f32_vmulc_minmax_ukernel__rvv_u8v(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const float output_min = params->scalar.min;
+  const float output_max = params->scalar.max;
+  const float b = *input_b;
+  size_t n = batch >> 2;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m8(n);
+    n -= vl;
+    vfloat32m8_t va = __riscv_vle32_v_f32m8(input_a, vl);
+    input_a += vl;
+    vfloat32m8_t vacc = __riscv_vfmul_vf_f32m8(va, b, vl);
+    vacc = __riscv_vfmax_vf_f32m8(vacc, output_min, vl);
+    vacc = __riscv_vfmin_vf_f32m8(vacc, output_max, vl);
+    __riscv_vse32_v_f32m8(output, vacc, vl);
+    output += vl;
+  } while (n > 0);
+}
+
+void xnn_f32_vrdivc_minmax_ukernel__rvv_u8v(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const float output_min = params->scalar.min;
+  const float output_max = params->scalar.max;
+  const float b = *input_b;
+  size_t n = batch >> 2;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m8(n);
+    n -= vl;
+    vfloat32m8_t va = __riscv_vle32_v_f32m8(input_a, vl);
+    input_a += vl;
+    vfloat32m8_t vacc = __riscv_vfrdiv_vf_f32m8(va, b, vl);
+    vacc = __riscv_vfmax_vf_f32m8(vacc, output_min, vl);
+    vacc = __riscv_vfmin_vf_f32m8(vacc, output_max, vl);
+    __riscv_vse32_v_f32m8(output, vacc, vl);
+    output += vl;
+  } while (n > 0);
+}
+
+void xnn_f32_vrsubc_minmax_ukernel__rvv_u8v(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const float output_min = params->scalar.min;
+  const float output_max = params->scalar.max;
+  const float b = *input_b;
+  size_t n = batch >> 2;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m8(n);
+    n -= vl;
+    vfloat32m8_t va = __riscv_vle32_v_f32m8(input_a, vl);
+    input_a += vl;
+    vfloat32m8_t vacc = __riscv_vfrsub_vf_f32m8(va, b, vl);
+    vacc = __riscv_vfmax_vf_f32m8(vacc, output_min, vl);
+    vacc = __riscv_vfmin_vf_f32m8(vacc, output_max, vl);
+    __riscv_vse32_v_f32m8(output, vacc, vl);
+    output += vl;
+  } while (n > 0);
+}
+
+void xnn_f32_vsqrdiff_ukernel__rvv_u8v(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  size_t n = batch >> 2;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m8(n);
+    n -= vl;
+    vfloat32m8_t va = __riscv_vle32_v_f32m8(input_a, vl);
+    input_a += vl;
+    vfloat32m8_t vb = __riscv_vle32_v_f32m8(input_b, vl);
+    input_b += vl;
+    vfloat32m8_t vacc = __riscv_vfsub_vv_f32m8(va, vb, vl);
+    vacc = __riscv_vfmul_vv_f32m8(vacc, vacc, vl);
+    __riscv_vse32_v_f32m8(output, vacc, vl);
+    output += vl;
+  } while (n > 0);
+}
+
+void xnn_f32_vsqrdiffc_ukernel__rvv_u8v(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const float b = *input_b;
+  size_t n = batch >> 2;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m8(n);
+    n -= vl;
+    vfloat32m8_t va = __riscv_vle32_v_f32m8(input_a, vl);
+    input_a += vl;
+    vfloat32m8_t vacc = __riscv_vfsub_vf_f32m8(va, b, vl);
+    vacc = __riscv_vfmul_vv_f32m8(vacc, vacc, vl);
+    __riscv_vse32_v_f32m8(output, vacc, vl);
+    output += vl;
+  } while (n > 0);
+}
+
+void xnn_f32_vsub_minmax_ukernel__rvv_u8v(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const float output_min = params->scalar.min;
+  const float output_max = params->scalar.max;
+  size_t n = batch >> 2;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m8(n);
+    n -= vl;
+    vfloat32m8_t va = __riscv_vle32_v_f32m8(input_a, vl);
+    input_a += vl;
+    vfloat32m8_t vb = __riscv_vle32_v_f32m8(input_b, vl);
+    input_b += vl;
+    vfloat32m8_t vacc = __riscv_vfsub_vv_f32m8(va, vb, vl);
+    vacc = __riscv_vfmax_vf_f32m8(vacc, output_min, vl);
+    vacc = __riscv_vfmin_vf_f32m8(vacc, output_max, vl);
+    __riscv_vse32_v_f32m8(output, vacc, vl);
+    output += vl;
+  } while (n > 0);
+}
+
+void xnn_f32_vsubc_minmax_ukernel__rvv_u8v(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const float output_min = params->scalar.min;
+  const float output_max = params->scalar.max;
+  const float b = *input_b;
+  size_t n = batch >> 2;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m8(n);
+    n -= vl;
+    vfloat32m8_t va = __riscv_vle32_v_f32m8(input_a, vl);
+    input_a += vl;
+    vfloat32m8_t vacc = __riscv_vfsub_vf_f32m8(va, b, vl);
+    vacc = __riscv_vfmax_vf_f32m8(vacc, output_min, vl);
+    vacc = __riscv_vfmin_vf_f32m8(vacc, output_max, vl);
+    __riscv_vse32_v_f32m8(output, vacc, vl);
+    output += vl;
+  } while (n > 0);
+}
+
 void xnn_qs8_vmul_minmax_fp32_ukernel__rvv_u2v(
     size_t batch,
     const int8_t* input_a,

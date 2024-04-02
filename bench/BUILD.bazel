@@ -438,6 +438,30 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f16_rmax_bench",
+    srcs = [
+        "f16-rmax.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f16_rminmax_bench",
+    srcs = [
+        "f16-rminmax.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f16_rmin_bench",
+    srcs = [
+        "f16-rmin.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f16_spmm_bench",
     srcs = [
         "f16-spmm.cc",
@@ -1387,6 +1411,14 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "prelu_bench",
     srcs = ["prelu.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "reciprocal_square_root_bench",
+    srcs = ["reciprocal-square-root.cc"],
     copts = xnnpack_optional_tflite_copts(),
     tags = ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),

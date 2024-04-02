@@ -129,7 +129,7 @@ jobs:
           CFLAGS: "/UNDEBUG"
           CXXFLAGS: "/UNDEBUG"
       - name: Run tests
-        run: ctest -C Release --output-on-failure --parallel %NUMBER_OF_PROCESSORS%
+        run: ctest -C Release --output-on-failure --parallel $NUMBER_OF_PROCESSORS
         working-directory: ${{ github.workspace }}/build/windows/x64
   cmake-windows-x86:
     runs-on: windows-latest
@@ -144,7 +144,7 @@ jobs:
           CFLAGS: "/UNDEBUG"
           CXXFLAGS: "/UNDEBUG"
       - name: Run tests
-        run: ctest -C Release --output-on-failure --parallel %NUMBER_OF_PROCESSORS%
+        run: ctest -C Release --output-on-failure --parallel $NUMBER_OF_PROCESSORS
         working-directory: ${{ github.workspace }}/build/windows/x86
   cmake-macos-arm64:
     runs-on: macos-latest

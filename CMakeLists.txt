@@ -299,6 +299,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/multiply2.c
   src/subgraph/negate.c
   src/subgraph/prelu.c
+  src/subgraph/reciprocal-square-root.c
   src/subgraph/reshape-helpers.c
   src/subgraph/scaled-dot-product-attention.c
   src/subgraph/sigmoid.c
@@ -320,6 +321,7 @@ SET(SUBGRAPH_SRCS
   src/tensor.c)
 
 SET(LOGGING_SRCS
+  src/enums/allocation-type.c
   src/enums/datatype-strings.c
   src/enums/microkernel-type.c
   src/enums/node-type.c
@@ -1693,6 +1695,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(prelu-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME prelu-test COMMAND prelu-test)
 
+    ADD_EXECUTABLE(reciprocal-square-root-test test/reciprocal-square-root.cc)
+    TARGET_INCLUDE_DIRECTORIES(reciprocal-square-root-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(reciprocal-square-root-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME reciprocal-square-root-test COMMAND reciprocal-square-root-test)
+
     ADD_EXECUTABLE(reshape-helpers-test test/reshape-helpers.cc)
     TARGET_INCLUDE_DIRECTORIES(reshape-helpers-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(reshape-helpers-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
@@ -1731,7 +1738,7 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(square-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME square-test COMMAND square-test)
 
-    ADD_EXECUTABLE(square-root-test test/square.cc)
+    ADD_EXECUTABLE(square-root-test test/square-root.cc)
     TARGET_INCLUDE_DIRECTORIES(square-root-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(square-root-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME square-root-test COMMAND square-root-test)
@@ -3719,6 +3726,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     TARGET_INCLUDE_DIRECTORIES(prelu-bench PRIVATE .)
     TARGET_LINK_LIBRARIES(prelu-bench PRIVATE XNNPACK benchmark::benchmark bench-utils)
 
+    ADD_EXECUTABLE(reciprocal-square-root-bench bench/reciprocal-square-root.cc)
+    TARGET_INCLUDE_DIRECTORIES(reciprocal-square-root-bench PRIVATE .)
+    TARGET_LINK_LIBRARIES(reciprocal-square-root-bench PRIVATE XNNPACK benchmark::benchmark bench-utils)
+
     ADD_EXECUTABLE(sigmoid-bench bench/sigmoid.cc)
     TARGET_INCLUDE_DIRECTORIES(sigmoid-bench PRIVATE .)
     TARGET_LINK_LIBRARIES(sigmoid-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
@@ -3804,6 +3815,21 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f16-f32acc-rsum-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f16-f32acc-rsum-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
   TARGET_LINK_LIBRARIES(f16-f32acc-rsum-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
+  ADD_EXECUTABLE(f16-rmax-bench bench/f16-rmax.cc)
+  TARGET_INCLUDE_DIRECTORIES(f16-rmax-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f16-rmax-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(f16-rmax-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
+  ADD_EXECUTABLE(f16-rminmax-bench bench/f16-rminmax.cc)
+  TARGET_INCLUDE_DIRECTORIES(f16-rminmax-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f16-rminmax-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(f16-rminmax-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
+  ADD_EXECUTABLE(f16-rmin-bench bench/f16-rmin.cc)
+  TARGET_INCLUDE_DIRECTORIES(f16-rmin-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f16-rmin-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(f16-rmin-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
   ADD_EXECUTABLE(f16-spmm-bench bench/f16-spmm.cc)
   TARGET_INCLUDE_DIRECTORIES(f16-spmm-bench PRIVATE . include src)

@@ -17,7 +17,10 @@ $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w", "QC4": "f32_qc4w"}[DATATYPE]
 #     const void* w,            x5
 #     float* c,                 x6
 #     size_t cm_stride,         x7
-#     size_t cn_stride,         [sp] -> (x0)
+$if DATATYPE == "QC4":
+  #     size_t cn_stride,         [sp, 16] -> (x0)
+$else:
+  #     size_t cn_stride,         [sp] -> (x0)
 $if INC:
   #     const float* acc,         [sp + 8] -> x15
   #     const xnn_f32_minmax_params* params)  [sp + 16] -> (x8)
@@ -272,7 +275,10 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_6
         # Clamp
         FMAX        v20.4s, v20.4s, v6.4s
         # Load cn_stride
-        LDR         x0, [sp]
+        $if DATATYPE == "QC4":
+          LDR         x0, [sp, 16]
+        $else:
+          LDR         x0, [sp]
         FMAX        v21.4s, v21.4s, v6.4s
         FMAX        v22.4s, v22.4s, v6.4s
         FMAX        v23.4s, v23.4s, v6.4s

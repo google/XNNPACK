@@ -74,15 +74,7 @@ static void init_f32_ibilinear_chw_config(void) {
     f32_ibilinear_chw_config.ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8;
     f32_ibilinear_chw_config.channel_tile = 1;
     f32_ibilinear_chw_config.pixel_tile = 8;
-  #elif XNN_ARCH_WASM
-    f32_ibilinear_chw_config.ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__scalar_p4;
-    f32_ibilinear_chw_config.channel_tile = 1;
-    f32_ibilinear_chw_config.pixel_tile = 4;
-  #elif XNN_ARCH_RISCV
-    f32_ibilinear_chw_config.ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__scalar_p4;
-    f32_ibilinear_chw_config.channel_tile = 1;
-    f32_ibilinear_chw_config.pixel_tile = 4;
-  #elif XNN_ARCH_PPC64
+  #else
     f32_ibilinear_chw_config.ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__scalar_p4;
     f32_ibilinear_chw_config.channel_tile = 1;
     f32_ibilinear_chw_config.pixel_tile = 4;

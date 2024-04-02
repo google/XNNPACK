@@ -17,10 +17,6 @@
 #else
   #include <pthread.h>
 #endif
-#if XNN_ARCH_ARM && XNN_PLATFORM_ANDROID
-  #include <ctype.h>
-  #include <sys/utsname.h>
-#endif
 #if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)
 #include <sys/syscall.h>
 #include <unistd.h>
@@ -47,22 +43,6 @@
 
 #include <xnnpack/config.h>
 #include <xnnpack/log.h>
-
-#if XNN_ARCH_ARM && XNN_PLATFORM_ANDROID
-static void KernelVersion(int* version) {
-  struct utsname buffer;
-  int i;
-  version[0] = version[1] = 0;
-  if (uname(&buffer) == 0) {
-    char* v = buffer.release;
-    for (i = 0; *v && i < 2; ++v) {
-      if (isdigit(*v)) {
-        version[i++] = (int) strtol(v, &v, 10);
-      }
-    }
-  }
-}
-#endif
 
 #if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)
 ssize_t xnn_syscall(size_t rax, size_t rdi, size_t rsi, size_t rdx) {
@@ -119,17 +99,6 @@ static void init_hardware_config(void) {
     hardware_config.use_arm_neon_fp16 = cpuinfo_has_arm_neon_fp16();
     hardware_config.use_arm_neon_fma = cpuinfo_has_arm_neon_fma();
     hardware_config.use_arm_neon_v8 = cpuinfo_has_arm_neon_v8();
-    hardware_config.use_arm_neon_udot = hardware_config.use_arm_neon_dot;
-    #if XNN_PLATFORM_ANDROID
-      if (hardware_config.use_arm_neon_dot) {
-        int kernelversion[2];
-        KernelVersion(kernelversion);
-        xnn_log_debug("udot is disabled in linux kernel earlier than 6.7");
-        if (kernelversion[0] < 6 || (kernelversion[0] == 6 && kernelversion[1] < 7)) {
-          hardware_config.use_arm_neon_dot = false;
-        }
-      }
-    #endif
   #endif
 
   #if XNN_ARCH_ARM64

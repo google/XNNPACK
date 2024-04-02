@@ -27,27 +27,7 @@ static struct xnn_lut32norm_config u8_lut32norm_config = {0};
 #endif
 
 static void init_u8_lut32norm_config(void) {
-  #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon) {
-      u8_lut32norm_config.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
-    } else if (!XNN_PLATFORM_MOBILE) {
-      u8_lut32norm_config.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
-    }
-  #elif XNN_ARCH_ARM64
-    u8_lut32norm_config.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
-  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    u8_lut32norm_config.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
-  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    u8_lut32norm_config.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
-  #elif XNN_ARCH_WASM
-    u8_lut32norm_config.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
-  #elif XNN_ARCH_RISCV
-    u8_lut32norm_config.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
-  #elif XNN_ARCH_PPC64
-    u8_lut32norm_config.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
-  #endif
+  u8_lut32norm_config.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
 }
 
 #if XNN_PLATFORM_WINDOWS
