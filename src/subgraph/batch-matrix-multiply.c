@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <xnnpack.h>
+#include <xnnpack/allocation-type.h>
 #include <xnnpack/common.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
@@ -58,10 +59,15 @@ static enum xnn_status create_batch_matrix_multiply_operator(
       for (size_t i = 0; i < input_b->shape.num_dims - 2; i++) {
         batch_size_b *= input_b->shape.dim[i];
       }
+      const size_t k = node->flags & XNN_FLAG_TRANSPOSE_B
+                           ? input_b->shape.dim[input_b->shape.num_dims - 1]
+                           : input_b->shape.dim[input_b->shape.num_dims - 2];
+      const size_t n = node->flags & XNN_FLAG_TRANSPOSE_B
+                           ? input_b->shape.dim[input_b->shape.num_dims - 2]
+                           : input_b->shape.dim[input_b->shape.num_dims - 1];
 
       status = xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
-          batch_size_b, /*k=*/input_b->shape.dim[input_b->shape.num_dims - 2],
-          /*n=*/input_b->shape.dim[input_b->shape.num_dims - 1], input_b->data,
+          batch_size_b, k, n, input_b->data,
           input_b->quantization.channelwise_scale, node->flags,
           &opdata->operator_objects[0]);
       break;
