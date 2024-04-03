@@ -1,0 +1,302 @@
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+$assert NR == 16
+$assert MR == 1
+$assert REQUANTIZATION == "FP32" or not REQUANTIZATION
+$assert DATATYPE in ["QD8_F32"]
+#include <assert.h>
+
+#include <immintrin.h>
+
+#include <xnnpack/gemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/math.h>
+#include <xnnpack/unaligned.h>
+$if PREFETCH:
+  #include <xnnpack/prefetch.h>
+
+
+$GFNI = 0
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8_F32": "qd8_f32_qc8w", "QC4_F32": "qd8_f32_qc4w"}[DATATYPE]
+$REQUANTIZATION_SPEC = "" if DATATYPE in ["QD8_F32", "QC4_F32"] else "_" + REQUANTIZATION.lower()
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx512vnni" if REQUANTIZATION else "avx512vnni"
+$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8_F32": "xnn_f32_minmax_params"}[DATATYPE]
+$XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
+$OUT_T = "float" if DATATYPE in ["QD8_F32", "QC4"] else XINT8_T
+$_MM_PACKXS_EPI16 = "_mm_packus_epi16" if DATATYPE == "QU8" else "_mm_packs_epi16"
+$_MM_MAX_EPX8 = "_mm_max_epi8"
+$_MM512_CVTXEPI32_EPI8 = "_mm512_cvtsepi32_epi8"
+void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c4__avx512amx${"_prfm" if PREFETCH else ""}(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    size_t ks,
+    const ${XINT8_T}** restrict a,
+    const void* restrict w,
+    ${OUT_T}* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    size_t a_offset,
+    const ${XINT8_T}* zero,
+    $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+      const int8_t* zero_data,
+      const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)],
+      const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    $else:
+      const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(${XINT8_T}) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+// TODO: amxintrin.h only provide intrinsics for __x86_64__
+// Update if amxintrin changes
+#if defined(__x86_64__)
+  $for N in range(0, NR, 16):
+    __attribute__((aligned(64))) int32_t res${N // 16}[${MR} * 16];
+
+  kc = round_up_po2(kc, 4 * sizeof(${XINT8_T}));
+  const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
+
+  // Define tile config data structure
+  struct __tile_config {
+    uint8_t palette_id;
+    uint8_t start_row;
+    uint8_t reserved_0[14];
+    uint16_t colsb[8];
+    uint16_t reserved_1[8];
+    uint8_t rows[8];
+    uint8_t reserved_2[8];
+  };
+
+  // Load tile configuration
+  __attribute__((aligned(64))) struct __tile_config tile_data = {0};
+  tile_data.palette_id = 1;
+  tile_data.rows[0] = mr;              // tmm0 = res 0
+  tile_data.rows[1] = mr;              // tmm1 = res 1
+  tile_data.rows[2] = mr;              // tmm2 = res 2
+  tile_data.rows[3] = mr;              // tmm3 = res 3
+  tile_data.rows[4] = mr;              // tmm4 = input
+  tile_data.rows[5] = 16;              // tmm5 = weights
+  tile_data.rows[6] = mr;              // tmm6 = input remainder
+  tile_data.rows[7] = kremainder >> 2; // tmm7 = weights remainder
+
+  tile_data.colsb[0] = 64;          // tmm0 = res 0
+  tile_data.colsb[1] = 64;          // tmm1 = res 1
+  tile_data.colsb[2] = 64;          // tmm2 = res 1
+  tile_data.colsb[3] = 64;          // tmm3 = res 1
+  tile_data.colsb[4] = 64;          // tmm4 = input
+  tile_data.colsb[5] = 64;          // tmm5 = weights
+  tile_data.colsb[6] = kremainder;  // tmm6 = input remainder
+  tile_data.colsb[7] = 64;          // tmm7 = weights remainder
+
+  //_tile_loadconfig(&tile_data);
+  __asm__ volatile ("ldtilecfg %0" :: "m" (tile_data));
+
+  ${OUT_T}* c0 = c;
+  $for M in range(1, MR):
+    ${OUT_T}* c${M} = (${OUT_T}*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        c${M} = c${M-1};
+      }
+
+  $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+    const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
+    const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+    $if DATATYPE in ["QC4_F16", "QC4_F32"]:
+      const __m256i vmask = _mm256_set1_epi8(params->scalar.mask);
+  $else:
+    const __m512 voutput_max_less_zero_point = _mm512_set1_ps(params->${PARAMS_STRUCT}.output_max_less_zero_point);
+    const __m512i voutput_zero_point = _mm512_set1_epi32(params->${PARAMS_STRUCT}.output_zero_point);
+    const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
+
+  do {
+    $for N in range(0, NR, 16):
+      const __m512i vksum${ABC[N:N+16]} = _mm512_load_epi32((const int32_t*) w + ${N});
+    w = (const int32_t*) w + ${NR};
+
+    // Zero tile accumulator
+    __asm__ volatile (
+      $for N in range(0, NR, 16):
+        "tilezero %%tmm${N // 16}\\n"
+      ::);
+
+    size_t p = ks;
+    do {
+      $for M in range(MR):
+        const ${XINT8_T}* restrict a${M} = a[${M}];
+        if XNN_UNPREDICTABLE(a${M} != zero) {
+          a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} + a_offset);
+        $if DATATYPE == "QD8_F32":
+          } else {
+            a${M} = zero_data;
+        }
+      a += ${MR};
+
+      size_t k = kc;
+      while (k >= 64 * sizeof(int8_t)) {
+        _tile_loadd(4, a0, 64);  // direct load for M=1
+        $for M in range(MR):
+          a${M} += 64;
+        $for N in range(0, NR, 16):
+          _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
+          _tile_dpbssd(${N // 16}, 4, 5);
+        $if PREFETCH:
+          $for P in range(4096, 5120 + NR // 16 * 1024, 64):
+            xnn_prefetch_to_l1((const int8_t*) w + ${P});
+
+        w = (const int8_t*) w + ${NR // 16 * 1024};
+        k -= 64 * sizeof(int8_t);
+      }
+
+      if XNN_UNLIKELY(k != 0) {
+        _tile_loadd(6, a0, 64);  // direct load for M=1
+        $for M in range(MR):
+          a${M} += kremainder;
+        $for N in range(0, NR, 16):
+          _tile_loadd(7, (const int8_t*) w + ${N * 4}, ${NR * 4});
+          _tile_dpbssd(${N // 16}, 6, 7);
+
+        w = (const int8_t*) w + kremainder * ${NR};
+        k -= kremainder * sizeof(int8_t);
+      }
+
+      p -= ${MR} * sizeof(void*);
+    } while (p != 0);
+
+    // Add tile to bias
+    $for N in range(0, NR, 16):
+      _tile_stored(${N // 16}, res${N // 16}, 64);
+
+    $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+      $for M in range(MR):
+        $for N in range(0, NR, 16):
+          __m512i vacc${M}x${ABC[N:N+16]} = _mm512_mullo_epi32(vksum${ABC[N:N+16]}, _mm512_set1_epi32((int) quantization_params->zero_point));
+      $for M in range(MR):
+        $for N in range(0, NR, 16):
+          vacc${M}x${ABC[N:N+16]} = _mm512_add_epi32(vacc${M}x${ABC[N:N+16]}, _mm512_load_epi32(res${N // 16} + ${M * 16}));
+    $else:
+      $for M in range(MR):
+        $for N in range(0, NR, 16):
+          __m512i vacc${M}x${ABC[N:N+16]} = _mm512_add_epi32(vksum${ABC[N:N+16]}, _mm512_load_epi32(res${N // 16} + ${M * 16}));
+
+    $if DATATYPE == "QC4_F32":
+      $for M in range(MR):
+        $for N in range(0, NR, 16):
+          vacc${M}x${ABC[N:N+16]} = _mm512_srai_epi32(vacc${M}x${ABC[N:N+16]}, 4);
+    $for M in range(MR):
+      $for N in range(0, NR, 16):
+        __m512 vscaled${M}x${ABC[N:N+16]} = _mm512_cvtepi32_ps(vacc${M}x${ABC[N:N+16]});
+
+    $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+      $for M in range(MR):
+        $for N in range(0, NR, 16):
+          vscaled${M}x${ABC[N:N+16]} = _mm512_mul_ps(vscaled${M}x${ABC[N:N+16]}, _mm512_set1_ps(quantization_params->inv_scale));
+
+      $for N in range(0, NR, 16):
+        const __m512 vfilter_output_scale${ABC[N:N+16]} = _mm512_load_ps((const float*) w + ${N});
+      w = (const int32_t*) w + ${NR};
+      $for N in range(0, NR, 16):
+        const __m512 vbias${ABC[N:N+16]} = _mm512_load_ps((const float*) w + ${N});
+      w = (const int32_t*) w + ${NR};
+
+      $for M in range(MR):
+        $for N in range(0, NR, 16):
+          vscaled${M}x${ABC[N:N+16]} = _mm512_fmadd_ps(vscaled${M}x${ABC[N:N+16]}, vfilter_output_scale${ABC[N:N+16]}, vbias${ABC[N:N+16]});
+
+      $for M in range(MR):
+        $for N in range(0, NR, 16):
+          vscaled${M}x${ABC[N:N+16]} = _mm512_max_ps(vscaled${M}x${ABC[N:N+16]}, voutput_min);
+
+      $for M in range(MR):
+        $for N in range(0, NR, 16):
+          vscaled${M}x${ABC[N:N+16]} = _mm512_min_ps(vscaled${M}x${ABC[N:N+16]}, voutput_max);
+
+      if XNN_LIKELY(nc >= ${NR}) {
+        $for M in reversed(range(MR)):
+          $for N in range(0, NR, 16):
+            _mm512_storeu_ps(c${M} + ${N}, vscaled${M}x${ABC[N:N+16]});
+          c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
+
+        a = (const ${XINT8_T}**restrict) ((uintptr_t) a - ks);
+        nc -= ${NR};
+      } else {
+        // Prepare mask for valid 32-bit elements (depends on nc).
+        $for N in range(0, NR, 16):
+          const __mmask16 vmask${N // 16} = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> ${N}) & 0xFFFF));
+        $for M in reversed(range(MR)):
+          $for N in range(0, NR, 16):
+            _mm512_mask_storeu_ps(c${M} + ${N}, vmask${N // 16}, vscaled${M}x${ABC[N:N+16]});
+        nc = 0;
+      }
+    $elif DATATYPE == "QC8":
+      $for N in range(0, NR, 16):
+        const __m512 vscale${ABC[N:N+16]} = _mm512_load_ps((const float*) w + ${N});
+      w = (const int32_t*) w + ${NR};
+
+      $for M in range(MR):
+        $for N in range(0, NR, 16):
+          vscaled${M}x${ABC[N:N+16]} = _mm512_mul_ps(vscaled${M}x${ABC[N:N+16]}, vscale${ABC[N:N+16]});
+
+      $for M in range(MR):
+        $for N in range(0, NR, 16):
+          vscaled${M}x${ABC[N:N+16]} = _mm512_min_ps(vscaled${M}x${ABC[N:N+16]}, voutput_max_less_zero_point);
+
+      $for M in range(MR):
+        $for N in range(0, NR, 16):
+          vacc${M}x${ABC[N:N+16]} = _mm512_cvtps_epi32(vscaled${M}x${ABC[N:N+16]});
+
+      $for M in range(MR):
+        $for N in range(0, NR, 16):
+          vacc${M}x${ABC[N:N+16]} = _mm512_add_epi32(vacc${M}x${ABC[N:N+16]}, voutput_zero_point);
+
+      $for M in range(MR):
+        $for N in range(0, NR, 16):
+          __m128i vout${M}x${ABC[N:N+16]} = ${_MM512_CVTXEPI32_EPI8}(vacc${M}x${ABC[N:N+16]});
+
+      $for M in range(MR):
+        $for N in range(0, NR, 16):
+          vout${M}x${ABC[N:N+16]} = ${_MM_MAX_EPX8}(vout${M}x${ABC[N:N+16]}, voutput_min);
+
+      if XNN_LIKELY(nc >= ${NR}) {
+        $for M in reversed(range(MR)):
+          $for N in range(0, NR, 16):
+            _mm_storeu_si128((__m128i*) (c${M} + ${N}), vout${M}x${ABC[N:N+16]});
+          c${M} = (${OUT_T}*) ((uintptr_t) c${M} + cn_stride);
+        a = (const ${XINT8_T}**restrict) ((uintptr_t) a - ks);
+        nc -= ${NR};
+      } else {
+        // Prepare mask for valid 8-bit elements (depends on nc).
+        $for N in range(0, NR, 16):
+          const __mmask16 vmask${N // 16} = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> ${N}) & 0xFFFF));
+
+        $for M in reversed(range(MR)):
+          $for N in range(0, NR, 16):
+            _mm_mask_storeu_epi8(c${M} + ${N}, vmask${N // 16}, vout${M}x${ABC[N:N+16]});
+        nc = 0;
+      }
+  } while (nc != 0);
+
+  // Release tile config
+  //  _tile_release();
+  __asm__ volatile ("tilerelease" ::);
+  #endif  // defined(__x86_64__)
+}

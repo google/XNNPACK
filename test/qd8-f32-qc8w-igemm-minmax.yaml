@@ -3,6 +3,12 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# AVX512AMX
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512amx
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 64
+
 # Scalar
 - name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x2__scalar
   init: xnn_init_f32_minmax_scalar_params
