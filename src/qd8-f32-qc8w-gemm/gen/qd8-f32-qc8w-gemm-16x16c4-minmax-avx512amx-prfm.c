@@ -46,10 +46,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_16x16c4__avx512amx_prfm(
   __attribute__((aligned(64))) int32_t res0[16 * 16];
 
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
-  size_t kremainder = kc & 63;
-  if (kremainder == 0) {  // zero is invalid config
-    kremainder = 64;
-  }
+  const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
 
   // Define tile config data structure
   struct __tile_config {
@@ -283,10 +280,10 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_16x16c4__avx512amx_prfm(
     vscaled14x0123456789ABCDEF = _mm512_mul_ps(vscaled14x0123456789ABCDEF, _mm512_set1_ps(quantization_params[14].inv_scale));
     vscaled15x0123456789ABCDEF = _mm512_mul_ps(vscaled15x0123456789ABCDEF, _mm512_set1_ps(quantization_params[15].inv_scale));
 
-    const __m512 vfilter_output_scale0123456789ABCDEF = _mm512_load_ps((const float*) w);
-    w = (const float*) w + 16;
-    const __m512 vbias0123456789ABCDEF = _mm512_load_ps((const float*) w);
-    w = (const float*) w + 16;
+    const __m512 vfilter_output_scale0123456789ABCDEF = _mm512_load_ps((const float*) w + 0);
+    w = (const int32_t*) w + 16;
+    const __m512 vbias0123456789ABCDEF = _mm512_load_ps((const float*) w + 0);
+    w = (const int32_t*) w + 16;
 
     vscaled0x0123456789ABCDEF = _mm512_fmadd_ps(vscaled0x0123456789ABCDEF, vfilter_output_scale0123456789ABCDEF, vbias0123456789ABCDEF);
     vscaled1x0123456789ABCDEF = _mm512_fmadd_ps(vscaled1x0123456789ABCDEF, vfilter_output_scale0123456789ABCDEF, vbias0123456789ABCDEF);
@@ -341,37 +338,36 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_16x16c4__avx512amx_prfm(
 
     if XNN_LIKELY(nc >= 16) {
       _mm512_storeu_ps(c15 + 0, vscaled15x0123456789ABCDEF);
-      _mm512_storeu_ps(c14 + 0, vscaled14x0123456789ABCDEF);
-      _mm512_storeu_ps(c13 + 0, vscaled13x0123456789ABCDEF);
-      _mm512_storeu_ps(c12 + 0, vscaled12x0123456789ABCDEF);
-      _mm512_storeu_ps(c11 + 0, vscaled11x0123456789ABCDEF);
-      _mm512_storeu_ps(c10 + 0, vscaled10x0123456789ABCDEF);
-      _mm512_storeu_ps(c9 + 0, vscaled9x0123456789ABCDEF);
-      _mm512_storeu_ps(c8 + 0, vscaled8x0123456789ABCDEF);
-      _mm512_storeu_ps(c7 + 0, vscaled7x0123456789ABCDEF);
-      _mm512_storeu_ps(c6 + 0, vscaled6x0123456789ABCDEF);
-      _mm512_storeu_ps(c5 + 0, vscaled5x0123456789ABCDEF);
-      _mm512_storeu_ps(c4 + 0, vscaled4x0123456789ABCDEF);
-      _mm512_storeu_ps(c3 + 0, vscaled3x0123456789ABCDEF);
-      _mm512_storeu_ps(c2 + 0, vscaled2x0123456789ABCDEF);
-      _mm512_storeu_ps(c1 + 0, vscaled1x0123456789ABCDEF);
-      _mm512_storeu_ps(c0 + 0, vscaled0x0123456789ABCDEF);
-
       c15 = (float*) ((uintptr_t) c15 + cn_stride);
+      _mm512_storeu_ps(c14 + 0, vscaled14x0123456789ABCDEF);
       c14 = (float*) ((uintptr_t) c14 + cn_stride);
+      _mm512_storeu_ps(c13 + 0, vscaled13x0123456789ABCDEF);
       c13 = (float*) ((uintptr_t) c13 + cn_stride);
+      _mm512_storeu_ps(c12 + 0, vscaled12x0123456789ABCDEF);
       c12 = (float*) ((uintptr_t) c12 + cn_stride);
+      _mm512_storeu_ps(c11 + 0, vscaled11x0123456789ABCDEF);
       c11 = (float*) ((uintptr_t) c11 + cn_stride);
+      _mm512_storeu_ps(c10 + 0, vscaled10x0123456789ABCDEF);
       c10 = (float*) ((uintptr_t) c10 + cn_stride);
+      _mm512_storeu_ps(c9 + 0, vscaled9x0123456789ABCDEF);
       c9 = (float*) ((uintptr_t) c9 + cn_stride);
+      _mm512_storeu_ps(c8 + 0, vscaled8x0123456789ABCDEF);
       c8 = (float*) ((uintptr_t) c8 + cn_stride);
+      _mm512_storeu_ps(c7 + 0, vscaled7x0123456789ABCDEF);
       c7 = (float*) ((uintptr_t) c7 + cn_stride);
+      _mm512_storeu_ps(c6 + 0, vscaled6x0123456789ABCDEF);
       c6 = (float*) ((uintptr_t) c6 + cn_stride);
+      _mm512_storeu_ps(c5 + 0, vscaled5x0123456789ABCDEF);
       c5 = (float*) ((uintptr_t) c5 + cn_stride);
+      _mm512_storeu_ps(c4 + 0, vscaled4x0123456789ABCDEF);
       c4 = (float*) ((uintptr_t) c4 + cn_stride);
+      _mm512_storeu_ps(c3 + 0, vscaled3x0123456789ABCDEF);
       c3 = (float*) ((uintptr_t) c3 + cn_stride);
+      _mm512_storeu_ps(c2 + 0, vscaled2x0123456789ABCDEF);
       c2 = (float*) ((uintptr_t) c2 + cn_stride);
+      _mm512_storeu_ps(c1 + 0, vscaled1x0123456789ABCDEF);
       c1 = (float*) ((uintptr_t) c1 + cn_stride);
+      _mm512_storeu_ps(c0 + 0, vscaled0x0123456789ABCDEF);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
 
       a -= kc;

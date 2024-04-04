@@ -44,10 +44,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
   __attribute__((aligned(64))) int32_t res0[1 * 16];
 
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
-  size_t kremainder = kc & 63;
-  if (kremainder == 0) {  // zero is invalid config
-    kremainder = 64;
-  }
+  const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
 
   // Define tile config data structure
   struct __tile_config {
@@ -127,8 +124,9 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(
 
     __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
 
-    const __m512 vscale0123456789ABCDEF = _mm512_load_ps(w);
-    w = (const float*) w + 16;
+    const __m512 vscale0123456789ABCDEF = _mm512_load_ps((const float*) w + 0);
+    w = (const int32_t*) w + 16;
+
     vscaled0x0123456789ABCDEF = _mm512_mul_ps(vscaled0x0123456789ABCDEF, vscale0123456789ABCDEF);
 
     vscaled0x0123456789ABCDEF = _mm512_min_ps(vscaled0x0123456789ABCDEF, voutput_max_less_zero_point);

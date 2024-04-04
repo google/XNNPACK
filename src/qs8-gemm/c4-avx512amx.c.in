@@ -3,9 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 $assert NR % 16 == 0
 $assert 16 <= NR <= 64
+$if DATATYPE == "QC8":
+  $assert NR == 16
 $assert 1 <= MR <= 16
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
 $assert DATATYPE in ["QD8_F32", "QC8"]
@@ -60,10 +62,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     __attribute__((aligned(64))) int32_t res${N // 16}[${MR} * 16];
 
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
-  size_t kremainder = kc & 63;
-  if (kremainder == 0) {  // zero is invalid config
-    kremainder = 64;
-  }
+  const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
 
   // Define tile config data structure
   struct __tile_config {
@@ -193,11 +192,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
           vscaled${M}x${ABC[N:N+16]} = _mm512_mul_ps(vscaled${M}x${ABC[N:N+16]}, _mm512_set1_ps(quantization_params[${M}].inv_scale));
 
       $for N in range(0, NR, 16):
-        const __m512 vfilter_output_scale${ABC[N:N+16]} = _mm512_load_ps((const float*) w);
-        w = (const float*) w + 16;
+        const __m512 vfilter_output_scale${ABC[N:N+16]} = _mm512_load_ps((const float*) w + ${N});
+      w = (const int32_t*) w + ${NR};
       $for N in range(0, NR, 16):
-        const __m512 vbias${ABC[N:N+16]} = _mm512_load_ps((const float*) w);
-        w = (const float*) w + 16;
+        const __m512 vbias${ABC[N:N+16]} = _mm512_load_ps((const float*) w + ${N});
+      w = (const int32_t*) w + ${NR};
 
       $for M in range(MR):
         $for N in range(0, NR, 16):
@@ -215,8 +214,6 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         $for M in reversed(range(MR)):
           $for N in range(0, NR, 16):
             _mm512_storeu_ps(c${M} + ${N}, vscaled${M}x${ABC[N:N+16]});
-
-        $for M in reversed(range(MR)):
           c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
         a -= kc;
@@ -230,18 +227,14 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
             _mm512_mask_storeu_ps(c${M} + ${N}, vmask${N // 16}, vscaled${M}x${ABC[N:N+16]});
         nc = 0;
       }
-    $elif DATATYPE in ["QS8", "QC8"]:
-      $if DATATYPE == "QC8":
+    $elif DATATYPE == "QC8":
+      $for N in range(0, NR, 16):
+        const __m512 vscale${ABC[N:N+16]} = _mm512_load_ps((const float*) w + ${N});
+      w = (const int32_t*) w + ${NR};
+
+      $for M in range(MR):
         $for N in range(0, NR, 16):
-          const __m512 vscale${ABC[N:N+16]} = _mm512_load_ps(w);
-          w = (const float*) w + 16;
-        $for M in range(MR):
-          $for N in range(0, NR, 16):
-            vscaled${M}x${ABC[N:N+16]} = _mm512_mul_ps(vscaled${M}x${ABC[N:N+16]}, vscale${ABC[N:N+16]});
-      $else:
-        $for M in range(MR):
-          $for N in range(0, NR, 16):
-            vscaled${M}x${ABC[N:N+16]} = _mm512_mul_ps(vscaled${M}x${ABC[N:N+16]}, vscale);
+          vscaled${M}x${ABC[N:N+16]} = _mm512_mul_ps(vscaled${M}x${ABC[N:N+16]}, vscale${ABC[N:N+16]});
 
       $for M in range(MR):
         $for N in range(0, NR, 16):
