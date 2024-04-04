@@ -15,16 +15,14 @@
 #include <xnnpack/reduce.h>
 
 
-void xnn_f32_rsum_ukernel__sse_u4(
+float xnn_f32_rsum_ukernel__sse_u4(
     size_t batch,
     const float* input,
-    float* output,
     const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
-  assert(output != NULL);
 
   __m128 vacc0 = _mm_setzero_ps();
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
@@ -44,5 +42,5 @@ void xnn_f32_rsum_ukernel__sse_u4(
   }
   vacc0 = _mm_add_ss(vacc0, _mm_shuffle_ps(vacc0, vacc0, _MM_SHUFFLE(1, 1, 1, 1)));
   vacc0 = _mm_mul_ss(vacc0, _mm_load_ss(&params->scalar.scale));
-  _mm_store_ss(output, vacc0);
+  return _mm_cvtss_f32(vacc0);
 }

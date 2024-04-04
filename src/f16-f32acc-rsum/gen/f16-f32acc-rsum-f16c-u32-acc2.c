@@ -17,16 +17,14 @@
 #include <xnnpack/unaligned.h>
 
 
-void xnn_f16_f32acc_rsum_ukernel__f16c_u32_acc2(
+float xnn_f16_f32acc_rsum_ukernel__f16c_u32_acc2(
     size_t batch,
     const void* input,
-    void* output,
     const union xnn_f16_f32acc_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
-  assert(output != NULL);
 
   const uint16_t* i = (const uint16_t*) input;
   __m256 vacc0 = _mm256_setzero_ps();
@@ -68,6 +66,5 @@ void xnn_f16_f32acc_rsum_ukernel__f16c_u32_acc2(
   vacc = _mm_add_ps(vacc, _mm_movehl_ps(vacc, vacc));
   vacc = _mm_add_ss(vacc, _mm_movehdup_ps(vacc));
   vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->avx.scale));
-  const __m128i vout = _mm_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT);
-  unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout, 0));
+  return _mm_cvtss_f32(vacc);
 }

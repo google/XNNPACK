@@ -1372,13 +1372,13 @@ struct univector_contiguous_context {
       size_t size);
 #endif
 
-struct reduce_context {
+struct rsum_context {
   const void* input;
   void* output;
   size_t input_stride;
   size_t output_stride;
   size_t scaled_elements;
-  xnn_reduce_ukernel_fn ukernel;
+  xnn_rsum_ukernel_fn ukernel;
   union {
     union xnn_f32_default_params f32_default;
     union xnn_f32_scale_params f32_scale;
@@ -1386,8 +1386,15 @@ struct reduce_context {
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_reduce(
-      const struct reduce_context context[restrict XNN_MIN_ELEMENTS(1)],
+  XNN_PRIVATE void xnn_compute_reduce_f16(
+      const struct rsum_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index,
+      size_t batch_range);
+#endif
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_reduce_f32(
+      const struct rsum_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
       size_t batch_range);
 #endif

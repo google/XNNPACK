@@ -17,19 +17,16 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
-void xnn_f16_rsum_ukernel__neonfp16arith_u${BATCH_TILE}${ACC_SUFFIX}(
+uint16_t xnn_f16_rsum_ukernel__neonfp16arith_u${BATCH_TILE}${ACC_SUFFIX}(
     size_t batch,
     const void* input,
-    void* output,
     const union xnn_f16_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
-  assert(output != NULL);
 
   const uint16_t* i = (const uint16_t*) input;
-  uint16_t* o = (uint16_t*) output;
   $for A in range(ACCUMULATORS):
     float16x8_t vacc${A} = vreinterpretq_f16_u16(vmovq_n_u16(0));
   $if BATCH_TILE > 8:
@@ -68,5 +65,5 @@ void xnn_f16_rsum_ukernel__neonfp16arith_u${BATCH_TILE}${ACC_SUFFIX}(
     vacc = vadd_f16(vacc, vt);
   }
   vacc = vmul_f16(vacc, vscale);
-  vst1_lane_u16(o, vreinterpret_u16_f16(vacc), 0);
+  return vget_lane_u16(vreinterpret_u16_f16(vacc), 0);
 }

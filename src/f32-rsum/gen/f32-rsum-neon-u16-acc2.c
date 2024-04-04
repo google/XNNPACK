@@ -15,16 +15,14 @@
 #include <xnnpack/reduce.h>
 
 
-void xnn_f32_rsum_ukernel__neon_u16_acc2(
+float xnn_f32_rsum_ukernel__neon_u16_acc2(
     size_t batch,
     const float* input,
-    float* output,
     const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
-  assert(output != NULL);
 
   float32x4_t vacc0 = vmovq_n_f32(0.0f);
   float32x4_t vacc1 = vmovq_n_f32(0.0f);
@@ -56,5 +54,5 @@ void xnn_f32_rsum_ukernel__neon_u16_acc2(
     vacc = vadd_f32(vacc, vt);
   }
   vacc = vmul_f32(vacc, vscale);
-  vst1_lane_f32(output, vacc, 0);
+  return vget_lane_f32(vacc, 0);
 }

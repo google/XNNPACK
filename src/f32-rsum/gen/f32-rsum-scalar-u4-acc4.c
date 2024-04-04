@@ -13,16 +13,14 @@
 #include <xnnpack/reduce.h>
 
 
-void xnn_f32_rsum_ukernel__scalar_u4_acc4(
+float xnn_f32_rsum_ukernel__scalar_u4_acc4(
     size_t batch,
     const float* input,
-    float* output,
     const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
-  assert(output != NULL);
 
   float vacc0 = 0.0f;
   float vacc1 = 0.0f;
@@ -53,5 +51,5 @@ void xnn_f32_rsum_ukernel__scalar_u4_acc4(
   }
   const float vscale = params->scalar.scale;
   vacc0 *= vscale;
-  *output = vacc0;
+  return vacc0;
 }

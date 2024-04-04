@@ -417,7 +417,7 @@ struct xnn_operator {
     struct pad_context pad;
     struct pixelwise_average_pooling_context pixelwise_average_pooling;
     struct prelu_context prelu;
-    struct reduce_context reduce;
+    struct rsum_context reduce;
     struct {
       struct resize_bilinear_context resize_bilinear;
       struct resize_bilinear_nhwc_indirection_init_context resize_nhwc_indirection_init;
