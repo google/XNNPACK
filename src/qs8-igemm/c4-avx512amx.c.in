@@ -5,7 +5,7 @@
 
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 $assert NR == 16
-$assert MR == 1
+$assert 1 <= MR <= 16
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
 $assert DATATYPE in ["QD8_F32"]
 #include <assert.h>
@@ -63,6 +63,8 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
 #if defined(__x86_64__)
   $for N in range(0, NR, 16):
     __attribute__((aligned(64))) int32_t res${N // 16}[${MR} * 16];
+  $for N in range(0, NR, 16):
+    __attribute__((aligned(64))) int32_t vintile[${MR} * 16];
 
   kc = round_up_po2(kc, 4 * sizeof(${XINT8_T}));
   const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
@@ -130,7 +132,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
 
   do {
     $for N in range(0, NR, 16):
-      const __m512i vksum${ABC[N:N+16]} = _mm512_load_epi32((const int32_t*) w + ${N});
+      const __m512i vksum${ABC[N:N+16]} = _mm512_loadu_epi32((const int32_t*) w + ${N});
     w = (const int32_t*) w + ${NR};
 
     // Zero tile accumulator
@@ -153,9 +155,11 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
 
       size_t k = kc;
       while (k >= 64 * sizeof(int8_t)) {
-        _tile_loadd(4, a0, 64);  // direct load for M=1
         $for M in range(MR):
+          const __m512i vin${M} = _mm512_loadu_epi32(a${M});
           a${M} += 64;
+          _mm512_store_epi32(vintile + ${M * 16}, vin${M});
+        _tile_loadd(4, vintile, 64);
         $for N in range(0, NR, 16):
           _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
           _tile_dpbssd(${N // 16}, 4, 5);
@@ -168,9 +172,11 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
       }
 
       if XNN_UNLIKELY(k != 0) {
-        _tile_loadd(6, a0, 64);  // direct load for M=1
         $for M in range(MR):
+          const __m512i vin${M} = _mm512_loadu_epi32(a${M});
           a${M} += kremainder;
+          _mm512_store_epi32(vintile + ${M * 16}, vin${M});
+        _tile_loadd(6, vintile, 64);
         $for N in range(0, NR, 16):
           _tile_loadd(7, (const int8_t*) w + ${N * 4}, ${NR * 4});
           _tile_dpbssd(${N // 16}, 6, 7);
@@ -212,10 +218,10 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
           vscaled${M}x${ABC[N:N+16]} = _mm512_mul_ps(vscaled${M}x${ABC[N:N+16]}, _mm512_set1_ps(quantization_params->inv_scale));
 
       $for N in range(0, NR, 16):
-        const __m512 vfilter_output_scale${ABC[N:N+16]} = _mm512_load_ps((const float*) w + ${N});
+        const __m512 vfilter_output_scale${ABC[N:N+16]} = _mm512_loadu_ps((const float*) w + ${N});
       w = (const int32_t*) w + ${NR};
       $for N in range(0, NR, 16):
-        const __m512 vbias${ABC[N:N+16]} = _mm512_load_ps((const float*) w + ${N});
+        const __m512 vbias${ABC[N:N+16]} = _mm512_loadu_ps((const float*) w + ${N});
       w = (const int32_t*) w + ${NR};
 
       $for M in range(MR):
@@ -249,7 +255,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
       }
     $elif DATATYPE == "QC8":
       $for N in range(0, NR, 16):
-        const __m512 vscale${ABC[N:N+16]} = _mm512_load_ps((const float*) w + ${N});
+        const __m512 vscale${ABC[N:N+16]} = _mm512_loadu_ps((const float*) w + ${N});
       w = (const int32_t*) w + ${NR};
 
       $for M in range(MR):

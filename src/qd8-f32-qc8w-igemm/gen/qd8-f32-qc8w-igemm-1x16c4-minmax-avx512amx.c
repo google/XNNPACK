@@ -46,6 +46,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512amx(
 // Update if amxintrin changes
 #if defined(__x86_64__)
   __attribute__((aligned(64))) int32_t res0[1 * 16];
+  __attribute__((aligned(64))) int32_t vintile[1 * 16];
 
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
@@ -91,7 +92,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512amx(
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
 
   do {
-    const __m512i vksum0123456789ABCDEF = _mm512_load_epi32((const int32_t*) w + 0);
+    const __m512i vksum0123456789ABCDEF = _mm512_loadu_epi32((const int32_t*) w + 0);
     w = (const int32_t*) w + 16;
 
     // Zero tile accumulator
@@ -111,8 +112,10 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512amx(
 
       size_t k = kc;
       while (k >= 64 * sizeof(int8_t)) {
-        _tile_loadd(4, a0, 64);  // direct load for M=1
+        const __m512i vin0 = _mm512_loadu_epi32(a0);
         a0 += 64;
+        _mm512_store_epi32(vintile + 0, vin0);
+        _tile_loadd(4, vintile, 64);
         _tile_loadd(5, (const int8_t*) w + 0, 64);
         _tile_dpbssd(0, 4, 5);
 
@@ -121,8 +124,10 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512amx(
       }
 
       if XNN_UNLIKELY(k != 0) {
-        _tile_loadd(6, a0, 64);  // direct load for M=1
+        const __m512i vin0 = _mm512_loadu_epi32(a0);
         a0 += kremainder;
+        _mm512_store_epi32(vintile + 0, vin0);
+        _tile_loadd(6, vintile, 64);
         _tile_loadd(7, (const int8_t*) w + 0, 64);
         _tile_dpbssd(0, 6, 7);
 
@@ -143,9 +148,9 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512amx(
 
     vscaled0x0123456789ABCDEF = _mm512_mul_ps(vscaled0x0123456789ABCDEF, _mm512_set1_ps(quantization_params->inv_scale));
 
-    const __m512 vfilter_output_scale0123456789ABCDEF = _mm512_load_ps((const float*) w + 0);
+    const __m512 vfilter_output_scale0123456789ABCDEF = _mm512_loadu_ps((const float*) w + 0);
     w = (const int32_t*) w + 16;
-    const __m512 vbias0123456789ABCDEF = _mm512_load_ps((const float*) w + 0);
+    const __m512 vbias0123456789ABCDEF = _mm512_loadu_ps((const float*) w + 0);
     w = (const int32_t*) w + 16;
 
     vscaled0x0123456789ABCDEF = _mm512_fmadd_ps(vscaled0x0123456789ABCDEF, vfilter_output_scale0123456789ABCDEF, vbias0123456789ABCDEF);
