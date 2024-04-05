@@ -3181,6 +3181,9 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-vrnd/gen/f32-vrndu-neon-u8.c
   src/f32-vrnd/gen/f32-vrndz-neon-u4.c
   src/f32-vrnd/gen/f32-vrndz-neon-u8.c
+  src/f32-vrsqrt/gen/f32-vrsqrt-neon-rsqrt-u4.c
+  src/f32-vrsqrt/gen/f32-vrsqrt-neon-rsqrt-u8.c
+  src/f32-vrsqrt/gen/f32-vrsqrt-neon-rsqrt-u16.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut64-p2-nr2recps-u4.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut64-p2-nr2recps-u8.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut64-p2-nr2recps-u12.c

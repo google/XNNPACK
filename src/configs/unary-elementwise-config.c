@@ -1365,7 +1365,17 @@ static void init_f32_sqrt_config(void) {
 }
 
 static void init_f32_rsqrt_config(void) {
-  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  #if XNN_ARCH_ARM
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_arm_neon) {
+      f32_rsqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__neon_rsqrt_u16;
+      f32_rsqrt_config.element_tile = 16;
+    } else if (!XNN_PLATFORM_MOBILE) {
+      f32_rsqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__scalar_rsqrt_u1;
+      f32_rsqrt_config.element_tile = 1;
+    }
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {

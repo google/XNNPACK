@@ -48,6 +48,27 @@ BENCHMARK_CAPTURE(f32_vrsqrt, scalar_rsqrt_u4,
                   /*init_params=*/nullptr)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  BENCHMARK_CAPTURE(f32_vrsqrt, neon_rsqrt_u4,
+                    xnn_f32_vrsqrt_ukernel__neon_rsqrt_u4,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vrsqrt, neon_rsqrt_u8,
+                    xnn_f32_vrsqrt_ukernel__neon_rsqrt_u8,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vrsqrt, neon_rsqrt_u16,
+                    xnn_f32_vrsqrt_ukernel__neon_rsqrt_u16,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_vrsqrt, sse_rsqrt_u4,
                     xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4,

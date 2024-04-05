@@ -1697,6 +1697,10 @@ DECLARE_F32_VRSQRT_UKERNEL_FUNCTION(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u16)
 DECLARE_F32_VRSQRT_UKERNEL_FUNCTION(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32)
 DECLARE_F32_VRSQRT_UKERNEL_FUNCTION(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64)
 
+DECLARE_F32_VRSQRT_UKERNEL_FUNCTION(xnn_f32_vrsqrt_ukernel__neon_rsqrt_u4)
+DECLARE_F32_VRSQRT_UKERNEL_FUNCTION(xnn_f32_vrsqrt_ukernel__neon_rsqrt_u8)
+DECLARE_F32_VRSQRT_UKERNEL_FUNCTION(xnn_f32_vrsqrt_ukernel__neon_rsqrt_u16)
+
 
 #define DECLARE_U64_U32_VSQRTSHIFT_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                 \
