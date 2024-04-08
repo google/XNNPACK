@@ -306,7 +306,10 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_u8_clamp_config
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_xx_copy_config();
 
 struct xnn_reduce_config {
-  xnn_reduce_ukernel_fn ukernel;
+  union {
+    xnn_rsum_ukernel_fn rsum;
+    xnn_reduce_ukernel_fn reduce;
+  } ukernel;
   union {
     xnn_init_f16_f32acc_scale_params_fn f16_f32acc_scale;
     xnn_init_f16_default_params_fn f16_default;

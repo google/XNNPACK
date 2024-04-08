@@ -16,10 +16,9 @@ extern "C" {
 #endif
 
 #define DECLARE_F16_RSUM_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                       \
+  XNN_INTERNAL uint16_t fn_name(                   \
       size_t batch,                                \
       const void* input,                           \
-      void* output,                                \
       const union xnn_f16_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__neonfp16arith_u8)
@@ -29,10 +28,9 @@ DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__neonfp16arith_u32_acc2)
 DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__neonfp16arith_u32_acc4)
 
 #define DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                              \
+  XNN_INTERNAL float fn_name(                             \
       size_t batch,                                       \
       const void* input,                                  \
-      void* output,                                       \
       const union xnn_f16_f32acc_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rsum_ukernel__f16c_u8)
@@ -246,10 +244,9 @@ DECLARE_U8_REDUCE_UKERNEL_FUNCTION(xnn_u8_rmax_ukernel__scalar_u2)
 DECLARE_U8_REDUCE_UKERNEL_FUNCTION(xnn_u8_rmax_ukernel__sse2_u16)
 
 #define DECLARE_F32_RSUM_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                       \
+  XNN_INTERNAL float fn_name(                      \
       size_t batch,                                \
       const float* input,                          \
-      float* output,                               \
       const union xnn_f32_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__avx_u8)

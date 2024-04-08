@@ -2011,8 +2011,8 @@ void xnn_compute_univector_contiguous(
   context->ukernel(size, x, y, &context->params);
 }
 
-void xnn_compute_reduce(
-    const struct reduce_context context[restrict XNN_MIN_ELEMENTS(1)],
+void xnn_compute_reduce_f16(
+    const struct rsum_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,
     size_t batch_range)
 {
@@ -2020,11 +2020,28 @@ void xnn_compute_reduce(
   const size_t output_stride = context->output_stride;
 
   const void* input = (const void*) ((uintptr_t) context->input + input_stride * batch_index);
-  void* output = (void*) ((uintptr_t) context->output + output_stride * batch_index);
+  uint16_t* output = (uint16_t*) ((uintptr_t) context->output + output_stride * batch_index);
   do {
-    context->ukernel(context->scaled_elements, input, output, &context->params);
+    *output = fp16_ieee_from_fp32_value(context->ukernel(context->scaled_elements, input, &context->params));
     input = (const void*) ((uintptr_t) input + input_stride);
-    output = (void*) ((uintptr_t) output + output_stride);
+    output = (uint16_t*) ((uintptr_t) output + output_stride);
+  } while (--batch_range != 0);
+}
+
+void xnn_compute_reduce_f32(
+    const struct rsum_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index,
+    size_t batch_range)
+{
+  const size_t input_stride = context->input_stride;
+  const size_t output_stride = context->output_stride;
+
+  const void* input = (const void*) ((uintptr_t) context->input + input_stride * batch_index);
+  float* output = (float*) ((uintptr_t) context->output + output_stride * batch_index);
+  do {
+    *output = context->ukernel(context->scaled_elements, input, &context->params);
+    input = (const void*) ((uintptr_t) input + input_stride);
+    output = (float*) ((uintptr_t) output + output_stride);
   } while (--batch_range != 0);
 }
 

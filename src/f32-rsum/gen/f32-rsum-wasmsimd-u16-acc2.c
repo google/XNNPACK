@@ -15,16 +15,14 @@
 #include <xnnpack/reduce.h>
 
 
-void xnn_f32_rsum_ukernel__wasmsimd_u16_acc2(
+float xnn_f32_rsum_ukernel__wasmsimd_u16_acc2(
     size_t batch,
     const float* input,
-    float* output,
     const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
-  assert(output != NULL);
 
   v128_t vacc0 = wasm_f32x4_const_splat(0.0f);
   v128_t vacc1 = wasm_f32x4_const_splat(0.0f);
@@ -60,5 +58,5 @@ void xnn_f32_rsum_ukernel__wasmsimd_u16_acc2(
   }
   const v128_t vscale = wasm_v128_load32_zero(&params->scalar.scale);
   vacc0 = wasm_f32x4_mul(vacc0, vscale);
-  wasm_v128_store32_lane(output, vacc0, 0);
+  return wasm_f32x4_extract_lane(vacc0, 0);
 }

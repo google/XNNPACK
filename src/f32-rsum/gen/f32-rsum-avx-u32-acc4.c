@@ -15,16 +15,14 @@
 #include <xnnpack/reduce.h>
 
 
-void xnn_f32_rsum_ukernel__avx_u32_acc4(
+float xnn_f32_rsum_ukernel__avx_u32_acc4(
     size_t batch,
     const float* input,
-    float* output,
     const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
-  assert(output != NULL);
 
   __m256 vacc0 = _mm256_setzero_ps();
   __m256 vacc1 = _mm256_setzero_ps();
@@ -62,5 +60,5 @@ void xnn_f32_rsum_ukernel__avx_u32_acc4(
   vacc = _mm_add_ps(vacc, _mm_movehl_ps(vacc, vacc));
   vacc = _mm_add_ss(vacc, _mm_movehdup_ps(vacc));
   vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->avx.scale));
-  _mm_store_ss(output, vacc);
+  return _mm_cvtss_f32(vacc);
 }

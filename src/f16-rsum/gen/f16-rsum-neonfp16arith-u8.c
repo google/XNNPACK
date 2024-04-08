@@ -15,19 +15,16 @@
 #include <xnnpack/reduce.h>
 
 
-void xnn_f16_rsum_ukernel__neonfp16arith_u8(
+uint16_t xnn_f16_rsum_ukernel__neonfp16arith_u8(
     size_t batch,
     const void* input,
-    void* output,
     const union xnn_f16_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
-  assert(output != NULL);
 
   const uint16_t* i = (const uint16_t*) input;
-  uint16_t* o = (uint16_t*) output;
   float16x8_t vacc0 = vreinterpretq_f16_u16(vmovq_n_u16(0));
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const float16x8_t vt = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
@@ -50,5 +47,5 @@ void xnn_f16_rsum_ukernel__neonfp16arith_u8(
     vacc = vadd_f16(vacc, vt);
   }
   vacc = vmul_f16(vacc, vscale);
-  vst1_lane_u16(o, vreinterpret_u16_f16(vacc), 0);
+  return vget_lane_u16(vreinterpret_u16_f16(vacc), 0);
 }

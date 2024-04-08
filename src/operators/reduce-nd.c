@@ -241,15 +241,19 @@ static enum xnn_status reshape_mean_nd(
   if (reduction_axis + 1 == num_input_dims) {
     // Reduction along the innermost dimension
 
-    mean_op->context.reduce = (struct reduce_context) {
+    mean_op->context.reduce = (struct rsum_context) {
         .input_stride = axis_dim << log2_data_element_size,
         .output_stride = UINT32_C(1) << log2_data_element_size,
         .scaled_elements = axis_dim << log2_data_element_size,
-        .ukernel = mean_op->reduce_config->ukernel,
+        .ukernel = mean_op->reduce_config->ukernel.rsum,
     };
     memcpy(&mean_op->context.reduce.params, scale_params, scale_params_size);
 
-    mean_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_reduce;
+    if (log2_data_element_size == 2) {
+      mean_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_reduce_f32;
+    } else {
+      mean_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_reduce_f16;
+    }
     mean_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
     mean_op->compute[0].range[0] = batch_like_dim;
     mean_op->compute[0].tile[0] = 2;

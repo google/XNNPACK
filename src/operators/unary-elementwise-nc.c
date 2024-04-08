@@ -33,7 +33,7 @@ static void init_unary_elementwise_nc(
 {
   assert(unary_elementwise_config != NULL);
   assert(unary_elementwise_config->ukernel != NULL);
-  assert(rminmax_config == NULL || rminmax_config->ukernel != NULL);
+  assert(rminmax_config == NULL || rminmax_config->ukernel.reduce != NULL);
 
   if (params_size != 0) {
     memcpy(&unary_elementwise_op->params, params, params_size);
@@ -1643,7 +1643,7 @@ enum xnn_status xnn_reshape_convert_nc_f16_qd8(
     .x_stride = input_stride * sizeof(uint16_t),
     .y_stride = output_stride,
     .batch_size = batch_size,
-    .rminmax_ukernel = convert_op->rminmax_config->ukernel,
+    .rminmax_ukernel = convert_op->rminmax_config->ukernel.reduce,
     .convert_ukernel = convert_op->unary_elementwise_config->ukernel,
     .init_params = convert_op->unary_elementwise_config->init.f16_qs8_cvt,
   };
@@ -1696,7 +1696,7 @@ enum xnn_status xnn_reshape_convert_nc_f32_qd8(
     .x_stride = input_stride * sizeof(float),
     .y_stride = output_stride,
     .batch_size = batch_size,
-    .rminmax_ukernel = convert_op->rminmax_config->ukernel,
+    .rminmax_ukernel = convert_op->rminmax_config->ukernel.reduce,
     .convert_ukernel = convert_op->unary_elementwise_config->ukernel,
     .init_params = convert_op->unary_elementwise_config->init.f32_qs8_cvt,
   };
