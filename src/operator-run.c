@@ -10,10 +10,12 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/compute.h>
+#include <xnnpack/config.h>
 #include <xnnpack/indirection.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
@@ -379,14 +381,10 @@ void xnn_compute_batched_packw_gemm_goi(
       /*extra_bytes=*/0, /*params=*/NULL);
 }
 
-void xnn_compute_grouped_gemm(
+void xnn_compute_hmp_grouped_gemm(
     const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t group_index,
-    size_t mr_block_start,
-    size_t nr_block_start,
-    size_t mr_block_size,
-    size_t nr_block_size)
-{
+    uint32_t uarch_index, size_t group_index, size_t mr_block_start,
+    size_t nr_block_start, size_t mr_block_size, size_t nr_block_size) {
   const size_t k_scaled  = context->k_scaled;
   const size_t a_stride  = context->a_stride;
   const size_t cm_stride = context->cm_stride;
@@ -407,10 +405,9 @@ void xnn_compute_grouped_gemm(
     group_index_b = (index % context->batch_dims_b[k]) +
                     context->batch_dims_b[k] * group_index_b;
   }
-
   if (context->quantization_params != NULL) {
     // If the effective `mr_block_size` is smaller than the kernel's `mr`,
-    // create a padded coppy of the quantization params.
+    // create a padded copy of the dynamic quantization params.
     const struct xnn_qd8_quantization_params* quantization_params =
         &context->quantization_params[group_index_a * context->gq_stride +
                                       mr_block_start];
@@ -425,7 +422,7 @@ void xnn_compute_grouped_gemm(
       quantization_params = padded_quantization_params;
     };
 
-    context->dq_ukernel.function[XNN_UARCH_DEFAULT](
+    context->dq_ukernel.function[uarch_index](
         mr_block_size, nr_block_size, k_scaled,
         (const void*)((uintptr_t)context->a + mr_block_start * a_stride +
                       group_index_a * context->ga_stride),
@@ -438,7 +435,7 @@ void xnn_compute_grouped_gemm(
                 group_index_c * context->gc_stride),
         cm_stride, context->cn_stride, &context->params, quantization_params);
   } else {
-    context->ukernel.function[XNN_UARCH_DEFAULT](
+    context->ukernel.function[uarch_index](
         mr_block_size, nr_block_size, k_scaled,
         (const void*)((uintptr_t)context->a + mr_block_start * a_stride +
                       group_index_a * context->ga_stride),
@@ -451,6 +448,15 @@ void xnn_compute_grouped_gemm(
                 group_index_c * context->gc_stride),
         cm_stride, context->cn_stride, &context->params);
   }
+}
+
+void xnn_compute_grouped_gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t group_index, size_t mr_block_start, size_t nr_block_start,
+    size_t mr_block_size, size_t nr_block_size) {
+  xnn_compute_hmp_grouped_gemm(context, XNN_UARCH_DEFAULT, group_index,
+                               mr_block_start, nr_block_start, mr_block_size,
+                               nr_block_size);
 }
 
 void xnn_compute_gemm(
@@ -2163,54 +2169,22 @@ void xnn_compute_rope(
 }
 
 #if XNN_MAX_UARCH_TYPES > 1
-  void xnn_compute_hmp_grouped_gemm(
-      const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-      uint32_t uarch_index,
-      size_t group_index,
-      size_t mr_block_start,
-      size_t nr_block_start,
-      size_t mr_block_size,
-      size_t nr_block_size)
-  {
-    const size_t k_scaled  = context->k_scaled;
-    const size_t a_stride  = context->a_stride;
-    const size_t cm_stride = context->cm_stride;
+void xnn_compute_hmp_gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    uint32_t uarch_index, size_t mr_block_start, size_t nr_block_start,
+    size_t mr_block_size, size_t nr_block_size) {
+  const size_t a_stride = context->a_stride;
+  const size_t cm_stride = context->cm_stride;
 
-    context->ukernel.function[uarch_index](
-        mr_block_size,
-        nr_block_size,
-        k_scaled,
-        (const void*) ((uintptr_t) context->a + mr_block_start * a_stride + group_index * context->ga_stride),
-        a_stride,
-        (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride + group_index * context->gw_stride),
-        (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize) + group_index * context->gc_stride),
-        cm_stride,
-        context->cn_stride,
-        &context->params);
-  }
-
-  void xnn_compute_hmp_gemm(
-      const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-      uint32_t uarch_index,
-      size_t mr_block_start,
-      size_t nr_block_start,
-      size_t mr_block_size,
-      size_t nr_block_size)
-  {
-    const size_t a_stride  = context->a_stride;
-    const size_t cm_stride = context->cm_stride;
-
-    context->ukernel.function[uarch_index](
-        mr_block_size,
-        nr_block_size,
-        context->k_scaled,
-        (const void*) ((uintptr_t) context->a + mr_block_start * a_stride),
-        a_stride,
-        (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride),
-        (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
-        cm_stride,
-        context->cn_stride,
-        context->fused_params);
+  context->ukernel.function[uarch_index](
+      mr_block_size, nr_block_size, context->k_scaled,
+      (const void*)((uintptr_t)context->a + mr_block_start * a_stride),
+      a_stride,
+      (const void*)((uintptr_t)context->packed_w +
+                    nr_block_start * context->w_stride),
+      (void*)((uintptr_t)context->c + mr_block_start * cm_stride +
+              (nr_block_start << context->log2_csize)),
+      cm_stride, context->cn_stride, context->fused_params);
   }
 
   void xnn_compute_hmp_dqgemm(

@@ -289,7 +289,8 @@ TEST_F(BatchMatrixMultiplyTestF16, matches_operator_api)
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(
+      workspace_size + XNN_EXTRA_BYTES);
   ASSERT_EQ(
     xnn_status_success,
     xnn_setup_batch_matrix_multiply_nc_f16(op, workspace.data(), input1.data(), input2.data(), operator_output.data()));
@@ -376,7 +377,8 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api)
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(
+      workspace_size + XNN_EXTRA_BYTES);
   ASSERT_EQ(
     xnn_status_success,
     xnn_setup_batch_matrix_multiply_nc_f32(op, workspace.data(), input1.data(), input2.data(), operator_output.data()));
@@ -463,7 +465,8 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api_transposed)
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(
+      workspace_size + XNN_EXTRA_BYTES);
   ASSERT_EQ(
     xnn_status_success,
     xnn_setup_batch_matrix_multiply_nc_f32(op, workspace.data(), input1.data(), input2.data(), operator_output.data()));
