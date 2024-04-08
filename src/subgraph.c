@@ -771,6 +771,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_max_pooling_2d:
       case xnn_node_type_negate:
       case xnn_node_type_prelu:
+      case xnn_node_type_reciprocal_square_root:
       case xnn_node_type_sigmoid:
       case xnn_node_type_softmax:
       case xnn_node_type_space_to_depth_2d:
