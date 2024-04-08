@@ -339,7 +339,8 @@ TEST_F(BatchMatrixMultiplyTestF16, matches_operator_api)
 
   // Check outputs match.
   for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
+    ASSERT_EQ(subgraph_output[i], operator_output[i])
+        << " at index " << i << " of " << operator_output.size();
   }
 }
 
@@ -427,7 +428,8 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api)
 
   // Check outputs match.
   for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
+    ASSERT_EQ(subgraph_output[i], operator_output[i])
+        << " at index " << i << " of " << operator_output.size();
   }
 }
 
@@ -515,7 +517,8 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api_transposed)
 
   // Check outputs match.
   for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
+    ASSERT_EQ(subgraph_output[i], operator_output[i])
+        << " at index " << i << " of " << operator_output.size();
   }
 }
 
