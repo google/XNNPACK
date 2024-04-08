@@ -4,10 +4,12 @@
 // LICENSE file in the root directory of this source tree.
 
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-$assert NR == 16
-$assert 1 <= MR <= 16
+$assert NR % 16 == 0
+$assert 16 <= NR <= 64
+$if DATATYPE == "QC8":
+  $assert NR == 16
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
-$assert DATATYPE in ["QD8_F32"]
+$assert DATATYPE in ["QD8_F32", "QC8"]
 #include <assert.h>
 
 #include <immintrin.h>
@@ -45,9 +47,9 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
     $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
       const int8_t* zero_data,
       const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)],
-      const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+      const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
     $else:
-      const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+      const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -61,13 +63,13 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
 // TODO: amxintrin.h only provide intrinsics for __x86_64__
 // Update if amxintrin changes
 #if defined(__x86_64__)
+  __attribute__((aligned(64))) int32_t vintile[${MR} * 16];
   $for N in range(0, NR, 16):
     __attribute__((aligned(64))) int32_t res${N // 16}[${MR} * 16];
-  $for N in range(0, NR, 16):
-    __attribute__((aligned(64))) int32_t vintile[${MR} * 16];
 
   kc = round_up_po2(kc, 4 * sizeof(${XINT8_T}));
   const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
+  const __mmask16 kremainder_mask = _cvtu32_mask16((UINT32_C(1) << (kremainder >> 2)) - 1);
 
   // Define tile config data structure
   struct __tile_config {
@@ -173,7 +175,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
 
       if XNN_UNLIKELY(k != 0) {
         $for M in range(MR):
-          const __m512i vin${M} = _mm512_loadu_epi32(a${M});
+          const __m512i vin${M} = _mm512_maskz_loadu_epi32(kremainder_mask, a${M});
           a${M} += kremainder;
           _mm512_store_epi32(vintile + ${M * 16}, vin${M});
         _tile_loadd(6, vintile, 64);

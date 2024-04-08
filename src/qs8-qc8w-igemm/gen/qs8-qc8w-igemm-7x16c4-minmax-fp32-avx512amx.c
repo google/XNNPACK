@@ -17,21 +17,19 @@
 #include <xnnpack/unaligned.h>
 
 
-void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512amx(
+void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_7x16c4__avx512amx(
     size_t mr,
     size_t nc,
     size_t kc,
     size_t ks,
     const int8_t** restrict a,
     const void* restrict w,
-    float* restrict c,
+    int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const int8_t* zero_data,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
-    const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qs8_qc8w_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 7);
@@ -87,34 +85,35 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512amx(
   //_tile_loadconfig(&tile_data);
   __asm__ volatile ("ldtilecfg %0" :: "m" (tile_data));
 
-  float* c0 = c;
-  float* c1 = (float*) ((uintptr_t) c0 + cm_stride);
+  int8_t* c0 = c;
+  int8_t* c1 = (int8_t*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {
     c1 = c0;
   }
-  float* c2 = (float*) ((uintptr_t) c1 + cm_stride);
+  int8_t* c2 = (int8_t*) ((uintptr_t) c1 + cm_stride);
   if XNN_UNPREDICTABLE(mr <= 2) {
     c2 = c1;
   }
-  float* c3 = (float*) ((uintptr_t) c2 + cm_stride);
+  int8_t* c3 = (int8_t*) ((uintptr_t) c2 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 4) {
     c3 = c2;
   }
-  float* c4 = (float*) ((uintptr_t) c3 + cm_stride);
+  int8_t* c4 = (int8_t*) ((uintptr_t) c3 + cm_stride);
   if XNN_UNPREDICTABLE(mr <= 4) {
     c4 = c3;
   }
-  float* c5 = (float*) ((uintptr_t) c4 + cm_stride);
+  int8_t* c5 = (int8_t*) ((uintptr_t) c4 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 6) {
     c5 = c4;
   }
-  float* c6 = (float*) ((uintptr_t) c5 + cm_stride);
+  int8_t* c6 = (int8_t*) ((uintptr_t) c5 + cm_stride);
   if XNN_UNPREDICTABLE(mr <= 6) {
     c6 = c5;
   }
 
-  const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
-  const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  const __m512 voutput_max_less_zero_point = _mm512_set1_ps(params->fp32_avx512vnni.output_max_less_zero_point);
+  const __m512i voutput_zero_point = _mm512_set1_epi32(params->fp32_avx512vnni.output_zero_point);
+  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx512vnni.output_min);
 
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_loadu_epi32((const int32_t*) w + 0);
@@ -130,44 +129,30 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512amx(
       const int8_t* restrict a0 = a[0];
       if XNN_UNPREDICTABLE(a0 != zero) {
         a0 = (const int8_t*) ((uintptr_t) a0 + a_offset);
-      } else {
-        a0 = zero_data;
       }
       const int8_t* restrict a1 = a[1];
       if XNN_UNPREDICTABLE(a1 != zero) {
         a1 = (const int8_t*) ((uintptr_t) a1 + a_offset);
-      } else {
-        a1 = zero_data;
       }
       const int8_t* restrict a2 = a[2];
       if XNN_UNPREDICTABLE(a2 != zero) {
         a2 = (const int8_t*) ((uintptr_t) a2 + a_offset);
-      } else {
-        a2 = zero_data;
       }
       const int8_t* restrict a3 = a[3];
       if XNN_UNPREDICTABLE(a3 != zero) {
         a3 = (const int8_t*) ((uintptr_t) a3 + a_offset);
-      } else {
-        a3 = zero_data;
       }
       const int8_t* restrict a4 = a[4];
       if XNN_UNPREDICTABLE(a4 != zero) {
         a4 = (const int8_t*) ((uintptr_t) a4 + a_offset);
-      } else {
-        a4 = zero_data;
       }
       const int8_t* restrict a5 = a[5];
       if XNN_UNPREDICTABLE(a5 != zero) {
         a5 = (const int8_t*) ((uintptr_t) a5 + a_offset);
-      } else {
-        a5 = zero_data;
       }
       const int8_t* restrict a6 = a[6];
       if XNN_UNPREDICTABLE(a6 != zero) {
         a6 = (const int8_t*) ((uintptr_t) a6 + a_offset);
-      } else {
-        a6 = zero_data;
       }
       a += 7;
 
@@ -238,20 +223,13 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512amx(
     // Add tile to bias
     _tile_stored(0, res0, 64);
 
-    __m512i vacc0x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params->zero_point));
-    __m512i vacc1x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params->zero_point));
-    __m512i vacc2x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params->zero_point));
-    __m512i vacc3x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params->zero_point));
-    __m512i vacc4x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params->zero_point));
-    __m512i vacc5x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params->zero_point));
-    __m512i vacc6x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params->zero_point));
-    vacc0x0123456789ABCDEF = _mm512_add_epi32(vacc0x0123456789ABCDEF, _mm512_load_epi32(res0 + 0));
-    vacc1x0123456789ABCDEF = _mm512_add_epi32(vacc1x0123456789ABCDEF, _mm512_load_epi32(res0 + 16));
-    vacc2x0123456789ABCDEF = _mm512_add_epi32(vacc2x0123456789ABCDEF, _mm512_load_epi32(res0 + 32));
-    vacc3x0123456789ABCDEF = _mm512_add_epi32(vacc3x0123456789ABCDEF, _mm512_load_epi32(res0 + 48));
-    vacc4x0123456789ABCDEF = _mm512_add_epi32(vacc4x0123456789ABCDEF, _mm512_load_epi32(res0 + 64));
-    vacc5x0123456789ABCDEF = _mm512_add_epi32(vacc5x0123456789ABCDEF, _mm512_load_epi32(res0 + 80));
-    vacc6x0123456789ABCDEF = _mm512_add_epi32(vacc6x0123456789ABCDEF, _mm512_load_epi32(res0 + 96));
+    __m512i vacc0x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 0));
+    __m512i vacc1x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 16));
+    __m512i vacc2x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 32));
+    __m512i vacc3x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 48));
+    __m512i vacc4x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 64));
+    __m512i vacc5x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 80));
+    __m512i vacc6x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 96));
 
     __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
     __m512 vscaled1x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc1x0123456789ABCDEF);
@@ -261,71 +239,85 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512amx(
     __m512 vscaled5x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc5x0123456789ABCDEF);
     __m512 vscaled6x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc6x0123456789ABCDEF);
 
-    vscaled0x0123456789ABCDEF = _mm512_mul_ps(vscaled0x0123456789ABCDEF, _mm512_set1_ps(quantization_params->inv_scale));
-    vscaled1x0123456789ABCDEF = _mm512_mul_ps(vscaled1x0123456789ABCDEF, _mm512_set1_ps(quantization_params->inv_scale));
-    vscaled2x0123456789ABCDEF = _mm512_mul_ps(vscaled2x0123456789ABCDEF, _mm512_set1_ps(quantization_params->inv_scale));
-    vscaled3x0123456789ABCDEF = _mm512_mul_ps(vscaled3x0123456789ABCDEF, _mm512_set1_ps(quantization_params->inv_scale));
-    vscaled4x0123456789ABCDEF = _mm512_mul_ps(vscaled4x0123456789ABCDEF, _mm512_set1_ps(quantization_params->inv_scale));
-    vscaled5x0123456789ABCDEF = _mm512_mul_ps(vscaled5x0123456789ABCDEF, _mm512_set1_ps(quantization_params->inv_scale));
-    vscaled6x0123456789ABCDEF = _mm512_mul_ps(vscaled6x0123456789ABCDEF, _mm512_set1_ps(quantization_params->inv_scale));
-
-    const __m512 vfilter_output_scale0123456789ABCDEF = _mm512_loadu_ps((const float*) w + 0);
-    w = (const int32_t*) w + 16;
-    const __m512 vbias0123456789ABCDEF = _mm512_loadu_ps((const float*) w + 0);
+    const __m512 vscale0123456789ABCDEF = _mm512_loadu_ps((const float*) w + 0);
     w = (const int32_t*) w + 16;
 
-    vscaled0x0123456789ABCDEF = _mm512_fmadd_ps(vscaled0x0123456789ABCDEF, vfilter_output_scale0123456789ABCDEF, vbias0123456789ABCDEF);
-    vscaled1x0123456789ABCDEF = _mm512_fmadd_ps(vscaled1x0123456789ABCDEF, vfilter_output_scale0123456789ABCDEF, vbias0123456789ABCDEF);
-    vscaled2x0123456789ABCDEF = _mm512_fmadd_ps(vscaled2x0123456789ABCDEF, vfilter_output_scale0123456789ABCDEF, vbias0123456789ABCDEF);
-    vscaled3x0123456789ABCDEF = _mm512_fmadd_ps(vscaled3x0123456789ABCDEF, vfilter_output_scale0123456789ABCDEF, vbias0123456789ABCDEF);
-    vscaled4x0123456789ABCDEF = _mm512_fmadd_ps(vscaled4x0123456789ABCDEF, vfilter_output_scale0123456789ABCDEF, vbias0123456789ABCDEF);
-    vscaled5x0123456789ABCDEF = _mm512_fmadd_ps(vscaled5x0123456789ABCDEF, vfilter_output_scale0123456789ABCDEF, vbias0123456789ABCDEF);
-    vscaled6x0123456789ABCDEF = _mm512_fmadd_ps(vscaled6x0123456789ABCDEF, vfilter_output_scale0123456789ABCDEF, vbias0123456789ABCDEF);
+    vscaled0x0123456789ABCDEF = _mm512_mul_ps(vscaled0x0123456789ABCDEF, vscale0123456789ABCDEF);
+    vscaled1x0123456789ABCDEF = _mm512_mul_ps(vscaled1x0123456789ABCDEF, vscale0123456789ABCDEF);
+    vscaled2x0123456789ABCDEF = _mm512_mul_ps(vscaled2x0123456789ABCDEF, vscale0123456789ABCDEF);
+    vscaled3x0123456789ABCDEF = _mm512_mul_ps(vscaled3x0123456789ABCDEF, vscale0123456789ABCDEF);
+    vscaled4x0123456789ABCDEF = _mm512_mul_ps(vscaled4x0123456789ABCDEF, vscale0123456789ABCDEF);
+    vscaled5x0123456789ABCDEF = _mm512_mul_ps(vscaled5x0123456789ABCDEF, vscale0123456789ABCDEF);
+    vscaled6x0123456789ABCDEF = _mm512_mul_ps(vscaled6x0123456789ABCDEF, vscale0123456789ABCDEF);
 
-    vscaled0x0123456789ABCDEF = _mm512_max_ps(vscaled0x0123456789ABCDEF, voutput_min);
-    vscaled1x0123456789ABCDEF = _mm512_max_ps(vscaled1x0123456789ABCDEF, voutput_min);
-    vscaled2x0123456789ABCDEF = _mm512_max_ps(vscaled2x0123456789ABCDEF, voutput_min);
-    vscaled3x0123456789ABCDEF = _mm512_max_ps(vscaled3x0123456789ABCDEF, voutput_min);
-    vscaled4x0123456789ABCDEF = _mm512_max_ps(vscaled4x0123456789ABCDEF, voutput_min);
-    vscaled5x0123456789ABCDEF = _mm512_max_ps(vscaled5x0123456789ABCDEF, voutput_min);
-    vscaled6x0123456789ABCDEF = _mm512_max_ps(vscaled6x0123456789ABCDEF, voutput_min);
+    vscaled0x0123456789ABCDEF = _mm512_min_ps(vscaled0x0123456789ABCDEF, voutput_max_less_zero_point);
+    vscaled1x0123456789ABCDEF = _mm512_min_ps(vscaled1x0123456789ABCDEF, voutput_max_less_zero_point);
+    vscaled2x0123456789ABCDEF = _mm512_min_ps(vscaled2x0123456789ABCDEF, voutput_max_less_zero_point);
+    vscaled3x0123456789ABCDEF = _mm512_min_ps(vscaled3x0123456789ABCDEF, voutput_max_less_zero_point);
+    vscaled4x0123456789ABCDEF = _mm512_min_ps(vscaled4x0123456789ABCDEF, voutput_max_less_zero_point);
+    vscaled5x0123456789ABCDEF = _mm512_min_ps(vscaled5x0123456789ABCDEF, voutput_max_less_zero_point);
+    vscaled6x0123456789ABCDEF = _mm512_min_ps(vscaled6x0123456789ABCDEF, voutput_max_less_zero_point);
 
-    vscaled0x0123456789ABCDEF = _mm512_min_ps(vscaled0x0123456789ABCDEF, voutput_max);
-    vscaled1x0123456789ABCDEF = _mm512_min_ps(vscaled1x0123456789ABCDEF, voutput_max);
-    vscaled2x0123456789ABCDEF = _mm512_min_ps(vscaled2x0123456789ABCDEF, voutput_max);
-    vscaled3x0123456789ABCDEF = _mm512_min_ps(vscaled3x0123456789ABCDEF, voutput_max);
-    vscaled4x0123456789ABCDEF = _mm512_min_ps(vscaled4x0123456789ABCDEF, voutput_max);
-    vscaled5x0123456789ABCDEF = _mm512_min_ps(vscaled5x0123456789ABCDEF, voutput_max);
-    vscaled6x0123456789ABCDEF = _mm512_min_ps(vscaled6x0123456789ABCDEF, voutput_max);
+    vacc0x0123456789ABCDEF = _mm512_cvtps_epi32(vscaled0x0123456789ABCDEF);
+    vacc1x0123456789ABCDEF = _mm512_cvtps_epi32(vscaled1x0123456789ABCDEF);
+    vacc2x0123456789ABCDEF = _mm512_cvtps_epi32(vscaled2x0123456789ABCDEF);
+    vacc3x0123456789ABCDEF = _mm512_cvtps_epi32(vscaled3x0123456789ABCDEF);
+    vacc4x0123456789ABCDEF = _mm512_cvtps_epi32(vscaled4x0123456789ABCDEF);
+    vacc5x0123456789ABCDEF = _mm512_cvtps_epi32(vscaled5x0123456789ABCDEF);
+    vacc6x0123456789ABCDEF = _mm512_cvtps_epi32(vscaled6x0123456789ABCDEF);
+
+    vacc0x0123456789ABCDEF = _mm512_add_epi32(vacc0x0123456789ABCDEF, voutput_zero_point);
+    vacc1x0123456789ABCDEF = _mm512_add_epi32(vacc1x0123456789ABCDEF, voutput_zero_point);
+    vacc2x0123456789ABCDEF = _mm512_add_epi32(vacc2x0123456789ABCDEF, voutput_zero_point);
+    vacc3x0123456789ABCDEF = _mm512_add_epi32(vacc3x0123456789ABCDEF, voutput_zero_point);
+    vacc4x0123456789ABCDEF = _mm512_add_epi32(vacc4x0123456789ABCDEF, voutput_zero_point);
+    vacc5x0123456789ABCDEF = _mm512_add_epi32(vacc5x0123456789ABCDEF, voutput_zero_point);
+    vacc6x0123456789ABCDEF = _mm512_add_epi32(vacc6x0123456789ABCDEF, voutput_zero_point);
+
+    __m128i vout0x0123456789ABCDEF = _mm512_cvtsepi32_epi8(vacc0x0123456789ABCDEF);
+    __m128i vout1x0123456789ABCDEF = _mm512_cvtsepi32_epi8(vacc1x0123456789ABCDEF);
+    __m128i vout2x0123456789ABCDEF = _mm512_cvtsepi32_epi8(vacc2x0123456789ABCDEF);
+    __m128i vout3x0123456789ABCDEF = _mm512_cvtsepi32_epi8(vacc3x0123456789ABCDEF);
+    __m128i vout4x0123456789ABCDEF = _mm512_cvtsepi32_epi8(vacc4x0123456789ABCDEF);
+    __m128i vout5x0123456789ABCDEF = _mm512_cvtsepi32_epi8(vacc5x0123456789ABCDEF);
+    __m128i vout6x0123456789ABCDEF = _mm512_cvtsepi32_epi8(vacc6x0123456789ABCDEF);
+
+    vout0x0123456789ABCDEF = _mm_max_epi8(vout0x0123456789ABCDEF, voutput_min);
+    vout1x0123456789ABCDEF = _mm_max_epi8(vout1x0123456789ABCDEF, voutput_min);
+    vout2x0123456789ABCDEF = _mm_max_epi8(vout2x0123456789ABCDEF, voutput_min);
+    vout3x0123456789ABCDEF = _mm_max_epi8(vout3x0123456789ABCDEF, voutput_min);
+    vout4x0123456789ABCDEF = _mm_max_epi8(vout4x0123456789ABCDEF, voutput_min);
+    vout5x0123456789ABCDEF = _mm_max_epi8(vout5x0123456789ABCDEF, voutput_min);
+    vout6x0123456789ABCDEF = _mm_max_epi8(vout6x0123456789ABCDEF, voutput_min);
 
     if XNN_LIKELY(nc >= 16) {
-      _mm512_storeu_ps(c6 + 0, vscaled6x0123456789ABCDEF);
-      c6 = (float*) ((uintptr_t) c6 + cn_stride);
-      _mm512_storeu_ps(c5 + 0, vscaled5x0123456789ABCDEF);
-      c5 = (float*) ((uintptr_t) c5 + cn_stride);
-      _mm512_storeu_ps(c4 + 0, vscaled4x0123456789ABCDEF);
-      c4 = (float*) ((uintptr_t) c4 + cn_stride);
-      _mm512_storeu_ps(c3 + 0, vscaled3x0123456789ABCDEF);
-      c3 = (float*) ((uintptr_t) c3 + cn_stride);
-      _mm512_storeu_ps(c2 + 0, vscaled2x0123456789ABCDEF);
-      c2 = (float*) ((uintptr_t) c2 + cn_stride);
-      _mm512_storeu_ps(c1 + 0, vscaled1x0123456789ABCDEF);
-      c1 = (float*) ((uintptr_t) c1 + cn_stride);
-      _mm512_storeu_ps(c0 + 0, vscaled0x0123456789ABCDEF);
-      c0 = (float*) ((uintptr_t) c0 + cn_stride);
-
+      _mm_storeu_si128((__m128i*) (c6 + 0), vout6x0123456789ABCDEF);
+      c6 = (int8_t*) ((uintptr_t) c6 + cn_stride);
+      _mm_storeu_si128((__m128i*) (c5 + 0), vout5x0123456789ABCDEF);
+      c5 = (int8_t*) ((uintptr_t) c5 + cn_stride);
+      _mm_storeu_si128((__m128i*) (c4 + 0), vout4x0123456789ABCDEF);
+      c4 = (int8_t*) ((uintptr_t) c4 + cn_stride);
+      _mm_storeu_si128((__m128i*) (c3 + 0), vout3x0123456789ABCDEF);
+      c3 = (int8_t*) ((uintptr_t) c3 + cn_stride);
+      _mm_storeu_si128((__m128i*) (c2 + 0), vout2x0123456789ABCDEF);
+      c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);
+      _mm_storeu_si128((__m128i*) (c1 + 0), vout1x0123456789ABCDEF);
+      c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
+      _mm_storeu_si128((__m128i*) (c0 + 0), vout0x0123456789ABCDEF);
+      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
       nc -= 16;
     } else {
-      // Prepare mask for valid 32-bit elements (depends on nc).
+      // Prepare mask for valid 8-bit elements (depends on nc).
       const __mmask16 vmask0 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 0) & 0xFFFF));
-      _mm512_mask_storeu_ps(c6 + 0, vmask0, vscaled6x0123456789ABCDEF);
-      _mm512_mask_storeu_ps(c5 + 0, vmask0, vscaled5x0123456789ABCDEF);
-      _mm512_mask_storeu_ps(c4 + 0, vmask0, vscaled4x0123456789ABCDEF);
-      _mm512_mask_storeu_ps(c3 + 0, vmask0, vscaled3x0123456789ABCDEF);
-      _mm512_mask_storeu_ps(c2 + 0, vmask0, vscaled2x0123456789ABCDEF);
-      _mm512_mask_storeu_ps(c1 + 0, vmask0, vscaled1x0123456789ABCDEF);
-      _mm512_mask_storeu_ps(c0 + 0, vmask0, vscaled0x0123456789ABCDEF);
+
+      _mm_mask_storeu_epi8(c6 + 0, vmask0, vout6x0123456789ABCDEF);
+      _mm_mask_storeu_epi8(c5 + 0, vmask0, vout5x0123456789ABCDEF);
+      _mm_mask_storeu_epi8(c4 + 0, vmask0, vout4x0123456789ABCDEF);
+      _mm_mask_storeu_epi8(c3 + 0, vmask0, vout3x0123456789ABCDEF);
+      _mm_mask_storeu_epi8(c2 + 0, vmask0, vout2x0123456789ABCDEF);
+      _mm_mask_storeu_epi8(c1 + 0, vmask0, vout1x0123456789ABCDEF);
+      _mm_mask_storeu_epi8(c0 + 0, vmask0, vout0x0123456789ABCDEF);
       nc = 0;
     }
   } while (nc != 0);
