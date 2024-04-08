@@ -1902,6 +1902,10 @@ typedef void (*xnn_u64_u32_vsqrtshift_ukernel_fn)(
 
 // VRSQRT: Vector Reciprocal SQuare RooT elementwise
 
+typedef void (*xnn_f16_vrsqrt_ukernel_fn)(
+    size_t batch, const void* input, void* output,
+    const union xnn_f16_rsqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 typedef void (*xnn_f32_vrsqrt_ukernel_fn)(
     size_t batch, const float* input, float* output,
     const union xnn_f32_rsqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
@@ -2652,6 +2656,9 @@ typedef size_t (*xnn_init_f16_sqrt_params_fn)(
 
 typedef size_t (*xnn_init_f32_sqrt_params_fn)(
   union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef size_t (*xnn_init_f16_rsqrt_params_fn)(
+  union xnn_f16_rsqrt_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f32_rsqrt_params_fn)(
   union xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]);

@@ -13,6 +13,7 @@ tools/generate-vunary-benchmark.py --spec test/f16-vrndd.yaml  --output bench/f1
 tools/generate-vunary-benchmark.py --spec test/f16-vrndne.yaml --output bench/f16-vrndne.cc &
 tools/generate-vunary-benchmark.py --spec test/f16-vrndu.yaml  --output bench/f16-vrndu.cc &
 tools/generate-vunary-benchmark.py --spec test/f16-vrndz.yaml  --output bench/f16-vrndz.cc &
+tools/generate-vunary-benchmark.py --spec test/f16-vrsqrt.yaml --output bench/f16-vrsqrt.cc &
 tools/generate-vunary-benchmark.py --spec test/f16-vsigmoid.yaml --output bench/f16-vsigmoid.cc &
 tools/generate-vunary-benchmark.py --spec test/f16-vsqr.yaml --output bench/f16-vsqr.cc &
 tools/generate-vunary-benchmark.py --spec test/f16-vsqrt.yaml --output bench/f16-vsqrt.cc &

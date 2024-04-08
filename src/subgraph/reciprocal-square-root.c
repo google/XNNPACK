@@ -30,6 +30,10 @@ static enum xnn_status create_reciprocal_square_root_operator(
 
   enum xnn_status status;
   switch (node->compute_type) {
+    case xnn_compute_type_fp16:
+      status = xnn_create_reciprocal_square_root_nc_f16(
+          node->flags, &opdata->operator_objects[0]);
+      break;
     case xnn_compute_type_fp32:
       status = xnn_create_reciprocal_square_root_nc_f32(
           node->flags, &opdata->operator_objects[0]);
@@ -54,6 +58,12 @@ static enum xnn_status reshape_reciprocal_square_root_operator(
   enum xnn_status status = xnn_status_invalid_state;
 
   switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_reciprocal_square_root_nc_f16:
+      status = xnn_reshape_reciprocal_square_root_nc_f16(
+          opdata->operator_objects[0], batch_size, /*channels=*/channel_dim,
+          /*input_stride=*/channel_dim, /*output_stride=*/channel_dim,
+          threadpool);
+      break;
     case xnn_operator_type_reciprocal_square_root_nc_f32:
       status = xnn_reshape_reciprocal_square_root_nc_f32(
           opdata->operator_objects[0], batch_size, /*channels=*/channel_dim,
@@ -90,6 +100,9 @@ static enum xnn_status setup_reciprocal_square_root_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_reciprocal_square_root_nc_f16:
+      return xnn_setup_reciprocal_square_root_nc_f16(
+          opdata->operator_objects[0], input_data, output_data);
     case xnn_operator_type_reciprocal_square_root_nc_f32:
       return xnn_setup_reciprocal_square_root_nc_f32(
           opdata->operator_objects[0], input_data, output_data);
@@ -124,6 +137,7 @@ enum xnn_status xnn_define_reciprocal_square_root(xnn_subgraph_t subgraph,
   }
 
   switch (input_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;
     default:
@@ -151,6 +165,9 @@ enum xnn_status xnn_define_reciprocal_square_root(xnn_subgraph_t subgraph,
 
   enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
+    case xnn_datatype_fp16:
+      compute_type = xnn_compute_type_fp16;
+      break;
     case xnn_datatype_fp32:
       compute_type = xnn_compute_type_fp32;
       break;

@@ -2393,6 +2393,9 @@ SET(ALL_F16C_MICROKERNEL_SRCS
   src/f16-vrnd/gen/f16-vrndu-f16c-u16.c
   src/f16-vrnd/gen/f16-vrndz-f16c-u8.c
   src/f16-vrnd/gen/f16-vrndz-f16c-u16.c
+  src/f16-vrsqrt/gen/f16-vrsqrt-f16c-rsqrt-u8.c
+  src/f16-vrsqrt/gen/f16-vrsqrt-f16c-rsqrt-u16.c
+  src/f16-vrsqrt/gen/f16-vrsqrt-f16c-rsqrt-u32.c
   src/f16-vsqrt/gen/f16-vsqrt-f16c-rsqrt-u8.c
   src/f16-vsqrt/gen/f16-vsqrt-f16c-rsqrt-u16.c
   src/f16-vsqrt/gen/f16-vsqrt-f16c-rsqrt-u32.c
@@ -4640,6 +4643,9 @@ SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vrnd/gen/f16-vrndu-neonfp16arith-u16.c
   src/f16-vrnd/gen/f16-vrndz-neonfp16arith-u8.c
   src/f16-vrnd/gen/f16-vrndz-neonfp16arith-u16.c
+  src/f16-vrsqrt/gen/f16-vrsqrt-neonfp16arith-rsqrt-u8.c
+  src/f16-vrsqrt/gen/f16-vrsqrt-neonfp16arith-rsqrt-u16.c
+  src/f16-vrsqrt/gen/f16-vrsqrt-neonfp16arith-rsqrt-u32.c
   src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-nr1fma-u8.c
   src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-nr1fma-u16.c
   src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-nr1fma-u24.c

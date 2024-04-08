@@ -497,6 +497,14 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f16_vrsqrt_test",
+    srcs = [
+        "f16-vrsqrt.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [":vunary_microkernel_tester"],
+)
+
+xnnpack_unit_test(
     name = "f16_vsqrt_test",
     srcs = [
         "f16-vsqrt.cc",

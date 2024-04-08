@@ -199,6 +199,7 @@ tools/generate-vunary-test.py --spec test/f16-vrndne.yaml --output test/f16-vrnd
 tools/generate-vunary-test.py --spec test/f16-vrndz.yaml  --output test/f16-vrndz.cc &
 tools/generate-vunary-test.py --spec test/f16-vrndu.yaml  --output test/f16-vrndu.cc &
 tools/generate-vunary-test.py --spec test/f16-vrndd.yaml  --output test/f16-vrndd.cc &
+tools/generate-vunary-test.py --spec test/f16-vrsqrt.yaml --output test/f16-vrsqrt.cc &
 tools/generate-vunary-test.py --spec test/f16-vsigmoid.yaml --output test/f16-vsigmoid.cc &
 tools/generate-vunary-test.py --spec test/f16-vsqrt.yaml --output test/f16-vsqrt.cc &
 tools/generate-vunary-test.py --spec test/f16-vtanh.yaml --output test/f16-vtanh.cc &

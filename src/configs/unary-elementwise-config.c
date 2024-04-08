@@ -31,6 +31,7 @@ static struct xnn_unary_elementwise_config f16_rndd_config = {0};
 static struct xnn_unary_elementwise_config f16_rndne_config = {0};
 static struct xnn_unary_elementwise_config f16_rndu_config = {0};
 static struct xnn_unary_elementwise_config f16_rndz_config = {0};
+static struct xnn_unary_elementwise_config f16_rsqrt_config = {0};
 static struct xnn_unary_elementwise_config f16_sigmoid_config = {0};
 static struct xnn_unary_elementwise_config f16_sqr_config = {0};
 static struct xnn_unary_elementwise_config f16_sqrt_config = {0};
@@ -80,6 +81,7 @@ static struct xnn_unary_elementwise_config xx_copy_config = {0};
   static INIT_ONCE init_guard_f16_rndne = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f16_rndu = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f16_rndz = INIT_ONCE_STATIC_INIT;
+  static INIT_ONCE init_guard_f16_rsqrt = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f16_sigmoid = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f16_sqr = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f16_sqrt = INIT_ONCE_STATIC_INIT;
@@ -127,6 +129,7 @@ static struct xnn_unary_elementwise_config xx_copy_config = {0};
   static pthread_once_t init_guard_f16_rndne = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f16_rndu = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f16_rndz = PTHREAD_ONCE_INIT;
+  static pthread_once_t init_guard_f16_rsqrt = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f16_sigmoid = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f16_sqr = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f16_sqrt = PTHREAD_ONCE_INIT;
@@ -418,6 +421,31 @@ static void init_f16_rndz_config(void) {
     if (hardware_config->use_x86_f16c) {
       f16_rndz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vrndz_ukernel__f16c_u16;
       f16_rndz_config.element_tile = 16;
+    }
+  #endif
+}
+
+static void init_f16_rsqrt_config(void) {
+  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_arm_neon_fp16_arith) {
+      f16_rsqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vrsqrt_ukernel__neonfp16arith_rsqrt_u16;
+      f16_rsqrt_config.element_tile = 16;
+    }
+  #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_arm_neon_fp16_arith) {
+      f16_rsqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vrsqrt_ukernel__neonfp16arith_rsqrt_u16;
+      f16_rsqrt_config.element_tile = 16;
+    }
+  #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_x86_f16c) {
+      f16_rsqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vrsqrt_ukernel__f16c_rsqrt_u32;
+      f16_rsqrt_config.element_tile = 32;
     }
   #endif
 }
@@ -2376,6 +2404,11 @@ static void init_xx_copy_config(void) {
     return TRUE;
   }
 
+  static BOOL CALLBACK init_f16_rsqrt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
+    init_f16_rsqrt_config();
+    return TRUE;
+  }
+
   static BOOL CALLBACK init_f16_sigmoid_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
     init_f16_sigmoid_config();
     return TRUE;
@@ -2688,6 +2721,19 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_rndz_config() {
     pthread_once(&init_guard_f16_rndz, &init_f16_rndz_config);
   #endif
   return &f16_rndz_config;
+}
+
+const struct xnn_unary_elementwise_config* xnn_init_f16_rsqrt_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
+    return NULL;
+  }
+  #if XNN_PLATFORM_WINDOWS
+    InitOnceExecuteOnce(&init_guard_f16_rsqrt, &init_f16_rsqrt_config_windows, NULL, NULL);
+  #else
+    pthread_once(&init_guard_f16_rsqrt, &init_f16_rsqrt_config);
+  #endif
+  return &f16_rsqrt_config;
 }
 
 const struct xnn_unary_elementwise_config* xnn_init_f16_sigmoid_config() {

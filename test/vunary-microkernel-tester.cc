@@ -265,6 +265,15 @@ void VUnaryMicrokernelTester::Test(
 }
 
 void VUnaryMicrokernelTester::Test(
+    xnn_f16_vrsqrt_ukernel_fn vrsqrt,
+    xnn_init_f16_rsqrt_params_fn init_params) const {
+  TestFP16(
+      vrsqrt, InitParamsWrapper(init_params),
+      [](float x) { return 1.0f / std::sqrt(x); }, TolMixed(1.0e-4f, 5.0e-3f),
+      1.0e-4f, 10.0f);
+}
+
+void VUnaryMicrokernelTester::Test(
     xnn_f32_vrsqrt_ukernel_fn vrsqrt,
     xnn_init_f32_rsqrt_params_fn init_params) const {
   TestFP32(

@@ -1070,6 +1070,15 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f16_vrsqrt_bench",
+    srcs = [
+        "f16-vrsqrt.cc",
+        "f16-vunary-benchmark.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f32_vsqrt_bench",
     srcs = [
         "f32-vsqrt.cc",

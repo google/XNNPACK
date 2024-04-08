@@ -1,0 +1,14 @@
+# Copyright 2024 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# ARM NEON+FP16ARITH: hardware square root
+- name: xnn_f16_vrsqrt_ukernel__neonfp16arith_rsqrt_u8
+- name: xnn_f16_vrsqrt_ukernel__neonfp16arith_rsqrt_u16
+- name: xnn_f16_vrsqrt_ukernel__neonfp16arith_rsqrt_u32
+
+# x86 AVX F16C
+- name: xnn_f16_vrsqrt_ukernel__f16c_rsqrt_u8
+- name: xnn_f16_vrsqrt_ukernel__f16c_rsqrt_u16
+- name: xnn_f16_vrsqrt_ukernel__f16c_rsqrt_u32

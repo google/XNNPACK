@@ -5693,6 +5693,17 @@ enum xnn_status xnn_run_square_root_nc_f32(
   uint32_t flags,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_reciprocal_square_root_nc_f16(
+    uint32_t flags, xnn_operator_t* sqrt_op_out);
+
+enum xnn_status xnn_reshape_reciprocal_square_root_nc_f16(
+    xnn_operator_t sqrt_op, size_t batch_size, size_t channels,
+    size_t input_stride, size_t output_stride, pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_reciprocal_square_root_nc_f16(xnn_operator_t sqrt_op,
+                                                        const void* input,
+                                                        void* output);
+
 enum xnn_status xnn_create_reciprocal_square_root_nc_f32(
     uint32_t flags, xnn_operator_t* sqrt_op_out);
 

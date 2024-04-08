@@ -199,6 +199,9 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f32_vsqrt_ukernel_fn vsqrt,
             xnn_init_f32_sqrt_params_fn init_params = nullptr) const;
 
+  void Test(xnn_f16_vrsqrt_ukernel_fn vrsqrt,
+            xnn_init_f16_rsqrt_params_fn init_params = nullptr) const;
+
   void Test(xnn_f32_vrsqrt_ukernel_fn vrsqrt,
             xnn_init_f32_rsqrt_params_fn init_params = nullptr) const;
 
