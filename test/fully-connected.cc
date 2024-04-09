@@ -171,8 +171,8 @@ TEST_F(FullyConnectedTestQC8, define)
 
   uint32_t bias_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint32, 0, 1.0f, bias_dims.size(), bias_dims.data(), bias.data(),
+    xnn_status_success, xnn_define_channelwise_quantized_tensor_value(
+                          subgraph, xnn_datatype_qcint32, scale.data(), bias_dims.size(), 0, bias_dims.data(), bias.data(),
                           /*external_id=*/2, /*flags=*/0, &bias_id));
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
@@ -759,8 +759,8 @@ TEST_F(FullyConnectedTestQC8, matches_operator_api)
 
   uint32_t bias_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint32, 0, kernel_scale, bias_dims.size(), bias_dims.data(),
+    xnn_status_success, xnn_define_channelwise_quantized_tensor_value(
+                          subgraph, xnn_datatype_qcint32, requantization_scales.data(), bias_dims.size(), 0, bias_dims.data(),
                           bias.data(), /*external_id=*/2, /*flags=*/0, &bias_id));
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
