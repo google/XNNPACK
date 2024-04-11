@@ -5159,6 +5159,12 @@ SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-neonv8-ld128-u16.c)
 
 SET(ALL_RVV_MICROKERNEL_SRCS
+  src/f32-gemm/gen/f32-gemm-1x4v-minmax-rvv.c
+  src/f32-gemm/gen/f32-gemm-1x4v-relu-rvv.c
+  src/f32-gemm/gen/f32-gemm-1x4v-rvv.c
+  src/f32-gemm/gen/f32-gemm-7x4v-minmax-rvv.c
+  src/f32-gemm/gen/f32-gemm-7x4v-relu-rvv.c
+  src/f32-gemm/gen/f32-gemm-7x4v-rvv.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-rvv-rr2-p6-u2v.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-rvv-rr2-p6-u4v.c
   src/f32-rminmax/gen/f32-rmax-rvv-u1v.c
