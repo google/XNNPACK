@@ -24,8 +24,8 @@ $if PREFETCH:
 
 $GFNI = 0
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8_F32": "qd8_f32_qc8w", "QC4_F32": "qd8_f32_qc4w"}[DATATYPE]
-$REQUANTIZATION_SPEC = "" if DATATYPE in ["QD8_F32", "QC4_F32"] else "_" + REQUANTIZATION.lower()
-$PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx512vnni" if REQUANTIZATION else "avx512vnni"
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx512"
+$REQUANTIZATION_SPEC = "" if DATATYPE == "QD8_F32" else "_" + REQUANTIZATION.lower()
 $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8_F32": "xnn_f32_minmax_params"}[DATATYPE]
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $OUT_T = "float" if DATATYPE in ["QD8_F32", "QC4"] else XINT8_T
