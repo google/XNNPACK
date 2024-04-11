@@ -2045,6 +2045,35 @@ BENCHMARK_CONV(f32_igemm_1x4__scalar)
 BENCHMARK_CONV(f32_igemm_2x4__scalar)
 BENCHMARK_CONV(f32_igemm_4x4__scalar)
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  static void f32_igemm_1x4v__rvv(benchmark::State& state, const char* net) {
+    size_t vlenb = 0;
+    asm volatile("csrr %0, vlenb" : "=r"(vlenb));
+    // LMUL=4
+    size_t nr = vlenb * 1.0;
+    f32_igemm(state,
+      xnn_f32_igemm_minmax_ukernel_1x4v__rvv,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/1, /*nr=*/nr, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckRVV);
+  }
+
+  static void f32_igemm_7x4v__rvv(benchmark::State& state, const char* net) {
+    size_t vlenb = 0;
+    asm volatile("csrr %0, vlenb" : "=r"(vlenb));
+    // LMUL=4
+    size_t nr = vlenb * 1.0;
+    f32_igemm(state,
+      xnn_f32_igemm_minmax_ukernel_7x4v__rvv,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/7, /*nr=*/nr, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckRVV);
+  }
+
+  BENCHMARK_CONV(f32_igemm_1x4v__rvv)
+  BENCHMARK_CONV(f32_igemm_7x4v__rvv)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif
