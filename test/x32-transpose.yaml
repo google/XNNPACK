@@ -49,6 +49,11 @@
 - name: xnn_x32_transposec_ukernel__4x4_reuse_mov_wasmsimd
 - name: xnn_x32_transposec_ukernel__4x4_reuse_multi_wasmsimd
 - name: xnn_x32_transposec_ukernel__4x4_reuse_switch_wasmsimd
+# RISC-V VECTOR
+- name: xnn_x32_transposec_ukernel__4x4_rvv
+- name: xnn_x32_transposec_ukernel__8x8_rvv
+- name: xnn_x32_transposec_ukernel__16x8_rvv
+- name: xnn_x32_transposec_ukernel__32x8_rvv
 # ARM NEON
 - name: xnn_x32_transposec_ukernel__2x2_multi_dec_zip_neon
 - name: xnn_x32_transposec_ukernel__2x2_multi_mov_zip_neon

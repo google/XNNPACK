@@ -5244,7 +5244,11 @@ SET(ALL_RVV_MICROKERNEL_SRCS
   src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u1v.c
   src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u2v.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u1v.c
-  src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u2v.c)
+  src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u2v.c
+  src/x32-transposec/gen/x32-transposec-4x4-rvv.c
+  src/x32-transposec/gen/x32-transposec-8x8-rvv.c
+  src/x32-transposec/gen/x32-transposec-16x8-rvv.c
+  src/x32-transposec/gen/x32-transposec-32x8-rvv.c)
 
 SET(ALL_RVVFP16ARITH_MICROKERNEL_SRCS
   src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u1v.c
