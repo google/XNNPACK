@@ -5184,6 +5184,12 @@ ALL_NEONV8_MICROKERNEL_SRCS = [
 ]
 
 ALL_RVV_MICROKERNEL_SRCS = [
+    "src/f32-gemm/gen/f32-gemm-1x4v-minmax-rvv.c",
+    "src/f32-gemm/gen/f32-gemm-1x4v-relu-rvv.c",
+    "src/f32-gemm/gen/f32-gemm-1x4v-rvv.c",
+    "src/f32-gemm/gen/f32-gemm-7x4v-minmax-rvv.c",
+    "src/f32-gemm/gen/f32-gemm-7x4v-relu-rvv.c",
+    "src/f32-gemm/gen/f32-gemm-7x4v-rvv.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-rvv-rr2-p6-u2v.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-rvv-rr2-p6-u4v.c",
     "src/f32-rminmax/gen/f32-rmax-rvv-u1v.c",
@@ -5264,6 +5270,10 @@ ALL_RVV_MICROKERNEL_SRCS = [
     "src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u2v.c",
     "src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u1v.c",
     "src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u2v.c",
+    "src/x32-transposec/gen/x32-transposec-4x4-rvv.c",
+    "src/x32-transposec/gen/x32-transposec-8x8-rvv.c",
+    "src/x32-transposec/gen/x32-transposec-16x8-rvv.c",
+    "src/x32-transposec/gen/x32-transposec-32x8-rvv.c",
 ]
 
 ALL_RVVFP16ARITH_MICROKERNEL_SRCS = [
