@@ -128,9 +128,6 @@ void* xnn_internal_weights_cache_offset_to_addr(struct xnn_internal_weights_cach
 
 enum xnn_status xnn_internal_delete_weights_cache(struct xnn_internal_weights_cache* weights_cache);
 
-// Wrapper function of the function pointers in `xnn_weights_cache_t`.
-bool xnn_weights_cache_is_finalized(xnn_weights_cache_t cache);
-
 size_t xnn_look_up_or_insert_weights_cache(
   xnn_weights_cache_t cache, const struct xnn_weights_cache_look_up_key* cache_key, void* ptr, size_t size);
 
