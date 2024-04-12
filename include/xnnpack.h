@@ -1905,6 +1905,9 @@ enum xnn_status xnn_finalize_weights_cache(
   xnn_weights_cache_t weights_cache,
   enum xnn_weights_cache_finalization_kind finalization_kind);
 
+// Wrapper function of the function pointers in `xnn_weights_cache_t`.
+bool xnn_weights_cache_is_finalized(xnn_weights_cache_t cache);
+
 /// Destroy a weights cache object, as well as memory used for the cache.
 /// @param weights_cache - the weights cache object to destroy.
 enum xnn_status xnn_delete_weights_cache(xnn_weights_cache_t weights_cache);
