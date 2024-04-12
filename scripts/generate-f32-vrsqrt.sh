@@ -33,4 +33,9 @@ tools/xngen src/f32-vrsqrt/avx512f-rsqrt.c.in -D BATCH_TILE=16  -o src/f32-vrsqr
 tools/xngen src/f32-vrsqrt/avx512f-rsqrt.c.in -D BATCH_TILE=32  -o src/f32-vrsqrt/gen/f32-vrsqrt-avx512f-rsqrt-u32.c &
 tools/xngen src/f32-vrsqrt/avx512f-rsqrt.c.in -D BATCH_TILE=64  -o src/f32-vrsqrt/gen/f32-vrsqrt-avx512f-rsqrt-u64.c &
 
+################################## WAsm SIMD ##################################
+tools/xngen src/f32-vrsqrt/wasmsimd-rsqrt.c.in -D BATCH_TILE=4  -o src/f32-vrsqrt/gen/f32-vrsqrt-wasmsimd-rsqrt-u4.c &
+tools/xngen src/f32-vrsqrt/wasmsimd-rsqrt.c.in -D BATCH_TILE=8  -o src/f32-vrsqrt/gen/f32-vrsqrt-wasmsimd-rsqrt-u8.c &
+tools/xngen src/f32-vrsqrt/wasmsimd-rsqrt.c.in -D BATCH_TILE=16 -o src/f32-vrsqrt/gen/f32-vrsqrt-wasmsimd-rsqrt-u16.c &
+
 wait
