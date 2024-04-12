@@ -690,7 +690,6 @@ TEST_F(FullyConnectedTestQC8, matches_operator_api)
   std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0xA5));
   const int8_t input_zero_point = -1;
   const float input_scale = scale_dist(rng);
-  const float kernel_scale = scale_dist(rng);
   std::vector<float> requantization_scales(output_channels, 1.0f);
   std::generate(requantization_scales.begin(), requantization_scales.end(), [&]() { return f32dist(rng); });
 
