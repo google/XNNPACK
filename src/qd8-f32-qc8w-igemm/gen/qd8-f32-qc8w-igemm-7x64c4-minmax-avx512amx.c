@@ -181,40 +181,60 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x64c4__avx512amx(
       a += 7;
 
       size_t k = kc;
-      while (k >= 64 * sizeof(int8_t)) {
-        const __m512i vin0 = _mm512_loadu_epi32(a0);
-        a0 += 64;
-        _mm512_store_epi32(vintile + 0, vin0);
-        const __m512i vin1 = _mm512_loadu_epi32(a1);
-        a1 += 64;
-        _mm512_store_epi32(vintile + 16, vin1);
-        const __m512i vin2 = _mm512_loadu_epi32(a2);
-        a2 += 64;
-        _mm512_store_epi32(vintile + 32, vin2);
-        const __m512i vin3 = _mm512_loadu_epi32(a3);
-        a3 += 64;
-        _mm512_store_epi32(vintile + 48, vin3);
-        const __m512i vin4 = _mm512_loadu_epi32(a4);
-        a4 += 64;
-        _mm512_store_epi32(vintile + 64, vin4);
-        const __m512i vin5 = _mm512_loadu_epi32(a5);
-        a5 += 64;
-        _mm512_store_epi32(vintile + 80, vin5);
-        const __m512i vin6 = _mm512_loadu_epi32(a6);
-        a6 += 64;
-        _mm512_store_epi32(vintile + 96, vin6);
-        _tile_loadd(4, vintile, 64);
-        _tile_loadd(5, (const int8_t*) w + 0, 256);
-        _tile_dpbssd(0, 4, 5);
-        _tile_loadd(5, (const int8_t*) w + 64, 256);
-        _tile_dpbssd(1, 4, 5);
-        _tile_loadd(5, (const int8_t*) w + 128, 256);
-        _tile_dpbssd(2, 4, 5);
-        _tile_loadd(5, (const int8_t*) w + 192, 256);
-        _tile_dpbssd(3, 4, 5);
+      if (mr == 1)
+      {
+        while (k >= 64 * sizeof(int8_t)) {
+          _tile_loadd(4, a0, 64);   // Directly load input for mr=1
+          a6 += 64;
+          _tile_loadd(5, (const int8_t*) w + 0, 256);
+          _tile_dpbssd(0, 4, 5);
+          _tile_loadd(5, (const int8_t*) w + 64, 256);
+          _tile_dpbssd(1, 4, 5);
+          _tile_loadd(5, (const int8_t*) w + 128, 256);
+          _tile_dpbssd(2, 4, 5);
+          _tile_loadd(5, (const int8_t*) w + 192, 256);
+          _tile_dpbssd(3, 4, 5);
 
-        w = (const int8_t*) w + 4096;
-        k -= 64 * sizeof(int8_t);
+          w = (const int8_t*) w + 4096;
+          k -= 64 * sizeof(int8_t);
+        }
+      }
+      else {
+        while (k >= 64 * sizeof(int8_t)) {
+          const __m512i vin0 = _mm512_loadu_epi32(a0);
+          a0 += 64;
+          _mm512_store_epi32(vintile + 0, vin0);
+          const __m512i vin1 = _mm512_loadu_epi32(a1);
+          a1 += 64;
+          _mm512_store_epi32(vintile + 16, vin1);
+          const __m512i vin2 = _mm512_loadu_epi32(a2);
+          a2 += 64;
+          _mm512_store_epi32(vintile + 32, vin2);
+          const __m512i vin3 = _mm512_loadu_epi32(a3);
+          a3 += 64;
+          _mm512_store_epi32(vintile + 48, vin3);
+          const __m512i vin4 = _mm512_loadu_epi32(a4);
+          a4 += 64;
+          _mm512_store_epi32(vintile + 64, vin4);
+          const __m512i vin5 = _mm512_loadu_epi32(a5);
+          a5 += 64;
+          _mm512_store_epi32(vintile + 80, vin5);
+          const __m512i vin6 = _mm512_loadu_epi32(a6);
+          a6 += 64;
+          _mm512_store_epi32(vintile + 96, vin6);
+          _tile_loadd(4, vintile, 64);
+          _tile_loadd(5, (const int8_t*) w + 0, 256);
+          _tile_dpbssd(0, 4, 5);
+          _tile_loadd(5, (const int8_t*) w + 64, 256);
+          _tile_dpbssd(1, 4, 5);
+          _tile_loadd(5, (const int8_t*) w + 128, 256);
+          _tile_dpbssd(2, 4, 5);
+          _tile_loadd(5, (const int8_t*) w + 192, 256);
+          _tile_dpbssd(3, 4, 5);
+
+          w = (const int8_t*) w + 4096;
+          k -= 64 * sizeof(int8_t);
+        }
       }
 
       if XNN_UNLIKELY(k != 0) {

@@ -6,6 +6,7 @@
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 $assert NR % 16 == 0
 $assert 16 <= NR <= 64
+$assert 1 <= MR <= 16
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
 $assert DATATYPE in ["QD8_F32", "QC8"]
 #include <assert.h>
@@ -154,22 +155,42 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
       a += ${MR};
 
       size_t k = kc;
-      while (k >= 64 * sizeof(int8_t)) {
-        $for M in range(MR):
-          const __m512i vin${M} = _mm512_loadu_epi32(a${M});
+      $if MR > 1:
+        if (mr == 1)
+      {
+        while (k >= 64 * sizeof(int8_t)) {
+          _tile_loadd(4, a0, 64);   // Directly load input for mr=1
           a${M} += 64;
-          _mm512_store_epi32(vintile + ${M * 16}, vin${M});
-        _tile_loadd(4, vintile, 64);
-        $for N in range(0, NR, 16):
-          _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
-          _tile_dpbssd(${N // 16}, 4, 5);
-        $if PREFETCH:
-          $for P in range(4096, 5120 + NR // 16 * 1024, 64):
-            xnn_prefetch_to_l1((const int8_t*) w + ${P});
+          $for N in range(0, NR, 16):
+            _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
+            _tile_dpbssd(${N // 16}, 4, 5);
+          $if PREFETCH:
+            $for P in range(4096, 5120 + NR // 16 * 1024, 64):
+              xnn_prefetch_to_l1((const int8_t*) w + ${P});
 
-        w = (const int8_t*) w + ${NR // 16 * 1024};
-        k -= 64 * sizeof(int8_t);
+          w = (const int8_t*) w + ${NR // 16 * 1024};
+          k -= 64 * sizeof(int8_t);
+        }
       }
+      $if MR > 1:
+        else {
+          while (k >= 64 * sizeof(int8_t)) {
+            $for M in range(MR):
+              const __m512i vin${M} = _mm512_loadu_epi32(a${M});
+              a${M} += 64;
+              _mm512_store_epi32(vintile + ${M * 16}, vin${M});
+            _tile_loadd(4, vintile, 64);
+            $for N in range(0, NR, 16):
+              _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
+              _tile_dpbssd(${N // 16}, 4, 5);
+            $if PREFETCH:
+              $for P in range(4096, 5120 + NR // 16 * 1024, 64):
+                xnn_prefetch_to_l1((const int8_t*) w + ${P});
+
+            w = (const int8_t*) w + ${NR // 16 * 1024};
+            k -= 64 * sizeof(int8_t);
+          }
+        }
 
       if XNN_UNLIKELY(k != 0) {
         $for M in range(MR):

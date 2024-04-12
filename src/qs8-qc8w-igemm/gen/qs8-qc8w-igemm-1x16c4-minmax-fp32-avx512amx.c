@@ -109,16 +109,16 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x16c4__avx512amx(
       a += 1;
 
       size_t k = kc;
-      while (k >= 64 * sizeof(int8_t)) {
-        const __m512i vin0 = _mm512_loadu_epi32(a0);
-        a0 += 64;
-        _mm512_store_epi32(vintile + 0, vin0);
-        _tile_loadd(4, vintile, 64);
-        _tile_loadd(5, (const int8_t*) w + 0, 64);
-        _tile_dpbssd(0, 4, 5);
+      {
+        while (k >= 64 * sizeof(int8_t)) {
+          _tile_loadd(4, a0, 64);   // Directly load input for mr=1
+          a0 += 64;
+          _tile_loadd(5, (const int8_t*) w + 0, 64);
+          _tile_dpbssd(0, 4, 5);
 
-        w = (const int8_t*) w + 1024;
-        k -= 64 * sizeof(int8_t);
+          w = (const int8_t*) w + 1024;
+          k -= 64 * sizeof(int8_t);
+        }
       }
 
       if XNN_UNLIKELY(k != 0) {
