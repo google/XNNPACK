@@ -23,8 +23,8 @@ void xnn_x8_transposec_ukernel__2x1_scalar_int(
     size_t block_height,
     const union xnn_x8_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(output_stride >= block_height * sizeof(int8_t));
-  assert(input_stride >= block_width * sizeof(int8_t));
+  assert(block_width == 1 || output_stride >= block_height * sizeof(int8_t));
+  assert(block_height == 1 || input_stride >= block_width * sizeof(int8_t));
 
   const size_t tile_height = 2;
   const size_t tile_width = 1;

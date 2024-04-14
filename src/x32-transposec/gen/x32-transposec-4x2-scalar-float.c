@@ -23,8 +23,8 @@ void xnn_x32_transposec_ukernel__4x2_scalar_float(
     size_t block_height,
     const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(output_stride >= block_height * sizeof(float));
-  assert(input_stride >= block_width * sizeof(float));
+  assert(block_width == 1 || output_stride >= block_height * sizeof(float));
+  assert(block_height == 1 || input_stride >= block_width * sizeof(float));
 
   const size_t tile_height = 4;
   const size_t tile_width = 2;
