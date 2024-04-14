@@ -1987,6 +1987,18 @@ size_t xnn_init_f16_minmax_avxvnni_params(
   params->avxvnni.sign_mask = 0x80;
   return sizeof(params->avxvnni);
 }
+
+size_t xnn_init_f16_minmax_scalar_params(
+  union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t min,
+  uint16_t max)
+{
+  const float min_f32 = fp16_ieee_to_fp32_value(min);
+  const float max_f32 = fp16_ieee_to_fp32_value(max);
+  params->scalar.min = min_f32;
+  params->scalar.max = max_f32;
+  return sizeof(params->scalar);
+}
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

@@ -378,6 +378,7 @@ DECLARE_INIT_BF16_MINMAX_PARAMS_FUNCTION(xnn_init_bf16_minmax_scalar_params)
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_F16_MINMAX_PARAMS_FUNCTION(xnn_init_f16_minmax_avx_params)
   DECLARE_INIT_F16_MINMAX_PARAMS_FUNCTION(xnn_init_f16_minmax_avxvnni_params)
+  DECLARE_INIT_F16_MINMAX_PARAMS_FUNCTION(xnn_init_f16_minmax_scalar_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 

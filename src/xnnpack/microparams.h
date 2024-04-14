@@ -130,6 +130,10 @@ union xnn_f16_minmax_params {
     float max;
     int8_t sign_mask;
   } avxvnni;
+  struct {
+    float min;
+    float max;
+  } scalar;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
