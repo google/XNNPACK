@@ -305,8 +305,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QD8_F32_QC8W_GEMM_MINMAX_1X16C4__AVX512AMX, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/64,
-          /*adj_k_block=*/64,
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
           /*mr=*/1, /*nr=*/16, /*kr=*/4, /*sr=*/1,
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
@@ -327,8 +327,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QD8_F32_QC8W_GEMM_MINMAX_7X16C4__AVX512AMX, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/64,
-          /*adj_k_block=*/64,
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
           /*mr=*/7, /*nr=*/16, /*kr=*/4, /*sr=*/1,
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
@@ -349,8 +349,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QD8_F32_QC8W_GEMM_MINMAX_16X16C4__AVX512AMX_PRFM, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/64,
-          /*adj_k_block=*/64,
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
           /*mr=*/16, /*nr=*/16, /*kr=*/4, /*sr=*/1,
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {

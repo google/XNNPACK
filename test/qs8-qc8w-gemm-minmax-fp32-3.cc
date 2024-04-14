@@ -295,8 +295,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QS8_QC8W_GEMM_MINMAX_FP32_7X64C4__AVX512AMX, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/64,
-          /*adj_k_block=*/64,
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
           /*mr=*/7, /*nr=*/64, /*kr=*/4, /*sr=*/1,
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
