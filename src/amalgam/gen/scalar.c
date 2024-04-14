@@ -27624,8 +27624,8 @@ void xnn_x16_transposec_ukernel__2x4_scalar_int(
     size_t block_height,
     const union xnn_x16_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(output_stride >= block_height * sizeof(int16_t));
-  assert(input_stride >= block_width * sizeof(int16_t));
+  assert(block_width == 1 || output_stride >= block_height * sizeof(int16_t));
+  assert(block_height == 1 || input_stride >= block_width * sizeof(int16_t));
 
   const size_t tile_height = 2;
   const size_t tile_width = 4;
@@ -28039,8 +28039,8 @@ void xnn_x32_transposec_ukernel__2x4_scalar_int(
     size_t block_height,
     const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(output_stride >= block_height * sizeof(int));
-  assert(input_stride >= block_width * sizeof(int));
+  assert(block_width == 1 || output_stride >= block_height * sizeof(int));
+  assert(block_height == 1 || input_stride >= block_width * sizeof(int));
 
   const size_t tile_height = 2;
   const size_t tile_width = 4;
@@ -28232,8 +28232,8 @@ void xnn_x64_transposec_ukernel__4x2_scalar_int(
     size_t block_height,
     const union xnn_x64_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(output_stride >= block_height * sizeof(int64_t));
-  assert(input_stride >= block_width * sizeof(int64_t));
+  assert(block_width == 1 || output_stride >= block_height * sizeof(int64_t));
+  assert(block_height == 1 || input_stride >= block_width * sizeof(int64_t));
 
   const size_t tile_height = 4;
   const size_t tile_width = 2;
@@ -29886,8 +29886,8 @@ void xnn_x8_transposec_ukernel__2x4_scalar_int(
     size_t block_height,
     const union xnn_x8_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(output_stride >= block_height * sizeof(int8_t));
-  assert(input_stride >= block_width * sizeof(int8_t));
+  assert(block_width == 1 || output_stride >= block_height * sizeof(int8_t));
+  assert(block_height == 1 || input_stride >= block_width * sizeof(int8_t));
 
   const size_t tile_height = 2;
   const size_t tile_width = 4;
