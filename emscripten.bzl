@@ -12,12 +12,13 @@ def xnnpack_emscripten_minimal_linkopts():
 def xnnpack_emscripten_test_linkopts():
     """Emscripten-specific linkopts for unit tests."""
     return [
+        "-s ALLOW_MEMORY_GROWTH=1",
         "-s ASSERTIONS=2",
+        "-s DEMANGLE_SUPPORT=1",
         "-s ENVIRONMENT=node,shell,web",
         "-s ERROR_ON_UNDEFINED_SYMBOLS=1",
-        "-s DEMANGLE_SUPPORT=1",
         "-s EXIT_RUNTIME=1",
-        "-s ALLOW_MEMORY_GROWTH=1",
+        "-s STACK_SIZE=5MB",
         "--pre-js $(location //:preamble.js.lds)",
     ]
 
