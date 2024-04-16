@@ -3862,8 +3862,7 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_u64(
 
 void xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u16(
     size_t batch, const float* input, float* output,
-    const union xnn_f32_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)])
-    XNN_OOB_READS {
+    const union xnn_f32_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)]) {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
