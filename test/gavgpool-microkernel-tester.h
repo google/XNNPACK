@@ -30,43 +30,43 @@
 
 class GAvgPoolMicrokernelTester {
  public:
-  inline GAvgPoolMicrokernelTester& rows(size_t rows) {
+  GAvgPoolMicrokernelTester& rows(size_t rows) {
     assert(rows != 0);
     this->rows_ = rows;
     return *this;
   }
 
-  inline size_t rows() const {
+  size_t rows() const {
     return this->rows_;
   }
 
-  inline GAvgPoolMicrokernelTester& channels(size_t channels) {
+  GAvgPoolMicrokernelTester& channels(size_t channels) {
     assert(channels != 0);
     this->channels_ = channels;
     return *this;
   }
 
-  inline size_t channels() const {
+  size_t channels() const {
     return this->channels_;
   }
 
-  inline GAvgPoolMicrokernelTester& channel_tile(size_t channel_tile) {
+  GAvgPoolMicrokernelTester& channel_tile(size_t channel_tile) {
     assert(channel_tile != 0);
     this->channel_tile_ = channel_tile;
     return *this;
   }
 
-  inline size_t channel_tile() const {
+  size_t channel_tile() const {
     return this->channel_tile_;
   }
 
-  inline GAvgPoolMicrokernelTester& input_stride(size_t input_stride) {
+  GAvgPoolMicrokernelTester& input_stride(size_t input_stride) {
     assert(input_stride != 0);
     this->input_stride_ = input_stride;
     return *this;
   }
 
-  inline size_t input_stride() const {
+  size_t input_stride() const {
     if (this->input_stride_ == 0) {
       return channels();
     } else {
@@ -75,70 +75,70 @@ class GAvgPoolMicrokernelTester {
     }
   }
 
-  inline GAvgPoolMicrokernelTester& input_scale(float input_scale) {
+  GAvgPoolMicrokernelTester& input_scale(float input_scale) {
     assert(input_scale > 0.0f);
     assert(std::isnormal(input_scale));
     this->input_scale_ = input_scale;
     return *this;
   }
 
-  inline float input_scale() const {
+  float input_scale() const {
     return this->input_scale_;
   }
 
-  inline GAvgPoolMicrokernelTester& input_zero_point(uint8_t input_zero_point) {
+  GAvgPoolMicrokernelTester& input_zero_point(uint8_t input_zero_point) {
     this->input_zero_point_ = input_zero_point;
     return *this;
   }
 
-  inline uint8_t input_zero_point() const {
+  uint8_t input_zero_point() const {
     return this->input_zero_point_;
   }
 
-  inline GAvgPoolMicrokernelTester& output_scale(float output_scale) {
+  GAvgPoolMicrokernelTester& output_scale(float output_scale) {
     assert(output_scale > 0.0f);
     assert(std::isnormal(output_scale));
     this->output_scale_ = output_scale;
     return *this;
   }
 
-  inline float output_scale() const {
+  float output_scale() const {
     return this->output_scale_;
   }
 
-  inline GAvgPoolMicrokernelTester& output_zero_point(uint8_t output_zero_point) {
+  GAvgPoolMicrokernelTester& output_zero_point(uint8_t output_zero_point) {
     this->output_zero_point_ = output_zero_point;
     return *this;
   }
 
-  inline uint8_t output_zero_point() const {
+  uint8_t output_zero_point() const {
     return this->output_zero_point_;
   }
 
-  inline GAvgPoolMicrokernelTester& qmin(uint8_t qmin) {
+  GAvgPoolMicrokernelTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
 
-  inline uint8_t qmin() const {
+  uint8_t qmin() const {
     return this->qmin_;
   }
 
-  inline GAvgPoolMicrokernelTester& qmax(uint8_t qmax) {
+  GAvgPoolMicrokernelTester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
 
-  inline uint8_t qmax() const {
+  uint8_t qmax() const {
     return this->qmax_;
   }
 
-  inline GAvgPoolMicrokernelTester& iterations(size_t iterations) {
+  GAvgPoolMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

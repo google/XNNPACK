@@ -26,50 +26,50 @@
 
 class GAvgPoolCWMicrokernelTester {
  public:
-  inline GAvgPoolCWMicrokernelTester& elements(size_t elements) {
+  GAvgPoolCWMicrokernelTester& elements(size_t elements) {
     assert(elements != 0);
     this->elements_ = elements;
     return *this;
   }
 
-  inline size_t elements() const {
+  size_t elements() const {
     return this->elements_;
   }
 
-  inline GAvgPoolCWMicrokernelTester& channels(size_t channels) {
+  GAvgPoolCWMicrokernelTester& channels(size_t channels) {
     assert(channels != 0);
     this->channels_ = channels;
     return *this;
   }
 
-  inline size_t channels() const {
+  size_t channels() const {
     return this->channels_;
   }
 
-  inline GAvgPoolCWMicrokernelTester& qmin(uint8_t qmin) {
+  GAvgPoolCWMicrokernelTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
 
-  inline uint8_t qmin() const {
+  uint8_t qmin() const {
     return this->qmin_;
   }
 
-  inline GAvgPoolCWMicrokernelTester& qmax(uint8_t qmax) {
+  GAvgPoolCWMicrokernelTester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
 
-  inline uint8_t qmax() const {
+  uint8_t qmax() const {
     return this->qmax_;
   }
 
-  inline GAvgPoolCWMicrokernelTester& iterations(size_t iterations) {
+  GAvgPoolCWMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

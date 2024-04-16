@@ -21,41 +21,41 @@
 
 class VLShiftMicrokernelTester {
  public:
-  inline VLShiftMicrokernelTester& batch(size_t batch) {
+  VLShiftMicrokernelTester& batch(size_t batch) {
     assert(batch != 0);
     this->batch_ = batch;
     return *this;
   }
 
-  inline size_t batch() const {
+  size_t batch() const {
     return this->batch_;
   }
 
-  inline VLShiftMicrokernelTester& shift(uint32_t shift) {
+  VLShiftMicrokernelTester& shift(uint32_t shift) {
     assert(shift < 32);
     this->shift_ = shift;
     return *this;
   }
 
-  inline uint32_t shift() const {
+  uint32_t shift() const {
     return this->shift_;
   }
 
-  inline VLShiftMicrokernelTester& inplace(bool inplace) {
+  VLShiftMicrokernelTester& inplace(bool inplace) {
     this->inplace_ = inplace;
     return *this;
   }
 
-  inline bool inplace() const {
+  bool inplace() const {
     return this->inplace_;
   }
 
-  inline VLShiftMicrokernelTester& iterations(size_t iterations) {
+  VLShiftMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

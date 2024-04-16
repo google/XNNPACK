@@ -35,29 +35,29 @@ inline size_t reference_index(
 
 class TransposeOperatorTester {
  public:
-  inline TransposeOperatorTester& num_dims(size_t num_dims) {
+  TransposeOperatorTester& num_dims(size_t num_dims) {
     assert(num_dims != 0);
     this->num_dims_ = num_dims;
     return *this;
   }
 
-  inline size_t num_dims() const { return this->num_dims_; }
+  size_t num_dims() const { return this->num_dims_; }
 
-  inline TransposeOperatorTester& shape(std::vector<size_t> shape) {
+  TransposeOperatorTester& shape(std::vector<size_t> shape) {
     assert(shape.size() <= XNN_MAX_TENSOR_DIMS);
     this->shape_ = shape;
     return *this;
   }
 
-  inline const std::vector<size_t>& dims() const { return this->shape_; }
+  const std::vector<size_t>& dims() const { return this->shape_; }
 
-  inline TransposeOperatorTester& perm(std::vector<size_t> perm) {
+  TransposeOperatorTester& perm(std::vector<size_t> perm) {
     assert(perm.size() <= XNN_MAX_TENSOR_DIMS);
     this->perm_ = perm;
     return *this;
   }
 
-  inline const std::vector<size_t>& perm() const { return this->perm_; }
+  const std::vector<size_t>& perm() const { return this->perm_; }
 
   void TestX8() const {
     size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());

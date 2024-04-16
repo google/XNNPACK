@@ -21,70 +21,70 @@
 
 class ConstantPadOperatorTester {
  public:
-  inline ConstantPadOperatorTester& input_shape(std::initializer_list<size_t> input_shape) {
+  ConstantPadOperatorTester& input_shape(std::initializer_list<size_t> input_shape) {
     assert(input_shape.size() <= XNN_MAX_TENSOR_DIMS);
     input_shape_ = std::vector<size_t>(input_shape);
     return *this;
   }
 
-  inline const std::vector<size_t>& input_shape() const {
+  const std::vector<size_t>& input_shape() const {
     return input_shape_;
   }
 
-  inline size_t input_dim(size_t i) const {
+  size_t input_dim(size_t i) const {
     return i < input_shape_.size() ? input_shape_[i] : 1;
   }
 
-  inline size_t num_dims() const {
+  size_t num_dims() const {
     return input_shape_.size();
   }
 
-  inline size_t num_input_elements() const {
+  size_t num_input_elements() const {
     return std::accumulate(
       input_shape_.cbegin(), input_shape_.cend(), size_t(1), std::multiplies<size_t>());
   }
 
-  inline ConstantPadOperatorTester& pre_paddings(std::initializer_list<size_t> pre_paddings) {
+  ConstantPadOperatorTester& pre_paddings(std::initializer_list<size_t> pre_paddings) {
     assert(pre_paddings.size() <= XNN_MAX_TENSOR_DIMS);
     pre_paddings_ = std::vector<size_t>(pre_paddings);
     return *this;
   }
 
-  inline const std::vector<size_t>& pre_paddings() const {
+  const std::vector<size_t>& pre_paddings() const {
     return pre_paddings_;
   }
 
-  inline size_t pre_padding(size_t i) const {
+  size_t pre_padding(size_t i) const {
     return i < pre_paddings_.size() ? pre_paddings_[i] : 0;
   }
 
-  inline size_t num_pre_paddings() const {
+  size_t num_pre_paddings() const {
     return pre_paddings_.size();
   }
 
-  inline ConstantPadOperatorTester& post_paddings(std::initializer_list<size_t> post_paddings) {
+  ConstantPadOperatorTester& post_paddings(std::initializer_list<size_t> post_paddings) {
     assert(post_paddings.size() <= XNN_MAX_TENSOR_DIMS);
     post_paddings_ = std::vector<size_t>(post_paddings);
     return *this;
   }
 
-  inline const std::vector<size_t>& post_paddings() const {
+  const std::vector<size_t>& post_paddings() const {
     return post_paddings_;
   }
 
-  inline size_t post_padding(size_t i) const {
+  size_t post_padding(size_t i) const {
     return i < post_paddings_.size() ? post_paddings_[i] : 0;
   }
 
-  inline size_t num_post_paddings() const {
+  size_t num_post_paddings() const {
     return post_paddings_.size();
   }
 
-  inline size_t output_dim(size_t i) const {
+  size_t output_dim(size_t i) const {
     return pre_padding(i) + input_dim(i) + post_padding(i);
   }
 
-  inline size_t num_output_elements() const {
+  size_t num_output_elements() const {
     size_t elements = 1;
     for (size_t i = 0; i < num_dims(); i++) {
       elements *= output_dim(i);
@@ -92,12 +92,12 @@ class ConstantPadOperatorTester {
     return elements;
   }
 
-  inline ConstantPadOperatorTester& iterations(size_t iterations) {
+  ConstantPadOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

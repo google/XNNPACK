@@ -25,42 +25,42 @@
 
 class IBilinearMicrokernelTester {
  public:
-  inline IBilinearMicrokernelTester& pixels(uint32_t pixels) {
+  IBilinearMicrokernelTester& pixels(uint32_t pixels) {
     assert(pixels >= 1);
     this->pixels_ = pixels;
     return *this;
   }
 
-  inline uint32_t pixels() const {
+  uint32_t pixels() const {
     return this->pixels_;
   }
 
-  inline IBilinearMicrokernelTester& channels(uint32_t channels) {
+  IBilinearMicrokernelTester& channels(uint32_t channels) {
     assert(channels >= 1);
     this->channels_ = channels;
     return *this;
   }
 
-  inline uint32_t channels() const {
+  uint32_t channels() const {
     return this->channels_;
   }
 
-  inline IBilinearMicrokernelTester& input_offset(uint32_t input_offset) {
+  IBilinearMicrokernelTester& input_offset(uint32_t input_offset) {
     this->input_offset_ = input_offset;
     return *this;
   }
 
-  inline uint32_t input_offset() const {
+  uint32_t input_offset() const {
     return this->input_offset_;
   }
 
-  inline IBilinearMicrokernelTester& output_stride(uint32_t output_stride) {
+  IBilinearMicrokernelTester& output_stride(uint32_t output_stride) {
     assert(output_stride != 0);
     this->output_stride_ = output_stride;
     return *this;
   }
 
-  inline uint32_t output_stride() const {
+  uint32_t output_stride() const {
     if (this->output_stride_ == 0) {
       return channels();
     } else {
@@ -69,22 +69,22 @@ class IBilinearMicrokernelTester {
     }
   }
 
-  inline IBilinearMicrokernelTester& iterations(size_t iterations) {
+  IBilinearMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 
-  inline IBilinearMicrokernelTester& input_stride(uint32_t input_stride) {
+  IBilinearMicrokernelTester& input_stride(uint32_t input_stride) {
     assert(input_stride != 0);
     this->input_stride_ = input_stride;
     return *this;
   }
 
-  inline uint32_t input_stride() const {
+  uint32_t input_stride() const {
     if (this->input_stride_ == 0) {
       return 4 * pixels();
     } else {

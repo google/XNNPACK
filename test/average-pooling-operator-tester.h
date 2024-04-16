@@ -31,7 +31,7 @@
 
 class AveragePoolingOperatorTester {
  public:
-  inline AveragePoolingOperatorTester& padding_tf_same(bool padding_same) {
+  AveragePoolingOperatorTester& padding_tf_same(bool padding_same) {
     if (padding_same) {
       assert(padding_top() == 0);
       assert(padding_left() == 0);
@@ -42,11 +42,11 @@ class AveragePoolingOperatorTester {
     return *this;
   }
 
-  inline bool padding_tf_same() const {
+  bool padding_tf_same() const {
     return this->padding_tf_same_;
   }
 
-  inline AveragePoolingOperatorTester& padding(uint32_t padding) {
+  AveragePoolingOperatorTester& padding(uint32_t padding) {
     assert(!padding_tf_same());
     this->padding_top_ = padding;
     this->padding_right_ = padding;
@@ -55,7 +55,7 @@ class AveragePoolingOperatorTester {
     return *this;
   }
 
-  inline AveragePoolingOperatorTester& padding(uint32_t padding_height, uint32_t padding_width) {
+  AveragePoolingOperatorTester& padding(uint32_t padding_height, uint32_t padding_width) {
     assert(!padding_tf_same());
     this->padding_top_ = padding_height;
     this->padding_right_ = padding_width;
@@ -64,27 +64,27 @@ class AveragePoolingOperatorTester {
     return *this;
   }
 
-  inline AveragePoolingOperatorTester& padding_height(uint32_t padding_height) {
+  AveragePoolingOperatorTester& padding_height(uint32_t padding_height) {
     assert(!padding_tf_same());
     this->padding_top_ = padding_height;
     this->padding_bottom_ = padding_height;
     return *this;
   }
 
-  inline AveragePoolingOperatorTester& padding_width(uint32_t padding_width) {
+  AveragePoolingOperatorTester& padding_width(uint32_t padding_width) {
     assert(!padding_tf_same());
     this->padding_right_ = padding_width;
     this->padding_left_ = padding_width;
     return *this;
   }
 
-  inline AveragePoolingOperatorTester& padding_top(uint32_t padding_top) {
+  AveragePoolingOperatorTester& padding_top(uint32_t padding_top) {
     assert(!padding_tf_same());
     this->padding_top_ = padding_top;
     return *this;
   }
 
-  inline uint32_t padding_top() const {
+  uint32_t padding_top() const {
     if (padding_tf_same()) {
       const uint32_t total_padding_height =
         (output_height() - 1) * stride_height() + pooling_height() - input_height();
@@ -94,13 +94,13 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  inline AveragePoolingOperatorTester& padding_left(uint32_t padding_left) {
+  AveragePoolingOperatorTester& padding_left(uint32_t padding_left) {
     assert(!padding_tf_same());
     this->padding_left_ = padding_left;
     return *this;
   }
 
-  inline uint32_t padding_left() const {
+  uint32_t padding_left() const {
     if (padding_tf_same()) {
       const uint32_t total_padding_width =
         (output_width() - 1) * stride_width() + pooling_width() - input_width();
@@ -110,13 +110,13 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  inline AveragePoolingOperatorTester& padding_bottom(uint32_t padding_bottom) {
+  AveragePoolingOperatorTester& padding_bottom(uint32_t padding_bottom) {
     assert(!padding_tf_same());
     this->padding_bottom_ = padding_bottom;
     return *this;
   }
 
-  inline uint32_t padding_bottom() const {
+  uint32_t padding_bottom() const {
     if (padding_tf_same()) {
       const uint32_t total_padding_height =
         (output_height() - 1) * stride_height() + pooling_height() - input_height();
@@ -126,13 +126,13 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  inline AveragePoolingOperatorTester& padding_right(uint32_t padding_right) {
+  AveragePoolingOperatorTester& padding_right(uint32_t padding_right) {
     assert(!padding_tf_same());
     this->padding_right_ = padding_right;
     return *this;
   }
 
-  inline uint32_t padding_right() const {
+  uint32_t padding_right() const {
     if (padding_tf_same()) {
       const uint32_t total_padding_width =
         (output_width() - 1) * stride_width() + pooling_width() - input_width();
@@ -142,7 +142,7 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  inline AveragePoolingOperatorTester& input_size(size_t input_height, size_t input_width) {
+  AveragePoolingOperatorTester& input_size(size_t input_height, size_t input_width) {
     assert(input_height >= 1);
     assert(input_width >= 1);
     this->input_height_ = input_height;
@@ -150,54 +150,54 @@ class AveragePoolingOperatorTester {
     return *this;
   }
 
-  inline AveragePoolingOperatorTester& input_height(size_t input_height) {
+  AveragePoolingOperatorTester& input_height(size_t input_height) {
     assert(input_height >= 1);
     this->input_height_ = input_height;
     return *this;
   }
 
-  inline size_t input_height() const {
+  size_t input_height() const {
     return this->input_height_;
   }
 
-  inline AveragePoolingOperatorTester& input_width(size_t input_width) {
+  AveragePoolingOperatorTester& input_width(size_t input_width) {
     assert(input_width >= 1);
     this->input_width_ = input_width;
     return *this;
   }
 
-  inline size_t input_width() const {
+  size_t input_width() const {
     return this->input_width_;
   }
 
-  inline AveragePoolingOperatorTester& channels(size_t channels) {
+  AveragePoolingOperatorTester& channels(size_t channels) {
     assert(channels != 0);
     this->channels_ = channels;
     return *this;
   }
 
-  inline size_t channels() const {
+  size_t channels() const {
     return this->channels_;
   }
 
-  inline AveragePoolingOperatorTester& batch_size(size_t batch_size) {
+  AveragePoolingOperatorTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
     return *this;
   }
 
-  inline size_t batch_size() const {
+  size_t batch_size() const {
     return this->batch_size_;
   }
 
-  inline AveragePoolingOperatorTester& pooling_size(uint32_t pooling_size) {
+  AveragePoolingOperatorTester& pooling_size(uint32_t pooling_size) {
     assert(pooling_size >= 1);
     this->pooling_height_ = pooling_size;
     this->pooling_width_ = pooling_size;
     return *this;
   }
 
-  inline AveragePoolingOperatorTester& pooling_size(uint32_t pooling_height, uint32_t pooling_width) {
+  AveragePoolingOperatorTester& pooling_size(uint32_t pooling_height, uint32_t pooling_width) {
     assert(pooling_height >= 1);
     assert(pooling_width >= 1);
     this->pooling_height_ = pooling_height;
@@ -205,34 +205,34 @@ class AveragePoolingOperatorTester {
     return *this;
   }
 
-  inline AveragePoolingOperatorTester& pooling_height(uint32_t pooling_height) {
+  AveragePoolingOperatorTester& pooling_height(uint32_t pooling_height) {
     assert(pooling_height >= 1);
     this->pooling_height_ = pooling_height;
     return *this;
   }
 
-  inline uint32_t pooling_height() const {
+  uint32_t pooling_height() const {
     return this->pooling_height_;
   }
 
-  inline AveragePoolingOperatorTester& pooling_width(uint32_t pooling_width) {
+  AveragePoolingOperatorTester& pooling_width(uint32_t pooling_width) {
     assert(pooling_width >= 1);
     this->pooling_width_ = pooling_width;
     return *this;
   }
 
-  inline uint32_t pooling_width() const {
+  uint32_t pooling_width() const {
     return this->pooling_width_;
   }
 
-  inline AveragePoolingOperatorTester& stride(uint32_t stride) {
+  AveragePoolingOperatorTester& stride(uint32_t stride) {
     assert(stride >= 1);
     this->stride_height_ = stride;
     this->stride_width_ = stride;
     return *this;
   }
 
-  inline AveragePoolingOperatorTester& stride(uint32_t stride_height, uint32_t stride_width) {
+  AveragePoolingOperatorTester& stride(uint32_t stride_height, uint32_t stride_width) {
     assert(stride_height >= 1);
     assert(stride_width >= 1);
     this->stride_height_ = stride_height;
@@ -240,27 +240,27 @@ class AveragePoolingOperatorTester {
     return *this;
   }
 
-  inline AveragePoolingOperatorTester& stride_height(uint32_t stride_height) {
+  AveragePoolingOperatorTester& stride_height(uint32_t stride_height) {
     assert(stride_height >= 1);
     this->stride_height_ = stride_height;
     return *this;
   }
 
-  inline uint32_t stride_height() const {
+  uint32_t stride_height() const {
     return this->stride_height_;
   }
 
-  inline AveragePoolingOperatorTester& stride_width(uint32_t stride_width) {
+  AveragePoolingOperatorTester& stride_width(uint32_t stride_width) {
     assert(stride_width >= 1);
     this->stride_width_ = stride_width;
     return *this;
   }
 
-  inline uint32_t stride_width() const {
+  uint32_t stride_width() const {
     return this->stride_width_;
   }
 
-  inline size_t output_height() const {
+  size_t output_height() const {
     if (padding_tf_same()) {
       return (input_height() + stride_height() - 1) / stride_height();
     } else {
@@ -273,7 +273,7 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  inline size_t output_width() const {
+  size_t output_width() const {
     if (padding_tf_same()) {
       return (input_width() + stride_width() - 1) / stride_width();
     } else {
@@ -286,13 +286,13 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  inline AveragePoolingOperatorTester& input_pixel_stride(size_t input_pixel_stride) {
+  AveragePoolingOperatorTester& input_pixel_stride(size_t input_pixel_stride) {
     assert(input_pixel_stride != 0);
     this->input_pixel_stride_ = input_pixel_stride;
     return *this;
   }
 
-  inline size_t input_pixel_stride() const {
+  size_t input_pixel_stride() const {
     if (this->input_pixel_stride_ == 0) {
       return channels();
     } else {
@@ -301,7 +301,7 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  inline size_t next_input_pixel_stride() const {
+  size_t next_input_pixel_stride() const {
     if (this->next_input_pixel_stride_ == 0) {
       return next_channels();
     } else {
@@ -310,13 +310,13 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  inline AveragePoolingOperatorTester& output_pixel_stride(size_t output_pixel_stride) {
+  AveragePoolingOperatorTester& output_pixel_stride(size_t output_pixel_stride) {
     assert(output_pixel_stride != 0);
     this->output_pixel_stride_ = output_pixel_stride;
     return *this;
   }
 
-  inline size_t next_output_pixel_stride() const {
+  size_t next_output_pixel_stride() const {
     if (this->next_output_pixel_stride_ == 0) {
       return next_channels();
     } else {
@@ -325,7 +325,7 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  inline size_t output_pixel_stride() const {
+  size_t output_pixel_stride() const {
     if (this->output_pixel_stride_ == 0) {
       return channels();
     } else {
@@ -334,13 +334,13 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  inline AveragePoolingOperatorTester& next_channels(uint32_t next_channels) {
+  AveragePoolingOperatorTester& next_channels(uint32_t next_channels) {
     assert(next_channels >= 1);
     this->next_channels_ = next_channels;
     return *this;
   }
 
-  inline uint32_t next_channels() const {
+  uint32_t next_channels() const {
     if (this->next_channels_ == 0) {
       return channels();
     } else {
@@ -348,13 +348,13 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  inline AveragePoolingOperatorTester& next_input_height(uint32_t next_input_height) {
+  AveragePoolingOperatorTester& next_input_height(uint32_t next_input_height) {
     assert(next_input_height >= 1);
     this->next_input_height_ = next_input_height;
     return *this;
   }
 
-  inline uint32_t next_input_height() const {
+  uint32_t next_input_height() const {
     if (this->next_input_height_ == 0) {
       return input_height();
     } else {
@@ -362,13 +362,13 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  inline AveragePoolingOperatorTester& next_input_width(uint32_t next_input_width) {
+  AveragePoolingOperatorTester& next_input_width(uint32_t next_input_width) {
     assert(next_input_width >= 1);
     this->next_input_width_ = next_input_width;
     return *this;
   }
 
-  inline uint32_t next_input_width() const {
+  uint32_t next_input_width() const {
     if (this->next_input_width_ == 0) {
       return input_width();
     } else {
@@ -376,7 +376,7 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  inline size_t next_output_height() const {
+  size_t next_output_height() const {
     const size_t padded_next_input_height = padding_top() + next_input_height() + padding_bottom();
     if (padded_next_input_height <= pooling_height()) {
       return 1;
@@ -385,7 +385,7 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  inline size_t next_output_width() const {
+  size_t next_output_width() const {
     const size_t padded_next_input_width = padding_left() + next_input_width() + padding_right();
     if (padded_next_input_width <= pooling_width()) {
       return 1;
@@ -394,13 +394,13 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  inline AveragePoolingOperatorTester& next_batch_size(size_t next_batch_size) {
+  AveragePoolingOperatorTester& next_batch_size(size_t next_batch_size) {
     assert(next_batch_size >= 1);
     this->next_batch_size_ = next_batch_size;
     return *this;
   }
 
-  inline size_t next_batch_size() const {
+  size_t next_batch_size() const {
     if (this->next_batch_size_ == 0) {
       return batch_size();
     } else {
@@ -408,70 +408,70 @@ class AveragePoolingOperatorTester {
     }
   }
 
-  inline AveragePoolingOperatorTester& input_scale(float input_scale) {
+  AveragePoolingOperatorTester& input_scale(float input_scale) {
     assert(input_scale > 0.0f);
     assert(std::isnormal(input_scale));
     this->input_scale_ = input_scale;
     return *this;
   }
 
-  inline float input_scale() const {
+  float input_scale() const {
     return this->input_scale_;
   }
 
-  inline AveragePoolingOperatorTester& input_zero_point(uint8_t input_zero_point) {
+  AveragePoolingOperatorTester& input_zero_point(uint8_t input_zero_point) {
     this->input_zero_point_ = input_zero_point;
     return *this;
   }
 
-  inline uint8_t input_zero_point() const {
+  uint8_t input_zero_point() const {
     return this->input_zero_point_;
   }
 
-  inline AveragePoolingOperatorTester& output_scale(float output_scale) {
+  AveragePoolingOperatorTester& output_scale(float output_scale) {
     assert(output_scale > 0.0f);
     assert(std::isnormal(output_scale));
     this->output_scale_ = output_scale;
     return *this;
   }
 
-  inline float output_scale() const {
+  float output_scale() const {
     return this->output_scale_;
   }
 
-  inline AveragePoolingOperatorTester& output_zero_point(uint8_t output_zero_point) {
+  AveragePoolingOperatorTester& output_zero_point(uint8_t output_zero_point) {
     this->output_zero_point_ = output_zero_point;
     return *this;
   }
 
-  inline uint8_t output_zero_point() const {
+  uint8_t output_zero_point() const {
     return this->output_zero_point_;
   }
 
-  inline AveragePoolingOperatorTester& qmin(uint8_t qmin) {
+  AveragePoolingOperatorTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
 
-  inline uint8_t qmin() const {
+  uint8_t qmin() const {
     return this->qmin_;
   }
 
-  inline AveragePoolingOperatorTester& qmax(uint8_t qmax) {
+  AveragePoolingOperatorTester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
 
-  inline uint8_t qmax() const {
+  uint8_t qmax() const {
     return this->qmax_;
   }
 
-  inline AveragePoolingOperatorTester& multithreaded(size_t multithreaded) {
+  AveragePoolingOperatorTester& multithreaded(size_t multithreaded) {
     this->multithreaded_ = multithreaded;
     return *this;
   }
 
-  inline size_t multithreaded() const {
+  size_t multithreaded() const {
     return this->multithreaded_;
   }
 
@@ -480,12 +480,12 @@ class AveragePoolingOperatorTester {
     return multithreaded() ? 5 : 1;
   }
 
-  inline AveragePoolingOperatorTester& iterations(size_t iterations) {
+  AveragePoolingOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

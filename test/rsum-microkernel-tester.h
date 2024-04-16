@@ -25,31 +25,31 @@
 
 class RSumMicrokernelTester {
  public:
-  inline RSumMicrokernelTester& batch_size(size_t batch_size) {
+  RSumMicrokernelTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
     return *this;
   }
 
-  inline size_t batch_size() const {
+  size_t batch_size() const {
     return this->batch_size_;
   }
 
-  inline RSumMicrokernelTester& scale(float scale) {
+  RSumMicrokernelTester& scale(float scale) {
     this->scale_ = scale;
     return *this;
   }
 
-  inline float scale() const {
+  float scale() const {
     return this->scale_;
   }
 
-  inline RSumMicrokernelTester& iterations(size_t iterations) {
+  RSumMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

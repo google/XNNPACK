@@ -23,22 +23,22 @@
 class RMaxAbsMicrokernelTester {
  public:
 
-  inline RMaxAbsMicrokernelTester& batch(size_t batch) {
+  RMaxAbsMicrokernelTester& batch(size_t batch) {
     assert(batch != 0);
     this->batch_ = batch;
     return *this;
   }
 
-  inline size_t batch() const {
+  size_t batch() const {
     return this->batch_;
   }
 
-  inline RMaxAbsMicrokernelTester& iterations(size_t iterations) {
+  RMaxAbsMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

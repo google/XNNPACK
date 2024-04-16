@@ -26,7 +26,7 @@
 
 class ResizeBilinearOperatorTester {
  public:
-  inline ResizeBilinearOperatorTester& input_size(size_t input_height, size_t input_width) {
+  ResizeBilinearOperatorTester& input_size(size_t input_height, size_t input_width) {
     assert(input_height >= 1);
     assert(input_width >= 1);
     this->input_height_ = input_height;
@@ -34,27 +34,27 @@ class ResizeBilinearOperatorTester {
     return *this;
   }
 
-  inline ResizeBilinearOperatorTester& input_height(size_t input_height) {
+  ResizeBilinearOperatorTester& input_height(size_t input_height) {
     assert(input_height >= 1);
     this->input_height_ = input_height;
     return *this;
   }
 
-  inline size_t input_height() const {
+  size_t input_height() const {
     return this->input_height_;
   }
 
-  inline ResizeBilinearOperatorTester& input_width(size_t input_width) {
+  ResizeBilinearOperatorTester& input_width(size_t input_width) {
     assert(input_width >= 1);
     this->input_width_ = input_width;
     return *this;
   }
 
-  inline size_t input_width() const {
+  size_t input_width() const {
     return this->input_width_;
   }
 
-  inline ResizeBilinearOperatorTester& output_size(size_t output_height, size_t output_width) {
+  ResizeBilinearOperatorTester& output_size(size_t output_height, size_t output_width) {
     assert(output_height >= 1);
     assert(output_width >= 1);
     this->output_height_ = output_height;
@@ -62,27 +62,27 @@ class ResizeBilinearOperatorTester {
     return *this;
   }
 
-  inline ResizeBilinearOperatorTester& output_height(size_t output_height) {
+  ResizeBilinearOperatorTester& output_height(size_t output_height) {
     assert(output_height >= 1);
     this->output_height_ = output_height;
     return *this;
   }
 
-  inline size_t output_height() const {
+  size_t output_height() const {
     return this->output_height_;
   }
 
-  inline ResizeBilinearOperatorTester& output_width(size_t output_width) {
+  ResizeBilinearOperatorTester& output_width(size_t output_width) {
     assert(output_width >= 1);
     this->output_width_ = output_width;
     return *this;
   }
 
-  inline size_t output_width() const {
+  size_t output_width() const {
     return this->output_width_;
   }
 
-  inline float height_scale() const {
+  float height_scale() const {
     if (align_corners() && output_height() > 1) {
       return float(input_height() - 1) / float(output_height() - 1);
     } else {
@@ -90,7 +90,7 @@ class ResizeBilinearOperatorTester {
     }
   }
 
-  inline float width_scale() const {
+  float width_scale() const {
     if (align_corners() && output_width() > 1) {
       return float(input_width() - 1) / float(output_width() - 1);
     } else {
@@ -98,33 +98,33 @@ class ResizeBilinearOperatorTester {
     }
   }
 
-  inline ResizeBilinearOperatorTester& channels(size_t channels) {
+  ResizeBilinearOperatorTester& channels(size_t channels) {
     assert(channels != 0);
     this->channels_ = channels;
     return *this;
   }
 
-  inline size_t channels() const {
+  size_t channels() const {
     return this->channels_;
   }
 
-  inline ResizeBilinearOperatorTester& batch_size(size_t batch_size) {
+  ResizeBilinearOperatorTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
     return *this;
   }
 
-  inline size_t batch_size() const {
+  size_t batch_size() const {
     return this->batch_size_;
   }
 
-  inline ResizeBilinearOperatorTester& input_pixel_stride(size_t input_pixel_stride) {
+  ResizeBilinearOperatorTester& input_pixel_stride(size_t input_pixel_stride) {
     assert(input_pixel_stride != 0);
     this->input_pixel_stride_ = input_pixel_stride;
     return *this;
   }
 
-  inline size_t input_pixel_stride() const {
+  size_t input_pixel_stride() const {
     if (this->input_pixel_stride_ == 0) {
       return channels();
     } else {
@@ -133,13 +133,13 @@ class ResizeBilinearOperatorTester {
     }
   }
 
-  inline ResizeBilinearOperatorTester& output_pixel_stride(size_t output_pixel_stride) {
+  ResizeBilinearOperatorTester& output_pixel_stride(size_t output_pixel_stride) {
     assert(output_pixel_stride != 0);
     this->output_pixel_stride_ = output_pixel_stride;
     return *this;
   }
 
-  inline size_t output_pixel_stride() const {
+  size_t output_pixel_stride() const {
     if (this->output_pixel_stride_ == 0) {
       return channels();
     } else {
@@ -148,7 +148,7 @@ class ResizeBilinearOperatorTester {
     }
   }
 
-  inline ResizeBilinearOperatorTester& next_input_size(uint32_t next_input_height, uint32_t next_input_width) {
+  ResizeBilinearOperatorTester& next_input_size(uint32_t next_input_height, uint32_t next_input_width) {
     assert(next_input_height >= 1);
     assert(next_input_width >= 1);
     this->next_input_height_ = next_input_height;
@@ -156,13 +156,13 @@ class ResizeBilinearOperatorTester {
     return *this;
   }
 
-  inline ResizeBilinearOperatorTester& next_input_height(uint32_t next_input_height) {
+  ResizeBilinearOperatorTester& next_input_height(uint32_t next_input_height) {
     assert(next_input_height >= 1);
     this->next_input_height_ = next_input_height;
     return *this;
   }
 
-  inline uint32_t next_input_height() const {
+  uint32_t next_input_height() const {
     if (this->next_input_height_ == 0) {
       return input_height();
     } else {
@@ -170,13 +170,13 @@ class ResizeBilinearOperatorTester {
     }
   }
 
-  inline ResizeBilinearOperatorTester& next_input_width(uint32_t next_input_width) {
+  ResizeBilinearOperatorTester& next_input_width(uint32_t next_input_width) {
     assert(next_input_width >= 1);
     this->next_input_width_ = next_input_width;
     return *this;
   }
 
-  inline uint32_t next_input_width() const {
+  uint32_t next_input_width() const {
     if (this->next_input_width_ == 0) {
       return input_width();
     } else {
@@ -184,13 +184,13 @@ class ResizeBilinearOperatorTester {
     }
   }
 
-  inline ResizeBilinearOperatorTester& next_batch_size(size_t next_batch_size) {
+  ResizeBilinearOperatorTester& next_batch_size(size_t next_batch_size) {
     assert(next_batch_size >= 1);
     this->next_batch_size_ = next_batch_size;
     return *this;
   }
 
-  inline size_t next_batch_size() const {
+  size_t next_batch_size() const {
     if (this->next_batch_size_ == 0) {
       return batch_size();
     } else {
@@ -198,39 +198,39 @@ class ResizeBilinearOperatorTester {
     }
   }
 
-  inline ResizeBilinearOperatorTester& align_corners(bool align_corners) {
+  ResizeBilinearOperatorTester& align_corners(bool align_corners) {
     this->align_corners_ = align_corners;
     return *this;
   }
 
-  inline bool align_corners() const {
+  bool align_corners() const {
     return this->align_corners_;
   }
 
-  inline ResizeBilinearOperatorTester& tf_legacy_mode(bool tf_legacy_mode) {
+  ResizeBilinearOperatorTester& tf_legacy_mode(bool tf_legacy_mode) {
     this->tf_legacy_mode_ = tf_legacy_mode;
     return *this;
   }
 
-  inline bool tf_legacy_mode() const {
+  bool tf_legacy_mode() const {
     return this->tf_legacy_mode_;
   }
 
-  inline ResizeBilinearOperatorTester& iterations(size_t iterations) {
+  ResizeBilinearOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 
-  inline ResizeBilinearOperatorTester& transient_indirection_buffer(bool transient_indirection_buffer) {
+  ResizeBilinearOperatorTester& transient_indirection_buffer(bool transient_indirection_buffer) {
     this->transient_indirection_buffer_ = transient_indirection_buffer;
     return *this;
   }
 
-  inline bool transient_indirection_buffer() const {
+  bool transient_indirection_buffer() const {
     return this->transient_indirection_buffer_;
   }
 

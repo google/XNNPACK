@@ -25,50 +25,50 @@ extern "C" XNN_INTERNAL const uint16_t xnn_table_vlog[129];
 
 class VLogMicrokernelTester {
  public:
-  inline VLogMicrokernelTester& batch(size_t batch) {
+  VLogMicrokernelTester& batch(size_t batch) {
     assert(batch != 0);
     this->batch_ = batch;
     return *this;
   }
 
-  inline size_t batch() const {
+  size_t batch() const {
     return this->batch_;
   }
 
-  inline VLogMicrokernelTester& input_lshift(uint32_t input_lshift) {
+  VLogMicrokernelTester& input_lshift(uint32_t input_lshift) {
     assert(input_lshift < 32);
     this->input_lshift_ = input_lshift;
     return *this;
   }
 
-  inline uint32_t input_lshift() const {
+  uint32_t input_lshift() const {
     return this->input_lshift_;
   }
 
-  inline VLogMicrokernelTester& output_scale(uint32_t output_scale) {
+  VLogMicrokernelTester& output_scale(uint32_t output_scale) {
     this->output_scale_ = output_scale;
     return *this;
   }
 
-  inline uint32_t output_scale() const {
+  uint32_t output_scale() const {
     return this->output_scale_;
   }
 
-  inline VLogMicrokernelTester& inplace(bool inplace) {
+  VLogMicrokernelTester& inplace(bool inplace) {
     this->inplace_ = inplace;
     return *this;
   }
 
-  inline bool inplace() const {
+  bool inplace() const {
     return this->inplace_;
   }
 
-  inline VLogMicrokernelTester& iterations(size_t iterations) {
+  VLogMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

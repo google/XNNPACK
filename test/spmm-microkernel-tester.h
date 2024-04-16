@@ -30,58 +30,58 @@ static inline bool is_fp16_zero(uint16_t x) {
 
 class SpMMMicrokernelTester {
  public:
-  inline SpMMMicrokernelTester& mr(size_t mr) {
+  SpMMMicrokernelTester& mr(size_t mr) {
     this->mr_ = mr;
     return *this;
   }
 
-  inline size_t mr() const {
+  size_t mr() const {
     return this->mr_;
   }
 
-  inline SpMMMicrokernelTester& nr(size_t nr) {
+  SpMMMicrokernelTester& nr(size_t nr) {
     this->nr_ = nr;
     return *this;
   }
 
-  inline size_t nr() const {
+  size_t nr() const {
     return this->nr_;
   }
 
-  inline SpMMMicrokernelTester& m(size_t m) {
+  SpMMMicrokernelTester& m(size_t m) {
     this->m_ = m;
     return *this;
   }
 
-  inline size_t m() const {
+  size_t m() const {
     return this->m_;
   }
 
-  inline SpMMMicrokernelTester& n(size_t n) {
+  SpMMMicrokernelTester& n(size_t n) {
     this->n_ = n;
     return *this;
   }
 
-  inline size_t n() const {
+  size_t n() const {
     return this->n_;
   }
 
-  inline SpMMMicrokernelTester& k(size_t k) {
+  SpMMMicrokernelTester& k(size_t k) {
     this->k_ = k;
     return *this;
   }
 
-  inline size_t k() const {
+  size_t k() const {
     return this->k_;
   }
 
-  inline SpMMMicrokernelTester& output_stride(size_t output_stride) {
+  SpMMMicrokernelTester& output_stride(size_t output_stride) {
     assert(output_stride != 0);
     this->output_stride_ = output_stride;
     return *this;
   }
 
-  inline size_t output_stride() const {
+  size_t output_stride() const {
     if (this->output_stride_ == 0) {
       return m();
     } else {
@@ -90,39 +90,39 @@ class SpMMMicrokernelTester {
     }
   }
 
-  inline SpMMMicrokernelTester& sparsity(float sparsity) {
+  SpMMMicrokernelTester& sparsity(float sparsity) {
     this->sparsity_ = sparsity;
     return *this;
   }
 
-  inline float sparsity() const {
+  float sparsity() const {
     return this->sparsity_;
   }
 
-  inline SpMMMicrokernelTester& qmin(uint8_t qmin) {
+  SpMMMicrokernelTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
 
-  inline uint8_t qmin() const {
+  uint8_t qmin() const {
     return this->qmin_;
   }
 
-  inline SpMMMicrokernelTester& qmax(uint8_t qmax) {
+  SpMMMicrokernelTester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
 
-  inline uint8_t qmax() const {
+  uint8_t qmax() const {
     return this->qmax_;
   }
 
-  inline SpMMMicrokernelTester& iterations(size_t iterations) {
+  SpMMMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

@@ -26,90 +26,90 @@
 
 class VMulCAddCMicrokernelTester {
  public:
-  inline VMulCAddCMicrokernelTester& channel_tile(size_t channel_tile) {
+  VMulCAddCMicrokernelTester& channel_tile(size_t channel_tile) {
     this->channel_tile_ = channel_tile;
     return *this;
   }
 
-  inline size_t channel_tile() const {
+  size_t channel_tile() const {
     return this->channel_tile_;
   }
 
-  inline VMulCAddCMicrokernelTester& channels(size_t channels) {
+  VMulCAddCMicrokernelTester& channels(size_t channels) {
     assert(channels != 0);
     this->channels_ = channels;
     return *this;
   }
 
-  inline size_t channels() const {
+  size_t channels() const {
     return this->channels_;
   }
 
-  inline size_t packed_channels() const {
+  size_t packed_channels() const {
     return channels() % channel_tile() == 0 ? channels() : (channels() / channel_tile() + 1) * channel_tile();
   }
 
-  inline VMulCAddCMicrokernelTester& rows(size_t rows) {
+  VMulCAddCMicrokernelTester& rows(size_t rows) {
     assert(rows != 0);
     this->rows_ = rows;
     return *this;
   }
 
-  inline size_t rows() const {
+  size_t rows() const {
     return this->rows_;
   }
 
-  inline VMulCAddCMicrokernelTester& input_stride(size_t input_stride) {
+  VMulCAddCMicrokernelTester& input_stride(size_t input_stride) {
     this->input_stride_ = input_stride;
     return *this;
   }
 
-  inline size_t input_stride() const {
+  size_t input_stride() const {
     return this->input_stride_ == 0 ? channels() : this->input_stride_;
   }
 
-  inline VMulCAddCMicrokernelTester& output_stride(size_t output_stride) {
+  VMulCAddCMicrokernelTester& output_stride(size_t output_stride) {
     this->output_stride_ = output_stride;
     return *this;
   }
 
-  inline size_t output_stride() const {
+  size_t output_stride() const {
     return this->output_stride_ == 0 ? channels() : this->output_stride_;
   }
 
-  inline VMulCAddCMicrokernelTester& inplace(bool inplace) {
+  VMulCAddCMicrokernelTester& inplace(bool inplace) {
     this->inplace_ = inplace;
     return *this;
   }
 
-  inline bool inplace() const {
+  bool inplace() const {
     return this->inplace_;
   }
 
-  inline VMulCAddCMicrokernelTester& qmin(uint8_t qmin) {
+  VMulCAddCMicrokernelTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
 
-  inline uint8_t qmin() const {
+  uint8_t qmin() const {
     return this->qmin_;
   }
 
-  inline VMulCAddCMicrokernelTester& qmax(uint8_t qmax) {
+  VMulCAddCMicrokernelTester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
 
-  inline uint8_t qmax() const {
+  uint8_t qmax() const {
     return this->qmax_;
   }
 
-  inline VMulCAddCMicrokernelTester& iterations(size_t iterations) {
+  VMulCAddCMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

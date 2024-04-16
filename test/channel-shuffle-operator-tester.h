@@ -23,37 +23,37 @@
 
 class ChannelShuffleOperatorTester {
  public:
-  inline ChannelShuffleOperatorTester& groups(size_t groups) {
+  ChannelShuffleOperatorTester& groups(size_t groups) {
     assert(groups != 0);
     this->groups_ = groups;
     return *this;
   }
 
-  inline size_t groups() const {
+  size_t groups() const {
     return this->groups_;
   }
 
-  inline ChannelShuffleOperatorTester& group_channels(size_t group_channels) {
+  ChannelShuffleOperatorTester& group_channels(size_t group_channels) {
     assert(group_channels != 0);
     this->group_channels_ = group_channels;
     return *this;
   }
 
-  inline size_t group_channels() const {
+  size_t group_channels() const {
     return this->group_channels_;
   }
 
-  inline size_t channels() const {
+  size_t channels() const {
     return groups() * group_channels();
   }
 
-  inline ChannelShuffleOperatorTester& input_stride(size_t input_stride) {
+  ChannelShuffleOperatorTester& input_stride(size_t input_stride) {
     assert(input_stride != 0);
     this->input_stride_ = input_stride;
     return *this;
   }
 
-  inline size_t input_stride() const {
+  size_t input_stride() const {
     if (this->input_stride_ == 0) {
       return channels();
     } else {
@@ -62,13 +62,13 @@ class ChannelShuffleOperatorTester {
     }
   }
 
-  inline ChannelShuffleOperatorTester& output_stride(size_t output_stride) {
+  ChannelShuffleOperatorTester& output_stride(size_t output_stride) {
     assert(output_stride != 0);
     this->output_stride_ = output_stride;
     return *this;
   }
 
-  inline size_t output_stride() const {
+  size_t output_stride() const {
     if (this->output_stride_ == 0) {
       return channels();
     } else {
@@ -77,22 +77,22 @@ class ChannelShuffleOperatorTester {
     }
   }
 
-  inline ChannelShuffleOperatorTester& batch_size(size_t batch_size) {
+  ChannelShuffleOperatorTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
     return *this;
   }
 
-  inline size_t batch_size() const {
+  size_t batch_size() const {
     return this->batch_size_;
   }
 
-  inline ChannelShuffleOperatorTester& iterations(size_t iterations) {
+  ChannelShuffleOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

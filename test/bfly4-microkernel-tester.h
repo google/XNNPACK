@@ -177,41 +177,41 @@ static void xnn_cs16_bfly4_reference(
 
 class BFly4MicrokernelTester {
  public:
-  inline BFly4MicrokernelTester& batch(size_t batch) {
+  BFly4MicrokernelTester& batch(size_t batch) {
     assert(batch != 0);
     this->batch_ = batch;
     return *this;
   }
 
-  inline size_t batch() const {
+  size_t batch() const {
     return this->batch_;
   }
 
-  inline BFly4MicrokernelTester& samples(size_t samples) {
+  BFly4MicrokernelTester& samples(size_t samples) {
     assert(samples != 0);
     this->samples_ = samples;
     return *this;
   }
 
-  inline size_t samples() const {
+  size_t samples() const {
     return this->samples_;
   }
 
-  inline BFly4MicrokernelTester& stride(uint32_t stride) {
+  BFly4MicrokernelTester& stride(uint32_t stride) {
     this->stride_ = stride;
     return *this;
   }
 
-  inline uint32_t stride() const {
+  uint32_t stride() const {
     return this->stride_;
   }
 
-  inline BFly4MicrokernelTester& iterations(size_t iterations) {
+  BFly4MicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

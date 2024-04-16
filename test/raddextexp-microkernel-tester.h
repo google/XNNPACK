@@ -21,22 +21,22 @@
 
 class RAddExtExpMicrokernelTester {
  public:
-  inline RAddExtExpMicrokernelTester& elements(size_t elements) {
+  RAddExtExpMicrokernelTester& elements(size_t elements) {
     assert(elements != 0);
     this->elements_ = elements;
     return *this;
   }
 
-  inline size_t elements() const {
+  size_t elements() const {
     return this->elements_;
   }
 
-  inline RAddExtExpMicrokernelTester& iterations(size_t iterations) {
+  RAddExtExpMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

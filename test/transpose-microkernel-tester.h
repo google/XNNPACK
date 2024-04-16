@@ -21,51 +21,51 @@
 
 class TransposeMicrokernelTester {
  public:
-  inline TransposeMicrokernelTester& element_size(size_t element_size) {
+  TransposeMicrokernelTester& element_size(size_t element_size) {
     assert(element_size != 0);
     this->element_size_ = element_size;
     return *this;
   }
 
-  inline size_t element_size() const { return this->element_size_; }
+  size_t element_size() const { return this->element_size_; }
 
-  inline TransposeMicrokernelTester& block_height(size_t block_height) {
+  TransposeMicrokernelTester& block_height(size_t block_height) {
     assert(block_height != 0);
     this->block_height_ = block_height;
     return *this;
   }
 
-  inline size_t block_height() const { return this->block_height_; }
+  size_t block_height() const { return this->block_height_; }
 
-  inline TransposeMicrokernelTester& block_width(size_t block_width) {
+  TransposeMicrokernelTester& block_width(size_t block_width) {
     assert(block_width != 0);
     this->block_width_ = block_width;
     return *this;
   }
 
-  inline size_t block_width() const { return this->block_width_; }
+  size_t block_width() const { return this->block_width_; }
 
-  inline TransposeMicrokernelTester& input_stride(size_t input_stride) {
+  TransposeMicrokernelTester& input_stride(size_t input_stride) {
     this->input_stride_ = input_stride;
     return *this;
   }
 
-  inline size_t input_stride() const { return this->input_stride_; }
+  size_t input_stride() const { return this->input_stride_; }
 
-  inline TransposeMicrokernelTester& output_stride(size_t output_stride) {
+  TransposeMicrokernelTester& output_stride(size_t output_stride) {
     this->output_stride_ = output_stride;
     return *this;
   }
 
-  inline size_t output_stride() const { return this->output_stride_; }
+  size_t output_stride() const { return this->output_stride_; }
 
-  inline TransposeMicrokernelTester& input_element_stride(size_t input_element_stride) {
+  TransposeMicrokernelTester& input_element_stride(size_t input_element_stride) {
     assert(input_element_stride >=  element_size_);
     this->input_element_stride_ = input_element_stride;
     return *this;
   }
 
-  inline size_t input_element_stride() const {
+  size_t input_element_stride() const {
     if (input_element_stride_ == 0) {
       return element_size_;
     } else {
@@ -73,13 +73,13 @@ class TransposeMicrokernelTester {
     }
   }
 
-  inline TransposeMicrokernelTester& output_element_stride(size_t output_element_stride) {
+  TransposeMicrokernelTester& output_element_stride(size_t output_element_stride) {
     assert(output_element_stride >=  element_size_);
     this->output_element_stride_ = output_element_stride;
     return *this;
   }
 
-  inline size_t output_element_stride() const {
+  size_t output_element_stride() const {
     if (output_element_stride_ == 0) {
       return element_size_;
     } else {
@@ -87,12 +87,12 @@ class TransposeMicrokernelTester {
     }
   }
 
-  inline TransposeMicrokernelTester& iterations(size_t iterations) {
+  TransposeMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const { return this->iterations_; }
+  size_t iterations() const { return this->iterations_; }
 
   void Test(xnn_transposev_ukernel_fn transpose) const {
     std::vector<uint8_t> input(input_stride() * block_height() * input_element_stride() + XNN_EXTRA_BYTES);

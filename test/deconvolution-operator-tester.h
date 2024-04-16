@@ -39,7 +39,7 @@ class DeconvolutionOperatorTester {
     Relu,
   };
 
-  inline DeconvolutionOperatorTester& padding(uint32_t padding) {
+  DeconvolutionOperatorTester& padding(uint32_t padding) {
     this->padding_top_ = padding;
     this->padding_right_ = padding;
     this->padding_bottom_ = padding;
@@ -47,73 +47,73 @@ class DeconvolutionOperatorTester {
     return *this;
   }
 
-  inline DeconvolutionOperatorTester& padding_height(uint32_t padding_height) {
+  DeconvolutionOperatorTester& padding_height(uint32_t padding_height) {
     this->padding_top_ = padding_height;
     this->padding_bottom_ = padding_height;
     return *this;
   }
 
-  inline uint32_t padding_height() const {
+  uint32_t padding_height() const {
     return this->padding_top_ + this->padding_bottom_;
   }
 
-  inline DeconvolutionOperatorTester& padding_width(uint32_t padding_width) {
+  DeconvolutionOperatorTester& padding_width(uint32_t padding_width) {
     this->padding_right_ = padding_width;
     this->padding_left_ = padding_width;
     return *this;
   }
 
-  inline uint32_t padding_width() const {
+  uint32_t padding_width() const {
     return this->padding_left_ + this->padding_right_;
   }
 
-  inline DeconvolutionOperatorTester& padding_top(uint32_t padding_top) {
+  DeconvolutionOperatorTester& padding_top(uint32_t padding_top) {
     this->padding_top_ = padding_top;
     return *this;
   }
 
-  inline uint32_t padding_top() const { return this->padding_top_; }
+  uint32_t padding_top() const { return this->padding_top_; }
 
-  inline DeconvolutionOperatorTester& padding_right(uint32_t padding_right) {
+  DeconvolutionOperatorTester& padding_right(uint32_t padding_right) {
     this->padding_right_ = padding_right;
     return *this;
   }
 
-  inline uint32_t padding_right() const { return this->padding_right_; }
+  uint32_t padding_right() const { return this->padding_right_; }
 
-  inline DeconvolutionOperatorTester& padding_bottom(uint32_t padding_bottom) {
+  DeconvolutionOperatorTester& padding_bottom(uint32_t padding_bottom) {
     this->padding_bottom_ = padding_bottom;
     return *this;
   }
 
-  inline uint32_t padding_bottom() const { return this->padding_bottom_; }
+  uint32_t padding_bottom() const { return this->padding_bottom_; }
 
-  inline DeconvolutionOperatorTester& padding_left(uint32_t padding_left) {
+  DeconvolutionOperatorTester& padding_left(uint32_t padding_left) {
     this->padding_left_ = padding_left;
     return *this;
   }
 
-  inline uint32_t padding_left() const { return this->padding_left_; }
+  uint32_t padding_left() const { return this->padding_left_; }
 
-  inline DeconvolutionOperatorTester& adjustment_height(uint32_t adjustment_height) {
+  DeconvolutionOperatorTester& adjustment_height(uint32_t adjustment_height) {
     this->adjustment_height_ = adjustment_height;
     return *this;
   }
 
-  inline uint32_t adjustment_height() const {
+  uint32_t adjustment_height() const {
     return this->adjustment_height_;
   }
 
-  inline DeconvolutionOperatorTester& adjustment_width(uint32_t adjustment_width) {
+  DeconvolutionOperatorTester& adjustment_width(uint32_t adjustment_width) {
     this->adjustment_width_ = adjustment_width;
     return *this;
   }
 
-  inline uint32_t adjustment_width() const {
+  uint32_t adjustment_width() const {
     return this->adjustment_width_;
   }
 
-  inline DeconvolutionOperatorTester& input_size(uint32_t input_height, uint32_t input_width) {
+  DeconvolutionOperatorTester& input_size(uint32_t input_height, uint32_t input_width) {
     assert(input_height >= 1);
     assert(input_width >= 1);
     this->input_height_ = input_height;
@@ -121,74 +121,74 @@ class DeconvolutionOperatorTester {
     return *this;
   }
 
-  inline DeconvolutionOperatorTester& input_height(uint32_t input_height) {
+  DeconvolutionOperatorTester& input_height(uint32_t input_height) {
     assert(input_height >= 1);
     this->input_height_ = input_height;
     return *this;
   }
 
-  inline uint32_t input_height() const {
+  uint32_t input_height() const {
     return this->input_height_;
   }
 
-  inline DeconvolutionOperatorTester& input_width(uint32_t input_width) {
+  DeconvolutionOperatorTester& input_width(uint32_t input_width) {
     assert(input_width >= 1);
     this->input_width_ = input_width;
     return *this;
   }
 
-  inline uint32_t input_width() const {
+  uint32_t input_width() const {
     return this->input_width_;
   }
 
-  inline DeconvolutionOperatorTester& groups(uint32_t groups) {
+  DeconvolutionOperatorTester& groups(uint32_t groups) {
     assert(groups >= 1);
     this->groups_ = groups;
     return *this;
   }
 
-  inline uint32_t groups() const {
+  uint32_t groups() const {
     return this->groups_;
   }
 
-  inline DeconvolutionOperatorTester& group_input_channels(size_t group_input_channels) {
+  DeconvolutionOperatorTester& group_input_channels(size_t group_input_channels) {
     assert(group_input_channels >= 1);
     this->group_input_channels_ = group_input_channels;
     return *this;
   }
 
-  inline size_t group_input_channels() const {
+  size_t group_input_channels() const {
     return this->group_input_channels_;
   }
 
-  inline DeconvolutionOperatorTester& group_output_channels(size_t group_output_channels) {
+  DeconvolutionOperatorTester& group_output_channels(size_t group_output_channels) {
     assert(group_output_channels >= 1);
     this->group_output_channels_ = group_output_channels;
     return *this;
   }
 
-  inline size_t group_output_channels() const {
+  size_t group_output_channels() const {
     return this->group_output_channels_;
   }
 
-  inline DeconvolutionOperatorTester& batch_size(size_t batch_size) {
+  DeconvolutionOperatorTester& batch_size(size_t batch_size) {
     assert(batch_size >= 1);
     this->batch_size_ = batch_size;
     return *this;
   }
 
-  inline size_t batch_size() const {
+  size_t batch_size() const {
     return this->batch_size_;
   }
 
-  inline DeconvolutionOperatorTester& kernel_size(uint32_t kernel_size) {
+  DeconvolutionOperatorTester& kernel_size(uint32_t kernel_size) {
     assert(kernel_size >= 1);
     this->kernel_height_ = kernel_size;
     this->kernel_width_ = kernel_size;
     return *this;
   }
 
-  inline DeconvolutionOperatorTester& kernel_size(uint32_t kernel_height, uint32_t kernel_width) {
+  DeconvolutionOperatorTester& kernel_size(uint32_t kernel_height, uint32_t kernel_width) {
     assert(kernel_height >= 1);
     assert(kernel_width >= 1);
     this->kernel_height_ = kernel_height;
@@ -196,34 +196,34 @@ class DeconvolutionOperatorTester {
     return *this;
   }
 
-  inline DeconvolutionOperatorTester& kernel_height(uint32_t kernel_height) {
+  DeconvolutionOperatorTester& kernel_height(uint32_t kernel_height) {
     assert(kernel_height >= 1);
     this->kernel_height_ = kernel_height;
     return *this;
   }
 
-  inline uint32_t kernel_height() const {
+  uint32_t kernel_height() const {
     return this->kernel_height_;
   }
 
-  inline DeconvolutionOperatorTester& kernel_width(uint32_t kernel_width) {
+  DeconvolutionOperatorTester& kernel_width(uint32_t kernel_width) {
     assert(kernel_width >= 1);
     this->kernel_width_ = kernel_width;
     return *this;
   }
 
-  inline uint32_t kernel_width() const {
+  uint32_t kernel_width() const {
     return this->kernel_width_;
   }
 
-  inline DeconvolutionOperatorTester& dilation(uint32_t dilation) {
+  DeconvolutionOperatorTester& dilation(uint32_t dilation) {
     assert(dilation >= 1);
     this->dilation_height_ = dilation;
     this->dilation_width_ = dilation;
     return *this;
   }
 
-  inline DeconvolutionOperatorTester& dilation(uint32_t dilation_height, uint32_t dilation_width) {
+  DeconvolutionOperatorTester& dilation(uint32_t dilation_height, uint32_t dilation_width) {
     assert(dilation_height >= 1);
     assert(dilation_width >= 1);
     this->dilation_height_ = dilation_height;
@@ -231,34 +231,34 @@ class DeconvolutionOperatorTester {
     return *this;
   }
 
-  inline DeconvolutionOperatorTester& dilation_height(uint32_t dilation_height) {
+  DeconvolutionOperatorTester& dilation_height(uint32_t dilation_height) {
     assert(dilation_height >= 1);
     this->dilation_height_ = dilation_height;
     return *this;
   }
 
-  inline uint32_t dilation_height() const {
+  uint32_t dilation_height() const {
     return this->dilation_height_;
   }
 
-  inline DeconvolutionOperatorTester& dilation_width(uint32_t dilation_width) {
+  DeconvolutionOperatorTester& dilation_width(uint32_t dilation_width) {
     assert(dilation_width >= 1);
     this->dilation_width_ = dilation_width;
     return *this;
   }
 
-  inline uint32_t dilation_width() const {
+  uint32_t dilation_width() const {
     return this->dilation_width_;
   }
 
-  inline DeconvolutionOperatorTester& stride(uint32_t stride) {
+  DeconvolutionOperatorTester& stride(uint32_t stride) {
     assert(stride >= 1);
     this->stride_height_ = stride;
     this->stride_width_ = stride;
     return *this;
   }
 
-  inline DeconvolutionOperatorTester& stride(uint32_t stride_height, uint32_t stride_width) {
+  DeconvolutionOperatorTester& stride(uint32_t stride_height, uint32_t stride_width) {
     assert(stride_height >= 1);
     assert(stride_width >= 1);
     this->stride_height_ = stride_height;
@@ -266,33 +266,33 @@ class DeconvolutionOperatorTester {
     return *this;
   }
 
-  inline DeconvolutionOperatorTester& stride_height(uint32_t stride_height) {
+  DeconvolutionOperatorTester& stride_height(uint32_t stride_height) {
     assert(stride_height >= 1);
     this->stride_height_ = stride_height;
     return *this;
   }
 
-  inline uint32_t stride_height() const {
+  uint32_t stride_height() const {
     return this->stride_height_;
   }
 
-  inline DeconvolutionOperatorTester& stride_width(uint32_t stride_width) {
+  DeconvolutionOperatorTester& stride_width(uint32_t stride_width) {
     assert(stride_width >= 1);
     this->stride_width_ = stride_width;
     return *this;
   }
 
-  inline uint32_t stride_width() const {
+  uint32_t stride_width() const {
     return this->stride_width_;
   }
 
-  inline DeconvolutionOperatorTester& input_pixel_stride(size_t input_pixel_stride) {
+  DeconvolutionOperatorTester& input_pixel_stride(size_t input_pixel_stride) {
     assert(input_pixel_stride >= 1);
     this->input_pixel_stride_ = input_pixel_stride;
     return *this;
   }
 
-  inline size_t input_pixel_stride() const {
+  size_t input_pixel_stride() const {
     if (this->input_pixel_stride_ == 0) {
       return group_input_channels() * groups();
     } else {
@@ -301,13 +301,13 @@ class DeconvolutionOperatorTester {
     }
   }
 
-  inline DeconvolutionOperatorTester& output_pixel_stride(size_t output_pixel_stride) {
+  DeconvolutionOperatorTester& output_pixel_stride(size_t output_pixel_stride) {
     assert(output_pixel_stride >= 1);
     this->output_pixel_stride_ = output_pixel_stride;
     return *this;
   }
 
-  inline size_t output_pixel_stride() const {
+  size_t output_pixel_stride() const {
     if (this->output_pixel_stride_ == 0) {
       return group_output_channels() * groups();
     } else {
@@ -316,23 +316,23 @@ class DeconvolutionOperatorTester {
     }
   }
 
-  inline uint32_t dilated_kernel_height() const {
+  uint32_t dilated_kernel_height() const {
     return (kernel_height() - 1) * dilation_height() + 1;
   }
 
-  inline uint32_t dilated_kernel_width() const {
+  uint32_t dilated_kernel_width() const {
     return (kernel_width() - 1) * dilation_width() + 1;
   }
 
-  inline size_t output_height() const {
+  size_t output_height() const {
     return stride_height() * (input_height() - 1) + adjustment_height() + dilated_kernel_height() - padding_height();
   }
 
-  inline size_t output_width() const {
+  size_t output_width() const {
     return stride_width() * (input_width() - 1) + adjustment_width() + dilated_kernel_width() - padding_width();
   }
 
-  inline DeconvolutionOperatorTester& next_input_size(uint32_t next_input_height, uint32_t next_input_width) {
+  DeconvolutionOperatorTester& next_input_size(uint32_t next_input_height, uint32_t next_input_width) {
     assert(next_input_height >= 1);
     assert(next_input_width >= 1);
     this->next_input_height_ = next_input_height;
@@ -340,13 +340,13 @@ class DeconvolutionOperatorTester {
     return *this;
   }
 
-  inline DeconvolutionOperatorTester& next_input_height(uint32_t next_input_height) {
+  DeconvolutionOperatorTester& next_input_height(uint32_t next_input_height) {
     assert(next_input_height >= 1);
     this->next_input_height_ = next_input_height;
     return *this;
   }
 
-  inline uint32_t next_input_height() const {
+  uint32_t next_input_height() const {
     if (this->next_input_height_ == 0) {
       return input_height();
     } else {
@@ -354,13 +354,13 @@ class DeconvolutionOperatorTester {
     }
   }
 
-  inline DeconvolutionOperatorTester& next_input_width(uint32_t next_input_width) {
+  DeconvolutionOperatorTester& next_input_width(uint32_t next_input_width) {
     assert(next_input_width >= 1);
     this->next_input_width_ = next_input_width;
     return *this;
   }
 
-  inline uint32_t next_input_width() const {
+  uint32_t next_input_width() const {
     if (this->next_input_width_ == 0) {
       return input_width();
     } else {
@@ -368,21 +368,21 @@ class DeconvolutionOperatorTester {
     }
   }
 
-  inline size_t next_output_height() const {
+  size_t next_output_height() const {
     return stride_height() * (next_input_height() - 1) + adjustment_height() + dilated_kernel_height() - padding_height();
   }
 
-  inline size_t next_output_width() const {
+  size_t next_output_width() const {
     return stride_width() * (next_input_width() - 1) + adjustment_width() + dilated_kernel_width() - padding_width();
   }
 
-  inline DeconvolutionOperatorTester& next_batch_size(size_t next_batch_size) {
+  DeconvolutionOperatorTester& next_batch_size(size_t next_batch_size) {
     assert(next_batch_size >= 1);
     this->next_batch_size_ = next_batch_size;
     return *this;
   }
 
-  inline size_t next_batch_size() const {
+  size_t next_batch_size() const {
     if (this->next_batch_size_ == 0) {
       return batch_size();
     } else {
@@ -390,77 +390,77 @@ class DeconvolutionOperatorTester {
     }
   }
 
-  inline DeconvolutionOperatorTester& qmin(uint8_t qmin) {
+  DeconvolutionOperatorTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
 
-  inline uint8_t qmin() const {
+  uint8_t qmin() const {
     return this->qmin_;
   }
 
-  inline DeconvolutionOperatorTester& qmax(uint8_t qmax) {
+  DeconvolutionOperatorTester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
 
-  inline uint8_t qmax() const {
+  uint8_t qmax() const {
     return this->qmax_;
   }
 
-  inline DeconvolutionOperatorTester& activation(Activation activation) {
+  DeconvolutionOperatorTester& activation(Activation activation) {
     this->activation_ = activation;
     return *this;
   }
 
-  inline Activation activation() const {
+  Activation activation() const {
     return this->activation_;
   }
 
-  inline DeconvolutionOperatorTester& has_bias(bool has_bias) {
+  DeconvolutionOperatorTester& has_bias(bool has_bias) {
     this->has_bias_ = has_bias;
     return *this;
   }
 
-  inline bool has_bias() const {
+  bool has_bias() const {
     return this->has_bias_;
   }
 
-  inline DeconvolutionOperatorTester& weights_type(WeightsType weights_type) {
+  DeconvolutionOperatorTester& weights_type(WeightsType weights_type) {
     this->weights_type_ = weights_type;
     return *this;
   }
 
-  inline WeightsType weights_type() const {
+  WeightsType weights_type() const {
     return this->weights_type_;
   }
 
-  inline DeconvolutionOperatorTester& use_weights_cache(bool use_weights_cache) {
+  DeconvolutionOperatorTester& use_weights_cache(bool use_weights_cache) {
     this->use_weights_cache_ = use_weights_cache;
     return *this;
   }
 
-  inline bool use_weights_cache() const {
+  bool use_weights_cache() const {
     return this->use_weights_cache_;
   }
 
 #if XNN_PLATFORM_JIT
-  inline DeconvolutionOperatorTester& use_jit(bool use_jit) {
+  DeconvolutionOperatorTester& use_jit(bool use_jit) {
     this->use_jit_ = use_jit;
     return *this;
   }
 
-  inline bool use_jit() const {
+  bool use_jit() const {
     return this->use_jit_;
   }
 #endif
 
-  inline DeconvolutionOperatorTester& iterations(size_t iterations) {
+  DeconvolutionOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

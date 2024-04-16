@@ -42,43 +42,43 @@ class FullyConnectedOperatorTester {
     FP32,
   };
 
-  inline FullyConnectedOperatorTester& input_channels(size_t input_channels) {
+  FullyConnectedOperatorTester& input_channels(size_t input_channels) {
     assert(input_channels >= 1);
     this->input_channels_ = input_channels;
     return *this;
   }
 
-  inline size_t input_channels() const {
+  size_t input_channels() const {
     return this->input_channels_;
   }
 
-  inline FullyConnectedOperatorTester& output_channels(size_t output_channels) {
+  FullyConnectedOperatorTester& output_channels(size_t output_channels) {
     assert(output_channels >= 1);
     this->output_channels_ = output_channels;
     return *this;
   }
 
-  inline size_t output_channels() const {
+  size_t output_channels() const {
     return this->output_channels_;
   }
 
-  inline FullyConnectedOperatorTester& batch_size(size_t batch_size) {
+  FullyConnectedOperatorTester& batch_size(size_t batch_size) {
     assert(batch_size >= 1);
     this->batch_size_ = batch_size;
     return *this;
   }
 
-  inline size_t batch_size() const {
+  size_t batch_size() const {
     return this->batch_size_;
   }
 
-  inline FullyConnectedOperatorTester& input_stride(size_t input_stride) {
+  FullyConnectedOperatorTester& input_stride(size_t input_stride) {
     assert(input_stride >= 1);
     this->input_stride_ = input_stride;
     return *this;
   }
 
-  inline size_t input_stride() const {
+  size_t input_stride() const {
     if (this->input_stride_ == 0) {
       return input_channels();
     } else {
@@ -87,13 +87,13 @@ class FullyConnectedOperatorTester {
     }
   }
 
-  inline FullyConnectedOperatorTester& output_stride(size_t output_stride) {
+  FullyConnectedOperatorTester& output_stride(size_t output_stride) {
     assert(output_stride >= 1);
     this->output_stride_ = output_stride;
     return *this;
   }
 
-  inline size_t output_stride() const {
+  size_t output_stride() const {
     if (this->output_stride_ == 0) {
       return output_channels();
     } else {
@@ -102,104 +102,104 @@ class FullyConnectedOperatorTester {
     }
   }
 
-  inline FullyConnectedOperatorTester& input_zero_point(size_t input_zero_point) {
+  FullyConnectedOperatorTester& input_zero_point(size_t input_zero_point) {
     this->input_zero_point_ = input_zero_point;
     return *this;
   }
 
-  inline size_t input_zero_point() const {
+  size_t input_zero_point() const {
     return this->input_zero_point_;
   }
 
-  inline FullyConnectedOperatorTester& kernel_zero_point(size_t kernel_zero_point) {
+  FullyConnectedOperatorTester& kernel_zero_point(size_t kernel_zero_point) {
     this->kernel_zero_point_ = kernel_zero_point;
     return *this;
   }
 
-  inline size_t kernel_zero_point() const {
+  size_t kernel_zero_point() const {
     return this->kernel_zero_point_;
   }
 
-  inline FullyConnectedOperatorTester& output_zero_point(size_t output_zero_point) {
+  FullyConnectedOperatorTester& output_zero_point(size_t output_zero_point) {
     this->output_zero_point_ = output_zero_point;
     return *this;
   }
 
-  inline size_t output_zero_point() const {
+  size_t output_zero_point() const {
     return this->output_zero_point_;
   }
 
-  inline FullyConnectedOperatorTester& qmin(uint8_t qmin) {
+  FullyConnectedOperatorTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
 
-  inline uint8_t qmin() const {
+  uint8_t qmin() const {
     return this->qmin_;
   }
 
-  inline FullyConnectedOperatorTester& qmax(uint8_t qmax) {
+  FullyConnectedOperatorTester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
 
-  inline uint8_t qmax() const {
+  uint8_t qmax() const {
     return this->qmax_;
   }
 
-  inline FullyConnectedOperatorTester& transpose_weights(bool transpose_weights) {
+  FullyConnectedOperatorTester& transpose_weights(bool transpose_weights) {
     this->transpose_weights_ = transpose_weights;
     return *this;
   }
 
-  inline bool transpose_weights() const {
+  bool transpose_weights() const {
     return this->transpose_weights_;
   }
 
-  inline FullyConnectedOperatorTester& has_bias(bool has_bias) {
+  FullyConnectedOperatorTester& has_bias(bool has_bias) {
     this->has_bias_ = has_bias;
     return *this;
   }
 
-  inline bool has_bias() const {
+  bool has_bias() const {
     return this->has_bias_;
   }
 
-  inline FullyConnectedOperatorTester& weights_type(WeightsType weights_type) {
+  FullyConnectedOperatorTester& weights_type(WeightsType weights_type) {
     this->weights_type_ = weights_type;
     return *this;
   }
 
-  inline WeightsType weights_type() const {
+  WeightsType weights_type() const {
     return this->weights_type_;
   }
 
-  inline FullyConnectedOperatorTester& use_weights_cache(bool use_weights_cache) {
+  FullyConnectedOperatorTester& use_weights_cache(bool use_weights_cache) {
     this->use_weights_cache_ = use_weights_cache;
     return *this;
   }
 
-  inline bool use_weights_cache() const {
+  bool use_weights_cache() const {
     return this->use_weights_cache_;
   }
 
 #if XNN_PLATFORM_JIT
-  inline FullyConnectedOperatorTester& use_jit(bool use_jit) {
+  FullyConnectedOperatorTester& use_jit(bool use_jit) {
     this->use_jit_ = use_jit;
     return *this;
   }
 
-  inline bool use_jit() const {
+  bool use_jit() const {
     return this->use_jit_;
   }
 #endif
 
-  inline FullyConnectedOperatorTester& iterations(size_t iterations) {
+  FullyConnectedOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

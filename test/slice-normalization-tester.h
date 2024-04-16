@@ -29,25 +29,25 @@ class SliceNormalizationTester {
     return *this;
   }
 
-  inline std::vector<size_t> input_shape() { return input_shape_; }
+  std::vector<size_t> input_shape() { return input_shape_; }
 
-  inline size_t num_dims() const { return input_shape_.size(); }
+  size_t num_dims() const { return input_shape_.size(); }
 
-  inline SliceNormalizationTester& offsets(const std::vector<size_t> offsets) {
+  SliceNormalizationTester& offsets(const std::vector<size_t> offsets) {
     assert(offsets.size() <= XNN_MAX_TENSOR_DIMS);
     this->offsets_ = offsets;
     return *this;
   }
 
-  inline std::vector<size_t> offsets() { return offsets_; }
+  std::vector<size_t> offsets() { return offsets_; }
 
-  inline SliceNormalizationTester& sizes(const std::vector<size_t> sizes) {
+  SliceNormalizationTester& sizes(const std::vector<size_t> sizes) {
     assert(sizes.size() <= XNN_MAX_TENSOR_DIMS);
     this->sizes_ = sizes;
     return *this;
   }
 
-  inline std::vector<size_t> sizes() { return sizes_; }
+  std::vector<size_t> sizes() { return sizes_; }
 
   inline SliceNormalizationTester& expected_offsets(
       const std::vector<size_t> expected_offsets) {
@@ -57,7 +57,7 @@ class SliceNormalizationTester {
     return *this;
   }
 
-  inline std::vector<size_t> expected_offsets() { return expected_offsets_; }
+  std::vector<size_t> expected_offsets() { return expected_offsets_; }
 
   inline SliceNormalizationTester& expected_input_shape(
       const std::vector<size_t> expected_input_shape) {
@@ -67,7 +67,7 @@ class SliceNormalizationTester {
     return *this;
   }
 
-  inline std::vector<size_t> expected_input_shape() {
+  std::vector<size_t> expected_input_shape() {
     return expected_input_shape_;
   }
 
@@ -81,7 +81,7 @@ class SliceNormalizationTester {
     return *this;
   }
 
-  inline std::vector<size_t> expected_output_shape() {
+  std::vector<size_t> expected_output_shape() {
     return expected_output_shape_;
   }
 

@@ -22,70 +22,70 @@
 
 class SliceOperatorTester {
  public:
-  inline SliceOperatorTester& input_shape(std::initializer_list<size_t> input_shape) {
+  SliceOperatorTester& input_shape(std::initializer_list<size_t> input_shape) {
     assert(input_shape.size() <= XNN_MAX_TENSOR_DIMS);
     input_shape_ = std::vector<size_t>(input_shape);
     return *this;
   }
 
-  inline const std::vector<size_t>& input_shape() const {
+  const std::vector<size_t>& input_shape() const {
     return input_shape_;
   }
 
-  inline size_t input_dim(size_t i) const {
+  size_t input_dim(size_t i) const {
     return i < input_shape_.size() ? input_shape_[i] : 1;
   }
 
-  inline size_t num_dims() const {
+  size_t num_dims() const {
     return input_shape_.size();
   }
 
-  inline size_t num_input_elements() const {
+  size_t num_input_elements() const {
     return std::accumulate(
       input_shape_.cbegin(), input_shape_.cend(), size_t(1), std::multiplies<size_t>());
   }
 
-  inline SliceOperatorTester& offsets(std::initializer_list<size_t> offsets) {
+  SliceOperatorTester& offsets(std::initializer_list<size_t> offsets) {
     assert(offsets.size() <= XNN_MAX_TENSOR_DIMS);
     offsets_ = std::vector<size_t>(offsets);
     return *this;
   }
 
-  inline const std::vector<size_t>& offsets() const {
+  const std::vector<size_t>& offsets() const {
     return offsets_;
   }
 
-  inline size_t offset(size_t i) const {
+  size_t offset(size_t i) const {
     return i < offsets_.size() ? offsets_[i] : 0;
   }
 
-  inline size_t num_offsets() const {
+  size_t num_offsets() const {
     return offsets_.size();
   }
 
-  inline SliceOperatorTester& sizes(std::initializer_list<size_t> sizes) {
+  SliceOperatorTester& sizes(std::initializer_list<size_t> sizes) {
     assert(sizes.size() <= XNN_MAX_TENSOR_DIMS);
     sizes_ = std::vector<size_t>(sizes);
     return *this;
   }
 
-  inline const std::vector<size_t>& sizes() const {
+  const std::vector<size_t>& sizes() const {
     return sizes_;
   }
 
-  inline size_t size(size_t i) const {
+  size_t size(size_t i) const {
     return i < sizes_.size() ? sizes_[i] : 1;
   }
 
-  inline size_t num_sizes() const {
+  size_t num_sizes() const {
     return sizes_.size();
   }
 
-  inline size_t output_dim(size_t i) const {
+  size_t output_dim(size_t i) const {
     return size(i);
   }
 
-  inline size_t num_output_elements() const {
+  size_t num_output_elements() const {
     size_t elements = 1;
     for (size_t i = 0; i < num_dims(); i++) {
       elements *= output_dim(i);
@@ -93,12 +93,12 @@ class SliceOperatorTester {
     return elements;
   }
 
-  inline SliceOperatorTester& iterations(size_t iterations) {
+  SliceOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

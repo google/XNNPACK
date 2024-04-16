@@ -13,43 +13,43 @@
 
 class ReduceNormalizationTester {
  public:
-  inline ReduceNormalizationTester& axes(const std::vector<size_t>& axes) {
+  ReduceNormalizationTester& axes(const std::vector<size_t>& axes) {
     assert(axes.size() <= XNN_MAX_TENSOR_DIMS);
     this->axes_ = axes;
     return *this;
   }
 
-  inline const std::vector<size_t>& axes() const {
+  const std::vector<size_t>& axes() const {
     return this->axes_;
   }
 
-  inline ReduceNormalizationTester& shape(const std::vector<size_t>& shape) {
+  ReduceNormalizationTester& shape(const std::vector<size_t>& shape) {
     assert(shape.size() <= XNN_MAX_TENSOR_DIMS);
     this->shape_ = shape;
     return *this;
   }
 
-  inline const std::vector<size_t>& shape() const {
+  const std::vector<size_t>& shape() const {
     return this->shape_;
   }
 
-  inline ReduceNormalizationTester& expected_axes(const std::vector<size_t>& expected_axes) {
+  ReduceNormalizationTester& expected_axes(const std::vector<size_t>& expected_axes) {
     assert(expected_axes.size() <= XNN_MAX_TENSOR_DIMS);
     this->expected_axes_ = expected_axes;
     return *this;
   }
 
-  inline const std::vector<size_t>& expected_axes() const {
+  const std::vector<size_t>& expected_axes() const {
     return this->expected_axes_;
   }
 
-  inline ReduceNormalizationTester& expected_shape(const std::vector<size_t>& expected_shape) {
+  ReduceNormalizationTester& expected_shape(const std::vector<size_t>& expected_shape) {
     assert(expected_shape.size() <= XNN_MAX_TENSOR_DIMS);
     this->expected_shape_ = expected_shape;
     return *this;
   }
 
-  inline const std::vector<size_t>& expected_shape() const {
+  const std::vector<size_t>& expected_shape() const {
     return this->expected_shape_;
   }
 

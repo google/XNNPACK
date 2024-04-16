@@ -26,52 +26,52 @@
 
 class RequantizationTester {
  public:
-  inline RequantizationTester& s(uint32_t s) {
+  RequantizationTester& s(uint32_t s) {
     this->s_ = s;
     return *this;
   }
 
-  inline uint32_t s() const {
+  uint32_t s() const {
     return this->s_;
   }
 
-  inline float scale() const {
+  float scale() const {
     return ldexpf(1.0f, -s());
   }
 
-  inline RequantizationTester& zero_point(int32_t zero_point) {
+  RequantizationTester& zero_point(int32_t zero_point) {
     this->zero_point_ = zero_point;
     return *this;
   }
 
-  inline int32_t zero_point() const {
+  int32_t zero_point() const {
     return this->zero_point_;
   }
 
-  inline RequantizationTester& qmin(int16_t qmin) {
+  RequantizationTester& qmin(int16_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
 
-  inline int16_t qmin() const {
+  int16_t qmin() const {
     return this->qmin_;
   }
 
-  inline RequantizationTester& qmax(int16_t qmax) {
+  RequantizationTester& qmax(int16_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
 
-  inline int16_t qmax() const {
+  int16_t qmax() const {
     return this->qmax_;
   }
 
-  inline RequantizationTester& iterations(size_t iterations) {
+  RequantizationTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

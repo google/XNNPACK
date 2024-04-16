@@ -26,32 +26,32 @@
 
 class ZipMicrokernelTester {
  public:
-  inline ZipMicrokernelTester& n(size_t n) {
+  ZipMicrokernelTester& n(size_t n) {
     assert(n != 0);
     this->n_ = n;
     return *this;
   }
 
-  inline size_t n() const {
+  size_t n() const {
     return this->n_;
   }
 
-  inline ZipMicrokernelTester& g(size_t g) {
+  ZipMicrokernelTester& g(size_t g) {
     assert(g != 0);
     this->g_ = g;
     return *this;
   }
 
-  inline size_t g() const {
+  size_t g() const {
     return this->g_;
   }
 
-  inline ZipMicrokernelTester& iterations(size_t iterations) {
+  ZipMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

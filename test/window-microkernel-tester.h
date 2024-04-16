@@ -22,51 +22,51 @@
 
 class WindowMicrokernelTester {
  public:
-  inline WindowMicrokernelTester& rows(size_t rows) {
+  WindowMicrokernelTester& rows(size_t rows) {
     assert(rows != 0);
     this->rows_ = rows;
     return *this;
   }
 
-  inline size_t rows() const {
+  size_t rows() const {
     return this->rows_;
   }
 
-  inline WindowMicrokernelTester& channels(size_t channels) {
+  WindowMicrokernelTester& channels(size_t channels) {
     assert(channels != 0);
     this->channels_ = channels;
     return *this;
   }
 
-  inline size_t channels() const {
+  size_t channels() const {
     return this->channels_;
   }
 
-  inline WindowMicrokernelTester& shift(uint32_t shift) {
+  WindowMicrokernelTester& shift(uint32_t shift) {
     assert(shift < 32);
     this->shift_ = shift;
     return *this;
   }
 
-  inline uint32_t shift() const {
+  uint32_t shift() const {
     return this->shift_;
   }
 
-  inline WindowMicrokernelTester& inplace(bool inplace) {
+  WindowMicrokernelTester& inplace(bool inplace) {
     this->inplace_ = inplace;
     return *this;
   }
 
-  inline bool inplace() const {
+  bool inplace() const {
     return this->inplace_;
   }
 
-  inline WindowMicrokernelTester& iterations(size_t iterations) {
+  WindowMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

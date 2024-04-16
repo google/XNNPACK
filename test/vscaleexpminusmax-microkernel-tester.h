@@ -21,33 +21,33 @@
 
 class VScaleExpMinusMaxMicrokernelTester {
  public:
-  inline VScaleExpMinusMaxMicrokernelTester& elements(size_t elements) {
+  VScaleExpMinusMaxMicrokernelTester& elements(size_t elements) {
     assert(elements != 0);
     this->elements_ = elements;
     return *this;
   }
 
-  inline size_t elements() const {
+  size_t elements() const {
     return this->elements_;
   }
 
-  inline VScaleExpMinusMaxMicrokernelTester& scale(float scale) {
+  VScaleExpMinusMaxMicrokernelTester& scale(float scale) {
     assert(std::isfinite(scale));
     assert(scale > 0);
     this->scale_ = scale;
     return *this;
   }
 
-  inline float scale() const {
+  float scale() const {
     return this->scale_;
   }
 
-  inline VScaleExpMinusMaxMicrokernelTester& iterations(size_t iterations) {
+  VScaleExpMinusMaxMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

@@ -34,22 +34,22 @@ class ReduceMicrokernelTester {
     MinMax,
   };
 
-  inline ReduceMicrokernelTester& batch_size(size_t batch_size) {
+  ReduceMicrokernelTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
     return *this;
   }
 
-  inline size_t batch_size() const {
+  size_t batch_size() const {
     return this->batch_size_;
   }
 
-  inline ReduceMicrokernelTester& iterations(size_t iterations) {
+  ReduceMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

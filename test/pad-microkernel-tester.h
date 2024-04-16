@@ -24,55 +24,55 @@
 
 class PadMicrokernelTester {
  public:
-  inline PadMicrokernelTester& rows(size_t rows) {
+  PadMicrokernelTester& rows(size_t rows) {
     assert(rows != 0);
     this->rows_ = rows;
     return *this;
   }
 
-  inline size_t rows() const {
+  size_t rows() const {
     return this->rows_;
   }
 
-  inline PadMicrokernelTester& input_channels(size_t input_channels) {
+  PadMicrokernelTester& input_channels(size_t input_channels) {
     assert(input_channels != 0);
     this->input_channels_ = input_channels;
     return *this;
   }
 
-  inline size_t input_channels() const {
+  size_t input_channels() const {
     return this->input_channels_;
   }
 
-  inline PadMicrokernelTester& pre_padding(size_t pre_padding) {
+  PadMicrokernelTester& pre_padding(size_t pre_padding) {
     this->pre_padding_ = pre_padding;
     return *this;
   }
 
-  inline size_t pre_padding() const {
+  size_t pre_padding() const {
     return this->pre_padding_;
   }
 
-  inline PadMicrokernelTester& post_padding(size_t post_padding) {
+  PadMicrokernelTester& post_padding(size_t post_padding) {
     this->post_padding_ = post_padding;
     return *this;
   }
 
-  inline size_t post_padding() const {
+  size_t post_padding() const {
     return this->post_padding_;
   }
 
-  inline size_t output_channels() const {
+  size_t output_channels() const {
     return pre_padding() + input_channels() + post_padding();
   }
 
-  inline PadMicrokernelTester& input_stride(size_t input_stride) {
+  PadMicrokernelTester& input_stride(size_t input_stride) {
     assert(input_stride != 0);
     this->input_stride_ = input_stride;
     return *this;
   }
 
-  inline size_t input_stride() const {
+  size_t input_stride() const {
     if (this->input_stride_ == 0) {
       return input_channels();
     } else {
@@ -81,13 +81,13 @@ class PadMicrokernelTester {
     }
   }
 
-  inline PadMicrokernelTester& output_stride(size_t output_stride) {
+  PadMicrokernelTester& output_stride(size_t output_stride) {
     assert(output_stride != 0);
     this->output_stride_ = output_stride;
     return *this;
   }
 
-  inline size_t output_stride() const {
+  size_t output_stride() const {
     if (this->output_stride_ == 0) {
       return pre_padding() + input_channels() + post_padding();
     } else {
@@ -96,12 +96,12 @@ class PadMicrokernelTester {
     }
   }
 
-  inline PadMicrokernelTester& iterations(size_t iterations) {
+  PadMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

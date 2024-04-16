@@ -23,22 +23,22 @@
 
 class FilterbankAccumulateMicrokernelTester {
  public:
-  inline FilterbankAccumulateMicrokernelTester& rows(size_t rows) {
+  FilterbankAccumulateMicrokernelTester& rows(size_t rows) {
     assert(rows != 0);
     this->rows_ = rows;
     return *this;
   }
 
-  inline size_t rows() const {
+  size_t rows() const {
     return this->rows_;
   }
 
-  inline FilterbankAccumulateMicrokernelTester& iterations(size_t iterations) {
+  FilterbankAccumulateMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

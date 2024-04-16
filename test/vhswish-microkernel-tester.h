@@ -27,62 +27,62 @@
 
 class VHSwishMicrokernelTester {
  public:
-  inline VHSwishMicrokernelTester& batch_size(size_t batch_size) {
+  VHSwishMicrokernelTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
     return *this;
   }
 
-  inline size_t batch_size() const {
+  size_t batch_size() const {
     return this->batch_size_;
   }
 
-  inline VHSwishMicrokernelTester& input_scale(float input_scale) {
+  VHSwishMicrokernelTester& input_scale(float input_scale) {
     assert(input_scale > 0.0f);
     assert(std::isnormal(input_scale));
     this->input_scale_ = input_scale;
     return *this;
   }
 
-  inline float input_scale() const {
+  float input_scale() const {
     return this->input_scale_;
   }
 
-  inline VHSwishMicrokernelTester& input_zero_point(int16_t input_zero_point) {
+  VHSwishMicrokernelTester& input_zero_point(int16_t input_zero_point) {
     this->input_zero_point_ = input_zero_point;
     return *this;
   }
 
-  inline int16_t input_zero_point() const {
+  int16_t input_zero_point() const {
     return this->input_zero_point_;
   }
 
-  inline VHSwishMicrokernelTester& output_scale(float output_scale) {
+  VHSwishMicrokernelTester& output_scale(float output_scale) {
     assert(output_scale > 0.0f);
     assert(std::isnormal(output_scale));
     this->output_scale_ = output_scale;
     return *this;
   }
 
-  inline float output_scale() const {
+  float output_scale() const {
     return this->output_scale_;
   }
 
-  inline VHSwishMicrokernelTester& output_zero_point(int16_t output_zero_point) {
+  VHSwishMicrokernelTester& output_zero_point(int16_t output_zero_point) {
     this->output_zero_point_ = output_zero_point;
     return *this;
   }
 
-  inline int16_t output_zero_point() const {
+  int16_t output_zero_point() const {
     return this->output_zero_point_;
   }
 
-  inline VHSwishMicrokernelTester& iterations(size_t iterations) {
+  VHSwishMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

@@ -24,31 +24,31 @@
 
 class LUTNormMicrokernelTester {
  public:
-  inline LUTNormMicrokernelTester& n(size_t n) {
+  LUTNormMicrokernelTester& n(size_t n) {
     assert(n != 0);
     this->n_ = n;
     return *this;
   }
 
-  inline size_t n() const {
+  size_t n() const {
     return this->n_;
   }
 
-  inline LUTNormMicrokernelTester& inplace(bool inplace) {
+  LUTNormMicrokernelTester& inplace(bool inplace) {
     this->inplace_ = inplace;
     return *this;
   }
 
-  inline bool inplace() const {
+  bool inplace() const {
     return this->inplace_;
   }
 
-  inline LUTNormMicrokernelTester& iterations(size_t iterations) {
+  LUTNormMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

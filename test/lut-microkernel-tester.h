@@ -26,31 +26,31 @@
 
 class LUTMicrokernelTester {
  public:
-  inline LUTMicrokernelTester& batch_size(size_t batch_size) {
+  LUTMicrokernelTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
     return *this;
   }
 
-  inline size_t batch_size() const {
+  size_t batch_size() const {
     return this->batch_size_;
   }
 
-  inline LUTMicrokernelTester& inplace(bool inplace) {
+  LUTMicrokernelTester& inplace(bool inplace) {
     this->inplace_ = inplace;
     return *this;
   }
 
-  inline bool inplace() const {
+  bool inplace() const {
     return this->inplace_;
   }
 
-  inline LUTMicrokernelTester& iterations(size_t iterations) {
+  LUTMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

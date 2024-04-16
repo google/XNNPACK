@@ -22,43 +22,43 @@
 
 class PackMicrokernelTester {
  public:
-  inline PackMicrokernelTester& mr(size_t mr) {
+  PackMicrokernelTester& mr(size_t mr) {
     assert(mr != 0);
     this->mr_ = mr;
     return *this;
   }
 
-  inline size_t mr() const {
+  size_t mr() const {
     return this->mr_;
   }
 
-  inline PackMicrokernelTester& m(size_t m) {
+  PackMicrokernelTester& m(size_t m) {
     assert(m != 0);
     this->m_ = m;
     return *this;
   }
 
-  inline size_t m() const {
+  size_t m() const {
     return this->m_;
   }
 
-  inline PackMicrokernelTester& k(size_t k) {
+  PackMicrokernelTester& k(size_t k) {
     assert(k != 0);
     this->k_ = k;
     return *this;
   }
 
-  inline size_t k() const {
+  size_t k() const {
     return this->k_;
   }
 
-  inline PackMicrokernelTester& x_stride(size_t x_stride) {
+  PackMicrokernelTester& x_stride(size_t x_stride) {
     assert(x_stride != 0);
     this->x_stride_ = x_stride;
     return *this;
   }
 
-  inline size_t x_stride() const {
+  size_t x_stride() const {
     if (this->x_stride_ == 0) {
       return k();
     } else {
@@ -67,12 +67,12 @@ class PackMicrokernelTester {
     }
   }
 
-  inline PackMicrokernelTester& iterations(size_t iterations) {
+  PackMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

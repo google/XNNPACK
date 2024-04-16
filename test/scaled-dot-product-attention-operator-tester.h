@@ -27,106 +27,106 @@
 
 class ScaledDotProductAttentionOperatorTester {
  public:
-  inline ScaledDotProductAttentionOperatorTester& batch_size(size_t batch_size) {
+  ScaledDotProductAttentionOperatorTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
     return *this;
   }
 
-  inline size_t batch_size() const {
+  size_t batch_size() const {
     return this->batch_size_;
   }
 
-  inline ScaledDotProductAttentionOperatorTester& query_heads(size_t query_heads) {
+  ScaledDotProductAttentionOperatorTester& query_heads(size_t query_heads) {
     assert(query_heads != 0);
     this->query_heads_ = query_heads;
     return *this;
   }
 
-  inline size_t query_heads() const {
+  size_t query_heads() const {
     return this->query_heads_;
   }
 
-  inline ScaledDotProductAttentionOperatorTester& key_value_heads(size_t key_value_heads) {
+  ScaledDotProductAttentionOperatorTester& key_value_heads(size_t key_value_heads) {
     assert(key_value_heads == 1 || key_value_heads == query_heads());
     this->key_value_heads_ = key_value_heads;
     return *this;
   }
 
-  inline size_t key_value_heads() const {
+  size_t key_value_heads() const {
     return this->key_value_heads_;
   }
 
-  inline ScaledDotProductAttentionOperatorTester& cap_tanh(float cap) {
+  ScaledDotProductAttentionOperatorTester& cap_tanh(float cap) {
     this->cap_type_ = xnn_attention_logits_cap_type_tanh;
     this->cap_value_ = cap;
     return *this;
   }
 
-  inline xnn_attention_logits_cap_type cap_type() const {
+  xnn_attention_logits_cap_type cap_type() const {
     return this->cap_type_;
   }
 
-  inline float cap_value() const {
+  float cap_value() const {
     return this->cap_value_;
   }
 
-  inline ScaledDotProductAttentionOperatorTester& query_tokens(size_t query_tokens) {
+  ScaledDotProductAttentionOperatorTester& query_tokens(size_t query_tokens) {
     this->query_tokens_ = query_tokens;
     return *this;
   }
 
-  inline size_t query_tokens() const {
+  size_t query_tokens() const {
     return this->query_tokens_;
   }
 
-  inline ScaledDotProductAttentionOperatorTester& key_value_tokens(size_t key_value_tokens) {
+  ScaledDotProductAttentionOperatorTester& key_value_tokens(size_t key_value_tokens) {
     this->key_value_tokens_ = key_value_tokens;
     return *this;
   }
 
-  inline size_t key_value_tokens() const {
+  size_t key_value_tokens() const {
     if (this->key_value_tokens_ == 0) return query_tokens();
     return this->key_value_tokens_;
   }
 
-  inline ScaledDotProductAttentionOperatorTester& query_key_channels(size_t query_key_channels) {
+  ScaledDotProductAttentionOperatorTester& query_key_channels(size_t query_key_channels) {
     this->query_key_channels_ = query_key_channels;
     return *this;
   }
 
-  inline size_t query_key_channels() const {
+  size_t query_key_channels() const {
     return this->query_key_channels_;
   }
 
-  inline ScaledDotProductAttentionOperatorTester& value_channels(size_t value_channels) {
+  ScaledDotProductAttentionOperatorTester& value_channels(size_t value_channels) {
     this->value_channels_ = value_channels;
     return *this;
   }
 
-  inline size_t value_channels() const {
+  size_t value_channels() const {
     return this->value_channels_;
   }
 
-  inline ScaledDotProductAttentionOperatorTester& multithreaded(bool multithreaded) {
+  ScaledDotProductAttentionOperatorTester& multithreaded(bool multithreaded) {
     this->multithreaded_ = multithreaded;
     return *this;
   }
 
-  inline bool multithreaded() const {
+  bool multithreaded() const {
     return this->multithreaded_;
   }
 
-  inline size_t num_threads() const {
+  size_t num_threads() const {
     return multithreaded() ? 5 : 1;
   }
 
-  inline ScaledDotProductAttentionOperatorTester& iterations(size_t iterations) {
+  ScaledDotProductAttentionOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

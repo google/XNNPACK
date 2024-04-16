@@ -21,22 +21,22 @@
 
 class VSquareAbsMicrokernelTester {
  public:
-  inline VSquareAbsMicrokernelTester& batch(size_t batch) {
+  VSquareAbsMicrokernelTester& batch(size_t batch) {
     assert(batch != 0);
     this->batch_ = batch;
     return *this;
   }
 
-  inline size_t batch() const {
+  size_t batch() const {
     return this->batch_;
   }
 
-  inline VSquareAbsMicrokernelTester& iterations(size_t iterations) {
+  VSquareAbsMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

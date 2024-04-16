@@ -25,75 +25,75 @@
 class PackWMicrokernelTester {
  public:
 
-  inline PackWMicrokernelTester& g(size_t g) {
+  PackWMicrokernelTester& g(size_t g) {
     this->g_ = g;
     return *this;
   }
 
-  inline size_t g() const {
+  size_t g() const {
     return this->g_;
   }
 
-  inline PackWMicrokernelTester& nr(size_t nr) {
+  PackWMicrokernelTester& nr(size_t nr) {
     this->nr_ = nr;
     return *this;
   }
 
-  inline size_t nr() const {
+  size_t nr() const {
     return this->nr_;
   }
 
-  inline PackWMicrokernelTester& kr(size_t kr) {
+  PackWMicrokernelTester& kr(size_t kr) {
     this->kr_ = kr;
     return *this;
   }
 
-  inline size_t kr() const {
+  size_t kr() const {
     return this->kr_;
   }
 
-  inline PackWMicrokernelTester& sr(size_t sr) {
+  PackWMicrokernelTester& sr(size_t sr) {
     this->sr_ = sr;
     return *this;
   }
 
-  inline size_t sr() const {
+  size_t sr() const {
     return this->sr_;
   }
 
-  inline PackWMicrokernelTester& n(size_t n) {
+  PackWMicrokernelTester& n(size_t n) {
     assert(n != 0);
     this->n_ = n;
     return *this;
   }
 
-  inline size_t n() const {
+  size_t n() const {
     return this->n_;
   }
 
-  inline size_t packed_k() const {
+  size_t packed_k() const {
     return round_up_po2(k(), kr() * sr());
   }
 
-  inline size_t packed_n() const {
+  size_t packed_n() const {
     return round_up(n(), nr());
   }
 
-  inline PackWMicrokernelTester& k(size_t k) {
+  PackWMicrokernelTester& k(size_t k) {
     this->k_ = k;
     return *this;
   }
 
-  inline size_t k() const {
+  size_t k() const {
     return this->k_;
   }
 
-  inline PackWMicrokernelTester& nullbias(bool nullbias) {
+  PackWMicrokernelTester& nullbias(bool nullbias) {
     this->nullbias_ = nullbias;
     return *this;
   }
 
-  inline bool nullbias() const {
+  bool nullbias() const {
     return this->nullbias_;
   }
 

@@ -23,7 +23,7 @@ class RuntimeTester : public SubgraphTester {
   using SubgraphTester::SubgraphTester;
 
   template<typename T>
-  inline std::vector<T> RunWithFusion() {
+  std::vector<T> RunWithFusion() {
     Run();
     std::vector<char>& tensor = this->external_tensors_.at(this->output_id_);
     std::vector<float> output = std::vector<float>(tensor.size() / sizeof(float));
@@ -32,7 +32,7 @@ class RuntimeTester : public SubgraphTester {
   }
 
   template<typename T>
-  inline std::vector<T> RunWithoutFusion() {
+  std::vector<T> RunWithoutFusion() {
     Run(XNN_FLAG_NO_OPERATOR_FUSION);
     std::vector<char>& tensor = this->external_tensors_.at(this->output_id_);
     std::vector<float> output = std::vector<float>(tensor.size() / sizeof(float));
@@ -41,7 +41,7 @@ class RuntimeTester : public SubgraphTester {
   }
 
   template<typename T>
-  inline std::vector<T> RepeatRun() {
+  std::vector<T> RepeatRun() {
     std::vector<char>& tensor = this->external_tensors_.at(this->output_id_);
     xnn_invoke_runtime(Runtime());
     std::vector<float> output = std::vector<float>(tensor.size() / sizeof(float));
@@ -98,7 +98,7 @@ class RuntimeTester : public SubgraphTester {
     return runtime_.get();
   }
 
-  inline void ReshapeInput(const std::vector<size_t>& dims, uint32_t external_id) {
+  void ReshapeInput(const std::vector<size_t>& dims, uint32_t external_id) {
     xnn_status status = xnn_reshape_external_value(Runtime(), external_id, dims.size(), dims.data());
     EXPECT_EQ(status, xnn_status_success);
     size_t num_elements = NumElements(dims);
@@ -108,7 +108,7 @@ class RuntimeTester : public SubgraphTester {
     external_tensors_[external_id] = input;
   }
 
-  inline void ReshapeRuntime() {
+  void ReshapeRuntime() {
     xnn_status status = xnn_reshape_runtime(Runtime());
     EXPECT_EQ(status, xnn_status_success);
     std::vector<size_t> output_dims(XNN_MAX_TENSOR_DIMS);

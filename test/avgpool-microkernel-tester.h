@@ -30,56 +30,56 @@
 
 class AvgPoolMicrokernelTester {
  public:
-  inline AvgPoolMicrokernelTester& output_pixels(size_t output_pixels) {
+  AvgPoolMicrokernelTester& output_pixels(size_t output_pixels) {
     assert(output_pixels != 0);
     this->output_pixels_ = output_pixels;
     return *this;
   }
 
-  inline size_t output_pixels() const {
+  size_t output_pixels() const {
     return this->output_pixels_;
   }
 
-  inline AvgPoolMicrokernelTester& step(size_t step) {
+  AvgPoolMicrokernelTester& step(size_t step) {
     assert(step != 0);
     this->step_ = step;
     return *this;
   }
 
-  inline size_t step() const {
+  size_t step() const {
     return this->step_;
   }
 
-  inline AvgPoolMicrokernelTester& input_offset(size_t input_offset) {
+  AvgPoolMicrokernelTester& input_offset(size_t input_offset) {
     assert(input_offset != 0);
     this->input_offset_ = input_offset;
     return *this;
   }
 
-  inline size_t input_offset() const {
+  size_t input_offset() const {
     return this->input_offset_;
   }
 
-  inline AvgPoolMicrokernelTester& zero_index(size_t zero_index) {
+  AvgPoolMicrokernelTester& zero_index(size_t zero_index) {
     this->zero_index_ = zero_index;
     return *this;
   }
 
-  inline size_t zero_index() const {
+  size_t zero_index() const {
     return this->zero_index_;
   }
 
-  inline AvgPoolMicrokernelTester& pooling_elements(size_t pooling_elements) {
+  AvgPoolMicrokernelTester& pooling_elements(size_t pooling_elements) {
     assert(pooling_elements != 0);
     this->pooling_elements_ = pooling_elements;
     return *this;
   }
 
-  inline size_t pooling_elements() const {
+  size_t pooling_elements() const {
     return this->pooling_elements_;
   }
 
-  inline size_t packed_pooling_elements() const {
+  size_t packed_pooling_elements() const {
     if (pooling_elements() <= primary_pooling_tile()) {
       return primary_pooling_tile();
     } else {
@@ -87,50 +87,50 @@ class AvgPoolMicrokernelTester {
     }
   }
 
-  inline AvgPoolMicrokernelTester& pooling_tile(size_t primary_tile, size_t incremental_tile = 0) {
+  AvgPoolMicrokernelTester& pooling_tile(size_t primary_tile, size_t incremental_tile = 0) {
     assert(primary_tile != 0);
     this->primary_pooling_tile_ = primary_tile;
     this->incremental_pooling_tile_ = incremental_tile;
     return *this;
   }
 
-  inline AvgPoolMicrokernelTester& primary_pooling_tile(size_t primary_pooling_tile) {
+  AvgPoolMicrokernelTester& primary_pooling_tile(size_t primary_pooling_tile) {
     assert(primary_pooling_tile != 0);
     this->primary_pooling_tile_ = primary_pooling_tile;
     return *this;
   }
 
-  inline size_t primary_pooling_tile() const {
+  size_t primary_pooling_tile() const {
     return this->primary_pooling_tile_;
   }
 
-  inline AvgPoolMicrokernelTester& incremental_pooling_tile(size_t incremental_pooling_tile) {
+  AvgPoolMicrokernelTester& incremental_pooling_tile(size_t incremental_pooling_tile) {
     assert(incremental_pooling_tile != 0);
     this->incremental_pooling_tile_ = incremental_pooling_tile;
     return *this;
   }
 
-  inline size_t incremental_pooling_tile() const {
+  size_t incremental_pooling_tile() const {
     return this->incremental_pooling_tile_;
   }
 
-  inline AvgPoolMicrokernelTester& channels(size_t channels) {
+  AvgPoolMicrokernelTester& channels(size_t channels) {
     assert(channels != 0);
     this->channels_ = channels;
     return *this;
   }
 
-  inline size_t channels() const {
+  size_t channels() const {
     return this->channels_;
   }
 
-  inline AvgPoolMicrokernelTester& output_stride(size_t output_stride) {
+  AvgPoolMicrokernelTester& output_stride(size_t output_stride) {
     assert(output_stride != 0);
     this->output_stride_ = output_stride;
     return *this;
   }
 
-  inline size_t output_stride() const {
+  size_t output_stride() const {
     if (this->output_stride_ == 0) {
       return channels();
     } else {
@@ -139,70 +139,70 @@ class AvgPoolMicrokernelTester {
     }
   }
 
-  inline AvgPoolMicrokernelTester& input_scale(float input_scale) {
+  AvgPoolMicrokernelTester& input_scale(float input_scale) {
     assert(input_scale > 0.0f);
     assert(std::isnormal(input_scale));
     this->input_scale_ = input_scale;
     return *this;
   }
 
-  inline float input_scale() const {
+  float input_scale() const {
     return this->input_scale_;
   }
 
-  inline AvgPoolMicrokernelTester& input_zero_point(uint8_t input_zero_point) {
+  AvgPoolMicrokernelTester& input_zero_point(uint8_t input_zero_point) {
     this->input_zero_point_ = input_zero_point;
     return *this;
   }
 
-  inline uint8_t input_zero_point() const {
+  uint8_t input_zero_point() const {
     return this->input_zero_point_;
   }
 
-  inline AvgPoolMicrokernelTester& output_scale(float output_scale) {
+  AvgPoolMicrokernelTester& output_scale(float output_scale) {
     assert(output_scale > 0.0f);
     assert(std::isnormal(output_scale));
     this->output_scale_ = output_scale;
     return *this;
   }
 
-  inline float output_scale() const {
+  float output_scale() const {
     return this->output_scale_;
   }
 
-  inline AvgPoolMicrokernelTester& output_zero_point(uint8_t output_zero_point) {
+  AvgPoolMicrokernelTester& output_zero_point(uint8_t output_zero_point) {
     this->output_zero_point_ = output_zero_point;
     return *this;
   }
 
-  inline uint8_t output_zero_point() const {
+  uint8_t output_zero_point() const {
     return this->output_zero_point_;
   }
 
-  inline AvgPoolMicrokernelTester& qmin(uint8_t qmin) {
+  AvgPoolMicrokernelTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
 
-  inline uint8_t qmin() const {
+  uint8_t qmin() const {
     return this->qmin_;
   }
 
-  inline AvgPoolMicrokernelTester& qmax(uint8_t qmax) {
+  AvgPoolMicrokernelTester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
 
-  inline uint8_t qmax() const {
+  uint8_t qmax() const {
     return this->qmax_;
   }
 
-  inline AvgPoolMicrokernelTester& iterations(size_t iterations) {
+  AvgPoolMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

@@ -26,23 +26,23 @@
 
 class SoftMaxOperatorTester {
  public:
-  inline SoftMaxOperatorTester& channels(size_t channels) {
+  SoftMaxOperatorTester& channels(size_t channels) {
     assert(channels != 0);
     this->channels_ = channels;
     return *this;
   }
 
-  inline size_t channels() const {
+  size_t channels() const {
     return this->channels_;
   }
 
-  inline SoftMaxOperatorTester& input_stride(size_t input_stride) {
+  SoftMaxOperatorTester& input_stride(size_t input_stride) {
     assert(input_stride != 0);
     this->input_stride_ = input_stride;
     return *this;
   }
 
-  inline size_t input_stride() const {
+  size_t input_stride() const {
     if (this->input_stride_ == 0) {
       return this->channels_;
     } else {
@@ -51,13 +51,13 @@ class SoftMaxOperatorTester {
     }
   }
 
-  inline SoftMaxOperatorTester& output_stride(size_t output_stride) {
+  SoftMaxOperatorTester& output_stride(size_t output_stride) {
     assert(output_stride != 0);
     this->output_stride_ = output_stride;
     return *this;
   }
 
-  inline size_t output_stride() const {
+  size_t output_stride() const {
     if (this->output_stride_ == 0) {
       return this->channels_;
     } else {
@@ -66,50 +66,50 @@ class SoftMaxOperatorTester {
     }
   }
 
-  inline SoftMaxOperatorTester& batch_size(size_t batch_size) {
+  SoftMaxOperatorTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
     return *this;
   }
 
-  inline size_t batch_size() const {
+  size_t batch_size() const {
     return this->batch_size_;
   }
 
-  inline SoftMaxOperatorTester& input_scale(float input_scale) {
+  SoftMaxOperatorTester& input_scale(float input_scale) {
     assert(input_scale > 0.0f);
     assert(std::isnormal(input_scale));
     this->input_scale_ = input_scale;
     return *this;
   }
 
-  inline float input_scale() const {
+  float input_scale() const {
     return this->input_scale_;
   }
 
-  inline SoftMaxOperatorTester& input_zero_point(uint8_t input_zero_point) {
+  SoftMaxOperatorTester& input_zero_point(uint8_t input_zero_point) {
     this->input_zero_point_ = input_zero_point;
     return *this;
   }
 
-  inline uint8_t input_zero_point() const {
+  uint8_t input_zero_point() const {
     return this->input_zero_point_;
   }
 
-  inline float output_scale() const {
+  float output_scale() const {
     return 1.0f / 256.0f;
   }
 
-  inline uint8_t output_zero_point() const {
+  uint8_t output_zero_point() const {
     return 0;
   }
 
-  inline SoftMaxOperatorTester& iterations(size_t iterations) {
+  SoftMaxOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

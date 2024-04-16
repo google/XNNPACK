@@ -25,43 +25,43 @@
 
 class DynamicFullyConnectedOperatorTester {
  public:
-  inline DynamicFullyConnectedOperatorTester& input_channels(size_t input_channels) {
+  DynamicFullyConnectedOperatorTester& input_channels(size_t input_channels) {
     assert(input_channels >= 1);
     this->input_channels_ = input_channels;
     return *this;
   }
 
-  inline size_t input_channels() const {
+  size_t input_channels() const {
     return this->input_channels_;
   }
 
-  inline DynamicFullyConnectedOperatorTester& output_channels(size_t output_channels) {
+  DynamicFullyConnectedOperatorTester& output_channels(size_t output_channels) {
     assert(output_channels >= 1);
     this->output_channels_ = output_channels;
     return *this;
   }
 
-  inline size_t output_channels() const {
+  size_t output_channels() const {
     return this->output_channels_;
   }
 
-  inline DynamicFullyConnectedOperatorTester& batch_size(size_t batch_size) {
+  DynamicFullyConnectedOperatorTester& batch_size(size_t batch_size) {
     assert(batch_size >= 1);
     this->batch_size_ = batch_size;
     return *this;
   }
 
-  inline size_t batch_size() const {
+  size_t batch_size() const {
     return this->batch_size_;
   }
 
-  inline DynamicFullyConnectedOperatorTester& input_stride(size_t input_stride) {
+  DynamicFullyConnectedOperatorTester& input_stride(size_t input_stride) {
     assert(input_stride >= 1);
     this->input_stride_ = input_stride;
     return *this;
   }
 
-  inline size_t input_stride() const {
+  size_t input_stride() const {
     if (this->input_stride_ == 0) {
       return input_channels();
     } else {
@@ -70,13 +70,13 @@ class DynamicFullyConnectedOperatorTester {
     }
   }
 
-  inline DynamicFullyConnectedOperatorTester& output_stride(size_t output_stride) {
+  DynamicFullyConnectedOperatorTester& output_stride(size_t output_stride) {
     assert(output_stride >= 1);
     this->output_stride_ = output_stride;
     return *this;
   }
 
-  inline size_t output_stride() const {
+  size_t output_stride() const {
     if (this->output_stride_ == 0) {
       return output_channels();
     } else {
@@ -85,52 +85,52 @@ class DynamicFullyConnectedOperatorTester {
     }
   }
 
-  inline DynamicFullyConnectedOperatorTester& qmin(uint8_t qmin) {
+  DynamicFullyConnectedOperatorTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
 
-  inline uint8_t qmin() const {
+  uint8_t qmin() const {
     return this->qmin_;
   }
 
-  inline DynamicFullyConnectedOperatorTester& qmax(uint8_t qmax) {
+  DynamicFullyConnectedOperatorTester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
 
-  inline uint8_t qmax() const {
+  uint8_t qmax() const {
     return this->qmax_;
   }
 
-  inline DynamicFullyConnectedOperatorTester& transpose_weights(bool transpose_weights) {
+  DynamicFullyConnectedOperatorTester& transpose_weights(bool transpose_weights) {
     this->transpose_weights_ = transpose_weights;
     return *this;
   }
 
-  inline bool transpose_weights() const {
+  bool transpose_weights() const {
     return this->transpose_weights_;
   }
 
-  inline DynamicFullyConnectedOperatorTester& has_bias(bool has_bias) {
+  DynamicFullyConnectedOperatorTester& has_bias(bool has_bias) {
     this->has_bias_ = has_bias;
     return *this;
   }
 
-  inline bool has_bias() const {
+  bool has_bias() const {
     return this->has_bias_;
   }
 
-  inline DynamicFullyConnectedOperatorTester& iterations(size_t iterations) {
+  DynamicFullyConnectedOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 
-  inline uint32_t flags() const {
+  uint32_t flags() const {
     uint32_t flags = 0;
     if (transpose_weights()) {
       flags |= XNN_FLAG_TRANSPOSE_WEIGHTS;

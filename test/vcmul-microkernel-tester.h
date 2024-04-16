@@ -27,40 +27,40 @@
 
 class VCMulMicrokernelTester {
  public:
-  inline VCMulMicrokernelTester& batch_size(size_t batch_size) {
+  VCMulMicrokernelTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
     return *this;
   }
 
-  inline size_t batch_size() const {
+  size_t batch_size() const {
     return this->batch_size_;
   }
 
-  inline VCMulMicrokernelTester& inplace_a(bool inplace_a) {
+  VCMulMicrokernelTester& inplace_a(bool inplace_a) {
     this->inplace_a_ = inplace_a;
     return *this;
   }
 
-  inline bool inplace_a() const {
+  bool inplace_a() const {
     return this->inplace_a_;
   }
 
-  inline VCMulMicrokernelTester& inplace_b(bool inplace_b) {
+  VCMulMicrokernelTester& inplace_b(bool inplace_b) {
     this->inplace_b_ = inplace_b;
     return *this;
   }
 
-  inline bool inplace_b() const {
+  bool inplace_b() const {
     return this->inplace_b_;
   }
 
-  inline VCMulMicrokernelTester& iterations(size_t iterations) {
+  VCMulMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 

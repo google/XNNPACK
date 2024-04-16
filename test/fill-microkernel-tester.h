@@ -24,33 +24,33 @@
 
 class FillMicrokernelTester {
  public:
-  inline FillMicrokernelTester& rows(size_t rows) {
+  FillMicrokernelTester& rows(size_t rows) {
     assert(rows != 0);
     this->rows_ = rows;
     return *this;
   }
 
-  inline size_t rows() const {
+  size_t rows() const {
     return this->rows_;
   }
 
-  inline FillMicrokernelTester& channels(size_t channels) {
+  FillMicrokernelTester& channels(size_t channels) {
     assert(channels != 0);
     this->channels_ = channels;
     return *this;
   }
 
-  inline size_t channels() const {
+  size_t channels() const {
     return this->channels_;
   }
 
-  inline FillMicrokernelTester& output_stride(size_t output_stride) {
+  FillMicrokernelTester& output_stride(size_t output_stride) {
     assert(output_stride != 0);
     this->output_stride_ = output_stride;
     return *this;
   }
 
-  inline size_t output_stride() const {
+  size_t output_stride() const {
     if (this->output_stride_ == 0) {
       return channels();
     } else {
@@ -58,12 +58,12 @@ class FillMicrokernelTester {
     }
   }
 
-  inline FillMicrokernelTester& iterations(size_t iterations) {
+  FillMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  inline size_t iterations() const {
+  size_t iterations() const {
     return this->iterations_;
   }
 
