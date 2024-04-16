@@ -7,7 +7,6 @@
 
 #include <cmath>
 #include <cstdlib>
-#include <limits>
 
 #include "unary-operator-tester.h"
 
@@ -29,9 +28,7 @@ class SquareRootOperatorTester : public UnaryOperatorTester {
   // fail when `std::abs(y - y_ref) > AbsTol32(y_ref)`. Note that for `fp16`
   // tests, both `y` and `y_ref` will be converted to `float` for the tolerance
   // evaluation.
-  float AbsTolF32(float y_ref) const override {
-    return std::abs(y_ref) * 2.0f * std::numeric_limits<float>::epsilon();
-  }
+  float AbsTolF32(float y_ref) const override { return 0.0f; }
   float AbsTolF16(float y_ref) const override {
     return std::abs(y_ref) * 5.0e-3f;
   }

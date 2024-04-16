@@ -4910,26 +4910,9 @@ size_t xnn_init_qu8_lrelu_wasmsimd_x86_params(
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_sqrt_sse_params(
-    union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]) {
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse.three[i] = 3.0f;
-  }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse.half[i] = 0.5f;
-  }
-  return sizeof(params->sse);
-}
-
 size_t xnn_init_f32_sqrt_avx_params(
   union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)])
 {
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.three[i] = 3.0f;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.half[i] = 0.5f;
-  }
   for (uint32_t i = 0; i < 7; i++) {
     params->avx.mask_table[i] = -1;
   }
@@ -4942,12 +4925,6 @@ size_t xnn_init_f32_sqrt_avx_params(
 size_t xnn_init_f32_sqrt_fma_params(
   union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)])
 {
-  for (uint32_t i = 0; i < 8; i++) {
-    params->fma.three[i] = 3.0f;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->fma.neg_half[i] = -0.5f;
-  }
   for (uint32_t i = 0; i < 8; i++) {
     params->fma.half[i] = 0.5f;
   }
@@ -4963,8 +4940,6 @@ size_t xnn_init_f32_sqrt_fma_params(
 size_t xnn_init_f32_sqrt_avx512_params(
   union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)])
 {
-  params->avx512.neg_three = -3.0f;
-  params->avx512.neg_half = -0.5f;
   params->avx512.half = 0.5f;
   return sizeof(params->avx512);
 }
