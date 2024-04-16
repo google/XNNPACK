@@ -11,6 +11,8 @@ load(
 )
 
 MICROKERNEL_TEST_DEPS = [
+    ":replicable_random_device",
+    "@FP16",
     "//:aligned_allocator",
     "//:allocator",
     "//:common",
@@ -27,23 +29,33 @@ MICROKERNEL_TEST_DEPS = [
     "//:requantization",
     "//:test_microkernels",
     "//:xnnpack_h",
-    "@FP16",
 ]
 
 OPERATOR_TEST_DEPS = [
+    ":replicable_random_device",
+    "@FP16",
+    "@pthreadpool",
     "//:allocator",
     "//:cache",
     "//:common",
+    "//:jit_test_mode",
+    "//:normalization_test_mode",
     "//:params",
     "//:quantization",
     "//:XNNPACK_test_mode",
-    "//:jit_test_mode",
-    "//:normalization_test_mode",
-    "@pthreadpool",
-    "@FP16",
 ]
 
-######################### Unit tests for micro-kernels #########################
+############################## Testing utilities ###############################
+
+xnnpack_cc_library(
+    name = "replicable_random_device",
+    testonly = True,
+    hdrs = ["replicable_random_device.h"],
+    deps = [
+        "//:xnnpack_h",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
 
 xnnpack_cc_library(
     name = "gemm_microkernel_tester",
@@ -116,6 +128,8 @@ xnnpack_cc_library(
     hdrs = ["vcvt-microkernel-tester.h"],
     deps = MICROKERNEL_TEST_DEPS + ["@com_google_googletest//:gtest_main"],
 )
+
+######################### Unit tests for micro-kernels #########################
 
 xnnpack_unit_test(
     name = "bf16_gemm_minmax_test",

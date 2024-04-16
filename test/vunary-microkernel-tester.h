@@ -21,6 +21,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -245,8 +246,7 @@ class VUnaryMicrokernelTester {
                                 const UKernelParamsType*),
                 InitParamsFunc init_params, ReferenceFunc ref,
                 ToleranceFunc tol, float range_min, float range_max) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(range_min, range_max);
 
     std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
@@ -276,7 +276,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_NEAR(y[i], y_ref[i], tol(y_ref[i]))
+        ASSERT_NEAR(y[i], y_ref[i], tol(y_ref[i]))
             << "at " << i << " / " << batch_size() << ", x[" << i
             << "] = " << x[i];
       }
@@ -319,8 +319,7 @@ class VUnaryMicrokernelTester {
                                 const UKernelParamsType*),
                 InitParamsFunc init_params, ReferenceFunc ref,
                 ToleranceFunc tol, float range_min, float range_max) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto distribution =
         std::uniform_real_distribution<float>(range_min, range_max);
     auto bf16rng = [&]() {
@@ -354,7 +353,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_NEAR(cvt_bf16_f32(y[i]), y_ref[i], tol(y_ref[i]))
+        ASSERT_NEAR(cvt_bf16_f32(y[i]), y_ref[i], tol(y_ref[i]))
             << "at " << i << " / " << batch_size() << ", x[" << i
             << "] = " << cvt_bf16_f32(x[i]);
       }
@@ -380,8 +379,7 @@ class VUnaryMicrokernelTester {
                                 const UKernelParamsType*),
                 InitParamsFunc init_params, ReferenceFunc ref,
                 ToleranceFunc tol, float range_min, float range_max) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto distribution =
         std::uniform_real_distribution<float>(range_min, range_max);
     auto f16rng = [&]() {
@@ -415,7 +413,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        EXPECT_NEAR(fp16_ieee_to_fp32_value(y[i]), y_ref[i], tol(y_ref[i]))
+        ASSERT_NEAR(fp16_ieee_to_fp32_value(y[i]), y_ref[i], tol(y_ref[i]))
             << "at " << i << " / " << batch_size() << ", x[" << i
             << "] = " << fp16_ieee_to_fp32_value(x[i]);
       }
