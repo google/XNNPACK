@@ -15,10 +15,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-#include <functional>
 #include <limits>
 #include <memory>
-#include <numeric>
 #include <random>
 #include <utility>
 #include <vector>

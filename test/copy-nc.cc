@@ -3,10 +3,10 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <gtest/gtest.h>
+#include <cstddef>
 
 #include "copy-operator-tester.h"
-
+#include <gtest/gtest.h>
 
 TEST(COPY_NC_X8, unit_batch) {
   for (size_t channels = 1; channels < 100; channels++) {

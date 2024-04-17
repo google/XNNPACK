@@ -8,14 +8,13 @@
 //   Generator: tools/generate-gavgpool-cw-test.py
 
 
-#include <gtest/gtest.h>
-
 #include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
-
 #include <xnnpack/gavgpool.h>
-#include "gavgpool-cw-microkernel-tester.h"
+#include <xnnpack/isa-checks.h>
+#include <xnnpack/microparams-init.h>
 
+#include "gavgpool-cw-microkernel-tester.h"
+#include <gtest/gtest.h>
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_GAVGPOOL_CW__NEON_U4, elements_eq_4) {

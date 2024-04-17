@@ -6,15 +6,16 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <xnnpack.h>
+#include <xnnpack/config.h>
+
 #include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <utility>
 
-#include <gtest/gtest.h>
-
-#include <xnnpack/config.h>
-#include <xnnpack/params.h>
-
 #include "average-pooling-operator-tester.h"
+#include <gtest/gtest.h>
 
 static std::pair<size_t, size_t> SmallPoolSize(size_t max_elements) {
   const size_t small_side = size_t(std::floor(std::sqrt(double(max_elements))));

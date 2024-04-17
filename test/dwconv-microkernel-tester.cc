@@ -8,16 +8,7 @@
 
 #include "dwconv-microkernel-tester.h"
 
-#include <algorithm>
-#include <cassert>
-#include <cmath>
-#include <cstddef>
-#include <cstdint>
-#include <cstdlib>
-#include <limits>
-#include <random>
-#include <vector>
-
+#include <stdint.h>
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
@@ -28,6 +19,16 @@
 #include <xnnpack/microparams.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/requantization.h>
+
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <limits>
+#include <random>
+#include <vector>
 
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>

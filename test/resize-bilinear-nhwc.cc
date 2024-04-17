@@ -3,10 +3,10 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <gtest/gtest.h>
+#include <cstddef>
 
 #include "resize-bilinear-operator-tester.h"
-
+#include <gtest/gtest.h>
 
 TEST(RESIZE_BILINEAR_NHWC_F16, aligned_centers_upscale_y) {
   for (size_t input_height = 1; input_height <= 3; input_height++) {

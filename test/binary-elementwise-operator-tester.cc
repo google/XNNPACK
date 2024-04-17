@@ -5,6 +5,9 @@
 
 #include "binary-elementwise-operator-tester.h"
 
+#include <stdint.h>
+#include <xnnpack.h>
+
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -17,8 +20,6 @@
 #include <numeric>
 #include <random>
 #include <vector>
-
-#include <xnnpack.h>
 
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>

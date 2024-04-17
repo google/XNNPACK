@@ -5,23 +5,20 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+#include <xnnpack.h>
 
-#include <cassert>
-#include <cstddef>
-#include <cstdlib>
 #include <algorithm>
+#include <cassert>
 #include <cmath>
-#include <limits>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
 #include <memory>
 #include <random>
 #include <vector>
 
+#include <gtest/gtest.h>
 #include <fp16/fp16.h>
-
-#include <xnnpack.h>
-#include <xnnpack/cache.h>
-
 
 class RoPEOperatorTester {
  public:

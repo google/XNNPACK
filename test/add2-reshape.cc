@@ -3,23 +3,19 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
-#include <array>
+#include <xnnpack.h>
+#include <xnnpack/node-type.h>
+#include <xnnpack/subgraph.h>
+
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <limits>
 #include <memory>
 #include <numeric>
-#include <random>
 #include <vector>
 
-#include <xnnpack.h>
-#include <xnnpack/node-type.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/subgraph.h>
-
 #include <gtest/gtest.h>
-
 
 TEST(Add2TestF32, Reshape)
 {

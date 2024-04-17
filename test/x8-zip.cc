@@ -6,14 +6,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <gtest/gtest.h>
-
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-
 #include <xnnpack/zip.h>
-#include "zip-microkernel-tester.h"
 
+#include <cstddef>
+
+#include <gtest/gtest.h>
+#include "zip-microkernel-tester.h"
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(X8_ZIP_X2__NEON, n_eq_8) {

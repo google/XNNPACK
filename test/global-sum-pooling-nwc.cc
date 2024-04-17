@@ -6,15 +6,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <xnnpack/config.h>
+
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
 
-#include <gtest/gtest.h>
-
 #include "global-sum-pooling-operator-tester.h"
-
-#include <xnnpack/params.h>
+#include <gtest/gtest.h>
 
 TEST(GLOBAL_SUM_POOLING_NWC_F16, unit_batch_small_width) {
   const struct xnn_gavgpool_config* gavgpool_config = xnn_init_f16_gavgpool_config();

@@ -5,25 +5,21 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
-#include <algorithm>
-#include <array>
-#include <functional>
-#include <limits>
-#include <memory>
-#include <numeric>
-#include <random>
-#include <vector>
-
-#include <fp16/fp16.h>
-#include <gtest/gtest.h>
-
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/subgraph.h>
 
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <memory>
+#include <random>
+#include <vector>
+
 #include "subgraph-binary-tester.h"
+#include <gtest/gtest.h>
+#include <fp16/fp16.h>
 
 using SquaredDifferenceTestF16 = BinaryTest<uint16_t>;
 using SquaredDifferenceTestF32 = BinaryTest<float>;

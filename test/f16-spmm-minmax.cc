@@ -8,14 +8,13 @@
 //   Generator: tools/generate-spmm-test.py
 
 
-#include <gtest/gtest.h>
-
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/spmm.h>
-#include "spmm-microkernel-tester.h"
 
+#include "spmm-microkernel-tester.h"
+#include <gtest/gtest.h>
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_SPMM_MINMAX_8X1__NEONFP16ARITH, k_eq_1) {

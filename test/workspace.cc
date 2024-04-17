@@ -3,6 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <xnnpack.h>
+#include <xnnpack/allocation-type.h>
+#include <xnnpack/math.h>
+#include <xnnpack/subgraph.h>
+
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -13,10 +18,6 @@
 #include <memory>
 #include <random>
 #include <vector>
-
-#include <xnnpack.h>
-#include <xnnpack/math.h>
-#include <xnnpack/subgraph.h>
 
 #include <gtest/gtest.h>
 

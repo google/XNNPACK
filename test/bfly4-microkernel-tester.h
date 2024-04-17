@@ -5,20 +5,19 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+#include <xnnpack/math.h>
+#include <xnnpack/microfnptr.h>
 
 #include <algorithm>
 #include <cassert>
-#include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
+#include <functional>
 #include <random>
 #include <vector>
 
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/math.h>
-#include <xnnpack/params.h>
+#include <gtest/gtest.h>
 
 // twiddle table for bfly4 for fft size 192 (complex numbers)
 // Even numbers are numpy.floor(0.5 + 32767 * numpy.cos(-2*pi*numpy.linspace(0, 255, num=256) / 256)).astype(numpy.int16).tolist()

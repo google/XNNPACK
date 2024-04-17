@@ -5,16 +5,19 @@
 
 #pragma once
 
-#include <algorithm>
-#include <cstddef>
-#include <cstdlib>
-#include <cstring>
-#include <vector>
-
 #include <xnnpack.h>
 #include <xnnpack/subgraph.h>
 
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <memory>
+#include <vector>
+
 #include "subgraph-tester.h"
+#include <gtest/gtest.h>
 
 namespace xnnpack {
 

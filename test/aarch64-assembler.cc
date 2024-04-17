@@ -3,18 +3,19 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
-#include <random>
-
-#include <gtest/gtest.h>
-
+#include <xnnpack.h>
 #include <xnnpack/aarch64-assembler.h>
+#include <xnnpack/assembler.h>
 #include <xnnpack/common.h>
 #include <xnnpack/memory.h>
-#include <xnnpack/microparams.h>
 #include <xnnpack/microparams-init.h>
-#include "assembler-helpers.h"
+#include <xnnpack/microparams.h>
 
+#include <cstdint>
+#include <random>
+
+#include "assembler-helpers.h"
+#include <gtest/gtest.h>
 
 namespace xnnpack {
 namespace aarch64 {

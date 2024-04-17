@@ -5,15 +5,17 @@
 
 #pragma once
 
+#include <xnnpack.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <functional>
+#include <memory>
 #include <numeric>
 #include <vector>
-
-#include <xnnpack.h>
 
 #include <gtest/gtest.h>
 

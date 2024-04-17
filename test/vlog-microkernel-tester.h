@@ -5,21 +5,21 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
-
-#include <algorithm>
-#include <cassert>
-#include <cmath>
-#include <cstddef>
-#include <cstdlib>
-#include <random>
-#include <vector>
-
 #include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/microfnptr.h>
 
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <functional>
+#include <random>
+#include <vector>
+
+#include <gtest/gtest.h>
 
 extern "C" XNN_INTERNAL const uint16_t xnn_table_vlog[129];
 

@@ -11,14 +11,13 @@
 //   Generator: tools/generate-maxpool-test.py
 
 
-#include <gtest/gtest.h>
-
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-
 #include <xnnpack/maxpool.h>
-#include "maxpool-microkernel-tester.h"
+#include <xnnpack/microparams-init.h>
 
+#include "maxpool-microkernel-tester.h"
+#include <gtest/gtest.h>
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_MAXPOOL_MINMAX_9P8X__SSE_C4, channels_eq_4_unipass_fulltile) {

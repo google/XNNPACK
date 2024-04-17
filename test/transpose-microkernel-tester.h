@@ -5,19 +5,20 @@
 
 #pragma once
 
+#include <xnnpack.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams.h>
+
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <numeric>
 #include <vector>
 
 #include <gtest/gtest.h>
-
-#include <xnnpack.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/params.h>
 
 class TransposeMicrokernelTester {
  public:

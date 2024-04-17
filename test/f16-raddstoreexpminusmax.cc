@@ -7,15 +7,13 @@
 //   Specification: test/f16-raddstoreexpminusmax.yaml
 //   Generator: tools/generate-raddstoreexpminusmax-test.py
 
-
-#include <gtest/gtest.h>
-
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/raddstoreexpminusmax.h>
-#include "raddstoreexpminusmax-microkernel-tester.h"
 
+#include "raddstoreexpminusmax-microkernel-tester.h"
+#include <gtest/gtest.h>
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_RADDSTOREEXPMINUSMAX__NEONFP16ARITH_RR2_P2_U32, elements_eq_32) {

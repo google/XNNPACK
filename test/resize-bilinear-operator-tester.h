@@ -5,24 +5,24 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
-
-#include <algorithm>
-#include <cmath>
-#include <cassert>
-#include <cstddef>
-#include <cstdlib>
-#include <functional>
-#include <numeric>
-#include <random>
-#include <vector>
-
-#include <fp16/fp16.h>
-
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <limits>
+#include <memory>
+#include <numeric>
+#include <random>
+#include <vector>
+
+#include <gtest/gtest.h>
+#include <fp16/fp16.h>
 
 class ResizeBilinearOperatorTester {
  public:

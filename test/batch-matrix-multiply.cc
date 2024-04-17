@@ -12,9 +12,11 @@
 
 #include <algorithm>  // For std::generate.
 #include <array>      // For std::array.
+#include <cassert>
 #include <cmath>
 #include <cstddef>  // For size_t.
 #include <cstdint>  // For uint32_t.
+#include <functional>
 #include <iterator>
 #include <limits>
 #include <memory>   // For std::unique_ptr.

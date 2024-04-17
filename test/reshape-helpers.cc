@@ -16,7 +16,6 @@
 #include <vector>
 
 #include <xnnpack.h>
-#include <xnnpack/reshape-helpers.h>
 #include <xnnpack/subgraph.h>
 
 #include <gtest/gtest.h>

@@ -3,19 +3,18 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cstdint>
+#include <xnnpack/math.h>
+#include <xnnpack/microkernel-utils.h>
+#include <xnnpack/pack.h>
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <numeric>
 #include <vector>
 
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/microkernel-utils.h>
-#include <xnnpack/operator-utils.h>
-#include <xnnpack/pack.h>
-
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
 // QD8-F32-QC4W GEMM packing tests.

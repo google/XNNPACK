@@ -5,20 +5,18 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+#include <xnnpack.h>
 
 #include <algorithm>
 #include <cassert>
-#include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
-#include <functional>
+#include <memory>
 #include <numeric>
-#include <random>
 #include <vector>
 
-#include <xnnpack.h>
-
+#include <gtest/gtest.h>
 
 class SpaceToDepthOperatorTester {
  public:

@@ -8,14 +8,13 @@
 //   Generator: tools/generate-dwconv2d-chw-test.py
 
 
-#include <gtest/gtest.h>
-
 #include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
-
 #include <xnnpack/dwconv.h>
-#include "dwconv2d-microkernel-tester.h"
+#include <xnnpack/isa-checks.h>
+#include <xnnpack/microparams-init.h>
 
+#include "dwconv2d-microkernel-tester.h"
+#include <gtest/gtest.h>
 
 #if XNN_ARCH_ARM64
   TEST(F32_DWCONV2D_CHW_3X3P1__AARCH64_NEONFMA_1X4, output_width_eq_4) {

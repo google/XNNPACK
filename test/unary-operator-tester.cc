@@ -5,6 +5,7 @@
 
 #include "unary-operator-tester.h"
 
+#include <stdint.h>
 #include <xnnpack.h>
 
 #include <algorithm>

@@ -8,7 +8,11 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+#include <xnnpack.h>
+#include <xnnpack/aligned-allocator.h>
+#include <xnnpack/cache.h>
+#include <xnnpack/common.h>
+#include <xnnpack/microparams.h>
 
 #include <algorithm>
 #include <cassert>
@@ -23,13 +27,9 @@
 #include <vector>
 
 #include "convolution-test-helpers.h"
+#include "pthreadpool.h"
+#include <gtest/gtest.h>
 #include <fp16/fp16.h>
-
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/cache.h>
-#include <xnnpack/allocator.h>
-
 
 class ConvolutionOperatorTester {
  public:

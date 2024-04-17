@@ -3,6 +3,15 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <xnnpack.h>
+#include <xnnpack/aligned-allocator.h>
+#include <xnnpack/common.h>
+#include <xnnpack/node-type.h>
+#include <xnnpack/operator-utils.h>
+#include <xnnpack/operator.h>
+#include <xnnpack/requantization.h>
+#include <xnnpack/subgraph.h>
+
 #include <algorithm>  // For std::generate, std::min.
 #include <array>      // For std::array.
 #include <cmath>      // For std::lrintf.
@@ -10,18 +19,12 @@
 #include <cstdint>    // For uint32_t.
 #include <limits>     // For std::numeric_limits.
 #include <memory>     // For std::unique_ptr.
-#include <random>     // For std::random_device, std::mt19937, std::uniform_real_distribution.
-#include <vector>     // For std::vector.
-
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/operator-utils.h>
-#include <xnnpack/requantization.h>
-#include <xnnpack/subgraph.h>
+#include <random>  // For std::random_device, std::mt19937, std::uniform_real_distribution.
+#include <vector>  // For std::vector.
 
 #include "convolution-test-helpers.h"
 #include <gtest/gtest.h>
+#include <fp16/fp16.h>
 
 namespace xnnpack {
 template <class InputType, class KernelType = InputType, class BiasType = InputType, class OutputType = InputType> class ConvolutionTestBase : public ::testing::Test {

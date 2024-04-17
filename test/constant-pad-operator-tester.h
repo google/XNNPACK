@@ -5,19 +5,23 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+#include <xnnpack.h>
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
+#include <functional>
 #include <initializer_list>
+#include <limits>
+#include <memory>
 #include <numeric>
 #include <random>
 #include <vector>
 
-#include <xnnpack.h>
-
+#include <gtest/gtest.h>
 
 class ConstantPadOperatorTester {
  public:

@@ -6,10 +6,10 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <gtest/gtest.h>
+#include <cstddef>
 
 #include "channel-shuffle-operator-tester.h"
-
+#include <gtest/gtest.h>
 
 TEST(CHANNEL_SHUFFLE_NC_X8, two_groups_unit_batch) {
   for (size_t group_channels = 1; group_channels < 100; group_channels += 15) {

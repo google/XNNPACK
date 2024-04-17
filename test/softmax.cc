@@ -3,23 +3,22 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
-#include <array>
-#include <cstddef>
-#include <cstdint>
-#include <limits>
-#include <memory>
-#include <random>
-
-#include <fp16/fp16.h>
-#include <gtest/gtest.h>
-
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/subgraph.h>
 
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <memory>
+#include <random>
+
 #include "subgraph-unary-tester.h"
+#include <gtest/gtest.h>
+#include <fp16/fp16.h>
 
 using SoftmaxTestF16 =
   UnaryTest<uint16_t, /*OutputType=*/uint16_t, /*min_dim=*/1, /*max_dim=*/XNN_MAX_TENSOR_DIMS, /*pad_output=*/true>;

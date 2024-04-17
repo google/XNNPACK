@@ -3,23 +3,21 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
-#include <array>
-#include <cstdint>
-#include <cstddef>
-#include <limits>
-#include <memory>
-#include <random>
-
-#include <fp16/fp16.h>
-#include <gtest/gtest.h>
-
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/subgraph.h>
 
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <cstdint>
+#include <memory>
+#include <random>
+
 #include "subgraph-unary-tester.h"
+#include <gtest/gtest.h>
+#include <fp16/fp16.h>
 
 using ClampTestQS8 = UnaryTest<int8_t>;
 using ClampTestQU8 = UnaryTest<uint8_t>;

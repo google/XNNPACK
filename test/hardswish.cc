@@ -3,24 +3,23 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>  // For std::generate.
-#include <array>      // For std::array.
-#include <cmath>
-#include <cstddef>     // For size_t.
-#include <functional>  // For std::multiplies.
-#include <memory>      // For std::unique_ptr.
-#include <random>      // For std::random_device, std::mt19937, std::uniform_real_distribution.
-#include <vector>      // For std::vector.
-
-#include <fp16/fp16.h>
-#include <gtest/gtest.h>
-
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/subgraph.h>
 
+#include <algorithm>  // For std::generate.
+#include <array>      // For std::array.
+#include <cmath>
+#include <cstddef>  // For size_t.
+#include <cstdint>
+#include <memory>  // For std::unique_ptr.
+#include <random>  // For std::random_device, std::mt19937, std::uniform_real_distribution.
+#include <vector>  // For std::vector.
+
 #include "subgraph-unary-tester.h"
+#include <gtest/gtest.h>
+#include <fp16/fp16.h>
 
 using HardSwishTestF16 = UnaryTest<uint16_t>;
 using HardSwishTestF32 = UnaryTest<float>;

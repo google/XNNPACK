@@ -5,21 +5,21 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
-#include <algorithm>
-#include <array>
-#include <memory>
-#include <vector>
-
-#include <fp16/fp16.h>
-#include <gtest/gtest.h>
-
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
+#include <xnnpack/requantization.h>
 #include <xnnpack/subgraph.h>
 
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <memory>
+#include <vector>
+
 #include "subgraph-binary-tester.h"
+#include <gtest/gtest.h>
+#include <fp16/fp16.h>
 
 using Subtract2TestQS8 = BinaryTest<int8_t>;
 using Subtract2TestQU8 = BinaryTest<uint8_t>;

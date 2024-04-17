@@ -8,10 +8,10 @@
 
 #include <xnnpack/common.h>
 
-#include <gtest/gtest.h>
+#include <cstdint>
 
 #include "fully-connected-operator-tester.h"
-
+#include <gtest/gtest.h>
 
 TEST(FULLY_CONNECTED_NC_QS8, unit_batch) {
   FullyConnectedOperatorTester()

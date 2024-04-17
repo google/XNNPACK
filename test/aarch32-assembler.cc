@@ -3,19 +3,20 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
-#include <ios>
+#include <xnnpack.h>
+#include <xnnpack/aarch32-assembler.h>
+#include <xnnpack/assembler.h>
+#include <xnnpack/common.h>
+#include <xnnpack/memory.h>
+#include <xnnpack/microparams-init.h>
+#include <xnnpack/microparams.h>
+
+#include <cstddef>
+#include <cstdint>
 #include <random>
 
-#include <gtest/gtest.h>
-
-#include <xnnpack/aarch32-assembler.h>
-#include <xnnpack/memory.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/common.h>
 #include "assembler-helpers.h"
-
+#include <gtest/gtest.h>
 
 namespace xnnpack {
 namespace aarch32 {

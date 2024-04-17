@@ -8,14 +8,13 @@
 //   Generator: tools/generate-conv-hwc-test.py
 
 
-#include <gtest/gtest.h>
-
 #include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
-
 #include <xnnpack/conv.h>
-#include "conv-hwc-microkernel-tester.h"
+#include <xnnpack/isa-checks.h>
+#include <xnnpack/microparams-init.h>
 
+#include "conv-hwc-microkernel-tester.h"
+#include <gtest/gtest.h>
 
 #if XNN_ARCH_ARM64
   TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X1, input_width_eq_2) {

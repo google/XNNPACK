@@ -5,23 +5,21 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+#include <xnnpack/aligned-allocator.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams.h>
 
 #include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <random>
 #include <vector>
 
+#include <gtest/gtest.h>
 #include <fp16/fp16.h>
-
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-
 
 static inline bool is_fp16_zero(uint16_t x) {
   const uint16_t two_x = x + x;

@@ -11,14 +11,13 @@
 //   Generator: tools/generate-gavgpool-test.py
 
 
-#include <gtest/gtest.h>
-
 #include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
-
 #include <xnnpack/gavgpool.h>
-#include "gavgpool-microkernel-tester.h"
+#include <xnnpack/isa-checks.h>
+#include <xnnpack/microparams-init.h>
 
+#include "gavgpool-microkernel-tester.h"
+#include <gtest/gtest.h>
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(QS8_GAVGPOOL_MINMAX_RNDNU_7P7X__NEON_C8, channels_eq_8_2pass_fulltile) {

@@ -3,9 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <gtest/gtest.h>
+#include <cstddef>
+#include <cstdint>
 
 #include "binary-elementwise-operator-tester.h"
+#include <gtest/gtest.h>
 
 constexpr size_t kDim1 = 2;
 constexpr size_t kDim2 = 3;

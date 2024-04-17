@@ -8,21 +8,19 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
-
-#include <cstddef>
-#include <cstdlib>
+#include <xnnpack/microfnptr.h>
 
 #include <algorithm>
-#include <cfloat>
-#include <cmath>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
 #include <functional>
 #include <limits>
 #include <random>
 #include <vector>
 
-#include <xnnpack/microfnptr.h>
-
+#include <gtest/gtest.h>
 
 class ZipMicrokernelTester {
  public:

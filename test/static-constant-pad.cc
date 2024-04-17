@@ -3,24 +3,25 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <xnnpack.h>
+#include <xnnpack/math.h>
+#include <xnnpack/node-type.h>
+#include <xnnpack/operator.h>
+#include <xnnpack/requantization.h>
+#include <xnnpack/subgraph.h>
+
 #include <algorithm>  // For std::generate, std::shuffle.
 #include <array>      // For std::array.
 #include <cmath>
-#include <cstddef>     // For size_t.
-#include <functional>  // For std::multiplies.
-#include <memory>      // For std::unique_ptr.
-#include <random>      // For std::random_device, std::mt19937, std::uniform_real_distribution.
-#include <vector>      // For std::vector.
-
-#include <fp16/fp16.h>
-#include <gtest/gtest.h>
-
-#include <xnnpack.h>
-#include <xnnpack/node-type.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/subgraph.h>
+#include <cstddef>  // For size_t.
+#include <cstdint>
+#include <memory>  // For std::unique_ptr.
+#include <random>  // For std::random_device, std::mt19937, std::uniform_real_distribution.
+#include <vector>  // For std::vector.
 
 #include "subgraph-unary-tester.h"
+#include <gtest/gtest.h>
+#include <fp16/fp16.h>
 
 using StaticConstantPadTestInt8 = UnaryTest<int8_t>;
 using StaticConstantPadTestUint8 = UnaryTest<uint8_t>;

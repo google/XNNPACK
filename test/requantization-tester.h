@@ -8,21 +8,21 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+#include <xnnpack/requantization-stubs.h>
+#include <xnnpack/requantization.h>
 
 #include <algorithm>
-#include <cfloat>
+#include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <functional>
 #include <limits>
 #include <random>
 #include <vector>
 
-#include <xnnpack/requantization-stubs.h>
-#include <xnnpack/requantization.h>
-
+#include <gtest/gtest.h>
 
 class RequantizationTester {
  public:

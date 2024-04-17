@@ -5,22 +5,24 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
-
-#include <array>
-#include <algorithm>
-#include <cassert>
-#include <cstddef>
-#include <cstdlib>
-#include <functional>
-#include <iomanip>
-#include <ios>
-#include <random>
-#include <vector>
-
 #include <xnnpack.h>
 #include <xnnpack/microfnptr.h>
 
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <functional>
+#include <iomanip>
+#include <ios>
+#include <limits>
+#include <random>
+#include <vector>
+
+#include <gtest/gtest.h>
 
 class PadMicrokernelTester {
  public:

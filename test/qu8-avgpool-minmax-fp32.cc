@@ -10,16 +10,14 @@
 //   Specification: test/qu8-avgpool-minmax-fp32.yaml
 //   Generator: tools/generate-avgpool-test.py
 
-
-#include <gtest/gtest.h>
-
+#include <xnnpack/avgpool.h>
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-
-#include <xnnpack/avgpool.h>
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/pavgpool.h>
-#include "avgpool-microkernel-tester.h"
 
+#include "avgpool-microkernel-tester.h"
+#include <gtest/gtest.h>
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_twopass_fulltile) {

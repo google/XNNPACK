@@ -8,26 +8,24 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+#include <xnnpack.h>
+#include <xnnpack/aligned-allocator.h>
+#include <xnnpack/common.h>
 
-#include <fp16/fp16.h>
-
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-
-#include <algorithm>
 #include <limits>
 #include <memory>
 #include <random>
 #include <vector>
 
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-
+#include "pthreadpool.h"
+#include <gtest/gtest.h>
+#include <fp16/fp16.h>
 
 class AveragePoolingOperatorTester {
  public:

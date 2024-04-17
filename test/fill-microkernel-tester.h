@@ -5,22 +5,23 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+#include <xnnpack/microfnptr.h>
 
-#include <array>
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <functional>
 #include <iomanip>
 #include <ios>
+#include <limits>
 #include <random>
 #include <vector>
 
-#include <xnnpack.h>
-#include <xnnpack/microfnptr.h>
-
+#include <gtest/gtest.h>
 
 class FillMicrokernelTester {
  public:

@@ -5,25 +5,23 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <xnnpack.h>
+#include <xnnpack/math.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams.h>
 
 #include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
-#include <stdint.h>
-#include <stdio.h>
 #include <cstdlib>
-#include <functional>
 #include <limits>
 #include <random>
 #include <vector>
 
-#include <xnnpack.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-
+#include <gtest/gtest.h>
 
 class VHSwishMicrokernelTester {
  public:

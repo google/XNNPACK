@@ -5,21 +5,21 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
-
-#include <algorithm>
-#include <cassert>
-#include <cmath>
-#include <cstddef>
-#include <cstdlib>
-#include <numeric>
-#include <random>
-#include <vector>
-
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/microfnptr.h>
 
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <functional>
+#include <numeric>
+#include <random>
+#include <vector>
+
+#include <gtest/gtest.h>
 
 class FilterbankSubtractMicrokernelTester {
  public:

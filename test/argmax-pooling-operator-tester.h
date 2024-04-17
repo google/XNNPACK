@@ -5,21 +5,22 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
-
-#include <algorithm>
-#include <cassert>
-#include <cstddef>
-#include <cstdlib>
-#include <cstdint>
-#include <memory>
-#include <random>
-#include <vector>
-
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <memory>
+#include <random>
+#include <vector>
+
+#include "pthreadpool.h"
+#include <gtest/gtest.h>
 
 class ArgmaxPoolingOperatorTester {
  public:

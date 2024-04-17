@@ -5,26 +5,27 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+#include <xnnpack.h>
+#include <xnnpack/aligned-allocator.h>
+#include <xnnpack/common.h>
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cmath>
 #include <cstddef>
-#include <cstdlib>
 #include <cstdint>
+#include <cstdlib>
+#include <functional>
 #include <initializer_list>
 #include <memory>
 #include <numeric>
 #include <random>
 #include <vector>
 
+#include "pthreadpool.h"
+#include <gtest/gtest.h>
 #include <fp16/fp16.h>
-
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-
 
 class MeanOperatorTester {
  public:

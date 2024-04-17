@@ -8,22 +8,23 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
-
-#include <cstddef>
-#include <cstdlib>
-#include <algorithm>
-#include <cmath>
-#include <limits>
-#include <random>
-#include <vector>
-
-#include <fp16/fp16.h>
-
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <limits>
+#include <memory>
+#include <random>
+#include <vector>
+
+#include <gtest/gtest.h>
+#include <fp16/fp16.h>
 
 class GlobalSumPoolingOperatorTester {
  public:

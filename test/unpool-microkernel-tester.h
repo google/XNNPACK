@@ -5,18 +5,18 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+#include <xnnpack/microfnptr.h>
 
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <functional>
 #include <random>
 #include <vector>
 
-#include <xnnpack/microfnptr.h>
-
+#include <gtest/gtest.h>
 
 class UnpoolMicrokernelTester {
  public:

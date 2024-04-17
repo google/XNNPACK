@@ -4,10 +4,10 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
+#include <cstddef>
 #include <vector>
 
 #include <gtest/gtest.h>
-
 #include "transpose-operator-tester.h"
 
 TEST(TRANSPOSE_ND_X8, transpose_1D) {

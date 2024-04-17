@@ -6,12 +6,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <gtest/gtest.h>
-
-#include "max-pooling-operator-tester.h"
-
+#include <xnnpack.h>
 #include <xnnpack/config.h>
 
+#include <cassert>
+#include <cstddef>
+
+#include "max-pooling-operator-tester.h"
+#include <gtest/gtest.h>
 
 TEST(MAX_POOLING_NHWC_S8, unit_batch_small_1xM_pool) {
   const struct xnn_maxpool_config* maxpool_config = xnn_init_s8_maxpool_config();

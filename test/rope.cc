@@ -3,24 +3,22 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <xnnpack.h>
+#include <xnnpack/node-type.h>
+#include <xnnpack/operator.h>
+#include <xnnpack/subgraph.h>
+
 #include <algorithm>  // For std::generate, std::min.
 #include <array>      // For std::array.
 #include <cmath>      // For std::lrintf.
 #include <cstddef>    // For size_t.
 #include <cstdint>    // For uint32_t.
-#include <limits>     // For std::numeric_limits.
 #include <memory>     // For std::unique_ptr.
-#include <numeric>    // For std::accumulate.
-#include <random>     // For std::random_device, std::mt19937, std::uniform_real_distribution.
-#include <vector>     // For std::vector.
+#include <random>  // For std::random_device, std::mt19937, std::uniform_real_distribution.
+#include <vector>  // For std::vector.
 
-#include <fp16/fp16.h>
 #include <gtest/gtest.h>
-
-#include <xnnpack.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/requantization.h>
-#include <xnnpack/subgraph.h>
+#include <fp16/fp16.h>
 
 template <class T> class RoPETestBase : public ::testing::Test {
 protected:

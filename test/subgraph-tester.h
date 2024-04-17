@@ -5,21 +5,22 @@
 
 #pragma once
 
+#include <xnnpack.h>
+#include <xnnpack/subgraph.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
-#include <cstdlib>
 #include <cstdint>
-#include <unordered_map>
+#include <cstdlib>
+#include <functional>
+#include <limits>
 #include <memory>
 #include <numeric>
 #include <random>
+#include <unordered_map>
 #include <vector>
-#include <type_traits>
-
-#include <xnnpack.h>
-#include <xnnpack/subgraph.h>
 
 #include <gtest/gtest.h>
 

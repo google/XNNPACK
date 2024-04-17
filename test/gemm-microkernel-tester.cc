@@ -1,5 +1,17 @@
 #include "gemm-microkernel-tester.h"
 
+#include <stdint.h>
+#include <xnnpack.h>
+#include <xnnpack/aligned-allocator.h>
+#include <xnnpack/common.h>
+#include <xnnpack/math.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
+#include <xnnpack/microparams.h>
+#include <xnnpack/pack.h>
+#include <xnnpack/quantization.h>
+#include <xnnpack/requantization.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -10,19 +22,6 @@
 #include <limits>
 #include <random>
 #include <vector>
-
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/memory.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/quantization.h>
-#include <xnnpack/requantization.h>
 
 #include <gtest/gtest.h>
 #include <fp16/bitcasts.h>
