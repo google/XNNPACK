@@ -16,6 +16,7 @@
 #include "dwconv2d-microkernel-tester.h"
 #include <gtest/gtest.h>
 
+
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_DWCONV2D_CHW_3X3P1__NEONFP16ARITH_1X8, output_width_eq_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;

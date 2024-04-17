@@ -7,13 +7,15 @@
 //   Specification: test/f32-raddstoreexpminusmax.yaml
 //   Generator: tools/generate-raddstoreexpminusmax-test.py
 
+
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/raddstoreexpminusmax.h>
 
-#include "raddstoreexpminusmax-microkernel-tester.h"
 #include <gtest/gtest.h>
+#include "raddstoreexpminusmax-microkernel-tester.h"
+
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_RADDSTOREEXPMINUSMAX__NEON_RR2_LUT64_P2_U4, elements_eq_4) {

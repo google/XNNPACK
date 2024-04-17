@@ -7,6 +7,7 @@
 //   Specification: test/qu8-vhswish.yaml
 //   Generator: tools/generate-vhswish-test.py
 
+
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 #include <xnnpack/microparams-init.h>

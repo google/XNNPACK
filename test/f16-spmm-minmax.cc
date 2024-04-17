@@ -16,6 +16,7 @@
 #include "spmm-microkernel-tester.h"
 #include <gtest/gtest.h>
 
+
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_SPMM_MINMAX_8X1__NEONFP16ARITH, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;

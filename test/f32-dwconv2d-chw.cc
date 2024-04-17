@@ -16,6 +16,7 @@
 #include "dwconv2d-microkernel-tester.h"
 #include <gtest/gtest.h>
 
+
 #if XNN_ARCH_ARM64
   TEST(F32_DWCONV2D_CHW_3X3P1__AARCH64_NEONFMA_1X4, output_width_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;

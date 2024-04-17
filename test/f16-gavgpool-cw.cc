@@ -16,6 +16,7 @@
 #include "gavgpool-cw-microkernel-tester.h"
 #include <gtest/gtest.h>
 
+
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_GAVGPOOL_CW__NEONFP16ARITH_U8, elements_eq_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;

@@ -16,6 +16,7 @@
 #include "spmm-microkernel-tester.h"
 #include <gtest/gtest.h>
 
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_4X1__NEON_PIPELINED, k_eq_1) {
     TEST_REQUIRES_ARM_NEON;

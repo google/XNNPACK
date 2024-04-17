@@ -16,6 +16,7 @@
 #include "conv-hwc2chw-microkernel-tester.h"
 #include <gtest/gtest.h>
 
+
 #if XNN_ARCH_ARM64
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__AARCH64_NEONFMA_2X2, input_width_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;

@@ -19,6 +19,7 @@
 #include "maxpool-microkernel-tester.h"
 #include <gtest/gtest.h>
 
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_eq_16_unipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;

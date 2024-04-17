@@ -16,6 +16,7 @@
 #include "gavgpool-cw-microkernel-tester.h"
 #include <gtest/gtest.h>
 
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_GAVGPOOL_CW__NEON_U4, elements_eq_4) {
     TEST_REQUIRES_ARM_NEON;

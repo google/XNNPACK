@@ -19,6 +19,7 @@
 #include "maxpool-microkernel-tester.h"
 #include <gtest/gtest.h>
 
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_MAXPOOL_MINMAX_9P8X__SSE_C4, channels_eq_4_unipass_fulltile) {
     TEST_REQUIRES_X86_SSE;

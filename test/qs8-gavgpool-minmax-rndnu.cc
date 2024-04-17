@@ -19,6 +19,7 @@
 #include "gavgpool-microkernel-tester.h"
 #include <gtest/gtest.h>
 
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(QS8_GAVGPOOL_MINMAX_RNDNU_7P7X__NEON_C8, channels_eq_8_2pass_fulltile) {
     TEST_REQUIRES_ARM_NEON;

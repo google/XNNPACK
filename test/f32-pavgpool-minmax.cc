@@ -10,6 +10,7 @@
 //   Specification: test/f32-pavgpool-minmax.yaml
 //   Generator: tools/generate-avgpool-test.py
 
+
 #include <xnnpack/avgpool.h>
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
@@ -18,6 +19,7 @@
 
 #include "avgpool-microkernel-tester.h"
 #include <gtest/gtest.h>
+
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_PAVGPOOL_MINMAX_9P8X__NEON_C4, channels_eq_4_twopass_fulltile) {
