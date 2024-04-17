@@ -20,11 +20,12 @@
   #include <android/log.h>
 #endif
 #if defined(__hexagon__)
-  #include <qurt_printf.h>
+  #define FARF_LOW 1
+  #include <HAP_farf.h>
 #endif
 
 #ifndef XNN_LOG_TO_STDIO
-  #if defined(__ANDROID__)
+  #if defined(__ANDROID__) || defined(__hexagon__)
     #define XNN_LOG_TO_STDIO 0
   #else
     #define XNN_LOG_TO_STDIO 1
@@ -103,8 +104,6 @@ static void xnn_vlog(int output_handle, const char* prefix, size_t prefix_length
       GetStdHandle((DWORD) output_handle),
       out_buffer, (prefix_length + format_length + XNN_LOG_NEWLINE_LENGTH) * sizeof(char),
       &bytes_written, NULL);
-  #elif defined(__hexagon__)
-    qurt_printf("%s", out_buffer);
   #else
     out_buffer[prefix_length + format_length] = '\n';
 
@@ -131,6 +130,8 @@ cleanup:
         'D', 'e', 'b', 'u', 'g', ' ', '(', 'X', 'N', 'N', 'P', 'A', 'C', 'K', ')', ':', ' '
       };
       xnn_vlog(XNN_LOG_STDOUT, debug_prefix, 17, format, args);
+    #elif defined(__hexagon__)
+      FARF(LOW, format, args);
     #elif defined(__ANDROID__)
       __android_log_vprint(ANDROID_LOG_DEBUG, xnnpack_module, format, args);
     #else
@@ -146,6 +147,8 @@ cleanup:
         'N', 'o', 't', 'e', ' ', '(', 'X', 'N', 'N', 'P', 'A', 'C', 'K', ')', ':', ' '
       };
       xnn_vlog(XNN_LOG_STDOUT, info_prefix, 16, format, args);
+    #elif defined(__hexagon__)
+      FARF(MEDIUM, format, args);
     #elif defined(__ANDROID__)
       __android_log_vprint(ANDROID_LOG_INFO, xnnpack_module, format, args);
     #else
@@ -161,6 +164,8 @@ cleanup:
         'W', 'a', 'r', 'n', 'i', 'n', 'g', ' ', 'i', 'n', ' ', 'X', 'N', 'N', 'P', 'A', 'C', 'K', ':', ' '
       };
       xnn_vlog(XNN_LOG_STDERR, warning_prefix, 20, format, args);
+    #elif defined(__hexagon__)
+      FARF(HIGH, format, args);
     #elif defined(__ANDROID__)
       __android_log_vprint(ANDROID_LOG_WARN, xnnpack_module, format, args);
     #else
@@ -176,6 +181,8 @@ cleanup:
         'E', 'r', 'r', 'o', 'r', ' ', 'i', 'n', ' ', 'X', 'N', 'N', 'P', 'A', 'C', 'K', ':', ' '
       };
       xnn_vlog(XNN_LOG_STDERR, error_prefix, 18, format, args);
+    #elif defined(__hexagon__)
+      FARF(ERROR, format, args);
     #elif defined(__ANDROID__)
       __android_log_vprint(ANDROID_LOG_ERROR, xnnpack_module, format, args);
     #else
@@ -191,6 +198,8 @@ cleanup:
         'F', 'a', 't', 'a', 'l', ' ', 'e', 'r', 'r', 'o', 'r', ' ', 'i', 'n', ' ', 'X', 'N', 'N', 'P', 'A', 'C', 'K', ':', ' '
       };
       xnn_vlog(XNN_LOG_STDERR, fatal_prefix, 24, format, args);
+    #elif defined(__hexagon__)
+      FARF(FATAL, format, args);
     #elif defined(__ANDROID__)
       __android_log_vprint(ANDROID_LOG_FATAL, xnnpack_module, format, args);
     #else
