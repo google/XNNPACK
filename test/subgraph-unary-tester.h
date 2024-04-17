@@ -3,21 +3,23 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
-#include <array>
-#include <cstdint>
-#include <cstddef>
-#include <limits>
-#include <memory>
-#include <numeric>
-#include <random>
-
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/requantization.h>
 #include <xnnpack/subgraph.h>
 
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <functional>
+#include <limits>
+#include <numeric>
+#include <random>
+#include <vector>
+
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 template <
@@ -27,17 +29,15 @@ template <
   size_t max_dim = XNN_MAX_TENSOR_DIMS,
   bool pad_output = false>
 class UnaryTest : public ::testing::Test {
-protected:
-  UnaryTest()
-  {
-    random_device = std::make_unique<std::random_device>();
-    rng = std::mt19937((*random_device)());
+ protected:
+  UnaryTest() {
     shape_dist = std::uniform_int_distribution<size_t>(min_dim, max_dim);
     dim_dist = std::uniform_int_distribution<size_t>(1, 9);
-    i8dist =
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
-    u8dist =
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
+    i8dist = std::uniform_int_distribution<int32_t>(
+        std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+    u8dist = std::uniform_int_distribution<int32_t>(
+        std::numeric_limits<uint8_t>::min(),
+        std::numeric_limits<uint8_t>::max());
     u32dist = std::uniform_int_distribution<uint32_t>();
     scale_dist = std::uniform_real_distribution<float>(0.1f, 10.0f);
     f32dist = std::uniform_real_distribution<float>(0.01f, 1.0f);
@@ -73,8 +73,7 @@ protected:
     return std::accumulate(dims.begin(), dims.end(), size_t(1), std::multiplies<size_t>());
   }
 
-  std::unique_ptr<std::random_device> random_device;
-  std::mt19937 rng;
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<size_t> shape_dist;
   std::uniform_int_distribution<size_t> dim_dist;
   std::uniform_real_distribution<float> scale_dist;

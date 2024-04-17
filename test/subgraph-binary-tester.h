@@ -5,29 +5,28 @@
 
 #pragma once
 
-#include <algorithm>
-#include <array>
-#include <functional>
-#include <limits>
-#include <memory>
-#include <numeric>
-#include <random>
-#include <vector>
-
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/requantization.h>
 #include <xnnpack/subgraph.h>
 
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <limits>
+#include <numeric>
+#include <random>
+#include <vector>
+
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 template <typename T> class BinaryTest : public ::testing::Test {
-protected:
-  BinaryTest()
-  {
-    random_device = std::make_unique<std::random_device>();
-    rng = std::mt19937((*random_device)());
+ protected:
+  BinaryTest() {
     shape_dist = std::uniform_int_distribution<size_t>(0, XNN_MAX_TENSOR_DIMS);
     dim_dist = std::uniform_int_distribution<size_t>(1, 9);
     f32dist = std::uniform_real_distribution<float>(0.01f, 1.0f);
@@ -120,8 +119,7 @@ protected:
     }
   }
 
-  std::unique_ptr<std::random_device> random_device;
-  std::mt19937 rng;
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<size_t> shape_dist;
   std::uniform_int_distribution<size_t> dim_dist;
   std::uniform_real_distribution<float> f32dist;

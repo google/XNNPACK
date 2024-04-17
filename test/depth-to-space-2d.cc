@@ -21,15 +21,13 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
 template <typename T> class DepthToSpaceTest : public ::testing::Test {
-protected:
-  DepthToSpaceTest()
-  {
-    random_device = std::make_unique<std::random_device>();
-    rng = std::mt19937((*random_device)());
+ protected:
+  DepthToSpaceTest() {
     dim_dist = std::uniform_int_distribution<size_t>(1, 9);
     i8dist =
       std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
@@ -73,8 +71,7 @@ protected:
   size_t input_channel() { return input_dims[3]; }
   size_t output_channel() { return output_dims[3]; }
 
-  std::unique_ptr<std::random_device> random_device;
-  std::mt19937 rng;
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<size_t> dim_dist;
   std::uniform_real_distribution<float> scale_dist;
   std::uniform_int_distribution<int32_t> i8dist;

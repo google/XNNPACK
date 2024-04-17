@@ -24,6 +24,7 @@
 #include <utility>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
@@ -469,8 +470,7 @@ class DeconvolutionOperatorTester {
   void TestQS8() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i32dist(-10000, 10000);
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
@@ -684,8 +684,7 @@ class DeconvolutionOperatorTester {
   void TestQU8() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i32dist(-10000, 10000);
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
@@ -901,8 +900,7 @@ class DeconvolutionOperatorTester {
         GTEST_FAIL() << "unexpected weights type";
     }
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
@@ -1127,8 +1125,7 @@ class DeconvolutionOperatorTester {
   void TestF32() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
@@ -1371,8 +1368,7 @@ class DeconvolutionOperatorTester {
   void StressWeightsCacheTestF32() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     struct xnn_internal_weights_cache* internal_weights_cache = nullptr;
@@ -1562,8 +1558,7 @@ class DeconvolutionOperatorTester {
   void TestSetupQS8() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i32dist(-10000, 10000);
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
@@ -1805,8 +1800,7 @@ class DeconvolutionOperatorTester {
   void TestSetupQU8() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i32dist(-10000, 10000);
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
@@ -2047,8 +2041,7 @@ class DeconvolutionOperatorTester {
   void TestSetupF16() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + std::max(
@@ -2292,8 +2285,7 @@ class DeconvolutionOperatorTester {
   void TestSetupF32() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max(

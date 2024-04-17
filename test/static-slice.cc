@@ -18,6 +18,7 @@
 #include <tuple>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include "subgraph-unary-tester.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

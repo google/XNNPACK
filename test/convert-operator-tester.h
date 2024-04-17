@@ -19,6 +19,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -133,8 +134,7 @@ class ConvertOperatorTester {
   }
 
   void TestF16toF32() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
@@ -180,8 +180,7 @@ class ConvertOperatorTester {
   }
 
   void TestF32toF16() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
@@ -227,8 +226,7 @@ class ConvertOperatorTester {
   }
 
   void TestF16toQD8() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
 
     std::vector<float> input_float((batch_size() - 1) * input_stride() + channels());
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
@@ -283,8 +281,7 @@ class ConvertOperatorTester {
   }
 
   void TestF32toQD8() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       (batch_size() - 1) * input_stride() + channels());
@@ -341,8 +338,7 @@ class ConvertOperatorTester {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
@@ -400,8 +396,7 @@ class ConvertOperatorTester {
     ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
@@ -455,8 +450,7 @@ class ConvertOperatorTester {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
@@ -512,8 +506,7 @@ class ConvertOperatorTester {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
@@ -568,8 +561,7 @@ class ConvertOperatorTester {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int16_t> qs16dist;
 
     std::vector<int16_t> input(XNN_EXTRA_BYTES / sizeof(int16_t) +
@@ -624,8 +616,7 @@ class ConvertOperatorTester {
     ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
@@ -673,8 +664,7 @@ class ConvertOperatorTester {
   }
 
   void TestRunF16toF32() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
@@ -715,8 +705,7 @@ class ConvertOperatorTester {
   }
 
   void TestRunF32toF16() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
@@ -764,8 +753,7 @@ class ConvertOperatorTester {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
@@ -811,8 +799,7 @@ class ConvertOperatorTester {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
@@ -859,8 +846,7 @@ class ConvertOperatorTester {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int16_t> qs16dist;
 
     std::vector<int16_t> input(XNN_EXTRA_BYTES / sizeof(int16_t) +
@@ -911,8 +897,7 @@ class ConvertOperatorTester {
     ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
@@ -958,8 +943,7 @@ class ConvertOperatorTester {
     ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 

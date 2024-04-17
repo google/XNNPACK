@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "pthreadpool.h"
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class ArgmaxPoolingOperatorTester {
@@ -346,8 +347,7 @@ class ArgmaxPoolingOperatorTester {
   }
 
   void TestF32() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<float> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
@@ -458,8 +458,7 @@ class ArgmaxPoolingOperatorTester {
   }
 
   void TestSetupF32() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max<size_t>(

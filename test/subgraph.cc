@@ -15,7 +15,7 @@
 namespace xnnpack {
 
 TEST(SUBGRAPH, hanging_nodes) {
-  auto tester = SubgraphTester(6);
+  SubgraphTester tester(6);
   tester
     .AddDynamicTensorF32({1, 256, 256, 3}, 0)
     .AddStaticTensorF32({32, 3, 3, 3}, TensorType::kDense, 1)
@@ -45,7 +45,7 @@ TEST(SUBGRAPH, hanging_nodes) {
 }
 
 TEST(SUBGRAPH, multiple_outputs_with_hanging_nodes) {
-  auto tester = SubgraphTester(4);
+  SubgraphTester tester(4);
   tester
     .AddDynamicTensorF32({96}, 0)
     .AddDynamicTensorF32({32}, 1)
@@ -68,7 +68,6 @@ TEST(SUBGRAPH, multiple_outputs_with_hanging_nodes) {
 
 TEST(SUBGRAPH, even_split3_first_two_outputs_optimized_away) {
   RuntimeTester tester(5);
-  // auto tester = RuntimeTester(4);
   constexpr size_t size = 9;
   float inputs[size] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
   tester

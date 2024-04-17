@@ -16,9 +16,10 @@
 #include <functional>  // For std::multiplies.
 #include <memory>      // For std::unique_ptr.
 #include <numeric>     // For std::accumulate.
-#include <random>  // For std::random_device, std::mt19937, std::uniform_real_distribution.
-#include <vector>  // For std::vector.
+#include <random>      // For std::uniform_real_distribution.
+#include <vector>      // For std::vector.
 
+#include "replicable_random_device.h"
 #include "subgraph-unary-tester.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>

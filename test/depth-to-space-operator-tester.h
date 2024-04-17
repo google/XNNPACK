@@ -18,6 +18,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class DepthToSpaceOperatorTester {
@@ -120,8 +121,7 @@ class DepthToSpaceOperatorTester {
   }
 
   void TestNHWCxX8() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto i8rng = std::bind(
       std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
       std::ref(rng));
@@ -193,8 +193,7 @@ class DepthToSpaceOperatorTester {
   }
 
   void TestNHWCxX16() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
 
     std::vector<int16_t> input(
@@ -264,8 +263,7 @@ class DepthToSpaceOperatorTester {
   }
 
   void TestNHWCxX32() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(), std::ref(rng));
 
     std::vector<int32_t> input(
@@ -335,8 +333,7 @@ class DepthToSpaceOperatorTester {
   }
 
   void TestNCHW2NHWCxX16() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
 
     std::vector<int16_t> input(XNN_EXTRA_BYTES / sizeof(int16_t) +
@@ -406,8 +403,7 @@ class DepthToSpaceOperatorTester {
   }
 
   void TestNCHW2NHWCxX32() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(), std::ref(rng));
 
     std::vector<int32_t> input(XNN_EXTRA_BYTES / sizeof(int32_t) +

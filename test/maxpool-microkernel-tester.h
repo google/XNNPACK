@@ -22,6 +22,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -159,8 +160,7 @@ class MaxPoolMicrokernelTester {
     ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
     ASSERT_LT(qmin(), qmax());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
@@ -231,8 +231,7 @@ class MaxPoolMicrokernelTester {
     ASSERT_LE(qmax(), std::numeric_limits<uint8_t>::max());
     ASSERT_LT(qmin(), qmax());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
@@ -301,8 +300,7 @@ class MaxPoolMicrokernelTester {
   void Test(xnn_f16_maxpool_ukernel_fn maxpool, xnn_init_f16_minmax_params_fn init_params) const {
     ASSERT_LT(qmin(), qmax());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<const uint16_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
@@ -390,8 +388,7 @@ class MaxPoolMicrokernelTester {
   void Test(xnn_f32_maxpool_ukernel_fn maxpool, xnn_init_f32_minmax_params_fn init_params) const {
     ASSERT_LT(qmin(), qmax());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());

@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "pthreadpool.h"
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -98,8 +99,7 @@ class MeanOperatorTester {
   }
 
   void TestF16() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
     // Compute generalized shapes.
@@ -225,8 +225,7 @@ class MeanOperatorTester {
   }
 
   void TestF32() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
     // Compute generalized shapes.

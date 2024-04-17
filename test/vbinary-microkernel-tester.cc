@@ -23,13 +23,13 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
 void VBinaryMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinary,
                                     OpType op_type) const {
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
   std::vector<uint16_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
@@ -103,8 +103,7 @@ void VBinaryMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinary,
 void VBinaryMicrokernelTester::Test(
     xnn_f16_vbinary_minmax_ukernel_fn vbinary_minmax, OpType op_type,
     xnn_init_f16_minmax_params_fn init_params) const {
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
   std::vector<uint16_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
@@ -203,8 +202,7 @@ void VBinaryMicrokernelTester::Test(
 void VBinaryMicrokernelTester::Test(
     xnn_f32_vbinary_ukernel_fn vbinary, OpType op_type,
     xnn_init_f32_default_params_fn init_params) const {
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
   std::vector<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
@@ -273,8 +271,7 @@ void VBinaryMicrokernelTester::Test(
 
 void VBinaryMicrokernelTester::Test(
     xnn_f32_vbinary_relu_ukernel_fn vbinary_relu, OpType op_type) const {
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> lhs_f32dist(-1.0f, 1.0f);
   // For denominator, avoid 0 so we don't get Infinity as the result.
   std::uniform_real_distribution<float> rhs_f32dist(0.1, 1.0f);
@@ -344,8 +341,7 @@ void VBinaryMicrokernelTester::Test(
 void VBinaryMicrokernelTester::Test(
     xnn_f32_vbinary_minmax_ukernel_fn vbinary_minmax, OpType op_type,
     xnn_init_f32_minmax_params_fn init_params) const {
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
   std::vector<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
@@ -430,11 +426,11 @@ void VBinaryMicrokernelTester::Test(
 void VBinaryMicrokernelTester::Test(
     xnn_qu8_vadd_minmax_ukernel_fn vadd_minmax,
     xnn_init_qu8_add_minmax_params_fn init_params) const {
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
-  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(
-                             0, std::numeric_limits<uint8_t>::max()),
-                         rng);
+  xnnpack::ReplicableRandomDevice rng;
+  auto u8rng = [&rng]() {
+    return std::uniform_int_distribution<uint32_t>(
+        0, std::numeric_limits<uint8_t>::max())(rng);
+  };
 
   std::vector<uint8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
   std::vector<uint8_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
@@ -501,11 +497,11 @@ void VBinaryMicrokernelTester::Test(
     xnn_qu8_vmul_minmax_ukernel_fn vmul_minmax,
     xnn_init_qu8_mul_minmax_params_fn init_params,
     xnn_qu8_requantize_fn requantize) const {
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
-  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(
-                             0, std::numeric_limits<uint8_t>::max()),
-                         rng);
+  xnnpack::ReplicableRandomDevice rng;
+  auto u8rng = [&rng]() {
+    return std::uniform_int_distribution<uint32_t>(
+        0, std::numeric_limits<uint8_t>::max())(rng);
+  };
 
   std::vector<uint8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
   std::vector<uint8_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
@@ -568,12 +564,12 @@ void VBinaryMicrokernelTester::Test(
 void VBinaryMicrokernelTester::Test(
     xnn_qs8_vadd_minmax_ukernel_fn vadd_minmax,
     xnn_init_qs8_add_minmax_params_fn init_params) const {
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
-  auto i8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             std::numeric_limits<int8_t>::min(),
-                             std::numeric_limits<int8_t>::max()),
-                         rng);
+  xnnpack::ReplicableRandomDevice rng;
+  auto i8rng = [&rng]() {
+    return std::uniform_int_distribution<int32_t>(
+        std::numeric_limits<int8_t>::min(),
+        std::numeric_limits<int8_t>::max())(rng);
+  };
 
   std::vector<int8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
   std::vector<int8_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
@@ -648,12 +644,12 @@ void VBinaryMicrokernelTester::Test(
     xnn_qs8_vmul_minmax_ukernel_fn vmul_minmax,
     xnn_init_qs8_mul_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const {
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
-  auto i8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             std::numeric_limits<int8_t>::min(),
-                             std::numeric_limits<int8_t>::max()),
-                         rng);
+  xnnpack::ReplicableRandomDevice rng;
+  auto i8rng = [&rng]() {
+    return std::uniform_int_distribution<int32_t>(
+        std::numeric_limits<int8_t>::min(),
+        std::numeric_limits<int8_t>::max())(rng);
+  };
 
   std::vector<int8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
   std::vector<int8_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));

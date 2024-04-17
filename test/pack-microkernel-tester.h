@@ -18,6 +18,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class PackMicrokernelTester {
@@ -77,9 +78,10 @@ class PackMicrokernelTester {
   }
 
   void Test(xnn_x32_packx_ukernel_fn packx) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), rng);
+    xnnpack::ReplicableRandomDevice rng;
+    auto u32rng = [&rng]() {
+      return std::uniform_int_distribution<uint32_t>()(rng);
+    };
 
     const uint32_t c = u32rng();
     std::vector<uint32_t> x(k() + (m() - 1) * x_stride() + XNN_EXTRA_BYTES / sizeof(uint32_t));

@@ -17,6 +17,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class UnpoolingOperatorTester {
@@ -278,8 +279,7 @@ class UnpoolingOperatorTester {
   }
 
   void TestX32() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
     auto idx_rng = std::bind(std::uniform_int_distribution<uint32_t>(0, pooling_height() * pooling_width() - 1), std::ref(rng));
 
@@ -356,8 +356,7 @@ class UnpoolingOperatorTester {
   }
 
   void TestSetupX32() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
     auto idx_rng = std::bind(std::uniform_int_distribution<uint32_t>(0, pooling_height() * pooling_width() - 1), std::ref(rng));
 

@@ -19,6 +19,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -44,8 +45,7 @@ class RAddStoreExpMinusMaxMicrokernelTester {
   }
 
   void Test(xnn_f16_raddstoreexpminusmax_ukernel_fn raddstoreexpminusmax, xnn_init_f16_expminus_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     // Choose such range that exph(x[i]) overflows, but exph(x[i] - x_max) doesn't.
     // However, the range is still narrow enough that double-precision exp doesn't overflow.
     std::uniform_real_distribution<float> f32dist(15.0f, 20.0f);
@@ -87,8 +87,7 @@ class RAddStoreExpMinusMaxMicrokernelTester {
   }
 
   void Test(xnn_f32_raddstoreexpminusmax_ukernel_fn raddstoreexpminusmax, xnn_init_f32_expminus_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     // Choose such range that expf(x[i]) overflows, but expf(x[i] - x_max) doesn't.
     // However, the range is still narrow enough that double-precision exp doesn't overflow.
     std::uniform_real_distribution<float> f32dist(90.0f, 100.0f);

@@ -18,6 +18,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class ArgMaxPoolMicrokernelTester {
@@ -144,8 +145,7 @@ class ArgMaxPoolMicrokernelTester {
   }
 
   void Test(xnn_f32_argmaxpool_unipass_ukernel_fn argmaxpool, Variant variant = Variant::Native) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
@@ -211,8 +211,7 @@ class ArgMaxPoolMicrokernelTester {
   }
 
   void Test(xnn_f32_argmaxpool_multipass_ukernel_fn argmaxpool, Variant variant = Variant::Native) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());

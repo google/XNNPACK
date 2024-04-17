@@ -17,6 +17,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 // twiddle table for bfly4 for fft size 192 (complex numbers)
@@ -83,9 +84,9 @@ static void xnn_cs16_bfly4_reference(
 {
   assert(batch != 0);
   assert(samples != 0);
-  assert(data != NULL);
+  assert(data != nullptr);
   assert(stride != 0);
-  assert(twiddle != NULL);
+  assert(twiddle != nullptr);
 
   int16_t* data0 = data;
   int16_t* data1 = data + samples * 2;
@@ -215,8 +216,7 @@ class BFly4MicrokernelTester {
   }
 
   void Test(xnn_cs16_bfly4_ukernel_fn bfly4) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
     const size_t fft_size = samples() * stride() * 4;  // 4 for bfly4.
 

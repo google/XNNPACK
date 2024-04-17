@@ -14,9 +14,10 @@
 #include <cstddef>  // For size_t.
 #include <cstdint>
 #include <memory>  // For std::unique_ptr.
-#include <random>  // For std::random_device, std::mt19937, std::uniform_real_distribution.
+#include <random>  // For std::uniform_real_distribution.
 #include <vector>  // For std::vector.
 
+#include "replicable_random_device.h"
 #include "subgraph-unary-tester.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>

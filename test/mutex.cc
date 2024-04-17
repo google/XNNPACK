@@ -13,6 +13,7 @@
 #include <thread>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 TEST(MUTEX, init_lock_unlock_destroy) {
@@ -36,8 +37,7 @@ TEST(MUTEX, counter) {
   threads.reserve(num_threads);
   volatile size_t counter = 0;
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto dist = std::uniform_int_distribution<int>(100, 200);
 
   ASSERT_EQ(xnn_status_success, xnn_mutex_init(&m));

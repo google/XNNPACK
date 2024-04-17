@@ -18,6 +18,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -129,8 +130,7 @@ class SpMMMicrokernelTester {
     ASSERT_GE(n(), 1);
     ASSERT_GE(k(), 1);
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
     std::uniform_real_distribution<float> pdist;
 
@@ -294,8 +294,7 @@ class SpMMMicrokernelTester {
     ASSERT_GE(n(), 1);
     ASSERT_GE(k(), 1);
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
     std::uniform_real_distribution<float> pdist;
 

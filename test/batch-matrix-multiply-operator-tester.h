@@ -21,6 +21,7 @@
 #include <utility>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -250,8 +251,7 @@ class BatchMatMulOperatorTester {
     ASSERT_EQ(batch_dims_a().size(), batch_dims_b().size());
     const size_t num_batch_dims = batch_dims_a().size();
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     size_t batch_size_a = 1;
@@ -334,8 +334,7 @@ class BatchMatMulOperatorTester {
     ASSERT_EQ(batch_dims_a().size(), batch_dims_b().size());
     const size_t num_batch_dims = batch_dims_a().size();
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     size_t batch_size_a = 1;
@@ -418,8 +417,7 @@ class BatchMatMulOperatorTester {
     ASSERT_EQ(batch_dims_a().size(), batch_dims_b().size());
     const size_t num_batch_dims = batch_dims_a().size();
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(range_f32_.first,
                                                   range_f32_.second);
 

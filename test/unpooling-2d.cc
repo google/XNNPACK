@@ -14,17 +14,15 @@
 #include <cstddef>    // For size_t.
 #include <cstdint>    // For uint32_t.
 #include <memory>     // For std::unique_ptr.
-#include <random>  // For std::random_device, std::mt19937, std::uniform_real_distribution.
-#include <vector>  // For std::vector.
+#include <random>     // For std::uniform_real_distribution.
+#include <vector>     // For std::vector.
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 template <class T, class BiasType = T> class Unpooling2DTestBase : public ::testing::Test {
-protected:
-  Unpooling2DTestBase()
-  {
-    random_device = std::make_unique<std::random_device>();
-    rng = std::mt19937((*random_device)());
+ protected:
+  Unpooling2DTestBase() {
     input_size_dist = std::uniform_int_distribution<uint32_t>(10, 15);
     kernel_size_dist = std::uniform_int_distribution<uint32_t>(1, 5);
     stride_dist = std::uniform_int_distribution<uint32_t>(1, 3);
@@ -54,8 +52,7 @@ protected:
     subgraph_output = std::vector<T>(batch_size * output_height * output_width * channels);
   }
 
-  std::unique_ptr<std::random_device> random_device;
-  std::mt19937 rng;
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<uint32_t> input_size_dist;
   std::uniform_int_distribution<uint32_t> kernel_size_dist;
   std::uniform_int_distribution<uint32_t> stride_dist;

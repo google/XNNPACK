@@ -28,8 +28,9 @@ using StaticTransposeTestF16 = UnaryTest<uint16_t, uint16_t, /*min_dim=*/1>;
 using StaticTransposeTestF32 = UnaryTest<float, float, /*min_dim=*/1>;
 
 namespace {
-template <typename Rng> std::vector<size_t> RandomPermutation(const std::vector<size_t>& input, Rng rng)
-{
+template <typename Rng>
+std::vector<size_t> RandomPermutation(const std::vector<size_t>& input,
+                                      Rng& rng) {
   std::vector<size_t> perm = std::vector<size_t>(input);
   std::iota(perm.begin(), perm.end(), 0);
   std::shuffle(perm.begin(), perm.end(), rng);

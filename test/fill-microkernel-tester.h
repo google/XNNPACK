@@ -21,6 +21,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class FillMicrokernelTester {
@@ -71,9 +72,11 @@ class FillMicrokernelTester {
   void Test(xnn_fill_ukernel_fn fill) const {
     ASSERT_GE(output_stride(), channels());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    xnnpack::ReplicableRandomDevice rng;
+    auto u8rng = [&rng]() {
+      return std::uniform_int_distribution<uint32_t>(
+          0, std::numeric_limits<uint8_t>::max())(rng);
+    };
 
     std::vector<uint8_t> output((rows() - 1) * output_stride() + channels());
     std::vector<uint8_t> output_copy(output.size());

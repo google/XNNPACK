@@ -24,17 +24,15 @@
 #include <vector>
 
 #include "convolution-test-helpers.h"
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
 namespace xnnpack {
 
 template <class T, class BiasType = T> class DepthwiseConvolutionTestBase : public ::testing::Test {
-protected:
-  DepthwiseConvolutionTestBase()
-  {
-    random_device = std::make_unique<std::random_device>();
-    rng = std::mt19937((*random_device)());
+ protected:
+  DepthwiseConvolutionTestBase() {
     input_size_dist = std::uniform_int_distribution<uint32_t>(10, 15);
     kernel_size_dist = std::uniform_int_distribution<uint32_t>(1, 7);
     stride_dist = std::uniform_int_distribution<uint32_t>(1, 2);
@@ -57,9 +55,11 @@ protected:
     input_padding_bottom = kernel_size_dist(rng);
     input_padding_left = kernel_size_dist(rng);
     output_height = xnn_compute_convolution_output_dimension(
-      input_padding_top + input_height + input_padding_bottom, kernel_height, dilation_height, subsampling_height);
+        input_padding_top + input_height + input_padding_bottom, kernel_height,
+        dilation_height, subsampling_height);
     output_width = xnn_compute_convolution_output_dimension(
-      input_padding_left + input_width + input_padding_right, kernel_width, dilation_width, subsampling_width);
+        input_padding_left + input_width + input_padding_right, kernel_width,
+        dilation_width, subsampling_width);
     output_channels = input_channels * depth_multiplier;
     output_min = -std::numeric_limits<float>::infinity();
     output_max = std::numeric_limits<float>::infinity();
@@ -69,15 +69,19 @@ protected:
     bias_dims = {{output_channels}};
     output_dims = {{batch_size, output_height, output_width, output_channels}};
 
-    input = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + batch_size * input_height * input_width * input_channels);
-    filter = std::vector<T>(batch_size * kernel_height * kernel_width * output_channels);
+    input = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) +
+                           batch_size * input_height * input_width *
+                               input_channels);
+    filter = std::vector<T>(batch_size * kernel_height * kernel_width *
+                            output_channels);
     bias = std::vector<BiasType>(output_channels);
-    operator_output = std::vector<T>(batch_size * output_height * output_width * output_channels);
-    subgraph_output = std::vector<T>(batch_size * output_height * output_width * output_channels);
+    operator_output = std::vector<T>(batch_size * output_height * output_width *
+                                     output_channels);
+    subgraph_output = std::vector<T>(batch_size * output_height * output_width *
+                                     output_channels);
   }
 
-  std::unique_ptr<std::random_device> random_device;
-  std::mt19937 rng;
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<uint32_t> input_size_dist;
   std::uniform_int_distribution<uint32_t> kernel_size_dist;
   std::uniform_int_distribution<uint32_t> stride_dist;

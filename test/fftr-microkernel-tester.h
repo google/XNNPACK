@@ -17,6 +17,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 static const int16_t xnn_reference_table_fftr_twiddle[256] = {
@@ -62,9 +63,9 @@ static void xnn_cs16_fftr_reference(
 
   assert(samples >= 2);
   assert(samples % 2 == 0);
-  assert(input != NULL);
-  assert(output != NULL);
-  assert(twiddle != NULL);
+  assert(input != nullptr);
+  assert(output != nullptr);
+  assert(twiddle != nullptr);
 
   const int16_t* il = input;
   const int16_t* ir = input + samples * 2;
@@ -139,8 +140,7 @@ class FftrMicrokernelTester {
   }
 
   void Test(xnn_cs16_fftr_ukernel_fn fftr) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
     const size_t sample_size = samples() * 2 + 2;
 

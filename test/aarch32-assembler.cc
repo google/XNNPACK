@@ -16,6 +16,7 @@
 #include <random>
 
 #include "assembler-helpers.h"
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 namespace xnnpack {
@@ -560,8 +561,7 @@ TEST_P(F32HardswishTest, F32Hardswish) {
   const std::vector<QRegister> accs = GetParam();
   const std::vector<QRegister> tmps = {q8, q9, q10, q11};
 
-  std::random_device random_device;
-  std::mt19937 rng(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(-6.0f, 6.0f);
 
   xnn_f32_hswish_params params;

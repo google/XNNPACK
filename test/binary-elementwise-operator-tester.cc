@@ -21,6 +21,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -36,8 +37,7 @@ void BinaryElementwiseOperatorTester::TestQS8() const {
   ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
   ASSERT_LT(qmin(), qmax());
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
@@ -250,8 +250,7 @@ void BinaryElementwiseOperatorTester::TestQU8() const {
   ASSERT_LE(qmax(), std::numeric_limits<uint8_t>::max());
   ASSERT_LT(qmin(), qmax());
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
@@ -457,8 +456,7 @@ void BinaryElementwiseOperatorTester::TestF16() const {
   ASSERT_NE(operation_type(), OperationType::Unknown);
   ASSERT_LT(qmin(), qmax());
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
   // Compute generalized shapes.
@@ -729,8 +727,7 @@ void BinaryElementwiseOperatorTester::TestF32() const {
   ASSERT_NE(operation_type(), OperationType::Unknown);
   ASSERT_LT(qmin(), qmax());
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
   // Compute generalized shapes.
@@ -989,8 +986,7 @@ void BinaryElementwiseOperatorTester::TestRunF32() const {
   ASSERT_NE(operation_type(), OperationType::Unknown);
   ASSERT_LT(qmin(), qmax());
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
   // Compute generalized shapes.
@@ -1187,8 +1183,7 @@ void BinaryElementwiseOperatorTester::TestRunQS8() const {
   ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
   ASSERT_LT(qmin(), qmax());
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
@@ -1362,8 +1357,7 @@ void BinaryElementwiseOperatorTester::TestRunQU8() const {
   ASSERT_LE(qmax(), std::numeric_limits<uint8_t>::max());
   ASSERT_LT(qmin(), qmax());
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 

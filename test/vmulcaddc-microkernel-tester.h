@@ -20,6 +20,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -113,8 +114,7 @@ class VMulCAddCMicrokernelTester {
   }
 
   void Test(xnn_f16_vmulcaddc_ukernel_fn vmulcaddc, xnn_init_f16_minmax_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     if (inplace()) {
@@ -182,8 +182,7 @@ class VMulCAddCMicrokernelTester {
   }
 
   void Test(xnn_f32_vmulcaddc_ukernel_fn vmulcaddc, xnn_init_f32_minmax_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     if (inplace()) {

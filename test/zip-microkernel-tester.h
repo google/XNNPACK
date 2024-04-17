@@ -20,6 +20,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class ZipMicrokernelTester {
@@ -54,9 +55,11 @@ class ZipMicrokernelTester {
   }
 
   void Test(xnn_x8_zipc_ukernel_fn zip) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    xnnpack::ReplicableRandomDevice rng;
+    auto u8rng = [&rng]() {
+      return std::uniform_int_distribution<uint32_t>(
+          0, std::numeric_limits<uint8_t>::max())(rng);
+    };
 
     std::vector<uint8_t> x(n() * g());
     std::vector<uint8_t> x_ref(g() * n());
@@ -79,9 +82,11 @@ class ZipMicrokernelTester {
   }
 
   void Test(xnn_x8_zipv_ukernel_fn zip) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    xnnpack::ReplicableRandomDevice rng;
+    auto u8rng = [&rng]() {
+      return std::uniform_int_distribution<uint32_t>(
+          0, std::numeric_limits<uint8_t>::max())(rng);
+    };
 
     std::vector<uint8_t> x(n() * g());
     std::vector<uint8_t> x_ref(g() * n());
@@ -104,9 +109,10 @@ class ZipMicrokernelTester {
   }
 
   void Test(xnn_x32_zipc_ukernel_fn zip) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), rng);
+    xnnpack::ReplicableRandomDevice rng;
+    auto u32rng = [&rng]() {
+      return std::uniform_int_distribution<uint32_t>()(rng);
+    };
 
     std::vector<uint32_t> x(n() * g());
     std::vector<uint32_t> x_ref(g() * n());
@@ -129,9 +135,10 @@ class ZipMicrokernelTester {
   }
 
   void Test(xnn_x32_zipv_ukernel_fn zip) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), rng);
+    xnnpack::ReplicableRandomDevice rng;
+    auto u32rng = [&rng]() {
+      return std::uniform_int_distribution<uint32_t>()(rng);
+    };
 
     std::vector<uint32_t> x(n() * g());
     std::vector<uint32_t> x_ref(g() * n());

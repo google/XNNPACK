@@ -17,6 +17,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class CopyOperatorTester {
@@ -81,8 +82,7 @@ class CopyOperatorTester {
   }
 
   void TestX8() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
@@ -129,8 +129,7 @@ class CopyOperatorTester {
   }
 
   void TestX16() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint16_t> u16dist;
 
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
@@ -176,8 +175,7 @@ class CopyOperatorTester {
   }
 
   void TestX32() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint32_t> u32dist;
 
     std::vector<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) +
@@ -223,8 +221,7 @@ class CopyOperatorTester {
   }
 
   void TestRunX32() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint32_t> u32dist;
 
     std::vector<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) +

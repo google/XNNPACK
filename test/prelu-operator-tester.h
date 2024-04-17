@@ -18,6 +18,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -115,8 +116,7 @@ class PReLUOperatorTester {
         GTEST_FAIL() << "unexpected weights type";
     }
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto f32irng = std::uniform_real_distribution<float>(-1.0f, 1.0f);
     auto f32wrng = std::uniform_real_distribution<float>(0.25f, 0.75f);
 
@@ -243,8 +243,7 @@ class PReLUOperatorTester {
   void TestF32() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto f32irng = std::uniform_real_distribution<float>(-1.0f, 1.0f);
     auto f32wrng = std::uniform_real_distribution<float>(0.25f, 0.75f);
 

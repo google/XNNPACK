@@ -11,7 +11,7 @@
 namespace xnnpack {
 
 TEST(SUBGRAPH_NCHW, single_conv) {
-  auto tester = SubgraphTester(4);
+  SubgraphTester tester(4);
   tester
     .AddDynamicTensorF32({1, 256, 256, 3}, 0)
     .AddStaticTensorF32({32, 3, 3, 3}, TensorType::kDense, 1)
@@ -35,7 +35,7 @@ TEST(SUBGRAPH_NCHW, single_conv) {
 }
 
 TEST(SUBGRAPH_NCHW, single_conv_and_global_average_pooling) {
-  auto tester = SubgraphTester(5);
+  SubgraphTester tester(5);
   tester
     .AddDynamicTensorF32({1, 256, 256, 3}, 0)
     .AddStaticTensorF32({32, 3, 3, 3}, TensorType::kDense, 1)
@@ -62,7 +62,7 @@ TEST(SUBGRAPH_NCHW, single_conv_and_global_average_pooling) {
 }
 
 TEST(SUBGRAPH_NCHW, pixelwise_conv_sandwich) {
-  auto tester = SubgraphTester(8);
+  SubgraphTester tester(8);
   tester
     .AddDynamicTensorF32({1, 256, 256, 3}, 0)
     .AddStaticTensorF32({8, 3, 3, 3}, TensorType::kDense, 1)
@@ -103,7 +103,7 @@ TEST(SUBGRAPH_NCHW, pixelwise_conv_sandwich) {
 }
 
 TEST(SUBGRAPH_NCHW, bottleneck) {
-  auto tester = SubgraphTester(15);
+  SubgraphTester tester(15);
   tester
     .AddDynamicTensorF32({1, 256, 256, 3}, 0)
     .AddStaticTensorF32({8, 3, 3, 3}, TensorType::kDense, 1)

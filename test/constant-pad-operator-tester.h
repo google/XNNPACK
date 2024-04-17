@@ -21,6 +21,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class ConstantPadOperatorTester {
@@ -109,8 +110,7 @@ class ConstantPadOperatorTester {
     ASSERT_EQ(num_dims(), num_pre_paddings());
     ASSERT_EQ(num_dims(), num_post_paddings());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
@@ -229,8 +229,7 @@ class ConstantPadOperatorTester {
     ASSERT_EQ(num_dims(), num_pre_paddings());
     ASSERT_EQ(num_dims(), num_post_paddings());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
@@ -331,8 +330,7 @@ class ConstantPadOperatorTester {
     ASSERT_EQ(num_dims(), num_pre_paddings());
     ASSERT_EQ(num_dims(), num_post_paddings());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint16_t> u16dist;
 
     // Compute generalized shapes.
@@ -450,8 +448,7 @@ class ConstantPadOperatorTester {
     ASSERT_EQ(num_dims(), num_pre_paddings());
     ASSERT_EQ(num_dims(), num_post_paddings());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint16_t> u16dist;
 
     // Compute generalized shapes.
@@ -551,8 +548,7 @@ class ConstantPadOperatorTester {
     ASSERT_EQ(num_dims(), num_pre_paddings());
     ASSERT_EQ(num_dims(), num_post_paddings());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint32_t> u32dist;
 
     // Compute generalized shapes.
@@ -670,8 +666,7 @@ class ConstantPadOperatorTester {
     ASSERT_EQ(num_dims(), num_pre_paddings());
     ASSERT_EQ(num_dims(), num_post_paddings());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint32_t> u32dist;
 
     // Compute generalized shapes.

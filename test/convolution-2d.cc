@@ -19,20 +19,19 @@
 #include <cstdint>    // For uint32_t.
 #include <limits>     // For std::numeric_limits.
 #include <memory>     // For std::unique_ptr.
-#include <random>  // For std::random_device, std::mt19937, std::uniform_real_distribution.
-#include <vector>  // For std::vector.
+#include <random>     // For std::uniform_real_distribution.
+#include <vector>     // For std::vector.
 
 #include "convolution-test-helpers.h"
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
 namespace xnnpack {
+
 template <class InputType, class KernelType = InputType, class BiasType = InputType, class OutputType = InputType> class ConvolutionTestBase : public ::testing::Test {
-protected:
-  ConvolutionTestBase()
-  {
-    random_device = std::make_unique<std::random_device>();
-    rng = std::mt19937((*random_device)());
+ protected:
+  ConvolutionTestBase() {
     input_size_dist = std::uniform_int_distribution<uint32_t>(10, 15);
     kernel_size_dist = std::uniform_int_distribution<uint32_t>(1, 5);
     subsampling_dist = std::uniform_int_distribution<uint32_t>(1, 5);
@@ -56,24 +55,35 @@ protected:
     group_output_channels = input_size_dist(rng);
     output_min = -std::numeric_limits<float>::infinity();
     output_max = std::numeric_limits<float>::infinity();
-    output_height = xnn_compute_convolution_output_dimension(input_height, kernel_height, dilation_height, subsampling_height);
-    output_width = xnn_compute_convolution_output_dimension(input_width, kernel_width, dilation_width, subsampling_width);
+    output_height = xnn_compute_convolution_output_dimension(
+        input_height, kernel_height, dilation_height, subsampling_height);
+    output_width = xnn_compute_convolution_output_dimension(
+        input_width, kernel_width, dilation_width, subsampling_width);
 
-    input_dims = {{batch_size, input_height, input_width, groups * group_input_channels}};
-    filter_dims = {{groups * group_output_channels, kernel_height, kernel_width, group_input_channels}};
+    input_dims = {
+        {batch_size, input_height, input_width, groups * group_input_channels}};
+    filter_dims = {{groups * group_output_channels, kernel_height, kernel_width,
+                    group_input_channels}};
     bias_dims = {{groups * group_output_channels}};
-    output_dims = {{batch_size, output_height, output_width, groups * group_output_channels}};
+    output_dims = {{batch_size, output_height, output_width,
+                    groups * group_output_channels}};
 
-    input = std::vector<InputType>(
-      XNN_EXTRA_BYTES / sizeof(InputType) + batch_size * input_height * input_width * groups * group_input_channels);
-    filter = std::vector<KernelType>(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
+    input = std::vector<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) +
+                                   batch_size * input_height * input_width *
+                                       groups * group_input_channels);
+    filter =
+        std::vector<KernelType>(groups * group_output_channels * kernel_height *
+                                kernel_width * group_input_channels);
     bias = std::vector<BiasType>(groups * group_output_channels);
-    operator_output = std::vector<OutputType>(batch_size * output_height * output_width * groups * group_output_channels);
-    subgraph_output = std::vector<OutputType>(batch_size * output_height * output_width * groups * group_output_channels);
+    operator_output =
+        std::vector<OutputType>(batch_size * output_height * output_width *
+                                groups * group_output_channels);
+    subgraph_output =
+        std::vector<OutputType>(batch_size * output_height * output_width *
+                                groups * group_output_channels);
   }
 
-  std::unique_ptr<std::random_device> random_device;
-  std::mt19937 rng;
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<uint32_t> input_size_dist;
   std::uniform_int_distribution<uint32_t> kernel_size_dist;
   std::uniform_int_distribution<uint32_t> subsampling_dist;

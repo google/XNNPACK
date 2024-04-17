@@ -23,6 +23,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class LUTMicrokernelTester {
@@ -56,8 +57,7 @@ class LUTMicrokernelTester {
   }
 
   void Test(xnn_x8_lut_ukernel_fn lut) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto u8rng = std::bind(
       std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 

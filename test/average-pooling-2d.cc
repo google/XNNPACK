@@ -20,6 +20,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -27,11 +28,8 @@ template <
   typename InputType,
   typename OutputType = InputType>
 class AveragePoolingTest : public ::testing::Test {
-protected:
-  AveragePoolingTest()
-  {
-    random_device = std::make_unique<std::random_device>();
-    rng = std::mt19937((*random_device)());
+ protected:
+  AveragePoolingTest() {
     input_size_dist = std::uniform_int_distribution<uint32_t>(10, 15);
     pooling_size_dist = std::uniform_int_distribution<uint32_t>(2, 5);
     stride_dist = std::uniform_int_distribution<uint32_t>(1, 2);
@@ -61,8 +59,7 @@ protected:
     subgraph_output = std::vector<OutputType>(batch_size * output_height * output_width * channels);
   }
 
-  std::unique_ptr<std::random_device> random_device;
-  std::mt19937 rng;
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<uint32_t> input_size_dist;
   std::uniform_int_distribution<uint32_t> pooling_size_dist;
   std::uniform_int_distribution<uint32_t> stride_dist;

@@ -21,6 +21,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -130,10 +131,9 @@ class ScaledDotProductAttentionOperatorTester {
   }
 
   void TestF16() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1, 1.0f);
-    // Use a different scale distributon to mitigate precision issues.
+    // Use a different scale distribution to mitigate precision issues.
     // In tests, channels are ~100, so scale is ~0.1.
     const float dk_scale = 1.0f / std::sqrt(static_cast<float>(query_key_channels()));
     std::uniform_real_distribution<float> scaledist(std::min(0.01f, dk_scale), std::max(0.01f, dk_scale));
@@ -296,8 +296,7 @@ class ScaledDotProductAttentionOperatorTester {
   }
 
   void TestF32() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
     std::uniform_real_distribution<float> scaledist(0.2f, 2.0f);
 

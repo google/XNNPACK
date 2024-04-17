@@ -22,6 +22,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class PadMicrokernelTester {
@@ -108,9 +109,11 @@ class PadMicrokernelTester {
   }
 
   void Test(xnn_pad_ukernel_fn pad) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    xnnpack::ReplicableRandomDevice rng;
+    auto u8rng = [&rng]() {
+      return std::uniform_int_distribution<uint32_t>(
+          0, std::numeric_limits<uint8_t>::max())(rng);
+    };
 
     std::vector<uint8_t> input(input_channels() + (rows() - 1) * input_stride() + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<uint8_t> output((pre_padding() + input_channels() + post_padding()) + (rows() - 1) * output_stride());

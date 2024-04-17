@@ -17,6 +17,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class VScaleExpMinusMaxMicrokernelTester {
@@ -52,11 +53,12 @@ class VScaleExpMinusMaxMicrokernelTester {
   }
 
   void Test(xnn_f32_vscaleexpminusmax_ukernel_fn vscaleexpminusmax) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     // Choose such range that expf(x[i]) overflows, but expf(x[i] - x_max) doesn't.
     // However, the range is still narrow enough that double-precision exp doesn't overflow.
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(90.0f, 100.0f), rng);
+    auto f32rng = [&rng]() {
+      return std::uniform_real_distribution<float>(90.0f, 100.0f)(rng);
+    };
 
     std::vector<float> x(elements() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(elements());

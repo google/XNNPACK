@@ -19,6 +19,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class FilterbankSubtractMicrokernelTester {
@@ -53,8 +54,7 @@ class FilterbankSubtractMicrokernelTester {
   }
 
   void Test(xnn_u32_filterbank_subtract_ukernel_fn filterbank_subtract) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
     const uint32_t smoothing = 655;
     const uint32_t alternate_smoothing = 655;

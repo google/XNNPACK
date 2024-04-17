@@ -16,6 +16,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class UnpoolMicrokernelTester {
@@ -74,8 +75,7 @@ class UnpoolMicrokernelTester {
   }
 
   void Test(xnn_x32_unpool_ukernel_fn unpool) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto x_rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
     auto i_rng = std::bind(std::uniform_int_distribution<uint32_t>(0, uint32_t(p() - 1)), std::ref(rng));
 

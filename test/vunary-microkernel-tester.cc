@@ -22,6 +22,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -319,8 +320,7 @@ void VUnaryMicrokernelTester::Test(
 void VUnaryMicrokernelTester::Test(
     xnn_s8_vclamp_ukernel_fn vclamp,
     xnn_init_s8_minmax_params_fn init_params) const {
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto i8rng = std::bind(std::uniform_int_distribution<int32_t>(
                              std::numeric_limits<int8_t>::min(),
                              std::numeric_limits<int8_t>::max()),
@@ -366,8 +366,7 @@ void VUnaryMicrokernelTester::Test(
 void VUnaryMicrokernelTester::Test(
     xnn_u8_vclamp_ukernel_fn vclamp,
     xnn_init_u8_minmax_params_fn init_params) const {
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto u8rng = std::bind(std::uniform_int_distribution<int32_t>(
                              0, std::numeric_limits<uint8_t>::max()),
                          std::ref(rng));
@@ -410,8 +409,7 @@ void VUnaryMicrokernelTester::Test(
     xnn_u64_u32_vsqrtshift_ukernel_fn vsqrtshift) const {
   ASSERT_FALSE(inplace());
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto u64rng =
       std::bind(std::uniform_int_distribution<uint64_t>(), std::ref(rng));
 

@@ -19,19 +19,17 @@
 #include <limits>   // For std::numeric_limits.
 #include <memory>   // For std::unique_ptr.
 #include <numeric>  // For std::accumulate.
-#include <random>  // For std::random_device, std::mt19937, std::uniform_real_distribution.
-#include <vector>  // For std::vector.
+#include <random>   // For std::uniform_real_distribution.
+#include <vector>   // For std::vector.
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
 template <class T>
 class ScaledDotProductAttentionTestBase : public ::testing::Test {
  protected:
-  ScaledDotProductAttentionTestBase()
-  {
-    random_device = std::make_unique<std::random_device>();
-    rng = std::mt19937((*random_device)());
+  ScaledDotProductAttentionTestBase() {
     f32dist = std::uniform_real_distribution<float>(0.1f, 1.0f);
     dim_dist = std::uniform_int_distribution<size_t>(5, 15);
     bernoulli_dist = std::bernoulli_distribution(0.5);
@@ -154,8 +152,7 @@ class ScaledDotProductAttentionTestBase : public ::testing::Test {
     return std::accumulate(dims.begin(), dims.end(), size_t(1), std::multiplies<size_t>());
   }
 
-  std::unique_ptr<std::random_device> random_device;
-  std::mt19937 rng;
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist;
   std::uniform_real_distribution<float> cap_dist;
   std::uniform_int_distribution<size_t> dim_dist;

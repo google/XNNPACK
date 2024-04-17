@@ -3084,6 +3084,7 @@ xnnpack_cc_library(
         "subgraph-unary-tester.h",
     ],
     deps = [
+        ":replicable_random_device",
         "//:node_type",
         "//:operators_test_mode",
         "//:requantization",
@@ -3100,6 +3101,7 @@ xnnpack_cc_library(
         "subgraph-binary-tester.h",
     ],
     deps = [
+        ":replicable_random_device",
         "//:node_type",
         "//:operators_test_mode",
         "//:requantization",
@@ -3115,6 +3117,7 @@ xnnpack_unit_test(
         "workspace.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "//:XNNPACK_test_mode",
         "//:allocation_type",
         "//:math",
@@ -3183,6 +3186,7 @@ xnnpack_unit_test(
         "argmax-pooling-2d.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
         "//:common",
@@ -3198,6 +3202,7 @@ xnnpack_unit_test(
         "average-pooling-2d.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
@@ -3242,6 +3247,7 @@ xnnpack_unit_test(
         "batch-matrix-multiply.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
@@ -3288,6 +3294,7 @@ xnnpack_unit_test(
         "concatenate2.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
@@ -3302,6 +3309,7 @@ xnnpack_unit_test(
         "concatenate3.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
@@ -3316,6 +3324,7 @@ xnnpack_unit_test(
         "concatenate4.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
@@ -3330,6 +3339,7 @@ xnnpack_unit_test(
         "concatenate5.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
@@ -3360,6 +3370,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":convolution_test_helpers",
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
@@ -3395,6 +3406,7 @@ xnnpack_unit_test(
     ],
     shard_count = 5,
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
@@ -3411,6 +3423,7 @@ xnnpack_unit_test(
         "depth-to-space-2d.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
@@ -3426,6 +3439,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":convolution_test_helpers",
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
@@ -3474,6 +3488,7 @@ xnnpack_unit_test(
         "even-split2.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
@@ -3488,6 +3503,7 @@ xnnpack_unit_test(
         "even-split3.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
@@ -3502,6 +3518,7 @@ xnnpack_unit_test(
         "even-split4.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
@@ -3531,6 +3548,7 @@ xnnpack_unit_test(
         "fully-connected.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
@@ -3549,6 +3567,7 @@ xnnpack_unit_test(
         "global-average-pooling-1d.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
@@ -3566,6 +3585,7 @@ xnnpack_unit_test(
         "global-average-pooling-2d.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
@@ -3583,6 +3603,7 @@ xnnpack_unit_test(
         "global-sum-pooling-1d.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
@@ -3599,6 +3620,7 @@ xnnpack_unit_test(
         "global-sum-pooling-2d.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
@@ -3615,6 +3637,7 @@ xnnpack_unit_test(
         "hardswish.cc",
     ],
     deps = [
+        ":replicable_random_device",
         ":subgraph_unary_tester",
         "@FP16",
         "//:XNNPACK_test_mode",
@@ -3645,6 +3668,7 @@ xnnpack_unit_test(
         "max-pooling-2d.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
@@ -3720,6 +3744,7 @@ xnnpack_unit_test(
         "prelu.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
@@ -3749,6 +3774,7 @@ xnnpack_unit_test(
         "rope.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
@@ -3763,6 +3789,7 @@ xnnpack_unit_test(
         "scaled-dot-product-attention.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
@@ -3868,6 +3895,7 @@ xnnpack_unit_test(
         "static-constant-pad.cc",
     ],
     deps = [
+        ":replicable_random_device",
         ":subgraph_unary_tester",
         "@FP16",
         "//:XNNPACK_test_mode",
@@ -3885,6 +3913,7 @@ xnnpack_unit_test(
         "static-mean.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:aligned_allocator",
@@ -3901,6 +3930,7 @@ xnnpack_unit_test(
         "static-reshape.cc",
     ],
     deps = [
+        ":replicable_random_device",
         ":subgraph_unary_tester",
         "@FP16",
         "//:XNNPACK_test_mode",
@@ -3916,6 +3946,7 @@ xnnpack_unit_test(
         "reshape-helpers.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "//:XNNPACK_test_mode",
         "//:subgraph_test_mode",
     ],
@@ -3941,6 +3972,7 @@ xnnpack_unit_test(
         "static-resize-bilinear-2d.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:node_type",
@@ -3955,6 +3987,7 @@ xnnpack_unit_test(
         "static-slice.cc",
     ],
     deps = [
+        ":replicable_random_device",
         ":subgraph_unary_tester",
         "@FP16",
         "//:XNNPACK_test_mode",
@@ -4028,6 +4061,7 @@ xnnpack_unit_test(
         "unpooling-2d.cc",
     ],
     deps = [
+        ":replicable_random_device",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:operator_utils",
@@ -4044,6 +4078,7 @@ xnnpack_unit_test(
         "subgraph-tester.h",
     ],
     deps = [
+        ":replicable_random_device",
         "//:XNNPACK_test_mode",
         "//:node_type",
         "//:subgraph_test_mode",
@@ -4060,6 +4095,7 @@ xnnpack_unit_test(
         "subgraph-tester.h",
     ],
     deps = [
+        ":replicable_random_device",
         "//:XNNPACK_test_mode",
         "//:subgraph_test_mode",
     ],
@@ -4073,6 +4109,7 @@ xnnpack_unit_test(
         "subgraph-tester.h",
     ],
     deps = [
+        ":replicable_random_device",
         "//:XNNPACK_test_mode",
         "//:subgraph_test_mode",
     ],
@@ -4086,9 +4123,8 @@ xnnpack_unit_test(
         "subgraph-tester.h",
     ],
     deps = [
+        ":replicable_random_device",
         "//:XNNPACK_test_mode",
-        "//:common",
-        "//:math",
         "//:node_type",
         "//:subgraph_test_mode",
     ],
@@ -4101,6 +4137,7 @@ xnnpack_unit_test(
         "subgraph-tester.h",
     ],
     deps = [
+        ":replicable_random_device",
         "//:XNNPACK_test_mode",
         "//:subgraph_test_mode",
     ],
@@ -4115,6 +4152,7 @@ xnnpack_unit_test(
         "subgraph-tester.h",
     ],
     deps = [
+        ":replicable_random_device",
         "@FP16",
         "//:XNNPACK_test_mode",
         "//:allocation_type",
@@ -4145,6 +4183,7 @@ xnnpack_unit_test(
         "assembler-helpers.h",
     ],
     deps = [
+        ":replicable_random_device",
         "//:common",
         "//:jit_test_mode",
         "//:memory",
@@ -4161,6 +4200,7 @@ xnnpack_unit_test(
         "assembler-helpers.h",
     ],
     deps = [
+        ":replicable_random_device",
         "//:common",
         "//:jit_test_mode",
         "//:memory",
@@ -4206,6 +4246,7 @@ xnnpack_unit_test(
     name = "mutex_test",
     srcs = ["mutex.cc"],
     deps = [
+        ":replicable_random_device",
         "//:common",
         "//:mutex_test_mode",
         "//:xnnpack_h",

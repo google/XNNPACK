@@ -19,6 +19,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -93,8 +94,7 @@ class IBilinearMicrokernelTester {
   }
 
   void Test(xnn_f16_ibilinear_ukernel_fn ibilinear) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     std::vector<const uint16_t*> indirection(pixels() * 4);
@@ -147,8 +147,7 @@ class IBilinearMicrokernelTester {
   }
 
   void Test(xnn_f32_ibilinear_ukernel_fn ibilinear) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<const float*> indirection(pixels() * 4);
@@ -201,8 +200,7 @@ class IBilinearMicrokernelTester {
   }
 
   void Test(xnn_s8_ibilinear_ukernel_fn ibilinear) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
     std::uniform_int_distribution<int16_t> w11dist(0, 2047);
@@ -258,8 +256,7 @@ class IBilinearMicrokernelTester {
   }
 
   void Test(xnn_u8_ibilinear_ukernel_fn ibilinear) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
     std::uniform_int_distribution<int16_t> w11dist(0, 2047);
@@ -313,8 +310,7 @@ class IBilinearMicrokernelTester {
   }
 
   void TestCHW(xnn_f16_ibilinear_chw_ukernel_fn ibilinear) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     std::vector<const uint16_t*> indirection(pixels() * 2);
@@ -371,8 +367,7 @@ class IBilinearMicrokernelTester {
   }
 
   void TestCHW(xnn_f32_ibilinear_chw_ukernel_fn ibilinear) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<const float*> indirection(pixels() * 2);

@@ -14,18 +14,16 @@
 #include <cstddef>    // For size_t.
 #include <cstdint>    // For uint32_t.
 #include <memory>     // For std::unique_ptr.
-#include <random>  // For std::random_device, std::mt19937, std::uniform_real_distribution.
-#include <vector>  // For std::vector.
+#include <random>     // For std::uniform_real_distribution.
+#include <vector>     // For std::vector.
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
 template <class T> class RoPETestBase : public ::testing::Test {
-protected:
-  RoPETestBase()
-  {
-    random_device = std::make_unique<std::random_device>();
-    rng = std::mt19937((*random_device)());
+ protected:
+  RoPETestBase() {
     f32dist = std::uniform_real_distribution<float>(0.1f, 1.0f);
     dim_dist = std::uniform_int_distribution<size_t>(5, 15);
 
@@ -37,14 +35,15 @@ protected:
     heads = dim_dist(rng);
     channels = dim_dist(rng) * 2;  // ensure the number of channels is even
 
-    input = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + batch_size * tokens * heads * channels);
-    weights = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + max_tokens * channels);
+    input = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) +
+                           batch_size * tokens * heads * channels);
+    weights =
+        std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + max_tokens * channels);
     operator_output = std::vector<T>(batch_size * tokens * heads * channels);
     subgraph_output = std::vector<T>(operator_output.size());
   }
 
-  std::unique_ptr<std::random_device> random_device;
-  std::mt19937 rng;
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist;
   std::uniform_int_distribution<size_t> dim_dist;
 

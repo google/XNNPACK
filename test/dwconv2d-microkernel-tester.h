@@ -22,6 +22,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -163,8 +164,7 @@ class DWConv2DMicrokernelTester {
   }
 
   void Test(xnn_f32_dwconv2d_chw_ukernel_fn dwconv, xnn_init_f32_chw_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<float, AlignedAllocator<float, 64>> input(input_height() * input_width() + 2 * XNN_EXTRA_BYTES);
@@ -233,8 +233,7 @@ class DWConv2DMicrokernelTester {
   }
 
   void Test(xnn_f16_dwconv2d_chw_ukernel_fn dwconv, xnn_init_f16_chw_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> input(input_height() * input_width() + 2 * XNN_EXTRA_BYTES);

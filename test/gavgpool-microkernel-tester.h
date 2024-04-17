@@ -24,6 +24,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -146,8 +147,7 @@ class GAvgPoolMicrokernelTester {
       xnn_init_qu8_avgpool_minmax_params_fn init_params,
       xnn_qu8_requantize_fn requantize) const
   {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
@@ -212,8 +212,7 @@ class GAvgPoolMicrokernelTester {
       xnn_init_qu8_avgpool_minmax_params_fn init_params,
       xnn_qu8_requantize_fn requantize) const
   {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
@@ -281,8 +280,7 @@ class GAvgPoolMicrokernelTester {
       xnn_init_qs8_avgpool_minmax_params_fn init_params,
       xnn_qs8_requantize_fn requantize) const
   {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
@@ -347,8 +345,7 @@ class GAvgPoolMicrokernelTester {
       xnn_init_qs8_avgpool_minmax_params_fn init_params,
       xnn_qs8_requantize_fn requantize) const
   {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
@@ -411,8 +408,7 @@ class GAvgPoolMicrokernelTester {
   }
 
   void Test(xnn_f16_gavgpool_minmax_unipass_ukernel_fn gavgpool_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<uint16_t> input((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
@@ -473,8 +469,7 @@ class GAvgPoolMicrokernelTester {
   }
 
   void Test(xnn_f16_gavgpool_minmax_multipass_ukernel_fn gavgpool_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<uint16_t> input((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
@@ -535,8 +530,7 @@ class GAvgPoolMicrokernelTester {
   }
 
   void Test(xnn_f32_gavgpool_minmax_unipass_ukernel_fn gavgpool_minmax, xnn_init_f32_scaleminmax_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<float> input((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
@@ -594,8 +588,7 @@ class GAvgPoolMicrokernelTester {
   }
 
   void Test(xnn_f32_gavgpool_minmax_multipass_ukernel_fn gavgpool_minmax, xnn_init_f32_scaleminmax_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<float> input((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));

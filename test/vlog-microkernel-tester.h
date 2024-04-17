@@ -19,6 +19,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 extern "C" XNN_INTERNAL const uint16_t xnn_table_vlog[129];
@@ -73,8 +74,7 @@ class VLogMicrokernelTester {
   }
 
   void Test(xnn_u32_vlog_ukernel_fn vlog) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto i16rng = std::bind(std::uniform_int_distribution<uint16_t>(), std::ref(rng));
     auto i32rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
 

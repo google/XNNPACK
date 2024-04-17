@@ -21,11 +21,12 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
 class ConvHWC2CHWMicrokernelTester {
-public:
+ public:
   ConvHWC2CHWMicrokernelTester& output_channels_tile(uint32_t output_channels_tile) {
     this->output_channels_tile_ = output_channels_tile;
     return *this;
@@ -289,8 +290,7 @@ public:
     ASSERT_GE(output_width(), 1);
     ASSERT_GE(output_height(), 1);
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
@@ -397,8 +397,7 @@ public:
     ASSERT_GE(output_width(), 1);
     ASSERT_GE(output_height(), 1);
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +

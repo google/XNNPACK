@@ -21,6 +21,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class VHSwishMicrokernelTester {
@@ -90,8 +91,7 @@ class VHSwishMicrokernelTester {
     ASSERT_GE(output_zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(output_zero_point(), std::numeric_limits<int8_t>::max());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
@@ -141,8 +141,7 @@ class VHSwishMicrokernelTester {
     ASSERT_GE(output_zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(output_zero_point(), std::numeric_limits<uint8_t>::max());
 
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 

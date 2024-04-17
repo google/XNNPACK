@@ -18,6 +18,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -92,8 +93,7 @@ class PReLUMicrokernelTester {
   }
 
   void Test(xnn_f16_prelu_ukernel_fn prelu) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
     std::uniform_real_distribution<float> w32dist(0.25f, 0.75f);
 
@@ -138,8 +138,7 @@ class PReLUMicrokernelTester {
   }
 
   void Test(xnn_f32_prelu_ukernel_fn prelu) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
     std::uniform_real_distribution<float> w32dist(0.25f, 0.75f);
 

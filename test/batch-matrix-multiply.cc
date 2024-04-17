@@ -22,20 +22,18 @@
 #include <memory>   // For std::unique_ptr.
 #include <numeric>  // For std::accumulate.
 #include <ostream>
-#include <random>  // For std::random_device, std::mt19937, std::uniform_real_distribution.
+#include <random>  // For std::uniform_real_distribution.
 #include <string>
 #include <vector>  // For std::vector.
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
 template <class InputType, class OutputType>
 class BatchMatrixMultiplyTestBase : public ::testing::Test {
  protected:
-  BatchMatrixMultiplyTestBase()
-  {
-    random_device = std::make_unique<std::random_device>();
-    rng = std::mt19937((*random_device)());
+  BatchMatrixMultiplyTestBase() {
     f32dist = std::uniform_real_distribution<float>(0.1f, 1.0f);
     i8dist = std::uniform_int_distribution<int32_t>(
         std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
@@ -91,8 +89,7 @@ class BatchMatrixMultiplyTestBase : public ::testing::Test {
     return std::accumulate(dims.begin(), dims.end(), size_t(1), std::multiplies<size_t>());
   }
 
-  std::unique_ptr<std::random_device> random_device;
-  std::mt19937 rng;
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist;
   std::uniform_int_distribution<int32_t> i8dist;
   std::uniform_int_distribution<int32_t> w8dist;

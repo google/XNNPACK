@@ -18,6 +18,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class RMaxAbsMicrokernelTester {
@@ -43,8 +44,7 @@ class RMaxAbsMicrokernelTester {
   }
 
   void Test(xnn_s16_rmaxabs_ukernel_fn rmaxabs) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
 
     std::vector<int16_t> input(batch() + XNN_EXTRA_BYTES / sizeof(int16_t));

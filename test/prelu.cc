@@ -19,6 +19,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -27,11 +28,8 @@ template <
   typename WeightType = InputType,
   typename OutputType = InputType>
 class PreluTest : public ::testing::Test {
-protected:
-  void SetUp() override
-  {
-    random_device = std::make_unique<std::random_device>();
-    rng = std::mt19937((*random_device)());
+ protected:
+  void SetUp() override {
     dim_dist = std::uniform_int_distribution<size_t>(1, 9);
     input_dims = RandomShape(4);
     output_dims = input_dims;
@@ -56,8 +54,7 @@ protected:
     return std::accumulate(dims.begin(), dims.end(), size_t(1), std::multiplies<size_t>());
   }
 
-  std::unique_ptr<std::random_device> random_device;
-  std::mt19937 rng;
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<size_t> dim_dist;
 
   std::vector<size_t> output_dims;

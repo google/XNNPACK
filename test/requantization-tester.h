@@ -22,6 +22,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class RequantizationTester {
@@ -528,8 +529,7 @@ class RequantizationTester {
     ASSERT_LE(qmax(), std::numeric_limits<uint8_t>::max());
     ASSERT_LT(qmin(), qmax());
 
-    std::random_device random_device;
-    std::mt19937 rng(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       auto u8rng =
         std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
@@ -571,8 +571,7 @@ class RequantizationTester {
     ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
     ASSERT_LT(qmin(), qmax());
 
-    std::random_device random_device;
-    std::mt19937 rng(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       auto i8rng = std::bind(
         std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), std::ref(rng));
@@ -614,8 +613,7 @@ class RequantizationTester {
     ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
     ASSERT_LT(qmin(), qmax());
 
-    std::random_device random_device;
-    std::mt19937 rng(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       auto i8rng = std::bind(
         std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), std::ref(rng));
@@ -657,8 +655,7 @@ class RequantizationTester {
     ASSERT_LE(qmax(), std::numeric_limits<uint8_t>::max());
     ASSERT_LT(qmin(), qmax());
 
-    std::random_device random_device;
-    std::mt19937 rng(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       auto u8rng =
         std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
@@ -702,8 +699,7 @@ class RequantizationTester {
     ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
     ASSERT_LT(qmin(), qmax());
 
-    std::random_device random_device;
-    std::mt19937 rng(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       auto i8rng = std::bind(
         std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), std::ref(rng));

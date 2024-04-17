@@ -24,6 +24,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -206,8 +207,7 @@ class AvgPoolMicrokernelTester {
   }
 
   void Test(xnn_f16_avgpool_minmax_unipass_ukernel_fn avgpool_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<const uint16_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
@@ -297,8 +297,7 @@ class AvgPoolMicrokernelTester {
   }
 
   void Test(xnn_f16_avgpool_minmax_multipass_ukernel_fn avgpool_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<const uint16_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
@@ -389,8 +388,7 @@ class AvgPoolMicrokernelTester {
   }
 
   void Test(xnn_f32_avgpool_minmax_unipass_ukernel_fn avgpool_minmax, xnn_init_f32_scaleminmax_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
@@ -476,8 +474,7 @@ class AvgPoolMicrokernelTester {
   }
 
   void Test(xnn_f32_avgpool_minmax_multipass_ukernel_fn avgpool_minmax, xnn_init_f32_scaleminmax_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
@@ -568,8 +565,7 @@ class AvgPoolMicrokernelTester {
       xnn_init_qu8_avgpool_minmax_params_fn init_params,
       xnn_qu8_requantize_fn requantize) const
   {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
@@ -663,8 +659,7 @@ class AvgPoolMicrokernelTester {
       xnn_init_qu8_avgpool_minmax_params_fn init_params,
       xnn_qu8_requantize_fn requantize) const
   {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
@@ -755,8 +750,7 @@ class AvgPoolMicrokernelTester {
   }
 
   void Test(xnn_f16_pavgpool_minmax_unipass_ukernel_fn pavgpool_minmax, xnn_init_f16_minmax_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
     std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
 
@@ -849,8 +843,7 @@ class AvgPoolMicrokernelTester {
   }
 
   void Test(xnn_f16_pavgpool_minmax_multipass_ukernel_fn pavgpool_minmax, xnn_init_f16_minmax_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
     std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
 
@@ -944,8 +937,7 @@ class AvgPoolMicrokernelTester {
   }
 
   void Test(xnn_f32_pavgpool_minmax_unipass_ukernel_fn pavgpool_minmax, xnn_init_f32_minmax_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
     std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
 
@@ -1034,8 +1026,7 @@ class AvgPoolMicrokernelTester {
   }
 
   void Test(xnn_f32_pavgpool_minmax_multipass_ukernel_fn pavgpool_minmax, xnn_init_f32_minmax_params_fn init_params) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
     std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
 

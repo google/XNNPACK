@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 namespace xnnpack {
@@ -89,9 +90,6 @@ class SubgraphTester {
     status = xnn_create_subgraph(external_value_ids, 0 /* flags */, &subgraph_ptr);
     EXPECT_EQ(status, xnn_status_success);
     subgraph_.reset(subgraph_ptr);
-
-    std::random_device random_device;
-    rng_ = std::mt19937(random_device());
   }
 
   inline SubgraphTester& AddInternalDynamicTensorF32(const std::vector<size_t>& dims,
@@ -572,7 +570,7 @@ class SubgraphTester {
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> subgraph_{nullptr, xnn_delete_subgraph};
   std::unordered_map<uint32_t, std::vector<char>> external_tensors_;
   uint32_t output_id_;
-  std::mt19937 rng_;
+  xnnpack::ReplicableRandomDevice rng_;
   std::uniform_real_distribution<float> f32dist = std::uniform_real_distribution<float>(-1.0f, +1.0f);
   std::uniform_int_distribution<int32_t> w8dist = std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max());
 

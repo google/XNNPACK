@@ -20,6 +20,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class LUTNormMicrokernelTester {
@@ -53,12 +54,15 @@ class LUTNormMicrokernelTester {
   }
 
   void Test(xnn_u8_lut32norm_ukernel_fn lutnorm) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
-    auto u32rng = std::bind(
-      std::uniform_int_distribution<uint32_t>(1, std::numeric_limits<uint32_t>::max() / (257 * n())),
-      rng);
+    xnnpack::ReplicableRandomDevice rng;
+    auto u8rng = [&rng]() {
+      return std::uniform_int_distribution<uint32_t>(
+          0, std::numeric_limits<uint8_t>::max())(rng);
+    };
+    auto u32rng = [&]() {
+      return std::uniform_int_distribution<uint32_t>(
+          1, std::numeric_limits<uint32_t>::max() / (257 * n()))(rng);
+    };
 
     std::vector<uint8_t> x(n());
     std::vector<uint32_t> t(256);

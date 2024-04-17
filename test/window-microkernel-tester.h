@@ -19,6 +19,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class WindowMicrokernelTester {
@@ -72,8 +73,7 @@ class WindowMicrokernelTester {
   }
 
   void Test(xnn_s16_window_ukernel_fn window) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
 
     std::vector<int16_t> input(channels() * rows() + XNN_EXTRA_BYTES / sizeof(int16_t));

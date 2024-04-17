@@ -17,6 +17,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class VLShiftMicrokernelTester {
@@ -60,8 +61,7 @@ class VLShiftMicrokernelTester {
   }
 
   void Test(xnn_i16_vlshift_ukernel_fn vlshift) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     auto u16rng = std::bind(std::uniform_int_distribution<uint16_t>(), std::ref(rng));
 
     std::vector<uint16_t> input(batch() + XNN_EXTRA_BYTES / sizeof(uint16_t));

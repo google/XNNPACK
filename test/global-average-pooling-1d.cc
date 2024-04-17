@@ -23,15 +23,13 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
 template <typename T> class GlobalAveragePooling1DTest : public ::testing::Test {
-protected:
-  GlobalAveragePooling1DTest()
-  {
-    random_device = std::make_unique<std::random_device>();
-    rng = std::mt19937((*random_device)());
+ protected:
+  GlobalAveragePooling1DTest() {
     shape_dist = std::uniform_int_distribution<size_t>(2, XNN_MAX_TENSOR_DIMS);
     dim_dist = std::uniform_int_distribution<size_t>(1, 9);
     f32dist = std::uniform_real_distribution<float>();
@@ -70,8 +68,7 @@ protected:
     return std::accumulate(dims.begin(), dims.end(), size_t(1), std::multiplies<size_t>());
   }
 
-  std::unique_ptr<std::random_device> random_device;
-  std::mt19937 rng;
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<size_t> shape_dist;
   std::uniform_int_distribution<size_t> dim_dist;
   std::uniform_real_distribution<float> f32dist;

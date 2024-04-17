@@ -21,6 +21,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
@@ -450,8 +451,7 @@ class MaxPoolingOperatorTester {
   }
 
   void TestS8() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
@@ -539,8 +539,7 @@ class MaxPoolingOperatorTester {
   }
 
   void TestU8() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
@@ -628,8 +627,7 @@ class MaxPoolingOperatorTester {
   }
 
   void TestF16() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     // Note: we need to avoid FP16 denormals in the generated tensor because they might be processed differently in
     // native vs emulated arithmetics, and we use exact comparison to verify the results against reference.
     std::uniform_real_distribution<float> f32dist(0.001f, 1.0f);
@@ -745,8 +743,7 @@ class MaxPoolingOperatorTester {
   }
 
   void TestF32() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<float> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
@@ -848,8 +845,7 @@ class MaxPoolingOperatorTester {
   }
 
   void TestSetupS8() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
@@ -999,8 +995,7 @@ class MaxPoolingOperatorTester {
   }
 
   void TestSetupU8() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
@@ -1150,8 +1145,7 @@ class MaxPoolingOperatorTester {
   }
 
   void TestSetupF16() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     // Note: we need to avoid FP16 denormals in the generated tensor because they might be processed differently in
     // native vs emulated arithmetics, and we use exact comparison to verify the results against reference.
     std::uniform_real_distribution<float> f32dist(0.001f, 1.0f);
@@ -1330,8 +1324,7 @@ class MaxPoolingOperatorTester {
   }
 
   void TestSetupF32() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max<size_t>(

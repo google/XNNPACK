@@ -19,6 +19,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 namespace {
@@ -29,11 +30,8 @@ inline size_t compute_output_dimension(size_t padded_input_dimension, size_t ker
 }  // namespace
 
 class ArgmaxPoolingTestF32 : public ::testing::Test {
-protected:
-  ArgmaxPoolingTestF32()
-  {
-    random_device = std::make_unique<std::random_device>();
-    rng = std::mt19937((*random_device)());
+ protected:
+  ArgmaxPoolingTestF32() {
     input_size_dist = std::uniform_int_distribution<uint32_t>(10, 15);
     pooling_size_dist = std::uniform_int_distribution<uint32_t>(2, 5);
     batch_size = input_size_dist(rng);
@@ -57,8 +55,7 @@ protected:
     subgraph_output_index = std::vector<uint32_t>(batch_size * output_height * output_width * channels);
   }
 
-  std::unique_ptr<std::random_device> random_device;
-  std::mt19937 rng;
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<uint32_t> input_size_dist;
   std::uniform_int_distribution<uint32_t> pooling_size_dist;
   uint32_t batch_size;

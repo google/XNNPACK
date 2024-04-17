@@ -16,6 +16,7 @@
 #include <random>
 #include <vector>
 
+#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 
 class FilterbankAccumulateMicrokernelTester {
@@ -40,8 +41,7 @@ class FilterbankAccumulateMicrokernelTester {
   }
 
   void Test(xnn_u32_filterbank_accumulate_ukernel_fn filterbank_accumulate) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
+    xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(1, 10);
     std::uniform_int_distribution<uint16_t> u16dist;
     std::uniform_int_distribution<uint32_t> u32dist;
