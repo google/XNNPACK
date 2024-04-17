@@ -730,27 +730,31 @@ enum xnn_status xnn_setup_runtime(
     }
   }
 
-  // Apply runtime state changes.
 #ifdef XNN_SLINKY_ENABLED
   size_t input_id = 0, output_id = 0;
+  // Use the runtime values instead of the external values so the order is the
+  // same.
+  for (size_t i = 0; i < runtime->num_values; i++) {
+    struct xnn_value* value = &runtime->values[i];
+    if (xnn_value_is_static(value)) {
+      // The value is constant.
+    } else if (value->flags & XNN_VALUE_FLAG_EXTERNAL_INPUT) {
+      runtime->input_values[input_id++] = value;
+    } else if (value->flags & XNN_VALUE_FLAG_EXTERNAL_OUTPUT) {
+      runtime->output_values[output_id++] = value;
+    }
+  }
+  runtime->num_inputs = input_id;
+  runtime->num_outputs = output_id;
 #endif
+
+  // Apply runtime state changes.
   for (size_t i = 0; i < num_external_values; i++) {
     const struct xnn_external_value* external_value = &external_values[i];
     const uint32_t value_id = external_value->id;
     struct xnn_value* value = &runtime->values[value_id];
     value->data = external_value->data;
-#ifdef XNN_SLINKY_ENABLED
-    if (value->flags & XNN_VALUE_FLAG_EXTERNAL_INPUT) {
-      runtime->input_values[input_id++] = value;
-    } else if (value->flags & XNN_VALUE_FLAG_EXTERNAL_OUTPUT) {
-      runtime->output_values[output_id++] = value;
-    }
-#endif
   }
-#ifdef XNN_SLINKY_ENABLED
-  runtime->num_inputs = input_id;
-  runtime->num_outputs = output_id;
-#endif
 
   for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
     struct xnn_operator_data* opdata = &runtime->opdata[opdata_id];
