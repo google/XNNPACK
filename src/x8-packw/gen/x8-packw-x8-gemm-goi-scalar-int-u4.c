@@ -14,7 +14,7 @@
 
 #include <xnnpack/math.h>
 #include <xnnpack/packw.h>
-
+#include <xnnpack/unaligned.h>
 
 void xnn_x8_packw_gemm_goi_ukernel_x8__scalar_int_u4(
   size_t g,
@@ -48,24 +48,24 @@ void xnn_x8_packw_gemm_goi_ukernel_x8__scalar_int_u4(
     size_t n = nc;
     for (;n >= 8; n -= 8) {
       if XNN_LIKELY(b != NULL) {
-        ((uint32_t*) out)[0] = b[0];
-        ((uint32_t*) out)[1] = b[1];
-        ((uint32_t*) out)[2] = b[2];
-        ((uint32_t*) out)[3] = b[3];
-        ((uint32_t*) out)[4] = b[4];
-        ((uint32_t*) out)[5] = b[5];
-        ((uint32_t*) out)[6] = b[6];
-        ((uint32_t*) out)[7] = b[7];
+        unaligned_store_s32(out + 0 * sizeof(int32_t), b[0]);
+        unaligned_store_s32(out + 1 * sizeof(int32_t), b[1]);
+        unaligned_store_s32(out + 2 * sizeof(int32_t), b[2]);
+        unaligned_store_s32(out + 3 * sizeof(int32_t), b[3]);
+        unaligned_store_s32(out + 4 * sizeof(int32_t), b[4]);
+        unaligned_store_s32(out + 5 * sizeof(int32_t), b[5]);
+        unaligned_store_s32(out + 6 * sizeof(int32_t), b[6]);
+        unaligned_store_s32(out + 7 * sizeof(int32_t), b[7]);
         b += 8;
       } else {
-        ((uint32_t*) out)[0] = 0;
-        ((uint32_t*) out)[1] = 0;
-        ((uint32_t*) out)[2] = 0;
-        ((uint32_t*) out)[3] = 0;
-        ((uint32_t*) out)[4] = 0;
-        ((uint32_t*) out)[5] = 0;
-        ((uint32_t*) out)[6] = 0;
-        ((uint32_t*) out)[7] = 0;
+        unaligned_store_s32(out + 0 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 1 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 2 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 3 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 4 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 5 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 6 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 7 * sizeof(int32_t), 0);
       }
       out += 8 * sizeof(uint32_t);
 
@@ -184,13 +184,13 @@ void xnn_x8_packw_gemm_goi_ukernel_x8__scalar_int_u4(
       if XNN_LIKELY(b != NULL) {
         size_t nb = n;
         do {
-          *((uint32_t*) out) = *b++;
+          unaligned_store_s32(out, *b++);
           out += sizeof(uint32_t);
         } while (--nb != 0);
       } else {
         size_t nb = n;
         do {
-          *((uint32_t*) out) = 0;
+          unaligned_store_s32(out, 0);
           out += sizeof(uint32_t);
         } while (--nb != 0);
       }

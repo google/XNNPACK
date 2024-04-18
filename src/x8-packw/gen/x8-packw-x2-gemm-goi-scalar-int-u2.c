@@ -14,7 +14,7 @@
 
 #include <xnnpack/math.h>
 #include <xnnpack/packw.h>
-
+#include <xnnpack/unaligned.h>
 
 void xnn_x8_packw_gemm_goi_ukernel_x2__scalar_int_u2(
   size_t g,
@@ -48,12 +48,12 @@ void xnn_x8_packw_gemm_goi_ukernel_x2__scalar_int_u2(
     size_t n = nc;
     for (;n >= 2; n -= 2) {
       if XNN_LIKELY(b != NULL) {
-        ((uint32_t*) out)[0] = b[0];
-        ((uint32_t*) out)[1] = b[1];
+        unaligned_store_s32(out + 0 * sizeof(int32_t), b[0]);
+        unaligned_store_s32(out + 1 * sizeof(int32_t), b[1]);
         b += 2;
       } else {
-        ((uint32_t*) out)[0] = 0;
-        ((uint32_t*) out)[1] = 0;
+        unaligned_store_s32(out + 0 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 1 * sizeof(int32_t), 0);
       }
       out += 2 * sizeof(uint32_t);
 
@@ -92,13 +92,13 @@ void xnn_x8_packw_gemm_goi_ukernel_x2__scalar_int_u2(
       if XNN_LIKELY(b != NULL) {
         size_t nb = n;
         do {
-          *((uint32_t*) out) = *b++;
+          unaligned_store_s32(out, *b++);
           out += sizeof(uint32_t);
         } while (--nb != 0);
       } else {
         size_t nb = n;
         do {
-          *((uint32_t*) out) = 0;
+          unaligned_store_s32(out, 0);
           out += sizeof(uint32_t);
         } while (--nb != 0);
       }

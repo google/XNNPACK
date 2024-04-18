@@ -13,7 +13,7 @@ $assert TYPE in ["int8_t"]
 
 #include <xnnpack/math.h>
 #include <xnnpack/packw.h>
-
+#include <xnnpack/unaligned.h>
 
 $BITS = {"int8_t": 8}[TYPE]
 $BTYPE = {"int8_t": "uint32_t"}[TYPE]
@@ -54,14 +54,14 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_int_u${KBLOCK}(
           $if BTYPE == TYPE:
             out[${N}] = b[${N}];
           $else:
-            ((${BTYPE}*) out)[${N}] = b[${N}];
+            unaligned_store_s32(out + ${N} * sizeof(int32_t), b[${N}]);
         b += ${NR};
       } else {
         $for N in range(NR):
           $if BTYPE == TYPE:
             out[${N}] = 0;
           $else:
-            ((${BTYPE}*) out)[${N}] = 0;
+            unaligned_store_s32(out + ${N} * sizeof(int32_t), 0);
       }
       $if BTYPE == TYPE:
         out += ${NR};
@@ -103,7 +103,7 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_int_u${KBLOCK}(
           $if BTYPE == TYPE:
             *out++ = *b++;
           $else:
-            *((${BTYPE}*) out) = *b++;
+            unaligned_store_s32(out, *b++);
             out += sizeof(${BTYPE});
         } while (--nb != 0);
       } else {
@@ -112,7 +112,7 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_int_u${KBLOCK}(
           $if BTYPE == TYPE:
             *out++ = 0;
           $else:
-            *((${BTYPE}*) out) = 0;
+            unaligned_store_s32(out, 0);
             out += sizeof(${BTYPE});
         } while (--nb != 0);
       }

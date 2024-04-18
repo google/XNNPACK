@@ -14,7 +14,7 @@
 
 #include <xnnpack/math.h>
 #include <xnnpack/packw.h>
-
+#include <xnnpack/unaligned.h>
 
 void xnn_x8_packw_gemm_goi_ukernel_x16__scalar_int_u2(
   size_t g,
@@ -48,40 +48,40 @@ void xnn_x8_packw_gemm_goi_ukernel_x16__scalar_int_u2(
     size_t n = nc;
     for (;n >= 16; n -= 16) {
       if XNN_LIKELY(b != NULL) {
-        ((uint32_t*) out)[0] = b[0];
-        ((uint32_t*) out)[1] = b[1];
-        ((uint32_t*) out)[2] = b[2];
-        ((uint32_t*) out)[3] = b[3];
-        ((uint32_t*) out)[4] = b[4];
-        ((uint32_t*) out)[5] = b[5];
-        ((uint32_t*) out)[6] = b[6];
-        ((uint32_t*) out)[7] = b[7];
-        ((uint32_t*) out)[8] = b[8];
-        ((uint32_t*) out)[9] = b[9];
-        ((uint32_t*) out)[10] = b[10];
-        ((uint32_t*) out)[11] = b[11];
-        ((uint32_t*) out)[12] = b[12];
-        ((uint32_t*) out)[13] = b[13];
-        ((uint32_t*) out)[14] = b[14];
-        ((uint32_t*) out)[15] = b[15];
+        unaligned_store_s32(out + 0 * sizeof(int32_t), b[0]);
+        unaligned_store_s32(out + 1 * sizeof(int32_t), b[1]);
+        unaligned_store_s32(out + 2 * sizeof(int32_t), b[2]);
+        unaligned_store_s32(out + 3 * sizeof(int32_t), b[3]);
+        unaligned_store_s32(out + 4 * sizeof(int32_t), b[4]);
+        unaligned_store_s32(out + 5 * sizeof(int32_t), b[5]);
+        unaligned_store_s32(out + 6 * sizeof(int32_t), b[6]);
+        unaligned_store_s32(out + 7 * sizeof(int32_t), b[7]);
+        unaligned_store_s32(out + 8 * sizeof(int32_t), b[8]);
+        unaligned_store_s32(out + 9 * sizeof(int32_t), b[9]);
+        unaligned_store_s32(out + 10 * sizeof(int32_t), b[10]);
+        unaligned_store_s32(out + 11 * sizeof(int32_t), b[11]);
+        unaligned_store_s32(out + 12 * sizeof(int32_t), b[12]);
+        unaligned_store_s32(out + 13 * sizeof(int32_t), b[13]);
+        unaligned_store_s32(out + 14 * sizeof(int32_t), b[14]);
+        unaligned_store_s32(out + 15 * sizeof(int32_t), b[15]);
         b += 16;
       } else {
-        ((uint32_t*) out)[0] = 0;
-        ((uint32_t*) out)[1] = 0;
-        ((uint32_t*) out)[2] = 0;
-        ((uint32_t*) out)[3] = 0;
-        ((uint32_t*) out)[4] = 0;
-        ((uint32_t*) out)[5] = 0;
-        ((uint32_t*) out)[6] = 0;
-        ((uint32_t*) out)[7] = 0;
-        ((uint32_t*) out)[8] = 0;
-        ((uint32_t*) out)[9] = 0;
-        ((uint32_t*) out)[10] = 0;
-        ((uint32_t*) out)[11] = 0;
-        ((uint32_t*) out)[12] = 0;
-        ((uint32_t*) out)[13] = 0;
-        ((uint32_t*) out)[14] = 0;
-        ((uint32_t*) out)[15] = 0;
+        unaligned_store_s32(out + 0 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 1 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 2 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 3 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 4 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 5 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 6 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 7 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 8 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 9 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 10 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 11 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 12 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 13 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 14 * sizeof(int32_t), 0);
+        unaligned_store_s32(out + 15 * sizeof(int32_t), 0);
       }
       out += 16 * sizeof(uint32_t);
 
@@ -232,13 +232,13 @@ void xnn_x8_packw_gemm_goi_ukernel_x16__scalar_int_u2(
       if XNN_LIKELY(b != NULL) {
         size_t nb = n;
         do {
-          *((uint32_t*) out) = *b++;
+          unaligned_store_s32(out, *b++);
           out += sizeof(uint32_t);
         } while (--nb != 0);
       } else {
         size_t nb = n;
         do {
-          *((uint32_t*) out) = 0;
+          unaligned_store_s32(out, 0);
           out += sizeof(uint32_t);
         } while (--nb != 0);
       }
