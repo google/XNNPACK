@@ -56,5 +56,5 @@ void xnn_f32_rsum_ukernel__neon_u12_acc3(
     vacc = vadd_f32(vacc, vt);
   }
   vacc = vmul_f32(vacc, vscale);
-  vst1_lane_f32(output, vacc, 0);
+  *output += vget_lane_f32(vacc, 0);
 }

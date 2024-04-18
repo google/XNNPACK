@@ -1,13 +1,12 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f16-f32acc-rsum/neonfp16arith.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert BATCH_TILE % 8 == 0 or BATCH_TILE == 4
-$assert BATCH_TILE >= 4
-$SIMD_TILE = BATCH_TILE // 4
-$assert ACCUMULATORS <= SIMD_TILE
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <arm_neon.h>
@@ -16,8 +15,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/reduce.h>
 
 
-$ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
-void xnn_f16_f32acc_rsum_ukernel__neonfp16_u${BATCH_TILE}${ACC_SUFFIX}(
+void xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u4(
     size_t batch,
     const void* input,
     void* output,
@@ -30,27 +28,7 @@ void xnn_f16_f32acc_rsum_ukernel__neonfp16_u${BATCH_TILE}${ACC_SUFFIX}(
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
-  $for A in range(ACCUMULATORS):
-    float32x4_t vacc${A} = vmovq_n_f32(0.0f);
-  $if BATCH_TILE > 8:
-    for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
-      $for N in range(0, SIMD_TILE, 2):
-        const float16x8_t vh${ABC[N:N+2]} = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
-
-      $for N in range(0, SIMD_TILE, 2):
-        const float32x4_t vt${N} = vcvt_f32_f16(vget_low_f16(vh${ABC[N:N+2]}));
-        const float32x4_t vt${N+1} = vcvt_f32_f16(vget_high_f16(vh${ABC[N:N+2]}));
-
-      $for N in range(SIMD_TILE):
-        vacc${N % ACCUMULATORS} = vaddq_f32(vacc${N % ACCUMULATORS}, vt${N});
-    }
-    $if ACCUMULATORS > 1:
-      $ACC_SLICE = 1
-      $while ACC_SLICE < ACCUMULATORS:
-        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-          $if A + ACC_SLICE < ACCUMULATORS:
-            vacc${A} = vaddq_f32(vacc${A}, vacc${A + ACC_SLICE});
-        $ACC_SLICE *= 2
+  float32x4_t vacc0 = vmovq_n_f32(0.0f);
   for (; batch >= 4 * sizeof(uint16_t); batch -= 4 * sizeof(uint16_t)) {
     const float16x4_t vh = vreinterpret_f16_u16(vld1_u16(i)); i += 4;
     const float32x4_t vt = vcvt_f32_f16(vh);
@@ -70,6 +48,10 @@ void xnn_f16_f32acc_rsum_ukernel__neonfp16_u${BATCH_TILE}${ACC_SUFFIX}(
     vacc = vadd_f32(vacc, vget_low_f32(vt));
   }
   vacc = vmul_f32(vacc, vscale);
-  const float16x4_t vout = vcvt_f16_f32(vcombine_f32(vacc, vacc));
+
+  float16x4_t vout_acc = vreinterpret_f16_u16(vld1_dup_u16(o));
+
+  float16x4_t vout = vcvt_f16_f32(vcombine_f32(vacc, vacc));
+  vout = vadd_f16(vout_acc, vout);
   vst1_lane_u16(o, vreinterpret_u16_f16(vout), 0);
 }

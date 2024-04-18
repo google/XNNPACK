@@ -68,6 +68,8 @@ void xnn_f16_f32acc_rsum_ukernel__f16c_u32_acc2(
   vacc = _mm_add_ps(vacc, _mm_movehl_ps(vacc, vacc));
   vacc = _mm_add_ss(vacc, _mm_movehdup_ps(vacc));
   vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->avx.scale));
+  const __m128 out_acc = _mm_cvtph_ps(_mm_set1_epi16(unaligned_load_u16(output)));
+  vacc = _mm_add_ss(vacc, out_acc);
   const __m128i vout = _mm_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT);
   unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout, 0));
 }

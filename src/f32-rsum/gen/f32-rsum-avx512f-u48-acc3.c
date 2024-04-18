@@ -64,5 +64,5 @@ void xnn_f32_rsum_ukernel__avx512f_u48_acc3(
   vacc = _mm_add_ps(vacc, _mm_movehl_ps(vacc, vacc));
   vacc = _mm_add_ss(vacc, _mm_movehdup_ps(vacc));
   vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->scalar.scale));
-  _mm_store_ss(output, vacc);
+  *output += _mm_cvtss_f32(vacc);
 }

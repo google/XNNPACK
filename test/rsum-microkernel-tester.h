@@ -102,7 +102,7 @@ class RSumMicrokernelTester {
       init_params(&params, scale());
 
       // Call optimized micro-kernel.
-      uint16_t output = UINT16_C(0x7E00);  /* NaN */
+      uint16_t output = fp16_ieee_from_fp32_value(0.f);
       rsum(batch_size() * sizeof(uint16_t), input.data(), &output, &params);
 
       // Verify results.
@@ -127,7 +127,7 @@ class RSumMicrokernelTester {
       init_params(&params, scale());
 
       // Call optimized micro-kernel.
-      float output = std::nanf("");
+      float output = 0.f;
       rsum(batch_size() * sizeof(float), input.data(), &output, &params);
 
       // Verify results.

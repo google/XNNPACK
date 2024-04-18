@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <stdio.h>
 #include <assert.h>
 #include <math.h>
 #include <stddef.h>
@@ -238,6 +239,9 @@ static enum xnn_status reshape_mean_nd(
   *workspace_size = 0;
   *workspace_alignment = 1;
 
+    printf("reduction axis %zu\n", reduction_axis);
+    printf("batch_like_dim %zu\n", batch_like_dim);
+    printf("axis_dim %zu\n", axis_dim);
   if (reduction_axis + 1 == num_input_dims) {
     // Reduction along the innermost dimension
 
@@ -246,6 +250,7 @@ static enum xnn_status reshape_mean_nd(
         .output_stride = UINT32_C(1) << log2_data_element_size,
         .scaled_elements = axis_dim << log2_data_element_size,
         .ukernel = mean_op->reduce_config->ukernel,
+        .element_size = UINT32_C(1) << log2_data_element_size,
     };
     memcpy(&mean_op->context.reduce.params, scale_params, scale_params_size);
 
@@ -254,9 +259,12 @@ static enum xnn_status reshape_mean_nd(
     mean_op->compute[0].range[0] = batch_like_dim;
     mean_op->compute[0].tile[0] = 2;
     mean_op->ukernel.type = xnn_microkernel_type_mean;
+     printf("RRRR\n");
   } else {
+     printf("QQQQ\n");
     // Reduction along the non-innermost dimension
     const size_t channel_like_dim = normalized_input_shape[num_input_dims - 1];
+    printf("channel_like_dim %zu\n", channel_like_dim);
 
     if (mean_op->channels != channel_like_dim) {
       const size_t zero_size = (channel_like_dim << log2_data_element_size) + XNN_EXTRA_BYTES;
@@ -287,7 +295,9 @@ static enum xnn_status reshape_mean_nd(
       mean_op->compute[0].type = xnn_parallelization_type_1d;
       mean_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_global_average_pooling_nwc_unipass;
       mean_op->context.global_average_pooling_nwc.unipass_ukernel = mean_op->gavgpool_config->unipass;
+      printf("SSSS\n");
     } else {
+      printf("KKKKK\n");
       const size_t multipass_batch_stride = round_up_po2(
           (channel_like_dim + (XNN_MAX_SIMD_SIZE >> log2_data_element_size)) << log2_accumulator_element_size,
           XNN_ALLOCATION_ALIGNMENT);

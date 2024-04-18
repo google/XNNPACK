@@ -4421,12 +4421,6 @@ SET(ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS
 SET(ALL_NEONFP16_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neonfp16-u8.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neonfp16-u16.c
-  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16-u4.c
-  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16-u8.c
-  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16-u16-acc2.c
-  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16-u24-acc3.c
-  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16-u32-acc2.c
-  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16-u32-acc4.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-neonfp16-u8.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-neonfp16-u16.c
   src/math/f16-f32-cvt-neonfp16.c
@@ -4519,6 +4513,12 @@ SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-dwconv/gen/f16-dwconv-25p16c-minmax-neonfp16arith.c
   src/f16-dwconv/gen/f16-dwconv-25p32c-minmax-neonfp16arith-acc2.c
   src/f16-dwconv/gen/f16-dwconv-25p32c-minmax-neonfp16arith.c
+  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16arith-u4.c
+  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16arith-u8.c
+  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16arith-u16-acc2.c
+  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16arith-u24-acc3.c
+  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16arith-u32-acc2.c
+  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16arith-u32-acc4.c
   src/f16-gavgpool-cw/f16-gavgpool-cw-neonfp16arith-u8.c
   src/f16-gavgpool/gen/f16-gavgpool-7p7x-minmax-neonfp16arith-c8.c
   src/f16-gavgpool/gen/f16-gavgpool-7p7x-minmax-neonfp16arith-c16.c

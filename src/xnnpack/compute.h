@@ -1378,6 +1378,7 @@ struct reduce_context {
   size_t input_stride;
   size_t output_stride;
   size_t scaled_elements;
+  size_t element_size;
   xnn_reduce_ukernel_fn ukernel;
   union {
     union xnn_f32_default_params f32_default;

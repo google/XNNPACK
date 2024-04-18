@@ -2028,6 +2028,7 @@ void xnn_compute_reduce(
   const void* input = (const void*) ((uintptr_t) context->input + input_stride * batch_index);
   void* output = (void*) ((uintptr_t) context->output + output_stride * batch_index);
   do {
+    memset(output, 0, context->element_size);
     context->ukernel(context->scaled_elements, input, output, &context->params);
     input = (const void*) ((uintptr_t) input + input_stride);
     output = (void*) ((uintptr_t) output + output_stride);
