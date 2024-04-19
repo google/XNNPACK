@@ -295,6 +295,12 @@ xnnpack_cc_library(
     ] + select({
         ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
         "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }) + select({
+        ":avxvnni_enabled": ["-DXNN_ENABLE_AVXVNNI=1"],
+        "//conditions:default": ["-DXNN_ENABLE_AVXVNNI=0"],
+    }) + select({
+        ":avx512amx_enabled": ["-DXNN_ENABLE_AVX512AMX=1"],
+        "//conditions:default": ["-DXNN_ENABLE_AVX512AMX=0"],
     }),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
