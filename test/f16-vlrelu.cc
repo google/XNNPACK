@@ -8,14 +8,18 @@
 //   Generator: tools/generate-vunary-test.py
 
 
-#include <vector>
-
-#include <gtest/gtest.h>
+#include <array>
+#include <cmath>
+#include <cstddef>
+#include <limits>
 
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
+#include <xnnpack/microparams-init.h>
+#include <xnnpack/microparams.h>
 #include <xnnpack/vunary.h>
 
+#include <gtest/gtest.h>
 #include "vunary-microkernel-tester.h"
 
 
@@ -66,7 +70,7 @@
 
   TEST(F16_VLRELU__NEONFP16ARITH_U8, slope) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (float slope : std::vector<float>({-0.7f, 0.3f, 1.3f})) {
+    for (float slope : std::array<float, 3>({-0.7f, 0.3f, 1.3f})) {
       for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -125,7 +129,7 @@
 
   TEST(F16_VLRELU__NEONFP16ARITH_U16, slope) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (float slope : std::vector<float>({-0.7f, 0.3f, 1.3f})) {
+    for (float slope : std::array<float, 3>({-0.7f, 0.3f, 1.3f})) {
       for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -184,7 +188,7 @@
 
   TEST(F16_VLRELU__F16C_U8, slope) {
     TEST_REQUIRES_X86_F16C;
-    for (float slope : std::vector<float>({-0.7f, 0.3f, 1.3f})) {
+    for (float slope : std::array<float, 3>({-0.7f, 0.3f, 1.3f})) {
       for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -243,7 +247,7 @@
 
   TEST(F16_VLRELU__F16C_U16, slope) {
     TEST_REQUIRES_X86_F16C;
-    for (float slope : std::vector<float>({-0.7f, 0.3f, 1.3f})) {
+    for (float slope : std::array<float, 3>({-0.7f, 0.3f, 1.3f})) {
       for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)

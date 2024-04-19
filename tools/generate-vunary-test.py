@@ -139,7 +139,7 @@ $if OP_TYPE == "ELU":
   TEST(${TEST_NAME}, prescale) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (float prescale : std::vector<float>({0.1f, 10.0f})) {
+    for (float prescale : std::array<float, 2>({0.1f, 10.0f})) {
       for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}${BATCH_SCALE}; batch_size += ${max(1, BATCH_TILE-1)}) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -152,7 +152,7 @@ $if OP_TYPE == "ELU":
   TEST(${TEST_NAME}, alpha) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (float alpha : std::vector<float>({0.3f, 3.0f})) {
+    for (float alpha : std::array<float, 2>({0.3f, 3.0f})) {
       for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}${BATCH_SCALE}; batch_size += ${max(1, BATCH_TILE-1)}) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -165,7 +165,7 @@ $if OP_TYPE == "ELU":
   TEST(${TEST_NAME}, beta) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (float beta : std::vector<float>({0.3f, 3.0f})) {
+    for (float beta : std::array<float, 2>({0.3f, 3.0f})) {
       for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}${BATCH_SCALE}; batch_size += ${max(1, BATCH_TILE-1)}) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -179,7 +179,7 @@ $if OP_TYPE == "LeakyReLU":
   TEST(${TEST_NAME}, slope) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (float slope : std::vector<float>({-0.7f, 0.3f, 1.3f})) {
+    for (float slope : std::array<float, 3>({-0.7f, 0.3f, 1.3f})) {
       for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}${BATCH_SCALE}; batch_size += ${max(1, BATCH_TILE-1)}) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -199,6 +199,33 @@ $if OP_TYPE == "SquareRootShift":
           .batch_size(batch_size)
           .shift(shift)
           .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+$if OP_TYPE == "SquareRoot" and DATATYPE == "f32":
+  TEST(${TEST_NAME}, special_values) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    std::array<float, 4> inputs = {0.0f, -0.0f, 1.0f, -1.0f};
+    std::array<float, 4> expected = {0.0, -0.0f, 1.0f, nanf("")};
+    std::array<float, 4> outputs;
+    $if len(TEST_ARGS) == 1:
+      ${TEST_ARGS[0]}(
+          inputs.size() * sizeof(float), inputs.data(), outputs.data(), nullptr);
+    $else:
+      union xnn_f32_sqrt_params params;
+      ${TEST_ARGS[1]}(&params);
+      ${TEST_ARGS[0]}(
+          inputs.size() * sizeof(float), inputs.data(), outputs.data(), &params);
+    for (int i = 0; i < inputs.size(); i++) {
+      if (std::isfinite(expected[i])) {
+        ASSERT_NEAR(
+            expected[i], outputs[i],
+            2 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            << "for input " << inputs[i];
+      } else {
+        ASSERT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
+            << "for input " << inputs[i];
       }
     }
   }
@@ -267,14 +294,18 @@ def main(args):
 //   Generator: {generator}
 
 
-#include <vector>
-
-#include <gtest/gtest.h>
+#include <array>
+#include <cmath>
+#include <cstddef>
+#include <limits>
 
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
+#include <xnnpack/microparams-init.h>
+#include <xnnpack/microparams.h>
 #include <xnnpack/vunary.h>
 
+#include <gtest/gtest.h>
 #include "vunary-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 

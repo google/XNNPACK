@@ -9283,7 +9283,7 @@ void xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8(
   }
 }
 
-void xnn_f32_vsqrt_ukernel__sse_sqrt_u4(
+void xnn_f32_vsqrt_ukernel__sse_rsqrt_u12(
     size_t batch,
     const float* input,
     float* output,
@@ -9294,16 +9294,93 @@ void xnn_f32_vsqrt_ukernel__sse_sqrt_u4(
   assert(input != NULL);
   assert(output != NULL);
 
+  // Constants for the Newton-Raphson iteration.
+  const __m128 vthree = _mm_load_ps(params->sse.three);
+  const __m128 vhalf = _mm_load_ps(params->sse.half);
+
+  for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {
+    const __m128 vx0 = _mm_loadu_ps(input);
+    const __m128 vx1 = _mm_loadu_ps(input + 4);
+    const __m128 vx2 = _mm_loadu_ps(input + 8);
+    input += 12;
+
+    // Create a mask of the +/-0 inputs, which will be flushed to zero later.
+    const __m128 vmask0 = _mm_cmpeq_ps(vx0, _mm_setzero_ps());
+    const __m128 vmask1 = _mm_cmpeq_ps(vx1, _mm_setzero_ps());
+    const __m128 vmask2 = _mm_cmpeq_ps(vx2, _mm_setzero_ps());
+
+    // Generate the initial 12-bit approximation.
+    const __m128 vt0_0 = _mm_rsqrt_ps(vx0);
+    const __m128 vt0_1 = _mm_rsqrt_ps(vx1);
+    const __m128 vt0_2 = _mm_rsqrt_ps(vx2);
+
+    // Do a single Newton-Raphson step as described above.
+    const __m128 vt1_0 = _mm_mul_ps(vt0_0, vt0_0);
+    const __m128 vt1_1 = _mm_mul_ps(vt0_1, vt0_1);
+    const __m128 vt1_2 = _mm_mul_ps(vt0_2, vt0_2);
+    const __m128 vt2_0 = _mm_mul_ps(vx0, vt1_0);
+    const __m128 vt2_1 = _mm_mul_ps(vx1, vt1_1);
+    const __m128 vt2_2 = _mm_mul_ps(vx2, vt1_2);
+    const __m128 vt3_0 = _mm_sub_ps(vthree, vt2_0);
+    const __m128 vt3_1 = _mm_sub_ps(vthree, vt2_1);
+    const __m128 vt3_2 = _mm_sub_ps(vthree, vt2_2);
+    const __m128 vt4_0 = _mm_mul_ps(vhalf, vt0_0);
+    const __m128 vt4_1 = _mm_mul_ps(vhalf, vt0_1);
+    const __m128 vt4_2 = _mm_mul_ps(vhalf, vt0_2);
+    const __m128 vt5_0 = _mm_mul_ps(vt3_0, vt4_0);
+    const __m128 vt5_1 = _mm_mul_ps(vt3_1, vt4_1);
+    const __m128 vt5_2 = _mm_mul_ps(vt3_2, vt4_2);
+    const __m128 vt6_0 = _mm_andnot_ps(vmask0, vt5_0);
+    const __m128 vt6_1 = _mm_andnot_ps(vmask1, vt5_1);
+    const __m128 vt6_2 = _mm_andnot_ps(vmask2, vt5_2);
+    const __m128 vy0 = _mm_mul_ps(vx0, vt6_0);
+    const __m128 vy1 = _mm_mul_ps(vx1, vt6_1);
+    const __m128 vy2 = _mm_mul_ps(vx2, vt6_2);
+
+    // Store the results.
+    _mm_storeu_ps(output, vy0);
+    _mm_storeu_ps(output + 4, vy1);
+    _mm_storeu_ps(output + 8, vy2);
+    output += 12;
+  }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const __m128 vx = _mm_loadu_ps(input);
     input += 4;
-    const __m128 vy = _mm_sqrt_ps(vx);
+
+    // Generate the initial 12-bit approximation.
+    const __m128 vt0 = _mm_rsqrt_ps(vx);
+
+    // Create a mask of the +/-0 inputs, which will be flushed to zero later.
+    const __m128 vmask = _mm_cmpeq_ps(vx, _mm_setzero_ps());
+
+    // Do a single Newton-Raphson step as described above.
+    const __m128 vt1 = _mm_mul_ps(vt0, vt0);
+    const __m128 vt2 = _mm_mul_ps(vx, vt1);
+    const __m128 vt3 = _mm_sub_ps(vthree, vt2);
+    const __m128 vt4 = _mm_mul_ps(vhalf, vt0);
+    const __m128 vt5 = _mm_mul_ps(vt3, vt4);
+    const __m128 vt6 = _mm_andnot_ps(vmask, vt5);
+    const __m128 vy = _mm_mul_ps(vx, vt6);
     _mm_storeu_ps(output, vy);
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
     const __m128 vx = _mm_loadu_ps(input);
-    __m128 vy = _mm_sqrt_ps(vx);
+    // Generate the initial 12-bit approximation.
+    const __m128 vt0 = _mm_rsqrt_ps(vx);
+
+    // Create a mask of the +/-0 inputs, which will be flushed to zero later.
+    const __m128 vmask = _mm_cmpeq_ps(vx, _mm_setzero_ps());
+
+    // Do a single Newton-Raphson step as described above.
+    const __m128 vt1 = _mm_mul_ps(vt0, vt0);
+    const __m128 vt2 = _mm_mul_ps(vx, vt1);
+    const __m128 vt3 = _mm_sub_ps(vthree, vt2);
+    const __m128 vt4 = _mm_mul_ps(vhalf, vt0);
+    const __m128 vt5 = _mm_mul_ps(vt3, vt4);
+    const __m128 vt6 = _mm_andnot_ps(vmask, vt5);
+    __m128 vy = _mm_mul_ps(vx, vt6);
+
     if (batch & (2 * sizeof(float))) {
       _mm_storel_pi((__m64*) output, vy);
       vy = _mm_movehl_ps(vy, vy);

@@ -8,14 +8,18 @@
 //   Generator: tools/generate-vunary-test.py
 
 
-#include <vector>
-
-#include <gtest/gtest.h>
+#include <array>
+#include <cmath>
+#include <cstddef>
+#include <limits>
 
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
+#include <xnnpack/microparams-init.h>
+#include <xnnpack/microparams.h>
 #include <xnnpack/vunary.h>
 
+#include <gtest/gtest.h>
 #include "vunary-microkernel-tester.h"
 
 
@@ -66,7 +70,7 @@
 
   TEST(F16_VELU__NEONFP16ARITH_RR1_P3_U8, prescale) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (float prescale : std::vector<float>({0.1f, 10.0f})) {
+    for (float prescale : std::array<float, 2>({0.1f, 10.0f})) {
       for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -78,7 +82,7 @@
 
   TEST(F16_VELU__NEONFP16ARITH_RR1_P3_U8, alpha) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (float alpha : std::vector<float>({0.3f, 3.0f})) {
+    for (float alpha : std::array<float, 2>({0.3f, 3.0f})) {
       for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -90,7 +94,7 @@
 
   TEST(F16_VELU__NEONFP16ARITH_RR1_P3_U8, beta) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (float beta : std::vector<float>({0.3f, 3.0f})) {
+    for (float beta : std::array<float, 2>({0.3f, 3.0f})) {
       for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -149,7 +153,7 @@
 
   TEST(F16_VELU__NEONFP16ARITH_RR1_P3_U16, prescale) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (float prescale : std::vector<float>({0.1f, 10.0f})) {
+    for (float prescale : std::array<float, 2>({0.1f, 10.0f})) {
       for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -161,7 +165,7 @@
 
   TEST(F16_VELU__NEONFP16ARITH_RR1_P3_U16, alpha) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (float alpha : std::vector<float>({0.3f, 3.0f})) {
+    for (float alpha : std::array<float, 2>({0.3f, 3.0f})) {
       for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -173,7 +177,7 @@
 
   TEST(F16_VELU__NEONFP16ARITH_RR1_P3_U16, beta) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (float beta : std::vector<float>({0.3f, 3.0f})) {
+    for (float beta : std::array<float, 2>({0.3f, 3.0f})) {
       for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -232,7 +236,7 @@
 
   TEST(F16_VELU__AVX2_RR1_P3_U8, prescale) {
     TEST_REQUIRES_X86_AVX2;
-    for (float prescale : std::vector<float>({0.1f, 10.0f})) {
+    for (float prescale : std::array<float, 2>({0.1f, 10.0f})) {
       for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -244,7 +248,7 @@
 
   TEST(F16_VELU__AVX2_RR1_P3_U8, alpha) {
     TEST_REQUIRES_X86_AVX2;
-    for (float alpha : std::vector<float>({0.3f, 3.0f})) {
+    for (float alpha : std::array<float, 2>({0.3f, 3.0f})) {
       for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -256,7 +260,7 @@
 
   TEST(F16_VELU__AVX2_RR1_P3_U8, beta) {
     TEST_REQUIRES_X86_AVX2;
-    for (float beta : std::vector<float>({0.3f, 3.0f})) {
+    for (float beta : std::array<float, 2>({0.3f, 3.0f})) {
       for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -315,7 +319,7 @@
 
   TEST(F16_VELU__AVX2_RR1_P3_U16, prescale) {
     TEST_REQUIRES_X86_AVX2;
-    for (float prescale : std::vector<float>({0.1f, 10.0f})) {
+    for (float prescale : std::array<float, 2>({0.1f, 10.0f})) {
       for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -327,7 +331,7 @@
 
   TEST(F16_VELU__AVX2_RR1_P3_U16, alpha) {
     TEST_REQUIRES_X86_AVX2;
-    for (float alpha : std::vector<float>({0.3f, 3.0f})) {
+    for (float alpha : std::array<float, 2>({0.3f, 3.0f})) {
       for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -339,7 +343,7 @@
 
   TEST(F16_VELU__AVX2_RR1_P3_U16, beta) {
     TEST_REQUIRES_X86_AVX2;
-    for (float beta : std::vector<float>({0.3f, 3.0f})) {
+    for (float beta : std::array<float, 2>({0.3f, 3.0f})) {
       for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
