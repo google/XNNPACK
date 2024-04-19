@@ -14,7 +14,6 @@ def xnnpack_emscripten_test_linkopts():
     return [
         "-s ALLOW_MEMORY_GROWTH=1",
         "-s ASSERTIONS=2",
-        "-s DEMANGLE_SUPPORT=1",
         "-s ENVIRONMENT=node,shell,web",
         "-s ERROR_ON_UNDEFINED_SYMBOLS=1",
         "-s EXIT_RUNTIME=1",
