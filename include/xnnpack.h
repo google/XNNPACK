@@ -1494,7 +1494,7 @@ enum xnn_status xnn_define_static_resize_bilinear_2d(
 /// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
 ///                   with [N, H, W, channels] dimensions.
 /// @param slope_id - Value ID for the slope tensor. The slope tensor must be a 1D tensor defined in the @a subgraph with
-///                   [channels] dimensions.
+///                   either [1] or [channels] dimensions.
 /// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
 ///                    with [N, H, W, channels] dimensions.
 /// @param flags - binary features of the PReLU Node. No supported flags are currently defined.
@@ -5084,7 +5084,8 @@ enum xnn_status xnn_run_negate_nc_f32(
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_prelu_nc_f16(
-  size_t channels,
+  size_t input_channels,
+  size_t slope_channels,
   size_t input_stride,
   size_t output_stride,
   const void* negative_slope,
@@ -5104,7 +5105,8 @@ enum xnn_status xnn_setup_prelu_nc_f16(
   void* output);
 
 enum xnn_status xnn_create_prelu_nc_f32(
-  size_t channels,
+  size_t input_channels,
+  size_t slope_channels,
   size_t input_stride,
   size_t output_stride,
   const float* negative_slope,

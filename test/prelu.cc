@@ -34,10 +34,15 @@ class PreluTest : public ::testing::Test {
     input_dims = RandomShape(4);
     output_dims = input_dims;
     batch_size = input_dims[0] * input_dims[1] * input_dims[2];
-    channels = input_dims[3];
-    slope_dims = {channels};
+    input_channels = input_dims[3];
+    slope_channels = input_dims[3];
+    // Randomly broadcast slope.
+    if (dim_dist(rng) < 3) {
+      slope_channels = 1;
+    }
+    slope_dims = {slope_channels};
     input = std::vector<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) + NumElements(input_dims));
-    slope = std::vector<WeightType>(channels);
+    slope = std::vector<WeightType>(slope_channels);
     operator_output = std::vector<OutputType>(NumElements(output_dims));
     subgraph_output = std::vector<OutputType>(operator_output.size());
   }
@@ -64,7 +69,8 @@ class PreluTest : public ::testing::Test {
   std::vector<WeightType> slope;
   std::vector<OutputType> operator_output;
   std::vector<OutputType> subgraph_output;
-  size_t channels;
+  size_t input_channels;
+  size_t slope_channels;
   size_t batch_size;
 };
 
@@ -171,7 +177,7 @@ TEST_F(PreluTestF16, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status =
-    xnn_create_prelu_nc_f16(channels, channels, channels, slope.data(), XNN_FLAG_FP32_STATIC_WEIGHTS, nullptr, nullptr, &op);
+    xnn_create_prelu_nc_f16(input_channels, slope_channels, input_channels, input_channels, slope.data(), XNN_FLAG_FP32_STATIC_WEIGHTS, nullptr, nullptr, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -244,7 +250,7 @@ TEST_F(PreluTestF32, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status =
-    xnn_create_prelu_nc_f32(channels, channels, channels, slope.data(), /*flags=*/0, nullptr, nullptr, &op);
+    xnn_create_prelu_nc_f32(input_channels, slope_channels, input_channels, input_channels, slope.data(), /*flags=*/0, nullptr, nullptr, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }

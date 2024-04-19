@@ -28,6 +28,7 @@ static enum xnn_status create_prelu_operator(
   const uint32_t input_id = node->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
+
   const uint32_t slope_id = node->inputs[1];
   assert(slope_id != XNN_INVALID_VALUE_ID);
   assert(slope_id < num_values);
@@ -37,15 +38,21 @@ static enum xnn_status create_prelu_operator(
 
   assert(node->num_outputs == 1);
 
+  const size_t num_slope_dims = values[slope_id].shape.num_dims;
+  const size_t slope_channels = num_slope_dims == 0 ? 1 : values[slope_id].shape.dim[num_slope_dims - 1];
+
   const size_t num_input_dims = values[input_id].shape.num_dims;
-  const size_t channel_dim = num_input_dims == 0 ? 1 : values[input_id].shape.dim[num_input_dims - 1];
+  const size_t input_channels = num_input_dims == 0 ? 1 : values[input_id].shape.dim[num_input_dims - 1];
 
   enum xnn_status status;
   switch (node->compute_type) {
     case xnn_compute_type_fp16:
       status = xnn_create_prelu_nc_f16(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
-        slope_data /* negative slope */,
+        input_channels,
+        slope_channels,
+        /*input_stride=*/input_channels,
+        /*output_stride=*/input_channels,
+        /*negative_slope=*/slope_data,
         node->flags | XNN_FLAG_FP32_STATIC_WEIGHTS,
         code_cache,
         weights_cache,
@@ -53,8 +60,11 @@ static enum xnn_status create_prelu_operator(
       break;
     case xnn_compute_type_fp32:
       status = xnn_create_prelu_nc_f32(
-        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
-        slope_data /* negative slope */,
+        input_channels,
+        slope_channels,
+        /*input_stride=*/input_channels,
+        /*output_stride=*/input_channels,
+        /*negative_slope=*/slope_data,
         node->flags,
         code_cache,
         weights_cache,

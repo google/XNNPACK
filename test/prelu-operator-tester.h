@@ -39,14 +39,28 @@ class PReLUOperatorTester {
     return this->batch_size_;
   }
 
-  PReLUOperatorTester& channels(size_t channels) {
-    assert(channels != 0);
-    this->channels_ = channels;
+  PReLUOperatorTester& input_channels(size_t input_channels) {
+    assert(input_channels != 0);
+    this->input_channels_ = input_channels;
     return *this;
   }
 
-  size_t channels() const {
-    return this->channels_;
+  size_t input_channels() const {
+    return this->input_channels_;
+  }
+
+  PReLUOperatorTester& slope_channels(size_t slope_channels) {
+    assert(slope_channels != 0);
+    this->slope_channels_ = slope_channels;
+    return *this;
+  }
+
+  size_t slope_channels() const {
+    if (this->slope_channels_ == 0) {
+      return this->input_channels_;
+    } else {
+      return this->slope_channels_;
+    }
   }
 
   PReLUOperatorTester& x_stride(size_t x_stride) {
@@ -57,9 +71,9 @@ class PReLUOperatorTester {
 
   size_t x_stride() const {
     if (this->x_stride_ == 0) {
-      return this->channels_;
+      return this->input_channels_;
     } else {
-      assert(this->x_stride_ >= this->channels_);
+      assert(this->x_stride_ >= this->input_channels_);
       return this->x_stride_;
     }
   }
@@ -72,9 +86,9 @@ class PReLUOperatorTester {
 
   size_t y_stride() const {
     if (this->y_stride_ == 0) {
-      return this->channels_;
+      return this->input_channels_;
     } else {
-      assert(this->y_stride_ >= this->channels_);
+      assert(this->y_stride_ >= this->input_channels_);
       return this->y_stride_;
     }
   }
@@ -120,23 +134,27 @@ class PReLUOperatorTester {
     auto f32irng = std::uniform_real_distribution<float>(-1.0f, 1.0f);
     auto f32wrng = std::uniform_real_distribution<float>(0.25f, 0.75f);
 
-    std::vector<uint16_t> x((batch_size() - 1) * x_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> w(channels());
-    std::vector<float> w_as_float(channels());
-    std::vector<uint16_t> y((batch_size() - 1) * y_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<float> y_ref(batch_size() * channels());
+    std::vector<uint16_t> x((batch_size() - 1) * x_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<uint16_t> w(input_channels());
+    std::vector<float> w_as_float(input_channels());
+    std::vector<uint16_t> y((batch_size() - 1) * y_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<float> y_ref(batch_size() * input_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), [&] { return fp16_ieee_from_fp32_value(f32irng(rng)); });
-      std::generate(w.begin(), w.end(), [&] { return fp16_ieee_from_fp32_value(f32wrng(rng)); });
+      if (slope_channels() == 1) {
+        std::fill(w.begin(), w.end(), fp16_ieee_from_fp32_value(f32wrng(rng)));
+      } else {
+        std::generate(w.begin(), w.end(), [&] { return fp16_ieee_from_fp32_value(f32wrng(rng)); });
+      }
       std::transform(w.cbegin(), w.cend(), w_as_float.begin(), fp16_ieee_to_fp32_value);
       std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t c = 0; c < channels(); c++) {
+        for (size_t c = 0; c < input_channels(); c++) {
           const float x_value = fp16_ieee_to_fp32_value(x[i * x_stride() + c]);
           const float w_value = w_as_float[c];
-          y_ref[i * channels() + c] = std::signbit(x_value) ? x_value * w_value : x_value;
+          y_ref[i * input_channels() + c] = std::signbit(x_value) ? x_value * w_value : x_value;
         }
       }
 
@@ -166,7 +184,7 @@ class PReLUOperatorTester {
       }
       ASSERT_EQ(xnn_status_success,
         xnn_create_prelu_nc_f16(
-          channels(), x_stride(), y_stride(),
+          input_channels(), slope_channels(), x_stride(), y_stride(),
           negative_slope_data,
           flags, /*code_cache=*/nullptr, auto_weights_cache.get(), &prelu_op));
       ASSERT_NE(nullptr, prelu_op);
@@ -200,7 +218,7 @@ class PReLUOperatorTester {
 
         ASSERT_EQ(xnn_status_success,
                   xnn_create_prelu_nc_f16(
-                      channels(), x_stride(), y_stride(),
+                      input_channels(), slope_channels(), x_stride(), y_stride(),
                       negative_slope_data,
                       flags, /*code_cache=*/nullptr, auto_weights_cache.get(), &prelu_op2));
         ASSERT_NE(nullptr, prelu_op2);
@@ -230,12 +248,12 @@ class PReLUOperatorTester {
 
   void VerifyF16(const std::vector<uint16_t>& y, const std::vector<float>& y_ref) const {
     for (size_t i = 0; i < batch_size(); i++) {
-      for (size_t c = 0; c < channels(); c++) {
+      for (size_t c = 0; c < input_channels(); c++) {
         ASSERT_NEAR(
             fp16_ieee_to_fp32_value(y[i * y_stride() + c]),
-            y_ref[i * channels() + c],
-            std::max(1.0e-4f, std::abs(y_ref[i * channels() + c]) * 1.0e-3f))
-            << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
+            y_ref[i * input_channels() + c],
+            std::max(1.0e-4f, std::abs(y_ref[i * input_channels() + c]) * 1.0e-3f))
+            << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << input_channels();
       }
     }
   }
@@ -247,19 +265,23 @@ class PReLUOperatorTester {
     auto f32irng = std::uniform_real_distribution<float>(-1.0f, 1.0f);
     auto f32wrng = std::uniform_real_distribution<float>(0.25f, 0.75f);
 
-    std::vector<float> x((batch_size() - 1) * x_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> w(channels());
-    std::vector<float> y((batch_size() - 1) * y_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y_ref(batch_size() * channels());
+    std::vector<float> x((batch_size() - 1) * x_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> w(input_channels());
+    std::vector<float> y((batch_size() - 1) * y_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> y_ref(batch_size() * input_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), [&] { return f32irng(rng);} );
-      std::generate(w.begin(), w.end(), [&] { return f32wrng(rng);} );
+      if (slope_channels() == 1) {
+        std::fill(w.begin(), w.end(), f32wrng(rng));
+      } else {
+        std::generate(w.begin(), w.end(), [&] { return f32wrng(rng);} );
+      }
       std::fill(y.begin(), y.end(), nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t c = 0; c < channels(); c++) {
-          y_ref[i * channels() + c] = std::signbit(x[i * x_stride() + c]) ? x[i * x_stride() + c] * w[c] : x[i * x_stride() + c];
+        for (size_t c = 0; c < input_channels(); c++) {
+          y_ref[i * input_channels() + c] = std::signbit(x[i * x_stride() + c]) ? x[i * x_stride() + c] * w[c] : x[i * x_stride() + c];
         }
       }
 
@@ -281,7 +303,7 @@ class PReLUOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_prelu_nc_f32(
-          channels(), x_stride(), y_stride(),
+          input_channels(), slope_channels(), x_stride(), y_stride(),
           w.data(),
           0, /*code_cache=*/nullptr, auto_weights_cache.get(), &prelu_op));
       ASSERT_NE(nullptr, prelu_op);
@@ -315,7 +337,7 @@ class PReLUOperatorTester {
 
         ASSERT_EQ(xnn_status_success,
                   xnn_create_prelu_nc_f32(
-                      channels(), x_stride(), y_stride(),
+                      input_channels(), slope_channels(), x_stride(), y_stride(),
                       w.data(),
                       0, /*code_cache=*/nullptr, auto_weights_cache.get(), &prelu_op2));
         ASSERT_NE(nullptr, prelu_op2);
@@ -346,12 +368,12 @@ class PReLUOperatorTester {
 
   void VerifyF32(const std::vector<float>& y, const std::vector<float>& y_ref) const {
     for (size_t i = 0; i < batch_size(); i++) {
-      for (size_t c = 0; c < channels(); c++) {
+      for (size_t c = 0; c < input_channels(); c++) {
         ASSERT_NEAR(
             y[i * y_stride() + c],
-            y_ref[i * channels() + c],
-            std::max(1.0e-6f, std::abs(y_ref[i * channels() + c]) * 1.0e-6f))
-          << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
+            y_ref[i * input_channels() + c],
+            std::max(1.0e-6f, std::abs(y_ref[i * input_channels() + c]) * 1.0e-6f))
+          << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << input_channels();
       }
     }
   }
@@ -364,7 +386,8 @@ class PReLUOperatorTester {
 
  private:
   size_t batch_size_{1};
-  size_t channels_{1};
+  size_t input_channels_{1};
+  size_t slope_channels_{0};
   size_t x_stride_{0};
   size_t y_stride_{0};
   WeightsType weights_type_{WeightsType::Default};

@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
       break;
     case 29:
       xnn_create_prelu_nc_f32(
-        0, 0, 0,
+        0, 0, 0, 0,
         NULL, 0, NULL, NULL, &op);
       break;
     case 30:

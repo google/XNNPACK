@@ -4764,38 +4764,63 @@ void xnn_pack_f32_to_f16_vmulcaddc_w(
 }
 
 void xnn_pack_f32_prelu_w(
-  size_t c,
+  size_t input_channels,
+  size_t slope_channels,
   const float* s,
   float* packed_weights)
 {
   assert(s != NULL);
   assert(packed_weights != NULL);
+  assert(slope_channels == input_channels || slope_channels == 1);
 
-  memcpy(packed_weights, s, c * sizeof(float));
+  if (slope_channels == 1) {
+    do {
+      *packed_weights++ = *s;
+    } while (--input_channels != 0);
+  } else {
+    memcpy(packed_weights, s, slope_channels * sizeof(float));
+  }
 }
 
 void xnn_pack_f16_prelu_w(
-  size_t c,
+  size_t input_channels,
+  size_t slope_channels,
   const uint16_t* s,
   uint16_t* packed_weights)
 {
   assert(s != NULL);
   assert(packed_weights != NULL);
+  assert(slope_channels == input_channels || slope_channels == 1);
 
-  memcpy(packed_weights, s, c * sizeof(uint16_t));
+  if (slope_channels == 1) {
+    do {
+      *packed_weights++ = *s;
+    } while (--input_channels != 0);
+  } else {
+    memcpy(packed_weights, s, slope_channels * sizeof(uint16_t));
+  }
 }
 
 void xnn_pack_f32_to_f16_prelu_w(
-  size_t c,
+  size_t input_channels,
+  size_t slope_channels,
   const float* s,
   uint16_t* packed_weights)
 {
   assert(s != NULL);
   assert(packed_weights != NULL);
+  assert(slope_channels == input_channels || slope_channels == 1);
 
-  do {
-    *packed_weights++ = fp16_ieee_from_fp32_value(*s++);
-  } while (--c != 0);
+  if (slope_channels == 1) {
+    uint16_t v =  fp16_ieee_from_fp32_value(*s);
+    for (size_t i = 0; i < input_channels; ++i) {
+      packed_weights[i] = v;
+    }
+  } else {
+    do {
+      *packed_weights++ = fp16_ieee_from_fp32_value(*s++);
+    } while (--input_channels != 0);
+  }
 }
 
 void xnn_analyze_f32_spmm_w(
