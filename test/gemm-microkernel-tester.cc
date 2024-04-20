@@ -49,7 +49,7 @@ TEST_P(GemmTest, Test) {
 
   // Loop over the `k`, `m`, and `n` values, if required.
   for (size_t k = params.loop_k_.from; k <= params.loop_k_.to;
-       k += params.loop_k_.step) {
+       k = NextPrime(k + params.loop_k_.step)) {
     if (params.loop_k_.is_set) {
       tester.k(k);
     }
