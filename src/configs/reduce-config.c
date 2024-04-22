@@ -66,10 +66,10 @@ static void init_f16_rminmax_config(void) {
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rminmax_ukernel__neonfp16arith_u32_acc4;
     } else {
-      f16_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rminmax_ukernel__scalar_u4_acc4;
+      f16_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rminmax_ukernel__scalar_u2_acc2;
     }
   #else
-    f16_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rminmax_ukernel__scalar_u4_acc4;
+    f16_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rminmax_ukernel__scalar_u2_acc2;
   #endif
 }
 
@@ -82,7 +82,7 @@ static void init_f32_rminmax_config(void) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__neon_u16_acc4,
         .element_tile = 16,
       };
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       f32_rminmax_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__scalar_u4_acc4,
         .element_tile = 4,

@@ -51,6 +51,8 @@ static void init_f16_rmax_config(void) {
     if (hardware_config->use_x86_avx2) {
       f16_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f16_rmax_ukernel__f16c_u32;
     }
+  #else
+    f16_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f16_rmax_ukernel__scalar_u2_acc2;
   #endif
 }
 
