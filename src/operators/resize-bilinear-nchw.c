@@ -3,7 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <stdio.h>
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
@@ -92,7 +91,7 @@ enum xnn_status xnn_create_resize_bilinear2d_nchw_f16(
 {
   const struct xnn_ibilinear_chw_config* ibilinear_chw_config = xnn_init_f16_ibilinear_chw_config();
   if (ibilinear_chw_config == NULL) {
-    printf("failed to create %s operator: unsupported hardware configuration",
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw_f16));
     return xnn_status_unsupported_hardware;
   }
@@ -114,7 +113,7 @@ enum xnn_status xnn_create_resize_bilinear2d_nchw_f32(
 {
   const struct xnn_ibilinear_chw_config* ibilinear_chw_config = xnn_init_f32_ibilinear_chw_config();
   if (ibilinear_chw_config == NULL) {
-    printf("QQQfailed to create %s operator: unsupported hardware configuration",
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw_f32));
     return xnn_status_unsupported_hardware;
   }
