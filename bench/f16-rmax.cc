@@ -65,6 +65,15 @@ static void f16_rmax(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(f16_rmax, f16c_u32,
+                    xnn_f16_rmax_ukernel__f16c_u32,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckF16C)
+    ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
+    ->UseRealTime();
+#endif
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   BENCHMARK_CAPTURE(f16_rmax, neonfp16arith_u8,
                     xnn_f16_rmax_ukernel__neonfp16arith_u8,
