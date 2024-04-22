@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <inttypes.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -11,10 +12,15 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
+#include <xnnpack/common.h>
+#include <xnnpack/compute.h>
 #include <xnnpack/config.h>
-#include <xnnpack/operator.h>
 #include <xnnpack/log.h>
+#include <xnnpack/operator-type.h>
+#include <xnnpack/operator.h>
+#include <xnnpack/params.h>
 
+#include "pthreadpool.h"
 
 static bool is_continugous(xnn_operator_t lut_elementwise_op)
 {

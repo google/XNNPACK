@@ -7,12 +7,10 @@
 //   Specification: src/enums/node-type.yaml
 //   Generator: tools/generate-enum.py
 
-
 #include <assert.h>
 #include <stdint.h>
 
 #include <xnnpack/node-type.h>
-
 
 #if XNN_LOG_LEVEL > 0
 static const uint16_t offset[58] = {

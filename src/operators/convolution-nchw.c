@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <inttypes.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -11,22 +12,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <fp16/fp16.h>
-
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
+#include <xnnpack/cache.h>
 #include <xnnpack/common.h>
 #include <xnnpack/compute.h>
 #include <xnnpack/config.h>
-#include <xnnpack/indirection.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/operator-utils.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microkernel-type.h>
 #include <xnnpack/operator-type.h>
+#include <xnnpack/operator-utils.h>
+#include <xnnpack/operator.h>
 #include <xnnpack/pack.h>
-#include <xnnpack/microparams-init.h>
 #include <xnnpack/params.h>
+
+#include "pthreadpool.h"
+#include <fp16/fp16.h>
 
 static enum xnn_status create_spmm_path(
     const uint32_t kernel_height,

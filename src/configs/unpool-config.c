@@ -14,9 +14,8 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
-#include <xnnpack/microparams-init.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/unpool.h>
-
 
 static struct xnn_unpool_config x32_unpool_config = {0};
 

@@ -18,8 +18,9 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
-#include <xnnpack/microparams-init.h>
 #include <xnnpack/dwconv.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
 
 static struct xnn_dwconv_config f16_dwconv_config[XNN_MAX_F16_DWCONV_UKERNELS] = {0};
 static struct xnn_dwconv_config f32_dwconv_config[XNN_MAX_F32_DWCONV_UKERNELS] = {0};

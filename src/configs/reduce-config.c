@@ -14,9 +14,9 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/reduce.h>
-
 
 static struct xnn_reduce_config f16_f32acc_rsum_config = {0};
 static struct xnn_reduce_config f16_rminmax_config = {0};

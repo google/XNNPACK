@@ -14,9 +14,9 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
-#include <xnnpack/microparams-init.h>
 #include <xnnpack/gavgpool.h>
-
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
 
 static struct xnn_gavgpool_cw_config f16_gavgpool_cw_config = {0};
 static struct xnn_gavgpool_cw_config f32_gavgpool_cw_config = {0};

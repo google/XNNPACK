@@ -16,15 +16,16 @@
   #include <cpuinfo.h>
 #endif  // XNN_ENABLE_CPUINFO
 
-#include <experiments-config.h>
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/igemm.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/packw.h>
+
+#include "experiments-config.h"
 
 #if XNN_ARCH_WASMSIMD
   #include <emscripten.h>

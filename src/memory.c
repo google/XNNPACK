@@ -8,7 +8,8 @@
 
 #if XNN_PLATFORM_WEB
 #include <emscripten/emscripten.h>
-#endif
+#endif  // XNN_PLATFORM_WEB
+
 #if XNN_PLATFORM_WINDOWS
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -28,16 +29,17 @@
 #include <errno.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#endif
+#endif  // XNN_PLATFORM_WINDOWS
 
-
+#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
+#include <xnnpack.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
 #include <xnnpack/memory.h>
-
 
 // Helpers to allocate/mmap and release memory used by both code and weights cache.
 
@@ -92,7 +94,7 @@ static void* allocate_buffer(size_t size) {
 // Releases memory previously mapped by `allocate_buffer`, returns xnn_status_success on success.
 static enum xnn_status release_memory(void* start, size_t capacity) {
 #if XNN_PLATFORM_WINDOWS
-  // We only decommited any unused capacity, so we release all of it now.
+  // We only decommitted any unused capacity, so we release all of it now.
   if (!VirtualFree(start, 0, MEM_RELEASE)) {
     xnn_log_error("failed to release code/weights buffer, error code: %" PRIu32, (uint32_t) GetLastError());
     return xnn_status_invalid_state;

@@ -4,16 +4,21 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdint.h>  // For size_t.
 #include <string.h>
 
 #include <xnnpack.h>
+#include <xnnpack/allocation-type.h>
+#include <xnnpack/common.h>
 #include <xnnpack/log.h>
+#include <xnnpack/node-type.h>
+#include <xnnpack/operator-type.h>
 #include <xnnpack/operator.h>
-#include <xnnpack/params.h>
-#include <xnnpack/subgraph.h>
 #include <xnnpack/subgraph-validation.h>
+#include <xnnpack/subgraph.h>
 
+#include "pthreadpool.h"
 
 static enum xnn_status create_even_split_operator_helper(
     const uint32_t output_id,

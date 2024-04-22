@@ -3,15 +3,17 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <math.h>
+#include <assert.h>
+#include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
-
-#include <fp16/fp16.h>
+#include <string.h>
 
 #include <xnnpack.h>
+#include <xnnpack/allocation-type.h>
 #include <xnnpack/allocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/config.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
@@ -19,6 +21,7 @@
 #include <xnnpack/params.h>
 #include <xnnpack/subgraph.h>
 
+#include <fp16/fp16.h>
 
 #ifndef XNN_ENABLE_SPARSE
   #error "XNN_ENABLE_SPARSE not defined"

@@ -14,7 +14,6 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
-#include <xnnpack/microparams-init.h>
 #include <xnnpack/lut.h>
 
 

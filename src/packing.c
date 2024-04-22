@@ -6,18 +6,20 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <stdint.h>
+#include <assert.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 
-#include <fp16/fp16.h>
-
+#include <xnnpack.h>
+#include <xnnpack/common.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/unaligned.h>
 
+#include <fp16/fp16.h>
 
 void xnn_pack_f32_gemm_goi_w(
   size_t g,

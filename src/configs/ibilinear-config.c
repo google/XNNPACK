@@ -14,9 +14,8 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
-#include <xnnpack/microparams-init.h>
 #include <xnnpack/ibilinear.h>
-
+#include <xnnpack/microfnptr.h>
 
 static struct xnn_ibilinear_config f16_ibilinear_config = {0};
 static struct xnn_ibilinear_config f32_ibilinear_config = {0};

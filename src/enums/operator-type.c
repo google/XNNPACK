@@ -7,12 +7,10 @@
 //   Specification: src/enums/operator-type.yaml
 //   Generator: tools/generate-enum.py
 
-
 #include <assert.h>
 #include <stdint.h>
 
 #include <xnnpack/operator-type.h>
-
 
 static const uint16_t offset[158] = {
   0, 8, 22, 36, 50, 64, 78, 92, 119, 147, 175, 203, 230, 257, 289, 321, 364, 382, 400, 425, 451, 467, 483, 498, 513,

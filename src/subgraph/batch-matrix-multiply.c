@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+
 #include <xnnpack.h>
 #include <xnnpack/allocation-type.h>
 #include <xnnpack/common.h>
@@ -16,7 +17,6 @@
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator-type.h>
 #include <xnnpack/operator.h>
-#include <xnnpack/params.h>
 #include <xnnpack/subgraph-validation.h>
 #include <xnnpack/subgraph.h>
 

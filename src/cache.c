@@ -3,15 +3,18 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <assert.h> // For assert.
-#include <stddef.h> // For size_t.
-#include <stdint.h> // For uint32_t.
+#include <assert.h>  // For assert.
+#include <stddef.h>  // For size_t.
+#include <stdint.h>  // For uint32_t.
+#include <string.h>
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/cache.h>
+#include <xnnpack/common.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
+#include <xnnpack/memory.h>
 #include <xnnpack/mutex.h>
 
 #define XNN_CACHE_HASH_SEED 7

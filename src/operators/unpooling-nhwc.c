@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include <math.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -13,16 +13,18 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/config.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/operator-utils.h>
-#include <xnnpack/operator-type.h>
-#include <xnnpack/log.h>
 #include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/params.h>
+#include <xnnpack/compute.h>
+#include <xnnpack/config.h>
 #include <xnnpack/indirection.h>
+#include <xnnpack/log.h>
+#include <xnnpack/math.h>
+#include <xnnpack/operator-type.h>
+#include <xnnpack/operator-utils.h>
+#include <xnnpack/operator.h>
+#include <xnnpack/params.h>
 
+#include "pthreadpool.h"
 
 enum xnn_status xnn_create_unpooling2d_nhwc_x32(
     uint32_t input_padding_top,

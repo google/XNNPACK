@@ -3,11 +3,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <stddef.h>
+#include <string.h>
+
 #include <xnnpack/allocator.h>
 #include <xnnpack/config.h>
 #include <xnnpack/log.h>
 #include <xnnpack/microparams.h>
-#include <xnnpack/params.h>
 #include <xnnpack/post-operation.h>
 
 char* allocate_and_initialize_post_operation_params(

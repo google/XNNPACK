@@ -14,9 +14,9 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
-#include <xnnpack/microparams-init.h>
 #include <xnnpack/maxpool.h>
-
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
 
 static struct xnn_maxpool_config f16_maxpool_config = {0};
 static struct xnn_maxpool_config f32_maxpool_config = {0};

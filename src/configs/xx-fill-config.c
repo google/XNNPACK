@@ -15,7 +15,7 @@
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
 #include <xnnpack/fill.h>
-
+#include <xnnpack/microfnptr.h>
 
 static struct xnn_xx_fill_config xx_fill_config = {0};
 

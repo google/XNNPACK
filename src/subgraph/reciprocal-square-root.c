@@ -14,7 +14,6 @@
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator-type.h>
 #include <xnnpack/operator.h>
-#include <xnnpack/params.h>
 #include <xnnpack/reshape-helpers.h>
 #include <xnnpack/subgraph-validation.h>
 #include <xnnpack/subgraph.h>

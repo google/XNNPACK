@@ -10,8 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <fp16/fp16.h>
-
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
@@ -19,13 +17,15 @@
 #include <xnnpack/config.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
+#include <xnnpack/microkernel-type.h>
 #include <xnnpack/microparams.h>
-#include <xnnpack/microparams-init.h>
 #include <xnnpack/normalization.h>
-#include <xnnpack/operator.h>
 #include <xnnpack/operator-type.h>
+#include <xnnpack/operator.h>
 #include <xnnpack/params.h>
 
+#include "pthreadpool.h"
+#include <fp16/fp16.h>
 
 static enum xnn_status create_mean_nd(
     uint32_t flags,

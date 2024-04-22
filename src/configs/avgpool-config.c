@@ -12,12 +12,11 @@
   #include <pthread.h>
 #endif
 
+#include <xnnpack/avgpool.h>
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/avgpool.h>
-#include <xnnpack/vunary.h>
-
 
 static struct xnn_avgpool_config f16_avgpool_config = {0};
 static struct xnn_avgpool_config f32_avgpool_config = {0};

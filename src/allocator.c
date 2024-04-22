@@ -6,10 +6,12 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdlib.h>
+
 #ifdef __ANDROID__
   #include <malloc.h>
 #endif
 
+#include <xnnpack.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
 

@@ -3,7 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -11,17 +10,19 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/config.h>
 #include <xnnpack/cache.h>
+#include <xnnpack/common.h>
+#include <xnnpack/compute.h>
+#include <xnnpack/config.h>
 #include <xnnpack/log.h>
-#include <xnnpack/operator.h>
+#include <xnnpack/math.h>
 #include <xnnpack/operator-type.h>
 #include <xnnpack/operator-utils.h>
+#include <xnnpack/operator.h>
 #include <xnnpack/pack.h>
-#include <xnnpack/microparams-init.h>
 #include <xnnpack/params.h>
 
+#include "pthreadpool.h"
 
 static enum xnn_status create_prelu_nc(
     size_t input_channels,

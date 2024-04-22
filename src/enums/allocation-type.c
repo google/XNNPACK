@@ -7,12 +7,10 @@
 //   Specification: src/enums/allocation-type.yaml
 //   Generator: tools/generate-enum.py
 
-
 #include <assert.h>
 #include <stdint.h>
 
 #include <xnnpack/allocation-type.h>
-
 
 #if XNN_LOG_LEVEL > 0
 static const uint8_t offset[6] = {

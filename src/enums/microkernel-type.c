@@ -7,12 +7,10 @@
 //   Specification: src/enums/microkernel-type.yaml
 //   Generator: tools/generate-enum.py
 
-
 #include <assert.h>
 #include <stdint.h>
 
 #include <xnnpack/microkernel-type.h>
-
 
 static const uint8_t offset[13] = {
   0, 8, 24, 39, 46, 51, 74, 80, 85, 111, 116, 126, 136

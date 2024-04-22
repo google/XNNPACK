@@ -3,12 +3,15 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <xnnpack.h>
+#include <xnnpack/common.h>
 #include <xnnpack/math.h>
 
 void xnn_normalize_slice(

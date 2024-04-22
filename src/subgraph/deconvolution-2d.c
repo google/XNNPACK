@@ -3,19 +3,22 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <math.h>
+#include <assert.h>
+#include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
 
 #include <xnnpack.h>
 #include <xnnpack/common.h>
 #include <xnnpack/log.h>
+#include <xnnpack/node-type.h>
+#include <xnnpack/operator-type.h>
 #include <xnnpack/operator.h>
-#include <xnnpack/params.h>
 #include <xnnpack/requantization.h>
-#include <xnnpack/subgraph.h>
 #include <xnnpack/subgraph-validation.h>
+#include <xnnpack/subgraph.h>
 
+#include "pthreadpool.h"
 
 static enum xnn_status create_deconvolution_operator(
   const struct xnn_node* node,

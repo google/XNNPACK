@@ -14,9 +14,9 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/spmm.h>
-
 
 static struct xnn_spmm_config f16_spmm_config = {0};
 static struct xnn_spmm_config f32_spmm_config = {0};
