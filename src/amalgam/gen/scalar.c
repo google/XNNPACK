@@ -239,18 +239,6 @@ void xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u4(
   }
 }
 
-static int16_t math_signcompliment_f16(const uint16_t a) {
-  return (a & 0x7FFF) ^ -((int16_t) a < 0);
-}
-
-static uint16_t math_max_f16(const uint16_t a, const uint16_t b) {
-  return math_signcompliment_f16(a) > math_signcompliment_f16(b) ? a : b;
-}
-
-static uint16_t math_min_f16(const uint16_t a, const uint16_t b) {
-  return math_signcompliment_f16(a) < math_signcompliment_f16(b) ? a : b;
-}
-
 void xnn_f16_rminmax_ukernel__scalar_u4_acc4(
     size_t batch,
     const void* input,
