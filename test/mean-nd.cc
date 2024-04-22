@@ -310,10 +310,101 @@ TEST(MEAN_ND_F32, reduce_first_axis) {
     .TestF32();
 }
 
-TEST(MEAN_ND_F32, reduce_last_axis) {
+TEST(MEAN_ND_F16, 1d_contig) {
+  MeanOperatorTester()
+    .input_shape({kDim3})
+    .reduction_axes({0})
+    .TestF16();
+}
+
+TEST(MEAN_ND_F16, 2d_contig) {
   MeanOperatorTester()
     .input_shape({kDim1, kDim2})
     .reduction_axes({1})
+    .TestF16();
+}
+
+TEST(MEAN_ND_F16, 3d_contig) {
+  MeanOperatorTester()
+    .input_shape({kDim1, kDim2, kDim3})
+    .reduction_axes({0, 2})
+    .TestF16();
+}
+
+TEST(MEAN_ND_F16, 4d_contig) {
+  MeanOperatorTester()
+    .input_shape({kDim1, kDim2, kDim3, kDim4})
+    .reduction_axes({1, 3})
+    .TestF16();
+}
+
+TEST(MEAN_ND_F16, 5d_contig) {
+  MeanOperatorTester()
+    .input_shape({kDim1, kDim2, kDim3, kDim4, kDim5})
+    .reduction_axes({0, 2, 4})
+    .TestF16();
+}
+
+TEST(MEAN_ND_F16, 6d_contig) {
+  MeanOperatorTester()
+    .input_shape({kDim1, kDim2, kDim3, kDim4, kDim5, kDim6})
+    .reduction_axes({1, 3, 5})
+    .TestF16();
+}
+
+TEST(MEAN_ND_F32, 1d_contig) {
+  MeanOperatorTester()
+    .input_shape({kDim3})
+    .reduction_axes({0})
+    .TestF32();
+}
+
+TEST(MEAN_ND_F32, 2d_contig) {
+  MeanOperatorTester()
+    .input_shape({kDim1, kDim2})
+    .reduction_axes({1})
+    .TestF32();
+}
+
+TEST(MEAN_ND_F32, 3d_contig) {
+  MeanOperatorTester()
+    .input_shape({kDim1, kDim2, kDim3})
+    .reduction_axes({0, 2})
+    .TestF32();
+}
+
+TEST(MEAN_ND_F32, 4d_contig) {
+  MeanOperatorTester()
+    .input_shape({kDim1, kDim2, kDim3, kDim4})
+    .reduction_axes({1, 3})
+    .TestF32();
+}
+
+TEST(MEAN_ND_F32, 5d_contig) {
+  MeanOperatorTester()
+    .input_shape({kDim1, kDim2, kDim3, kDim4, kDim5})
+    .reduction_axes({0, 2, 4})
+    .TestF32();
+}
+
+TEST(MEAN_ND_F32, 6d_contig) {
+  MeanOperatorTester()
+    .input_shape({kDim1, kDim2, kDim3, kDim4, kDim5, kDim6})
+    .reduction_axes({1, 3, 5})
+    .TestF32();
+}
+
+TEST(MEAN_ND_F32, reduce_last_axis) {
+  MeanOperatorTester()
+    .input_shape({kDim1, kDim2, kDim3})
+    .reduction_axes({0,2})
+    .TestF32();
+}
+
+TEST(MEAN_ND_F32, reduce_last_axis2) {
+  MeanOperatorTester()
+    .input_shape({kDim1, kDim2, kDim3})
+    .reduction_axes({0,2})
     .TestF32();
 }
 

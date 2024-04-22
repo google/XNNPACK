@@ -2015,22 +2015,54 @@ void xnn_compute_univector_contiguous(
   context->ukernel(size, x, y, &context->params);
 }
 
-void xnn_compute_reduce(
+void xnn_compute_contiguous_reduce(
     const struct reduce_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index,
-    size_t batch_range)
+    size_t output_idx0,
+    size_t output_idx1,
+    size_t output_idx2,
+    size_t output1_block_size,
+    size_t output2_block_size)
 {
-  const size_t input_stride = context->input_stride;
-  const size_t output_stride = context->output_stride;
+  assert(output1_block_size == 1);
+  const size_t* input_stride = context->input_stride;
+  const size_t* output_stride = context->output_stride;
 
-  const void* input = (const void*) ((uintptr_t) context->input + input_stride * batch_index);
-  void* output = (void*) ((uintptr_t) context->output + output_stride * batch_index);
-  do {
-    memset(output, 0, context->element_size);
-    context->ukernel(context->scaled_elements, input, output, &context->params);
-    input = (const void*) ((uintptr_t) input + input_stride);
-    output = (void*) ((uintptr_t) output + output_stride);
-  } while (--batch_range != 0);
+  // input dimensions 1, 3 & 5 are reduced so the entireity of these dimensions
+  // are processed so their indices are always 0.
+  size_t input_offset = input_stride[0] * output_idx0 + input_stride[2] * output_idx1 + input_stride[4] * output_idx2;
+  size_t output_offset = output_stride[0] * output_idx0 + output_stride[1] * output_idx1 + output_stride[2] * output_idx2;
+  int input_shape1 = context->input_shape[1];
+  int input_shape3 = context->input_shape[3];
+
+  void* output = (void*) ((uintptr_t) context->output + output_offset);
+  // Rsum microkernels accumulate into the output buffer.
+  memset(output, 0, context->element_size * output2_block_size);
+
+  // Input dimension 1 is reduced.
+  for (size_t i = 0; i < input_shape1; ++i) {
+    const void* input = (const void*) ((uintptr_t) context->input + input_offset);
+    // Input dimension 3 is reduced.
+    for (size_t j = 0; j < input_shape3; ++j) {
+      const void* input_row = input;
+      // output2_block_size output elements are written.
+      for (size_t k = 0; k < output2_block_size; ++k) {
+        // The microkernel reduces input dimension 5.
+        context->ukernel(context->scaled_elements, input_row, output, &context->params);
+        // input_stride[4] is the number of bytes of input which have been
+        // processed by the microkernel call.
+        input_row = (const void*) ((uintptr_t) input_row + input_stride[4]);
+        // Increment output pointer by the number of output bytes which have
+        // been written.
+        output = (void*) ((uintptr_t) output + output_stride[2]);
+      }
+      // Reset the output pointer.
+      output = (void*) ((uintptr_t) context->output + output_offset);
+      // Iterating over input_shape[3].
+      input = (const void*) ((uintptr_t) input + input_stride[3]);
+    }
+    // Iterating over input_shape[1].
+    input_offset += input_stride[1];
+  }
 }
 
 void xnn_compute_pad_qd8_params(

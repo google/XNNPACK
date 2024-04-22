@@ -198,6 +198,16 @@ static enum xnn_status reshape_mean_nd(
     }
   }
 
+  for (size_t i = 1; i < num_reduction_axes; i++) {
+    if (reduction_axes[i] <= reduction_axes[i - 1]) {
+      xnn_log_error(
+        "failed to reshape %s operator with #%zu reduction axis of %zu: the reduction "
+        "axes must be in ascending order and unique",
+        xnn_operator_type_to_string(mean_op->type), i, reduction_axes[i]);
+      return xnn_status_invalid_parameter;
+    }
+  }
+
   size_t normalized_input_shape[XNN_MAX_TENSOR_DIMS];
   assert(num_input_dims <= XNN_MAX_TENSOR_DIMS);
   memcpy(normalized_input_shape, input_shape, num_input_dims * sizeof(size_t));
@@ -210,13 +220,6 @@ static enum xnn_status reshape_mean_nd(
     &num_reduction_axes, normalized_reduction_axes,
     &num_input_dims, normalized_input_shape);
 
-  if (num_reduction_axes != 1) {
-    xnn_log_error(
-      "failed to reshape %s operator with %zu normalized reduction axes: only a single post-normalization reduction axis is supported",
-      xnn_operator_type_to_string(mean_op->type), num_reduction_axes);
-    return xnn_status_invalid_parameter;
-  }
-
   size_t num_input_elements = 1;
   for (size_t i = 0; i < num_input_dims; i++) {
     num_input_elements *= normalized_input_shape[i];
@@ -227,38 +230,63 @@ static enum xnn_status reshape_mean_nd(
     return xnn_status_success;
   }
 
-  const size_t reduction_axis = normalized_reduction_axes[0];
-  const size_t axis_dim = normalized_input_shape[reduction_axis];
-  const size_t batch_like_dim = reduction_axis == 0 ? 1 : normalized_input_shape[0];
-
-  if (update_params != NULL) {
-    update_params(mean_op, axis_dim);
-  }
-
   *workspace_size = 0;
   *workspace_alignment = 1;
 
-  if (reduction_axis + 1 == num_input_dims) {
-    // Reduction along the innermost dimension
+  // Reduction along the innermost dimension.
+  if (normalized_reduction_axes[num_reduction_axes - 1] == num_input_dims - 1) {
+    memmove(&normalized_input_shape[XNN_MAX_TENSOR_DIMS - num_input_dims], &normalized_input_shape[0], sizeof(size_t) * num_input_dims);
+    for (int i = 0; i < XNN_MAX_TENSOR_DIMS - num_input_dims; ++i) {
+      normalized_input_shape[i] = 1;
+    }
+
+    const size_t scale_dim = normalized_input_shape[1] * normalized_input_shape[3] * normalized_input_shape[5];
+    const size_t axis_dim = normalized_input_shape[5];
+
+    if (update_params != NULL) {
+      update_params(mean_op, scale_dim);
+    }
 
     mean_op->context.reduce = (struct reduce_context) {
-        .input_stride = axis_dim << log2_data_element_size,
-        .output_stride = UINT32_C(1) << log2_data_element_size,
-        .scaled_elements = axis_dim << log2_data_element_size,
-        .ukernel = mean_op->reduce_config->ukernel,
-        .element_size = UINT32_C(1) << log2_data_element_size,
+      .scaled_elements = axis_dim << log2_data_element_size,
+      .ukernel = mean_op->reduce_config->ukernel,
+      .element_size = UINT32_C(1) << log2_data_element_size,
     };
     memcpy(&mean_op->context.reduce.params, scale_params, scale_params_size);
+    mean_op->context.reduce.input_stride[XNN_MAX_TENSOR_DIMS - 1] = (1 << log2_data_element_size);
+    for (int i = XNN_MAX_TENSOR_DIMS -  2; i >= 0; --i) {
+      mean_op->context.reduce.input_stride[i] =  (mean_op->context.reduce.input_stride[i + 1] * normalized_input_shape[i + 1]);
+    }
+    memcpy(mean_op->context.reduce.input_shape, normalized_input_shape, XNN_MAX_TENSOR_DIMS * sizeof(size_t));
+    mean_op->context.reduce.output_stride[XNN_MAX_TENSOR_DIMS / 2 - 1] = (1 << log2_data_element_size);
+    for (int i = XNN_MAX_TENSOR_DIMS / 2 -  2; i >= 0; --i) {
+      mean_op->context.reduce.output_stride[i] =  (mean_op->context.reduce.output_stride[i + 1] * normalized_input_shape[(i + 1) * 2]);
+    }
 
-    mean_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_reduce;
-    mean_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-    mean_op->compute[0].range[0] = batch_like_dim;
-    mean_op->compute[0].tile[0] = 2;
+    mean_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_contiguous_reduce;
+    mean_op->compute[0].type = xnn_parallelization_type_3d_tile_2d;
+    mean_op->compute[0].range[0] = normalized_input_shape[0];
+    mean_op->compute[0].range[1] = normalized_input_shape[2];
+    mean_op->compute[0].range[2] = normalized_input_shape[4];
+    mean_op->compute[0].tile[0] = 1;
+    mean_op->compute[0].tile[1] = 2;
     mean_op->ukernel.type = xnn_microkernel_type_mean;
   } else {
     // Reduction along the non-innermost dimension
+    if (num_reduction_axes != 1) {
+      xnn_log_error(
+          "failed to reshape %s operator with %zu normalized reduction axes: only a single post-normalization reduction axis is supported",
+          xnn_operator_type_to_string(mean_op->type), num_reduction_axes);
+      return xnn_status_invalid_parameter;
+    }
+    const size_t reduction_axis = normalized_reduction_axes[0];
+    const size_t axis_dim = normalized_input_shape[reduction_axis];
+    const size_t batch_like_dim = reduction_axis == 0 ? 1 : normalized_input_shape[0];
     const size_t channel_like_dim = normalized_input_shape[num_input_dims - 1];
 
+    if (update_params != NULL) {
+      update_params(mean_op, axis_dim);
+    }
     if (mean_op->channels != channel_like_dim) {
       const size_t zero_size = (channel_like_dim << log2_data_element_size) + XNN_EXTRA_BYTES;
       // Note: zero buffer must be SIMD-aligned, so we can't use xnn_reallocate_memory
