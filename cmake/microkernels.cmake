@@ -3131,6 +3131,9 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u20-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u20-acc5.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u20.c
+  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-neon-c16.c
+  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-neon-c32.c
+  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-neon-c64.c
   src/f32-rminmax/gen/f32-rmax-neon-u4.c
   src/f32-rminmax/gen/f32-rmax-neon-u8-acc2.c
   src/f32-rminmax/gen/f32-rmax-neon-u12-acc3.c

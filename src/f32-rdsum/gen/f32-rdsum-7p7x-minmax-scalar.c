@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-rsum-discontig/scalar.c.in
+//   Template: src/f32-rdsum/scalar.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 Google LLC
