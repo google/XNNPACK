@@ -42,4 +42,7 @@ tools/generate-vunary-benchmark.py --spec test/f32-vlrelu.yaml --output bench/f3
 tools/generate-vunary-benchmark.py --spec test/f16-vhswish.yaml --output bench/f16-vhswish.cc &
 tools/generate-vunary-benchmark.py --spec test/f32-vhswish.yaml --output bench/f32-vhswish.cc &
 
+### Tests for Rsum micro-kernels
+tools/generate-rdsum-benchmark.py  --spec test/f32-gavgpool-minmax.yaml --output bench/f32-rdsum.cc
+
 wait

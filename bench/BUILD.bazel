@@ -827,6 +827,16 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f32_rdsum_bench",
+    srcs = [
+        "f32-rdsum.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":rsum_benchmark",
+    ],
+)
+
+xnnpack_benchmark(
     name = "f32_spmm_bench",
     srcs = [
         "f32-spmm.cc",
@@ -1260,6 +1270,14 @@ xnnpack_benchmark(
         "//:allocator",
         "//:math",
     ],
+)
+
+xnnpack_cc_library(
+    name = "rsum_benchmark",
+    hdrs = [
+        "rsum-benchmark.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
 xnnpack_cc_library(
