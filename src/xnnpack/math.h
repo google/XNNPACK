@@ -119,12 +119,12 @@ XNN_INLINE static int16_t math_signcomplement_f16(uint16_t a) {
   return (a & 0x7FFF) ^ -((int16_t) a < 0);
 }
 
-XNN_INLINE static uint16_t math_min_f16(const uint16_t a, const uint16_t b) {
-  return math_signcomplement_f16(a) < math_signcomplement_f16(b) ? a : b;
+XNN_INLINE static int16_t math_min_s16(int16_t a, int16_t b) {
+  return XNN_UNPREDICTABLE(a < b) ? a : b;
 }
 
-XNN_INLINE static uint16_t math_max_f16(const uint16_t a, const uint16_t b) {
-  return math_signcomplement_f16(a) > math_signcomplement_f16(b) ? a : b;
+XNN_INLINE static int16_t math_max_s16(int16_t a, int16_t b) {
+  return XNN_UNPREDICTABLE(a > b) ? a : b;
 }
 
 XNN_INLINE static int32_t math_min_s32(int32_t a, int32_t b) {

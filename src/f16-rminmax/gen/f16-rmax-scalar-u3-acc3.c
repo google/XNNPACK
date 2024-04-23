@@ -28,28 +28,29 @@ void xnn_f16_rmax_ukernel__scalar_u3_acc3(
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
 
-  uint16_t vmax0 = *i;
-  uint16_t vmax1 = vmax0;
-  uint16_t vmax2 = vmax0;
+  int16_t vt = math_signcomplement_f16(*i);
+  int16_t vmax0 = vt;
+  int16_t vmax1 = vt;
+  int16_t vmax2 = vt;
   for (; batch >= 3 * sizeof(uint16_t); batch -= 3 * sizeof(uint16_t)) {
-    const uint16_t vt0 = i[0];
-    const uint16_t vt1 = i[1];
-    const uint16_t vt2 = i[2];
+    const int16_t vt0 = math_signcomplement_f16(i[0]);
+    const int16_t vt1 = math_signcomplement_f16(i[1]);
+    const int16_t vt2 = math_signcomplement_f16(i[2]);
     i += 3;
 
-    vmax0 = math_max_f16(vmax0, vt0);
-    vmax1 = math_max_f16(vmax1, vt1);
-    vmax2 = math_max_f16(vmax2, vt2);
+    vmax0 = math_max_s16(vmax0, vt0);
+    vmax1 = math_max_s16(vmax1, vt1);
+    vmax2 = math_max_s16(vmax2, vt2);
   }
-  vmax0 = math_max_f16(vmax0, vmax1);
-  vmax0 = math_max_f16(vmax0, vmax2);
+  vmax0 = math_max_s16(vmax0, vmax1);
+  vmax0 = math_max_s16(vmax0, vmax2);
 
   if XNN_UNLIKELY(batch != 0) {
     do {
-      const uint16_t vt = *i++;
-      vmax0 = math_max_f16(vmax0, vt);
+      vt = math_signcomplement_f16(*i++);
+      vmax0 = math_max_s16(vmax0, vt);
       batch -= sizeof(uint16_t);
     } while (batch != 0);
   }
-  o[0] = vmax0;
+  o[0] = (uint16_t) math_signcomplement_f16((uint16_t) vmax0);
 }

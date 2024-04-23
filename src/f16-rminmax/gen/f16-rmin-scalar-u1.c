@@ -28,11 +28,12 @@ void xnn_f16_rmin_ukernel__scalar_u1(
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
 
-  uint16_t vmin0 = *i;
+  int16_t vt = math_signcomplement_f16(*i);
+  int16_t vmin0 = vt;
   do {
-    const uint16_t vt = *i++;
-    vmin0 = math_min_f16(vmin0, vt);
+    vt = math_signcomplement_f16(*i++);
+    vmin0 = math_min_s16(vmin0, vt);
     batch -= sizeof(uint16_t);
   } while (batch != 0);
-  o[0] = vmin0;
+  o[0] = (uint16_t) math_signcomplement_f16((uint16_t) vmin0);
 }
