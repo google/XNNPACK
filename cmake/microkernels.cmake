@@ -1503,6 +1503,11 @@ SET(ALL_AVX512F_MICROKERNEL_SRCS
 SET(ALL_AVX512SKX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-u16.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-u32.c
+  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u16.c
+  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u32-acc2.c
+  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u48-acc3.c
+  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u64-acc2.c
+  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u64-acc4.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-avx512skx-u16.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-avx512skx-u32.c
   src/f32-qc8w-gemm/gen/f32-qc4w-gemm-1x32-minmax-avx512skx-broadcast.c

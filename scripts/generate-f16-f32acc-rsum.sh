@@ -19,4 +19,11 @@ tools/xngen src/f16-f32acc-rsum/f16c.c.in -D BATCH_TILE=24 -D ACCUMULATORS=3 -o 
 tools/xngen src/f16-f32acc-rsum/f16c.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -o src/f16-f32acc-rsum/gen/f16-f32acc-rsum-f16c-u32-acc2.c &
 tools/xngen src/f16-f32acc-rsum/f16c.c.in -D BATCH_TILE=32 -D ACCUMULATORS=4 -o src/f16-f32acc-rsum/gen/f16-f32acc-rsum-f16c-u32-acc4.c &
 
+################################## x86 AVX512 #################################
+tools/xngen src/f16-f32acc-rsum/avx512sdk.c.in -D BATCH_TILE=16 -D ACCUMULATORS=1 -o src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u16.c &
+tools/xngen src/f16-f32acc-rsum/avx512sdk.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -o src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u32-acc2.c &
+tools/xngen src/f16-f32acc-rsum/avx512sdk.c.in -D BATCH_TILE=48 -D ACCUMULATORS=3 -o src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u48-acc3.c &
+tools/xngen src/f16-f32acc-rsum/avx512sdk.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -o src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u64-acc2.c &
+tools/xngen src/f16-f32acc-rsum/avx512sdk.c.in -D BATCH_TILE=64 -D ACCUMULATORS=4 -o src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u64-acc4.c &
+
 wait
