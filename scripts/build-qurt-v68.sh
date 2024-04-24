@@ -5,7 +5,7 @@
 
 set -e
 
-mkdir -p build/qurt/v66
+mkdir -p build/qurt/v68
 
 CMAKE_ARGS=()
 
@@ -29,7 +29,7 @@ CMAKE_ARGS+=("-DHAVE_STEADY_CLOCK=0")
 # Use-specified CMake arguments go last to allow overridding defaults
 CMAKE_ARGS+=($@)
 
-cd build/qurt/v66 && cmake ../../.. \
+cd build/qurt/v68 && cmake ../../.. \
     "${CMAKE_ARGS[@]}"
 
 cmake --build . -- "-j$((2*$(nproc)))"
