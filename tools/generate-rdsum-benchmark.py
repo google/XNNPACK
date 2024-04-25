@@ -41,7 +41,7 @@ def split_ukernel_name(name):
 
 
 BENCHMARK_TEMPLATE = """\
-BENCHMARK_CAPTURE( ${OP_NAME}, ${BENCHMARK_NAME},
+BENCHMARK_CAPTURE(${OP_NAME}, ${BENCHMARK_NAME},
                   ${KERNEL},
                   $if CHECK_ISA:
                     ${INIT_PARAMS},
@@ -99,6 +99,10 @@ def main(args):
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Specification: {specification}
+//   Generator: {generator}
 
 #include "bench/rsum-benchmark.h"
 #include "bench/utils.h"
