@@ -110,6 +110,11 @@ static void init_f32_maxpool_config(void) {
     f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_maxpool_config.first_pass_tile_size = 9;
     f32_maxpool_config.remainder_pass_tile_size = 8;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p8x__rvv_c2v;
+    f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_maxpool_config.first_pass_tile_size = 9;
+    f32_maxpool_config.remainder_pass_tile_size = 8;
   #else
     f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p8x__scalar_c1;
     f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
