@@ -32,6 +32,9 @@
 - name: xnn_f32_vmax_ukernel__wasm_u2
 - name: xnn_f32_vmax_ukernel__wasm_u4
 - name: xnn_f32_vmax_ukernel__wasm_u8
+# Hexagon
+- name: xnn_f32_vmax_ukernel__hexagon_u32 
+- name: xnn_f32_vmax_ukernel__hexagon_u64 
 # Scalar
 - name: xnn_f32_vmax_ukernel__scalar_u1
 - name: xnn_f32_vmax_ukernel__scalar_u2

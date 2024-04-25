@@ -591,4 +591,18 @@ tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=SQRDIFF  -D BATCH_TILE=32 -D
 tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=SUB      -D BATCH_TILE=16 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vsubc-minmax-avx512f-u16.c &
 tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=SUB      -D BATCH_TILE=32 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vsubc-minmax-avx512f-u32.c &
 
+################################### ARM NEON ##################################
+tools/xngen src/f32-vbinary/vop-hexagon.c.in -D OP=ADD     -D BATCH_TILE=32 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vadd-minmax-hexagon-u32.c &
+tools/xngen src/f32-vbinary/vop-hexagon.c.in -D OP=ADD     -D BATCH_TILE=64 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vadd-minmax-hexagon-u64.c &
+tools/xngen src/f32-vbinary/vop-hexagon.c.in -D OP=MAX     -D BATCH_TILE=32 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmax-hexagon-u32.c &
+tools/xngen src/f32-vbinary/vop-hexagon.c.in -D OP=MAX     -D BATCH_TILE=64 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmax-hexagon-u64.c &
+tools/xngen src/f32-vbinary/vop-hexagon.c.in -D OP=MIN     -D BATCH_TILE=32 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmin-hexagon-u32.c &
+tools/xngen src/f32-vbinary/vop-hexagon.c.in -D OP=MIN     -D BATCH_TILE=64 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmin-hexagon-u64.c &
+tools/xngen src/f32-vbinary/vop-hexagon.c.in -D OP=MUL     -D BATCH_TILE=32 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vmul-minmax-hexagon-u32.c &
+tools/xngen src/f32-vbinary/vop-hexagon.c.in -D OP=MUL     -D BATCH_TILE=64 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vmul-minmax-hexagon-u64.c &
+tools/xngen src/f32-vbinary/vop-hexagon.c.in -D OP=SUB     -D BATCH_TILE=32 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vsub-minmax-hexagon-u32.c &
+tools/xngen src/f32-vbinary/vop-hexagon.c.in -D OP=SUB     -D BATCH_TILE=64 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vsub-minmax-hexagon-u64.c &
+tools/xngen src/f32-vbinary/vop-hexagon.c.in -D OP=SQRDIFF     -D BATCH_TILE=32 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vsqrdiff-hexagon-u32.c &
+tools/xngen src/f32-vbinary/vop-hexagon.c.in -D OP=SQRDIFF     -D BATCH_TILE=64 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vsqrdiff-hexagon-u64.c &
+
 wait
