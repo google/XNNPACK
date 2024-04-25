@@ -46,10 +46,16 @@ static void init_f16_f32acc_rsum_config(void) {
         .element_tile = 32,
       };
     }
-  #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
+  #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64)
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_x86_f16c) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+      f16_f32acc_rsum_config = (struct xnn_reduce_config) {
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__avx512skx_u64_acc4,
+        .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_scalar_params,
+        .element_tile = 64,
+      };
+    } else if (hardware_config->use_x86_f16c) {
       f16_f32acc_rsum_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__f16c_u32_acc4,
         .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_avx_params,
