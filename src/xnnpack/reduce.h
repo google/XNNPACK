@@ -301,10 +301,10 @@ DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__wasmsimd_u16_acc4)
       float* output,                                \
       const union xnn_f32_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__scalar_c4)
 DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__neon_c16)
 DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__neon_c32)
 DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__neon_c64)
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__scalar_c4)
 
 #ifdef __cplusplus
 }  // extern "C"
