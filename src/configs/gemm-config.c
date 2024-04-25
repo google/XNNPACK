@@ -2312,7 +2312,8 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
           qd8_f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
           qd8_f32_qc8w_gemm_config.mr = 2;
           qd8_f32_qc8w_gemm_config.nr = 8;
-          qd8_f32_qc8w_gemm_config.log2_kr = 3;
+          qd8_f32_qc8w_gemm_config.log2_kr = 1;
+          qd8_f32_qc8w_gemm_config.log2_sr = 2;
         }
       #else  // !XNN_ENABLE_ASSEMBLY
         if (XNN_ENABLE_ARM_I8MM && hardware_config->use_arm_neon_i8mm) {
