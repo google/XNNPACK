@@ -1259,7 +1259,7 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(copy-nc-eager-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME copy-nc-eager-test COMMAND copy-nc-eager-test)
 
-    ADD_EXECUTABLE(deconvolution-nhwc-test test/deconvolution-nhwc.cc)
+    ADD_EXECUTABLE(deconvolution-nhwc-test test/deconvolution-nhwc.cc test/deconvolution-nhwc-qd8-f32-qc8w.cc)
     TARGET_INCLUDE_DIRECTORIES(deconvolution-nhwc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(deconvolution-nhwc-test PRIVATE XNNPACK fp16 GTest::gmock GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME deconvolution-nhwc-test COMMAND deconvolution-nhwc-test)

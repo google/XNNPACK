@@ -2621,6 +2621,7 @@ xnnpack_unit_test(
     timeout = "moderate",
     srcs = [
         "deconvolution-nhwc.cc",
+        "deconvolution-nhwc-qd8-f32-qc8w.cc",
         "deconvolution-operator-tester.h",
     ],
     shard_count = 10,
