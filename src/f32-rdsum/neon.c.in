@@ -14,15 +14,14 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 $UNROLL = CHANNELS >> 2
-void xnn_f32_rdsum_minmax_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_c${CHANNELS}(
+void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_c${CHANNELS}(
     size_t rows,
     size_t channels,
     const float* input,
     size_t input_stride,
     const float* zero,
-    float* unused,
     float* output,
-    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -30,8 +29,6 @@ void xnn_f32_rdsum_minmax_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_c${CHAN
   assert(output != NULL);
 
   const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
-  const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
-  const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
 
   size_t input_increment = ${ACCUMULATORS} * input_stride;
   for (; channels >= ${CHANNELS}; channels -= ${CHANNELS}) {
@@ -62,8 +59,6 @@ void xnn_f32_rdsum_minmax_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_c${CHAN
     }
     $for i in range(UNROLL):
       vacc${i} = vmulq_f32(vacc${i}, vscale);
-      vacc${i} = vmaxq_f32(vacc${i}, vmin);
-      vacc${i} = vminq_f32(vacc${i}, vmax);
 
     $for i in range(0, UNROLL):
       vst1q_f32(output, vacc${i}); output += 4;
@@ -97,8 +92,6 @@ void xnn_f32_rdsum_minmax_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_c${CHAN
     }
     for (int i = 0; i < (channels + 4) >> 2; ++i) {
       vacc[i] = vmulq_f32(vacc[i], vscale);
-      vacc[i] = vmaxq_f32(vacc[i], vmin);
-      vacc[i] = vminq_f32(vacc[i], vmax);
     }
 
     for (int i = 0; i < channels >> 2; ++i) {

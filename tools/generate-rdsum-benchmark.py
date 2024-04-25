@@ -111,7 +111,7 @@ def main(args):
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
-#include <xnnpack/gavgpool.h>
+#include <xnnpack/reduce.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
 """.format(specification=options.spec, generator=sys.argv[0])
