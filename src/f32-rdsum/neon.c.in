@@ -60,6 +60,11 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_c${CHANNELS}(
     $for i in range(UNROLL):
       vacc${i} = vmulq_f32(vacc${i}, vscale);
 
+    const float* o = output;
+    $for i in range(0, UNROLL):
+      float32x4_t vo${i} = vld1q_f32(o); o += 4;
+    $for i in range(0, UNROLL):
+      vacc${i} = vaddq_f32(vo${i}, vacc${i});
     $for i in range(0, UNROLL):
       vst1q_f32(output, vacc${i}); output += 4;
 
@@ -94,6 +99,14 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_c${CHANNELS}(
       vacc[i] = vmulq_f32(vacc[i], vscale);
     }
 
+    float32x4_t vo[${UNROLL}];
+    const float* o = output;
+    for (int i = 0; i < channels >> 2; ++i) {
+      vo[i] = vld1q_f32(o); o += 4;
+    }
+    for (int i = 0; i < channels >> 2; ++i) {
+      vacc[i] = vaddq_f32(vo[i], vacc[i]);
+    }
     for (int i = 0; i < channels >> 2; ++i) {
       vst1q_f32(output, vacc[i]); output += 4;
     }
@@ -101,11 +114,11 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_c${CHANNELS}(
     channels &= 0x3;
     float32x2_t vacc_low = vget_low_f32(vacc[pos]);
     if (channels & 2) {
-      vst1_f32(output, vacc_low); output += 2;
+      vst1_f32(output, vadd_f32(vld1_f32(output), vacc_low)); output += 2;
       vacc_low = vget_high_f32(vacc[pos]);
     }
     if (channels & 1) {
-      vst1_lane_f32(output, vacc_low, 0);
+      vst1_lane_f32(output, vadd_f32(vld1_dup_f32(output), vacc_low), 0);
     }
   }
 }

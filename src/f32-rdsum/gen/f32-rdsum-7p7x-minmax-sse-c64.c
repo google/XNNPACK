@@ -343,6 +343,39 @@ void xnn_f32_rdsum_ukernel_7p7x__sse_c64(
     vacc14 = _mm_mul_ps(vacc14, vscale);
     vacc15 = _mm_mul_ps(vacc15, vscale);
 
+    const float* o = output;
+    __m128 vo0 = _mm_loadu_ps(o); o += 4;
+    __m128 vo1 = _mm_loadu_ps(o); o += 4;
+    __m128 vo2 = _mm_loadu_ps(o); o += 4;
+    __m128 vo3 = _mm_loadu_ps(o); o += 4;
+    __m128 vo4 = _mm_loadu_ps(o); o += 4;
+    __m128 vo5 = _mm_loadu_ps(o); o += 4;
+    __m128 vo6 = _mm_loadu_ps(o); o += 4;
+    __m128 vo7 = _mm_loadu_ps(o); o += 4;
+    __m128 vo8 = _mm_loadu_ps(o); o += 4;
+    __m128 vo9 = _mm_loadu_ps(o); o += 4;
+    __m128 vo10 = _mm_loadu_ps(o); o += 4;
+    __m128 vo11 = _mm_loadu_ps(o); o += 4;
+    __m128 vo12 = _mm_loadu_ps(o); o += 4;
+    __m128 vo13 = _mm_loadu_ps(o); o += 4;
+    __m128 vo14 = _mm_loadu_ps(o); o += 4;
+    __m128 vo15 = _mm_loadu_ps(o); o += 4;
+    vacc0 = _mm_add_ps(vo0, vacc0);
+    vacc1 = _mm_add_ps(vo1, vacc1);
+    vacc2 = _mm_add_ps(vo2, vacc2);
+    vacc3 = _mm_add_ps(vo3, vacc3);
+    vacc4 = _mm_add_ps(vo4, vacc4);
+    vacc5 = _mm_add_ps(vo5, vacc5);
+    vacc6 = _mm_add_ps(vo6, vacc6);
+    vacc7 = _mm_add_ps(vo7, vacc7);
+    vacc8 = _mm_add_ps(vo8, vacc8);
+    vacc9 = _mm_add_ps(vo9, vacc9);
+    vacc10 = _mm_add_ps(vo10, vacc10);
+    vacc11 = _mm_add_ps(vo11, vacc11);
+    vacc12 = _mm_add_ps(vo12, vacc12);
+    vacc13 = _mm_add_ps(vo13, vacc13);
+    vacc14 = _mm_add_ps(vo14, vacc14);
+    vacc15 = _mm_add_ps(vo15, vacc15);
     _mm_storeu_ps(output, vacc0); output += 4;
     _mm_storeu_ps(output, vacc1); output += 4;
     _mm_storeu_ps(output, vacc2); output += 4;
@@ -426,10 +459,18 @@ void xnn_f32_rdsum_ukernel_7p7x__sse_c64(
       i5 = (const float*) ((uintptr_t) i5 + input_increment);
       i6 = (const float*) ((uintptr_t) i6 + input_increment);
     }
-    for (int i = 0; i < (channels + 4) >> 2; ++i) {
+    for (int i = 0; i < num_chunks; ++i) {
       vacc[i] = _mm_mul_ps(vacc[i], vscale);
     }
 
+    __m128 vo[16];
+    const float* o = output;
+    for (int i = 0; i < channels >> 2; ++i) {
+      vo[i] = _mm_loadu_ps(o); o += 4;
+    }
+    for (int i = 0; i < channels >> 2; ++i) {
+      vacc[i] = _mm_add_ps(vo[i], vacc[i]);
+    }
     for (int i = 0; i < channels >> 2; ++i) {
       _mm_storeu_ps(output, vacc[i]); output += 4;
     }
@@ -437,12 +478,14 @@ void xnn_f32_rdsum_ukernel_7p7x__sse_c64(
     channels &= 0x3;
     __m128 vout = vacc[pos];
     if (channels & 2) {
-      _mm_storel_pi((__m64*) output, vout);
+      __m128 vo = _mm_loadl_pi(vscale, (__m64*) output);
+      _mm_storel_pi((__m64*) output, _mm_add_ps(vo, vout));
       vout = _mm_movehl_ps(vout, vout);
       output += 2;
     }
     if (channels & 1) {
-      _mm_store_ss(output, vout);
+      __m128 vo = _mm_load_ss(output);
+      _mm_store_ss(output, _mm_add_ps(vo, vout));
     }
   }
 }

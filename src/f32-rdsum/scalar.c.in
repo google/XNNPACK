@@ -53,7 +53,7 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__scalar_c4(
       vacc${i} = vacc${i} * vscale;
 
     $for i in range(0, CHANNELS):
-      *output++ = vacc${i};
+      *output++ += vacc${i};
 
     input = (const float*) ((uintptr_t) input + ${CHANNELS} * sizeof(float));
   }
@@ -83,12 +83,12 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__scalar_c4(
       vacc${i} = vacc${i} * vscale;
 
     if (channels & 2) {
-      *output++ = vacc0;
-      *output++ = vacc1;
+      *output++ += vacc0;
+      *output++ += vacc1;
       vacc0 = vacc2;
     }
     if (channels & 1) {
-      *output++ = vacc0;
+      *output++ += vacc0;
     }
   }
 }

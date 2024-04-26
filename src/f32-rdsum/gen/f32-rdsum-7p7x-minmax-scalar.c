@@ -103,10 +103,10 @@ void xnn_f32_rdsum_ukernel_7p7x__scalar_c4(
     vacc2 = vacc2 * vscale;
     vacc3 = vacc3 * vscale;
 
-    *output++ = vacc0;
-    *output++ = vacc1;
-    *output++ = vacc2;
-    *output++ = vacc3;
+    *output++ += vacc0;
+    *output++ += vacc1;
+    *output++ += vacc2;
+    *output++ += vacc3;
 
     input = (const float*) ((uintptr_t) input + 4 * sizeof(float));
   }
@@ -176,12 +176,12 @@ void xnn_f32_rdsum_ukernel_7p7x__scalar_c4(
     vacc2 = vacc2 * vscale;
 
     if (channels & 2) {
-      *output++ = vacc0;
-      *output++ = vacc1;
+      *output++ += vacc0;
+      *output++ += vacc1;
       vacc0 = vacc2;
     }
     if (channels & 1) {
-      *output++ = vacc0;
+      *output++ += vacc0;
     }
   }
 }
