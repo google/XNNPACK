@@ -281,8 +281,8 @@ void xnn_f32_rdsum_ukernel_7p7x__neon_c32(
     for (int i = 0; i < channels >> 2; ++i) {
       vst1q_f32(output, vacc[i]); output += 4;
     }
-    size_t pos = channels / 4;
-    channels %= 4;
+    size_t pos = channels >> 2;
+    channels &= 0x3;
     float32x2_t vacc_low = vget_low_f32(vacc[pos]);
     if (channels & 2) {
       vst1_f32(output, vacc_low); output += 2;

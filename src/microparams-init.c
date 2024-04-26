@@ -1683,6 +1683,18 @@ size_t xnn_init_f32_scale_scalar_params(
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+size_t xnn_init_f32_scale_sse_params(
+  union xnn_f32_scale_params params[XNN_MIN_ELEMENTS(1)],
+  float scale)
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse.scale[i] = scale;
+  }
+  return sizeof(params->sse);
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_f32_scale_avx_params(
   union xnn_f32_scale_params params[XNN_MIN_ELEMENTS(1)],
   float scale)

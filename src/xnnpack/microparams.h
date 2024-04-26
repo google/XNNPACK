@@ -63,6 +63,9 @@ union xnn_f32_scale_params {
   } scalar;
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
+    XNN_ALIGN(16) float scale[4];
+  } sse;
+  struct {
     int32_t mask_table[14];
     float scale;
   } avx;

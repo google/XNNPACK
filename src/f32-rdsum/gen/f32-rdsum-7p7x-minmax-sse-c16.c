@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-rdsum/neon.c.in
+//   Template: src/f32-rdsum/sse.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 Google LLC
@@ -9,14 +9,14 @@
 
 #include <assert.h>
 
-#include <arm_neon.h>
+#include <xmmintrin.h>
 
 #include <xnnpack/common.h>
 #include <xnnpack/reduce.h>
 #include <xnnpack/math.h>
 
 
-void xnn_f32_rdsum_ukernel_7p7x__neon_c16(
+void xnn_f32_rdsum_ukernel_7p7x__sse_c16(
     size_t rows,
     size_t channels,
     const float* input,
@@ -30,7 +30,7 @@ void xnn_f32_rdsum_ukernel_7p7x__neon_c16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
+  const __m128 vscale = _mm_load_ps(params->sse.scale);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 16; channels -= 16) {
@@ -42,10 +42,10 @@ void xnn_f32_rdsum_ukernel_7p7x__neon_c16(
     const float* i5 = (const float*) ((uintptr_t) input + 5 * input_stride);
     const float* i6 = (const float*) ((uintptr_t) input + 6 * input_stride);
 
-    float32x4_t vacc0 = vdupq_n_f32(0.f);
-    float32x4_t vacc1 = vdupq_n_f32(0.f);
-    float32x4_t vacc2 = vdupq_n_f32(0.f);
-    float32x4_t vacc3 = vdupq_n_f32(0.f);
+    __m128 vacc0 = _mm_setzero_ps();
+    __m128 vacc1 = _mm_setzero_ps();
+    __m128 vacc2 = _mm_setzero_ps();
+    __m128 vacc3 = _mm_setzero_ps();
 
     for (int r = rows; r > 0; r -= 7) {
       if XNN_UNPREDICTABLE(r < 2) {
@@ -66,66 +66,66 @@ void xnn_f32_rdsum_ukernel_7p7x__neon_c16(
       if XNN_UNPREDICTABLE(r <= 6) {
         i6 = zero;
       }
-      float32x4_t vin0;
-      float32x4_t vin1;
-      float32x4_t vin2;
-      float32x4_t vin3;
-      vin0 = vld1q_f32(&i0[0]);
-      vin1 = vld1q_f32(&i0[4]);
-      vin2 = vld1q_f32(&i0[8]);
-      vin3 = vld1q_f32(&i0[12]);
-      vacc0 = vaddq_f32(vin0, vacc0);
-      vacc1 = vaddq_f32(vin1, vacc1);
-      vacc2 = vaddq_f32(vin2, vacc2);
-      vacc3 = vaddq_f32(vin3, vacc3);
-      vin0 = vld1q_f32(&i1[0]);
-      vin1 = vld1q_f32(&i1[4]);
-      vin2 = vld1q_f32(&i1[8]);
-      vin3 = vld1q_f32(&i1[12]);
-      vacc0 = vaddq_f32(vin0, vacc0);
-      vacc1 = vaddq_f32(vin1, vacc1);
-      vacc2 = vaddq_f32(vin2, vacc2);
-      vacc3 = vaddq_f32(vin3, vacc3);
-      vin0 = vld1q_f32(&i2[0]);
-      vin1 = vld1q_f32(&i2[4]);
-      vin2 = vld1q_f32(&i2[8]);
-      vin3 = vld1q_f32(&i2[12]);
-      vacc0 = vaddq_f32(vin0, vacc0);
-      vacc1 = vaddq_f32(vin1, vacc1);
-      vacc2 = vaddq_f32(vin2, vacc2);
-      vacc3 = vaddq_f32(vin3, vacc3);
-      vin0 = vld1q_f32(&i3[0]);
-      vin1 = vld1q_f32(&i3[4]);
-      vin2 = vld1q_f32(&i3[8]);
-      vin3 = vld1q_f32(&i3[12]);
-      vacc0 = vaddq_f32(vin0, vacc0);
-      vacc1 = vaddq_f32(vin1, vacc1);
-      vacc2 = vaddq_f32(vin2, vacc2);
-      vacc3 = vaddq_f32(vin3, vacc3);
-      vin0 = vld1q_f32(&i4[0]);
-      vin1 = vld1q_f32(&i4[4]);
-      vin2 = vld1q_f32(&i4[8]);
-      vin3 = vld1q_f32(&i4[12]);
-      vacc0 = vaddq_f32(vin0, vacc0);
-      vacc1 = vaddq_f32(vin1, vacc1);
-      vacc2 = vaddq_f32(vin2, vacc2);
-      vacc3 = vaddq_f32(vin3, vacc3);
-      vin0 = vld1q_f32(&i5[0]);
-      vin1 = vld1q_f32(&i5[4]);
-      vin2 = vld1q_f32(&i5[8]);
-      vin3 = vld1q_f32(&i5[12]);
-      vacc0 = vaddq_f32(vin0, vacc0);
-      vacc1 = vaddq_f32(vin1, vacc1);
-      vacc2 = vaddq_f32(vin2, vacc2);
-      vacc3 = vaddq_f32(vin3, vacc3);
-      vin0 = vld1q_f32(&i6[0]);
-      vin1 = vld1q_f32(&i6[4]);
-      vin2 = vld1q_f32(&i6[8]);
-      vin3 = vld1q_f32(&i6[12]);
-      vacc0 = vaddq_f32(vin0, vacc0);
-      vacc1 = vaddq_f32(vin1, vacc1);
-      vacc2 = vaddq_f32(vin2, vacc2);
-      vacc3 = vaddq_f32(vin3, vacc3);
+      __m128 vin0;
+      __m128 vin1;
+      __m128 vin2;
+      __m128 vin3;
+      vin0 = _mm_loadu_ps(&i0[0]);
+      vin1 = _mm_loadu_ps(&i0[4]);
+      vin2 = _mm_loadu_ps(&i0[8]);
+      vin3 = _mm_loadu_ps(&i0[12]);
+      vacc0 = _mm_add_ps(vin0, vacc0);
+      vacc1 = _mm_add_ps(vin1, vacc1);
+      vacc2 = _mm_add_ps(vin2, vacc2);
+      vacc3 = _mm_add_ps(vin3, vacc3);
+      vin0 = _mm_loadu_ps(&i1[0]);
+      vin1 = _mm_loadu_ps(&i1[4]);
+      vin2 = _mm_loadu_ps(&i1[8]);
+      vin3 = _mm_loadu_ps(&i1[12]);
+      vacc0 = _mm_add_ps(vin0, vacc0);
+      vacc1 = _mm_add_ps(vin1, vacc1);
+      vacc2 = _mm_add_ps(vin2, vacc2);
+      vacc3 = _mm_add_ps(vin3, vacc3);
+      vin0 = _mm_loadu_ps(&i2[0]);
+      vin1 = _mm_loadu_ps(&i2[4]);
+      vin2 = _mm_loadu_ps(&i2[8]);
+      vin3 = _mm_loadu_ps(&i2[12]);
+      vacc0 = _mm_add_ps(vin0, vacc0);
+      vacc1 = _mm_add_ps(vin1, vacc1);
+      vacc2 = _mm_add_ps(vin2, vacc2);
+      vacc3 = _mm_add_ps(vin3, vacc3);
+      vin0 = _mm_loadu_ps(&i3[0]);
+      vin1 = _mm_loadu_ps(&i3[4]);
+      vin2 = _mm_loadu_ps(&i3[8]);
+      vin3 = _mm_loadu_ps(&i3[12]);
+      vacc0 = _mm_add_ps(vin0, vacc0);
+      vacc1 = _mm_add_ps(vin1, vacc1);
+      vacc2 = _mm_add_ps(vin2, vacc2);
+      vacc3 = _mm_add_ps(vin3, vacc3);
+      vin0 = _mm_loadu_ps(&i4[0]);
+      vin1 = _mm_loadu_ps(&i4[4]);
+      vin2 = _mm_loadu_ps(&i4[8]);
+      vin3 = _mm_loadu_ps(&i4[12]);
+      vacc0 = _mm_add_ps(vin0, vacc0);
+      vacc1 = _mm_add_ps(vin1, vacc1);
+      vacc2 = _mm_add_ps(vin2, vacc2);
+      vacc3 = _mm_add_ps(vin3, vacc3);
+      vin0 = _mm_loadu_ps(&i5[0]);
+      vin1 = _mm_loadu_ps(&i5[4]);
+      vin2 = _mm_loadu_ps(&i5[8]);
+      vin3 = _mm_loadu_ps(&i5[12]);
+      vacc0 = _mm_add_ps(vin0, vacc0);
+      vacc1 = _mm_add_ps(vin1, vacc1);
+      vacc2 = _mm_add_ps(vin2, vacc2);
+      vacc3 = _mm_add_ps(vin3, vacc3);
+      vin0 = _mm_loadu_ps(&i6[0]);
+      vin1 = _mm_loadu_ps(&i6[4]);
+      vin2 = _mm_loadu_ps(&i6[8]);
+      vin3 = _mm_loadu_ps(&i6[12]);
+      vacc0 = _mm_add_ps(vin0, vacc0);
+      vacc1 = _mm_add_ps(vin1, vacc1);
+      vacc2 = _mm_add_ps(vin2, vacc2);
+      vacc3 = _mm_add_ps(vin3, vacc3);
       i0 = (const float*) ((uintptr_t) i0 + input_increment);
       i1 = (const float*) ((uintptr_t) i1 + input_increment);
       i2 = (const float*) ((uintptr_t) i2 + input_increment);
@@ -134,20 +134,20 @@ void xnn_f32_rdsum_ukernel_7p7x__neon_c16(
       i5 = (const float*) ((uintptr_t) i5 + input_increment);
       i6 = (const float*) ((uintptr_t) i6 + input_increment);
     }
-    vacc0 = vmulq_f32(vacc0, vscale);
-    vacc1 = vmulq_f32(vacc1, vscale);
-    vacc2 = vmulq_f32(vacc2, vscale);
-    vacc3 = vmulq_f32(vacc3, vscale);
+    vacc0 = _mm_mul_ps(vacc0, vscale);
+    vacc1 = _mm_mul_ps(vacc1, vscale);
+    vacc2 = _mm_mul_ps(vacc2, vscale);
+    vacc3 = _mm_mul_ps(vacc3, vscale);
 
-    vst1q_f32(output, vacc0); output += 4;
-    vst1q_f32(output, vacc1); output += 4;
-    vst1q_f32(output, vacc2); output += 4;
-    vst1q_f32(output, vacc3); output += 4;
+    _mm_storeu_ps(output, vacc0); output += 4;
+    _mm_storeu_ps(output, vacc1); output += 4;
+    _mm_storeu_ps(output, vacc2); output += 4;
+    _mm_storeu_ps(output, vacc3); output += 4;
 
     input = (const float*) ((uintptr_t) input + 16 * sizeof(float));
   }
   if (channels != 0) {
-    size_t input_increment = 7 * input_stride;
+    input_increment = 7 * input_stride;
     const float* i0 = input;
     const float* i1 = (const float*) ((uintptr_t) input + 1 * input_stride);
     const float* i2 = (const float*) ((uintptr_t) input + 2 * input_stride);
@@ -155,11 +155,11 @@ void xnn_f32_rdsum_ukernel_7p7x__neon_c16(
     const float* i4 = (const float*) ((uintptr_t) input + 4 * input_stride);
     const float* i5 = (const float*) ((uintptr_t) input + 5 * input_stride);
     const float* i6 = (const float*) ((uintptr_t) input + 6 * input_stride);
-    float32x4_t vacc[4];
-    vacc[0] = vdupq_n_f32(0.f);
-    vacc[1] = vdupq_n_f32(0.f);
-    vacc[2] = vdupq_n_f32(0.f);
-    vacc[3] = vdupq_n_f32(0.f);
+    __m128 vacc[4];
+    vacc[0] = _mm_setzero_ps();
+    vacc[1] = _mm_setzero_ps();
+    vacc[2] = _mm_setzero_ps();
+    vacc[3] = _mm_setzero_ps();
 
     size_t num_chunks = round_up_po2(channels, 4) >> 2;
     for (int r = rows; r > 0; r -= 7) {
@@ -182,13 +182,13 @@ void xnn_f32_rdsum_ukernel_7p7x__neon_c16(
         i6 = zero;
       }
       for (int i = 0; i < num_chunks; ++i) {
-        vacc[i] = vaddq_f32(vld1q_f32(&i0[i*4]), vacc[i]);
-        vacc[i] = vaddq_f32(vld1q_f32(&i1[i*4]), vacc[i]);
-        vacc[i] = vaddq_f32(vld1q_f32(&i2[i*4]), vacc[i]);
-        vacc[i] = vaddq_f32(vld1q_f32(&i3[i*4]), vacc[i]);
-        vacc[i] = vaddq_f32(vld1q_f32(&i4[i*4]), vacc[i]);
-        vacc[i] = vaddq_f32(vld1q_f32(&i5[i*4]), vacc[i]);
-        vacc[i] = vaddq_f32(vld1q_f32(&i6[i*4]), vacc[i]);
+        vacc[i] = _mm_add_ps(_mm_loadu_ps(&i0[i*4]), vacc[i]);
+        vacc[i] = _mm_add_ps(_mm_loadu_ps(&i1[i*4]), vacc[i]);
+        vacc[i] = _mm_add_ps(_mm_loadu_ps(&i2[i*4]), vacc[i]);
+        vacc[i] = _mm_add_ps(_mm_loadu_ps(&i3[i*4]), vacc[i]);
+        vacc[i] = _mm_add_ps(_mm_loadu_ps(&i4[i*4]), vacc[i]);
+        vacc[i] = _mm_add_ps(_mm_loadu_ps(&i5[i*4]), vacc[i]);
+        vacc[i] = _mm_add_ps(_mm_loadu_ps(&i6[i*4]), vacc[i]);
       }
       i0 = (const float*) ((uintptr_t) i0 + input_increment);
       i1 = (const float*) ((uintptr_t) i1 + input_increment);
@@ -199,21 +199,22 @@ void xnn_f32_rdsum_ukernel_7p7x__neon_c16(
       i6 = (const float*) ((uintptr_t) i6 + input_increment);
     }
     for (int i = 0; i < (channels + 4) >> 2; ++i) {
-      vacc[i] = vmulq_f32(vacc[i], vscale);
+      vacc[i] = _mm_mul_ps(vacc[i], vscale);
     }
 
     for (int i = 0; i < channels >> 2; ++i) {
-      vst1q_f32(output, vacc[i]); output += 4;
+      _mm_storeu_ps(output, vacc[i]); output += 4;
     }
-    size_t pos = channels >> 2;
+    const size_t pos = channels >> 2;
     channels &= 0x3;
-    float32x2_t vacc_low = vget_low_f32(vacc[pos]);
+    __m128 vout = vacc[pos];
     if (channels & 2) {
-      vst1_f32(output, vacc_low); output += 2;
-      vacc_low = vget_high_f32(vacc[pos]);
+      _mm_storel_pi((__m64*) output, vout);
+      vout = _mm_movehl_ps(vout, vout);
+      output += 2;
     }
     if (channels & 1) {
-      vst1_lane_f32(output, vacc_low, 0);
+      _mm_store_ss(output, vout);
     }
   }
 }

@@ -6,7 +6,7 @@
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
-#include <arm_neon.h>
+#include <xmmintrin.h>
 
 #include <xnnpack/common.h>
 #include <xnnpack/reduce.h>
@@ -14,7 +14,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 $UNROLL = CHANNELS >> 2
-void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_c${CHANNELS}(
+void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__sse_c${CHANNELS}(
     size_t rows,
     size_t channels,
     const float* input,
@@ -28,7 +28,7 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_c${CHANNELS}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
+  const __m128 vscale = _mm_load_ps(params->sse.scale);
 
   size_t input_increment = ${ACCUMULATORS} * input_stride;
   for (; channels >= ${CHANNELS}; channels -= ${CHANNELS}) {
@@ -37,7 +37,7 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_c${CHANNELS}(
       const float* i${i} = (const float*) ((uintptr_t) input + ${i} * input_stride);
 
     $for i in range(UNROLL):
-      float32x4_t vacc${i} = vdupq_n_f32(0.f);
+      __m128 vacc${i} = _mm_setzero_ps();
 
     for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
       $for N in range(1, ACCUMULATORS, 2):
@@ -48,31 +48,31 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_c${CHANNELS}(
           i${N+1} = zero;
         }
       $for c in range(UNROLL):
-        float32x4_t vin${c};
+        __m128 vin${c};
       $for j in range(ACCUMULATORS):
         $for c in range(UNROLL):
-          vin${c} = vld1q_f32(&i${j}[${c*4}]);
+          vin${c} = _mm_loadu_ps(&i${j}[${c*4}]);
         $for c in range(UNROLL):
-          vacc${c} = vaddq_f32(vin${c}, vacc${c});
+          vacc${c} = _mm_add_ps(vin${c}, vacc${c});
       $for N in range(0, ACCUMULATORS):
         i${N} = (const float*) ((uintptr_t) i${N} + input_increment);
     }
     $for i in range(UNROLL):
-      vacc${i} = vmulq_f32(vacc${i}, vscale);
+      vacc${i} = _mm_mul_ps(vacc${i}, vscale);
 
     $for i in range(0, UNROLL):
-      vst1q_f32(output, vacc${i}); output += 4;
+      _mm_storeu_ps(output, vacc${i}); output += 4;
 
     input = (const float*) ((uintptr_t) input + ${CHANNELS} * sizeof(float));
   }
   if (channels != 0) {
-    size_t input_increment = ${ACCUMULATORS} * input_stride;
+    input_increment = ${ACCUMULATORS} * input_stride;
     const float* i0 = input;
     $for i in range(1, ACCUMULATORS):
       const float* i${i} = (const float*) ((uintptr_t) input + ${i} * input_stride);
-    float32x4_t vacc[${UNROLL}];
+    __m128 vacc[${UNROLL}];
     $for i in range(UNROLL):
-      vacc[${i}] = vdupq_n_f32(0.f);
+      vacc[${i}] = _mm_setzero_ps();
 
     size_t num_chunks = round_up_po2(channels, 4) >> 2;
     for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
@@ -85,27 +85,28 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_c${CHANNELS}(
         }
       for (int i = 0; i < num_chunks; ++i) {
         $for c in range(ACCUMULATORS):
-          vacc[i] = vaddq_f32(vld1q_f32(&i${c}[i*4]), vacc[i]);
+          vacc[i] = _mm_add_ps(_mm_loadu_ps(&i${c}[i*4]), vacc[i]);
       }
       $for N in range(ACCUMULATORS):
         i${N} = (const float*) ((uintptr_t) i${N} + input_increment);
     }
     for (int i = 0; i < (channels + 4) >> 2; ++i) {
-      vacc[i] = vmulq_f32(vacc[i], vscale);
+      vacc[i] = _mm_mul_ps(vacc[i], vscale);
     }
 
     for (int i = 0; i < channels >> 2; ++i) {
-      vst1q_f32(output, vacc[i]); output += 4;
+      _mm_storeu_ps(output, vacc[i]); output += 4;
     }
-    size_t pos = channels >> 2;
+    const size_t pos = channels >> 2;
     channels &= 0x3;
-    float32x2_t vacc_low = vget_low_f32(vacc[pos]);
+    __m128 vout = vacc[pos];
     if (channels & 2) {
-      vst1_f32(output, vacc_low); output += 2;
-      vacc_low = vget_high_f32(vacc[pos]);
+      _mm_storel_pi((__m64*) output, vout);
+      vout = _mm_movehl_ps(vout, vout);
+      output += 2;
     }
     if (channels & 1) {
-      vst1_lane_f32(output, vacc_low, 0);
+      _mm_store_ss(output, vout);
     }
   }
 }

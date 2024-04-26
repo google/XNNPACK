@@ -6577,6 +6577,9 @@ SET(ALL_SSE_MICROKERNEL_SRCS
   src/f32-ppmm/gen/f32-ppmm-4x8-minmax-sse.c
   src/f32-prelu/gen/f32-prelu-sse-2x4.c
   src/f32-prelu/gen/f32-prelu-sse-2x8.c
+  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-sse-c16.c
+  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-sse-c32.c
+  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-sse-c64.c
   src/f32-rminmax/gen/f32-rmax-sse-u4.c
   src/f32-rminmax/gen/f32-rmax-sse-u8-acc2.c
   src/f32-rminmax/gen/f32-rmax-sse-u12-acc3.c

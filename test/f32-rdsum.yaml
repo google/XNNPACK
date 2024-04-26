@@ -13,3 +13,10 @@
   init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rdsum_ukernel_7p7x__neon_c64
   init: xnn_init_f32_scale_scalar_params
+# x86 SSE
+- name: xnn_f32_rdsum_ukernel_7p7x__sse_c16
+  init: xnn_init_f32_scale_sse_params
+- name: xnn_f32_rdsum_ukernel_7p7x__sse_c32
+  init: xnn_init_f32_scale_sse_params
+- name: xnn_f32_rdsum_ukernel_7p7x__sse_c64
+  init: xnn_init_f32_scale_sse_params
