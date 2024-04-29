@@ -40,3 +40,5 @@
   init: xnn_init_f16_f32acc_scale_scalar_params
 - name: xnn_f16_f32acc_rsum_ukernel__avx512skx_u64_acc4
   init: xnn_init_f16_f32acc_scale_scalar_params
+- name: xnn_f16_f32acc_rsum_ukernel__avx512skx_u128_acc4
+  init: xnn_init_f16_f32acc_scale_scalar_params

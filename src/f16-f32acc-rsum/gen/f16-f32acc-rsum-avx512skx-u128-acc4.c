@@ -17,7 +17,7 @@
 #include <xnnpack/unaligned.h>
 
 
-void xnn_f16_f32acc_rsum_ukernel__avx512skx_u16(
+void xnn_f16_f32acc_rsum_ukernel__avx512skx_u128_acc4(
     size_t batch,
     const void* input,
     void* output,
@@ -30,6 +30,32 @@ void xnn_f16_f32acc_rsum_ukernel__avx512skx_u16(
 
   const uint16_t* i = (const uint16_t*) input;
   __m512 vacc0 = _mm512_setzero_ps();
+  __m512 vacc1 = _mm512_setzero_ps();
+  __m512 vacc2 = _mm512_setzero_ps();
+  __m512 vacc3 = _mm512_setzero_ps();
+  for (; batch >= 128 * sizeof(uint16_t); batch -= 128 * sizeof(uint16_t)) {
+    const __m512 vt0 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) i));
+    const __m512 vt1 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) (i + 16)));
+    const __m512 vt2 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) (i + 32)));
+    const __m512 vt3 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) (i + 48)));
+    const __m512 vt4 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) (i + 64)));
+    const __m512 vt5 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) (i + 80)));
+    const __m512 vt6 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) (i + 96)));
+    const __m512 vt7 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) (i + 112)));
+    i += 128;
+
+    vacc0 = _mm512_add_ps(vacc0, vt0);
+    vacc1 = _mm512_add_ps(vacc1, vt1);
+    vacc2 = _mm512_add_ps(vacc2, vt2);
+    vacc3 = _mm512_add_ps(vacc3, vt3);
+    vacc0 = _mm512_add_ps(vacc0, vt4);
+    vacc1 = _mm512_add_ps(vacc1, vt5);
+    vacc2 = _mm512_add_ps(vacc2, vt6);
+    vacc3 = _mm512_add_ps(vacc3, vt7);
+  }
+  vacc0 = _mm512_add_ps(vacc0, vacc1);
+  vacc2 = _mm512_add_ps(vacc2, vacc3);
+  vacc0 = _mm512_add_ps(vacc0, vacc2);
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
     const __m512 vt = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) i));
     i += 16;
