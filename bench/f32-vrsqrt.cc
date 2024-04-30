@@ -141,6 +141,24 @@ BENCHMARK_CAPTURE(f32_vrsqrt, scalar_rsqrt_u4,
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_vrsqrt, wasmsimd_rsqrt_u4,
+                    xnn_f32_vrsqrt_ukernel__wasmsimd_rsqrt_u4,
+                    /*init_params=*/nullptr)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vrsqrt, wasmsimd_rsqrt_u8,
+                    xnn_f32_vrsqrt_ukernel__wasmsimd_rsqrt_u8,
+                    /*init_params=*/nullptr)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vrsqrt, wasmsimd_rsqrt_u16,
+                    xnn_f32_vrsqrt_ukernel__wasmsimd_rsqrt_u16,
+                    /*init_params=*/nullptr)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

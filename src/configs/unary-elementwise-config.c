@@ -1432,6 +1432,9 @@ static void init_f32_rsqrt_config(void) {
       f32_rsqrt_config.init.f32_rsqrt = xnn_init_f32_rsqrt_sse_params;
       f32_rsqrt_config.element_tile = 8;
     }
+  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+    f32_rsqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__wasmsimd_rsqrt_u8;
+    f32_rsqrt_config.element_tile = 8;
   #else
     f32_rsqrt_config.ukernel =
         (xnn_vunary_ukernel_fn)xnn_f32_vrsqrt_ukernel__scalar_rsqrt_u4;

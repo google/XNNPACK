@@ -44,3 +44,8 @@
   init: xnn_init_f32_rsqrt_avx512_params
 - name: xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64
   init: xnn_init_f32_rsqrt_avx512_params
+
+# WAsm SIMD
+- name: xnn_f32_vrsqrt_ukernel__wasmsimd_rsqrt_u4
+- name: xnn_f32_vrsqrt_ukernel__wasmsimd_rsqrt_u8
+- name: xnn_f32_vrsqrt_ukernel__wasmsimd_rsqrt_u16
