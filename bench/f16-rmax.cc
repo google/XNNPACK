@@ -65,15 +65,6 @@ static void f16_rmax(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(f16_rmax, f16c_u32,
-                    xnn_f16_rmax_ukernel__f16c_u32,
-                    /*init_params=*/nullptr,
-                    benchmark::utils::CheckF16C)
-    ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
-    ->UseRealTime();
-#endif
-
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   BENCHMARK_CAPTURE(f16_rmax, neonfp16arith_u8,
                     xnn_f16_rmax_ukernel__neonfp16arith_u8,
@@ -106,6 +97,46 @@ static void f16_rmax(
     ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(f16_rmax, avx512skx_u16,
+                    xnn_f16_rmax_ukernel__avx512skx_u16,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX512SKX)
+    ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_rmax, avx512skx_u32_acc2,
+                    xnn_f16_rmax_ukernel__avx512skx_u32_acc2,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX512SKX)
+    ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_rmax, avx512skx_u48_acc3,
+                    xnn_f16_rmax_ukernel__avx512skx_u48_acc3,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX512SKX)
+    ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_rmax, avx512skx_u64_acc2,
+                    xnn_f16_rmax_ukernel__avx512skx_u64_acc2,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX512SKX)
+    ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_rmax, avx512skx_u64_acc4,
+                    xnn_f16_rmax_ukernel__avx512skx_u64_acc4,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX512SKX)
+    ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f16_rmax, f16c_u32,
+                    xnn_f16_rmax_ukernel__f16c_u32,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckF16C)
+    ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
+    ->UseRealTime();
+#endif
 
 BENCHMARK_CAPTURE(f16_rmax, scalar_u1,
                   xnn_f16_rmax_ukernel__scalar_u1)

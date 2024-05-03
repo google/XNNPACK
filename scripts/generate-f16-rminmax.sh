@@ -23,6 +23,25 @@ tools/xngen src/f16-rminmax/neonfp16arith.c.in -D BATCH_TILE=24 -D ACCUMULATORS=
 tools/xngen src/f16-rminmax/neonfp16arith.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-neonfp16arith-u32-acc2.c &
 tools/xngen src/f16-rminmax/neonfp16arith.c.in -D BATCH_TILE=32 -D ACCUMULATORS=4 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-neonfp16arith-u32-acc4.c &
 
+################################## x86 AVX512SKX #################################
+tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=16 -D ACCUMULATORS=1 -D OP=MAX -o src/f16-rminmax/gen/f16-rmax-avx512skx-u16.c &
+tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -D OP=MAX -o src/f16-rminmax/gen/f16-rmax-avx512skx-u32-acc2.c &
+tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=48 -D ACCUMULATORS=3 -D OP=MAX -o src/f16-rminmax/gen/f16-rmax-avx512skx-u48-acc3.c &
+tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -D OP=MAX -o src/f16-rminmax/gen/f16-rmax-avx512skx-u64-acc2.c &
+tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=64 -D ACCUMULATORS=4 -D OP=MAX -o src/f16-rminmax/gen/f16-rmax-avx512skx-u64-acc4.c &
+
+tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=16 -D ACCUMULATORS=1 -D OP=MIN -o src/f16-rminmax/gen/f16-rmin-avx512skx-u16.c &
+tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -D OP=MIN -o src/f16-rminmax/gen/f16-rmin-avx512skx-u32-acc2.c &
+tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=48 -D ACCUMULATORS=3 -D OP=MIN -o src/f16-rminmax/gen/f16-rmin-avx512skx-u48-acc3.c &
+tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -D OP=MIN -o src/f16-rminmax/gen/f16-rmin-avx512skx-u64-acc2.c &
+tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=64 -D ACCUMULATORS=4 -D OP=MIN -o src/f16-rminmax/gen/f16-rmin-avx512skx-u64-acc4.c &
+
+tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=16 -D ACCUMULATORS=1 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-avx512skx-u16.c &
+tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-avx512skx-u32-acc2.c &
+tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=48 -D ACCUMULATORS=3 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-avx512skx-u48-acc3.c &
+tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-avx512skx-u64-acc2.c &
+tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=64 -D ACCUMULATORS=4 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-avx512skx-u64-acc4.c &
+
 #################################### Scalar ###################################
 ### Generic C micro-kernels
 tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=F16 -D ACCUMULATORS=1 -D OP=MINMAX -D WASM=0 -o src/f16-rminmax/gen/f16-rminmax-scalar-u1.c &
