@@ -48,7 +48,9 @@ static void init_f16_rmax_config(void) {
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_x86_f16c) {
+    if (hardware_config->use_x86_avx512skx) {
+      f16_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f16_rmax_ukernel__avx512skx_u64_acc4;
+    } else if (hardware_config->use_x86_f16c) {
       f16_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f16_rmax_ukernel__f16c_u32;
     }
   #else
