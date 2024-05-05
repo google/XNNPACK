@@ -1517,6 +1517,9 @@ ALL_AVX512F_MICROKERNEL_SRCS = [
     "src/math/f32-sqrt-avx512f-nr1fma1adj.c",
     "src/math/f32-sqrt-avx512f-nr1fma.c",
     "src/math/f32-sqrt-avx512f-nr2fma.c",
+    "src/x8-packw/gen/x8-packw-x16c4-gemm-goi-avx512f-u16-prfm.c",
+    "src/x8-packw/gen/x8-packw-x32c4-gemm-goi-avx512f-u16-prfm.c",
+    "src/x8-packw/gen/x8-packw-x64c4-gemm-goi-avx512f-u16-prfm.c",
     "src/x32-packw/gen/x32-packw-x16-gemm-goi-avx512f-u4-prfm.c",
     "src/x32-packw/gen/x32-packw-x16-gemm-goi-avx512f-u4.c",
 ]
