@@ -1521,6 +1521,14 @@ ALL_AVX512F_MICROKERNEL_SRCS = [
     "src/x32-packw/gen/x32-packw-x16-gemm-goi-avx512f-u4.c",
 ]
 
+ALL_AVX512FP16_MICROKERNEL_SRCS = [
+    "src/f16-rminmax/gen/f16-rmax-avx512fp16-u32.c",
+    "src/f16-rminmax/gen/f16-rmax-avx512fp16-u64-acc2.c",
+    "src/f16-rminmax/gen/f16-rmax-avx512fp16-u96-acc3.c",
+    "src/f16-rminmax/gen/f16-rmax-avx512fp16-u128-acc2.c",
+    "src/f16-rminmax/gen/f16-rmax-avx512fp16-u128-acc4.c",
+]
+
 ALL_AVX512SKX_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-u16.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-u32.c",

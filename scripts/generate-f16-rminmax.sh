@@ -23,6 +23,13 @@ tools/xngen src/f16-rminmax/neonfp16arith.c.in -D BATCH_TILE=24 -D ACCUMULATORS=
 tools/xngen src/f16-rminmax/neonfp16arith.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-neonfp16arith-u32-acc2.c &
 tools/xngen src/f16-rminmax/neonfp16arith.c.in -D BATCH_TILE=32 -D ACCUMULATORS=4 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-neonfp16arith-u32-acc4.c &
 
+################################## x86 AVX512FP16 #################################
+tools/xngen src/f16-rminmax/avx512fp16.c.in -D BATCH_TILE=32  -D ACCUMULATORS=1 -D OP=MAX -o src/f16-rminmax/gen/f16-rmax-avx512fp16-u32.c &
+tools/xngen src/f16-rminmax/avx512fp16.c.in -D BATCH_TILE=64  -D ACCUMULATORS=2 -D OP=MAX -o src/f16-rminmax/gen/f16-rmax-avx512fp16-u64-acc2.c &
+tools/xngen src/f16-rminmax/avx512fp16.c.in -D BATCH_TILE=96  -D ACCUMULATORS=3 -D OP=MAX -o src/f16-rminmax/gen/f16-rmax-avx512fp16-u96-acc3.c &
+tools/xngen src/f16-rminmax/avx512fp16.c.in -D BATCH_TILE=128 -D ACCUMULATORS=2 -D OP=MAX -o src/f16-rminmax/gen/f16-rmax-avx512fp16-u128-acc2.c &
+tools/xngen src/f16-rminmax/avx512fp16.c.in -D BATCH_TILE=128 -D ACCUMULATORS=4 -D OP=MAX -o src/f16-rminmax/gen/f16-rmax-avx512fp16-u128-acc4.c &
+
 ################################## x86 AVX512SKX #################################
 tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=16 -D ACCUMULATORS=1 -D OP=MAX -o src/f16-rminmax/gen/f16-rmax-avx512skx-u16.c &
 tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -D OP=MAX -o src/f16-rminmax/gen/f16-rmax-avx512skx-u32-acc2.c &
