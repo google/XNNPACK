@@ -7,6 +7,7 @@ load(
     "//:build_defs.bzl",
     "xnnpack_binary",
     "xnnpack_cc_library",
+    "xnnpack_gunit_deps_for_library",
     "xnnpack_unit_test",
 )
 
@@ -54,9 +55,8 @@ xnnpack_cc_library(
     name = "replicable_random_device",
     testonly = True,
     hdrs = ["replicable_random_device.h"],
-    deps = [
+    deps = xnnpack_gunit_deps_for_library() + [
         "//:xnnpack_h",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -65,12 +65,11 @@ xnnpack_cc_library(
     testonly = True,
     srcs = ["gemm-microkernel-tester.cc"],
     hdrs = ["gemm-microkernel-tester.h"],
-    deps = MICROKERNEL_TEST_DEPS + [
+    deps = MICROKERNEL_TEST_DEPS + xnnpack_gunit_deps_for_library() + [
         "//:XNNPACK_test_mode",
         "//:jit",
         "//:packing_test_mode",
         "//:post_operation",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -79,7 +78,7 @@ xnnpack_cc_library(
     testonly = True,
     srcs = ["unary-operator-tester.cc"],
     hdrs = ["unary-operator-tester.h"],
-    deps = OPERATOR_TEST_DEPS + ["@com_google_googletest//:gtest_main"],
+    deps = OPERATOR_TEST_DEPS + xnnpack_gunit_deps_for_library(),
 )
 
 xnnpack_cc_library(
@@ -87,7 +86,7 @@ xnnpack_cc_library(
     testonly = True,
     srcs = ["binary-elementwise-operator-tester.cc"],
     hdrs = ["binary-elementwise-operator-tester.h"],
-    deps = OPERATOR_TEST_DEPS + ["@com_google_googletest//:gtest_main"],
+    deps = OPERATOR_TEST_DEPS + xnnpack_gunit_deps_for_library(),
 )
 
 xnnpack_cc_library(
@@ -95,7 +94,7 @@ xnnpack_cc_library(
     testonly = True,
     srcs = ["vunary-microkernel-tester.cc"],
     hdrs = ["vunary-microkernel-tester.h"],
-    deps = MICROKERNEL_TEST_DEPS + ["@com_google_googletest//:gtest_main"],
+    deps = MICROKERNEL_TEST_DEPS + xnnpack_gunit_deps_for_library(),
 )
 
 xnnpack_cc_library(
@@ -103,7 +102,7 @@ xnnpack_cc_library(
     testonly = True,
     srcs = ["vbinary-microkernel-tester.cc"],
     hdrs = ["vbinary-microkernel-tester.h"],
-    deps = MICROKERNEL_TEST_DEPS + ["@com_google_googletest//:gtest_main"],
+    deps = MICROKERNEL_TEST_DEPS + xnnpack_gunit_deps_for_library(),
 )
 
 xnnpack_cc_library(
@@ -111,7 +110,7 @@ xnnpack_cc_library(
     testonly = True,
     srcs = ["vbinaryc-microkernel-tester.cc"],
     hdrs = ["vbinaryc-microkernel-tester.h"],
-    deps = MICROKERNEL_TEST_DEPS + ["@com_google_googletest//:gtest_main"],
+    deps = MICROKERNEL_TEST_DEPS + xnnpack_gunit_deps_for_library(),
 )
 
 xnnpack_cc_library(
@@ -119,10 +118,9 @@ xnnpack_cc_library(
     testonly = True,
     srcs = ["dwconv-microkernel-tester.cc"],
     hdrs = ["dwconv-microkernel-tester.h"],
-    deps = MICROKERNEL_TEST_DEPS + [
+    deps = MICROKERNEL_TEST_DEPS + xnnpack_gunit_deps_for_library() + [
         "//:microkernel_utils",
         "//:packing_test_mode",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -131,7 +129,7 @@ xnnpack_cc_library(
     testonly = True,
     srcs = ["vcvt-microkernel-tester.cc"],
     hdrs = ["vcvt-microkernel-tester.h"],
-    deps = MICROKERNEL_TEST_DEPS + ["@com_google_googletest//:gtest_main"],
+    deps = MICROKERNEL_TEST_DEPS + xnnpack_gunit_deps_for_library(),
 )
 
 ######################### Unit tests for micro-kernels #########################
@@ -1614,6 +1612,7 @@ xnnpack_unit_test(
         "qs8-qc8w-dwconv-minmax-multipass-fp32.cc",
     ],
     shard_count = 10,
+    tags = ["not_run:hvx_sim"],
     deps = MICROKERNEL_TEST_DEPS + [
         ":dwconv_microkernel_tester",
     ],
@@ -1626,6 +1625,7 @@ xnnpack_unit_test(
         "qs8-qc8w-dwconv-minmax-unipass-fp32.cc",
     ],
     shard_count = 10,
+    tags = ["not_run:hvx_sim"],
     deps = MICROKERNEL_TEST_DEPS + [
         ":dwconv_microkernel_tester",
     ],
@@ -1737,6 +1737,7 @@ xnnpack_unit_test(
         "qs8-dwconv-minmax-unipass-fp32.cc",
     ],
     shard_count = 10,
+    tags = ["not_run:hvx_sim"],
     deps = MICROKERNEL_TEST_DEPS + [
         ":dwconv_microkernel_tester",
     ],
@@ -1774,6 +1775,7 @@ xnnpack_unit_test(
         "gavgpool-microkernel-tester.h",
         "qs8-gavgpool-minmax-fp32.cc",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -1793,6 +1795,7 @@ xnnpack_unit_test(
         "requantization-tester.h",
     ],
     shard_count = 5,
+    tags = ["not_run:hvx_sim"],
     deps = MICROKERNEL_TEST_DEPS + ["//:requantization_stubs"],
 )
 
@@ -1884,6 +1887,7 @@ xnnpack_unit_test(
         "avgpool-microkernel-tester.h",
         "qu8-avgpool-minmax-fp32.cc",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -1893,6 +1897,7 @@ xnnpack_unit_test(
         "qu8-dwconv-minmax-multipass-fp32.cc",
     ],
     shard_count = 10,
+    tags = ["not_run:hvx_sim"],
     deps = MICROKERNEL_TEST_DEPS + [
         ":dwconv_microkernel_tester",
     ],
@@ -1915,6 +1920,7 @@ xnnpack_unit_test(
         "qu8-dwconv-minmax-unipass-fp32.cc",
     ],
     shard_count = 5,
+    tags = ["not_run:hvx_sim"],
     deps = MICROKERNEL_TEST_DEPS + [
         ":dwconv_microkernel_tester",
     ],
@@ -1944,6 +1950,7 @@ xnnpack_unit_test(
         "gavgpool-microkernel-tester.h",
         "qu8-gavgpool-minmax-fp32.cc",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -1963,6 +1970,7 @@ xnnpack_unit_test(
         "qu8-gemm-minmax-fp32-2.cc",
     ],
     shard_count = 10,
+    tags = ["not_run:hvx_sim"],
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -1987,6 +1995,7 @@ xnnpack_unit_test(
         "qu8-igemm-minmax-fp32-2.cc",
     ],
     shard_count = 10,
+    tags = ["not_run:hvx_sim"],
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -2011,6 +2020,7 @@ xnnpack_unit_test(
         "requantization-tester.h",
     ],
     shard_count = 5,
+    tags = ["not_run:hvx_sim"],
     deps = MICROKERNEL_TEST_DEPS + ["//:requantization_stubs"],
 )
 
@@ -2454,6 +2464,7 @@ xnnpack_unit_test(
         "add-nd.cc",
     ],
     shard_count = 5,
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
 )
 
@@ -2463,6 +2474,7 @@ xnnpack_unit_test(
     srcs = [
         "add-nd-eager.cc",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
 )
 
@@ -2472,6 +2484,7 @@ xnnpack_unit_test(
         "argmax-pooling-nhwc.cc",
         "argmax-pooling-operator-tester.h",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -2482,6 +2495,7 @@ xnnpack_unit_test(
         "average-pooling-operator-tester.h",
     ],
     shard_count = 5,
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -2503,6 +2517,7 @@ xnnpack_unit_test(
         "batch-matrix-multiply-operator-tester.h",
     ],
     shard_count = 2,
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -2530,6 +2545,7 @@ xnnpack_unit_test(
     srcs = [
         "clamp-nc.cc",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [
         ":unary_operator_tester",
     ],
@@ -2542,6 +2558,7 @@ xnnpack_unit_test(
         "constant-pad-operator-tester.h",
     ],
     shard_count = 5,
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -2552,6 +2569,7 @@ xnnpack_unit_test(
         "constant-pad-operator-tester.h",
     ],
     shard_count = 5,
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -2561,6 +2579,7 @@ xnnpack_unit_test(
         "convert-nc.cc",
         "convert-operator-tester.h",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -2570,6 +2589,7 @@ xnnpack_unit_test(
         "convert-nc-eager.cc",
         "convert-operator-tester.h",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -2581,6 +2601,7 @@ xnnpack_unit_test(
         "convolution-operator-tester.h",
     ],
     shard_count = 10,
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [
         ":convolution_test_helpers",
     ],
@@ -2593,6 +2614,7 @@ xnnpack_unit_test(
         "convolution-nchw.cc",
         "convolution-operator-tester.h",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [
         ":convolution_test_helpers",
     ],
@@ -2625,6 +2647,7 @@ xnnpack_unit_test(
         "deconvolution-operator-tester.h",
     ],
     shard_count = 10,
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [
         ":convolution_test_helpers",
     ],
@@ -2654,6 +2677,7 @@ xnnpack_unit_test(
         "divide-nd.cc",
     ],
     shard_count = 5,
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
 )
 
@@ -2662,6 +2686,7 @@ xnnpack_unit_test(
     srcs = [
         "divide-nd-eager.cc",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
 )
 
@@ -2709,6 +2734,7 @@ xnnpack_unit_test(
         "global-average-pooling-nwc.cc",
         "global-average-pooling-operator-tester.h",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -2759,6 +2785,7 @@ xnnpack_unit_test(
         "max-pooling-operator-tester.h",
     ],
     shard_count = 10,
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -2768,6 +2795,7 @@ xnnpack_unit_test(
         "maximum-nd.cc",
     ],
     shard_count = 5,
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
 )
 
@@ -2776,6 +2804,7 @@ xnnpack_unit_test(
     srcs = [
         "maximum-nd-eager.cc",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
 )
 
@@ -2786,6 +2815,7 @@ xnnpack_unit_test(
         "mean-nd.cc",
         "mean-operator-tester.h",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -2795,6 +2825,7 @@ xnnpack_unit_test(
         "minimum-nd.cc",
     ],
     shard_count = 5,
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
 )
 
@@ -2803,6 +2834,7 @@ xnnpack_unit_test(
     srcs = [
         "minimum-nd-eager.cc",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
 )
 
@@ -2813,6 +2845,7 @@ xnnpack_unit_test(
         "multiply-nd.cc",
     ],
     shard_count = 5,
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
 )
 
@@ -2822,6 +2855,7 @@ xnnpack_unit_test(
     srcs = [
         "multiply-nd-eager.cc",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
 )
 
@@ -2915,6 +2949,7 @@ xnnpack_unit_test(
         "scaled-dot-product-attention-nhtc.cc",
         "scaled-dot-product-attention-operator-tester.h",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -2993,6 +3028,7 @@ xnnpack_unit_test(
         "squared-difference-nd.cc",
     ],
     shard_count = 5,
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
 )
 
@@ -3001,6 +3037,7 @@ xnnpack_unit_test(
     srcs = [
         "squared-difference-nd-eager.cc",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
 )
 
@@ -3010,6 +3047,7 @@ xnnpack_unit_test(
         "subtract-nd.cc",
     ],
     shard_count = 10,
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
 )
 
@@ -3019,6 +3057,7 @@ xnnpack_unit_test(
         "subtract-nd-eager.cc",
     ],
     shard_count = 5,
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
 )
 
@@ -3039,6 +3078,7 @@ xnnpack_unit_test(
         "transpose-operator-tester.h",
     ],
     shard_count = 10,
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -3049,6 +3089,7 @@ xnnpack_unit_test(
         "transpose-operator-tester.h",
     ],
     shard_count = 5,
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -3068,6 +3109,7 @@ xnnpack_unit_test(
         "unpooling-nhwc.cc",
         "unpooling-operator-tester.h",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -3083,6 +3125,7 @@ xnnpack_cc_library(
         "convolution-test-helpers.h",
     ],
     deps = [
+        "//:microparams",
         "//:quantization",
     ],
 )
@@ -3093,14 +3136,13 @@ xnnpack_cc_library(
     hdrs = [
         "subgraph-unary-tester.h",
     ],
-    deps = [
+    deps = xnnpack_gunit_deps_for_library() + [
         ":replicable_random_device",
         "//:node_type",
         "//:operators_test_mode",
         "//:requantization",
         "//:subgraph_test_mode",
         "//:xnnpack_h",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -3110,14 +3152,13 @@ xnnpack_cc_library(
     hdrs = [
         "subgraph-binary-tester.h",
     ],
-    deps = [
+    deps = xnnpack_gunit_deps_for_library() + [
         ":replicable_random_device",
         "//:node_type",
         "//:operators_test_mode",
         "//:requantization",
         "//:subgraph_test_mode",
         "//:xnnpack_h",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -3415,6 +3456,7 @@ xnnpack_unit_test(
         "deconvolution-2d.cc",
     ],
     shard_count = 5,
+    tags = ["not_run:hvx_sim"],
     deps = [
         ":replicable_random_device",
         "@FP16",
@@ -4087,6 +4129,7 @@ xnnpack_unit_test(
         "runtime-tester.h",
         "subgraph-tester.h",
     ],
+    tags = ["not_run:hvx_sim"],
     deps = [
         ":replicable_random_device",
         "//:XNNPACK_test_mode",
@@ -4255,6 +4298,7 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "mutex_test",
     srcs = ["mutex.cc"],
+    tags = ["not_run:hvx_sim"],
     deps = [
         ":replicable_random_device",
         "//:common",
