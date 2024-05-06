@@ -82,6 +82,36 @@ BENCHMARK_CAPTURE(f32_rsum_discontig, scalar_c4,
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(f32_rsum_discontig, avx_c16,
+                    xnn_f32_rdsum_ukernel_7p7x__avx_c16,
+                    xnn_init_f32_scale_avx_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(f32_rsum_discontig, avx_c32,
+                    xnn_f32_rdsum_ukernel_7p7x__avx_c32,
+                    xnn_init_f32_scale_avx_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(f32_rsum_discontig, avx_c64,
+                    xnn_f32_rdsum_ukernel_7p7x__avx_c64,
+                    xnn_init_f32_scale_avx_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif

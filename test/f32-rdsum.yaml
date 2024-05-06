@@ -20,3 +20,10 @@
   init: xnn_init_f32_scale_sse_params
 - name: xnn_f32_rdsum_ukernel_7p7x__sse_c64
   init: xnn_init_f32_scale_sse_params
+# x86 AVX
+- name: xnn_f32_rdsum_ukernel_7p7x__avx_c16
+  init: xnn_init_f32_scale_avx_params
+- name: xnn_f32_rdsum_ukernel_7p7x__avx_c32
+  init: xnn_init_f32_scale_avx_params
+- name: xnn_f32_rdsum_ukernel_7p7x__avx_c64
+  init: xnn_init_f32_scale_avx_params
