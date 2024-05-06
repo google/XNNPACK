@@ -1548,7 +1548,17 @@ SET(ALL_AVX512FP16_MICROKERNEL_SRCS
   src/f16-rminmax/gen/f16-rmax-avx512fp16-u64-acc2.c
   src/f16-rminmax/gen/f16-rmax-avx512fp16-u96-acc3.c
   src/f16-rminmax/gen/f16-rmax-avx512fp16-u128-acc2.c
-  src/f16-rminmax/gen/f16-rmax-avx512fp16-u128-acc4.c)
+  src/f16-rminmax/gen/f16-rmax-avx512fp16-u128-acc4.c
+  src/f16-rminmax/gen/f16-rmin-avx512fp16-u32.c
+  src/f16-rminmax/gen/f16-rmin-avx512fp16-u64-acc2.c
+  src/f16-rminmax/gen/f16-rmin-avx512fp16-u96-acc3.c
+  src/f16-rminmax/gen/f16-rmin-avx512fp16-u128-acc2.c
+  src/f16-rminmax/gen/f16-rmin-avx512fp16-u128-acc4.c
+  src/f16-rminmax/gen/f16-rminmax-avx512fp16-u32.c
+  src/f16-rminmax/gen/f16-rminmax-avx512fp16-u64-acc2.c
+  src/f16-rminmax/gen/f16-rminmax-avx512fp16-u96-acc3.c
+  src/f16-rminmax/gen/f16-rminmax-avx512fp16-u128-acc2.c
+  src/f16-rminmax/gen/f16-rminmax-avx512fp16-u128-acc4.c)
 
 SET(ALL_AVX512SKX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-u16.c
