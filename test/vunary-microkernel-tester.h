@@ -131,11 +131,18 @@ class VUnaryMicrokernelTester {
   static float TolExact16(float y_ref) { return std::abs(y_ref) * 5.0e-4f; }
   static std::function<float(float)> TolMixed(float abs_tol, float rel_tol) {
     return [=](float y_ref) -> float {
-      return std::max(abs_tol, std::abs(y_ref) * rel_tol);
+      return std::max(abs_tol, std::abs(y_ref * (1.0f + rel_tol) - y_ref));
     };
   }
   static std::function<float(float)> TolRelative(float rel_tol) {
-    return [=](float y_ref) -> float { return std::abs(y_ref) * rel_tol; };
+    return [=](float y_ref) -> float {
+      // Note that `y_ref * rel_tol`, i.e. the expected absolute difference,
+      // may round differently than `y_ref * (1 + rel_tol) - y_ref`, i.e. the
+      // effective absolute difference computed in `float`s. We therefore use
+      // the latter form since it is the true difference between two `float`s
+      // within the given relative tolerance.
+      return std::abs(y_ref * (1.0f + rel_tol) - y_ref);
+    };
   }
 
   void Test(xnn_f32_vrelu_ukernel_fn vrelu) const;
