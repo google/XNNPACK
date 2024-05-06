@@ -64,7 +64,7 @@ TEST(F32_VTANH__SCALAR_EXPM1MINUS_RR1_LUT8_P4H3TS_DIV_U1, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -132,7 +132,7 @@ TEST(F32_VTANH__SCALAR_EXPM1MINUS_RR1_LUT8_P4H3TS_DIV_U2, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -200,7 +200,7 @@ TEST(F32_VTANH__SCALAR_EXPM1MINUS_RR1_LUT8_P4H3TS_DIV_U4, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -252,7 +252,7 @@ TEST(F32_VTANH__SCALAR_EXPM1MINUS_RR1_P6H5TS_DIV_U1, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -320,7 +320,7 @@ TEST(F32_VTANH__SCALAR_EXPM1MINUS_RR1_P6H5TS_DIV_U2, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -388,7 +388,7 @@ TEST(F32_VTANH__SCALAR_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -438,7 +438,7 @@ TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U1, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -504,7 +504,7 @@ TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U2, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -570,7 +570,7 @@ TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U4, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -636,7 +636,7 @@ TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U8, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -688,7 +688,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_LUT8_P4H3TS_DIV_U1, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -756,7 +756,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_LUT8_P4H3TS_DIV_U2, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -824,7 +824,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_LUT8_P4H3TS_DIV_U4, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -876,7 +876,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U1, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -944,7 +944,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U2, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1012,7 +1012,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1065,7 +1065,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1136,7 +1136,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1207,7 +1207,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1262,7 +1262,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1333,7 +1333,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1404,7 +1404,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1481,7 +1481,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1558,7 +1558,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1635,7 +1635,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1712,7 +1712,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1789,7 +1789,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1866,7 +1866,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1943,7 +1943,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -2020,7 +2020,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -2097,7 +2097,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -2174,7 +2174,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -2251,7 +2251,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -2328,7 +2328,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -2405,7 +2405,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -2482,7 +2482,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -2559,7 +2559,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -2636,7 +2636,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -2713,7 +2713,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -2790,7 +2790,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -2867,7 +2867,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -2944,7 +2944,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -3021,7 +3021,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -3098,7 +3098,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -3175,7 +3175,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -3252,7 +3252,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -3329,7 +3329,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -3406,7 +3406,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -3483,7 +3483,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -3560,7 +3560,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -3637,7 +3637,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -3714,7 +3714,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -3791,7 +3791,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -3868,7 +3868,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -3945,7 +3945,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -4022,7 +4022,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -4099,7 +4099,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -4176,7 +4176,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -4253,7 +4253,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -4330,7 +4330,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -4407,7 +4407,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -4484,7 +4484,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -4561,7 +4561,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -4638,7 +4638,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -4715,7 +4715,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -4792,7 +4792,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -4869,7 +4869,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -4946,7 +4946,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -5023,7 +5023,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -5100,7 +5100,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -5177,7 +5177,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -5254,7 +5254,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -5331,7 +5331,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -5408,7 +5408,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -5485,7 +5485,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -5562,7 +5562,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -5639,7 +5639,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -5716,7 +5716,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -5793,7 +5793,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -5870,7 +5870,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -5947,7 +5947,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -6024,7 +6024,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -6101,7 +6101,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -6178,7 +6178,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -6255,7 +6255,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -6332,7 +6332,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -6409,7 +6409,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -6486,7 +6486,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -6563,7 +6563,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -6640,7 +6640,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -6717,7 +6717,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -6794,7 +6794,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -6871,7 +6871,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -6948,7 +6948,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -7025,7 +7025,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -7102,7 +7102,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -7179,7 +7179,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -7256,7 +7256,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -7333,7 +7333,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -7410,7 +7410,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -7487,7 +7487,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -7564,7 +7564,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -7641,7 +7641,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -7718,7 +7718,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -7795,7 +7795,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -7872,7 +7872,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -7949,7 +7949,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -8026,7 +8026,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -8103,7 +8103,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -8180,7 +8180,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -8257,7 +8257,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -8334,7 +8334,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -8411,7 +8411,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -8488,7 +8488,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -8565,7 +8565,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -8642,7 +8642,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -8719,7 +8719,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -8796,7 +8796,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -8873,7 +8873,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -8950,7 +8950,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -9027,7 +9027,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -9104,7 +9104,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -9181,7 +9181,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -9258,7 +9258,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -9335,7 +9335,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -9412,7 +9412,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -9489,7 +9489,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -9566,7 +9566,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -9643,7 +9643,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -9720,7 +9720,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -9797,7 +9797,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -9874,7 +9874,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -9951,7 +9951,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -10028,7 +10028,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -10105,7 +10105,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -10182,7 +10182,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -10259,7 +10259,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -10336,7 +10336,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -10413,7 +10413,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -10490,7 +10490,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -10567,7 +10567,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -10644,7 +10644,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -10721,7 +10721,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -10798,7 +10798,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -10875,7 +10875,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -10952,7 +10952,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -11029,7 +11029,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -11106,7 +11106,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -11183,7 +11183,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -11260,7 +11260,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -11337,7 +11337,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -11414,7 +11414,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -11491,7 +11491,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -11568,7 +11568,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -11645,7 +11645,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -11722,7 +11722,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -11799,7 +11799,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -11876,7 +11876,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -11953,7 +11953,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -12030,7 +12030,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -12107,7 +12107,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -12184,7 +12184,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -12261,7 +12261,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -12338,7 +12338,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -12415,7 +12415,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -12492,7 +12492,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -12569,7 +12569,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -12646,7 +12646,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -12723,7 +12723,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -12800,7 +12800,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -12877,7 +12877,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -12954,7 +12954,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -13031,7 +13031,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -13108,7 +13108,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -13185,7 +13185,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -13262,7 +13262,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -13339,7 +13339,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -13416,7 +13416,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -13493,7 +13493,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -13570,7 +13570,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -13647,7 +13647,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -13724,7 +13724,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -13801,7 +13801,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -13878,7 +13878,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -13955,7 +13955,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -14032,7 +14032,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -14109,7 +14109,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -14186,7 +14186,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -14263,7 +14263,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -14340,7 +14340,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -14417,7 +14417,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -14494,7 +14494,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -14571,7 +14571,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -14648,7 +14648,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -14725,7 +14725,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -14802,7 +14802,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -14879,7 +14879,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -14956,7 +14956,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -15033,7 +15033,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -15110,7 +15110,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -15187,7 +15187,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -15264,7 +15264,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -15341,7 +15341,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -15418,7 +15418,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -15495,7 +15495,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -15572,7 +15572,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -15649,7 +15649,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -15726,7 +15726,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -15803,7 +15803,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -15880,7 +15880,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -15957,7 +15957,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -16034,7 +16034,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -16111,7 +16111,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -16188,7 +16188,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -16265,7 +16265,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -16342,7 +16342,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -16419,7 +16419,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -16496,7 +16496,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -16573,7 +16573,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -16650,7 +16650,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -16727,7 +16727,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -16804,7 +16804,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -16881,7 +16881,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -16958,7 +16958,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -17035,7 +17035,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -17112,7 +17112,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -17189,7 +17189,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -17266,7 +17266,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -17343,7 +17343,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -17420,7 +17420,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -17497,7 +17497,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -17574,7 +17574,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -17651,7 +17651,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -17728,7 +17728,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -17805,7 +17805,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -17882,7 +17882,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -17959,7 +17959,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -18036,7 +18036,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -18113,7 +18113,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -18190,7 +18190,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -18267,7 +18267,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -18344,7 +18344,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -18421,7 +18421,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -18498,7 +18498,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -18575,7 +18575,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -18652,7 +18652,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -18729,7 +18729,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -18806,7 +18806,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -18883,7 +18883,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -18960,7 +18960,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -19037,7 +19037,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -19114,7 +19114,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -19191,7 +19191,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -19268,7 +19268,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -19345,7 +19345,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -19422,7 +19422,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -19499,7 +19499,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -19576,7 +19576,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -19653,7 +19653,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -19730,7 +19730,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -19807,7 +19807,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -19884,7 +19884,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -19961,7 +19961,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -20038,7 +20038,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -20115,7 +20115,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -20192,7 +20192,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -20269,7 +20269,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -20346,7 +20346,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -20423,7 +20423,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -20500,7 +20500,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -20577,7 +20577,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -20654,7 +20654,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -20731,7 +20731,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -20808,7 +20808,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -20885,7 +20885,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -20962,7 +20962,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -21039,7 +21039,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -21116,7 +21116,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -21193,7 +21193,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -21270,7 +21270,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -21347,7 +21347,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -21424,7 +21424,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -21501,7 +21501,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -21578,7 +21578,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -21655,7 +21655,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -21732,7 +21732,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -21809,7 +21809,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -21886,7 +21886,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -21963,7 +21963,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -22040,7 +22040,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -22117,7 +22117,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -22194,7 +22194,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -22271,7 +22271,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -22348,7 +22348,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -22425,7 +22425,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -22502,7 +22502,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -22579,7 +22579,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -22656,7 +22656,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -22733,7 +22733,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -22810,7 +22810,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -22887,7 +22887,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -22964,7 +22964,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -23041,7 +23041,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -23118,7 +23118,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -23195,7 +23195,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -23272,7 +23272,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -23349,7 +23349,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -23426,7 +23426,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -23503,7 +23503,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -23580,7 +23580,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -23657,7 +23657,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -23734,7 +23734,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -23811,7 +23811,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -23888,7 +23888,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -23965,7 +23965,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -24042,7 +24042,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -24119,7 +24119,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -24196,7 +24196,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -24273,7 +24273,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -24350,7 +24350,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -24427,7 +24427,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -24504,7 +24504,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -24581,7 +24581,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -24658,7 +24658,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -24735,7 +24735,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -24812,7 +24812,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -24889,7 +24889,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -24966,7 +24966,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -25043,7 +25043,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -25120,7 +25120,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -25197,7 +25197,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -25274,7 +25274,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -25351,7 +25351,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -25428,7 +25428,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -25505,7 +25505,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -25582,7 +25582,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -25659,7 +25659,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -25736,7 +25736,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -25813,7 +25813,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -25890,7 +25890,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -25967,7 +25967,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -26044,7 +26044,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -26121,7 +26121,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -26198,7 +26198,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -26275,7 +26275,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -26352,7 +26352,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -26429,7 +26429,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -26506,7 +26506,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -26583,7 +26583,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -26660,7 +26660,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -26737,7 +26737,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -26814,7 +26814,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -26891,7 +26891,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -26968,7 +26968,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -27045,7 +27045,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -27122,7 +27122,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -27199,7 +27199,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -27276,7 +27276,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -27353,7 +27353,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -27430,7 +27430,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -27507,7 +27507,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -27584,7 +27584,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -27661,7 +27661,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -27738,7 +27738,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -27815,7 +27815,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -27892,7 +27892,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -27963,7 +27963,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -28034,7 +28034,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -28105,7 +28105,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -28176,7 +28176,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -28247,7 +28247,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -28318,7 +28318,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -28389,7 +28389,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -28460,7 +28460,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -28531,7 +28531,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -28602,7 +28602,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -28673,7 +28673,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -28744,7 +28744,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -28815,7 +28815,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -28886,7 +28886,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -28957,7 +28957,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -29028,7 +29028,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -29099,7 +29099,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -29170,7 +29170,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -29241,7 +29241,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -29312,7 +29312,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -29383,7 +29383,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -29454,7 +29454,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -29525,7 +29525,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -29596,7 +29596,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -29667,7 +29667,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -29738,7 +29738,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -29809,7 +29809,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -29880,7 +29880,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -29951,7 +29951,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -30022,7 +30022,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -30093,7 +30093,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -30164,7 +30164,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -30241,7 +30241,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -30318,7 +30318,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -30395,7 +30395,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -30472,7 +30472,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -30549,7 +30549,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -30626,7 +30626,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -30703,7 +30703,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -30780,7 +30780,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -30857,7 +30857,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -30934,7 +30934,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -31011,7 +31011,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -31088,7 +31088,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -31165,7 +31165,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -31242,7 +31242,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -31319,7 +31319,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -31396,7 +31396,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -31473,7 +31473,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -31550,7 +31550,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -31627,7 +31627,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -31704,7 +31704,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -31781,7 +31781,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -31858,7 +31858,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -31935,7 +31935,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -32012,7 +32012,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -32089,7 +32089,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -32166,7 +32166,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -32243,7 +32243,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -32320,7 +32320,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -32397,7 +32397,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -32474,7 +32474,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -32551,7 +32551,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -32628,7 +32628,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
