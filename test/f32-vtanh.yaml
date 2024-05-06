@@ -17,6 +17,11 @@
 - name: xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_p6h5ts_div_u4
   init: xnn_init_f32_tanh_scalar_expm1minus_rr1_p6h5_params
 
+- name: xnn_f32_vtanh_ukernel__scalar_rational_9_6_u1
+- name: xnn_f32_vtanh_ukernel__scalar_rational_9_6_u2
+- name: xnn_f32_vtanh_ukernel__scalar_rational_9_6_u4
+- name: xnn_f32_vtanh_ukernel__scalar_rational_9_6_u8
+
 # Scalar+FMA
 - name: xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3ts_div_u1
   init: xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params
@@ -78,6 +83,24 @@
   init: xnn_init_f32_tanh_sse_expm1minus_rr1_p6h5_params
 - name: xnn_f32_vtanh_ukernel__sse2_expm1minus_rr1_p6h5ts_nr2_u16
   init: xnn_init_f32_tanh_sse_expm1minus_rr1_p6h5_params
+
+- name: xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u4
+  init: xnn_init_f32_tanh_sse_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u8
+  init: xnn_init_f32_tanh_sse_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u12
+  init: xnn_init_f32_tanh_sse_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u16
+  init: xnn_init_f32_tanh_sse_rational_9_6_params
+
+- name: xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u4
+  init: xnn_init_f32_tanh_sse_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u8
+  init: xnn_init_f32_tanh_sse_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u12
+  init: xnn_init_f32_tanh_sse_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u16
+  init: xnn_init_f32_tanh_sse_rational_9_6_params
 
 # SSE4.1
 - name: xnn_f32_vtanh_ukernel__sse41_expm1minus_rr1_lut8_p4h3ts_div_u4
@@ -219,6 +242,24 @@
 - name: xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5ts_nr2_u80
   init: xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params
 
+- name: xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u8
+  init: xnn_init_f32_tanh_avx_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u16
+  init: xnn_init_f32_tanh_avx_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u24
+  init: xnn_init_f32_tanh_avx_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u32
+  init: xnn_init_f32_tanh_avx_rational_9_6_params
+
+- name: xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u8
+  init: xnn_init_f32_tanh_avx_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u16
+  init: xnn_init_f32_tanh_avx_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u24
+  init: xnn_init_f32_tanh_avx_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u32
+  init: xnn_init_f32_tanh_avx_rational_9_6_params
+
 # FMA3
 - name: xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3ts_perm_div_u8
   init: xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params
@@ -336,6 +377,24 @@
   init: xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params
 - name: xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5ts_nr1adj_u80
   init: xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params
+
+- name: xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u8
+  init: xnn_init_f32_tanh_fma3_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u16
+  init: xnn_init_f32_tanh_fma3_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u24
+  init: xnn_init_f32_tanh_fma3_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u32
+  init: xnn_init_f32_tanh_fma3_rational_9_6_params
+
+- name: xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u8
+  init: xnn_init_f32_tanh_fma3_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u16
+  init: xnn_init_f32_tanh_fma3_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u24
+  init: xnn_init_f32_tanh_fma3_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u32
+  init: xnn_init_f32_tanh_fma3_rational_9_6_params
 
 # AVX2
 - name: xnn_f32_vtanh_ukernel__avx2_expm1minus_rr1_lut4_p4h3ts_perm_div_u8
@@ -519,7 +578,6 @@
 - name: xnn_f32_vtanh_ukernel__avx2_expm1minus_rr1_p6h5ts_nr1adj_u80
   init: xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params
 
-
 # AVX-512
 - name: xnn_f32_vtanh_ukernel__avx512skx_expm1minus_rr1_lut4_p4h3ts_perm_div_u16
   init: xnn_init_f32_tanh_avx512_expm1minus_rr1_lut4_p4h3_perm_params
@@ -681,6 +739,24 @@
   init: xnn_init_f32_tanh_avx512_expm1minus_rr1_p6h5_params
 - name: xnn_f32_vtanh_ukernel__avx512skx_expm1minus_rr1_p6h5ts_nr1_u160
   init: xnn_init_f32_tanh_avx512_expm1minus_rr1_p6h5_params
+
+- name: xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u16
+  init: xnn_init_f32_tanh_avx512_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u32
+  init: xnn_init_f32_tanh_avx512_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u48
+  init: xnn_init_f32_tanh_avx512_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u64
+  init: xnn_init_f32_tanh_avx512_rational_9_6_params
+
+- name: xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u16
+  init: xnn_init_f32_tanh_avx512_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u32
+  init: xnn_init_f32_tanh_avx512_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u48
+  init: xnn_init_f32_tanh_avx512_rational_9_6_params
+- name: xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u64
+  init: xnn_init_f32_tanh_avx512_rational_9_6_params
 
 # Wasm SIMD
 - name: xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_lut8_p4h3ts_div_abs_min_u4

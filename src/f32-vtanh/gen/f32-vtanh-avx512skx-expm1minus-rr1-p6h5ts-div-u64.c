@@ -50,10 +50,18 @@ void xnn_f32_vtanh_ukernel__avx512skx_expm1minus_rr1_p6h5ts_div_u64(
     const __m512 vx3 = _mm512_loadu_ps(input + 48);
     input += 64;
 
-    const __m512 vz0 = _mm512_range_ps(vsat_cutoff, vx0, 0xA);
-    const __m512 vz1 = _mm512_range_ps(vsat_cutoff, vx1, 0xA);
-    const __m512 vz2 = _mm512_range_ps(vsat_cutoff, vx2, 0xA);
-    const __m512 vz3 = _mm512_range_ps(vsat_cutoff, vx3, 0xA);
+    const __mmask16 vnan_mask0 = _mm512_cmp_ps_mask(vx0, vx0, _CMP_EQ_OQ);
+    __m512 vz0 = _mm512_range_ps(vsat_cutoff, vx0, 0xA);
+    vz0 = _mm512_mask_blend_ps(vnan_mask0, vx0, vz0);
+    const __mmask16 vnan_mask1 = _mm512_cmp_ps_mask(vx1, vx1, _CMP_EQ_OQ);
+    __m512 vz1 = _mm512_range_ps(vsat_cutoff, vx1, 0xA);
+    vz1 = _mm512_mask_blend_ps(vnan_mask1, vx1, vz1);
+    const __mmask16 vnan_mask2 = _mm512_cmp_ps_mask(vx2, vx2, _CMP_EQ_OQ);
+    __m512 vz2 = _mm512_range_ps(vsat_cutoff, vx2, 0xA);
+    vz2 = _mm512_mask_blend_ps(vnan_mask2, vx2, vz2);
+    const __mmask16 vnan_mask3 = _mm512_cmp_ps_mask(vx3, vx3, _CMP_EQ_OQ);
+    __m512 vz3 = _mm512_range_ps(vsat_cutoff, vx3, 0xA);
+    vz3 = _mm512_mask_blend_ps(vnan_mask3, vx3, vz3);
     __m512 vn0 = _mm512_fmadd_ps(vz0, vminus_log2e, vmagic_bias);
     __m512 vn1 = _mm512_fmadd_ps(vz1, vminus_log2e, vmagic_bias);
     __m512 vn2 = _mm512_fmadd_ps(vz2, vminus_log2e, vmagic_bias);
@@ -134,7 +142,9 @@ void xnn_f32_vtanh_ukernel__avx512skx_expm1minus_rr1_p6h5ts_div_u64(
     const __m512 vx = _mm512_loadu_ps(input);
     input += 16;
 
-    const __m512 vz = _mm512_range_ps(vsat_cutoff, vx, 0xA);
+    const __mmask16 vnan_mask = _mm512_cmp_ps_mask(vx, vx, _CMP_EQ_OQ);
+    __m512 vz = _mm512_range_ps(vsat_cutoff, vx, 0xA);
+    vz = _mm512_mask_blend_ps(vnan_mask, vx, vz);
     __m512 vn = _mm512_fmadd_ps(vz, vminus_log2e, vmagic_bias);
 
     const __m512 vs = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(vn), 23));
@@ -171,7 +181,9 @@ void xnn_f32_vtanh_ukernel__avx512skx_expm1minus_rr1_p6h5ts_div_u64(
 
     const __m512 vx = _mm512_maskz_loadu_ps(vmask, input);
 
-    const __m512 vz = _mm512_range_ps(vsat_cutoff, vx, 0xA);
+    const __mmask16 vnan_mask = _mm512_cmp_ps_mask(vx, vx, _CMP_EQ_OQ);
+    __m512 vz = _mm512_range_ps(vsat_cutoff, vx, 0xA);
+    vz = _mm512_mask_blend_ps(vnan_mask, vx, vz);
     __m512 vn = _mm512_fmadd_ps(vz, vminus_log2e, vmagic_bias);
 
     const __m512 vs = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(vn), 23));

@@ -210,7 +210,7 @@ class VUnaryMicrokernelTester {
             xnn_init_f16_tanh_params_fn init_params = nullptr) const;
 
   void Test(xnn_f32_vtanh_ukernel_fn vtanh,
-            xnn_init_f32_tanh_params_fn init_params) const;
+            xnn_init_f32_tanh_params_fn init_params = nullptr) const;
 
   void Test(xnn_f16_vclamp_ukernel_fn vclamp,
             xnn_init_f16_minmax_params_fn init_params) const;
