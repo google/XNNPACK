@@ -77,12 +77,6 @@ static void init_f16_rminmax_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-
-    #if XNN_ENABLE_AVX512FP16
-      if (hardware_config->use_x86_avx512fp16) {
-        f16_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rminmax_ukernel__avx512fp16_u128_acc4;
-      } else
-    #endif
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
       f16_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rminmax_ukernel__avx512skx_u64_acc4;
     } else {
