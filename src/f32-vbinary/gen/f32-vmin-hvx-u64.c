@@ -1,10 +1,11 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-vbinary/vop-hexagon.c.in
+//   Template: src/f32-vbinary/vop-hvx.c.in
 //   Generator: tools/xngen
 //
 
 #include <assert.h>
 
+#include <hvx_hexagon_protos.h>
 #include <hexagon_protos.h>
 #include <hexagon_types.h>
 
@@ -12,7 +13,7 @@
 #include <xnnpack/math.h>
 #include <xnnpack/vbinary.h>
 
-void xnn_f32_vmin_ukernel__hexagon_u64(
+void xnn_f32_vmin_ukernel__hvx_u64(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -26,34 +27,39 @@ void xnn_f32_vmin_ukernel__hexagon_u64(
   assert(output != NULL);
 
 
+  const HVX_Vector *vptr_a = (const HVX_Vector *) input_a;
+  const HVX_Vector *vptr_b = (const HVX_Vector *) input_b;
+  HVX_Vector *vptr_o = (HVX_Vector*) output;
+
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
-    const HVX_Vector va0 = *((const HVX_Vector*) input_a); input_a += 32;
-    const HVX_Vector vb0 = *((const HVX_Vector*) input_b); input_b += 32;
-    const HVX_Vector va1 = *((const HVX_Vector*) input_a); input_a += 32;
-    const HVX_Vector vb1 = *((const HVX_Vector*) input_b); input_b += 32;
+    HVX_Vector va0 = *vptr_a++;
+    HVX_Vector vb0 = *vptr_b++;
+    HVX_Vector va1 = *vptr_a++;
+    HVX_Vector vb1 = *vptr_b++;
 
     HVX_Vector vacc0 = Q6_Vsf_vmin_VsfVsf(va0, vb0);
     HVX_Vector vacc1 = Q6_Vsf_vmin_VsfVsf(va1, vb1);
 
 
 
-    *((HVX_Vector*) output) = vacc0; output += 32;
-    *((HVX_Vector*) output) = vacc1; output += 32;
+    *vptr_o++ = vacc0;
+    *vptr_o++ = vacc1;
   }
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
-    const HVX_Vector va = *((const HVX_Vector*) input_a); input_a += 32;
-    const HVX_Vector vb = *((const HVX_Vector*) input_b); input_b += 32;
+    HVX_Vector va = *vptr_a++;
+    HVX_Vector vb = *vptr_b++;
 
     HVX_Vector vacc = Q6_Vsf_vmin_VsfVsf(va, vb);
 
-    *((HVX_Vector*) output) = vacc; output += 32;
+    *vptr_o++ = vacc;
   }
   if XNN_UNLIKELY(batch != 0) {
-     const HVX_Vector va = *((const HVX_Vector*) input_a);
-     const HVX_Vector vb = *((const HVX_Vector*) input_b);
+     HVX_Vector va = *vptr_a;
+     HVX_Vector vb = *vptr_b;
 
      HVX_Vector vacc = Q6_Vsf_vmin_VsfVsf(va, vb);
 
-     *((HVX_Vector*) output) = vacc;
+     HVX_VectorPred mask = Q6_Q_vsetq_R(batch);
+     Q6_vmem_QRIV(mask, vptr_o, vacc);
   }
 }

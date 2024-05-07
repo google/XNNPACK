@@ -1,10 +1,11 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-vbinary/vop-hexagon.c.in
+//   Template: src/f32-vbinary/vop-hvx.c.in
 //   Generator: tools/xngen
 //
 
 #include <assert.h>
 
+#include <hvx_hexagon_protos.h>
 #include <hexagon_protos.h>
 #include <hexagon_types.h>
 
@@ -12,7 +13,7 @@
 #include <xnnpack/math.h>
 #include <xnnpack/vbinary.h>
 
-void xnn_f32_vmul_minmax_ukernel__hexagon_u32(
+void xnn_f32_vmul_minmax_ukernel__hvx_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -25,27 +26,32 @@ void xnn_f32_vmul_minmax_ukernel__hexagon_u32(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const HVX_Vector voutput_min = Q6_V_vsplat_R(params->scalar.min);
-  const HVX_Vector voutput_max = Q6_V_vsplat_R(params->scalar.max);
+  const HVX_Vector voutput_min = Q6_V_vsplat_R(*((uint32_t *) &params->scalar.min));
+  const HVX_Vector voutput_max = Q6_V_vsplat_R(*((uint32_t *) &params->scalar.max));
+
+  const HVX_Vector *vptr_a = (const HVX_Vector *) input_a;
+  const HVX_Vector *vptr_b = (const HVX_Vector *) input_b;
+  HVX_Vector *vptr_o = (HVX_Vector*) output;
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
-    const HVX_Vector va = *((const HVX_Vector*) input_a); input_a += 32;
-    const HVX_Vector vb = *((const HVX_Vector*) input_b); input_b += 32;
+    HVX_Vector va = *vptr_a++;
+    HVX_Vector vb = *vptr_b++;
 
-    HVX_Vector vacc = Q6_Vqf32_vmpy_VsfVsf(va, vb);
+    HVX_Vector vacc = Q6_Vsf_vmpy_VsfVsf(va, vb);
     vacc = Q6_Vsf_vmax_VsfVsf(vacc, voutput_min);
     vacc = Q6_Vsf_vmin_VsfVsf(vacc, voutput_max);
 
-    *((HVX_Vector*) output) = vacc; output += 32;
+    *vptr_o++ = vacc;
   }
   if XNN_UNLIKELY(batch != 0) {
-     const HVX_Vector va = *((const HVX_Vector*) input_a);
-     const HVX_Vector vb = *((const HVX_Vector*) input_b);
+     HVX_Vector va = *vptr_a;
+     HVX_Vector vb = *vptr_b;
 
-     HVX_Vector vacc = Q6_Vqf32_vmpy_VsfVsf(va, vb);
+     HVX_Vector vacc = Q6_Vsf_vmpy_VsfVsf(va, vb);
      vacc = Q6_Vsf_vmax_VsfVsf(vacc, voutput_min);
      vacc = Q6_Vsf_vmin_VsfVsf(vacc, voutput_max);
 
-     *((HVX_Vector*) output) = vacc;
+     HVX_VectorPred mask = Q6_Q_vsetq_R(batch);
+     Q6_vmem_QRIV(mask, vptr_o, vacc);
   }
 }
