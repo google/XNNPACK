@@ -220,8 +220,7 @@ jobs:
         id: setup-ndk
         uses: nttld/setup-ndk@v1
         with:
-          # Use old version of NDK so that android_ndk_repository works correctly (need platforms folder in NDK).
-          ndk-version: r20b
+          ndk-version: r25b
           add-to-path: false
       - name: Build and run tests
         run: |
