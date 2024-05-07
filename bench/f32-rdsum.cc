@@ -112,6 +112,36 @@ BENCHMARK_CAPTURE(f32_rsum_discontig, scalar_c4,
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(f32_rsum_discontig, avx512f_c16,
+                    xnn_f32_rdsum_ukernel_7p7x__avx512f_c16,
+                    xnn_init_f32_scale_scalar_params,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(f32_rsum_discontig, avx512f_c32,
+                    xnn_f32_rdsum_ukernel_7p7x__avx512f_c32,
+                    xnn_init_f32_scale_scalar_params,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(f32_rsum_discontig, avx512f_c64,
+                    xnn_f32_rdsum_ukernel_7p7x__avx512f_c64,
+                    xnn_init_f32_scale_scalar_params,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(f32_rsum_discontig, wasmsimd_c16,
                     xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16,

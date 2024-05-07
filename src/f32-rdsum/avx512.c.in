@@ -1,0 +1,134 @@
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <immintrin.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/reduce.h>
+#include <xnnpack/math.h>
+
+
+$UNROLL = CHANNELS >> 4
+void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__avx512f_c${CHANNELS}(
+    size_t rows,
+    size_t channels,
+    const float* input,
+    size_t input_stride,
+    const float* zero,
+    float* output,
+    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(rows != 0);
+  assert(channels != 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
+
+  size_t input_increment = ${ACCUMULATORS} * input_stride;
+  for (; channels >= ${CHANNELS}; channels -= ${CHANNELS}) {
+    const float* i0 = input;
+    $for i in range(1, ACCUMULATORS):
+      const float* i${i} = (const float*) ((uintptr_t) input + ${i} * input_stride);
+
+    $for i in range(UNROLL):
+      __m512 vacc${i} = _mm512_setzero_ps();
+
+    for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
+      $for N in range(1, ACCUMULATORS, 2):
+        if XNN_UNPREDICTABLE(r < ${N+1}) {
+          i${N} = zero;
+        }
+        if XNN_UNPREDICTABLE(r <= ${N+1}) {
+          i${N+1} = zero;
+        }
+      $for c in range(UNROLL):
+        __m512 vin${c};
+      $for j in range(ACCUMULATORS):
+        $for c in range(UNROLL):
+          vin${c} = _mm512_loadu_ps(&i${j}[${c*16}]);
+        $for c in range(UNROLL):
+          vacc${c} = _mm512_add_ps(vin${c}, vacc${c});
+      $for N in range(0, ACCUMULATORS):
+        i${N} = (const float*) ((uintptr_t) i${N} + input_increment);
+    }
+    $for i in range(UNROLL):
+      vacc${i} = _mm512_mul_ps(vacc${i}, vscale);
+
+    const float* o = output;
+    $for i in range(0, UNROLL):
+      const __m512 vo${i} = _mm512_loadu_ps(o); o += 16;
+    $for i in range(0, UNROLL):
+      vacc${i} = _mm512_add_ps(vo${i}, vacc${i});
+    $for i in range(0, UNROLL):
+      _mm512_storeu_ps(output, vacc${i}); output += 16;
+
+    input = (const float*) ((uintptr_t) input + ${CHANNELS} * sizeof(float));
+  }
+  if (channels != 0) {
+    input_increment = ${ACCUMULATORS} * input_stride;
+    const float* i0 = input;
+    $for i in range(1, ACCUMULATORS):
+      const float* i${i} = (const float*) ((uintptr_t) input + ${i} * input_stride);
+    __m512 vacc[${UNROLL}];
+    $for i in range(UNROLL):
+      vacc[${i}] = _mm512_setzero_ps();
+
+    const size_t num_full_chunks = channels >> 4;
+    const size_t num_chunks = round_up_po2(channels, 16) >> 4;
+    const size_t remainder = channels & 0xF;
+    const size_t batch = channels & 0xF;
+    __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+    if (remainder) {
+      assert(batch >= 1);
+      assert(batch <= 15);
+      vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+    }
+    for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
+      $for N in range(1, ACCUMULATORS, 2):
+        if XNN_UNPREDICTABLE(r < ${N+1}) {
+          i${N} = zero;
+        }
+        if XNN_UNPREDICTABLE(r <= ${N+1}) {
+          i${N+1} = zero;
+        }
+      for (int i = 0; i < num_full_chunks; ++i) {
+        $for c in range(ACCUMULATORS):
+          vacc[i] = _mm512_add_ps(_mm512_loadu_ps(&i${c}[i*16]), vacc[i]);
+      }
+
+      if (remainder) {
+        $for c in range(ACCUMULATORS):
+          vacc[num_full_chunks] = _mm512_maskz_add_ps(vmask, vacc[num_full_chunks],  _mm512_maskz_loadu_ps(vmask, &i${c}[num_full_chunks*16]));
+      }
+      $for N in range(ACCUMULATORS):
+        i${N} = (const float*) ((uintptr_t) i${N} + input_increment);
+    }
+    for (size_t i = 0; i < num_chunks; ++i) {
+      vacc[i] = _mm512_mul_ps(vacc[i], vscale);
+    }
+
+    __m512 vo[${UNROLL}];
+    const float* o = output;
+    for (int i = 0; i < channels >> 4; ++i) {
+      vo[i] = _mm512_loadu_ps(o); o += 16;
+    }
+    for (int i = 0; i < channels >> 4; ++i) {
+      vacc[i] = _mm512_add_ps(vo[i], vacc[i]);
+    }
+    for (int i = 0; i < channels >> 4; ++i) {
+      _mm512_storeu_ps(output, vacc[i]); output += 16;
+    }
+    if (remainder) {
+      const size_t pos = num_full_chunks;
+      __m512 vout = vacc[pos];
+      vout = _mm512_maskz_add_ps(vmask, vout,  _mm512_maskz_loadu_ps(vmask, output));
+      _mm512_mask_storeu_ps(output, vmask, vout);
+    }
+  }
+}

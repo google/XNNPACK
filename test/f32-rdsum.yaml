@@ -27,6 +27,13 @@
   init: xnn_init_f32_scale_avx_params
 - name: xnn_f32_rdsum_ukernel_7p7x__avx_c64
   init: xnn_init_f32_scale_avx_params
+# x86 AVX512F
+- name: xnn_f32_rdsum_ukernel_7p7x__avx512f_c16
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rdsum_ukernel_7p7x__avx512f_c32
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rdsum_ukernel_7p7x__avx512f_c64
+  init: xnn_init_f32_scale_scalar_params
 # WAsmSIMD
 - name: xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16
   init: xnn_init_f32_scale_scalar_params

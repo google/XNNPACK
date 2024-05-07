@@ -1324,6 +1324,10 @@ SET(ALL_AVX512F_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u192-acc3.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u192-acc6.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u192.c
+  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c16.c
+  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c32.c
+  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c64.c
+  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c128.c
   src/f32-rminmax/gen/f32-rmax-avx512f-u16.c
   src/f32-rminmax/gen/f32-rmax-avx512f-u32-acc2.c
   src/f32-rminmax/gen/f32-rmax-avx512f-u48-acc3.c
