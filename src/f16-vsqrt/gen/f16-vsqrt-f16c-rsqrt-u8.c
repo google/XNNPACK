@@ -19,6 +19,7 @@
 #include <xnnpack/microparams.h>
 #include <xnnpack/vunary.h>
 
+
 // In the following, instead of computing `sqrt(x)` on the converted `float`
 // values, we compute `x * rsqrt(x)` where `rsqrt(x)` is the 12-bit
 // approximation of the reciprocal square root.

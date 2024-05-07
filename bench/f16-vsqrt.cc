@@ -118,6 +118,24 @@ void f16_vsqrt(benchmark::State& state, xnn_f16_vsqrt_ukernel_fn ukernel,
 #endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(f16_vsqrt, avx512skx_sqrt_u16,
+                    xnn_f16_vsqrt_ukernel__avx512skx_sqrt_u16,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX512SKX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vsqrt, avx512skx_sqrt_u32,
+                    xnn_f16_vsqrt_ukernel__avx512skx_sqrt_u32,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX512SKX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vsqrt, avx512skx_sqrt_u64,
+                    xnn_f16_vsqrt_ukernel__avx512skx_sqrt_u64,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX512SKX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
   BENCHMARK_CAPTURE(f16_vsqrt, f16c_rsqrt_u8,
                     xnn_f16_vsqrt_ukernel__f16c_rsqrt_u8,
                     /*init_params=*/nullptr,
