@@ -1,0 +1,12 @@
+# Copyright 2024 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# ARM NEON
+- name: xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_c16
+  init: xnn_init_f16_f32acc_scale_scalar_params
+- name: xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_c32
+  init: xnn_init_f16_f32acc_scale_scalar_params
+- name: xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_c64
+  init: xnn_init_f16_f32acc_scale_scalar_params

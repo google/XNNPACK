@@ -1,0 +1,126 @@
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/reduce.h>
+#include <xnnpack/math.h>
+
+
+$UNROLL = CHANNELS >> 2
+void xnn_f16_f32acc_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neonfp16arith_c${CHANNELS}(
+    size_t rows,
+    size_t channels,
+    const void* input,
+    size_t input_stride,
+    const void* zero,
+    void* output,
+    const union xnn_f16_f32acc_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(rows != 0);
+  assert(channels != 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
+
+  size_t input_increment = ${ACCUMULATORS} * input_stride;
+  for (; channels >= ${CHANNELS}; channels -= ${CHANNELS}) {
+    const uint16_t* i0 = input;
+    $for i in range(1, ACCUMULATORS):
+      const uint16_t* i${i} = (const uint16_t*) ((uintptr_t) input + ${i} * input_stride);
+
+    $for i in range(UNROLL):
+      float32x4_t vacc${i} = vdupq_n_f32(0.f);
+
+    for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
+      $for N in range(1, ACCUMULATORS, 2):
+        if XNN_UNPREDICTABLE(r < ${N+1}) {
+          i${N} = zero;
+        }
+        if XNN_UNPREDICTABLE(r <= ${N+1}) {
+          i${N+1} = zero;
+        }
+      $for c in range(UNROLL):
+        float32x4_t vin${c};
+      $for j in range(ACCUMULATORS):
+        $for c in range(UNROLL):
+          vin${c} = vcvt_f32_f16(vreinterpret_f16_u16(vld1_u16(&i${j}[${c*4}])));
+        $for c in range(UNROLL):
+          vacc${c} = vaddq_f32(vin${c}, vacc${c});
+      $for N in range(0, ACCUMULATORS):
+        i${N} = (const uint16_t*) ((uintptr_t) i${N} + input_increment);
+    }
+    $for i in range(UNROLL):
+      vacc${i} = vmulq_f32(vacc${i}, vscale);
+
+    const uint16_t* o = (const uint16_t*) output;
+    $for i in range(0, UNROLL):
+      float16x4_t vo${i} = vreinterpret_f16_u16(vld1_u16(o)); o += 4;
+    $for i in range(0, UNROLL):
+      float16x4_t vfp16_out${i} = vadd_f16(vo${i}, vcvt_f16_f32(vacc${i}));
+    $for i in range(0, UNROLL):
+      vst1_u16(output, vreinterpret_u16_f16(vfp16_out${i})); output = (void*) ((uintptr_t) output + 4 * sizeof(uint16_t));
+
+    input = (const uint16_t*) ((uintptr_t) input + ${CHANNELS} * sizeof(uint16_t));
+  }
+  if (channels != 0) {
+    input_increment = ${ACCUMULATORS} * input_stride;
+    const uint16_t* i0 = input;
+    $for i in range(1, ACCUMULATORS):
+      const uint16_t* i${i} = (const uint16_t*) ((uintptr_t) input + ${i} * input_stride);
+    float32x4_t vacc[${UNROLL}];
+    $for i in range(UNROLL):
+      vacc[${i}] = vdupq_n_f32(0.f);
+
+    const size_t num_chunks = round_up_po2(channels, 4) >> 2;
+    for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
+      $for N in range(1, ACCUMULATORS, 2):
+        if XNN_UNPREDICTABLE(r < ${N+1}) {
+          i${N} = zero;
+        }
+        if XNN_UNPREDICTABLE(r <= ${N+1}) {
+          i${N+1} = zero;
+        }
+      for (int i = 0; i < num_chunks; ++i) {
+        $for c in range(ACCUMULATORS):
+          vacc[i] = vaddq_f32(vcvt_f32_f16(vreinterpret_f16_u16(vld1_u16(&i${c}[i*4]))), vacc[i]);
+      }
+      $for N in range(ACCUMULATORS):
+        i${N} = (const uint16_t*) ((uintptr_t) i${N} + input_increment);
+    }
+    for (int i = 0; i < (channels + 4) >> 2; ++i) {
+      vacc[i] = vmulq_f32(vacc[i], vscale);
+    }
+
+    float16x4_t vo[${UNROLL}];
+    const uint16_t* o = (const uint16_t*) output;
+    for (int i = 0; i < channels >> 2; ++i) {
+      vo[i] = vreinterpret_f16_u16(vld1_u16(o)); o += 4;
+    }
+    float16x4_t vfp16_out[${UNROLL}];
+    for (int i = 0; i < channels >> 2; ++i) {
+      vfp16_out[i] = vadd_f16(vo[i], vcvt_f16_f32(vacc[i]));
+    }
+    for (int i = 0; i < channels >> 2; ++i) {
+      vst1_u16(output, vreinterpret_u16_f16(vfp16_out[i])); output = (void*) ((uintptr_t) output + 4 * sizeof(uint16_t));
+    }
+
+    const size_t pos = channels >> 2;
+    channels &= 0x3;
+    float16x4_t vacc_low = vcvt_f16_f32(vacc[pos]);
+    if (channels & 2) {
+      vst1_lane_u32(output, vreinterpret_u32_f16(vadd_f16(vacc_low, vreinterpret_f16_u32(vld1_dup_u32(output)))), 0); output = (void*) ((uintptr_t) output + 2 * sizeof(uint16_t));
+      vacc_low = vext_f16(vacc_low, vacc_low, 2);
+    }
+    if (channels & 1) {
+      vst1_lane_u16(output, vreinterpret_u16_f16(vadd_f16(vacc_low, vreinterpret_f16_u16(vld1_dup_u16(output)))), 0);
+    }
+  }
+}

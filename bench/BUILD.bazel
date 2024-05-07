@@ -827,6 +827,16 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f16_f32acc_rdsum_bench",
+    srcs = [
+        "f16-f32acc-rdsum.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":rsum_benchmark",
+    ],
+)
+
+xnnpack_benchmark(
     name = "f32_rdsum_bench",
     srcs = [
         "f32-rdsum.cc",

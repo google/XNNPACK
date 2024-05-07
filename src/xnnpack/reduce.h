@@ -356,6 +356,20 @@ DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32)
 DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64)
 DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__avx512f_c128)
 
+#define DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                               \
+      size_t rows,                                         \
+      size_t channels,                                     \
+      const void* input,                                   \
+      size_t input_stride,                                 \
+      const void* zero,                                    \
+      void* output,                                        \
+      const union xnn_f16_f32acc_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_c16)
+DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_c32)
+DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_c64)
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

@@ -1067,6 +1067,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f16_f32acc_rdsum_test",
+    srcs = [
+        "f16-f32acc-rdsum.cc",
+        "rdsum-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_rdsum_test",
     srcs = [
         "f32-rdsum.cc",

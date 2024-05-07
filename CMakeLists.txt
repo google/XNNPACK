@@ -4115,6 +4115,21 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f32-rsum-bench PRIVATE benchmark::benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(f32-rsum-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
+  ADD_EXECUTABLE(f16-f32acc-rdsum-test test/f16-f32acc-rdsum.cc)
+  TARGET_INCLUDE_DIRECTORIES(f16-f32acc-rdsum-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-f32acc-rdsum-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
+  TARGET_LINK_LIBRARIES(f16-f32acc-rdsum-test PRIVATE hardware-config logging microkernels-all)
+
+  ADD_EXECUTABLE(f32-rdsum-test test/f32-rdsum.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-rdsum-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f32-rdsum-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
+  TARGET_LINK_LIBRARIES(f32-rdsum-test PRIVATE hardware-config logging microkernels-all)
+
+  ADD_EXECUTABLE(f16-f32acc-rdsum-bench bench/f16-f32acc-rdsum.cc)
+  TARGET_INCLUDE_DIRECTORIES(f16-f32acc-rdsum-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f16-f32acc-rdsum-bench PRIVATE benchmark::benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(f16-f32acc-rdsum-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
   ADD_EXECUTABLE(f32-rdsum-bench bench/f32-rdsum.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-rdsum-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-rdsum-bench PRIVATE benchmark::benchmark pthreadpool)

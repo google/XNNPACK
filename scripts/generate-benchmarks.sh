@@ -44,5 +44,6 @@ tools/generate-vunary-benchmark.py --spec test/f32-vhswish.yaml --output bench/f
 
 ### Tests for Rsum micro-kernels
 tools/generate-rdsum-benchmark.py  --spec test/f32-rdsum.yaml --output bench/f32-rdsum.cc
+tools/generate-rdsum-benchmark.py  --spec test/f16-f32acc-rdsum.yaml --output bench/f16-f32acc-rdsum.cc
 
 wait
