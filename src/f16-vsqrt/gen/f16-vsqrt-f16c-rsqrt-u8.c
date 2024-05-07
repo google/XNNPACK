@@ -8,6 +8,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -17,7 +18,6 @@
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/microparams.h>
 #include <xnnpack/vunary.h>
-
 
 // In the following, instead of computing `sqrt(x)` on the converted `float`
 // values, we compute `x * rsqrt(x)` where `rsqrt(x)` is the 12-bit
@@ -40,7 +40,7 @@ void xnn_f16_vsqrt_ukernel__f16c_rsqrt_u8(
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
-  const __m256 vinf = _mm256_set1_ps(UINT32_C(0x7F800000));
+  const __m256 vinf = _mm256_set1_ps(INFINITY);
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     __m256 vacc = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
     i += 8;
