@@ -26,7 +26,7 @@ void xnn_f16_rminmax_ukernel__avx512fp16_u64_acc2(
   assert(input != NULL);
   assert(output != NULL);
 
-#if defined(__clang__)
+#if defined(__AVX512FP16__)
   const uint16_t* i = (const uint16_t*) input;
   __m512h vmin0 = _mm512_castsi512_ph(_mm512_set1_epi16(*i));
   __m512h vmax0 = vmin0;
@@ -77,5 +77,5 @@ void xnn_f16_rminmax_ukernel__avx512fp16_u64_acc2(
 
   *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(_mm_castph_si128(vmin), 0);
   *((uint16_t*) output + 1) = (uint16_t) _mm_extract_epi16(_mm_castph_si128(vmax), 0);
-#endif  //defined(__clang__)
+#endif  // defined(__AVX512FP16__)
 }
