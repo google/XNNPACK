@@ -549,8 +549,15 @@ void xnn_compute_grouped_batch_igemm(
       &context->params);
 }
 
-void xnn_compute_dq_zero_buffer(
+void xnn_compute_dq_zero_buffer_igemm(
     const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index
+    ) {
+  memset(context->zero_buffers[batch_index], context->quantization_params[batch_index].zero_point, context->zero_size);
+}
+
+void xnn_compute_dq_zero_buffer_subconv(
+    const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index
     ) {
   memset(context->zero_buffers[batch_index], context->quantization_params[batch_index].zero_point, context->zero_size);
@@ -880,6 +887,47 @@ void xnn_compute_grouped_subconv2d(
       &context->params);
 }
 
+void xnn_compute_grouped_dqsubconv2d(
+      const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index,
+      size_t group_index,
+      size_t subkernel_index,
+      size_t slice_y,
+      size_t slice_x_start,
+      size_t nc_block_start,
+      size_t slice_x_max,
+      size_t nc_block_size)
+{
+  const struct subconvolution_params* subconvolution_params = &context->subconvolution_params[subkernel_index];
+
+  if XNN_UNLIKELY(slice_y >= subconvolution_params->slice_height) {
+    return;
+  }
+
+  const size_t slice_width = subconvolution_params->slice_width;
+  if XNN_UNLIKELY(slice_x_start >= slice_width) {
+    return;
+  }
+  const size_t slice_x_size = min(slice_x_max, slice_width - slice_x_start);
+
+  const size_t cx_stride = context->cx_stride;
+  context->dq_ukernel.function[XNN_UARCH_DEFAULT](
+      slice_x_size,
+      nc_block_size,
+      context->kc,
+      subconvolution_params->scaled_kernel_size,
+      (const void**) ((uintptr_t) subconvolution_params->indirection_buffer + slice_y * subconvolution_params->indirection_y_stride + slice_x_start * subconvolution_params->indirection_x_stride),
+      (const void*) ((uintptr_t) subconvolution_params->weights + nc_block_start * subconvolution_params->w_stride + group_index * context->gw_stride),
+      (void*) ((uintptr_t) subconvolution_params->output + group_index * context->gc_stride + slice_y * context->cy_stride + slice_x_start * cx_stride + batch_index * context->bc_stride + (nc_block_start << context->log2_csize)),
+      cx_stride,
+      context->cn_stride,
+      context->a_offset + group_index * context->ga_stride + batch_index * context->ba_stride,
+      context->zero,
+      context->zero_buffers[batch_index],
+      &context->params,
+      (const void*) ((uintptr_t) &context->quantization_params[batch_index]));
+}
+
 void xnn_compute_subconv2d(
       const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
@@ -916,6 +964,46 @@ void xnn_compute_subconv2d(
       context->a_offset + batch_index * context->ba_stride,
       context->zero,
       &context->params);
+}
+
+void xnn_compute_dqsubconv2d(
+      const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index,
+      size_t subkernel_index,
+      size_t slice_y,
+      size_t slice_x_start,
+      size_t nc_block_start,
+      size_t slice_x_max,
+      size_t nc_block_size)
+{
+  const struct subconvolution_params* subconvolution_params = &context->subconvolution_params[subkernel_index];
+
+  if XNN_UNLIKELY(slice_y >= subconvolution_params->slice_height) {
+    return;
+  }
+
+  const size_t slice_width = subconvolution_params->slice_width;
+  if XNN_UNLIKELY(slice_x_start >= slice_width) {
+    return;
+  }
+  const size_t slice_x_size = min(slice_x_max, slice_width - slice_x_start);
+
+  const size_t cx_stride = context->cx_stride;
+  context->dq_ukernel.function[XNN_UARCH_DEFAULT](
+      slice_x_size,
+      nc_block_size,
+      context->kc,
+      subconvolution_params->scaled_kernel_size,
+      (const void**) ((uintptr_t) subconvolution_params->indirection_buffer + slice_y * subconvolution_params->indirection_y_stride + slice_x_start * subconvolution_params->indirection_x_stride),
+      (const void*) ((uintptr_t) subconvolution_params->weights + nc_block_start * subconvolution_params->w_stride),
+      (void*) ((uintptr_t) subconvolution_params->output + slice_y * context->cy_stride + slice_x_start * cx_stride + batch_index * context->bc_stride + (nc_block_start << context->log2_csize)),
+      cx_stride,
+      context->cn_stride,
+      context->a_offset + batch_index * context->ba_stride,
+      context->zero,
+      context->zero_buffers[batch_index],
+      &context->params,
+      (const void*) ((uintptr_t) &context->quantization_params[batch_index]));
 }
 
 void xnn_compute_conv2d_hwc2chw(

@@ -529,7 +529,7 @@ XNN_PRIVATE void xnn_compute_grouped_batch_igemm(
     size_t batch_index, size_t group_index, size_t mr_block_start,
     size_t nr_block_start, size_t mr_block_size, size_t nr_block_size);
 
-XNN_PRIVATE void xnn_compute_dq_zero_buffer(
+XNN_PRIVATE void xnn_compute_dq_zero_buffer_igemm(
     const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t size);
 
@@ -655,6 +655,8 @@ struct subconv_context {
   size_t kc;
   size_t a_offset;
   void* zero;
+  // Zero buffers.
+  void** zero_buffers;
   size_t cx_stride;
   size_t cy_stride;
   size_t cn_stride;
@@ -664,7 +666,14 @@ struct subconv_context {
   size_t ba_stride;
   size_t bc_stride;
   uint32_t log2_csize;
-  struct xnn_hmp_igemm_ukernel ukernel;
+  // Size, in bytes, of the zero buffer.
+  size_t zero_size;
+  union {
+    struct xnn_hmp_igemm_ukernel ukernel;
+    struct xnn_hmp_dqigemm_ukernel dq_ukernel;
+  };
+  // Parameters for dynamically quantized inputs.
+  const struct xnn_qd8_quantization_params* quantization_params;
   union {
     union xnn_qs8_conv_minmax_params qs8;
     union xnn_qu8_conv_minmax_params qu8;
@@ -674,6 +683,10 @@ struct subconv_context {
 };
 
 #ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_dq_zero_buffer_subconv(
+    const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t size);
+
   XNN_PRIVATE void xnn_compute_grouped_subconv2d(
       const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
@@ -685,7 +698,28 @@ struct subconv_context {
       size_t slice_x_max,
       size_t nr_block_size);
 
+  XNN_PRIVATE void xnn_compute_grouped_dqsubconv2d(
+    const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index,
+    size_t group_index,
+    size_t subkernel_index,
+    size_t slice_y,
+    size_t slice_x_start,
+    size_t nr_block_start,
+    size_t slice_x_max,
+    size_t nr_block_size);
+
   XNN_PRIVATE void xnn_compute_subconv2d(
+      const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index,
+      size_t subkernel_index,
+      size_t slice_y,
+      size_t slice_x_start,
+      size_t nr_block_start,
+      size_t slice_x_max,
+      size_t nr_block_size);
+
+  XNN_PRIVATE void xnn_compute_dqsubconv2d(
       const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
       size_t subkernel_index,

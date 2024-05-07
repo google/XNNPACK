@@ -2136,7 +2136,7 @@ static enum xnn_status reshape_igemm(
   #endif
   if (dynamic_quantization && convolution_op->zero_size > 0) {
     convolution_op->compute[igemm_compute_index].type = xnn_parallelization_type_1d;
-    convolution_op->compute[igemm_compute_index].task_1d = (pthreadpool_task_1d_t) xnn_compute_dq_zero_buffer;
+    convolution_op->compute[igemm_compute_index].task_1d = (pthreadpool_task_1d_t) xnn_compute_dq_zero_buffer_igemm;
     convolution_op->compute[igemm_compute_index].range[0] = batch_size;
     ++igemm_compute_index;
   }
