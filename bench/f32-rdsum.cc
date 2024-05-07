@@ -112,6 +112,33 @@ BENCHMARK_CAPTURE(f32_rsum_discontig, scalar_c4,
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_rsum_discontig, wasmsimd_c16,
+                    xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16,
+                    xnn_init_f32_scale_scalar_params)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_rsum_discontig, wasmsimd_c32,
+                    xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32,
+                    xnn_init_f32_scale_scalar_params)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_rsum_discontig, wasmsimd_c64,
+                    xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64,
+                    xnn_init_f32_scale_scalar_params)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif
