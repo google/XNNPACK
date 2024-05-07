@@ -27,7 +27,7 @@ void xnn_f16_vsqrt_ukernel__avx512fp16_sqrt_u64(
   assert(input != NULL);
   assert(output != NULL);
 
-#if defined(__AVX512FP16__)
+#if defined(__clang__)
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
   for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
@@ -62,5 +62,5 @@ void xnn_f16_vsqrt_ukernel__avx512fp16_sqrt_u64(
 
     _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));
   }
-#endif  // defined(__AVX512FP16__)
+#endif  //defined(__clang__)
 }
