@@ -1148,7 +1148,7 @@ class DeconvolutionOperatorTester {
       for (size_t g = 0; g < groups(); g++) {
         for (size_t oc = 0; oc < group_output_channels(); oc++) {
           int32_t range = w8dist(rng);
-          auto weights_dist = std::uniform_int_distribution<int32_t>(std::min(range, 0), std::max(range, 0));
+          auto weights_dist = std::uniform_int_distribution<int32_t>(std::min<int32_t>(range, 0), std::max<int32_t>(range, 0));
           bias[g * group_output_channels() + oc] = f32dist(rng);
           for (size_t y = 0; y < kernel_height(); y++) {
             for (size_t x = 0; x < kernel_width(); x++) {
