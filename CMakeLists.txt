@@ -254,7 +254,7 @@ IF(NOT XNNPACK_USE_SYSTEM_LIBS)
 ENDIF()
 
 # ---[ XNNPACK library
-INCLUDE(cmake/microkernels.cmake)
+INCLUDE(cmake/gen/microkernels.cmake)
 
 SET(OPERATOR_SRCS
   src/operator-delete.c
