@@ -6,7 +6,6 @@ Auto-generated file. Do not edit!
 """
 
 ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS = [
-    "src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-aarch64-neonfma-2x2.c",
     "src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x4-aarch64-neonfma-2x1.c",
     "src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x4-aarch64-neonfma-2x2.c",
     "src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x8-aarch64-neonfma-2x1.c",
@@ -15,6 +14,7 @@ ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS = [
     "src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p1c3x4-aarch64-neonfma-2x2.c",
     "src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p1c3x8-aarch64-neonfma-2x1.c",
     "src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p1c3x8-aarch64-neonfma-2x2.c",
+    "src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-aarch64-neonfma-2x2.c",
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-aarch64-neonfma-1x4-acc2.c",
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-aarch64-neonfma-1x4-acc3.c",
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-aarch64-neonfma-1x4-acc4.c",
