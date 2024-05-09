@@ -161,12 +161,6 @@ static void init_hardware_config(void) {
       hardware_config.vlenb = vlenb;
       xnn_log_info("RISC-V VLENB: %" PRIu32, vlenb);
     }
-    hardware_config.use_riscv_vector = 1;
-    hardware_config.vlenb = 128;
-    char* value = getenv("VLENB_VAL");
-    if (value != NULL) {
-      hardware_config.vlenb = atoi(value);
-    }
   #endif
 
   #if XNN_ARCH_PPC64
