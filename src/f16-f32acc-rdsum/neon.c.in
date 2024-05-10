@@ -13,8 +13,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/math.h>
 
 
-$UNROLL = CHANNELS >> 2
-void xnn_f16_f32acc_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neonfp16arith_c${CHANNELS}(
+$UNROLL = CHANNELS_BATCH >> 2
+void xnn_f16_f32acc_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neonfp16arith_c${CHANNELS_BATCH}(
     size_t rows,
     size_t channels,
     const void* input,
@@ -31,7 +31,7 @@ void xnn_f16_f32acc_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neonfp16arit
   const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
 
   size_t input_increment = ${ACCUMULATORS} * input_stride;
-  for (; channels >= ${CHANNELS}; channels -= ${CHANNELS}) {
+  for (; channels >= ${CHANNELS_BATCH}; channels -= ${CHANNELS_BATCH}) {
     const uint16_t* i0 = input;
     $for i in range(1, ACCUMULATORS):
       const uint16_t* i${i} = (const uint16_t*) ((uintptr_t) input + ${i} * input_stride);
@@ -68,7 +68,7 @@ void xnn_f16_f32acc_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neonfp16arit
     $for i in range(0, UNROLL):
       vst1_u16(output, vreinterpret_u16_f16(vfp16_out${i})); output = (void*) ((uintptr_t) output + 4 * sizeof(uint16_t));
 
-    input = (const uint16_t*) ((uintptr_t) input + ${CHANNELS} * sizeof(uint16_t));
+    input = (const uint16_t*) ((uintptr_t) input + ${CHANNELS_BATCH} * sizeof(uint16_t));
   }
   if (channels != 0) {
     input_increment = ${ACCUMULATORS} * input_stride;
