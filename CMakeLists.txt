@@ -3800,7 +3800,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
     ADD_EXECUTABLE(softmax-bench bench/softmax.cc)
     TARGET_INCLUDE_DIRECTORIES(softmax-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(softmax-bench PRIVATE XNNPACK benchmark::benchmark bench-utils)
+    TARGET_LINK_LIBRARIES(softmax-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
 
     ADD_EXECUTABLE(square-bench bench/square.cc)
     TARGET_INCLUDE_DIRECTORIES(square-bench PRIVATE .)
