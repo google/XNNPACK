@@ -90,6 +90,41 @@ tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=RSUB    -D BATCH_TILE=1 -D
 tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=RSUB    -D BATCH_TILE=2 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vrsubc-minmax-fp16arith-u2.c &
 tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=RSUB    -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vrsubc-minmax-fp16arith-u4.c &
 
+################################### x86 AVX512 FP16 ##################################
+tools/xngen src/f16-vbinary/vop-avx512fp16.c.in -D OP=ADD      -D BATCH_TILE=32  -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vadd-minmax-avx512fp16-u32.c &
+tools/xngen src/f16-vbinary/vop-avx512fp16.c.in -D OP=ADD      -D BATCH_TILE=64 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vadd-minmax-avx512fp16-u64.c &
+tools/xngen src/f16-vbinary/vop-avx512fp16.c.in -D OP=DIV      -D BATCH_TILE=32  -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vdiv-minmax-avx512fp16-u32.c &
+tools/xngen src/f16-vbinary/vop-avx512fp16.c.in -D OP=DIV      -D BATCH_TILE=64 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vdiv-minmax-avx512fp16-u64.c &
+tools/xngen src/f16-vbinary/vop-avx512fp16.c.in -D OP=MAX      -D BATCH_TILE=32  -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/f16-vmax-avx512fp16-u32.c &
+tools/xngen src/f16-vbinary/vop-avx512fp16.c.in -D OP=MAX      -D BATCH_TILE=64 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/f16-vmax-avx512fp16-u64.c &
+tools/xngen src/f16-vbinary/vop-avx512fp16.c.in -D OP=MIN      -D BATCH_TILE=32  -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/f16-vmin-avx512fp16-u32.c &
+tools/xngen src/f16-vbinary/vop-avx512fp16.c.in -D OP=MIN      -D BATCH_TILE=64 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/f16-vmin-avx512fp16-u64.c &
+tools/xngen src/f16-vbinary/vop-avx512fp16.c.in -D OP=MUL      -D BATCH_TILE=32  -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vmul-minmax-avx512fp16-u32.c &
+tools/xngen src/f16-vbinary/vop-avx512fp16.c.in -D OP=MUL      -D BATCH_TILE=64 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vmul-minmax-avx512fp16-u64.c &
+tools/xngen src/f16-vbinary/vop-avx512fp16.c.in -D OP=SQRDIFF  -D BATCH_TILE=32  -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/f16-vsqrdiff-avx512fp16-u32.c &
+tools/xngen src/f16-vbinary/vop-avx512fp16.c.in -D OP=SQRDIFF  -D BATCH_TILE=64 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/f16-vsqrdiff-avx512fp16-u64.c &
+tools/xngen src/f16-vbinary/vop-avx512fp16.c.in -D OP=SUB      -D BATCH_TILE=32  -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vsub-minmax-avx512fp16-u32.c &
+tools/xngen src/f16-vbinary/vop-avx512fp16.c.in -D OP=SUB      -D BATCH_TILE=64 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vsub-minmax-avx512fp16-u64.c &
+
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=ADD     -D BATCH_TILE=32  -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vaddc-minmax-avx512fp16-u32.c &
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=ADD     -D BATCH_TILE=64 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vaddc-minmax-avx512fp16-u64.c &
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=DIV     -D BATCH_TILE=32  -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vdivc-minmax-avx512fp16-u32.c &
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=DIV     -D BATCH_TILE=64 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vdivc-minmax-avx512fp16-u64.c &
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=RDIV    -D BATCH_TILE=32  -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vrdivc-minmax-avx512fp16-u32.c &
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=RDIV    -D BATCH_TILE=64 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vrdivc-minmax-avx512fp16-u64.c &
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=MAX     -D BATCH_TILE=32  -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/f16-vmaxc-avx512fp16-u32.c &
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=MAX     -D BATCH_TILE=64 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/f16-vmaxc-avx512fp16-u64.c &
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=MIN     -D BATCH_TILE=32  -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/f16-vminc-avx512fp16-u32.c &
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=MIN     -D BATCH_TILE=64 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/f16-vminc-avx512fp16-u64.c &
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=MUL     -D BATCH_TILE=32  -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vmulc-minmax-avx512fp16-u32.c &
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=MUL     -D BATCH_TILE=64 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vmulc-minmax-avx512fp16-u64.c &
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=SQRDIFF -D BATCH_TILE=32  -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/f16-vsqrdiffc-avx512fp16-u32.c &
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=SQRDIFF -D BATCH_TILE=64 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/f16-vsqrdiffc-avx512fp16-u64.c &
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=SUB     -D BATCH_TILE=32  -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vsubc-minmax-avx512fp16-u32.c &
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=SUB     -D BATCH_TILE=64 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vsubc-minmax-avx512fp16-u64.c &
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=RSUB    -D BATCH_TILE=32  -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vrsubc-minmax-avx512fp16-u32.c &
+tools/xngen src/f16-vbinary/vopc-avx512fp16.c.in -D OP=RSUB    -D BATCH_TILE=64 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vrsubc-minmax-avx512fp16-u64.c &
+
 ################################### x86 F16C ##################################
 tools/xngen src/f16-vbinary/vop-f16c.c.in -D OP=ADD      -D BATCH_TILE=8  -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vadd-minmax-f16c-u8.c &
 tools/xngen src/f16-vbinary/vop-f16c.c.in -D OP=ADD      -D BATCH_TILE=16 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/f16-vadd-minmax-f16c-u16.c &
