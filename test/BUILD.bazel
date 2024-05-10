@@ -602,6 +602,22 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f16_vsqrdiff_test",
+    srcs = [
+        "f16-vsqrdiff.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [":vbinary_microkernel_tester"],
+)
+
+xnnpack_unit_test(
+    name = "f16_vsqrdiffc_test",
+    srcs = [
+        "f16-vsqrdiffc.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [":vbinaryc_microkernel_tester"],
+)
+
+xnnpack_unit_test(
     name = "f16_vsub_minmax_test",
     srcs = [
         "f16-vsub-minmax.cc",
