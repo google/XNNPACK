@@ -152,6 +152,526 @@ void xnn_f16_rminmax_ukernel__avx512fp16_u128_acc4(
 #endif  // defined(__AVX512FP16__)
 }
 
+void xnn_f16_vadd_minmax_ukernel__avx512fp16_u64(
+    size_t batch,
+    const void* restrict input_a,
+    const void* restrict input_b,
+    void* restrict output,
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+#if defined(__AVX512FP16__)
+  const uint16_t* a = (const uint16_t*) input_a;
+  const uint16_t* b = (const uint16_t*) input_b;
+  uint16_t* o = (uint16_t*) output;
+
+  const __m512h voutput_min = _mm512_castsi512_ph(_mm512_set1_epi16((params->fp16arith.min)));
+  const __m512h voutput_max = _mm512_castsi512_ph(_mm512_set1_epi16((params->fp16arith.max)));
+
+  for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
+    __m512h vacc0 = _mm512_loadu_ph(a);
+    __m512h vacc1 = _mm512_loadu_ph(a + 32);
+    a += 64;
+
+    vacc0 = _mm512_add_ph(vacc0, _mm512_loadu_ph(b));
+    vacc1 = _mm512_add_ph(vacc1, _mm512_loadu_ph(b + 32));
+    b += 64;
+
+
+    vacc0 = _mm512_max_ph(voutput_min, vacc0);
+    vacc1 = _mm512_max_ph(voutput_min, vacc1);
+
+    vacc0 = _mm512_min_ph(voutput_max, vacc0);
+    vacc1 = _mm512_min_ph(voutput_max, vacc1);
+
+    _mm512_storeu_ph(o, vacc0);
+    _mm512_storeu_ph(o + 32, vacc1);
+    o += 64;
+  }
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
+    __m512h vacc = _mm512_loadu_ph(a);
+    a += 32;
+
+    vacc = _mm512_add_ph(vacc, _mm512_loadu_ph(b));
+    b += 32;
+
+    vacc = _mm512_max_ph(voutput_min, vacc);
+    vacc = _mm512_min_ph(voutput_max, vacc);
+
+    _mm512_storeu_ph(o, vacc);
+    o += 32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 31 * sizeof(uint16_t));
+    // Prepare mask for valid 16-bit elements (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_HALF;
+    const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+
+    __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+
+    vacc = _mm512_maskz_add_ph(vmask, vacc, _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, b)));
+
+    vacc = _mm512_maskz_max_ph(vmask, voutput_min, vacc);
+    vacc = _mm512_maskz_min_ph(vmask, voutput_max, vacc);
+    _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));
+  }
+#endif  // defined(__AVX512FP16__)
+}
+
+void xnn_f16_vaddc_minmax_ukernel__avx512fp16_u64(
+    size_t batch,
+    const void* restrict input_a,
+    const void* restrict input_b,
+    void* restrict output,
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+#if defined(__AVX512FP16__)
+  const uint16_t* a = (const uint16_t*) input_a;
+  const uint16_t* b = (const uint16_t*) input_b;
+  uint16_t* o = (uint16_t*) output;
+
+  const __m512h voutput_min = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.min));
+  const __m512h voutput_max = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.max));
+  const __m512h vb = _mm512_castsi512_ph(_mm512_set1_epi16(*b));
+
+  for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
+    __m512h vacc0 = _mm512_loadu_ph(a);
+    __m512h vacc1 = _mm512_loadu_ph(a + 32);
+    a += 64;
+
+    vacc0 = _mm512_add_ph(vacc0, vb);
+    vacc1 = _mm512_add_ph(vacc1, vb);
+
+
+    vacc0 = _mm512_max_ph(voutput_min, vacc0);
+    vacc1 = _mm512_max_ph(voutput_min, vacc1);
+
+    vacc0 = _mm512_min_ph(voutput_max, vacc0);
+    vacc1 = _mm512_min_ph(voutput_max, vacc1);
+
+    _mm512_storeu_ph(o, vacc0);
+    _mm512_storeu_ph(o + 32, vacc1);
+    o += 64;
+  }
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
+    __m512h vacc = _mm512_loadu_ph(a);
+    a += 32;
+
+    vacc = _mm512_add_ph(vacc, vb);
+    vacc = _mm512_max_ph(voutput_min, vacc);
+    vacc = _mm512_min_ph(voutput_max, vacc);
+
+    _mm512_storeu_ph(o, vacc);
+    o += 32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 31 * sizeof(uint16_t));
+    // Prepare mask for valid 16-bit elements (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_HALF;
+    const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+
+    __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+
+    vacc = _mm512_maskz_add_ph(vmask, vacc, vb);
+    vacc = _mm512_maskz_max_ph(vmask, voutput_min, vacc);
+    vacc = _mm512_maskz_min_ph(vmask, voutput_max, vacc);
+    _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));
+  }
+#endif  // defined(__AVX512FP16__)
+}
+
+void xnn_f16_vdiv_minmax_ukernel__avx512fp16_u64(
+    size_t batch,
+    const void* restrict input_a,
+    const void* restrict input_b,
+    void* restrict output,
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+#if defined(__AVX512FP16__)
+  const uint16_t* a = (const uint16_t*) input_a;
+  const uint16_t* b = (const uint16_t*) input_b;
+  uint16_t* o = (uint16_t*) output;
+
+  const __m512h voutput_min = _mm512_castsi512_ph(_mm512_set1_epi16((params->fp16arith.min)));
+  const __m512h voutput_max = _mm512_castsi512_ph(_mm512_set1_epi16((params->fp16arith.max)));
+
+  for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
+    __m512h vacc0 = _mm512_loadu_ph(a);
+    __m512h vacc1 = _mm512_loadu_ph(a + 32);
+    a += 64;
+
+    vacc0 = _mm512_div_ph(vacc0, _mm512_loadu_ph(b));
+    vacc1 = _mm512_div_ph(vacc1, _mm512_loadu_ph(b + 32));
+    b += 64;
+
+
+    vacc0 = _mm512_max_ph(voutput_min, vacc0);
+    vacc1 = _mm512_max_ph(voutput_min, vacc1);
+
+    vacc0 = _mm512_min_ph(voutput_max, vacc0);
+    vacc1 = _mm512_min_ph(voutput_max, vacc1);
+
+    _mm512_storeu_ph(o, vacc0);
+    _mm512_storeu_ph(o + 32, vacc1);
+    o += 64;
+  }
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
+    __m512h vacc = _mm512_loadu_ph(a);
+    a += 32;
+
+    vacc = _mm512_div_ph(vacc, _mm512_loadu_ph(b));
+    b += 32;
+
+    vacc = _mm512_max_ph(voutput_min, vacc);
+    vacc = _mm512_min_ph(voutput_max, vacc);
+
+    _mm512_storeu_ph(o, vacc);
+    o += 32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 31 * sizeof(uint16_t));
+    // Prepare mask for valid 16-bit elements (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_HALF;
+    const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+
+    __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+
+    vacc = _mm512_maskz_div_ph(vmask, vacc, _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, b)));
+
+    vacc = _mm512_maskz_max_ph(vmask, voutput_min, vacc);
+    vacc = _mm512_maskz_min_ph(vmask, voutput_max, vacc);
+    _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));
+  }
+#endif  // defined(__AVX512FP16__)
+}
+
+void xnn_f16_vdivc_minmax_ukernel__avx512fp16_u64(
+    size_t batch,
+    const void* restrict input_a,
+    const void* restrict input_b,
+    void* restrict output,
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+#if defined(__AVX512FP16__)
+  const uint16_t* a = (const uint16_t*) input_a;
+  const uint16_t* b = (const uint16_t*) input_b;
+  uint16_t* o = (uint16_t*) output;
+
+  const __m512h voutput_min = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.min));
+  const __m512h voutput_max = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.max));
+  const __m512h vb = _mm512_castsi512_ph(_mm512_set1_epi16(*b));
+
+  for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
+    __m512h vacc0 = _mm512_loadu_ph(a);
+    __m512h vacc1 = _mm512_loadu_ph(a + 32);
+    a += 64;
+
+    vacc0 = _mm512_div_ph(vacc0, vb);
+    vacc1 = _mm512_div_ph(vacc1, vb);
+
+
+    vacc0 = _mm512_max_ph(voutput_min, vacc0);
+    vacc1 = _mm512_max_ph(voutput_min, vacc1);
+
+    vacc0 = _mm512_min_ph(voutput_max, vacc0);
+    vacc1 = _mm512_min_ph(voutput_max, vacc1);
+
+    _mm512_storeu_ph(o, vacc0);
+    _mm512_storeu_ph(o + 32, vacc1);
+    o += 64;
+  }
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
+    __m512h vacc = _mm512_loadu_ph(a);
+    a += 32;
+
+    vacc = _mm512_div_ph(vacc, vb);
+    vacc = _mm512_max_ph(voutput_min, vacc);
+    vacc = _mm512_min_ph(voutput_max, vacc);
+
+    _mm512_storeu_ph(o, vacc);
+    o += 32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 31 * sizeof(uint16_t));
+    // Prepare mask for valid 16-bit elements (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_HALF;
+    const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+
+    __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+
+    vacc = _mm512_maskz_div_ph(vmask, vacc, vb);
+    vacc = _mm512_maskz_max_ph(vmask, voutput_min, vacc);
+    vacc = _mm512_maskz_min_ph(vmask, voutput_max, vacc);
+    _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));
+  }
+#endif  // defined(__AVX512FP16__)
+}
+
+void xnn_f16_vmax_ukernel__avx512fp16_u64(
+    size_t batch,
+    const void* restrict input_a,
+    const void* restrict input_b,
+    void* restrict output,
+    const union xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+#if defined(__AVX512FP16__)
+  const uint16_t* a = (const uint16_t*) input_a;
+  const uint16_t* b = (const uint16_t*) input_b;
+  uint16_t* o = (uint16_t*) output;
+
+
+  for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
+    __m512h vacc0 = _mm512_loadu_ph(a);
+    __m512h vacc1 = _mm512_loadu_ph(a + 32);
+    a += 64;
+
+    vacc0 = _mm512_max_ph(vacc0, _mm512_loadu_ph(b));
+    vacc1 = _mm512_max_ph(vacc1, _mm512_loadu_ph(b + 32));
+    b += 64;
+
+
+
+    _mm512_storeu_ph(o, vacc0);
+    _mm512_storeu_ph(o + 32, vacc1);
+    o += 64;
+  }
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
+    __m512h vacc = _mm512_loadu_ph(a);
+    a += 32;
+
+    vacc = _mm512_max_ph(vacc, _mm512_loadu_ph(b));
+    b += 32;
+
+
+    _mm512_storeu_ph(o, vacc);
+    o += 32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 31 * sizeof(uint16_t));
+    // Prepare mask for valid 16-bit elements (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_HALF;
+    const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+
+    __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+
+    vacc = _mm512_maskz_max_ph(vmask, vacc, _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, b)));
+
+    _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));
+  }
+#endif  // defined(__AVX512FP16__)
+}
+
+void xnn_f16_vmaxc_ukernel__avx512fp16_u64(
+    size_t batch,
+    const void* restrict input_a,
+    const void* restrict input_b,
+    void* restrict output,
+    const union xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+#if defined(__AVX512FP16__)
+  const uint16_t* a = (const uint16_t*) input_a;
+  const uint16_t* b = (const uint16_t*) input_b;
+  uint16_t* o = (uint16_t*) output;
+
+  const __m512h vb = _mm512_castsi512_ph(_mm512_set1_epi16(*b));
+
+  for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
+    __m512h vacc0 = _mm512_loadu_ph(a);
+    __m512h vacc1 = _mm512_loadu_ph(a + 32);
+    a += 64;
+
+    vacc0 = _mm512_max_ph(vacc0, vb);
+    vacc1 = _mm512_max_ph(vacc1, vb);
+
+
+
+    _mm512_storeu_ph(o, vacc0);
+    _mm512_storeu_ph(o + 32, vacc1);
+    o += 64;
+  }
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
+    __m512h vacc = _mm512_loadu_ph(a);
+    a += 32;
+
+    vacc = _mm512_max_ph(vacc, vb);
+
+    _mm512_storeu_ph(o, vacc);
+    o += 32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 31 * sizeof(uint16_t));
+    // Prepare mask for valid 16-bit elements (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_HALF;
+    const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+
+    __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+
+    vacc = _mm512_maskz_max_ph(vmask, vacc, vb);
+    _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));
+  }
+#endif  // defined(__AVX512FP16__)
+}
+
+void xnn_f16_vmin_ukernel__avx512fp16_u64(
+    size_t batch,
+    const void* restrict input_a,
+    const void* restrict input_b,
+    void* restrict output,
+    const union xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+#if defined(__AVX512FP16__)
+  const uint16_t* a = (const uint16_t*) input_a;
+  const uint16_t* b = (const uint16_t*) input_b;
+  uint16_t* o = (uint16_t*) output;
+
+
+  for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
+    __m512h vacc0 = _mm512_loadu_ph(a);
+    __m512h vacc1 = _mm512_loadu_ph(a + 32);
+    a += 64;
+
+    vacc0 = _mm512_min_ph(vacc0, _mm512_loadu_ph(b));
+    vacc1 = _mm512_min_ph(vacc1, _mm512_loadu_ph(b + 32));
+    b += 64;
+
+
+
+    _mm512_storeu_ph(o, vacc0);
+    _mm512_storeu_ph(o + 32, vacc1);
+    o += 64;
+  }
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
+    __m512h vacc = _mm512_loadu_ph(a);
+    a += 32;
+
+    vacc = _mm512_min_ph(vacc, _mm512_loadu_ph(b));
+    b += 32;
+
+
+    _mm512_storeu_ph(o, vacc);
+    o += 32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 31 * sizeof(uint16_t));
+    // Prepare mask for valid 16-bit elements (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_HALF;
+    const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+
+    __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+
+    vacc = _mm512_maskz_min_ph(vmask, vacc, _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, b)));
+
+    _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));
+  }
+#endif  // defined(__AVX512FP16__)
+}
+
+void xnn_f16_vminc_ukernel__avx512fp16_u64(
+    size_t batch,
+    const void* restrict input_a,
+    const void* restrict input_b,
+    void* restrict output,
+    const union xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+#if defined(__AVX512FP16__)
+  const uint16_t* a = (const uint16_t*) input_a;
+  const uint16_t* b = (const uint16_t*) input_b;
+  uint16_t* o = (uint16_t*) output;
+
+  const __m512h vb = _mm512_castsi512_ph(_mm512_set1_epi16(*b));
+
+  for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
+    __m512h vacc0 = _mm512_loadu_ph(a);
+    __m512h vacc1 = _mm512_loadu_ph(a + 32);
+    a += 64;
+
+    vacc0 = _mm512_min_ph(vacc0, vb);
+    vacc1 = _mm512_min_ph(vacc1, vb);
+
+
+
+    _mm512_storeu_ph(o, vacc0);
+    _mm512_storeu_ph(o + 32, vacc1);
+    o += 64;
+  }
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
+    __m512h vacc = _mm512_loadu_ph(a);
+    a += 32;
+
+    vacc = _mm512_min_ph(vacc, vb);
+
+    _mm512_storeu_ph(o, vacc);
+    o += 32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 31 * sizeof(uint16_t));
+    // Prepare mask for valid 16-bit elements (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_HALF;
+    const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+
+    __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+
+    vacc = _mm512_maskz_min_ph(vmask, vacc, vb);
+    _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));
+  }
+#endif  // defined(__AVX512FP16__)
+}
+
 void xnn_f16_vmul_minmax_ukernel__avx512fp16_u64(
     size_t batch,
     const void* restrict input_a,
@@ -286,6 +806,412 @@ void xnn_f16_vmulc_minmax_ukernel__avx512fp16_u64(
     __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
 
     vacc = _mm512_maskz_mul_ph(vmask, vacc, vb);
+    vacc = _mm512_maskz_max_ph(vmask, voutput_min, vacc);
+    vacc = _mm512_maskz_min_ph(vmask, voutput_max, vacc);
+    _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));
+  }
+#endif  // defined(__AVX512FP16__)
+}
+
+void xnn_f16_vrdivc_minmax_ukernel__avx512fp16_u64(
+    size_t batch,
+    const void* restrict input_a,
+    const void* restrict input_b,
+    void* restrict output,
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+#if defined(__AVX512FP16__)
+  const uint16_t* a = (const uint16_t*) input_a;
+  const uint16_t* b = (const uint16_t*) input_b;
+  uint16_t* o = (uint16_t*) output;
+
+  const __m512h voutput_min = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.min));
+  const __m512h voutput_max = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.max));
+  const __m512h vb = _mm512_castsi512_ph(_mm512_set1_epi16(*b));
+
+  for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
+    __m512h vacc0 = _mm512_loadu_ph(a);
+    __m512h vacc1 = _mm512_loadu_ph(a + 32);
+    a += 64;
+
+    vacc0 = _mm512_div_ph(vb, vacc0);
+    vacc1 = _mm512_div_ph(vb, vacc1);
+
+
+    vacc0 = _mm512_max_ph(voutput_min, vacc0);
+    vacc1 = _mm512_max_ph(voutput_min, vacc1);
+
+    vacc0 = _mm512_min_ph(voutput_max, vacc0);
+    vacc1 = _mm512_min_ph(voutput_max, vacc1);
+
+    _mm512_storeu_ph(o, vacc0);
+    _mm512_storeu_ph(o + 32, vacc1);
+    o += 64;
+  }
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
+    __m512h vacc = _mm512_loadu_ph(a);
+    a += 32;
+
+    vacc = _mm512_div_ph(vb, vacc);
+    vacc = _mm512_max_ph(voutput_min, vacc);
+    vacc = _mm512_min_ph(voutput_max, vacc);
+
+    _mm512_storeu_ph(o, vacc);
+    o += 32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 31 * sizeof(uint16_t));
+    // Prepare mask for valid 16-bit elements (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_HALF;
+    const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+
+    __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+
+    vacc = _mm512_maskz_div_ph(vmask, vb, vacc);
+    vacc = _mm512_maskz_max_ph(vmask, voutput_min, vacc);
+    vacc = _mm512_maskz_min_ph(vmask, voutput_max, vacc);
+    _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));
+  }
+#endif  // defined(__AVX512FP16__)
+}
+
+void xnn_f16_vrsubc_minmax_ukernel__avx512fp16_u64(
+    size_t batch,
+    const void* restrict input_a,
+    const void* restrict input_b,
+    void* restrict output,
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+#if defined(__AVX512FP16__)
+  const uint16_t* a = (const uint16_t*) input_a;
+  const uint16_t* b = (const uint16_t*) input_b;
+  uint16_t* o = (uint16_t*) output;
+
+  const __m512h voutput_min = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.min));
+  const __m512h voutput_max = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.max));
+  const __m512h vb = _mm512_castsi512_ph(_mm512_set1_epi16(*b));
+
+  for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
+    __m512h vacc0 = _mm512_loadu_ph(a);
+    __m512h vacc1 = _mm512_loadu_ph(a + 32);
+    a += 64;
+
+    vacc0 = _mm512_sub_ph(vb, vacc0);
+    vacc1 = _mm512_sub_ph(vb, vacc1);
+
+
+    vacc0 = _mm512_max_ph(voutput_min, vacc0);
+    vacc1 = _mm512_max_ph(voutput_min, vacc1);
+
+    vacc0 = _mm512_min_ph(voutput_max, vacc0);
+    vacc1 = _mm512_min_ph(voutput_max, vacc1);
+
+    _mm512_storeu_ph(o, vacc0);
+    _mm512_storeu_ph(o + 32, vacc1);
+    o += 64;
+  }
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
+    __m512h vacc = _mm512_loadu_ph(a);
+    a += 32;
+
+    vacc = _mm512_sub_ph(vb, vacc);
+    vacc = _mm512_max_ph(voutput_min, vacc);
+    vacc = _mm512_min_ph(voutput_max, vacc);
+
+    _mm512_storeu_ph(o, vacc);
+    o += 32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 31 * sizeof(uint16_t));
+    // Prepare mask for valid 16-bit elements (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_HALF;
+    const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+
+    __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+
+    vacc = _mm512_maskz_sub_ph(vmask, vb, vacc);
+    vacc = _mm512_maskz_max_ph(vmask, voutput_min, vacc);
+    vacc = _mm512_maskz_min_ph(vmask, voutput_max, vacc);
+    _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));
+  }
+#endif  // defined(__AVX512FP16__)
+}
+
+void xnn_f16_vsqrdiff_ukernel__avx512fp16_u64(
+    size_t batch,
+    const void* restrict input_a,
+    const void* restrict input_b,
+    void* restrict output,
+    const union xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+#if defined(__AVX512FP16__)
+  const uint16_t* a = (const uint16_t*) input_a;
+  const uint16_t* b = (const uint16_t*) input_b;
+  uint16_t* o = (uint16_t*) output;
+
+
+  for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
+    __m512h vacc0 = _mm512_loadu_ph(a);
+    __m512h vacc1 = _mm512_loadu_ph(a + 32);
+    a += 64;
+
+    vacc0 = _mm512_sub_ph(vacc0, _mm512_loadu_ph(b));
+    vacc1 = _mm512_sub_ph(vacc1, _mm512_loadu_ph(b + 32));
+    b += 64;
+
+    vacc0 = _mm512_mul_ph(vacc0, vacc0);
+    vacc1 = _mm512_mul_ph(vacc1, vacc1);
+
+
+    _mm512_storeu_ph(o, vacc0);
+    _mm512_storeu_ph(o + 32, vacc1);
+    o += 64;
+  }
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
+    __m512h vacc = _mm512_loadu_ph(a);
+    a += 32;
+
+    vacc = _mm512_sub_ph(vacc, _mm512_loadu_ph(b));
+    b += 32;
+
+    vacc = _mm512_mul_ph(vacc, vacc);
+
+    _mm512_storeu_ph(o, vacc);
+    o += 32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 31 * sizeof(uint16_t));
+    // Prepare mask for valid 16-bit elements (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_HALF;
+    const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+
+    __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+
+    vacc = _mm512_maskz_sub_ph(vmask, vacc, _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, b)));
+
+    vacc = _mm512_maskz_mul_ph(vmask, vacc, vacc);
+    _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));
+  }
+#endif  // defined(__AVX512FP16__)
+}
+
+void xnn_f16_vsqrdiffc_ukernel__avx512fp16_u64(
+    size_t batch,
+    const void* restrict input_a,
+    const void* restrict input_b,
+    void* restrict output,
+    const union xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+#if defined(__AVX512FP16__)
+  const uint16_t* a = (const uint16_t*) input_a;
+  const uint16_t* b = (const uint16_t*) input_b;
+  uint16_t* o = (uint16_t*) output;
+
+  const __m512h vb = _mm512_castsi512_ph(_mm512_set1_epi16(*b));
+
+  for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
+    __m512h vacc0 = _mm512_loadu_ph(a);
+    __m512h vacc1 = _mm512_loadu_ph(a + 32);
+    a += 64;
+
+    vacc0 = _mm512_sub_ph(vacc0, vb);
+    vacc1 = _mm512_sub_ph(vacc1, vb);
+
+    vacc0 = _mm512_mul_ph(vacc0, vacc0);
+    vacc1 = _mm512_mul_ph(vacc1, vacc1);
+
+
+    _mm512_storeu_ph(o, vacc0);
+    _mm512_storeu_ph(o + 32, vacc1);
+    o += 64;
+  }
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
+    __m512h vacc = _mm512_loadu_ph(a);
+    a += 32;
+
+    vacc = _mm512_sub_ph(vacc, vb);
+    vacc = _mm512_mul_ph(vacc, vacc);
+
+    _mm512_storeu_ph(o, vacc);
+    o += 32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 31 * sizeof(uint16_t));
+    // Prepare mask for valid 16-bit elements (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_HALF;
+    const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+
+    __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+
+    vacc = _mm512_maskz_sub_ph(vmask, vacc, vb);
+    vacc = _mm512_maskz_mul_ph(vmask, vacc, vacc);
+    _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));
+  }
+#endif  // defined(__AVX512FP16__)
+}
+
+void xnn_f16_vsub_minmax_ukernel__avx512fp16_u64(
+    size_t batch,
+    const void* restrict input_a,
+    const void* restrict input_b,
+    void* restrict output,
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+#if defined(__AVX512FP16__)
+  const uint16_t* a = (const uint16_t*) input_a;
+  const uint16_t* b = (const uint16_t*) input_b;
+  uint16_t* o = (uint16_t*) output;
+
+  const __m512h voutput_min = _mm512_castsi512_ph(_mm512_set1_epi16((params->fp16arith.min)));
+  const __m512h voutput_max = _mm512_castsi512_ph(_mm512_set1_epi16((params->fp16arith.max)));
+
+  for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
+    __m512h vacc0 = _mm512_loadu_ph(a);
+    __m512h vacc1 = _mm512_loadu_ph(a + 32);
+    a += 64;
+
+    vacc0 = _mm512_sub_ph(vacc0, _mm512_loadu_ph(b));
+    vacc1 = _mm512_sub_ph(vacc1, _mm512_loadu_ph(b + 32));
+    b += 64;
+
+
+    vacc0 = _mm512_max_ph(voutput_min, vacc0);
+    vacc1 = _mm512_max_ph(voutput_min, vacc1);
+
+    vacc0 = _mm512_min_ph(voutput_max, vacc0);
+    vacc1 = _mm512_min_ph(voutput_max, vacc1);
+
+    _mm512_storeu_ph(o, vacc0);
+    _mm512_storeu_ph(o + 32, vacc1);
+    o += 64;
+  }
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
+    __m512h vacc = _mm512_loadu_ph(a);
+    a += 32;
+
+    vacc = _mm512_sub_ph(vacc, _mm512_loadu_ph(b));
+    b += 32;
+
+    vacc = _mm512_max_ph(voutput_min, vacc);
+    vacc = _mm512_min_ph(voutput_max, vacc);
+
+    _mm512_storeu_ph(o, vacc);
+    o += 32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 31 * sizeof(uint16_t));
+    // Prepare mask for valid 16-bit elements (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_HALF;
+    const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+
+    __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+
+    vacc = _mm512_maskz_sub_ph(vmask, vacc, _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, b)));
+
+    vacc = _mm512_maskz_max_ph(vmask, voutput_min, vacc);
+    vacc = _mm512_maskz_min_ph(vmask, voutput_max, vacc);
+    _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));
+  }
+#endif  // defined(__AVX512FP16__)
+}
+
+void xnn_f16_vsubc_minmax_ukernel__avx512fp16_u64(
+    size_t batch,
+    const void* restrict input_a,
+    const void* restrict input_b,
+    void* restrict output,
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+#if defined(__AVX512FP16__)
+  const uint16_t* a = (const uint16_t*) input_a;
+  const uint16_t* b = (const uint16_t*) input_b;
+  uint16_t* o = (uint16_t*) output;
+
+  const __m512h voutput_min = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.min));
+  const __m512h voutput_max = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.max));
+  const __m512h vb = _mm512_castsi512_ph(_mm512_set1_epi16(*b));
+
+  for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
+    __m512h vacc0 = _mm512_loadu_ph(a);
+    __m512h vacc1 = _mm512_loadu_ph(a + 32);
+    a += 64;
+
+    vacc0 = _mm512_sub_ph(vacc0, vb);
+    vacc1 = _mm512_sub_ph(vacc1, vb);
+
+
+    vacc0 = _mm512_max_ph(voutput_min, vacc0);
+    vacc1 = _mm512_max_ph(voutput_min, vacc1);
+
+    vacc0 = _mm512_min_ph(voutput_max, vacc0);
+    vacc1 = _mm512_min_ph(voutput_max, vacc1);
+
+    _mm512_storeu_ph(o, vacc0);
+    _mm512_storeu_ph(o + 32, vacc1);
+    o += 64;
+  }
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
+    __m512h vacc = _mm512_loadu_ph(a);
+    a += 32;
+
+    vacc = _mm512_sub_ph(vacc, vb);
+    vacc = _mm512_max_ph(voutput_min, vacc);
+    vacc = _mm512_min_ph(voutput_max, vacc);
+
+    _mm512_storeu_ph(o, vacc);
+    o += 32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 31 * sizeof(uint16_t));
+    // Prepare mask for valid 16-bit elements (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_HALF;
+    const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+
+    __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+
+    vacc = _mm512_maskz_sub_ph(vmask, vacc, vb);
     vacc = _mm512_maskz_max_ph(vmask, voutput_min, vacc);
     vacc = _mm512_maskz_min_ph(vmask, voutput_max, vacc);
     _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));

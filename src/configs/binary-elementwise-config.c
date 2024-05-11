@@ -105,6 +105,15 @@ static void init_f16_vadd_config(void) {
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    #if XNN_ENABLE_AVX512FP16
+      if (hardware_config->use_x86_avx512fp16) {
+        f16_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vadd_minmax_ukernel__avx512fp16_u64;
+        f16_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vaddc_minmax_ukernel__avx512fp16_u64;
+        f16_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vaddc_minmax_ukernel__avx512fp16_u64;
+        f16_vadd_config.init.f16_minmax = xnn_init_f16_minmax_fp16arith_params;
+        f16_vadd_config.minmax.element_tile = 64;
+      } else
+    #endif
     if (hardware_config->use_x86_avx2) {
       f16_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vadd_minmax_ukernel__f16c_u16;
       f16_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vaddc_minmax_ukernel__f16c_u16;
@@ -139,6 +148,15 @@ static void init_f16_vdiv_config(void) {
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    #if XNN_ENABLE_AVX512FP16
+      if (hardware_config->use_x86_avx512fp16) {
+        f16_vdiv_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vdiv_minmax_ukernel__avx512fp16_u64;
+        f16_vdiv_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vdivc_minmax_ukernel__avx512fp16_u64;
+        f16_vdiv_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vrdivc_minmax_ukernel__avx512fp16_u64;
+        f16_vdiv_config.init.f16_minmax = xnn_init_f16_minmax_fp16arith_params;
+        f16_vdiv_config.minmax.element_tile = 64;
+      } else
+    #endif
     if (hardware_config->use_x86_avx2) {
       f16_vdiv_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vdiv_minmax_ukernel__f16c_u8;
       f16_vdiv_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vdivc_minmax_ukernel__f16c_u8;
@@ -171,6 +189,15 @@ static void init_f16_vmax_config(void) {
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    #if XNN_ENABLE_AVX512FP16
+      if (hardware_config->use_x86_avx512fp16) {
+        f16_vmax_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vmax_ukernel__avx512fp16_u64;
+        f16_vmax_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vmaxc_ukernel__avx512fp16_u64;
+        f16_vmax_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vmaxc_ukernel__avx512fp16_u64;
+        f16_vmax_config.init.f16_minmax = xnn_init_f16_minmax_fp16arith_params;
+        f16_vmax_config.minmax.element_tile = 64;
+      } else
+    #endif
     if (hardware_config->use_x86_avx2) {
       f16_vmax_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vmax_ukernel__f16c_u16;
       f16_vmax_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vmaxc_ukernel__f16c_u16;
@@ -202,6 +229,15 @@ static void init_f16_vmin_config(void) {
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    #if XNN_ENABLE_AVX512FP16
+      if (hardware_config->use_x86_avx512fp16) {
+        f16_vmin_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vmin_ukernel__avx512fp16_u64;
+        f16_vmin_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vminc_ukernel__avx512fp16_u64;
+        f16_vmin_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vminc_ukernel__avx512fp16_u64;
+        f16_vmin_config.init.f16_minmax = xnn_init_f16_minmax_fp16arith_params;
+        f16_vmin_config.minmax.element_tile = 64;
+      } else
+    #endif
     if (hardware_config->use_x86_avx2) {
       f16_vmin_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vmin_ukernel__f16c_u16;
       f16_vmin_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vminc_ukernel__f16c_u16;
@@ -278,6 +314,15 @@ static void init_f16_vsub_config(void) {
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    #if XNN_ENABLE_AVX512FP16
+      if (hardware_config->use_x86_avx512fp16) {
+        f16_vsub_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vsub_minmax_ukernel__avx512fp16_u64;
+        f16_vsub_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vsubc_minmax_ukernel__avx512fp16_u64;
+        f16_vsub_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vrsubc_minmax_ukernel__avx512fp16_u64;
+        f16_vsub_config.init.f16_minmax = xnn_init_f16_minmax_fp16arith_params;
+        f16_vsub_config.minmax.element_tile = 64;
+      } else
+    #endif
     if (hardware_config->use_x86_avx2) {
       f16_vsub_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vsub_minmax_ukernel__f16c_u16;
       f16_vsub_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vsubc_minmax_ukernel__f16c_u16;
@@ -312,6 +357,15 @@ static void init_f16_vsqrdiff_config(void) {
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    #if XNN_ENABLE_AVX512FP16
+      if (hardware_config->use_x86_avx512fp16) {
+        f16_vsqrdiff_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vsqrdiff_ukernel__avx512fp16_u64;
+        f16_vsqrdiff_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vsqrdiffc_ukernel__avx512fp16_u64;
+        f16_vsqrdiff_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vsqrdiffc_ukernel__avx512fp16_u64;
+        f16_vsqrdiff_config.init.f16_minmax = xnn_init_f16_minmax_fp16arith_params;
+        f16_vsqrdiff_config.minmax.element_tile = 64;
+      } else
+    #endif
     if (hardware_config->use_x86_avx2) {
       f16_vsqrdiff_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vsqrdiff_ukernel__f16c_u16;
       f16_vsqrdiff_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vsqrdiffc_ukernel__f16c_u16;
