@@ -1,0 +1,144 @@
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <immintrin.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/reduce.h>
+#include <xnnpack/math.h>
+
+
+$UNROLL = CHANNELS_BATCH >> 3
+void xnn_f16_f32acc_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__f16c_c${CHANNELS_BATCH}(
+    size_t rows,
+    size_t channels,
+    const void* input,
+    size_t input_stride,
+    const void* zero,
+    void* output,
+    const union xnn_f16_f32acc_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(rows != 0);
+  assert(channels != 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const __m256 vscale = _mm256_set1_ps(params->avx.scale);
+
+  size_t input_increment = ${ACCUMULATORS} * input_stride;
+  for (; channels >= ${CHANNELS_BATCH}; channels -= ${CHANNELS_BATCH}) {
+    const uint16_t* i0 = input;
+    $for ACC in range(1, ACCUMULATORS):
+      const uint16_t* i${ACC} = (const uint16_t*) ((uintptr_t) input + ${ACC} * input_stride);
+
+    $for i in range(UNROLL):
+      __m256 vacc${i} = _mm256_setzero_ps();
+
+    for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
+      $for ACC in range(1, ACCUMULATORS, 2):
+        if XNN_UNPREDICTABLE(r < ${ACC+1}) {
+          i${ACC} = zero;
+        }
+        if XNN_UNPREDICTABLE(r <= ${ACC+1}) {
+          i${ACC+1} = zero;
+        }
+      $for c in range(UNROLL):
+        __m256 vin${c};
+      $for j in range(ACCUMULATORS):
+        $for c in range(UNROLL):
+          vin${c} = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (&i${j}[${c*8}])));
+        $for c in range(UNROLL):
+          vacc${c} = _mm256_add_ps(vin${c}, vacc${c});
+      $for ACC in range(0, ACCUMULATORS):
+        i${ACC} = (const uint16_t*) ((uintptr_t) i${ACC} + input_increment);
+    }
+    $for i in range(UNROLL):
+      vacc${i} = _mm256_mul_ps(vacc${i}, vscale);
+
+    const uint16_t* o = output;
+    $for i in range(0, UNROLL):
+      __m256 vo${i} = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) o)); o = (const void*) ((uintptr_t) o + 8 * sizeof(uint16_t));
+    $for i in range(0, UNROLL):
+      vacc${i} = _mm256_add_ps(vo${i}, vacc${i});
+    $for i in range(0, UNROLL):
+      _mm_storeu_si128((__m128i*) output, _mm256_cvtps_ph(vacc${i}, _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 8 * sizeof(uint16_t));
+
+    input = (const uint16_t*) ((uintptr_t) input + ${CHANNELS_BATCH} * sizeof(uint16_t));
+  }
+  if (channels != 0) {
+    input_increment = ${ACCUMULATORS} * input_stride;
+    const uint16_t* i0 = input;
+    $for ACC in range(1, ACCUMULATORS):
+      const uint16_t* i${ACC} = (const uint16_t*) ((uintptr_t) input + ${ACC} * input_stride);
+    __m256 vacc[${UNROLL}];
+    $for i in range(UNROLL):
+      vacc[${i}] = _mm256_setzero_ps();
+
+    const size_t num_full_chunks = channels >> 3;
+    const size_t num_chunks = round_up_po2(channels, 8) >> 3;
+    const size_t remainder = channels & 0x7;
+    for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
+      $for ACC in range(1, ACCUMULATORS, 2):
+        if XNN_UNPREDICTABLE(r < ${ACC+1}) {
+          i${ACC} = zero;
+        }
+        if XNN_UNPREDICTABLE(r <= ${ACC+1}) {
+          i${ACC+1} = zero;
+        }
+      for (int i = 0; i < num_full_chunks; ++i) {
+        $for c in range(ACCUMULATORS):
+          vacc[i] = _mm256_add_ps(_mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) &i${c}[i*8])), vacc[i]);
+      }
+
+      if (remainder) {
+        $for c in range(ACCUMULATORS):
+          vacc[num_full_chunks] = _mm256_add_ps(vacc[num_full_chunks],  _mm256_cvtph_ps(_mm_loadu_si128((const  __m128i*) &i${c}[num_full_chunks*8])));
+      }
+      $for ACC in range(ACCUMULATORS):
+        i${ACC} = (const uint16_t*) ((uintptr_t) i${ACC} + input_increment);
+    }
+    for (size_t i = 0; i < num_chunks; ++i) {
+      vacc[i] = _mm256_mul_ps(vacc[i], vscale);
+    }
+
+    __m256 vo[${UNROLL}];
+    const uint16_t* o = output;
+    for (int i = 0; i < num_full_chunks; ++i) {
+      vo[i] = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) o)); o = (const void*) ((uintptr_t) o + 8 * sizeof(uint16_t));
+    }
+    for (int i = 0; i < num_full_chunks; ++i) {
+      vacc[i] = _mm256_add_ps(vo[i], vacc[i]);
+    }
+    for (int i = 0; i < num_full_chunks; ++i) {
+      _mm_storeu_si128((__m128i*) output, _mm256_cvtps_ph(vacc[i], _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 8 * sizeof(uint16_t));
+    }
+    if (remainder) {
+      __m256 vout = vacc[num_full_chunks];
+      __m128 vout_low = _mm256_castps256_ps128(vout);
+      if (channels & 4) {
+        __m128 vo =  _mm_cvtph_ps(_mm_loadl_epi64((__m128i*) output));
+        vo = _mm_add_ps(vout_low, vo);
+        _mm_storel_epi64((__m128i*) output, _mm_cvtps_ph(vo, _MM_FROUND_TO_NEAREST_INT));
+        vout_low  = _mm256_castps256_ps128(_mm256_permute2f128_ps(vout, vout, 1));
+        output = (void*) ((uintptr_t) output + 4 * sizeof(uint16_t));
+      }
+      if (channels & 2) {
+        __m128 vo = _mm_cvtph_ps(_mm_loadu_si32(output));
+        vo = _mm_add_ps(vout_low, vo);
+        _mm_storeu_si32(output, _mm_cvtps_ph(vo, _MM_FROUND_TO_NEAREST_INT));
+        vout_low = _mm_movehl_ps(vout_low, vout_low);
+        output = (void*) ((uintptr_t) output + 2 * sizeof(uint16_t));
+      }
+      if (channels & 1) {
+        __m128 vo = _mm_cvtph_ps(_mm_loadu_si16(output));
+        vo = _mm_add_ps(vout_low, vo);
+        _mm_storeu_si16(output, _mm_cvtps_ph(vo, _MM_FROUND_TO_NEAREST_INT));
+      }
+    }
+  }
+}
