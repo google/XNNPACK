@@ -2989,6 +2989,12 @@ ALL_HEXAGON_MICROKERNEL_SRCS = [
     "src/cs16-vsquareabs/gen/cs16-vsquareabs-hexagon-x8.c",
     "src/cs16-vsquareabs/gen/cs16-vsquareabs-hexagon-x10.c",
     "src/cs16-vsquareabs/gen/cs16-vsquareabs-hexagon-x12.c",
+    "src/f32-gemm/gen/f32-gemm-1x32-minmax-hvx-broadcast.c",
+    "src/f32-gemm/gen/f32-gemm-4x32-minmax-hvx-broadcast.c",
+    "src/f32-gemm/gen/f32-gemm-5x32-minmax-hvx-broadcast.c",
+    "src/f32-gemm/gen/f32-gemm-6x32-minmax-hvx-broadcast.c",
+    "src/f32-gemm/gen/f32-gemm-7x32-minmax-hvx-broadcast.c",
+    "src/f32-gemm/gen/f32-gemm-8x32-minmax-hvx-broadcast.c",
 ]
 
 ALL_NEON_MICROKERNEL_SRCS = [

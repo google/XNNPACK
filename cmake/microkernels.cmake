@@ -85,6 +85,7 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-5x16-minmax-avx-broadcast.c
   src/f32-gemm/gen/f32-gemm-6x8-minmax-avx-broadcast.c
   src/f32-gemm/gen/f32-gemm-6x16-minmax-avx-broadcast.c
+  src/f32-gemm/gen/f32-gemm-6x32-minmax-avx-broadcast.c
   src/f32-gemm/gen/f32-gemm-7x8-minmax-avx-broadcast.c
   src/f32-gemminc/gen/f32-gemminc-1x8-minmax-avx-broadcast.c
   src/f32-gemminc/gen/f32-gemminc-1x16-minmax-avx-broadcast.c
@@ -2977,7 +2978,13 @@ SET(ALL_HEXAGON_MICROKERNEL_SRCS
   src/cs16-vsquareabs/gen/cs16-vsquareabs-hexagon-x6.c
   src/cs16-vsquareabs/gen/cs16-vsquareabs-hexagon-x8.c
   src/cs16-vsquareabs/gen/cs16-vsquareabs-hexagon-x10.c
-  src/cs16-vsquareabs/gen/cs16-vsquareabs-hexagon-x12.c)
+  src/cs16-vsquareabs/gen/cs16-vsquareabs-hexagon-x12.c
+  src/f32-gemm/gen/f32-gemm-1x32-minmax-hvx-broadcast.c
+  src/f32-gemm/gen/f32-gemm-4x32-minmax-hvx-broadcast.c
+  src/f32-gemm/gen/f32-gemm-5x32-minmax-hvx-broadcast.c
+  src/f32-gemm/gen/f32-gemm-6x32-minmax-hvx-broadcast.c
+  src/f32-gemm/gen/f32-gemm-7x32-minmax-hvx-broadcast.c
+  src/f32-gemm/gen/f32-gemm-8x32-minmax-hvx-broadcast.c)
 
 SET(ALL_NEON_MICROKERNEL_SRCS
   src/cs16-bfly4/cs16-bfly4-neon-x1.c
