@@ -63,6 +63,10 @@
 - name: xnn_f32_rsum_ukernel__wasmsimd_u16_acc4
   init: xnn_init_f32_scale_scalar_params
 
+# RISC-V Vector
+- name: xnn_f32_rsum_ukernel__rvv_u1v
+  init: xnn_init_f32_scale_scalar_params
+
 # Scalar
 - name: xnn_f32_rsum_ukernel__scalar_u1
   init: xnn_init_f32_scale_scalar_params
