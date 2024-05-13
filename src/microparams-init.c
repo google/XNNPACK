@@ -2227,6 +2227,20 @@ size_t xnn_init_f32_minmax_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_HEXAGON
+size_t xnn_init_f32_minmax_hvx_params(
+  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float output_min,
+  float output_max)
+{
+  for (uint32_t i = 0; i < 32; i++) {
+    params->hvx.min[i] = output_min;
+    params->hvx.max[i] = output_max;
+  }
+  return sizeof(params->hvx);
+}
+#endif // XNN_ARCH_HEXAGON
+
 size_t xnn_init_f32_minmax_scalar_params(
   union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,
