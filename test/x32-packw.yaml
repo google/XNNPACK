@@ -74,3 +74,17 @@
 - name: xnn_x32_packw_gemm_goi_ukernel_x8__scalar_int_u4
 - name: xnn_x32_packw_gemm_goi_ukernel_x16__scalar_float_u4
 - name: xnn_x32_packw_gemm_goi_ukernel_x16__scalar_int_u4
+
+# RISC-V Vector
+- name: xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u2
+- name: xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u4
+- name: xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u8
+- name: xnn_x32_packw_gemm_goi_ukernel_x2v__rvv_u2
+- name: xnn_x32_packw_gemm_goi_ukernel_x2v__rvv_u4
+- name: xnn_x32_packw_gemm_goi_ukernel_x2v__rvv_u8
+- name: xnn_x32_packw_gemm_goi_ukernel_x4v__rvv_u2
+- name: xnn_x32_packw_gemm_goi_ukernel_x4v__rvv_u4
+- name: xnn_x32_packw_gemm_goi_ukernel_x4v__rvv_u8
+- name: xnn_x32_packw_gemm_goi_ukernel_x8v__rvv_u2
+- name: xnn_x32_packw_gemm_goi_ukernel_x8v__rvv_u4
+- name: xnn_x32_packw_gemm_goi_ukernel_x8v__rvv_u8
