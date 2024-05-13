@@ -1409,12 +1409,21 @@ struct univector_contiguous_context {
 struct reduce_context {
   const void* input;
   void* output;
+  const void* zero;
   size_t input_shape[XNN_MAX_TENSOR_DIMS];
   size_t input_stride[XNN_MAX_TENSOR_DIMS];
   size_t output_stride[XNN_MAX_TENSOR_DIMS];
   size_t scaled_elements;
+  size_t channels;
   size_t element_size;
-  xnn_reduce_ukernel_fn ukernel;
+  size_t input_pixel_stride;
+  size_t output_pixel_stride;
+  size_t input_batch_stride;
+  size_t output_batch_stride;
+  union {
+    xnn_reduce_ukernel_fn rsum;
+    xnn_rdsum_ukernel_fn rdsum;
+  } ukernel;
   union {
     union xnn_f32_default_params f32_default;
     union xnn_f32_scale_params f32_scale;
@@ -1425,6 +1434,18 @@ struct reduce_context {
 // Compute contigous reduction over the 1st, 3rd and 5th dimensions of the input
 // tensor.
   XNN_PRIVATE void xnn_compute_contiguous_reduce(
+      const struct reduce_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t output_idx0,
+      size_t output_idx1,
+      size_t output_idx2,
+      size_t output1_block_size,
+      size_t output2_block_size);
+#endif
+
+#ifndef __cplusplus
+// Compute discontigous reduction over the 0st, 2rd and 4th dimensions of the input
+// tensor.
+  XNN_PRIVATE void xnn_compute_discontiguous_reduce(
       const struct reduce_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t output_idx0,
       size_t output_idx1,

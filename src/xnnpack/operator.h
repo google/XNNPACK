@@ -340,7 +340,8 @@ struct xnn_operator {
       const struct xnn_avgpool_config* avgpool_config;
       const struct xnn_gavgpool_config* gavgpool_config;
       const struct xnn_pavgpool_config* pavgpool_config;
-      const struct xnn_reduce_config* reduce_config;
+      const struct xnn_reduce_config* rdsum_config;
+      const struct xnn_reduce_config* rsum_config;
     };
     const struct xnn_gavgpool_cw_config* gavgpool_cw_config;
     const struct xnn_ibilinear_chw_config* ibilinear_chw_config;

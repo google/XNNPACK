@@ -33,16 +33,15 @@ template <class T> class MeanTestBase : public ::testing::Test {
 
     auto num_input_dim_dist = std::uniform_int_distribution<size_t>(2, XNN_MAX_TENSOR_DIMS);
     const size_t num_input_dims = num_input_dim_dist(rng);
+    auto num_reduction_axes_dist = std::uniform_int_distribution<size_t>(1, num_input_dims);
+    const size_t num_reduction_axes = num_reduction_axes_dist(rng);
 
-    auto reduction_axes_seq_start_dist = std::uniform_int_distribution<size_t>(0, num_input_dims - 1);
-    const size_t reduction_axes_seq_start = reduction_axes_seq_start_dist(rng);
-    auto reduction_axes_seq_end_dist = std::uniform_int_distribution<size_t>(reduction_axes_seq_start + 1, num_input_dims);
-    const size_t reduction_axes_seq_end = reduction_axes_seq_end_dist(rng);
-
-    reduction_axes.clear();
-    for (size_t axis = reduction_axes_seq_start; axis < reduction_axes_seq_end; axis++) {
-      reduction_axes.push_back(axis);
-    }
+    auto axes_dist = std::uniform_int_distribution<size_t>(0, num_input_dims - 1);
+    reduction_axes.resize(num_reduction_axes);
+    std::generate(reduction_axes.begin(), reduction_axes.end(), [&]() { return axes_dist(rng); });
+    std::sort(reduction_axes.begin(), reduction_axes.end());
+    auto end = std::unique(reduction_axes.begin(), reduction_axes.end());
+    reduction_axes.erase(end, reduction_axes.end());
 
     auto shape_dist = std::uniform_int_distribution<size_t>(2, 15);
     input_shape.resize(num_input_dims);
@@ -181,18 +180,13 @@ TEST_F(MeanTestF16, matches_operator_api)
 
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  size_t workspace_size = 0;
-  size_t workspace_alignment = 0;
   ASSERT_EQ(xnn_status_success,
     xnn_reshape_mean_nd_f16(op,
       reduction_axes.size(), reduction_axes.data(),
       input_shape.size(), input_shape.data(),
-      &workspace_size, &workspace_alignment,
       /*threadpool=*/nullptr));
-  ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
-  ASSERT_EQ(xnn_status_success, xnn_setup_mean_nd_f16(op, workspace.data(), input.data(), operator_output.data()));
+  ASSERT_EQ(xnn_status_success, xnn_setup_mean_nd_f16(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -258,18 +252,13 @@ TEST_F(MeanTestF32, matches_operator_api)
 
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  size_t workspace_size = 0;
-  size_t workspace_alignment = 0;
   ASSERT_EQ(xnn_status_success,
     xnn_reshape_mean_nd_f32(op,
       reduction_axes.size(), reduction_axes.data(),
       input_shape.size(), input_shape.data(),
-      &workspace_size, &workspace_alignment,
       /*threadpool=*/nullptr));
-  ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
-  ASSERT_EQ(xnn_status_success, xnn_setup_mean_nd_f32(op, workspace.data(), input.data(), operator_output.data()));
+  ASSERT_EQ(xnn_status_success, xnn_setup_mean_nd_f32(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
