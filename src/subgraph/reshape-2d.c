@@ -5,7 +5,7 @@
 
 #include <assert.h>
 #include <inttypes.h>
-#include <pthreadpool.h>
+#include "pthreadpool.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>

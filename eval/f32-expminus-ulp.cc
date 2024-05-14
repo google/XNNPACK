@@ -15,16 +15,14 @@
 #if XNN_ENABLE_CPUINFO
   #include <cpuinfo.h>
 #endif  // XNN_ENABLE_CPUINFO
-#include <pthreadpool.h>
-
-#include <benchmark/benchmark.h>
-
-#include "bench/utils.h"
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
-#include <xnnpack/math.h>
 #include <xnnpack/math-stubs.h>
+#include <xnnpack/math.h>
 
+#include "bench/utils.h"
+#include <benchmark/benchmark.h>
+#include "pthreadpool.h"
 
 struct ComputeErrorContext {
   const float* input;

@@ -12,7 +12,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <pthreadpool.h>
+#include "pthreadpool.h"
 
 #ifdef __cplusplus
 extern "C" {
