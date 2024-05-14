@@ -130,6 +130,13 @@ static void init_f32_gavgpool_config(void) {
     f32_gavgpool_config.update.f32 = xnn_update_f32_scaleminmax_scalar_params;
     f32_gavgpool_config.row_tile = 7;
     f32_gavgpool_config.channel_tile = 1;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    f32_gavgpool_config.unipass = (xnn_gavgpool_unipass_ukernel_fn) xnn_f32_gavgpool_minmax_ukernel_7x__rvv_c2v;
+    f32_gavgpool_config.multipass = (xnn_gavgpool_multipass_ukernel_fn) xnn_f32_gavgpool_minmax_ukernel_7p7x__rvv_c2v;
+    f32_gavgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
+    f32_gavgpool_config.update.f32 = xnn_update_f32_scaleminmax_scalar_params;
+    f32_gavgpool_config.row_tile = 7;
+    f32_gavgpool_config.channel_tile = 16;
   #else
     f32_gavgpool_config.unipass = (xnn_gavgpool_unipass_ukernel_fn) xnn_f32_gavgpool_minmax_ukernel_7x__scalar_c1;
     f32_gavgpool_config.multipass = (xnn_gavgpool_multipass_ukernel_fn) xnn_f32_gavgpool_minmax_ukernel_7p7x__scalar_c1;
