@@ -2684,9 +2684,11 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "divide_nd_eager_test",
+    timeout = "moderate",
     srcs = [
         "divide-nd-eager.cc",
     ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
 )
 
@@ -3031,6 +3033,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "subtract_nd_test",
+    timeout = "moderate",
     srcs = [
         "subtract-nd.cc",
     ],
