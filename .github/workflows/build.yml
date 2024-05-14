@@ -148,14 +148,14 @@ jobs:
         working-directory: ${{ github.workspace }}/build/windows/x86
   cmake-macos-arm64:
     runs-on: macos-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - name: Create output directory
         run: mkdir -p build/macos/arm64
         working-directory: ${{ github.workspace }}
       - name: Generate CMake project
-        run: cmake -G Xcode -DCMAKE_OSX_ARCHITECTURES=arm64 -DHAVE_STD_REGEX=TRUE ../../..
+        run: cmake -G Xcode -DCMAKE_CONFIGURATION_TYPES=Release -DCMAKE_OSX_ARCHITECTURES=arm64 -DHAVE_STD_REGEX=TRUE ../../..
         working-directory: ${{ github.workspace }}/build/macos/arm64
       - name: Build with Xcode
         run: cmake --build build/macos/arm64 --parallel $(sysctl -n hw.ncpu) -- -quiet
@@ -220,8 +220,7 @@ jobs:
         id: setup-ndk
         uses: nttld/setup-ndk@v1
         with:
-          # Use old version of NDK so that android_ndk_repository works correctly (need platforms folder in NDK).
-          ndk-version: r20b
+          ndk-version: r25b
           add-to-path: false
       - name: Build and run tests
         run: |

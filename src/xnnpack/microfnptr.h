@@ -1548,6 +1548,35 @@ typedef void (*xnn_u8_reduce_ukernel_fn)(
     uint8_t* output,
     const void* params);
 
+// RDSUM: Discontiguous Reduce-Sum
+
+typedef void (*xnn_rdsum_ukernel_fn)(
+    size_t rows,
+    size_t channels,
+    const void* input,
+    size_t input_stride,
+    const void* zero,
+    void* output,
+    const void* params);
+
+typedef void (*xnn_f16_f32acc_rdsum_ukernel_fn)(
+    size_t rows,
+    size_t channels,
+    const void* input,
+    size_t input_stride,
+    const void* zero,
+    void* output,
+    const union xnn_f16_f32acc_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+typedef void (*xnn_f32_rdsum_ukernel_fn)(
+    size_t rows,
+    size_t channels,
+    const float* input,
+    size_t input_stride,
+    const float* zero,
+    float* output,
+    const union xnn_f32_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 // RSUM: Reduce-Sum
 
 typedef void (*xnn_f16_rsum_ukernel_fn)(

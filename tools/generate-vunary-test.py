@@ -18,36 +18,50 @@ import xnncommon
 
 
 parser = argparse.ArgumentParser(
-  description='Vector unary operation microkernel test generator')
-parser.add_argument("-s", "--spec", metavar="FILE", required=True,
-                    help="Specification (YAML) file")
-parser.add_argument("-o", "--output", metavar="FILE", required=True,
-                    help='Output (C++ source) file')
+    description="Vector unary operation microkernel test generator"
+)
+parser.add_argument(
+    "-s",
+    "--spec",
+    metavar="FILE",
+    required=True,
+    help="Specification (YAML) file",
+)
+parser.add_argument(
+    "-o",
+    "--output",
+    metavar="FILE",
+    required=True,
+    help="Output (C++ source) file",
+)
 parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"(?:xnn_|xnn_generate_)(s8|u8|bf16|f16|f32|u32|u64)(_(s8|u8|bf16|f16|f32|u32|u64))*_v(abs|clamp|elu|hswish|lrelu|neg|relu|rndd|rndne|rndu|rndz|rsqrt|sigmoid|sqr|sqrt|sqrtshift|tanh)_(fact_)?ukernel__(.+)_u(\d+)(v)?", name)
+  match = re.fullmatch(
+      r"(?:xnn_|xnn_generate_)(s8|u8|bf16|f16|f32|u32|u64)(_(s8|u8|bf16|f16|f32|u32|u64))*_v(abs|clamp|elu|hswish|lrelu|neg|relu|rndd|rndne|rndu|rndz|rsqrt|sigmoid|sqr|sqrt|sqrtshift|tanh)_(fact_)?ukernel__(.+)_u(\d+)(v)?",
+      name,
+  )
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
-    "abs": "Abs",
-    "clamp": "Clamp",
-    "elu": "ELU",
-    "hswish": "HardSwish",
-    "lrelu": "LeakyReLU",
-    "neg": "Negate",
-    "relu": "ReLU",
-    "rndd": "RoundDown",
-    "rndne": "RoundToNearestEven",
-    "rndz": "RoundTowardsZero",
-    "rndu": "RoundUp",
-    "rsqrt": "ReciprocalSquareRoot",
-    "sigmoid": "Sigmoid",
-    "sqr": "Square",
-    "sqrt": "SquareRoot",
-    "sqrtshift": "SquareRootShift",
-    "tanh": "TanH",
+      "abs": "Abs",
+      "clamp": "Clamp",
+      "elu": "ELU",
+      "hswish": "HardSwish",
+      "lrelu": "LeakyReLU",
+      "neg": "Negate",
+      "relu": "ReLU",
+      "rndd": "RoundDown",
+      "rndne": "RoundToNearestEven",
+      "rndz": "RoundTowardsZero",
+      "rndu": "RoundUp",
+      "rsqrt": "ReciprocalSquareRoot",
+      "sigmoid": "Sigmoid",
+      "sqr": "Square",
+      "sqrt": "SquareRoot",
+      "sqrtshift": "SquareRootShift",
+      "tanh": "TanH",
   }[match.group(4)]
   batch_tile = int(match.group(7))
   vector_tile = bool(match.group(8))
@@ -55,6 +69,25 @@ def split_ukernel_name(name):
   arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(6))
   return op_type, batch_tile, vector_tile, arch, isa
 
+
+SPECIAL_VALUES_F32 = {
+    "SquareRoot": (
+        4,  # Number of elements.
+        "{0.0f, -0.0f, 1.0f, -1.0f}",  # Inputs.
+        "{0.0f, -0.0f, 1.0f, NAN}",  # Expected outputs.
+        "xnn_f32_sqrt_params",  # Params name.
+        1,  # Error margin in ULP.
+    ),
+    "TanH": (
+        7,  # Number of elements.
+        "{0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN}",
+        "{0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN}",
+        "xnn_f32_tanh_params",
+        # TODO: b/338934971 - This should be `1` ulp, but this fails on
+        # `cmake-linux-riscv64-rvv` (but not on `cmake-linux-riscv64`).
+        3,
+    ),
+}
 
 TEST_TEMPLATE = """\
 TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}${BATCH_SUFFIX}) {
@@ -202,37 +235,47 @@ $if OP_TYPE == "SquareRootShift":
       }
     }
   }
-$if OP_TYPE == "SquareRoot" and DATATYPE == "f32":
+$if DATATYPE == "f32" and OP_TYPE in SPECIAL_VALUES_F32:
   TEST(${TEST_NAME}, special_values) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    std::array<float, 4> inputs = {0.0f, -0.0f, 1.0f, -1.0f};
-    std::array<float, 4> expected = {0.0, -0.0f, 1.0f, nanf("")};
-    std::array<float, 4> outputs;
+    constexpr size_t num_elements = ${SPECIAL_VALUES_F32[OP_TYPE][0]};
+    constexpr size_t buffered_size =
+        num_elements + XNN_EXTRA_BYTES / sizeof(float);
+    std::array<float, buffered_size> inputs =
+        ${SPECIAL_VALUES_F32[OP_TYPE][1]};
+    std::array<float, num_elements> expected =
+        ${SPECIAL_VALUES_F32[OP_TYPE][2]};
+    std::array<float, buffered_size> outputs;
     $if len(TEST_ARGS) == 1:
       ${TEST_ARGS[0]}(
-          inputs.size() * sizeof(float), inputs.data(), outputs.data(), nullptr);
+          num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     $else:
-      union xnn_f32_sqrt_params params;
+      union ${SPECIAL_VALUES_F32[OP_TYPE][3]} params;
       ${TEST_ARGS[1]}(&params);
       ${TEST_ARGS[0]}(
-          inputs.size() * sizeof(float), inputs.data(), outputs.data(), &params);
-    for (int i = 0; i < inputs.size(); i++) {
+          num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+    for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
-        ASSERT_NEAR(
+        EXPECT_NEAR(
             expected[i], outputs[i],
-            2 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            ${SPECIAL_VALUES_F32[OP_TYPE][4]} * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
-        ASSERT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
-            << "for input " << inputs[i];
+        EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
+            << "for input " << inputs[i] << " and output " << outputs[i]
+            << " (FP_INFINITE=" << FP_INFINITE << ", FP_NAN=" << FP_NAN
+            << ", FP_NORMAL=" << FP_NORMAL << ", FP_SUBNORMAL=" << FP_SUBNORMAL
+            << ", FP_ZERO=" << FP_ZERO << ")";
       }
     }
   }
 """
 
 
-def generate_test_cases(ukernel, op_type, init_fn, batch_tile, vector_tile, isa):
+def generate_test_cases(
+    ukernel, op_type, init_fn, batch_tile, vector_tile, isa
+):
   """Generates all tests cases for a Vector Unary Operation micro-kernel.
 
   Args:
@@ -240,11 +283,11 @@ def generate_test_cases(ukernel, op_type, init_fn, batch_tile, vector_tile, isa)
     op_type: Operation type.
     init_fn: C name of the function to initialize microkernel parameters.
     batch_tile: Number of batch elements processed per one iteration of the
-                inner loop of the micro-kernel.
+      inner loop of the micro-kernel.
     vector_tile: Indicates if batch tile is specified in vectors rather than
-                 elements.
+      elements.
     isa: instruction set required to run the micro-kernel. Generated unit test
-         will skip execution if the host processor doesn't support this ISA.
+      will skip execution if the host processor doesn't support this ISA.
 
   Returns:
     Code for the test case.
@@ -260,19 +303,25 @@ def generate_test_cases(ukernel, op_type, init_fn, batch_tile, vector_tile, isa)
   if vector_tile:
     ctype = {"f16": "uint16_t", "f32": "float"}[datatype]
     batch_scale = {
-      "rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype,
-      "rvvfp16arith": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype,
+        "rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype,
+        "rvvfp16arith": (
+            " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype
+        ),
     }[isa]
-  return xngen.preprocess(TEST_TEMPLATE, {
-      "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
-      "TEST_ARGS": test_args,
-      "DATATYPE": datatype,
-      "BATCH_TILE": batch_tile,
-      "BATCH_SCALE": batch_scale,
-      "BATCH_SUFFIX": "v" if vector_tile else "",
-      "OP_TYPE": op_type,
-      "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
-    })
+  return xngen.preprocess(
+      TEST_TEMPLATE,
+      {
+          "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
+          "TEST_ARGS": test_args,
+          "DATATYPE": datatype,
+          "BATCH_TILE": batch_tile,
+          "BATCH_SCALE": batch_scale,
+          "BATCH_SUFFIX": "v" if vector_tile else "",
+          "OP_TYPE": op_type,
+          "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
+          "SPECIAL_VALUES_F32": SPECIAL_VALUES_F32,
+      },
+  )
 
 
 def main(args):
@@ -299,6 +348,7 @@ def main(args):
 #include <cstddef>
 #include <limits>
 
+#include <xnnpack.h>
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 #include <xnnpack/microparams-init.h>
@@ -315,7 +365,8 @@ def main(args):
       op_type, batch_tile, vector_tile, arch, isa = split_ukernel_name(name)
 
       test_case = generate_test_cases(
-        name, op_type, init_fn, batch_tile, vector_tile, isa)
+          name, op_type, init_fn, batch_tile, vector_tile, isa
+      )
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     xnncommon.overwrite_if_changed(options.output, tests)

@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <limits>
 
+#include <xnnpack.h>
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 #include <xnnpack/microparams-init.h>

@@ -16,6 +16,7 @@
 - name: xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u80
 - name: xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u88
 - name: xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u96
+
 # x86 AVX512
 - name: xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u16
 - name: xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u32

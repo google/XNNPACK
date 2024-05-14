@@ -133,6 +133,12 @@ static void f16_f32acc_rsum(
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
     ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_f32acc_rsum, avx512skx_u128_acc4,
+                    xnn_f16_f32acc_rsum_ukernel__avx512skx_u128_acc4,
+                    xnn_init_f16_f32acc_scale_scalar_params,
+                    benchmark::utils::CheckAVX512SKX)
+    ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
+    ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

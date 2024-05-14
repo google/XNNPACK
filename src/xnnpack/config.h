@@ -48,6 +48,7 @@ struct xnn_hardware_config {
   bool use_x86_avx512vnni;
   bool use_x86_avx512vnnigfni;
   bool use_x86_avx512amx;
+  bool use_x86_avx512fp16;
   bool use_x86_avxvnni;
 #endif
 #if XNN_ARCH_RISCV
@@ -307,6 +308,7 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_xx_copy_config(
 
 struct xnn_reduce_config {
   xnn_reduce_ukernel_fn ukernel;
+  xnn_rdsum_ukernel_fn rd_ukernel;
   union {
     xnn_init_f16_f32acc_scale_params_fn f16_f32acc_scale;
     xnn_init_f16_default_params_fn f16_default;
@@ -319,9 +321,11 @@ struct xnn_reduce_config {
   size_t element_tile;
 };
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_f32acc_rsum_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_f32acc_rdsum_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_rminmax_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rminmax_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rsum_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rdsum_config();
 
 struct xnn_xx_fill_config {
   xnn_fill_ukernel_fn ukernel;

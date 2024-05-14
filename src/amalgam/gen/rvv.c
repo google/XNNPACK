@@ -8,14 +8,222 @@
 
 #include <riscv_vector.h>
 
+#include <xnnpack/avgpool.h>
 #include <xnnpack/common.h>
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/maxpool.h>
 #include <xnnpack/raddstoreexpminusmax.h>
+#include <xnnpack/reduce.h>
+#include <xnnpack/transpose.h>
 #include <xnnpack/vbinary.h>
 #include <xnnpack/vunary.h>
 
+
+void xnn_f32_avgpool_minmax_ukernel_9p8x__rvv_c2v(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
+    const float** input,
+    size_t input_offset,
+    const float* zero,
+    float* buffer,
+    float* output,
+    size_t input_increment,
+    size_t output_increment,
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(output_pixels != 0);
+  assert(kernel_elements > 9);
+  assert(channels != 0);
+  assert((input_offset & 3) == 0);
+
+  input_offset >>= XNN_LOG2_SIZEOF_FLOAT;
+
+  do {
+    {
+      const float *i[9];
+      for (size_t kk = 0; kk < 9; ++kk) {
+        assert(input[kk] != NULL);
+        i[kk] = (input[kk] != zero ? input[kk] + input_offset : zero) ;
+      }
+      input += 9;
+
+      float* b = buffer;
+      for (size_t c = channels; c != 0; ) {
+        int32_t n = __riscv_vsetvl_e32m2(c);
+        c -= n;
+
+        vfloat32m2_t i0_f32v = __riscv_vle32_v_f32m2(i[0], n); i[0] += n;
+        vfloat32m2_t i1_f32v = __riscv_vle32_v_f32m2(i[1], n); i[1] += n;
+        vfloat32m2_t i2_f32v = __riscv_vle32_v_f32m2(i[2], n); i[2] += n;
+        vfloat32m2_t i3_f32v = __riscv_vle32_v_f32m2(i[3], n); i[3] += n;
+        vfloat32m2_t i4_f32v = __riscv_vle32_v_f32m2(i[4], n); i[4] += n;
+        vfloat32m2_t i5_f32v = __riscv_vle32_v_f32m2(i[5], n); i[5] += n;
+        vfloat32m2_t i6_f32v = __riscv_vle32_v_f32m2(i[6], n); i[6] += n;
+        vfloat32m2_t i7_f32v = __riscv_vle32_v_f32m2(i[7], n); i[7] += n;
+        vfloat32m2_t i8_f32v = __riscv_vle32_v_f32m2(i[8], n); i[8] += n;
+
+        vfloat32m2_t sum01_f32v = __riscv_vfadd_vv_f32m2(i0_f32v, i1_f32v, n);
+        vfloat32m2_t sum23_f32v = __riscv_vfadd_vv_f32m2(i2_f32v, i3_f32v, n);
+        vfloat32m2_t sum45_f32v = __riscv_vfadd_vv_f32m2(i4_f32v, i5_f32v, n);
+        vfloat32m2_t sum67_f32v = __riscv_vfadd_vv_f32m2(i6_f32v, i7_f32v, n);
+        vfloat32m2_t sum018_f32v = __riscv_vfadd_vv_f32m2(sum01_f32v, i8_f32v, n);
+        vfloat32m2_t sum2345_f32v = __riscv_vfadd_vv_f32m2(sum23_f32v, sum45_f32v, n);
+        vfloat32m2_t sum01678_f32v = __riscv_vfadd_vv_f32m2(sum018_f32v, sum67_f32v, n);
+        vfloat32m2_t sum_f32v = __riscv_vfadd_vv_f32m2(sum2345_f32v, sum01678_f32v, n);
+        __riscv_vse32_v_f32m2(b, sum_f32v, n); b += n;
+      }
+    }
+
+    size_t k = kernel_elements;
+    for (k -= 9; k > 8; k -= 8) {
+      const float *i[8];
+      for (size_t kk = 0; kk < 8; ++kk) {
+        assert(input[kk] != NULL);
+        i[kk] = (input[kk] != zero ? input[kk] + input_offset : zero) ;
+      }
+      input += 8;
+
+      float* b = buffer;
+      for (size_t c = channels; c != 0; ) {
+        int32_t n = __riscv_vsetvl_e32m2(c);
+        c -= n;
+
+        vfloat32m2_t i0_f32v = __riscv_vle32_v_f32m2(i[0], n); i[0] += n;
+        vfloat32m2_t i1_f32v = __riscv_vle32_v_f32m2(i[1], n); i[1] += n;
+        vfloat32m2_t i2_f32v = __riscv_vle32_v_f32m2(i[2], n); i[2] += n;
+        vfloat32m2_t i3_f32v = __riscv_vle32_v_f32m2(i[3], n); i[3] += n;
+        vfloat32m2_t i4_f32v = __riscv_vle32_v_f32m2(i[4], n); i[4] += n;
+        vfloat32m2_t i5_f32v = __riscv_vle32_v_f32m2(i[5], n); i[5] += n;
+        vfloat32m2_t i6_f32v = __riscv_vle32_v_f32m2(i[6], n); i[6] += n;
+        vfloat32m2_t i7_f32v = __riscv_vle32_v_f32m2(i[7], n); i[7] += n;
+        vfloat32m2_t vacc_f32v = __riscv_vle32_v_f32m2(b, n);
+
+        vfloat32m2_t sum01_f32v = __riscv_vfadd_vv_f32m2(i0_f32v, i1_f32v, n);
+        vfloat32m2_t sum23_f32v = __riscv_vfadd_vv_f32m2(i2_f32v, i3_f32v, n);
+        vfloat32m2_t sum45_f32v = __riscv_vfadd_vv_f32m2(i4_f32v, i5_f32v, n);
+        vfloat32m2_t sum67_f32v = __riscv_vfadd_vv_f32m2(i6_f32v, i7_f32v, n);
+        vfloat32m2_t sum01a_f32v = __riscv_vfadd_vv_f32m2(sum01_f32v, vacc_f32v, n);
+        vfloat32m2_t sum2345_f32v = __riscv_vfadd_vv_f32m2(sum23_f32v, sum45_f32v, n);
+        vfloat32m2_t sum0167a_f32v = __riscv_vfadd_vv_f32m2(sum01a_f32v, sum67_f32v, n);
+        vfloat32m2_t sum_f32v = __riscv_vfadd_vv_f32m2(sum2345_f32v, sum0167a_f32v, n);
+        __riscv_vse32_v_f32m2(b, sum_f32v, n); b += n;
+      }
+    }
+
+    {
+      const float *i[8];
+      for (size_t kk = 0; kk < k; ++kk) {
+        assert(input[kk] != NULL);
+        i[kk] = (input[kk] != zero ? input[kk] + input_offset : zero) ;
+      }
+      for (size_t tail = k; tail < 8; ++tail) {
+        i[tail] = zero;
+      }
+      input = (const float**) ((uintptr_t) input + input_increment);
+
+      const float scale = params->scalar.scale;
+      const float min = params->scalar.min;
+      const float max = params->scalar.max;
+      float* b = buffer;
+
+      for (size_t c = channels; c != 0; ) {
+        int32_t n = __riscv_vsetvl_e32m2(c);
+        c -= n;
+
+        vfloat32m2_t i0_f32v = __riscv_vle32_v_f32m2(i[0], n); i[0] += n;
+        vfloat32m2_t i1_f32v = __riscv_vle32_v_f32m2(i[1], n); i[1] += n;
+        vfloat32m2_t i2_f32v = __riscv_vle32_v_f32m2(i[2], n); i[2] += n;
+        vfloat32m2_t i3_f32v = __riscv_vle32_v_f32m2(i[3], n); i[3] += n;
+        vfloat32m2_t i4_f32v = __riscv_vle32_v_f32m2(i[4], n); i[4] += n;
+        vfloat32m2_t i5_f32v = __riscv_vle32_v_f32m2(i[5], n); i[5] += n;
+        vfloat32m2_t i6_f32v = __riscv_vle32_v_f32m2(i[6], n); i[6] += n;
+        vfloat32m2_t i7_f32v = __riscv_vle32_v_f32m2(i[7], n); i[7] += n;
+        vfloat32m2_t vacc_f32v = __riscv_vle32_v_f32m2(b, n); b += n;
+
+        vfloat32m2_t sum01_f32v = __riscv_vfadd_vv_f32m2(i0_f32v, i1_f32v, n);
+        vfloat32m2_t sum23_f32v = __riscv_vfadd_vv_f32m2(i2_f32v, i3_f32v, n);
+        vfloat32m2_t sum45_f32v = __riscv_vfadd_vv_f32m2(i4_f32v, i5_f32v, n);
+        vfloat32m2_t sum67_f32v = __riscv_vfadd_vv_f32m2(i6_f32v, i7_f32v, n);
+        vfloat32m2_t sum01a_f32v = __riscv_vfadd_vv_f32m2(sum01_f32v, vacc_f32v, n);
+        vfloat32m2_t sum2345_f32v = __riscv_vfadd_vv_f32m2(sum23_f32v, sum45_f32v, n);
+        vfloat32m2_t sum0167a_f32v = __riscv_vfadd_vv_f32m2(sum01a_f32v, sum67_f32v, n);
+        vfloat32m2_t sum_f32v = __riscv_vfadd_vv_f32m2(sum2345_f32v, sum0167a_f32v, n);
+        vfloat32m2_t out_f32v = __riscv_vfmul_vf_f32m2(sum_f32v, scale, n);
+        out_f32v = __riscv_vfmin_vf_f32m2(__riscv_vfmax_vf_f32m2(out_f32v, min, n), max, n);
+        __riscv_vse32_v_f32m2(output, out_f32v, n); output += n;
+      }
+    }
+    output = (float*) ((uintptr_t) output + output_increment);
+  } while (--output_pixels != 0);
+}
+
+void xnn_f32_avgpool_minmax_ukernel_9x__rvv_c2v(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
+    const float** input,
+    size_t input_offset,
+    const float* zero,
+    float* output,
+    size_t input_increment,
+    size_t output_increment,
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(output_pixels != 0);
+  assert(kernel_elements != 0);
+  assert(kernel_elements <= 9);
+  assert(channels != 0);
+  assert((input_offset & 3) == 0);
+
+  input_offset >>= XNN_LOG2_SIZEOF_FLOAT;
+
+  const float scale = params->scalar.scale;
+  const float min = params->scalar.min;
+  const float max = params->scalar.max;
+
+  do {
+    const float *i[9];
+    for (size_t kk = 0; kk < kernel_elements; ++kk) {
+      assert(input[kk] != NULL);
+      i[kk] = (input[kk] != zero ? input[kk] + input_offset : zero) ;
+    }
+    for (size_t tail = kernel_elements; tail < 9; ++tail) {
+      i[tail] = zero;
+    }
+    input = (const float**) ((uintptr_t) input + input_increment);
+
+    for (size_t c = channels; c != 0; ) {
+      int32_t n = __riscv_vsetvl_e32m2(c);
+
+      vfloat32m2_t i0_f32v = __riscv_vle32_v_f32m2(i[0], n); i[0] += n;
+      vfloat32m2_t i1_f32v = __riscv_vle32_v_f32m2(i[1], n); i[1] += n;
+      vfloat32m2_t i2_f32v = __riscv_vle32_v_f32m2(i[2], n); i[2] += n;
+      vfloat32m2_t i3_f32v = __riscv_vle32_v_f32m2(i[3], n); i[3] += n;
+      vfloat32m2_t i4_f32v = __riscv_vle32_v_f32m2(i[4], n); i[4] += n;
+      vfloat32m2_t i5_f32v = __riscv_vle32_v_f32m2(i[5], n); i[5] += n;
+      vfloat32m2_t i6_f32v = __riscv_vle32_v_f32m2(i[6], n); i[6] += n;
+      vfloat32m2_t i7_f32v = __riscv_vle32_v_f32m2(i[7], n); i[7] += n;
+      vfloat32m2_t i8_f32v = __riscv_vle32_v_f32m2(i[8], n); i[8] += n;
+
+      vfloat32m2_t sum01_f32v = __riscv_vfadd_vv_f32m2(i0_f32v, i1_f32v, n);
+      vfloat32m2_t sum23_f32v = __riscv_vfadd_vv_f32m2(i2_f32v, i3_f32v, n);
+      vfloat32m2_t sum45_f32v = __riscv_vfadd_vv_f32m2(i4_f32v, i5_f32v, n);
+      vfloat32m2_t sum67_f32v = __riscv_vfadd_vv_f32m2(i6_f32v, i7_f32v, n);
+      vfloat32m2_t sum018_f32v = __riscv_vfadd_vv_f32m2(sum01_f32v, i8_f32v, n);
+      vfloat32m2_t sum2345_f32v = __riscv_vfadd_vv_f32m2(sum23_f32v, sum45_f32v, n);
+      vfloat32m2_t sum01678_f32v = __riscv_vfadd_vv_f32m2(sum018_f32v, sum67_f32v, n);
+      vfloat32m2_t sum_f32v = __riscv_vfadd_vv_f32m2(sum2345_f32v, sum01678_f32v, n);
+      vfloat32m2_t out_f32v = __riscv_vfmul_vf_f32m2(sum_f32v, scale, n);
+      out_f32v = __riscv_vfmin_vf_f32m2(__riscv_vfmax_vf_f32m2(out_f32v, min, n), max, n);
+      __riscv_vse32_v_f32m2(output, out_f32v, n); output += n;
+
+      c -= n;
+    }
+    output = (float*) ((uintptr_t) output + output_increment);
+  } while (--output_pixels != 0);
+}
 
 void xnn_f32_maxpool_minmax_ukernel_9p8x__rvv_c2v(
     size_t output_pixels,
@@ -367,6 +575,64 @@ void xnn_f32_rminmax_ukernel__rvv_u8v(
   vfloat32m1_t fmax = __riscv_vfmv_s_f_f32m1(-INFINITY, 1);
   output[0] = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredmin_vs_f32m8_f32m1(t0, fmin, N));
   output[1] = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredmax_vs_f32m8_f32m1(t1, fmax, N));
+}
+
+void xnn_f32_rsum_ukernel__rvv_u1v(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+  float out;
+
+  batch >>= XNN_LOG2_SIZEOF_FLOAT;
+  vfloat32m1_t acc_f32v = __riscv_vfmv_s_f_f32m1(0.f, __riscv_vsetvl_e32m1(batch));
+  size_t n = __riscv_vsetvl_e32m1(batch);
+  vfloat32m1_t sum0_f32v = __riscv_vfmv_s_f_f32m1(0.f, n);
+  vfloat32m1_t sum1_f32v = __riscv_vfmv_s_f_f32m1(0.f, n);
+  for (; batch >= n * 8; batch -= n * 8) {
+    vfloat32m1_t in0_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
+    vfloat32m1_t in1_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
+    vfloat32m1_t in2_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
+    vfloat32m1_t in3_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
+    vfloat32m1_t in4_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
+    vfloat32m1_t in5_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
+    vfloat32m1_t in6_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
+    vfloat32m1_t in7_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
+    vfloat32m1_t sum01_f32v = __riscv_vfadd_vv_f32m1(in0_f32v, in1_f32v, n);
+    vfloat32m1_t sum23_f32v = __riscv_vfadd_vv_f32m1(in2_f32v, in3_f32v, n);
+    vfloat32m1_t sum45_f32v = __riscv_vfadd_vv_f32m1(in4_f32v, in5_f32v, n);
+    vfloat32m1_t sum67_f32v = __riscv_vfadd_vv_f32m1(in6_f32v, in7_f32v, n);
+    vfloat32m1_t sum0123_f32v = __riscv_vfadd_vv_f32m1(sum01_f32v, sum23_f32v, n);
+    vfloat32m1_t sum4567_f32v = __riscv_vfadd_vv_f32m1(sum45_f32v, sum67_f32v, n);
+    sum0_f32v = __riscv_vfadd_vv_f32m1(sum0_f32v, sum0123_f32v, n);
+    sum1_f32v = __riscv_vfadd_vv_f32m1(sum1_f32v, sum4567_f32v, n);
+  }
+  for (; batch >= n * 4; batch -= n * 4) {
+    vfloat32m1_t in0_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
+    vfloat32m1_t in1_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
+    vfloat32m1_t in2_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
+    vfloat32m1_t in3_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
+    vfloat32m1_t sum01_f32v = __riscv_vfadd_vv_f32m1(in0_f32v, in1_f32v, n);
+    vfloat32m1_t sum23_f32v = __riscv_vfadd_vv_f32m1(in2_f32v, in3_f32v, n);
+    sum0_f32v = __riscv_vfadd_vv_f32m1(sum0_f32v, sum01_f32v, n);
+    sum1_f32v = __riscv_vfadd_vv_f32m1(sum1_f32v, sum23_f32v, n);
+  }
+  vfloat32m1_t sum_f32v = __riscv_vfadd_vv_f32m1(sum0_f32v, sum1_f32v, n);
+  for (; batch > 0;) {
+    size_t n1 = __riscv_vsetvl_e32m1(batch);
+    vfloat32m1_t in_f32v = __riscv_vle32_v_f32m1(input, n1); input += n1;
+    sum_f32v = __riscv_vfadd_vv_f32m1_tu(sum_f32v, sum_f32v, in_f32v, n1);
+    batch -= n1;
+  }
+  acc_f32v = __riscv_vfredosum_vs_f32m1_f32m1(sum_f32v, acc_f32v, n);
+  vfloat32m1_t out_f32v = __riscv_vfmul_vf_f32m1(acc_f32v, params->scalar.scale, 1);
+  __riscv_vse32_v_f32m1(&out, out_f32v, 1);
+  *output += out;
 }
 
 void xnn_f32_vadd_minmax_ukernel__rvv_u8v(
@@ -1027,4 +1293,1174 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__rvv_u2v(
 
     batch -= n;
   } while (batch != 0);
+}
+
+void xnn_x32_transposec_ukernel__16x8_rvv(
+  const uint32_t* input,
+  uint32_t* output,
+  size_t input_stride,
+  size_t output_stride,
+  size_t block_width,
+  size_t block_height,
+  const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(block_width == 1 || output_stride >= block_height * sizeof(uint32_t));
+  assert(block_height == 1 || input_stride >= block_width * sizeof(uint32_t));
+
+  const size_t tile_height = 16;
+  const size_t tile_width = 8;
+  const size_t tile_hbytes = tile_height * sizeof(uint32_t);
+  const size_t tile_wbytes = tile_width * sizeof(uint32_t);
+  const size_t input_reset = tile_wbytes - round_down_po2(block_height, tile_height) * input_stride;
+  const size_t input_offset = tile_height * input_stride;
+  const size_t output_reset = tile_width * output_stride - round_down_po2(block_height, 2) * sizeof(uint32_t);
+
+  const uint32_t* i0 = input;
+
+  uint32_t* o0 = (uint32_t*) output;
+  uint32_t* o1 = (uint32_t*) ((uintptr_t) o0 + output_stride);
+  uint32_t* o2 = (uint32_t*) ((uintptr_t) o1 + output_stride);
+  uint32_t* o3 = (uint32_t*) ((uintptr_t) o2 + output_stride);
+  uint32_t* o4 = (uint32_t*) ((uintptr_t) o3 + output_stride);
+  uint32_t* o5 = (uint32_t*) ((uintptr_t) o4 + output_stride);
+  uint32_t* o6 = (uint32_t*) ((uintptr_t) o5 + output_stride);
+  uint32_t* o7 = (uint32_t*) ((uintptr_t) o6 + output_stride);
+
+  do {
+    size_t bh = block_height;
+    size_t vl = __riscv_vsetvl_e32m1(tile_height);
+    for (; bh >= 16; bh -= 16) {
+      if (block_width >= tile_width) {
+        vuint32m1x8_t tuple = __riscv_vlsseg8e32_v_u32m1x8(i0, input_stride, vl);
+
+        vuint32m1_t v_d0 = __riscv_vget_v_u32m1x8_u32m1(tuple, 0);
+        __riscv_vse32_v_u32m1(o0, v_d0, vl);
+        vuint32m1_t v_d1 = __riscv_vget_v_u32m1x8_u32m1(tuple, 1);
+        __riscv_vse32_v_u32m1(o1, v_d1, vl);
+        vuint32m1_t v_d2 = __riscv_vget_v_u32m1x8_u32m1(tuple, 2);
+        __riscv_vse32_v_u32m1(o2, v_d2, vl);
+        vuint32m1_t v_d3 = __riscv_vget_v_u32m1x8_u32m1(tuple, 3);
+        __riscv_vse32_v_u32m1(o3, v_d3, vl);
+        vuint32m1_t v_d4 = __riscv_vget_v_u32m1x8_u32m1(tuple, 4);
+        __riscv_vse32_v_u32m1(o4, v_d4, vl);
+        vuint32m1_t v_d5 = __riscv_vget_v_u32m1x8_u32m1(tuple, 5);
+        __riscv_vse32_v_u32m1(o5, v_d5, vl);
+        vuint32m1_t v_d6 = __riscv_vget_v_u32m1x8_u32m1(tuple, 6);
+        __riscv_vse32_v_u32m1(o6, v_d6, vl);
+        vuint32m1_t v_d7 = __riscv_vget_v_u32m1x8_u32m1(tuple, 7);
+        __riscv_vse32_v_u32m1(o7, v_d7, vl);
+
+      } else {
+        switch (block_width) {
+          case 7: {
+            vuint32m1x7_t tuple = __riscv_vlsseg7e32_v_u32m1x7(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x7_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x7_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x7_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x7_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x7_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            vuint32m1_t v_d5 = __riscv_vget_v_u32m1x7_u32m1(tuple, 5);
+            __riscv_vse32_v_u32m1(o5, v_d5, vl);
+            vuint32m1_t v_d6 = __riscv_vget_v_u32m1x7_u32m1(tuple, 6);
+            __riscv_vse32_v_u32m1(o6, v_d6, vl);
+            break;
+          }
+
+          case 6: {
+            vuint32m1x6_t tuple = __riscv_vlsseg6e32_v_u32m1x6(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x6_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x6_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x6_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x6_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x6_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            vuint32m1_t v_d5 = __riscv_vget_v_u32m1x6_u32m1(tuple, 5);
+            __riscv_vse32_v_u32m1(o5, v_d5, vl);
+            break;
+          }
+
+          case 5: {
+            vuint32m1x5_t tuple = __riscv_vlsseg5e32_v_u32m1x5(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x5_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x5_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x5_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x5_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x5_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            break;
+          }
+
+          case 4: {
+            vuint32m1x4_t tuple = __riscv_vlsseg4e32_v_u32m1x4(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x4_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x4_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x4_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x4_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            break;
+          }
+
+          case 3: {
+            vuint32m1x3_t tuple = __riscv_vlsseg3e32_v_u32m1x3(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x3_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x3_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x3_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            break;
+          }
+
+          case 2: {
+            vuint32m1x2_t tuple = __riscv_vlsseg2e32_v_u32m1x2(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x2_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x2_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            break;
+          }
+
+          case 1: {
+            vuint32m1_t v_d0 = __riscv_vlse32_v_u32m1(i0, input_stride, vl);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            break;
+          }
+
+          default:
+            XNN_UNREACHABLE;
+        }
+      }
+
+      i0 = (uint32_t*) ((uintptr_t) i0 + input_offset);
+      o7 = (uint32_t*) ((uintptr_t) o7 + tile_hbytes);
+      o6 = (uint32_t*) ((uintptr_t) o6 + tile_hbytes);
+      o5 = (uint32_t*) ((uintptr_t) o5 + tile_hbytes);
+      o4 = (uint32_t*) ((uintptr_t) o4 + tile_hbytes);
+      o3 = (uint32_t*) ((uintptr_t) o3 + tile_hbytes);
+      o2 = (uint32_t*) ((uintptr_t) o2 + tile_hbytes);
+      o1 = (uint32_t*) ((uintptr_t) o1 + tile_hbytes);
+      o0 = (uint32_t*) ((uintptr_t) o0 + tile_hbytes);
+    }
+
+    if (bh != 0) {
+      const uint32_t* i = i0;
+      vl = __riscv_vsetvl_e32m1(bh);
+      if (block_width >= tile_width) {
+        vuint32m1x8_t tuple = __riscv_vlsseg8e32_v_u32m1x8(i, input_stride, vl);
+
+        vuint32m1_t v_d0 = __riscv_vget_v_u32m1x8_u32m1(tuple, 0);
+        __riscv_vse32_v_u32m1(o0, v_d0, vl);
+        vuint32m1_t v_d1 = __riscv_vget_v_u32m1x8_u32m1(tuple, 1);
+        __riscv_vse32_v_u32m1(o1, v_d1, vl);
+        vuint32m1_t v_d2 = __riscv_vget_v_u32m1x8_u32m1(tuple, 2);
+        __riscv_vse32_v_u32m1(o2, v_d2, vl);
+        vuint32m1_t v_d3 = __riscv_vget_v_u32m1x8_u32m1(tuple, 3);
+        __riscv_vse32_v_u32m1(o3, v_d3, vl);
+        vuint32m1_t v_d4 = __riscv_vget_v_u32m1x8_u32m1(tuple, 4);
+        __riscv_vse32_v_u32m1(o4, v_d4, vl);
+        vuint32m1_t v_d5 = __riscv_vget_v_u32m1x8_u32m1(tuple, 5);
+        __riscv_vse32_v_u32m1(o5, v_d5, vl);
+        vuint32m1_t v_d6 = __riscv_vget_v_u32m1x8_u32m1(tuple, 6);
+        __riscv_vse32_v_u32m1(o6, v_d6, vl);
+        vuint32m1_t v_d7 = __riscv_vget_v_u32m1x8_u32m1(tuple, 7);
+        __riscv_vse32_v_u32m1(o7, v_d7, vl);
+      } else {
+        switch(block_width) {
+          case 7: {
+            vuint32m1x7_t tuple = __riscv_vlsseg7e32_v_u32m1x7(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x7_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x7_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x7_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x7_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x7_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            vuint32m1_t v_d5 = __riscv_vget_v_u32m1x7_u32m1(tuple, 5);
+            __riscv_vse32_v_u32m1(o5, v_d5, vl);
+            vuint32m1_t v_d6 = __riscv_vget_v_u32m1x7_u32m1(tuple, 6);
+            __riscv_vse32_v_u32m1(o6, v_d6, vl);
+            break;
+          }
+          case 6: {
+            vuint32m1x6_t tuple = __riscv_vlsseg6e32_v_u32m1x6(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x6_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x6_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x6_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x6_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x6_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            vuint32m1_t v_d5 = __riscv_vget_v_u32m1x6_u32m1(tuple, 5);
+            __riscv_vse32_v_u32m1(o5, v_d5, vl);
+            break;
+          }
+          case 5: {
+            vuint32m1x5_t tuple = __riscv_vlsseg5e32_v_u32m1x5(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x5_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x5_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x5_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x5_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x5_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            break;
+          }
+          case 4: {
+            vuint32m1x4_t tuple = __riscv_vlsseg4e32_v_u32m1x4(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x4_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x4_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x4_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x4_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            break;
+          }
+          case 3: {
+            vuint32m1x3_t tuple = __riscv_vlsseg3e32_v_u32m1x3(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x3_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x3_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x3_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            break;
+          }
+          case 2: {
+            vuint32m1x2_t tuple = __riscv_vlsseg2e32_v_u32m1x2(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x2_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x2_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            break;
+          }
+
+          case 1: {
+            vuint32m1_t v_d0 = __riscv_vlse32_v_u32m1(i, input_stride, vl);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            break;
+          }
+
+          default:
+            XNN_UNREACHABLE;
+        }
+      }
+
+      if (bh & 8) {
+        o7 += 8;
+        o6 += 8;
+        o5 += 8;
+        o4 += 8;
+        o3 += 8;
+        o2 += 8;
+        o1 += 8;
+        o0 += 8;
+        i = (uint32_t*) ((uintptr_t) i + input_stride * 8);
+      }
+      if (bh & 4) {
+        o7 += 4;
+        o6 += 4;
+        o5 += 4;
+        o4 += 4;
+        o3 += 4;
+        o2 += 4;
+        o1 += 4;
+        o0 += 4;
+        i = (uint32_t*) ((uintptr_t) i + input_stride * 4);
+      }
+      if (bh & 2) {
+        o7 += 2;
+        o6 += 2;
+        o5 += 2;
+        o4 += 2;
+        o3 += 2;
+        o2 += 2;
+        o1 += 2;
+        o0 += 2;
+        i = (uint32_t*) ((uintptr_t) i + input_stride * 2);
+      }
+    }
+
+    i0 = (const uint32_t*) ((uintptr_t) i0 + input_reset);
+
+    o0 = (uint32_t*) ((uintptr_t) o0 + output_reset);
+    o1 = (uint32_t*) ((uintptr_t) o1 + output_reset);
+    o2 = (uint32_t*) ((uintptr_t) o2 + output_reset);
+    o3 = (uint32_t*) ((uintptr_t) o3 + output_reset);
+    o4 = (uint32_t*) ((uintptr_t) o4 + output_reset);
+    o5 = (uint32_t*) ((uintptr_t) o5 + output_reset);
+    o6 = (uint32_t*) ((uintptr_t) o6 + output_reset);
+    o7 = (uint32_t*) ((uintptr_t) o7 + output_reset);
+
+    block_width = doz(block_width, tile_width);
+  } while (block_width != 0);
+}
+
+void xnn_x32_transposec_ukernel__32x8_rvv(
+  const uint32_t* input,
+  uint32_t* output,
+  size_t input_stride,
+  size_t output_stride,
+  size_t block_width,
+  size_t block_height,
+  const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(block_width == 1 || output_stride >= block_height * sizeof(uint32_t));
+  assert(block_height == 1 || input_stride >= block_width * sizeof(uint32_t));
+
+  const size_t tile_height = 32;
+  const size_t tile_width = 8;
+  const size_t tile_hbytes = tile_height * sizeof(uint32_t);
+  const size_t tile_wbytes = tile_width * sizeof(uint32_t);
+  const size_t input_reset = tile_wbytes - round_down_po2(block_height, tile_height) * input_stride;
+  const size_t input_offset = tile_height * input_stride;
+  const size_t output_reset = tile_width * output_stride - round_down_po2(block_height, 2) * sizeof(uint32_t);
+
+  const uint32_t* i0 = input;
+
+  uint32_t* o0 = (uint32_t*) output;
+  uint32_t* o1 = (uint32_t*) ((uintptr_t) o0 + output_stride);
+  uint32_t* o2 = (uint32_t*) ((uintptr_t) o1 + output_stride);
+  uint32_t* o3 = (uint32_t*) ((uintptr_t) o2 + output_stride);
+  uint32_t* o4 = (uint32_t*) ((uintptr_t) o3 + output_stride);
+  uint32_t* o5 = (uint32_t*) ((uintptr_t) o4 + output_stride);
+  uint32_t* o6 = (uint32_t*) ((uintptr_t) o5 + output_stride);
+  uint32_t* o7 = (uint32_t*) ((uintptr_t) o6 + output_stride);
+
+  do {
+    size_t bh = block_height;
+    size_t vl = __riscv_vsetvl_e32m1(tile_height);
+    for (; bh >= 32; bh -= 32) {
+      if (block_width >= tile_width) {
+        vuint32m1x8_t tuple = __riscv_vlsseg8e32_v_u32m1x8(i0, input_stride, vl);
+
+        vuint32m1_t v_d0 = __riscv_vget_v_u32m1x8_u32m1(tuple, 0);
+        __riscv_vse32_v_u32m1(o0, v_d0, vl);
+        vuint32m1_t v_d1 = __riscv_vget_v_u32m1x8_u32m1(tuple, 1);
+        __riscv_vse32_v_u32m1(o1, v_d1, vl);
+        vuint32m1_t v_d2 = __riscv_vget_v_u32m1x8_u32m1(tuple, 2);
+        __riscv_vse32_v_u32m1(o2, v_d2, vl);
+        vuint32m1_t v_d3 = __riscv_vget_v_u32m1x8_u32m1(tuple, 3);
+        __riscv_vse32_v_u32m1(o3, v_d3, vl);
+        vuint32m1_t v_d4 = __riscv_vget_v_u32m1x8_u32m1(tuple, 4);
+        __riscv_vse32_v_u32m1(o4, v_d4, vl);
+        vuint32m1_t v_d5 = __riscv_vget_v_u32m1x8_u32m1(tuple, 5);
+        __riscv_vse32_v_u32m1(o5, v_d5, vl);
+        vuint32m1_t v_d6 = __riscv_vget_v_u32m1x8_u32m1(tuple, 6);
+        __riscv_vse32_v_u32m1(o6, v_d6, vl);
+        vuint32m1_t v_d7 = __riscv_vget_v_u32m1x8_u32m1(tuple, 7);
+        __riscv_vse32_v_u32m1(o7, v_d7, vl);
+
+      } else {
+        switch (block_width) {
+          case 7: {
+            vuint32m1x7_t tuple = __riscv_vlsseg7e32_v_u32m1x7(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x7_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x7_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x7_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x7_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x7_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            vuint32m1_t v_d5 = __riscv_vget_v_u32m1x7_u32m1(tuple, 5);
+            __riscv_vse32_v_u32m1(o5, v_d5, vl);
+            vuint32m1_t v_d6 = __riscv_vget_v_u32m1x7_u32m1(tuple, 6);
+            __riscv_vse32_v_u32m1(o6, v_d6, vl);
+            break;
+          }
+
+          case 6: {
+            vuint32m1x6_t tuple = __riscv_vlsseg6e32_v_u32m1x6(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x6_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x6_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x6_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x6_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x6_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            vuint32m1_t v_d5 = __riscv_vget_v_u32m1x6_u32m1(tuple, 5);
+            __riscv_vse32_v_u32m1(o5, v_d5, vl);
+            break;
+          }
+
+          case 5: {
+            vuint32m1x5_t tuple = __riscv_vlsseg5e32_v_u32m1x5(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x5_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x5_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x5_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x5_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x5_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            break;
+          }
+
+          case 4: {
+            vuint32m1x4_t tuple = __riscv_vlsseg4e32_v_u32m1x4(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x4_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x4_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x4_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x4_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            break;
+          }
+
+          case 3: {
+            vuint32m1x3_t tuple = __riscv_vlsseg3e32_v_u32m1x3(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x3_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x3_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x3_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            break;
+          }
+
+          case 2: {
+            vuint32m1x2_t tuple = __riscv_vlsseg2e32_v_u32m1x2(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x2_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x2_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            break;
+          }
+
+          case 1: {
+            vuint32m1_t v_d0 = __riscv_vlse32_v_u32m1(i0, input_stride, vl);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            break;
+          }
+
+          default:
+            XNN_UNREACHABLE;
+        }
+      }
+
+      i0 = (uint32_t*) ((uintptr_t) i0 + input_offset);
+      o7 = (uint32_t*) ((uintptr_t) o7 + tile_hbytes);
+      o6 = (uint32_t*) ((uintptr_t) o6 + tile_hbytes);
+      o5 = (uint32_t*) ((uintptr_t) o5 + tile_hbytes);
+      o4 = (uint32_t*) ((uintptr_t) o4 + tile_hbytes);
+      o3 = (uint32_t*) ((uintptr_t) o3 + tile_hbytes);
+      o2 = (uint32_t*) ((uintptr_t) o2 + tile_hbytes);
+      o1 = (uint32_t*) ((uintptr_t) o1 + tile_hbytes);
+      o0 = (uint32_t*) ((uintptr_t) o0 + tile_hbytes);
+    }
+
+    if (bh != 0) {
+      const uint32_t* i = i0;
+      vl = __riscv_vsetvl_e32m1(bh);
+      if (block_width >= tile_width) {
+        vuint32m1x8_t tuple = __riscv_vlsseg8e32_v_u32m1x8(i, input_stride, vl);
+
+        vuint32m1_t v_d0 = __riscv_vget_v_u32m1x8_u32m1(tuple, 0);
+        __riscv_vse32_v_u32m1(o0, v_d0, vl);
+        vuint32m1_t v_d1 = __riscv_vget_v_u32m1x8_u32m1(tuple, 1);
+        __riscv_vse32_v_u32m1(o1, v_d1, vl);
+        vuint32m1_t v_d2 = __riscv_vget_v_u32m1x8_u32m1(tuple, 2);
+        __riscv_vse32_v_u32m1(o2, v_d2, vl);
+        vuint32m1_t v_d3 = __riscv_vget_v_u32m1x8_u32m1(tuple, 3);
+        __riscv_vse32_v_u32m1(o3, v_d3, vl);
+        vuint32m1_t v_d4 = __riscv_vget_v_u32m1x8_u32m1(tuple, 4);
+        __riscv_vse32_v_u32m1(o4, v_d4, vl);
+        vuint32m1_t v_d5 = __riscv_vget_v_u32m1x8_u32m1(tuple, 5);
+        __riscv_vse32_v_u32m1(o5, v_d5, vl);
+        vuint32m1_t v_d6 = __riscv_vget_v_u32m1x8_u32m1(tuple, 6);
+        __riscv_vse32_v_u32m1(o6, v_d6, vl);
+        vuint32m1_t v_d7 = __riscv_vget_v_u32m1x8_u32m1(tuple, 7);
+        __riscv_vse32_v_u32m1(o7, v_d7, vl);
+      } else {
+        switch(block_width) {
+          case 7: {
+            vuint32m1x7_t tuple = __riscv_vlsseg7e32_v_u32m1x7(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x7_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x7_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x7_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x7_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x7_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            vuint32m1_t v_d5 = __riscv_vget_v_u32m1x7_u32m1(tuple, 5);
+            __riscv_vse32_v_u32m1(o5, v_d5, vl);
+            vuint32m1_t v_d6 = __riscv_vget_v_u32m1x7_u32m1(tuple, 6);
+            __riscv_vse32_v_u32m1(o6, v_d6, vl);
+            break;
+          }
+          case 6: {
+            vuint32m1x6_t tuple = __riscv_vlsseg6e32_v_u32m1x6(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x6_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x6_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x6_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x6_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x6_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            vuint32m1_t v_d5 = __riscv_vget_v_u32m1x6_u32m1(tuple, 5);
+            __riscv_vse32_v_u32m1(o5, v_d5, vl);
+            break;
+          }
+          case 5: {
+            vuint32m1x5_t tuple = __riscv_vlsseg5e32_v_u32m1x5(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x5_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x5_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x5_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x5_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x5_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            break;
+          }
+          case 4: {
+            vuint32m1x4_t tuple = __riscv_vlsseg4e32_v_u32m1x4(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x4_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x4_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x4_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x4_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            break;
+          }
+          case 3: {
+            vuint32m1x3_t tuple = __riscv_vlsseg3e32_v_u32m1x3(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x3_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x3_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x3_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            break;
+          }
+          case 2: {
+            vuint32m1x2_t tuple = __riscv_vlsseg2e32_v_u32m1x2(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x2_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x2_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            break;
+          }
+
+          case 1: {
+            vuint32m1_t v_d0 = __riscv_vlse32_v_u32m1(i, input_stride, vl);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            break;
+          }
+
+          default:
+            XNN_UNREACHABLE;
+        }
+      }
+
+      if (bh & 16) {
+        o7 += 16;
+        o6 += 16;
+        o5 += 16;
+        o4 += 16;
+        o3 += 16;
+        o2 += 16;
+        o1 += 16;
+        o0 += 16;
+        i = (uint32_t*) ((uintptr_t) i + input_stride * 16);
+      }
+      if (bh & 8) {
+        o7 += 8;
+        o6 += 8;
+        o5 += 8;
+        o4 += 8;
+        o3 += 8;
+        o2 += 8;
+        o1 += 8;
+        o0 += 8;
+        i = (uint32_t*) ((uintptr_t) i + input_stride * 8);
+      }
+      if (bh & 4) {
+        o7 += 4;
+        o6 += 4;
+        o5 += 4;
+        o4 += 4;
+        o3 += 4;
+        o2 += 4;
+        o1 += 4;
+        o0 += 4;
+        i = (uint32_t*) ((uintptr_t) i + input_stride * 4);
+      }
+      if (bh & 2) {
+        o7 += 2;
+        o6 += 2;
+        o5 += 2;
+        o4 += 2;
+        o3 += 2;
+        o2 += 2;
+        o1 += 2;
+        o0 += 2;
+        i = (uint32_t*) ((uintptr_t) i + input_stride * 2);
+      }
+    }
+
+    i0 = (const uint32_t*) ((uintptr_t) i0 + input_reset);
+
+    o0 = (uint32_t*) ((uintptr_t) o0 + output_reset);
+    o1 = (uint32_t*) ((uintptr_t) o1 + output_reset);
+    o2 = (uint32_t*) ((uintptr_t) o2 + output_reset);
+    o3 = (uint32_t*) ((uintptr_t) o3 + output_reset);
+    o4 = (uint32_t*) ((uintptr_t) o4 + output_reset);
+    o5 = (uint32_t*) ((uintptr_t) o5 + output_reset);
+    o6 = (uint32_t*) ((uintptr_t) o6 + output_reset);
+    o7 = (uint32_t*) ((uintptr_t) o7 + output_reset);
+
+    block_width = doz(block_width, tile_width);
+  } while (block_width != 0);
+}
+
+void xnn_x32_transposec_ukernel__4x4_rvv(
+  const uint32_t* input,
+  uint32_t* output,
+  size_t input_stride,
+  size_t output_stride,
+  size_t block_width,
+  size_t block_height,
+  const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(block_width == 1 || output_stride >= block_height * sizeof(uint32_t));
+  assert(block_height == 1 || input_stride >= block_width * sizeof(uint32_t));
+
+  const size_t tile_height = 4;
+  const size_t tile_width = 4;
+  const size_t tile_hbytes = tile_height * sizeof(uint32_t);
+  const size_t tile_wbytes = tile_width * sizeof(uint32_t);
+  const size_t input_reset = tile_wbytes - round_down_po2(block_height, tile_height) * input_stride;
+  const size_t input_offset = tile_height * input_stride;
+  const size_t output_reset = tile_width * output_stride - round_down_po2(block_height, 2) * sizeof(uint32_t);
+
+  const uint32_t* i0 = input;
+
+  uint32_t* o0 = (uint32_t*) output;
+  uint32_t* o1 = (uint32_t*) ((uintptr_t) o0 + output_stride);
+  uint32_t* o2 = (uint32_t*) ((uintptr_t) o1 + output_stride);
+  uint32_t* o3 = (uint32_t*) ((uintptr_t) o2 + output_stride);
+
+  do {
+    size_t bh = block_height;
+    size_t vl = __riscv_vsetvl_e32m1(tile_height);
+    for (; bh >= 4; bh -= 4) {
+      if (block_width >= tile_width) {
+        vuint32m1x4_t tuple = __riscv_vlsseg4e32_v_u32m1x4(i0, input_stride, vl);
+
+        vuint32m1_t v_d0 = __riscv_vget_v_u32m1x4_u32m1(tuple, 0);
+        __riscv_vse32_v_u32m1(o0, v_d0, vl);
+        vuint32m1_t v_d1 = __riscv_vget_v_u32m1x4_u32m1(tuple, 1);
+        __riscv_vse32_v_u32m1(o1, v_d1, vl);
+        vuint32m1_t v_d2 = __riscv_vget_v_u32m1x4_u32m1(tuple, 2);
+        __riscv_vse32_v_u32m1(o2, v_d2, vl);
+        vuint32m1_t v_d3 = __riscv_vget_v_u32m1x4_u32m1(tuple, 3);
+        __riscv_vse32_v_u32m1(o3, v_d3, vl);
+
+      } else {
+        switch (block_width) {
+          case 3: {
+            vuint32m1x3_t tuple = __riscv_vlsseg3e32_v_u32m1x3(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x3_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x3_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x3_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            break;
+          }
+
+          case 2: {
+            vuint32m1x2_t tuple = __riscv_vlsseg2e32_v_u32m1x2(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x2_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x2_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            break;
+          }
+
+          case 1: {
+            vuint32m1_t v_d0 = __riscv_vlse32_v_u32m1(i0, input_stride, vl);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            break;
+          }
+
+          default:
+            XNN_UNREACHABLE;
+        }
+      }
+
+      i0 = (uint32_t*) ((uintptr_t) i0 + input_offset);
+      o3 = (uint32_t*) ((uintptr_t) o3 + tile_hbytes);
+      o2 = (uint32_t*) ((uintptr_t) o2 + tile_hbytes);
+      o1 = (uint32_t*) ((uintptr_t) o1 + tile_hbytes);
+      o0 = (uint32_t*) ((uintptr_t) o0 + tile_hbytes);
+    }
+
+    if (bh != 0) {
+      const uint32_t* i = i0;
+      vl = __riscv_vsetvl_e32m1(bh);
+      if (block_width >= tile_width) {
+        vuint32m1x4_t tuple = __riscv_vlsseg4e32_v_u32m1x4(i, input_stride, vl);
+
+        vuint32m1_t v_d0 = __riscv_vget_v_u32m1x4_u32m1(tuple, 0);
+        __riscv_vse32_v_u32m1(o0, v_d0, vl);
+        vuint32m1_t v_d1 = __riscv_vget_v_u32m1x4_u32m1(tuple, 1);
+        __riscv_vse32_v_u32m1(o1, v_d1, vl);
+        vuint32m1_t v_d2 = __riscv_vget_v_u32m1x4_u32m1(tuple, 2);
+        __riscv_vse32_v_u32m1(o2, v_d2, vl);
+        vuint32m1_t v_d3 = __riscv_vget_v_u32m1x4_u32m1(tuple, 3);
+        __riscv_vse32_v_u32m1(o3, v_d3, vl);
+      } else {
+        switch(block_width) {
+          case 3: {
+            vuint32m1x3_t tuple = __riscv_vlsseg3e32_v_u32m1x3(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x3_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x3_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x3_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            break;
+          }
+          case 2: {
+            vuint32m1x2_t tuple = __riscv_vlsseg2e32_v_u32m1x2(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x2_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x2_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            break;
+          }
+
+          case 1: {
+            vuint32m1_t v_d0 = __riscv_vlse32_v_u32m1(i, input_stride, vl);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            break;
+          }
+
+          default:
+            XNN_UNREACHABLE;
+        }
+      }
+
+      if (bh & 2) {
+        o3 += 2;
+        o2 += 2;
+        o1 += 2;
+        o0 += 2;
+        i = (uint32_t*) ((uintptr_t) i + input_stride * 2);
+      }
+    }
+
+    i0 = (const uint32_t*) ((uintptr_t) i0 + input_reset);
+
+    o0 = (uint32_t*) ((uintptr_t) o0 + output_reset);
+    o1 = (uint32_t*) ((uintptr_t) o1 + output_reset);
+    o2 = (uint32_t*) ((uintptr_t) o2 + output_reset);
+    o3 = (uint32_t*) ((uintptr_t) o3 + output_reset);
+
+    block_width = doz(block_width, tile_width);
+  } while (block_width != 0);
+}
+
+void xnn_x32_transposec_ukernel__8x8_rvv(
+  const uint32_t* input,
+  uint32_t* output,
+  size_t input_stride,
+  size_t output_stride,
+  size_t block_width,
+  size_t block_height,
+  const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(block_width == 1 || output_stride >= block_height * sizeof(uint32_t));
+  assert(block_height == 1 || input_stride >= block_width * sizeof(uint32_t));
+
+  const size_t tile_height = 8;
+  const size_t tile_width = 8;
+  const size_t tile_hbytes = tile_height * sizeof(uint32_t);
+  const size_t tile_wbytes = tile_width * sizeof(uint32_t);
+  const size_t input_reset = tile_wbytes - round_down_po2(block_height, tile_height) * input_stride;
+  const size_t input_offset = tile_height * input_stride;
+  const size_t output_reset = tile_width * output_stride - round_down_po2(block_height, 2) * sizeof(uint32_t);
+
+  const uint32_t* i0 = input;
+
+  uint32_t* o0 = (uint32_t*) output;
+  uint32_t* o1 = (uint32_t*) ((uintptr_t) o0 + output_stride);
+  uint32_t* o2 = (uint32_t*) ((uintptr_t) o1 + output_stride);
+  uint32_t* o3 = (uint32_t*) ((uintptr_t) o2 + output_stride);
+  uint32_t* o4 = (uint32_t*) ((uintptr_t) o3 + output_stride);
+  uint32_t* o5 = (uint32_t*) ((uintptr_t) o4 + output_stride);
+  uint32_t* o6 = (uint32_t*) ((uintptr_t) o5 + output_stride);
+  uint32_t* o7 = (uint32_t*) ((uintptr_t) o6 + output_stride);
+
+  do {
+    size_t bh = block_height;
+    size_t vl = __riscv_vsetvl_e32m1(tile_height);
+    for (; bh >= 8; bh -= 8) {
+      if (block_width >= tile_width) {
+        vuint32m1x8_t tuple = __riscv_vlsseg8e32_v_u32m1x8(i0, input_stride, vl);
+
+        vuint32m1_t v_d0 = __riscv_vget_v_u32m1x8_u32m1(tuple, 0);
+        __riscv_vse32_v_u32m1(o0, v_d0, vl);
+        vuint32m1_t v_d1 = __riscv_vget_v_u32m1x8_u32m1(tuple, 1);
+        __riscv_vse32_v_u32m1(o1, v_d1, vl);
+        vuint32m1_t v_d2 = __riscv_vget_v_u32m1x8_u32m1(tuple, 2);
+        __riscv_vse32_v_u32m1(o2, v_d2, vl);
+        vuint32m1_t v_d3 = __riscv_vget_v_u32m1x8_u32m1(tuple, 3);
+        __riscv_vse32_v_u32m1(o3, v_d3, vl);
+        vuint32m1_t v_d4 = __riscv_vget_v_u32m1x8_u32m1(tuple, 4);
+        __riscv_vse32_v_u32m1(o4, v_d4, vl);
+        vuint32m1_t v_d5 = __riscv_vget_v_u32m1x8_u32m1(tuple, 5);
+        __riscv_vse32_v_u32m1(o5, v_d5, vl);
+        vuint32m1_t v_d6 = __riscv_vget_v_u32m1x8_u32m1(tuple, 6);
+        __riscv_vse32_v_u32m1(o6, v_d6, vl);
+        vuint32m1_t v_d7 = __riscv_vget_v_u32m1x8_u32m1(tuple, 7);
+        __riscv_vse32_v_u32m1(o7, v_d7, vl);
+
+      } else {
+        switch (block_width) {
+          case 7: {
+            vuint32m1x7_t tuple = __riscv_vlsseg7e32_v_u32m1x7(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x7_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x7_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x7_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x7_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x7_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            vuint32m1_t v_d5 = __riscv_vget_v_u32m1x7_u32m1(tuple, 5);
+            __riscv_vse32_v_u32m1(o5, v_d5, vl);
+            vuint32m1_t v_d6 = __riscv_vget_v_u32m1x7_u32m1(tuple, 6);
+            __riscv_vse32_v_u32m1(o6, v_d6, vl);
+            break;
+          }
+
+          case 6: {
+            vuint32m1x6_t tuple = __riscv_vlsseg6e32_v_u32m1x6(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x6_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x6_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x6_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x6_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x6_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            vuint32m1_t v_d5 = __riscv_vget_v_u32m1x6_u32m1(tuple, 5);
+            __riscv_vse32_v_u32m1(o5, v_d5, vl);
+            break;
+          }
+
+          case 5: {
+            vuint32m1x5_t tuple = __riscv_vlsseg5e32_v_u32m1x5(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x5_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x5_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x5_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x5_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x5_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            break;
+          }
+
+          case 4: {
+            vuint32m1x4_t tuple = __riscv_vlsseg4e32_v_u32m1x4(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x4_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x4_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x4_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x4_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            break;
+          }
+
+          case 3: {
+            vuint32m1x3_t tuple = __riscv_vlsseg3e32_v_u32m1x3(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x3_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x3_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x3_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            break;
+          }
+
+          case 2: {
+            vuint32m1x2_t tuple = __riscv_vlsseg2e32_v_u32m1x2(i0, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x2_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x2_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            break;
+          }
+
+          case 1: {
+            vuint32m1_t v_d0 = __riscv_vlse32_v_u32m1(i0, input_stride, vl);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            break;
+          }
+
+          default:
+            XNN_UNREACHABLE;
+        }
+      }
+
+      i0 = (uint32_t*) ((uintptr_t) i0 + input_offset);
+      o7 = (uint32_t*) ((uintptr_t) o7 + tile_hbytes);
+      o6 = (uint32_t*) ((uintptr_t) o6 + tile_hbytes);
+      o5 = (uint32_t*) ((uintptr_t) o5 + tile_hbytes);
+      o4 = (uint32_t*) ((uintptr_t) o4 + tile_hbytes);
+      o3 = (uint32_t*) ((uintptr_t) o3 + tile_hbytes);
+      o2 = (uint32_t*) ((uintptr_t) o2 + tile_hbytes);
+      o1 = (uint32_t*) ((uintptr_t) o1 + tile_hbytes);
+      o0 = (uint32_t*) ((uintptr_t) o0 + tile_hbytes);
+    }
+
+    if (bh != 0) {
+      const uint32_t* i = i0;
+      vl = __riscv_vsetvl_e32m1(bh);
+      if (block_width >= tile_width) {
+        vuint32m1x8_t tuple = __riscv_vlsseg8e32_v_u32m1x8(i, input_stride, vl);
+
+        vuint32m1_t v_d0 = __riscv_vget_v_u32m1x8_u32m1(tuple, 0);
+        __riscv_vse32_v_u32m1(o0, v_d0, vl);
+        vuint32m1_t v_d1 = __riscv_vget_v_u32m1x8_u32m1(tuple, 1);
+        __riscv_vse32_v_u32m1(o1, v_d1, vl);
+        vuint32m1_t v_d2 = __riscv_vget_v_u32m1x8_u32m1(tuple, 2);
+        __riscv_vse32_v_u32m1(o2, v_d2, vl);
+        vuint32m1_t v_d3 = __riscv_vget_v_u32m1x8_u32m1(tuple, 3);
+        __riscv_vse32_v_u32m1(o3, v_d3, vl);
+        vuint32m1_t v_d4 = __riscv_vget_v_u32m1x8_u32m1(tuple, 4);
+        __riscv_vse32_v_u32m1(o4, v_d4, vl);
+        vuint32m1_t v_d5 = __riscv_vget_v_u32m1x8_u32m1(tuple, 5);
+        __riscv_vse32_v_u32m1(o5, v_d5, vl);
+        vuint32m1_t v_d6 = __riscv_vget_v_u32m1x8_u32m1(tuple, 6);
+        __riscv_vse32_v_u32m1(o6, v_d6, vl);
+        vuint32m1_t v_d7 = __riscv_vget_v_u32m1x8_u32m1(tuple, 7);
+        __riscv_vse32_v_u32m1(o7, v_d7, vl);
+      } else {
+        switch(block_width) {
+          case 7: {
+            vuint32m1x7_t tuple = __riscv_vlsseg7e32_v_u32m1x7(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x7_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x7_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x7_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x7_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x7_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            vuint32m1_t v_d5 = __riscv_vget_v_u32m1x7_u32m1(tuple, 5);
+            __riscv_vse32_v_u32m1(o5, v_d5, vl);
+            vuint32m1_t v_d6 = __riscv_vget_v_u32m1x7_u32m1(tuple, 6);
+            __riscv_vse32_v_u32m1(o6, v_d6, vl);
+            break;
+          }
+          case 6: {
+            vuint32m1x6_t tuple = __riscv_vlsseg6e32_v_u32m1x6(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x6_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x6_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x6_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x6_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x6_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            vuint32m1_t v_d5 = __riscv_vget_v_u32m1x6_u32m1(tuple, 5);
+            __riscv_vse32_v_u32m1(o5, v_d5, vl);
+            break;
+          }
+          case 5: {
+            vuint32m1x5_t tuple = __riscv_vlsseg5e32_v_u32m1x5(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x5_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x5_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x5_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x5_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            vuint32m1_t v_d4 = __riscv_vget_v_u32m1x5_u32m1(tuple, 4);
+            __riscv_vse32_v_u32m1(o4, v_d4, vl);
+            break;
+          }
+          case 4: {
+            vuint32m1x4_t tuple = __riscv_vlsseg4e32_v_u32m1x4(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x4_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x4_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x4_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            vuint32m1_t v_d3 = __riscv_vget_v_u32m1x4_u32m1(tuple, 3);
+            __riscv_vse32_v_u32m1(o3, v_d3, vl);
+            break;
+          }
+          case 3: {
+            vuint32m1x3_t tuple = __riscv_vlsseg3e32_v_u32m1x3(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x3_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x3_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            vuint32m1_t v_d2 = __riscv_vget_v_u32m1x3_u32m1(tuple, 2);
+            __riscv_vse32_v_u32m1(o2, v_d2, vl);
+            break;
+          }
+          case 2: {
+            vuint32m1x2_t tuple = __riscv_vlsseg2e32_v_u32m1x2(i, input_stride, vl);
+
+            vuint32m1_t v_d0 = __riscv_vget_v_u32m1x2_u32m1(tuple, 0);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            vuint32m1_t v_d1 = __riscv_vget_v_u32m1x2_u32m1(tuple, 1);
+            __riscv_vse32_v_u32m1(o1, v_d1, vl);
+            break;
+          }
+
+          case 1: {
+            vuint32m1_t v_d0 = __riscv_vlse32_v_u32m1(i, input_stride, vl);
+            __riscv_vse32_v_u32m1(o0, v_d0, vl);
+            break;
+          }
+
+          default:
+            XNN_UNREACHABLE;
+        }
+      }
+
+      if (bh & 4) {
+        o7 += 4;
+        o6 += 4;
+        o5 += 4;
+        o4 += 4;
+        o3 += 4;
+        o2 += 4;
+        o1 += 4;
+        o0 += 4;
+        i = (uint32_t*) ((uintptr_t) i + input_stride * 4);
+      }
+      if (bh & 2) {
+        o7 += 2;
+        o6 += 2;
+        o5 += 2;
+        o4 += 2;
+        o3 += 2;
+        o2 += 2;
+        o1 += 2;
+        o0 += 2;
+        i = (uint32_t*) ((uintptr_t) i + input_stride * 2);
+      }
+    }
+
+    i0 = (const uint32_t*) ((uintptr_t) i0 + input_reset);
+
+    o0 = (uint32_t*) ((uintptr_t) o0 + output_reset);
+    o1 = (uint32_t*) ((uintptr_t) o1 + output_reset);
+    o2 = (uint32_t*) ((uintptr_t) o2 + output_reset);
+    o3 = (uint32_t*) ((uintptr_t) o3 + output_reset);
+    o4 = (uint32_t*) ((uintptr_t) o4 + output_reset);
+    o5 = (uint32_t*) ((uintptr_t) o5 + output_reset);
+    o6 = (uint32_t*) ((uintptr_t) o6 + output_reset);
+    o7 = (uint32_t*) ((uintptr_t) o7 + output_reset);
+
+    block_width = doz(block_width, tile_width);
+  } while (block_width != 0);
 }

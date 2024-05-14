@@ -440,6 +440,28 @@ static void f32_raddstoreexpminusmax(
 #endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, avx512f_rr1_p5_scalef_u64,
+                    xnn_f32_rmax_ukernel__avx_u32_acc4,
+                    xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u64,
+                    xnn_init_f32_expminus_avx512_rr1_p5_params,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, avx512f_rr1_p5_scalef_u64_acc2,
+                    xnn_f32_rmax_ukernel__avx_u32_acc4,
+                    xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u64_acc2,
+                    xnn_init_f32_expminus_avx512_rr1_p5_params,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, avx512f_rr1_p5_scalef_u64_acc4,
+                    xnn_f32_rmax_ukernel__avx_u32_acc4,
+                    xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u64_acc4,
+                    xnn_init_f32_expminus_avx512_rr1_p5_params,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
   BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, avx512f_rr1_p5_scalef_u128,
                     xnn_f32_rmax_ukernel__avx_u32_acc4,
                     xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u128,
@@ -525,6 +547,28 @@ static void f32_raddstoreexpminusmax(
                     xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u192_acc6,
                     xnn_init_f32_expminus_avx512_rr1_p5_params,
                     benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, avx2_rr1_p5_u32,
+                    xnn_f32_rmax_ukernel__avx_u32_acc4,
+                    xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u32,
+                    xnn_init_f32_expminus_avx2_rr1_p5_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, avx2_rr1_p5_u32_acc2,
+                    xnn_f32_rmax_ukernel__avx_u32_acc4,
+                    xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u32_acc2,
+                    xnn_init_f32_expminus_avx2_rr1_p5_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, avx2_rr1_p5_u32_acc4,
+                    xnn_f32_rmax_ukernel__avx_u32_acc4,
+                    xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u32_acc4,
+                    xnn_init_f32_expminus_avx2_rr1_p5_params,
+                    benchmark::utils::CheckAVX2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 

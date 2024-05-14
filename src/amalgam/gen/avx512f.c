@@ -15,6 +15,7 @@
 #include <xnnpack/igemm.h>
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
+#include <xnnpack/microparams.h>
 #include <xnnpack/packw.h>
 #include <xnnpack/prefetch.h>
 #include <xnnpack/prelu.h>
@@ -1989,6 +1990,240 @@ void xnn_f32_prelu_ukernel__avx512f_2x16(
   } while (rows != 0);
 }
 
+void xnn_f32_rdsum_ukernel_7p7x__avx512f_c64(
+    size_t rows,
+    size_t channels,
+    const float* input,
+    size_t input_stride,
+    const float* zero,
+    float* output,
+    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(rows != 0);
+  assert(channels != 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
+
+  size_t input_increment = 7 * input_stride;
+  for (; channels >= 64; channels -= 64) {
+    const float* i0 = input;
+    const float* i1 = (const float*) ((uintptr_t) input + 1 * input_stride);
+    const float* i2 = (const float*) ((uintptr_t) input + 2 * input_stride);
+    const float* i3 = (const float*) ((uintptr_t) input + 3 * input_stride);
+    const float* i4 = (const float*) ((uintptr_t) input + 4 * input_stride);
+    const float* i5 = (const float*) ((uintptr_t) input + 5 * input_stride);
+    const float* i6 = (const float*) ((uintptr_t) input + 6 * input_stride);
+
+    __m512 vacc0 = _mm512_setzero_ps();
+    __m512 vacc1 = _mm512_setzero_ps();
+    __m512 vacc2 = _mm512_setzero_ps();
+    __m512 vacc3 = _mm512_setzero_ps();
+
+    for (int r = rows; r > 0; r -= 7) {
+      if XNN_UNPREDICTABLE(r < 2) {
+        i1 = zero;
+      }
+      if XNN_UNPREDICTABLE(r <= 2) {
+        i2 = zero;
+      }
+      if XNN_UNPREDICTABLE(r < 4) {
+        i3 = zero;
+      }
+      if XNN_UNPREDICTABLE(r <= 4) {
+        i4 = zero;
+      }
+      if XNN_UNPREDICTABLE(r < 6) {
+        i5 = zero;
+      }
+      if XNN_UNPREDICTABLE(r <= 6) {
+        i6 = zero;
+      }
+      __m512 vin0;
+      __m512 vin1;
+      __m512 vin2;
+      __m512 vin3;
+      vin0 = _mm512_loadu_ps(&i0[0]);
+      vin1 = _mm512_loadu_ps(&i0[16]);
+      vin2 = _mm512_loadu_ps(&i0[32]);
+      vin3 = _mm512_loadu_ps(&i0[48]);
+      vacc0 = _mm512_add_ps(vin0, vacc0);
+      vacc1 = _mm512_add_ps(vin1, vacc1);
+      vacc2 = _mm512_add_ps(vin2, vacc2);
+      vacc3 = _mm512_add_ps(vin3, vacc3);
+      vin0 = _mm512_loadu_ps(&i1[0]);
+      vin1 = _mm512_loadu_ps(&i1[16]);
+      vin2 = _mm512_loadu_ps(&i1[32]);
+      vin3 = _mm512_loadu_ps(&i1[48]);
+      vacc0 = _mm512_add_ps(vin0, vacc0);
+      vacc1 = _mm512_add_ps(vin1, vacc1);
+      vacc2 = _mm512_add_ps(vin2, vacc2);
+      vacc3 = _mm512_add_ps(vin3, vacc3);
+      vin0 = _mm512_loadu_ps(&i2[0]);
+      vin1 = _mm512_loadu_ps(&i2[16]);
+      vin2 = _mm512_loadu_ps(&i2[32]);
+      vin3 = _mm512_loadu_ps(&i2[48]);
+      vacc0 = _mm512_add_ps(vin0, vacc0);
+      vacc1 = _mm512_add_ps(vin1, vacc1);
+      vacc2 = _mm512_add_ps(vin2, vacc2);
+      vacc3 = _mm512_add_ps(vin3, vacc3);
+      vin0 = _mm512_loadu_ps(&i3[0]);
+      vin1 = _mm512_loadu_ps(&i3[16]);
+      vin2 = _mm512_loadu_ps(&i3[32]);
+      vin3 = _mm512_loadu_ps(&i3[48]);
+      vacc0 = _mm512_add_ps(vin0, vacc0);
+      vacc1 = _mm512_add_ps(vin1, vacc1);
+      vacc2 = _mm512_add_ps(vin2, vacc2);
+      vacc3 = _mm512_add_ps(vin3, vacc3);
+      vin0 = _mm512_loadu_ps(&i4[0]);
+      vin1 = _mm512_loadu_ps(&i4[16]);
+      vin2 = _mm512_loadu_ps(&i4[32]);
+      vin3 = _mm512_loadu_ps(&i4[48]);
+      vacc0 = _mm512_add_ps(vin0, vacc0);
+      vacc1 = _mm512_add_ps(vin1, vacc1);
+      vacc2 = _mm512_add_ps(vin2, vacc2);
+      vacc3 = _mm512_add_ps(vin3, vacc3);
+      vin0 = _mm512_loadu_ps(&i5[0]);
+      vin1 = _mm512_loadu_ps(&i5[16]);
+      vin2 = _mm512_loadu_ps(&i5[32]);
+      vin3 = _mm512_loadu_ps(&i5[48]);
+      vacc0 = _mm512_add_ps(vin0, vacc0);
+      vacc1 = _mm512_add_ps(vin1, vacc1);
+      vacc2 = _mm512_add_ps(vin2, vacc2);
+      vacc3 = _mm512_add_ps(vin3, vacc3);
+      vin0 = _mm512_loadu_ps(&i6[0]);
+      vin1 = _mm512_loadu_ps(&i6[16]);
+      vin2 = _mm512_loadu_ps(&i6[32]);
+      vin3 = _mm512_loadu_ps(&i6[48]);
+      vacc0 = _mm512_add_ps(vin0, vacc0);
+      vacc1 = _mm512_add_ps(vin1, vacc1);
+      vacc2 = _mm512_add_ps(vin2, vacc2);
+      vacc3 = _mm512_add_ps(vin3, vacc3);
+      i0 = (const float*) ((uintptr_t) i0 + input_increment);
+      i1 = (const float*) ((uintptr_t) i1 + input_increment);
+      i2 = (const float*) ((uintptr_t) i2 + input_increment);
+      i3 = (const float*) ((uintptr_t) i3 + input_increment);
+      i4 = (const float*) ((uintptr_t) i4 + input_increment);
+      i5 = (const float*) ((uintptr_t) i5 + input_increment);
+      i6 = (const float*) ((uintptr_t) i6 + input_increment);
+    }
+    vacc0 = _mm512_mul_ps(vacc0, vscale);
+    vacc1 = _mm512_mul_ps(vacc1, vscale);
+    vacc2 = _mm512_mul_ps(vacc2, vscale);
+    vacc3 = _mm512_mul_ps(vacc3, vscale);
+
+    const float* o = output;
+    const __m512 vo0 = _mm512_loadu_ps(o); o += 16;
+    const __m512 vo1 = _mm512_loadu_ps(o); o += 16;
+    const __m512 vo2 = _mm512_loadu_ps(o); o += 16;
+    const __m512 vo3 = _mm512_loadu_ps(o); o += 16;
+    vacc0 = _mm512_add_ps(vo0, vacc0);
+    vacc1 = _mm512_add_ps(vo1, vacc1);
+    vacc2 = _mm512_add_ps(vo2, vacc2);
+    vacc3 = _mm512_add_ps(vo3, vacc3);
+    _mm512_storeu_ps(output, vacc0); output += 16;
+    _mm512_storeu_ps(output, vacc1); output += 16;
+    _mm512_storeu_ps(output, vacc2); output += 16;
+    _mm512_storeu_ps(output, vacc3); output += 16;
+
+    input = (const float*) ((uintptr_t) input + 64 * sizeof(float));
+  }
+  if (channels != 0) {
+    input_increment = 7 * input_stride;
+    const float* i0 = input;
+    const float* i1 = (const float*) ((uintptr_t) input + 1 * input_stride);
+    const float* i2 = (const float*) ((uintptr_t) input + 2 * input_stride);
+    const float* i3 = (const float*) ((uintptr_t) input + 3 * input_stride);
+    const float* i4 = (const float*) ((uintptr_t) input + 4 * input_stride);
+    const float* i5 = (const float*) ((uintptr_t) input + 5 * input_stride);
+    const float* i6 = (const float*) ((uintptr_t) input + 6 * input_stride);
+    __m512 vacc[4];
+    vacc[0] = _mm512_setzero_ps();
+    vacc[1] = _mm512_setzero_ps();
+    vacc[2] = _mm512_setzero_ps();
+    vacc[3] = _mm512_setzero_ps();
+
+    const size_t num_full_chunks = channels >> 4;
+    const size_t num_chunks = round_up_po2(channels, 16) >> 4;
+    const size_t remainder = channels & 0xF;
+    const size_t batch = channels & 0xF;
+    __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+    if (remainder) {
+      assert(batch >= 1);
+      assert(batch <= 15);
+      vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+    }
+    for (int r = rows; r > 0; r -= 7) {
+      if XNN_UNPREDICTABLE(r < 2) {
+        i1 = zero;
+      }
+      if XNN_UNPREDICTABLE(r <= 2) {
+        i2 = zero;
+      }
+      if XNN_UNPREDICTABLE(r < 4) {
+        i3 = zero;
+      }
+      if XNN_UNPREDICTABLE(r <= 4) {
+        i4 = zero;
+      }
+      if XNN_UNPREDICTABLE(r < 6) {
+        i5 = zero;
+      }
+      if XNN_UNPREDICTABLE(r <= 6) {
+        i6 = zero;
+      }
+      for (int i = 0; i < num_full_chunks; ++i) {
+        vacc[i] = _mm512_add_ps(_mm512_loadu_ps(&i0[i*16]), vacc[i]);
+        vacc[i] = _mm512_add_ps(_mm512_loadu_ps(&i1[i*16]), vacc[i]);
+        vacc[i] = _mm512_add_ps(_mm512_loadu_ps(&i2[i*16]), vacc[i]);
+        vacc[i] = _mm512_add_ps(_mm512_loadu_ps(&i3[i*16]), vacc[i]);
+        vacc[i] = _mm512_add_ps(_mm512_loadu_ps(&i4[i*16]), vacc[i]);
+        vacc[i] = _mm512_add_ps(_mm512_loadu_ps(&i5[i*16]), vacc[i]);
+        vacc[i] = _mm512_add_ps(_mm512_loadu_ps(&i6[i*16]), vacc[i]);
+      }
+
+      if (remainder) {
+        vacc[num_full_chunks] = _mm512_maskz_add_ps(vmask, vacc[num_full_chunks],  _mm512_maskz_loadu_ps(vmask, &i0[num_full_chunks*16]));
+        vacc[num_full_chunks] = _mm512_maskz_add_ps(vmask, vacc[num_full_chunks],  _mm512_maskz_loadu_ps(vmask, &i1[num_full_chunks*16]));
+        vacc[num_full_chunks] = _mm512_maskz_add_ps(vmask, vacc[num_full_chunks],  _mm512_maskz_loadu_ps(vmask, &i2[num_full_chunks*16]));
+        vacc[num_full_chunks] = _mm512_maskz_add_ps(vmask, vacc[num_full_chunks],  _mm512_maskz_loadu_ps(vmask, &i3[num_full_chunks*16]));
+        vacc[num_full_chunks] = _mm512_maskz_add_ps(vmask, vacc[num_full_chunks],  _mm512_maskz_loadu_ps(vmask, &i4[num_full_chunks*16]));
+        vacc[num_full_chunks] = _mm512_maskz_add_ps(vmask, vacc[num_full_chunks],  _mm512_maskz_loadu_ps(vmask, &i5[num_full_chunks*16]));
+        vacc[num_full_chunks] = _mm512_maskz_add_ps(vmask, vacc[num_full_chunks],  _mm512_maskz_loadu_ps(vmask, &i6[num_full_chunks*16]));
+      }
+      i0 = (const float*) ((uintptr_t) i0 + input_increment);
+      i1 = (const float*) ((uintptr_t) i1 + input_increment);
+      i2 = (const float*) ((uintptr_t) i2 + input_increment);
+      i3 = (const float*) ((uintptr_t) i3 + input_increment);
+      i4 = (const float*) ((uintptr_t) i4 + input_increment);
+      i5 = (const float*) ((uintptr_t) i5 + input_increment);
+      i6 = (const float*) ((uintptr_t) i6 + input_increment);
+    }
+    for (size_t i = 0; i < num_chunks; ++i) {
+      vacc[i] = _mm512_mul_ps(vacc[i], vscale);
+    }
+
+    __m512 vo[4];
+    const float* o = output;
+    for (int i = 0; i < channels >> 4; ++i) {
+      vo[i] = _mm512_loadu_ps(o); o += 16;
+    }
+    for (int i = 0; i < channels >> 4; ++i) {
+      vacc[i] = _mm512_add_ps(vo[i], vacc[i]);
+    }
+    for (int i = 0; i < channels >> 4; ++i) {
+      _mm512_storeu_ps(output, vacc[i]); output += 16;
+    }
+    if (remainder) {
+      const size_t pos = num_full_chunks;
+      __m512 vout = vacc[pos];
+      vout = _mm512_maskz_add_ps(vmask, vout,  _mm512_maskz_loadu_ps(vmask, output));
+      _mm512_mask_storeu_ps(output, vmask, vout);
+    }
+  }
+}
+
 void xnn_f32_rmax_ukernel__avx512f_u64_acc4(
     size_t batch,
     const float* input,
@@ -3917,6 +4152,108 @@ void xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u16(
     const __m512 vt6 = _mm512_mask_blend_ps(vinf_mask, vt5, _mm512_setzero_ps());
     const __m512 vy = _mm512_mul_ps(vx, vt6);
 
+
+    _mm512_mask_storeu_ps(output, vmask, vy);
+  }
+}
+
+void xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u16(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_tanh_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  // Cap the inputs to this value as `tanh(x)` will always be `+/-1.0f` beyond
+  // this point. This value is chosen as the first floating point number as of
+  // which the interpolation returns 1.0f.
+  const __m512 vmax_x = _mm512_set1_ps(params->avx512_rational_9_6.max_abs_x);
+  const __m512 vmin_x = _mm512_set1_ps(-params->avx512_rational_9_6.max_abs_x);
+  
+  // The monomial coefficients of the numerator polynomial (odd).
+  const __m512 valpha_1 = _mm512_set1_ps(params->avx512_rational_9_6.alpha_1);
+  const __m512 valpha_3 = _mm512_set1_ps(params->avx512_rational_9_6.alpha_3);
+  const __m512 valpha_5 = _mm512_set1_ps(params->avx512_rational_9_6.alpha_5);
+  const __m512 valpha_7 = _mm512_set1_ps(params->avx512_rational_9_6.alpha_7);
+  const __m512 valpha_9 = _mm512_set1_ps(params->avx512_rational_9_6.alpha_9);
+
+  // The monomial coefficients of the denominator polynomial (even).
+  const __m512 vbeta_0 = _mm512_set1_ps(params->avx512_rational_9_6.beta_0);
+  const __m512 vbeta_2 = _mm512_set1_ps(params->avx512_rational_9_6.beta_2);
+  const __m512 vbeta_4 = _mm512_set1_ps(params->avx512_rational_9_6.beta_4);
+  const __m512 vbeta_6 = _mm512_set1_ps(params->avx512_rational_9_6.beta_6);
+
+  // Constant needed for the Newton-Raphson iteration of the reciprocal.
+  const __m512 vtwo = _mm512_set1_ps(params->avx512_rational_9_6.two);
+
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    __m512 vx = _mm512_loadu_ps(input);
+    input += 16;
+
+    // Clamp the inputs to the interpolation range.
+    vx = _mm512_min_ps(vmax_x, vx);
+    vx = _mm512_max_ps(vmin_x, vx);
+
+    // Since the polynomials are odd/even, we need x^2.
+    const __m512 vx2 = _mm512_mul_ps(vx, vx);
+
+    // Evaluate the numerator polynomial p.
+    __m512 vp = _mm512_fmadd_ps(vx2, valpha_9, valpha_7);
+    vp = _mm512_fmadd_ps(vx2, vp, valpha_5);
+    vp = _mm512_fmadd_ps(vx2, vp, valpha_3);
+    vp = _mm512_fmadd_ps(vx2, vp, valpha_1);
+    vp = _mm512_mul_ps(vx, vp);
+
+    // Evaluate the denominator polynomial q.
+    __m512 vq = _mm512_fmadd_ps(vx2, vbeta_6, vbeta_4);
+    vq = _mm512_fmadd_ps(vx2, vq, vbeta_2);
+    vq = _mm512_fmadd_ps(vx2, vq, vbeta_0);
+
+    // Divide the numerator by the denominator.
+    const __m512 vt0 =  _mm512_rcp14_ps(vq);
+    const __m512 vt1 = _mm512_mul_ps(vt0, _mm512_fnmadd_ps(vt0, vq, vtwo));
+    const __m512 vy =  _mm512_mul_ps(vp, vt1);
+
+    _mm512_storeu_ps(output, vy);
+    output += 16;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_FLOAT;
+    const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+
+    __m512 vx = _mm512_maskz_loadu_ps(vmask, input);
+
+    // Clamp the inputs to the interpolation range.
+    vx = _mm512_min_ps(vmax_x, vx);
+    vx = _mm512_max_ps(vmin_x, vx);
+
+    // Since the polynomials are odd/even, we need x^2.
+    const __m512 vx2 = _mm512_mul_ps(vx, vx);
+
+    // Evaluate the numerator polynomial p.
+    __m512 vp = _mm512_fmadd_ps(vx2, valpha_9, valpha_7);
+    vp = _mm512_fmadd_ps(vx2, vp, valpha_5);
+    vp = _mm512_fmadd_ps(vx2, vp, valpha_3);
+    vp = _mm512_fmadd_ps(vx2, vp, valpha_1);
+    vp = _mm512_mul_ps(vx, vp);
+
+    // Evaluate the denominator polynomial q.
+    __m512 vq = _mm512_fmadd_ps(vx2, vbeta_6, vbeta_4);
+    vq = _mm512_fmadd_ps(vx2, vq, vbeta_2);
+    vq = _mm512_fmadd_ps(vx2, vq, vbeta_0);
+
+    // Divide the numerator by the denominator.
+    const __m512 vt0 =  _mm512_rcp14_ps(vq);
+    const __m512 vt1 = _mm512_mul_ps(vt0, _mm512_fnmadd_ps(vt0, vq, vtwo));
+    const __m512 vy =  _mm512_mul_ps(vp, vt1);
 
     _mm512_mask_storeu_ps(output, vmask, vy);
   }

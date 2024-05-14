@@ -4,6 +4,9 @@
 # LICENSE file in the root directory of this source tree.
 
 # x86 AVX
+- name: xnn_f32_raddexpminusmax_ukernel__avx2_p5_u32
+- name: xnn_f32_raddexpminusmax_ukernel__avx2_p5_u32_acc2
+- name: xnn_f32_raddexpminusmax_ukernel__avx2_p5_u32_acc4
 - name: xnn_f32_raddexpminusmax_ukernel__avx2_p5_u64
 - name: xnn_f32_raddexpminusmax_ukernel__avx2_p5_u64_acc2
 - name: xnn_f32_raddexpminusmax_ukernel__avx2_p5_u64_acc4
@@ -16,7 +19,11 @@
 - name: xnn_f32_raddexpminusmax_ukernel__avx2_p5_u96_acc2
 - name: xnn_f32_raddexpminusmax_ukernel__avx2_p5_u96_acc3
 - name: xnn_f32_raddexpminusmax_ukernel__avx2_p5_u96_acc6
+
 # x86 AVX512
+- name: xnn_f32_raddexpminusmax_ukernel__avx512f_p5_scalef_u64
+- name: xnn_f32_raddexpminusmax_ukernel__avx512f_p5_scalef_u64_acc2
+- name: xnn_f32_raddexpminusmax_ukernel__avx512f_p5_scalef_u64_acc4
 - name: xnn_f32_raddexpminusmax_ukernel__avx512f_p5_scalef_u128
 - name: xnn_f32_raddexpminusmax_ukernel__avx512f_p5_scalef_u128_acc2
 - name: xnn_f32_raddexpminusmax_ukernel__avx512f_p5_scalef_u128_acc4

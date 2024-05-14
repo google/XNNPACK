@@ -233,6 +233,20 @@ static void f16_raddstoreexpminusmax(
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(f16_raddstoreexpminusmax, avx2_rr1_p2_u16,
+                    xnn_f16_rmax_ukernel__f16c_u32,
+                    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u16,
+                    xnn_init_f16_expminus_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_raddstoreexpminusmax, avx2_rr1_p2_u16_acc2,
+                    xnn_f16_rmax_ukernel__f16c_u32,
+                    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u16_acc2,
+                    xnn_init_f16_expminus_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
   BENCHMARK_CAPTURE(f16_raddstoreexpminusmax, avx2_rr1_p2_u32,
                     xnn_f16_rmax_ukernel__f16c_u32,
                     xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u32,

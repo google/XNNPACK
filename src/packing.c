@@ -1822,8 +1822,8 @@ void xnn_pack_qs8_conv_kgo_w(
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
-  return pack_qs8_conv_kgo_w(g, nc, ks, nr, kr, sr, k, b, scale, packed_weights,
-                             extra_bytes, /*zero_point_offset=*/0, params);
+  pack_qs8_conv_kgo_w(g, nc, ks, nr, kr, sr, k, b, scale, packed_weights,
+                      extra_bytes, /*zero_point_offset=*/0, params);
 }
 
 void xnn_pack_qs8_to_qu8_conv_kgo_w(
@@ -1840,8 +1840,8 @@ void xnn_pack_qs8_to_qu8_conv_kgo_w(
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
-  return pack_qs8_conv_kgo_w(g, nc, ks, nr, kr, sr, k, b, scale, packed_weights,
-                             extra_bytes, /*zero_point_offset=*/128, params);
+  pack_qs8_conv_kgo_w(g, nc, ks, nr, kr, sr, k, b, scale, packed_weights,
+                      extra_bytes, /*zero_point_offset=*/128, params);
 }
 
 void xnn_pack_f32_deconv_goki_w(
@@ -2141,8 +2141,8 @@ void xnn_pack_qs8_deconv_goki_w(
   struct subconvolution_params* subconv_params,
   const struct xnn_qs8_packing_params* params)
 {
-  return pack_qs8_deconv_goki_w(g, nc, kh, kw, kc, sh, sw, nr, kr, sr, k, b, scale,
-                                packed_weights, extra_bytes, /*zero_point_offset=*/0, subconv_params, params);
+  pack_qs8_deconv_goki_w(g, nc, kh, kw, kc, sh, sw, nr, kr, sr, k, b, scale,
+                         packed_weights, extra_bytes, /*zero_point_offset=*/0, subconv_params, params);
 }
 
 void xnn_pack_qs8_to_qu8_deconv_goki_w(
@@ -2164,8 +2164,8 @@ void xnn_pack_qs8_to_qu8_deconv_goki_w(
   struct subconvolution_params* subconv_params,
   const struct xnn_qs8_packing_params* params)
 {
-  return pack_qs8_deconv_goki_w(g, nc, kh, kw, kc, sh, sw, nr, kr, sr, k, b, scale,
-                                packed_weights, extra_bytes, /*zero_point_offset=*/128, subconv_params, params);
+  pack_qs8_deconv_goki_w(g, nc, kh, kw, kc, sh, sw, nr, kr, sr, k, b, scale,
+                         packed_weights, extra_bytes, /*zero_point_offset=*/128, subconv_params, params);
 }
 
 void xnn_pack_qu8_deconv_goki_w(

@@ -14,11 +14,11 @@
 // Default: serves to differentiate pointer types for micro-kernels without fused activation.
 
 union xnn_f16_default_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 };
 
 union xnn_f32_default_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     int32_t mask_table[14];
@@ -30,14 +30,14 @@ union xnn_f32_default_params {
 // ReLU: serves to differentiate pointer types for micro-kernels with fused ReLU activation.
 
 union xnn_f32_relu_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 };
 
 
 // Scale: used by RSUM microkernels
 
 union xnn_f16_scale_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t scale;
@@ -63,6 +63,9 @@ union xnn_f32_scale_params {
   } scalar;
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
+    XNN_ALIGN(16) float scale[4];
+  } sse;
+  struct {
     int32_t mask_table[14];
     float scale;
   } avx;
@@ -73,7 +76,7 @@ union xnn_f32_scale_params {
 // Scale+Min+Max: used by AVGPOOL/GAVGPOOL microkernels.
 
 union xnn_f16_scaleminmax_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t scale;
@@ -1083,7 +1086,7 @@ union xnn_qu8_avgpool_minmax_params {
 // Abs: used by VABS microkernels.
 
 union xnn_bf16_abs_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     XNN_ALIGN(16) uint16_t nonsign_mask[8];
@@ -1092,7 +1095,7 @@ union xnn_bf16_abs_params {
 };
 
 union xnn_f16_abs_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) uint16_t nonsign_mask[8];
@@ -1101,7 +1104,7 @@ union xnn_f16_abs_params {
 };
 
 union xnn_f32_abs_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float nonsign_mask[4];
@@ -1519,7 +1522,7 @@ union xnn_qs16_qs8_cvt_params {
 };
 
 union xnn_qs8_f16_cvt_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     int16_t minus_zero_point;
@@ -1657,7 +1660,7 @@ union xnn_qu8_f32_cvt_params {
 // ELU: used by VELU microkernels.
 
 union xnn_f16_elu_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t prescale;
@@ -1972,7 +1975,7 @@ union xnn_f32_elu_params {
 // ExpMinus: used by RADDEXPMINUSMAX microkernels.
 
 union xnn_f16_expminus_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t magic_bias;
@@ -2126,7 +2129,7 @@ union xnn_f32_expminus_params {
 // HSwish: used by VHSWISH microkernels.
 
 union xnn_f16_hswish_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t sixth;
@@ -2267,7 +2270,7 @@ struct {
 // LReLU (Leaky ReLU): used by VLRELU microkernels.
 
 union xnn_f16_lrelu_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t slope;
@@ -2430,7 +2433,7 @@ union xnn_qu8_lrelu_params {
 // Neg: used by VNEG microkernels.
 
 union xnn_f16_neg_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) uint16_t sign_mask[8];
@@ -2439,7 +2442,7 @@ union xnn_f16_neg_params {
 };
 
 union xnn_f32_neg_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float sign_mask[4];
@@ -2463,11 +2466,11 @@ union xnn_f32_neg_params {
 // Rnd (Round): used by VRNDNE/VRNDU/VRNDD/VRNDZ microkernels.
 
 union xnn_f16_rnd_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 };
 
 union xnn_f32_rnd_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float sign_mask[4];
@@ -2483,7 +2486,7 @@ union xnn_f32_rnd_params {
 // Sigmoid: used by VSIGMOID microkernels.
 
 union xnn_f16_sigmoid_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t magic_bias;
@@ -2717,11 +2720,11 @@ union xnn_f32_sigmoid_params {
 // Sqrt (Square Root): used by VSQRT microkernels.
 
 union xnn_f16_sqrt_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 };
 
 union xnn_f32_sqrt_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float three[4];
@@ -2779,7 +2782,7 @@ union xnn_f32_rsqrt_params {
 // TanH (Hyperbolic Tangent): used by VTANH microkernels.
 
 union xnn_f16_tanh_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(32) uint16_t sign_mask[16];
@@ -2834,6 +2837,61 @@ union xnn_f32_tanh_params {
     float one;
   } scalar_expm1minus_rr1_lut8_p4h3;
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) float max_x[4];
+    XNN_ALIGN(16) float min_x[4];
+    XNN_ALIGN(16) float alpha_1[4];
+    XNN_ALIGN(16) float alpha_3[4];
+    XNN_ALIGN(16) float alpha_5[4];
+    XNN_ALIGN(16) float alpha_7[4];
+    XNN_ALIGN(16) float alpha_9[4];
+    XNN_ALIGN(16) float beta_0[4];
+    XNN_ALIGN(16) float beta_2[4];
+    XNN_ALIGN(16) float beta_4[4];
+    XNN_ALIGN(16) float beta_6[4];
+    XNN_ALIGN(16) float two[4];
+  } sse_rational_9_6;
+  struct {
+    float max_abs_x;
+    float alpha_1;
+    float alpha_3;
+    float alpha_5;
+    float alpha_7;
+    float alpha_9;
+    float beta_0;
+    float beta_2;
+    float beta_4;
+    float beta_6;
+    float two;
+    int32_t mask_table[14];
+  } avx_rational_9_6;
+  struct {
+    float max_abs_x;
+    float alpha_1;
+    float alpha_3;
+    float alpha_5;
+    float alpha_7;
+    float alpha_9;
+    float beta_0;
+    float beta_2;
+    float beta_4;
+    float beta_6;
+    float two;
+    int32_t mask_table[14];
+  } fma3_rational_9_6;
+  struct {
+    float max_abs_x;
+    float alpha_1;
+    float alpha_3;
+    float alpha_5;
+    float alpha_7;
+    float alpha_9;
+    float beta_0;
+    float beta_2;
+    float beta_4;
+    float beta_6;
+    float two;
+  } avx512_rational_9_6;
   struct {
     XNN_ALIGN(16) float sign_mask[4];
     XNN_ALIGN(16) float sat_cutoff[4];
@@ -3070,7 +3128,7 @@ union xnn_f32_tanh_params {
 // CHW: used by CONV/DWCONV microkernels in CHW layout with Min+Max parameters.
 
 union xnn_f16_chw_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t min;
@@ -3138,7 +3196,7 @@ union xnn_f32_chw_params {
 // GAvgPool (Global Average Pool): used by GAVGPOOL microkernels in CHW layout with Scale+Min+Max parameters.
 
 union xnn_f16_gavgpool_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     XNN_ALIGN(16) uint16_t mask[8];
@@ -3195,7 +3253,7 @@ struct jit_gemm_params {
 };
 
 union xnn_x8_transpose_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     uint32_t mask_table[15];
@@ -3204,7 +3262,7 @@ union xnn_x8_transpose_params {
 };
 
 union xnn_x16_transpose_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     uint32_t mask_table[15];
@@ -3213,17 +3271,17 @@ union xnn_x16_transpose_params {
 };
 
 union xnn_x24_transpose_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
-    uint8_t pos0[16]; // used by tbl kernels
-    uint8_t pos1[16]; // used by tbl kernels
-    uint8_t pos2[16]; // used by tbl kernels
-    uint8_t pos3[16]; // used by tbl kernels
+    uint8_t pos0[16];  // used by tbl kernels
+    uint8_t pos1[16];  // used by tbl kernels
+    uint8_t pos2[16];  // used by tbl kernels
+    uint8_t pos3[16];  // used by tbl kernels
   } neon_tbl128;
   struct {
-    uint8_t pos0[8]; // used by tbl kernels
-    uint8_t pos1[8]; // used by tbl kernels
+    uint8_t pos0[8];  // used by tbl kernels
+    uint8_t pos1[8];  // used by tbl kernels
   } neon_tbl64;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -3239,17 +3297,17 @@ union xnn_x24_transpose_params {
 };
 
 union xnn_x32_transpose_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
-    uint8_t pos0[16]; // used by tbl kernels
-    uint8_t pos1[16]; // used by tbl kernels
-    uint8_t pos2[16]; // used by tbl kernels
-    uint8_t pos3[16]; // used by tbl kernels
+    uint8_t pos0[16];  // used by tbl kernels
+    uint8_t pos1[16];  // used by tbl kernels
+    uint8_t pos2[16];  // used by tbl kernels
+    uint8_t pos3[16];  // used by tbl kernels
   } neon_tbl128;
   struct {
-    uint8_t pos0[8]; // used by tbl kernels
-    uint8_t pos1[8]; // used by tbl kernels
+    uint8_t pos0[8];  // used by tbl kernels
+    uint8_t pos1[8];  // used by tbl kernels
   } neon_tbl64;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -3260,7 +3318,7 @@ union xnn_x32_transpose_params {
 };
 
 union xnn_x64_transpose_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     uint64_t mask_table[7];
@@ -3269,5 +3327,5 @@ union xnn_x64_transpose_params {
 };
 
 union xnn_x32_packb_params {
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 };

@@ -2648,9 +2648,7 @@ void xnn_f32_vsigmoid_ukernel__sse2_rr2_lut64_p2_div_u8(
   }
 }
 
-extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
-
-void xnn_f32_vtanh_ukernel__sse2_expm1minus_rr1_lut8_p4h3ts_div_u16(
+void xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -2661,344 +2659,142 @@ void xnn_f32_vtanh_ukernel__sse2_expm1minus_rr1_lut8_p4h3ts_div_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vsign_mask = _mm_load_ps(params->sse_expm1minus_rr1_lut8_p4h3.sign_mask);
-  const __m128 vsat_cutoff = _mm_load_ps(params->sse_expm1minus_rr1_lut8_p4h3.sat_cutoff);
-  const __m128 vlog2e = _mm_load_ps(params->sse_expm1minus_rr1_lut8_p4h3.log2e);
-  const __m128 vmagic_bias = _mm_load_ps(params->sse_expm1minus_rr1_lut8_p4h3.magic_bias);
-  const __m128i vindex_mask = _mm_load_si128((const __m128i*) params->sse_expm1minus_rr1_lut8_p4h3.index_mask);
-  const __m128 vminus_ln2 = _mm_load_ps(params->sse_expm1minus_rr1_lut8_p4h3.minus_ln2);
-  const __m128 vc4 = _mm_load_ps(params->sse_expm1minus_rr1_lut8_p4h3.c4);
-  const __m128 vc3 = _mm_load_ps(params->sse_expm1minus_rr1_lut8_p4h3.c3);
-  const __m128 vc2 = _mm_load_ps(params->sse_expm1minus_rr1_lut8_p4h3.c2);
-  const __m128 vminus_two = _mm_load_ps(params->sse_expm1minus_rr1_lut8_p4h3.minus_two);
-  const __m128 vminus_one = _mm_load_ps(params->sse_expm1minus_rr1_lut8_p4h3.minus_one);
+  // Cap the inputs to this value as `tanh(x)` will always be `+/-1.0f` beyond
+  // this point. This value is chosen as the first floating point number as of
+  // which the interpolation returns 1.0f.
+#if XNN_ARCH_X86
+  const __m128 vmax_x = _mm_load_ps(params->sse_rational_9_6.max_x);
+  const __m128 vmin_x = _mm_load_ps(params->sse_rational_9_6.min_x);
+#else
+  const __m128 vmax_x = _mm_set1_ps(7.623543739319f);
+  const __m128 vmin_x = _mm_set1_ps(-7.623543739319f);
+#endif  // XNN_ARCH_X86
+  
+  // The monomial coefficients of the numerator polynomial (odd).
+#if XNN_ARCH_X86
+  const __m128 valpha_1 = _mm_load_ps(params->sse_rational_9_6.alpha_1);
+  const __m128 valpha_3 = _mm_load_ps(params->sse_rational_9_6.alpha_3);
+  const __m128 valpha_5 = _mm_load_ps(params->sse_rational_9_6.alpha_5);
+  const __m128 valpha_7 = _mm_load_ps(params->sse_rational_9_6.alpha_7);
+  const __m128 valpha_9 = _mm_load_ps(params->sse_rational_9_6.alpha_9);
+#else
+  const __m128 valpha_1 = _mm_set1_ps(-9.022999554873e-03f);
+  const __m128 valpha_3 = _mm_set1_ps(-1.146968104877e-03f);
+  const __m128 valpha_5 = _mm_set1_ps(-2.432360815874e-05f);
+  const __m128 valpha_7 = _mm_set1_ps(-6.458659385089e-08f);
+  const __m128 valpha_9 = _mm_set1_ps(5.535878699892e-11f);
+#endif  // XNN_ARCH_X86
 
-  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m128 vx0123 = _mm_loadu_ps(input);
-    const __m128 vx4567 = _mm_loadu_ps(input + 4);
-    const __m128 vx89AB = _mm_loadu_ps(input + 8);
-    const __m128 vxCDEF = _mm_loadu_ps(input + 12);
-    input += 16;
+  // The monomial coefficients of the denominator polynomial (even).
+#if XNN_ARCH_X86
+  const __m128 vbeta_0 = _mm_load_ps(params->sse_rational_9_6.beta_0);
+  const __m128 vbeta_2 = _mm_load_ps(params->sse_rational_9_6.beta_2);
+  const __m128 vbeta_4 = _mm_load_ps(params->sse_rational_9_6.beta_4);
+  const __m128 vbeta_6 = _mm_load_ps(params->sse_rational_9_6.beta_6);
+#else
+  const __m128 vbeta_0 = _mm_set1_ps(-9.023001417518e-03f);
+  const __m128 vbeta_2 = _mm_set1_ps(-4.154618829489e-03f);
+  const __m128 vbeta_4 = _mm_set1_ps(-2.061512641376e-04f);
+  const __m128 vbeta_6 = _mm_set1_ps(-1.774490101525e-06f);
+#endif  // XNN_ARCH_X86
+  
 
-    __m128 vz0123 = _mm_or_ps(vx0123, vsign_mask);
-    __m128 vz4567 = _mm_or_ps(vx4567, vsign_mask);
-    __m128 vz89AB = _mm_or_ps(vx89AB, vsign_mask);
-    __m128 vzCDEF = _mm_or_ps(vxCDEF, vsign_mask);
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+    __m128 vx_0 = _mm_loadu_ps(input);
+    __m128 vx_1 = _mm_loadu_ps(input + 4);
+    input += 8;
 
-    const __m128 vinvsignx0123 = _mm_xor_ps(vx0123, vz0123);
-    const __m128 vinvsignx4567 = _mm_xor_ps(vx4567, vz4567);
-    const __m128 vinvsignx89AB = _mm_xor_ps(vx89AB, vz89AB);
-    const __m128 vinvsignxCDEF = _mm_xor_ps(vxCDEF, vzCDEF);
+    // Clamp the inputs to the interpolation range.
+    vx_0 = _mm_min_ps(vmax_x, vx_0);
+    vx_1 = _mm_min_ps(vmax_x, vx_1);
+    vx_0 = _mm_max_ps(vmin_x, vx_0);
+    vx_1 = _mm_max_ps(vmin_x, vx_1);
 
-    vz0123 = _mm_max_ps(vsat_cutoff, vz0123);
-    vz4567 = _mm_max_ps(vsat_cutoff, vz4567);
-    vz89AB = _mm_max_ps(vsat_cutoff, vz89AB);
-    vzCDEF = _mm_max_ps(vsat_cutoff, vzCDEF);
+    // Since the polynomials are odd/even, we need x^2.
+    const __m128 vx2_0 = _mm_mul_ps(vx_0, vx_0);
+    const __m128 vx2_1 = _mm_mul_ps(vx_1, vx_1);
 
-    __m128 vn0123 = _mm_add_ps(_mm_mul_ps(vz0123, vlog2e), vmagic_bias);
-    __m128 vn4567 = _mm_add_ps(_mm_mul_ps(vz4567, vlog2e), vmagic_bias);
-    __m128 vn89AB = _mm_add_ps(_mm_mul_ps(vz89AB, vlog2e), vmagic_bias);
-    __m128 vnCDEF = _mm_add_ps(_mm_mul_ps(vzCDEF, vlog2e), vmagic_bias);
+    // Evaluate the numerator polynomial p.
+    __m128 vp_0 = _mm_add_ps(_mm_mul_ps(vx2_0, valpha_9), valpha_7);
+    __m128 vp_1 = _mm_add_ps(_mm_mul_ps(vx2_1, valpha_9), valpha_7);
+    vp_0 = _mm_add_ps(_mm_mul_ps(vx2_0, vp_0), valpha_5);
+    vp_1 = _mm_add_ps(_mm_mul_ps(vx2_1, vp_1), valpha_5);
+    vp_0 = _mm_add_ps(_mm_mul_ps(vx2_0, vp_0), valpha_3);
+    vp_1 = _mm_add_ps(_mm_mul_ps(vx2_1, vp_1), valpha_3);
+    vp_0 = _mm_add_ps(_mm_mul_ps(vx2_0, vp_0), valpha_1);
+    vp_1 = _mm_add_ps(_mm_mul_ps(vx2_1, vp_1), valpha_1);
+    vp_0 = _mm_mul_ps(vx_0, vp_0);
+    vp_1 = _mm_mul_ps(vx_1, vp_1);
 
-    const __m128i ve0123 = _mm_slli_epi32(_mm_castps_si128(vn0123), 20);
-    const __m128i ve4567 = _mm_slli_epi32(_mm_castps_si128(vn4567), 20);
-    const __m128i ve89AB = _mm_slli_epi32(_mm_castps_si128(vn89AB), 20);
-    const __m128i veCDEF = _mm_slli_epi32(_mm_castps_si128(vnCDEF), 20);
+    // Evaluate the denominator polynomial q.
+    __m128 vq_0 = _mm_add_ps(_mm_mul_ps(vx2_0, vbeta_6), vbeta_4);
+    __m128 vq_1 = _mm_add_ps(_mm_mul_ps(vx2_1, vbeta_6), vbeta_4);
+    vq_0 = _mm_add_ps(_mm_mul_ps(vx2_0, vq_0), vbeta_2);
+    vq_1 = _mm_add_ps(_mm_mul_ps(vx2_1, vq_1), vbeta_2);
+    vq_0 = _mm_add_ps(_mm_mul_ps(vx2_0, vq_0), vbeta_0);
+    vq_1 = _mm_add_ps(_mm_mul_ps(vx2_1, vq_1), vbeta_0);
 
-    #if XNN_ARCH_X86_64
-      __m128i vidx0123 = _mm_and_si128(_mm_castps_si128(vn0123), vindex_mask);
-      __m128i vidx4567 = _mm_and_si128(_mm_castps_si128(vn4567), vindex_mask);
-      __m128i vidx89AB = _mm_and_si128(_mm_castps_si128(vn89AB), vindex_mask);
-      __m128i vidxCDEF = _mm_and_si128(_mm_castps_si128(vnCDEF), vindex_mask);
+    // Divide the numerator by the denominator.
+    const __m128 vy_0 =  _mm_div_ps(vp_0, vq_0);
+    const __m128 vy_1 =  _mm_div_ps(vp_1, vq_1);
 
-      const uint64_t vidx01 = (uint64_t) _mm_cvtsi128_si64(vidx0123);
-      vidx0123 = _mm_unpackhi_epi64(vidx0123, vidx0123);
-      const uint64_t vidx45 = (uint64_t) _mm_cvtsi128_si64(vidx4567);
-      vidx4567 = _mm_unpackhi_epi64(vidx4567, vidx4567);
-      const uint64_t vidx89 = (uint64_t) _mm_cvtsi128_si64(vidx89AB);
-      vidx89AB = _mm_unpackhi_epi64(vidx89AB, vidx89AB);
-      const uint64_t vidxCD = (uint64_t) _mm_cvtsi128_si64(vidxCDEF);
-      vidxCDEF = _mm_unpackhi_epi64(vidxCDEF, vidxCDEF);
-
-      const uint64_t vidx23 = (uint64_t) _mm_cvtsi128_si64(vidx0123);
-      const uint64_t vidx67 = (uint64_t) _mm_cvtsi128_si64(vidx4567);
-      const uint64_t vidxAB = (uint64_t) _mm_cvtsi128_si64(vidx89AB);
-      const uint64_t vidxEF = (uint64_t) _mm_cvtsi128_si64(vidxCDEF);
-
-      const __m128i vl0 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx01]);
-      const __m128i vl1 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) (vidx01 >> 32)]);
-      const __m128i vl4 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx45]);
-      const __m128i vl5 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) (vidx45 >> 32)]);
-      const __m128i vl8 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx89]);
-      const __m128i vl9 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) (vidx89 >> 32)]);
-      const __m128i vlC = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) vidxCD]);
-      const __m128i vlD = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) (vidxCD >> 32)]);
-
-      const __m128i vl01 = _mm_unpacklo_epi32(vl0, vl1);
-      const __m128i vl45 = _mm_unpacklo_epi32(vl4, vl5);
-      const __m128i vl89 = _mm_unpacklo_epi32(vl8, vl9);
-      const __m128i vlCD = _mm_unpacklo_epi32(vlC, vlD);
-
-      const __m128i vl2 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx23]);
-      const __m128i vl3 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) (vidx23 >> 32)]);
-      const __m128i vl6 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx67]);
-      const __m128i vl7 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) (vidx67 >> 32)]);
-      const __m128i vlA = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) vidxAB]);
-      const __m128i vlB = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) (vidxAB >> 32)]);
-      const __m128i vlE = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) vidxEF]);
-      const __m128i vlF = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) (vidxEF >> 32)]);
-
-      const __m128i vl23 = _mm_unpacklo_epi32(vl2, vl3);
-      const __m128i vl67 = _mm_unpacklo_epi32(vl6, vl7);
-      const __m128i vlAB = _mm_unpacklo_epi32(vlA, vlB);
-      const __m128i vlEF = _mm_unpacklo_epi32(vlE, vlF);
-    #else
-      const __m128i vidx0123 = _mm_and_si128(_mm_castps_si128(vn0123), vindex_mask);
-      const __m128i vidx4567 = _mm_and_si128(_mm_castps_si128(vn4567), vindex_mask);
-      const __m128i vidx89AB = _mm_and_si128(_mm_castps_si128(vn89AB), vindex_mask);
-      const __m128i vidxCDEF = _mm_and_si128(_mm_castps_si128(vnCDEF), vindex_mask);
-
-      const uint32_t vidx0 = (uint32_t) _mm_cvtsi128_si32(vidx0123);
-      const uint32_t vidx4 = (uint32_t) _mm_cvtsi128_si32(vidx4567);
-      const uint32_t vidx8 = (uint32_t) _mm_cvtsi128_si32(vidx89AB);
-      const uint32_t vidxC = (uint32_t) _mm_cvtsi128_si32(vidxCDEF);
-
-      const __m128i vl0 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx0]);
-      const __m128i vl4 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx4]);
-      const __m128i vl8 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx8]);
-      const __m128i vlC = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidxC]);
-
-      const uint32_t vidx1 = (uint32_t) _mm_extract_epi16(vidx0123, 2);
-      const uint32_t vidx5 = (uint32_t) _mm_extract_epi16(vidx4567, 2);
-      const uint32_t vidx9 = (uint32_t) _mm_extract_epi16(vidx89AB, 2);
-      const uint32_t vidxD = (uint32_t) _mm_extract_epi16(vidxCDEF, 2);
-
-      const __m128i vl1 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx1]);
-      const __m128i vl5 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx5]);
-      const __m128i vl9 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx9]);
-      const __m128i vlD = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidxD]);
-
-      const __m128i vl01 = _mm_unpacklo_epi32(vl0, vl1);
-      const __m128i vl45 = _mm_unpacklo_epi32(vl4, vl5);
-      const __m128i vl89 = _mm_unpacklo_epi32(vl8, vl9);
-      const __m128i vlCD = _mm_unpacklo_epi32(vlC, vlD);
-
-      const uint32_t vidx2 = (uint32_t) _mm_extract_epi16(vidx0123, 4);
-      const uint32_t vidx6 = (uint32_t) _mm_extract_epi16(vidx4567, 4);
-      const uint32_t vidxA = (uint32_t) _mm_extract_epi16(vidx89AB, 4);
-      const uint32_t vidxE = (uint32_t) _mm_extract_epi16(vidxCDEF, 4);
-
-      const __m128i vl2 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx2]);
-      const __m128i vl6 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx6]);
-      const __m128i vlA = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidxA]);
-      const __m128i vlE = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidxE]);
-
-      const uint32_t vidx3 = (uint32_t) _mm_extract_epi16(vidx0123, 6);
-      const uint32_t vidx7 = (uint32_t) _mm_extract_epi16(vidx4567, 6);
-      const uint32_t vidxB = (uint32_t) _mm_extract_epi16(vidx89AB, 6);
-      const uint32_t vidxF = (uint32_t) _mm_extract_epi16(vidxCDEF, 6);
-
-      const __m128i vl3 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx3]);
-      const __m128i vl7 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx7]);
-      const __m128i vlB = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidxB]);
-      const __m128i vlF = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidxF]);
-
-      const __m128i vl23 = _mm_unpacklo_epi32(vl2, vl3);
-      const __m128i vl67 = _mm_unpacklo_epi32(vl6, vl7);
-      const __m128i vlAB = _mm_unpacklo_epi32(vlA, vlB);
-      const __m128i vlEF = _mm_unpacklo_epi32(vlE, vlF);
-    #endif
-    const __m128i vl0123 = _mm_unpacklo_epi64(vl01, vl23);
-    const __m128i vl4567 = _mm_unpacklo_epi64(vl45, vl67);
-    const __m128i vl89AB = _mm_unpacklo_epi64(vl89, vlAB);
-    const __m128i vlCDEF = _mm_unpacklo_epi64(vlCD, vlEF);
-
-    const __m128 vs0123 = _mm_castsi128_ps(_mm_add_epi32(vl0123, ve0123));
-    const __m128 vs4567 = _mm_castsi128_ps(_mm_add_epi32(vl4567, ve4567));
-    const __m128 vs89AB = _mm_castsi128_ps(_mm_add_epi32(vl89AB, ve89AB));
-    const __m128 vsCDEF = _mm_castsi128_ps(_mm_add_epi32(vlCDEF, veCDEF));
-
-    vn0123 = _mm_sub_ps(vn0123, vmagic_bias);
-    vn4567 = _mm_sub_ps(vn4567, vmagic_bias);
-    vn89AB = _mm_sub_ps(vn89AB, vmagic_bias);
-    vnCDEF = _mm_sub_ps(vnCDEF, vmagic_bias);
-
-    const __m128 vt0123 = _mm_add_ps(_mm_mul_ps(vn0123, vminus_ln2), vz0123);
-    const __m128 vt4567 = _mm_add_ps(_mm_mul_ps(vn4567, vminus_ln2), vz4567);
-    const __m128 vt89AB = _mm_add_ps(_mm_mul_ps(vn89AB, vminus_ln2), vz89AB);
-    const __m128 vtCDEF = _mm_add_ps(_mm_mul_ps(vnCDEF, vminus_ln2), vzCDEF);
-
-    __m128 vp0123 = _mm_add_ps(_mm_mul_ps(vc4, vt0123), vc3);
-    __m128 vp4567 = _mm_add_ps(_mm_mul_ps(vc4, vt4567), vc3);
-    __m128 vp89AB = _mm_add_ps(_mm_mul_ps(vc4, vt89AB), vc3);
-    __m128 vpCDEF = _mm_add_ps(_mm_mul_ps(vc4, vtCDEF), vc3);
-    vp0123 = _mm_add_ps(_mm_mul_ps(vp0123, vt0123), vc2);
-    vp4567 = _mm_add_ps(_mm_mul_ps(vp4567, vt4567), vc2);
-    vp89AB = _mm_add_ps(_mm_mul_ps(vp89AB, vt89AB), vc2);
-    vpCDEF = _mm_add_ps(_mm_mul_ps(vpCDEF, vtCDEF), vc2);
-    vp0123 = _mm_sub_ps(_mm_mul_ps(vp0123, vt0123), vminus_two);
-    vp4567 = _mm_sub_ps(_mm_mul_ps(vp4567, vt4567), vminus_two);
-    vp89AB = _mm_sub_ps(_mm_mul_ps(vp89AB, vt89AB), vminus_two);
-    vpCDEF = _mm_sub_ps(_mm_mul_ps(vpCDEF, vtCDEF), vminus_two);
-
-    const __m128 vts0123 = _mm_mul_ps(vt0123, vs0123);
-    const __m128 vsmo0123 = _mm_add_ps(vs0123, vminus_one);
-    const __m128 vts4567 = _mm_mul_ps(vt4567, vs4567);
-    const __m128 vsmo4567 = _mm_add_ps(vs4567, vminus_one);
-    const __m128 vts89AB = _mm_mul_ps(vt89AB, vs89AB);
-    const __m128 vsmo89AB = _mm_add_ps(vs89AB, vminus_one);
-    const __m128 vtsCDEF = _mm_mul_ps(vtCDEF, vsCDEF);
-    const __m128 vsmoCDEF = _mm_add_ps(vsCDEF, vminus_one);
-    const __m128 vemo0123 = _mm_add_ps(_mm_mul_ps(vp0123, vts0123), vsmo0123);
-    const __m128 vemo4567 = _mm_add_ps(_mm_mul_ps(vp4567, vts4567), vsmo4567);
-    const __m128 vemo89AB = _mm_add_ps(_mm_mul_ps(vp89AB, vts89AB), vsmo89AB);
-    const __m128 vemoCDEF = _mm_add_ps(_mm_mul_ps(vpCDEF, vtsCDEF), vsmoCDEF);
-
-    const __m128 vepo0123 = _mm_sub_ps(vemo0123, vminus_two);
-    const __m128 vepo4567 = _mm_sub_ps(vemo4567, vminus_two);
-    const __m128 vepo89AB = _mm_sub_ps(vemo89AB, vminus_two);
-    const __m128 vepoCDEF = _mm_sub_ps(vemoCDEF, vminus_two);
-
-    __m128 vy0123 = _mm_div_ps(vemo0123, vepo0123);
-    __m128 vy4567 = _mm_div_ps(vemo4567, vepo4567);
-    __m128 vy89AB = _mm_div_ps(vemo89AB, vepo89AB);
-    __m128 vyCDEF = _mm_div_ps(vemoCDEF, vepoCDEF);
-
-
-    vy0123 = _mm_xor_ps(vy0123, vinvsignx0123);
-    vy4567 = _mm_xor_ps(vy4567, vinvsignx4567);
-    vy89AB = _mm_xor_ps(vy89AB, vinvsignx89AB);
-    vyCDEF = _mm_xor_ps(vyCDEF, vinvsignxCDEF);
-
-    _mm_storeu_ps(output, vy0123);
-    _mm_storeu_ps(output + 4, vy4567);
-    _mm_storeu_ps(output + 8, vy89AB);
-    _mm_storeu_ps(output + 12, vyCDEF);
-    output += 16;
+    _mm_storeu_ps(output, vy_0);
+    _mm_storeu_ps(output + 4, vy_1);
+    output += 8;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const __m128 vx = _mm_loadu_ps(input);
+    __m128 vx = _mm_loadu_ps(input);
     input += 4;
 
-    __m128 vz = _mm_or_ps(vx, vsign_mask);
+    // Clamp the inputs to the interpolation range.
+    vx = _mm_min_ps(vmax_x, vx);
+    vx = _mm_max_ps(vmin_x, vx);
 
-    const __m128 vinvsignx = _mm_xor_ps(vx, vz);
+    // Since the polynomials are odd/even, we need x^2.
+    const __m128 vx2 = _mm_mul_ps(vx, vx);
 
-    vz = _mm_max_ps(vsat_cutoff, vz);
+    // Evaluate the numerator polynomial p.
+    __m128 vp = _mm_add_ps(_mm_mul_ps(vx2, valpha_9), valpha_7);
+    vp = _mm_add_ps(_mm_mul_ps(vx2, vp), valpha_5);
+    vp = _mm_add_ps(_mm_mul_ps(vx2, vp), valpha_3);
+    vp = _mm_add_ps(_mm_mul_ps(vx2, vp), valpha_1);
+    vp = _mm_mul_ps(vx, vp);
 
-    __m128 vn = _mm_add_ps(_mm_mul_ps(vz, vlog2e), vmagic_bias);
+    // Evaluate the denominator polynomial q.
+    __m128 vq = _mm_add_ps(_mm_mul_ps(vx2, vbeta_6), vbeta_4);
+    vq = _mm_add_ps(_mm_mul_ps(vx2, vq), vbeta_2);
+    vq = _mm_add_ps(_mm_mul_ps(vx2, vq), vbeta_0);
 
-    const __m128i ve = _mm_slli_epi32(_mm_castps_si128(vn), 20);
-
-    #if XNN_ARCH_X86_64
-      __m128i vidx = _mm_and_si128(_mm_castps_si128(vn), vindex_mask);
-      const uint64_t vidx_lo = (uint64_t) _mm_cvtsi128_si64(vidx);
-      vidx = _mm_unpackhi_epi64(vidx, vidx);
-      const uint64_t vidx_hi = (uint64_t) _mm_cvtsi128_si64(vidx);
-      const __m128i vl0 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx_lo]);
-      const __m128i vl1 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) (vidx_lo >> 32)]);
-      const __m128i vl_lo = _mm_unpacklo_epi32(vl0, vl1);
-      const __m128i vl2 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx_hi]);
-      const __m128i vl3 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) (vidx_hi >> 32)]);
-      const __m128i vl_hi = _mm_unpacklo_epi32(vl2, vl3);
-    #else
-      const __m128i vidx = _mm_and_si128(_mm_castps_si128(vn), vindex_mask);
-      const uint32_t vidx0 = (uint32_t) _mm_cvtsi128_si32(vidx);
-      const __m128i vl0 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx0]);
-      const uint32_t vidx1 = (uint32_t) _mm_extract_epi16(vidx, 2);
-      const __m128i vl1 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx1]);
-      const __m128i vl_lo = _mm_unpacklo_epi32(vl0, vl1);
-      const uint32_t vidx2 = (uint32_t) _mm_extract_epi16(vidx, 4);
-      const __m128i vl2 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx2]);
-      const uint32_t vidx3 = (uint32_t) _mm_extract_epi16(vidx, 6);
-      const __m128i vl3 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx3]);
-      const __m128i vl_hi = _mm_unpacklo_epi32(vl2, vl3);
-    #endif
-    const __m128i vl = _mm_unpacklo_epi64(vl_lo, vl_hi);
-
-    const __m128 vs = _mm_castsi128_ps(_mm_add_epi32(vl, ve));
-
-    vn = _mm_sub_ps(vn, vmagic_bias);
-
-    const __m128 vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2), vz);
-
-    __m128 vp = _mm_add_ps(_mm_mul_ps(vc4, vt), vc3);
-    vp = _mm_add_ps(_mm_mul_ps(vp, vt), vc2);
-    vp = _mm_sub_ps(_mm_mul_ps(vp, vt), vminus_two);
-
-    const __m128 vts = _mm_mul_ps(vt, vs);
-    const __m128 vsmo = _mm_add_ps(vs, vminus_one);
-    const __m128 vemo = _mm_add_ps(_mm_mul_ps(vp, vts), vsmo);
-
-    const __m128 vepo = _mm_sub_ps(vemo, vminus_two);
-
-    __m128 vy = _mm_div_ps(vemo, vepo);
-
-
-    vy = _mm_xor_ps(vy, vinvsignx);
+    // Divide the numerator by the denominator.
+    const __m128 vy =  _mm_div_ps(vp, vq);
 
     _mm_storeu_ps(output, vy);
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
-    const __m128 vx = _mm_loadu_ps(input);
+    __m128 vx = _mm_loadu_ps(input);
 
-    __m128 vz = _mm_or_ps(vx, vsign_mask);
+    // Clamp the inputs to the interpolation range.
+    vx = _mm_min_ps(vmax_x, vx);
+    vx = _mm_max_ps(vmin_x, vx);
 
-    const __m128 vinvsignx = _mm_xor_ps(vx, vz);
+    // Since the polynomials are odd/even, we need x^2.
+    const __m128 vx2 = _mm_mul_ps(vx, vx);
 
-    vz = _mm_max_ps(vsat_cutoff, vz);
+    // Evaluate the numerator polynomial p.
+    __m128 vp = _mm_add_ps(_mm_mul_ps(vx2, valpha_9), valpha_7);
+    vp = _mm_add_ps(_mm_mul_ps(vx2, vp), valpha_5);
+    vp = _mm_add_ps(_mm_mul_ps(vx2, vp), valpha_3);
+    vp = _mm_add_ps(_mm_mul_ps(vx2, vp), valpha_1);
+    vp = _mm_mul_ps(vx, vp);
 
-    __m128 vn = _mm_add_ps(_mm_mul_ps(vz, vlog2e), vmagic_bias);
+    // Evaluate the denominator polynomial q.
+    __m128 vq = _mm_add_ps(_mm_mul_ps(vx2, vbeta_6), vbeta_4);
+    vq = _mm_add_ps(_mm_mul_ps(vx2, vq), vbeta_2);
+    vq = _mm_add_ps(_mm_mul_ps(vx2, vq), vbeta_0);
 
-    const __m128i ve = _mm_slli_epi32(_mm_castps_si128(vn), 20);
-
-    #if XNN_ARCH_X86_64
-      __m128i vidx = _mm_and_si128(_mm_castps_si128(vn), vindex_mask);
-      const uint64_t vidx_lo = (uint64_t) _mm_cvtsi128_si64(vidx);
-      vidx = _mm_unpackhi_epi64(vidx, vidx);
-      const uint64_t vidx_hi = (uint64_t) _mm_cvtsi128_si64(vidx);
-      const __m128i vl0 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx_lo]);
-      const __m128i vl1 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) (vidx_lo >> 32)]);
-      const __m128i vl_lo = _mm_unpacklo_epi32(vl0, vl1);
-      const __m128i vl2 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx_hi]);
-      const __m128i vl3 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) (vidx_hi >> 32)]);
-      const __m128i vl_hi = _mm_unpacklo_epi32(vl2, vl3);
-    #else
-      const __m128i vidx = _mm_and_si128(_mm_castps_si128(vn), vindex_mask);
-      const uint32_t vidx0 = (uint32_t) _mm_cvtsi128_si32(vidx);
-      const __m128i vl0 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx0]);
-      const uint32_t vidx1 = (uint32_t) _mm_extract_epi16(vidx, 2);
-      const __m128i vl1 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx1]);
-      const __m128i vl_lo = _mm_unpacklo_epi32(vl0, vl1);
-      const uint32_t vidx2 = (uint32_t) _mm_extract_epi16(vidx, 4);
-      const __m128i vl2 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx2]);
-      const uint32_t vidx3 = (uint32_t) _mm_extract_epi16(vidx, 6);
-      const __m128i vl3 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[vidx3]);
-      const __m128i vl_hi = _mm_unpacklo_epi32(vl2, vl3);
-    #endif
-    const __m128i vl = _mm_unpacklo_epi64(vl_lo, vl_hi);
-
-    const __m128 vs = _mm_castsi128_ps(_mm_add_epi32(vl, ve));
-
-    vn = _mm_sub_ps(vn, vmagic_bias);
-
-    const __m128 vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2), vz);
-
-    __m128 vp = _mm_add_ps(_mm_mul_ps(vc4, vt), vc3);
-    vp = _mm_add_ps(_mm_mul_ps(vp, vt), vc2);
-    vp = _mm_sub_ps(_mm_mul_ps(vp, vt), vminus_two);
-
-    const __m128 vts = _mm_mul_ps(vt, vs);
-    const __m128 vsmo = _mm_add_ps(vs, vminus_one);
-    const __m128 vemo = _mm_add_ps(_mm_mul_ps(vp, vts), vsmo);
-
-    const __m128 vepo = _mm_sub_ps(vemo, vminus_two);
-
-    __m128 vy = _mm_div_ps(vemo, vepo);
-
-
-    vy = _mm_xor_ps(vy, vinvsignx);
+    // Divide the numerator by the denominator.
+    __m128 vy =  _mm_div_ps(vp, vq);
 
     if (batch & (2 * sizeof(float))) {
       _mm_storel_pi((__m64*) output, vy);

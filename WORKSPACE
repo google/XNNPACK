@@ -84,8 +84,17 @@ http_archive(
     ],
 )
 
-# Android NDK location and version is auto-detected from $ANDROID_NDK_HOME environment variable
+http_archive(
+    name = "rules_android_ndk",
+    url = "https://github.com/bazelbuild/rules_android_ndk/archive/81ec8b79dc50ee97e336a25724fdbb28e33b8d41.zip",
+    sha256 = "b29409496439cdcdb50a8e161c4953ca78a548e16d3ee729a1b5cd719ffdacbf",
+    strip_prefix = "rules_android_ndk-81ec8b79dc50ee97e336a25724fdbb28e33b8d41",
+)
+load("@rules_android_ndk//:rules.bzl", "android_ndk_repository")
+
 android_ndk_repository(name = "androidndk")
+
+register_toolchains("@androidndk//:all")
 
 # Android SDK location and API is auto-detected from $ANDROID_HOME environment variable
 android_sdk_repository(name = "androidsdk")

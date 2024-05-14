@@ -111,6 +111,8 @@
   string: "Deconvolution (NHWC, F16)"
 - name: xnn_operator_type_deconvolution_nhwc_f32
   string: "Deconvolution (NHWC, F32)"
+- name: xnn_operator_type_deconvolution_nhwc_qd8_f32_qc8w
+  string: "Deconvolution (NHWC, QD8, F32, QC8W)"
 - name: xnn_operator_type_deconvolution_nhwc_qs8
   string: "Deconvolution (NHWC, QS8)"
 - name: xnn_operator_type_deconvolution_nhwc_qu8

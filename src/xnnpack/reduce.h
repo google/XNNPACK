@@ -47,6 +47,7 @@ DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rsum_ukernel__avx512skx_
 DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rsum_ukernel__avx512skx_u48_acc3)
 DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rsum_ukernel__avx512skx_u64_acc2)
 DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rsum_ukernel__avx512skx_u64_acc4)
+DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rsum_ukernel__avx512skx_u128_acc4)
 
 DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rsum_ukernel__f16c_u8)
 DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rsum_ukernel__f16c_u16_acc2)
@@ -61,6 +62,60 @@ DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rsum_ukernel__f16c_u32_a
       const void* input,                           \
       void* output,                                \
       const union xnn_f16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__neonfp16arith_u8)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__neonfp16arith_u16_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__neonfp16arith_u24_acc3)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__neonfp16arith_u32_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4)
+
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__neonfp16arith_u8)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__neonfp16arith_u16_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__neonfp16arith_u24_acc3)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__neonfp16arith_u32_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__neonfp16arith_u32_acc4)
+
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__neonfp16arith_u8)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__neonfp16arith_u16_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__neonfp16arith_u24_acc3)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__neonfp16arith_u32_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__neonfp16arith_u32_acc4)
+
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__avx512fp16_u32)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__avx512fp16_u64_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__avx512fp16_u96_acc3)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__avx512fp16_u128_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__avx512fp16_u128_acc4)
+
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__avx512fp16_u32)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__avx512fp16_u64_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__avx512fp16_u96_acc3)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__avx512fp16_u128_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__avx512fp16_u128_acc4)
+
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__avx512fp16_u32)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__avx512fp16_u64_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__avx512fp16_u96_acc3)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__avx512fp16_u128_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__avx512fp16_u128_acc4)
+
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__avx512skx_u16)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__avx512skx_u32_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__avx512skx_u48_acc3)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__avx512skx_u64_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__avx512skx_u64_acc4)
+
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__avx512skx_u16)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__avx512skx_u32_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__avx512skx_u48_acc3)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__avx512skx_u64_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__avx512skx_u64_acc4)
+
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__avx512skx_u16)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__avx512skx_u32_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__avx512skx_u48_acc3)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__avx512skx_u64_acc2)
+DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__avx512skx_u64_acc4)
 
 DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__f16c_u32)
 
@@ -81,24 +136,6 @@ DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__scalar_u2_acc2)
 DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__scalar_u3_acc3)
 DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__scalar_u4_acc2)
 DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__scalar_u4_acc4)
-
-DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__neonfp16arith_u8)
-DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__neonfp16arith_u16_acc2)
-DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__neonfp16arith_u24_acc3)
-DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__neonfp16arith_u32_acc2)
-DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4)
-
-DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__neonfp16arith_u8)
-DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__neonfp16arith_u16_acc2)
-DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__neonfp16arith_u24_acc3)
-DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__neonfp16arith_u32_acc2)
-DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmin_ukernel__neonfp16arith_u32_acc4)
-
-DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__neonfp16arith_u8)
-DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__neonfp16arith_u16_acc2)
-DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__neonfp16arith_u24_acc3)
-DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__neonfp16arith_u32_acc2)
-DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rminmax_ukernel__neonfp16arith_u32_acc4)
 
 #define DECLARE_F32_REDUCE_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                         \
@@ -275,6 +312,7 @@ DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__neon_u8_acc2)
 DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__neon_u12_acc3)
 DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__neon_u16_acc2)
 DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__neon_u16_acc4)
+DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__rvv_u1v)
 DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__scalar_u1)
 DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__scalar_u2_acc2)
 DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__scalar_u3_acc3)
@@ -290,6 +328,57 @@ DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__wasmsimd_u8_acc2)
 DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__wasmsimd_u12_acc3)
 DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__wasmsimd_u16_acc2)
 DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__wasmsimd_u16_acc4)
+
+#define DECLARE_F32_RDSUM_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                        \
+      size_t rows,                                  \
+      size_t channels,                              \
+      const float* input,                           \
+      size_t input_stride,                          \
+      const float* zero,                            \
+      float* output,                                \
+      const union xnn_f32_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__neon_c16)
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__neon_c32)
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__neon_c64)
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__scalar_c4)
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__sse_c16)
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__sse_c32)
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__sse_c64)
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__avx_c16)
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__avx_c32)
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__avx_c64)
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16)
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32)
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64)
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16)
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32)
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64)
+DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__avx512f_c128)
+
+#define DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                               \
+      size_t rows,                                         \
+      size_t channels,                                     \
+      const void* input,                                   \
+      size_t input_stride,                                 \
+      const void* zero,                                    \
+      void* output,                                        \
+      const union xnn_f16_f32acc_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_c16)
+DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_c32)
+DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_c64)
+DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c16)
+DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c32)
+DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c64)
+DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c128)
+DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c16)
+DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c32)
+DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c64)
+DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c128)
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

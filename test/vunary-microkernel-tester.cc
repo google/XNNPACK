@@ -5,12 +5,6 @@
 
 #include "vunary-microkernel-tester.h"
 
-#include <stdint.h>
-#include <xnnpack.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams.h>
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -21,6 +15,11 @@
 #include <limits>
 #include <random>
 #include <vector>
+
+#include <xnnpack.h>
+#include <xnnpack/common.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams.h>
 
 #include "replicable_random_device.h"
 #include <gtest/gtest.h>
@@ -300,7 +299,8 @@ void VUnaryMicrokernelTester::Test(
   TestFP32(
       vtanh, InitParamsWrapper(init_params),
       [](float x) { return std::tanh(x); },
-      TolMixed(/*abs_tol=*/5.0e-6f, /*rel_tol=*/1.0e-5f), -10.0f, 10.0f);
+      TolRelative(5.0f * std::numeric_limits<float>::epsilon()),  // 5 ULP.
+      -10.0f, 10.0f);
 }
 
 void VUnaryMicrokernelTester::Test(

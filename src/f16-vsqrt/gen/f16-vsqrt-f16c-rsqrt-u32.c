@@ -8,6 +8,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -40,7 +41,7 @@ void xnn_f16_vsqrt_ukernel__f16c_rsqrt_u32(
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
-  const __m256 vinf = _mm256_set1_ps(UINT32_C(0x7F800000));
+  const __m256 vinf = _mm256_set1_ps(INFINITY);
   for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
     __m256 vacc0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
     __m256 vacc1 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i + 8)));

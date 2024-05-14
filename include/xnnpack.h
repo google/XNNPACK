@@ -3604,6 +3604,49 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_f32(
   const float* input,
   float* output);
 
+enum xnn_status xnn_create_deconvolution2d_nhwc_qd8_f32_qc8w(
+  uint32_t output_padding_top,
+  uint32_t output_padding_right,
+  uint32_t output_padding_bottom,
+  uint32_t output_padding_left,
+  uint32_t kernel_height,
+  uint32_t kernel_width,
+  uint32_t stride_height,
+  uint32_t stride_width,
+  uint32_t dilation_height,
+  uint32_t dilation_width,
+  uint32_t groups,
+  size_t group_input_channels,
+  size_t group_output_channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
+  const float* kernel_scale,
+  const int8_t* kernel,
+  const float* bias,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* deconvolution_op_out);
+
+enum xnn_status xnn_reshape_deconvolution2d_nhwc_qd8_f32_qc8w(
+  xnn_operator_t deconvolution_op,
+  size_t batch_size,
+  size_t input_height,
+  size_t input_width,
+  uint32_t adjustment_height,
+  uint32_t adjustment_width,
+  size_t* output_height_out,
+  size_t* output_width_out,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_deconvolution2d_nhwc_qd8_f32_qc8w(
+  xnn_operator_t deconvolution_op,
+  const int8_t* input,
+  float* output,
+  const struct xnn_dynamic_quantization_params* quantization_params);
+
 enum xnn_status xnn_create_deconvolution2d_nhwc_qs8(
   uint32_t output_padding_top,
   uint32_t output_padding_right,
@@ -4819,13 +4862,10 @@ enum xnn_status xnn_reshape_mean_nd_f16(
   const size_t* reduction_axes,
   size_t num_input_dims,
   const size_t* input_shape,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_mean_nd_f16(
   xnn_operator_t mean_op,
-  void* workspace,
   const void* input,
   void* output);
 
@@ -4839,13 +4879,10 @@ enum xnn_status xnn_reshape_mean_nd_f32(
   const size_t* reduction_axes,
   size_t num_input_dims,
   const size_t* input_shape,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_mean_nd_f32(
   xnn_operator_t mean_op,
-  void* workspace,
   const float* input,
   float* output);
 

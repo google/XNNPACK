@@ -96,4 +96,18 @@ tools/xngen src/x32-packw/s4-wasmsimd.c.in -D NR=8 -D KBLOCK=4 -o src/x32-packw/
 ### KR 4
 tools/xngen src/x32-packw/c4-wasmsimd.c.in -D NR=2 -D KR=4 -o src/x32-packw/gen/x32-packw-x2c4-gemm-goi-wasmsimd-u4.c &
 
+################################## RISC-V VECTOR ##################################
+tools/xngen src/x32-packw/NRv-rvv.in -D NR=m1 -D KBLOCK=2 -o src/x32-packw/gen/x32-packw-x1v-gemm-goi-rvv-u2.c &
+tools/xngen src/x32-packw/NRv-rvv.in -D NR=m1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x1v-gemm-goi-rvv-u4.c &
+tools/xngen src/x32-packw/NRv-rvv.in -D NR=m1 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x1v-gemm-goi-rvv-u8.c &
+tools/xngen src/x32-packw/NRv-rvv.in -D NR=m2 -D KBLOCK=2 -o src/x32-packw/gen/x32-packw-x2v-gemm-goi-rvv-u2.c &
+tools/xngen src/x32-packw/NRv-rvv.in -D NR=m2 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x2v-gemm-goi-rvv-u4.c &
+tools/xngen src/x32-packw/NRv-rvv.in -D NR=m2 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x2v-gemm-goi-rvv-u8.c &
+tools/xngen src/x32-packw/NRv-rvv.in -D NR=m4 -D KBLOCK=2 -o src/x32-packw/gen/x32-packw-x4v-gemm-goi-rvv-u2.c &
+tools/xngen src/x32-packw/NRv-rvv.in -D NR=m4 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x4v-gemm-goi-rvv-u4.c &
+tools/xngen src/x32-packw/NRv-rvv.in -D NR=m4 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x4v-gemm-goi-rvv-u8.c &
+tools/xngen src/x32-packw/NRv-rvv.in -D NR=m8 -D KBLOCK=2 -o src/x32-packw/gen/x32-packw-x8v-gemm-goi-rvv-u2.c &
+tools/xngen src/x32-packw/NRv-rvv.in -D NR=m8 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8v-gemm-goi-rvv-u4.c &
+tools/xngen src/x32-packw/NRv-rvv.in -D NR=m8 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x8v-gemm-goi-rvv-u8.c &
+
 wait

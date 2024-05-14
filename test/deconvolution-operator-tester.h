@@ -11,6 +11,7 @@
 #include <xnnpack.h>
 #include <xnnpack/cache.h>
 #include <xnnpack/common.h>
+#include <xnnpack/microparams.h>
 
 #include <algorithm>
 #include <cassert>
@@ -1118,6 +1119,261 @@ class DeconvolutionOperatorTester {
             }
           }
         }
+      }
+    }
+  }
+
+  void TestQD8F32QC8W() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_real_distribution<float> f32dist(-1.f, 1.f);
+    std::uniform_real_distribution<float> f32idist(0.5f, 2.0f);
+    std::uniform_int_distribution<int32_t> w8dist(
+    std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+
+    std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
+      (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + groups() * group_input_channels());
+    std::vector<int8_t> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    std::vector<float> bias(groups() * group_output_channels());
+    std::vector<float> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + groups() * group_output_channels());
+    std::vector<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
+    std::vector<xnn_qd8_quantization_params> quantization_params(batch_size());
+    std::vector<float> kernel_scale(groups() * group_output_channels());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
+      // Weights in the same output channel will be all positive or all negative. This ensures that no catastrophic
+      // cancellation occur, but test covers both positive and negative values.
+      for (size_t g = 0; g < groups(); g++) {
+        for (size_t oc = 0; oc < group_output_channels(); oc++) {
+          int32_t range = w8dist(rng);
+          auto weights_dist = std::uniform_int_distribution<int32_t>(std::min(range, 0), std::max(range, 0));
+          bias[g * group_output_channels() + oc] = f32dist(rng);
+          for (size_t y = 0; y < kernel_height(); y++) {
+            for (size_t x = 0; x < kernel_width(); x++) {
+              for (size_t ic = 0; ic < group_input_channels(); ic++) {
+                size_t index = ((((g * group_output_channels() + oc) * kernel_height()) + y) * kernel_width() + x) *
+                                 group_input_channels() + ic;
+                kernel[index] = weights_dist(rng);
+              }
+            }
+          }
+        }
+      }
+
+      std::generate(kernel_scale.begin(), kernel_scale.end(),
+                    [&]() { return f32idist(rng); });
+
+      std::generate(
+          quantization_params.begin(), quantization_params.end(), [&]() {
+            return xnn_qd8_quantization_params{w8dist(rng), f32idist(rng)};
+          });
+      std::fill(output.begin(), output.end(), nanf(""));
+
+      // Compute reference results, without clamping.
+      std::fill(output_ref.begin(), output_ref.end(), 0.0f);
+      for (size_t i = 0; i < batch_size(); i++) {
+        int32_t zero_point = quantization_params[i].zero_point;
+        float inv_scale = quantization_params[i].inv_scale;
+        for (size_t oy = 0; oy < output_height(); oy++) {
+          for (size_t ox = 0; ox < output_width(); ox++) {
+            for (size_t ky = 0; ky < kernel_height(); ky++) {
+              const size_t y = oy + padding_top() - ky * dilation_height();
+              const size_t iy = y / stride_height();
+              if (iy * stride_height() == y && iy < input_height()) {
+                for (size_t kx = 0; kx < kernel_width(); kx++) {
+                  const size_t x = ox + padding_left() - kx * dilation_width();
+                  const size_t ix = x / stride_width();
+                  if (ix * stride_width() == x && ix < input_width()) {
+                    for (size_t g = 0; g < groups(); g++) {
+                      for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                        for (size_t ic = 0; ic < group_input_channels(); ic++) {
+                          output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
+                            (int32_t(input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + g * group_input_channels() + ic]) - zero_point) *
+                            int32_t(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            for (size_t g = 0; g < groups(); g++) {
+              for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                size_t n_index = g * group_output_channels() + oc;
+                output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] *=
+                  (inv_scale * kernel_scale[n_index]);
+                if (has_bias()) {
+                  output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
+                    bias[g * group_output_channels() + oc];
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Compute clamping parameters.
+      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
+
+      float output_min = qmin() == 0 ? -std::numeric_limits<float>::infinity() :
+        accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin());
+      float output_max = qmax() == 255 ? std::numeric_limits<float>::infinity() :
+        accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
+
+      switch (activation()) {
+        case Activation::MinMax:
+          if (qmin() != 0) {
+            ASSERT_THAT(output_ref, testing::Contains(testing::Lt(output_min)));
+          }
+          if (qmax() != 255) {
+            ASSERT_THAT(output_ref, testing::Contains(testing::Gt(output_max)));
+          }
+          break;
+        case Activation::Relu:
+          output_min = 0.0f;
+          output_max = std::numeric_limits<float>::infinity();
+          ASSERT_THAT(output_ref, testing::Contains(testing::Lt(output_min)));
+          ASSERT_THAT(output_ref, testing::Contains(testing::Gt(output_min)));
+          break;
+      }
+
+      // Clamp reference results.
+      for (float& value : output_ref) {
+        value = std::max(std::min(value, output_max), output_min);
+      }
+
+      // Create, setup, run, and destroy Deconvolution operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t deconvolution_op = nullptr;
+
+      std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_code_cache(
+          nullptr, xnn_release_code_cache);
+      #if XNN_PLATFORM_JIT
+        xnn_code_cache code_cache;
+        if (use_jit()) {
+          xnn_init_code_cache(&code_cache);
+          auto_code_cache.reset(&code_cache);
+        }
+      #endif
+      struct xnn_internal_weights_cache* internal_weights_cache = nullptr;
+      std::unique_ptr<xnn_weights_cache_provider, decltype(&xnn_delete_weights_cache)> auto_weights_cache(
+        nullptr, xnn_delete_weights_cache);
+      if (use_weights_cache()) {
+        xnn_weights_cache_t weights_cache = nullptr;
+        xnn_create_weights_cache(&weights_cache);
+        auto_weights_cache.reset(weights_cache);
+        if (weights_cache) {
+          internal_weights_cache = (struct xnn_internal_weights_cache*) weights_cache->context;
+        }
+      }
+
+      ASSERT_EQ(
+          xnn_status_success,
+          xnn_create_deconvolution2d_nhwc_qd8_f32_qc8w(
+              padding_top(), padding_right(), padding_bottom(), padding_left(),
+              kernel_height(), kernel_width(), stride_height(), stride_width(),
+              dilation_height(), dilation_width(), groups(),
+              group_input_channels(), group_output_channels(),
+              input_pixel_stride(), output_pixel_stride(), kernel_scale.data(), kernel.data(),
+              has_bias() ? bias.data() : nullptr, output_min, output_max,
+              /*flags=*/0, auto_code_cache.get(), auto_weights_cache.get(), &deconvolution_op));
+      if (use_weights_cache()) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_finalize_weights_cache(auto_weights_cache.get(), xnn_weights_cache_finalization_kind_soft));
+      }
+
+      // Smart pointer to automatically delete deconvolution_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
+
+      #if XNN_PLATFORM_JIT
+        if (use_jit()) {
+          // Check that we actually generated code.
+          ASSERT_GT(code_cache.cache.code.size, 0);
+          xnn_finalize_code_memory(&code_cache.cache.code);
+        }
+      #endif
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_reshape_deconvolution2d_nhwc_qd8_f32_qc8w(
+          deconvolution_op,
+          batch_size(), input_height(), input_width(),
+          adjustment_height(), adjustment_width(),
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+          /*threadpool=*/nullptr));
+
+      ASSERT_EQ(
+          xnn_status_success,
+          xnn_setup_deconvolution2d_nhwc_qd8_f32_qc8w(
+              deconvolution_op, input.data(), output.data(),
+              reinterpret_cast<const struct xnn_dynamic_quantization_params*>(
+                  quantization_params.data())));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
+
+      VerifyF32(output, output_ref, output_max, output_min);
+
+      if (use_weights_cache()) {
+        // We already finalized the code cache, so create a new code cache if we are testing JIT.
+        std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_inner_code_cache(
+            nullptr, xnn_release_code_cache);
+        #if XNN_PLATFORM_JIT
+          xnn_code_cache inner_code_cache;
+          if (use_jit()) {
+            xnn_init_code_cache(&inner_code_cache);
+            auto_inner_code_cache.reset(&inner_code_cache);
+          }
+        #endif
+
+        xnn_operator_t deconvolution_op2 = nullptr;
+        size_t old_weights_cache_size = internal_weights_cache->cache.weights.size;
+
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_create_deconvolution2d_nhwc_qd8_f32_qc8w(
+                padding_top(), padding_right(), padding_bottom(), padding_left(),
+                kernel_height(), kernel_width(), stride_height(), stride_width(),
+                dilation_height(), dilation_width(), groups(),
+                group_input_channels(), group_output_channels(),
+                input_pixel_stride(), output_pixel_stride(), kernel_scale.data(), kernel.data(),
+                has_bias() ? bias.data() : nullptr, output_min, output_max,
+                /*flags=*/0, auto_inner_code_cache.get(), auto_weights_cache.get(), &deconvolution_op2));
+
+        // Smart pointer to automatically delete deconvolution_op2.
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op2, xnn_delete_operator);
+        std::vector<float> output2(output.size(), nanf(""));
+
+        #if XNN_PLATFORM_JIT
+          if (use_jit()) {
+            // Check that we actually generated code.
+            ASSERT_GT(inner_code_cache.cache.code.size, 0);
+            xnn_finalize_code_memory(&inner_code_cache.cache.code);
+          }
+        #endif
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_reshape_deconvolution2d_nhwc_qd8_f32_qc8w(
+                      deconvolution_op2,
+                      batch_size(), input_height(), input_width(),
+                      adjustment_height(), adjustment_width(),
+                      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                      /*threadpool=*/nullptr));
+
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_setup_deconvolution2d_nhwc_qd8_f32_qc8w(
+                deconvolution_op2, input.data(), output2.data(),
+                reinterpret_cast<const struct xnn_dynamic_quantization_params*>(
+                    quantization_params.data())));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_run_operator(deconvolution_op2, /*threadpool=*/nullptr));
+
+        VerifyWeightsCache(internal_weights_cache, old_weights_cache_size);
+        VerifyF32(output2, output_ref, output_max, output_min);
       }
     }
   }

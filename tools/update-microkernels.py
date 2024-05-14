@@ -25,6 +25,7 @@ ISA_LIST = frozenset({
   'avx512vnni',
   'avx512vnnigfni',
   'avx512amx',
+  'avx512fp16',
   'avxvnni',
   'f16c',
   'fma',
@@ -79,6 +80,7 @@ ISA_TO_HEADER_MAP = {
   'avx512vnni': 'immintrin.h',
   'avx512vnnigfni': 'immintrin.h',
   'avx512amx': 'immintrin.h',
+  'avx512fp16': 'immintrin.h',
   'avxvnni': 'immintrin.h',
   'f16c': 'immintrin.h',
   'fma3': 'immintrin.h',
@@ -211,21 +213,24 @@ def amalgamate_microkernel_sources(source_paths, include_header):
 def make_variable_name(prefix, key, suffix):
   return '_'.join(token for token in [prefix, key.upper(), suffix] if token)
 
-def write_grouped_microkernels_bzl(file, microkernels, prefix, suffix):
-  for key in sorted(microkernels):
-    variable_name = make_variable_name(prefix, key, suffix)
-    file.write(f'\n{variable_name} = [\n')
-    for microkernel in sorted(microkernels[key], key=human_sort_key):
-      file.write(f'    "{microkernel}",\n')
-    file.write(']\n')
+def write_grouped_microkernels_bzl(file, key, microkernels, prefix, suffix):
+  if key not in microkernels:
+    return []
+  variable_name = make_variable_name(prefix, key, suffix)
+  file.write(f'\n{variable_name} = [\n')
+  for microkernel in sorted(microkernels[key], key=human_sort_key):
+    file.write(f'    "{microkernel}",\n')
+  file.write(']\n')
+  return [variable_name]
 
-def write_grouped_microkernels_cmake(file, microkernels, prefix, suffix):
-  for key in sorted(microkernels):
-    variable_name = make_variable_name(prefix, key, suffix)
-    file.write(f'\nSET({variable_name}')
-    for microkernel in sorted(microkernels[key], key=human_sort_key):
-      file.write(f'\n  {microkernel}')
-    file.write(')\n')
+def write_grouped_microkernels_cmake(file, key, microkernels, prefix, suffix):
+  if key not in microkernels:
+    return
+  variable_name = make_variable_name(prefix, key, suffix)
+  file.write(f'\nSET({variable_name}')
+  for microkernel in sorted(microkernels[key], key=human_sort_key):
+    file.write(f'\n  {microkernel}')
+  file.write(')\n')
 
 def main(args):
   options = parser.parse_args(args)
@@ -334,12 +339,34 @@ Microkernel filenames lists.
 Auto-generated file. Do not edit!
   Generator: tools/update-microkernels.py
 """
+
 ''')
-    write_grouped_microkernels_bzl(microkernels_bzl, c_microkernels_per_isa, 'ALL', 'MICROKERNEL_SRCS')
-    write_grouped_microkernels_bzl(microkernels_bzl, asm_microkernels_per_arch, '', 'ASM_MICROKERNEL_SRCS')
-    write_grouped_microkernels_bzl(microkernels_bzl, jit_microkernels_per_arch, '', 'JIT_MICROKERNEL_SRCS')
+    keys = set(c_microkernels_per_isa.keys()).union(asm_microkernels_per_arch.keys(), jit_microkernels_per_arch.keys())
+    keys = sorted(keys, key=lambda key: key + "_microkernels.bzl")
+    exports = ['\n']
+    for key in keys:
+      arch_microkernels_bzl_filename = key + '_microkernels.bzl'
+      with io.StringIO() as arch_microkernels_bzl:
+        arch_microkernels_bzl.write(f'''\
+"""
+Microkernel filenames lists for {key}.
+
+Auto-generated file. Do not edit!
+  Generator: tools/update-microkernels.py
+"""
+''')
+        vars = write_grouped_microkernels_bzl(arch_microkernels_bzl, key, c_microkernels_per_isa, 'ALL', 'MICROKERNEL_SRCS')
+        vars = vars + write_grouped_microkernels_bzl(arch_microkernels_bzl, key, asm_microkernels_per_arch, '', 'ASM_MICROKERNEL_SRCS')
+        vars = vars + write_grouped_microkernels_bzl(arch_microkernels_bzl, key, jit_microkernels_per_arch, '', 'JIT_MICROKERNEL_SRCS')
+        arch_microkernels_bzl.seek(0)
+        xnncommon.overwrite_if_changed(os.path.join(root_dir, 'gen', arch_microkernels_bzl_filename), arch_microkernels_bzl.read())
+        imports = ', '.join(f'_{var} = "{var}"' for var in vars)
+        microkernels_bzl.write(f'load("{arch_microkernels_bzl_filename}", {imports})\n')
+        for var in vars:
+          exports.append(f'{var} = _{var}\n')
+    microkernels_bzl.write(''.join(exports))
     microkernels_bzl.seek(0)
-    xnncommon.overwrite_if_changed(os.path.join(root_dir, 'microkernels.bzl'), microkernels_bzl.read())
+    xnncommon.overwrite_if_changed(os.path.join(root_dir, 'gen', 'microkernels.bzl'), microkernels_bzl.read())
 
   with io.StringIO() as microkernels_cmake:
     microkernels_cmake.write("""\
@@ -354,11 +381,31 @@ Auto-generated file. Do not edit!
 #   Generator: tools/update-microkernels.py
 
 """)
-    write_grouped_microkernels_cmake(microkernels_cmake, c_microkernels_per_isa, 'ALL', 'MICROKERNEL_SRCS')
-    write_grouped_microkernels_cmake(microkernels_cmake, asm_microkernels_per_arch, '', 'ASM_MICROKERNEL_SRCS')
-    write_grouped_microkernels_cmake(microkernels_cmake, jit_microkernels_per_arch, '', 'JIT_MICROKERNEL_SRCS')
+    keys = sorted(set(c_microkernels_per_isa.keys()).union(asm_microkernels_per_arch.keys(), jit_microkernels_per_arch.keys()))
+    for key in keys:
+      arch_microkernels_cmake_filename = key + '_microkernels.cmake'
+      with io.StringIO() as arch_microkernels_cmake:
+        arch_microkernels_cmake.write(f"""\
+# Copyright 2022 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+#
+# Description: microkernel filename lists for {key}
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+
+""")
+        write_grouped_microkernels_cmake(arch_microkernels_cmake, key, c_microkernels_per_isa, 'ALL', 'MICROKERNEL_SRCS')
+        write_grouped_microkernels_cmake(arch_microkernels_cmake, key, asm_microkernels_per_arch, '', 'ASM_MICROKERNEL_SRCS')
+        write_grouped_microkernels_cmake(arch_microkernels_cmake, key, jit_microkernels_per_arch, '', 'JIT_MICROKERNEL_SRCS')
+        arch_microkernels_cmake.seek(0)
+        xnncommon.overwrite_if_changed(os.path.join(root_dir, 'cmake', 'gen', arch_microkernels_cmake_filename), arch_microkernels_cmake.read())
+        microkernels_cmake.write(f'INCLUDE(cmake/gen/{arch_microkernels_cmake_filename})\n')
+
     microkernels_cmake.seek(0)
-    xnncommon.overwrite_if_changed(os.path.join(root_dir, 'cmake', 'microkernels.cmake'), microkernels_cmake.read())
+    xnncommon.overwrite_if_changed(os.path.join(root_dir, 'cmake', 'gen', 'microkernels.cmake'), microkernels_cmake.read())
 
   if options.amalgamate:
     # Collect filenames of production microkernels as a set

@@ -598,8 +598,7 @@ class GAvgPoolMicrokernelTester {
     std::vector<float> output_ref(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
-
+      std::fill(output.begin(), output.end(), 0.f); // kernels accumulate.
       // Compute reference results, without clamping.
       for (size_t c = 0; c < channels(); c++) {
         float acc = 0.0f;

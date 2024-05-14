@@ -31,7 +31,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"xnn_(qs8|qu8|f16|f32)_(gavgpool|rdsum)(_(minmax))?(_(fp32|rndnu))?_ukernel_((\d+)p)?(\d+)x__(.+)_c(\d+)(_acc(\d+))?", name)
+  match = re.match(r"xnn_(qs8|qu8|f16_f32acc|f32)_(rdsum)(_(minmax))?(_(fp32|rndnu))?_ukernel_((\d+)p)?(\d+)x__(.+)_c(\d+)(_acc(\d+))?", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
 
@@ -41,7 +41,7 @@ def split_ukernel_name(name):
 
 
 BENCHMARK_TEMPLATE = """\
-BENCHMARK_CAPTURE( ${OP_NAME}, ${BENCHMARK_NAME},
+BENCHMARK_CAPTURE(${OP_NAME}, ${BENCHMARK_NAME},
                   ${KERNEL},
                   $if CHECK_ISA:
                     ${INIT_PARAMS},
@@ -99,6 +99,10 @@ def main(args):
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Specification: {specification}
+//   Generator: {generator}
 
 #include "bench/rsum-benchmark.h"
 #include "bench/utils.h"
@@ -107,7 +111,7 @@ def main(args):
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
-#include <xnnpack/gavgpool.h>
+#include <xnnpack/reduce.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
 """.format(specification=options.spec, generator=sys.argv[0])

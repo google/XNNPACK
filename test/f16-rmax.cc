@@ -203,6 +203,376 @@
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
+#if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  TEST(F16_RMAX__AVX512FP16_U32, batch_eq_32) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    ReduceMicrokernelTester()
+      .batch_size(32)
+      .Test(xnn_f16_rmax_ukernel__avx512fp16_u32, ReduceMicrokernelTester::OpType::Max);
+  }
+
+  TEST(F16_RMAX__AVX512FP16_U32, batch_div_32) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512fp16_u32, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512FP16_U32, batch_lt_32) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    for (size_t batch_size = 1; batch_size < 32; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512fp16_u32, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512FP16_U32, batch_gt_32) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    for (size_t batch_size = 33; batch_size < 64; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512fp16_u32, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+#endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  TEST(F16_RMAX__AVX512FP16_U64_ACC2, batch_eq_64) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    ReduceMicrokernelTester()
+      .batch_size(64)
+      .Test(xnn_f16_rmax_ukernel__avx512fp16_u64_acc2, ReduceMicrokernelTester::OpType::Max);
+  }
+
+  TEST(F16_RMAX__AVX512FP16_U64_ACC2, batch_div_64) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512fp16_u64_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512FP16_U64_ACC2, batch_lt_64) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    for (size_t batch_size = 1; batch_size < 64; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512fp16_u64_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512FP16_U64_ACC2, batch_gt_64) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    for (size_t batch_size = 65; batch_size < 128; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512fp16_u64_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+#endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  TEST(F16_RMAX__AVX512FP16_U96_ACC3, batch_eq_96) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    ReduceMicrokernelTester()
+      .batch_size(96)
+      .Test(xnn_f16_rmax_ukernel__avx512fp16_u96_acc3, ReduceMicrokernelTester::OpType::Max);
+  }
+
+  TEST(F16_RMAX__AVX512FP16_U96_ACC3, batch_div_96) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    for (size_t batch_size = 192; batch_size < 960; batch_size += 96) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512fp16_u96_acc3, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512FP16_U96_ACC3, batch_lt_96) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    for (size_t batch_size = 1; batch_size < 96; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512fp16_u96_acc3, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512FP16_U96_ACC3, batch_gt_96) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    for (size_t batch_size = 97; batch_size < 192; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512fp16_u96_acc3, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+#endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  TEST(F16_RMAX__AVX512FP16_U128_ACC2, batch_eq_128) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    ReduceMicrokernelTester()
+      .batch_size(128)
+      .Test(xnn_f16_rmax_ukernel__avx512fp16_u128_acc2, ReduceMicrokernelTester::OpType::Max);
+  }
+
+  TEST(F16_RMAX__AVX512FP16_U128_ACC2, batch_div_128) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    for (size_t batch_size = 256; batch_size < 1280; batch_size += 128) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512fp16_u128_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512FP16_U128_ACC2, batch_lt_128) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    for (size_t batch_size = 1; batch_size < 128; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512fp16_u128_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512FP16_U128_ACC2, batch_gt_128) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    for (size_t batch_size = 129; batch_size < 256; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512fp16_u128_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+#endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  TEST(F16_RMAX__AVX512FP16_U128_ACC4, batch_eq_128) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    ReduceMicrokernelTester()
+      .batch_size(128)
+      .Test(xnn_f16_rmax_ukernel__avx512fp16_u128_acc4, ReduceMicrokernelTester::OpType::Max);
+  }
+
+  TEST(F16_RMAX__AVX512FP16_U128_ACC4, batch_div_128) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    for (size_t batch_size = 256; batch_size < 1280; batch_size += 128) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512fp16_u128_acc4, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512FP16_U128_ACC4, batch_lt_128) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    for (size_t batch_size = 1; batch_size < 128; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512fp16_u128_acc4, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512FP16_U128_ACC4, batch_gt_128) {
+    TEST_REQUIRES_X86_AVX512FP16;
+    for (size_t batch_size = 129; batch_size < 256; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512fp16_u128_acc4, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+#endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(F16_RMAX__AVX512SKX_U16, batch_eq_16) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    ReduceMicrokernelTester()
+      .batch_size(16)
+      .Test(xnn_f16_rmax_ukernel__avx512skx_u16, ReduceMicrokernelTester::OpType::Max);
+  }
+
+  TEST(F16_RMAX__AVX512SKX_U16, batch_div_16) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512skx_u16, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512SKX_U16, batch_lt_16) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512skx_u16, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512SKX_U16, batch_gt_16) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 17; batch_size < 32; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512skx_u16, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(F16_RMAX__AVX512SKX_U32_ACC2, batch_eq_32) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    ReduceMicrokernelTester()
+      .batch_size(32)
+      .Test(xnn_f16_rmax_ukernel__avx512skx_u32_acc2, ReduceMicrokernelTester::OpType::Max);
+  }
+
+  TEST(F16_RMAX__AVX512SKX_U32_ACC2, batch_div_32) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512skx_u32_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512SKX_U32_ACC2, batch_lt_32) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size < 32; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512skx_u32_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512SKX_U32_ACC2, batch_gt_32) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 33; batch_size < 64; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512skx_u32_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(F16_RMAX__AVX512SKX_U48_ACC3, batch_eq_48) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    ReduceMicrokernelTester()
+      .batch_size(48)
+      .Test(xnn_f16_rmax_ukernel__avx512skx_u48_acc3, ReduceMicrokernelTester::OpType::Max);
+  }
+
+  TEST(F16_RMAX__AVX512SKX_U48_ACC3, batch_div_48) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 96; batch_size < 480; batch_size += 48) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512skx_u48_acc3, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512SKX_U48_ACC3, batch_lt_48) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size < 48; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512skx_u48_acc3, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512SKX_U48_ACC3, batch_gt_48) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 49; batch_size < 96; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512skx_u48_acc3, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(F16_RMAX__AVX512SKX_U64_ACC2, batch_eq_64) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    ReduceMicrokernelTester()
+      .batch_size(64)
+      .Test(xnn_f16_rmax_ukernel__avx512skx_u64_acc2, ReduceMicrokernelTester::OpType::Max);
+  }
+
+  TEST(F16_RMAX__AVX512SKX_U64_ACC2, batch_div_64) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512skx_u64_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512SKX_U64_ACC2, batch_lt_64) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size < 64; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512skx_u64_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512SKX_U64_ACC2, batch_gt_64) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 65; batch_size < 128; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512skx_u64_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(F16_RMAX__AVX512SKX_U64_ACC4, batch_eq_64) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    ReduceMicrokernelTester()
+      .batch_size(64)
+      .Test(xnn_f16_rmax_ukernel__avx512skx_u64_acc4, ReduceMicrokernelTester::OpType::Max);
+  }
+
+  TEST(F16_RMAX__AVX512SKX_U64_ACC4, batch_div_64) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512skx_u64_acc4, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512SKX_U64_ACC4, batch_lt_64) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size < 64; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512skx_u64_acc4, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F16_RMAX__AVX512SKX_U64_ACC4, batch_gt_64) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 65; batch_size < 128; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_rmax_ukernel__avx512skx_u64_acc4, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F16_RMAX__F16C_U32, batch_eq_32) {
     TEST_REQUIRES_X86_F16C;

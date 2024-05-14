@@ -5,6 +5,9 @@
 # LICENSE file in the root directory of this source tree.
 
 ################################### x86 AVX2 ##################################
+tools/xngen src/f32-raddextexp/avx2-p5.c.in -D BATCH_TILE=32 -D ACCUMULATORS=1 -o src/f32-raddextexp/gen/f32-raddextexp-avx2-p5-u32.c &
+tools/xngen src/f32-raddextexp/avx2-p5.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -o src/f32-raddextexp/gen/f32-raddextexp-avx2-p5-u32-acc2.c &
+tools/xngen src/f32-raddextexp/avx2-p5.c.in -D BATCH_TILE=32 -D ACCUMULATORS=4 -o src/f32-raddextexp/gen/f32-raddextexp-avx2-p5-u32-acc4.c &
 tools/xngen src/f32-raddextexp/avx2-p5.c.in -D BATCH_TILE=64 -D ACCUMULATORS=1 -o src/f32-raddextexp/gen/f32-raddextexp-avx2-p5-u64.c &
 tools/xngen src/f32-raddextexp/avx2-p5.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -o src/f32-raddextexp/gen/f32-raddextexp-avx2-p5-u64-acc2.c &
 tools/xngen src/f32-raddextexp/avx2-p5.c.in -D BATCH_TILE=64 -D ACCUMULATORS=4 -o src/f32-raddextexp/gen/f32-raddextexp-avx2-p5-u64-acc4.c &
@@ -19,6 +22,9 @@ tools/xngen src/f32-raddextexp/avx2-p5.c.in -D BATCH_TILE=96 -D ACCUMULATORS=3 -
 tools/xngen src/f32-raddextexp/avx2-p5.c.in -D BATCH_TILE=96 -D ACCUMULATORS=6 -o src/f32-raddextexp/gen/f32-raddextexp-avx2-p5-u96-acc6.c &
 
 ################################# x86 AVX512F #################################
+tools/xngen src/f32-raddextexp/avx512f-p5-scalef.c.in -D BATCH_TILE=64  -D ACCUMULATORS=1 -o src/f32-raddextexp/gen/f32-raddextexp-avx512f-p5-scalef-u64.c &
+tools/xngen src/f32-raddextexp/avx512f-p5-scalef.c.in -D BATCH_TILE=64  -D ACCUMULATORS=2 -o src/f32-raddextexp/gen/f32-raddextexp-avx512f-p5-scalef-u64-acc2.c &
+tools/xngen src/f32-raddextexp/avx512f-p5-scalef.c.in -D BATCH_TILE=64  -D ACCUMULATORS=4 -o src/f32-raddextexp/gen/f32-raddextexp-avx512f-p5-scalef-u64-acc4.c &
 tools/xngen src/f32-raddextexp/avx512f-p5-scalef.c.in -D BATCH_TILE=128 -D ACCUMULATORS=1 -o src/f32-raddextexp/gen/f32-raddextexp-avx512f-p5-scalef-u128.c &
 tools/xngen src/f32-raddextexp/avx512f-p5-scalef.c.in -D BATCH_TILE=128 -D ACCUMULATORS=2 -o src/f32-raddextexp/gen/f32-raddextexp-avx512f-p5-scalef-u128-acc2.c &
 tools/xngen src/f32-raddextexp/avx512f-p5-scalef.c.in -D BATCH_TILE=128 -D ACCUMULATORS=4 -o src/f32-raddextexp/gen/f32-raddextexp-avx512f-p5-scalef-u128-acc4.c &

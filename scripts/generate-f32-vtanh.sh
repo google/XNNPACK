@@ -29,6 +29,11 @@ tools/xngen src/f32-vtanh/scalar-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D P
 tools/xngen src/f32-vtanh/scalar-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D BATCH_TILE=2 -D FMA=1 -D WASM=0 -o src/f32-vtanh/gen/f32-vtanh-fma-expm1minus-rr1-lut8-p4h3ts-div-u2.c &
 tools/xngen src/f32-vtanh/scalar-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D BATCH_TILE=4 -D FMA=1 -D WASM=0 -o src/f32-vtanh/gen/f32-vtanh-fma-expm1minus-rr1-lut8-p4h3ts-div-u4.c &
 
+tools/xngen src/f32-vtanh/scalar-rational-9-6.c.in -D BATCH_TILE=1 -o src/f32-vtanh/gen/f32-vtanh-scalar-rational-9-6-u1.c &
+tools/xngen src/f32-vtanh/scalar-rational-9-6.c.in -D BATCH_TILE=2 -o src/f32-vtanh/gen/f32-vtanh-scalar-rational-9-6-u2.c &
+tools/xngen src/f32-vtanh/scalar-rational-9-6.c.in -D BATCH_TILE=4 -o src/f32-vtanh/gen/f32-vtanh-scalar-rational-9-6-u4.c &
+tools/xngen src/f32-vtanh/scalar-rational-9-6.c.in -D BATCH_TILE=8 -o src/f32-vtanh/gen/f32-vtanh-scalar-rational-9-6-u8.c &
+
 ################################### x86 SSE ###################################
 tools/xngen src/f32-vtanh/sse-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D BATCH_TILE=4  -D DIV=DIV -D SAT=MINMAX -D SSE=2 -o src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-p6h5ts-div-u4.c &
 tools/xngen src/f32-vtanh/sse-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D BATCH_TILE=8  -D DIV=DIV -D SAT=MINMAX -D SSE=2 -o src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-p6h5ts-div-u8.c &
@@ -73,6 +78,16 @@ tools/xngen src/f32-vtanh/sse-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0
 tools/xngen src/f32-vtanh/sse-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D BATCH_TILE=16 -D DIV=DIV -D SAT=MINMAX -D SSE=4 -o src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-lut8-p4h3ts-div-u16.c &
 tools/xngen src/f32-vtanh/sse-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D BATCH_TILE=20 -D DIV=DIV -D SAT=MINMAX -D SSE=4 -o src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-lut8-p4h3ts-div-u20.c &
 tools/xngen src/f32-vtanh/sse-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D BATCH_TILE=24 -D DIV=DIV -D SAT=MINMAX -D SSE=4 -o src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-lut8-p4h3ts-div-u24.c &
+
+tools/xngen src/f32-vtanh/sse-rational-9-6.c.in -D BATCH_TILE=4 -D DIV=DIV -o src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-6-div-u4.c &
+tools/xngen src/f32-vtanh/sse-rational-9-6.c.in -D BATCH_TILE=8 -D DIV=DIV -o src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-6-div-u8.c &
+tools/xngen src/f32-vtanh/sse-rational-9-6.c.in -D BATCH_TILE=12 -D DIV=DIV -o src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-6-div-u12.c &
+tools/xngen src/f32-vtanh/sse-rational-9-6.c.in -D BATCH_TILE=16 -D DIV=DIV -o src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-6-div-u16.c &
+
+tools/xngen src/f32-vtanh/sse-rational-9-6.c.in -D BATCH_TILE=4 -D DIV=NR -o src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-6-nr-u4.c &
+tools/xngen src/f32-vtanh/sse-rational-9-6.c.in -D BATCH_TILE=8 -D DIV=NR -o src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-6-nr-u8.c &
+tools/xngen src/f32-vtanh/sse-rational-9-6.c.in -D BATCH_TILE=12 -D DIV=NR -o src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-6-nr-u12.c &
+tools/xngen src/f32-vtanh/sse-rational-9-6.c.in -D BATCH_TILE=16 -D DIV=NR -o src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-6-nr-u16.c &
 
 ################################### x86 AVX ###################################
 tools/xngen src/f32-vtanh/avx-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D BATCH_TILE=8  -D DIV=DIV -D FMA=0 -D SAT=MINMAX -o src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-div-u8.c &
@@ -182,6 +197,26 @@ tools/xngen src/f32-vtanh/avx-expm1minus-lut.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D 
 tools/xngen src/f32-vtanh/avx-expm1minus-lut.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D BATCH_TILE=16 -D DIV=NR1ADJ -D FMA=3 -o src/f32-vtanh/gen/f32-vtanh-fma3-expm1minus-rr1-lut8-p4h3ts-nr1adj-u16.c &
 tools/xngen src/f32-vtanh/avx-expm1minus-lut.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D BATCH_TILE=24 -D DIV=NR1ADJ -D FMA=3 -o src/f32-vtanh/gen/f32-vtanh-fma3-expm1minus-rr1-lut8-p4h3ts-nr1adj-u24.c &
 tools/xngen src/f32-vtanh/avx-expm1minus-lut.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D BATCH_TILE=32 -D DIV=NR1ADJ -D FMA=3 -o src/f32-vtanh/gen/f32-vtanh-fma3-expm1minus-rr1-lut8-p4h3ts-nr1adj-u32.c &
+
+tools/xngen src/f32-vtanh/avx-rational-9-6.c.in -D BATCH_TILE=8 -D DIV=DIV -o src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-div-u8.c &
+tools/xngen src/f32-vtanh/avx-rational-9-6.c.in -D BATCH_TILE=16 -D DIV=DIV -o src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-div-u16.c &
+tools/xngen src/f32-vtanh/avx-rational-9-6.c.in -D BATCH_TILE=24 -D DIV=DIV -o src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-div-u24.c &
+tools/xngen src/f32-vtanh/avx-rational-9-6.c.in -D BATCH_TILE=32 -D DIV=DIV -o src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-div-u32.c &
+
+tools/xngen src/f32-vtanh/avx-rational-9-6.c.in -D BATCH_TILE=8 -D DIV=NR -o src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-nr-u8.c &
+tools/xngen src/f32-vtanh/avx-rational-9-6.c.in -D BATCH_TILE=16 -D DIV=NR -o src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-nr-u16.c &
+tools/xngen src/f32-vtanh/avx-rational-9-6.c.in -D BATCH_TILE=24 -D DIV=NR -o src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-nr-u24.c &
+tools/xngen src/f32-vtanh/avx-rational-9-6.c.in -D BATCH_TILE=32 -D DIV=NR -o src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-nr-u32.c &
+
+tools/xngen src/f32-vtanh/fma3-rational-9-6.c.in -D BATCH_TILE=8 -D DIV=DIV -o src/f32-vtanh/gen/f32-vtanh-fma3-rational-9-6-div-u8.c &
+tools/xngen src/f32-vtanh/fma3-rational-9-6.c.in -D BATCH_TILE=16 -D DIV=DIV -o src/f32-vtanh/gen/f32-vtanh-fma3-rational-9-6-div-u16.c &
+tools/xngen src/f32-vtanh/fma3-rational-9-6.c.in -D BATCH_TILE=24 -D DIV=DIV -o src/f32-vtanh/gen/f32-vtanh-fma3-rational-9-6-div-u24.c &
+tools/xngen src/f32-vtanh/fma3-rational-9-6.c.in -D BATCH_TILE=32 -D DIV=DIV -o src/f32-vtanh/gen/f32-vtanh-fma3-rational-9-6-div-u32.c &
+
+tools/xngen src/f32-vtanh/fma3-rational-9-6.c.in -D BATCH_TILE=8 -D DIV=NR -o src/f32-vtanh/gen/f32-vtanh-fma3-rational-9-6-nr-u8.c &
+tools/xngen src/f32-vtanh/fma3-rational-9-6.c.in -D BATCH_TILE=16 -D DIV=NR -o src/f32-vtanh/gen/f32-vtanh-fma3-rational-9-6-nr-u16.c &
+tools/xngen src/f32-vtanh/fma3-rational-9-6.c.in -D BATCH_TILE=24 -D DIV=NR -o src/f32-vtanh/gen/f32-vtanh-fma3-rational-9-6-nr-u24.c &
+tools/xngen src/f32-vtanh/fma3-rational-9-6.c.in -D BATCH_TILE=32 -D DIV=NR -o src/f32-vtanh/gen/f32-vtanh-fma3-rational-9-6-nr-u32.c &
 
 tools/xngen src/f32-vtanh/avx2-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D BATCH_TILE=8  -D DIV=DIV    -D SAT=MINMAX -D PERM=0 -o src/f32-vtanh/gen/f32-vtanh-avx2-expm1minus-rr1-p6h5ts-div-u8.c &
 tools/xngen src/f32-vtanh/avx2-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D BATCH_TILE=16 -D DIV=DIV    -D SAT=MINMAX -D PERM=0 -o src/f32-vtanh/gen/f32-vtanh-avx2-expm1minus-rr1-p6h5ts-div-u16.c &
@@ -361,6 +396,16 @@ tools/xngen src/f32-vtanh/avx512skx-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -
 tools/xngen src/f32-vtanh/avx512skx-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D BATCH_TILE=128 -D DIV=NR1ADJ -D PERM=0 -o src/f32-vtanh/gen/f32-vtanh-avx512skx-expm1minus-rr1-lut8-p4h3ts-gather-nr1adj-u128.c &
 tools/xngen src/f32-vtanh/avx512skx-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D BATCH_TILE=144 -D DIV=NR1ADJ -D PERM=0 -o src/f32-vtanh/gen/f32-vtanh-avx512skx-expm1minus-rr1-lut8-p4h3ts-gather-nr1adj-u144.c &
 tools/xngen src/f32-vtanh/avx512skx-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D BATCH_TILE=160 -D DIV=NR1ADJ -D PERM=0 -o src/f32-vtanh/gen/f32-vtanh-avx512skx-expm1minus-rr1-lut8-p4h3ts-gather-nr1adj-u160.c &
+
+tools/xngen src/f32-vtanh/avx512f-rational-9-6.c.in -D BATCH_TILE=16 -D DIV=DIV -o src/f32-vtanh/gen/f32-vtanh-avx512f-rational-9-6-div-u8.c &
+tools/xngen src/f32-vtanh/avx512f-rational-9-6.c.in -D BATCH_TILE=32 -D DIV=DIV -o src/f32-vtanh/gen/f32-vtanh-avx512f-rational-9-6-div-u16.c &
+tools/xngen src/f32-vtanh/avx512f-rational-9-6.c.in -D BATCH_TILE=48 -D DIV=DIV -o src/f32-vtanh/gen/f32-vtanh-avx512f-rational-9-6-div-u24.c &
+tools/xngen src/f32-vtanh/avx512f-rational-9-6.c.in -D BATCH_TILE=64 -D DIV=DIV -o src/f32-vtanh/gen/f32-vtanh-avx512f-rational-9-6-div-u32.c &
+
+tools/xngen src/f32-vtanh/avx512f-rational-9-6.c.in -D BATCH_TILE=16 -D DIV=NR -o src/f32-vtanh/gen/f32-vtanh-avx512f-rational-9-6-nr-u8.c &
+tools/xngen src/f32-vtanh/avx512f-rational-9-6.c.in -D BATCH_TILE=32 -D DIV=NR -o src/f32-vtanh/gen/f32-vtanh-avx512f-rational-9-6-nr-u16.c &
+tools/xngen src/f32-vtanh/avx512f-rational-9-6.c.in -D BATCH_TILE=48 -D DIV=NR -o src/f32-vtanh/gen/f32-vtanh-avx512f-rational-9-6-nr-u24.c &
+tools/xngen src/f32-vtanh/avx512f-rational-9-6.c.in -D BATCH_TILE=64 -D DIV=NR -o src/f32-vtanh/gen/f32-vtanh-avx512f-rational-9-6-nr-u32.c &
 
 ################################### Wasm SIMD ####################################
 tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D MINMAX=WASM   -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-vtanh-wasmsimd-expm1minus-rr1-p6h5ts-div-abs-min-u4.c &

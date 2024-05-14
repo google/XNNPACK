@@ -529,7 +529,7 @@ XNN_PRIVATE void xnn_compute_grouped_batch_igemm(
     size_t batch_index, size_t group_index, size_t mr_block_start,
     size_t nr_block_start, size_t mr_block_size, size_t nr_block_size);
 
-XNN_PRIVATE void xnn_compute_dq_zero_buffer(
+XNN_PRIVATE void xnn_compute_dq_zero_buffer_igemm(
     const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t size);
 
@@ -655,6 +655,8 @@ struct subconv_context {
   size_t kc;
   size_t a_offset;
   void* zero;
+  // Zero buffers.
+  void** zero_buffers;
   size_t cx_stride;
   size_t cy_stride;
   size_t cn_stride;
@@ -664,7 +666,14 @@ struct subconv_context {
   size_t ba_stride;
   size_t bc_stride;
   uint32_t log2_csize;
-  struct xnn_hmp_igemm_ukernel ukernel;
+  // Size, in bytes, of the zero buffer.
+  size_t zero_size;
+  union {
+    struct xnn_hmp_igemm_ukernel ukernel;
+    struct xnn_hmp_dqigemm_ukernel dq_ukernel;
+  };
+  // Parameters for dynamically quantized inputs.
+  const struct xnn_qd8_quantization_params* quantization_params;
   union {
     union xnn_qs8_conv_minmax_params qs8;
     union xnn_qu8_conv_minmax_params qu8;
@@ -674,6 +683,10 @@ struct subconv_context {
 };
 
 #ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_dq_zero_buffer_subconv(
+    const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t size);
+
   XNN_PRIVATE void xnn_compute_grouped_subconv2d(
       const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
@@ -685,7 +698,28 @@ struct subconv_context {
       size_t slice_x_max,
       size_t nr_block_size);
 
+  XNN_PRIVATE void xnn_compute_grouped_dqsubconv2d(
+    const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index,
+    size_t group_index,
+    size_t subkernel_index,
+    size_t slice_y,
+    size_t slice_x_start,
+    size_t nr_block_start,
+    size_t slice_x_max,
+    size_t nr_block_size);
+
   XNN_PRIVATE void xnn_compute_subconv2d(
+      const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index,
+      size_t subkernel_index,
+      size_t slice_y,
+      size_t slice_x_start,
+      size_t nr_block_start,
+      size_t slice_x_max,
+      size_t nr_block_size);
+
+  XNN_PRIVATE void xnn_compute_dqsubconv2d(
       const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
       size_t subkernel_index,
@@ -1375,12 +1409,21 @@ struct univector_contiguous_context {
 struct reduce_context {
   const void* input;
   void* output;
+  const void* zero;
   size_t input_shape[XNN_MAX_TENSOR_DIMS];
   size_t input_stride[XNN_MAX_TENSOR_DIMS];
   size_t output_stride[XNN_MAX_TENSOR_DIMS];
   size_t scaled_elements;
+  size_t channels;
   size_t element_size;
-  xnn_reduce_ukernel_fn ukernel;
+  size_t input_pixel_stride;
+  size_t output_pixel_stride;
+  size_t input_batch_stride;
+  size_t output_batch_stride;
+  union {
+    xnn_reduce_ukernel_fn rsum;
+    xnn_rdsum_ukernel_fn rdsum;
+  } ukernel;
   union {
     union xnn_f32_default_params f32_default;
     union xnn_f32_scale_params f32_scale;
@@ -1391,6 +1434,18 @@ struct reduce_context {
 // Compute contigous reduction over the 1st, 3rd and 5th dimensions of the input
 // tensor.
   XNN_PRIVATE void xnn_compute_contiguous_reduce(
+      const struct reduce_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t output_idx0,
+      size_t output_idx1,
+      size_t output_idx2,
+      size_t output1_block_size,
+      size_t output2_block_size);
+#endif
+
+#ifndef __cplusplus
+// Compute discontigous reduction over the 0st, 2rd and 4th dimensions of the input
+// tensor.
+  XNN_PRIVATE void xnn_compute_discontiguous_reduce(
       const struct reduce_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t output_idx0,
       size_t output_idx1,

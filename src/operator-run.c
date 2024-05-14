@@ -549,8 +549,15 @@ void xnn_compute_grouped_batch_igemm(
       &context->params);
 }
 
-void xnn_compute_dq_zero_buffer(
+void xnn_compute_dq_zero_buffer_igemm(
     const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index
+    ) {
+  memset(context->zero_buffers[batch_index], context->quantization_params[batch_index].zero_point, context->zero_size);
+}
+
+void xnn_compute_dq_zero_buffer_subconv(
+    const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index
     ) {
   memset(context->zero_buffers[batch_index], context->quantization_params[batch_index].zero_point, context->zero_size);
@@ -880,6 +887,47 @@ void xnn_compute_grouped_subconv2d(
       &context->params);
 }
 
+void xnn_compute_grouped_dqsubconv2d(
+      const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index,
+      size_t group_index,
+      size_t subkernel_index,
+      size_t slice_y,
+      size_t slice_x_start,
+      size_t nc_block_start,
+      size_t slice_x_max,
+      size_t nc_block_size)
+{
+  const struct subconvolution_params* subconvolution_params = &context->subconvolution_params[subkernel_index];
+
+  if XNN_UNLIKELY(slice_y >= subconvolution_params->slice_height) {
+    return;
+  }
+
+  const size_t slice_width = subconvolution_params->slice_width;
+  if XNN_UNLIKELY(slice_x_start >= slice_width) {
+    return;
+  }
+  const size_t slice_x_size = min(slice_x_max, slice_width - slice_x_start);
+
+  const size_t cx_stride = context->cx_stride;
+  context->dq_ukernel.function[XNN_UARCH_DEFAULT](
+      slice_x_size,
+      nc_block_size,
+      context->kc,
+      subconvolution_params->scaled_kernel_size,
+      (const void**) ((uintptr_t) subconvolution_params->indirection_buffer + slice_y * subconvolution_params->indirection_y_stride + slice_x_start * subconvolution_params->indirection_x_stride),
+      (const void*) ((uintptr_t) subconvolution_params->weights + nc_block_start * subconvolution_params->w_stride + group_index * context->gw_stride),
+      (void*) ((uintptr_t) subconvolution_params->output + group_index * context->gc_stride + slice_y * context->cy_stride + slice_x_start * cx_stride + batch_index * context->bc_stride + (nc_block_start << context->log2_csize)),
+      cx_stride,
+      context->cn_stride,
+      context->a_offset + group_index * context->ga_stride + batch_index * context->ba_stride,
+      context->zero,
+      context->zero_buffers[batch_index],
+      &context->params,
+      (const void*) ((uintptr_t) &context->quantization_params[batch_index]));
+}
+
 void xnn_compute_subconv2d(
       const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
@@ -916,6 +964,46 @@ void xnn_compute_subconv2d(
       context->a_offset + batch_index * context->ba_stride,
       context->zero,
       &context->params);
+}
+
+void xnn_compute_dqsubconv2d(
+      const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index,
+      size_t subkernel_index,
+      size_t slice_y,
+      size_t slice_x_start,
+      size_t nc_block_start,
+      size_t slice_x_max,
+      size_t nc_block_size)
+{
+  const struct subconvolution_params* subconvolution_params = &context->subconvolution_params[subkernel_index];
+
+  if XNN_UNLIKELY(slice_y >= subconvolution_params->slice_height) {
+    return;
+  }
+
+  const size_t slice_width = subconvolution_params->slice_width;
+  if XNN_UNLIKELY(slice_x_start >= slice_width) {
+    return;
+  }
+  const size_t slice_x_size = min(slice_x_max, slice_width - slice_x_start);
+
+  const size_t cx_stride = context->cx_stride;
+  context->dq_ukernel.function[XNN_UARCH_DEFAULT](
+      slice_x_size,
+      nc_block_size,
+      context->kc,
+      subconvolution_params->scaled_kernel_size,
+      (const void**) ((uintptr_t) subconvolution_params->indirection_buffer + slice_y * subconvolution_params->indirection_y_stride + slice_x_start * subconvolution_params->indirection_x_stride),
+      (const void*) ((uintptr_t) subconvolution_params->weights + nc_block_start * subconvolution_params->w_stride),
+      (void*) ((uintptr_t) subconvolution_params->output + slice_y * context->cy_stride + slice_x_start * cx_stride + batch_index * context->bc_stride + (nc_block_start << context->log2_csize)),
+      cx_stride,
+      context->cn_stride,
+      context->a_offset + batch_index * context->ba_stride,
+      context->zero,
+      context->zero_buffers[batch_index],
+      &context->params,
+      (const void*) ((uintptr_t) &context->quantization_params[batch_index]));
 }
 
 void xnn_compute_conv2d_hwc2chw(
@@ -2027,7 +2115,7 @@ void xnn_compute_contiguous_reduce(
   const size_t* input_stride = context->input_stride;
   const size_t* output_stride = context->output_stride;
 
-  // input dimensions 1, 3 & 5 are reduced so the entireity of these dimensions
+  // input dimensions 1, 3 & 5 are reduced so the entirety of these dimensions
   // are processed so their indices are always 0.
   size_t input_offset = input_stride[0] * output_idx0 + input_stride[2] * output_idx1 + input_stride[4] * output_idx2;
   size_t output_offset = output_stride[0] * output_idx0 + output_stride[1] * output_idx1 + output_stride[2] * output_idx2;
@@ -2047,7 +2135,7 @@ void xnn_compute_contiguous_reduce(
       // output2_block_size output elements are written.
       for (size_t k = 0; k < output2_block_size; ++k) {
         // The microkernel reduces input dimension 5.
-        context->ukernel(context->scaled_elements, input_row, output, &context->params);
+        context->ukernel.rsum(context->scaled_elements, input_row, output, &context->params);
         // input_stride[4] is the number of bytes of input which have been
         // processed by the microkernel call.
         input_row = (const void*) ((uintptr_t) input_row + input_stride[4]);
@@ -2062,6 +2150,50 @@ void xnn_compute_contiguous_reduce(
     }
     // Iterating over input_shape[1].
     input_offset += input_stride[1];
+  }
+}
+
+void xnn_compute_discontiguous_reduce(
+    const struct reduce_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t output_idx0,
+    size_t output_idx1,
+    size_t output_idx2,
+    size_t output1_block_size,
+    size_t output2_block_size)
+{
+  assert(output1_block_size == 1);
+  const size_t* input_stride = context->input_stride;
+  const size_t* output_stride = context->output_stride;
+
+  // input dimensions 0, 2 & 4 are reduced so the entirety of these dimensions
+  // are processed so their indices are always 0.
+  size_t input_offset = input_stride[1] * output_idx0 + input_stride[3] * output_idx1 + input_stride[5] * output_idx2;
+  size_t output_offset = output_stride[0] * output_idx0 + output_stride[1] * output_idx1 + output_stride[2] * output_idx2;
+  int input_shape0 = context->input_shape[0];
+  int input_shape2 = context->input_shape[2];
+
+  void* output = (void*) ((uintptr_t) context->output + output_offset);
+  // RDsum microkernels accumulate into the output buffer.
+  memset(output, 0, context->element_size * output2_block_size);
+
+  // Input dimension 0 is reduced.
+  for (size_t i = 0; i < input_shape0; ++i) {
+    const void* input = (const void*) ((uintptr_t) context->input + input_offset);
+    // Input dimension 2 is reduced.
+    for (size_t j = 0; j < input_shape2; ++j) {
+      const void* input_row = input;
+      // The microkernel reduces input dimension 4 and iterates over output_block_size elements of dimension 5.
+      context->ukernel.rdsum(context->scaled_elements, output2_block_size, input_row, input_stride[4], context->zero, output, &context->params);
+      // input_stride[4] is the number of bytes of input which have been
+      // processed by the microkernel call.
+      input_row = (const void*) ((uintptr_t) input_row + input_stride[4]);
+      // Reset the output pointer.
+      output = (void*) ((uintptr_t) context->output + output_offset);
+      // Iterating over input_shape[2].
+      input = (const void*) ((uintptr_t) input + input_stride[2]);
+    }
+    // Iterating over input_shape[0].
+    input_offset += input_stride[0];
   }
 }
 
