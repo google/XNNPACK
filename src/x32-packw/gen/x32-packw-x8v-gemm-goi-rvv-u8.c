@@ -240,7 +240,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8v__rvv_u8(
         w0 += 1;
       }
       out = (uint32_t*) ((uintptr_t) out0 + extra_bytes);
-      w0 += (nr - 1) * kc; 
+      w0 += (nr - 1) * kc;
     }
     weights += nc * kc;
   } while (--g != 0);
