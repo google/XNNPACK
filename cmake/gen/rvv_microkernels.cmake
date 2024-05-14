@@ -14,6 +14,12 @@ SET(ALL_RVV_MICROKERNEL_SRCS
   src/f32-avgpool/gen/f32-avgpool-9p8x-minmax-rvv-c2v.c
   src/f32-avgpool/gen/f32-avgpool-9x-minmax-rvv-c1v.c
   src/f32-avgpool/gen/f32-avgpool-9x-minmax-rvv-c2v.c
+  src/f32-gavgpool/gen/f32-gavgpool-7p7x-minmax-rvv-c1v.c
+  src/f32-gavgpool/gen/f32-gavgpool-7p7x-minmax-rvv-c2v.c
+  src/f32-gavgpool/gen/f32-gavgpool-7p7x-minmax-rvv-c4v.c
+  src/f32-gavgpool/gen/f32-gavgpool-7x-minmax-rvv-c1v.c
+  src/f32-gavgpool/gen/f32-gavgpool-7x-minmax-rvv-c2v.c
+  src/f32-gavgpool/gen/f32-gavgpool-7x-minmax-rvv-c4v.c
   src/f32-gemm/gen/f32-gemm-1x4v-minmax-rvv.c
   src/f32-gemm/gen/f32-gemm-1x4v-relu-rvv.c
   src/f32-gemm/gen/f32-gemm-1x4v-rvv.c
