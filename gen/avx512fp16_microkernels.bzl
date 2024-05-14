@@ -6,6 +6,18 @@ Auto-generated file. Do not edit!
 """
 
 ALL_AVX512FP16_MICROKERNEL_SRCS = [
+    "src/f16-gemm/gen/f16-gemm-1x32-minmax-avx512fp16-broadcast.c",
+    "src/f16-gemm/gen/f16-gemm-1x64-minmax-avx512fp16-broadcast.c",
+    "src/f16-gemm/gen/f16-gemm-4x32-minmax-avx512fp16-broadcast.c",
+    "src/f16-gemm/gen/f16-gemm-4x64-minmax-avx512fp16-broadcast.c",
+    "src/f16-gemm/gen/f16-gemm-5x32-minmax-avx512fp16-broadcast.c",
+    "src/f16-gemm/gen/f16-gemm-5x64-minmax-avx512fp16-broadcast.c",
+    "src/f16-gemm/gen/f16-gemm-6x32-minmax-avx512fp16-broadcast.c",
+    "src/f16-gemm/gen/f16-gemm-6x64-minmax-avx512fp16-broadcast.c",
+    "src/f16-gemm/gen/f16-gemm-7x32-minmax-avx512fp16-broadcast.c",
+    "src/f16-gemm/gen/f16-gemm-7x64-minmax-avx512fp16-broadcast.c",
+    "src/f16-gemm/gen/f16-gemm-8x32-minmax-avx512fp16-broadcast.c",
+    "src/f16-gemm/gen/f16-gemm-8x64-minmax-avx512fp16-broadcast.c",
     "src/f16-rminmax/gen/f16-rmax-avx512fp16-u32.c",
     "src/f16-rminmax/gen/f16-rmax-avx512fp16-u64-acc2.c",
     "src/f16-rminmax/gen/f16-rmax-avx512fp16-u96-acc3.c",
