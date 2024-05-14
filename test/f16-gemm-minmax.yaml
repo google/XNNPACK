@@ -116,6 +116,7 @@
   init: xnn_init_f16_minmax_fp16arith_params
   pack: xnn_pack_f16_gemm_goi_w
   k-block: 1
+
 - name: xnn_f16_gemm_minmax_ukernel_1x64__avx512fp16_broadcast
   init: xnn_init_f16_minmax_fp16arith_params
   pack: xnn_pack_f16_gemm_goi_w
