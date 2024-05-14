@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"xnn_(qs8|qu8|f16|f32)_(gavgpool|rdsum)(_(minmax))?(_(fp32|rndnu))?_ukernel_((\d+)p)?(\d+)x__(.+)_c(\d+)(_acc(\d+))?", name)
+  match = re.match(r"xnn_(qs8|qu8|f16|f32)_(gavgpool|rdsum)(_(minmax))?(_(fp32|rndnu))?_ukernel_((\d+)p)?(\d+)x__(.+)_c(\d+)(_acc(\d+))?(v)?", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
 
@@ -39,68 +39,114 @@ def split_ukernel_name(name):
     primary_tile = int(match.group(9))
     incremental_tile = 0
   channel_tile = int(match.group(11))
+  vector_tile = bool(match.group(12))
 
   arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(10))
-  return requantization_type, primary_tile, incremental_tile, channel_tile, arch, isa
+  return requantization_type, primary_tile, incremental_tile, channel_tile, vector_tile, arch, isa
 
 
 AVGPOOL_TEST_TEMPLATE = """\
 $if INCREMENTAL_TILE == 0:
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_fulltile) {
+  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_fulltile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     GAvgPoolMicrokernelTester()
       .rows(${PRIMARY_TILE})
-      .channels(${CHANNEL_TILE})
+      .channels(${CHANNEL_SCALED_TILE})
       .Test(${", ".join(TEST_ARGS)});
   }
 
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_subtile) {
+  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_subtile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t rows = 1; rows < ${PRIMARY_TILE}; rows++) {
       GAvgPoolMicrokernelTester()
         .rows(rows)
-        .channels(${CHANNEL_TILE})
+        .channels(${CHANNEL_SCALED_TILE})
         .Test(${", ".join(TEST_ARGS)});
     }
   }
 
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_fulltile_with_input_stride) {
+  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_fulltile_with_input_stride) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     GAvgPoolMicrokernelTester()
       .rows(${PRIMARY_TILE})
-      .channels(${CHANNEL_TILE})
-      .input_stride(${next_prime(CHANNEL_TILE+1)})
+      .channels(${CHANNEL_SCALED_TILE})
+      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+        .input_stride(${next_prime(CHANNEL_TILE+1)})
+      $else:
+        .input_stride(${CHANNEL_SCALED_TILE}+1)
       .Test(${", ".join(TEST_ARGS)});
   }
 
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_fulltile_with_qmax) {
+  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_fulltile_with_qmax) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     GAvgPoolMicrokernelTester()
       .rows(${PRIMARY_TILE})
-      .channels(${CHANNEL_TILE})
+      .channels(${CHANNEL_SCALED_TILE})
       .qmax(128)
       .Test(${", ".join(TEST_ARGS)});
   }
 
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_fulltile_with_qmin) {
+  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_fulltile_with_qmin) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     GAvgPoolMicrokernelTester()
       .rows(${PRIMARY_TILE})
-      .channels(${CHANNEL_TILE})
+      .channels(${CHANNEL_SCALED_TILE})
       .qmin(128)
       .Test(${", ".join(TEST_ARGS)});
   }
 
-  $if CHANNEL_TILE > 1:
-    TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}_fulltile) {
+  $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
+    TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_fulltile) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
+      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+        for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
+          GAvgPoolMicrokernelTester()
+            .rows(${PRIMARY_TILE})
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      $else:
+        for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+          GAvgPoolMicrokernelTester()
+            .rows(${PRIMARY_TILE})
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+    }
+
+    TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_subtile) {
+      $if ISA_CHECK:
+        ${ISA_CHECK};
+      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+        for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
+          for (size_t rows = 1; rows < ${PRIMARY_TILE}; rows++) {
+            GAvgPoolMicrokernelTester()
+              .rows(rows)
+              .channels(channels)
+              .Test(${", ".join(TEST_ARGS)});
+          }
+        }
+      $else:
+        for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+          for (size_t rows = 1; rows < ${PRIMARY_TILE}; rows++) {
+            GAvgPoolMicrokernelTester()
+              .rows(rows)
+              .channels(channels)
+              .Test(${", ".join(TEST_ARGS)});
+          }
+        }
+    }
+
+    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_fulltile) {
+      $if ISA_CHECK:
+        ${ISA_CHECK};
+      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
         GAvgPoolMicrokernelTester()
           .rows(${PRIMARY_TILE})
           .channels(channels)
@@ -108,10 +154,10 @@ $if INCREMENTAL_TILE == 0:
       }
     }
 
-    TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}_subtile) {
+    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_subtile) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
+      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
         for (size_t rows = 1; rows < ${PRIMARY_TILE}; rows++) {
           GAvgPoolMicrokernelTester()
             .rows(rows)
@@ -121,34 +167,10 @@ $if INCREMENTAL_TILE == 0:
       }
     }
 
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}_fulltile) {
+    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_fulltile_with_qmax) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
-        GAvgPoolMicrokernelTester()
-          .rows(${PRIMARY_TILE})
-          .channels(channels)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
-
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}_subtile) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
-        for (size_t rows = 1; rows < ${PRIMARY_TILE}; rows++) {
-          GAvgPoolMicrokernelTester()
-            .rows(rows)
-            .channels(channels)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-      }
-    }
-
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}_fulltile_with_qmax) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
+      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
         GAvgPoolMicrokernelTester()
           .rows(${PRIMARY_TILE})
           .channels(channels)
@@ -157,10 +179,10 @@ $if INCREMENTAL_TILE == 0:
       }
     }
 
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}_fulltile_with_qmin) {
+    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_fulltile_with_qmin) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
+      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
         GAvgPoolMicrokernelTester()
           .rows(${PRIMARY_TILE})
           .channels(channels)
@@ -169,195 +191,279 @@ $if INCREMENTAL_TILE == 0:
       }
     }
 
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_fulltile) {
+  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_fulltile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-      GAvgPoolMicrokernelTester()
-        .rows(${PRIMARY_TILE})
-        .channels(channels)
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_subtile) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-      for (size_t rows = 1; rows < ${PRIMARY_TILE}; rows++) {
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
         GAvgPoolMicrokernelTester()
-          .rows(rows)
+          .rows(${PRIMARY_TILE})
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
       }
-    }
+    $else:
+      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+        GAvgPoolMicrokernelTester()
+          .rows(${PRIMARY_TILE})
+          .channels(channels)
+          .Test(${", ".join(TEST_ARGS)});
+      }
   }
 
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_fulltile_with_qmax) {
+  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_subtile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-      GAvgPoolMicrokernelTester()
-        .rows(${PRIMARY_TILE})
-        .channels(channels)
-        .qmax(128)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
+        for (size_t rows = 1; rows < ${PRIMARY_TILE}; rows++) {
+          GAvgPoolMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      }
+    $else:
+      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+        for (size_t rows = 1; rows < ${PRIMARY_TILE}; rows++) {
+          GAvgPoolMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      }
   }
 
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_fulltile_with_qmin) {
+  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_fulltile_with_qmax) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-      GAvgPoolMicrokernelTester()
-        .rows(${PRIMARY_TILE})
-        .channels(channels)
-        .qmin(128)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
+        GAvgPoolMicrokernelTester()
+          .rows(${PRIMARY_TILE})
+          .channels(channels)
+          .qmax(128)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    $else:
+      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+        GAvgPoolMicrokernelTester()
+          .rows(${PRIMARY_TILE})
+          .channels(channels)
+          .qmax(128)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+  }
+
+  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_fulltile_with_qmin) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
+        GAvgPoolMicrokernelTester()
+          .rows(${PRIMARY_TILE})
+          .channels(channels)
+          .qmin(128)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    $else:
+      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+        GAvgPoolMicrokernelTester()
+          .rows(${PRIMARY_TILE})
+          .channels(channels)
+          .qmin(128)
+          .Test(${", ".join(TEST_ARGS)});
+      }
   }
 $else:
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_2pass_fulltile) {
+  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     GAvgPoolMicrokernelTester()
       .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
-      .channels(${CHANNEL_TILE})
+      .channels(${CHANNEL_SCALED_TILE})
       .Test(${", ".join(TEST_ARGS)});
   }
 
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_2pass_fulltile_with_input_stride) {
+  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile_with_input_stride) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     GAvgPoolMicrokernelTester()
       .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
       .channels(${CHANNEL_TILE})
-      .input_stride(${next_prime(CHANNEL_TILE+1)})
+      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+        .input_stride(${next_prime(CHANNEL_TILE+1)})
+      $else:
+        .input_stride(${CHANNEL_SCALED_TILE}+1)
       .Test(${", ".join(TEST_ARGS)});
   }
 
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_2pass_fulltile_with_qmax) {
+  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile_with_qmax) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     GAvgPoolMicrokernelTester()
       .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
-      .channels(${CHANNEL_TILE})
+      .channels(${CHANNEL_SCALED_TILE})
       .qmax(128)
       .Test(${", ".join(TEST_ARGS)});
   }
 
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_2pass_fulltile_with_qmin) {
+  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile_with_qmin) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     GAvgPoolMicrokernelTester()
       .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
-      .channels(${CHANNEL_TILE})
+      .channels(${CHANNEL_SCALED_TILE})
       .qmin(128)
       .Test(${", ".join(TEST_ARGS)});
   }
 
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_2pass_subtile) {
+  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t rows = ${PRIMARY_TILE+1}; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
       GAvgPoolMicrokernelTester()
         .rows(rows)
-        .channels(${CHANNEL_TILE})
+        .channels(${CHANNEL_SCALED_TILE})
         .Test(${", ".join(TEST_ARGS)});
     }
   }
 
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_2pass_subtile_with_input_stride) {
+  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile_with_input_stride) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t rows = ${PRIMARY_TILE+1}; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
       GAvgPoolMicrokernelTester()
         .rows(rows)
-        .channels(${CHANNEL_TILE})
-        .input_stride(${next_prime(CHANNEL_TILE+1)})
+        .channels(${CHANNEL_SCALED_TILE})
+        $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+          .input_stride(${next_prime(CHANNEL_TILE+1)})
+        $else:
+          .input_stride(${CHANNEL_SCALED_TILE}+1)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
 
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_multipass_fulltile) {
+  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t rows = ${PRIMARY_TILE+INCREMENTAL_TILE}; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
       GAvgPoolMicrokernelTester()
         .rows(rows)
-        .channels(${CHANNEL_TILE})
+        .channels(${CHANNEL_SCALED_TILE})
         .Test(${", ".join(TEST_ARGS)});
     }
   }
 
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_multipass_fulltile_with_input_stride) {
+  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile_with_input_stride) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t rows = ${PRIMARY_TILE+INCREMENTAL_TILE}; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
       GAvgPoolMicrokernelTester()
         .rows(rows)
-        .channels(${CHANNEL_TILE})
-        .input_stride(${next_prime(CHANNEL_TILE+1)})
+        .channels(${CHANNEL_SCALED_TILE})
+        $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+          .input_stride(${next_prime(CHANNEL_TILE+1)})
+        $else:
+          .input_stride(${CHANNEL_SCALED_TILE}+1)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
 
-  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}_2pass_fulltile) {
+  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-      GAvgPoolMicrokernelTester()
-        .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
-        .channels(channels)
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-
-  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}_2pass_subtile) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-      for (size_t rows = ${PRIMARY_TILE+1}; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
         GAvgPoolMicrokernelTester()
-          .rows(rows)
+          .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
       }
-    }
-  }
-
-  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}_multipass_fulltile) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-      for (size_t rows = ${PRIMARY_TILE+INCREMENTAL_TILE}; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
+    $else:
+      for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
         GAvgPoolMicrokernelTester()
-          .rows(rows)
+          .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
       }
-    }
   }
 
-  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}_multipass_fulltile_with_input_stride) {
+  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-      for (size_t rows = ${PRIMARY_TILE+INCREMENTAL_TILE}; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-        GAvgPoolMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .input_stride(${next_prime(CHANNEL_TILE*16+1)})
-          .Test(${", ".join(TEST_ARGS)});
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
+        for (size_t rows = ${PRIMARY_TILE+1}; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
+          GAvgPoolMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
       }
-    }
+    $else:
+      for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+        for (size_t rows = ${PRIMARY_TILE+1}; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
+          GAvgPoolMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      }
   }
 
-  $if CHANNEL_TILE > 1:
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}_2pass_fulltile) {
+  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
+        for (size_t rows = ${PRIMARY_TILE+INCREMENTAL_TILE}; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
+          GAvgPoolMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      }
+    $else:
+      for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+        for (size_t rows = ${PRIMARY_TILE+INCREMENTAL_TILE}; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
+          GAvgPoolMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      }
+  }
+
+  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile_with_input_stride) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
+        for (size_t rows = ${PRIMARY_TILE+INCREMENTAL_TILE}; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
+          GAvgPoolMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .input_stride(${next_prime(CHANNEL_TILE*16+1)})
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      }
+    $else:
+      for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+        for (size_t rows = ${PRIMARY_TILE+INCREMENTAL_TILE}; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
+          GAvgPoolMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .input_stride(${CHANNEL_SCALED_TILE}*16+1)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      }
+  }
+
+  $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
+    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
+      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
         GAvgPoolMicrokernelTester()
           .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
           .channels(channels)
@@ -365,10 +471,10 @@ $else:
       }
     }
 
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}_2pass_fulltile_with_qmax) {
+    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile_with_qmax) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
+      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
         GAvgPoolMicrokernelTester()
           .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
           .channels(channels)
@@ -377,10 +483,10 @@ $else:
       }
     }
 
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}_2pass_fulltile_with_qmin) {
+    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile_with_qmin) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
+      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
         GAvgPoolMicrokernelTester()
           .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
           .channels(channels)
@@ -389,10 +495,10 @@ $else:
       }
     }
 
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}_2pass_subtile) {
+    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
+      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
         for (size_t rows = ${PRIMARY_TILE+1}; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
           GAvgPoolMicrokernelTester()
             .rows(rows)
@@ -402,10 +508,10 @@ $else:
       }
     }
 
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}_multipass_fulltile) {
+    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
+      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
         for (size_t rows = ${PRIMARY_TILE+INCREMENTAL_TILE}; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
           GAvgPoolMicrokernelTester()
             .rows(rows)
@@ -415,100 +521,160 @@ $else:
       }
     }
 
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}_multipass_fulltile_with_input_stride) {
+    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile_with_input_stride) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
+      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
         for (size_t rows = ${PRIMARY_TILE+INCREMENTAL_TILE}; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
           GAvgPoolMicrokernelTester()
             .rows(rows)
             .channels(channels)
-            .input_stride(${next_prime(CHANNEL_TILE+1)})
+            $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+              .input_stride(${next_prime(CHANNEL_TILE+1)})
+            $else:
+              .input_stride(${CHANNEL_SCALED_TILE}+1)
             .Test(${", ".join(TEST_ARGS)});
         }
       }
     }
 
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_2pass_fulltile) {
+  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-      GAvgPoolMicrokernelTester()
-        .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
-        .channels(channels)
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_2pass_fulltile_with_qmax) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-      GAvgPoolMicrokernelTester()
-        .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
-        .channels(channels)
-        .qmax(128)
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_2pass_fulltile_with_qmin) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-      GAvgPoolMicrokernelTester()
-        .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
-        .channels(channels)
-        .qmin(128)
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_2pass_subtile) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-      for (size_t rows = ${PRIMARY_TILE+1}; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
         GAvgPoolMicrokernelTester()
-          .rows(rows)
+          .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
       }
-    }
-  }
-
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_multipass_fulltile) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-      for (size_t rows = ${PRIMARY_TILE+INCREMENTAL_TILE}; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
+    $else:
+      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
         GAvgPoolMicrokernelTester()
-          .rows(rows)
+          .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
       }
-    }
   }
 
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_multipass_fulltile_with_input_stride) {
+  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile_with_qmax) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-      for (size_t rows = ${PRIMARY_TILE+INCREMENTAL_TILE}; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
         GAvgPoolMicrokernelTester()
-          .rows(rows)
+          .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
           .channels(channels)
-          .input_stride(${next_prime(CHANNEL_TILE*2+11)})
+          .qmax(128)
           .Test(${", ".join(TEST_ARGS)});
       }
-    }
+    $else:
+      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+        GAvgPoolMicrokernelTester()
+          .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
+          .channels(channels)
+          .qmax(128)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+  }
+
+  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile_with_qmin) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
+        GAvgPoolMicrokernelTester()
+          .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
+          .channels(channels)
+          .qmin(128)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    $else:
+      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+        GAvgPoolMicrokernelTester()
+          .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
+          .channels(channels)
+          .qmin(128)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+  }
+
+  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
+        for (size_t rows = ${PRIMARY_TILE+1}; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
+          GAvgPoolMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      }
+    $else:
+      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+        for (size_t rows = ${PRIMARY_TILE+1}; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
+          GAvgPoolMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      }
+  }
+
+  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
+        for (size_t rows = ${PRIMARY_TILE+INCREMENTAL_TILE}; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
+          GAvgPoolMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      }
+    $else:
+      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+        for (size_t rows = ${PRIMARY_TILE+INCREMENTAL_TILE}; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
+          GAvgPoolMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      }
+  }
+
+  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile_with_input_stride) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
+        for (size_t rows = ${PRIMARY_TILE+INCREMENTAL_TILE}; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
+          GAvgPoolMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .input_stride(${next_prime(CHANNEL_TILE*2+11)})
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      }
+    $else:
+      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+        for (size_t rows = ${PRIMARY_TILE+INCREMENTAL_TILE}; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
+          GAvgPoolMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .input_stride(${CHANNEL_SCALED_TILE}*2+11)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      }
   }
 
 """
 
 
 def generate_test_cases(ukernel, init_fn, requantization_type, primary_tile,
-                        incremental_tile, channel_tile, isa):
+                        incremental_tile, channel_tile, vector_tile, isa):
   """Generates all tests cases for a GAVGPOOL micro-kernel.
 
   Args:
@@ -521,6 +687,8 @@ def generate_test_cases(ukernel, init_fn, requantization_type, primary_tile,
                       the incremental outer loop of the micro-kernel.
     channel_tile: Number of channels processed per one iteration of the inner
                   loops of the micro-kernel.
+    vector_tile: Indicates if channels are specified in vectors rather than
+                 elements.
     isa: instruction set required to run the micro-kernel. Generated unit test
          will skip execution if the host processor doesn't support this ISA.
 
@@ -533,6 +701,10 @@ def generate_test_cases(ukernel, init_fn, requantization_type, primary_tile,
   if requantization_type:
     test_args.append("xnn_%s_requantize_%s" % \
       (datatype.lower(), requantization_type.lower()))
+  channel_scaled_tile = channel_tile
+  if vector_tile:
+    ctype = {"qs8": "int8_t", "qu8": "uint8_t", "f16": "uint16_t", "f32": "float"}[datatype]
+    channel_scaled_tile = {"rvv": "(%s*xnn_init_hardware_config()->vlenb/sizeof(%s))" % (str(channel_tile), ctype)}[isa]
   return xngen.preprocess(AVGPOOL_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
@@ -540,6 +712,8 @@ def generate_test_cases(ukernel, init_fn, requantization_type, primary_tile,
       "PRIMARY_TILE": primary_tile,
       "INCREMENTAL_TILE": incremental_tile,
       "CHANNEL_TILE": channel_tile,
+      "CHANNEL_SCALED_TILE": channel_scaled_tile,
+      "CHANNEL_SUFFIX": "v" if vector_tile else "",
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
     })
@@ -579,12 +753,12 @@ def main(args):
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       init_fn = ukernel_spec.get("init")
-      requantization_type, primary_tile, incremental_tile, channel_tile, arch, \
+      requantization_type, primary_tile, incremental_tile, channel_tile, vector_tile, arch, \
         isa = split_ukernel_name(name)
 
       test_case = generate_test_cases(name, init_fn, requantization_type,
                                       primary_tile, incremental_tile,
-                                      channel_tile, isa)
+                                      channel_tile, vector_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     xnncommon.overwrite_if_changed(options.output, tests)
