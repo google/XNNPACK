@@ -51,7 +51,7 @@ tools/generate-argmaxpool-test.py --spec test/f32-argmaxpool.yaml --output test/
 ### Tests for GEMM micro-kernels
 tools/generate-gemm-test.py --spec test/bf16-gemm-minmax.yaml --output-test test/bf16-gemm-minmax.cc &
 
-tools/generate-gemm-test.py --spec test/f16-gemm-minmax.yaml        --output-test test/f16-gemm-minmax.cc &
+tools/generate-gemm-test.py --spec test/f16-gemm-minmax.yaml        --output-test test/f16-gemm-minmax.cc --output-bench bench/f16-gemm-minmax.cc &
 tools/generate-gemm-test.py --spec test/f16-f32acc-gemm-minmax.yaml --output-test test/f16-f32acc-gemm-minmax.cc &
 tools/generate-gemm-test.py --spec test/f16-gemm-jit.yaml           --output-test test/f16-gemm-jit.cc &
 

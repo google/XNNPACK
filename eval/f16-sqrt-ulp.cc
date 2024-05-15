@@ -15,17 +15,15 @@
 #if XNN_ENABLE_CPUINFO
   #include <cpuinfo.h>
 #endif  // XNN_ENABLE_CPUINFO
-#include <pthreadpool.h>
-
-#include <benchmark/benchmark.h>
-#include <fp16/fp16.h>
-
-#include "bench/utils.h"
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
-#include <xnnpack/math.h>
 #include <xnnpack/math-stubs.h>
+#include <xnnpack/math.h>
 
+#include <fp16/fp16.h>
+#include "bench/utils.h"
+#include <benchmark/benchmark.h>
+#include "pthreadpool.h"
 
 struct ComputeErrorContext {
   const uint16_t* input;

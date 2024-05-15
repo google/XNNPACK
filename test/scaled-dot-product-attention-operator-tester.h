@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <pthreadpool.h>
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
@@ -24,6 +23,7 @@
 #include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "pthreadpool.h"
 
 class ScaledDotProductAttentionOperatorTester {
  public:

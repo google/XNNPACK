@@ -19,9 +19,9 @@
 #include <random>
 #include <vector>
 
-#include "pthreadpool.h"
 #include "replicable_random_device.h"
 #include <gtest/gtest.h>
+#include "pthreadpool.h"
 
 class ArgmaxPoolingOperatorTester {
  public:

@@ -29,8 +29,8 @@
 #include <xnnpack/operator.h>
 #include <xnnpack/params.h>
 
-#include "pthreadpool.h"
 #include <fp16/fp16.h>
+#include "pthreadpool.h"
 
 static inline size_t compute_output_dimension_with_tf_same_padding(
     size_t input_dimension,

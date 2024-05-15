@@ -58,7 +58,7 @@ static void init_f16_avgpool_config(void) {
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_x86_avx2) {
+    if (hardware_config->use_x86_f16c) {
       f16_avgpool_config.unipass = (xnn_avgpool_unipass_ukernel_fn) xnn_f16_avgpool_minmax_ukernel_9x__f16c_c8;
       f16_avgpool_config.multipass = (xnn_avgpool_multipass_ukernel_fn) xnn_f16_avgpool_minmax_ukernel_9p8x__f16c_c8;
       f16_avgpool_config.init.f16 = xnn_init_f16_scaleminmax_avx_params;

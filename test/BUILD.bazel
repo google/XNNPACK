@@ -2582,10 +2582,12 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "convert_nc_test",
+    timeout = "moderate",
     srcs = [
         "convert-nc.cc",
         "convert-operator-tester.h",
     ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS,
 )
 

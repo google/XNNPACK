@@ -57,7 +57,7 @@ static void init_f16_maxpool_config(void) {
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_x86_avx2) {
+    if (hardware_config->use_x86_f16c) {
       f16_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8;
       f16_maxpool_config.init.f16 = xnn_init_f16_minmax_avx_params;
       f16_maxpool_config.first_pass_tile_size = 9;
@@ -107,6 +107,11 @@ static void init_f32_maxpool_config(void) {
     }
   #elif XNN_ARCH_WASM
     f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p8x__wasm_c1;
+    f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_maxpool_config.first_pass_tile_size = 9;
+    f32_maxpool_config.remainder_pass_tile_size = 8;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p8x__rvv_c2v;
     f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_maxpool_config.first_pass_tile_size = 9;
     f32_maxpool_config.remainder_pass_tile_size = 8;

@@ -23,10 +23,10 @@
 #include <random>
 #include <vector>
 
-#include "pthreadpool.h"
 #include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "pthreadpool.h"
 
 class AveragePoolingOperatorTester {
  public:

@@ -10,9 +10,6 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
-#include <pthreadpool.h>
-
 #include <xnnpack/allocator.h>
 #include <xnnpack/cache.h>
 #include <xnnpack/compute.h>
@@ -21,6 +18,7 @@
 #include <xnnpack/operator-type.h>
 #include <xnnpack/params.h>
 
+#include "pthreadpool.h"
 
 // Maximum number of pthreadpool parallelization invocations per operator.
 #define XNN_MAX_COMPUTE_INVOCATIONS 3

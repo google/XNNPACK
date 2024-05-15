@@ -28,6 +28,8 @@ ALL_RVV_MICROKERNEL_SRCS = [
     "src/f32-igemm/gen/f32-igemm-7x4v-minmax-rvv.c",
     "src/f32-igemm/gen/f32-igemm-7x4v-relu-rvv.c",
     "src/f32-igemm/gen/f32-igemm-7x4v-rvv.c",
+    "src/f32-maxpool/gen/f32-maxpool-9p8x-minmax-rvv-c1v.c",
+    "src/f32-maxpool/gen/f32-maxpool-9p8x-minmax-rvv-c2v.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-rvv-rr2-p6-u2v.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-rvv-rr2-p6-u4v.c",
     "src/f32-rminmax/gen/f32-rmax-rvv-u1v.c",
