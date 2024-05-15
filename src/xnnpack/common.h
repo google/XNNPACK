@@ -241,8 +241,14 @@
   #define XNN_MIN_ELEMENTS(count) static count
 #endif
 
-#if defined(__cplusplus) || XNN_COMPILER_MSVC
-  #define XNN_RESTRICT
+#if defined(__cplusplus)
+  #if XNN_COMPILER_MSVC
+    #define XNN_RESTRICT __restrict
+  #elif XNN_COMPILER_GCC || XNN_COMPILER_CLANG
+    #define XNN_RESTRICT __restrict__
+  #else
+    #define XNN_RESTRICT
+  #endif
 #else
   #define XNN_RESTRICT restrict
 #endif
