@@ -1085,6 +1085,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qs8_rsum_minmax_fp32_test",
+    srcs = [
+        "qs8-rsum-minmax-fp32.cc",
+        "rsum-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f16_f32acc_rdsum_test",
     srcs = [
         "f16-f32acc-rdsum.cc",
