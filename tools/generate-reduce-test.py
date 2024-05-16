@@ -133,7 +133,7 @@ $if TESTER == "RSumMicrokernelTester":
     $if ISA_CHECK:
       ${ISA_CHECK};
     ${TESTER}()
-      .batch_size(${32 * BATCH_TILE})
+      .batch_size(${128 * BATCH_TILE})
       .Test(${", ".join(TEST_ARGS)});
   }
 """

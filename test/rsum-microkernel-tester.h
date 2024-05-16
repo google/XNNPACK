@@ -113,10 +113,9 @@ class RSumMicrokernelTester {
     std::vector<int8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
     {//for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::iota(input.begin(), input.end(), 1);
 
       // Compute reference results.
-      int8_t output_init = 0x80;//i8dist(rng);
+      int8_t output_init = i8dist(rng);
       int8_t output_ref = 0;
       int32_t acc = 0;
       for (size_t i = 0; i < batch_size(); i++) {

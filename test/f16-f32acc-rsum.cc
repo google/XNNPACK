@@ -66,7 +66,7 @@
   TEST(F16_F32ACC_RSUM__NEONFP16ARITH_U4, overflow_accumulator) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     RSumMicrokernelTester()
-      .batch_size(128)
+      .batch_size(512)
       .Test(xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u4, xnn_init_f16_f32acc_scale_scalar_params);
   }
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
@@ -120,7 +120,7 @@
   TEST(F16_F32ACC_RSUM__NEONFP16ARITH_U8, overflow_accumulator) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     RSumMicrokernelTester()
-      .batch_size(256)
+      .batch_size(1024)
       .Test(xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u8, xnn_init_f16_f32acc_scale_scalar_params);
   }
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
@@ -174,7 +174,7 @@
   TEST(F16_F32ACC_RSUM__NEONFP16ARITH_U16_ACC2, overflow_accumulator) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     RSumMicrokernelTester()
-      .batch_size(512)
+      .batch_size(2048)
       .Test(xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u16_acc2, xnn_init_f16_f32acc_scale_scalar_params);
   }
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
@@ -228,7 +228,7 @@
   TEST(F16_F32ACC_RSUM__NEONFP16ARITH_U24_ACC3, overflow_accumulator) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     RSumMicrokernelTester()
-      .batch_size(768)
+      .batch_size(3072)
       .Test(xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u24_acc3, xnn_init_f16_f32acc_scale_scalar_params);
   }
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
@@ -282,7 +282,7 @@
   TEST(F16_F32ACC_RSUM__NEONFP16ARITH_U32_ACC2, overflow_accumulator) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     RSumMicrokernelTester()
-      .batch_size(1024)
+      .batch_size(4096)
       .Test(xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u32_acc2, xnn_init_f16_f32acc_scale_scalar_params);
   }
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
@@ -336,7 +336,7 @@
   TEST(F16_F32ACC_RSUM__NEONFP16ARITH_U32_ACC4, overflow_accumulator) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     RSumMicrokernelTester()
-      .batch_size(1024)
+      .batch_size(4096)
       .Test(xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u32_acc4, xnn_init_f16_f32acc_scale_scalar_params);
   }
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
@@ -390,7 +390,7 @@
   TEST(F16_F32ACC_RSUM__F16C_U8, overflow_accumulator) {
     TEST_REQUIRES_X86_F16C;
     RSumMicrokernelTester()
-      .batch_size(256)
+      .batch_size(1024)
       .Test(xnn_f16_f32acc_rsum_ukernel__f16c_u8, xnn_init_f16_f32acc_scale_avx_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -444,7 +444,7 @@
   TEST(F16_F32ACC_RSUM__F16C_U16_ACC2, overflow_accumulator) {
     TEST_REQUIRES_X86_F16C;
     RSumMicrokernelTester()
-      .batch_size(512)
+      .batch_size(2048)
       .Test(xnn_f16_f32acc_rsum_ukernel__f16c_u16_acc2, xnn_init_f16_f32acc_scale_avx_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -498,7 +498,7 @@
   TEST(F16_F32ACC_RSUM__F16C_U24_ACC3, overflow_accumulator) {
     TEST_REQUIRES_X86_F16C;
     RSumMicrokernelTester()
-      .batch_size(768)
+      .batch_size(3072)
       .Test(xnn_f16_f32acc_rsum_ukernel__f16c_u24_acc3, xnn_init_f16_f32acc_scale_avx_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -552,7 +552,7 @@
   TEST(F16_F32ACC_RSUM__F16C_U32_ACC2, overflow_accumulator) {
     TEST_REQUIRES_X86_F16C;
     RSumMicrokernelTester()
-      .batch_size(1024)
+      .batch_size(4096)
       .Test(xnn_f16_f32acc_rsum_ukernel__f16c_u32_acc2, xnn_init_f16_f32acc_scale_avx_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -606,7 +606,7 @@
   TEST(F16_F32ACC_RSUM__F16C_U32_ACC4, overflow_accumulator) {
     TEST_REQUIRES_X86_F16C;
     RSumMicrokernelTester()
-      .batch_size(1024)
+      .batch_size(4096)
       .Test(xnn_f16_f32acc_rsum_ukernel__f16c_u32_acc4, xnn_init_f16_f32acc_scale_avx_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -660,7 +660,7 @@
   TEST(F16_F32ACC_RSUM__AVX512SKX_U16, overflow_accumulator) {
     TEST_REQUIRES_X86_AVX512SKX;
     RSumMicrokernelTester()
-      .batch_size(512)
+      .batch_size(2048)
       .Test(xnn_f16_f32acc_rsum_ukernel__avx512skx_u16, xnn_init_f16_f32acc_scale_scalar_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -714,7 +714,7 @@
   TEST(F16_F32ACC_RSUM__AVX512SKX_U32_ACC2, overflow_accumulator) {
     TEST_REQUIRES_X86_AVX512SKX;
     RSumMicrokernelTester()
-      .batch_size(1024)
+      .batch_size(4096)
       .Test(xnn_f16_f32acc_rsum_ukernel__avx512skx_u32_acc2, xnn_init_f16_f32acc_scale_scalar_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -768,7 +768,7 @@
   TEST(F16_F32ACC_RSUM__AVX512SKX_U48_ACC3, overflow_accumulator) {
     TEST_REQUIRES_X86_AVX512SKX;
     RSumMicrokernelTester()
-      .batch_size(1536)
+      .batch_size(6144)
       .Test(xnn_f16_f32acc_rsum_ukernel__avx512skx_u48_acc3, xnn_init_f16_f32acc_scale_scalar_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -822,7 +822,7 @@
   TEST(F16_F32ACC_RSUM__AVX512SKX_U64_ACC2, overflow_accumulator) {
     TEST_REQUIRES_X86_AVX512SKX;
     RSumMicrokernelTester()
-      .batch_size(2048)
+      .batch_size(8192)
       .Test(xnn_f16_f32acc_rsum_ukernel__avx512skx_u64_acc2, xnn_init_f16_f32acc_scale_scalar_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -876,7 +876,7 @@
   TEST(F16_F32ACC_RSUM__AVX512SKX_U64_ACC4, overflow_accumulator) {
     TEST_REQUIRES_X86_AVX512SKX;
     RSumMicrokernelTester()
-      .batch_size(2048)
+      .batch_size(8192)
       .Test(xnn_f16_f32acc_rsum_ukernel__avx512skx_u64_acc4, xnn_init_f16_f32acc_scale_scalar_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -930,7 +930,7 @@
   TEST(F16_F32ACC_RSUM__AVX512SKX_U128_ACC4, overflow_accumulator) {
     TEST_REQUIRES_X86_AVX512SKX;
     RSumMicrokernelTester()
-      .batch_size(4096)
+      .batch_size(16384)
       .Test(xnn_f16_f32acc_rsum_ukernel__avx512skx_u128_acc4, xnn_init_f16_f32acc_scale_scalar_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
