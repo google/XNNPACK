@@ -31,13 +31,15 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"xnn_(qs8|qu8|f16_f32acc|f32)_(rdsum)(_(minmax))?(_(fp32|rndnu))?_ukernel_((\d+)p)?(\d+)x__(.+)_c(\d+)(_acc(\d+))?", name)
+  match = re.fullmatch(r"xnn_(f16|f16_f32acc|f32|qs8|u8)_(rminmax|rmax|rmin|rsum|rdsum)(_minmax_(fp32))?_ukernel_(.*)_(u|c)(\d+)(v)?(_acc\d+)?", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
 
   dtype = match.group(1)
-  arch, isa, _ = xnncommon.parse_target_name(target_name=match.group(10))
-  return dtype, arch, isa
+  op = match.group(2)
+  target_name = match.group(5)
+  arch, isa, _ = xnncommon.parse_target_name(target_name=target_name)
+  return dtype, arch, isa, op
 
 
 BENCHMARK_TEMPLATE = """\
@@ -48,13 +50,14 @@ BENCHMARK_CAPTURE(${OP_NAME}, ${BENCHMARK_NAME},
                     ${CHECK_ISA})
                   $else:
                     ${INIT_PARAMS})
-  ->Apply(BenchmarkBatch)
+  ->Apply(Benchmark${OP})
   ->UseRealTime();
 """
 
 def generate_benchmark_cases(
     ukernel: str,
     dtype: str,
+    op: str,
     isa: str,
     init_fn: str | None = None,
 ):
@@ -63,6 +66,7 @@ def generate_benchmark_cases(
   Args:
     ukernel: C name of the micro-kernel function.
     dtype: input datatype.
+    op: reduction operator.
     isa: instruction set required to run the micro-kernel. Generated unit test
       will skip execution if the host processor doesn't support this ISA.
     init_fn: C name of the function to initialize microkernel parameters.
@@ -77,7 +81,8 @@ def generate_benchmark_cases(
   return xngen.preprocess(
       BENCHMARK_TEMPLATE,
       {
-          "OP_NAME": dtype + "_rsum_discontig",
+          "OP": op.upper(),
+          "OP_NAME": dtype + "_" + op,
           "BENCHMARK_NAME": ukernel.split("__", 1)[1],
           "KERNEL": ukernel,
           "INIT_PARAMS": init_fn or "/*init_params=*/nullptr",
@@ -119,14 +124,10 @@ def main(args):
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       init_fn = ukernel_spec.get("init")
-      dtype, arch, isa = split_ukernel_name(name)
+      dtype, arch, isa, op = split_ukernel_name(name)
 
-      benchmark_case = generate_benchmark_cases(name, dtype, isa, init_fn)
-      # Only generate benchmarks for generic and multipass kernels. The unipass
-      # kernels will be removed.
-      regexp = re.compile(r'\dp\dx')
-      if regexp.search(name):
-        benches += "\n\n" + xnncommon.postprocess_test_case(benchmark_case, arch, isa)
+      benchmark_case = generate_benchmark_cases(name, dtype, op, isa, init_fn)
+      benches += "\n\n" + xnncommon.postprocess_test_case(benchmark_case, arch, isa)
 
     # Footer with `main` function.
     benches += "\n\n" + """\
