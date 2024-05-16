@@ -278,6 +278,11 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rminmax-neon-u12-acc3.c
   src/f32-rminmax/gen/f32-rminmax-neon-u16-acc2.c
   src/f32-rminmax/gen/f32-rminmax-neon-u16-acc4.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-neon-u4.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-neon-u8-acc2.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-neon-u12-acc3.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-neon-u16-acc2.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-neon-u16-acc4.c
   src/f32-rsum/gen/f32-rsum-neon-u4.c
   src/f32-rsum/gen/f32-rsum-neon-u8-acc2.c
   src/f32-rsum/gen/f32-rsum-neon-u12-acc3.c

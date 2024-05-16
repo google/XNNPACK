@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-rminmax/scalar.c.in
+//   Template: src/f32-rminmaxsum/scalar.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC

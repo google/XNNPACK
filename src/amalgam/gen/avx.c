@@ -3895,7 +3895,6 @@ void xnn_f32_rmax_ukernel__avx_u32_acc4(
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
-  assert(params != NULL);
 
   __m256 vmax0 = _mm256_broadcast_ss(input);
   __m256 vmax1 = vmax0;
@@ -3932,6 +3931,7 @@ void xnn_f32_rmax_ukernel__avx_u32_acc4(
     vmax0 = _mm256_blendv_ps(vmax0, _mm256_max_ps(vmax0, vt), _mm256_castsi256_ps(vmask));
   }
   __m128 vmax = _mm_max_ps(_mm256_castps256_ps128(vmax0), _mm256_extractf128_ps(vmax0, 1));
+
   vmax = _mm_max_ps(vmax, _mm_movehl_ps(vmax, vmax));
   vmax = _mm_max_ss(vmax, _mm_movehdup_ps(vmax));
   _mm_store_ss(output, vmax);
@@ -3947,7 +3947,6 @@ void xnn_f32_rminmax_ukernel__avx_u32_acc4(
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
-  assert(params != NULL);
 
   __m256 vmin0 = _mm256_broadcast_ss(input);
   __m256 vmax0 = vmin0;
@@ -3998,6 +3997,7 @@ void xnn_f32_rminmax_ukernel__avx_u32_acc4(
   }
   __m128 vmin = _mm_min_ps(_mm256_castps256_ps128(vmin0), _mm256_extractf128_ps(vmin0, 1));
   __m128 vmax = _mm_max_ps(_mm256_castps256_ps128(vmax0), _mm256_extractf128_ps(vmax0, 1));
+
   vmin = _mm_min_ps(vmin, _mm_movehl_ps(vmin, vmin));
   vmax = _mm_max_ps(vmax, _mm_movehl_ps(vmax, vmax));
   vmin = _mm_min_ss(vmin, _mm_movehdup_ps(vmin));
