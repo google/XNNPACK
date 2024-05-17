@@ -1388,6 +1388,13 @@
         .Test(xnn_f32_rsum_ukernel__rvv_u1v, xnn_init_f32_scale_scalar_params);
     }
   }
+
+  TEST(F32_RSUM__RVV_U1V, overflow_accumulator) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    RSumMicrokernelTester()
+      .batch_size(128)
+      .Test(xnn_f32_rsum_ukernel__rvv_u1v, xnn_init_f32_scale_scalar_params);
+  }
 #endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 

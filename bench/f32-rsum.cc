@@ -258,6 +258,17 @@
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(f32_rsum, rvv_u1v,
+                    xnn_f32_rsum_ukernel__rvv_u1v,
+                    xnn_init_f32_scale_scalar_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
 BENCHMARK_CAPTURE(f32_rsum, scalar_u1,
                   xnn_f32_rsum_ukernel__scalar_u1,
                   xnn_init_f32_scale_scalar_params)
