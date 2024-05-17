@@ -124,6 +124,13 @@ static void init_f32_pavgpool_config(void) {
     f32_pavgpool_config.primary_tile = 9;
     f32_pavgpool_config.incremental_tile = 8;
     f32_pavgpool_config.channel_tile = 1;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    f32_pavgpool_config.unipass = (xnn_pavgpool_unipass_ukernel_fn) xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v;
+    f32_pavgpool_config.multipass = (xnn_pavgpool_multipass_ukernel_fn) xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v;
+    f32_pavgpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_pavgpool_config.primary_tile = 9;
+    f32_pavgpool_config.incremental_tile = 8;
+    f32_pavgpool_config.channel_tile = 4;
   #else
     f32_pavgpool_config.unipass = (xnn_pavgpool_unipass_ukernel_fn) xnn_f32_pavgpool_minmax_ukernel_9x__scalar_c1;
     f32_pavgpool_config.multipass = (xnn_pavgpool_multipass_ukernel_fn) xnn_f32_pavgpool_minmax_ukernel_9p8x__scalar_c1;
