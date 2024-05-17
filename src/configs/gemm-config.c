@@ -2,6 +2,11 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 
 #include <assert.h>
 #include <stddef.h>
@@ -1726,15 +1731,16 @@ static void init_qd8_f32_qc4w_gemm_config(void) {
     assert(hardware_config != NULL);
     if (XNN_ENABLE_ARM_I8MM && hardware_config->use_arm_neon_i8mm) {
       #if XNN_ENABLE_ARM_I8MM
-        qd8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__neoni8mm);
-        qd8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x16c8__neoni8mm);
+        qd8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) kai_matmul_clamp_f32_qai8dxp1x8_qsu4cxp8x8_1x8x32_neon_dotprod);
+        qd8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(8)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) kai_matmul_clamp_f32_qai8dxp4x8_qsu4cxp8x8_8x8x32_neon_i8mm);
         qd8_f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
         qd8_f32_qc4w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_qc4w_gemm_gio_w;
         qd8_f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_qc4w_gemm_goi_w;
-        qd8_f32_qc4w_gemm_config.mr = 4;
-        qd8_f32_qc4w_gemm_config.nr = 16;
-        qd8_f32_qc4w_gemm_config.log2_kr = 3;
-        qd8_f32_qc4w_gemm_config.planes = 2;
+        qd8_f32_qc4w_gemm_config.mr = 8;
+        qd8_f32_qc4w_gemm_config.nr = 8;
+        qd8_f32_qc4w_gemm_config.log2_kr = 16;
+        qd8_f32_qc4w_gemm_config.log2_sr = 2;
+        qd8_f32_qc4w_gemm_config.mr_lhs_pack = 4;
       #endif  // XNN_ENABLE_ARM_I8MM
     } else if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
       #if XNN_ENABLE_ARM_DOTPROD

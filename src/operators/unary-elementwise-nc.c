@@ -2,6 +2,11 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 
 #include <assert.h>
 #include <math.h>
@@ -570,6 +575,7 @@ enum xnn_status xnn_create_convert_nc_f32_qd8(
   uint32_t flags,
   xnn_operator_t* convert_op_out)
 {
+
   const struct xnn_reduce_config* f32_rminmax_config = xnn_init_f32_rminmax_config();
   if (f32_rminmax_config == NULL) {
     xnn_log_error(
@@ -1681,15 +1687,40 @@ enum xnn_status xnn_reshape_convert_nc_f32_qd8(
 
   convert_op->batch_size = batch_size;
 
-  convert_op->context.f32_qd8_convert = (struct f32_qd8_convert_context) {
-    .n = channels * sizeof(float),
-    .x_stride = input_stride * sizeof(float),
-    .y_stride = output_stride,
-    .batch_size = batch_size,
-    .rminmax_ukernel = convert_op->rminmax_config->ukernel,
-    .convert_ukernel = convert_op->unary_elementwise_config->ukernel,
-    .init_params = convert_op->unary_elementwise_config->init.f32_qs8_cvt,
-  };
+  // The flag can provide information about the optional packing to perform
+  // after converting the data
+  #define GEMM_LHS_PACK 1
+
+  if(GEMM_LHS_PACK == convert_op->flags) {
+    const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f32_qc4w_gemm_config();
+
+    const size_t mr_lhs_pack = batch_size > 1? gemm_config->mr_lhs_pack : 1;
+
+    convert_op->context.f32_qd8_convert = (struct f32_qd8_convert_context) {
+      .n = channels * sizeof(float),
+      .x_stride = input_stride * sizeof(float),
+      .y_stride = output_stride,
+      .batch_size = batch_size,
+      .rminmax_ukernel = convert_op->rminmax_config->ukernel,
+      .convert_ukernel = convert_op->unary_elementwise_config->ukernel,
+      .init_params = convert_op->unary_elementwise_config->init.f32_qs8_cvt,
+      .gemm_lhs_pack = true,
+      .gemm_lhs_pack_params.mr = mr_lhs_pack,
+      .gemm_lhs_pack_params.kr = gemm_config->log2_kr,
+      .gemm_lhs_pack_params.sr = gemm_config->log2_sr,
+    };
+  } else {
+    convert_op->context.f32_qd8_convert = (struct f32_qd8_convert_context) {
+      .n = channels * sizeof(float),
+      .x_stride = input_stride * sizeof(float),
+      .y_stride = output_stride,
+      .batch_size = batch_size,
+      .rminmax_ukernel = convert_op->rminmax_config->ukernel,
+      .convert_ukernel = convert_op->unary_elementwise_config->ukernel,
+      .init_params = convert_op->unary_elementwise_config->init.f32_qs8_cvt,
+      .gemm_lhs_pack = false,
+    };
+  }
   memcpy(&convert_op->context.f32_qd8_convert.params, &convert_op->params.f32_default, sizeof(convert_op->params.f32_default));
 
   convert_op->compute[0].type = xnn_parallelization_type_1d;

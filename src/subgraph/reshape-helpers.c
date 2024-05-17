@@ -1,5 +1,16 @@
+//
+// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
+#include <xnnpack/config.h>
 #include <xnnpack/log.h>
 #include <xnnpack/reshape-helpers.h>
+
+inline static size_t roundup(size_t a, size_t b) {
+    return ((a + b - 1) / b) * b;
+}
 
 enum xnn_status resize_unary_elementwise_output_tensor(
   const struct xnn_operator_data* opdata,
@@ -15,7 +26,30 @@ enum xnn_status resize_unary_elementwise_output_tensor(
   const struct xnn_value* input = &values[opdata->inputs[0]];
   output->shape.num_dims = input->shape.num_dims;
   memcpy(&output->shape.dim[0], &input->shape.dim[0], input->shape.num_dims * sizeof(size_t));
-  const size_t new_size = xnn_tensor_get_size(output);
+  size_t new_size = xnn_tensor_get_size(output);
+
+  if(opdata->type == xnn_node_type_convert) {
+    // Many assumptions here. For example, we assume we always convert to int8 and
+    // we call matmul int4 after converting.
+    // Another assumption is that K is multiple of 32.
+    // In theory, the mr value should be passed through the xnn_operator_data struct
+    const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f32_qc4w_gemm_config();
+
+    const size_t batch_size = output->shape.dim[0];
+    const size_t m          = output->shape.dim[1];
+    const size_t k          = output->shape.dim[2];
+    const size_t mr_lhs_pack = batch_size > 1? gemm_config->mr_lhs_pack : 1;
+    const size_t num_bytes_per_scale  = sizeof(float);
+    const size_t num_bytes_per_offset = sizeof(int32_t);
+    const size_t lhs_stride = mr_lhs_pack * (k * sizeof(int8_t) + num_bytes_per_scale + num_bytes_per_offset);
+    const size_t m_roundedup = roundup(m , mr_lhs_pack);
+    const size_t new_size_packed = m_roundedup * lhs_stride;
+    if(new_size_packed > new_size) {
+      // Increase the size
+      new_size += (new_size_packed - new_size);
+    }
+  }
+
   if (new_size > output->size || opdata->workspace_size > old_workspace_size) {
     output->size = new_size;
     return xnn_status_reallocation_required;

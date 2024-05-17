@@ -2,6 +2,11 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 
 #pragma once
 
@@ -1488,6 +1493,12 @@ struct f16_qd8_convert_context {
   } params;
 };
 
+struct convert_gemm_lhs_pack_context {
+  size_t mr;
+  size_t kr;
+  size_t sr;
+};
+
 struct f32_qd8_convert_context {
   size_t n;
   const float* x;
@@ -1502,6 +1513,8 @@ struct f32_qd8_convert_context {
   union {
     union xnn_f32_default_params f32_default;
   } params;
+  bool gemm_lhs_pack;
+  struct convert_gemm_lhs_pack_context gemm_lhs_pack_params;
 };
 
 #ifndef __cplusplus

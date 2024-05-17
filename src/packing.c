@@ -5,6 +5,11 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 
 #include <stdint.h>
 #include <stddef.h>
@@ -381,101 +386,140 @@ static int8_t sign_extend_int4(int8_t value) {
   return (value ^ 0x8) - 8;
 }
 
+#define KAI_ASSERT(x)                                                                                                  \
+    do {                                                                                                               \
+        if (!(x)) {                                                                                                    \
+            exit(EXIT_FAILURE);                                                                                        \
+        }                                                                                                              \
+    } while (0)
+
+inline static int8_t kai_int4_sign_extend(int8_t x) {
+    return (x ^ 0x8) - 8;
+}
+
+struct kai_rhs_pack_nxk_qs4cxP_qs4cxS1S0_params {
+    int8_t lhs_zero_point;
+    uint8_t rhs_zero_point;
+};
+
 void xnn_pack_qs8_qc4w_gemm_goi_w(
-  size_t g,
-  size_t nc,
-  size_t kc,
+  size_t num_groups,
+  size_t n,
+  size_t k,
   size_t nr,
   size_t kr,
   size_t sr,
-  const uint8_t* k,
-  const int32_t* b,
+  const uint8_t* rhs,
+  const int32_t* bias,
   const float* scale,
-  void* packed_weights,
+  void* rhs_p,
   size_t extra_bytes,
-  const struct xnn_qs8_qc4w_packing_params* params)
+  const struct xnn_qs8_qc4w_packing_params* params_xnnpack)
 {
-  assert(g != 0);
-  assert(nc != 0);
-  assert(kc != 0);
-  assert(nr >= sr);
-  assert(kr >= 1 && kr <= 16);
-  assert(sr >= 1 && sr <= 16);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
-  assert(params != NULL);
-  assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
+  struct kai_rhs_pack_nxk_qs4cxP_qs4cxS1S0_params params;
 
-  const size_t skr = sr * kr;
-  const uint32_t izp = (uint32_t) params->input_zero_point;
-  const uint32_t kernel_zero_point = (uint32_t) params->kernel_zero_point;
-  do {
-    size_t nr_block_start = 0;
-    do {
-      const size_t nr_block_size = min(nc - nr_block_start, nr);
-      int32_t* packed_b = (int32_t*) packed_weights;
-      if XNN_LIKELY(b != NULL) {
-        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
-          packed_weights = (int32_t*) packed_weights + 1;
-        }
-      } else {
-        size_t n = nr_block_size;
-        do {
-          unaligned_store_s32(packed_weights, 0);
-          packed_weights = (int32_t*) packed_weights + 1;
-        } while (--n != 0);
-      }
-      packed_weights = (int32_t*) packed_weights + (nr - nr_block_size);
+  params.lhs_zero_point = params_xnnpack->input_zero_point;
+  params.rhs_zero_point = params_xnnpack->kernel_zero_point;
 
-      for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr * 2); kr_block_start += kr * 2) {
-        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          int32_t ksum = 0;
-          for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-            const size_t k_offset = (nr_block_start + nr_block_offset) * kc + kc_idx;
-            const size_t kh_offset = k_offset + kr;
-            if (kernel_zero_point == 0) {
-              int8_t kv_lo = 0;
-              if (kc_idx < kc) {
-                kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4) : (k[k_offset >> 1] & 0xF));
-              }
-              int8_t kv_hi = 0;
-              if ((kc_idx + kr) < kc) {
-                kv_hi = ((kh_offset & 1) ? (k[kh_offset >> 1] >> 4) : (k[kh_offset >> 1] & 0xF));
-              }
-              const int8_t kv = (kv_lo | (kv_hi << 4));
-              kv_lo = sign_extend_int4(kv_lo);
-              kv_hi = sign_extend_int4(kv_hi);
-              ksum += kv_lo + kv_hi;
-              ((int8_t*) packed_weights)[kr_block_offset] = kv;
+  // Temporary asserts
+  KAI_ASSERT(num_groups == 1);
+  KAI_ASSERT((k % 2) == 0);
+  KAI_ASSERT((n % nr) == 0);
+  KAI_ASSERT((k % kr) == 0);
+  KAI_ASSERT(bias == NULL);
+  KAI_ASSERT(extra_bytes == 0);
+  KAI_ASSERT(sr == 2);
+  KAI_ASSERT(kr >= 1 && kr <= 16);
+  KAI_ASSERT(rhs != NULL);
+  KAI_ASSERT(scale != NULL);
+  KAI_ASSERT(rhs_p != NULL);
+  KAI_ASSERT(params_xnnpack != NULL);
+  KAI_ASSERT(params.rhs_zero_point == 8);
+  KAI_ASSERT(params.lhs_zero_point == 1);
+
+  // Note: The input matrix (rhs) is expected with:
+  // "k" columns and "n" rows (NxK)
+
+  const size_t rhs_zero_point = params.rhs_zero_point;
+  const size_t rhs_stride = k / 2;
+  const size_t rhs_packed_stride = nr * ((k / 2) + sizeof(float) + sizeof(int32_t));
+
+  for (size_t y = 0; y < n; y += nr) {
+    const uint8_t* src_row = (const uint8_t*)rhs + y * rhs_stride;
+    uint8_t* dst_row = (uint8_t*)rhs_p + (y / nr) * rhs_packed_stride;
+
+    int32_t* sums = (int32_t*)(dst_row + nr * (k / 2));
+
+    // Initialize to zero the RHS reduction sums
+    memset(sums, 0, nr * sizeof(int32_t));
+
+    for (size_t x = 0; x < k; x += (kr * 2)) {
+      for (size_t s = 0; s < sr; ++s) {
+        for (size_t i = 0; i < nr; ++i) {
+          for (size_t kr_idx = 0; kr_idx < kr / sr; kr_idx += 2) {
+            const size_t src_addr_byte0 = i * rhs_stride + (x / 2) + kr_idx / 2 + s * (kr / sr) / 2;
+            const size_t src_addr_byte1 = src_addr_byte0 + (kr / 2);
+
+            const uint8_t byte0 = src_row[src_addr_byte0];
+            const uint8_t byte1 = src_row[src_addr_byte1];
+
+            if (rhs_zero_point == 0) {
+              int8_t src_x0_lo = (byte0 & 0x0F);
+              int8_t src_x1_lo = (byte0 >> 4);
+
+              int8_t src_x0_hi = (byte1 & 0x0F);
+              int8_t src_x1_hi = (byte1 >> 4);
+
+              const int8_t dst_qs0 = src_x0_lo | (src_x0_hi << 4);
+              const int8_t dst_qs1 = src_x1_lo | (src_x1_hi << 4);
+
+              src_x0_lo = kai_int4_sign_extend(src_x0_lo);
+              src_x1_lo = kai_int4_sign_extend(src_x1_lo);
+              src_x0_hi = kai_int4_sign_extend(src_x0_hi);
+              src_x1_hi = kai_int4_sign_extend(src_x1_hi);
+              sums[i] += src_x0_lo + src_x0_hi;
+              sums[i] += src_x1_lo + src_x1_hi;
+
+              *(int8_t*)dst_row = dst_qs0;
+              dst_row += sizeof(int8_t);
+              *(int8_t*)dst_row = dst_qs1;
+              dst_row += sizeof(int8_t);
+
             } else {
-              uint8_t kv_lo = kernel_zero_point;
-              if (kc_idx < kc) {
-                kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4) : (k[k_offset >> 1] & 0xF));
-              }
-              uint8_t kv_hi = kernel_zero_point;
-              if ((kc_idx + kr) < kc) {
-                kv_hi = ((kh_offset & 1) ? (k[kh_offset >> 1] >> 4) : (k[kh_offset >> 1] & 0xF));
-              }
-              const uint8_t kv = (kv_lo | (kv_hi << 4)) ^ 0x88;
-              ksum += kv_lo + kv_hi - 2 * kernel_zero_point;  // subtract 2 zero points
-              ((uint8_t*) packed_weights)[kr_block_offset] = kv;
+              const uint8_t src_x0_lo = (byte0 & 0x0F);
+              const uint8_t src_x1_lo = (byte0 >> 4);
+
+              const uint8_t src_x0_hi = (byte1 & 0x0F);
+              const uint8_t src_x1_hi = (byte1 >> 4);
+
+              sums[i] += src_x0_lo + src_x0_hi - 2 * rhs_zero_point;
+              sums[i] += src_x1_lo + src_x1_hi - 2 * rhs_zero_point;
+
+              const uint8_t dst_qs0 = src_x0_lo | (src_x0_hi << 4);
+              const uint8_t dst_qs1 = src_x1_lo | (src_x1_hi << 4);
+
+              *dst_row = dst_qs0 ^ 0x88;
+              dst_row += sizeof(uint8_t);
+              *dst_row = dst_qs1 ^ 0x88;
+              dst_row += sizeof(uint8_t);
             }
           }
-          unaligned_indexed_store_u32(packed_b, nr_block_offset, unaligned_indexed_load_u32(packed_b, nr_block_offset) - ksum * izp * 16);
-          packed_weights = (uint8_t*) packed_weights + kr;  // kr * 2 nibbles
         }
-        packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;  // skip NR remainder
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
-      nr_block_start += nr;
-    } while (nr_block_start < nc);
-    k += nc * kc;  // kc * 2 nibbles
-    if XNN_UNPREDICTABLE(b != NULL) {
-      b += nc;
     }
-  } while (--g != 0);
+
+    // Adjust the reduction sums
+    for (size_t i = 0; i < nr; ++i) {
+      *((int32_t*)(dst_row)) = sums[i] * 16;
+      dst_row += sizeof(int32_t);
+    }
+
+    // Adjust the scales
+    for (size_t i = 0; i < nr; ++i) {
+      *((float*)(dst_row)) = scale[y + i] * 0.0625f;
+      dst_row += sizeof(float);
+    }
+  }
 }
 
 void xnn_pack_qs8_qc4w_gemm_gio_w(

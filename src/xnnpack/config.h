@@ -2,6 +2,11 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 
 #pragma once
 
@@ -737,6 +742,7 @@ struct xnn_gemm_config {
   uint8_t log2_kr;
   uint8_t log2_sr;
   uint8_t planes;  // number of 4 bit planes (1 for legacy, 2 for unzip)
+  uint8_t mr_lhs_pack;
 };
 
 XNN_INTERNAL struct xnn_gemm_config* xnn_init_f16_gemm_config();

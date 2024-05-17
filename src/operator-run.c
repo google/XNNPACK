@@ -5,6 +5,11 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 
 #include <assert.h>
 #include <stddef.h>
@@ -25,6 +30,8 @@
 #include <xnnpack/quantization.h>
 
 #include "pthreadpool.h"
+
+#include <arm_neon.h>
 
 void xnn_compute_transposec_2d(
     const struct transpose_context* context,
@@ -2034,23 +2041,226 @@ void xnn_compute_f16_qd8_convert(
   context->convert_ukernel(n, input, output, &params);
 }
 
+#define KAI_ASSERT(x)                                                                                                  \
+    do {                                                                                                               \
+        if (!(x)) {                                                                                                    \
+            exit(EXIT_FAILURE);                                                                                        \
+        }                                                                                                              \
+    } while (0)
+
+#define KAI_UNUSED(x) (void)(x)
+#define KAI_MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define KAI_MAX(a, b) (((a) > (b)) ? (a) : (b))
+
+// The following functions should not be here because this file is not
+// target specific.
+size_t kai_get_lhs_offset_lhs_quant_pack_qai8dxp_f32(
+  size_t m_idx,
+  size_t lhs_stride)
+{
+  return m_idx * lhs_stride;
+}
+
+size_t kai_get_lhs_packed_offset_lhs_quant_pack_qai8dxp_f32(
+  size_t m_idx,
+  size_t k,
+  size_t mr,
+  size_t kr,
+  size_t sr)
+{
+  KAI_ASSERT(k % kr == 0);
+  KAI_UNUSED(kr);
+
+  const size_t kai_num_bytes_per_multiplier = sizeof(float);
+  const size_t kai_num_bytes_per_offset = sizeof(int32_t);
+  const size_t dst_y = (m_idx / mr);
+
+  const size_t dst_stride = mr * (k * sizeof(int8_t) + kai_num_bytes_per_multiplier + kai_num_bytes_per_offset);
+
+  // It points always at the beginning of the row
+  return dst_y * dst_stride;
+}
+
+void kai_run_lhs_quant_pack_qai8dxp_f32(
+  size_t m,
+  size_t k,
+  size_t mr,
+  size_t kr,
+  size_t sr,
+  size_t m_idx_start,
+  const float* restrict lhs,
+  size_t lhs_stride,
+  void* restrict lhs_packed)
+{
+  KAI_ASSERT(k % kr == 0);
+  KAI_ASSERT((kr % sr) == 0);
+
+  const size_t kai_num_bytes_per_multiplier = sizeof(float);
+  const size_t kai_num_bytes_per_offset = sizeof(int32_t);
+
+  if (m == 0) {
+      return;
+  }
+
+  const size_t num_rows = m;
+  const size_t num_cols = k;
+
+  const float* src_ptr = lhs;
+
+  const size_t dst_stride = mr * (k * sizeof(int8_t) + kai_num_bytes_per_multiplier + kai_num_bytes_per_offset);
+  const size_t k_block_len = kr / sr;
+
+  for (size_t row_idx = 0; row_idx < num_rows; ++row_idx) {
+    float32x4_t vmax0 = vdupq_n_f32(-FLT_MAX);
+    float32x4_t vmin0 = vdupq_n_f32(FLT_MAX);
+
+    // Find min/max for each channel
+    size_t k_idx = 0;
+    for (; k_idx <= (num_cols - 8); k_idx += 8) {
+      const float32x4_t src0_0 = vld1q_f32(src_ptr + 0 + k_idx);
+      const float32x4_t src0_1 = vld1q_f32(src_ptr + 4 + k_idx);
+
+      // Calculate the max
+      vmax0 = vmaxq_f32(src0_0, vmax0);
+      vmax0 = vmaxq_f32(vmax0, src0_1);
+
+      // Calculate the min
+      vmin0 = vminq_f32(src0_0, vmin0);
+      vmin0 = vminq_f32(vmin0, src0_1);
+    }
+
+    for (; k_idx < num_cols; ++k_idx) {
+      const float src0_0 = *(src_ptr + k_idx);
+
+      // Calculate the max
+      vmax0 = vsetq_lane_f32(KAI_MAX(src0_0, vgetq_lane_f32(vmax0, 0)), vmax0, 0);
+      // Calculate the min
+      vmin0 = vsetq_lane_f32(KAI_MIN(src0_0, vgetq_lane_f32(vmin0, 0)), vmin0, 0);
+    }
+
+    // Get the max/min
+    const float max0 = vmaxvq_f32(vmax0);
+    const float min0 = vminvq_f32(vmin0);
+
+    // Maximum/minimum int8 values
+    const float qmin = (float)INT8_MIN;
+    const float qmax = (float)INT8_MAX;
+
+    const float rmin0 = KAI_MIN(0.0f, min0);
+    const float rmax0 = KAI_MAX(0.0f, max0);
+
+    const float scale0 = rmin0 == rmax0 ? 1.f : (qmax - qmin) / (rmax0 - rmin0);
+
+    // Reciprocal to quantize
+    const float recip_scale0 = scale0 ? 1.0f / scale0 : 0.0f;
+
+    const float descaled_min0 = rmin0 * scale0;
+    const float descaled_max0 = rmax0 * scale0;
+
+    const float zero_point_from_min_error0 = qmin + descaled_min0;
+    const float zero_point_from_max_error0 = qmax + descaled_max0;
+
+    float zero_point0 =
+      zero_point_from_min_error0 + zero_point_from_max_error0 > 0 ? qmin - descaled_min0 : qmax - descaled_max0;
+
+    zero_point0 = KAI_MAX(zero_point0, qmin);
+    zero_point0 = KAI_MIN(zero_point0, qmax);
+
+    // Round to nearest integer
+    const int32_t nudged_zero_point0 = lrintf(zero_point0);
+
+    const size_t dst_x = ((row_idx + m_idx_start) % mr);
+
+    uint8_t* dst_ptr = (uint8_t*)lhs_packed + dst_x * k_block_len * sizeof(int8_t);
+
+    // Quantize the channels
+    k_idx = 0;
+    for (; k_idx < num_cols; k_idx += k_block_len) {
+      for (size_t k_block_idx = 0; k_block_idx < k_block_len; ++k_block_idx) {
+        const float src0_0 = *(src_ptr + k_idx + k_block_idx);
+
+        // Scale the values
+        int32_t v0_s32 = (int32_t)(round(src0_0 * scale0));
+
+        v0_s32 = v0_s32 + nudged_zero_point0;
+        v0_s32 = KAI_MAX(v0_s32, INT8_MIN);
+        v0_s32 = KAI_MIN(v0_s32, INT8_MAX);
+        *((int8_t*)(dst_ptr)) = (int8_t)v0_s32;
+        dst_ptr += sizeof(int8_t);
+      }
+      dst_ptr += (mr - 1) * k_block_len * sizeof(int8_t);
+    }
+
+    dst_ptr = (uint8_t*)lhs_packed + mr * (k * sizeof(int8_t));
+
+    dst_ptr += dst_x * kai_num_bytes_per_offset;
+
+    // LHS offset at the beginning of the row
+    *((int32_t*)(dst_ptr)) = -nudged_zero_point0;
+
+    // Assuming the same sizeof() for kai_num_bytes_per_offset and kai_num_bytes_per_multiplier
+    KAI_ASSERT(kai_num_bytes_per_offset == kai_num_bytes_per_multiplier);
+
+    dst_ptr += mr * kai_num_bytes_per_offset;
+
+    // Store the scale quantization params
+    *((float*)(dst_ptr)) = recip_scale0;
+
+    src_ptr += (lhs_stride / sizeof(float));
+
+    if(((row_idx + 1) + m_idx_start % mr) == 0) {
+      lhs_packed = (void*)((uint8_t*)lhs_packed + dst_stride);
+    }
+  }
+}
+
 void xnn_compute_f32_qd8_convert(
     const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index)
 {
-  const size_t x_stride = context->x_stride;
-  const size_t y_stride = context->y_stride;
-  const size_t n        = context->n;
-  const void* input = (const void*) ((uintptr_t) context->x + x_stride * batch_index);
-  void* output = (void*) ((uintptr_t) context->y + y_stride * batch_index);
+  if(context->gemm_lhs_pack) {
+    const size_t lhs_stride = context->x_stride;
+    const size_t k          = context->n / sizeof(float);
 
-  float minmax[2];
-  context->rminmax_ukernel(n, input, minmax, &context->params);
-  context->quantization_params[batch_index] = xnn_f32_qd8_asymmetric_quantization_params(minmax[0], minmax[1]);
+    const size_t lhs_offset = kai_get_lhs_offset_lhs_quant_pack_qai8dxp_f32(
+      batch_index,
+      lhs_stride);
 
-  union xnn_f32_qs8_cvt_params params;
-  context->init_params(&params, 1.0f / context->quantization_params[batch_index].inv_scale, context->quantization_params[batch_index].zero_point, INT8_MIN, INT8_MAX);
-  context->convert_ukernel(n, input, output, &params);
+    const size_t lhs_packed_offset = kai_get_lhs_packed_offset_lhs_quant_pack_qai8dxp_f32(
+      batch_index,
+      k,
+      context->gemm_lhs_pack_params.mr,
+      context->gemm_lhs_pack_params.kr,
+      context->gemm_lhs_pack_params.sr);
+
+    const float* lhs_ptr = (const float*)((const uint8_t*)context->x + lhs_offset);
+    void* lhs_packed_ptr = (void*)(context->y + lhs_packed_offset);
+
+    kai_run_lhs_quant_pack_qai8dxp_f32(
+      1,
+      k,
+      context->gemm_lhs_pack_params.mr,
+      context->gemm_lhs_pack_params.kr,
+      context->gemm_lhs_pack_params.sr,
+      batch_index,
+      lhs_ptr,
+      lhs_stride,
+      lhs_packed_ptr);
+  } else {
+    const size_t x_stride = context->x_stride;
+    const size_t y_stride = context->y_stride;
+    const size_t n        = context->n;
+    const void* input = (const void*) ((uintptr_t) context->x + x_stride * batch_index);
+    void* output = (void*) ((uintptr_t) context->y + y_stride * batch_index);
+
+    float minmax[2];
+    context->rminmax_ukernel(n, input, minmax, &context->params);
+    context->quantization_params[batch_index] = xnn_f32_qd8_asymmetric_quantization_params(minmax[0], minmax[1]);
+
+    union xnn_f32_qs8_cvt_params params;
+    context->init_params(&params, 1.0f / context->quantization_params[batch_index].inv_scale, context->quantization_params[batch_index].zero_point, INT8_MIN, INT8_MAX);
+    context->convert_ukernel(n, input, output, &params);
+  }
 }
 
 void xnn_compute_u8_softmax(
