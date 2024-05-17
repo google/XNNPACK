@@ -20,3 +20,12 @@ tools/xngen src/qs8-rsum/neon-mlal.c.in -D ACCUMULATORS=2 -D CHANNEL_TILE=64  -D
 
 tools/xngen src/qs8-rsum/neon-mlal.c.in -D ACCUMULATORS=4 -D CHANNEL_TILE=32  -D REQUANTIZATION=FP32 -D ARMV8=0 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-neon-u32-acc4.c &
 tools/xngen src/qs8-rsum/neon-mlal.c.in -D ACCUMULATORS=4 -D CHANNEL_TILE=64  -D REQUANTIZATION=FP32 -D ARMV8=0 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-neon-u64-acc4.c &
+
+tools/xngen src/qs8-rsum/neondot.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=16  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-neondot-u16.c &
+tools/xngen src/qs8-rsum/neondot.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=32  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-neondot-u32.c &
+tools/xngen src/qs8-rsum/neondot.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=64  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-neondot-u64.c &
+
+tools/xngen src/qs8-rsum/neondot.c.in -D ACCUMULATORS=2 -D CHANNEL_TILE=32  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-neondot-u32-acc2.c &
+tools/xngen src/qs8-rsum/neondot.c.in -D ACCUMULATORS=2 -D CHANNEL_TILE=64  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-neondot-u64-acc2.c &
+
+tools/xngen src/qs8-rsum/neondot.c.in -D ACCUMULATORS=4 -D CHANNEL_TILE=64  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-neondot-u64-acc4.c &

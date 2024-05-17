@@ -1164,10 +1164,10 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_neon_params(
   params->fp32_neon.magic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
   params->fp32_neon.output_min = output_min;
   params->fp32_neon.output_max = output_max;
-  for (uint32_t i = 0; i < 7; i++) {
+  for (uint32_t i = 0; i < 15; i++) {
     params->fp32_neon.mask_table[i] = 1;
   }
-  for (uint32_t i = 7; i < 14; i++) {
+  for (uint32_t i = 15; i < 30; i++) {
     params->fp32_neon.mask_table[i] = 0;
   }
   return sizeof(params->fp32_neon);

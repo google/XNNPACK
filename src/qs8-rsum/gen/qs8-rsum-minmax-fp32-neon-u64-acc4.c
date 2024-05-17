@@ -93,7 +93,7 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__neon_mlal_u64_acc4(
     }
     if (XNN_UNLIKELY(batch != 0)) {
       int8x8_t vt = vld1_s8(input);
-      vone = vld1_s8(&params->fp32_neon.mask_table[7 - batch]);
+      vone = vld1_s8(&params->fp32_neon.mask_table[15 - batch]);
       vacc16_0 = vmlal_s8(vacc16_0, vt, vone);
     }
     vacc0 = vaddq_s32(vacc0, vaddq_s32(vmovl_s16(vget_low_s16(vacc16_0)), vmovl_s16(vget_high_s16(vacc16_0))));

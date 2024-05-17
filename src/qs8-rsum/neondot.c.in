@@ -5,10 +5,9 @@
 
 $assert CHANNEL_TILE % 4 == 0
 $assert CHANNEL_TILE >= 4
-$SIMD_TILE = CHANNEL_TILE // 8
+$SIMD_TILE = CHANNEL_TILE // 16
 $assert ACCUMULATORS <= SIMD_TILE
 $import math
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <arm_neon.h>
@@ -18,8 +17,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/reduce.h>
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
-$PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if ARMV8 else "neon")
-void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__neon_mlal_u${CHANNEL_TILE}${ACC_SUFFIX}(
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_neon"
+void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__neondot_u${CHANNEL_TILE}${ACC_SUFFIX}(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -29,46 +28,27 @@ void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__neon_mlal_u${CHANNEL
   assert(input != NULL);
   assert(output != NULL);
 
-  int8x8_t vone = vdup_n_s8(1);
-  int num_batches = batch  >> ${(int(math.log2(ACCUMULATORS * 256)))};
+  int8x16_t vone = vdupq_n_s8(1);
   $for A in range(ACCUMULATORS):
     int32x4_t vacc${A} = vmovq_n_s32(0);
   $if CHANNEL_TILE > 8:
-    for (; num_batches > 0; --num_batches) {
-      $for A in range(ACCUMULATORS):
-        int16x8_t vacc16_${A} = vmovq_n_s16(0);
-      for (size_t current_batch = ${ACCUMULATORS * 256}; current_batch > 0; current_batch -= ${CHANNEL_TILE}) {
-        $for N in range(SIMD_TILE):
-          const int8x8_t vt${N} = vld1_s8(input); input += 8;
-
-        $for N in range(SIMD_TILE):
-          vacc16_${N % ACCUMULATORS} = vmlal_s8(vacc16_${N % ACCUMULATORS}, vt${N}, vone);
-      }
-      $for A in range(ACCUMULATORS):
-        vacc${A} = vaddq_s32(vacc${A}, vaddq_s32(vmovl_s16(vget_low_s16(vacc16_${A})), vmovl_s16(vget_high_s16(vacc16_${A}))));
-      batch -= ${ACCUMULATORS * 256};
-    }
-  if (XNN_UNLIKELY(batch != 0)) {
-    $for A in range(ACCUMULATORS):
-      int16x8_t vacc16_${A} = vmovq_n_s16(0);
     for (; batch >= ${CHANNEL_TILE}; batch -= ${CHANNEL_TILE}) {
       $for N in range(SIMD_TILE):
-        const int8x8_t vt${N} = vld1_s8(input); input += 8;
+        const int8x16_t vt${N} = vld1q_s8(input); input += 16;
+
       $for N in range(SIMD_TILE):
-        vacc16_${N % ACCUMULATORS} = vmlal_s8(vacc16_${N % ACCUMULATORS}, vt${N}, vone);
+        vacc${N % ACCUMULATORS} = vdotq_s32(vacc${N % ACCUMULATORS}, vt${N}, vone);
     }
-    $for A in range(1, ACCUMULATORS):
-      vacc16_0 = vaddq_s16(vacc16_0, vacc16_${A});
-    for (; batch >= 8; batch -= 8) {
-      const int8x8_t vt = vld1_s8(input); input += 8;
-      vacc16_0 = vmlal_s8(vacc16_0, vt, vone);
+  if (XNN_UNLIKELY(batch != 0)) {
+    for (; batch >= 16; batch -= 16) {
+      const int8x16_t vt = vld1q_s8(input); input += 16;
+      vacc0 = vdotq_s32(vacc0, vt, vone);
     }
     if (XNN_UNLIKELY(batch != 0)) {
-      int8x8_t vt = vld1_s8(input);
-      vone = vld1_s8(&params->fp32_neon.mask_table[15 - batch]);
-      vacc16_0 = vmlal_s8(vacc16_0, vt, vone);
+      int8x16_t vt = vld1q_s8(input);
+      vone = vld1q_s8(&params->fp32_neon.mask_table[15 - batch]);
+      vacc0 = vdotq_s32(vacc0, vt, vone);
     }
-    vacc0 = vaddq_s32(vacc0, vaddq_s32(vmovl_s16(vget_low_s16(vacc16_0)), vmovl_s16(vget_high_s16(vacc16_0))));
   }
   $if ACCUMULATORS > 1:
     $ACC_SLICE = 1

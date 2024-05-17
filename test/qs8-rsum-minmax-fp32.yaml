@@ -28,3 +28,15 @@
   init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
 - name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_mlal_u64_acc4
   init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u16
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u32
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u64
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u32_acc2
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u64_acc2
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u64_acc4
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
