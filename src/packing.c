@@ -20,6 +20,7 @@
 #include <xnnpack/unaligned.h>
 
 #include <fp16/fp16.h>
+#include <stdio.h>
 
 void xnn_pack_f32_gemm_goi_w(
   size_t g,
@@ -536,6 +537,94 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
             const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
             const size_t k_offset = (nr_block_start + nr_block_offset) * kc + kc_idx;
             const size_t kh_offset = k_offset + kr;
+            uint8_t kv_lo = 8;
+            if (kc_idx < kc) {
+              kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4) : (k[k_offset >> 1] & 0xF));
+            }
+            uint8_t kv_hi = 8;
+            if ((kc_idx + kr) < kc) {
+              kv_hi = ((kh_offset & 1) ? (k[kh_offset >> 1] >> 4) : (k[kh_offset >> 1] & 0xF));
+            }
+            ksum += kv_lo + kv_hi - 16;  // subtract 2 zero points (8)
+            const uint8_t kv = (kv_lo | (kv_hi << 4)) ^ 0x88;
+            ((uint8_t*) packed_weights)[kr_block_offset] = kv;
+          }
+
+          size_t block_index = kr_block_start / bl;
+          size_t scale_index = (nr_block_start + nr_block_offset) * num_blocks + block_index;
+          unaligned_indexed_store_f32(packed_b, nr_block_offset, unaligned_indexed_load_f32(packed_b, nr_block_offset) - (float) ksum * izp * scale[scale_index] * 16);
+          packed_weights = (uint8_t*) packed_weights + kr;  // kr * 2 nibbles
+        }
+        if (((2 * kr) + kr_block_start) % bl == 0) {
+          packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes_bl);
+        }
+
+        packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;  // skip NR remainder
+      }
+      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes_n);
+      nr_block_start += nr;
+    } while (nr_block_start < nc);
+    k += nc * kc;  // kc * 2 nibbles
+  } while (--g != 0);
+}
+
+void xnn_pack_qs8_qb4w_gemm_gio_w(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  size_t k_stride,
+  size_t bl,              // block size
+  const uint8_t* k,       // kernel
+  const int32_t* bias,
+  const float* scale,
+  void* packed_weights,
+  size_t extra_bytes_bl,  // extra bytes per block
+  size_t extra_bytes_n,   // extra bytes per n
+  const struct xnn_qs8_qc4w_packing_params* params)
+{
+  assert(g != 0);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(nr >= sr);
+  assert(kr >= 1 && kr <= 16);
+  assert(sr >= 1 && sr <= 16);
+  assert(k != NULL);
+  assert(packed_weights != NULL);
+  assert(params != NULL);
+  assert(params->kernel_zero_point == 8);
+  assert(b == NULL);  // Not used here. Must be updated outside.
+
+  const size_t skr = sr * kr;
+
+  // Constraints for blocksize
+  // These need to be reevaluated in the future.
+  assert(bl != 0);
+  assert(round_up_po2(kc, skr) % bl == 0); // must be round number of blocks inside a column
+  assert(bl % skr == 0); // must be round number of kr * sr
+  assert(bl <= round_up_po2(kc, skr)); // must not be larger than K
+  assert(2 * skr <= bl); // must be at least two skr to avoid back-to-back extra_bytes
+
+  const size_t num_blocks = round_up_po2(kc, skr) / bl;
+  const int32_t izp = (int32_t) params->input_zero_point;
+
+  do {
+    size_t nr_block_start = 0;
+    do {
+      const size_t nr_block_size = min(nc - nr_block_start, nr);
+      int32_t* packed_b = (int32_t*) packed_weights;
+      packed_weights = (float*) packed_weights + nr_block_size;
+      packed_weights = (float*) packed_weights + (nr - nr_block_size);
+
+      for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr * 2); kr_block_start += kr * 2) {
+        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+          int32_t ksum = 0;
+          for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
+            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+            const size_t k_offset = (nr_block_start + nr_block_offset + kc_idx * k_stride);
+            const size_t kh_offset = k_offset + (kr * k_stride);
             uint8_t kv_lo = 8;
             if (kc_idx < kc) {
               kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4) : (k[k_offset >> 1] & 0xF));
