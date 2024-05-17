@@ -259,7 +259,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, nc_gt_1) {
   size_t stride = ksum_bytes + k_bytes + block_bytes + bias_bytes;
   size_t block_stride = (bl * nr) / 2 +  (sizeof(float) * nr);
 
-  xnn_init_qs8_qb8w_scale_fp32_params(
+  xnn_init_blockwise_scale_fp32_params(
     /*channels=*/ nc,
     /*channels_tile=*/ nr,
     /*channel_stride=*/ nr,
@@ -422,7 +422,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GIO_W, bl_eq_kc) {
   size_t stride = ksum_bytes + k_bytes + block_bytes + bias_bytes;
   size_t block_stride = (bl * nr) / 2 +  (sizeof(float) * nr);
 
-  xnn_init_qs8_qb8w_scale_fp32_params(
+  xnn_init_blockwise_scale_fp32_params(
     /*channels=*/ nc,
     /*channels_tile=*/ nr,
     /*channel_stride=*/ nr,

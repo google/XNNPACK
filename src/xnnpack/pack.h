@@ -422,7 +422,7 @@ XNN_INTERNAL void xnn_pack_qs8_qb4w_gemm_gio_w(
   size_t k_stride,
   size_t bl,
   const uint8_t* kernel,
-  const int32_t* bias,
+  const float* bias,
   const float* scale,
   void* packed_weights,
   size_t extra_bytes_bl,
