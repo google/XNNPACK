@@ -73,9 +73,20 @@ TEST_P(GemmTest, Test) {
             if (params.loop_bzp_.is_set) {
               tester.b_zero_point(bzp);
             }
+            for (size_t bl = params.loop_bl_.from; bl <= tester.k() / 2;
+               bl += params.loop_bl_.step) {
+              
+               if (params.loop_bl_.is_set) {
+                // Require block size to divide (padded) column size.
+                if (round_up_po2(k, params.loop_bl_.step) % bl != 0) {
+                  continue;
+                }
+                tester.bl(bl);
+               }
 
-            // Call the test function.
-            params.test_func(tester);
+               // Call the test function.
+               params.test_func(tester);
+            }
           }
         }
       }
@@ -1248,19 +1259,16 @@ void GemmMicrokernelTester::Test(
   const size_t planes = 2;  // 4 bit is 2 planes - low nibbles and high nibbles
   const size_t k2 =  round_up_po2(k(), 2);  // tester assumes byte aligned rows
 
-  // TODO - Add bl to gen script.
-  const size_t bl = k2;
-
   const size_t packed_k2 = round_up_po2(k(), kr() * sr() * planes);  // 2 blocks for nibbles
   const size_t packed_k_bytes = (packed_k2 + 1)/ 2;
-  const size_t num_blocks = packed_k2 / bl;
+  const size_t num_blocks = packed_k2 / bl();
 
   std::vector<float> input(m() * k2);
   std::vector<int8_t> a((m() - 1) * a_stride() + k2 + XNN_EXTRA_BYTES / sizeof(int8_t));
   std::vector<xnn_qd8_quantization_params> quantization_params(mr());
   std::vector<uint8_t> b(n() * k2 / 2);
   std::vector<float> bias(n());
-  std::vector<float> kernel_scale2d(n() * k2 / bl);
+  std::vector<float> kernel_scale2d(n() * k2 / bl());
   std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_w(packed_n() * packed_k_bytes +
                                                                /* vksum */ packed_n() * sizeof(float) +
                                                                /* scales */ packed_n() * num_blocks * sizeof(float) +
@@ -1303,14 +1311,14 @@ void GemmMicrokernelTester::Test(
     // TODO
     bool can_use_optimized_packing = false; // can_use_xnn_pack_qs8_qc4w_gemm_bl_goi_w_nr8_kr4(n(), nr(), kr(), sr(), nr() * sizeof(float), nr() * sizeof(float));
 
-    pack(/*g=*/1, n(), k2, nr(), kr(), sr(), bl,
+    pack(/*g=*/1, n(), k2, nr(), kr(), sr(), bl(),
       b.data(), /*bias=*/bias.data(), /*scale=*/kernel_scale2d.data(),
       packed_w.data(), sizeof(float) * nr(), sizeof(float) * nr(), &packing_params);
 
     if (!can_use_optimized_packing) {
       // Fill in packed kernel scale
       size_t stride =  nr() * (packed_k_bytes + /* scales= */ num_blocks * sizeof(float) + /* ksum= */ sizeof(float) + /* bias= */ sizeof(float));
-      size_t block_stride = (bl / 2 + sizeof(float)) * nr();
+      size_t block_stride = (bl() / 2 + sizeof(float)) * nr();
       size_t start_offset = nr() * (packed_k_bytes / num_blocks + sizeof(float));
       uintptr_t start = (uintptr_t) packed_w.data() + start_offset;
       xnn_init_qs8_qc8w_bl_scale_fp32_params(
@@ -1341,8 +1349,8 @@ void GemmMicrokernelTester::Test(
         for (size_t bl_index=0; bl_index < num_blocks; ++bl_index) {
           int32_t ksum = 0;
           int32_t c_ref_acc = 0;
-          for (size_t kr_index = 0; kr_index < bl; kr_index++) {
-            const size_t k_index =  bl_index * bl + kr_index;
+          for (size_t kr_index = 0; kr_index < bl(); kr_index++) {
+            const size_t k_index =  bl_index * bl() + kr_index;
             const size_t nb_index = (n_index * k2 + k_index) / 2;
             const int32_t bv = int32_t((k_index % 2 == 0) ? (b[nb_index] & UINT8_C(0xF)) : (b[nb_index] >> 4)) - b_zero_point();
             ksum += bv;
@@ -1380,7 +1388,7 @@ void GemmMicrokernelTester::Test(
       }
     }
 
-    gemm(m(), n(), k2, bl,
+    gemm(m(), n(), k2, bl(),
         a.data(), a_stride() * sizeof(int8_t),
         static_cast<const void*>(packed_w.data()),
         c.data(), cm_stride() * sizeof(uint16_t), cn_stride() * sizeof(uint16_t), &params, quantization_params.data());

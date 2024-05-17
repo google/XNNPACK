@@ -72,6 +72,15 @@ class GemmMicrokernelTester {
     return this->sr_;
   }
 
+  GemmMicrokernelTester& bl(size_t bl) {
+    this->bl_ = bl;
+    return *this;
+  }
+
+  size_t bl() const {
+    return this->bl_;
+  }
+
   GemmMicrokernelTester& m(size_t m) {
     this->m_ = m;
     return *this;
@@ -457,6 +466,7 @@ class GemmMicrokernelTester {
   size_t nr_{1};
   size_t kr_{1};
   size_t sr_{1};
+  size_t bl_{2};
   size_t m_{1};
   size_t n_{1};
   size_t k_{1};
@@ -516,6 +526,10 @@ struct GemmTestParams {
     loop_bzp_ = LoopParams(from, to, step);
     return *this;
   }
+  GemmTestParams& loop_bl(size_t from, size_t to, size_t step = 1) {
+    loop_bl_ = LoopParams(from, to, step);
+    return *this;
+  }
 
   std::string test_name;
   GemmMicrokernelTester tester;
@@ -526,6 +540,7 @@ struct GemmTestParams {
   LoopParams loop_n_;
   LoopParams loop_zi_;
   LoopParams loop_bzp_;
+  LoopParams loop_bl_;
 };
 
 using GemmTest = testing::TestWithParam<GemmTestParams>;
