@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-rsum/neon-mlal.c.in
+//   Template: src/qs8-rsum/neon-addw.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 Google LLC
@@ -15,7 +15,7 @@
 #include <xnnpack/math.h>
 #include <xnnpack/reduce.h>
 
-void xnn_qs8_rsum_minmax_fp32_ukernel__neon_mlal_u16(
+void xnn_qs8_rsum_minmax_fp32_ukernel__neon_addw_u16(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -25,7 +25,8 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__neon_mlal_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  int8x8_t vone = vdup_n_s8(1);
+  // 256 int8s may be summed into an int16 before overflowing.
+  // There are 8 lanes in the accumulator register and 1 registers.
   int num_batches = batch  >> 8;
   int32x4_t vacc0 = vmovq_n_s32(0);
   for (; num_batches > 0; --num_batches) {
@@ -34,8 +35,8 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__neon_mlal_u16(
       const int8x8_t vt0 = vld1_s8(input); input += 8;
       const int8x8_t vt1 = vld1_s8(input); input += 8;
 
-      vacc16_0 = vmlal_s8(vacc16_0, vt0, vone);
-      vacc16_0 = vmlal_s8(vacc16_0, vt1, vone);
+      vacc16_0 = vaddw_s8(vacc16_0, vt0);
+      vacc16_0 = vaddw_s8(vacc16_0, vt1);
     }
     vacc0 = vaddq_s32(vacc0, vaddq_s32(vmovl_s16(vget_low_s16(vacc16_0)), vmovl_s16(vget_high_s16(vacc16_0))));
     batch -= 256;
@@ -45,17 +46,17 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__neon_mlal_u16(
     for (; batch >= 16; batch -= 16) {
       const int8x8_t vt0 = vld1_s8(input); input += 8;
       const int8x8_t vt1 = vld1_s8(input); input += 8;
-      vacc16_0 = vmlal_s8(vacc16_0, vt0, vone);
-      vacc16_0 = vmlal_s8(vacc16_0, vt1, vone);
+      vacc16_0 = vaddw_s8(vacc16_0, vt0);
+      vacc16_0 = vaddw_s8(vacc16_0, vt1);
     }
     for (; batch >= 8; batch -= 8) {
       const int8x8_t vt = vld1_s8(input); input += 8;
-      vacc16_0 = vmlal_s8(vacc16_0, vt, vone);
+      vacc16_0 = vaddw_s8(vacc16_0, vt);
     }
     if (XNN_UNLIKELY(batch != 0)) {
-      int8x8_t vt = vld1_s8(input);
-      vone = vld1_s8(&params->fp32_neon.mask_table[15 - batch]);
-      vacc16_0 = vmlal_s8(vacc16_0, vt, vone);
+      const int8x8_t vt = vld1_s8(input);
+      const int8x8_t vmask = vld1_s8(&params->fp32_neon.mask_table[15 - batch]);
+      vacc16_0 = vmlal_s8(vacc16_0, vt, vmask);
     }
     vacc0 = vaddq_s32(vacc0, vaddq_s32(vmovl_s16(vget_low_s16(vacc16_0)), vmovl_s16(vget_high_s16(vacc16_0))));
   }

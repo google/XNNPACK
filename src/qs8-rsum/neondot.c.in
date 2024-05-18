@@ -28,7 +28,7 @@ void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__neondot_u${CHANNEL_T
   assert(input != NULL);
   assert(output != NULL);
 
-  int8x16_t vone = vdupq_n_s8(1);
+  const int8x16_t vone = vdupq_n_s8(1);
   $for A in range(ACCUMULATORS):
     int32x4_t vacc${A} = vmovq_n_s32(0);
   $if CHANNEL_TILE > 8:
@@ -46,8 +46,8 @@ void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__neondot_u${CHANNEL_T
     }
     if (XNN_UNLIKELY(batch != 0)) {
       int8x16_t vt = vld1q_s8(input);
-      vone = vld1q_s8(&params->fp32_neon.mask_table[15 - batch]);
-      vacc0 = vdotq_s32(vacc0, vt, vone);
+      const int8x16_t vmask = vld1q_s8(&params->fp32_neon.mask_table[15 - batch]);
+      vacc0 = vdotq_s32(vacc0, vt, vmask);
     }
   }
   $if ACCUMULATORS > 1:

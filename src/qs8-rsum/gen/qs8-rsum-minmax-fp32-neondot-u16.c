@@ -25,7 +25,7 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  int8x16_t vone = vdupq_n_s8(1);
+  const int8x16_t vone = vdupq_n_s8(1);
   int32x4_t vacc0 = vmovq_n_s32(0);
   for (; batch >= 16; batch -= 16) {
     const int8x16_t vt0 = vld1q_s8(input); input += 16;
@@ -39,8 +39,8 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u16(
     }
     if (XNN_UNLIKELY(batch != 0)) {
       int8x16_t vt = vld1q_s8(input);
-      vone = vld1q_s8(&params->fp32_neon.mask_table[15 - batch]);
-      vacc0 = vdotq_s32(vacc0, vt, vone);
+      const int8x16_t vmask = vld1q_s8(&params->fp32_neon.mask_table[15 - batch]);
+      vacc0 = vdotq_s32(vacc0, vt, vmask);
     }
   }
   int32x2_t vacc_lo = vadd_s32(vget_low_s32(vacc0), vget_high_s32(vacc0));
