@@ -53,8 +53,8 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u64_acc4(
     }
   }
   vacc0 = vaddq_s32(vacc0, vacc1);
+  vacc2 = vaddq_s32(vacc2, vacc3);
   vacc0 = vaddq_s32(vacc0, vacc2);
-  vacc0 = vaddq_s32(vacc0, vacc3);
   int32x2_t vacc_lo = vadd_s32(vget_low_s32(vacc0), vget_high_s32(vacc0));
   vacc_lo = vpadd_s32(vacc_lo, vacc_lo);
 
