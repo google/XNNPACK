@@ -12,29 +12,27 @@
   init: xnn_init_qs8_avgpool_minmax_fp32_scalar_imagic_params
 
 # ARM NEON
-- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_addw_u16
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_u16
   init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
-- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_addw_u32
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_u32
   init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
-- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_addw_u64
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_u32_acc2
   init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
-- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_addw_u16_acc2
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_u64
   init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
-- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_addw_u32_acc2
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_u64_acc2
   init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
-- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_addw_u64_acc2
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_u64_acc4
   init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
-- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_addw_u32_acc4
-  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
-- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_addw_u64_acc4
-  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+
+# ARM NEONDOT
 - name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u16
   init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
 - name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u32
   init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
-- name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u64
-  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
 - name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u32_acc2
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u64
   init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
 - name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u64_acc2
   init: xnn_init_qs8_avgpool_minmax_fp32_neon_params

@@ -3,9 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert CHANNEL_TILE % 4 == 0
-$assert CHANNEL_TILE >= 4
-$SIMD_TILE = CHANNEL_TILE // 8
+$assert CHANNEL_TILE % 16 == 0
+$assert CHANNEL_TILE >= 16
+$SIMD_TILE = CHANNEL_TILE // 16
 $assert ACCUMULATORS <= SIMD_TILE
 $import math
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -19,7 +19,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if ARMV8 else "neon")
-void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__neon_addw_u${CHANNEL_TILE}${ACC_SUFFIX}(
+void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__neon_u${CHANNEL_TILE}${ACC_SUFFIX}(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -29,34 +29,37 @@ void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__neon_addw_u${CHANNEL
   assert(input != NULL);
   assert(output != NULL);
 
-  // 256 int8s may be summed into an int16 before overflowing.
-  // There are 8 lanes in the accumulator register and ${ACCUMULATORS} registers.
-  int num_batches = batch  >> ${(int(math.log2(ACCUMULATORS * 256)))};
+  // 256 int8s may be summed into an int16 before overflowing
+  // Each vpada does 2 adds so we can do 128 vpada
+  // There ${ACCUMULATORS} registers so batch size is ${ACCUMULATORS * 128}
+  int num_batches = batch  >> ${(int(math.log2(ACCUMULATORS * 128)))};
   $for A in range(ACCUMULATORS):
     int32x4_t vacc${A} = vmovq_n_s32(0);
-  $if CHANNEL_TILE > 8:
-    for (; num_batches > 0; --num_batches) {
-      $for A in range(ACCUMULATORS):
-        int16x8_t vacc16_${A} = vmovq_n_s16(0);
-      for (size_t current_batch = ${ACCUMULATORS * 256}; current_batch > 0; current_batch -= ${CHANNEL_TILE}) {
-        $for N in range(SIMD_TILE):
-          const int8x8_t vt${N} = vld1_s8(input); input += 8;
 
-        $for N in range(SIMD_TILE):
-          vacc16_${N % ACCUMULATORS} = vaddw_s8(vacc16_${N % ACCUMULATORS}, vt${N});
-      }
-      $for A in range(ACCUMULATORS):
-        vacc${A} = vpadalq_s16(vacc${A}, vacc16_${A});
-      batch -= ${ACCUMULATORS * 256};
+  for (; num_batches > 0; --num_batches) {
+    $for A in range(ACCUMULATORS):
+      int16x8_t vacc16_${A} = vmovq_n_s16(0);
+    for (size_t current_batch = ${ACCUMULATORS * 128}; current_batch > 0; current_batch -= ${CHANNEL_TILE}) {
+      $for N in range(SIMD_TILE):
+        const int8x16_t vt${N} = vld1q_s8(input); input += 16;
+
+      $for N in range(SIMD_TILE):
+        vacc16_${N % ACCUMULATORS} = vpadalq_s8(vacc16_${N % ACCUMULATORS}, vt${N});
     }
+    $for A in range(ACCUMULATORS):
+      vacc${A} = vpadalq_s16(vacc${A}, vacc16_${A});
+    batch -= ${ACCUMULATORS * 128};
+  }
+
   if (XNN_UNLIKELY(batch != 0)) {
     $for A in range(ACCUMULATORS):
       int16x8_t vacc16_${A} = vmovq_n_s16(0);
     for (; batch >= ${CHANNEL_TILE}; batch -= ${CHANNEL_TILE}) {
       $for N in range(SIMD_TILE):
-        const int8x8_t vt${N} = vld1_s8(input); input += 8;
+        const int8x16_t vt${N} = vld1q_s8(input); input += 16;
+
       $for N in range(SIMD_TILE):
-        vacc16_${N % ACCUMULATORS} = vaddw_s8(vacc16_${N % ACCUMULATORS}, vt${N});
+        vacc16_${N % ACCUMULATORS} = vpadalq_s8(vacc16_${N % ACCUMULATORS}, vt${N});
     }
     $if ACCUMULATORS > 1:
       $ACC_SLICE = 1
@@ -65,14 +68,15 @@ void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__neon_addw_u${CHANNEL
           $if A + ACC_SLICE < ACCUMULATORS:
             vacc16_${A} = vaddq_s16(vacc16_${A}, vacc16_${A + ACC_SLICE});
         $ACC_SLICE *= 2
-    for (; batch >= 8; batch -= 8) {
-      const int8x8_t vt = vld1_s8(input); input += 8;
-      vacc16_0 = vaddw_s8(vacc16_0, vt);
+    for (; batch >= 16; batch -= 16) {
+      const int8x16_t vt = vld1q_s8(input); input += 16;
+      vacc16_0 = vpadalq_s8(vacc16_0, vt);
     }
     if (XNN_UNLIKELY(batch != 0)) {
-      const int8x8_t vt = vld1_s8(input);
-      const int8x8_t vmask = vld1_s8(&params->fp32_neon.mask_table[15 - batch]);
-      vacc16_0 = vmlal_s8(vacc16_0, vt, vmask);
+      const int8x16_t vt = vld1q_s8(input);
+      const int8x16_t vmask = vld1q_s8(&params->fp32_neon.mask_table[15 - batch]);
+      const int8x16_t vtm = vmulq_s8(vt, vmask);
+      vacc16_0 = vpadalq_s8(vacc16_0, vtm);
     }
     vacc0 = vpadalq_s16(vacc0, vacc16_0);
   }
@@ -83,7 +87,6 @@ void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__neon_addw_u${CHANNEL
         $if A + ACC_SLICE < ACCUMULATORS:
           vacc${A} = vaddq_s32(vacc${A}, vacc${A + ACC_SLICE});
       $ACC_SLICE *= 2
-
   #if XNN_ARCH_ARM64
     const int32_t vacc = vaddvq_s32(vacc0);
   #else

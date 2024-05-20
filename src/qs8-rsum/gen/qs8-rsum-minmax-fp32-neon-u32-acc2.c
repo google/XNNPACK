@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-rsum/neon-addw.c.in
+//   Template: src/qs8-rsum/neon.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 Google LLC
@@ -15,7 +15,7 @@
 #include <xnnpack/math.h>
 #include <xnnpack/reduce.h>
 
-void xnn_qs8_rsum_minmax_fp32_ukernel__neon_addw_u32_acc2(
+void xnn_qs8_rsum_minmax_fp32_ukernel__neon_u32_acc2(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -25,56 +25,52 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__neon_addw_u32_acc2(
   assert(input != NULL);
   assert(output != NULL);
 
-  // 256 int8s may be summed into an int16 before overflowing.
-  // There are 8 lanes in the accumulator register and 2 registers.
-  int num_batches = batch  >> 9;
+  // 256 int8s may be summed into an int16 before overflowing
+  // Each vpada does 2 adds so we can do 128 vpada
+  // There 2 registers so batch size is 256
+  int num_batches = batch  >> 8;
   int32x4_t vacc0 = vmovq_n_s32(0);
   int32x4_t vacc1 = vmovq_n_s32(0);
+
   for (; num_batches > 0; --num_batches) {
     int16x8_t vacc16_0 = vmovq_n_s16(0);
     int16x8_t vacc16_1 = vmovq_n_s16(0);
-    for (size_t current_batch = 512; current_batch > 0; current_batch -= 32) {
-      const int8x8_t vt0 = vld1_s8(input); input += 8;
-      const int8x8_t vt1 = vld1_s8(input); input += 8;
-      const int8x8_t vt2 = vld1_s8(input); input += 8;
-      const int8x8_t vt3 = vld1_s8(input); input += 8;
+    for (size_t current_batch = 256; current_batch > 0; current_batch -= 32) {
+      const int8x16_t vt0 = vld1q_s8(input); input += 16;
+      const int8x16_t vt1 = vld1q_s8(input); input += 16;
 
-      vacc16_0 = vaddw_s8(vacc16_0, vt0);
-      vacc16_1 = vaddw_s8(vacc16_1, vt1);
-      vacc16_0 = vaddw_s8(vacc16_0, vt2);
-      vacc16_1 = vaddw_s8(vacc16_1, vt3);
+      vacc16_0 = vpadalq_s8(vacc16_0, vt0);
+      vacc16_1 = vpadalq_s8(vacc16_1, vt1);
     }
     vacc0 = vpadalq_s16(vacc0, vacc16_0);
     vacc1 = vpadalq_s16(vacc1, vacc16_1);
-    batch -= 512;
+    batch -= 256;
   }
+
   if (XNN_UNLIKELY(batch != 0)) {
     int16x8_t vacc16_0 = vmovq_n_s16(0);
     int16x8_t vacc16_1 = vmovq_n_s16(0);
     for (; batch >= 32; batch -= 32) {
-      const int8x8_t vt0 = vld1_s8(input); input += 8;
-      const int8x8_t vt1 = vld1_s8(input); input += 8;
-      const int8x8_t vt2 = vld1_s8(input); input += 8;
-      const int8x8_t vt3 = vld1_s8(input); input += 8;
-      vacc16_0 = vaddw_s8(vacc16_0, vt0);
-      vacc16_1 = vaddw_s8(vacc16_1, vt1);
-      vacc16_0 = vaddw_s8(vacc16_0, vt2);
-      vacc16_1 = vaddw_s8(vacc16_1, vt3);
+      const int8x16_t vt0 = vld1q_s8(input); input += 16;
+      const int8x16_t vt1 = vld1q_s8(input); input += 16;
+
+      vacc16_0 = vpadalq_s8(vacc16_0, vt0);
+      vacc16_1 = vpadalq_s8(vacc16_1, vt1);
     }
     vacc16_0 = vaddq_s16(vacc16_0, vacc16_1);
-    for (; batch >= 8; batch -= 8) {
-      const int8x8_t vt = vld1_s8(input); input += 8;
-      vacc16_0 = vaddw_s8(vacc16_0, vt);
+    for (; batch >= 16; batch -= 16) {
+      const int8x16_t vt = vld1q_s8(input); input += 16;
+      vacc16_0 = vpadalq_s8(vacc16_0, vt);
     }
     if (XNN_UNLIKELY(batch != 0)) {
-      const int8x8_t vt = vld1_s8(input);
-      const int8x8_t vmask = vld1_s8(&params->fp32_neon.mask_table[15 - batch]);
-      vacc16_0 = vmlal_s8(vacc16_0, vt, vmask);
+      const int8x16_t vt = vld1q_s8(input);
+      const int8x16_t vmask = vld1q_s8(&params->fp32_neon.mask_table[15 - batch]);
+      const int8x16_t vtm = vmulq_s8(vt, vmask);
+      vacc16_0 = vpadalq_s8(vacc16_0, vtm);
     }
     vacc0 = vpadalq_s16(vacc0, vacc16_0);
   }
   vacc0 = vaddq_s32(vacc0, vacc1);
-
   #if XNN_ARCH_ARM64
     const int32_t vacc = vaddvq_s32(vacc0);
   #else
