@@ -19,7 +19,7 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u64_acc2(
     size_t batch,
     const int8_t* input,
     int8_t* output,
-    const union xnn_qs8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qs8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(input != NULL);
@@ -51,8 +51,14 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u64_acc2(
     }
   }
   vacc0 = vaddq_s32(vacc0, vacc1);
-  int32x2_t vacc_lo = vadd_s32(vget_low_s32(vacc0), vget_high_s32(vacc0));
-  vacc_lo = vpadd_s32(vacc_lo, vacc_lo);
+
+  #if XNN_ARCH_ARM64
+    const int32_t vacc = vaddvq_s32(vacc0);
+  #else
+    int32x2_t vacc_lo = vadd_s32(vget_low_s32(vacc0), vget_high_s32(vacc0));
+    vacc_lo = vpadd_s32(vacc_lo, vacc_lo);
+    const int32_t vacc = vget_lane_s32(vacc_lo, 0);
+  #endif
 
   const int32_t vinit_bias = params->fp32_neon.init_bias;
   const float vscale = params->fp32_neon.scale;
@@ -61,7 +67,7 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u64_acc2(
   const float vmagic_bias = params->fp32_neon.magic_bias;
   const int32_t vmagic_bias_less_output_zero_point = params->fp32_neon.magic_bias_less_output_zero_point;
 
-  float vfpacc = (float) (vget_lane_s32(vacc_lo, 0) + vinit_bias) * vscale;
+  float vfpacc = (float) (vacc + vinit_bias) * vscale;
   vfpacc += vmagic_bias;
   int32_t vout = (int32_t) float_as_uint32(vfpacc);
   vout -= vmagic_bias_less_output_zero_point;
