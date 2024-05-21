@@ -992,6 +992,15 @@ union xnn_qs8_avgpool_minmax_params {
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int8_t output_min[16];
   } fp32_sse4;
+  struct {
+    int32_t init_bias;
+    float scale;
+    float magic_bias;
+    int32_t magic_bias_less_output_zero_point;
+    int8_t output_min;
+    int8_t output_max;
+    int8_t mask_table[15];  // same as neon except 0xff and 8 byte mask
+  } fp32_avx2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   struct {
