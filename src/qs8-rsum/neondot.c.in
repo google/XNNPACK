@@ -1,0 +1,89 @@
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert CHANNEL_TILE % 4 == 0
+$assert CHANNEL_TILE >= 4
+$SIMD_TILE = CHANNEL_TILE // 16
+$assert ACCUMULATORS <= SIMD_TILE
+$import math
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/math.h>
+#include <xnnpack/reduce.h>
+
+$ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_neon"
+void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__neondot_u${CHANNEL_TILE}${ACC_SUFFIX}(
+    size_t batch,
+    const int8_t* input,
+    int8_t* output,
+    const union xnn_qs8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const int8x16_t vone = vdupq_n_s8(1);
+  $for A in range(ACCUMULATORS):
+    int32x4_t vacc${A} = vmovq_n_s32(0);
+  $if CHANNEL_TILE > 8:
+    for (; batch >= ${CHANNEL_TILE}; batch -= ${CHANNEL_TILE}) {
+      $for N in range(SIMD_TILE):
+        const int8x16_t vt${N} = vld1q_s8(input); input += 16;
+
+      $for N in range(SIMD_TILE):
+        vacc${N % ACCUMULATORS} = vdotq_s32(vacc${N % ACCUMULATORS}, vt${N}, vone);
+    }
+  if (XNN_UNLIKELY(batch != 0)) {
+    for (; batch >= 16; batch -= 16) {
+      const int8x16_t vt = vld1q_s8(input); input += 16;
+      vacc0 = vdotq_s32(vacc0, vt, vone);
+    }
+    if (XNN_UNLIKELY(batch != 0)) {
+      int8x16_t vt = vld1q_s8(input);
+      const int8x16_t vmask = vld1q_s8(&params->fp32_neon.mask_table[15 - batch]);
+      vacc0 = vdotq_s32(vacc0, vt, vmask);
+    }
+  }
+  $if ACCUMULATORS > 1:
+    $ACC_SLICE = 1
+    $while ACC_SLICE < ACCUMULATORS:
+      $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+        $if A + ACC_SLICE < ACCUMULATORS:
+          vacc${A} = vaddq_s32(vacc${A}, vacc${A + ACC_SLICE});
+      $ACC_SLICE *= 2
+
+  #if XNN_ARCH_ARM64
+    const int32_t vacc = vaddvq_s32(vacc0);
+  #else
+    int32x2_t vacc_lo = vadd_s32(vget_low_s32(vacc0), vget_high_s32(vacc0));
+    vacc_lo = vpadd_s32(vacc_lo, vacc_lo);
+    const int32_t vacc = vget_lane_s32(vacc_lo, 0);
+  #endif
+
+  $if REQUANTIZATION == "FP32":
+    const int32_t vinit_bias = params->fp32_neon.init_bias;
+    const float vscale = params->${PARAMS_STRUCT}.scale;
+    const int32_t output_min = params->fp32_neon.output_min;
+    const int32_t output_max = params->fp32_neon.output_max;
+    const float vmagic_bias = params->fp32_neon.magic_bias;
+    const int32_t vmagic_bias_less_output_zero_point = params->fp32_neon.magic_bias_less_output_zero_point;
+  $elif REQUANTIZATION == "RNDNU":
+    const int32x4_t vleft_pre_shift = vld1q_dup_s32(&params->rndnu_neon.left_pre_shift);
+    const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
+    const int32x4_t vleft_post_shift = vld1q_dup_s32(&params->rndnu_neon.left_post_shift);
+    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->rndnu_neon.output_zero_point);
+
+  float vfpacc = (float) (vacc + vinit_bias) * vscale;
+  vfpacc += vmagic_bias;
+  int32_t vout = (int32_t) float_as_uint32(vfpacc);
+  vout -= vmagic_bias_less_output_zero_point;
+  vout = math_max_s32(vout, output_min);
+  vout = math_min_s32(vout, output_max);
+  *output += (int8_t) vout;
+}

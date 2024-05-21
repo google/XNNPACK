@@ -683,7 +683,6 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/qs8-rsum/gen/qs8-rsum-minmax-fp32-neon-u16-acc2.c",
     "src/qs8-rsum/gen/qs8-rsum-minmax-fp32-neon-u16.c",
     "src/qs8-rsum/gen/qs8-rsum-minmax-fp32-neon-u32-acc2.c",
-    "src/qs8-rsum/gen/qs8-rsum-minmax-fp32-neon-u32-acc4.c",
     "src/qs8-rsum/gen/qs8-rsum-minmax-fp32-neon-u32.c",
     "src/qs8-rsum/gen/qs8-rsum-minmax-fp32-neon-u64-acc2.c",
     "src/qs8-rsum/gen/qs8-rsum-minmax-fp32-neon-u64-acc4.c",

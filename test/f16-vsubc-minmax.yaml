@@ -28,4 +28,3 @@
   init: xnn_init_f16_minmax_avx_params
 - name: xnn_f16_vsubc_minmax_ukernel__f16c_u16
   init: xnn_init_f16_minmax_avx_params
-

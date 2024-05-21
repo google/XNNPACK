@@ -38,8 +38,8 @@ BENCHMARK_CAPTURE(qs8_rsum, scalar_imagic_u4,
   ->UseRealTime();
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(qs8_rsum, neon_mlal_u16,
-                    xnn_qs8_rsum_minmax_fp32_ukernel__neon_mlal_u16,
+  BENCHMARK_CAPTURE(qs8_rsum, neon_u16,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__neon_u16,
                     xnn_init_qs8_avgpool_minmax_fp32_neon_params,
                     benchmark::utils::CheckNEON)
     ->Apply(BenchmarkRSUM)
@@ -48,8 +48,8 @@ BENCHMARK_CAPTURE(qs8_rsum, scalar_imagic_u4,
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(qs8_rsum, neon_mlal_u32,
-                    xnn_qs8_rsum_minmax_fp32_ukernel__neon_mlal_u32,
+  BENCHMARK_CAPTURE(qs8_rsum, neon_u32,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__neon_u32,
                     xnn_init_qs8_avgpool_minmax_fp32_neon_params,
                     benchmark::utils::CheckNEON)
     ->Apply(BenchmarkRSUM)
@@ -58,8 +58,8 @@ BENCHMARK_CAPTURE(qs8_rsum, scalar_imagic_u4,
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(qs8_rsum, neon_mlal_u64,
-                    xnn_qs8_rsum_minmax_fp32_ukernel__neon_mlal_u64,
+  BENCHMARK_CAPTURE(qs8_rsum, neon_u32_acc2,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__neon_u32_acc2,
                     xnn_init_qs8_avgpool_minmax_fp32_neon_params,
                     benchmark::utils::CheckNEON)
     ->Apply(BenchmarkRSUM)
@@ -68,8 +68,8 @@ BENCHMARK_CAPTURE(qs8_rsum, scalar_imagic_u4,
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(qs8_rsum, neon_mlal_u16_acc2,
-                    xnn_qs8_rsum_minmax_fp32_ukernel__neon_mlal_u16_acc2,
+  BENCHMARK_CAPTURE(qs8_rsum, neon_u64,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__neon_u64,
                     xnn_init_qs8_avgpool_minmax_fp32_neon_params,
                     benchmark::utils::CheckNEON)
     ->Apply(BenchmarkRSUM)
@@ -78,8 +78,8 @@ BENCHMARK_CAPTURE(qs8_rsum, scalar_imagic_u4,
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(qs8_rsum, neon_mlal_u32_acc2,
-                    xnn_qs8_rsum_minmax_fp32_ukernel__neon_mlal_u32_acc2,
+  BENCHMARK_CAPTURE(qs8_rsum, neon_u64_acc2,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__neon_u64_acc2,
                     xnn_init_qs8_avgpool_minmax_fp32_neon_params,
                     benchmark::utils::CheckNEON)
     ->Apply(BenchmarkRSUM)
@@ -88,8 +88,8 @@ BENCHMARK_CAPTURE(qs8_rsum, scalar_imagic_u4,
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(qs8_rsum, neon_mlal_u64_acc2,
-                    xnn_qs8_rsum_minmax_fp32_ukernel__neon_mlal_u64_acc2,
+  BENCHMARK_CAPTURE(qs8_rsum, neon_u64_acc4,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__neon_u64_acc4,
                     xnn_init_qs8_avgpool_minmax_fp32_neon_params,
                     benchmark::utils::CheckNEON)
     ->Apply(BenchmarkRSUM)
@@ -97,24 +97,64 @@ BENCHMARK_CAPTURE(qs8_rsum, scalar_imagic_u4,
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(qs8_rsum, neon_mlal_u32_acc4,
-                    xnn_qs8_rsum_minmax_fp32_ukernel__neon_mlal_u32_acc4,
+#if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  BENCHMARK_CAPTURE(qs8_rsum, neondot_u16,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u16,
                     xnn_init_qs8_avgpool_minmax_fp32_neon_params,
-                    benchmark::utils::CheckNEON)
+                    benchmark::utils::CheckNEONDOT)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(qs8_rsum, neon_mlal_u64_acc4,
-                    xnn_qs8_rsum_minmax_fp32_ukernel__neon_mlal_u64_acc4,
+#if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  BENCHMARK_CAPTURE(qs8_rsum, neondot_u32,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u32,
                     xnn_init_qs8_avgpool_minmax_fp32_neon_params,
-                    benchmark::utils::CheckNEON)
+                    benchmark::utils::CheckNEONDOT)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+
+#if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  BENCHMARK_CAPTURE(qs8_rsum, neondot_u32_acc2,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u32_acc2,
+                    xnn_init_qs8_avgpool_minmax_fp32_neon_params,
+                    benchmark::utils::CheckNEONDOT)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+
+#if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  BENCHMARK_CAPTURE(qs8_rsum, neondot_u64,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u64,
+                    xnn_init_qs8_avgpool_minmax_fp32_neon_params,
+                    benchmark::utils::CheckNEONDOT)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+
+#if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  BENCHMARK_CAPTURE(qs8_rsum, neondot_u64_acc2,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u64_acc2,
+                    xnn_init_qs8_avgpool_minmax_fp32_neon_params,
+                    benchmark::utils::CheckNEONDOT)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+
+#if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  BENCHMARK_CAPTURE(qs8_rsum, neondot_u64_acc4,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u64_acc4,
+                    xnn_init_qs8_avgpool_minmax_fp32_neon_params,
+                    benchmark::utils::CheckNEONDOT)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
