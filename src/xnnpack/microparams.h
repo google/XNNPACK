@@ -38,11 +38,9 @@ union xnn_f32_relu_params {
 
 union xnn_f16_scale_params {
   char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t scale;
   } fp16arith;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 };
 
 union xnn_f16_f32acc_scale_params {

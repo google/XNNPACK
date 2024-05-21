@@ -28,6 +28,13 @@ DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__neonfp16arith_u24_acc3)
 DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__neonfp16arith_u32_acc2)
 DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__neonfp16arith_u32_acc4)
 
+DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__avx512fp16_u32)
+DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__avx512fp16_u64_acc2)
+DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__avx512fp16_u96_acc3)
+DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__avx512fp16_u128_acc2)
+DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__avx512fp16_u128_acc4)
+
+
 #define DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                              \
       size_t batch,                                       \

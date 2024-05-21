@@ -1725,7 +1725,6 @@ void xnn_update_qu8_avgpool_minmax_fp32_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_f16_scale_fp16arith_params(
   union xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale)
@@ -1733,7 +1732,6 @@ size_t xnn_init_f16_scale_fp16arith_params(
   params->fp16arith.scale = scale;
   return sizeof(params->fp16arith);
 }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 size_t xnn_init_f16_f32acc_scale_scalar_params(
   union xnn_f16_f32acc_scale_params params[XNN_MIN_ELEMENTS(1)],
