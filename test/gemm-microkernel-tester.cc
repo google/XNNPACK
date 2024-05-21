@@ -1244,7 +1244,7 @@ void GemmMicrokernelTester::Test(
 void GemmMicrokernelTester::Test(
   xnn_qd8_f16_qb4w_gemm_ukernel_fn gemm,
   xnn_init_f16_qc4w_minmax_params_fn init_params,
-  xnn_pack_qs8_qc4w_gemm_bl_fn pack) const
+  xnn_pack_qs8_qb4w_gemm_fn pack) const
 {
   ASSERT_LE(m(), mr());
 
@@ -1312,7 +1312,7 @@ void GemmMicrokernelTester::Test(
     bool can_use_optimized_packing = false; // can_use_xnn_pack_qs8_qc4w_gemm_bl_goi_w_nr8_kr4(n(), nr(), kr(), sr(), nr() * sizeof(float), nr() * sizeof(float));
 
     pack(/*g=*/1, n(), k2, nr(), kr(), sr(), bl(),
-      b.data(), /*bias=*/bias.data(), /*scale=*/kernel_scale2d.data(),
+      b.data(), /*bias=*/nullptr, /*scale=*/kernel_scale2d.data(),
       packed_w.data(), sizeof(float) * nr(), sizeof(float) * nr(), &packing_params);
 
     if (!can_use_optimized_packing) {
@@ -1321,7 +1321,7 @@ void GemmMicrokernelTester::Test(
       size_t block_stride = (bl() / 2 + sizeof(float)) * nr();
       size_t start_offset = nr() * (packed_k_bytes / num_blocks + sizeof(float));
       uintptr_t start = (uintptr_t) packed_w.data() + start_offset;
-      xnn_init_qs8_qc8w_bl_scale_fp32_params(
+      xnn_init_qs8_qb8w_scale_fp32_params(
         n(), nr(), nr(),
         stride,
         stride,
