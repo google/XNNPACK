@@ -37,4 +37,14 @@ tools/xngen src/qs8-rsum/sse41.c.in -D ACCUMULATORS=2 -D CHANNEL_TILE=64  -D REQ
 tools/xngen src/qs8-rsum/sse41.c.in -D ACCUMULATORS=4 -D CHANNEL_TILE=32  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u32-acc4.c &
 tools/xngen src/qs8-rsum/sse41.c.in -D ACCUMULATORS=4 -D CHANNEL_TILE=64  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u64-acc4.c &
 
+################################### x86 AVX2 ##################################
+tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=16  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u16.c &
+tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=32  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u32.c &
+tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=64  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u64.c &
+
+tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=2 -D CHANNEL_TILE=32  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u32-acc2.c &
+tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=2 -D CHANNEL_TILE=64  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u64-acc2.c &
+
+tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=4 -D CHANNEL_TILE=64  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u64-acc4.c &
+
 wait
