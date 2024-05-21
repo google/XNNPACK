@@ -1120,13 +1120,23 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_sse4_params(
   for (uint32_t i = 0; i < 4; i++) {
     params->fp32_sse4.init_bias[i] = init_bias;
     params->fp32_sse4.scale[i] = scale;
+    params->fp32_sse4.magic_bias[i] = 12582912.0f;
+    params->fp32_sse4.magic_bias_less_output_zero_point[i] = INT32_C(0x4B400000) - (int32_t) output_zero_point;
     params->fp32_sse4.output_max_less_zero_point[i] = output_max_less_zero_point;
+    params->fp32_sse4.magic_bias_less_output_zero_point[i] = INT32_C(0x4B400000) - (int32_t) output_zero_point;
   }
   for (uint32_t i = 0; i < 8; i++) {
     params->fp32_sse4.output_zero_point[i] = (int16_t) output_zero_point;
   }
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_sse4.output_min[i] = output_min;
+    params->fp32_sse4.output_max[i] = output_max;
+  }
+  for (uint32_t i = 0; i < 7; i++) {
+    params->fp32_sse4.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->fp32_sse4.mask_table[i] = 0;
   }
   return sizeof(params->fp32_sse4);
 }

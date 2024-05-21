@@ -259,6 +259,14 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qs8-requantization/qs8-requantization-rndna-sse41.c
   src/qs8-requantization/qs8-requantization-rndnu-sse41-sra.c
   src/qs8-requantization/qs8-requantization-rndnu-sse41-srl.c
+  src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u16-acc2.c
+  src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u16.c
+  src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u32-acc2.c
+  src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u32-acc4.c
+  src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u32.c
+  src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u64-acc2.c
+  src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u64-acc4.c
+  src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u64.c
   src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul16-ld64-u8.c
   src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul16-ld64-u16.c
   src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul16-ld64-u24.c
