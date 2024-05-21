@@ -2838,6 +2838,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "minimum_nd_eager_test",
+    timeout = "moderate",
     srcs = [
         "minimum-nd-eager.cc",
     ],
@@ -3036,6 +3037,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "squared_difference_nd_eager_test",
+    timeout = "moderate",
     srcs = [
         "squared-difference-nd-eager.cc",
     ],
@@ -3054,6 +3056,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "subtract_nd_eager_test",
+    timeout = "moderate",
     srcs = [
         "subtract-nd-eager.cc",
     ],
