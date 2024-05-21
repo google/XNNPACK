@@ -31,7 +31,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_2x8__scalar(
   assert(nc != 0);
   assert(kc != 0);
   size_t bl = params->scalar.blocksize;
-  assert(bl <= kc);
+  assert(bl <= round_up_po2(kc, 2));
   assert(bl != 0);
 
   const int8_t* a0 = a;

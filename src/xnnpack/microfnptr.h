@@ -74,20 +74,6 @@ typedef void (*xnn_dqgemm_ukernel_fn)(
     const void* params,
     const struct xnn_qd8_quantization_params* quantization_params);
 
-typedef void (*xnn_dqgemm_bl_ukernel_fn)(
-    size_t mr,
-    size_t nr,
-    size_t k,
-    size_t bl,
-    const void* a,
-    size_t a_stride,
-    const void* w,
-    void* c,
-    size_t cm_stride,
-    size_t cn_stride,
-    const void* params,
-    const struct xnn_qd8_quantization_params* quantization_params);
-
 typedef void (*xnn_f32_gemm_ukernel_fn)(
     size_t mr,
     size_t nr,

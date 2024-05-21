@@ -80,7 +80,10 @@ static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
       /*isa_check=*/nullptr,
     /*extended_weights=*/true);
 }\n
-BENCHMARK_GEMM(${UKERNEL_NAME})
+$if KERNELTYPE in ['qb4w']:
+  BENCHMARK_GEMM_BL(${UKERNEL_NAME})
+$else:
+  BENCHMARK_GEMM(${UKERNEL_NAME})
 """
 
 GEMM_BENCH_CODE = """\
@@ -97,7 +100,10 @@ static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
     $else:
       /*isa_check=*/nullptr);
 }\n
-BENCHMARK_GEMM(${UKERNEL_NAME})
+$if KERNELTYPE in ['qb4w']:
+  BENCHMARK_GEMM_BL(${UKERNEL_NAME})
+$else:
+  BENCHMARK_GEMM(${UKERNEL_NAME})
 """
 
 GEMM_CREATE_TESTS_CODE = """\
@@ -942,6 +948,7 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, vector_tile, init_
       GEMM_BENCH_CODE_XW if xw else GEMM_BENCH_CODE, {
           "UKERNEL_NAME": ukernel_name,
           "GEMM": ukernel,
+          "KERNELTYPE": kerneltype,
           "INIT_PARAMS": init_fn,
           "PACK_FN": pack_fn,
           "MR": mr,

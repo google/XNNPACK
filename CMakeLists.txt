@@ -4062,6 +4062,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f32-gemm-goi-minmax-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
   TARGET_LINK_LIBRARIES(f32-gemm-goi-minmax-bench PRIVATE jit bench-utils hardware-config logging microkernels-all microparams-init packing)
 
+  ADD_EXECUTABLE(qd8-f16-qb4w-gemm-bench bench/qd8-f16-qb4w-gemm.cc)
+  TARGET_INCLUDE_DIRECTORIES(qd8-f16-qb4w-gemm-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(qd8-f16-qb4w-gemm-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(qd8-f16-qb4w-gemm-bench PRIVATE jit bench-utils hardware-config logging microkernels-all microparams-init packing)
+
   ADD_EXECUTABLE(qd8-f16-qc4w-gemm-bench bench/qd8-f16-qc4w-gemm.cc)
   TARGET_INCLUDE_DIRECTORIES(qd8-f16-qc4w-gemm-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(qd8-f16-qc4w-gemm-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
@@ -4191,6 +4196,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(qd8-f32-qc8w-gemm-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(qd8-f32-qc8w-gemm-bench PRIVATE benchmark::benchmark fp16 pthreadpool packing)
   TARGET_LINK_LIBRARIES(qd8-f32-qc8w-gemm-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
+  ADD_EXECUTABLE(qd8-f32-qb4w-gemm-bench bench/qd8-f32-qb4w-gemm.cc)
+  TARGET_INCLUDE_DIRECTORIES(qd8-f32-qb4w-gemm-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(qd8-f32-qb4w-gemm-bench PRIVATE benchmark::benchmark fp16 pthreadpool packing)
+  TARGET_LINK_LIBRARIES(qd8-f32-qb4w-gemm-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
   ADD_EXECUTABLE(qd8-f32-qc4w-gemm-bench bench/qd8-f32-qc4w-gemm.cc)
   TARGET_INCLUDE_DIRECTORIES(qd8-f32-qc4w-gemm-bench PRIVATE . include src)
