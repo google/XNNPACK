@@ -4553,7 +4553,6 @@ alias(
     actual = select({
         ":xnn_enable_riscv_vector_explicit_true": ":xnn_enable_riscv_vector_explicit_true",
         ":xnn_enable_riscv_vector_explicit_false": ":xnn_enable_riscv_vector_explicit_true",
-        "//build_config:android": ":xnn_enable_riscv_vector_explicit_false",
         "//conditions:default": ":riscv_vector_enabled_by_default",
     }),
 )
@@ -4571,7 +4570,6 @@ alias(
     actual = select({
         ":xnn_enable_riscv_fp16_vector_explicit_true": ":xnn_enable_riscv_fp16_vector_explicit_true",
         ":xnn_enable_riscv_fp16_vector_explicit_false": ":xnn_enable_riscv_fp16_vector_explicit_true",
-        "//build_config:android": ":xnn_enable_riscv_fp16_vector_explicit_false",
         "//conditions:default": ":riscv_fp16_vector_enabled_by_default",
     }),
 )
