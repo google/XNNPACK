@@ -42,17 +42,17 @@
 # x86 SSE4.1
 - name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u16
   init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
-- name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u32
-  init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
-- name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u64
-  init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
 - name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u16_acc2
+  init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u32
   init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
 - name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u32_acc2
   init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
-- name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u64_acc2
-  init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
 - name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u32_acc4
+  init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u64
+  init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u64_acc2
   init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
 - name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u64_acc4
   init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
@@ -62,12 +62,11 @@
   init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
 - name: xnn_qs8_rsum_minmax_fp32_ukernel__avx2_u32
   init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
-- name: xnn_qs8_rsum_minmax_fp32_ukernel__avx2_u64
-  init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
 - name: xnn_qs8_rsum_minmax_fp32_ukernel__avx2_u32_acc2
+  init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__avx2_u64
   init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
 - name: xnn_qs8_rsum_minmax_fp32_ukernel__avx2_u64_acc2
   init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
 - name: xnn_qs8_rsum_minmax_fp32_ukernel__avx2_u64_acc4
   init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
-
