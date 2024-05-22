@@ -20,7 +20,7 @@ $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QU8": "qu8", "QD8": "qd8_f32
 $VARIANT_SPEC = "_" + VARIANT.lower() if VARIANT else ""
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar" + ("_" + VARIANT.lower() if VARIANT else "")
-$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QC4": "xnn_f32_qc4w_minmax_params", "QB4": "xnn_f32_qc4w_minmax_params"}[DATATYPE]
+$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QC4": "xnn_f32_qc4w_minmax_params", "QB4": "xnn_f32_qb4w_minmax_params"}[DATATYPE]
 $SCALING_PARAMS = "xnn_qd8_quantization_params" if DATATYPE in ["QD8", "QC4", "QB4"] else ""
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $OUT_T = {"QC8": "int8_t", "QS8": "int8_t", "QU8": "uint8_t", "QD8": "float", "QC4": "float", "QB4": "float"}[DATATYPE]
@@ -31,8 +31,6 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
     size_t mr,
     size_t nc,
     size_t kc,
-    $if BLOCKWISE:
-      size_t bl,
     const ${XINT8_T}* restrict a,
     size_t a_stride,
     const void* restrict w,
@@ -50,6 +48,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
   assert(nc != 0);
   assert(kc != 0);
   $if BLOCKWISE:
+    size_t bl = params->scalar.blocksize;
     assert(bl <= kc);
     assert(bl != 0);
 

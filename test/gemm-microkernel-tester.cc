@@ -1545,7 +1545,7 @@ void GemmMicrokernelTester::Test(
 
 void GemmMicrokernelTester::Test(
   xnn_qd8_f32_qb4w_gemm_ukernel_fn gemm,
-  xnn_init_f32_qc4w_minmax_params_fn init_params,
+  xnn_init_f32_qb4w_minmax_params_fn init_params,
   xnn_pack_qs8_qb4w_gemm_fn pack) const
 {
   ASSERT_LE(m(), mr());
@@ -1672,8 +1672,8 @@ void GemmMicrokernelTester::Test(
         : accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
 
     // Prepare parameters.
-    xnn_f32_qc4w_minmax_params params;
-    init_params(&params, c_min, c_max, 8);
+    xnn_f32_qb4w_minmax_params params;
+    init_params(&params, c_min, c_max, 8, bl());
 
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
@@ -1681,7 +1681,7 @@ void GemmMicrokernelTester::Test(
       }
     }
 
-    gemm(m(), n(), k2, bl(),
+    gemm(m(), n(), k2,
         a.data(), a_stride() * sizeof(int8_t),
         static_cast<const void*>(packed_w.data()),
         c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float), &params, quantization_params.data());
