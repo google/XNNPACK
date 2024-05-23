@@ -35,13 +35,11 @@ void xnn_f32_vmin_ukernel__hvx_u64(
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
     HVX_Vector va0 = *vptr_a++;
     HVX_Vector va1 = *vptr_a++;
-
     HVX_Vector vb0 = *vptr_b++;
     HVX_Vector vb1 = *vptr_b++;
 
     HVX_Vector vacc0 = Q6_Vsf_vmin_VsfVsf(va0, vb0);
     HVX_Vector vacc1 = Q6_Vsf_vmin_VsfVsf(va1, vb1);
-
 
 
     *vptr_o++ = vacc0;

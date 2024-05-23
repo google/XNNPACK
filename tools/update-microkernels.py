@@ -33,6 +33,7 @@ ISA_LIST = frozenset({
   'fma3',
   'fp16arith',
   'hexagon',
+  'hvx',
   'neon',
   'neonbf16',
   'neondot',

@@ -35,7 +35,6 @@ void xnn_f32_vsqrdiff_ukernel__hvx_u64(
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
     HVX_Vector va0 = *vptr_a++;
     HVX_Vector va1 = *vptr_a++;
-
     HVX_Vector vb0 = *vptr_b++;
     HVX_Vector vb1 = *vptr_b++;
 
@@ -44,7 +43,6 @@ void xnn_f32_vsqrdiff_ukernel__hvx_u64(
 
     vacc0 = Q6_Vsf_vmpy_VsfVsf(vacc0, vacc0);
     vacc1 = Q6_Vsf_vmpy_VsfVsf(vacc1, vacc1);
-
 
     *vptr_o++ = vacc0;
     *vptr_o++ = vacc1;

@@ -32,7 +32,7 @@
 - name: xnn_f32_vmax_ukernel__wasm_u2
 - name: xnn_f32_vmax_ukernel__wasm_u4
 - name: xnn_f32_vmax_ukernel__wasm_u8
-# Hexagon
+# Hexagon HVX
 - name: xnn_f32_vmax_ukernel__hvx_u32 
 - name: xnn_f32_vmax_ukernel__hvx_u64 
 # Scalar

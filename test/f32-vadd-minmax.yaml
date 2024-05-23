@@ -50,7 +50,7 @@
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vadd_minmax_ukernel__wasm_u8
   init: xnn_init_f32_minmax_scalar_params
-# Hexagon
+# Hexagon HVX
 - name: xnn_f32_vadd_minmax_ukernel__hvx_u32
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vadd_minmax_ukernel__hvx_u64

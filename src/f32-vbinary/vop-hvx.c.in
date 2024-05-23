@@ -51,7 +51,6 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__hvx_u${BATCH_TILE}(
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       $for N in range(SIMD_TILE):
         HVX_Vector va${ABC[N]} = *vptr_a++;
-
       $for N in range(SIMD_TILE):
         HVX_Vector vb${ABC[N]} = *vptr_b++;
 
@@ -61,7 +60,6 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__hvx_u${BATCH_TILE}(
       $if OP == "SQRDIFF":
         $for N in range(SIMD_TILE):
           vacc${ABC[N]} = Q6_Vsf_vmpy_VsfVsf(vacc${ABC[N]}, vacc${ABC[N]});
-
       $if ACTIVATION == "MINMAX":
         $for N in range(SIMD_TILE):
           vacc${ABC[N]} = Q6_Vsf_vmax_VsfVsf(vacc${ABC[N]}, voutput_min);

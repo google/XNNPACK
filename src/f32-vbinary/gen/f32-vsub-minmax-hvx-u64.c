@@ -37,13 +37,11 @@ void xnn_f32_vsub_minmax_ukernel__hvx_u64(
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
     HVX_Vector va0 = *vptr_a++;
     HVX_Vector va1 = *vptr_a++;
-
     HVX_Vector vb0 = *vptr_b++;
     HVX_Vector vb1 = *vptr_b++;
 
     HVX_Vector vacc0 = Q6_Vsf_vsub_VsfVsf(va0, vb0);
     HVX_Vector vacc1 = Q6_Vsf_vsub_VsfVsf(va1, vb1);
-
 
     vacc0 = Q6_Vsf_vmax_VsfVsf(vacc0, voutput_min);
     vacc1 = Q6_Vsf_vmax_VsfVsf(vacc1, voutput_min);
