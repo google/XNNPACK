@@ -70,3 +70,11 @@
   init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
 - name: xnn_qs8_rsum_minmax_fp32_ukernel__avx2_u64_acc4
   init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
+
+# x86 AVX512
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__avx512skx_u32
+  init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__avx512skx_u64
+  init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__avx512skx_u64_acc2
+  init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
