@@ -17,6 +17,13 @@
 # WAsm
 - name: xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1
   init: xnn_init_f32_scaleminmax_scalar_params
+# RISC-V Vector
+- name: xnn_f32_gavgpool_minmax_ukernel_7p7x__rvv_c1v
+  init: xnn_init_f32_scaleminmax_scalar_params
+- name: xnn_f32_gavgpool_minmax_ukernel_7p7x__rvv_c2v
+  init: xnn_init_f32_scaleminmax_scalar_params
+- name: xnn_f32_gavgpool_minmax_ukernel_7p7x__rvv_c4v
+  init: xnn_init_f32_scaleminmax_scalar_params
 # Scalar
 - name: xnn_f32_gavgpool_minmax_ukernel_7p7x__scalar_c1
   init: xnn_init_f32_scaleminmax_scalar_params
@@ -33,6 +40,13 @@
   init: xnn_init_f32_scaleminmax_scalar_params
 # WAsm
 - name: xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1
+  init: xnn_init_f32_scaleminmax_scalar_params
+# RISC-V Vector
+- name: xnn_f32_gavgpool_minmax_ukernel_7x__rvv_c1v
+  init: xnn_init_f32_scaleminmax_scalar_params
+- name: xnn_f32_gavgpool_minmax_ukernel_7x__rvv_c2v
+  init: xnn_init_f32_scaleminmax_scalar_params
+- name: xnn_f32_gavgpool_minmax_ukernel_7x__rvv_c4v
   init: xnn_init_f32_scaleminmax_scalar_params
 # Scalar
 - name: xnn_f32_gavgpool_minmax_ukernel_7x__scalar_c1
