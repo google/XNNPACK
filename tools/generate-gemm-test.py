@@ -123,7 +123,7 @@ std::vector<GemmTestParams> CreateTests(
           $if EXTENDED_WEIGHTS:
             .extended_weights(true)
           .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr).k(k_block)
-          $if KERNELTYPE == 'qc4w':
+          $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
       , test_func, isa_check));
   gemm_tests.push_back(GemmTestParams(
@@ -133,7 +133,7 @@ std::vector<GemmTestParams> CreateTests(
             .extended_weights(true)
           .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr).k(k_block)
           .cn_stride(NextPrime(nr + 1))
-          $if KERNELTYPE == 'qc4w':
+          $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
     , test_func, isa_check));
   if (!is_igemm) {
@@ -144,7 +144,7 @@ std::vector<GemmTestParams> CreateTests(
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr).k(k_block)
             .a_stride(NextPrime(k_block + 1))
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check));
   }
@@ -154,7 +154,7 @@ std::vector<GemmTestParams> CreateTests(
           $if EXTENDED_WEIGHTS:
             .extended_weights(true)
           .mr(mr).nr(nr).kr(kr).sr(sr).k(k_block).iterations(1)
-          $if KERNELTYPE == 'qc4w':
+          $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
       , test_func, isa_check)
       .loop_n(1, nr)
@@ -165,7 +165,7 @@ std::vector<GemmTestParams> CreateTests(
           $if EXTENDED_WEIGHTS:
             .extended_weights(true)
           .mr(mr).nr(nr).kr(kr).sr(sr).n(nr).k(k_block).iterations(1)
-          $if KERNELTYPE == 'qc4w':
+          $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
       , test_func, isa_check)
       .loop_m(1, mr));
@@ -175,7 +175,7 @@ std::vector<GemmTestParams> CreateTests(
           $if EXTENDED_WEIGHTS:
             .extended_weights(true)
           .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).k(k_block).iterations(1)
-          $if KERNELTYPE == 'qc4w':
+          $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
       , test_func, isa_check)
       .loop_n(1, nr));
@@ -186,7 +186,7 @@ std::vector<GemmTestParams> CreateTests(
           $if EXTENDED_WEIGHTS:
             .extended_weights(true)
           .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr).k(k_block * 2)
-          $if KERNELTYPE == 'qc4w':
+          $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
       , test_func, isa_check));
     if (!is_igemm) {
@@ -197,7 +197,7 @@ std::vector<GemmTestParams> CreateTests(
                 .extended_weights(true)
               .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr).k(k_block * 2)
               .a_stride(NextPrime(k_block * 2 + 1))
-              $if KERNELTYPE == 'qc4w':
+              $if KERNELTYPE in ['qb4w', 'qc4w']:
                 .b_zero_point(8)
           , test_func, isa_check));
     }
@@ -207,7 +207,7 @@ std::vector<GemmTestParams> CreateTests(
             $if EXTENDED_WEIGHTS:
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).k(k_block * 2).iterations(1)
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check)
         .loop_n(1, nr)
@@ -219,7 +219,7 @@ std::vector<GemmTestParams> CreateTests(
             $if EXTENDED_WEIGHTS:
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr)
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check)
         .loop_k(1, adj_k_block - 1));
@@ -231,7 +231,7 @@ std::vector<GemmTestParams> CreateTests(
                 .extended_weights(true)
               .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr)
               .a_stride(NextPrime(adj_k_block + 1))
-              $if KERNELTYPE == 'qc4w':
+              $if KERNELTYPE in ['qb4w', 'qc4w']:
                 .b_zero_point(8)
           , test_func, isa_check)
           .loop_k(1, adj_k_block - 1));
@@ -242,7 +242,7 @@ std::vector<GemmTestParams> CreateTests(
             $if EXTENDED_WEIGHTS:
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).iterations(1)
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check)
         .loop_k(1, adj_k_block - 1)
@@ -255,7 +255,7 @@ std::vector<GemmTestParams> CreateTests(
           $if EXTENDED_WEIGHTS:
             .extended_weights(true)
           .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr)
-          $if KERNELTYPE == 'qc4w':
+          $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
       , test_func, isa_check)
       .loop_k(adj_k_block + 1, adj_k_block * 2 - 1, k_block));
@@ -267,7 +267,7 @@ std::vector<GemmTestParams> CreateTests(
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr)
             .a_stride(NextPrime(adj_k_block * 2 + 1))
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
       , test_func, isa_check)
       .loop_k(adj_k_block + 1, adj_k_block * 2 - 1, k_block));
@@ -278,7 +278,7 @@ std::vector<GemmTestParams> CreateTests(
           $if EXTENDED_WEIGHTS:
             .extended_weights(true)
           .mr(mr).nr(nr).kr(kr).sr(sr).iterations(1)
-          $if KERNELTYPE == 'qc4w':
+          $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
       , test_func, isa_check)
       .loop_k(adj_k_block + 1, adj_k_block * 2 - 1, k_block)
@@ -291,7 +291,7 @@ std::vector<GemmTestParams> CreateTests(
             $if EXTENDED_WEIGHTS:
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr)
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check)
         .loop_k(adj_k_block + k_block, k_block * 5, k_block));
@@ -303,7 +303,7 @@ std::vector<GemmTestParams> CreateTests(
                 .extended_weights(true)
               .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr)
               .a_stride(NextPrime(k_block * 3 + 1))
-              $if KERNELTYPE == 'qc4w':
+              $if KERNELTYPE in ['qb4w', 'qc4w']:
                 .b_zero_point(8)
           , test_func, isa_check)
           .loop_k(adj_k_block + k_block, k_block * 3, k_block));
@@ -314,7 +314,7 @@ std::vector<GemmTestParams> CreateTests(
             $if EXTENDED_WEIGHTS:
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).iterations(1)
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check)
         .loop_k(adj_k_block + k_block, k_block * 5, k_block)
@@ -327,7 +327,7 @@ std::vector<GemmTestParams> CreateTests(
           $if EXTENDED_WEIGHTS:
             .extended_weights(true)
           .mr(mr).nr(nr).kr(kr).sr(sr).m(mr)
-          $if KERNELTYPE == 'qc4w':
+          $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
       , test_func, isa_check)
       $if NR_SCALE != "":
@@ -342,7 +342,7 @@ std::vector<GemmTestParams> CreateTests(
             $if EXTENDED_WEIGHTS:
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).known_nc_mod_nr(false)
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check)
         $if NR_SCALE != "":
@@ -356,7 +356,7 @@ std::vector<GemmTestParams> CreateTests(
             $if EXTENDED_WEIGHTS:
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr).k(k_block).relu(true)
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check));
   gemm_tests.push_back(GemmTestParams(
@@ -366,7 +366,7 @@ std::vector<GemmTestParams> CreateTests(
             .extended_weights(true)
           .mr(mr).nr(nr).kr(kr).sr(sr).m(mr)
           .cn_stride(NextPrime(nr + 1))
-          $if KERNELTYPE == 'qc4w':
+          $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
       , test_func, isa_check)
       $if NR_SCALE != "":
@@ -382,7 +382,7 @@ std::vector<GemmTestParams> CreateTests(
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).m(mr)
             .a_stride(NextPrime(k_block * 3 + 1))
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check)
         $if NR_SCALE != "":
@@ -397,7 +397,7 @@ std::vector<GemmTestParams> CreateTests(
           $if EXTENDED_WEIGHTS:
             .extended_weights(true)
           .mr(mr).nr(nr).kr(kr).sr(sr).iterations(1)
-          $if KERNELTYPE == 'qc4w':
+          $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
       , test_func, isa_check)
       $if NR_SCALE != "":
@@ -412,7 +412,7 @@ std::vector<GemmTestParams> CreateTests(
           $if EXTENDED_WEIGHTS:
             .extended_weights(true)
           .mr(mr).nr(nr).kr(kr).sr(sr).m(mr)
-          $if KERNELTYPE == 'qc4w':
+          $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
       , test_func, isa_check)
       .loop_n(nr * 2, nr * 3, nr)
@@ -424,7 +424,7 @@ std::vector<GemmTestParams> CreateTests(
             .extended_weights(true)
           .mr(mr).nr(nr).kr(kr).sr(sr).m(mr)
           .cn_stride(NextPrime(nr + 1))
-          $if KERNELTYPE == 'qc4w':
+          $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
       , test_func, isa_check)
       .loop_n(nr * 2, nr * 3, nr)
@@ -437,7 +437,7 @@ std::vector<GemmTestParams> CreateTests(
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).m(mr)
             .a_stride(NextPrime(k_block * 3 + 1))
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check)
         .loop_n(nr * 2, nr * 3, nr)
@@ -449,7 +449,7 @@ std::vector<GemmTestParams> CreateTests(
           $if EXTENDED_WEIGHTS:
             .extended_weights(true)
           .mr(mr).nr(nr).kr(kr).sr(sr).iterations(1)
-          $if KERNELTYPE == 'qc4w':
+          $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
       , test_func, isa_check)
       .loop_n(nr * 2, nr * 3, nr)
@@ -462,7 +462,7 @@ std::vector<GemmTestParams> CreateTests(
             $if EXTENDED_WEIGHTS:
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr).ks(3)
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check)
         .loop_k(1, k_block * 3, k_block + 1));
@@ -472,7 +472,7 @@ std::vector<GemmTestParams> CreateTests(
             $if EXTENDED_WEIGHTS:
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).ks(3).iterations(1)
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check)
         .loop_k(1, k_block * 3, k_block + 1)
@@ -484,7 +484,7 @@ std::vector<GemmTestParams> CreateTests(
             $if EXTENDED_WEIGHTS:
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).ks(3)
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check)
         $if NR_SCALE != "":
@@ -498,7 +498,7 @@ std::vector<GemmTestParams> CreateTests(
             $if EXTENDED_WEIGHTS:
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).ks(3)
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check)
         .loop_n(nr * 2, nr * 3, nr)
@@ -512,7 +512,7 @@ std::vector<GemmTestParams> CreateTests(
           .mr(mr).nr(nr).kr(kr).sr(sr)
           .cm_stride(NextPrime(nr + 1))
           .iterations(1)
-          $if KERNELTYPE == 'qc4w':
+          $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
       , test_func, isa_check)
       .loop_k(1, k_block * 3, k_block + 1)
@@ -526,7 +526,7 @@ std::vector<GemmTestParams> CreateTests(
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr).ks(3)
             .a_offset(NextPrime(mr * k_block * 3 + 1))
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check)
         .loop_k(1, k_block * 3, k_block + 1));
@@ -537,7 +537,7 @@ std::vector<GemmTestParams> CreateTests(
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr).ks(3)
             .a_offset(NextPrime(mr * k_block * 3 + 1))
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check)
         .loop_k(1, k_block * 3, k_block + 1)
@@ -550,7 +550,7 @@ std::vector<GemmTestParams> CreateTests(
             $if EXTENDED_WEIGHTS:
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr).k(k_block).qmin(128)
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check));
     gemm_tests.push_back(GemmTestParams(
@@ -559,7 +559,7 @@ std::vector<GemmTestParams> CreateTests(
             $if EXTENDED_WEIGHTS:
               .extended_weights(true)
             .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr).k(k_block).qmax(128)
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
         , test_func, isa_check));
   gemm_tests.push_back(GemmTestParams(
@@ -569,7 +569,7 @@ std::vector<GemmTestParams> CreateTests(
             .extended_weights(true)
           .mr(mr).nr(nr).kr(kr).sr(sr).m(mr).n(nr).k(k_block)
           .cm_stride(NextPrime(nr + 1))
-          $if KERNELTYPE == 'qc4w':
+          $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
       , test_func, isa_check));
   $if DATATYPE == "qu8":
@@ -656,7 +656,7 @@ $if TEST_NAME.startswith('GENERATE') and DATATYPE in ['f32', 'f16']:
               .n(${NR})
             .k(k)
             .iterations(1)
-            $if KERNELTYPE == 'qc4w':
+            $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
             .Test(${", ".join(TEST_ARGS)});
         }
@@ -790,7 +790,7 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, vector_tile, init_
     if (
         datatype == "qd8"
         and ukernel_type in ["f16", "f32"]
-        and activation in ["qc8w", "qc4w"]
+        and activation in ["qc8w", "qc4w", "qb4w"]
     ):
       _, datatype, _, kerneltype, ukernel_type, activation, _ = ukernel.split(
           "_", 6

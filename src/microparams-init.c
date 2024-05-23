@@ -2236,7 +2236,6 @@ size_t xnn_init_f16_minmax_scalar_params(
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_f16_qc4w_minmax_scalar_params(
   union xnn_f16_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t output_min,
@@ -2249,7 +2248,6 @@ size_t xnn_init_f16_qc4w_minmax_scalar_params(
   params->fp16arith.minus_kernel_zero_point = -(int32_t) kernel_zero_point;
   return sizeof(params->fp16arith);
 }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_f16_qc4w_minmax_avx_params(
