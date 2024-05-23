@@ -66,7 +66,7 @@ void xnn_f32_gemm_minmax_ukernel_5x32__hvx_broadcast(
   }
 
   do {
-    HVX_Vector vacc0x0 = *((HVX_UVector *)(w + 0));
+    HVX_Vector vacc0x0 = *((HVX_Vector *)(w + 0));
     HVX_Vector vacc1x0 = vacc0x0;
     HVX_Vector vacc2x0 = vacc0x0;
     HVX_Vector vacc3x0 = vacc0x0;
@@ -86,7 +86,7 @@ void xnn_f32_gemm_minmax_ukernel_5x32__hvx_broadcast(
       const HVX_Vector va4 = Q6_V_vsplat_R(*(uint32_t *)a4);
       a4 += 1;
 
-      const HVX_Vector vb0 = *((const HVX_UVector *)(w));
+      const HVX_Vector vb0 = *((const HVX_Vector *)(w));
       w += 32;
 
       vacc0x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va0, vb0),vacc0x0)); 

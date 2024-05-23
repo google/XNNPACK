@@ -2081,7 +2081,7 @@ void GemmMicrokernelTester::Test(
   std::vector<float> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> b(n() * k());
   std::vector<float> bias(n());
-  std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + packed_n());
+  std::vector<float, AlignedAllocator<float, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n());
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
 
