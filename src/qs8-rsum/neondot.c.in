@@ -27,6 +27,7 @@ void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__neondot_u${CHANNEL_T
   assert(batch != 0);
   assert(input != NULL);
   assert(output != NULL);
+  assert(params != NULL);
 
   const int8x16_t vone = vdupq_n_s8(1);
   $for A in range(ACCUMULATORS):
@@ -66,18 +67,12 @@ void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__neondot_u${CHANNEL_T
     const int32_t vacc = vget_lane_s32(vacc_lo, 0);
   #endif
 
-  $if REQUANTIZATION == "FP32":
-    const int32_t vinit_bias = params->fp32_neon.init_bias;
-    const float vscale = params->${PARAMS_STRUCT}.scale;
-    const int32_t output_min = params->fp32_neon.output_min;
-    const int32_t output_max = params->fp32_neon.output_max;
-    const float vmagic_bias = params->fp32_neon.magic_bias;
-    const int32_t vmagic_bias_less_output_zero_point = params->fp32_neon.magic_bias_less_output_zero_point;
-  $elif REQUANTIZATION == "RNDNU":
-    const int32x4_t vleft_pre_shift = vld1q_dup_s32(&params->rndnu_neon.left_pre_shift);
-    const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
-    const int32x4_t vleft_post_shift = vld1q_dup_s32(&params->rndnu_neon.left_post_shift);
-    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->rndnu_neon.output_zero_point);
+  const int32_t vinit_bias = params->fp32_neon.init_bias;
+  const float vscale = params->${PARAMS_STRUCT}.scale;
+  const int32_t output_min = params->fp32_neon.output_min;
+  const int32_t output_max = params->fp32_neon.output_max;
+  const float vmagic_bias = params->fp32_neon.magic_bias;
+  const int32_t vmagic_bias_less_output_zero_point = params->fp32_neon.magic_bias_less_output_zero_point;
 
   float vfpacc = (float) (vacc + vinit_bias) * vscale;
   vfpacc += vmagic_bias;

@@ -24,6 +24,7 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u32_acc2(
   assert(batch != 0);
   assert(input != NULL);
   assert(output != NULL);
+  assert(params != NULL);
 
   const int8x16_t vone = vdupq_n_s8(1);
   int32x4_t vacc0 = vmovq_n_s32(0);

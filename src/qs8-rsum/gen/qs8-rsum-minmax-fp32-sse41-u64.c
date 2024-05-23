@@ -25,6 +25,7 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u64(
   assert(batch != 0);
   assert(input != NULL);
   assert(output != NULL);
+  assert(params != NULL);
 
   __m128i vacc0 = _mm_setzero_si128();
   int num_batches = batch  >> 8;
@@ -72,18 +73,21 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u64(
       vacc16_0 = _mm_add_epi16(vacc16_0, vt6);
       vacc16_0 = _mm_add_epi16(vacc16_0, vt7);
     }
+
+
     for (; batch >= 8; batch -= 8) {
       const __m128i vt7 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
       vacc16_0 = _mm_add_epi16(vacc16_0, vt7);
     }
     if (XNN_UNLIKELY(batch != 0)) {
       __m128i vt = _mm_loadl_epi64((const __m128i*) input);
-      const __m128i vone = _mm_loadl_epi64((const __m128i*) &params->fp32_sse4.mask_table[7 - batch]);
-      vt = _mm_cvtepi8_epi16(_mm_and_si128(vt, vone));
+      const __m128i vmask = _mm_loadl_epi64((const __m128i*) &params->fp32_sse4.mask_table[7 - batch]);
+      vt = _mm_cvtepi8_epi16(_mm_and_si128(vt, vmask));
       vacc16_0 = _mm_add_epi16(vacc16_0, vt);
     }
     vacc0 = _mm_add_epi32(vacc0, _mm_add_epi32(_mm_cvtepi16_epi32(vacc16_0), _mm_cvtepi16_epi32(_mm_srli_si128(vacc16_0, 8))));
   }
+
 
   __m128i vacc_lo = _mm_hadd_epi32(vacc0, vacc0);
   vacc_lo = _mm_hadd_epi32(vacc_lo, vacc_lo);

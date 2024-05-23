@@ -25,6 +25,7 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u16_acc2(
   assert(batch != 0);
   assert(input != NULL);
   assert(output != NULL);
+  assert(params != NULL);
 
   __m128i vacc0 = _mm_setzero_si128();
   __m128i vacc1 = _mm_setzero_si128();
@@ -52,19 +53,22 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u16_acc2(
       vacc16_0 = _mm_add_epi16(vacc16_0, vt0);
       vacc16_1 = _mm_add_epi16(vacc16_1, vt1);
     }
+
     vacc16_0 = _mm_add_epi16(vacc16_0, vacc16_1);
+
     for (; batch >= 8; batch -= 8) {
       const __m128i vt1 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
       vacc16_0 = _mm_add_epi16(vacc16_0, vt1);
     }
     if (XNN_UNLIKELY(batch != 0)) {
       __m128i vt = _mm_loadl_epi64((const __m128i*) input);
-      const __m128i vone = _mm_loadl_epi64((const __m128i*) &params->fp32_sse4.mask_table[7 - batch]);
-      vt = _mm_cvtepi8_epi16(_mm_and_si128(vt, vone));
+      const __m128i vmask = _mm_loadl_epi64((const __m128i*) &params->fp32_sse4.mask_table[7 - batch]);
+      vt = _mm_cvtepi8_epi16(_mm_and_si128(vt, vmask));
       vacc16_0 = _mm_add_epi16(vacc16_0, vt);
     }
     vacc0 = _mm_add_epi32(vacc0, _mm_add_epi32(_mm_cvtepi16_epi32(vacc16_0), _mm_cvtepi16_epi32(_mm_srli_si128(vacc16_0, 8))));
   }
+
   vacc0 = _mm_add_epi32(vacc0, vacc1);
 
   __m128i vacc_lo = _mm_hadd_epi32(vacc0, vacc0);

@@ -24,6 +24,7 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__neon_u64(
   assert(batch != 0);
   assert(input != NULL);
   assert(output != NULL);
+  assert(params != NULL);
 
   // 256 int8s may be summed into an int16 before overflowing
   // Each vpada does 2 adds so we can do 128 vpada

@@ -25,6 +25,7 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__avx2_u16(
   assert(batch != 0);
   assert(input != NULL);
   assert(output != NULL);
+  assert(params != NULL);
 
   __m256i vacc0 = _mm256_setzero_si256();
   // 256 int8s may be summed into an int16 before overflowing.
@@ -48,20 +49,23 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__avx2_u16(
       const __m256i vt0 = _mm256_cvtepi8_epi16(_mm_loadu_si128((const __m128i*) input)); input += 16;
       vacc16_0 = _mm256_add_epi16(vacc16_0, vt0);
     }
+
+
     for (; batch >= 16; batch -= 16) {
       const __m256i vt0 = _mm256_cvtepi8_epi16(_mm_loadu_si128((const __m128i*) input)); input += 16;
       vacc16_0 = _mm256_add_epi16(vacc16_0, vt0);
     }
     if (XNN_UNLIKELY(batch != 0)) {
       const __m128i vt = _mm_loadu_si128((const __m128i*) input);
-      const __m128i vone = _mm_loadu_si128((const __m128i*) &params->fp32_avx2.mask_table[15 - batch]);
-      const __m256i vtl = _mm256_cvtepi8_epi16(_mm_and_si128(vt, vone));
+      const __m128i vmask = _mm_loadu_si128((const __m128i*) &params->fp32_avx2.mask_table[15 - batch]);
+      const __m256i vtl = _mm256_cvtepi8_epi16(_mm_and_si128(vt, vmask));
       vacc16_0 = _mm256_add_epi16(vacc16_0, vtl);
     }
     __m256i left = _mm256_cvtepi16_epi32(_mm256_castsi256_si128(vacc16_0));
     __m256i right = _mm256_cvtepi16_epi32(_mm256_extractf128_si256(vacc16_0, 1));
     vacc0 = _mm256_add_epi32(vacc0, _mm256_add_epi32(left, right));
   }
+
 
   __m128i vacc_lo = _mm_add_epi32(_mm256_castsi256_si128(vacc0), _mm256_extractf128_si256(vacc0, 1));
   vacc_lo = _mm_hadd_epi32(vacc_lo, vacc_lo);

@@ -22,6 +22,7 @@ void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__scalar_${VARIANT.low
   assert(batch != 0);
   assert(input != NULL);
   assert(output != NULL);
+  assert(params != NULL);
 
   const int32_t vinit_bias = params->${PARAMS_STRUCT}.init_bias;
   $for A in range(ACCUMULATORS):

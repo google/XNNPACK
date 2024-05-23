@@ -21,6 +21,7 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__scalar_imagic_u4(
   assert(batch != 0);
   assert(input != NULL);
   assert(output != NULL);
+  assert(params != NULL);
 
   const int32_t vinit_bias = params->fp32_scalar_imagic.init_bias;
   int32_t vacc0 = vinit_bias;

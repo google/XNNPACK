@@ -28,6 +28,7 @@ void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__sse41_u${CHANNEL_TIL
   assert(batch != 0);
   assert(input != NULL);
   assert(output != NULL);
+  assert(params != NULL);
 
   $for ACC in range(ACCUMULATORS):
     __m128i vacc${ACC} = _mm_setzero_si128();
@@ -55,38 +56,45 @@ void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__sse41_u${CHANNEL_TIL
       $for N in range(SIMD_TILE):
         vacc16_${N % ACCUMULATORS} = _mm_add_epi16(vacc16_${N % ACCUMULATORS}, vt${N});
     }
-    $for ACC in range(1, ACCUMULATORS):
-      vacc16_0 = _mm_add_epi16(vacc16_0, vacc16_${ACC});
+
+    $if ACCUMULATORS > 1:
+      $ACC_SLICE = 1
+      $while ACC_SLICE < ACCUMULATORS:
+        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+          $if A + ACC_SLICE < ACCUMULATORS:
+            vacc16_${A} = _mm_add_epi16(vacc16_${A}, vacc16_${A + ACC_SLICE});
+        $ACC_SLICE *= 2
+
     for (; batch >= 8; batch -= 8) {
       const __m128i vt${N} = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
       vacc16_0 = _mm_add_epi16(vacc16_0, vt${N});
     }
     if (XNN_UNLIKELY(batch != 0)) {
       __m128i vt = _mm_loadl_epi64((const __m128i*) input);
-      const __m128i vone = _mm_loadl_epi64((const __m128i*) &params->fp32_sse4.mask_table[7 - batch]);
-      vt = _mm_cvtepi8_epi16(_mm_and_si128(vt, vone));
+      const __m128i vmask = _mm_loadl_epi64((const __m128i*) &params->fp32_sse4.mask_table[7 - batch]);
+      vt = _mm_cvtepi8_epi16(_mm_and_si128(vt, vmask));
       vacc16_0 = _mm_add_epi16(vacc16_0, vt);
     }
     vacc0 = _mm_add_epi32(vacc0, _mm_add_epi32(_mm_cvtepi16_epi32(vacc16_0), _mm_cvtepi16_epi32(_mm_srli_si128(vacc16_0, 8))));
   }
-  $for ACC in range(1, ACCUMULATORS):
-    vacc0 = _mm_add_epi32(vacc0, vacc${ACC});
+
+  $if ACCUMULATORS > 1:
+    $ACC_SLICE = 1
+    $while ACC_SLICE < ACCUMULATORS:
+      $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+        $if A + ACC_SLICE < ACCUMULATORS:
+          vacc${A} = _mm_add_epi32(vacc${A}, vacc${A + ACC_SLICE});
+      $ACC_SLICE *= 2
 
   __m128i vacc_lo = _mm_hadd_epi32(vacc0, vacc0);
   vacc_lo = _mm_hadd_epi32(vacc_lo, vacc_lo);
 
-  $if REQUANTIZATION == "FP32":
-    const int32_t vinit_bias = params->fp32_sse4.init_bias[0];
-    const float vscale = params->fp32_sse4.scale[0];
-    const int32_t output_min = params->fp32_sse4.output_min[0];
-    const int32_t output_max = params->fp32_sse4.output_max[0];
-    const float vmagic_bias = params->fp32_sse4.magic_bias[0];
-    const int32_t vmagic_bias_less_output_zero_point = params->fp32_sse4.magic_bias_less_output_zero_point[0];
-  $elif REQUANTIZATION == "RNDNU":
-    const int32x4_t vleft_pre_shift = vld1q_dup_s32(&params->rndnu_neon.left_pre_shift);
-    const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
-    const int32x4_t vleft_post_shift = vld1q_dup_s32(&params->rndnu_neon.left_post_shift);
-    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->rndnu_neon.output_zero_point);
+  const int32_t vinit_bias = params->fp32_sse4.init_bias[0];
+  const float vscale = params->fp32_sse4.scale[0];
+  const int32_t output_min = params->fp32_sse4.output_min[0];
+  const int32_t output_max = params->fp32_sse4.output_max[0];
+  const float vmagic_bias = params->fp32_sse4.magic_bias[0];
+  const int32_t vmagic_bias_less_output_zero_point = params->fp32_sse4.magic_bias_less_output_zero_point[0];
 
   float vfpacc = (float) (_mm_cvtsi128_si32(vacc_lo) + vinit_bias) * vscale;
   vfpacc += vmagic_bias;
