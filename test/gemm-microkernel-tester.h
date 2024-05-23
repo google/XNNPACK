@@ -72,15 +72,6 @@ class GemmMicrokernelTester {
     return this->sr_;
   }
 
-  GemmMicrokernelTester& bl(size_t bl) {
-    this->bl_ = bl;
-    return *this;
-  }
-
-  size_t bl() const {
-    return this->bl_;
-  }
-
   GemmMicrokernelTester& m(size_t m) {
     this->m_ = m;
     return *this;
@@ -312,7 +303,7 @@ class GemmMicrokernelTester {
 
   void Test(
     xnn_qd8_f16_qb4w_gemm_ukernel_fn gemm,
-    xnn_init_f16_qc4w_minmax_params_fn init_params,
+    xnn_init_f16_qb4w_minmax_params_fn init_params,
     xnn_pack_qs8_qb4w_gemm_fn pack) const;
 
   void Test(
@@ -480,7 +471,6 @@ class GemmMicrokernelTester {
   size_t nr_{1};
   size_t kr_{1};
   size_t sr_{1};
-  size_t bl_{2};
   size_t m_{1};
   size_t n_{1};
   size_t k_{1};

@@ -1,0 +1,163 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert DATATYPE in ["QB4_F16"]
+#include <assert.h>
+
+#include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
+#include <xnnpack/unaligned.h>
+#include <fp16/fp16.h>
+
+
+$DATATYPE_SPEC = {"QB4_F16": "qd8_f16_qb4w"}[DATATYPE]
+$PARAMS_UNION = {"QB4_F16": "xnn_f16_qb4w_minmax_params"}[DATATYPE]
+$SCALING_PARAMS = "xnn_qd8_quantization_params" if DATATYPE in ["QB4_F16"] else ""
+$XINT8_T = "int8_t"
+$MIN_F32 = "math_min_f32"
+$MAX_F32 = "math_max_f32"
+void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}__scalar(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    const ${XINT8_T}* restrict a,
+    size_t a_stride,
+    const void* restrict w,
+    void* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const union ${PARAMS_UNION} params[XNN_MIN_ELEMENTS(1)],
+    const struct ${SCALING_PARAMS} quantization_params[XNN_MIN_ELEMENTS(${MR})])
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+
+  kc = round_up_po2(kc, 2);
+  size_t bl = params->fp16arith.blocksize;
+  
+  assert(bl != 0);
+  assert(bl <= kc);
+  assert(kc % bl == 0);
+
+  $for M in range(MR):
+    const int8_t* a${M} = (const int8_t*) ((uintptr_t) a + a_stride * ${M});
+    uint16_t* c${M} = (uint16_t*) ((uintptr_t) c + cm_stride * ${M});
+    $if M > 0:
+        if XNN_UNPREDICTABLE(mr <= ${M}) {
+            a${M} = a${M-1};
+            c${M} = c${M-1};
+        }
+
+  do {
+    $for N in range(NR):
+        const float vksum${N} = unaligned_indexed_load_f32(w, ${N});
+    w = (const float*) w + ${NR};
+
+    $for M in range(MR):
+        const float vinput_zero_point${M} = (float) quantization_params[${M}].zero_point;
+
+    $for M in range(MR):
+        $for N in range(NR):
+            float vout${M}x${N} = vinput_zero_point${M} * vksum${N};
+
+    size_t n_blocks = kc / bl;
+
+    for (size_t nb=0; nb<n_blocks; ++nb){
+      $for M in range(MR):
+        $for N in range(NR):
+            int32_t vacc${M}x${N} = 0;
+
+      for (size_t k=bl; k >= 2 * sizeof(int8_t); k -= 2 * sizeof(int8_t)) {
+        $for M in range(MR):
+            const int32_t va${M}c0 = (int32_t) a${M}[0];
+            const int32_t va${M}c1 = (int32_t) a${M}[1];
+            a${M} += 2;
+
+        $for N in range(NR):
+            const uint8_t vbi${N} = ((const uint8_t*) w)[${N}];
+        w = (const uint8_t*) w + ${NR};
+
+        $for N in range(NR):
+            const int32_t vb${N}c0 = (int32_t) (int8_t) (vbi${N} << 4);
+            const int32_t vb${N}c1 = (int32_t) (int8_t) (vbi${N} & 0xF0);
+
+        $for M in range(MR):
+            $for N in range(NR):
+                vacc${M}x${N} += va${M}c0 * vb${N}c0;
+            $for N in range(NR):
+                vacc${M}x${N} += va${M}c1 * vb${N}c1;
+      }
+
+      $for M in range(MR):
+        $for N in range(NR):
+            float vf${M}x${N} = vacc${M}x${N};
+
+      $for N in range(NR):
+        const float vfilter_output_scale${N} = unaligned_indexed_load_f32(w, 0);
+        w = (const float*) w + 1;
+        $for M in range(MR):
+            vf${M}x${N} *= vfilter_output_scale${N};
+
+      $for M in range(MR):
+        $for N in range(NR):
+            vout${M}x${N} += vf${M}x${N};
+    }
+
+    $for M in range(MR):
+        $for N in range(NR):
+            vout${M}x${N} /= 16;
+
+    $for M in range(MR):
+        const float vinput_scale${M} = quantization_params[${M}].inv_scale;
+        $for N in range(NR):
+            vout${M}x${N} *= vinput_scale${M};
+
+    $for N in range(NR):
+        const float vbias${N} = unaligned_indexed_load_f32(w, ${N});
+        $for M in range(MR):
+            vout${M}x${N} += vbias${N};
+    w = (const float*) w + ${NR};
+
+    const float voutput_min = fp16_ieee_to_fp32_value(params->fp16arith.min);
+    $for M in range(MR):
+        $for N in range(NR):
+            vout${M}x${N} = math_max_f32(vout${M}x${N}, voutput_min);
+
+    const float voutput_max = fp16_ieee_to_fp32_value(params->fp16arith.max);
+    $for M in range(MR):
+        $for N in range(NR):
+            vout${M}x${N} = math_min_f32(vout${M}x${N}, voutput_max);
+
+    if XNN_LIKELY(nc >= ${NR}) {
+        $for M in range(MR):
+            $for N in range(NR):
+                c${M}[${N}] = fp16_ieee_from_fp32_value(vout${M}x${N});
+
+        $for M in range(MR):
+            a${M} = (const int8_t*) ((uintptr_t) a${M} - kc);
+
+        $for M in range(MR):
+            c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
+
+      nc -= ${NR};
+    } else {
+      $for LOG2N in reversed(range(NR.bit_length() - 1)):
+        if (nc & ${1 << LOG2N}) {
+            $for M in range(MR):
+                $for N in range(1 << LOG2N):
+                    c${M}[${N}] = fp16_ieee_from_fp32_value(vout${M}x${N});
+                c${M} += ${1 << LOG2N};
+            $if LOG2N != 0:
+                $for N in range(NR - (1 << LOG2N) - 1):
+                    $for M in range(MR):
+                        vout${M}x${N} = vout${M}x${N + (1 << LOG2N)};
+        }
+
+      nc = 0;
+    }
+  } while (nc != 0);
+}

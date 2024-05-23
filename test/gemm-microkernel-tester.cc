@@ -1244,7 +1244,7 @@ void GemmMicrokernelTester::Test(
 
 void GemmMicrokernelTester::Test(
   xnn_qd8_f16_qb4w_gemm_ukernel_fn gemm,
-  xnn_init_f16_qc4w_minmax_params_fn init_params,
+  xnn_init_f16_qb4w_minmax_params_fn init_params,
   xnn_pack_qs8_qb4w_gemm_fn pack) const
 {
   ASSERT_LE(m(), mr());
@@ -1273,7 +1273,7 @@ void GemmMicrokernelTester::Test(
   std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_w(packed_n() * packed_k_bytes +
                                                                /* vksum */ packed_n() * sizeof(float) +
                                                                /* scales */ packed_n() * num_blocks * sizeof(float) +
-                                                               /* bias */ packed_n() * sizeof(float)); // TODO
+                                                               /* bias */ packed_n() * sizeof(float));
 
   std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n(), 0);
@@ -1309,38 +1309,33 @@ void GemmMicrokernelTester::Test(
     // until runtime, set it to 1.
     const xnn_qs8_qc4w_packing_params packing_params = { /*input_zero_point=*/1, b_zero_point()};
 
-    // TODO
-    bool can_use_optimized_packing = false; // can_use_xnn_pack_qs8_qc4w_gemm_bl_goi_w_nr8_kr4(n(), nr(), kr(), sr(), nr() * sizeof(float), nr() * sizeof(float));
-
     pack(/*g=*/1, n(), k2, nr(), kr(), sr(), bl(),
       b.data(), /*bias=*/nullptr, /*scale=*/kernel_scale2d.data(),
       packed_w.data(), sizeof(float) * nr(), sizeof(float) * nr(), &packing_params);
 
-    if (!can_use_optimized_packing) {
-      // Fill in packed kernel scale
-      size_t stride =  nr() * (packed_k_bytes + /* scales= */ num_blocks * sizeof(float) + /* ksum= */ sizeof(float) + /* bias= */ sizeof(float));
-      size_t block_stride = (bl() / 2 + sizeof(float)) * nr();
-      size_t start_offset = nr() * (packed_k_bytes / num_blocks + sizeof(float));
-      uintptr_t start = (uintptr_t) packed_w.data() + start_offset;
-      xnn_init_qs8_qb8w_scale_fp32_params(
-        n(), nr(), nr(),
-        stride,
-        stride,
-        /*num_blocks=*/ num_blocks,
-        /*block_stride=*/ block_stride,
-        0,
-        kernel_scale2d.data(),
-        (void*) start);
+    // Fill in packed kernel scale
+    size_t stride =  nr() * (packed_k_bytes + /* scales= */ num_blocks * sizeof(float) + /* ksum= */ sizeof(float) + /* bias= */ sizeof(float));
+    size_t block_stride = (bl() / 2 + sizeof(float)) * nr();
+    size_t start_offset = nr() * (packed_k_bytes / num_blocks + sizeof(float));
+    uintptr_t start = (uintptr_t) packed_w.data() + start_offset;
+    xnn_init_blockwise_scale_fp32_params(
+      n(), nr(), nr(),
+      stride,
+      stride,
+      /*num_blocks=*/ num_blocks,
+      /*block_stride=*/ block_stride,
+      0,
+      kernel_scale2d.data(),
+      (void*) start);
 
-      start = (uintptr_t) packed_w.data() + stride - sizeof(float) * nr();
-      xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(),
-        stride,
-        stride,
-        0,
-        bias.data(),
-        (void*) start);
-    }
+    start = (uintptr_t) packed_w.data() + stride - sizeof(float) * nr();
+    xnn_init_qs8_qc8w_scale_fp32_params(
+      n(), nr(), nr(),
+      stride,
+      stride,
+      0,
+      bias.data(),
+      (void*) start);
 
     // Compute 32-bit results and output quantization arguments.
     std::fill(c_ref.begin(), c_ref.end(), 0);
@@ -1378,10 +1373,12 @@ void GemmMicrokernelTester::Test(
         : accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
 
     // Prepare parameters.
-    xnn_f16_qc4w_minmax_params params;
+    xnn_f16_qb4w_minmax_params params;
     init_params(&params,
       fp16_ieee_from_fp32_value(c_min),
-      fp16_ieee_from_fp32_value(c_max), 8);
+      fp16_ieee_from_fp32_value(c_max),
+      8,
+      bl());
 
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
@@ -1389,7 +1386,7 @@ void GemmMicrokernelTester::Test(
       }
     }
 
-    gemm(m(), n(), k2, bl(),
+    gemm(m(), n(), k2,
         a.data(), a_stride() * sizeof(int8_t),
         static_cast<const void*>(packed_w.data()),
         c.data(), cm_stride() * sizeof(uint16_t), cn_stride() * sizeof(uint16_t), &params, quantization_params.data());

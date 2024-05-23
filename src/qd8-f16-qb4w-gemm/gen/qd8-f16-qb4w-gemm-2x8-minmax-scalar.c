@@ -19,20 +19,23 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_2x8__scalar(
     size_t mr,
     size_t nc,
     size_t kc,
-    size_t bl,
     const int8_t* restrict a,
     size_t a_stride,
     const void* restrict w,
     void* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f16_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+    const union xnn_f16_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[XNN_MIN_ELEMENTS(2)])
 {
   assert(mr != 0);
   assert(mr <= 2);
   assert(nc != 0);
   assert(kc != 0);
+
+  kc = round_up_po2(kc, 2);
+  size_t bl = params->fp16arith.blocksize;
+  
   assert(bl != 0);
   assert(bl <= kc);
   assert(kc % bl == 0);
@@ -46,7 +49,6 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_2x8__scalar(
       c1 = c0;
   }
 
-  kc = round_up_po2(kc, 2);
   do {
     const float vksum0 = unaligned_indexed_load_f32(w, 0);
     const float vksum1 = unaligned_indexed_load_f32(w, 1);

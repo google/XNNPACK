@@ -2285,6 +2285,63 @@ size_t xnn_init_f16_qc4w_minmax_avxvnni_params(
   params->avxvnni.gfni_shl4 = INT64_C(0x01020408);
   return sizeof(params->avxvnni);
 }
+#endif
+
+size_t xnn_init_f16_qb4w_minmax_scalar_params(
+  union xnn_f16_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t output_min,
+  uint16_t output_max,
+  uint8_t kernel_zero_point,
+  size_t blocksize)
+{
+  assert(kernel_zero_point <= 15);
+  params->fp16arith.min = output_min;
+  params->fp16arith.max = output_max;
+  params->fp16arith.minus_kernel_zero_point = -(int32_t) kernel_zero_point;
+  params->fp16arith.blocksize = blocksize;
+  return sizeof(params->fp16arith);
+}
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+size_t xnn_init_f16_qb4w_minmax_avx_params(
+  union xnn_f16_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t output_min,
+  uint16_t output_max,
+  uint8_t kernel_zero_point,
+  size_t blocksize)
+{
+  assert(kernel_zero_point <= 15);
+  const float min_f32 = fp16_ieee_to_fp32_value(output_min);
+  const float max_f32 = fp16_ieee_to_fp32_value(output_max);
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.min[i] = min_f32;
+    params->avx.max[i] = max_f32;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx.mask[i] = 0xF0;
+  }
+  params->avx.blocksize = blocksize;
+  return sizeof(params->avx);
+}
+
+size_t xnn_init_f16_qb4w_minmax_avxvnni_params(
+  union xnn_f16_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t output_min,
+  uint16_t output_max,
+  uint8_t kernel_zero_point,
+  size_t blocksize)
+{
+  assert(kernel_zero_point <= 15);
+  const float min_f32 = fp16_ieee_to_fp32_value(output_min);
+  const float max_f32 = fp16_ieee_to_fp32_value(output_max);
+  params->avxvnni.min = min_f32;
+  params->avxvnni.max = max_f32;
+  params->avxvnni.sign_mask = 0x80;
+  params->avxvnni.mask = 0xF0;
+  params->avxvnni.gfni_shl4 = INT64_C(0x01020408);
+  params->avxvnni.blocksize = blocksize;
+  return sizeof(params->avxvnni);
+}
 
 size_t xnn_init_f32_default_avx_params(
   union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)])

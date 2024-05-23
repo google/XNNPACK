@@ -445,6 +445,23 @@ DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_scalar_par
   DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_avxvnni_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+
+#define DECLARE_INIT_F16_QB4W_MINMAX_PARAMS_FUNCTION(fn_name)     \
+  XNN_INTERNAL size_t fn_name(                                    \
+    union xnn_f16_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)], \
+    uint16_t output_min,                                          \
+    uint16_t output_max,                                          \
+    uint8_t kernel_zero_point,                                    \
+    size_t blocksize);
+
+DECLARE_INIT_F16_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qb4w_minmax_scalar_params)
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_F16_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qb4w_minmax_avx_params)
+  DECLARE_INIT_F16_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qb4w_minmax_avxvnni_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
 #define DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                    \
     union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)], \
