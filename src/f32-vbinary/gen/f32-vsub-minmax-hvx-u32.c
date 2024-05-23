@@ -10,6 +10,7 @@
 #include <hexagon_types.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/vbinary.h>
 
@@ -29,9 +30,9 @@ void xnn_f32_vsub_minmax_ukernel__hvx_u32(
   const HVX_Vector voutput_min = Q6_V_vsplat_R(*((uint32_t *) &params->scalar.min));
   const HVX_Vector voutput_max = Q6_V_vsplat_R(*((uint32_t *) &params->scalar.max));
 
-  const HVX_Vector *vptr_a = (const HVX_Vector *) input_a;
-  const HVX_Vector *vptr_b = (const HVX_Vector *) input_b;
-  HVX_Vector *vptr_o = (HVX_Vector*) output;
+  const HVX_UVector *vptr_a = (const HVX_UVector *) input_a;
+  const HVX_UVector *vptr_b = (const HVX_UVector *) input_b;
+  HVX_UVector *vptr_o = (HVX_UVector*) output;
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     HVX_Vector va = *vptr_a++;
@@ -50,8 +51,7 @@ void xnn_f32_vsub_minmax_ukernel__hvx_u32(
      HVX_Vector vacc = Q6_Vsf_vsub_VsfVsf(va, vb);
      vacc = Q6_Vsf_vmax_VsfVsf(vacc, voutput_min);
      vacc = Q6_Vsf_vmin_VsfVsf(vacc, voutput_max);
-
-     HVX_VectorPred mask = Q6_Q_vsetq_R(batch);
-     Q6_vmem_QRIV(mask, vptr_o, vacc);
+     
+     Q6_V_vstu_variable(vptr_o, batch, vacc);
   }
 }

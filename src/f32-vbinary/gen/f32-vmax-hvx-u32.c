@@ -10,6 +10,7 @@
 #include <hexagon_types.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/vbinary.h>
 
@@ -27,9 +28,9 @@ void xnn_f32_vmax_ukernel__hvx_u32(
   assert(output != NULL);
 
 
-  const HVX_Vector *vptr_a = (const HVX_Vector *) input_a;
-  const HVX_Vector *vptr_b = (const HVX_Vector *) input_b;
-  HVX_Vector *vptr_o = (HVX_Vector*) output;
+  const HVX_UVector *vptr_a = (const HVX_UVector *) input_a;
+  const HVX_UVector *vptr_b = (const HVX_UVector *) input_b;
+  HVX_UVector *vptr_o = (HVX_UVector*) output;
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     HVX_Vector va = *vptr_a++;
@@ -44,8 +45,7 @@ void xnn_f32_vmax_ukernel__hvx_u32(
      HVX_Vector vb = *vptr_b;
 
      HVX_Vector vacc = Q6_Vsf_vmax_VsfVsf(va, vb);
-
-     HVX_VectorPred mask = Q6_Q_vsetq_R(batch);
-     Q6_vmem_QRIV(mask, vptr_o, vacc);
+     
+     Q6_V_vstu_variable(vptr_o, batch, vacc);
   }
 }

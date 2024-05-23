@@ -7,12 +7,10 @@
 
 #include <stdint.h>
 #include <xnnpack.h>
-#include <xnnpack/common.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/microparams.h>
 #include <xnnpack/requantization.h>
-#include <xnnpack/aligned-allocator.h>
 
 #include <algorithm>
 #include <cassert>
@@ -346,9 +344,9 @@ void VBinaryMicrokernelTester::Test(
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
-  std::vector<float, AlignedAllocator<float, XNN_ALLOCATION_ALIGNMENT>> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<float, AlignedAllocator<float, XNN_ALLOCATION_ALIGNMENT>> b(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<float, AlignedAllocator<float, XNN_ALLOCATION_ALIGNMENT>> y(batch_size() + (inplace_a() || inplace_b()
+  std::vector<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<float> b(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<float> y(batch_size() + (inplace_a() || inplace_b()
                                            ? XNN_EXTRA_BYTES / sizeof(float)
                                            : 0));
   std::vector<float> y_ref(batch_size());
