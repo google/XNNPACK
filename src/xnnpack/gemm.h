@@ -648,7 +648,7 @@ DECLARE_F32_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_qc4w_gemm_minmax_ukernel_4
       const int8_t* a,                                                                                 \
       size_t a_stride,                                                                                 \
       const void* w,                                                                                   \
-      void* c,                                                                                         \
+      uint16_t* c,                                                                                     \
       size_t cm_stride,                                                                                \
       size_t cn_stride,                                                                                \
       const union xnn_f16_qb4w_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)],                 \

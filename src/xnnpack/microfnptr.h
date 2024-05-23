@@ -284,7 +284,7 @@ typedef void (*xnn_qd8_f16_qb4w_gemm_ukernel_fn)(
     const int8_t* a,
     size_t a_stride,
     const void* w,
-    void* c,
+    uint16_t* c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f16_qb4w_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)],

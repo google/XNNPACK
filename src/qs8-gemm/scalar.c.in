@@ -3,9 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert DATATYPE in ["QD8", "QC4", "QB4"] or REQUANTIZATION in ["FP32", "RNDNU"]
+$assert DATATYPE in ["QD8", "QC4", "QB4_F16", "QB4_F32"] or REQUANTIZATION in ["FP32", "RNDNU"]
 $assert REQUANTIZATION != "FP32" or VARIANT in ["FMAGIC", "IMAGIC", "LRINTF"]
-$assert DATATYPE in ["QC8", "QS8", "QU8", "QD8", "QC4", "QB4"]
+$assert DATATYPE in ["QC8", "QS8", "QU8", "QD8", "QC4", "QB4_F16", "QB4_F32"]
 #include <assert.h>
 $if VARIANT == "LRINTF":
   #include <math.h>
@@ -14,19 +14,21 @@ $if VARIANT == "LRINTF":
 #include <xnnpack/math.h>
 $if NR % 4 != 0:
   #include <xnnpack/unaligned.h>
+$if DATATYPE in ["QB4_F16"]:
+  #include <fp16/fp16.h>
 
 
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QU8": "qu8", "QD8": "qd8_f32_qc8w", "QC4": "qd8_f32_qc4w", "QB4": "qd8_f32_qb4w"}[DATATYPE]
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QU8": "qu8", "QD8": "qd8_f32_qc8w", "QC4": "qd8_f32_qc4w", "QB4_F16": "qd8_f16_qb4w", "QB4_F32": "qd8_f32_qb4w"}[DATATYPE]
 $VARIANT_SPEC = "_" + VARIANT.lower() if VARIANT else ""
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar" + ("_" + VARIANT.lower() if VARIANT else "")
-$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QC4": "xnn_f32_qc4w_minmax_params", "QB4": "xnn_f32_qb4w_minmax_params"}[DATATYPE]
-$SCALING_PARAMS = "xnn_qd8_quantization_params" if DATATYPE in ["QD8", "QC4", "QB4"] else ""
+$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QC4": "xnn_f32_qc4w_minmax_params", "QB4_F16": "xnn_f16_qb4w_minmax_params", "QB4_F32": "xnn_f32_qb4w_minmax_params"}[DATATYPE]
+$SCALING_PARAMS = "xnn_qd8_quantization_params" if DATATYPE in ["QD8", "QC4", "QB4_F16", "QB4_F32"] else ""
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
-$OUT_T = {"QC8": "int8_t", "QS8": "int8_t", "QU8": "uint8_t", "QD8": "float", "QC4": "float", "QB4": "float"}[DATATYPE]
+$OUT_T = {"QC8": "int8_t", "QS8": "int8_t", "QU8": "uint8_t", "QB4_F16": "uint16_t", "QD8": "float", "QC4": "float", "QB4_F32": "float"}[DATATYPE]
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
-$BLOCKWISE = True if DATATYPE in ["QB4"] else False
+$BLOCKWISE = True if DATATYPE in ["QB4_F16", "QB4_F32"] else False
 void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}${VARIANT_SPEC}(
     size_t mr,
     size_t nc,
@@ -37,7 +39,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
     ${OUT_T}* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    $if DATATYPE in ["QD8", "QC4", "QB4"]:
+    $if DATATYPE in ["QD8", "QC4", "QB4_F16", "QB4_F32"]:
       const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)],
       const struct ${SCALING_PARAMS} quantization_params[restrict XNN_MIN_ELEMENTS(1)])
     $else:
@@ -48,8 +50,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
   assert(nc != 0);
   assert(kc != 0);
   $if BLOCKWISE:
-    size_t bl = params->scalar.blocksize;
-    assert(bl <= kc);
+    $if DATATYPE == "QB4_F16":
+      size_t bl = params->fp16arith.blocksize;
+    $else:
+      size_t bl = params->scalar.blocksize;
+    assert(bl <= round_up_po2(kc, 2));
     assert(bl != 0);
 
   const ${XINT8_T}* a0 = a;
@@ -75,10 +80,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
 
   $if DATATYPE == "QU8":
     const int32_t vb_zero_point = params->${PARAMS_STRUCT}.kernel_zero_point;
-  $elif DATATYPE in ["QC4", "QB4"]:
+  $elif DATATYPE in ["QC4", "QB4_F16", "QB4_F32"]:
     kc = round_up_po2(kc, 2);
   do {
-    $if DATATYPE in ["QD8", "QC4", "QB4"]:
+    $if DATATYPE in ["QD8", "QC4", "QB4_F16", "QB4_F32"]:
       $if NR % 4 != 0:
         $for N in range(NR):
           $if BLOCKWISE:
@@ -124,7 +129,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
         size_t k = bl;
     $else:
       size_t k = kc;
-    $if DATATYPE in ["QC4", "QB4"]:
+    $if DATATYPE in ["QC4", "QB4_F16", "QB4_F32"]:
       for (; k >= 2 * sizeof(uint8_t); k -= 2 * sizeof(uint8_t)) {
         $for M in range(MR):
           const int32_t va${M}c0 = (int32_t) a${M}[0];
@@ -184,7 +189,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
         w = (const float*) w + ${NR};
       }
 
-    $if DATATYPE in ["QD8", "QC4", "QB4"]:
+    $if DATATYPE in ["QD8", "QC4", "QB4_F16", "QB4_F32"]:
       $for M in range(MR):
         $for N in range(NR):
           $if BLOCKWISE:
@@ -231,12 +236,18 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
       $else:
         w = (const float*) w + ${NR * 2};
 
-      const float voutput_min = params->scalar.min;
+      $if DATATYPE in ["QB4_F16"]:
+        const float voutput_min = fp16_ieee_to_fp32_value(params->fp16arith.min);
+      $else:
+        const float voutput_min = params->scalar.min;
       $for N in range(NR):
         $for M in range(MR):
           vout${M}x${N} = ${MAX_F32}(vout${M}x${N}, voutput_min);
 
-      const float voutput_max = params->scalar.max;
+      $if DATATYPE in ["QB4_F16"]:
+        const float voutput_max = fp16_ieee_to_fp32_value(params->fp16arith.max);
+      $else:
+        const float voutput_max = params->scalar.max;
       $for N in range(NR):
         $for M in range(MR):
           vout${M}x${N} = ${MIN_F32}(vout${M}x${N}, voutput_max);
@@ -244,13 +255,19 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
       if XNN_LIKELY(nc >= ${NR}) {
         $for M in range(MR):
           $for N in range(NR):
-            c${M}[${N}] = vout${M}x${N};
+            $if DATATYPE in ["QB4_F16"]:
+              c${M}[${N}] = fp16_ieee_from_fp32_value(vout${M}x${N});
+            $else:
+              c${M}[${N}] = vout${M}x${N};
 
         $for M in range(MR):
           a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} - kc);
 
         $for M in range(MR):
-          c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
+          $if DATATYPE in ["QB4_F16"]:
+            c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
+          $else:
+            c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
         nc -= ${NR};
       } else {
@@ -258,7 +275,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
           if (nc & ${1 << LOG2N}) {
             $for M in range(MR):
               $for N in range(1 << LOG2N):
-                c${M}[${N}] = vout${M}x${N};
+                $if DATATYPE in ["QB4_F16"]:
+                  c${M}[${N}] = fp16_ieee_from_fp32_value(vout${M}x${N});
+                $else:
+                  c${M}[${N}] = vout${M}x${N};
               $if LOG2N != 0:
                 $for N in range(NR - (1 << LOG2N) - 1):
                   vout${M}x${N} = vout${M}x${N + (1 << LOG2N)};
