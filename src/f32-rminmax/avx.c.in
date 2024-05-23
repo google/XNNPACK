@@ -29,6 +29,7 @@ void xnn_f32_r${OP.lower()}_ukernel__avx_u${BATCH_TILE}${ACC_SUFFIX}(
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
+  assert(params != NULL);
 
   $if EMIT_MIN:
     __m256 vmin0 = _mm256_broadcast_ss(input);

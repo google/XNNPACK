@@ -23,7 +23,138 @@
 #include <xnnpack/microfnptr.h>
 
 namespace {
-void f32_rsum_discontig(
+void f16_rsum(
+    benchmark::State& state,
+    xnn_f16_rsum_ukernel_fn rsum,
+    xnn_init_f16_scale_params_fn init_params,
+    benchmark::utils::IsaCheckFunction isa_check = nullptr)
+{
+  if (isa_check != nullptr && !isa_check(state)) {
+    return;
+  }
+  const size_t rows = state.range(0);
+  const size_t batch = state.range(0);
+
+  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> input(rows * batch + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::vector<uint16_t> output(rows);
+  std::iota(input.begin(), input.end(), 1);
+
+  // Prepare parameters.
+  xnn_f16_scale_params params;
+  init_params(&params, /*scale=*/1.0f);
+
+  for (auto _ : state) {
+    for (int i = 0; i < rows; ++i) {
+      rsum(batch * sizeof(uint16_t), &input[i * batch], &output[i], &params);
+    }
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+}
+
+void f16_f32acc_rsum(
+    benchmark::State& state,
+    xnn_f16_f32acc_rsum_ukernel_fn rsum,
+    xnn_init_f16_f32acc_scale_params_fn init_params,
+    benchmark::utils::IsaCheckFunction isa_check = nullptr)
+{
+  if (isa_check != nullptr && !isa_check(state)) {
+    return;
+  }
+  const size_t rows = state.range(0);
+  const size_t batch = state.range(0);
+
+  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> input(rows * batch + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::vector<uint16_t> output(rows);
+  std::iota(input.begin(), input.end(), 1);
+
+  // Prepare parameters.
+  xnn_f16_f32acc_scale_params params;
+  init_params(&params, /*scale=*/1.0f);
+
+  for (auto _ : state) {
+    for (int i = 0; i < rows; ++i) {
+      rsum(batch * sizeof(uint16_t), &input[i * batch], &output[i], &params);
+    }
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+}
+
+void f32_rsum(
+    benchmark::State& state,
+    xnn_f32_rsum_ukernel_fn rsum,
+    xnn_init_f32_scale_params_fn init_params,
+    benchmark::utils::IsaCheckFunction isa_check = nullptr)
+{
+  if (isa_check != nullptr && !isa_check(state)) {
+    return;
+  }
+  const size_t rows = state.range(0);
+  const size_t batch = state.range(0);
+
+  std::vector<float, AlignedAllocator<float, 64>> input(rows * batch + XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<float> output(rows);
+  std::iota(input.begin(), input.end(), 1);
+
+  // Prepare parameters.
+  xnn_f32_scale_params params;
+  init_params(&params, /*scale=*/1.0f);
+
+  for (auto _ : state) {
+    for (int i = 0; i < rows; ++i) {
+      rsum(batch * sizeof(float), &input[i * batch], &output[i], &params);
+    }
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+}
+
+void qs8_rsum(
+    benchmark::State& state,
+    xnn_qs8_rsum_ukernel_fn rsum,
+    xnn_init_qs8_avgpool_minmax_params_fn init_params,
+    benchmark::utils::IsaCheckFunction isa_check = nullptr)
+{
+  if (isa_check != nullptr && !isa_check(state)) {
+    return;
+  }
+  const size_t rows = state.range(0);
+  const size_t batch = state.range(0);
+
+  std::vector<int8_t, AlignedAllocator<int8_t, 64>> input(rows * batch + XNN_EXTRA_BYTES);
+  std::vector<int8_t> output(rows);
+  std::iota(input.begin(), input.end(), 1);
+
+  // Prepare parameters.
+  union xnn_qs8_avgpool_minmax_params params;
+  init_params(
+    &params,
+    /*init_bias=*/0, /*scale=*/1.0f, /*output_zero_point=*/0,
+    std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+
+  for (auto _ : state) {
+    for (int i = 0; i < rows; ++i) {
+      rsum(batch, &input[i * batch], &output[i], &params);
+    }
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+}
+
+void f32_rdsum(
     benchmark::State& state,
     xnn_f32_rdsum_ukernel_fn rdsum,
     xnn_init_f32_scale_params_fn init_params,
@@ -54,7 +185,7 @@ void f32_rsum_discontig(
   }
 }
 
-void f16_f32acc_rsum_discontig(
+void f16_f32acc_rdsum(
     benchmark::State& state,
     xnn_f16_f32acc_rdsum_ukernel_fn rdsum,
     xnn_init_f16_f32acc_scale_params_fn init_params,
@@ -85,12 +216,23 @@ void f16_f32acc_rsum_discontig(
   }
 }
 
-static void BenchmarkBatch(benchmark::internal::Benchmark* b)
+static void BenchmarkRSUM(benchmark::internal::Benchmark* b)
+{
+  b->ArgNames({"rows, batch"});
+  b->Args({1, 512});
+  b->Args({1, 1024});
+  b->Args({1, 8000});
+  b->Args({512, 512});
+  b->Args({512, 1024});
+  b->Args({512, 8000});
+}
+
+static void BenchmarkRDSUM(benchmark::internal::Benchmark* b)
 {
   b->ArgNames({"rows", "channels"});
   b->Args({8, 1024});
   b->Args({16, 1024});
-  b->Args({1024, 1024});
+  b->Args({10240, 1024});
 }
 
 }  // namespace

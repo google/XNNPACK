@@ -1597,6 +1597,12 @@ typedef void (*xnn_f32_rsum_ukernel_fn)(
     float* output,
     const union xnn_f32_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+typedef void (*xnn_qs8_rsum_ukernel_fn)(
+    size_t batch,
+    const int8_t* input,
+    int8_t* output,
+    const union xnn_qs8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 // RMAX: Reduce-MAX
 
 typedef void (*xnn_rmax_ukernel_fn)(

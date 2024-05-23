@@ -25,6 +25,7 @@ void xnn_f32_rmax_ukernel__avx_u32_acc2(
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
+  assert(params != NULL);
 
   __m256 vmax0 = _mm256_broadcast_ss(input);
   __m256 vmax1 = vmax0;

@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/x32-packw/NRv-rvv.in
+//   Template: src/x32-packw/rvv.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 SiFive, Inc.

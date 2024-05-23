@@ -121,6 +121,20 @@ XNN_INTERNAL void xnn_init_qs8_qc8w_scale_fp32_params(
   const float scale[XNN_MIN_ELEMENTS(1)],
   void* packed_w);
 
+XNN_INTERNAL void xnn_init_qs8_qb8w_scale_fp32_params(
+  size_t channels,
+  size_t channels_tile,
+  size_t channels_subtile,
+  size_t stride,
+  size_t substride,
+  size_t num_blocks,
+  size_t block_stride,
+  // How much offset to subtract from packed_w pointer when moving from channels_tile to channels_subtile.
+  size_t stride_offset,
+  const float scale[XNN_MIN_ELEMENTS(1)],
+  void* packed_w);
+
+
 XNN_INTERNAL void xnn_init_qs8_to_qs8_qc8w_scale_fp32_params(
   size_t channels,
   size_t channels_tile,
@@ -152,6 +166,7 @@ DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_scalar
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_sse2_params)
   DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_sse4_params)
+  DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_avx2_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_wasmsimd_params)
@@ -235,9 +250,7 @@ DECLARE_UPDATE_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qu8_avgpool_minmax_fp32_sc
     union xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)], \
     uint16_t scale);
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_F16_SCALE_PARAMS_FUNCTION(xnn_init_f16_scale_fp16arith_params)
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
 #define DECLARE_INIT_F16_F32ACC_SCALE_PARAMS_FUNCTION(fn_name)     \

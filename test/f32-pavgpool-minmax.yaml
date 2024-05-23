@@ -17,6 +17,9 @@
 # WAsm
 - name: xnn_f32_pavgpool_minmax_ukernel_9p8x__wasm_c1
   init: xnn_init_f32_minmax_scalar_params
+# RISC-V Vector
+- name: xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v
+  init: xnn_init_f32_minmax_scalar_params
 # Scalar
 - name: xnn_f32_pavgpool_minmax_ukernel_9p8x__scalar_c1
   init: xnn_init_f32_minmax_scalar_params
@@ -33,6 +36,9 @@
   init: xnn_init_f32_minmax_wasmsimd_params
 # WAsm
 - name: xnn_f32_pavgpool_minmax_ukernel_9x__wasm_c1
+  init: xnn_init_f32_minmax_scalar_params
+# RISC-V Vector
+- name: xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v
   init: xnn_init_f32_minmax_scalar_params
 # Scalar
 - name: xnn_f32_pavgpool_minmax_ukernel_9x__scalar_c1

@@ -14,8 +14,8 @@
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/maxpool.h>
+#include <xnnpack/pavgpool.h>
 #include <xnnpack/raddstoreexpminusmax.h>
-#include <xnnpack/reduce.h>
 #include <xnnpack/transpose.h>
 #include <xnnpack/vbinary.h>
 #include <xnnpack/vunary.h>
@@ -598,6 +598,219 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__rvv_c2v(
   } while (--output_pixels != 0);
 }
 
+void xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
+    const float** input,
+    size_t input_offset,
+    const float* zero,
+    const float* multiplier,
+    float* buffer,
+    float* output,
+    size_t input_increment,
+    size_t output_increment,
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(output_pixels != 0);
+  assert(kernel_elements > 9);
+  assert(channels != 0);
+  assert((input_offset & 3) == 0);
+
+  input_offset >>= XNN_LOG2_SIZEOF_FLOAT;
+
+  do {
+    {
+      const float *i[9];
+      for (size_t kk = 0; kk < 9; ++kk) {
+        assert(input[kk] != NULL);
+        i[kk] = (input[kk] != zero ? input[kk] + input_offset : zero) ;
+      }
+      input += 9;
+
+      float* b = buffer;
+      for (size_t c = channels; c != 0; ) {
+        int32_t n = __riscv_vsetvl_e32m1(c);
+
+        vfloat32m1_t i0_f32v = __riscv_vle32_v_f32m1(i[0], n); i[0] += n;
+        vfloat32m1_t i1_f32v = __riscv_vle32_v_f32m1(i[1], n); i[1] += n;
+        vfloat32m1_t i2_f32v = __riscv_vle32_v_f32m1(i[2], n); i[2] += n;
+        vfloat32m1_t i3_f32v = __riscv_vle32_v_f32m1(i[3], n); i[3] += n;
+        vfloat32m1_t i4_f32v = __riscv_vle32_v_f32m1(i[4], n); i[4] += n;
+        vfloat32m1_t i5_f32v = __riscv_vle32_v_f32m1(i[5], n); i[5] += n;
+        vfloat32m1_t i6_f32v = __riscv_vle32_v_f32m1(i[6], n); i[6] += n;
+        vfloat32m1_t i7_f32v = __riscv_vle32_v_f32m1(i[7], n); i[7] += n;
+        vfloat32m1_t i8_f32v = __riscv_vle32_v_f32m1(i[8], n); i[8] += n;
+
+        vfloat32m1_t sum01_f32v = __riscv_vfadd_vv_f32m1(i0_f32v, i1_f32v, n);
+        vfloat32m1_t sum23_f32v = __riscv_vfadd_vv_f32m1(i2_f32v, i3_f32v, n);
+        vfloat32m1_t sum45_f32v = __riscv_vfadd_vv_f32m1(i4_f32v, i5_f32v, n);
+        vfloat32m1_t sum67_f32v = __riscv_vfadd_vv_f32m1(i6_f32v, i7_f32v, n);
+        vfloat32m1_t sum018_f32v = __riscv_vfadd_vv_f32m1(sum01_f32v, i8_f32v, n);
+        vfloat32m1_t sum2345_f32v = __riscv_vfadd_vv_f32m1(sum23_f32v, sum45_f32v, n);
+        vfloat32m1_t sum01678_f32v = __riscv_vfadd_vv_f32m1(sum018_f32v, sum67_f32v, n);
+        vfloat32m1_t sum_f32v = __riscv_vfadd_vv_f32m1(sum2345_f32v, sum01678_f32v, n);
+        __riscv_vse32_v_f32m1(b, sum_f32v, n); b += n;
+
+        c -= n;
+      }
+    }
+
+    size_t k = kernel_elements;
+    for (k -= 9; k > 8; k -= 8) {
+      const float *i[8];
+      for (size_t kk = 0; kk < 8; ++kk) {
+        assert(input[kk] != NULL);
+        i[kk] = (input[kk] != zero ? input[kk] + input_offset : zero) ;
+      }
+      input += 8;
+
+      float* b = buffer;
+      for (size_t c = channels; c != 0; ) {
+        int32_t n = __riscv_vsetvl_e32m1(c);
+
+        vfloat32m1_t i0_f32v = __riscv_vle32_v_f32m1(i[0], n); i[0] += n;
+        vfloat32m1_t i1_f32v = __riscv_vle32_v_f32m1(i[1], n); i[1] += n;
+        vfloat32m1_t i2_f32v = __riscv_vle32_v_f32m1(i[2], n); i[2] += n;
+        vfloat32m1_t i3_f32v = __riscv_vle32_v_f32m1(i[3], n); i[3] += n;
+        vfloat32m1_t i4_f32v = __riscv_vle32_v_f32m1(i[4], n); i[4] += n;
+        vfloat32m1_t i5_f32v = __riscv_vle32_v_f32m1(i[5], n); i[5] += n;
+        vfloat32m1_t i6_f32v = __riscv_vle32_v_f32m1(i[6], n); i[6] += n;
+        vfloat32m1_t i7_f32v = __riscv_vle32_v_f32m1(i[7], n); i[7] += n;
+        vfloat32m1_t vacc_f32v = __riscv_vle32_v_f32m1(b, n);
+
+        vfloat32m1_t sum01_f32v = __riscv_vfadd_vv_f32m1(i0_f32v, i1_f32v, n);
+        vfloat32m1_t sum23_f32v = __riscv_vfadd_vv_f32m1(i2_f32v, i3_f32v, n);
+        vfloat32m1_t sum45_f32v = __riscv_vfadd_vv_f32m1(i4_f32v, i5_f32v, n);
+        vfloat32m1_t sum67_f32v = __riscv_vfadd_vv_f32m1(i6_f32v, i7_f32v, n);
+        vfloat32m1_t sum01a_f32v = __riscv_vfadd_vv_f32m1(sum01_f32v, vacc_f32v, n);
+        vfloat32m1_t sum2345_f32v = __riscv_vfadd_vv_f32m1(sum23_f32v, sum45_f32v, n);
+        vfloat32m1_t sum0167a_f32v = __riscv_vfadd_vv_f32m1(sum01a_f32v, sum67_f32v, n);
+        vfloat32m1_t sum_f32v = __riscv_vfadd_vv_f32m1(sum2345_f32v, sum0167a_f32v, n);
+        __riscv_vse32_v_f32m1(b, sum_f32v, n); b += n;
+
+        c -= n;
+      }
+    }
+
+    {
+      const float *i[8];
+      for (size_t kk = 0; kk < k; ++kk) {
+        assert(input[kk] != NULL);
+        i[kk] = (input[kk] != zero ? input[kk] + input_offset : zero) ;
+      }
+      for (size_t tail = k; tail < 8; ++tail) {
+        i[tail] = zero;
+      }
+
+      input = (const float**) ((uintptr_t) input + input_increment);
+
+      const float mult = *multiplier++;
+
+      const float min = params->scalar.min;
+      const float max = params->scalar.max;
+      float* b = buffer;
+      for (size_t c = channels; c != 0; ) {
+        int32_t n = __riscv_vsetvl_e32m1(c);
+
+        vfloat32m1_t i0_f32v = __riscv_vle32_v_f32m1(i[0], n); i[0] += n;
+        vfloat32m1_t i1_f32v = __riscv_vle32_v_f32m1(i[1], n); i[1] += n;
+        vfloat32m1_t i2_f32v = __riscv_vle32_v_f32m1(i[2], n); i[2] += n;
+        vfloat32m1_t i3_f32v = __riscv_vle32_v_f32m1(i[3], n); i[3] += n;
+        vfloat32m1_t i4_f32v = __riscv_vle32_v_f32m1(i[4], n); i[4] += n;
+        vfloat32m1_t i5_f32v = __riscv_vle32_v_f32m1(i[5], n); i[5] += n;
+        vfloat32m1_t i6_f32v = __riscv_vle32_v_f32m1(i[6], n); i[6] += n;
+        vfloat32m1_t i7_f32v = __riscv_vle32_v_f32m1(i[7], n); i[7] += n;
+        vfloat32m1_t vacc_f32v = __riscv_vle32_v_f32m1(b, n); b += n;
+
+        vfloat32m1_t sum01_f32v = __riscv_vfadd_vv_f32m1(i0_f32v, i1_f32v, n);
+        vfloat32m1_t sum23_f32v = __riscv_vfadd_vv_f32m1(i2_f32v, i3_f32v, n);
+        vfloat32m1_t sum45_f32v = __riscv_vfadd_vv_f32m1(i4_f32v, i5_f32v, n);
+        vfloat32m1_t sum67_f32v = __riscv_vfadd_vv_f32m1(i6_f32v, i7_f32v, n);
+        vfloat32m1_t sum01a_f32v = __riscv_vfadd_vv_f32m1(sum01_f32v, vacc_f32v, n);
+        vfloat32m1_t sum2345_f32v = __riscv_vfadd_vv_f32m1(sum23_f32v, sum45_f32v, n);
+        vfloat32m1_t sum0167a_f32v = __riscv_vfadd_vv_f32m1(sum01a_f32v, sum67_f32v, n);
+        vfloat32m1_t sum_f32v = __riscv_vfadd_vv_f32m1(sum2345_f32v, sum0167a_f32v, n);
+        vfloat32m1_t out_f32v = __riscv_vfmul_vf_f32m1(sum_f32v, mult, n);
+        out_f32v = __riscv_vfmin_vf_f32m1(__riscv_vfmax_vf_f32m1(out_f32v, min, n), max, n);
+        __riscv_vse32_v_f32m1(output, out_f32v, n); output += n;
+
+        c -= n;
+      }
+    }
+    output = (float*) ((uintptr_t) output + output_increment);
+  } while (--output_pixels != 0);
+}
+
+void xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
+    const float** input,
+    size_t input_offset,
+    const float* zero,
+    const float* multiplier,
+    float* output,
+    size_t input_increment,
+    size_t output_increment,
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(output_pixels != 0);
+  assert(kernel_elements != 0);
+  assert(kernel_elements <= 9);
+  assert(channels != 0);
+  assert((input_offset & 3) == 0);
+
+  input_offset >>= XNN_LOG2_SIZEOF_FLOAT;
+
+  const float output_min = params->scalar.min;
+  const float output_max = params->scalar.max;
+
+  do {
+    const float *i[9];
+    for (size_t kk = 0; kk < kernel_elements; ++kk) {
+      assert(input[kk] != NULL);
+      i[kk] = (input[kk] != zero ? input[kk] + input_offset : zero) ;
+    }
+    for (size_t tail = kernel_elements; tail < 9; ++tail) {
+      i[tail] = zero;
+    }
+
+    input = (const float**) ((uintptr_t) input + input_increment);
+
+    const float mult = *multiplier++;
+
+    for (size_t c = channels; c != 0; ) {
+      int32_t n = __riscv_vsetvl_e32m1(c);
+
+      vfloat32m1_t i0_f32v = __riscv_vle32_v_f32m1(i[0], n); i[0] += n;
+      vfloat32m1_t i1_f32v = __riscv_vle32_v_f32m1(i[1], n); i[1] += n;
+      vfloat32m1_t i2_f32v = __riscv_vle32_v_f32m1(i[2], n); i[2] += n;
+      vfloat32m1_t i3_f32v = __riscv_vle32_v_f32m1(i[3], n); i[3] += n;
+      vfloat32m1_t i4_f32v = __riscv_vle32_v_f32m1(i[4], n); i[4] += n;
+      vfloat32m1_t i5_f32v = __riscv_vle32_v_f32m1(i[5], n); i[5] += n;
+      vfloat32m1_t i6_f32v = __riscv_vle32_v_f32m1(i[6], n); i[6] += n;
+      vfloat32m1_t i7_f32v = __riscv_vle32_v_f32m1(i[7], n); i[7] += n;
+      vfloat32m1_t i8_f32v = __riscv_vle32_v_f32m1(i[8], n); i[8] += n;
+
+      vfloat32m1_t sum01_f32v = __riscv_vfadd_vv_f32m1(i0_f32v, i1_f32v, n);
+      vfloat32m1_t sum23_f32v = __riscv_vfadd_vv_f32m1(i2_f32v, i3_f32v, n);
+      vfloat32m1_t sum45_f32v = __riscv_vfadd_vv_f32m1(i4_f32v, i5_f32v, n);
+      vfloat32m1_t sum67_f32v = __riscv_vfadd_vv_f32m1(i6_f32v, i7_f32v, n);
+      vfloat32m1_t sum018_f32v = __riscv_vfadd_vv_f32m1(sum01_f32v, i8_f32v, n);
+      vfloat32m1_t sum2345_f32v = __riscv_vfadd_vv_f32m1(sum23_f32v, sum45_f32v, n);
+      vfloat32m1_t sum01678_f32v = __riscv_vfadd_vv_f32m1(sum018_f32v, sum67_f32v, n);
+      vfloat32m1_t sum_f32v = __riscv_vfadd_vv_f32m1(sum2345_f32v, sum01678_f32v, n);
+      vfloat32m1_t out_f32v = __riscv_vfmul_vf_f32m1(sum_f32v, mult, n);
+      out_f32v = __riscv_vfmin_vf_f32m1(__riscv_vfmax_vf_f32m1(out_f32v, output_min, n), output_max, n);
+      __riscv_vse32_v_f32m1(output, out_f32v, n); output += n;
+
+      c -= n;
+    }
+    output = (float*) ((uintptr_t) output + output_increment);
+  } while (--output_pixels != 0);
+}
+
 static inline vfloat32m4_t eval_poly_horner(vfloat32m4_t x,
                                                   float c6, float c5,
                                                   float c4, float c3, float c2,
@@ -781,64 +994,6 @@ void xnn_f32_rminmax_ukernel__rvv_u8v(
   vfloat32m1_t fmax = __riscv_vfmv_s_f_f32m1(-INFINITY, 1);
   output[0] = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredmin_vs_f32m8_f32m1(t0, fmin, N));
   output[1] = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredmax_vs_f32m8_f32m1(t1, fmax, N));
-}
-
-void xnn_f32_rsum_ukernel__rvv_u1v(
-    size_t batch,
-    const float* input,
-    float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
-{
-  assert(batch != 0);
-  assert(batch % sizeof(float) == 0);
-  assert(input != NULL);
-  assert(output != NULL);
-  float out;
-
-  batch >>= XNN_LOG2_SIZEOF_FLOAT;
-  vfloat32m1_t acc_f32v = __riscv_vfmv_s_f_f32m1(0.f, __riscv_vsetvl_e32m1(batch));
-  size_t n = __riscv_vsetvl_e32m1(batch);
-  vfloat32m1_t sum0_f32v = __riscv_vfmv_s_f_f32m1(0.f, n);
-  vfloat32m1_t sum1_f32v = __riscv_vfmv_s_f_f32m1(0.f, n);
-  for (; batch >= n * 8; batch -= n * 8) {
-    vfloat32m1_t in0_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
-    vfloat32m1_t in1_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
-    vfloat32m1_t in2_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
-    vfloat32m1_t in3_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
-    vfloat32m1_t in4_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
-    vfloat32m1_t in5_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
-    vfloat32m1_t in6_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
-    vfloat32m1_t in7_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
-    vfloat32m1_t sum01_f32v = __riscv_vfadd_vv_f32m1(in0_f32v, in1_f32v, n);
-    vfloat32m1_t sum23_f32v = __riscv_vfadd_vv_f32m1(in2_f32v, in3_f32v, n);
-    vfloat32m1_t sum45_f32v = __riscv_vfadd_vv_f32m1(in4_f32v, in5_f32v, n);
-    vfloat32m1_t sum67_f32v = __riscv_vfadd_vv_f32m1(in6_f32v, in7_f32v, n);
-    vfloat32m1_t sum0123_f32v = __riscv_vfadd_vv_f32m1(sum01_f32v, sum23_f32v, n);
-    vfloat32m1_t sum4567_f32v = __riscv_vfadd_vv_f32m1(sum45_f32v, sum67_f32v, n);
-    sum0_f32v = __riscv_vfadd_vv_f32m1(sum0_f32v, sum0123_f32v, n);
-    sum1_f32v = __riscv_vfadd_vv_f32m1(sum1_f32v, sum4567_f32v, n);
-  }
-  for (; batch >= n * 4; batch -= n * 4) {
-    vfloat32m1_t in0_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
-    vfloat32m1_t in1_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
-    vfloat32m1_t in2_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
-    vfloat32m1_t in3_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
-    vfloat32m1_t sum01_f32v = __riscv_vfadd_vv_f32m1(in0_f32v, in1_f32v, n);
-    vfloat32m1_t sum23_f32v = __riscv_vfadd_vv_f32m1(in2_f32v, in3_f32v, n);
-    sum0_f32v = __riscv_vfadd_vv_f32m1(sum0_f32v, sum01_f32v, n);
-    sum1_f32v = __riscv_vfadd_vv_f32m1(sum1_f32v, sum23_f32v, n);
-  }
-  vfloat32m1_t sum_f32v = __riscv_vfadd_vv_f32m1(sum0_f32v, sum1_f32v, n);
-  for (; batch > 0;) {
-    size_t n1 = __riscv_vsetvl_e32m1(batch);
-    vfloat32m1_t in_f32v = __riscv_vle32_v_f32m1(input, n1); input += n1;
-    sum_f32v = __riscv_vfadd_vv_f32m1_tu(sum_f32v, sum_f32v, in_f32v, n1);
-    batch -= n1;
-  }
-  acc_f32v = __riscv_vfredosum_vs_f32m1_f32m1(sum_f32v, acc_f32v, n);
-  vfloat32m1_t out_f32v = __riscv_vfmul_vf_f32m1(acc_f32v, params->scalar.scale, 1);
-  __riscv_vse32_v_f32m1(&out, out_f32v, 1);
-  *output += out;
 }
 
 void xnn_f32_vadd_minmax_ukernel__rvv_u8v(

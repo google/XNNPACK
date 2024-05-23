@@ -183,6 +183,16 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qs8_rsum_minmax_fp32_bench",
+    srcs = [
+        "qs8-rsum-minmax-fp32.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":rsum_benchmark",
+    ],
+)
+
+xnnpack_benchmark(
     name = "qs8_vadd_bench",
     srcs = [
         "qs8-vadd.cc",
@@ -442,7 +452,9 @@ xnnpack_benchmark(
     srcs = [
         "f16-rsum.cc",
     ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":rsum_benchmark",
+    ],
 )
 
 xnnpack_benchmark(
@@ -450,7 +462,9 @@ xnnpack_benchmark(
     srcs = [
         "f16-f32acc-rsum.cc",
     ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":rsum_benchmark",
+    ],
 )
 
 xnnpack_benchmark(
@@ -839,7 +853,9 @@ xnnpack_benchmark(
     srcs = [
         "f32-rsum.cc",
     ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":rsum_benchmark",
+    ],
 )
 
 xnnpack_benchmark(

@@ -3579,6 +3579,819 @@
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_eq_1v_twopass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    AvgPoolMicrokernelTester()
+      .pooling_elements(17)
+      .pooling_tile(9, 8)
+      .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+      .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_eq_1v_twopass_fulltile_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    AvgPoolMicrokernelTester()
+      .pooling_elements(17)
+      .pooling_tile(9, 8)
+      .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+      .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))+1)
+      .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_eq_1v_twopass_fulltile_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t zero_index = 0; zero_index < 17; zero_index++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+        .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))+1)
+        .zero_index(zero_index)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_eq_1v_twopass_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    AvgPoolMicrokernelTester()
+      .pooling_elements(17)
+      .pooling_tile(9, 8)
+      .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+      .qmin(128)
+      .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_eq_1v_twopass_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    AvgPoolMicrokernelTester()
+      .pooling_elements(17)
+      .pooling_tile(9, 8)
+      .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+      .qmax(128)
+      .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_eq_1v_twopass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(9, 8)
+        .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_eq_1v_twopass_subtile_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(9, 8)
+        .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+        .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))+1)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_eq_1v_twopass_subtile_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
+      for (size_t zero_index = 0; zero_index < pooling_elements; zero_index++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))+1)
+          .zero_index(zero_index)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_div_1v_twopass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_div_1v_twopass_fulltile_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*5)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_div_1v_twopass_fulltile_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+      for (size_t zero_index = 0; zero_index < 17; zero_index++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(17)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*5)
+          .zero_index(zero_index)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_div_1v_twopass_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_div_1v_twopass_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_div_1v_twopass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_div_1v_twopass_subtile_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*8)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_div_1v_twopass_subtile_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+        for (size_t zero_index = 0; zero_index < pooling_elements; zero_index++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 8)
+            .channels(channels)
+            .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*8)
+            .zero_index(zero_index)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_lt_1v_twopass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_lt_1v_twopass_fulltile_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_lt_1v_twopass_fulltile_with_zero_index) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+      for (size_t zero_index = 0; zero_index < 17; zero_index++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(17)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+          .zero_index(zero_index)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_lt_1v_twopass_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_lt_1v_twopass_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_lt_1v_twopass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
+      for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_lt_1v_twopass_subtile_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
+      for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_lt_1v_twopass_subtile_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
+      for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+        for (size_t zero_index = 0; zero_index < pooling_elements; zero_index++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 8)
+            .channels(channels)
+            .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+            .zero_index(zero_index)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_gt_1v_twopass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_gt_1v_twopass_fulltile_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*2)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_gt_1v_twopass_fulltile_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+      for (size_t zero_index = 0; zero_index < 17; zero_index++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(17)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*2)
+          .zero_index(zero_index)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_gt_1v_twopass_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_gt_1v_twopass_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_gt_1v_twopass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_gt_1v_twopass_subtile_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*2)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_gt_1v_twopass_subtile_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+        for (size_t zero_index = 0; zero_index < pooling_elements; zero_index++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 8)
+            .channels(channels)
+            .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*2)
+            .zero_index(zero_index)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_eq_1v_multipass) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(9, 8)
+        .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_eq_1v_multipass_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(9, 8)
+        .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+        .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))+1)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_eq_1v_multipass_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t zero_index = 0; zero_index < pooling_elements; zero_index++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))+1)
+          .zero_index(zero_index)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_eq_1v_multipass_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(9, 8)
+        .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+        .qmin(128)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_eq_1v_multipass_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(9, 8)
+        .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+        .qmax(128)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_div_1v_multipass) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_div_1v_multipass_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*8)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_div_1v_multipass_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+        for (size_t zero_index = 0; zero_index < pooling_elements; zero_index++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 8)
+            .channels(channels)
+            .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*8)
+            .zero_index(zero_index)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_div_1v_multipass_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .qmin(128)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_div_1v_multipass_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .qmax(128)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_lt_1v_multipass) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_lt_1v_multipass_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_lt_1v_multipass_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+        for (size_t zero_index = 0; zero_index < pooling_elements; zero_index++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 8)
+            .channels(channels)
+            .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+            .zero_index(zero_index)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_lt_1v_multipass_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .qmin(128)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_lt_1v_multipass_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .qmax(128)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_gt_1v_multipass) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_gt_1v_multipass_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*2)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_gt_1v_multipass_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+        for (size_t zero_index = 0; zero_index < pooling_elements; zero_index++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 8)
+            .channels(channels)
+            .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*2)
+            .zero_index(zero_index)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_gt_1v_multipass_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .qmin(128)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, channels_gt_1v_multipass_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .qmax(128)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, few_output_pixels) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{10, 16, 18}}) {
+        for (size_t channels = 1; channels <= (1*xnn_init_hardware_config()->vlenb/sizeof(float))*5; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))-1) {
+          AvgPoolMicrokernelTester()
+            .output_pixels(output_pixels)
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 8)
+            .channels(channels)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, few_output_pixels_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{10, 16, 18}}) {
+        for (size_t channels = 1; channels <= (1*xnn_init_hardware_config()->vlenb/sizeof(float))*5; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))-1) {
+          AvgPoolMicrokernelTester()
+            .output_pixels(output_pixels)
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 8)
+            .channels(channels)
+            .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*5+1)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, few_output_pixels_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{10, 16, 18}}) {
+        for (size_t channels = 1; channels <= (1*xnn_init_hardware_config()->vlenb/sizeof(float))*5; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))-1) {
+          for (size_t zero_index = 0; zero_index < pooling_elements; zero_index++) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(9, 8)
+              .channels(channels)
+              .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*5+1)
+              .zero_index(zero_index)
+              .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+          }
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, few_output_pixels_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{10, 16, 18}}) {
+        for (size_t channels = 1; channels <= (1*xnn_init_hardware_config()->vlenb/sizeof(float))*5; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))-1) {
+          AvgPoolMicrokernelTester()
+            .output_pixels(output_pixels)
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 8)
+            .channels(channels)
+            .qmin(128)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, few_output_pixels_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{10, 16, 18}}) {
+        for (size_t channels = 1; channels <= (1*xnn_init_hardware_config()->vlenb/sizeof(float))*5; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))-1) {
+          AvgPoolMicrokernelTester()
+            .output_pixels(output_pixels)
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 8)
+            .channels(channels)
+            .qmax(128)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, few_output_pixels_with_output_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{10, 16, 18}}) {
+        for (size_t channels = 1; channels <= (1*xnn_init_hardware_config()->vlenb/sizeof(float))*5; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))-1) {
+          AvgPoolMicrokernelTester()
+            .output_pixels(output_pixels)
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 8)
+            .channels(channels)
+            .output_stride((1*xnn_init_hardware_config()->vlenb/sizeof(float))*5+1)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9P8X__RVV_C1V, few_output_pixels_with_step) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{10, 16, 18}}) {
+        for (size_t channels = 1; channels <= (1*xnn_init_hardware_config()->vlenb/sizeof(float))*5; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))-1) {
+          for (size_t step = 2; step <= pooling_elements; step++) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(9, 8)
+              .step(step)
+              .channels(channels)
+              .output_stride((1*xnn_init_hardware_config()->vlenb/sizeof(float))*5+1)
+              .Test(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+          }
+        }
+      }
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
 TEST(F32_PAVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile) {
   AvgPoolMicrokernelTester()
     .pooling_elements(17)
@@ -6360,6 +7173,541 @@ TEST(F32_PAVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
     }
   }
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_eq_1v_unipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    AvgPoolMicrokernelTester()
+      .pooling_elements(9)
+      .pooling_tile(9)
+      .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+      .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_eq_1v_unipass_fulltile_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    AvgPoolMicrokernelTester()
+      .pooling_elements(9)
+      .pooling_tile(9)
+      .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+      .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))+1)
+      .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_eq_1v_unipass_fulltile_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t zero_index = 0; zero_index < 9; zero_index++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(9)
+        .pooling_tile(9)
+        .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+        .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))+1)
+        .zero_index(zero_index)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_eq_1v_unipass_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    AvgPoolMicrokernelTester()
+      .pooling_elements(9)
+      .pooling_tile(9)
+      .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+      .qmin(128)
+      .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_eq_1v_unipass_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    AvgPoolMicrokernelTester()
+      .pooling_elements(9)
+      .pooling_tile(9)
+      .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+      .qmax(128)
+      .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_eq_1v_unipass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(9)
+        .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_eq_1v_unipass_subtile_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(9)
+        .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+        .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))+1)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_eq_1v_unipass_subtile_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
+      for (size_t zero_index = 0; zero_index < pooling_elements; zero_index++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9)
+          .channels((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))+1)
+          .zero_index(zero_index)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_div_1v_unipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(9)
+        .pooling_tile(9)
+        .channels(channels)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_div_1v_unipass_fulltile_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(9)
+        .pooling_tile(9)
+        .channels(channels)
+        .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*8)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_div_1v_unipass_fulltile_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+      for (size_t zero_index = 0; zero_index < 9; zero_index++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(9)
+          .pooling_tile(9)
+          .channels(channels)
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*8)
+          .zero_index(zero_index)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_div_1v_unipass_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(9)
+        .pooling_tile(9)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_div_1v_unipass_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(9)
+        .pooling_tile(9)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_div_1v_unipass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9)
+          .channels(channels)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_div_1v_unipass_subtile_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9)
+          .channels(channels)
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*8)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_div_1v_unipass_subtile_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))) {
+        for (size_t zero_index = 0; zero_index < pooling_elements; zero_index++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9)
+            .channels(channels)
+            .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*8)
+            .zero_index(zero_index)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_lt_1v_unipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(9)
+        .pooling_tile(9)
+        .channels(channels)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_lt_1v_unipass_fulltile_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(9)
+        .pooling_tile(9)
+        .channels(channels)
+        .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_lt_1v_unipass_fulltile_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+      for (size_t zero_index = 0; zero_index < 9; zero_index++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(9)
+          .pooling_tile(9)
+          .channels(channels)
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+          .zero_index(zero_index)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_lt_1v_unipass_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(9)
+        .pooling_tile(9)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_lt_1v_unipass_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(9)
+        .pooling_tile(9)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_lt_1v_unipass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
+      for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9)
+          .channels(channels)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_lt_1v_unipass_subtile_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
+      for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9)
+          .channels(channels)
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_lt_1v_unipass_subtile_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
+      for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float)); channels++) {
+        for (size_t zero_index = 0; zero_index < pooling_elements; zero_index++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9)
+            .channels(channels)
+            .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float)))
+            .zero_index(zero_index)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_gt_1v_unipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(9)
+        .pooling_tile(9)
+        .channels(channels)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_gt_1v_unipass_fulltile_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(9)
+        .pooling_tile(9)
+        .channels(channels)
+        .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*2)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_gt_1v_unipass_fulltile_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+      for (size_t zero_index = 0; zero_index < 9; zero_index++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(9)
+          .pooling_tile(9)
+          .channels(channels)
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*2)
+          .zero_index(zero_index)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_gt_1v_unipass_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(9)
+        .pooling_tile(9)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_gt_1v_unipass_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(9)
+        .pooling_tile(9)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_gt_1v_unipass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9)
+          .channels(channels)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_gt_1v_unipass_subtile_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9)
+          .channels(channels)
+          .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*2)
+          .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, channels_gt_1v_unipass_subtile_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
+      for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(float))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(float))*2; channels++) {
+        for (size_t zero_index = 0; zero_index < pooling_elements; zero_index++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9)
+            .channels(channels)
+            .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*2)
+            .zero_index(zero_index)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, few_output_pixels) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, 8, 9}}) {
+        for (size_t channels = 1; channels <= (1*xnn_init_hardware_config()->vlenb/sizeof(float))*5; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))-1) {
+          AvgPoolMicrokernelTester()
+            .output_pixels(output_pixels)
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 0)
+            .channels(channels)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, few_output_pixels_with_input_offset) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, 8, 9}}) {
+        for (size_t channels = 1; channels <= (1*xnn_init_hardware_config()->vlenb/sizeof(float))*5; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))-1) {
+          AvgPoolMicrokernelTester()
+            .output_pixels(output_pixels)
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 0)
+            .channels(channels)
+            .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*5+1)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, few_output_pixels_with_zero) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, 8, 9}}) {
+        for (size_t channels = 1; channels <= (1*xnn_init_hardware_config()->vlenb/sizeof(float))*5; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))-1) {
+          for (size_t zero_index = 0; zero_index < pooling_elements; zero_index++) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(9, 0)
+              .channels(channels)
+              .input_offset((1*xnn_init_hardware_config()->vlenb/sizeof(float))*5+1)
+              .zero_index(zero_index)
+              .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+          }
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, few_output_pixels_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, 8, 9}}) {
+        for (size_t channels = 1; channels <= (1*xnn_init_hardware_config()->vlenb/sizeof(float))*5; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))-1) {
+          AvgPoolMicrokernelTester()
+            .output_pixels(output_pixels)
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 0)
+            .channels(channels)
+            .qmin(128)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, few_output_pixels_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, 8, 9}}) {
+        for (size_t channels = 1; channels <= (1*xnn_init_hardware_config()->vlenb/sizeof(float))*5; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))-1) {
+          AvgPoolMicrokernelTester()
+            .output_pixels(output_pixels)
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 0)
+            .channels(channels)
+            .qmax(128)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, few_output_pixels_with_output_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, 8, 9}}) {
+        for (size_t channels = 1; channels <= (1*xnn_init_hardware_config()->vlenb/sizeof(float))*5; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))-1) {
+          AvgPoolMicrokernelTester()
+            .output_pixels(output_pixels)
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 0)
+            .channels(channels)
+            .output_stride((1*xnn_init_hardware_config()->vlenb/sizeof(float))*5+1)
+            .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MINMAX_9X__RVV_C1V, few_output_pixels_with_step) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, 8, 9}}) {
+        for (size_t channels = 1; channels <= (1*xnn_init_hardware_config()->vlenb/sizeof(float))*5; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(float))-1) {
+          for (size_t step = 2; step <= pooling_elements; step++) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(9, 0)
+              .step(step)
+              .channels(channels)
+              .output_stride((1*xnn_init_hardware_config()->vlenb/sizeof(float))*5+1)
+              .Test(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v, xnn_init_f32_minmax_scalar_params);
+          }
+        }
+      }
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 
 TEST(F32_PAVGPOOL_MINMAX_9X__SCALAR_C1, channels_eq_1_unipass_fulltile) {
