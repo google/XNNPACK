@@ -60,7 +60,7 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
 
   do {
     $for N in range(0, NR, 32):
-        HVX_Vector vacc0x${ABC[N]} = *((HVX_UVector *)(w + ${N}));
+        HVX_Vector vacc0x${ABC[N]} = *((HVX_Vector *)(w + ${N}));
     $for M in range(1, MR):
       $for N in range(0, NR, 32):
         HVX_Vector vacc${M}x${ABC[N]} = vacc0x${ABC[N]};
@@ -72,9 +72,9 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
         const HVX_Vector va${M} = Q6_V_vsplat_R(*(uint32_t *)a${M});
         a${M} += 1;
 
-      const HVX_Vector vb${ABC[0]} = *((const HVX_UVector *)(w));
+      const HVX_Vector vb${ABC[0]} = *((const HVX_Vector *)(w));
       $for N in range(32, NR, 32):
-        const HVX_Vector vb${ABC[N]} = *((const HVX_UVector *)(w + ${N}));
+        const HVX_Vector vb${ABC[N]} = *((const HVX_Vector *)(w + ${N}));
       w += ${NR};
 
       $for N in range(0, NR, 32):
