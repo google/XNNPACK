@@ -325,6 +325,16 @@
   #endif
 #endif
 
+#ifndef XNN_WEAK_SYMBOL
+  #if defined(_WIN32)
+    #define XNN_WEAK_SYMBOL __declspec(selectany)
+  #elif XNN_COMPILER_CLANG || XNN_COMPILER_GCC || XNN_COMPILER_ICC
+    #define XNN_WEAK_SYMBOL __attribute__((weak))
+  #else
+    #define XNN_WEAK_SYMBOL
+  #endif
+#endif
+
 #if defined(__clang__)
   #define XNN_PRAGMA_CLANG(pragma) _Pragma(pragma)
 #else

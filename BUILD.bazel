@@ -165,7 +165,17 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/zip.h",
 ]
 
-INTERNAL_MICROKERNEL_HDRS = MICROKERNEL_HDRS + [
+SIMD_HEADERS = [
+    "include/simd/f32-scalar.h",
+    "include/simd/f32-sse2.h",
+    "include/simd/f32-avx.h",
+    "include/simd/f32-fma3.h",
+    "include/simd/f32-avx512f.h",
+    "include/simd/f32-neon.h",
+    "include/simd/f32-wasmsimd.h",
+]
+
+INTERNAL_MICROKERNEL_HDRS = MICROKERNEL_HDRS + SIMD_HEADERS + [
     "src/xnnpack/cache.h",
     "src/xnnpack/intrinsics-polyfill.h",
     "src/xnnpack/math-stubs.h",

@@ -1122,12 +1122,21 @@ union xnn_f32_abs_params {
     XNN_ALIGN(16) float nonsign_mask[4];
   } sse;
   struct {
+    XNN_ALIGN(16) float nonsign_mask[4];
+  } sse2;
+  struct {
     XNN_ALIGN(32) float nonsign_mask[8];
     int32_t mask_table[14];
   } avx;
   struct {
+    XNN_ALIGN(32) float nonsign_mask[8];
+  } fma3;
+  struct {
     uint32_t nonsign_mask;
   } avx512;
+  struct {
+    float nonsign_mask[1];
+  } avx512f;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   struct {
@@ -2460,12 +2469,21 @@ union xnn_f32_neg_params {
     XNN_ALIGN(16) float sign_mask[4];
   } sse;
   struct {
+    XNN_ALIGN(16) float sign_mask[4];
+  } sse2;
+  struct {
     XNN_ALIGN(32) float sign_mask[8];
     int32_t mask_table[14];
   } avx;
   struct {
+    XNN_ALIGN(32) float sign_mask[8];
+  } fma3;
+  struct {
     uint32_t sign_mask;
   } avx512;
+  struct {
+    float sign_mask[1];
+  } avx512f;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   struct {

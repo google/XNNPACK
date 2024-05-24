@@ -254,6 +254,9 @@ SET(ALL_FMA3_MICROKERNEL_SRCS
   src/f32-vtanh/gen/f32-vtanh-fma3-rational-9-6-nr-u16.c
   src/f32-vtanh/gen/f32-vtanh-fma3-rational-9-6-nr-u24.c
   src/f32-vtanh/gen/f32-vtanh-fma3-rational-9-6-nr-u32.c
+  src/f32-vunary/gen/f32-vabs-fma3.c
+  src/f32-vunary/gen/f32-vneg-fma3.c
+  src/f32-vunary/gen/f32-vsqr-fma3.c
   src/math/f32-sqrt-fma3-nr1fma.c
   src/math/f32-sqrt-fma3-nr1fma1adj.c
   src/math/f32-sqrt-fma3-nr2fma.c

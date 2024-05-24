@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <simd/f32-avx.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -6432,173 +6433,6 @@ void xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u16(
 
     // Divide the numerator by the denominator.
     const __m256 vy =  _mm256_div_ps(vp, vq);
-
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
-    if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
-      output += 4;
-    }
-    if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
-      output += 2;
-    }
-    if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
-    }
-  }
-}
-
-void xnn_f32_vabs_ukernel__avx_u16(
-    size_t batch,
-    const float* input,
-    float* output,
-    const union xnn_f32_abs_params params[restrict XNN_MIN_ELEMENTS(1)])
-{
-  assert(batch != 0);
-  assert(batch % sizeof(float) == 0);
-  assert(input != NULL);
-  assert(output != NULL);
-
-  const __m256 vnonsign_mask = _mm256_load_ps(params->avx.nonsign_mask);
-  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 vx01234567 = _mm256_loadu_ps(input);
-    const __m256 vx89ABCDEF = _mm256_loadu_ps(input + 8);
-    input += 16;
-
-    const __m256 vy01234567 = _mm256_and_ps(vx01234567, vnonsign_mask);
-    const __m256 vy89ABCDEF = _mm256_and_ps(vx89ABCDEF, vnonsign_mask);
-
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
-    output += 16;
-  }
-  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 vx = _mm256_loadu_ps(input);
-    input += 8;
-    const __m256 vy = _mm256_and_ps(vx, vnonsign_mask);
-    _mm256_storeu_ps(output, vy);
-    output += 8;
-  }
-  if XNN_UNLIKELY(batch != 0) {
-    assert(batch >= 1 * sizeof(float));
-    assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
-
-    const __m256 vx = _mm256_maskload_ps(input, vmask);
-    const __m256 vy = _mm256_and_ps(vx, vnonsign_mask);
-
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
-    if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
-      output += 4;
-    }
-    if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
-      output += 2;
-    }
-    if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
-    }
-  }
-}
-
-void xnn_f32_vneg_ukernel__avx_u16(
-    size_t batch,
-    const float* input,
-    float* output,
-    const union xnn_f32_neg_params params[restrict XNN_MIN_ELEMENTS(1)])
-{
-  assert(batch != 0);
-  assert(batch % sizeof(float) == 0);
-  assert(input != NULL);
-  assert(output != NULL);
-
-  const __m256 vsign_mask = _mm256_load_ps(params->sse.sign_mask);
-  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 vx01234567 = _mm256_loadu_ps(input);
-    const __m256 vx89ABCDEF = _mm256_loadu_ps(input + 8);
-    input += 16;
-
-    const __m256 vy01234567 = _mm256_xor_ps(vx01234567, vsign_mask);
-    const __m256 vy89ABCDEF = _mm256_xor_ps(vx89ABCDEF, vsign_mask);
-
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
-    output += 16;
-  }
-  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 vx = _mm256_loadu_ps(input);
-    input += 8;
-    const __m256 vy = _mm256_xor_ps(vx, vsign_mask);
-    _mm256_storeu_ps(output, vy);
-    output += 8;
-  }
-  if XNN_UNLIKELY(batch != 0) {
-    assert(batch >= 1 * sizeof(float));
-    assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
-
-    const __m256 vx = _mm256_maskload_ps(input, vmask);
-    const __m256 vy = _mm256_xor_ps(vx, vsign_mask);
-
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
-    if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
-      output += 4;
-    }
-    if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
-      output += 2;
-    }
-    if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
-    }
-  }
-}
-
-void xnn_f32_vsqr_ukernel__avx_u16(
-    size_t batch,
-    const float* input,
-    float* output,
-    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
-{
-  assert(batch != 0);
-  assert(batch % sizeof(float) == 0);
-  assert(input != NULL);
-  assert(output != NULL);
-
-  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 vx01234567 = _mm256_loadu_ps(input);
-    const __m256 vx89ABCDEF = _mm256_loadu_ps(input + 8);
-    input += 16;
-
-    const __m256 vy01234567 = _mm256_mul_ps(vx01234567, vx01234567);
-    const __m256 vy89ABCDEF = _mm256_mul_ps(vx89ABCDEF, vx89ABCDEF);
-
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
-    output += 16;
-  }
-  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 vx = _mm256_loadu_ps(input);
-    input += 8;
-    const __m256 vy = _mm256_mul_ps(vx, vx);
-    _mm256_storeu_ps(output, vy);
-    output += 8;
-  }
-  if XNN_UNLIKELY(batch != 0) {
-    assert(batch >= 1 * sizeof(float));
-    assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
-
-    const __m256 vx = _mm256_maskload_ps(input, vmask);
-    const __m256 vy = _mm256_mul_ps(vx, vx);
 
     __m128 vy_lo = _mm256_castps256_ps128(vy);
     if (batch & (4 * sizeof(float))) {
@@ -16664,5 +16498,140 @@ void xnn_x8_lut_ukernel__avx_u64(
     if (batch & (1 * sizeof(uint8_t))) {
       *output = (uint8_t) _mm_extract_epi8(vy, 0);
     }
+  }
+}
+
+void xnn_f32_vabs_ukernel__avx_u16(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_abs_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_f32 == 8);
+
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vx1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
+    input += 2 * xnn_simd_size_f32;
+
+    const xnn_simd_f32_t vy0 = xnn_abs_f32(vx0);
+    const xnn_simd_f32_t vy1 = xnn_abs_f32(vx1);
+
+    xnn_storeu_f32(output, vy0);
+    xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy1);
+    output += 2 * xnn_simd_size_f32;
+  }
+
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    const xnn_simd_f32_t vx = xnn_loadu_f32(input);
+    input += xnn_simd_size_f32;
+
+    const xnn_simd_f32_t vy = xnn_abs_f32(vx);
+
+    xnn_storeu_f32(output, vy);
+    output += xnn_simd_size_f32;
+  }
+
+  if XNN_UNLIKELY(batch != 0) {
+    const xnn_simd_f32_t vx =
+        xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
+
+    const xnn_simd_f32_t vy = xnn_abs_f32(vx);
+
+    xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
+  }
+}
+
+void xnn_f32_vneg_ukernel__avx_u16(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_neg_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_f32 == 8);
+
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vx1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
+    input += 2 * xnn_simd_size_f32;
+
+    const xnn_simd_f32_t vy0 = xnn_neg_f32(vx0);
+    const xnn_simd_f32_t vy1 = xnn_neg_f32(vx1);
+
+    xnn_storeu_f32(output, vy0);
+    xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy1);
+    output += 2 * xnn_simd_size_f32;
+  }
+
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    const xnn_simd_f32_t vx = xnn_loadu_f32(input);
+    input += xnn_simd_size_f32;
+
+    const xnn_simd_f32_t vy = xnn_neg_f32(vx);
+
+    xnn_storeu_f32(output, vy);
+    output += xnn_simd_size_f32;
+  }
+
+  if XNN_UNLIKELY(batch != 0) {
+    const xnn_simd_f32_t vx =
+        xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
+
+    const xnn_simd_f32_t vy = xnn_neg_f32(vx);
+
+    xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
+  }
+}
+
+void xnn_f32_vsqr_ukernel__avx_u16(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_f32 == 8);
+
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vx1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
+    input += 2 * xnn_simd_size_f32;
+
+    const xnn_simd_f32_t vy0 = xnn_mul_f32(vx0, vx0);
+    const xnn_simd_f32_t vy1 = xnn_mul_f32(vx1, vx1);
+
+    xnn_storeu_f32(output, vy0);
+    xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy1);
+    output += 2 * xnn_simd_size_f32;
+  }
+
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    const xnn_simd_f32_t vx = xnn_loadu_f32(input);
+    input += xnn_simd_size_f32;
+
+    const xnn_simd_f32_t vy = xnn_mul_f32(vx, vx);
+
+    xnn_storeu_f32(output, vy);
+    output += xnn_simd_size_f32;
+  }
+
+  if XNN_UNLIKELY(batch != 0) {
+    const xnn_simd_f32_t vx =
+        xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
+
+    const xnn_simd_f32_t vy = xnn_mul_f32(vx, vx);
+
+    xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
 }

@@ -668,7 +668,7 @@ static void init_f32_abs_config(void) {
       f32_abs_config.init.f32_abs = xnn_init_f32_abs_avx_params;
       f32_abs_config.element_tile = 16;
     } else {
-      f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__sse_u8;
+      f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__sse2_u8;
       f32_abs_config.init.f32_abs = xnn_init_f32_abs_sse_params;
       f32_abs_config.element_tile = 8;
     }
@@ -998,7 +998,7 @@ static void init_f32_neg_config(void) {
       f32_neg_config.init.f32_neg = xnn_init_f32_neg_avx_params;
       f32_neg_config.element_tile = 16;
     } else {
-      f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__sse_u8;
+      f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__sse2_u8;
       f32_neg_config.init.f32_neg = xnn_init_f32_neg_sse_params;
       f32_neg_config.element_tile = 8;
     }
@@ -1334,7 +1334,7 @@ static void init_f32_sqr_config(void) {
       f32_sqr_config.init.f32_default = xnn_init_f32_default_avx_params;
       f32_sqr_config.element_tile = 16;
     } else {
-      f32_sqr_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__sse_u8;
+      f32_sqr_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__sse2_u8;
       f32_sqr_config.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

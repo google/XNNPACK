@@ -233,12 +233,6 @@ SET(ALL_SSE_MICROKERNEL_SRCS
   src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u4.c
   src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u8.c
   src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u16.c
-  src/f32-vunary/gen/f32-vabs-sse-u4.c
-  src/f32-vunary/gen/f32-vabs-sse-u8.c
-  src/f32-vunary/gen/f32-vneg-sse-u4.c
-  src/f32-vunary/gen/f32-vneg-sse-u8.c
-  src/f32-vunary/gen/f32-vsqr-sse-u4.c
-  src/f32-vunary/gen/f32-vsqr-sse-u8.c
   src/math/f32-roundd-sse-addsub.c
   src/math/f32-roundne-sse-addsub.c
   src/math/f32-roundu-sse-addsub.c

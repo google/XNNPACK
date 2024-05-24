@@ -605,8 +605,11 @@ DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_scalar_expm1minus_rr1_p6
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_F32_ABS_PARAMS_FUNCTION(xnn_init_f32_abs_sse_params)
+  DECLARE_INIT_F32_ABS_PARAMS_FUNCTION(xnn_init_f32_abs_sse2_params)
   DECLARE_INIT_F32_ABS_PARAMS_FUNCTION(xnn_init_f32_abs_avx_params)
+  DECLARE_INIT_F32_ABS_PARAMS_FUNCTION(xnn_init_f32_abs_fma3_params)
   DECLARE_INIT_F32_ABS_PARAMS_FUNCTION(xnn_init_f32_abs_avx512_params)
+  DECLARE_INIT_F32_ABS_PARAMS_FUNCTION(xnn_init_f32_abs_avx512f_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   DECLARE_INIT_F32_ABS_PARAMS_FUNCTION(xnn_init_f32_abs_wasmsimd_params)
@@ -619,8 +622,11 @@ DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_scalar_expm1minus_rr1_p6
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_F32_NEG_PARAMS_FUNCTION(xnn_init_f32_neg_sse_params)
+  DECLARE_INIT_F32_NEG_PARAMS_FUNCTION(xnn_init_f32_neg_sse2_params)
   DECLARE_INIT_F32_NEG_PARAMS_FUNCTION(xnn_init_f32_neg_avx_params)
+  DECLARE_INIT_F32_NEG_PARAMS_FUNCTION(xnn_init_f32_neg_fma3_params)
   DECLARE_INIT_F32_NEG_PARAMS_FUNCTION(xnn_init_f32_neg_avx512_params)
+  DECLARE_INIT_F32_NEG_PARAMS_FUNCTION(xnn_init_f32_neg_avx512f_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   DECLARE_INIT_F32_NEG_PARAMS_FUNCTION(xnn_init_f32_neg_wasmsimd_params)

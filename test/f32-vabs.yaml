@@ -6,31 +6,54 @@
 # ARM NEON
 - name: xnn_f32_vabs_ukernel__neon_u4
 - name: xnn_f32_vabs_ukernel__neon_u8
+- name: xnn_f32_vabs_ukernel__neon_u12
+
 # RISC-V Vector
 - name: xnn_f32_vabs_ukernel__rvv_u1v
 - name: xnn_f32_vabs_ukernel__rvv_u2v
 - name: xnn_f32_vabs_ukernel__rvv_u4v
 - name: xnn_f32_vabs_ukernel__rvv_u8v
+
 # x86 SSE
-- name: xnn_f32_vabs_ukernel__sse_u4
-  init: xnn_init_f32_abs_sse_params
-- name: xnn_f32_vabs_ukernel__sse_u8
-  init: xnn_init_f32_abs_sse_params
+- name: xnn_f32_vabs_ukernel__sse2_u4
+  init: xnn_init_f32_abs_sse2_params
+- name: xnn_f32_vabs_ukernel__sse2_u8
+  init: xnn_init_f32_abs_sse2_params
+- name: xnn_f32_vabs_ukernel__sse2_u12
+  init: xnn_init_f32_abs_sse2_params
+
 # x86 AVX
 - name: xnn_f32_vabs_ukernel__avx_u8
   init: xnn_init_f32_abs_avx_params
 - name: xnn_f32_vabs_ukernel__avx_u16
   init: xnn_init_f32_abs_avx_params
+- name: xnn_f32_vabs_ukernel__avx_u24
+  init: xnn_init_f32_abs_avx_params
+
+# x86 FMA3
+- name: xnn_f32_vabs_ukernel__fma3_u8
+  init: xnn_init_f32_abs_fma3_params
+- name: xnn_f32_vabs_ukernel__fma3_u16
+  init: xnn_init_f32_abs_fma3_params
+- name: xnn_f32_vabs_ukernel__fma3_u24
+  init: xnn_init_f32_abs_fma3_params
+
 # x86 AVX512
 - name: xnn_f32_vabs_ukernel__avx512f_u16
-  init: xnn_init_f32_abs_avx512_params
+  init: xnn_init_f32_abs_avx512f_params
 - name: xnn_f32_vabs_ukernel__avx512f_u32
-  init: xnn_init_f32_abs_avx512_params
+  init: xnn_init_f32_abs_avx512f_params
+- name: xnn_f32_vabs_ukernel__avx512f_u48
+  init: xnn_init_f32_abs_avx512f_params
+
 # WAsm SIMD
 - name: xnn_f32_vabs_ukernel__wasmsimd_u4
   init: xnn_init_f32_abs_wasmsimd_params
 - name: xnn_f32_vabs_ukernel__wasmsimd_u8
   init: xnn_init_f32_abs_wasmsimd_params
+- name: xnn_f32_vabs_ukernel__wasmsimd_u12
+  init: xnn_init_f32_abs_wasmsimd_params
+
 # Scalar
 - name: xnn_f32_vabs_ukernel__scalar_u1
 - name: xnn_f32_vabs_ukernel__scalar_u2
