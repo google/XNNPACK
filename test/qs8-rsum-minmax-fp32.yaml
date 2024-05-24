@@ -1,0 +1,80 @@
+# Copyright 2024 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Scalar
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__scalar_imagic_u1
+  init: xnn_init_qs8_avgpool_minmax_fp32_scalar_imagic_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__scalar_imagic_u2
+  init: xnn_init_qs8_avgpool_minmax_fp32_scalar_imagic_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__scalar_imagic_u4
+  init: xnn_init_qs8_avgpool_minmax_fp32_scalar_imagic_params
+
+# ARM NEON
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_u16
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_u32
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_u32_acc2
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_u64
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_u64_acc2
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neon_u64_acc4
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+
+# ARM NEONDOT
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u16
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u32
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u32_acc2
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u64
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u64_acc2
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u64_acc4
+  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+
+# x86 SSE4.1
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u16
+  init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u16_acc2
+  init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u32
+  init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u32_acc2
+  init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u32_acc4
+  init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u64
+  init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u64_acc2
+  init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u64_acc4
+  init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
+
+# x86 AVX2
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__avx2_u16
+  init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__avx2_u32
+  init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__avx2_u32_acc2
+  init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__avx2_u64
+  init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__avx2_u64_acc2
+  init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__avx2_u64_acc4
+  init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
+
+# x86 AVX512
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__avx512skx_u32
+  init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__avx512skx_u64
+  init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__avx512skx_u64_acc2
+  init: xnn_init_qs8_avgpool_minmax_fp32_avx2_params

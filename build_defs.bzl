@@ -26,10 +26,6 @@ def xnnpack_std_cxxopts():
     """Compiler flags to specify language standard for C++ sources."""
     return ["-std=gnu++14"]
 
-def xnnpack_gunit_deps_for_library():
-    """Depencies needed for a library to use gunit."""
-    return ["@com_google_googletest//:gtest_main"]
-
 def xnnpack_optional_ruy_copts():
     """Compiler flags to optionally enable Ruy benchmarks."""
     return []
@@ -77,7 +73,6 @@ def xnnpack_cc_library(
         x86_srcs = [],
         aarch32_srcs = [],
         aarch64_srcs = [],
-        hvx_srcs = [],
         riscv_srcs = [],
         wasm_srcs = [],
         wasmsimd_srcs = [],
@@ -93,7 +88,6 @@ def xnnpack_cc_library(
         msvc_x86_64_copts = [],
         aarch32_copts = [],
         aarch64_copts = [],
-        hvx_copts = [],
         riscv_copts = [],
         wasm_copts = [],
         wasmsimd_copts = [],
@@ -116,7 +110,6 @@ def xnnpack_cc_library(
       x86_srcs: The list of x86-specific source files.
       aarch32_srcs: The list of AArch32-specific source files.
       aarch64_srcs: The list of AArch64-specific source files.
-      hvx_srcs: The list of HVX-specific source files.
       riscv_srcs: The list of RISC-V-specific source files.
       wasm_srcs: The list of WebAssembly 1.0-specific source files.
       wasmsimd_srcs: The list of WebAssembly SIMD-specific source files.
@@ -138,7 +131,6 @@ def xnnpack_cc_library(
                          builds.
       aarch32_copts: The list of compiler flags to use in AArch32 builds.
       aarch64_copts: The list of compiler flags to use in AArch64 builds.
-      hvx_copts: The list of compiler flags to use in HVX builds.
       riscv_copts: The list of compiler flags to use in RISC-V builds.
       wasm_copts: The list of compiler flags to use in WebAssembly 1.0 builds.
       wasmsimd_copts: The list of compiler flags to use in WebAssembly SIMD
@@ -234,7 +226,6 @@ def xnnpack_aggregate_library(
         x86_deps = [],
         aarch32_deps = [],
         aarch64_deps = [],
-        hvx_deps = [],
         riscv_deps = [],
         wasm_deps = [],
         wasmsimd_deps = [],
@@ -249,7 +240,6 @@ def xnnpack_aggregate_library(
       x86_deps: The list of libraries to link in x86 and x86-64 builds.
       aarch32_deps: The list of libraries to link in AArch32 builds.
       aarch64_deps: The list of libraries to link in AArch64 builds.
-      hvx_deps: The list of libraries to link in HVX builds.
       riscv_deps: The list of libraries to link in RISC-V builds.
       wasm_deps: The list of libraries to link in WebAssembly 1.0 builds.
       wasmsimd_deps: The list of libraries to link in WebAssembly SIMD builds.
@@ -270,6 +260,7 @@ def xnnpack_aggregate_library(
             "//build_config:emscripten_wasmsimd": wasmsimd_deps,
             "//build_config:emscripten_wasmrelaxedsimd": wasmrelaxedsimd_deps,
             "//build_config:riscv": riscv_deps,
+            "//conditions:default": [],
         }),
         defines = defines,
         compatible_with = compatible_with,

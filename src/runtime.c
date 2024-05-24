@@ -534,6 +534,7 @@ enum xnn_status xnn_create_runtime_v4(
         code_cache = &runtime->code_cache;
         status = xnn_init_code_cache(code_cache);
         if (status != xnn_status_success) {
+          xnn_log_error("failed to initialize code cache");
           goto error;
         }
       #endif
@@ -581,6 +582,7 @@ enum xnn_status xnn_create_runtime_v4(
       assert(node->create != NULL);
       status = node->create(node, runtime->values, runtime->num_values, runtime->opdata + i, code_cache, weights_cache);
       if (status != xnn_status_success) {
+        xnn_log_error("failed to create node %zu", i);
         goto error;
       }
       runtime->opdata[i].setup = node->setup;

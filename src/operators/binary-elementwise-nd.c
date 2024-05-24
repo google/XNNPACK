@@ -23,8 +23,8 @@
 #include <xnnpack/operator.h>
 #include <xnnpack/params.h>
 
-#include "pthreadpool.h"
 #include <fp16/fp16.h>
+#include "pthreadpool.h"
 
 static void init_binary_elementwise_nd(
   const void* params,

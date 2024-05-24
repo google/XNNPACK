@@ -33,4 +33,3 @@
 - name: xnn_f16_rmax_ukernel__scalar_u3_acc3
 - name: xnn_f16_rmax_ukernel__scalar_u4_acc2
 - name: xnn_f16_rmax_ukernel__scalar_u4_acc4
-

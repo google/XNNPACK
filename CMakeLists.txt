@@ -254,7 +254,7 @@ IF(NOT XNNPACK_USE_SYSTEM_LIBS)
 ENDIF()
 
 # ---[ XNNPACK library
-INCLUDE(cmake/microkernels.cmake)
+INCLUDE(cmake/gen/microkernels.cmake)
 
 SET(OPERATOR_SRCS
   src/operator-delete.c
@@ -2991,6 +2991,12 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qs8-requantization-test PRIVATE hardware-config logging microkernels-all)
   ADD_TEST(NAME qs8-requantization-test COMMAND qs8-requantization-test)
 
+  ADD_EXECUTABLE(qs8-rsum-minmax-fp32-test test/qs8-rsum-minmax-fp32.cc)
+  TARGET_INCLUDE_DIRECTORIES(qs8-rsum-minmax-fp32-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qs8-rsum-minmax-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
+  TARGET_LINK_LIBRARIES(qs8-rsum-minmax-fp32-test PRIVATE hardware-config logging microkernels-all)
+  ADD_TEST(NAME qs8-rsum-minmax-fp32-test COMMAND qs8-rsum-minmax-fp32-test)
+
   ADD_EXECUTABLE(qs8-vadd-minmax-test test/qs8-vadd-minmax.cc)
   SET_TARGET_PROPERTIES(qs8-vadd-minmax-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qs8-vadd-minmax-test PRIVATE include src test)
@@ -3800,7 +3806,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
     ADD_EXECUTABLE(softmax-bench bench/softmax.cc)
     TARGET_INCLUDE_DIRECTORIES(softmax-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(softmax-bench PRIVATE XNNPACK benchmark::benchmark bench-utils)
+    TARGET_LINK_LIBRARIES(softmax-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
 
     ADD_EXECUTABLE(square-bench bench/square.cc)
     TARGET_INCLUDE_DIRECTORIES(square-bench PRIVATE .)

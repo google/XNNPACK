@@ -1,0 +1,149 @@
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert DATATYPE in ["F16"]
+$assert NR % 32 == 0
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <immintrin.h>
+
+#include <xnnpack/gemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
+
+
+$RANGE_MR = list(range(MR))
+$DATATYPE_SPEC = {"F16": "f16", "QC8": "f16_qc8w", "QC4": "f16_qc4w"}[DATATYPE]
+void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    const void* restrict a,
+    size_t a_stride,
+    const void* restrict w,
+    void* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    $if DATATYPE == "QC4":
+      const union xnn_f16_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    $else:
+      const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(uint16_t) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+#if defined(__AVX512FP16__)
+  const uint16_t* a0 = (const uint16_t*) a;
+  uint16_t* c0 = (uint16_t*) c;
+  $for M in range(1, MR):
+    const uint16_t* a${M} = (const uint16_t*) ((uintptr_t) a${M-1} + a_stride);
+    uint16_t* c${M} = (uint16_t*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+
+  do {
+    __m512h vacc0x${ABC[0:32]} = _mm512_load_ph(w);
+    $for N in range(32, NR, 32):
+      __m512h vacc0x${ABC[N:N+32]} = _mm512_load_ph((const uint16_t*) w + ${N});
+    $for M in range(1, MR):
+      $for N in range(0, NR, 32):
+        __m512h vacc${M}x${ABC[N:N+32]} = vacc0x${ABC[N:N+32]};
+    w = (const uint16_t*) w + ${NR};
+
+    size_t k = kc;
+    do {
+      const __m512h vb${ABC[0:32]} = _mm512_load_ph(w);
+      $for N in range(32, NR, 32):
+        const __m512h vb${ABC[N:N+32]} = _mm512_load_ph((const uint16_t*) w + ${N});
+      w = (const uint16_t*) w + ${NR};
+
+      $for M in range(MR):
+        const __m512h va${M} = _mm512_castsi512_ph(_mm512_set1_epi16(*a${M}));
+        $for N in range(0, NR, 32):
+          vacc${M}x${ABC[N:N+32]} = _mm512_fmadd_ph(va${M}, vb${ABC[N:N+32]}, vacc${M}x${ABC[N:N+32]});
+
+      $for M in range(MR):
+        a${M} += 1;
+
+      k -= sizeof(uint16_t);
+    } while (k != 0);
+
+    const __m512h vmin = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.min));
+    $for N in range(0, NR, 32):
+      $for M in range(MR):
+        vacc${M}x${ABC[N:N+32]} = _mm512_max_ph(vmin, vacc${M}x${ABC[N:N+32]});
+
+    const __m512h vmax = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.max));
+    $for N in range(0, NR, 32):
+      $for M in range(MR):
+        vacc${M}x${ABC[N:N+32]} = _mm512_min_ph(vmax, vacc${M}x${ABC[N:N+32]});
+
+    if XNN_LIKELY(nc >= ${NR}) {
+      $for M in RANGE_MR:
+        _mm512_storeu_ph(c${M}, vacc${M}x${ABC[0:32]});
+        $for N in range(32, NR, 32):
+          _mm512_storeu_ph((uint16_t*) c${M} + ${N}, vacc${M}x${ABC[N:N+32]});
+        c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
+
+      $for M in RANGE_MR:
+        a${M} = (const uint16_t*) ((uintptr_t) a${M} - kc);
+
+      nc -= ${NR};
+    } else {
+      $for LOG2N in reversed(range(5, NR.bit_length())):
+        $if NR != 1 << LOG2N:
+          if (nc & ${1 << LOG2N}) {
+            $if LOG2N >= 5:
+              $for M in RANGE_MR:
+                _mm512_storeu_ph(c${M}, vacc${M}x${ABC[0:32]});
+                $for N in range(32, 1 << LOG2N, 32):
+                  _mm512_storeu_ph((uint16_t*) c${M} + ${N}, vacc${M}x${ABC[N:N+32]});
+
+              $for M in RANGE_MR:
+                $for N in range(0, NR - (1 << LOG2N), 32):
+                  vacc${M}x${ABC[N:N+32]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+32]};
+
+              $for M in RANGE_MR:
+                c${M} += ${1 << LOG2N};
+          }
+        $if LOG2N == 5:
+          $if NR > 32:
+            if (nc & 31) {
+              // Prepare mask for valid 16-bit elements (depends on nc).
+              const __mmask32 vmask = _cvtu32_mask32((uint32_t) (UINT32_C(1) << (nc & 31)) - UINT32_C(1));
+              $for M in RANGE_MR:
+                _mm512_mask_storeu_epi16(c${M}, vmask, _mm512_castph_si512(vacc${M}x${ABC[0:32]}));
+            }
+          $else:
+            assert(nc != 0);
+            assert(nc < ${NR});
+            // Prepare mask for valid 16-bit elements (depends on nc).
+            const __mmask32 vmask = _cvtu32_mask32((uint32_t) (UINT32_C(1) << nc) - UINT32_C(1));
+            $for M in RANGE_MR:
+              _mm512_mask_storeu_epi16(c${M}, vmask, _mm512_castph_si512(vacc${M}x${ABC[0:32]}));
+      nc = 0;
+    }
+  } while (nc != 0);
+#endif  // defined(__AVX512FP16__)
+}

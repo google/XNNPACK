@@ -830,10 +830,17 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         }
         break;
       case xnn_node_type_convert:
-        if (node->compute_type == xnn_compute_type_fp32_to_qd8) {
-          subgraph->values[node->inputs[0]].fp16_compatible = true;
-        } else if (node->compute_type == xnn_compute_type_fp32_to_qs8) {
-          subgraph->values[node->inputs[0]].fp16_compatible = true;
+        switch (node->compute_type) {
+          case xnn_compute_type_fp32_to_qd8:
+          case xnn_compute_type_fp32_to_qs8:
+          case xnn_compute_type_fp32_to_qu8:
+            subgraph->values[node->inputs[0]].fp16_compatible = true;
+            break;
+          case xnn_compute_type_qs8_to_fp32:
+          case xnn_compute_type_qu8_to_fp32:
+            subgraph->values[node->outputs[0]].fp16_compatible = true;
+          default:
+            break;
         }
         break;
       default:

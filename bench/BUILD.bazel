@@ -183,6 +183,16 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qs8_rsum_minmax_fp32_bench",
+    srcs = [
+        "qs8-rsum-minmax-fp32.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":rsum_benchmark",
+    ],
+)
+
+xnnpack_benchmark(
     name = "qs8_vadd_bench",
     srcs = [
         "qs8-vadd.cc",
@@ -414,6 +424,22 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f16_gemm_minmax_bench",
+    srcs = [
+        "f16-gemm-minmax.cc",
+        "gemm.h",
+        "google/gemm.h",
+    ],
+    copts = xnnpack_optional_ruy_copts(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+        "//:allocator",
+        "//:isa_checks",
+        "//:math",
+    ] + xnnpack_optional_ruy_deps(),
+)
+
+xnnpack_benchmark(
     name = "f16_raddstoreexpminusmax_bench",
     srcs = [
         "f16-raddstoreexpminusmax.cc",
@@ -426,7 +452,9 @@ xnnpack_benchmark(
     srcs = [
         "f16-rsum.cc",
     ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":rsum_benchmark",
+    ],
 )
 
 xnnpack_benchmark(
@@ -434,7 +462,9 @@ xnnpack_benchmark(
     srcs = [
         "f16-f32acc-rsum.cc",
     ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":rsum_benchmark",
+    ],
 )
 
 xnnpack_benchmark(
@@ -823,7 +853,9 @@ xnnpack_benchmark(
     srcs = [
         "f32-rsum.cc",
     ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":rsum_benchmark",
+    ],
 )
 
 xnnpack_benchmark(

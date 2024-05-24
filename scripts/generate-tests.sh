@@ -51,7 +51,7 @@ tools/generate-argmaxpool-test.py --spec test/f32-argmaxpool.yaml --output test/
 ### Tests for GEMM micro-kernels
 tools/generate-gemm-test.py --spec test/bf16-gemm-minmax.yaml --output-test test/bf16-gemm-minmax.cc &
 
-tools/generate-gemm-test.py --spec test/f16-gemm-minmax.yaml        --output-test test/f16-gemm-minmax.cc &
+tools/generate-gemm-test.py --spec test/f16-gemm-minmax.yaml        --output-test test/f16-gemm-minmax.cc --output-bench bench/f16-gemm-minmax.cc &
 tools/generate-gemm-test.py --spec test/f16-f32acc-gemm-minmax.yaml --output-test test/f16-f32acc-gemm-minmax.cc &
 tools/generate-gemm-test.py --spec test/f16-gemm-jit.yaml           --output-test test/f16-gemm-jit.cc &
 
@@ -241,6 +241,7 @@ tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f32-r
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f32-rmin.yaml --output test/f32-rmin.cc &
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f32-rminmax.yaml --output test/f32-rminmax.cc &
 
+tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/qs8-rsum-minmax-fp32.yaml --output test/qs8-rsum-minmax-fp32.cc &
 tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/f32-rsum.yaml --output test/f32-rsum.cc &
 
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/u8-rmax.yaml --output test/u8-rmax.cc &

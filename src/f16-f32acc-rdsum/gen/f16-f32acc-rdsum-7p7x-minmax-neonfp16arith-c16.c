@@ -171,6 +171,7 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_c16(
     vacc[3] = vdupq_n_f32(0.f);
 
     const size_t num_chunks = round_up_po2(channels, 4) >> 2;
+    const size_t num_full_chunks = channels >> 2;
     for (int r = rows; r > 0; r -= 7) {
       if XNN_UNPREDICTABLE(r < 2) {
         i1 = zero;
@@ -213,14 +214,14 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_c16(
 
     float16x4_t vo[4];
     const uint16_t* o = (const uint16_t*) output;
-    for (int i = 0; i < channels >> 2; ++i) {
+    for (int i = 0; i < num_full_chunks; ++i) {
       vo[i] = vreinterpret_f16_u16(vld1_u16(o)); o += 4;
     }
     float16x4_t vfp16_out[4];
-    for (int i = 0; i < channels >> 2; ++i) {
+    for (int i = 0; i < num_full_chunks; ++i) {
       vfp16_out[i] = vadd_f16(vo[i], vcvt_f16_f32(vacc[i]));
     }
-    for (int i = 0; i < channels >> 2; ++i) {
+    for (int i = 0; i < num_full_chunks; ++i) {
       vst1_u16(output, vreinterpret_u16_f16(vfp16_out[i])); output = (void*) ((uintptr_t) output + 4 * sizeof(uint16_t));
     }
 

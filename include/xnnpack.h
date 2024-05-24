@@ -12,7 +12,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <pthreadpool.h>
+#include "pthreadpool.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -4862,13 +4862,10 @@ enum xnn_status xnn_reshape_mean_nd_f16(
   const size_t* reduction_axes,
   size_t num_input_dims,
   const size_t* input_shape,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_mean_nd_f16(
   xnn_operator_t mean_op,
-  void* workspace,
   const void* input,
   void* output);
 
@@ -4882,13 +4879,10 @@ enum xnn_status xnn_reshape_mean_nd_f32(
   const size_t* reduction_axes,
   size_t num_input_dims,
   const size_t* input_shape,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_mean_nd_f32(
   xnn_operator_t mean_op,
-  void* workspace,
   const float* input,
   float* output);
 

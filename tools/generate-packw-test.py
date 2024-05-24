@@ -32,7 +32,7 @@ parser.add_argument(
 parser.set_defaults(defines=list())
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(x8|x16|x32)_packw_gemm_goi_ukernel_x(\d+)(c(\d+))?(s(\d+))?__(.+)_u(\d+)(_(.+))?", name)
+  match = re.fullmatch(r"xnn_(x8|x16|x32)_packw_gemm_goi_ukernel_x(\d+)(c(\d+))?(s(\d+))?(v)?__(.+)_u(\d+)(_(.+))?", name)
   assert match is not None
   nr = int(match.group(2))
   if match.group(3):
@@ -43,19 +43,20 @@ def split_ukernel_name(name):
     sr = int(match.group(6))
   else:
     sr = 1
-  kblock = int(match.group(8))
-  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(7))
-  return nr, kr, sr, kblock, arch, isa
+  vector_tile = match.group(7)
+  kblock = int(match.group(9))
+  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(8))
+  return nr, kr, sr, kblock, vector_tile, arch, isa
 
 PACKW_BENCHMARK_TEMPLATE = """\
 static void ${BENCHMARK_NAME}(benchmark::State& state, const char* net) {
   ${DATATYPE}_packw(state,
     ${UKERNEL_NAME},
     $if ISA_CHECK:
-      /*nr=*/${NR}, /*kr=*/${KR}, /*sr=*/${SR},
+      /*nr=*/${NR}${NR_SCALE}, /*kr=*/${KR}, /*sr=*/${SR},
       benchmark::utils::${ISA_CHECK});
     $else:
-      /*nr=*/${NR}, /*kr=*/${KR}, /*sr=*/${SR});
+      /*nr=*/${NR}${NR_SCALE}, /*kr=*/${KR}, /*sr=*/${SR});
 }
 BENCHMARK_BGEMM(${BENCHMARK_NAME})
 """
@@ -65,9 +66,9 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   PackWMicrokernelTester()
-    .n(${NR})
+    .n(${NR}${NR_SCALE})
     .k(${KBLOCK})
-    .nr(${NR})
+    .nr(${NR}${NR_SCALE})
     .kr(${KR})
     .sr(${SR})
     .Test(${", ".join(TEST_ARGS)});
@@ -78,9 +79,9 @@ $if KBLOCK > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     PackWMicrokernelTester()
-      .n(${NR})
+      .n(${NR}${NR_SCALE})
       .k(${KBLOCK*5})
-      .nr(${NR})
+      .nr(${NR}${NR_SCALE})
       .kr(${KR})
       .sr(${SR})
       .Test(${", ".join(TEST_ARGS)});
@@ -91,9 +92,9 @@ $if KBLOCK > 1:
       ${ISA_CHECK};
     for (size_t k = 1; k < ${KBLOCK}; k++) {
       PackWMicrokernelTester()
-        .n(${NR})
+        .n(${NR}${NR_SCALE})
         .k(k)
-        .nr(${NR})
+        .nr(${NR}${NR_SCALE})
         .kr(${KR})
         .sr(${SR})
         .Test(${", ".join(TEST_ARGS)});
@@ -105,23 +106,23 @@ TEST(${TEST_NAME}, k_gt_${KBLOCK}) {
     ${ISA_CHECK};
   for (size_t k = ${KBLOCK+1}; k < ${4 if KBLOCK == 1 else KBLOCK*2}; k++) {
     PackWMicrokernelTester()
-      .n(${NR})
+      .n(${NR}${NR_SCALE})
       .k(k)
-      .nr(${NR})
+      .nr(${NR}${NR_SCALE})
       .kr(${KR})
       .sr(${SR})
       .Test(${", ".join(TEST_ARGS)});
   }
 }
 
-TEST(${TEST_NAME}, n_eq_${NR}) {
+TEST(${TEST_NAME}, n_eq_${NR}${NR_SUFFIX}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t k = 1; k < ${4 if KBLOCK == 1 else KBLOCK*2}; k++) {
     PackWMicrokernelTester()
-      .n(${NR})
+      .n(${NR}${NR_SCALE})
       .k(k)
-      .nr(${NR})
+      .nr(${NR}${NR_SCALE})
       .kr(${KR})
       .sr(${SR})
       .Test(${", ".join(TEST_ARGS)});
@@ -129,25 +130,42 @@ TEST(${TEST_NAME}, n_eq_${NR}) {
 }
 
 $if NR > 1:
-  TEST(${TEST_NAME}, n_div_${NR}) {
+  TEST(${TEST_NAME}, n_div_${NR}${NR_SUFFIX}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t k = 1; k < ${4 if KBLOCK == 1 else KBLOCK*2}; k++) {
       PackWMicrokernelTester()
-        .n(${NR*2})
+        .n(${NR*2}${NR_SCALE})
         .k(k)
-        .nr(${NR})
+        .nr(${NR}${NR_SCALE})
         .kr(${KR})
         .sr(${SR})
         .Test(${", ".join(TEST_ARGS)});
     }
   }
 
-  TEST(${TEST_NAME}, n_lt_${NR}) {
+  TEST(${TEST_NAME}, n_lt_${NR}${NR_SUFFIX}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t k = 1; k < ${4 if KBLOCK == 1 else KBLOCK*2}; k++) {
-      for (size_t n = 1; n < ${NR}; n++) {
+      for (size_t n = 1; n < ${NR}${NR_SCALE}; n++) {
+        PackWMicrokernelTester()
+          .n(n)
+          .k(k)
+          .nr(${NR}${NR_SCALE})
+          .kr(${KR})
+          .sr(${SR})
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
+TEST(${TEST_NAME}, n_gt_${NR}${NR_SUFFIX}) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (size_t k = 1; k < ${4 if KBLOCK == 1 else KBLOCK*2}; k++) {
+    $if NR_SCALE == "":
+      for (size_t n = ${NR+1}; n < ${4 if NR == 1 else NR*2}; n++) {
         PackWMicrokernelTester()
           .n(n)
           .k(k)
@@ -156,22 +174,18 @@ $if NR > 1:
           .sr(${SR})
           .Test(${", ".join(TEST_ARGS)});
       }
-    }
-  }
-
-TEST(${TEST_NAME}, n_gt_${NR}) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t k = 1; k < ${4 if KBLOCK == 1 else KBLOCK*2}; k++) {
-    for (size_t n = ${NR+1}; n < ${4 if NR == 1 else NR*2}; n++) {
-      PackWMicrokernelTester()
-        .n(n)
-        .k(k)
-        .nr(${NR})
-        .kr(${KR})
-        .sr(${SR})
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    $else:
+      for (size_t n = ${NR+1}${NR_SCALE};
+                  n < ${4 if NR == 1 else NR*2}${NR_SCALE};
+                  n += 1${NR_SCALE}) {
+        PackWMicrokernelTester()
+          .n(n)
+          .k(k)
+          .nr(${NR}${NR_SCALE})
+          .kr(${KR})
+          .sr(${SR})
+          .Test(${", ".join(TEST_ARGS)});
+      }
   }
 }
 
@@ -180,16 +194,30 @@ TEST(${TEST_NAME}, g_gt_1) {
     ${ISA_CHECK};
   for (size_t g = 2; g <= 3; g++) {
     for (size_t k = 1; k < ${4 if KBLOCK == 1 else KBLOCK*2}; k++) {
-      for (size_t n = ${NR+1}; n < ${4 if NR == 1 else NR*2}; n++) {
-        PackWMicrokernelTester()
-          .g(g)
-          .n(n)
-          .k(k)
-          .nr(${NR})
-          .kr(${KR})
-          .sr(${SR})
-          .Test(${", ".join(TEST_ARGS)});
-      }
+      $if NR_SCALE == "":
+        for (size_t n = ${NR+1}; n < ${4 if NR == 1 else NR*2}; n++) {
+          PackWMicrokernelTester()
+            .g(g)
+            .n(n)
+            .k(k)
+            .nr(${NR})
+            .kr(${KR})
+            .sr(${SR})
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      $else:
+        for (size_t n = ${NR+1}${NR_SCALE};
+                    n < ${4 if NR == 1 else NR*2}${NR_SCALE};
+                    n += 1${NR_SCALE}) {
+          PackWMicrokernelTester()
+            .g(g)
+            .n(n)
+            .k(k)
+            .nr(${NR}${NR_SCALE})
+            .kr(${KR})
+            .sr(${SR})
+            .Test(${", ".join(TEST_ARGS)});
+        }
     }
   }
 }
@@ -199,17 +227,32 @@ TEST(${TEST_NAME}, null_bias) {
     ${ISA_CHECK};
   for (size_t g = 2; g <= 3; g++) {
     for (size_t k = 1; k < ${4 if KBLOCK == 1 else KBLOCK*2}; k++) {
-      for (size_t n = ${NR+1}; n < ${4 if NR == 1 else NR*2}; n++) {
-        PackWMicrokernelTester()
-          .nullbias(true)
-          .g(g)
-          .n(n)
-          .k(k)
-          .nr(${NR})
-          .kr(${KR})
-          .sr(${SR})
-          .Test(${", ".join(TEST_ARGS)});
-      }
+      $if NR_SCALE == "":
+        for (size_t n = ${NR+1}; n < ${4 if NR == 1 else NR*2}; n++) {
+          PackWMicrokernelTester()
+            .nullbias(true)
+            .g(g)
+            .n(n)
+            .k(k)
+            .nr(${NR})
+            .kr(${KR})
+            .sr(${SR})
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      $else:
+        for (size_t n = ${NR+1}${NR_SCALE};
+                    n < ${4 if NR == 1 else NR*2}${NR_SCALE};
+                    n += 1${NR_SCALE}) {
+          PackWMicrokernelTester()
+            .nullbias(true)
+            .g(g)
+            .n(n)
+            .k(k)
+            .nr(${NR}${NR_SCALE})
+            .kr(${KR})
+            .sr(${SR})
+            .Test(${", ".join(TEST_ARGS)});
+        }
     }
   }
 }
@@ -217,7 +260,7 @@ TEST(${TEST_NAME}, null_bias) {
 """
 
 
-def generate_test_cases(ukernel, nr, kr, sr, kblock, isa):
+def generate_test_cases(ukernel, nr, kr, sr, kblock, vector_tile, isa):
   """Generates all tests cases for a PACKW micro-kernel.
 
   Args:
@@ -226,6 +269,8 @@ def generate_test_cases(ukernel, nr, kr, sr, kblock, isa):
     kr: KR parameter of the PACKW micro-kernel.
     sr: SR parameter of the PACKW micro-kernel.
     kblock: unroll factor along the K dimension.
+    vector_tile: Indicates if vector tile is specified in vectors rather than
+                 elements.
     isa: instruction set required to run the micro-kernel. Generated unit test
          will skip execution if the host processor doesn't support this ISA.
 
@@ -234,6 +279,10 @@ def generate_test_cases(ukernel, nr, kr, sr, kblock, isa):
   """
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
+  nr_scale = ""
+  if vector_tile:
+    ctype = {"x8": "uint8_t", "x16": "uint16_t", "x32": "uint32_t"}[datatype]
+    nr_scale = {"rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype}[isa]
   test_case = xngen.preprocess(PACKW_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": [ukernel],
@@ -241,6 +290,8 @@ def generate_test_cases(ukernel, nr, kr, sr, kblock, isa):
       "KR": kr,
       "SR": sr,
       "KBLOCK": kblock,
+      "NR_SCALE": nr_scale,
+      "NR_SUFFIX": "v" if vector_tile else "",
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
     })
@@ -253,6 +304,8 @@ def generate_test_cases(ukernel, nr, kr, sr, kblock, isa):
       "KR": kr,
       "SR": sr,
       "KBLOCK": kblock,
+      "NR_SCALE": nr_scale,
+      "NR_SUFFIX": "v" if vector_tile else "",
       "ISA_CHECK": xnncommon.generate_isa_utilcheck_macro(isa),
       "next_prime": next_prime,
     })
@@ -313,9 +366,9 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
-      nr, kr, sr, kblock, arch, isa = split_ukernel_name(name)
+      nr, kr, sr, kblock, vector_tile, arch, isa = split_ukernel_name(name)
 
-      test_case, benchmark = generate_test_cases(name, nr, kr, sr, kblock, isa)
+      test_case, benchmark = generate_test_cases(name, nr, kr, sr, kblock, vector_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
       benches[isa_hierarchy.get(isa, 0)] += \

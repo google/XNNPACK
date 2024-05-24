@@ -71,7 +71,6 @@ static enum xnn_status reshape_mean_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_mean_nd_f16:
@@ -81,8 +80,6 @@ static enum xnn_status reshape_mean_operator(
         opdata->reduction_axes,
         input_value->shape.num_dims,
         input_value->shape.dim,
-        &opdata->workspace_size,
-        &opdata->workspace_alignment,
         threadpool);
       break;
     case xnn_operator_type_mean_nd_f32:
@@ -92,8 +89,6 @@ static enum xnn_status reshape_mean_operator(
         opdata->reduction_axes,
         input_value->shape.num_dims,
         input_value->shape.dim,
-        &opdata->workspace_size,
-        &opdata->workspace_alignment,
         threadpool);
       break;
     default:
@@ -136,7 +131,7 @@ static enum xnn_status reshape_mean_operator(
     output_value->shape.num_dims = input_value->shape.num_dims - num_skip_axis;
   }
   const size_t new_size = xnn_tensor_get_size(output_value);
-  if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
+  if (new_size > output_value->size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
   }
@@ -171,12 +166,10 @@ static enum xnn_status setup_mean_operator(
     case xnn_operator_type_mean_nd_f16:
       return xnn_setup_mean_nd_f16(
         opdata->operator_objects[0],
-        opdata->workspace,
         input_data, output_data);
     case xnn_operator_type_mean_nd_f32:
       return xnn_setup_mean_nd_f32(
         opdata->operator_objects[0],
-        opdata->workspace,
         input_data, output_data);
     default:
       XNN_UNREACHABLE;
@@ -261,24 +254,23 @@ enum xnn_status xnn_define_static_mean(
     return xnn_status_invalid_parameter;
   }
 
-  size_t last_axis = 0;
   for (size_t i = 0; i < num_reduction_axes; i++) {
-    const size_t axis = reduction_axes[i];
-    if (axis > input_value->shape.num_dims) {
+    if (reduction_axes[i] > input_value->shape.num_dims) {
       xnn_log_error(
         "failed to define %s operator with #%zu reduction axis of %zu: the index is out of bounds for a %zuD input shape",
-        xnn_node_type_to_string(xnn_node_type_static_mean), i, axis, input_value->shape.num_dims);
+        xnn_node_type_to_string(xnn_node_type_static_mean), i, reduction_axes[i], input_value->shape.num_dims);
       return xnn_status_invalid_parameter;
     }
-    if (i != 0) {
-      if (axis != last_axis + 1) {
-        xnn_log_error(
-          "failed to define %s operator with #%zu reduction axis of %zu: the axis is disjoint with #%zu reduction axis of %zu",
-          xnn_node_type_to_string(xnn_node_type_static_mean), i, axis, i - 1, last_axis);
-        return xnn_status_invalid_parameter;
-      }
+  }
+
+  for (size_t i = 1; i < num_reduction_axes; i++) {
+    if (reduction_axes[i] <= reduction_axes[i - 1]) {
+      xnn_log_error(
+        "failed to define %s operator with #%zu reduction axis of %zu: the reduction "
+        "axes must be in ascending order and unique",
+        xnn_node_type_to_string(xnn_node_type_static_mean), i, reduction_axes[i]);
+      return xnn_status_invalid_parameter;
     }
-    last_axis = axis;
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);

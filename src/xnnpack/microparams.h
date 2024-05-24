@@ -38,11 +38,9 @@ union xnn_f32_relu_params {
 
 union xnn_f16_scale_params {
   char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t scale;
   } fp16arith;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 };
 
 union xnn_f16_f32acc_scale_params {
@@ -958,6 +956,7 @@ union xnn_qs8_avgpool_minmax_params {
     int32_t magic_bias_less_output_zero_point;
     int8_t output_min;
     int8_t output_max;
+    int8_t mask_table[30];
   } fp32_neon;
   struct {
     int32_t init_bias;
@@ -987,10 +986,23 @@ union xnn_qs8_avgpool_minmax_params {
   struct {
     XNN_ALIGN(16) int32_t init_bias[4];
     XNN_ALIGN(16) float scale[4];
+    XNN_ALIGN(16) float magic_bias[4];
     XNN_ALIGN(16) float output_max_less_zero_point[4];
+    XNN_ALIGN(16) int32_t magic_bias_less_output_zero_point[4];
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int8_t output_min[16];
+    XNN_ALIGN(16) int8_t output_max[16];
+    XNN_ALIGN(16) int8_t mask_table[14];
   } fp32_sse4;
+  struct {
+    XNN_ALIGN(16) int32_t init_bias[8];
+    XNN_ALIGN(16) float scale[8];
+    XNN_ALIGN(16) float magic_bias[8];
+    XNN_ALIGN(16) int32_t magic_bias_less_output_zero_point[8];
+    XNN_ALIGN(16) int8_t output_min[32];
+    XNN_ALIGN(16) int8_t output_max[32];
+    XNN_ALIGN(16) int8_t mask_table[30];
+  } fp32_avx2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   struct {
