@@ -265,7 +265,13 @@ static void init_f16_gemm_config(void) {
 
 #if XNN_ARCH_WASMSIMD
   EM_JS(int, hardware_concurrency, (void), {
-    return self.navigator.hardwareConcurrency;
+    concurrency = 1;
+    try {
+      concurrency = self.navigator.hardwareConcurrency;
+    } catch(e) {
+      // d8 environment doesn't provide `self`, thus we keep the default
+    }
+    return concurrency;
   });
   // A cpu with more than `kCoreCountThresholdForAdaptiveAvxOptimization` is
   // assumed to support AVX instructions.
