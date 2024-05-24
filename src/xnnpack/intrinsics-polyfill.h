@@ -273,13 +273,25 @@ uint8x16x4_t vld1q_u8_x4(const uint8_t* address) {
 #include <hexagon_types.h>
 
 static XNN_INTRINSIC
-void Q6_V_vstu_scalar(char *addr, size_t nb, HVX_Vector vin)
+void Q6_V_vstu_variable(void *addr, uint32_t n, HVX_Vector vin)
 {
-    char temp[128];
-    *((HVX_UVector *)temp) = vin;
-    for (unsigned idx = 0; idx < nb; idx++) {
-        *addr = temp[idx];
-         addr++;
+    // Rotate as needed.
+    vin = Q6_V_vlalign_VVR(vin, vin, (size_t) addr);
+
+    uint32_t left_off = (size_t) addr & 127;
+    uint32_t right_off = left_off + n;
+
+    HVX_VectorPred ql_not = Q6_Q_vsetq_R((size_t) addr);
+    HVX_VectorPred qr = Q6_Q_vsetq2_R(right_off);
+
+    if (right_off > 128)
+    {
+        Q6_vmem_QRIV(qr, (HVX_Vector*) addr + 1, vin);
+        // all 1's
+        qr = Q6_Q_vcmp_eq_VbVb(vin, vin);
     }
+
+    ql_not = Q6_Q_or_QQn(ql_not, qr);
+    Q6_vmem_QnRIV(ql_not, (HVX_Vector*) addr, vin);
 }
 #endif  // Hexagon
