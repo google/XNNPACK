@@ -7,6 +7,7 @@ load(
     "//:build_defs.bzl",
     "xnnpack_binary",
     "xnnpack_cc_library",
+    "xnnpack_test_deps_for_library",
     "xnnpack_unit_test",
 )
 
@@ -54,9 +55,8 @@ xnnpack_cc_library(
     name = "replicable_random_device",
     testonly = True,
     hdrs = ["replicable_random_device.h"],
-    deps = [
+    deps = xnnpack_test_deps_for_library() + [
         "//:xnnpack_h",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -65,12 +65,11 @@ xnnpack_cc_library(
     testonly = True,
     srcs = ["gemm-microkernel-tester.cc"],
     hdrs = ["gemm-microkernel-tester.h"],
-    deps = MICROKERNEL_TEST_DEPS + [
+    deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library() + [
         "//:XNNPACK_test_mode",
         "//:jit",
         "//:packing_test_mode",
         "//:post_operation",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -79,7 +78,7 @@ xnnpack_cc_library(
     testonly = True,
     srcs = ["unary-operator-tester.cc"],
     hdrs = ["unary-operator-tester.h"],
-    deps = OPERATOR_TEST_DEPS + ["@com_google_googletest//:gtest_main"],
+    deps = OPERATOR_TEST_DEPS + xnnpack_test_deps_for_library(),
 )
 
 xnnpack_cc_library(
@@ -87,7 +86,7 @@ xnnpack_cc_library(
     testonly = True,
     srcs = ["binary-elementwise-operator-tester.cc"],
     hdrs = ["binary-elementwise-operator-tester.h"],
-    deps = OPERATOR_TEST_DEPS + ["@com_google_googletest//:gtest_main"],
+    deps = OPERATOR_TEST_DEPS + xnnpack_test_deps_for_library(),
 )
 
 xnnpack_cc_library(
@@ -95,7 +94,7 @@ xnnpack_cc_library(
     testonly = True,
     srcs = ["vunary-microkernel-tester.cc"],
     hdrs = ["vunary-microkernel-tester.h"],
-    deps = MICROKERNEL_TEST_DEPS + ["@com_google_googletest//:gtest_main"],
+    deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library(),
 )
 
 xnnpack_cc_library(
@@ -103,7 +102,7 @@ xnnpack_cc_library(
     testonly = True,
     srcs = ["vbinary-microkernel-tester.cc"],
     hdrs = ["vbinary-microkernel-tester.h"],
-    deps = MICROKERNEL_TEST_DEPS + ["@com_google_googletest//:gtest_main"],
+    deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library(),
 )
 
 xnnpack_cc_library(
@@ -111,7 +110,7 @@ xnnpack_cc_library(
     testonly = True,
     srcs = ["vbinaryc-microkernel-tester.cc"],
     hdrs = ["vbinaryc-microkernel-tester.h"],
-    deps = MICROKERNEL_TEST_DEPS + ["@com_google_googletest//:gtest_main"],
+    deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library(),
 )
 
 xnnpack_cc_library(
@@ -119,10 +118,9 @@ xnnpack_cc_library(
     testonly = True,
     srcs = ["dwconv-microkernel-tester.cc"],
     hdrs = ["dwconv-microkernel-tester.h"],
-    deps = MICROKERNEL_TEST_DEPS + [
+    deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library() + [
         "//:microkernel_utils",
         "//:packing_test_mode",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -131,7 +129,7 @@ xnnpack_cc_library(
     testonly = True,
     srcs = ["vcvt-microkernel-tester.cc"],
     hdrs = ["vcvt-microkernel-tester.h"],
-    deps = MICROKERNEL_TEST_DEPS + ["@com_google_googletest//:gtest_main"],
+    deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library(),
 )
 
 ######################### Unit tests for micro-kernels #########################
@@ -3125,6 +3123,7 @@ xnnpack_cc_library(
         "convolution-test-helpers.h",
     ],
     deps = [
+        "//:microparams",
         "//:quantization",
     ],
 )
@@ -3135,14 +3134,13 @@ xnnpack_cc_library(
     hdrs = [
         "subgraph-unary-tester.h",
     ],
-    deps = [
+    deps = xnnpack_test_deps_for_library() + [
         ":replicable_random_device",
         "//:node_type",
         "//:operators_test_mode",
         "//:requantization",
         "//:subgraph_test_mode",
         "//:xnnpack_h",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -3152,14 +3150,13 @@ xnnpack_cc_library(
     hdrs = [
         "subgraph-binary-tester.h",
     ],
-    deps = [
+    deps = xnnpack_test_deps_for_library() + [
         ":replicable_random_device",
         "//:node_type",
         "//:operators_test_mode",
         "//:requantization",
         "//:subgraph_test_mode",
         "//:xnnpack_h",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 

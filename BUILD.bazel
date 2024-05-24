@@ -441,7 +441,7 @@ xnnpack_cc_library(
         ":logging",
         ":microkernels_h",
         ":microparams_init",
-        ":packing",
+        ":packing_test_mode",
         ":test_microkernels",
     ] + select({
         ":cpuinfo_enabled": ["@cpuinfo"],
@@ -2938,6 +2938,17 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "hvx_microkernels",
+    gcc_copts = xnnpack_gcc_std_copts(),
+    hvx_srcs = ALL_HEXAGON_MICROKERNEL_SRCS,
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":microkernels_h",
+    ],
+)
+
+xnnpack_cc_library(
     name = "log_level_default",
     defines = select({
         # No logging in optimized mode
@@ -3087,6 +3098,7 @@ xnnpack_aggregate_library(
         ":avxvnni_enabled": [":avxvnni_bench_microkernels"],
         "//conditions:default": [],
     }),
+    hvx_deps = [":hvx_microkernels"],
     wasm_deps = [
         ":wasm_bench_microkernels",
         ":asm_microkernels",
@@ -3195,6 +3207,7 @@ xnnpack_aggregate_library(
         ":avx512fp16_enabled": [":avx512fp16_prod_microkernels"],
         "//conditions:default": [],
     }),
+    hvx_deps = [":hvx_microkernels"],
     wasm_deps = [
         ":wasm_prod_microkernels",
         ":asm_microkernels",
@@ -3310,6 +3323,7 @@ xnnpack_aggregate_library(
         ":avx512fp16_enabled": [":avx512fp16_test_microkernels"],
         "//conditions:default": [],
     }),
+    hvx_deps = [":hvx_microkernels"],
     wasm_deps = [
         ":wasm_test_microkernels",
         ":asm_microkernels",
