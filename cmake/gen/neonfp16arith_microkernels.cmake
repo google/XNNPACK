@@ -326,12 +326,12 @@ SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vunary/gen/f16-vsqr-neonfp16arith-u8.c
   src/f16-vunary/gen/f16-vsqr-neonfp16arith-u16.c
   src/math/f16-exp-neonfp16arith-rr2-p3.c
+  src/math/f16-expm1minus-neonfp16arith-rr1-p3.c
+  src/math/f16-expm1minus-neonfp16arith-rr2-p3.c
   src/math/f16-expminus-neonfp16arith-rr1-p2.c
   src/math/f16-expminus-neonfp16arith-rr1-p3.c
   src/math/f16-expminus-neonfp16arith-rr2-p2.c
   src/math/f16-expminus-neonfp16arith-rr2-p3.c
-  src/math/f16-expm1minus-neonfp16arith-rr1-p3.c
-  src/math/f16-expm1minus-neonfp16arith-rr2-p3.c
   src/math/f16-sigmoid-neonfp16arith-rr2-p2-nr1fma.c
   src/math/f16-sigmoid-neonfp16arith-rr2-p2-nr1recps.c
   src/math/f16-sigmoid-neonfp16arith-rr2-p2-recpe.c

@@ -130,54 +130,12 @@ parser.add_argument('-a', '--amalgamate', action='store_true',
                     help='Amalgamate production microkernels')
 
 
-def compare_strs(str1, str2, num_sort=True):
-    winner = 0 # which one's bigger
-    num_sort_mode = False
-    for i in range(min(len(str1),len(str2))):
-        if winner == 0:
-            if num_sort:
-                if str1[i].isdigit() and str2[i].isdigit():
-                    if num_sort_mode:
-                        str1_num += str1[i]
-                        str2_num += str2[i]
-                    else:
-                        num_sort_mode = True
-                        str1_num = str1[i]
-                        str2_num = str2[i]
-                elif num_sort_mode:
-                    if str1[i].isdigit(): str1_num += str1[i]
-                    if str2[i].isdigit(): str2_num += str2[i]
-                    winner = int(str1_num) - int(str2_num)
-                    num_sort_mode = False
-                    if winner != 0: break
-            if str1[i] != str2[i] and not num_sort_mode:
-                if str2[i].isdigit():
-                    winner = -1
-                elif str1[i].isdigit() or str1[i] > str2[i]:
-                    winner = 1
-                else:
-                    winner = -1
-    if num_sort_mode: # if it's still in num_sort_mode then find the results
-        if len(str1)-1 > i:
-            i += 1
-            if str1[i].isdigit(): str1_num += str1[i]
-        elif len(str2)-1 > i:
-            i += 1
-            if str2[i].isdigit(): str2_num += str2[i]
-        if int(str1_num) > int(str2_num):
-            winner = 1
-        elif int(str1_num) < int(str2_num):
-            winner = -1
-        num_sort_mode = False
-
-    if winner == 0:
-        if str2[i].isdigit():
-            winner = -1
-        elif str1[i].isdigit() or str1[i] > str2[i]:
-            winner = 1
-        else:
-            winner = -1
-    return winner
+def human_sort_key(text):
+  return [
+      token.zfill(10) if token.isdigit() else token.lower()
+      for token in re.split(r'(\d+|\W)', text)
+      if token
+  ]
 
 
 def amalgamate_microkernel_sources(source_paths, include_header):
@@ -262,7 +220,7 @@ def write_grouped_microkernels_bzl(file, key, microkernels, prefix, suffix):
     return []
   variable_name = make_variable_name(prefix, key, suffix)
   file.write(f'\n{variable_name} = [\n')
-  for microkernel in sorted(microkernels[key], key=cmp_to_key(compare_strs)):
+  for microkernel in sorted(microkernels[key], key=human_sort_key):
     file.write(f'    "{microkernel}",\n')
   file.write(']\n')
   return [variable_name]
@@ -272,7 +230,7 @@ def write_grouped_microkernels_cmake(file, key, microkernels, prefix, suffix):
     return
   variable_name = make_variable_name(prefix, key, suffix)
   file.write(f'\nSET({variable_name}')
-  for microkernel in sorted(microkernels[key], key=cmp_to_key(compare_strs)):
+  for microkernel in sorted(microkernels[key], key=human_sort_key):
     file.write(f'\n  {microkernel}')
   file.write(')\n')
 

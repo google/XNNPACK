@@ -224,11 +224,11 @@ SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2recps-u16.c
   src/math/f32-exp-neonfma-rr2-lut64-p2.c
   src/math/f32-exp-neonfma-rr2-p5.c
+  src/math/f32-expm1minus-neonfma-rr1-lut16-p3.c
+  src/math/f32-expm1minus-neonfma-rr1-p6.c
   src/math/f32-expminus-neonfma-rr2-lut64-p2.c
   src/math/f32-expminus-neonfma-rr2-lut2048-p1.c
   src/math/f32-expminus-neonfma-rr2-p5.c
-  src/math/f32-expm1minus-neonfma-rr1-lut16-p3.c
-  src/math/f32-expm1minus-neonfma-rr1-p6.c
   src/math/f32-sigmoid-neonfma-rr1-lut64-p2-nr1recps1fma.c
   src/math/f32-sigmoid-neonfma-rr1-lut64-p2-nr2fma.c
   src/math/f32-sigmoid-neonfma-rr1-lut64-p2-nr2recps.c
