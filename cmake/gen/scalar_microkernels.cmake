@@ -827,9 +827,9 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qs8-requantization/qs8-requantization-rndna-scalar-unsigned32.c
   src/qs8-requantization/qs8-requantization-rndna-scalar-unsigned64.c
   src/qs8-requantization/qs8-requantization-rndnu-scalar.c
-  src/qs8-rsum/gen/qs8-rdsum-minmax-fp32-scalar-imagic-u1-acc1.c
-  src/qs8-rsum/gen/qs8-rdsum-minmax-fp32-scalar-imagic-u2-acc1.c
-  src/qs8-rsum/gen/qs8-rdsum-minmax-fp32-scalar-imagic-u4-acc1.c
+  src/qs8-rsum/gen/qs8-rsum-minmax-fp32-scalar-imagic-u1.c
+  src/qs8-rsum/gen/qs8-rsum-minmax-fp32-scalar-imagic-u2.c
+  src/qs8-rsum/gen/qs8-rsum-minmax-fp32-scalar-imagic-u4.c
   src/qs8-vadd/gen/qs8-vadd-minmax-scalar-u1.c
   src/qs8-vadd/gen/qs8-vadd-minmax-scalar-u2.c
   src/qs8-vadd/gen/qs8-vadd-minmax-scalar-u4.c
