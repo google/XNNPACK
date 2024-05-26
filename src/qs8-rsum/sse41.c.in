@@ -3,13 +3,12 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert CHANNEL_TILE % 4 == 0
-$assert CHANNEL_TILE >= 4
+$assert CHANNEL_TILE % 8 == 0
+$assert CHANNEL_TILE >= 8
 $SIMD_TILE = CHANNEL_TILE // 8
 $assert ACCUMULATORS <= SIMD_TILE
 $import math
 #include <assert.h>
-#include <stdio.h>
 
 #include <immintrin.h>
 
@@ -66,8 +65,8 @@ void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__sse41_u${CHANNEL_TIL
         $ACC_SLICE *= 2
 
     for (; batch >= 8; batch -= 8) {
-      const __m128i vt${N} = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
-      vacc16_0 = _mm_add_epi16(vacc16_0, vt${N});
+      const __m128i vt = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
+      vacc16_0 = _mm_add_epi16(vacc16_0, vt);
     }
     if (XNN_UNLIKELY(batch != 0)) {
       __m128i vt = _mm_loadl_epi64((const __m128i*) input);

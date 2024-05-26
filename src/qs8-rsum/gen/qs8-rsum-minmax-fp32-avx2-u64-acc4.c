@@ -8,7 +8,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include <stdio.h>
 
 #include <immintrin.h>
 
@@ -85,8 +84,8 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__avx2_u64_acc4(
     vacc16_0 = _mm256_add_epi16(vacc16_0, vacc16_2);
 
     for (; batch >= 16; batch -= 16) {
-      const __m256i vt3 = _mm256_cvtepi8_epi16(_mm_loadu_si128((const __m128i*) input)); input += 16;
-      vacc16_0 = _mm256_add_epi16(vacc16_0, vt3);
+      const __m256i vt = _mm256_cvtepi8_epi16(_mm_loadu_si128((const __m128i*) input)); input += 16;
+      vacc16_0 = _mm256_add_epi16(vacc16_0, vt);
     }
     if (XNN_UNLIKELY(batch != 0)) {
       const __m128i vt = _mm_loadu_si128((const __m128i*) input);
