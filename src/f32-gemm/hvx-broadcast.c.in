@@ -132,11 +132,11 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
             }
           $else:
             $for M in RANGE_MR:
-              vstu_scalar((char*)c${M}, nc*sizeof(float), vacc${M}x${ABC[0]});
+              vstu_variable_scalar((char*)c${M}, nc*sizeof(float), vacc${M}x${ABC[0]});
             $break
         $elif LOG2N == 5:
             $for M in RANGE_MR:
-              vstu_scalar((char*)c${M}, nc*sizeof(float), vacc${M}x${ABC[0]});
+              vstu_variable_scalar((char*)c${M}, nc*sizeof(float), vacc${M}x${ABC[0]});
             $break  
       nc = 0;
     }
