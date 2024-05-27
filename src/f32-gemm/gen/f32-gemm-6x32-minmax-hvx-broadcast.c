@@ -9,13 +9,20 @@
 
 
 #include <assert.h>
-
 #include <hexagon_types.h>
 #include <hexagon_protos.h>
 #include <hvx_hexagon_protos.h>
-
 #include <xnnpack/gemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
+
+static XNN_INLINE
+void vstu_variable_scalar(char *bytes, size_t num_bytes, HVX_Vector vin) {
+  char temp[128]  __attribute__((aligned(128)));
+  *((HVX_Vector *)temp) = vin;
+  for (size_t idx = 0; idx < num_bytes; idx++){
+     *bytes = temp[idx];
+     bytes++;
+  }
+}
 
 void xnn_f32_gemm_minmax_ukernel_6x32__hvx_broadcast(
     size_t mr,
@@ -147,12 +154,12 @@ void xnn_f32_gemm_minmax_ukernel_6x32__hvx_broadcast(
 
       nc -= 32;
     } else {
-      Q6_V_vstu_scalar((char*)c0, nc*sizeof(float), vacc0x0);
-      Q6_V_vstu_scalar((char*)c1, nc*sizeof(float), vacc1x0);
-      Q6_V_vstu_scalar((char*)c2, nc*sizeof(float), vacc2x0);
-      Q6_V_vstu_scalar((char*)c3, nc*sizeof(float), vacc3x0);
-      Q6_V_vstu_scalar((char*)c4, nc*sizeof(float), vacc4x0);
-      Q6_V_vstu_scalar((char*)c5, nc*sizeof(float), vacc5x0);
+      vstu_scalar((char*)c0, nc*sizeof(float), vacc0x0);
+      vstu_scalar((char*)c1, nc*sizeof(float), vacc1x0);
+      vstu_scalar((char*)c2, nc*sizeof(float), vacc2x0);
+      vstu_scalar((char*)c3, nc*sizeof(float), vacc3x0);
+      vstu_scalar((char*)c4, nc*sizeof(float), vacc4x0);
+      vstu_scalar((char*)c5, nc*sizeof(float), vacc5x0);
       nc = 0;
     }
   } while (nc != 0);
