@@ -14,6 +14,23 @@
 extern "C" {
 #endif
 
+bool can_dimension_be_removed(
+    const size_t* input_stride,
+    const size_t* output_stride,
+    const size_t* shape,
+    const size_t* inverted_perm,
+    size_t input_dim,
+    const size_t num_dims);
+
+void fold_into_previous_dim(
+    size_t* shape,
+    size_t* perm,
+    size_t* inverted_perm,
+    size_t* input_stride,
+    size_t* output_stride,
+    size_t num_dims,
+    size_t input_dim);
+
 // Calculates normalized offsets, input_shape, and output_shape.
 // Each value in offsets must be less than the corresponding dimension of input_shape.
 // Each value in sizes must be >= 0 and less than or equals to the corresponding dimension of input_shape.
