@@ -2741,6 +2741,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "global_average_pooling_nwc_test",
+    timeout = "moderate",
     srcs = [
         "global-average-pooling-nwc.cc",
         "global-average-pooling-operator-tester.h",
