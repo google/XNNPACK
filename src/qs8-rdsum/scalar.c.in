@@ -1,0 +1,109 @@
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/math.h>
+#include <xnnpack/reduce.h>
+
+
+$CHANNELS_BATCH = 4
+$MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
+$MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
+void xnn_qs8_rdsum_minmax_fp32_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__scalar_c4(
+    size_t rows,
+    size_t channels,
+    const int8_t* input,
+    size_t input_stride,
+    const int8_t* zero,
+    int8_t* output,
+    const union xnn_qs8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(rows != 0);
+  assert(channels != 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  size_t input_increment = ${ACCUMULATORS} * input_stride;
+  const int32_t vinit_bias = params->fp32_scalar_fmagic.init_bias;
+  const float vscale = params->fp32_scalar_fmagic.scale;
+  const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
+  const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
+  const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
+  const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
+  for (; channels >= ${CHANNELS_BATCH}; channels -= ${CHANNELS_BATCH}) {
+    const int8_t* i0 = input;
+    $for ACC in range(1, ACCUMULATORS):
+      const int8_t* i${ACC} = (const int8_t*) ((uintptr_t) i${ACC - 1} + input_stride);
+    $for C in range(CHANNELS_BATCH):
+      int32_t vacc${C} = vinit_bias;
+
+    for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
+      $for ACC in range(1, ACCUMULATORS, 2):
+        if XNN_UNPREDICTABLE(r < ${ACC+1}) {
+          i${ACC} = zero;
+        }
+        if XNN_UNPREDICTABLE(r <= ${ACC+1}) {
+          i${ACC+1} = zero;
+        }
+      $for ACC in range(ACCUMULATORS):
+        $for C in range(CHANNELS_BATCH):
+          vacc${C} += (int32_t) i${ACC}[${C}];
+      $for ACC in range(ACCUMULATORS):
+        i${ACC} = (const int8_t*) ((uintptr_t) i${ACC} + input_increment);
+    }
+
+    $for C in range(CHANNELS_BATCH):
+      float vfpacc${C} = (float) vacc${C} * vscale;
+      vfpacc${C} = ${MAX_F32}(vfpacc${C}, voutput_min_less_zero_point);
+      vfpacc${C} = ${MIN_F32}(vfpacc${C}, voutput_max_less_zero_point);
+      vfpacc${C} += vmagic_bias;
+      vacc${C} = (int32_t) float_as_uint32(vfpacc${C}) - vmagic_bias_less_output_zero_point;
+    $for C in range(CHANNELS_BATCH):
+      *output++ += (int8_t) vacc${C};
+
+    input = (const int8_t*) ((uintptr_t) input + ${CHANNELS_BATCH});
+  }
+  if (channels != 0) {
+    size_t input_increment = ${ACCUMULATORS} * input_stride;
+    const int8_t* i0 = input;
+    $for i in range(1, ACCUMULATORS):
+      const int8_t* i${i} = (const int8_t*) ((uintptr_t) i${i - 1} + input_stride);
+    $for C in range(CHANNELS_BATCH - 1):
+      int32_t vacc${C} = vinit_bias;
+
+    for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
+      $for N in range(1, ACCUMULATORS, 2):
+        if XNN_UNPREDICTABLE(r < ${N+1}) {
+          i${N} = zero;
+        }
+        if XNN_UNPREDICTABLE(r <= ${N+1}) {
+          i${N+1} = zero;
+        }
+      $for j in range(0, ACCUMULATORS):
+        $for C in range(CHANNELS_BATCH-1):
+          vacc${C} += (int32_t) i${j}[${C}];
+      $for N in range(0, ACCUMULATORS):
+        i${N} = (const int8_t*) ((uintptr_t) i${N} + input_increment);
+    }
+    $for C in range(CHANNELS_BATCH-1):
+      float vfpacc${C} = (float) vacc${C} * vscale;
+      vfpacc${C} = ${MAX_F32}(vfpacc${C}, voutput_min_less_zero_point);
+      vfpacc${C} = ${MIN_F32}(vfpacc${C}, voutput_max_less_zero_point);
+      vfpacc${C} += vmagic_bias;
+      vacc${C} = (int32_t) float_as_uint32(vfpacc${C}) - vmagic_bias_less_output_zero_point;
+
+    if (channels & 2) {
+      *output++ += (int8_t) vacc0;
+      *output++ += (int8_t) vacc1;
+      vacc0 = vacc2;
+    }
+    if (channels & 1) {
+      *output += (int8_t) vacc0;
+    }
+  }
+}

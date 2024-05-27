@@ -248,6 +248,7 @@ tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/u8-rm
 
 tools/generate-rdsum-test.py --spec test/f16-f32acc-rdsum.yaml --output test/f16-f32acc-rdsum.cc &
 tools/generate-rdsum-test.py --spec test/f32-rdsum.yaml --output test/f32-rdsum.cc &
+tools/generate-rdsum-test.py --spec test/qs8-rdsum-minmax-fp32.yaml --output test/qs8-rdsum-minmax-fp32.cc &
 
 ### Tests for Fill micro-kernels
 tools/generate-fill-test.py --spec test/xx-fill.yaml --output test/xx-fill.cc &

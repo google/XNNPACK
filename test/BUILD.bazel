@@ -132,6 +132,13 @@ xnnpack_cc_library(
     deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library(),
 )
 
+xnnpack_cc_library(
+    name = "rdsum_microkernel_tester",
+    testonly = True,
+    hdrs = ["rdsum-microkernel-tester.h"],
+    deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library(),
+)
+
 ######################### Unit tests for micro-kernels #########################
 
 xnnpack_unit_test(
@@ -1095,18 +1102,16 @@ xnnpack_unit_test(
     name = "f16_f32acc_rdsum_test",
     srcs = [
         "f16-f32acc-rdsum.cc",
-        "rdsum-microkernel-tester.h",
     ],
-    deps = MICROKERNEL_TEST_DEPS,
+    deps = MICROKERNEL_TEST_DEPS + [":rdsum_microkernel_tester"],
 )
 
 xnnpack_unit_test(
     name = "f32_rdsum_test",
     srcs = [
         "f32-rdsum.cc",
-        "rdsum-microkernel-tester.h",
     ],
-    deps = MICROKERNEL_TEST_DEPS,
+    deps = MICROKERNEL_TEST_DEPS + [":rdsum_microkernel_tester"],
 )
 
 xnnpack_unit_test(
@@ -1826,6 +1831,14 @@ xnnpack_unit_test(
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + ["//:requantization_stubs"],
+)
+
+xnnpack_unit_test(
+    name = "qs8_rdsum_minmax_fp32_test",
+    srcs = [
+        "qs8-rdsum-minmax-fp32.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [":rdsum_microkernel_tester"],
 )
 
 xnnpack_unit_test(
