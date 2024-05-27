@@ -9,6 +9,7 @@ import os
 import re
 import sys
 import io
+from functools import cmp_to_key
 
 import xnncommon
 
@@ -130,12 +131,13 @@ parser.add_argument('-a', '--amalgamate', action='store_true',
                     help='Amalgamate production microkernels')
 
 
-import re
-
-NUMBERS_REGEX = re.compile('([0-9]+)')
-
 def human_sort_key(text):
-  return [int(token) if token.isdigit() else token.lower() for token in NUMBERS_REGEX.split(text)]
+  return [
+      token.zfill(10) if token.isdigit() else token.lower()
+      for token in re.split(r'(\d+|\W)', text)
+      if token
+  ]
+
 
 def amalgamate_microkernel_sources(source_paths, include_header):
   amalgam_lines = list()

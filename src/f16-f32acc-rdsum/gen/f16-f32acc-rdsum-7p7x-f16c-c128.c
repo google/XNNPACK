@@ -11,6 +11,7 @@
 
 #include <immintrin.h>
 
+#include <xnnpack/unaligned.h>
 #include <xnnpack/common.h>
 #include <xnnpack/reduce.h>
 #include <xnnpack/math.h>
@@ -497,14 +498,14 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c128(
         output = (void*) ((uintptr_t) output + 4 * sizeof(uint16_t));
       }
       if (channels & 2) {
-        __m128 vo = _mm_cvtph_ps(_mm_cvtsi32_si128(*(int32_t*) output));
+        __m128 vo = _mm_cvtph_ps(_mm_cvtsi32_si128(unaligned_load_s32(output)));
         vo = _mm_add_ps(vout_low, vo);
         _mm_storeu_si32(output, _mm_cvtps_ph(vo, _MM_FROUND_TO_NEAREST_INT));
         vout_low = _mm_movehl_ps(vout_low, vout_low);
         output = (void*) ((uintptr_t) output + 2 * sizeof(uint16_t));
       }
       if (channels & 1) {
-        __m128 vo = _mm_cvtph_ps(_mm_set1_epi16(*(uint16_t*) output));
+        __m128 vo = _mm_cvtph_ps(_mm_set1_epi16(unaligned_load_s16(output)));
         vo = _mm_add_ps(vout_low, vo);
         _mm_storeu_si16(output, _mm_cvtps_ph(vo, _MM_FROUND_TO_NEAREST_INT));
       }
