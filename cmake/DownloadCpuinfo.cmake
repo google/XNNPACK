@@ -17,8 +17,8 @@ ENDIF()
 
 INCLUDE(ExternalProject)
 ExternalProject_Add(cpuinfo
-  URL https://github.com/pytorch/cpuinfo/archive/d6860c477c99f1fce9e28eb206891af3c0e1a1d7.zip
-  URL_HASH SHA256=a615cac78fad03952cc3e1fd231ce789a8df6e81a5957b64350cb8200364b385
+  URL https://github.com/xujuntwt95329/cpuinfo/archive/10bf0a03827877a4c6896189f27e291f78a62ce5.zip
+  URL_HASH SHA256=2128b3087bf8c190128fbe8f1003552f84f5f0ed79c79868212d99eee11296eb
   SOURCE_DIR "${CMAKE_BINARY_DIR}/cpuinfo-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/cpuinfo"
   CONFIGURE_COMMAND ""
