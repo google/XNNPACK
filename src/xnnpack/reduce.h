@@ -440,6 +440,9 @@ DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rdsum_ukernel_7p7x__neo
       const union xnn_qs8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_QS8_RDSUM_UKERNEL_FUNCTION(xnn_qs8_rdsum_minmax_fp32_ukernel_7p7x__scalar_c4)
+DECLARE_QS8_RDSUM_UKERNEL_FUNCTION(xnn_qs8_rdsum_minmax_fp32_ukernel_7p7x__neon_c16)
+DECLARE_QS8_RDSUM_UKERNEL_FUNCTION(xnn_qs8_rdsum_minmax_fp32_ukernel_7p7x__neon_c32)
+DECLARE_QS8_RDSUM_UKERNEL_FUNCTION(xnn_qs8_rdsum_minmax_fp32_ukernel_7p7x__neon_c64)
 #ifdef __cplusplus
 }  // extern "C"
 #endif

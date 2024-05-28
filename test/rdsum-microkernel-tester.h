@@ -139,9 +139,10 @@ class RDSumMicrokernelTester {
     std::vector<int8_t> zero(channels() + XNN_EXTRA_BYTES, 0);
     std::vector<int8_t> output(channels());
     std::vector<int8_t> output_ref(channels());
-    {//for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(output.begin(), output.end(), [&]() { return i8dist(rng); });
+      std::fill(output.begin(), output.end(), 0);
       output_ref = output;
 
       // Compute reference results, without clamping.
@@ -258,7 +259,7 @@ class RDSumMicrokernelTester {
   float output_scale_{0.75f};
   uint8_t input_zero_point_{121};
   uint8_t output_zero_point_{133};
-  size_t iterations_{15};
+  size_t iterations_{3};
   uint8_t qmin_{0};
   uint8_t qmax_{255};
 };

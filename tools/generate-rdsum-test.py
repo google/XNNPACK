@@ -261,6 +261,17 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_multipass_fulltile_with_input_str
     }
   }
 }
+
+TEST(${TEST_NAME}, overflow_accumulator) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (size_t channels = 1; channels < ${CHANNEL_TILE * 2}; ++channels) {
+     RDSumMicrokernelTester()
+       .rows(${257 + INCREMENTAL_TILE})
+       .channels(channels)
+       .Test(${", ".join(TEST_ARGS)});
+  }
+}
 """
 
 
