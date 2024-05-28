@@ -67,10 +67,10 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
 
   do {
     $for N in range(0, NR, 32):
-        HVX_Vector vacc0x${ABC[N]} = *((HVX_Vector *)(w + ${N}));
+        HVX_Vector vacc0x${ABC[int(N/32)]} = *((HVX_Vector *)(w + ${N}));
     $for M in range(1, MR):
       $for N in range(0, NR, 32):
-        HVX_Vector vacc${M}x${ABC[N]} = vacc0x${ABC[N]};
+        HVX_Vector vacc${M}x${ABC[int(N/32)]} = vacc0x${ABC[int(N/32)]};
     w += ${NR};
 
     size_t k = kc;
@@ -81,12 +81,12 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
 
       const HVX_Vector vb${ABC[0]} = *((const HVX_Vector *)(w));
       $for N in range(32, NR, 32):
-        const HVX_Vector vb${ABC[N]} = *((const HVX_Vector *)(w + ${N}));
+        const HVX_Vector vb${ABC[int(N/32)]} = *((const HVX_Vector *)(w + ${N}));
       w += ${NR};
 
       $for N in range(0, NR, 32):
         $for M in range(MR):
-            vacc${M}x${ABC[N]} = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va${M}, vb${ABC[N]}),vacc${M}x${ABC[N]})); 
+            vacc${M}x${ABC[int(N/32)]} = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va${M}, vb${ABC[int(N/32)]}),vacc${M}x${ABC[int(N/32)]})); 
 
       k -= sizeof(float);
     } while (k != 0);
@@ -94,18 +94,18 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
     const HVX_Vector vmin = *(const HVX_Vector *)((params->hvx.min));
     $for N in range(0, NR, 32):
       $for M in range(MR):
-        vacc${M}x${ABC[N]} = Q6_Vw_vmax_VwVw(vmin, vacc${M}x${ABC[N]});
+        vacc${M}x${ABC[int(N/32)]} = Q6_Vw_vmax_VwVw(vmin, vacc${M}x${ABC[int(N/32)]});
 
     const HVX_Vector vmax = *(const HVX_Vector *)((params->hvx.max));
     $for N in range(0, NR, 32):
       $for M in range(MR):
-        vacc${M}x${ABC[N]} = Q6_Vw_vmin_VwVw(vmax, vacc${M}x${ABC[N]});
+        vacc${M}x${ABC[int(N/32)]} = Q6_Vw_vmin_VwVw(vmax, vacc${M}x${ABC[int(N/32)]});
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in RANGE_MR:
         *((HVX_UVector *)c${M}) = vacc${M}x${ABC[0]};
         $for N in range(32, NR, 32):
-          *((HVX_UVector *)(c${M} + ${N}) = vacc${M}x${ABC[N]});
+          *((HVX_UVector *)(c${M} + ${N})) = vacc${M}x${ABC[int(N/32)]};
         c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
       $for M in RANGE_MR:
@@ -120,11 +120,11 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
               $for M in RANGE_MR:
                 *((HVX_UVector *)c${M}) = vacc${M}x${ABC[0]};
                 $for N in range(32, 1 << LOG2N, 32):
-                  *((HVX_UVector *)(c${M} + ${N})) = vacc${M}x${ABC[N]};
+                  *((HVX_UVector *)(c${M} + ${N})) = vacc${M}x${ABC[int(N/32)]};
 
               $for M in RANGE_MR:
-                $for N in range(0, NR - (1 << LOG2N), 32):
-                  vacc${M}x${ABC[N]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+32]};
+                $for N in range(0, 1 << LOG2N, 32):
+                  vacc${M}x${ABC[int(N/32)]} = vacc${M}x${ABC[int((N + (1<<LOG2N))/32)]}; 
 
               $for M in RANGE_MR:
                 c${M} += ${1 << LOG2N};

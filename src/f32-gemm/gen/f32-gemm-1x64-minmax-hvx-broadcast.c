@@ -24,7 +24,7 @@ void vstu_variable_scalar(char *bytes, size_t num_bytes, HVX_Vector vin) {
   }
 }
 
-void xnn_f32_gemm_minmax_ukernel_1x32__hvx_broadcast(
+void xnn_f32_gemm_minmax_ukernel_1x64__hvx_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -50,7 +50,8 @@ void xnn_f32_gemm_minmax_ukernel_1x32__hvx_broadcast(
 
   do {
     HVX_Vector vacc0x0 = *((HVX_Vector *)(w + 0));
-    w += 32;
+    HVX_Vector vacc0x1 = *((HVX_Vector *)(w + 32));
+    w += 64;
 
     size_t k = kc;
     do {
@@ -58,27 +59,40 @@ void xnn_f32_gemm_minmax_ukernel_1x32__hvx_broadcast(
       a0 += 1;
 
       const HVX_Vector vb0 = *((const HVX_Vector *)(w));
-      w += 32;
+      const HVX_Vector vb1 = *((const HVX_Vector *)(w + 32));
+      w += 64;
 
       vacc0x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va0, vb0),vacc0x0)); 
+      vacc0x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va0, vb1),vacc0x1)); 
 
       k -= sizeof(float);
     } while (k != 0);
 
     const HVX_Vector vmin = *(const HVX_Vector *)((params->hvx.min));
     vacc0x0 = Q6_Vw_vmax_VwVw(vmin, vacc0x0);
+    vacc0x1 = Q6_Vw_vmax_VwVw(vmin, vacc0x1);
 
     const HVX_Vector vmax = *(const HVX_Vector *)((params->hvx.max));
     vacc0x0 = Q6_Vw_vmin_VwVw(vmax, vacc0x0);
+    vacc0x1 = Q6_Vw_vmin_VwVw(vmax, vacc0x1);
 
-    if XNN_LIKELY(nc >= 32) {
+    if XNN_LIKELY(nc >= 64) {
       *((HVX_UVector *)c0) = vacc0x0;
+      *((HVX_UVector *)(c0 + 32)) = vacc0x1;
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
 
       a0 = (const float*) ((uintptr_t) a0 - kc);
 
-      nc -= 32;
+      nc -= 64;
     } else {
+      if (nc & 32) {
+        *((HVX_UVector *)c0) = vacc0x0;
+
+        vacc0x0 = vacc0x1; 
+
+        c0 += 32;
+        nc ^= 32;
+      }
       vstu_variable_scalar((char*)c0, nc*sizeof(float), vacc0x0);
       nc = 0;
     }

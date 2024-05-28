@@ -621,11 +621,12 @@ tools/xngen src/f32-gemm/MRxNRv-rvv.c.in -D MR=1 -D NR=m4 -D ACTIVATION=MINMAX -
 
 ################################### HEXAGON HVX ##################################
 tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=1 -D NR=32 -o src/f32-gemm/gen/f32-gemm-1x32-minmax-hvx-broadcast.c &
-tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=4 -D NR=32 -o src/f32-gemm/gen/f32-gemm-4x32-minmax-hvx-broadcast.c &
-tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=5 -D NR=32 -o src/f32-gemm/gen/f32-gemm-5x32-minmax-hvx-broadcast.c &
-tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=6 -D NR=32 -o src/f32-gemm/gen/f32-gemm-6x32-minmax-hvx-broadcast.c &
-tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=7 -D NR=32 -o src/f32-gemm/gen/f32-gemm-7x32-minmax-hvx-broadcast.c &
 tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=8 -D NR=32 -o src/f32-gemm/gen/f32-gemm-8x32-minmax-hvx-broadcast.c &
+tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=16 -D NR=32 -o src/f32-gemm/gen/f32-gemm-16x32-minmax-hvx-broadcast.c &
+tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=1 -D NR=64 -o src/f32-gemm/gen/f32-gemm-1x64-minmax-hvx-broadcast.c &
+tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=4 -D NR=64 -o src/f32-gemm/gen/f32-gemm-4x64-minmax-hvx-broadcast.c &
+tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=1 -D NR=128 -o src/f32-gemm/gen/f32-gemm-1x128-minmax-hvx-broadcast.c &
+tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=2 -D NR=128 -o src/f32-gemm/gen/f32-gemm-2x128-minmax-hvx-broadcast.c &
 
 
 wait # JIT requires the assembly files to be generated first.
