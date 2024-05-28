@@ -11,7 +11,3 @@ struct xnn_experiment_config* xnn_get_experiment_config() {
   return &experiment_config;
 }
 
-void xnn_experiment_enable_adaptive_avx_optimization() {
-  experiment_config.adaptive_avx_optimization = true;
-}
-
