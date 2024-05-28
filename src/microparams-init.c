@@ -969,6 +969,64 @@ void xnn_init_qs8_qb8w_scale_fp32_params(
   }
 }
 
+size_t xnn_init_qs8_rsum_scalar_params(
+  union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
+{
+  return sizeof(params->scalar);
+}
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+size_t xnn_init_qs8_rsum_ssse3_params(
+  union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 16; i++) {
+    params->ssse3.onemask_table[i] = 1;
+  }
+  for (uint32_t i = 16; i < 32; i++) {
+    params->ssse3.onemask_table[i] = 0;
+  }
+  return sizeof(params->sse4);
+}
+
+size_t xnn_init_qs8_rsum_sse4_params(
+  union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 15; i++) {
+    params->sse4.mask_table[i] = 1;
+  }
+  for (uint32_t i = 15; i < 30; i++) {
+    params->sse4.mask_table[i] = 0;
+  }
+  return sizeof(params->sse4);
+}
+
+size_t xnn_init_qs8_rsum_avx2_params(
+  union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 15; i++) {
+    params->avx2.mask_table[i] = 1;
+  }
+  for (uint32_t i = 15; i < 30; i++) {
+    params->avx2.mask_table[i] = 0;
+  }
+  return sizeof(params->avx2);
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+size_t xnn_init_qs8_rsum_neon_params(
+  union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 15; i++) {
+    params->neon.mask_table[i] = 1;
+  }
+  for (uint32_t i = 15; i < 30; i++) {
+    params->neon.mask_table[i] = 0;
+  }
+  return sizeof(params->neon);
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
 size_t xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params(
   union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int32_t init_bias,

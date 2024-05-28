@@ -16,11 +16,11 @@
 #include <xnnpack/math.h>
 #include <xnnpack/reduce.h>
 
-void xnn_qs8_rsum_minmax_fp32_ukernel__avx512vnni_u256_acc4(
+void xnn_qs8_rsum_ukernel__avx512vnni_u256_acc4(
     size_t batch,
     const int8_t* input,
-    int8_t* output,
-    const union xnn_qs8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    int32_t* output,
+    const union xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(input != NULL);
@@ -54,18 +54,5 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__avx512vnni_u256_acc4(
 
   int32_t res = _mm512_reduce_add_epi32(vacc0);
 
-  const int32_t vinit_bias = params->fp32_avx2.init_bias[0];
-  const float vscale = params->fp32_avx2.scale[0];
-  const int32_t output_min = params->fp32_avx2.output_min[0];
-  const int32_t output_max = params->fp32_avx2.output_max[0];
-  const float vmagic_bias = params->fp32_avx2.magic_bias[0];
-  const int32_t vmagic_bias_less_output_zero_point = params->fp32_avx2.magic_bias_less_output_zero_point[0];
-
-  float vfpacc = (float) (res + vinit_bias) * vscale;
-  vfpacc += vmagic_bias;
-  int32_t vout = (int32_t) float_as_uint32(vfpacc);
-  vout -= vmagic_bias_less_output_zero_point;
-  vout = math_max_s32(vout, output_min);
-  vout = math_min_s32(vout, output_max);
-  *output += (int8_t) vout;
+  *output += res;
 }

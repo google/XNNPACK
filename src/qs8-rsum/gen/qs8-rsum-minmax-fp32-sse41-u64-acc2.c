@@ -15,11 +15,11 @@
 #include <xnnpack/math.h>
 #include <xnnpack/reduce.h>
 
-void xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u64_acc2(
+void xnn_qs8_rsum_ukernel__sse41_u64_acc2(
     size_t batch,
     const int8_t* input,
-    int8_t* output,
-    const union xnn_qs8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    int32_t* output,
+    const union xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(input != NULL);
@@ -57,7 +57,7 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u64_acc2(
       vacc16 = _mm_add_epi16(vacc16, vt);
     }
     if (XNN_UNLIKELY(batch != 0)) {
-      const __m128i vmask = _mm_loadu_si128((const __m128i*) &params->fp32_sse4.mask_table[15 - batch]);
+      const __m128i vmask = _mm_loadu_si128((const __m128i*) &params->sse4.mask_table[15 - batch]);
       const __m128i vt = _mm_maddubs_epi16(vmask, _mm_loadu_si128((const __m128i*) input));
       vacc16 = _mm_add_epi16(vacc16, vt);
     }
@@ -67,18 +67,5 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u64_acc2(
   __m128i vacc_lo = _mm_hadd_epi32(vacc, vacc);
   vacc_lo = _mm_hadd_epi32(vacc_lo, vacc_lo);
 
-  const int32_t vinit_bias = params->fp32_sse4.init_bias[0];
-  const float vscale = params->fp32_sse4.scale[0];
-  const int32_t output_min = params->fp32_sse4.output_min[0];
-  const int32_t output_max = params->fp32_sse4.output_max[0];
-  const float vmagic_bias = params->fp32_sse4.magic_bias[0];
-  const int32_t vmagic_bias_less_output_zero_point = params->fp32_sse4.magic_bias_less_output_zero_point[0];
-
-  float vfpacc = (float) (_mm_cvtsi128_si32(vacc_lo) + vinit_bias) * vscale;
-  vfpacc += vmagic_bias;
-  int32_t vout = (int32_t) float_as_uint32(vfpacc);
-  vout -= vmagic_bias_less_output_zero_point;
-  vout = math_max_s32(vout, output_min);
-  vout = math_min_s32(vout, output_max);
-  *output += (int8_t) vout;
+  *output += _mm_cvtsi128_si32(vacc_lo);
 }

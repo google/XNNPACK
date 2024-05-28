@@ -922,6 +922,29 @@ union xnn_qu8_mul_minmax_params {
 };
 
 
+// RSum params used by RSUM & RDSUM microkernels.
+union xnn_qs8_rsum_params {
+  struct {
+    char _;  // Dummy member variable to comply with the C standard
+  } scalar;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    int8_t mask_table[30];
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    int8_t onemask_table[32];  // 16 ones, 16 zeros
+  } ssse3;
+  struct {
+    XNN_ALIGN(16) int8_t mask_table[30];
+  } sse4;
+  struct {
+    XNN_ALIGN(16) int8_t mask_table[30];
+  } avx2;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+};
+
 // AvgPool w. Min+Max: used by quantized GAVGPOOL microkernels with MINMAX activation.
 
 union xnn_qs8_avgpool_minmax_params {
