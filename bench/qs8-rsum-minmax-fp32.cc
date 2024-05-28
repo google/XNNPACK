@@ -367,6 +367,66 @@ BENCHMARK_CAPTURE(qs8_rsum, scalar_imagic_u4,
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qs8_rsum, avx512vnni_u64,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__avx512vnni_u64,
+                    xnn_init_qs8_avgpool_minmax_fp32_avx2_params,
+                    benchmark::utils::CheckAVX512VNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qs8_rsum, avx512vnni_u128,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__avx512vnni_u128,
+                    xnn_init_qs8_avgpool_minmax_fp32_avx2_params,
+                    benchmark::utils::CheckAVX512VNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qs8_rsum, avx512vnni_u256,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__avx512vnni_u256,
+                    xnn_init_qs8_avgpool_minmax_fp32_avx2_params,
+                    benchmark::utils::CheckAVX512VNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qs8_rsum, avx512vnni_u128_acc2,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__avx512vnni_u128_acc2,
+                    xnn_init_qs8_avgpool_minmax_fp32_avx2_params,
+                    benchmark::utils::CheckAVX512VNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qs8_rsum, avx512vnni_u256_acc2,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__avx512vnni_u256_acc2,
+                    xnn_init_qs8_avgpool_minmax_fp32_avx2_params,
+                    benchmark::utils::CheckAVX512VNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qs8_rsum, avx512vnni_u256_acc4,
+                    xnn_qs8_rsum_minmax_fp32_ukernel__avx512vnni_u256_acc4,
+                    xnn_init_qs8_avgpool_minmax_fp32_avx2_params,
+                    benchmark::utils::CheckAVX512VNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif
