@@ -816,6 +816,7 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4-minmax-fp32-scalar-fmagic.c",
     "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4-minmax-fp32-scalar-imagic.c",
     "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4-minmax-fp32-scalar-lrintf.c",
+    "src/qs8-rdsum/gen/qs8-rdsum-minmax-fp32-scalar-u1-acc1.c",
     "src/qs8-requantization/qs8-requantization-fp32-scalar-fmagic.c",
     "src/qs8-requantization/qs8-requantization-fp32-scalar-lrintf.c",
     "src/qs8-requantization/qs8-requantization-gemmlowp-scalar.c",

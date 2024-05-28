@@ -18,5 +18,4 @@ tools/xngen src/f16-rsum/avx512fp16.c.in -D BATCH_TILE=96  -D ACCUMULATORS=3 -o 
 tools/xngen src/f16-rsum/avx512fp16.c.in -D BATCH_TILE=128 -D ACCUMULATORS=2 -o src/f16-rsum/gen/f16-rsum-avx512fp16-u128-acc2.c &
 tools/xngen src/f16-rsum/avx512fp16.c.in -D BATCH_TILE=128 -D ACCUMULATORS=4 -o src/f16-rsum/gen/f16-rsum-avx512fp16-u128-acc4.c &
 
-
 wait

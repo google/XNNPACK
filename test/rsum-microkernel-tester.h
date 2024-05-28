@@ -104,40 +104,32 @@ class RSumMicrokernelTester {
   }
 
   void Test(xnn_qs8_rsum_ukernel_fn rsum,
-      xnn_init_qs8_avgpool_minmax_params_fn init_params,
-      xnn_qs8_requantize_fn requantize) const {
+      xnn_init_qs8_rsum_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
     std::vector<int8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
-    {//for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
 
       // Compute reference results.
-      int8_t output_init = i8dist(rng);
-      int8_t output_ref = 0;
-      int32_t acc = 0;
+      int32_t output_init = i8dist(rng);
+      int32_t output_ref = output_init;
       for (size_t i = 0; i < batch_size(); i++) {
-        acc += int32_t(input[i]) - int32_t(input_zero_point() - 0x80);
+        output_ref += int32_t(input[i]);
       }
-      output_ref = requantize(
-        acc, input_scale() / (output_scale() * float(batch_size())), int8_t(output_zero_point() - 0x80), std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()) + output_init;
 
       // Prepare parameters
-      union xnn_qs8_avgpool_minmax_params params;
-      init_params(
-        &params,
-        -int32_t(input_zero_point() - 0x80) * int32_t(batch_size()),
-        input_scale() / (output_scale() * float(batch_size())),
-        int8_t(output_zero_point() - 0x80), int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+      union xnn_qs8_rsum_params params;
+      init_params(&params);
 
       // Call optimized micro-kernel.
-      int8_t output = output_init;
+      int32_t output = output_init;
       rsum(batch_size() * sizeof(int8_t), input.data(), &output, &params);
 
       // Verify results.
-      EXPECT_EQ(int32_t(output_ref), int32_t(output));
+      EXPECT_EQ(output_ref, output);
     }
   }
 

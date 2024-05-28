@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 struct xnn_experiment_config {
-  bool adaptive_avx_optimization;
+  int dummy;  // C requires that a struct or union has at least one member
 };
 
 struct xnn_experiment_config* xnn_get_experiment_config();

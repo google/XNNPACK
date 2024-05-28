@@ -742,8 +742,6 @@ tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=16 -D KERNEL_T
 tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=25 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QU8 -D REQUANTIZATION=FP32     -o src/qu8-dwconv/gen/qu8-dwconv-25p8c-minmax-fp32-avx-mul32.c &
 tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QU8 -D REQUANTIZATION=FP32     -o src/qu8-dwconv/gen/qu8-dwconv-25p16c-minmax-fp32-avx-mul32.c &
 
-
-
 tools/xngen src/qs8-dwconv/multipass-sse-mul16.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=5  -D MIDDLE_PASS_TILE=5  -D LAST_PASS_TILE=5 -D SSE=2 -D AVX=0 -D XOP=0 -D ADD16=0 -D DATATYPE=QS8 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/qs8-dwconv-5f5m5l8c8s8r-minmax-fp32-sse2-mul16.c &
 tools/xngen src/qs8-dwconv/multipass-sse-mul16.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=5  -D MIDDLE_PASS_TILE=5  -D LAST_PASS_TILE=5 -D SSE=2 -D AVX=0 -D XOP=0 -D ADD16=0 -D DATATYPE=QS8 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/qs8-dwconv-5f5m5l16c8s8r-minmax-fp32-sse2-mul16.c &
 tools/xngen src/qs8-dwconv/multipass-sse-mul16.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=6  -D MIDDLE_PASS_TILE=6  -D LAST_PASS_TILE=7 -D SSE=2 -D AVX=0 -D XOP=0 -D ADD16=0 -D DATATYPE=QS8 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/qs8-dwconv-6f6m7l8c8s8r-minmax-fp32-sse2-mul16.c &

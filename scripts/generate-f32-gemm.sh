@@ -135,9 +135,9 @@ tools/xngen src/f32-gemm/4x8-aarch32-neon-cortex-a75.S.in       -D INC=0 -D PREF
 tools/xngen src/f32-gemm/4x8-aarch32-neon-cortex-a7.S.in        -D INC=0 -D PREFETCH=1 -o src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a7.S &
 tools/xngen src/f32-gemm/4x8-aarch32-neon-ld64.S.in             -D INC=0 -D PREFETCH=0 -o src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-ld64.S &
 
-tools/xngen src/f32-gemm/4x4-linear-aarch32-vfp-ld64.S.in       -D INC=0 -D ACTIVATION=LINEAR -D PREFETCH=0 -o src/f32-gemm/gen/f32-gemm-4x4-asm-aarch32-vfp-ld64.S
-tools/xngen src/f32-gemm/4x4-aarch32-vfp-ld64.S.in              -D INC=0 -D ACTIVATION=MINMAX -D PREFETCH=0 -o src/f32-gemm/gen/f32-gemm-4x4-minmax-asm-aarch32-vfp-ld64.S
-tools/xngen src/f32-gemm/4x8-aarch32-neon-cortex-a55.S.in       -D INC=0 -D ACTIVATION=MINMAX -D PREFETCH=0 -o src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a55.S
+tools/xngen src/f32-gemm/4x4-linear-aarch32-vfp-ld64.S.in       -D INC=0 -D ACTIVATION=LINEAR -D PREFETCH=0 -o src/f32-gemm/gen/f32-gemm-4x4-asm-aarch32-vfp-ld64.S &
+tools/xngen src/f32-gemm/4x4-aarch32-vfp-ld64.S.in              -D INC=0 -D ACTIVATION=MINMAX -D PREFETCH=0 -o src/f32-gemm/gen/f32-gemm-4x4-minmax-asm-aarch32-vfp-ld64.S &
+tools/xngen src/f32-gemm/4x8-aarch32-neon-cortex-a55.S.in       -D INC=0 -D ACTIVATION=MINMAX -D PREFETCH=0 -o src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a55.S &
 
 ################################### ARM NEON ##################################
 ### LD64 micro-kernels
@@ -628,8 +628,8 @@ tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=4 -D NR=64 -o src/f32-gemm/gen
 tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=1 -D NR=128 -o src/f32-gemm/gen/f32-gemm-1x128-minmax-hvx-broadcast.c &
 tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=2 -D NR=128 -o src/f32-gemm/gen/f32-gemm-2x128-minmax-hvx-broadcast.c &
 
-
-wait # JIT requires the assembly files to be generated first.
+wait
+ # JIT requires the assembly files to be generated first.
 
 ##################################### JIT #####################################
 # AArch32

@@ -5,9 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 #################################### Scalar ###################################
-
 ### Generic C micro-kernels
-
 tools/xngen src/x32-packb/scalar.c.in -D BIAS=1 -D CHANNEL_TILE=2 -D CHANNEL_SUBTILE=1 -D TYPE=uint32_t -o src/x32-packb/gen/x32-packb-2c1s1r-gemm-scalar-int.c &
 tools/xngen src/x32-packb/scalar.c.in -D BIAS=1 -D CHANNEL_TILE=2 -D CHANNEL_SUBTILE=2 -D TYPE=uint32_t -o src/x32-packb/gen/x32-packb-2c2s1r-gemm-scalar-int.c &
 tools/xngen src/x32-packb/scalar.c.in -D BIAS=1 -D CHANNEL_TILE=4 -D CHANNEL_SUBTILE=1 -D TYPE=uint32_t -o src/x32-packb/gen/x32-packb-4c1s1r-gemm-scalar-int.c &
