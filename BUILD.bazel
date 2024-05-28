@@ -3415,6 +3415,18 @@ xnnpack_cc_library(
     ],
 )
 
+xnnpack_cc_library(
+    name = "models_h_test_mode",
+    hdrs = ["src/xnnpack/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    deps = [
+        ":XNNPACK_test_mode",
+        ":aligned_allocator",
+        ":common",
+        "@FP16",
+    ],
+)
+
 ############################# Build configurations #############################
 
 # Enables usage of ARM FP16 (FP16 arithmetics) scalar kernels.

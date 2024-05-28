@@ -24,7 +24,7 @@ MICROKERNEL_TEST_DEPS = [
     "//:microkernels_h",
     "//:microparams_init",
     "//:microparams",
-    "//:packing",
+    "//:packing_test_mode",
     "//:params",
     "//:quantization",
     "//:requantization",
@@ -68,7 +68,6 @@ xnnpack_cc_library(
     deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library() + [
         "//:XNNPACK_test_mode",
         "//:jit",
-        "//:packing_test_mode",
         "//:post_operation",
     ],
 )
@@ -120,7 +119,6 @@ xnnpack_cc_library(
     hdrs = ["dwconv-microkernel-tester.h"],
     deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library() + [
         "//:microkernel_utils",
-        "//:packing_test_mode",
     ],
 )
 
@@ -477,7 +475,7 @@ xnnpack_unit_test(
         "f16-vmulcaddc-minmax.cc",
         "vmulcaddc-microkernel-tester.h",
     ],
-    deps = MICROKERNEL_TEST_DEPS + ["//:packing_test_mode"],
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -743,7 +741,7 @@ xnnpack_unit_test(
         "conv-hwc-microkernel-tester.h",
         "f32-conv-hwc.cc",
     ],
-    deps = MICROKERNEL_TEST_DEPS + ["//:packing_test_mode"],
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -752,7 +750,7 @@ xnnpack_unit_test(
         "conv-hwc2chw-microkernel-tester.h",
         "f16-conv-hwc2chw.cc",
     ],
-    deps = MICROKERNEL_TEST_DEPS + ["//:packing_test_mode"],
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -761,7 +759,7 @@ xnnpack_unit_test(
         "conv-hwc2chw-microkernel-tester.h",
         "f32-conv-hwc2chw.cc",
     ],
-    deps = MICROKERNEL_TEST_DEPS + ["//:packing_test_mode"],
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -813,7 +811,7 @@ xnnpack_unit_test(
         "dwconv2d-microkernel-tester.h",
         "f16-dwconv2d-chw.cc",
     ],
-    deps = MICROKERNEL_TEST_DEPS + ["//:packing_test_mode"],
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -822,7 +820,7 @@ xnnpack_unit_test(
         "dwconv2d-microkernel-tester.h",
         "f32-dwconv2d-chw.cc",
     ],
-    deps = MICROKERNEL_TEST_DEPS + ["//:packing_test_mode"],
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -894,7 +892,6 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
-        "//:packing_test_mode",
     ],
 )
 
@@ -1374,7 +1371,7 @@ xnnpack_unit_test(
         "f32-vmulcaddc-minmax.cc",
         "vmulcaddc-microkernel-tester.h",
     ],
-    deps = MICROKERNEL_TEST_DEPS + ["//:packing_test_mode"],
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -2316,9 +2313,7 @@ xnnpack_unit_test(
         "packb-microkernel-tester.h",
         "x32-packb.cc",
     ],
-    deps = MICROKERNEL_TEST_DEPS + [
-        "//:packing_test_mode",
-    ],
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -2327,9 +2322,7 @@ xnnpack_unit_test(
         "packw-microkernel-tester.h",
         "x8-packw.cc",
     ],
-    deps = MICROKERNEL_TEST_DEPS + [
-        "//:packing_test_mode",
-    ],
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -2338,9 +2331,7 @@ xnnpack_unit_test(
         "packw-microkernel-tester.h",
         "x16-packw.cc",
     ],
-    deps = MICROKERNEL_TEST_DEPS + [
-        "//:packing_test_mode",
-    ],
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -2349,9 +2340,7 @@ xnnpack_unit_test(
         "packw-microkernel-tester.h",
         "x32-packw.cc",
     ],
-    deps = MICROKERNEL_TEST_DEPS + [
-        "//:packing_test_mode",
-    ],
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -2432,9 +2421,7 @@ xnnpack_unit_test(
         "packb-microkernel-tester.h",
         "x32-zerob.cc",
     ],
-    deps = MICROKERNEL_TEST_DEPS + [
-        "//:packing_test_mode",
-    ],
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -4339,7 +4326,6 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
         "//:operator_utils",
-        "//:packing_test_mode",
     ],
 )
 
