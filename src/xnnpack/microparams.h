@@ -984,6 +984,15 @@ union xnn_qs8_avgpool_minmax_params {
     XNN_ALIGN(16) int16_t output_min[8];
   } fp32_sse2;
   struct {
+    int32_t init_bias;
+    float scale;
+    float magic_bias;
+    int32_t magic_bias_less_output_zero_point;
+    int8_t output_min;
+    int8_t output_max;
+    int8_t onemask_table[32];  // 16 ones, 16 zeros
+  } fp32_ssse3;
+  struct {
     XNN_ALIGN(16) int32_t init_bias[4];
     XNN_ALIGN(16) float scale[4];
     XNN_ALIGN(16) float magic_bias[4];

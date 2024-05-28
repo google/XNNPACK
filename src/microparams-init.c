@@ -1105,6 +1105,33 @@ void xnn_update_qs8_avgpool_minmax_fp32_sse2_params(
   }
 }
 
+// Same as NEON.  Used for rsum ssse3
+size_t xnn_init_qs8_avgpool_minmax_fp32_ssse3_params(
+  union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int32_t init_bias,
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
+  params->fp32_ssse3.init_bias = init_bias;
+  params->fp32_ssse3.scale = scale;
+  params->fp32_ssse3.magic_bias = 12582912.0f;
+  params->fp32_ssse3.magic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->fp32_ssse3.output_min = output_min;
+  params->fp32_ssse3.output_max = output_max;
+  for (uint32_t i = 0; i < 16; i++) {
+    params->fp32_ssse3.onemask_table[i] = 1;
+  }
+  for (uint32_t i = 16; i < 32; i++) {
+    params->fp32_ssse3.onemask_table[i] = 0;
+  }
+  return sizeof(params->fp32_ssse3);
+}
+
 size_t xnn_init_qs8_avgpool_minmax_fp32_sse4_params(
   union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int32_t init_bias,

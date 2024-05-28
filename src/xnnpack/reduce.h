@@ -375,6 +375,9 @@ DECLARE_QS8_RSUM_UKERNEL_FUNCTION(xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u32_ac
 DECLARE_QS8_RSUM_UKERNEL_FUNCTION(xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u64)
 DECLARE_QS8_RSUM_UKERNEL_FUNCTION(xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u64_acc2)
 DECLARE_QS8_RSUM_UKERNEL_FUNCTION(xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u64_acc4)
+DECLARE_QS8_RSUM_UKERNEL_FUNCTION(xnn_qs8_rsum_minmax_fp32_ukernel__ssse3_u16)
+DECLARE_QS8_RSUM_UKERNEL_FUNCTION(xnn_qs8_rsum_minmax_fp32_ukernel__ssse3_u32_acc2)
+DECLARE_QS8_RSUM_UKERNEL_FUNCTION(xnn_qs8_rsum_minmax_fp32_ukernel__ssse3_u64_acc4)
 
 #define DECLARE_F32_RDSUM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                        \

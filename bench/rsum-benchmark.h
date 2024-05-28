@@ -225,6 +225,7 @@ static void BenchmarkRSUM(benchmark::internal::Benchmark* b)
   b->Args({512, 512});
   b->Args({512, 1024});
   b->Args({512, 8000});
+  b->Args({1024, 64});
 }
 
 static void BenchmarkRDSUM(benchmark::internal::Benchmark* b)

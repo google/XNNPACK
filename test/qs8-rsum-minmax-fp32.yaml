@@ -39,6 +39,14 @@
 - name: xnn_qs8_rsum_minmax_fp32_ukernel__neondot_u64_acc4
   init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
 
+# x86 SSSE3
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__ssse3_u16
+  init: xnn_init_qs8_avgpool_minmax_fp32_ssse3_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__ssse3_u32_acc2
+  init: xnn_init_qs8_avgpool_minmax_fp32_ssse3_params
+- name: xnn_qs8_rsum_minmax_fp32_ukernel__ssse3_u64_acc4
+  init: xnn_init_qs8_avgpool_minmax_fp32_ssse3_params
+
 # x86 SSE4.1
 - name: xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u16
   init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
