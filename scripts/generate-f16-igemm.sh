@@ -38,10 +38,10 @@ tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=3 -D NR=16 -D ACCTYPE=F32 -o
 tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-4x16-minmax-avx2-broadcast.c &
 tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-5x16-minmax-avx2-broadcast.c &
 
-wait # JIT requires assembly files to be generated first.
+wait
+ # JIT requires assembly files to be generated first.
 
 ##################################### JIT #####################################
-
 scripts/convert-assembly-to-jit.py --no-post-op -i src/f16-igemm/f16-igemm-1x16-minmax-asm-aarch64-neonfp16arith-ld64.S -o src/f16-igemm/gen/f16-igemm-1x16-aarch64-neonfp16arith-ld64.cc &
 scripts/convert-assembly-to-jit.py --no-post-op -i src/f16-igemm/f16-igemm-4x16-minmax-asm-aarch64-neonfp16arith-ld64.S -o src/f16-igemm/gen/f16-igemm-4x16-aarch64-neonfp16arith-ld64.cc &
 scripts/convert-assembly-to-jit.py --no-post-op --force-prfm -i src/f16-igemm/f16-igemm-6x16-minmax-asm-aarch64-neonfp16arith-ld64.S -o src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-ld64.cc &
