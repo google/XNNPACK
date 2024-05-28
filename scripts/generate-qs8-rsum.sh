@@ -34,23 +34,27 @@ tools/xngen src/qs8-rsum/ssse3.c.in -D CHANNEL_TILE=64 -D ACCUMULATORS=4 -D REQU
 tools/xngen src/qs8-rsum/sse41.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=16  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u16.c &
 tools/xngen src/qs8-rsum/sse41.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=32  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u32.c &
 tools/xngen src/qs8-rsum/sse41.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=64  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u64.c &
-tools/xngen src/qs8-rsum/sse41.c.in -D ACCUMULATORS=2 -D CHANNEL_TILE=16  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u16-acc2.c &
+
 tools/xngen src/qs8-rsum/sse41.c.in -D ACCUMULATORS=2 -D CHANNEL_TILE=32  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u32-acc2.c &
 tools/xngen src/qs8-rsum/sse41.c.in -D ACCUMULATORS=2 -D CHANNEL_TILE=64  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u64-acc2.c &
-tools/xngen src/qs8-rsum/sse41.c.in -D ACCUMULATORS=4 -D CHANNEL_TILE=32  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u32-acc4.c &
 tools/xngen src/qs8-rsum/sse41.c.in -D ACCUMULATORS=4 -D CHANNEL_TILE=64  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-sse41-u64-acc4.c &
 
 ################################### x86 AVX2 ##################################
-tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=16  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u16.c &
 tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=32  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u32.c &
 tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=64  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u64.c &
-tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=2 -D CHANNEL_TILE=32  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u32-acc2.c &
+tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=128  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u128.c &
 tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=2 -D CHANNEL_TILE=64  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u64-acc2.c &
-tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=4 -D CHANNEL_TILE=64  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u64-acc4.c &
+tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=2 -D CHANNEL_TILE=128  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u128-acc2.c &
+tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=4 -D CHANNEL_TILE=128  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u128-acc4.c &
 
-################################### x86 AVX512SKX #############################
-tools/xngen src/qs8-rsum/avx512skx.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=32  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx512skx-u32.c &
+################################### x86 AVX512 #################################
 tools/xngen src/qs8-rsum/avx512skx.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=64  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx512skx-u64.c &
-tools/xngen src/qs8-rsum/avx512skx.c.in -D ACCUMULATORS=2 -D CHANNEL_TILE=64  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx512skx-u64-acc2.c &
+tools/xngen src/qs8-rsum/avx512skx.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=128  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx512skx-u128.c &
+tools/xngen src/qs8-rsum/avx512skx.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=256  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx512skx-u256.c &
+
+tools/xngen src/qs8-rsum/avx512skx.c.in -D ACCUMULATORS=2 -D CHANNEL_TILE=128  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx512skx-u128-acc2.c &
+tools/xngen src/qs8-rsum/avx512skx.c.in -D ACCUMULATORS=2 -D CHANNEL_TILE=256  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx512skx-u256-acc2.c &
+
+tools/xngen src/qs8-rsum/avx512skx.c.in -D ACCUMULATORS=4 -D CHANNEL_TILE=256  -D REQUANTIZATION=FP32 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx512skx-u256-acc4.c &
 
 wait

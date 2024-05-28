@@ -1159,10 +1159,10 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_sse4_params(
     params->fp32_sse4.output_min[i] = output_min;
     params->fp32_sse4.output_max[i] = output_max;
   }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->fp32_sse4.mask_table[i] = -1;
+  for (uint32_t i = 0; i < 15; i++) {
+    params->fp32_sse4.mask_table[i] = 1;
   }
-  for (uint32_t i = 7; i < 14; i++) {
+  for (uint32_t i = 15; i < 30; i++) {
     params->fp32_sse4.mask_table[i] = 0;
   }
   return sizeof(params->fp32_sse4);
@@ -1190,7 +1190,7 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_avx2_params(
     params->fp32_avx2.output_max[i] = output_max;
   }
   for (uint32_t i = 0; i < 15; i++) {
-    params->fp32_avx2.mask_table[i] = -1;
+    params->fp32_avx2.mask_table[i] = 1;
   }
   for (uint32_t i = 15; i < 30; i++) {
     params->fp32_avx2.mask_table[i] = 0;

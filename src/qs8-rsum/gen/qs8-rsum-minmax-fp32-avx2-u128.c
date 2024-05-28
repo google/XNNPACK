@@ -1,14 +1,12 @@
+// Auto-generated file. Do not edit!
+//   Template: src/qs8-rsum/avx2.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert CHANNEL_TILE % 16 == 0
-$assert CHANNEL_TILE >= 16
-$SIMD_TILE = CHANNEL_TILE // 32
-$assert ACCUMULATORS <= SIMD_TILE
-$assert REQUANTIZATION == "FP32"
-$import math
 #include <assert.h>
 
 #include <immintrin.h>
@@ -17,9 +15,7 @@ $import math
 #include <xnnpack/math.h>
 #include <xnnpack/reduce.h>
 
-$ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
-$PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx2"
-void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__avx2_u${CHANNEL_TILE}${ACC_SUFFIX}(
+void xnn_qs8_rsum_minmax_fp32_ukernel__avx2_u128(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -32,26 +28,28 @@ void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__avx2_u${CHANNEL_TILE
 
   __m256i vacc = _mm256_setzero_si256();
   // 256 int8s may be summed into an int16 before overflowing.
-  // There are ${ACCUMULATORS} registers and each register has 16 lanes so batch size is ${ACCUMULATORS * 256 * 16}
+  // There are 1 registers and each register has 16 lanes so batch size is 4096
   const __m256i vone = _mm256_set1_epi8(INT8_C(1));
-  while (batch >= ${CHANNEL_TILE}) {
-    $for ACC in range(ACCUMULATORS):
-      __m256i vacc16_${ACC} = _mm256_setzero_si256();
-    for (int current_batch = min(batch, ${ACCUMULATORS * 256 * 16}); current_batch >= ${CHANNEL_TILE}; current_batch -= ${CHANNEL_TILE}) {
-      $for N in range(SIMD_TILE):
-        const __m256i vt${N} = _mm256_maddubs_epi16(vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
+  while (batch >= 128) {
+    __m256i vacc16_0 = _mm256_setzero_si256();
+    for (int current_batch = min(batch, 4096); current_batch >= 128; current_batch -= 128) {
+      const __m256i vt0 = _mm256_maddubs_epi16(vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
+      const __m256i vt1 = _mm256_maddubs_epi16(vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
+      const __m256i vt2 = _mm256_maddubs_epi16(vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
+      const __m256i vt3 = _mm256_maddubs_epi16(vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
 
-      $for N in range(SIMD_TILE):
-        vacc16_${N % ACCUMULATORS} = _mm256_add_epi16(vacc16_${N % ACCUMULATORS}, vt${N});
+      vacc16_0 = _mm256_add_epi16(vacc16_0, vt0);
+      vacc16_0 = _mm256_add_epi16(vacc16_0, vt1);
+      vacc16_0 = _mm256_add_epi16(vacc16_0, vt2);
+      vacc16_0 = _mm256_add_epi16(vacc16_0, vt3);
     }
-    $for ACC in range(ACCUMULATORS):
-      __m256i left${ACC} = _mm256_cvtepi16_epi32(_mm256_castsi256_si128(vacc16_${ACC}));
-      __m256i right${ACC} = _mm256_cvtepi16_epi32(_mm256_extractf128_si256(vacc16_${ACC}, 1));
-      vacc = _mm256_add_epi32(vacc, _mm256_add_epi32(left${ACC}, right${ACC}));
-    batch = (batch >= ${ACCUMULATORS * 256 * 16} ? (batch - ${ACCUMULATORS * 256 * 16}) : batch & ${CHANNEL_TILE - 1});
+    __m256i left0 = _mm256_cvtepi16_epi32(_mm256_castsi256_si128(vacc16_0));
+    __m256i right0 = _mm256_cvtepi16_epi32(_mm256_extractf128_si256(vacc16_0, 1));
+    vacc = _mm256_add_epi32(vacc, _mm256_add_epi32(left0, right0));
+    batch = (batch >= 4096 ? (batch - 4096) : batch & 127);
   }
   if (XNN_UNLIKELY(batch != 0)) {
-    assert(batch < ${CHANNEL_TILE});
+    assert(batch < 128);
 
     __m128i vacc16 = _mm_setzero_si128();
     const __m128i vone_16 = _mm_set1_epi8(1);

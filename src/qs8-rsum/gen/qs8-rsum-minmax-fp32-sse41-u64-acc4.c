@@ -8,7 +8,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include <stdio.h>
 
 #include <immintrin.h>
 
@@ -27,87 +26,49 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__sse41_u64_acc4(
   assert(output != NULL);
   assert(params != NULL);
 
-  __m128i vacc0 = _mm_setzero_si128();
-  __m128i vacc1 = _mm_setzero_si128();
-  __m128i vacc2 = _mm_setzero_si128();
-  __m128i vacc3 = _mm_setzero_si128();
-  int num_batches = batch  >> 10;
-  for (; num_batches > 0; --num_batches) {
+  __m128i vacc = _mm_setzero_si128();
+  // 256 int8s may be summed into an int16 before overflowing.
+  // There are 4 registers and each register has 8 lanes so batch size is 8192
+  const __m128i vone = _mm_set1_epi8(INT8_C(1));
+  while (batch >= 64) {
     __m128i vacc16_0 = _mm_setzero_si128();
     __m128i vacc16_1 = _mm_setzero_si128();
     __m128i vacc16_2 = _mm_setzero_si128();
     __m128i vacc16_3 = _mm_setzero_si128();
-    for (size_t current_batch = 1024; current_batch > 0; current_batch -= 64) {
-      const __m128i vt0 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
-      const __m128i vt1 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
-      const __m128i vt2 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
-      const __m128i vt3 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
-      const __m128i vt4 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
-      const __m128i vt5 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
-      const __m128i vt6 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
-      const __m128i vt7 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
+    for (int current_batch = min(batch, 8192); current_batch >= 64; current_batch -= 64) {
+      const __m128i vt0 = _mm_maddubs_epi16(vone, _mm_loadu_si128((const __m128i*) input)); input += 16;
+      const __m128i vt1 = _mm_maddubs_epi16(vone, _mm_loadu_si128((const __m128i*) input)); input += 16;
+      const __m128i vt2 = _mm_maddubs_epi16(vone, _mm_loadu_si128((const __m128i*) input)); input += 16;
+      const __m128i vt3 = _mm_maddubs_epi16(vone, _mm_loadu_si128((const __m128i*) input)); input += 16;
 
       vacc16_0 = _mm_add_epi16(vacc16_0, vt0);
       vacc16_1 = _mm_add_epi16(vacc16_1, vt1);
       vacc16_2 = _mm_add_epi16(vacc16_2, vt2);
       vacc16_3 = _mm_add_epi16(vacc16_3, vt3);
-      vacc16_0 = _mm_add_epi16(vacc16_0, vt4);
-      vacc16_1 = _mm_add_epi16(vacc16_1, vt5);
-      vacc16_2 = _mm_add_epi16(vacc16_2, vt6);
-      vacc16_3 = _mm_add_epi16(vacc16_3, vt7);
     }
-    vacc0 = _mm_add_epi32(vacc0, _mm_add_epi32(_mm_cvtepi16_epi32(vacc16_0), _mm_cvtepi16_epi32(_mm_srli_si128(vacc16_0, 8))));
-    vacc1 = _mm_add_epi32(vacc1, _mm_add_epi32(_mm_cvtepi16_epi32(vacc16_1), _mm_cvtepi16_epi32(_mm_srli_si128(vacc16_1, 8))));
-    vacc2 = _mm_add_epi32(vacc2, _mm_add_epi32(_mm_cvtepi16_epi32(vacc16_2), _mm_cvtepi16_epi32(_mm_srli_si128(vacc16_2, 8))));
-    vacc3 = _mm_add_epi32(vacc3, _mm_add_epi32(_mm_cvtepi16_epi32(vacc16_3), _mm_cvtepi16_epi32(_mm_srli_si128(vacc16_3, 8))));
-    batch -= 1024;
+    vacc = _mm_add_epi32(vacc, _mm_add_epi32(_mm_cvtepi16_epi32(vacc16_0), _mm_cvtepi16_epi32(_mm_srli_si128(vacc16_0, 8))));
+    vacc = _mm_add_epi32(vacc, _mm_add_epi32(_mm_cvtepi16_epi32(vacc16_1), _mm_cvtepi16_epi32(_mm_srli_si128(vacc16_1, 8))));
+    vacc = _mm_add_epi32(vacc, _mm_add_epi32(_mm_cvtepi16_epi32(vacc16_2), _mm_cvtepi16_epi32(_mm_srli_si128(vacc16_2, 8))));
+    vacc = _mm_add_epi32(vacc, _mm_add_epi32(_mm_cvtepi16_epi32(vacc16_3), _mm_cvtepi16_epi32(_mm_srli_si128(vacc16_3, 8))));
+    batch = (batch >= 8192 ? (batch - 8192) : batch & 63);
   }
   if (XNN_UNLIKELY(batch != 0)) {
-    __m128i vacc16_0 = _mm_setzero_si128();
-    __m128i vacc16_1 = _mm_setzero_si128();
-    __m128i vacc16_2 = _mm_setzero_si128();
-    __m128i vacc16_3 = _mm_setzero_si128();
-    for (; batch >= 64; batch -= 64) {
-      const __m128i vt0 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
-      const __m128i vt1 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
-      const __m128i vt2 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
-      const __m128i vt3 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
-      const __m128i vt4 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
-      const __m128i vt5 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
-      const __m128i vt6 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
-      const __m128i vt7 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
-      vacc16_0 = _mm_add_epi16(vacc16_0, vt0);
-      vacc16_1 = _mm_add_epi16(vacc16_1, vt1);
-      vacc16_2 = _mm_add_epi16(vacc16_2, vt2);
-      vacc16_3 = _mm_add_epi16(vacc16_3, vt3);
-      vacc16_0 = _mm_add_epi16(vacc16_0, vt4);
-      vacc16_1 = _mm_add_epi16(vacc16_1, vt5);
-      vacc16_2 = _mm_add_epi16(vacc16_2, vt6);
-      vacc16_3 = _mm_add_epi16(vacc16_3, vt7);
-    }
+    assert(batch < 64);
 
-    vacc16_0 = _mm_add_epi16(vacc16_0, vacc16_1);
-    vacc16_2 = _mm_add_epi16(vacc16_2, vacc16_3);
-    vacc16_0 = _mm_add_epi16(vacc16_0, vacc16_2);
-
-    for (; batch >= 8; batch -= 8) {
-      const __m128i vt7 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input)); input += 8;
-      vacc16_0 = _mm_add_epi16(vacc16_0, vt7);
+    __m128i vacc16 = _mm_setzero_si128();
+    for (; batch >= 16; batch -= 16) {
+      const __m128i vt = _mm_maddubs_epi16(vone, _mm_loadu_si128((const __m128i*) input)); input += 16;
+      vacc16 = _mm_add_epi16(vacc16, vt);
     }
     if (XNN_UNLIKELY(batch != 0)) {
-      __m128i vt = _mm_loadl_epi64((const __m128i*) input);
-      const __m128i vmask = _mm_loadl_epi64((const __m128i*) &params->fp32_sse4.mask_table[7 - batch]);
-      vt = _mm_cvtepi8_epi16(_mm_and_si128(vt, vmask));
-      vacc16_0 = _mm_add_epi16(vacc16_0, vt);
+      const __m128i vmask = _mm_loadu_si128((const __m128i*) &params->fp32_sse4.mask_table[15 - batch]);
+      const __m128i vt = _mm_maddubs_epi16(vmask, _mm_loadu_si128((const __m128i*) input));
+      vacc16 = _mm_add_epi16(vacc16, vt);
     }
-    vacc0 = _mm_add_epi32(vacc0, _mm_add_epi32(_mm_cvtepi16_epi32(vacc16_0), _mm_cvtepi16_epi32(_mm_srli_si128(vacc16_0, 8))));
+    vacc = _mm_add_epi32(vacc, _mm_add_epi32(_mm_cvtepi16_epi32(vacc16), _mm_cvtepi16_epi32(_mm_srli_si128(vacc16, 8))));
   }
 
-  vacc0 = _mm_add_epi32(vacc0, vacc1);
-  vacc2 = _mm_add_epi32(vacc2, vacc3);
-  vacc0 = _mm_add_epi32(vacc0, vacc2);
-
-  __m128i vacc_lo = _mm_hadd_epi32(vacc0, vacc0);
+  __m128i vacc_lo = _mm_hadd_epi32(vacc, vacc);
   vacc_lo = _mm_hadd_epi32(vacc_lo, vacc_lo);
 
   const int32_t vinit_bias = params->fp32_sse4.init_bias[0];

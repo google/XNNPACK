@@ -111,7 +111,7 @@ class RSumMicrokernelTester {
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
     std::vector<int8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
-    {//for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
 
       // Compute reference results.
