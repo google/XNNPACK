@@ -3,11 +3,10 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert CHANNEL_TILE % 4 == 0
-$assert CHANNEL_TILE >= 4
+$assert CHANNEL_TILE % 16 == 0
+$assert CHANNEL_TILE >= 16
 $SIMD_TILE = CHANNEL_TILE // 16
 $assert ACCUMULATORS <= SIMD_TILE
-$import math
 #include <assert.h>
 
 #include <arm_neon.h>
@@ -29,7 +28,7 @@ void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__neondot_u${CHANNEL_T
   assert(output != NULL);
   assert(params != NULL);
 
-  const int8x16_t vone = vdupq_n_s8(1);
+  const int8x16_t vone = vdupq_n_s8(INT8_C(1));
   $for A in range(ACCUMULATORS):
     int32x4_t vacc${A} = vmovq_n_s32(0);
   $if CHANNEL_TILE > 8:
@@ -68,7 +67,7 @@ void xnn_qs8_rsum_minmax_${REQUANTIZATION.lower()}_ukernel__neondot_u${CHANNEL_T
   #endif
 
   const int32_t vinit_bias = params->fp32_neon.init_bias;
-  const float vscale = params->${PARAMS_STRUCT}.scale;
+  const float vscale = params->fp32_neon.scale;
   const int32_t output_min = params->fp32_neon.output_min;
   const int32_t output_max = params->fp32_neon.output_max;
   const float vmagic_bias = params->fp32_neon.magic_bias;

@@ -26,16 +26,12 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__neon_u64_acc4(
   assert(output != NULL);
   assert(params != NULL);
 
-  // 256 int8s may be summed into an int16 before overflowing
-  // Each vpada does 2 adds so we can do 128 vpada
-  // There 4 registers so batch size is 512
-  int num_batches = batch  >> 9;
   int32x4_t vacc0 = vmovq_n_s32(0);
   int32x4_t vacc1 = vmovq_n_s32(0);
   int32x4_t vacc2 = vmovq_n_s32(0);
   int32x4_t vacc3 = vmovq_n_s32(0);
 
-  for (; num_batches > 0; --num_batches) {
+  for (; batch >= 512; batch -= 512) {
     int16x8_t vacc16_0 = vmovq_n_s16(0);
     int16x8_t vacc16_1 = vmovq_n_s16(0);
     int16x8_t vacc16_2 = vmovq_n_s16(0);
@@ -55,7 +51,6 @@ void xnn_qs8_rsum_minmax_fp32_ukernel__neon_u64_acc4(
     vacc1 = vpadalq_s16(vacc1, vacc16_1);
     vacc2 = vpadalq_s16(vacc2, vacc16_2);
     vacc3 = vpadalq_s16(vacc3, vacc16_3);
-    batch -= 512;
   }
 
   if (XNN_UNLIKELY(batch != 0)) {
