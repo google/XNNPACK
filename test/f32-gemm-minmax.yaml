@@ -961,6 +961,10 @@
   init: xnn_init_f32_minmax_hvx_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_7x64__hvx_broadcast
+  init: xnn_init_f32_minmax_hvx_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
 - name: xnn_f32_gemm_minmax_ukernel_1x128__hvx_broadcast
   init: xnn_init_f32_minmax_hvx_params
   pack: xnn_pack_f32_gemm_goi_w
