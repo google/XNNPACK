@@ -19,6 +19,53 @@
 #include "bench/utils.h"
 
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  static void qd8_f32_qb4w_gemm_minmax_ukernel_1x8c8__avx2(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x8c8__avx2,
+      xnn_init_f32_qb4w_minmax_avx_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/1, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX2);
+  }
+
+  BENCHMARK_GEMM_BL(qd8_f32_qb4w_gemm_minmax_ukernel_1x8c8__avx2)
+
+  static void qd8_f32_qb4w_gemm_minmax_ukernel_2x8c8__avx2(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qb4w_gemm_minmax_ukernel_2x8c8__avx2,
+      xnn_init_f32_qb4w_minmax_avx_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/2, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX2);
+  }
+
+  BENCHMARK_GEMM_BL(qd8_f32_qb4w_gemm_minmax_ukernel_2x8c8__avx2)
+
+  static void qd8_f32_qb4w_gemm_minmax_ukernel_3x8c8__avx2(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x8c8__avx2,
+      xnn_init_f32_qb4w_minmax_avx_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/3, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX2);
+  }
+
+  BENCHMARK_GEMM_BL(qd8_f32_qb4w_gemm_minmax_ukernel_3x8c8__avx2)
+
+  static void qd8_f32_qb4w_gemm_minmax_ukernel_4x8c8__avx2(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x8c8__avx2,
+      xnn_init_f32_qb4w_minmax_avx_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/4, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX2);
+  }
+
+  BENCHMARK_GEMM_BL(qd8_f32_qb4w_gemm_minmax_ukernel_4x8c8__avx2)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
 static void qd8_f32_qb4w_gemm_minmax_ukernel_1x2__scalar(benchmark::State& state, const char* net) {
   GEMMBenchmark(state,
     xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x2__scalar,
@@ -95,18 +142,6 @@ static void qd8_f32_qb4w_gemm_minmax_ukernel_4x4__scalar(benchmark::State& state
 }
 
 BENCHMARK_GEMM_BL(qd8_f32_qb4w_gemm_minmax_ukernel_4x4__scalar)
-
-static void qd8_f32_qb4w_gemm_minmax_ukernel_1x8c2__avx2(benchmark::State& state, const char* net) {
-  GEMMBenchmark(state,
-    xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x8c2__avx2,
-    xnn_init_f32_qb4w_minmax_avx_params,
-    xnn_pack_qs8_qb4w_gemm_goi_w,
-    /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-    /*isa_check=*/nullptr);
-}
-
-BENCHMARK_GEMM_BL(qd8_f32_qb4w_gemm_minmax_ukernel_1x8c2__avx2)
-
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
