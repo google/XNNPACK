@@ -7,14 +7,16 @@
 //   Specification: test/qd8-f32-qb4w-gemm-minmax.yaml
 //   Generator: tools/generate-gemm-test.py
 
-#include <benchmark/benchmark.h>
-#include "bench/gemm-benchmark.h"
-#include "bench/utils.h"
-
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
+#include <xnnpack/pack.h>
+
+#include <benchmark/benchmark.h>
+#include "bench/gemm-benchmark.h"
+#include "bench/utils.h"
 
 
 static void qd8_f32_qb4w_gemm_minmax_ukernel_1x2__scalar(benchmark::State& state, const char* net) {
