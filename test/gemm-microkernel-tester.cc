@@ -50,32 +50,32 @@ TEST_P(GemmTest, Test) {
 
   // Loop over the `k`, `m`, and `n` values, if required.
   for (size_t k = params.loop_k_.from; k <= params.loop_k_.to;
-       k = NextPrime(k + params.loop_k_.step)) {
+       k = params.loop_k_.next(k)) {
     if (params.loop_k_.is_set) {
       tester.k(k);
     }
     for (size_t m = params.loop_m_.from; m <= params.loop_m_.to;
-         m += params.loop_m_.step) {
+         m = params.loop_m_.next(m)) {
       if (params.loop_m_.is_set) {
         tester.m(m);
       }
       for (size_t n = params.loop_n_.from; n <= params.loop_n_.to;
-           n  = NextPrime(n + params.loop_n_.step)) {
+           n = params.loop_n_.next(n)) {
         if (params.loop_n_.is_set) {
           tester.n(n);
         }
         for (size_t zi = params.loop_zi_.from; zi <= params.loop_zi_.to;
-             zi += params.loop_zi_.step) {
+             zi = params.loop_zi_.next(zi)) {
           if (params.loop_zi_.is_set) {
             tester.zero_index(zi);
           }
           for (size_t bzp = params.loop_bzp_.from; bzp <= params.loop_bzp_.to;
-               bzp += params.loop_bzp_.step) {
+               bzp = params.loop_bzp_.next(bzp)) {
             if (params.loop_bzp_.is_set) {
               tester.b_zero_point(bzp);
             }
             for (size_t bl = params.loop_bl_.from; bl <= tester.k() / 2;
-               bl += params.loop_bl_.step) {
+               bl = params.loop_bl_.next(bl)) {
               
                if (params.loop_bl_.is_set) {
                 // Require block size to divide (padded) column size.

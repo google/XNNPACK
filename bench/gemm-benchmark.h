@@ -402,7 +402,7 @@ void GEMMBenchmark(benchmark::State& state,
 
   const size_t mc = state.range(0);
   const size_t nc = state.range(1);
-  const size_t kc = state.range(2);
+  const size_t kc = round_up_po2(state.range(2), 2 * kr * sr);
   const size_t bl = round_up_po2(state.range(3), 2 * kr * sr);
 
   std::random_device random_device;
@@ -586,7 +586,7 @@ void GEMMBenchmark(benchmark::State& state,
 
   const size_t mc = state.range(0);
   const size_t nc = state.range(1);
-  const size_t kc = state.range(2);
+  const size_t kc = round_up_po2(state.range(2), 2 * kr * sr);
   const size_t bl = round_up_po2(state.range(3), 2 * kr * sr);
 
   std::random_device random_device;
