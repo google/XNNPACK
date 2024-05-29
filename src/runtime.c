@@ -1011,6 +1011,29 @@ enum xnn_status xnn_get_runtime_profiling_info(xnn_runtime_t runtime,
         }
       }
       break;
+      case xnn_profile_info_operator_id:{
+        size_t num_valid_ops = 0;
+        for (size_t i = 0; i < runtime->num_ops; ++i) {
+          if (opdata[i].operator_objects[0] != NULL) {
+            num_valid_ops += 1;
+          }
+        }
+        required_size = num_valid_ops * sizeof(uint32_t);
+        if (param_value_size < required_size) {
+          *param_value_size_ret = required_size;
+          status = xnn_status_out_of_memory;
+        } else {
+          uint32_t* data = (uint32_t*) param_value;
+          for (size_t i = 0; i < runtime->num_ops; ++i) {
+            if (opdata[i].operator_objects[0] != NULL) {
+              uint32_t node_id = opdata[i].id;
+              *data++ = node_id;
+            }
+          }
+        }
+      }
+
+      break;
     }
     default:
       status = xnn_status_invalid_parameter;
