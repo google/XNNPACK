@@ -1023,6 +1023,65 @@ TEST(F32_VSQRDIFF__HVX_U64, inplace_a_and_b) {
 }
 
 
+TEST(F32_VSQRDIFF__HVX_U128, batch_eq_128) {
+  VBinaryMicrokernelTester()
+    .batch_size(128)
+    .Test(xnn_f32_vsqrdiff_ukernel__hvx_u128, VBinaryMicrokernelTester::OpType::SqrDiff);
+}
+
+TEST(F32_VSQRDIFF__HVX_U128, batch_div_128) {
+  for (size_t batch_size = 256; batch_size < 1280; batch_size += 128) {
+    VBinaryMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_vsqrdiff_ukernel__hvx_u128, VBinaryMicrokernelTester::OpType::SqrDiff);
+  }
+}
+
+TEST(F32_VSQRDIFF__HVX_U128, batch_lt_128) {
+  for (size_t batch_size = 1; batch_size < 128; batch_size++) {
+    VBinaryMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_vsqrdiff_ukernel__hvx_u128, VBinaryMicrokernelTester::OpType::SqrDiff);
+  }
+}
+
+TEST(F32_VSQRDIFF__HVX_U128, batch_gt_128) {
+  for (size_t batch_size = 129; batch_size < 256; batch_size++) {
+    VBinaryMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_vsqrdiff_ukernel__hvx_u128, VBinaryMicrokernelTester::OpType::SqrDiff);
+  }
+}
+
+TEST(F32_VSQRDIFF__HVX_U128, inplace_a) {
+  for (size_t batch_size = 1; batch_size <= 640; batch_size += 127) {
+    VBinaryMicrokernelTester()
+      .batch_size(batch_size)
+      .inplace_a(true)
+      .Test(xnn_f32_vsqrdiff_ukernel__hvx_u128, VBinaryMicrokernelTester::OpType::SqrDiff);
+  }
+}
+
+TEST(F32_VSQRDIFF__HVX_U128, inplace_b) {
+  for (size_t batch_size = 1; batch_size <= 640; batch_size += 127) {
+    VBinaryMicrokernelTester()
+      .batch_size(batch_size)
+      .inplace_b(true)
+      .Test(xnn_f32_vsqrdiff_ukernel__hvx_u128, VBinaryMicrokernelTester::OpType::SqrDiff);
+  }
+}
+
+TEST(F32_VSQRDIFF__HVX_U128, inplace_a_and_b) {
+  for (size_t batch_size = 1; batch_size <= 640; batch_size += 127) {
+    VBinaryMicrokernelTester()
+      .batch_size(batch_size)
+      .inplace_a(true)
+      .inplace_b(true)
+      .Test(xnn_f32_vsqrdiff_ukernel__hvx_u128, VBinaryMicrokernelTester::OpType::SqrDiff);
+  }
+}
+
+
 TEST(F32_VSQRDIFF__SCALAR_U1, batch_eq_1) {
   VBinaryMicrokernelTester()
     .batch_size(1)
