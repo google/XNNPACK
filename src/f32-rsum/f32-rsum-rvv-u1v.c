@@ -24,8 +24,8 @@ void xnn_f32_rsum_ukernel__rvv_u1v(
   batch >>= XNN_LOG2_SIZEOF_FLOAT;
   vfloat32m1_t acc_f32v = __riscv_vfmv_s_f_f32m1(0.f, __riscv_vsetvl_e32m1(batch));
   size_t n = __riscv_vsetvl_e32m1(batch);
-  vfloat32m1_t sum0_f32v = __riscv_vfmv_s_f_f32m1(0.f, n);
-  vfloat32m1_t sum1_f32v = __riscv_vfmv_s_f_f32m1(0.f, n);
+  vfloat32m1_t sum0_f32v = __riscv_vfmv_v_f_f32m1(0.f, n);
+  vfloat32m1_t sum1_f32v = __riscv_vfmv_v_f_f32m1(0.f, n);
   for (; batch >= n * 8; batch -= n * 8) {
     vfloat32m1_t in0_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
     vfloat32m1_t in1_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
