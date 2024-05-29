@@ -265,7 +265,7 @@ static void init_f16_gemm_config(void) {
 
 #if XNN_ARCH_WASMSIMD
   EM_JS(int, hardware_concurrency, (void), {
-    concurrency = 1;
+    var concurrency = 1;
     try {
       concurrency = self.navigator.hardwareConcurrency;
     } catch(e) {
