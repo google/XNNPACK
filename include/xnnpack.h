@@ -186,6 +186,8 @@ enum xnn_status xnn_deinitialize(void);
 /// Subgraph objects are used to define Values (tensors) and Nodes (operators) comprising the model.
 typedef struct xnn_subgraph* xnn_subgraph_t;
 
+uint32_t xnn_subgraph_num_nodes(xnn_subgraph_t subgraph);
+
 /// Create a empty Subgraph object.
 ///
 /// @param external_value_ids - number of Value IDs to reserve for communication with external graph representation.
@@ -1930,10 +1932,15 @@ typedef struct xnn_runtime* xnn_runtime_t;
 enum xnn_profile_info {
   /// Returns a size_t containing the number of operators.
   xnn_profile_info_num_operators,
-  /// Returns a char[] containing the null character separated names of all operators.
+  /// Returns a char[] containing the null character separated names of all
+  /// operators.
   xnn_profile_info_operator_name,
-  /// Returns a uint64_t[] with the runtimes of all operators in the same order as xnn_profile_info_operator_name.
+  /// Returns a uint64_t[] with the runtimes of all operators in the same order
+  /// as xnn_profile_info_operator_name.
   xnn_profile_info_operator_timing,
+  /// Returns a uint32_t[] with the node_ids of all operators in the same order
+  /// as xnn_profile_info_operator_name.
+  xnn_profile_info_operator_id,
 };
 
 /// Return profile information for all operators.
