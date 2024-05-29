@@ -369,7 +369,8 @@ tools/xngen src/f32-igemm/MRxNRv-rvv.c.in -D MR=7 -D NR=m4 -D ACTIVATION=RELU   
 tools/xngen src/f32-igemm/MRxNRv-rvv.c.in -D MR=1 -D NR=m4 -D ACTIVATION=MINMAX -o src/f32-igemm/gen/f32-igemm-1x4v-minmax-rvv.c &
 tools/xngen src/f32-igemm/MRxNRv-rvv.c.in -D MR=7 -D NR=m4 -D ACTIVATION=MINMAX -o src/f32-igemm/gen/f32-igemm-7x4v-minmax-rvv.c &
 
-wait # JIT requires the assembly files to be generated first.
+wait
+ # JIT requires the assembly files to be generated first.
 
 ###################################### JIT ####################################
 # AArch32

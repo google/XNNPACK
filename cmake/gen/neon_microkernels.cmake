@@ -679,6 +679,9 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x8-minmax-fp32-neon-mlal-lane.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x16-minmax-fp32-neon-mlal-lane-prfm.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x16-minmax-fp32-neon-mlal-lane.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-neon-c16.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-neon-c32.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-neon-c64.c
   src/qs8-requantization/qs8-requantization-fp32-neon.c
   src/qs8-requantization/qs8-requantization-gemmlowp-neon.c
   src/qs8-requantization/qs8-requantization-rndna-neon.c

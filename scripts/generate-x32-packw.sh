@@ -67,7 +67,6 @@ tools/xngen src/x32-packw/s4-sse2.c.in -D NR=16 -D SR=4 -D PREFETCH=1 -D KBLOCK=
 tools/xngen src/x32-packw/c4-sse2.c.in -D NR=2  -D KR=4 -D PREFETCH=0 -o src/x32-packw/gen/x32-packw-x2c4-gemm-goi-sse2-u4.c &
 tools/xngen src/x32-packw/c4-sse2.c.in -D NR=2  -D KR=4 -D PREFETCH=1 -o src/x32-packw/gen/x32-packw-x2c4-gemm-goi-sse2-u4-prfm.c &
 
-
 ################################### x86 AVX ###################################
 ### NR multiple of 8
 tools/xngen src/x32-packw/avx.c.in -D NR=8  -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8-gemm-goi-avx-u4.c &

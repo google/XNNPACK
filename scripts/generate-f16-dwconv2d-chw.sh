@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 ################################## ARM NEON ###################################
-
 tools/xngen src/f16-dwconv2d-chw/3x3p1-neonfp16arith.c.in   -D ROW_TILE=1 -D ACCUMULATORS=1 -o src/f16-dwconv2d-chw/gen/f16-dwconv2d-chw-3x3p1-minmax-neonfp16arith-1x8.c &
 tools/xngen src/f16-dwconv2d-chw/3x3p1-neonfp16arith.c.in   -D ROW_TILE=2 -D ACCUMULATORS=1 -o src/f16-dwconv2d-chw/gen/f16-dwconv2d-chw-3x3p1-minmax-neonfp16arith-2x8.c &
 tools/xngen src/f16-dwconv2d-chw/3x3p1-neonfp16arith.c.in   -D ROW_TILE=3 -D ACCUMULATORS=1 -o src/f16-dwconv2d-chw/gen/f16-dwconv2d-chw-3x3p1-minmax-neonfp16arith-3x8.c &

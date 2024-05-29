@@ -122,7 +122,7 @@ void f32_rsum(
 void qs8_rsum(
     benchmark::State& state,
     xnn_qs8_rsum_ukernel_fn rsum,
-    xnn_init_qs8_avgpool_minmax_params_fn init_params,
+    xnn_init_qs8_rsum_params_fn init_params,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check != nullptr && !isa_check(state)) {
@@ -132,15 +132,12 @@ void qs8_rsum(
   const size_t batch = state.range(0);
 
   std::vector<int8_t, AlignedAllocator<int8_t, 64>> input(rows * batch + XNN_EXTRA_BYTES);
-  std::vector<int8_t> output(rows);
+  std::vector<int32_t> output(rows);
   std::iota(input.begin(), input.end(), 1);
 
   // Prepare parameters.
-  union xnn_qs8_avgpool_minmax_params params;
-  init_params(
-    &params,
-    /*init_bias=*/0, /*scale=*/1.0f, /*output_zero_point=*/0,
-    std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+  union xnn_qs8_rsum_params params;
+  init_params(&params);
 
   for (auto _ : state) {
     for (int i = 0; i < rows; ++i) {
@@ -225,6 +222,7 @@ static void BenchmarkRSUM(benchmark::internal::Benchmark* b)
   b->Args({512, 512});
   b->Args({512, 1024});
   b->Args({512, 8000});
+  b->Args({1024, 64});
 }
 
 static void BenchmarkRDSUM(benchmark::internal::Benchmark* b)
