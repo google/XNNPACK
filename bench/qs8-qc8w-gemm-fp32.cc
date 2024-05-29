@@ -3813,6 +3813,62 @@
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 
 
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c16__wasmusdot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c16__wasmusdot,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params,
+      xnn_pack_qs8_to_qu8_gemm_goi_w,
+      /*mr=*/1, /*nr=*/4, /*kr=*/16, /*sr=*/1,
+      benchmark::utils::CheckWAsmUSDOT);
+  }
+
+  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c16__wasmusdot)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void qs8_qc8w_gemm_minmax_fp32_ukernel_2x4c16__wasmusdot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x4c16__wasmusdot,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params,
+      xnn_pack_qs8_to_qu8_gemm_goi_w,
+      /*mr=*/2, /*nr=*/4, /*kr=*/16, /*sr=*/1,
+      benchmark::utils::CheckWAsmUSDOT);
+  }
+
+  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_2x4c16__wasmusdot)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void qs8_qc8w_gemm_minmax_fp32_ukernel_3x4c16__wasmusdot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x4c16__wasmusdot,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params,
+      xnn_pack_qs8_to_qu8_gemm_goi_w,
+      /*mr=*/3, /*nr=*/4, /*kr=*/16, /*sr=*/1,
+      benchmark::utils::CheckWAsmUSDOT);
+  }
+
+  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_3x4c16__wasmusdot)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void qs8_qc8w_gemm_minmax_fp32_ukernel_4x4c16__wasmusdot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4c16__wasmusdot,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params,
+      xnn_pack_qs8_to_qu8_gemm_goi_w,
+      /*mr=*/4, /*nr=*/4, /*kr=*/16, /*sr=*/1,
+      benchmark::utils::CheckWAsmUSDOT);
+  }
+
+  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_4x4c16__wasmusdot)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
 static void qs8_qc8w_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic(benchmark::State& state, const char* net) {
   GEMMBenchmark(state,
     xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic,

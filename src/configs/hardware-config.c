@@ -245,6 +245,18 @@ static void init_hardware_config(void) {
         wasm_v128_xor(overflow_output, wasm_i32x4_const(65536, 33024, 33024, 512))));
     }
     {
+      // Check out-of-bounds behaviour of VNNI (vpdpbusd) version Relaxed Integer Dot Product with Accumulation.
+      const v128_t int8_input = wasm_i8x16_const(0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0);
+      const volatile v128_t xint8_input = wasm_i8x16_const(0, 0, 0, -128, 0, 0, -128, 0, 0, -128, 0, 0, -128, 0, 0, 0);  // volatile to confuse Clang which otherwise ICE's
+      const v128_t xint8_output = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(int8_input, xint8_input, wasm_i8x16_const_splat(0));
+
+      const volatile v128_t overflow_input = wasm_i8x16_const(-128, -128, -128, -128, -128, -128, -1, -1, -1, -1, -128, -128, -1, -1, -1, -1);  // volatile to confuse Clang which otherwise ICE's
+      const v128_t overflow_output = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(wasm_i8x16_const_splat(-128), overflow_input, wasm_i8x16_const_splat(0));
+      hardware_config.use_wasm_usdot = !wasm_v128_any_true(wasm_v128_or(
+        wasm_v128_xor(xint8_output, wasm_i32x4_const_splat(128)),
+        wasm_v128_xor(overflow_output, wasm_i32x4_const(-65536, -98048, -98048, -130560))));
+    }
+    {
       const v128_t input1 = wasm_i32x4_const(0xF0F0F0F0, 0xAAAAAAAA, 0xCCCCCCCC, 0x99999999);
       const v128_t input2 = wasm_i32x4_const(0x0F0F0F0F, 0x55555555, 0x33333333, 0x66666666);
       v128_t diff = wasm_i8x16_const_splat(0);

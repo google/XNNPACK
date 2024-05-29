@@ -217,6 +217,11 @@ tools/xngen src/qs8-igemm/MRx4c16-wasmsdot.c.in -D MR=2 -D REQUANTIZATION=FP32 -
 tools/xngen src/qs8-igemm/MRx4c16-wasmsdot.c.in -D MR=3 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x4c16-minmax-fp32-wasmsdot.c &
 tools/xngen src/qs8-igemm/MRx4c16-wasmsdot.c.in -D MR=4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4c16-minmax-fp32-wasmsdot.c &
 
+tools/xngen src/qs8-igemm/MRx4c16-wasmusdot.c.in -D MR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x4c16-minmax-fp32-wasmusdot.c &
+tools/xngen src/qs8-igemm/MRx4c16-wasmusdot.c.in -D MR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x4c16-minmax-fp32-wasmusdot.c &
+tools/xngen src/qs8-igemm/MRx4c16-wasmusdot.c.in -D MR=3 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x4c16-minmax-fp32-wasmusdot.c &
+tools/xngen src/qs8-igemm/MRx4c16-wasmusdot.c.in -D MR=4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4c16-minmax-fp32-wasmusdot.c &
+
 ################################## ARMv6 SIMD #################################
 tools/xngen src/qs8-igemm/c4-armsimd32.c.in -D MR=1 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x1c4-minmax-fp32-armsimd32.c &
 tools/xngen src/qs8-igemm/c4-armsimd32.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x2c4-minmax-fp32-armsimd32.c &
