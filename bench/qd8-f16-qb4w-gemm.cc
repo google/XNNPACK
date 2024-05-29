@@ -10,6 +10,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/gemm.h"
+#include "xnnpack/isa-checks.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"

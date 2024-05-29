@@ -76,9 +76,10 @@ TEST_P(GemmTest, Test) {
             if (params.loop_bzp_.is_set) {
               tester.b_zero_point(bzp);
             }
-            for (size_t bl = params.loop_bl_.from; bl <= params.loop_bl_.to;
-                 bl += params.loop_bl_.step) {
-              if (params.loop_bl_.is_set) {
+            for (size_t bl = params.loop_bl_.from; bl <= tester.k() / 2;
+               bl = params.loop_bl_.next(bl)) {
+              
+               if (params.loop_bl_.is_set) {
                 // Require block size to divide (padded) column size.
                 if (round_up_po2(k, params.loop_bl_.step) % bl != 0) {
                   continue;
