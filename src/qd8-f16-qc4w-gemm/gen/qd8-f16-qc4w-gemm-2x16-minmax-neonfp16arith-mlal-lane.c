@@ -13,7 +13,7 @@
 
 #include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
+#include <xnnpack/math.h>
 
 
 void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_2x16__neonfp16arith_mlal_lane(

@@ -13,7 +13,7 @@
 
 #include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
+#include <xnnpack/math.h>
 #include "xnnpack/prefetch.h"
 
 
