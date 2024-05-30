@@ -50,14 +50,17 @@ SET(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES
   "$ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/include/qurt"
   "$ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/include/posix")
 
-SET(HEXAGON_C_LINK_EXECUTABLE_LINK_OPTIONS "-mv68 -g -nostdlib --section-start .interp=0x23000000 --dynamic-linker= --force-dynamic -E -z muldefs --whole-archive -o <TARGET> --start-group $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/init.o $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/crt1.o $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/debugmon.o $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/libqurt.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/libc.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/libqcc.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/libhexagon.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/libqurtcfs.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/libtimer.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/libposix.a <OBJECTS> <LINK_LIBRARIES> $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/fini.o --end-group")
-SET(HEXAGON_CXX_LINK_EXECUTABLE_LINK_OPTIONS "-mv68 -g -nostdlib --section-start .interp=0x23000000 --dynamic-linker= --force-dynamic -E -z muldefs --whole-archive -o <TARGET> --start-group $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/init.o $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/crt1.o  $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/debugmon.o $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/libqurt.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/libc.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/libqcc.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/libhexagon.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/libqurtcfs.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/libtimer.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/libposix.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/libc++.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/libc++abi.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/libc_eh.a <OBJECTS> <LINK_LIBRARIES> $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/fini.o --end-group")
+SET(HEXAGON_C_LINK_EXECUTABLE_LINK_OPTIONS "-mv68 -g -nostdlib --section-start .interp=0x23000000 --dynamic-linker= --force-dynamic -E -z muldefs --whole-archive -o <TARGET> --start-group $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/init.o $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/crt1.o $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/debugmon.o $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/libqurt.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/libc.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/libqcc.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/libhexagon.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/libqurtcfs.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/libtimer.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/libposix.a <OBJECTS> <LINK_LIBRARIES> $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/fini.o --end-group")
+SET(HEXAGON_CXX_LINK_EXECUTABLE_LINK_OPTIONS "-mv68 -g -nostdlib --section-start .interp=0x23000000 --dynamic-linker= --force-dynamic -E -z muldefs --whole-archive -o <TARGET> --start-group $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/init.o $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/crt1.o  $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/debugmon.o $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/libqurt.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/libc.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/libqcc.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/libhexagon.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/libqurtcfs.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/libtimer.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/lib/pic/libposix.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/libc++.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/libc++abi.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/libc_eh.a <OBJECTS> <LINK_LIBRARIES> $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/v68/G0/fini.o --end-group")
 
 SET(CMAKE_C_LINK_EXECUTABLE "${HEXAGON_LINK} ${HEXAGON_C_LINK_EXECUTABLE_LINK_OPTIONS}")
 SET(CMAKE_CXX_LINK_EXECUTABLE "${HEXAGON_LINK} ${HEXAGON_CXX_LINK_EXECUTABLE_LINK_OPTIONS}")
 
 ADD_COMPILE_OPTIONS(-O2)
 ADD_COMPILE_OPTIONS(-mv68)
+ADD_COMPILE_OPTIONS(-mhvx)
+ADD_COMPILE_OPTIONS(-mhvx-ieee-fp)
+ADD_COMPILE_OPTIONS(-mhvx-qfloat)
 
 SET(CMAKE_THREAD_LIBS_INIT "" CACHE STRING "")
 SET(CMAKE_HAVE_THREADS_LIBRARY TRUE)
@@ -74,8 +77,7 @@ $ENV{HEXAGON_TOOLS_ROOT}/lib/iss/l2vic.so 32 0xFC910000")
 
 SET(HEXAGON_SIMRUN_CONTENT
 "#!/bin/sh
-${HEXAGON_SIM} -mv68 --quiet --simulated_returnval --usefs ${CMAKE_CURRENT_BINARY_DIR} --pmu_statsfile ${CMAKE_CURRENT_BINARY_DIR}/pmu_stats.txt --cosim_file ${CMAKE_BINARY_DIR}/q6ss.cfg --l2tcm_base 0xd800 --rtos ${CMAKE_BINARY_DIR}/osam.cfg $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/sdksim_bin/runelf.pbn -- $@")
-
+${HEXAGON_SIM} -mv68 -mhvx -mhvx-ieee-fp mhvx-qfloat --quiet --simulated_returnval --usefs ${CMAKE_CURRENT_BINARY_DIR} --pmu_statsfile ${CMAKE_CURRENT_BINARY_DIR}/pmu_stats.txt --cosim_file ${CMAKE_BINARY_DIR}/q6ss.cfg --l2tcm_base 0xd800 --rtos ${CMAKE_BINARY_DIR}/osam.cfg $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/computev68/sdksim_bin/runelf.pbn -- $@")
 
 FILE(WRITE "${CMAKE_BINARY_DIR}/osam.cfg" "${HEXAGON_SIM_OSAM_CONTENT}")
 FILE(WRITE "${CMAKE_BINARY_DIR}/q6ss.cfg" "${HEXAGON_SIM_Q6SS_CONTENT}")
