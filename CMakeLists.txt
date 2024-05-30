@@ -4287,6 +4287,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(qs8-requantization-bench PRIVATE benchmark::benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(qs8-requantization-bench PRIVATE bench-utils microkernels-all)
 
+  ADD_EXECUTABLE(qs8-rdsum-minmax-fp32-test test/qs8-rdsum-minmax-fp32.cc)
+  TARGET_INCLUDE_DIRECTORIES(qs8-rdsum-minmax-fp32-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qs8-rdsum-minmax-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
+  TARGET_LINK_LIBRARIES(qs8-rdsum-minmax-fp32-test PRIVATE hardware-config logging microkernels-all)
+
   ADD_EXECUTABLE(qs8-vadd-bench bench/qs8-vadd.cc)
   TARGET_INCLUDE_DIRECTORIES(qs8-vadd-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(qs8-vadd-bench PRIVATE benchmark::benchmark pthreadpool)

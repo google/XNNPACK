@@ -1,0 +1,202 @@
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$import math
+#include <assert.h>
+#include <math.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/reduce.h>
+#include <xnnpack/math.h>
+
+
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcderfghijlmnopqrstuvqxyz01234567"
+$PARAMS_STRUCT = "fp32_neon"
+void xnn_qs8_rdsum_minmax_fp32_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_c${CHANNELS}(
+    size_t rows,
+    size_t channels,
+    const int8_t* input,
+    size_t input_stride,
+    const int8_t* zero,
+    int8_t* output,
+    const union xnn_qs8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(rows != 0);
+  assert(channels != 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  size_t input_increment = ${ACCUMULATORS} * input_stride;
+  const int32x4_t vinit_bias = vld1q_dup_s32(&params->${PARAMS_STRUCT}.init_bias);
+  for (; channels >= ${CHANNELS}; channels -= ${CHANNELS}) {
+    const int8_t* i0 = input;
+    $for ACC in range(1, ACCUMULATORS):
+      const int8_t* i${ACC} = (const int8_t*) ((uintptr_t) input + ${ACC} * input_stride);
+
+    $for C in range(0, CHANNELS, 4):
+      int32x4_t vacc${ABC[C:C+4]} = vinit_bias;
+
+    // 256 int8s may be summed into an int16 before overflowing
+    // To prevent handling the tails of the inner 256 loop, we round 256 down to
+    // the nearest integer multiple of ACCUMULATORS.
+    $OVERFLOW = math.floor(256 / ACCUMULATORS) * ACCUMULATORS
+    int num_batches = floor((rows + ${OVERFLOW - 1}) / ${OVERFLOW});
+    int r = rows;
+    for (; num_batches > 0; --num_batches) {
+      $for C in range(0, CHANNELS, 8):
+        int16x8_t vacc16_${ABC[C:C+8]} = vmovq_n_s16(0);
+      for (int current_batch = min(r, ${OVERFLOW}); current_batch > 0; current_batch -= ${ACCUMULATORS}) {
+        $for N in range(1, ACCUMULATORS, 2):
+          if XNN_UNPREDICTABLE(current_batch < ${N+1}) {
+            i${N} = zero;
+          }
+          if XNN_UNPREDICTABLE(current_batch <= ${N+1}) {
+            i${N+1} = zero;
+          }
+        $for C in range(0, CHANNELS, 8):
+          int8x8_t vin${ABC[C:C+8]};
+        $for ACC in range(ACCUMULATORS):
+          $for C in range(0, CHANNELS, 8):
+            vin${ABC[C:C+8]} = vld1_s8(&i${ACC}[${C}]);
+          $for C in range(0, CHANNELS, 8):
+            vacc16_${ABC[C:C+8]} = vaddw_s8(vacc16_${ABC[C:C+8]}, vin${ABC[C:C+8]});
+        $for N in range(0, ACCUMULATORS):
+          i${N} = (const int8_t*) ((uintptr_t) i${N} + input_increment);
+      }
+      $for C in range(0, CHANNELS, 8):
+        vacc${ABC[C:C+4]} = vaddw_s16(vacc${ABC[C:C+4]}, vget_low_s16(vacc16_${ABC[C:C+8]}));
+        vacc${ABC[C+4:C+8]} = vaddw_s16(vacc${ABC[C+4:C+8]}, vget_high_s16(vacc16_${ABC[C:C+8]}));
+      r = doz(r, ${OVERFLOW});
+    }
+
+    const float32x4_t vscale = vld1q_dup_f32(&params->fp32_neon.scale);
+    const float32x4_t vmagic_bias = vld1q_dup_f32(&params->fp32_neon.magic_bias);
+    const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->fp32_neon.magic_bias_less_output_zero_point);
+    const int8x8_t voutput_min = vld1_dup_s8(&params->fp32_neon.output_min);
+    const int8x8_t voutput_max = vld1_dup_s8(&params->fp32_neon.output_max);
+
+    $for C in range(0, CHANNELS, 4):
+      float32x4_t vfpacc${ABC[C:C+4]} = vcvtq_f32_s32(vacc${ABC[C:C+4]});
+    $for C in range(0, CHANNELS, 4):
+      vfpacc${ABC[C:C+4]} = vmulq_f32(vfpacc${ABC[C:C+4]}, vscale);
+
+    $for C in range(0, CHANNELS, 4):
+      vacc${ABC[C:C+4]} = vreinterpretq_s32_f32(vaddq_f32(vfpacc${ABC[C:C+4]}, vmagic_bias));
+    $for C in range(0, CHANNELS, 4):
+      vacc${ABC[C:C+4]} = vqsubq_s32(vacc${ABC[C:C+4]}, vmagic_bias_less_output_zero_point);
+
+    #if XNN_ARCH_ARM64
+      $for C in range(0, CHANNELS, 8):
+        int16x8_t vacc16_${ABC[C:C+8]} = vqmovn_high_s32(vqmovn_s32(vacc${ABC[C:C+4]}), vacc${ABC[C+4:C+8]});
+    #else  // !XNN_ARCH_ARM64
+      $for C in range(0, CHANNELS, 8):
+        int16x8_t vacc16_${ABC[C:C+8]} = vcombine_s16(vqmovn_s32(vacc${ABC[C:C+4]}), vqmovn_s32(vacc${ABC[C+4:C+8]}));
+    #endif  // !XNN_ARCH_ARM64
+    $for C in range(0, CHANNELS, 8):
+      int8x8_t vacc8_${ABC[C:C+8]} = vqmovn_s16(vacc16_${ABC[C:C+8]});
+    $for C in range(0, CHANNELS, 8):
+      vacc8_${ABC[C:C+8]} = vmin_s8(vacc8_${ABC[C:C+8]}, voutput_max);
+    $for C in range(0, CHANNELS, 8):
+      vacc8_${ABC[C:C+8]} = vmax_s8(vacc8_${ABC[C:C+8]}, voutput_min);
+
+    const int8_t* o = output;
+    $for C in range(0, CHANNELS, 8):
+      int8x8_t vo${ABC[C:C+8]} = vld1_s8(o); o += 8;
+    $for C in range(0, CHANNELS, 8):
+      vacc8_${ABC[C:C+8]} = vadd_s8(vo${ABC[C:C+8]}, vacc8_${ABC[C:C+8]});
+    $for C in range(0, CHANNELS, 8):
+      vst1_s8(output, vacc8_${ABC[C:C+8]}); output += 8;
+
+    input = (const int8_t*) ((uintptr_t) input + ${CHANNELS} * sizeof(int8_t));
+  }
+  if (channels != 0) {
+    input_increment = ${ACCUMULATORS} * input_stride;
+    // 256 int8s may be summed into an int16 before overflowing.
+    do {
+      int num_batches = floor((rows + ${OVERFLOW - 1}) / ${OVERFLOW});
+      int r = rows;
+      const int8_t* i0 = input;
+      $for ACC in range(1, ACCUMULATORS):
+        const int8_t* i${ACC} = (const int8_t*) ((uintptr_t) input + ${ACC} * input_stride);
+
+      int32x4_t vacc0 = vinit_bias;
+      int32x4_t vacc1 = vinit_bias;
+
+      for (; num_batches > 0; --num_batches) {
+        int16x8_t vacc16 = vmovq_n_s16(0);
+        for (int current_batch = min(r, ${OVERFLOW}); current_batch > 0; current_batch -= ${ACCUMULATORS}) {
+          $for N in range(1, ACCUMULATORS, 2):
+            if XNN_UNPREDICTABLE(current_batch < ${N+1}) {
+              i${N} = zero;
+            }
+            if XNN_UNPREDICTABLE(current_batch <= ${N+1}) {
+              i${N+1} = zero;
+            }
+
+          $for ACC in range(ACCUMULATORS):
+            int8x8_t vin${ACC} = vld1_s8(&i${ACC}[0]);
+          $for ACC in range(ACCUMULATORS):
+            vacc16 = vaddw_s8(vacc16, vin${ACC});
+          $for N in range(ACCUMULATORS):
+            i${N} = (const int8_t*) ((uintptr_t) i${N} + input_increment);
+        }
+        vacc0 = vaddw_s16(vacc0, vget_low_s16(vacc16));
+        vacc1 = vaddw_s16(vacc1, vget_high_s16(vacc16));
+        r = doz(r, ${OVERFLOW});
+      }
+
+      const float32x4_t vscale = vld1q_dup_f32(&params->fp32_neon.scale);
+      const float32x4_t vmagic_bias = vld1q_dup_f32(&params->fp32_neon.magic_bias);
+      const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->fp32_neon.magic_bias_less_output_zero_point);
+      const int8x8_t voutput_min = vld1_dup_s8(&params->fp32_neon.output_min);
+      const int8x8_t voutput_max = vld1_dup_s8(&params->fp32_neon.output_max);
+
+      float32x4_t vfpacc0 = vcvtq_f32_s32(vacc0);
+      float32x4_t vfpacc1 = vcvtq_f32_s32(vacc1);
+      vfpacc0 = vmulq_f32(vfpacc0, vscale);
+      vfpacc1 = vmulq_f32(vfpacc1, vscale);
+      vacc0 = vreinterpretq_s32_f32(vaddq_f32(vfpacc0, vmagic_bias));
+      vacc1 = vreinterpretq_s32_f32(vaddq_f32(vfpacc1, vmagic_bias));
+      vacc0 = vqsubq_s32(vacc0, vmagic_bias_less_output_zero_point);
+      vacc1 = vqsubq_s32(vacc1, vmagic_bias_less_output_zero_point);
+      #if XNN_ARCH_ARM64
+        int16x8_t vacc16 = vqmovn_high_s32(vqmovn_s32(vacc0), vacc1);
+      #else  // !XNN_ARCH_ARM64
+        int16x8_t vacc16 = vcombine_s16(vqmovn_s32(vacc0), vqmovn_s32(vacc1));
+      #endif  // !XNN_ARCH_ARM64
+
+      int8x8_t vacc8 = vqmovn_s16(vacc16);
+      vacc8 = vmin_s8(vacc8, voutput_max);
+      vacc8 = vmax_s8(vacc8, voutput_min);
+
+      if XNN_LIKELY(channels >= 8) {
+        int8x8_t vo = vld1_s8(output);
+        vacc8 = vadd_s8(vo, vacc8);
+        vst1_s8(output, vacc8); output += 8;
+        channels -= 8;
+        input = (const int8_t*) ((uintptr_t) input + 8 * sizeof(int8_t));
+      } else {
+        if (channels & 4) {
+          int8x8_t vo = vreinterpret_s8_s32(vld1_s32((const int32_t*) output));
+          vacc8 = vadd_s8(vo, vacc8);
+          vst1_lane_s32((int32_t*) output, vreinterpret_s32_s8(vacc8), 0); output += 4;
+          vacc8 = vext_s8(vacc8, vacc8, 4);
+        }
+        if (channels & 2) {
+          int8x8_t vo = vreinterpret_s8_s16(vld1_s16((const int16_t*) output));
+          vacc8 = vadd_s8(vo, vacc8);
+          vst1_lane_s16((int32_t*) output, vreinterpret_s16_s8(vacc8), 0); output += 2;
+          vacc8 = vext_s8(vacc8, vacc8, 2);
+        }
+        if (channels & 1) {
+          *output += vget_lane_s8(vacc8, 0);
+        }
+        channels = 0;
+      }
+    } while (channels != 0);
+  }
+}

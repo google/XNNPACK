@@ -922,6 +922,29 @@ union xnn_qu8_mul_minmax_params {
 };
 
 
+// RSum params used by RSUM & RDSUM microkernels.
+union xnn_qs8_rsum_params {
+  struct {
+    char _;  // Dummy member variable to comply with the C standard
+  } scalar;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    int8_t mask_table[30];
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    int8_t onemask_table[32];  // 16 ones, 16 zeros
+  } ssse3;
+  struct {
+    XNN_ALIGN(16) int8_t mask_table[30];
+  } sse4;
+  struct {
+    XNN_ALIGN(16) int8_t mask_table[30];
+  } avx2;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+};
+
 // AvgPool w. Min+Max: used by quantized GAVGPOOL microkernels with MINMAX activation.
 
 union xnn_qs8_avgpool_minmax_params {
@@ -984,6 +1007,15 @@ union xnn_qs8_avgpool_minmax_params {
     XNN_ALIGN(16) int16_t output_min[8];
   } fp32_sse2;
   struct {
+    int32_t init_bias;
+    float scale;
+    float magic_bias;
+    int32_t magic_bias_less_output_zero_point;
+    int8_t output_min;
+    int8_t output_max;
+    int8_t onemask_table[32];  // 16 ones, 16 zeros
+  } fp32_ssse3;
+  struct {
     XNN_ALIGN(16) int32_t init_bias[4];
     XNN_ALIGN(16) float scale[4];
     XNN_ALIGN(16) float magic_bias[4];
@@ -992,7 +1024,7 @@ union xnn_qs8_avgpool_minmax_params {
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int8_t output_min[16];
     XNN_ALIGN(16) int8_t output_max[16];
-    XNN_ALIGN(16) int8_t mask_table[14];
+    XNN_ALIGN(16) int8_t mask_table[30];
   } fp32_sse4;
   struct {
     XNN_ALIGN(16) int32_t init_bias[8];

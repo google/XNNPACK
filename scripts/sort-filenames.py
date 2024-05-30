@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import re
 import argparse
+from functools import cmp_to_key
 
 parser = argparse.ArgumentParser()
 parser.add_argument('inputs', nargs='+', help='Input filename')
@@ -61,25 +62,6 @@ def compare_strs(str1, str2, num_sort=True):
             winner = -1
     return winner
 
-
-def cmp_to_key(mycmp):
-    'Convert a cmp= function into a key= function'
-    class K:
-        def __init__(self, obj, *args):
-            self.obj = obj
-        def __lt__(self, other):
-            return mycmp(self.obj, other.obj) < 0
-        def __gt__(self, other):
-            return mycmp(self.obj, other.obj) > 0
-        def __eq__(self, other):
-            return mycmp(self.obj, other.obj) == 0
-        def __le__(self, other):
-            return mycmp(self.obj, other.obj) <= 0
-        def __ge__(self, other):
-            return mycmp(self.obj, other.obj) >= 0
-        def __ne__(self, other):
-            return mycmp(self.obj, other.obj) != 0
-    return K
 
 def custom_sort(listy):
     for _ in range(len(listy)-1+1):

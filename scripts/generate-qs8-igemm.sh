@@ -251,7 +251,6 @@ tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=3 -D NR=16 -D PREFETCH=1 -D 
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=1 -D REQUANTIZATION=         -D DATATYPE=QD8 -D ARMV8=0 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x16-minmax-neon-mlal-lane-prfm.c &
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=6 -D NR=16 -D PREFETCH=1 -D REQUANTIZATION=         -D DATATYPE=QD8 -D ARMV8=0 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-6x16-minmax-neon-mlal-lane-prfm.c &
 
-
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=1 -D NR=8  -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8-minmax-fp32-neon-mlal-lane.c &
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=2 -D NR=8  -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8-minmax-fp32-neon-mlal-lane.c &
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=3 -D NR=8  -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x8-minmax-fp32-neon-mlal-lane.c &
@@ -315,10 +314,7 @@ tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D 
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=1 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QU8 -D ARMV8=1 -o src/qu8-igemm/gen/qu8-igemm-1x16-minmax-fp32-neonv8-mlal-lane.c &
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QU8 -D ARMV8=1 -o src/qu8-igemm/gen/qu8-igemm-4x16-minmax-fp32-neonv8-mlal-lane.c &
 
-
 ### C2 micro-kernels
-
-
 tools/xngen src/qs8-igemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c2-minmax-fp32-neon-mlal-dup.c &
 tools/xngen src/qs8-igemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c2-minmax-fp32-neon-mlal-dup.c &
 
@@ -326,8 +322,6 @@ tools/xngen src/qs8-igemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQ
 tools/xngen src/qs8-igemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=DUP  -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c2-minmax-fp32-neonv8-mlal-dup.c &
 
 ### C2 LD1R micro-kernels
-
-
 tools/xngen src/qs8-igemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c2-minmax-fp32-neon-mlal-ld1r.c &
 tools/xngen src/qs8-igemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c2-minmax-fp32-neon-mlal-ld1r.c &
 
@@ -335,8 +329,6 @@ tools/xngen src/qs8-igemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQ
 tools/xngen src/qs8-igemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=LD1R -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c2-minmax-fp32-neonv8-mlal-ld1r.c &
 
 ### C2 LD2R micro-kernels
-
-
 tools/xngen src/qs8-igemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c2-minmax-fp32-neon-mlal-ld2r.c &
 tools/xngen src/qs8-igemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c2-minmax-fp32-neon-mlal-ld2r.c &
 
@@ -344,8 +336,6 @@ tools/xngen src/qs8-igemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQ
 tools/xngen src/qs8-igemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=LD2R -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c2-minmax-fp32-neonv8-mlal-ld2r.c &
 
 ### C2 LD4R micro-kernels
-
-
 tools/xngen src/qs8-igemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c2-minmax-fp32-neon-mlal-ld4r.c &
 tools/xngen src/qs8-igemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c2-minmax-fp32-neon-mlal-ld4r.c &
 
@@ -358,8 +348,6 @@ tools/xngen src/qs8-igemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D
 tools/xngen src/qs8-igemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=      -D DATATYPE=QD8_F32 -D ARMV8=0 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x8c2s4-minmax-neon-mlal.c &
 tools/xngen src/qs8-igemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=      -D DATATYPE=QD8_F32 -D ARMV8=0 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-2x8c2s4-minmax-neon-mlal.c &
 
-
-
 tools/xngen src/qs8-igemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c2s4-minmax-fp32-neon-mlal.c &
 tools/xngen src/qs8-igemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c2s4-minmax-fp32-neon-mlal.c &
 
@@ -367,8 +355,6 @@ tools/xngen src/qs8-igemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D
 tools/xngen src/qs8-igemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c2s4-minmax-fp32-neonv8-mlal.c &
 
 ### C4 micro-kernels
-
-
 tools/xngen src/qs8-igemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c4-minmax-fp32-neon-mlal-dup.c &
 tools/xngen src/qs8-igemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c4-minmax-fp32-neon-mlal-dup.c &
 
@@ -376,8 +362,6 @@ tools/xngen src/qs8-igemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQ
 tools/xngen src/qs8-igemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=DUP  -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c4-minmax-fp32-neonv8-mlal-dup.c &
 
 ### C4 LD1R micro-kernels
-
-
 tools/xngen src/qs8-igemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c4-minmax-fp32-neon-mlal-ld1r.c &
 tools/xngen src/qs8-igemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c4-minmax-fp32-neon-mlal-ld1r.c &
 
@@ -385,8 +369,6 @@ tools/xngen src/qs8-igemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQ
 tools/xngen src/qs8-igemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=LD1R -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c4-minmax-fp32-neonv8-mlal-ld1r.c &
 
 ### C4 LD2R micro-kernels
-
-
 tools/xngen src/qs8-igemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c4-minmax-fp32-neon-mlal-ld2r.c &
 tools/xngen src/qs8-igemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c4-minmax-fp32-neon-mlal-ld2r.c &
 
@@ -394,8 +376,6 @@ tools/xngen src/qs8-igemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQ
 tools/xngen src/qs8-igemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=LD2R -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c4-minmax-fp32-neonv8-mlal-ld2r.c &
 
 ### C4S2 micro-kernels
-
-
 tools/xngen src/qs8-igemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c4s2-minmax-fp32-neon-mlal.c &
 tools/xngen src/qs8-igemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c4s2-minmax-fp32-neon-mlal.c &
 
@@ -403,7 +383,6 @@ tools/xngen src/qs8-igemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D
 tools/xngen src/qs8-igemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c4s2-minmax-fp32-neonv8-mlal.c &
 
 ### C8 micro-kernels
-
 tools/xngen src/qs8-igemm/c8-neon-mull.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c8-minmax-fp32-neon-mlal.c &
 tools/xngen src/qs8-igemm/c8-neon-mull.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c8-minmax-fp32-neon-mlal.c &
 
@@ -411,9 +390,7 @@ tools/xngen src/qs8-igemm/c8-neon-mull.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANT
 tools/xngen src/qs8-igemm/c8-neon-mull.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c8-minmax-fp32-neonv8-mlal.c &
 
 ### C16 micro-kernels
-
 ### C4 micro-kernels
-
 tools/xngen src/qs8-igemm/c4-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c4-minmax-fp32-neondot.c &
 tools/xngen src/qs8-igemm/c4-neondot.c.in -D MR=4  -D NR=8  -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8c4-minmax-fp32-neondot.c &
 tools/xngen src/qs8-igemm/c4-neondot.c.in -D MR=6  -D NR=8  -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x8c4-minmax-fp32-neondot.c &
@@ -511,11 +488,8 @@ tools/xngen src/qs8-igemm/4x8c4-aarch32-neondot-cortex-a55.S.in                 
 
 ############################### AArch64 assembly ##############################
 ### Cortex-A53 lane micro-kernels
-
-
 tools/xngen src/qs8-igemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-cortex-a53.S &
 tools/xngen src/qs8-igemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-cortex-a53-prfm.S &
-
 
 tools/xngen src/qs8-igemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-ld64.S &
 tools/xngen src/qs8-igemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-ld64-prfm.S &
@@ -536,13 +510,11 @@ tools/xngen src/qs8-igemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATI
 tools/xngen src/qs8-igemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=      -D DATATYPE=QD8_F16 -o src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-4x16c4-minmax-asm-aarch64-neondot-ld128.S &
 tools/xngen src/qs8-igemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=      -D DATATYPE=QD8_F32 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x16c4-minmax-asm-aarch64-neondot-ld128.S &
 
-
 tools/xngen src/qs8-igemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x16c4-minmax-fp32-asm-aarch64-neondot-cortex-a55.S &
 tools/xngen src/qs8-igemm/4x16c4-aarch64-neondot-ld64.S.in       -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x16c4-minmax-fp32-asm-aarch64-neondot-ld64.S &
 tools/xngen src/qs8-igemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x16c4-minmax-fp32-asm-aarch64-neondot-ld128.S &
 
 ### C8 / C16 micro-kernels
-
 tools/xngen src/qs8-igemm/1x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal-cortex-a53.S &
 tools/xngen src/qs8-igemm/1x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal-cortex-a53-prfm.S &
 tools/xngen src/qs8-igemm/2x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c8-minmax-fp32-asm-aarch64-neon-mlal-cortex-a53.S &
@@ -560,7 +532,7 @@ tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=2 -D SSE=2 -D AVX=0 -D XOP=0 -D 
 tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=3 -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -D VARIANT=LD64  -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x4c2-minmax-fp32-sse2-ld64.c &
 tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -D VARIANT=LD64  -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4c2-minmax-fp32-sse2-ld64.c &
 
-tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QU8 -D REQUANTIZATION=FP32 -D VARIANT=LD64  -o src/qu8-igemm/gen/qu8-igemm-1x4c2-minmax-fp32-sse2-ld64.c &f
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QU8 -D REQUANTIZATION=FP32 -D VARIANT=LD64  -o src/qu8-igemm/gen/qu8-igemm-1x4c2-minmax-fp32-sse2-ld64.c &
 tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=2 -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QU8 -D REQUANTIZATION=FP32 -D VARIANT=LD64  -o src/qu8-igemm/gen/qu8-igemm-2x4c2-minmax-fp32-sse2-ld64.c &
 tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=3 -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QU8 -D REQUANTIZATION=FP32 -D VARIANT=LD64  -o src/qu8-igemm/gen/qu8-igemm-3x4c2-minmax-fp32-sse2-ld64.c &
 tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QU8 -D REQUANTIZATION=FP32 -D VARIANT=LD64  -o src/qu8-igemm/gen/qu8-igemm-4x4c2-minmax-fp32-sse2-ld64.c &
@@ -794,7 +766,6 @@ tools/xngen src/qs8-igemm/c8-neoni8mm.c.in -D MR=6 -D NR=8  -D REQUANTIZATION=FP
 tools/xngen src/qs8-igemm/c8-neoni8mm.c.in -D MR=6 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x16c8-minmax-fp32-neoni8mm.c &
 tools/xngen src/qs8-igemm/c8-neoni8mm.c.in -D MR=8 -D NR=8  -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x8c8-minmax-fp32-neoni8mm.c &
 tools/xngen src/qs8-igemm/c8-neoni8mm.c.in -D MR=8 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x16c8-minmax-fp32-neoni8mm.c &
-
 
 ################################### x86 AVX2 ##################################
 ### C8 micro-kernels

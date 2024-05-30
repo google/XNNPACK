@@ -13,6 +13,7 @@ on:
       - 'cmake/**'
       - 'scripts/build-*.sh'
       - '.github/**/*.yml'
+      - 'WORKSPACE'
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
@@ -225,7 +226,7 @@ jobs:
       - name: Build and run tests
         run: |
           # TODO(b/340788119): re-enable once an ndk supports this flag.
-          bazel test --define=xnn_enable_avx512fp16=false test:all
+          bazel test --define=xnn_enable_avx512fp16=false --test_output=errors test:all
         working-directory: ${{ github.workspace }}
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}

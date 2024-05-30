@@ -165,6 +165,16 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/zip.h",
 ]
 
+MICROKERNEL_DEPS = [
+    ":common",
+    ":math",
+    ":microkernels_h",
+    ":microparams",
+    ":prefetch",
+    ":tables",
+    ":unaligned",
+]
+
 INTERNAL_MICROKERNEL_HDRS = MICROKERNEL_HDRS + [
     "src/xnnpack/cache.h",
     "src/xnnpack/intrinsics-polyfill.h",
@@ -441,7 +451,7 @@ xnnpack_cc_library(
         ":logging",
         ":microkernels_h",
         ":microparams_init",
-        ":packing",
+        ":packing_test_mode",
         ":test_microkernels",
     ] + select({
         ":cpuinfo_enabled": ["@cpuinfo"],
@@ -657,14 +667,7 @@ xnnpack_cc_library(
         "-ffp-contract=off",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
+    deps = MICROKERNEL_DEPS + [
         "@FP16",
         "@FXdiv",
     ],
@@ -681,14 +684,7 @@ xnnpack_cc_library(
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     riscv_srcs = ["src/amalgam/gen/fma.c"],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
+    deps = MICROKERNEL_DEPS + [
         "@FP16",
         "@FXdiv",
     ],
@@ -708,14 +704,7 @@ xnnpack_cc_library(
         "-ffp-contract=off",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
+    deps = MICROKERNEL_DEPS + [
         "@FP16",
         "@FXdiv",
     ],
@@ -731,15 +720,7 @@ xnnpack_cc_library(
     wasm_srcs = ALL_WASM_MICROKERNEL_SRCS,
     wasmrelaxedsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS + ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS,
     wasmsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -759,15 +740,7 @@ xnnpack_cc_library(
         "src/amalgam/gen/wasm.c",
         "src/amalgam/gen/wasmsimd.c",
     ],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -784,15 +757,7 @@ xnnpack_cc_library(
     wasm_srcs = ALL_WASM_MICROKERNEL_SRCS,
     wasmrelaxedsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS + ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS,
     wasmsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -809,15 +774,7 @@ xnnpack_cc_library(
         "-fno-math-errno",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -834,15 +791,7 @@ xnnpack_cc_library(
         "-fno-math-errno",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -863,15 +812,7 @@ xnnpack_cc_library(
         "-fno-math-errno",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -891,15 +832,7 @@ xnnpack_cc_library(
     aarch64_srcs = ALL_FP16ARITH_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -917,15 +850,7 @@ xnnpack_cc_library(
     aarch32_srcs = ["src/amalgam/gen/fp16arith.c"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -949,15 +874,7 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -971,15 +888,7 @@ xnnpack_cc_library(
     aarch64_srcs = ALL_NEON_MICROKERNEL_SRCS + ALL_NEON_AARCH64_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -996,15 +905,7 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1022,15 +923,7 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1044,15 +937,7 @@ xnnpack_cc_library(
     aarch64_srcs = ALL_NEONFP16_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1066,15 +951,7 @@ xnnpack_cc_library(
     aarch64_srcs = ["src/amalgam/gen/neonfp16.c"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1092,15 +969,7 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1114,15 +983,7 @@ xnnpack_cc_library(
     aarch64_srcs = ALL_NEONFMA_MICROKERNEL_SRCS + ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1139,15 +1000,7 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1165,15 +1018,7 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1187,15 +1032,7 @@ xnnpack_cc_library(
     aarch64_srcs = ALL_NEONV8_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1209,15 +1046,7 @@ xnnpack_cc_library(
     aarch64_srcs = ["src/amalgam/gen/neonv8.c"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1235,15 +1064,7 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1258,15 +1079,7 @@ xnnpack_cc_library(
     aarch64_srcs = ALL_NEONFP16ARITH_MICROKERNEL_SRCS + ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1284,15 +1097,7 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1311,14 +1116,7 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
+    deps = MICROKERNEL_DEPS + [
         "@FP16",
     ],
 )
@@ -1329,15 +1127,7 @@ xnnpack_cc_library(
     aarch64_srcs = ALL_NEONBF16_MICROKERNEL_SRCS + ALL_NEONBF16_AARCH64_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":params",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1350,15 +1140,7 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":params",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1373,15 +1155,7 @@ xnnpack_cc_library(
     aarch64_srcs = ALL_NEONDOTFP16ARITH_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1398,15 +1172,7 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1425,15 +1191,7 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1448,15 +1206,7 @@ xnnpack_cc_library(
     aarch64_srcs = ALL_NEONDOT_MICROKERNEL_SRCS + ALL_NEONDOT_AARCH64_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1474,15 +1224,7 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1501,15 +1243,7 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1526,15 +1260,7 @@ xnnpack_cc_library(
     aarch64_srcs = ALL_NEONI8MM_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1549,15 +1275,7 @@ xnnpack_cc_library(
     aarch64_srcs = ["src/amalgam/gen/neoni8mm.c"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1576,15 +1294,7 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1597,15 +1307,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1621,15 +1323,7 @@ xnnpack_cc_library(
         "src/amalgam/gen/sse.c",
         "src/amalgam/gen/sse2.c",
     ],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1646,15 +1340,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1667,15 +1353,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSSE3_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1688,15 +1366,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ["src/amalgam/gen/ssse3.c"],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1713,15 +1383,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSSE3_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1734,15 +1396,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSE41_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1755,15 +1409,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ["src/amalgam/gen/sse41.c"],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1780,15 +1426,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSE41_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1804,15 +1442,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_AVX_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1828,15 +1458,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ["src/amalgam/gen/avx.c"],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1856,15 +1478,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_AVX_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1880,15 +1494,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_AVXVNNI_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1904,15 +1510,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ["src/amalgam/gen/avxvnni.c"],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -1932,15 +1530,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_AVXVNNI_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2022,15 +1612,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_FMA3_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2045,15 +1627,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ["src/amalgam/gen/fma3.c"],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2072,15 +1646,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_FMA3_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2095,15 +1661,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX2"],
     msvc_x86_64_copts = ["/arch:AVX2"],
     x86_srcs = ALL_AVX2_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2118,15 +1676,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX2"],
     msvc_x86_64_copts = ["/arch:AVX2"],
     x86_srcs = ["src/amalgam/gen/avx2.c"],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2145,15 +1695,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX2"],
     msvc_x86_64_copts = ["/arch:AVX2"],
     x86_srcs = ALL_AVX2_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2166,15 +1708,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512F_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2187,15 +1721,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ["src/amalgam/gen/avx512f.c"],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2212,15 +1738,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512F_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2241,15 +1759,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512SKX_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2270,15 +1780,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ["src/amalgam/gen/avx512skx.c"],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2303,15 +1805,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512SKX_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2333,15 +1827,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512VBMI_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2363,15 +1849,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ["src/amalgam/gen/avx512vbmi.c"],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2397,15 +1875,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512VBMI_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2427,15 +1897,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512VNNI_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2457,15 +1919,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ["src/amalgam/gen/avx512vnni.c"],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2491,15 +1945,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512VNNI_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2522,15 +1968,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512VNNIGFNI_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2553,15 +1991,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ["src/amalgam/gen/avx512vnnigfni.c"],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2588,15 +2018,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512VNNIGFNI_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2621,15 +2043,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512AMX_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2654,15 +2068,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ["src/amalgam/gen/avx512amx.c"],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2691,15 +2097,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512AMX_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2723,15 +2121,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512FP16_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2755,15 +2145,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ["src/amalgam/gen/avx512fp16.c"],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2791,15 +2173,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512FP16_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2810,15 +2184,7 @@ xnnpack_cc_library(
         "-march=rv64gcv -mabi=lp64d",
     ],
     riscv_srcs = ALL_RVV_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2829,15 +2195,7 @@ xnnpack_cc_library(
         "-march=rv64gcv -mabi=lp64d",
     ],
     riscv_srcs = ["src/amalgam/gen/rvv.c"],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2852,15 +2210,7 @@ xnnpack_cc_library(
         "-march=rv64gcv -mabi=lp64d",
     ],
     riscv_srcs = ALL_RVV_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2871,15 +2221,7 @@ xnnpack_cc_library(
         "-march=rv64gc_zvfh -mabi=lp64d",
     ],
     riscv_srcs = ALL_RVVFP16ARITH_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2890,15 +2232,7 @@ xnnpack_cc_library(
         "-march=rv64gc_zvfh -mabi=lp64d",
     ],
     riscv_srcs = ["src/amalgam/gen/rvvfp16arith.c"],
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
@@ -2909,14 +2243,7 @@ xnnpack_cc_library(
         "-march=rv64gc_zvfh -mabi=lp64d",
     ],
     riscv_srcs = ALL_RVVFP16ARITH_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":prefetch",
-        ":tables",
-        ":unaligned",
+    deps = MICROKERNEL_DEPS + [
         "@FP16",
     ],
 )
@@ -2935,6 +2262,17 @@ xnnpack_cc_library(
     wasm_srcs = WASM32_ASM_MICROKERNEL_SRCS,
     wasmrelaxedsimd_srcs = WASM32_ASM_MICROKERNEL_SRCS,
     wasmsimd_srcs = WASM32_ASM_MICROKERNEL_SRCS,
+)
+
+xnnpack_cc_library(
+    name = "hvx_microkernels",
+    gcc_copts = xnnpack_gcc_std_copts(),
+    hvx_srcs = ALL_HEXAGON_MICROKERNEL_SRCS,
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":microkernels_h",
+    ],
 )
 
 xnnpack_cc_library(
@@ -3087,6 +2425,7 @@ xnnpack_aggregate_library(
         ":avxvnni_enabled": [":avxvnni_bench_microkernels"],
         "//conditions:default": [],
     }),
+    hvx_deps = [":hvx_microkernels"],
     wasm_deps = [
         ":wasm_bench_microkernels",
         ":asm_microkernels",
@@ -3195,6 +2534,7 @@ xnnpack_aggregate_library(
         ":avx512fp16_enabled": [":avx512fp16_prod_microkernels"],
         "//conditions:default": [],
     }),
+    hvx_deps = [":hvx_microkernels"],
     wasm_deps = [
         ":wasm_prod_microkernels",
         ":asm_microkernels",
@@ -3310,6 +2650,7 @@ xnnpack_aggregate_library(
         ":avx512fp16_enabled": [":avx512fp16_test_microkernels"],
         "//conditions:default": [],
     }),
+    hvx_deps = [":hvx_microkernels"],
     wasm_deps = [
         ":wasm_test_microkernels",
         ":asm_microkernels",
@@ -4553,6 +3894,7 @@ alias(
     actual = select({
         ":xnn_enable_riscv_vector_explicit_true": ":xnn_enable_riscv_vector_explicit_true",
         ":xnn_enable_riscv_vector_explicit_false": ":xnn_enable_riscv_vector_explicit_true",
+        "//build_config:android": ":xnn_enable_riscv_vector_explicit_false",
         "//conditions:default": ":riscv_vector_enabled_by_default",
     }),
 )
@@ -4570,6 +3912,7 @@ alias(
     actual = select({
         ":xnn_enable_riscv_fp16_vector_explicit_true": ":xnn_enable_riscv_fp16_vector_explicit_true",
         ":xnn_enable_riscv_fp16_vector_explicit_false": ":xnn_enable_riscv_fp16_vector_explicit_true",
+        "//build_config:android": ":xnn_enable_riscv_fp16_vector_explicit_false",
         "//conditions:default": ":riscv_fp16_vector_enabled_by_default",
     }),
 )
