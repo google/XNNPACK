@@ -171,11 +171,6 @@
   #define XNN_COMPILER_ICC 0
 #endif
 
-
-#ifndef XNN_TEST_MODE
-  #define XNN_TEST_MODE 0
-#endif
-
 #ifndef XNN_MAX_UARCH_TYPES
   #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS
     #define XNN_MAX_UARCH_TYPES 3

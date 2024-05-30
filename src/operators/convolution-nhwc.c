@@ -1952,19 +1952,16 @@ static enum xnn_status reshape_gemm(
     convolution_op->context.gemm.fused_params = convolution_op->post_operation_params;
   }
 
-  #if XNN_TEST_MODE
-    const size_t nc = nr;
-  #else
-    size_t nc = group_output_channels;
-    if (num_threads > 1) {
-      const size_t num_other_tiles = groups * divide_round_up(batch_output_size, mr);
-      const size_t target_tiles_per_thread = 5;
-      const size_t max_nc = divide_round_up(group_output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
-      if (max_nc < nc) {
-        nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
-      }
+  size_t nc = group_output_channels;
+  if (num_threads > 1) {
+    const size_t num_other_tiles = groups * divide_round_up(batch_output_size, mr);
+    const size_t target_tiles_per_thread = 5;
+    const size_t max_nc = divide_round_up(group_output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
+    if (max_nc < nc) {
+      nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
     }
-  #endif
+  }
+
   if (groups == 1) {
     #if XNN_MAX_UARCH_TYPES > 1
       if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
@@ -2145,19 +2142,16 @@ static enum xnn_status reshape_igemm(
   };
   memcpy(&convolution_op->context.igemm.params, &convolution_op->params, sizeof(convolution_op->context.igemm.params));
 
-  #if XNN_TEST_MODE
-    const size_t nc = nr;
-  #else
-    size_t nc = group_output_channels;
-    if (num_threads > 1) {
-      const size_t num_other_tiles = groups * batch_size * divide_round_up(output_size, mr);
-      const size_t target_tiles_per_thread = 5;
-      const size_t max_nc = divide_round_up(group_output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
-      if (max_nc < nc) {
-        nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
-      }
+  size_t nc = group_output_channels;
+  if (num_threads > 1) {
+    const size_t num_other_tiles = groups * batch_size * divide_round_up(output_size, mr);
+    const size_t target_tiles_per_thread = 5;
+    const size_t max_nc = divide_round_up(group_output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
+    if (max_nc < nc) {
+      nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
     }
-  #endif
+  }
+
   if (dynamic_quantization && convolution_op->zero_size > 0) {
     convolution_op->compute[igemm_compute_index].type = xnn_parallelization_type_1d;
     convolution_op->compute[igemm_compute_index].task_1d = (pthreadpool_task_1d_t) xnn_compute_dq_zero_buffer_igemm;
@@ -2354,16 +2348,13 @@ static enum xnn_status reshape_dwconv(
     convolution_op->compute[0].context_offset = offsetof(struct xnn_operator, context.dwconv_indirection_init) - offsetof(struct xnn_operator, context);
     convolution_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_dwconv_indirection;
     convolution_op->compute[0].range[0] = output_height;
-    #if XNN_TEST_MODE
+
+    if (num_threads > 1) {
+      const size_t target_tiles_per_thread = 5;
+      convolution_op->compute[0].tile[0] = divide_round_up(output_height, num_threads * target_tiles_per_thread);
+    } else {
       convolution_op->compute[0].tile[0] = output_height;
-    #else
-      if (num_threads > 1) {
-        const size_t target_tiles_per_thread = 5;
-        convolution_op->compute[0].tile[0] = divide_round_up(output_height, num_threads * target_tiles_per_thread);
-      } else {
-        convolution_op->compute[0].tile[0] = output_height;
-      }
-    #endif
+    }
   } else {
     dwconv_compute_index = 0;
 
@@ -2378,10 +2369,6 @@ static enum xnn_status reshape_dwconv(
       convolution_op->indirection_buffer = indirection_buffer;
       xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
         indirection_buffer_size, xnn_operator_type_to_string(convolution_op->type));
-
-      #if XNN_TEST_MODE
-        memset(convolution_op->indirection_buffer, 0, indirection_buffer_size);
-      #endif
 
       // Set a dummy input first, the actual input offset is calculated in setup when we have the input pointer.
       // This offset must be aligned properly because inputs and input offsets need to be aligned.
@@ -2485,9 +2472,6 @@ static enum xnn_status reshape_vmulcaddc(
   memcpy(&convolution_op->context.vmulcaddc.params, &convolution_op->params,
          sizeof(convolution_op->context.vmulcaddc.params));
 
-#if XNN_TEST_MODE
-  const size_t mc = convolution_op->ukernel.vmulcaddc.mr;
-#else
   size_t mc = batch_output_size;
   if (num_threads > 1) {
     const size_t target_tiles_per_thread = 5;
@@ -2497,7 +2481,7 @@ static enum xnn_status reshape_vmulcaddc(
       mc = min(mc, divide_round_up(mc, max_mc * mr) * mr);
     }
   }
-#endif
+
   convolution_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
   convolution_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_vmulcaddc;
   convolution_op->compute[0].range[0] = batch_output_size;
@@ -2865,29 +2849,6 @@ static enum xnn_status setup_dwconv(
     void* workspace,
     uint32_t log2_input_element_size)
 {
-  #if XNN_TEST_MODE
-    // indirection buffer is only set at this time if it is persistent.
-    if (!(convolution_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER)) {
-      const size_t kernel_height = convolution_op->kernel_height;
-      const size_t kernel_width = convolution_op->kernel_width;
-      const size_t kernel_size = kernel_height * kernel_width;
-      const size_t output_width = convolution_op->output_width;
-      const size_t step_width = convolution_op->dilation_width == 1 ?
-          min(convolution_op->stride_width, kernel_width) : kernel_width;
-      const size_t step_height = kernel_size + (output_width - 1) * step_width * kernel_height;
-      const struct xnn_ukernel_dwconv dwconv_ukernel = convolution_op->ukernel.dwconv;
-      const size_t tile_size = dwconv_ukernel.tile_size;
-      const size_t indirection_buffer_size =
-        sizeof(void*) * (tile_size - kernel_size + convolution_op->output_height * step_height);
-
-      // TODO(zhin): store step_height and step_width, this is already computed in create.
-      for (size_t i = 0; i < indirection_buffer_size / sizeof(void*); i++) {
-        // Indirection initialization should have set all indirection pointers, make sure none of them are NULL.
-        assert(convolution_op->indirection_buffer[i] != NULL);
-      }
-    }
-  #endif
-
   if (convolution_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER) {
     convolution_op->context.dwconv.input_offset = (size_t) 0;
     convolution_op->context.dwconv.indirect_input = (const void**) workspace;
