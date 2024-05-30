@@ -244,9 +244,8 @@ static enum xnn_status reshape_resize_bilinear2d_nhwc(
   const size_t indirection_buffer_size = sizeof(void*) * (output_height * output_width * 4);
   const size_t packed_weights_size = (output_height * output_width * 2) << log2_weight_element_size;
 
-  #if !XNN_TEST_MODE
-    const size_t num_threads = pthreadpool_get_threads_count(threadpool);
-  #endif
+  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
+
   size_t resize_bilinear_compute_index = 0;
   if (enable_transient_indirection) {
     *workspace_size = indirection_buffer_size + packed_weights_size;
@@ -266,16 +265,13 @@ static enum xnn_status reshape_resize_bilinear2d_nhwc(
     resize_op->compute[0].context_offset = offsetof(struct xnn_operator, context.resize_nhwc_indirection_init) - offsetof(struct xnn_operator, context);
     resize_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_resize_bilinear_indirection;
     resize_op->compute[0].range[0] = output_height;
-    #if XNN_TEST_MODE
-      resize_op->compute[0].tile[0] = 1;
-    #else
-      if (num_threads > 1) {
-        const size_t target_tiles_per_thread = 5;
-        resize_op->compute[0].tile[0] = divide_round_up(output_height, num_threads * target_tiles_per_thread);
-      } else {
-        resize_op->compute[0].tile[0] = output_height;
-      }
-    #endif
+
+    if (num_threads > 1) {
+      const size_t target_tiles_per_thread = 5;
+      resize_op->compute[0].tile[0] = divide_round_up(output_height, num_threads * target_tiles_per_thread);
+    } else {
+      resize_op->compute[0].tile[0] = output_height;
+    }
   } else {
     *workspace_size = 0;
     *workspace_alignment = 1;
@@ -345,21 +341,18 @@ static enum xnn_status reshape_resize_bilinear2d_nhwc(
   };
 
   const size_t output_size = output_height * output_width;
-  #if XNN_TEST_MODE
-    const size_t output_size_tile = ibilinear->pixel_tile;
-  #else
-    size_t output_size_tile = output_size;
-    if (num_threads > 1) {
-      const size_t target_tiles_per_thread = 5;
-      const size_t max_output_size_tile = divide_round_up(output_size, num_threads * target_tiles_per_thread);
-      if (max_output_size_tile < output_size_tile) {
-        const uint32_t output_size_subtile = ibilinear->pixel_tile;
-        output_size_tile =
-          min(output_size_tile,
-            divide_round_up(output_size_tile, max_output_size_tile * output_size_subtile) * output_size_subtile);
-      }
+  size_t output_size_tile = output_size;
+  if (num_threads > 1) {
+    const size_t target_tiles_per_thread = 5;
+    const size_t max_output_size_tile = divide_round_up(output_size, num_threads * target_tiles_per_thread);
+    if (max_output_size_tile < output_size_tile) {
+      const uint32_t output_size_subtile = ibilinear->pixel_tile;
+      output_size_tile =
+        min(output_size_tile,
+          divide_round_up(output_size_tile, max_output_size_tile * output_size_subtile) * output_size_subtile);
     }
-  #endif
+  }
+
   resize_op->compute[resize_bilinear_compute_index].type = xnn_parallelization_type_2d_tile_1d;
   resize_op->compute[resize_bilinear_compute_index].task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_resize_bilinear;
   resize_op->compute[resize_bilinear_compute_index].range[0] = batch_size;

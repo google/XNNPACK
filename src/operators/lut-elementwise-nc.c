@@ -366,15 +366,11 @@ static enum xnn_status reshape_lut_elementwise_nc(
     };
 
     const size_t range = batch_size * channels * sizeof(uint8_t);
-    #if XNN_TEST_MODE
-      const size_t tile = lut_config->tile_size;
-    #else
-      size_t tile = range;
-      if (pthreadpool_get_threads_count(threadpool) > 1) {
-        const size_t block_size = 1024;
-        tile = block_size * sizeof(uint8_t);
-      }
-    #endif
+    size_t tile = range;
+    if (pthreadpool_get_threads_count(threadpool) > 1) {
+      const size_t block_size = 1024;
+      tile = block_size * sizeof(uint8_t);
+    }
 
     lut_elementwise_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
     lut_elementwise_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_lut_contiguous;

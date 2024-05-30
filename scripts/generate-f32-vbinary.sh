@@ -591,4 +591,24 @@ tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=SQRDIFF  -D BATCH_TILE=32 -D
 tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=SUB      -D BATCH_TILE=16 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vsubc-minmax-avx512f-u16.c &
 tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=SUB      -D BATCH_TILE=32 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vsubc-minmax-avx512f-u32.c &
 
+################################### HEXAGON HVX ##################################
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=ADD     -D BATCH_TILE=32 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vadd-minmax-hvx-u32.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=ADD     -D BATCH_TILE=64 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vadd-minmax-hvx-u64.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=ADD     -D BATCH_TILE=128 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vadd-minmax-hvx-u128.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=MAX     -D BATCH_TILE=32 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmax-hvx-u32.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=MAX     -D BATCH_TILE=64 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmax-hvx-u64.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=MAX     -D BATCH_TILE=128 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmax-hvx-u128.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=MIN     -D BATCH_TILE=32 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmin-hvx-u32.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=MIN     -D BATCH_TILE=64 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmin-hvx-u64.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=MIN     -D BATCH_TILE=128 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmin-hvx-u128.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=MUL     -D BATCH_TILE=32 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vmul-minmax-hvx-u32.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=MUL     -D BATCH_TILE=64 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vmul-minmax-hvx-u64.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=MUL     -D BATCH_TILE=128 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vmul-minmax-hvx-u128.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=SUB     -D BATCH_TILE=32 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vsub-minmax-hvx-u32.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=SUB     -D BATCH_TILE=64 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vsub-minmax-hvx-u64.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=SUB     -D BATCH_TILE=128 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vsub-minmax-hvx-u128.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=SQRDIFF     -D BATCH_TILE=32 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vsqrdiff-hvx-u32.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=SQRDIFF     -D BATCH_TILE=64 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vsqrdiff-hvx-u64.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=SQRDIFF     -D BATCH_TILE=128 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vsqrdiff-hvx-u128.c &
+
 wait
