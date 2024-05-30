@@ -83,6 +83,7 @@ _ISA_TO_ARCH_MAP = {
   "avx512amx": ["x86-32", "x86-64"],
   "avx512fp16": ["x86-32", "x86-64"],
   "avxvnni": ["x86-32", "x86-64"],
+  "hvx": ["hexagon"],
   "rvv": ["riscv"],
   "rvvfp16arith": ["riscv"],
   "wasm32": ["wasm", "wasmsimd"],
