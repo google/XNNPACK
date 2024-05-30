@@ -21,7 +21,7 @@ load(
 MICROKERNEL_BENCHMARK_DEPS = [
     ":bench_utils",
     "//:aligned_allocator",
-    "//:bench_microkernels",
+    "//:test_microkernels",
     "//:common",
     "//:enable_assembly",
     "//:jit",
@@ -994,7 +994,7 @@ xnnpack_benchmark(
         "f32-vrelu.cc",
         "f32-vunary-benchmark.h",
     ],
-    deps = MICROKERNEL_BENCHMARK_DEPS + ["//:jit_test_mode"],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
 xnnpack_benchmark(
