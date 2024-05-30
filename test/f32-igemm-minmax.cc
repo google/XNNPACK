@@ -2891,3 +2891,54 @@ INSTANTIATE_TEST_SUITE_P(
     [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
       return info.param.test_name;
     });
+
+
+INSTANTIATE_TEST_SUITE_P(
+    F32_IGEMM_MINMAX_1X32__HVX_BROADCAST, GemmTest,
+    testing::ValuesIn(CreateTests1(
+        /*k_block=*/1,
+        /*adj_k_block=*/1,
+        /*mr=*/1, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+        /*is_igemm=*/true,
+        [](GemmMicrokernelTester& tester) {
+          tester.Test(xnn_f32_igemm_minmax_ukernel_1x32__hvx_broadcast,
+                      xnn_init_f32_minmax_hvx_params,
+                      xnn_pack_f32_igemm_goi_w);
+        })),
+    [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+      return info.param.test_name;
+    });
+
+
+INSTANTIATE_TEST_SUITE_P(
+    F32_IGEMM_MINMAX_1X64__HVX_BROADCAST, GemmTest,
+    testing::ValuesIn(CreateTests1(
+        /*k_block=*/1,
+        /*adj_k_block=*/1,
+        /*mr=*/1, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+        /*is_igemm=*/true,
+        [](GemmMicrokernelTester& tester) {
+          tester.Test(xnn_f32_igemm_minmax_ukernel_1x64__hvx_broadcast,
+                      xnn_init_f32_minmax_hvx_params,
+                      xnn_pack_f32_igemm_goi_w);
+        })),
+    [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+      return info.param.test_name;
+    });
+
+
+INSTANTIATE_TEST_SUITE_P(
+    F32_IGEMM_MINMAX_4X64__HVX_BROADCAST, GemmTest,
+    testing::ValuesIn(CreateTests1(
+        /*k_block=*/1,
+        /*adj_k_block=*/1,
+        /*mr=*/4, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+        /*is_igemm=*/true,
+        [](GemmMicrokernelTester& tester) {
+          tester.Test(xnn_f32_igemm_minmax_ukernel_4x64__hvx_broadcast,
+                      xnn_init_f32_minmax_hvx_params,
+                      xnn_pack_f32_igemm_goi_w);
+        })),
+    [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+      return info.param.test_name;
+    });

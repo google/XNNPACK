@@ -339,6 +339,8 @@
   #else
     #define XNN_ALLOCATION_ALIGNMENT 64
   #endif
+#elif XNN_ARCH_HEXAGON
+  #define XNN_ALLOCATION_ALIGNMENT 128
 #else
   #define XNN_ALLOCATION_ALIGNMENT 16
 #endif

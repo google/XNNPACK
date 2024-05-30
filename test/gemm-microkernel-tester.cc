@@ -28,9 +28,9 @@
 #include <fp16/bitcasts.h>
 #include <fp16/fp16.h>
 
-#if XNN_ARCH_ARM64
-#include <xnnpack/aarch64-assembler.h>
-#endif  // XNN_ARCH_ARM64
+#if XNN_ARCH_ARMXNN_ALLOCATION_ALIGNMENT
+#include <xnnpack/aarchXNN_ALLOCATION_ALIGNMENT-assembler.h>
+#endif  // XNN_ARCH_ARMXNN_ALLOCATION_ALIGNMENT
 #if XNN_ARCH_ARM
 #include <xnnpack/aarch32-assembler.h>
 #endif  // XNN_ARCH_ARM
@@ -103,7 +103,7 @@ void GemmMicrokernelTester::Test(
   std::vector<int8_t> b(n() * ks() * k());
   std::vector<float> bias(n());
   std::vector<float> kernel_scale(n());
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(ks() * packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
+  std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(ks() * packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
   std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n(), 0);
   std::vector<int8_t> junk(k() + XNN_EXTRA_BYTES / sizeof(int8_t));
@@ -223,7 +223,7 @@ void GemmMicrokernelTester::Test(
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        // Extract tolerance into variable to workaround test failures on Linux AArch64.
+        // Extract tolerance into variable to workaround test failures on Linux AArchXNN_ALLOCATION_ALIGNMENT.
         const float tolerance = std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f);
         EXPECT_NEAR(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -254,7 +254,7 @@ void GemmMicrokernelTester::Test(
   std::vector<int8_t> b(n() * ks() * k());
   std::vector<float> bias(n());
   std::vector<float> kernel_scale(n());
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(ks() * packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
+  std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(ks() * packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
   std::vector<float> c_ref(m() * n(), 0);
@@ -373,7 +373,7 @@ void GemmMicrokernelTester::Test(
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        // Extract tolerance into variable to workaround test failures on Linux AArch64.
+        // Extract tolerance into variable to workaround test failures on Linux AArchXNN_ALLOCATION_ALIGNMENT.
         const float tolerance = std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f);
         EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -401,7 +401,7 @@ void GemmMicrokernelTester::Test(
   std::vector<uint8_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint8_t));
   std::vector<uint8_t> b(n() * k());
   std::vector<int32_t> bias(n());
-  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(uint8_t));
+  std::vector<uint8_t, AlignedAllocator<uint8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(uint8_t));
   std::vector<uint8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
   std::vector<uint8_t> c_ref(m() * n());
@@ -486,7 +486,7 @@ void GemmMicrokernelTester::Test(
 
   std::vector<uint8_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint8_t));
   std::vector<uint8_t> b(n() * ks() * k());
-  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_w(ks() * packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(uint8_t));
+  std::vector<uint8_t, AlignedAllocator<uint8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(ks() * packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(uint8_t));
   std::vector<int32_t> bias(n());
   std::vector<uint8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
@@ -608,8 +608,8 @@ void GemmMicrokernelTester::Test(
   std::vector<int8_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(int8_t));
   std::vector<int8_t> b(n() * k());
   std::vector<int32_t> bias(n());
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float)) / sizeof(int8_t));
-  std::vector<int16_t, AlignedAllocator<int16_t, 64>> packed_xw(packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float)) / sizeof(int16_t));
+  std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float)) / sizeof(int8_t));
+  std::vector<int16_t, AlignedAllocator<int16_t, XNN_ALLOCATION_ALIGNMENT>> packed_xw(packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float)) / sizeof(int16_t));
   std::vector<int8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
   std::vector<float> scale(n());
@@ -714,7 +714,7 @@ void GemmMicrokernelTester::Test(
 
   std::vector<int8_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint8_t));
   std::vector<int8_t> b(n() * ks() * k());
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(ks() * packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float)) / sizeof(int8_t));
+  std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(ks() * packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float)) / sizeof(int8_t));
   std::vector<int32_t> bias(n());
   std::vector<int8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
@@ -850,7 +850,7 @@ void GemmMicrokernelTester::Test(
   std::vector<int8_t> b(n() * k());
   std::vector<float> bias(n());
   std::vector<float> kernel_scale(n());
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() +
+  std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() +
                                                              packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
   std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n(), 0);
@@ -950,7 +950,7 @@ void GemmMicrokernelTester::Test(
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        // Extract tolerance into variable to workaround test failures on Linux AArch64.
+        // Extract tolerance into variable to workaround test failures on Linux AArchXNN_ALLOCATION_ALIGNMENT.
         const float tolerance = std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f);
         EXPECT_NEAR(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -981,7 +981,7 @@ void GemmMicrokernelTester::Test(
   std::vector<int8_t> b(n() * k());
   std::vector<float> bias(n());
   std::vector<float> kernel_scale(n());
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() +
+  std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() +
                                                              packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
@@ -1080,7 +1080,7 @@ void GemmMicrokernelTester::Test(
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        // Extract tolerance into variable to workaround test failures on Linux AArch64.
+        // Extract tolerance into variable to workaround test failures on Linux AArchXNN_ALLOCATION_ALIGNMENT.
         const float tolerance = std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f);
         EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -1117,7 +1117,7 @@ void GemmMicrokernelTester::Test(
   std::vector<uint8_t> b(n() * k2 / 2);
   std::vector<float> bias(n());
   std::vector<float> kernel_scale(n());
-  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_w(packed_n() * packed_k_bytes +
+  std::vector<uint8_t, AlignedAllocator<uint8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k_bytes +
                                                                packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
   std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
@@ -1218,7 +1218,7 @@ void GemmMicrokernelTester::Test(
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        // Extract tolerance into variable to workaround test failures on Linux AArch64.
+        // Extract tolerance into variable to workaround test failures on Linux AArchXNN_ALLOCATION_ALIGNMENT.
         const float tolerance = std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f);
         EXPECT_NEAR(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -1255,7 +1255,7 @@ void GemmMicrokernelTester::Test(
   std::vector<uint8_t> b(n() * k2 / 2);
   std::vector<float> bias(n());
   std::vector<float> kernel_scale(n());
-  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_w(packed_n() * packed_k_bytes +
+  std::vector<uint8_t, AlignedAllocator<uint8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k_bytes +
                                                                packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
@@ -1354,7 +1354,7 @@ void GemmMicrokernelTester::Test(
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        // Extract tolerance into variable to workaround test failures on Linux AArch64.
+        // Extract tolerance into variable to workaround test failures on Linux AArchXNN_ALLOCATION_ALIGNMENT.
         const float tolerance = std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f);
         EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -1386,8 +1386,8 @@ void GemmMicrokernelTester::Test(
   std::vector<int8_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(int8_t));
   std::vector<int8_t> b(n() * k());
   std::vector<int32_t> bias(n());
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int8_t));
-  std::vector<int16_t, AlignedAllocator<int16_t, 64>> packed_xw(packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int16_t));
+  std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int8_t));
+  std::vector<int16_t, AlignedAllocator<int16_t, XNN_ALLOCATION_ALIGNMENT>> packed_xw(packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int16_t));
   std::vector<int8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
   std::vector<int8_t> c_ref(m() * n());
@@ -1477,7 +1477,7 @@ void GemmMicrokernelTester::Test(
 
   std::vector<int8_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(int8_t));
   std::vector<int8_t> b(n() * ks() * k());
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(ks() * packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int8_t));
+  std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(ks() * packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int8_t));
   std::vector<int32_t> bias(n());
   std::vector<int8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
@@ -1593,7 +1593,7 @@ void GemmMicrokernelTester::Test(
 
   std::vector<uint16_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint16_t));
   std::vector<uint16_t> b(n() * k());
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(packed_n() * packed_k() + packed_n());
+  std::vector<uint16_t, AlignedAllocator<uint16_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n());
   std::vector<uint16_t> bias(n());
   std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
@@ -1673,7 +1673,7 @@ void GemmMicrokernelTester::Test(
 
   std::vector<uint16_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint16_t));
   std::vector<uint16_t> b(n() * k());
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(packed_n() * packed_k() + packed_n());
+  std::vector<uint16_t, AlignedAllocator<uint16_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n());
   std::vector<uint16_t> bias(n());
   std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
@@ -1749,7 +1749,7 @@ void GemmMicrokernelTester::Test(
 
   std::vector<uint16_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint16_t));
   std::vector<uint16_t> b(n() * ks() * k());
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(ks() * packed_k() * packed_n() + packed_n());
+  std::vector<uint16_t, AlignedAllocator<uint16_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(ks() * packed_k() * packed_n() + packed_n());
   std::vector<uint16_t> bias(n());
   std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
@@ -1871,7 +1871,7 @@ void GemmMicrokernelTester::Test(
   std::vector<float> a(packed_k() * mr());
   std::vector<float> b(n() * k());
   std::vector<float> bias(n());
-  std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + packed_n());
+  std::vector<float, AlignedAllocator<float, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n());
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
 
@@ -1950,7 +1950,7 @@ void GemmMicrokernelTester::Test(
   std::vector<float> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> b(n() * k());
   std::vector<float> bias(n());
-  std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + packed_n());
+  std::vector<float, AlignedAllocator<float, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n());
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
 
@@ -2013,7 +2013,7 @@ void GemmMicrokernelTester::Test(
   std::vector<float> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> b(n() * k());
   std::vector<float> bias(n());
-  std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + packed_n());
+  std::vector<float, AlignedAllocator<float, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n());
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
 
@@ -2081,7 +2081,7 @@ void GemmMicrokernelTester::Test(
   std::vector<float> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> b(n() * k());
   std::vector<float> bias(n());
-  std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + packed_n());
+  std::vector<float, AlignedAllocator<float, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n());
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
 
@@ -2261,7 +2261,7 @@ void GemmMicrokernelTester::Test(
   std::vector<uint8_t> b(n() * k_stride);
   std::vector<float> bias(n());
   std::vector<float> scale(n());
-  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_w(packed_n() * packed_k_bytes + packed_n() * sizeof(float) * 2);
+  std::vector<uint8_t, AlignedAllocator<uint8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k_bytes + packed_n() * sizeof(float) * 2);
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<double> c_ref(m() * n());
 
@@ -2375,7 +2375,7 @@ void GemmMicrokernelTester::Test(
   std::vector<int8_t> b(n() * k());
   std::vector<float> bias(n());
   std::vector<float> scale(n());
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(float) * 2);
+  std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(float) * 2);
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
 
@@ -2461,7 +2461,7 @@ void GemmMicrokernelTester::Test(
   std::vector<int8_t> b(n() * k());
   std::vector<float> bias(n());
   std::vector<float> scale(n());
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(float) * 2);
+  std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(float) * 2);
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
 
@@ -2541,7 +2541,7 @@ void GemmMicrokernelTester::Test(
   std::vector<int8_t> b(n() * k());
   std::vector<float> bias(n());
   std::vector<float> scale(n());
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(float) * 2);
+  std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(float) * 2);
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<double> c_ref(m() * n());
 
@@ -2642,10 +2642,10 @@ void GemmMicrokernelTester::Test(
   std::vector<float> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> b(n() * k());
   std::vector<float> bias(n());
-  std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k());  // no packed_n()
+  std::vector<float, AlignedAllocator<float, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k());  // no packed_n()
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
-  std::vector<float, AlignedAllocator<float, 64>> acc(mr() * packed_n());
+  std::vector<float, AlignedAllocator<float, XNN_ALLOCATION_ALIGNMENT>> acc(mr() * packed_n());
 
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
@@ -2727,7 +2727,7 @@ void GemmMicrokernelTester::Test(
 
   std::vector<float> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> b(n() * ks() * k());
-  std::vector<float, AlignedAllocator<float, 64>> packed_w(ks() * packed_k() * packed_n() + packed_n());
+  std::vector<float, AlignedAllocator<float, XNN_ALLOCATION_ALIGNMENT>> packed_w(ks() * packed_k() * packed_n() + packed_n());
   std::vector<float> bias(n());
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
@@ -2820,7 +2820,7 @@ void GemmMicrokernelTester::Test(
 
   std::vector<float> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> b(n() * ks() * k());
-  std::vector<float, AlignedAllocator<float, 64>> packed_w(ks() * packed_k() * packed_n() + packed_n());
+  std::vector<float, AlignedAllocator<float, XNN_ALLOCATION_ALIGNMENT>> packed_w(ks() * packed_k() * packed_n() + packed_n());
   std::vector<float> bias(n());
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
@@ -2918,7 +2918,7 @@ void GemmMicrokernelTester::Test(
 
   std::vector<float> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> b(n() * ks() * k());
-  std::vector<float, AlignedAllocator<float, 64>> packed_w(ks() * packed_k() * packed_n() + packed_n());
+  std::vector<float, AlignedAllocator<float, XNN_ALLOCATION_ALIGNMENT>> packed_w(ks() * packed_k() * packed_n() + packed_n());
   std::vector<float> bias(n());
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
@@ -3032,18 +3032,18 @@ enum class TrampolineType {
   kIGEMM
 };
 
-#if XNN_ARCH_ARM64
-using TrampolineReturnType = uint64_t;
-using TrampolineGenerator = xnnpack::aarch64::TrampolineGenerator;
+#if XNN_ARCH_ARMXNN_ALLOCATION_ALIGNMENT
+using TrampolineReturnType = uintXNN_ALLOCATION_ALIGNMENT_t;
+using TrampolineGenerator = xnnpack::aarchXNN_ALLOCATION_ALIGNMENT::TrampolineGenerator;
 constexpr size_t kNumArgsOnStackForGEMM = 2;
 constexpr size_t kNumArgsOnStackForIGEMM = 4;
 
-std::string RegisterFromCorruptedValue(uint64_t corrupted_value) {
-  const uint8_t reg_code = corrupted_value & xnnpack::aarch64::kRegisterCorruptMask;
-  const std::string reg_type = (corrupted_value & (~reg_code)) == xnnpack::aarch64::kXRegisterCorruptValue ? "x" : "d";
+std::string RegisterFromCorruptedValue(uintXNN_ALLOCATION_ALIGNMENT_t corrupted_value) {
+  const uint8_t reg_code = corrupted_value & xnnpack::aarchXNN_ALLOCATION_ALIGNMENT::kRegisterCorruptMask;
+  const std::string reg_type = (corrupted_value & (~reg_code)) == xnnpack::aarchXNN_ALLOCATION_ALIGNMENT::kXRegisterCorruptValue ? "x" : "d";
   return reg_type + std::to_string(reg_code);
 }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARMXNN_ALLOCATION_ALIGNMENT
 
 #if XNN_ARCH_ARM
 using TrampolineReturnType = uint32_t;
@@ -3157,7 +3157,7 @@ void GemmMicrokernelTester::Test(
   std::vector<float> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> b(n() * k());
   std::vector<float> bias(n());
-  std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + packed_n());
+  std::vector<float, AlignedAllocator<float, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n());
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
 
@@ -3312,7 +3312,7 @@ void GemmMicrokernelTester::Test(
   std::vector<float> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> b(n() * k());
   std::vector<float> bias(n());
-  std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + packed_n());
+  std::vector<float, AlignedAllocator<float, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n());
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
 
@@ -3404,7 +3404,7 @@ void GemmMicrokernelTester::Test(
 
   std::vector<float> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> b(n() * ks() * k());
-  std::vector<float, AlignedAllocator<float, 64>> packed_w(ks() * packed_k() * packed_n() + packed_n());
+  std::vector<float, AlignedAllocator<float, XNN_ALLOCATION_ALIGNMENT>> packed_w(ks() * packed_k() * packed_n() + packed_n());
   std::vector<float> bias(n());
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
@@ -3572,7 +3572,7 @@ void GemmMicrokernelTester::Test(
 
   std::vector<float> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> b(n() * ks() * k());
-  std::vector<float, AlignedAllocator<float, 64>> packed_w(ks() * packed_k() * packed_n() + packed_n());
+  std::vector<float, AlignedAllocator<float, XNN_ALLOCATION_ALIGNMENT>> packed_w(ks() * packed_k() * packed_n() + packed_n());
   std::vector<float> bias(n());
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
@@ -3703,7 +3703,7 @@ void GemmMicrokernelTester::Test(
 
   std::vector<uint16_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint16_t));
   std::vector<uint16_t> b(n() * k());
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(packed_n() * packed_k() + packed_n());
+  std::vector<uint16_t, AlignedAllocator<uint16_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n());
   std::vector<uint16_t> bias(n());
   std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
@@ -3792,7 +3792,7 @@ void GemmMicrokernelTester::Test(
 
   std::vector<uint16_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint16_t));
   std::vector<uint16_t> b(n() * ks() * k());
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(ks() * packed_k() * packed_n() + packed_n());
+  std::vector<uint16_t, AlignedAllocator<uint16_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(ks() * packed_k() * packed_n() + packed_n());
   std::vector<uint16_t> bias(n());
   std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
@@ -3932,8 +3932,8 @@ void GemmMicrokernelTester::Test(
   std::vector<int8_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(int8_t));
   std::vector<int8_t> b(n() * k());
   std::vector<int32_t> bias(n());
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float)) / sizeof(int8_t));
-  std::vector<int16_t, AlignedAllocator<int16_t, 64>> packed_xw(packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float)) / sizeof(int16_t));
+  std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float)) / sizeof(int8_t));
+  std::vector<int16_t, AlignedAllocator<int16_t, XNN_ALLOCATION_ALIGNMENT>> packed_xw(packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float)) / sizeof(int16_t));
   std::vector<int8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
   std::vector<float> scale(n());
@@ -4056,7 +4056,7 @@ void GemmMicrokernelTester::Test(
 
   std::vector<int8_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint8_t));
   std::vector<int8_t> b(n() * ks() * k());
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(ks() * packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float)) / sizeof(int8_t));
+  std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(ks() * packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float)) / sizeof(int8_t));
   std::vector<int32_t> bias(n());
   std::vector<int8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
@@ -4201,8 +4201,8 @@ void GemmMicrokernelTester::Test(
   std::vector<int8_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(int8_t));
   std::vector<int8_t> b(n() * k());
   std::vector<int32_t> bias(n());
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int8_t));
-  std::vector<int16_t, AlignedAllocator<int16_t, 64>> packed_xw(packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int16_t));
+  std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int8_t));
+  std::vector<int16_t, AlignedAllocator<int16_t, XNN_ALLOCATION_ALIGNMENT>> packed_xw(packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int16_t));
   std::vector<int8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
   std::vector<int8_t> c_ref(m() * n());
@@ -4301,7 +4301,7 @@ void GemmMicrokernelTester::Test(
 
   std::vector<int8_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint8_t));
   std::vector<int8_t> b(n() * ks() * k());
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(ks() * packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int8_t));
+  std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(ks() * packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int8_t));
   std::vector<int32_t> bias(n());
   std::vector<int8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
@@ -4416,9 +4416,9 @@ void GemmMicrokernelTester::Test(
 using xnnpack::aarch32::kAlignInstruction;
 #endif  // XNN_ARCH_ARM
 
-#if XNN_ARCH_ARM64
-using xnnpack::aarch64::kAlignInstruction;
-#endif  // XNN_ARCH_ARM64
+#if XNN_ARCH_ARMXNN_ALLOCATION_ALIGNMENT
+using xnnpack::aarchXNN_ALLOCATION_ALIGNMENT::kAlignInstruction;
+#endif  // XNN_ARCH_ARMXNN_ALLOCATION_ALIGNMENT
 
 // Returns the index of last instruction before all the alignment instructions at the end of the JIT microkernel.
 static size_t FindEndOfCodeBeforeAlignment(xnn_code_buffer* code_buffer, uint32_t* jit_start)
