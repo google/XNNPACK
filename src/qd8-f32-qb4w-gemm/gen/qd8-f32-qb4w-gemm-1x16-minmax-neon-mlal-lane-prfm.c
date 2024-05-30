@@ -14,9 +14,10 @@
 #include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
+#include <xnnpack/prefetch.h>
 
 
-void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x16__neon_mlal_lane(
+void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x16__neon_mlal_lane_prfm(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -111,6 +112,8 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x16__neon_mlal_lane(
       const int16x8_t vxb01234567c7 = vmovl_s8(vb01234567c7);
       const int16x8_t vxb89ABCDEFc7 = vmovl_s8(vb89ABCDEFc7);
 
+      xnn_prefetch_to_l1((const int8_t*) w + 448);
+      xnn_prefetch_to_l1((const int8_t*) w + 512);
 
       vacc0x0123 = vmlal_lane_s16(vacc0x0123, vget_low_s16(vxb01234567c0), vget_low_s16(vxa0), 0);
       vacc0x4567 = vmlal_lane_s16(vacc0x4567, vget_high_s16(vxb01234567c0), vget_low_s16(vxa0), 0);
