@@ -4340,13 +4340,3 @@ xnnpack_unit_test(
         "//:xnnpack_h",
     ],
 )
-
-xnnpack_unit_test(
-    name = "build_identifier_test",
-    srcs = [
-        "build-identifier.cc",
-    ],
-    deps = [
-        "//:XNNPACK",
-    ],
-)

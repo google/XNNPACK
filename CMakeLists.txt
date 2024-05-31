@@ -380,8 +380,7 @@ SET(XNNPACK_SRCS
   src/configs/x8-lut-config.c
   src/configs/zip-config.c
   src/init.c
-  src/params.c
-  "${PROJECT_BINARY_DIR}/build_identifier.c")
+  src/params.c)
 
 SET(TABLE_SRCS
   src/tables/exp2-k-over-64.c
@@ -605,14 +604,6 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
     LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_RVVFP16ARITH_MICROKERNEL_SRCS})
   ENDIF()
 ENDIF()
-
-ADD_CUSTOM_COMMAND(
-  OUTPUT "${PROJECT_BINARY_DIR}/build_identifier.c"
-  COMMAND python3 "scripts/generate-build-identifier.py" --output "${PROJECT_BINARY_DIR}/build_identifier.c" ${PROD_MICROKERNEL_SRCS}
-  DEPENDS ${PROD_MICROKERNEL_SRCS}
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-)
-
 IF(XNNPACK_BUILD_ALL_MICROKERNELS)
   ADD_LIBRARY(microkernels-all OBJECT ${ALL_MICROKERNEL_SRCS} ${TABLE_SRCS})
 ENDIF()
