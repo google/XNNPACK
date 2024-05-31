@@ -28,9 +28,9 @@
 #include <fp16/bitcasts.h>
 #include <fp16/fp16.h>
 
-#if XNN_ARCH_ARMXNN_ALLOCATION_ALIGNMENT
-#include <xnnpack/aarchXNN_ALLOCATION_ALIGNMENT-assembler.h>
-#endif  // XNN_ARCH_ARMXNN_ALLOCATION_ALIGNMENT
+#if XNN_ARCH_ARM64
+#include <xnnpack/aarch64-assembler.h>
+#endif  // XNN_ARCH_ARM64
 #if XNN_ARCH_ARM
 #include <xnnpack/aarch32-assembler.h>
 #endif  // XNN_ARCH_ARM
@@ -3032,18 +3032,18 @@ enum class TrampolineType {
   kIGEMM
 };
 
-#if XNN_ARCH_ARMXNN_ALLOCATION_ALIGNMENT
-using TrampolineReturnType = uintXNN_ALLOCATION_ALIGNMENT_t;
-using TrampolineGenerator = xnnpack::aarchXNN_ALLOCATION_ALIGNMENT::TrampolineGenerator;
+#if XNN_ARCH_ARM64
+using TrampolineReturnType = uint64_t;
+using TrampolineGenerator = xnnpack::aarch64::TrampolineGenerator;
 constexpr size_t kNumArgsOnStackForGEMM = 2;
 constexpr size_t kNumArgsOnStackForIGEMM = 4;
 
-std::string RegisterFromCorruptedValue(uintXNN_ALLOCATION_ALIGNMENT_t corrupted_value) {
-  const uint8_t reg_code = corrupted_value & xnnpack::aarchXNN_ALLOCATION_ALIGNMENT::kRegisterCorruptMask;
-  const std::string reg_type = (corrupted_value & (~reg_code)) == xnnpack::aarchXNN_ALLOCATION_ALIGNMENT::kXRegisterCorruptValue ? "x" : "d";
+std::string RegisterFromCorruptedValue(uint64_t corrupted_value) {
+  const uint8_t reg_code = corrupted_value & xnnpack::aarch64::kRegisterCorruptMask;
+  const std::string reg_type = (corrupted_value & (~reg_code)) == xnnpack::aarch64::kXRegisterCorruptValue ? "x" : "d";
   return reg_type + std::to_string(reg_code);
 }
-#endif  // XNN_ARCH_ARMXNN_ALLOCATION_ALIGNMENT
+#endif  // XNN_ARCH_ARM64
 
 #if XNN_ARCH_ARM
 using TrampolineReturnType = uint32_t;
@@ -4416,9 +4416,9 @@ void GemmMicrokernelTester::Test(
 using xnnpack::aarch32::kAlignInstruction;
 #endif  // XNN_ARCH_ARM
 
-#if XNN_ARCH_ARMXNN_ALLOCATION_ALIGNMENT
-using xnnpack::aarchXNN_ALLOCATION_ALIGNMENT::kAlignInstruction;
-#endif  // XNN_ARCH_ARMXNN_ALLOCATION_ALIGNMENT
+#if XNN_ARCH_ARM64
+using xnnpack::aarch64::kAlignInstruction;
+#endif  // XNN_ARCH_ARM64
 
 // Returns the index of last instruction before all the alignment instructions at the end of the JIT microkernel.
 static size_t FindEndOfCodeBeforeAlignment(xnn_code_buffer* code_buffer, uint32_t* jit_start)
