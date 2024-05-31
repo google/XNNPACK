@@ -265,22 +265,19 @@ static enum xnn_status reshape_resize_bilinear2d_nchw(
     .ukernel = ibilinear_chw->ukernel,
   };
 
-  #if XNN_TEST_MODE
-    const size_t output_channel_tile = ibilinear_chw->channel_tile;
-  #else
-    size_t output_channel_tile = channels;
-    const size_t num_threads = pthreadpool_get_threads_count(threadpool);
-    if (num_threads > 1) {
-      const size_t target_tiles_per_thread = 4;
-      const size_t max_channel_tile = divide_round_up(output_channel_tile, num_threads * target_tiles_per_thread);
-      if (max_channel_tile < output_channel_tile) {
-        const uint32_t output_channel_subtile = ibilinear_chw->channel_tile;
-        output_channel_tile =
-          min(output_channel_tile,
-            divide_round_up(output_channel_tile, max_channel_tile * output_channel_subtile) * output_channel_subtile);
-      }
+  size_t output_channel_tile = channels;
+  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
+  if (num_threads > 1) {
+    const size_t target_tiles_per_thread = 4;
+    const size_t max_channel_tile = divide_round_up(output_channel_tile, num_threads * target_tiles_per_thread);
+    if (max_channel_tile < output_channel_tile) {
+      const uint32_t output_channel_subtile = ibilinear_chw->channel_tile;
+      output_channel_tile =
+        min(output_channel_tile,
+          divide_round_up(output_channel_tile, max_channel_tile * output_channel_subtile) * output_channel_subtile);
     }
-  #endif
+  }
+
   resize_op->compute[0].type = xnn_parallelization_type_2d_tile_1d;
   resize_op->compute[0].task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_resize_bilinear_chw;
   resize_op->compute[0].range[0] = batch_size;

@@ -492,19 +492,16 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
   memcpy(&batch_matrix_multiply_op->context.gemm.params, params, params_size);
   batch_matrix_multiply_op->context.gemm.fused_params = &batch_matrix_multiply_op->context.gemm.params;
 
-  #if XNN_TEST_MODE
-    const size_t nc = nr;
-  #else
-    size_t nc = n;
-    if (num_threads > 1) {
-      const size_t num_other_tiles = divide_round_up(m, mr);
-      const size_t target_tiles_per_thread = 5;
-      const size_t max_nc = divide_round_up(n * num_other_tiles, num_threads * target_tiles_per_thread);
-      if (max_nc < nc) {
-        nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
-      }
+  size_t nc = n;
+  if (num_threads > 1) {
+    const size_t num_other_tiles = divide_round_up(m, mr);
+    const size_t target_tiles_per_thread = 5;
+    const size_t max_nc = divide_round_up(n * num_other_tiles, num_threads * target_tiles_per_thread);
+    if (max_nc < nc) {
+      nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
     }
-  #endif
+  }
+
   #if XNN_MAX_UARCH_TYPES > 1
     if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
       gemm_compute->type = xnn_parallelization_type_3d_tile_2d_with_uarch;

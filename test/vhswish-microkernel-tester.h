@@ -6,7 +6,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <stdio.h>
 #include <xnnpack.h>
 #include <xnnpack/math.h>
 #include <xnnpack/microfnptr.h>

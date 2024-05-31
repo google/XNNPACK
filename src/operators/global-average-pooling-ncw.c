@@ -229,18 +229,14 @@ enum xnn_status xnn_reshape_global_average_pooling_ncw_f32(
   global_average_pooling_op->compute[0].range[0] = batch_size;
   global_average_pooling_op->compute[0].range[1] = channels;
 
-  #if XNN_TEST_MODE
+  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
+  if (num_threads > 1) {
+    const size_t target_channels_per_thread = 8;
+    global_average_pooling_op->compute[0].tile[0] =
+        divide_round_up(channels, num_threads * target_channels_per_thread);
+  } else {
     global_average_pooling_op->compute[0].tile[0] = channels;
-  #else
-    const size_t num_threads = pthreadpool_get_threads_count(threadpool);
-    if (num_threads > 1) {
-      const size_t target_channels_per_thread = 8;
-      global_average_pooling_op->compute[0].tile[0] =
-          divide_round_up(channels, num_threads * target_channels_per_thread);
-    } else {
-      global_average_pooling_op->compute[0].tile[0] = channels;
-    }
-  #endif  // XNN_TEST_MODE
+  }
 
   global_average_pooling_op->state = xnn_run_state_needs_setup;
 
@@ -308,19 +304,14 @@ enum xnn_status xnn_reshape_global_average_pooling_ncw_f16(
   global_average_pooling_op->compute[0].range[0] = batch_size;
   global_average_pooling_op->compute[0].range[1] = channels;
 
-  #if XNN_TEST_MODE
+  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
+  if (num_threads > 1) {
+    const size_t target_channels_per_thread = 8;
+    global_average_pooling_op->compute[0].tile[0] =
+        divide_round_up(channels, num_threads * target_channels_per_thread);
+  } else {
     global_average_pooling_op->compute[0].tile[0] = channels;
-  #else
-    const size_t num_threads = pthreadpool_get_threads_count(threadpool);
-    if (num_threads > 1) {
-      const size_t target_channels_per_thread = 8;
-      global_average_pooling_op->compute[0].tile[0] =
-          divide_round_up(channels, num_threads * target_channels_per_thread);
-    } else {
-      global_average_pooling_op->compute[0].tile[0] = channels;
-    }
-  #endif  // XNN_TEST_MODE
-
+  }
 
   global_average_pooling_op->state = xnn_run_state_needs_setup;
 

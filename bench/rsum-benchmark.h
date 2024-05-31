@@ -215,7 +215,7 @@ void f16_f32acc_rdsum(
 
 static void BenchmarkRSUM(benchmark::internal::Benchmark* b)
 {
-  b->ArgNames({"rows, batch"});
+  b->ArgNames({"channels","rows"});
   b->Args({1, 512});
   b->Args({1, 1024});
   b->Args({1, 8000});

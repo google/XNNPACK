@@ -1704,60 +1704,6 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(QS8_RSUM__AVX512SKX_U256, batch_eq_256) {
-    TEST_REQUIRES_X86_AVX512SKX;
-    RSumMicrokernelTester()
-      .batch_size(256)
-      .Test(xnn_qs8_rsum_ukernel__avx512skx_u256, xnn_init_qs8_rsum_scalar_params);
-  }
-
-  TEST(QS8_RSUM__AVX512SKX_U256, batch_div_256) {
-    TEST_REQUIRES_X86_AVX512SKX;
-    for (size_t batch_size = 512; batch_size < 2560; batch_size += 256) {
-      RSumMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_qs8_rsum_ukernel__avx512skx_u256, xnn_init_qs8_rsum_scalar_params);
-    }
-  }
-
-  TEST(QS8_RSUM__AVX512SKX_U256, batch_lt_256) {
-    TEST_REQUIRES_X86_AVX512SKX;
-    for (size_t batch_size = 1; batch_size < 256; batch_size++) {
-      RSumMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_qs8_rsum_ukernel__avx512skx_u256, xnn_init_qs8_rsum_scalar_params);
-    }
-  }
-
-  TEST(QS8_RSUM__AVX512SKX_U256, batch_gt_256) {
-    TEST_REQUIRES_X86_AVX512SKX;
-    for (size_t batch_size = 257; batch_size < 512; batch_size++) {
-      RSumMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_qs8_rsum_ukernel__avx512skx_u256, xnn_init_qs8_rsum_scalar_params);
-    }
-  }
-
-  TEST(QS8_RSUM__AVX512SKX_U256, scale) {
-    TEST_REQUIRES_X86_AVX512SKX;
-    for (float scale = 0.3f; scale < 5.0f; scale *= 3.0f) {
-      RSumMicrokernelTester()
-        .batch_size(257)
-        .scale(scale)
-        .Test(xnn_qs8_rsum_ukernel__avx512skx_u256, xnn_init_qs8_rsum_scalar_params);
-    }
-  }
-
-  TEST(QS8_RSUM__AVX512SKX_U256, overflow_accumulator) {
-    TEST_REQUIRES_X86_AVX512SKX;
-    RSumMicrokernelTester()
-      .batch_size(32768)
-      .Test(xnn_qs8_rsum_ukernel__avx512skx_u256, xnn_init_qs8_rsum_scalar_params);
-  }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(QS8_RSUM__AVX512SKX_U128_ACC2, batch_eq_128) {
     TEST_REQUIRES_X86_AVX512SKX;
     RSumMicrokernelTester()
@@ -1807,6 +1753,60 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
     RSumMicrokernelTester()
       .batch_size(16384)
       .Test(xnn_qs8_rsum_ukernel__avx512skx_u128_acc2, xnn_init_qs8_rsum_scalar_params);
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(QS8_RSUM__AVX512SKX_U256, batch_eq_256) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    RSumMicrokernelTester()
+      .batch_size(256)
+      .Test(xnn_qs8_rsum_ukernel__avx512skx_u256, xnn_init_qs8_rsum_scalar_params);
+  }
+
+  TEST(QS8_RSUM__AVX512SKX_U256, batch_div_256) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 512; batch_size < 2560; batch_size += 256) {
+      RSumMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_qs8_rsum_ukernel__avx512skx_u256, xnn_init_qs8_rsum_scalar_params);
+    }
+  }
+
+  TEST(QS8_RSUM__AVX512SKX_U256, batch_lt_256) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size < 256; batch_size++) {
+      RSumMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_qs8_rsum_ukernel__avx512skx_u256, xnn_init_qs8_rsum_scalar_params);
+    }
+  }
+
+  TEST(QS8_RSUM__AVX512SKX_U256, batch_gt_256) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 257; batch_size < 512; batch_size++) {
+      RSumMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_qs8_rsum_ukernel__avx512skx_u256, xnn_init_qs8_rsum_scalar_params);
+    }
+  }
+
+  TEST(QS8_RSUM__AVX512SKX_U256, scale) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (float scale = 0.3f; scale < 5.0f; scale *= 3.0f) {
+      RSumMicrokernelTester()
+        .batch_size(257)
+        .scale(scale)
+        .Test(xnn_qs8_rsum_ukernel__avx512skx_u256, xnn_init_qs8_rsum_scalar_params);
+    }
+  }
+
+  TEST(QS8_RSUM__AVX512SKX_U256, overflow_accumulator) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    RSumMicrokernelTester()
+      .batch_size(32768)
+      .Test(xnn_qs8_rsum_ukernel__avx512skx_u256, xnn_init_qs8_rsum_scalar_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -2028,60 +2028,6 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(QS8_RSUM__AVX512VNNI_U256, batch_eq_256) {
-    TEST_REQUIRES_X86_AVX512VNNI;
-    RSumMicrokernelTester()
-      .batch_size(256)
-      .Test(xnn_qs8_rsum_ukernel__avx512vnni_u256, xnn_init_qs8_rsum_scalar_params);
-  }
-
-  TEST(QS8_RSUM__AVX512VNNI_U256, batch_div_256) {
-    TEST_REQUIRES_X86_AVX512VNNI;
-    for (size_t batch_size = 512; batch_size < 2560; batch_size += 256) {
-      RSumMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_qs8_rsum_ukernel__avx512vnni_u256, xnn_init_qs8_rsum_scalar_params);
-    }
-  }
-
-  TEST(QS8_RSUM__AVX512VNNI_U256, batch_lt_256) {
-    TEST_REQUIRES_X86_AVX512VNNI;
-    for (size_t batch_size = 1; batch_size < 256; batch_size++) {
-      RSumMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_qs8_rsum_ukernel__avx512vnni_u256, xnn_init_qs8_rsum_scalar_params);
-    }
-  }
-
-  TEST(QS8_RSUM__AVX512VNNI_U256, batch_gt_256) {
-    TEST_REQUIRES_X86_AVX512VNNI;
-    for (size_t batch_size = 257; batch_size < 512; batch_size++) {
-      RSumMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_qs8_rsum_ukernel__avx512vnni_u256, xnn_init_qs8_rsum_scalar_params);
-    }
-  }
-
-  TEST(QS8_RSUM__AVX512VNNI_U256, scale) {
-    TEST_REQUIRES_X86_AVX512VNNI;
-    for (float scale = 0.3f; scale < 5.0f; scale *= 3.0f) {
-      RSumMicrokernelTester()
-        .batch_size(257)
-        .scale(scale)
-        .Test(xnn_qs8_rsum_ukernel__avx512vnni_u256, xnn_init_qs8_rsum_scalar_params);
-    }
-  }
-
-  TEST(QS8_RSUM__AVX512VNNI_U256, overflow_accumulator) {
-    TEST_REQUIRES_X86_AVX512VNNI;
-    RSumMicrokernelTester()
-      .batch_size(32768)
-      .Test(xnn_qs8_rsum_ukernel__avx512vnni_u256, xnn_init_qs8_rsum_scalar_params);
-  }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(QS8_RSUM__AVX512VNNI_U128_ACC2, batch_eq_128) {
     TEST_REQUIRES_X86_AVX512VNNI;
     RSumMicrokernelTester()
@@ -2131,6 +2077,60 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
     RSumMicrokernelTester()
       .batch_size(16384)
       .Test(xnn_qs8_rsum_ukernel__avx512vnni_u128_acc2, xnn_init_qs8_rsum_scalar_params);
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(QS8_RSUM__AVX512VNNI_U256, batch_eq_256) {
+    TEST_REQUIRES_X86_AVX512VNNI;
+    RSumMicrokernelTester()
+      .batch_size(256)
+      .Test(xnn_qs8_rsum_ukernel__avx512vnni_u256, xnn_init_qs8_rsum_scalar_params);
+  }
+
+  TEST(QS8_RSUM__AVX512VNNI_U256, batch_div_256) {
+    TEST_REQUIRES_X86_AVX512VNNI;
+    for (size_t batch_size = 512; batch_size < 2560; batch_size += 256) {
+      RSumMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_qs8_rsum_ukernel__avx512vnni_u256, xnn_init_qs8_rsum_scalar_params);
+    }
+  }
+
+  TEST(QS8_RSUM__AVX512VNNI_U256, batch_lt_256) {
+    TEST_REQUIRES_X86_AVX512VNNI;
+    for (size_t batch_size = 1; batch_size < 256; batch_size++) {
+      RSumMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_qs8_rsum_ukernel__avx512vnni_u256, xnn_init_qs8_rsum_scalar_params);
+    }
+  }
+
+  TEST(QS8_RSUM__AVX512VNNI_U256, batch_gt_256) {
+    TEST_REQUIRES_X86_AVX512VNNI;
+    for (size_t batch_size = 257; batch_size < 512; batch_size++) {
+      RSumMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_qs8_rsum_ukernel__avx512vnni_u256, xnn_init_qs8_rsum_scalar_params);
+    }
+  }
+
+  TEST(QS8_RSUM__AVX512VNNI_U256, scale) {
+    TEST_REQUIRES_X86_AVX512VNNI;
+    for (float scale = 0.3f; scale < 5.0f; scale *= 3.0f) {
+      RSumMicrokernelTester()
+        .batch_size(257)
+        .scale(scale)
+        .Test(xnn_qs8_rsum_ukernel__avx512vnni_u256, xnn_init_qs8_rsum_scalar_params);
+    }
+  }
+
+  TEST(QS8_RSUM__AVX512VNNI_U256, overflow_accumulator) {
+    TEST_REQUIRES_X86_AVX512VNNI;
+    RSumMicrokernelTester()
+      .batch_size(32768)
+      .Test(xnn_qs8_rsum_ukernel__avx512vnni_u256, xnn_init_qs8_rsum_scalar_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 

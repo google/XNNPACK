@@ -3,13 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert CHANNEL_TILE % 4 == 0
-$assert CHANNEL_TILE >= 4
+$assert CHANNEL_TILE % 64 == 0
+$assert CHANNEL_TILE >= 64
 $SIMD_TILE = CHANNEL_TILE // 64
 $assert ACCUMULATORS <= SIMD_TILE
-$import math
 #include <assert.h>
-#include <stdio.h>
 
 #include <immintrin.h>
 
@@ -27,7 +25,6 @@ void xnn_qs8_rsum_ukernel__avx512vnni_u${CHANNEL_TILE}${ACC_SUFFIX}(
   assert(batch != 0);
   assert(input != NULL);
   assert(output != NULL);
-  assert(params != NULL);
 
   $for ACC in range(ACCUMULATORS):
     __m512i vacc${ACC} = _mm512_setzero_si512();
@@ -41,6 +38,7 @@ void xnn_qs8_rsum_ukernel__avx512vnni_u${CHANNEL_TILE}${ACC_SUFFIX}(
       vacc0 = _mm512_dpbusd_epi32(vacc0, vone, _mm512_loadu_si512((const __m512i*) input)); input += 64;
     }
     if (XNN_UNLIKELY(batch != 0)) {
+      assert(batch >= 1 && batch <= 63);
       const __mmask64 vmask = _cvtu64_mask64((uint64_t) ((UINT64_C(1) << (batch & 63)) - UINT64_C(1)));
       vacc0 = _mm512_dpbusd_epi32(vacc0, vone, _mm512_maskz_loadu_epi8(vmask, (const __m512i*) input)); input += 64;
     }

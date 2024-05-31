@@ -8,7 +8,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include <stdio.h>
 
 #include <immintrin.h>
 
@@ -25,7 +24,6 @@ void xnn_qs8_rsum_ukernel__avx512vnni_u256(
   assert(batch != 0);
   assert(input != NULL);
   assert(output != NULL);
-  assert(params != NULL);
 
   __m512i vacc0 = _mm512_setzero_si512();
   const __m512i vone = _mm512_set1_epi8(1);
@@ -40,6 +38,7 @@ void xnn_qs8_rsum_ukernel__avx512vnni_u256(
       vacc0 = _mm512_dpbusd_epi32(vacc0, vone, _mm512_loadu_si512((const __m512i*) input)); input += 64;
     }
     if (XNN_UNLIKELY(batch != 0)) {
+      assert(batch >= 1 && batch <= 63);
       const __mmask64 vmask = _cvtu64_mask64((uint64_t) ((UINT64_C(1) << (batch & 63)) - UINT64_C(1)));
       vacc0 = _mm512_dpbusd_epi32(vacc0, vone, _mm512_maskz_loadu_epi8(vmask, (const __m512i*) input)); input += 64;
     }

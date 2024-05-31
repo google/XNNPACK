@@ -266,3 +266,32 @@ uint8x16x4_t vld1q_u8_x4(const uint8_t* address) {
 #endif  // AArch64 GCC pre-8, 8.1-8.4, 9.1-9.3
 
 #endif  // ARM64 NEON
+
+// Hexagon
+#if XNN_ARCH_HEXAGON
+#include <hvx_hexagon_protos.h>
+#include <hexagon_types.h>
+
+static XNN_INTRINSIC
+void Q6_V_vstu_variable(void *addr, uint32_t n, HVX_Vector vin)
+{
+    // Rotate as needed.
+    vin = Q6_V_vlalign_VVR(vin, vin, (size_t) addr);
+
+    uint32_t left_off = (size_t) addr & 127;
+    uint32_t right_off = left_off + n;
+
+    HVX_VectorPred ql_not = Q6_Q_vsetq_R((size_t) addr);
+    HVX_VectorPred qr = Q6_Q_vsetq2_R(right_off);
+
+    if (right_off > 128)
+    {
+        Q6_vmem_QRIV(qr, (HVX_Vector*) addr + 1, vin);
+        // all 1's
+        qr = Q6_Q_vcmp_eq_VbVb(vin, vin);
+    }
+
+    ql_not = Q6_Q_or_QQn(ql_not, qr);
+    Q6_vmem_QnRIV(ql_not, (HVX_Vector*) addr, vin);
+}
+#endif  // Hexagon

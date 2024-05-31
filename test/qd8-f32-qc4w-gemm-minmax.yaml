@@ -3,6 +3,16 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# AVX512 AMX
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__avx512amx
+  init: xnn_init_f32_qc4w_minmax_avx512vnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 64
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_16x16c4__avx512amx
+  init: xnn_init_f32_qc4w_minmax_avx512vnni_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 64
+
 # ARM NEONDOT
 - name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c4__neondot
   init: xnn_init_f32_qc4w_minmax_scalar_params
