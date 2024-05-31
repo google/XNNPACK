@@ -182,6 +182,23 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator);
 /// @retval xnn_status_success - deinitialization call succeeded.
 enum xnn_status xnn_deinitialize(void);
 
+/// Get the microkernel implementation build identifier's data.
+///
+/// That identifier will be unique for the current set of microkernels implementations.
+///
+/// @returns A pointer to the current identifier's data.
+const void* xnn_experimental_get_build_identifier_data();
+
+/// Get the microkernel implementation build identifier's data size.
+///
+/// @returns The size in bytes of the identifier's data.
+size_t xnn_experimental_get_build_identifier_size();
+
+/// Check whether the given data matches this version's identifier.
+///
+/// @returns The size in bytes of the identifier's data.
+bool xnn_experimental_check_build_identifier(const void* data, size_t size);
+
 /// Subgraph is an abstract representation of a neural network model.
 /// Subgraph objects are used to define Values (tensors) and Nodes (operators) comprising the model.
 typedef struct xnn_subgraph* xnn_subgraph_t;

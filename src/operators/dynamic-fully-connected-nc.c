@@ -391,20 +391,17 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
   }
   dynamic_fully_connected_op->context.gemm.fused_params = &dynamic_fully_connected_op->context.gemm.params;
 
-  #if XNN_TEST_MODE
-    const size_t nc = nr;
-  #else
-    size_t nc = output_channels;
-    const size_t num_threads = pthreadpool_get_threads_count(threadpool);
-    if (num_threads > 1) {
-      const size_t num_other_tiles = divide_round_up(batch_size, mr);
-      const size_t target_tiles_per_thread = 5;
-      const size_t max_nc = divide_round_up(output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
-      if (max_nc < nc) {
-        nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
-      }
+  size_t nc = output_channels;
+  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
+  if (num_threads > 1) {
+    const size_t num_other_tiles = divide_round_up(batch_size, mr);
+    const size_t target_tiles_per_thread = 5;
+    const size_t max_nc = divide_round_up(output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
+    if (max_nc < nc) {
+      nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
     }
-  #endif
+  }
+
   #if XNN_MAX_UARCH_TYPES > 1
     if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
       dynamic_fully_connected_op->compute[1].type = xnn_parallelization_type_2d_tile_2d_with_uarch;

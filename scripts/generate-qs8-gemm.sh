@@ -1528,4 +1528,7 @@ tools/xngen src/qs8-gemm/c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=0 -D MR=7  -D N
 tools/xngen src/qs8-gemm/c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=0 -D MR=16 -D NR=64 -D DATATYPE=QD8_F16 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-16x64c4-minmax-avx512amx.c &
 tools/xngen src/qs8-gemm/c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=1 -D MR=16 -D NR=64 -D DATATYPE=QD8_F16 -D REQUANTIZATION= -o src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-16x64c4-minmax-avx512amx-prfm.c &
 
+tools/xngen src/qs8-gemm/c4-avx512amx.c.in -D GFNI=1 -D PREFETCH=0 -D MR=1  -D NR=16 -D DATATYPE=QC4_F32 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x16c4-minmax-avx512amx.c &
+tools/xngen src/qs8-gemm/c4-avx512amx.c.in -D GFNI=1 -D PREFETCH=0 -D MR=16 -D NR=16 -D DATATYPE=QC4_F32 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-16x16c4-minmax-avx512amx.c &
+
 wait

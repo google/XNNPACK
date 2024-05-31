@@ -21,7 +21,7 @@ load(
 MICROKERNEL_BENCHMARK_DEPS = [
     ":bench_utils",
     "//:aligned_allocator",
-    "//:bench_microkernels",
+    "//:test_microkernels",
     "//:common",
     "//:enable_assembly",
     "//:jit",
@@ -131,23 +131,25 @@ xnnpack_benchmark(
     ],
 )
 
-xnnpack_benchmark(
-    name = "qs8_f16_vcvt_bench",
+[xnnpack_benchmark(
+    name = "%s_bench" % kernel,
     srcs = [
-        "qs8-f16-vcvt.cc",
+        "%s.cc" % kernel.replace("_", "-"),
         "vcvt-benchmark.h",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "qs8_f32_vcvt_bench",
-    srcs = [
-        "qs8-f32-vcvt.cc",
-        "vcvt-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
+) for kernel in [
+    "qs8_f16_vcvt",
+    "qs8_f32_vcvt",
+    "qs8_vcvt",
+    "qs16_qs8_vcvt",
+    "qu8_f32_vcvt",
+    "qu8_vcvt",
+    "f16_f32_vcvt",
+    "f32_f16_vcvt",
+    "f32_qs8_vcvt",
+    "f32_qu8_vcvt",
+]]
 
 xnnpack_benchmark(
     name = "qs8_gemm_bench",
@@ -209,24 +211,6 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "qs8_vcvt_bench",
-    srcs = [
-        "qs8-vcvt.cc",
-        "vcvt-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "qs16_qs8_vcvt_bench",
-    srcs = [
-        "qs16-qs8-vcvt.cc",
-        "vcvt-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
     name = "qs8_vhswish_bench",
     srcs = [
         "qs8-vhswish.cc",
@@ -254,15 +238,6 @@ xnnpack_benchmark(
     name = "qs8_vmulc_bench",
     srcs = [
         "qs8-vmulc.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "qu8_f32_vcvt_bench",
-    srcs = [
-        "qu8-f32-vcvt.cc",
-        "vcvt-benchmark.h",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -321,15 +296,6 @@ xnnpack_benchmark(
     name = "qu8_vaddc_bench",
     srcs = [
         "qu8-vaddc.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "qu8_vcvt_bench",
-    srcs = [
-        "qu8-vcvt.cc",
-        "vcvt-benchmark.h",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -500,32 +466,56 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
-xnnpack_benchmark(
-    name = "f16_vsigmoid_bench",
+[xnnpack_benchmark(
+    name = "%s_bench" % kernel,
     srcs = [
-        "f16-vsigmoid.cc",
+        "%s.cc" % kernel.replace("_", "-"),
         "f16-vunary-benchmark.h",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
-)
+) for kernel in [
+    "f16_vsigmoid",
+    "f16_vtanh",
+    "f16_velu",
+    "f16_vabs",
+    "f16_vhswish",
+    "f16_vlrelu",
+    "f16_vneg",
+    "f16_vrndd",
+    "f16_vrndne",
+    "f16_vrndu",
+    "f16_vrndz",
+    "f16_vsqr",
+    "f16_vsqrt",
+    "f16_vrsqrt",
+    "f16_vclamp",
+]]
 
-xnnpack_benchmark(
-    name = "f16_vtanh_bench",
+[xnnpack_benchmark(
+    name = "%s_bench" % kernel,
     srcs = [
-        "f16-vtanh.cc",
-        "f16-vunary-benchmark.h",
+        "%s.cc" % kernel.replace("_", "-"),
+        "f32-vunary-benchmark.h",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f16_f32_vcvt_bench",
-    srcs = [
-        "f16-f32-vcvt.cc",
-        "vcvt-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
+) for kernel in [
+    "f32_vabs",
+    "f32_velu",
+    "f32_vhswish",
+    "f32_vlrelu",
+    "f32_vneg",
+    "f32_vrelu",
+    "f32_vrndd",
+    "f32_vrndne",
+    "f32_vrndu",
+    "f32_vrndz",
+    "f32_vsigmoid",
+    "f32_vsqr",
+    "f32_vsqrt",
+    "f32_vrsqrt",
+    "f32_vclamp",
+    "f32_vtanh",
+]]
 
 xnnpack_benchmark(
     name = "f32_igemm_bench",
@@ -636,15 +626,6 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "f32_f16_vcvt_bench",
-    srcs = [
-        "f32-f16-vcvt.cc",
-        "vcvt-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
     name = "xx_transposev_bench",
     srcs = [
         "xx-transposev.cc",
@@ -652,45 +633,19 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
-xnnpack_benchmark(
-    name = "x8_transpose_bench",
+[xnnpack_benchmark(
+    name = "x%d_transpose_bench" % bits,
     srcs = [
-        "x8-transpose.cc",
+        "x%d-transpose.cc" % bits,
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "x16_transpose_bench",
-    srcs = [
-        "x16-transpose.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "x24_transpose_bench",
-    srcs = [
-        "x24-transpose.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "x32_transpose_bench",
-    srcs = [
-        "x32-transpose.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "x64_transpose_bench",
-    srcs = [
-        "x64-transpose.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
+) for bits in [
+    8,
+    16,
+    24,
+    32,
+    64,
+]]
 
 xnnpack_benchmark(
     name = "f32_bgemm_bench",
@@ -772,24 +727,6 @@ xnnpack_benchmark(
         "//:allocator",
         "//:math",
     ],
-)
-
-xnnpack_benchmark(
-    name = "f32_qs8_vcvt_bench",
-    srcs = [
-        "f32-qs8-vcvt.cc",
-        "vcvt-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f32_qu8_vcvt_bench",
-    srcs = [
-        "f32-qu8-vcvt.cc",
-        "vcvt-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
 xnnpack_benchmark(
@@ -899,177 +836,6 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "f16_velu_bench",
-    srcs = [
-        "f16-velu.cc",
-        "f16-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f32_vabs_bench",
-    srcs = [
-        "f32-vabs.cc",
-        "f32-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f16_vabs_bench",
-    srcs = [
-        "f16-vabs.cc",
-        "f16-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f32_velu_bench",
-    srcs = [
-        "f32-velu.cc",
-        "f32-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f32_vhswish_bench",
-    srcs = [
-        "f32-vhswish.cc",
-        "f32-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f16_vhswish_bench",
-    srcs = [
-        "f16-vhswish.cc",
-        "f16-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f32_vlrelu_bench",
-    srcs = [
-        "f32-vlrelu.cc",
-        "f32-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f16_vlrelu_bench",
-    srcs = [
-        "f16-vlrelu.cc",
-        "f16-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f32_vneg_bench",
-    srcs = [
-        "f32-vneg.cc",
-        "f32-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f16_vneg_bench",
-    srcs = [
-        "f16-vneg.cc",
-        "f16-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f32_vrelu_bench",
-    srcs = [
-        "f32-vrelu.cc",
-        "f32-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS + ["//:jit_test_mode"],
-)
-
-xnnpack_benchmark(
-    name = "f32_vrndd_bench",
-    srcs = [
-        "f32-vrndd.cc",
-        "f32-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f16_vrndd_bench",
-    srcs = [
-        "f16-vrndd.cc",
-        "f16-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f32_vrndne_bench",
-    srcs = [
-        "f32-vrndne.cc",
-        "f32-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f16_vrndne_bench",
-    srcs = [
-        "f16-vrndne.cc",
-        "f16-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f32_vrndu_bench",
-    srcs = [
-        "f32-vrndu.cc",
-        "f32-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f16_vrndu_bench",
-    srcs = [
-        "f16-vrndu.cc",
-        "f16-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f32_vrndz_bench",
-    srcs = [
-        "f32-vrndz.cc",
-        "f32-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f16_vrndz_bench",
-    srcs = [
-        "f16-vrndz.cc",
-        "f16-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
     name = "f32_vscaleexpminusmax_bench",
     srcs = [
         "f32-vscaleexpminusmax.cc",
@@ -1081,96 +847,6 @@ xnnpack_benchmark(
     name = "f32_vscaleextexp_bench",
     srcs = [
         "f32-vscaleextexp.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f32_vsigmoid_bench",
-    srcs = [
-        "f32-vsigmoid.cc",
-        "f32-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f32_vsqr_bench",
-    srcs = [
-        "f32-vsqr.cc",
-        "f32-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f16_vsqr_bench",
-    srcs = [
-        "f16-vsqr.cc",
-        "f16-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f16_vsqrt_bench",
-    srcs = [
-        "f16-vsqrt.cc",
-        "f16-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f16_vrsqrt_bench",
-    srcs = [
-        "f16-vrsqrt.cc",
-        "f16-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f32_vsqrt_bench",
-    srcs = [
-        "f32-vsqrt.cc",
-        "f32-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f32_vrsqrt_bench",
-    srcs = [
-        "f32-vrsqrt.cc",
-        "f32-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f32_vclamp_bench",
-    srcs = [
-        "f32-vclamp.cc",
-        "f32-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f16_vclamp_bench",
-    srcs = [
-        "f16-vclamp.cc",
-        "f16-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f32_vtanh_bench",
-    srcs = [
-        "f32-vtanh.cc",
-        "f32-vunary-benchmark.h",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )

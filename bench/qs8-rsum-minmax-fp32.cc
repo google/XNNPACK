@@ -328,8 +328,8 @@ BENCHMARK_CAPTURE(qs8_rsum, scalar_u4,
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(qs8_rsum, avx512skx_u256,
-                    xnn_qs8_rsum_ukernel__avx512skx_u256,
+  BENCHMARK_CAPTURE(qs8_rsum, avx512skx_u128_acc2,
+                    xnn_qs8_rsum_ukernel__avx512skx_u128_acc2,
                     xnn_init_qs8_rsum_scalar_params,
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(BenchmarkRSUM)
@@ -338,8 +338,8 @@ BENCHMARK_CAPTURE(qs8_rsum, scalar_u4,
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(qs8_rsum, avx512skx_u128_acc2,
-                    xnn_qs8_rsum_ukernel__avx512skx_u128_acc2,
+  BENCHMARK_CAPTURE(qs8_rsum, avx512skx_u256,
+                    xnn_qs8_rsum_ukernel__avx512skx_u256,
                     xnn_init_qs8_rsum_scalar_params,
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(BenchmarkRSUM)
@@ -388,8 +388,8 @@ BENCHMARK_CAPTURE(qs8_rsum, scalar_u4,
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(qs8_rsum, avx512vnni_u256,
-                    xnn_qs8_rsum_ukernel__avx512vnni_u256,
+  BENCHMARK_CAPTURE(qs8_rsum, avx512vnni_u128_acc2,
+                    xnn_qs8_rsum_ukernel__avx512vnni_u128_acc2,
                     xnn_init_qs8_rsum_scalar_params,
                     benchmark::utils::CheckAVX512VNNI)
     ->Apply(BenchmarkRSUM)
@@ -398,8 +398,8 @@ BENCHMARK_CAPTURE(qs8_rsum, scalar_u4,
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(qs8_rsum, avx512vnni_u128_acc2,
-                    xnn_qs8_rsum_ukernel__avx512vnni_u128_acc2,
+  BENCHMARK_CAPTURE(qs8_rsum, avx512vnni_u256,
+                    xnn_qs8_rsum_ukernel__avx512vnni_u256,
                     xnn_init_qs8_rsum_scalar_params,
                     benchmark::utils::CheckAVX512VNNI)
     ->Apply(BenchmarkRSUM)

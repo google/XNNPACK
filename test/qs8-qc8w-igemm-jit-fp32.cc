@@ -22,6 +22,7 @@
 #include <xnnpack/isa-checks.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/pack.h>
+#include <xnnpack/packw.h>
 #include <xnnpack/ppmm.h>
 #include <xnnpack/requantization.h>
 
