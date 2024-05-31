@@ -80,9 +80,9 @@
   init: xnn_init_qs8_rsum_scalar_params
 - name: xnn_qs8_rsum_ukernel__avx512skx_u128
   init: xnn_init_qs8_rsum_scalar_params
-- name: xnn_qs8_rsum_ukernel__avx512skx_u256
-  init: xnn_init_qs8_rsum_scalar_params
 - name: xnn_qs8_rsum_ukernel__avx512skx_u128_acc2
+  init: xnn_init_qs8_rsum_scalar_params
+- name: xnn_qs8_rsum_ukernel__avx512skx_u256
   init: xnn_init_qs8_rsum_scalar_params
 - name: xnn_qs8_rsum_ukernel__avx512skx_u256_acc2
   init: xnn_init_qs8_rsum_scalar_params
@@ -94,9 +94,9 @@
   init: xnn_init_qs8_rsum_scalar_params
 - name: xnn_qs8_rsum_ukernel__avx512vnni_u128
   init: xnn_init_qs8_rsum_scalar_params
-- name: xnn_qs8_rsum_ukernel__avx512vnni_u256
-  init: xnn_init_qs8_rsum_scalar_params
 - name: xnn_qs8_rsum_ukernel__avx512vnni_u128_acc2
+  init: xnn_init_qs8_rsum_scalar_params
+- name: xnn_qs8_rsum_ukernel__avx512vnni_u256
   init: xnn_init_qs8_rsum_scalar_params
 - name: xnn_qs8_rsum_ukernel__avx512vnni_u256_acc2
   init: xnn_init_qs8_rsum_scalar_params
