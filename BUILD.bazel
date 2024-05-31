@@ -1991,7 +1991,7 @@ py_binary(
 
 genrule(
     name = "generate_build_identifier",
-    srcs = ALL_MICROKERNEL_SRCS,
+    srcs = ["src/packing.c"] + glob(["src/amalgam/**/*.c"]),
     outs = ["src/build_identifier.c"],
     cmd = "$(location generate_build_identifier_py) --output $@ $(SRCS)",
     tools = [":generate_build_identifier_py"],

@@ -64,11 +64,8 @@ bool xnn_experimental_check_build_identifier(const void* data, const size_t size
 def main(args) -> None:
   m = hashlib.sha256()
   for path in args.inputs:
-    if any(path.endswith(ext) for ext in [".c", ".S", ".cc", ".h"]):
-      with open(path, "rb") as f:
-        m.update(f.read())
-    else:
-      print(f"generate-build-identifier.py: Unknown file extension for {path}. File was ignored.", file=sys.stderr)
+    with open(path, "rb") as f:
+      m.update(f.read())
   byte_list = ", ".join(str(b).rjust(3, "x") for b in m.digest())
   byte_list = textwrap.indent(textwrap.fill(byte_list, width=40), "  ").replace("x", " ")
   with open(args.output, "w") as out:
