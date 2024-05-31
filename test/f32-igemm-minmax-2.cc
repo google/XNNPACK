@@ -3189,7 +3189,7 @@ INSTANTIATE_TEST_SUITE_P(
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_f32_igemm_minmax_ukernel_8x32__hvx_broadcast,
                       xnn_init_f32_minmax_hvx_params,
-                      xnn_pack_f32_igemm_goi_w);
+                      xnn_pack_f32_conv_goki_w);
         })),
     [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
       return info.param.test_name;
@@ -3206,7 +3206,7 @@ INSTANTIATE_TEST_SUITE_P(
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_f32_igemm_minmax_ukernel_16x32__hvx_broadcast,
                       xnn_init_f32_minmax_hvx_params,
-                      xnn_pack_f32_igemm_goi_w);
+                      xnn_pack_f32_conv_goki_w);
         })),
     [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
       return info.param.test_name;
@@ -3223,7 +3223,7 @@ INSTANTIATE_TEST_SUITE_P(
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_f32_igemm_minmax_ukernel_7x64__hvx_broadcast,
                       xnn_init_f32_minmax_hvx_params,
-                      xnn_pack_f32_igemm_goi_w);
+                      xnn_pack_f32_conv_goki_w);
         })),
     [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
       return info.param.test_name;
@@ -3240,7 +3240,7 @@ INSTANTIATE_TEST_SUITE_P(
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_f32_igemm_minmax_ukernel_1x128__hvx_broadcast,
                       xnn_init_f32_minmax_hvx_params,
-                      xnn_pack_f32_igemm_goi_w);
+                      xnn_pack_f32_conv_goki_w);
         })),
     [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
       return info.param.test_name;
@@ -3257,7 +3257,7 @@ INSTANTIATE_TEST_SUITE_P(
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_f32_igemm_minmax_ukernel_2x128__hvx_broadcast,
                       xnn_init_f32_minmax_hvx_params,
-                      xnn_pack_f32_igemm_goi_w);
+                      xnn_pack_f32_conv_goki_w);
         })),
     [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
       return info.param.test_name;
