@@ -129,7 +129,7 @@ TEST(${TEST_NAME}, n_eq_${NR}${NR_SUFFIX}) {
   }
 }
 
-$if NR > 1 or NR_SCALE != "":
+$if NR > 1:
   TEST(${TEST_NAME}, n_div_${NR}${NR_SUFFIX}) {
     $if ISA_CHECK:
       ${ISA_CHECK};

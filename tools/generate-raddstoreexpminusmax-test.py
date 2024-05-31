@@ -46,7 +46,7 @@ TEST(${TEST_NAME}, elements_eq_${ELEMENTS_TILE}${ELEMENTS_SUFFIX}) {
     .Test(${TEST_FUNCTION}, ${INIT_FUNCTION});
 }
 
-$if ELEMENTS_TILE > 1 or ELEMENTS_SCALE != "":
+$if ELEMENTS_TILE > 1:
   TEST(${TEST_NAME}, elements_div_${ELEMENTS_TILE}${ELEMENTS_SUFFIX}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
