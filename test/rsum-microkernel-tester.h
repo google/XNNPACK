@@ -156,9 +156,22 @@ class RSumMicrokernelTester {
       uint16_t output = UINT16_C(0x7E00);  /* NaN */
       rsum(batch_size() * sizeof(uint16_t), input.data(), &output, &params);
 
-      // Verify results.
-      EXPECT_NEAR(fp16_ieee_to_fp32_value(output), output_ref, std::abs(output_ref) * 2.0e-3f)
-        << "with batch " << batch_size() << ", scale " << scale();
+      // Verify results. For an explanation of the error bound, see
+      // https://epubs.siam.org/doi/pdf/10.1137/18M1226312, Eq. 2.1. We use a
+      // $\lambda$ of 5.0 which should only fail with a probability of 5.7e-5.
+      // We don't use the usual hard bound $\gamma_n = \frac{nu}{1 - nu}$ since
+      // for `fp16` $nu > 1$ already for $n > 2000$, rendering the bound
+      // meaningless.
+      const float fp16_u =
+          4.88281e-4;  // Half of the ULP, max relative rounding error.
+      const float n = batch_size() - 1;
+      const float gamma_n = std::expm1(5.0f * std::sqrt(n) * fp16_u +
+                                       n * fp16_u * fp16_u / (1.0f - fp16_u));
+      const float max_abs_err =
+          gamma_n * output_ref;  // The random inputs are all positive, so we
+                                 // can just use the "exact" result here.
+      EXPECT_NEAR(fp16_ieee_to_fp32_value(output), output_ref, max_abs_err)
+          << "with batch " << batch_size() << ", scale " << scale();
     }
   }
 
