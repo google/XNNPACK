@@ -7,9 +7,7 @@ $assert CHANNEL_TILE % 4 == 0
 $assert CHANNEL_TILE >= 4
 $SIMD_TILE = CHANNEL_TILE // 64
 $assert ACCUMULATORS <= SIMD_TILE
-$import math
 #include <assert.h>
-#include <stdio.h>
 
 #include <immintrin.h>
 
