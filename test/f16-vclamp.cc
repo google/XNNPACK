@@ -174,6 +174,24 @@
       .Test(xnn_f16_vclamp_ukernel__rvvfp16arith_u1v, xnn_init_f16_minmax_fp16arith_params);
   }
 
+  TEST(F16_VCLAMP__RVVFP16ARITH_U1V, batch_div_1v) {
+    TEST_REQUIRES_RISCV_VECTOR_FP16_ARITH;
+    for (size_t batch_size = 2 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t); batch_size < 10 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t); batch_size += 1 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t)) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_vclamp_ukernel__rvvfp16arith_u1v, xnn_init_f16_minmax_fp16arith_params);
+    }
+  }
+
+  TEST(F16_VCLAMP__RVVFP16ARITH_U1V, batch_lt_1v) {
+    TEST_REQUIRES_RISCV_VECTOR_FP16_ARITH;
+    for (size_t batch_size = 1; batch_size < 1 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t); batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_vclamp_ukernel__rvvfp16arith_u1v, xnn_init_f16_minmax_fp16arith_params);
+    }
+  }
+
   TEST(F16_VCLAMP__RVVFP16ARITH_U1V, batch_gt_1v) {
     TEST_REQUIRES_RISCV_VECTOR_FP16_ARITH;
     for (size_t batch_size = 1 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t) + 1; batch_size < 10 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t); batch_size++) {
