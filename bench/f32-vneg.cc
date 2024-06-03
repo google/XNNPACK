@@ -76,14 +76,19 @@ void f32_vneg(benchmark::State& state, xnn_f32_vneg_ukernel_fn ukernel,
 #endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(f32_vneg, sse_u4,
-                    xnn_f32_vneg_ukernel__sse_u4,
-                    xnn_init_f32_neg_sse_params)
+  BENCHMARK_CAPTURE(f32_vneg, sse2_u4,
+                    xnn_f32_vneg_ukernel__sse2_u4,
+                    xnn_init_f32_neg_sse2_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vneg, sse_u8,
-                    xnn_f32_vneg_ukernel__sse_u8,
-                    xnn_init_f32_neg_sse_params)
+  BENCHMARK_CAPTURE(f32_vneg, sse2_u8,
+                    xnn_f32_vneg_ukernel__sse2_u8,
+                    xnn_init_f32_neg_sse2_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vneg, sse2_u12,
+                    xnn_f32_vneg_ukernel__sse2_u12,
+                    xnn_init_f32_neg_sse2_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vneg, avx_u8,
@@ -94,6 +99,12 @@ void f32_vneg(benchmark::State& state, xnn_f32_vneg_ukernel_fn ukernel,
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vneg, avx_u16,
                     xnn_f32_vneg_ukernel__avx_u16,
+                    xnn_init_f32_neg_avx_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vneg, avx_u24,
+                    xnn_f32_vneg_ukernel__avx_u24,
                     xnn_init_f32_neg_avx_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
@@ -110,6 +121,12 @@ void f32_vneg(benchmark::State& state, xnn_f32_vneg_ukernel_fn ukernel,
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vneg, avx512f_u48,
+                    xnn_f32_vneg_ukernel__avx512f_u48,
+                    xnn_init_f32_neg_avx512_params,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -120,6 +137,11 @@ void f32_vneg(benchmark::State& state, xnn_f32_vneg_ukernel_fn ukernel,
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vneg, wasmsimd_u8,
                     xnn_f32_vneg_ukernel__wasmsimd_u8,
+                    xnn_init_f32_neg_wasmsimd_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vneg, wasmsimd_u12,
+                    xnn_f32_vneg_ukernel__wasmsimd_u12,
                     xnn_init_f32_neg_wasmsimd_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();

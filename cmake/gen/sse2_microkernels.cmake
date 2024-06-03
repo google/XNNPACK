@@ -114,6 +114,9 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-6-nr-u8.c
   src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-6-nr-u12.c
   src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-6-nr-u16.c
+  src/f32-vunary/gen/f32-vabs-sse2.c
+  src/f32-vunary/gen/f32-vneg-sse2.c
+  src/f32-vunary/gen/f32-vsqr-sse2.c
   src/math/f16-f32-cvt-sse2-int16.c
   src/math/f16-f32-cvt-sse2-int32.c
   src/math/f32-exp-sse2-rr2-lut64-p2.c

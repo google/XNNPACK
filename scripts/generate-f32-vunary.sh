@@ -4,34 +4,6 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-#################################### Scalar ###################################
-### Generic C micro-kernels
-tools/xngen src/f32-vunary/scalar.c.in -D OP=ABS -D BATCH_TILE=1 -o src/f32-vunary/gen/f32-vabs-scalar-u1.c &
-tools/xngen src/f32-vunary/scalar.c.in -D OP=ABS -D BATCH_TILE=2 -o src/f32-vunary/gen/f32-vabs-scalar-u2.c &
-tools/xngen src/f32-vunary/scalar.c.in -D OP=ABS -D BATCH_TILE=4 -o src/f32-vunary/gen/f32-vabs-scalar-u4.c &
-tools/xngen src/f32-vunary/scalar.c.in -D OP=NEG -D BATCH_TILE=1 -o src/f32-vunary/gen/f32-vneg-scalar-u1.c &
-tools/xngen src/f32-vunary/scalar.c.in -D OP=NEG -D BATCH_TILE=2 -o src/f32-vunary/gen/f32-vneg-scalar-u2.c &
-tools/xngen src/f32-vunary/scalar.c.in -D OP=NEG -D BATCH_TILE=4 -o src/f32-vunary/gen/f32-vneg-scalar-u4.c &
-tools/xngen src/f32-vunary/scalar.c.in -D OP=SQR -D BATCH_TILE=1 -o src/f32-vunary/gen/f32-vsqr-scalar-u1.c &
-tools/xngen src/f32-vunary/scalar.c.in -D OP=SQR -D BATCH_TILE=2 -o src/f32-vunary/gen/f32-vsqr-scalar-u2.c &
-tools/xngen src/f32-vunary/scalar.c.in -D OP=SQR -D BATCH_TILE=4 -o src/f32-vunary/gen/f32-vsqr-scalar-u4.c &
-
-################################## WAsm SIMD ##################################
-tools/xngen src/f32-vunary/wasmsimd.c.in -D OP=ABS -D BATCH_TILE=4 -o src/f32-vunary/gen/f32-vabs-wasmsimd-u4.c &
-tools/xngen src/f32-vunary/wasmsimd.c.in -D OP=ABS -D BATCH_TILE=8 -o src/f32-vunary/gen/f32-vabs-wasmsimd-u8.c &
-tools/xngen src/f32-vunary/wasmsimd.c.in -D OP=NEG -D BATCH_TILE=4 -o src/f32-vunary/gen/f32-vneg-wasmsimd-u4.c &
-tools/xngen src/f32-vunary/wasmsimd.c.in -D OP=NEG -D BATCH_TILE=8 -o src/f32-vunary/gen/f32-vneg-wasmsimd-u8.c &
-tools/xngen src/f32-vunary/wasmsimd.c.in -D OP=SQR -D BATCH_TILE=4 -o src/f32-vunary/gen/f32-vsqr-wasmsimd-u4.c &
-tools/xngen src/f32-vunary/wasmsimd.c.in -D OP=SQR -D BATCH_TILE=8 -o src/f32-vunary/gen/f32-vsqr-wasmsimd-u8.c &
-
-################################### ARM NEON ##################################
-tools/xngen src/f32-vunary/neon.c.in -D OP=ABS -D BATCH_TILE=4 -o src/f32-vunary/gen/f32-vabs-neon-u4.c &
-tools/xngen src/f32-vunary/neon.c.in -D OP=ABS -D BATCH_TILE=8 -o src/f32-vunary/gen/f32-vabs-neon-u8.c &
-tools/xngen src/f32-vunary/neon.c.in -D OP=NEG -D BATCH_TILE=4 -o src/f32-vunary/gen/f32-vneg-neon-u4.c &
-tools/xngen src/f32-vunary/neon.c.in -D OP=NEG -D BATCH_TILE=8 -o src/f32-vunary/gen/f32-vneg-neon-u8.c &
-tools/xngen src/f32-vunary/neon.c.in -D OP=SQR -D BATCH_TILE=4 -o src/f32-vunary/gen/f32-vsqr-neon-u4.c &
-tools/xngen src/f32-vunary/neon.c.in -D OP=SQR -D BATCH_TILE=8 -o src/f32-vunary/gen/f32-vsqr-neon-u8.c &
-
 ################################ RISC-V Vector ################################
 tools/xngen src/f32-vunary/rvv.c.in -D OP=ABS -D LMUL=1 -o src/f32-vunary/gen/f32-vabs-rvv-u1v.c &
 tools/xngen src/f32-vunary/rvv.c.in -D OP=ABS -D LMUL=2 -o src/f32-vunary/gen/f32-vabs-rvv-u2v.c &
@@ -48,28 +20,34 @@ tools/xngen src/f32-vunary/rvv.c.in -D OP=SQR -D LMUL=2 -o src/f32-vunary/gen/f3
 tools/xngen src/f32-vunary/rvv.c.in -D OP=SQR -D LMUL=4 -o src/f32-vunary/gen/f32-vsqr-rvv-u4v.c &
 tools/xngen src/f32-vunary/rvv.c.in -D OP=SQR -D LMUL=8 -o src/f32-vunary/gen/f32-vsqr-rvv-u8v.c &
 
+#################################### Scalar ###################################
+tools/xngen src/f32-vunary/simd.c.in -D OP=ABS -D ARCH=scalar -D BATCH_TILES="1,2,4" -o src/f32-vunary/gen/f32-vabs-scalar.c
+tools/xngen src/f32-vunary/simd.c.in -D OP=NEG -D ARCH=scalar -D BATCH_TILES="1,2,4" -o src/f32-vunary/gen/f32-vneg-scalar.c
+tools/xngen src/f32-vunary/simd.c.in -D OP=SQR -D ARCH=scalar -D BATCH_TILES="1,2,4" -o src/f32-vunary/gen/f32-vsqr-scalar.c
+
 ################################# x86 128-bit #################################
-tools/xngen src/f32-vunary/sse.c.in -D OP=ABS -D BATCH_TILE=4 -o src/f32-vunary/gen/f32-vabs-sse-u4.c &
-tools/xngen src/f32-vunary/sse.c.in -D OP=ABS -D BATCH_TILE=8 -o src/f32-vunary/gen/f32-vabs-sse-u8.c &
-tools/xngen src/f32-vunary/sse.c.in -D OP=NEG -D BATCH_TILE=4 -o src/f32-vunary/gen/f32-vneg-sse-u4.c &
-tools/xngen src/f32-vunary/sse.c.in -D OP=NEG -D BATCH_TILE=8 -o src/f32-vunary/gen/f32-vneg-sse-u8.c &
-tools/xngen src/f32-vunary/sse.c.in -D OP=SQR -D BATCH_TILE=4 -o src/f32-vunary/gen/f32-vsqr-sse-u4.c &
-tools/xngen src/f32-vunary/sse.c.in -D OP=SQR -D BATCH_TILE=8 -o src/f32-vunary/gen/f32-vsqr-sse-u8.c &
+tools/xngen src/f32-vunary/simd.c.in -D OP=ABS -D ARCH=sse2 -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vabs-sse2.c
+tools/xngen src/f32-vunary/simd.c.in -D OP=NEG -D ARCH=sse2 -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vneg-sse2.c
+tools/xngen src/f32-vunary/simd.c.in -D OP=SQR -D ARCH=sse2 -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vsqr-sse2.c
 
 ################################# x86 256-bit #################################
-tools/xngen src/f32-vunary/avx.c.in -D OP=ABS -D BATCH_TILE=8  -o src/f32-vunary/gen/f32-vabs-avx-u8.c &
-tools/xngen src/f32-vunary/avx.c.in -D OP=ABS -D BATCH_TILE=16 -o src/f32-vunary/gen/f32-vabs-avx-u16.c &
-tools/xngen src/f32-vunary/avx.c.in -D OP=NEG -D BATCH_TILE=8  -o src/f32-vunary/gen/f32-vneg-avx-u8.c &
-tools/xngen src/f32-vunary/avx.c.in -D OP=NEG -D BATCH_TILE=16 -o src/f32-vunary/gen/f32-vneg-avx-u16.c &
-tools/xngen src/f32-vunary/avx.c.in -D OP=SQR -D BATCH_TILE=8  -o src/f32-vunary/gen/f32-vsqr-avx-u8.c &
-tools/xngen src/f32-vunary/avx.c.in -D OP=SQR -D BATCH_TILE=16 -o src/f32-vunary/gen/f32-vsqr-avx-u16.c &
+tools/xngen src/f32-vunary/simd.c.in -D OP=ABS -D ARCH=avx -D BATCH_TILES="8,16,24" -o src/f32-vunary/gen/f32-vabs-avx.c
+tools/xngen src/f32-vunary/simd.c.in -D OP=NEG -D ARCH=avx -D BATCH_TILES="8,16,24" -o src/f32-vunary/gen/f32-vneg-avx.c
+tools/xngen src/f32-vunary/simd.c.in -D OP=SQR -D ARCH=avx -D BATCH_TILES="8,16,24" -o src/f32-vunary/gen/f32-vsqr-avx.c
 
 ################################# x86 512-bit #################################
-tools/xngen src/f32-vunary/avx512f.c.in -D OP=ABS -D BATCH_TILE=16 -o src/f32-vunary/gen/f32-vabs-avx512f-u16.c &
-tools/xngen src/f32-vunary/avx512f.c.in -D OP=ABS -D BATCH_TILE=32 -o src/f32-vunary/gen/f32-vabs-avx512f-u32.c &
-tools/xngen src/f32-vunary/avx512f.c.in -D OP=NEG -D BATCH_TILE=16 -o src/f32-vunary/gen/f32-vneg-avx512f-u16.c &
-tools/xngen src/f32-vunary/avx512f.c.in -D OP=NEG -D BATCH_TILE=32 -o src/f32-vunary/gen/f32-vneg-avx512f-u32.c &
-tools/xngen src/f32-vunary/avx512f.c.in -D OP=SQR -D BATCH_TILE=16 -o src/f32-vunary/gen/f32-vsqr-avx512f-u16.c &
-tools/xngen src/f32-vunary/avx512f.c.in -D OP=SQR -D BATCH_TILE=32 -o src/f32-vunary/gen/f32-vsqr-avx512f-u32.c &
+tools/xngen src/f32-vunary/simd.c.in -D OP=ABS -D ARCH=avx512f -D BATCH_TILES="16,32,48" -o src/f32-vunary/gen/f32-vabs-avx512f.c
+tools/xngen src/f32-vunary/simd.c.in -D OP=NEG -D ARCH=avx512f -D BATCH_TILES="16,32,48" -o src/f32-vunary/gen/f32-vneg-avx512f.c
+tools/xngen src/f32-vunary/simd.c.in -D OP=SQR -D ARCH=avx512f -D BATCH_TILES="16,32,48" -o src/f32-vunary/gen/f32-vsqr-avx512f.c
+
+################################### ARM NEON ##################################
+tools/xngen src/f32-vunary/simd.c.in -D OP=ABS -D ARCH=neon -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vabs-neon.c
+tools/xngen src/f32-vunary/simd.c.in -D OP=NEG -D ARCH=neon -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vneg-neon.c
+tools/xngen src/f32-vunary/simd.c.in -D OP=SQR -D ARCH=neon -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vsqr-neon.c
+
+################################## WAsm SIMD ##################################
+tools/xngen src/f32-vunary/simd.c.in -D OP=ABS -D ARCH=wasmsimd -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vabs-wasmsimd.c
+tools/xngen src/f32-vunary/simd.c.in -D OP=NEG -D ARCH=wasmsimd -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vneg-wasmsimd.c
+tools/xngen src/f32-vunary/simd.c.in -D OP=SQR -D ARCH=wasmsimd -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vsqr-wasmsimd.c
 
 wait

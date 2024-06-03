@@ -3696,6 +3696,15 @@ size_t xnn_init_f32_abs_sse_params(
   return sizeof(params->sse);
 }
 
+size_t xnn_init_f32_abs_sse2_params(
+  union xnn_f32_abs_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse2.nonsign_mask[i] = math_nonsign_mask_f32();
+  }
+  return sizeof(params->sse);
+}
+
 size_t xnn_init_f32_abs_avx_params(
   union xnn_f32_abs_params params[XNN_MIN_ELEMENTS(1)])
 {
@@ -3711,11 +3720,27 @@ size_t xnn_init_f32_abs_avx_params(
   return sizeof(params->avx);
 }
 
+size_t xnn_init_f32_abs_fma3_params(
+  union xnn_f32_abs_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->fma3.nonsign_mask[i] = math_nonsign_mask_f32();
+  }
+  return sizeof(params->fma3);
+}
+
 size_t xnn_init_f32_abs_avx512_params(
   union xnn_f32_abs_params params[XNN_MIN_ELEMENTS(1)])
 {
   params->avx512.nonsign_mask = UINT32_C(0x7FFFFFFF);
   return sizeof(params->avx512);
+}
+
+size_t xnn_init_f32_abs_avx512f_params(
+  union xnn_f32_abs_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->avx512f.nonsign_mask[0] = math_nonsign_mask_f32();
+  return sizeof(params->avx512f);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -3750,6 +3775,15 @@ size_t xnn_init_f32_neg_sse_params(
   return sizeof(params->sse);
 }
 
+size_t xnn_init_f32_neg_sse2_params(
+  union xnn_f32_neg_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse2.sign_mask[i] = -0.0f;
+  }
+  return sizeof(params->sse);
+}
+
 size_t xnn_init_f32_neg_avx_params(
   union xnn_f32_neg_params params[XNN_MIN_ELEMENTS(1)])
 {
@@ -3765,11 +3799,27 @@ size_t xnn_init_f32_neg_avx_params(
   return sizeof(params->avx);
 }
 
+size_t xnn_init_f32_neg_fma3_params(
+  union xnn_f32_neg_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->fma3.sign_mask[i] = -0.0f;
+  }
+  return sizeof(params->fma3);
+}
+
 size_t xnn_init_f32_neg_avx512_params(
   union xnn_f32_neg_params params[XNN_MIN_ELEMENTS(1)])
 {
   params->avx512.sign_mask = UINT32_C(0x80000000);
   return sizeof(params->avx512);
+}
+
+size_t xnn_init_f32_neg_avx512f_params(
+  union xnn_f32_neg_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->avx512f.sign_mask[0] = -0.0f;
+  return sizeof(params->avx512f);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
