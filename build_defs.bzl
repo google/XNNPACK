@@ -432,3 +432,29 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = []):
         }),
         tags = tags,
     )
+
+SrcListInfo = provider("A list of source files.", fields = {"srcs": "sources"})
+
+def _source_list_aspect_impl(_target, ctx):
+    srcs = []
+    if hasattr(ctx.rule.attr, "srcs"):
+        srcs += [s for src in ctx.rule.attr.srcs for s in src.files.to_list()]
+    transitive = [dep[SrcListInfo].srcs for dep in ctx.rule.attr.deps]
+    return [SrcListInfo(srcs = depset(srcs, transitive = transitive))]
+
+source_list_aspect = aspect(
+    implementation = _source_list_aspect_impl,
+    attr_aspects = ["deps"],
+)
+
+def _transitive_source_list_rule_impl(ctx):
+    files = [p for dep in ctx.attr.deps for p in dep[SrcListInfo].srcs.to_list() if p.owner.repo_name == ctx.label.repo_name and p.owner.package.startswith(ctx.label.package)]
+    return [DefaultInfo(files = depset(files))]
+
+xnnpack_transitive_source_list = rule(
+    implementation = _transitive_source_list_rule_impl,
+    attrs = {
+        "deps": attr.label_list(aspects = [source_list_aspect]),
+    },
+)
+
