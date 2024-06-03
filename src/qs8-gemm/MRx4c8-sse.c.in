@@ -8,9 +8,9 @@ $assert SSE in [2, 3, 4]
 $assert not XOP or AVX
 $assert not AVX or SSE == 4
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
-$assert DATATYPE in ["QC8", "QD8", "QS8", "QU8", "QC4"]
+$assert DATATYPE in ["QC8", "QD8", "QS8", "QU8", "QC4", "QB4"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
-$assert not DATATYPE in ["QD8", "QC4"] or not REQUANTIZATION
+$assert not DATATYPE in ["QD8", "QC4", "QB4"] or not REQUANTIZATION
 $assert VARIANT in ["LD64", "LD128", "EXTENDED"]
 $assert MR <= 4
 #include <assert.h>
@@ -31,17 +31,17 @@ $if DATATYPE != "QD8":
   #include <xnnpack/unaligned.h>
 
 
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w", "QC4": "qd8_f32_qc4w", "QS8": "qs8", "QU8": "qu8"}[DATATYPE]
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w", "QC4": "qd8_f32_qc4w", "QS8": "qs8", "QU8": "qu8", "QB4": "qd8_f32_qb4w"}[DATATYPE]
 $LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
-$if DATATYPE in ["QD8", "QC4"]:
+$if DATATYPE in ["QD8", "QC4", "QB4"]:
   $PARAMS_STRUCT = "xop" if (XOP and DATATYPE == "QC4") else "sse"
 $else:
   $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("sse4" if SSE == 4 and DATATYPE != "QU8" else "sse2")
-$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QC4": "xnn_f32_qc4w_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params"}[DATATYPE]
+$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QC4": "xnn_f32_qc4w_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params", "QB4": "xnn_f32_qb4w_minmax_params"}[DATATYPE]
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
-$OUT_T = "float" if DATATYPE in ["QD8", "QC4"] else XINT8_T
+$OUT_T = "float" if DATATYPE in ["QD8", "QC4", "QB4"] else XINT8_T
 $ISA = "xop" if XOP else "avx" if AVX else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
 void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__${ISA}${LOAD_SUFFIX}(
     size_t mr,
@@ -53,7 +53,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
     ${OUT_T}* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    $if DATATYPE in ["QD8", "QC4"]:
+    $if DATATYPE in ["QD8", "QC4", "QB4"]:
       const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)],
       const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
     $else:
@@ -68,6 +68,11 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
   assert(w != NULL);
   assert(c != NULL);
 
+  $if DATATYPE == "QB4":
+    size_t bl = params->sse.blocksize;
+    assert(bl <= round_up_po2(kc, 2));
+    assert(bl != 0);
+    size_t n_blocks = kc / bl;
   kc = round_up_po2(kc, 8 * sizeof(${XINT8_T}));
   const ${XINT8_T}* a0 = a;
   ${OUT_T}* c0 = c;
@@ -90,8 +95,10 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
         c${M} = c${M-1};
       }
 
-  $if DATATYPE == "QC4":
+  $if DATATYPE in ["QC4", "QB4"]:
     const __m128i vmask = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.mask);  // 0xF0
+    $if DATATYPE == "QB4":
+      const __m128 one_sixteenth = _mm_load1_ps(&params->sse.one_sixteenth);
     $if XOP:
       const __m128i vshift = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.shift);  // 4
   do {
@@ -147,6 +154,20 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
         $for M in range(MR):
           __m128i vacc${M}x2 = _mm_unpacklo_epi64(vksum23${M}, vzero);
           __m128i vacc${M}x3 = _mm_unpackhi_epi64(vksum23${M}, vzero);
+    $elif DATATYPE == "QB4":
+      const __m128 vksum = _mm_load_ps((const float*) w);
+      $for M in range(0, MR, 2):
+        $if M + 1 == MR:
+          __m128i vinput_zero_point${M} = _mm_cvtsi32_si128(*((const int*) &quantization_params[${M}].zero_point));
+          vinput_zero_point${M} = _mm_shuffle_epi32(vinput_zero_point${M}, _MM_SHUFFLE(0, 0, 0, 0));
+        $else:
+          const __m128i vinput_zero_point${ABC[M:M+2]} = _mm_loadu_si128((const __m128i*) &quantization_params[${M}]);
+          const __m128i vinput_zero_point${M} = _mm_shuffle_epi32(vinput_zero_point${ABC[M:M+2]}, _MM_SHUFFLE(0, 0, 0, 0));
+          const __m128i vinput_zero_point${M+1} = _mm_shuffle_epi32(vinput_zero_point${ABC[M:M+2]}, _MM_SHUFFLE(2, 2, 2, 2));
+
+      $for M in range(0, MR):
+        __m128 vinput_zero_point${M}_float = _mm_cvtepi32_ps(vinput_zero_point${M});
+        __m128 vout${M}x0123 = _mm_mul_ps(vksum, vinput_zero_point${M}_float);
     $else:
       $for N in range(4):
         __m128i vacc0x${N} = _mm_cvtsi32_si128(((const int*) w)[${N}]);
@@ -159,9 +180,18 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
       const __m128i vb_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.kernel_zero_point);
       $if SSE < 4 or VARIANT == "LD128":
         const __m128i vzero = _mm_setzero_si128();
-    size_t k = kc;
+    $if DATATYPE == "QB4":
+      for (size_t nb=0; nb<n_blocks; ++nb){
+        $for M in range(MR):
+          __m128i vacc${M}x0 = _mm_setzero_si128();
+          __m128i vacc${M}x1 = _mm_setzero_si128();
+          __m128i vacc${M}x2 = _mm_setzero_si128();
+          __m128i vacc${M}x3 = _mm_setzero_si128();
+        size_t k = bl;
+    $else:
+      size_t k = kc;
 
-    $if DATATYPE == "QC4":
+    $if DATATYPE in ["QC4", "QB4"]:
       while (k >= 16 * sizeof(${XINT8_T})) {
         $for M in range(MR):
           const __m128i va${M}c0 = _mm_loadl_epi64((const __m128i*) a${M});
@@ -287,7 +317,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
 
       $if VARIANT == "LD128":
         $for N in range(0, 4, 2):
-          $if DATATYPE == "QC4":
+          $if DATATYPE in ["QC4", "QB4"]:
             $if N == 0:
               __m128i vb${N}${N+1} = _mm_load_si128((const __m128i*) w);
             $else:
@@ -327,7 +357,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
       $else:
         $for N in range(4):
           $if VARIANT == "LD64":
-            $if DATATYPE == "QC4":
+            $if DATATYPE in ["QC4", "QB4"]:
               $if N == 0:
                 __m128i vb${N} = _mm_loadl_epi64((const __m128i*) w);
               $else:
@@ -375,6 +405,10 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
         w = (const ${XINT8_T}*) w + 32;
       k -= 8 * sizeof(${XINT8_T});
     }
+    $if DATATYPE == "QB4":
+      // accumulate float
+      const __m128 vfilter_output_scale0123 = _mm_load_ps((const float*) w);
+      w = (const float*) w + 4;
 
     $if SSE >= 3:
       $for M in range(MR):
@@ -391,12 +425,20 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
       $for M in range(MR):
         __m128i vacc${M}x0123 = _mm_add_epi32(_mm_unpacklo_epi32(vacc${M}x02, vacc${M}x13), _mm_unpackhi_epi32(vacc${M}x02, vacc${M}x13));
 
-    $if DATATYPE in ["QD8", "QC4"]:
+    $if DATATYPE == "QB4":
+      $for M in range(MR):
+        vout${M}x0123 = _mm_add_ps(vout${M}x0123, _mm_mul_ps(_mm_cvtepi32_ps(vacc${M}x0123), vfilter_output_scale0123));
+      }
+    $if DATATYPE in ["QD8", "QC4", "QB4"]:
       $if DATATYPE == "QC4":
         $for M in range(MR):
           vacc${M}x0123 = _mm_srai_epi32(vacc${M}x0123, 4);
-      $for M in range(MR):
-        __m128 vout${M}x0123 = _mm_cvtepi32_ps(vacc${M}x0123);
+      $if DATATYPE == "QB4":
+        $for M in range(MR):
+          vout${M}x0123 = _mm_mul_ps(vout${M}x0123, one_sixteenth);
+      $else:
+        $for M in range(MR):
+          __m128 vout${M}x0123 = _mm_cvtepi32_ps(vacc${M}x0123);
 
       $if AVX:
         $for M in range(MR):
@@ -413,12 +455,17 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
       $for M in range(MR):
         vout${M}x0123 = _mm_mul_ps(vout${M}x0123, vinput_scale${M});
 
-      const __m128 vfilter_output_scale0123 = _mm_load_ps((const float*) w);
-      $for M in range(MR):
-        vout${M}x0123 = _mm_mul_ps(vout${M}x0123, vfilter_output_scale0123);
+      $if DATATYPE in ["QD8", "QC4"]:
+        const __m128 vfilter_output_scale0123 = _mm_load_ps((const float*) w);
+        $for M in range(MR):
+          vout${M}x0123 = _mm_mul_ps(vout${M}x0123, vfilter_output_scale0123);
 
-      const __m128 vbias0123 = _mm_load_ps((const float*) w + 4);
-      w = (const float*) w + 8;
+      $if DATATYPE == "QB4":
+        const __m128 vbias0123 = _mm_load_ps((const float*) w);
+        w = (const float*) w + 4;
+      $else:
+        const __m128 vbias0123 = _mm_load_ps((const float*) w + 4);
+        w = (const float*) w + 8;
       $for M in range(MR):
         vout${M}x0123 = _mm_add_ps(vout${M}x0123, vbias0123);
 

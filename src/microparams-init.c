@@ -2595,6 +2595,7 @@ size_t xnn_init_f32_qb4w_minmax_sse_params(
     params->sse.mask[i] = 0xF0;
   }
   params->sse.blocksize = blocksize;
+  params->sse.one_sixteenth = 0x1p-4;
   return sizeof(params->sse);
 }
 
