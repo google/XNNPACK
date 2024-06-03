@@ -366,39 +366,6 @@ static void GEMMEnd2EndBenchmark(
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  static void qu8_gemm_2x16c8__avx512skx(benchmark::State& state, models::ExecutionPlanFactory model) {
-    GEMMEnd2EndBenchmark(state, model,
-      xnn_qu8_gemm_minmax_fp32_ukernel_2x16c8__avx512skx,
-      xnn_qu8_igemm_minmax_fp32_ukernel_2x16c8__avx512skx,
-      xnn_qu8_gemm_minmax_fp32_ukernel_1x16c8__avx512skx,
-      xnn_qu8_igemm_minmax_fp32_ukernel_1x16c8__avx512skx,
-      xnn_init_qu8_conv_minmax_fp32_avx512_params,
-      /*mr=*/2, /*nr=*/16, /*log2_kr=*/3, /*log2_sr=*/0,
-      benchmark::utils::CheckAVX512F);
-  }
-
-  static void qu8_gemm_3x16c8__avx512skx(benchmark::State& state, models::ExecutionPlanFactory model) {
-    GEMMEnd2EndBenchmark(state, model,
-      xnn_qu8_gemm_minmax_fp32_ukernel_3x16c8__avx512skx,
-      xnn_qu8_igemm_minmax_fp32_ukernel_3x16c8__avx512skx,
-      xnn_qu8_gemm_minmax_fp32_ukernel_1x16c8__avx512skx,
-      xnn_qu8_igemm_minmax_fp32_ukernel_1x16c8__avx512skx,
-      xnn_init_qu8_conv_minmax_fp32_avx512_params,
-      /*mr=*/3, /*nr=*/16, /*log2_kr=*/3, /*log2_sr=*/0,
-      benchmark::utils::CheckAVX512F);
-  }
-
-  static void qu8_gemm_4x16c8__avx512skx(benchmark::State& state, models::ExecutionPlanFactory model) {
-    GEMMEnd2EndBenchmark(state, model,
-      xnn_qu8_gemm_minmax_fp32_ukernel_4x16c8__avx512skx,
-      xnn_qu8_igemm_minmax_fp32_ukernel_4x16c8__avx512skx,
-      xnn_qu8_gemm_minmax_fp32_ukernel_1x16c8__avx512skx,
-      xnn_qu8_igemm_minmax_fp32_ukernel_1x16c8__avx512skx,
-      xnn_init_qu8_conv_minmax_fp32_avx512_params,
-      /*mr=*/4, /*nr=*/16, /*log2_kr=*/3, /*log2_sr=*/0,
-      benchmark::utils::CheckAVX512F);
-  }
-
   static void qu8_gemm_2x8c8__avx2(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_qu8_gemm_minmax_fp32_ukernel_2x8c8__avx2,
@@ -716,11 +683,6 @@ static void GEMMEnd2EndBenchmark(
       xnn_init_qu8_conv_minmax_fp32_sse2_params,
       /*mr=*/3, /*nr=*/4, /*log2_kr=*/3, /*log2_sr=*/0);
   }
-
-
-  BENCHMARK_QU8_END2END(qu8_gemm_2x16c8__avx512skx);
-  BENCHMARK_QU8_END2END(qu8_gemm_3x16c8__avx512skx);
-  BENCHMARK_QU8_END2END(qu8_gemm_4x16c8__avx512skx);
 
   BENCHMARK_QU8_END2END(qu8_gemm_2x8c8__avx2);
   BENCHMARK_QU8_END2END(qu8_gemm_3x8c8__avx2);
