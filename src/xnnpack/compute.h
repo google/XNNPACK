@@ -1740,15 +1740,19 @@ struct scaled_dot_product_attention_context {
   xnn_vunary_ukernel_fn vtanh_ukernel;
 
   union {
+    union xnn_f16_expminus_params f16;
     union xnn_f32_expminus_params f32;
   } expminus_params;
   union {
+    union xnn_f16_minmax_params f16;
     union xnn_f32_minmax_params f32;
   } minmax_params;
   union {
     union xnn_f16_default_params f16;
+    union xnn_f32_default_params f32;
   } rmax_params;
   union {
+    union xnn_f16_tanh_params f16;
     union xnn_f32_tanh_params f32;
   } tanh_params;
 
