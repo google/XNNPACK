@@ -99,19 +99,19 @@ void f32_vsqr(benchmark::State& state, xnn_f32_vsqr_ukernel_fn ukernel,
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vsqr, avx_u8,
                     xnn_f32_vsqr_ukernel__avx_u8,
-                    xnn_init_f32_default_avx_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vsqr, avx_u16,
                     xnn_f32_vsqr_ukernel__avx_u16,
-                    xnn_init_f32_default_avx_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vsqr, avx_u24,
                     xnn_f32_vsqr_ukernel__avx_u24,
-                    xnn_init_f32_default_avx_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();

@@ -261,9 +261,9 @@ enum xnn_status xnn_create_abs_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_abs_config = xnn_init_f32_abs_config();
 
-  union xnn_f32_abs_params params;
-  if XNN_LIKELY(f32_abs_config != NULL && f32_abs_config->init.f32_abs != NULL) {
-    f32_abs_config->init.f32_abs(&params);
+  union xnn_f32_default_params params;
+  if XNN_LIKELY(f32_abs_config != NULL && f32_abs_config->init.f32_default != NULL) {
+    f32_abs_config->init.f32_default(&params);
   }
 
   return create_unary_elementwise_nc(
@@ -1199,9 +1199,9 @@ enum xnn_status xnn_create_negate_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_neg_config = xnn_init_f32_neg_config();
 
-  union xnn_f32_neg_params params;
-  if XNN_LIKELY(f32_neg_config != NULL && f32_neg_config->init.f32_neg != NULL) {
-    f32_neg_config->init.f32_neg(&params);
+  union xnn_f32_default_params params;
+  if XNN_LIKELY(f32_neg_config != NULL && f32_neg_config->init.f32_default != NULL) {
+    f32_neg_config->init.f32_default(&params);
   }
 
   return create_unary_elementwise_nc(
@@ -1421,7 +1421,7 @@ enum xnn_status xnn_reshape_abs_nc_f32(
     output_stride,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    &abs_op->params.f32_abs, sizeof(abs_op->params.f32_abs),
+    &abs_op->params.f32_default, sizeof(abs_op->params.f32_default),
     threadpool);
 }
 
@@ -2129,7 +2129,7 @@ enum xnn_status xnn_reshape_negate_nc_f32(
     channels, input_stride, output_stride,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    &negate_op->params.f32_neg, sizeof(negate_op->params.f32_neg),
+    &negate_op->params.f32_default, sizeof(negate_op->params.f32_default),
     threadpool);
 }
 
@@ -2974,9 +2974,9 @@ enum xnn_status xnn_run_abs_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_abs_config = xnn_init_f32_abs_config();
 
-  union xnn_f32_abs_params params;
-  if XNN_LIKELY(f32_abs_config != NULL && f32_abs_config->init.f32_abs != NULL) {
-    f32_abs_config->init.f32_abs(&params);
+  union xnn_f32_default_params params;
+  if XNN_LIKELY(f32_abs_config != NULL && f32_abs_config->init.f32_default != NULL) {
+    f32_abs_config->init.f32_default(&params);
   }
 
   return run_unary_elementwise_nc(
@@ -3532,9 +3532,9 @@ enum xnn_status xnn_run_negate_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_neg_config = xnn_init_f32_neg_config();
 
-  union xnn_f32_neg_params params;
-  if XNN_LIKELY(f32_neg_config != NULL && f32_neg_config->init.f32_neg != NULL) {
-    f32_neg_config->init.f32_neg(&params);
+  union xnn_f32_default_params params;
+  if XNN_LIKELY(f32_neg_config != NULL && f32_neg_config->init.f32_default != NULL) {
+    f32_neg_config->init.f32_default(&params);
   }
 
   return run_unary_elementwise_nc(

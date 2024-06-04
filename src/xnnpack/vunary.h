@@ -55,7 +55,7 @@ DECLARE_F16_VABS_UKERNEL_FUNCTION(xnn_f16_vabs_ukernel__sse2_u8)
 DECLARE_F16_VABS_UKERNEL_FUNCTION(xnn_f16_vabs_ukernel__sse2_u16)
 
 #define DECLARE_F32_VABS_UKERNEL_FUNCTION(fn_name) \
-  DECLARE_F32_UKERNEL_FUNCTION(fn_name, xnn_f32_abs_params);
+  DECLARE_F32_UKERNEL_FUNCTION(fn_name, xnn_f32_default_params);
 
 DECLARE_F32_VABS_UKERNEL_FUNCTION(xnn_f32_vabs_ukernel__rvv_u1v)
 DECLARE_F32_VABS_UKERNEL_FUNCTION(xnn_f32_vabs_ukernel__rvv_u2v)
@@ -417,7 +417,7 @@ DECLARE_F16_VNEG_UKERNEL_FUNCTION(xnn_f16_vneg_ukernel__sse2_u8)
 DECLARE_F16_VNEG_UKERNEL_FUNCTION(xnn_f16_vneg_ukernel__sse2_u16)
 
 #define DECLARE_F32_VNEG_UKERNEL_FUNCTION(fn_name) \
-  DECLARE_F32_UKERNEL_FUNCTION(fn_name, xnn_f32_neg_params);
+  DECLARE_F32_UKERNEL_FUNCTION(fn_name, xnn_f32_default_params);
 
 DECLARE_F32_VNEG_UKERNEL_FUNCTION(xnn_f32_vneg_ukernel__rvv_u1v)
 DECLARE_F32_VNEG_UKERNEL_FUNCTION(xnn_f32_vneg_ukernel__rvv_u2v)

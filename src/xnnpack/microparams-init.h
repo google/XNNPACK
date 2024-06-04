@@ -614,40 +614,6 @@ DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_scalar_expm1minus_rr1_p6
   DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#define DECLARE_INIT_F32_ABS_PARAMS_FUNCTION(fn_name)      \
-  XNN_INTERNAL size_t fn_name(                             \
-    union xnn_f32_abs_params params[XNN_MIN_ELEMENTS(1)]);
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F32_ABS_PARAMS_FUNCTION(xnn_init_f32_abs_sse_params)
-  DECLARE_INIT_F32_ABS_PARAMS_FUNCTION(xnn_init_f32_abs_sse2_params)
-  DECLARE_INIT_F32_ABS_PARAMS_FUNCTION(xnn_init_f32_abs_avx_params)
-  DECLARE_INIT_F32_ABS_PARAMS_FUNCTION(xnn_init_f32_abs_fma3_params)
-  DECLARE_INIT_F32_ABS_PARAMS_FUNCTION(xnn_init_f32_abs_avx512_params)
-  DECLARE_INIT_F32_ABS_PARAMS_FUNCTION(xnn_init_f32_abs_avx512f_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_F32_ABS_PARAMS_FUNCTION(xnn_init_f32_abs_wasmsimd_params)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
-#define DECLARE_INIT_F32_NEG_PARAMS_FUNCTION(fn_name)      \
-  XNN_INTERNAL size_t fn_name(                             \
-    union xnn_f32_neg_params params[XNN_MIN_ELEMENTS(1)]);
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F32_NEG_PARAMS_FUNCTION(xnn_init_f32_neg_sse_params)
-  DECLARE_INIT_F32_NEG_PARAMS_FUNCTION(xnn_init_f32_neg_sse2_params)
-  DECLARE_INIT_F32_NEG_PARAMS_FUNCTION(xnn_init_f32_neg_avx_params)
-  DECLARE_INIT_F32_NEG_PARAMS_FUNCTION(xnn_init_f32_neg_fma3_params)
-  DECLARE_INIT_F32_NEG_PARAMS_FUNCTION(xnn_init_f32_neg_avx512_params)
-  DECLARE_INIT_F32_NEG_PARAMS_FUNCTION(xnn_init_f32_neg_avx512f_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_F32_NEG_PARAMS_FUNCTION(xnn_init_f32_neg_wasmsimd_params)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
 #define DECLARE_INIT_BF16_ABS_PARAMS_FUNCTION(fn_name)      \
   XNN_INTERNAL size_t fn_name(                             \
     union xnn_bf16_abs_params params[XNN_MIN_ELEMENTS(1)]);

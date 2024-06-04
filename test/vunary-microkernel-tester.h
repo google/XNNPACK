@@ -147,14 +147,14 @@ class VUnaryMicrokernelTester {
 
   void Test(xnn_f32_vrelu_ukernel_fn vrelu) const;
 
-  void Test(xnn_bf16_vabs_ukernel_fn vabs,
+  void TestAbs(xnn_bf16_vabs_ukernel_fn vabs,
             xnn_init_bf16_abs_params_fn init_params = nullptr) const;
 
-  void Test(xnn_f16_vabs_ukernel_fn vabs,
+  void TestAbs(xnn_f16_vabs_ukernel_fn vabs,
             xnn_init_f16_abs_params_fn init_params = nullptr) const;
 
-  void Test(xnn_f32_vabs_ukernel_fn vabs,
-            xnn_init_f32_abs_params_fn init_params = nullptr) const;
+  void TestAbs(xnn_f32_vabs_ukernel_fn vabs,
+            xnn_init_f32_default_params_fn init_params = nullptr) const;
 
   void Test(xnn_f32_vclamp_ukernel_fn vclamp,
             xnn_init_f32_minmax_params_fn init_params) const;
@@ -177,11 +177,11 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f32_vlrelu_ukernel_fn vlrelu,
             xnn_init_f32_lrelu_params_fn init_params) const;
 
-  void Test(xnn_f16_vneg_ukernel_fn vneg,
+  void TestNeg(xnn_f16_vneg_ukernel_fn vneg,
             xnn_init_f16_neg_params_fn init_params = nullptr) const;
 
-  void Test(xnn_f32_vneg_ukernel_fn vneg,
-            xnn_init_f32_neg_params_fn init_params = nullptr) const;
+  void TestNeg(xnn_f32_vneg_ukernel_fn vneg,
+            xnn_init_f32_default_params_fn init_params = nullptr) const;
 
   void Test(xnn_f16_vround_ukernel_fn vrnd, OpType op_type,
             xnn_init_f16_rnd_params_fn init_params = nullptr) const;
@@ -195,10 +195,10 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f32_vsigmoid_ukernel_fn vsigmoid,
             xnn_init_f32_sigmoid_params_fn init_params) const;
 
-  void Test(xnn_f16_vsqr_ukernel_fn vsqr,
+  void TestSqr(xnn_f16_vsqr_ukernel_fn vsqr,
             xnn_init_f16_default_params_fn init_params = nullptr) const;
 
-  void Test(xnn_f32_vsqr_ukernel_fn vsqr,
+  void TestSqr(xnn_f32_vsqr_ukernel_fn vsqr,
             xnn_init_f32_default_params_fn init_params = nullptr) const;
 
   void Test(xnn_f16_vsqrt_ukernel_fn vsqrt,

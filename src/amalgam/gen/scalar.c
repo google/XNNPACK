@@ -30174,7 +30174,7 @@ void xnn_f32_vabs_ukernel__scalar_u4(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_abs_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -30225,7 +30225,7 @@ void xnn_f32_vneg_ukernel__scalar_u4(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_neg_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);

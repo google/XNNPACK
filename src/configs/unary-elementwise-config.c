@@ -661,20 +661,16 @@ static void init_f32_abs_config(void) {
     assert(hardware_config != NULL);
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__avx512f_u16;
-      f32_abs_config.init.f32_abs = xnn_init_f32_abs_avx512_params;
       f32_abs_config.element_tile = 16;
     } else if (hardware_config->use_x86_avx) {
       f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__avx_u16;
-      f32_abs_config.init.f32_abs = xnn_init_f32_abs_avx_params;
       f32_abs_config.element_tile = 16;
     } else {
       f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__sse2_u8;
-      f32_abs_config.init.f32_abs = xnn_init_f32_abs_sse_params;
       f32_abs_config.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__wasmsimd_u8;
-    f32_abs_config.init.f32_abs = xnn_init_f32_abs_wasmsimd_params;
     f32_abs_config.element_tile = 8;
   #elif XNN_ARCH_WASM
     f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__scalar_u4;
@@ -991,20 +987,16 @@ static void init_f32_neg_config(void) {
     assert(hardware_config != NULL);
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__avx512f_u16;
-      f32_neg_config.init.f32_neg = xnn_init_f32_neg_avx512_params;
       f32_neg_config.element_tile = 16;
     } else if (hardware_config->use_x86_avx) {
       f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__avx_u16;
-      f32_neg_config.init.f32_neg = xnn_init_f32_neg_avx_params;
       f32_neg_config.element_tile = 16;
     } else {
       f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__sse2_u8;
-      f32_neg_config.init.f32_neg = xnn_init_f32_neg_sse_params;
       f32_neg_config.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__wasmsimd_u8;
-    f32_neg_config.init.f32_neg = xnn_init_f32_neg_wasmsimd_params;
     f32_neg_config.element_tile = 8;
   #elif XNN_ARCH_WASM
     f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__scalar_u4;

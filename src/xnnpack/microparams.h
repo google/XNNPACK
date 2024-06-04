@@ -1159,36 +1159,6 @@ union xnn_f16_abs_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
-union xnn_f32_abs_params {
-  char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) float nonsign_mask[4];
-  } sse;
-  struct {
-    XNN_ALIGN(16) float nonsign_mask[4];
-  } sse2;
-  struct {
-    XNN_ALIGN(32) float nonsign_mask[8];
-    int32_t mask_table[14];
-  } avx;
-  struct {
-    XNN_ALIGN(32) float nonsign_mask[8];
-  } fma3;
-  struct {
-    uint32_t nonsign_mask;
-  } avx512;
-  struct {
-    float nonsign_mask[1];
-  } avx512f;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  struct {
-    XNN_ALIGN(8) float nonsign_mask[2];
-  } wasmsimd;
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-};
-
 
 // Cvt (Convert): used by VCVT microkernels.
 
@@ -2504,36 +2474,6 @@ union xnn_f16_neg_params {
     XNN_ALIGN(16) uint16_t sign_mask[8];
   } sse;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-};
-
-union xnn_f32_neg_params {
-  char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) float sign_mask[4];
-  } sse;
-  struct {
-    XNN_ALIGN(16) float sign_mask[4];
-  } sse2;
-  struct {
-    XNN_ALIGN(32) float sign_mask[8];
-    int32_t mask_table[14];
-  } avx;
-  struct {
-    XNN_ALIGN(32) float sign_mask[8];
-  } fma3;
-  struct {
-    uint32_t sign_mask;
-  } avx512;
-  struct {
-    float sign_mask[1];
-  } avx512f;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  struct {
-    XNN_ALIGN(8) float sign_mask[2];
-  } wasmsimd;
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
 
