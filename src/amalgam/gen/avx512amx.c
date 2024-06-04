@@ -2622,10 +2622,10 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_16x16c4__avx512amx(
       _tile_loadd(6, a, a_stride);
       a += kremainder;
       for (size_t k = 0; k < ((kremainder + 7) >> 3); ++k) {
-        const __m512i vb0123456789ABCDEF = _mm512_load_epi32((const int8_t*) w + 64 * k);
+        const __m512i vb0123456789ABCDEF = _mm512_load_epi32((const int8_t*) w + 0 + 64 * k);
         const __m512i vl0123456789ABCDEF = _mm512_gf2p8affine_epi64_epi8(vb0123456789ABCDEF, vshl4, 0);
         const __m512i vh0123456789ABCDEF = _mm512_and_si512(vb0123456789ABCDEF, vmask);
-        _mm512_store_epi32(weight_buffer + 128 * k, vl0123456789ABCDEF);
+        _mm512_store_epi32(weight_buffer + 128 * k + 0, vl0123456789ABCDEF);
         _mm512_store_epi32(weight_buffer + 128 * k + 64, vh0123456789ABCDEF);
       }
       _tile_loadd(7, weight_buffer, 64);

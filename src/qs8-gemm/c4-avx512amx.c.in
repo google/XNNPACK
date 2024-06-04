@@ -178,10 +178,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
       $for N in range(0, NR, 16):
         $if DATATYPE in ["QC4_F32", "QC4_F16"]:
           for (size_t k = 0; k < ((kremainder + 7) >> 3); ++k) {
-            const __m512i vb${ABC[N:N+16]} = _mm512_load_epi32((const int8_t*) w + ${N * 4 + NR * 4} * k);
+            const __m512i vb${ABC[N:N+16]} = _mm512_load_epi32((const int8_t*) w + ${N * 4} + ${NR * 4} * k);
             const __m512i vl${ABC[N:N+16]} = _mm512_gf2p8affine_epi64_epi8(vb${ABC[N:N+16]}, vshl4, 0);
             const __m512i vh${ABC[N:N+16]} = _mm512_and_si512(vb${ABC[N:N+16]}, vmask);
-            _mm512_store_epi32(weight_buffer + ${64*2} * k, vl${ABC[N:N+16]});
+            _mm512_store_epi32(weight_buffer + ${64*2} * k + 0, vl${ABC[N:N+16]});
             _mm512_store_epi32(weight_buffer + ${64*2} * k + 64, vh${ABC[N:N+16]});
           }
           _tile_loadd(7, weight_buffer, 64);

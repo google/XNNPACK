@@ -15,9 +15,10 @@
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/unaligned.h>
+#include <xnnpack/prefetch.h>
 
 
-void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_16x16c4__avx512amx(
+void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_16x16c4__avx512amx_prfm(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -205,6 +206,38 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_16x16c4__avx512amx(
       _mm512_store_epi32(weight_buffer + 960, vh7x0123456789ABCDEF);
       _tile_loadd(5, weight_buffer, 64);
       _tile_dpbssd(0, 4, 5);
+      xnn_prefetch_to_l1((const int8_t*) w + 4096);
+      xnn_prefetch_to_l1((const int8_t*) w + 4160);
+      xnn_prefetch_to_l1((const int8_t*) w + 4224);
+      xnn_prefetch_to_l1((const int8_t*) w + 4288);
+      xnn_prefetch_to_l1((const int8_t*) w + 4352);
+      xnn_prefetch_to_l1((const int8_t*) w + 4416);
+      xnn_prefetch_to_l1((const int8_t*) w + 4480);
+      xnn_prefetch_to_l1((const int8_t*) w + 4544);
+      xnn_prefetch_to_l1((const int8_t*) w + 4608);
+      xnn_prefetch_to_l1((const int8_t*) w + 4672);
+      xnn_prefetch_to_l1((const int8_t*) w + 4736);
+      xnn_prefetch_to_l1((const int8_t*) w + 4800);
+      xnn_prefetch_to_l1((const int8_t*) w + 4864);
+      xnn_prefetch_to_l1((const int8_t*) w + 4928);
+      xnn_prefetch_to_l1((const int8_t*) w + 4992);
+      xnn_prefetch_to_l1((const int8_t*) w + 5056);
+      xnn_prefetch_to_l1((const int8_t*) w + 5120);
+      xnn_prefetch_to_l1((const int8_t*) w + 5184);
+      xnn_prefetch_to_l1((const int8_t*) w + 5248);
+      xnn_prefetch_to_l1((const int8_t*) w + 5312);
+      xnn_prefetch_to_l1((const int8_t*) w + 5376);
+      xnn_prefetch_to_l1((const int8_t*) w + 5440);
+      xnn_prefetch_to_l1((const int8_t*) w + 5504);
+      xnn_prefetch_to_l1((const int8_t*) w + 5568);
+      xnn_prefetch_to_l1((const int8_t*) w + 5632);
+      xnn_prefetch_to_l1((const int8_t*) w + 5696);
+      xnn_prefetch_to_l1((const int8_t*) w + 5760);
+      xnn_prefetch_to_l1((const int8_t*) w + 5824);
+      xnn_prefetch_to_l1((const int8_t*) w + 5888);
+      xnn_prefetch_to_l1((const int8_t*) w + 5952);
+      xnn_prefetch_to_l1((const int8_t*) w + 6016);
+      xnn_prefetch_to_l1((const int8_t*) w + 6080);
 
       w = (const int8_t*) w + 512;
       k -= 64 * sizeof(int8_t);

@@ -335,6 +335,50 @@ std::vector<GemmTestParams> CreateTests1(
 }  // namespace
 
 
+#if XNN_ENABLE_AVX512AMX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F32_QC4W_GEMM_MINMAX_1X32C4__AVX512AMX, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/64,
+          /*adj_k_block=*/64,
+          /*mr=*/1, /*nr=*/32, /*kr=*/4, /*sr=*/1,
+          /*is_igemm=*/false,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x32c4__avx512amx,
+                        xnn_init_f32_qc4w_minmax_avx512vnni_params,
+                        xnn_pack_qs8_qc4w_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_X86_AVX512AMX;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+#endif  // XNN_ENABLE_AVX512AMX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVX512AMX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F32_QC4W_GEMM_MINMAX_7X32C4__AVX512AMX, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/64,
+          /*adj_k_block=*/64,
+          /*mr=*/7, /*nr=*/32, /*kr=*/4, /*sr=*/1,
+          /*is_igemm=*/false,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x32c4__avx512amx,
+                        xnn_init_f32_qc4w_minmax_avx512vnni_params,
+                        xnn_pack_qs8_qc4w_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_X86_AVX512AMX;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+#endif  // XNN_ENABLE_AVX512AMX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
 #if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F32_QC4W_GEMM_MINMAX_6X16C4__NEONDOT, GemmTest,
