@@ -3800,7 +3800,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
     ADD_EXECUTABLE(negate-bench bench/negate.cc)
     TARGET_INCLUDE_DIRECTORIES(negate-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(negate-bench PRIVATE XNNPACK benchmark::benchmark bench-utils)
+    TARGET_LINK_LIBRARIES(negate-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
 
     ADD_EXECUTABLE(prelu-bench bench/prelu.cc)
     TARGET_INCLUDE_DIRECTORIES(prelu-bench PRIVATE .)
@@ -3808,7 +3808,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
     ADD_EXECUTABLE(reciprocal-square-root-bench bench/reciprocal-square-root.cc)
     TARGET_INCLUDE_DIRECTORIES(reciprocal-square-root-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(reciprocal-square-root-bench PRIVATE XNNPACK benchmark::benchmark bench-utils)
+    TARGET_LINK_LIBRARIES(reciprocal-square-root-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
 
     ADD_EXECUTABLE(sigmoid-bench bench/sigmoid.cc)
     TARGET_INCLUDE_DIRECTORIES(sigmoid-bench PRIVATE .)
@@ -3824,11 +3824,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
     ADD_EXECUTABLE(square-root-bench bench/square-root.cc)
     TARGET_INCLUDE_DIRECTORIES(square-root-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(square-root-bench PRIVATE XNNPACK benchmark::benchmark bench-utils)
+    TARGET_LINK_LIBRARIES(square-root-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
 
     ADD_EXECUTABLE(truncation-bench bench/truncation.cc)
     TARGET_INCLUDE_DIRECTORIES(truncation-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(truncation-bench PRIVATE XNNPACK benchmark::benchmark bench-utils)
+    TARGET_LINK_LIBRARIES(truncation-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
 
     ADD_EXECUTABLE(tanh-bench bench/tanh.cc)
     TARGET_INCLUDE_DIRECTORIES(tanh-bench PRIVATE .)
