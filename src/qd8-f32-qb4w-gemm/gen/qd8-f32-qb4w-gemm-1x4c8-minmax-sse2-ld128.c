@@ -47,7 +47,6 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4c8__sse2_ld128(
   float* c0 = c;
 
   const __m128i vmask = _mm_load_si128((const __m128i*) params->sse.mask);  // 0xF0
-  const __m128 one_sixteenth = _mm_load1_ps(&params->sse.one_sixteenth);
   do {
     const __m128 vksum = _mm_load_ps((const float*) w);
     __m128i vinput_zero_point0 = _mm_cvtsi32_si128(*((const int*) &quantization_params[0].zero_point));
@@ -152,6 +151,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4c8__sse2_ld128(
 
     vout0x0123 = _mm_add_ps(vout0x0123, _mm_mul_ps(_mm_cvtepi32_ps(vacc0x0123), vfilter_output_scale0123));
     }
+    __m128 one_sixteenth = _mm_set_ps1(1.0f/16);
     vout0x0123 = _mm_mul_ps(vout0x0123, one_sixteenth);
 
     const __m128 vinput_scale0 = _mm_load1_ps(&quantization_params[0].inv_scale);
