@@ -34,9 +34,8 @@ BENCHMARK(xnnpack_bankers_rounding_f32)
 #ifdef BENCHMARK_TENSORFLOW_LITE
 
 static void tflite_bankers_rounding_f32(benchmark::State& state) {
-  tflite_unary_operator(state, tflite::TensorType_FLOAT32,
-                        tflite::TensorType_FLOAT32,
-                        tflite::BuiltinOperator_ROUND);
+  benchmark_tflite_unary_operator<float, float>(state,
+                                                tflite::BuiltinOperator_ROUND);
 }
 
 BENCHMARK(tflite_bankers_rounding_f32)

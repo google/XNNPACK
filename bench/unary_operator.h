@@ -24,6 +24,7 @@
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "tensorflow/lite/interpreter.h"
 #include "tensorflow/lite/kernels/register.h"
+#include "tensorflow/lite/kernels/test_util.h"
 #include "tensorflow/lite/model.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
@@ -44,7 +45,7 @@ static void benchmark_unary_operator(Create create, Reshape reshape,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
+  std::uniform_real_distribution<float> f32dist(0.0f, 10.0f);
 
   std::vector<In> input(batch_size + XNN_EXTRA_BYTES / sizeof(In));
   std::vector<Out> output(batch_size);
@@ -107,16 +108,22 @@ static void benchmark_unary_operator(Create create, Reshape reshape,
 }
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
-static void tflite_unary_operator(benchmark::State& state,
-                                  tflite::TensorType in_type,
-                                  tflite::TensorType out_type,
-                                  tflite::BuiltinOperator op_code) {
-  const size_t batch_size = state.range(0);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f),
-                          std::ref(rng));
+template <typename T>
+struct TypeToTfliteType {
+  using type = T;
+};
+template <>
+struct TypeToTfliteType<float16> {
+  using type = TfLiteFloat16;
+};
+
+template <typename In, typename Out, class BuildInQuantization,
+          class BuildOutQuantization>
+static void benchmark_tflite_unary_operator(
+    benchmark::State& state, BuildInQuantization in_quantization,
+    BuildOutQuantization out_quantization, tflite::BuiltinOperator op_code) {
+  const size_t batch_size = state.range(0);
 
   flatbuffers::FlatBufferBuilder builder;
   const flatbuffers::Offset<tflite::OperatorCode> operator_code =
@@ -131,10 +138,12 @@ static void tflite_unary_operator(benchmark::State& state,
   const std::array<flatbuffers::Offset<tflite::Tensor>, 2> tensors{{
       tflite::CreateTensor(
           builder, builder.CreateVector<int32_t>(shape.data(), shape.size()),
-          in_type),
+          tflite::TensorTypeFor<typename TypeToTfliteType<In>::type>::value,
+          /*buffer=*/0, /*name=*/0, in_quantization(builder)),
       tflite::CreateTensor(
           builder, builder.CreateVector<int32_t>(shape.data(), shape.size()),
-          out_type),
+          tflite::TensorTypeFor<typename TypeToTfliteType<Out>::type>::value,
+          /*buffer=*/0, /*name=*/0, out_quantization(builder)),
   }};
 
   const std::array<int32_t, 1> op_inputs{{0}};
@@ -174,9 +183,13 @@ static void tflite_unary_operator(benchmark::State& state,
     return;
   }
 
-  std::generate(interpreter->typed_tensor<float>(0),
-                interpreter->typed_tensor<float>(0) + batch_size,
-                std::ref(f32rng));
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  auto f32dist = std::uniform_real_distribution<float>(0.0f, 10.0f);
+  In* input_ptr = reinterpret_cast<In*>(
+      interpreter->typed_tensor<typename TypeToTfliteType<In>::type>(0));
+  std::generate(input_ptr, input_ptr + batch_size,
+                [&]() { return f32dist(rng); });
 
   for (auto _ : state) {
     if (interpreter->Invoke() != kTfLiteOk) {
@@ -199,6 +212,18 @@ static void tflite_unary_operator(benchmark::State& state,
                          benchmark::Counter::kIsRate);
 
   interpreter.reset();
+}
+
+static flatbuffers::Offset<tflite::QuantizationParameters> no_quantization(
+    flatbuffers::FlatBufferBuilder& builder) {
+  return 0;
+}
+
+template <typename In, typename Out>
+static void benchmark_tflite_unary_operator(benchmark::State& state,
+                                            tflite::BuiltinOperator op_code) {
+  return benchmark_tflite_unary_operator<In, Out>(state, no_quantization,
+                                                  no_quantization, op_code);
 }
 #endif  // BENCHMARK_TENSORFLOW_LITE
 

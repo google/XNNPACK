@@ -1034,12 +1034,18 @@ xnnpack_cc_library(
     "abs",
     "bankers_rounding",
     "ceiling",
+    "convert",
+    "elu",
     "floor",
+    "leaky_relu",
     "negate",
     "hardswish",
     "reciprocal_square_root",
+    "sigmoid",
+    "softmax",
     "square",
     "square_root",
+    "tanh",
     "truncation",
 ]]
 
@@ -1066,16 +1072,6 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "convert_bench",
-    srcs = [
-        "convert.cc",
-    ],
-    copts = xnnpack_optional_tflite_copts(),
-    tags = ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-)
-
-xnnpack_benchmark(
     name = "convolution_bench",
     srcs = ["convolution.cc"],
     copts = xnnpack_optional_tflite_copts(),
@@ -1086,14 +1082,6 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "deconvolution_bench",
     srcs = ["deconvolution.cc"],
-    copts = xnnpack_optional_tflite_copts(),
-    tags = ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-)
-
-xnnpack_benchmark(
-    name = "elu_bench",
-    srcs = ["elu.cc"],
     copts = xnnpack_optional_tflite_copts(),
     tags = ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
@@ -1114,14 +1102,6 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "leaky_relu_bench",
-    srcs = ["leaky-relu.cc"],
-    copts = xnnpack_optional_tflite_copts(),
-    tags = ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-)
-
-xnnpack_benchmark(
     name = "max_pooling_bench",
     srcs = ["max-pooling.cc"],
     deps = OPERATOR_BENCHMARK_DEPS,
@@ -1138,30 +1118,6 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "scaled_dot_product_attention_bench",
     srcs = ["scaled-dot-product-attention.cc"],
-    copts = xnnpack_optional_tflite_copts(),
-    tags = ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-)
-
-xnnpack_benchmark(
-    name = "sigmoid_bench",
-    srcs = ["sigmoid.cc"],
-    copts = xnnpack_optional_tflite_copts(),
-    tags = ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-)
-
-xnnpack_benchmark(
-    name = "softmax_bench",
-    srcs = ["softmax.cc"],
-    copts = xnnpack_optional_tflite_copts(),
-    tags = ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-)
-
-xnnpack_benchmark(
-    name = "tanh_bench",
-    srcs = ["tanh.cc"],
     copts = xnnpack_optional_tflite_copts(),
     tags = ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
