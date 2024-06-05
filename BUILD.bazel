@@ -1580,10 +1580,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     hvx_srcs = ALL_HEXAGON_MICROKERNEL_SRCS + ALL_HVX_MICROKERNEL_SRCS,
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":microkernels_h",
-    ],
+    deps = MICROKERNEL_DEPS,
 )
 
 xnnpack_cc_library(
