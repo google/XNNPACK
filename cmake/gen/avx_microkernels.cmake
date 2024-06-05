@@ -224,50 +224,6 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt-u8.c
   src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt-u16.c
   src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt-u32.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut4-p4h2ts-perm-div-u8.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut4-p4h2ts-perm-div-u16.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut4-p4h2ts-perm-div-u24.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut4-p4h2ts-perm-div-u32.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut4-p4h2ts-perm-div-u40.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut4-p4h2ts-perm-div-u48.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut4-p4h2ts-perm-div-u56.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut4-p4h2ts-perm-div-u64.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut4-p4h2ts-perm-div-u72.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut4-p4h2ts-perm-div-u80.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut8-p4h3ts-div-u8.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut8-p4h3ts-div-u16.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut8-p4h3ts-div-u24.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut8-p4h3ts-div-u32.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-div-u8.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-div-u16.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-div-u24.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-div-u32.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-div-u40.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-div-u48.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-div-u56.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-div-u64.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-div-u72.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-div-u80.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr1-u8.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr1-u16.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr1-u24.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr1-u32.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr1-u40.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr1-u48.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr1-u56.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr1-u64.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr1-u72.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr1-u80.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr2-u8.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr2-u16.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr2-u24.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr2-u32.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr2-u40.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr2-u48.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr2-u56.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr2-u64.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr2-u72.c
-  src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr2-u80.c
   src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-div.c
   src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-nr.c
   src/f32-vunary/gen/f32-vabs-avx.c
