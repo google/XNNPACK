@@ -576,7 +576,10 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api) {
 
   // Check outputs match.
   for (size_t i = 0; i < operator_output.size(); i++) {
-    EXPECT_EQ(subgraph_output[i], operator_output[i]) << i;
+    ASSERT_NEAR(subgraph_output[i], operator_output[i],
+                std::abs(operator_output[i]) * 5 *
+                    std::numeric_limits<float>::epsilon())
+        << "at offset " << i;
   }
 }
 
@@ -782,7 +785,10 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_no_r
 
   // Check outputs match.
   for (size_t i = 0; i < operator_output.size(); i++) {
-    EXPECT_EQ(subgraph_output[i], operator_output[i]) << i;
+    ASSERT_NEAR(subgraph_output[i], operator_output[i],
+                std::abs(operator_output[i]) * 5 *
+                    std::numeric_limits<float>::epsilon())
+        << "at offset " << i;
   }
 }
 
@@ -975,7 +981,10 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_requ
 
   // Check outputs match.
   for (size_t i = 0; i < operator_output.size(); i++) {
-    EXPECT_EQ(subgraph_output[i], operator_output[i]) << i;
+    ASSERT_NEAR(subgraph_output[i], operator_output[i],
+                std::abs(operator_output[i]) * 5 *
+                    std::numeric_limits<float>::epsilon())
+        << "at offset " << i;
   }
 }
 

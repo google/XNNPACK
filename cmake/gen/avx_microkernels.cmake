@@ -268,14 +268,8 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr2-u64.c
   src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr2-u72.c
   src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-p6h5ts-nr2-u80.c
-  src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-div-u8.c
-  src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-div-u16.c
-  src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-div-u24.c
-  src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-div-u32.c
-  src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-nr-u8.c
-  src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-nr-u16.c
-  src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-nr-u24.c
-  src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-nr-u32.c
+  src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-div.c
+  src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-nr.c
   src/f32-vunary/gen/f32-vabs-avx.c
   src/f32-vunary/gen/f32-vneg-avx.c
   src/f32-vunary/gen/f32-vsqr-avx.c

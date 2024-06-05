@@ -14380,68 +14380,6 @@ void xnn_f32_vsqrt_ukernel__scalar_sqrt_u1(
   }
 }
 
-void xnn_f32_vtanh_ukernel__scalar_rational_9_6_u1(
-    size_t batch,
-    const float* input,
-    float* output,
-    const union xnn_f32_tanh_params params[restrict XNN_MIN_ELEMENTS(1)])
-{
-  assert(batch != 0);
-  assert(batch % sizeof(float) == 0);
-  assert(input != NULL);
-  assert(output != NULL);
-
-  // Cap the inputs to this value as `tanh(x)` will always be `+/-1.0f` beyond
-  // this point. This value is chosen as the first floating point number as of
-  // which the interpolation returns 1.0f.
-  const float max_x = 7.623543739319f;
-  const float min_x = -7.623543739319f;
-  
-  // The monomial coefficients of the numerator polynomial (odd).
-  const float alpha_1 = -9.022999554873e-03f;
-  const float alpha_3 = -1.146968104877e-03f;
-  const float alpha_5 = -2.432360815874e-05f;
-  const float alpha_7 = -6.458659385089e-08f;
-  const float alpha_9 = 5.535878699892e-11f;
-
-  // The monomial coefficients of the denominator polynomial (even).
-  const float beta_0 = -9.023001417518e-03f;
-  const float beta_2 = -4.154618829489e-03f;
-  const float beta_4 = -2.061512641376e-04f;
-  const float beta_6 = -1.774490101525e-06f;
-  
-  for (; batch >= sizeof(float); batch -= sizeof(float)) {
-    float x = *input;
-    input++;
-
-    // Clamp the inputs to the interpolation range. Note that we don't use
-    //`fminf` or `fmaxf` since they let `NaN`s through.
-    x = max_x < x ? max_x : x;
-    x = x < min_x ? min_x : x;
-
-    // Since the polynomials are odd/even, we need x^2.
-    const float x2 = x * x;
-
-    // Evaluate the numerator polynomial p.
-    float p = x2 * alpha_9 + alpha_7;
-    p = x2 * p + alpha_5;
-    p = x2 * p + alpha_3;
-    p = x2 * p + alpha_1;
-    p = x * p;
-
-    // Evaluate the denominator polynomial q.
-    float q = x2 * beta_6 + beta_4;
-    q = x2 * q + beta_2;
-    q = x2 * q + beta_0;
-
-    // Divide the numerator by the denominator.
-    const float y =  p / q;
-
-    *output = y;
-    output++;
-  }
-}
-
 void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4__scalar(
     size_t mr,
     size_t nc,
@@ -30320,5 +30258,73 @@ void xnn_f32_vsqr_ukernel__scalar_u4(
     const xnn_simd_f32_t vy = xnn_mul_f32(vx, vx);
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
+  }
+}
+
+void xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u1(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_tanh_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_f32 == 1);
+
+  // Cap the inputs to this value as `tanh(x)` will always be `+/-1.0f` beyond
+  // this point. This value is chosen as the first floating point number as of
+  // which the interpolation returns 1.0f.
+  #if XNN_SIMD_HAS_NATIVE_FMA
+    XNN_SIMD_CONST_F32(vmax_x, 7.646893501282f);
+    XNN_SIMD_CONST_F32(vmin_x, -7.646893501282f);
+  #else
+    XNN_SIMD_CONST_F32(vmax_x, 7.623543739319f);
+    XNN_SIMD_CONST_F32(vmin_x, -7.623543739319f);
+  #endif  // XNN_SIMD_HAS_NATIVE_FMA
+
+  // The monomial coefficients of the numerator polynomial (odd).
+  XNN_SIMD_CONST_F32(valpha_1, -9.022999554873e-03f);
+  XNN_SIMD_CONST_F32(valpha_3, -1.146968104877e-03f);
+  XNN_SIMD_CONST_F32(valpha_5, -2.432360815874e-05f);
+  XNN_SIMD_CONST_F32(valpha_7, -6.458659385089e-08f);
+  XNN_SIMD_CONST_F32(valpha_9, 5.535878699892e-11f);
+
+  // The monomial coefficients of the denominator polynomial (even).
+  XNN_SIMD_CONST_F32(vbeta_0, -9.023001417518e-03f);
+  XNN_SIMD_CONST_F32(vbeta_2, -4.154618829489e-03f);
+  XNN_SIMD_CONST_F32(vbeta_4, -2.061512641376e-04f);
+  XNN_SIMD_CONST_F32(vbeta_6, -1.774490101525e-06f);
+
+
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    xnn_simd_f32_t vx = xnn_loadu_f32(input);
+    input += xnn_simd_size_f32;
+
+    // Clamp the inputs to the interpolation range.
+    vx = xnn_min_f32(vmax_x, vx);
+    vx = xnn_max_f32(vmin_x, vx);
+
+    // Since the polynomials are odd/even, we need x^2.
+    const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
+
+    // Evaluate the numerator polynomial p.
+    xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_9, valpha_7);
+    vp = xnn_fmadd_f32(vx2, vp, valpha_5);
+    vp = xnn_fmadd_f32(vx2, vp, valpha_3);
+    vp = xnn_fmadd_f32(vx2, vp, valpha_1);
+    vp = xnn_mul_f32(vx, vp);
+
+    // Evaluate the denominator polynomial q.
+    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_6, vbeta_4);
+    vq = xnn_fmadd_f32(vx2, vq, vbeta_2);
+    vq = xnn_fmadd_f32(vx2, vq, vbeta_0);
+
+    // Divide the numerator by the denominator.
+    const xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
+
+    xnn_storeu_f32(output, vy);
+    output += xnn_simd_size_f32;
   }
 }

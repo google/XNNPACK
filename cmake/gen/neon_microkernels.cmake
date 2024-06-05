@@ -383,6 +383,8 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-vtanh/gen/f32-vtanh-neon-expm1minus-rr1-p6h5ts-nr2recps-u8.c
   src/f32-vtanh/gen/f32-vtanh-neon-expm1minus-rr1-p6h5ts-nr2recps-u12.c
   src/f32-vtanh/gen/f32-vtanh-neon-expm1minus-rr1-p6h5ts-nr2recps-u16.c
+  src/f32-vtanh/gen/f32-vtanh-neon-rational-9-6-div.c
+  src/f32-vtanh/gen/f32-vtanh-neon-rational-9-6-nr.c
   src/f32-vunary/gen/f32-vabs-neon.c
   src/f32-vunary/gen/f32-vneg-neon.c
   src/f32-vunary/gen/f32-vsqr-neon.c

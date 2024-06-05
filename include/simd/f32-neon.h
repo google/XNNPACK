@@ -19,10 +19,10 @@ static const size_t xnn_simd_log2_size_f32 = 2;
 static const size_t xnn_simd_bytes_f32 = xnn_simd_size_f32 * sizeof(float);
 
 #define XNN_SIMD_CONST_F32(var, val) \
-  const xnn_simd_f32_t var = {(val), (val), (val), (val)};
+  const float32x4_t var = vdupq_n_f32(val);
 
 #define XNN_SIMD_CONST_U32(var, val) \
-  const uint32x4_t var = {(val), (val), (val), (val)};
+  const uint32x4_t var = vdupq_n_u32(val);
 
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return vdupq_n_f32(0.f); }

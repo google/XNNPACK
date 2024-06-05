@@ -400,30 +400,30 @@ TEST(F32_VTANH__SCALAR_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U1, batch_eq_1) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U1, batch_eq_1) {
   VUnaryMicrokernelTester()
     .batch_size(1)
-    .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u1);
+    .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u1);
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U1, batch_gt_1) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U1, batch_gt_1) {
   for (size_t batch_size = 1 + 1; batch_size < 10; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
-      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u1);
+      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u1);
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U1, inplace) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U1, inplace) {
   for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .inplace(true)
-      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u1);
+      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u1);
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U1, special_values) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U1, special_values) {
   constexpr size_t num_elements = 7;
   constexpr size_t buffered_size =
       num_elements + XNN_EXTRA_BYTES / sizeof(float);
@@ -432,7 +432,7 @@ TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U1, special_values) {
   std::array<float, num_elements> expected =
       {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
   std::array<float, buffered_size> outputs;
-  xnn_f32_vtanh_ukernel__scalar_rational_9_6_u1(
+  xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u1(
       num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
   for (int i = 0; i < num_elements; i++) {
     if (std::isfinite(expected[i])) {
@@ -450,46 +450,46 @@ TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U1, special_values) {
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U2, batch_eq_2) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U2, batch_eq_2) {
   VUnaryMicrokernelTester()
     .batch_size(2)
-    .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u2);
+    .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u2);
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U2, batch_div_2) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U2, batch_div_2) {
   for (size_t batch_size = 4; batch_size < 20; batch_size += 2) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
-      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u2);
+      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u2);
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U2, batch_lt_2) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U2, batch_lt_2) {
   for (size_t batch_size = 1; batch_size < 2; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
-      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u2);
+      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u2);
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U2, batch_gt_2) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U2, batch_gt_2) {
   for (size_t batch_size = 2 + 1; batch_size < 4; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
-      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u2);
+      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u2);
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U2, inplace) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U2, inplace) {
   for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .inplace(true)
-      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u2);
+      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u2);
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U2, special_values) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U2, special_values) {
   constexpr size_t num_elements = 7;
   constexpr size_t buffered_size =
       num_elements + XNN_EXTRA_BYTES / sizeof(float);
@@ -498,7 +498,7 @@ TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U2, special_values) {
   std::array<float, num_elements> expected =
       {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
   std::array<float, buffered_size> outputs;
-  xnn_f32_vtanh_ukernel__scalar_rational_9_6_u2(
+  xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u2(
       num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
   for (int i = 0; i < num_elements; i++) {
     if (std::isfinite(expected[i])) {
@@ -516,46 +516,46 @@ TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U2, special_values) {
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U4, batch_eq_4) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U4, batch_eq_4) {
   VUnaryMicrokernelTester()
     .batch_size(4)
-    .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u4);
+    .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u4);
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U4, batch_div_4) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U4, batch_div_4) {
   for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
-      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u4);
+      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u4);
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U4, batch_lt_4) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U4, batch_lt_4) {
   for (size_t batch_size = 1; batch_size < 4; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
-      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u4);
+      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u4);
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U4, batch_gt_4) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U4, batch_gt_4) {
   for (size_t batch_size = 4 + 1; batch_size < 8; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
-      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u4);
+      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u4);
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U4, inplace) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U4, inplace) {
   for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .inplace(true)
-      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u4);
+      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u4);
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U4, special_values) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U4, special_values) {
   constexpr size_t num_elements = 7;
   constexpr size_t buffered_size =
       num_elements + XNN_EXTRA_BYTES / sizeof(float);
@@ -564,7 +564,7 @@ TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U4, special_values) {
   std::array<float, num_elements> expected =
       {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
   std::array<float, buffered_size> outputs;
-  xnn_f32_vtanh_ukernel__scalar_rational_9_6_u4(
+  xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u4(
       num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
   for (int i = 0; i < num_elements; i++) {
     if (std::isfinite(expected[i])) {
@@ -582,46 +582,46 @@ TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U4, special_values) {
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U8, batch_eq_8) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U8, batch_eq_8) {
   VUnaryMicrokernelTester()
     .batch_size(8)
-    .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u8);
+    .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u8);
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U8, batch_div_8) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U8, batch_div_8) {
   for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
-      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u8);
+      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u8);
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U8, batch_lt_8) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U8, batch_lt_8) {
   for (size_t batch_size = 1; batch_size < 8; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
-      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u8);
+      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u8);
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U8, batch_gt_8) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U8, batch_gt_8) {
   for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
-      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u8);
+      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u8);
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U8, inplace) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U8, inplace) {
   for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .inplace(true)
-      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_u8);
+      .Test(xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u8);
   }
 }
 
-TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U8, special_values) {
+TEST(F32_VTANH__SCALAR_RATIONAL_9_6_DIV_U8, special_values) {
   constexpr size_t num_elements = 7;
   constexpr size_t buffered_size =
       num_elements + XNN_EXTRA_BYTES / sizeof(float);
@@ -630,7 +630,7 @@ TEST(F32_VTANH__SCALAR_RATIONAL_9_6_U8, special_values) {
   std::array<float, num_elements> expected =
       {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
   std::array<float, buffered_size> outputs;
-  xnn_f32_vtanh_ukernel__scalar_rational_9_6_u8(
+  xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u8(
       num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
   for (int i = 0; i < num_elements; i++) {
     if (std::isfinite(expected[i])) {
@@ -2655,7 +2655,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_SSE2;
     VUnaryMicrokernelTester()
       .batch_size(4)
-      .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u4, xnn_init_f32_tanh_sse_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u4);
   }
 
   TEST(F32_VTANH__SSE2_RATIONAL_9_6_DIV_U4, batch_div_4) {
@@ -2663,7 +2663,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u4, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u4);
     }
   }
 
@@ -2672,7 +2672,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 4; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u4, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u4);
     }
   }
 
@@ -2681,7 +2681,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 4 + 1; batch_size < 8; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u4, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u4);
     }
   }
 
@@ -2691,7 +2691,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u4, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u4);
     }
   }
 
@@ -2705,10 +2705,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_sse_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u4(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -2732,7 +2730,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_SSE2;
     VUnaryMicrokernelTester()
       .batch_size(8)
-      .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u8, xnn_init_f32_tanh_sse_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u8);
   }
 
   TEST(F32_VTANH__SSE2_RATIONAL_9_6_DIV_U8, batch_div_8) {
@@ -2740,7 +2738,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u8, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u8);
     }
   }
 
@@ -2749,7 +2747,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 8; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u8, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u8);
     }
   }
 
@@ -2758,7 +2756,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u8, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u8);
     }
   }
 
@@ -2768,7 +2766,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u8, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u8);
     }
   }
 
@@ -2782,10 +2780,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_sse_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u8(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -2809,7 +2805,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_SSE2;
     VUnaryMicrokernelTester()
       .batch_size(12)
-      .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u12, xnn_init_f32_tanh_sse_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u12);
   }
 
   TEST(F32_VTANH__SSE2_RATIONAL_9_6_DIV_U12, batch_div_12) {
@@ -2817,7 +2813,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 24; batch_size < 120; batch_size += 12) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u12, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u12);
     }
   }
 
@@ -2826,7 +2822,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 12; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u12, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u12);
     }
   }
 
@@ -2835,7 +2831,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 12 + 1; batch_size < 24; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u12, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u12);
     }
   }
 
@@ -2845,7 +2841,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u12, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u12);
     }
   }
 
@@ -2859,10 +2855,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_sse_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u12(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -2886,7 +2880,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_SSE2;
     VUnaryMicrokernelTester()
       .batch_size(16)
-      .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u16, xnn_init_f32_tanh_sse_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u16);
   }
 
   TEST(F32_VTANH__SSE2_RATIONAL_9_6_DIV_U16, batch_div_16) {
@@ -2894,7 +2888,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u16, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u16);
     }
   }
 
@@ -2903,7 +2897,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u16, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u16);
     }
   }
 
@@ -2912,7 +2906,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u16, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u16);
     }
   }
 
@@ -2922,7 +2916,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u16, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u16);
     }
   }
 
@@ -2936,10 +2930,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_sse_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u16(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -2963,7 +2955,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_SSE2;
     VUnaryMicrokernelTester()
       .batch_size(4)
-      .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u4, xnn_init_f32_tanh_sse_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u4);
   }
 
   TEST(F32_VTANH__SSE2_RATIONAL_9_6_NR_U4, batch_div_4) {
@@ -2971,7 +2963,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u4, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u4);
     }
   }
 
@@ -2980,7 +2972,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 4; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u4, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u4);
     }
   }
 
@@ -2989,7 +2981,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 4 + 1; batch_size < 8; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u4, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u4);
     }
   }
 
@@ -2999,7 +2991,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u4, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u4);
     }
   }
 
@@ -3013,10 +3005,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_sse_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u4(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -3040,7 +3030,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_SSE2;
     VUnaryMicrokernelTester()
       .batch_size(8)
-      .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u8, xnn_init_f32_tanh_sse_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u8);
   }
 
   TEST(F32_VTANH__SSE2_RATIONAL_9_6_NR_U8, batch_div_8) {
@@ -3048,7 +3038,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u8, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u8);
     }
   }
 
@@ -3057,7 +3047,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 8; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u8, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u8);
     }
   }
 
@@ -3066,7 +3056,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u8, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u8);
     }
   }
 
@@ -3076,7 +3066,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u8, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u8);
     }
   }
 
@@ -3090,10 +3080,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_sse_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u8(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -3117,7 +3105,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_SSE2;
     VUnaryMicrokernelTester()
       .batch_size(12)
-      .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u12, xnn_init_f32_tanh_sse_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u12);
   }
 
   TEST(F32_VTANH__SSE2_RATIONAL_9_6_NR_U12, batch_div_12) {
@@ -3125,7 +3113,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 24; batch_size < 120; batch_size += 12) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u12, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u12);
     }
   }
 
@@ -3134,7 +3122,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 12; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u12, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u12);
     }
   }
 
@@ -3143,7 +3131,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 12 + 1; batch_size < 24; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u12, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u12);
     }
   }
 
@@ -3153,7 +3141,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u12, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u12);
     }
   }
 
@@ -3167,10 +3155,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_sse_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u12(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -3194,7 +3180,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_SSE2;
     VUnaryMicrokernelTester()
       .batch_size(16)
-      .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u16, xnn_init_f32_tanh_sse_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u16);
   }
 
   TEST(F32_VTANH__SSE2_RATIONAL_9_6_NR_U16, batch_div_16) {
@@ -3202,7 +3188,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u16, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u16);
     }
   }
 
@@ -3211,7 +3197,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u16, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u16);
     }
   }
 
@@ -3220,7 +3206,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u16, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u16);
     }
   }
 
@@ -3230,7 +3216,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u16, xnn_init_f32_tanh_sse_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u16);
     }
   }
 
@@ -3244,10 +3230,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_sse_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u16(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -8507,7 +8491,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_AVX;
     VUnaryMicrokernelTester()
       .batch_size(8)
-      .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u8, xnn_init_f32_tanh_avx_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u8);
   }
 
   TEST(F32_VTANH__AVX_RATIONAL_9_6_DIV_U8, batch_div_8) {
@@ -8515,7 +8499,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u8, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u8);
     }
   }
 
@@ -8524,7 +8508,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 8; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u8, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u8);
     }
   }
 
@@ -8533,7 +8517,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u8, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u8);
     }
   }
 
@@ -8543,7 +8527,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u8, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u8);
     }
   }
 
@@ -8557,10 +8541,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_avx_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u8(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -8584,7 +8566,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_AVX;
     VUnaryMicrokernelTester()
       .batch_size(16)
-      .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u16, xnn_init_f32_tanh_avx_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u16);
   }
 
   TEST(F32_VTANH__AVX_RATIONAL_9_6_DIV_U16, batch_div_16) {
@@ -8592,7 +8574,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u16, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u16);
     }
   }
 
@@ -8601,7 +8583,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u16, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u16);
     }
   }
 
@@ -8610,7 +8592,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u16, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u16);
     }
   }
 
@@ -8620,7 +8602,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u16, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u16);
     }
   }
 
@@ -8634,10 +8616,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_avx_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u16(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -8661,7 +8641,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_AVX;
     VUnaryMicrokernelTester()
       .batch_size(24)
-      .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u24, xnn_init_f32_tanh_avx_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u24);
   }
 
   TEST(F32_VTANH__AVX_RATIONAL_9_6_DIV_U24, batch_div_24) {
@@ -8669,7 +8649,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 48; batch_size < 240; batch_size += 24) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u24, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u24);
     }
   }
 
@@ -8678,7 +8658,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 24; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u24, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u24);
     }
   }
 
@@ -8687,7 +8667,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 24 + 1; batch_size < 48; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u24, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u24);
     }
   }
 
@@ -8697,7 +8677,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u24, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u24);
     }
   }
 
@@ -8711,10 +8691,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_avx_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u24(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -8738,7 +8716,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_AVX;
     VUnaryMicrokernelTester()
       .batch_size(32)
-      .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u32, xnn_init_f32_tanh_avx_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u32);
   }
 
   TEST(F32_VTANH__AVX_RATIONAL_9_6_DIV_U32, batch_div_32) {
@@ -8746,7 +8724,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u32, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u32);
     }
   }
 
@@ -8755,7 +8733,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u32, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u32);
     }
   }
 
@@ -8764,7 +8742,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 32 + 1; batch_size < 64; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u32, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u32);
     }
   }
 
@@ -8774,7 +8752,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u32, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u32);
     }
   }
 
@@ -8788,10 +8766,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_avx_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u32(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -8815,7 +8791,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_AVX;
     VUnaryMicrokernelTester()
       .batch_size(8)
-      .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u8, xnn_init_f32_tanh_avx_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u8);
   }
 
   TEST(F32_VTANH__AVX_RATIONAL_9_6_NR_U8, batch_div_8) {
@@ -8823,7 +8799,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u8, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u8);
     }
   }
 
@@ -8832,7 +8808,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 8; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u8, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u8);
     }
   }
 
@@ -8841,7 +8817,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u8, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u8);
     }
   }
 
@@ -8851,7 +8827,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u8, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u8);
     }
   }
 
@@ -8865,10 +8841,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_avx_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u8(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -8892,7 +8866,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_AVX;
     VUnaryMicrokernelTester()
       .batch_size(16)
-      .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u16, xnn_init_f32_tanh_avx_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u16);
   }
 
   TEST(F32_VTANH__AVX_RATIONAL_9_6_NR_U16, batch_div_16) {
@@ -8900,7 +8874,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u16, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u16);
     }
   }
 
@@ -8909,7 +8883,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u16, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u16);
     }
   }
 
@@ -8918,7 +8892,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u16, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u16);
     }
   }
 
@@ -8928,7 +8902,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u16, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u16);
     }
   }
 
@@ -8942,10 +8916,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_avx_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u16(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -8969,7 +8941,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_AVX;
     VUnaryMicrokernelTester()
       .batch_size(24)
-      .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u24, xnn_init_f32_tanh_avx_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u24);
   }
 
   TEST(F32_VTANH__AVX_RATIONAL_9_6_NR_U24, batch_div_24) {
@@ -8977,7 +8949,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 48; batch_size < 240; batch_size += 24) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u24, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u24);
     }
   }
 
@@ -8986,7 +8958,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 24; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u24, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u24);
     }
   }
 
@@ -8995,7 +8967,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 24 + 1; batch_size < 48; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u24, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u24);
     }
   }
 
@@ -9005,7 +8977,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u24, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u24);
     }
   }
 
@@ -9019,10 +8991,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_avx_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u24(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -9046,7 +9016,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_AVX;
     VUnaryMicrokernelTester()
       .batch_size(32)
-      .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u32, xnn_init_f32_tanh_avx_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u32);
   }
 
   TEST(F32_VTANH__AVX_RATIONAL_9_6_NR_U32, batch_div_32) {
@@ -9054,7 +9024,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u32, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u32);
     }
   }
 
@@ -9063,7 +9033,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u32, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u32);
     }
   }
 
@@ -9072,7 +9042,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 32 + 1; batch_size < 64; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u32, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u32);
     }
   }
 
@@ -9082,7 +9052,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u32, xnn_init_f32_tanh_avx_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u32);
     }
   }
 
@@ -9096,10 +9066,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_avx_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u32(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -13589,7 +13557,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_FMA3;
     VUnaryMicrokernelTester()
       .batch_size(8)
-      .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u8, xnn_init_f32_tanh_fma3_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u8);
   }
 
   TEST(F32_VTANH__FMA3_RATIONAL_9_6_DIV_U8, batch_div_8) {
@@ -13597,7 +13565,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u8, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u8);
     }
   }
 
@@ -13606,7 +13574,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 8; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u8, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u8);
     }
   }
 
@@ -13615,7 +13583,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u8, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u8);
     }
   }
 
@@ -13625,7 +13593,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u8, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u8);
     }
   }
 
@@ -13639,10 +13607,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_fma3_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u8(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -13666,7 +13632,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_FMA3;
     VUnaryMicrokernelTester()
       .batch_size(16)
-      .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u16, xnn_init_f32_tanh_fma3_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u16);
   }
 
   TEST(F32_VTANH__FMA3_RATIONAL_9_6_DIV_U16, batch_div_16) {
@@ -13674,7 +13640,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u16, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u16);
     }
   }
 
@@ -13683,7 +13649,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u16, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u16);
     }
   }
 
@@ -13692,7 +13658,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u16, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u16);
     }
   }
 
@@ -13702,7 +13668,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u16, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u16);
     }
   }
 
@@ -13716,10 +13682,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_fma3_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u16(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -13743,7 +13707,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_FMA3;
     VUnaryMicrokernelTester()
       .batch_size(24)
-      .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u24, xnn_init_f32_tanh_fma3_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u24);
   }
 
   TEST(F32_VTANH__FMA3_RATIONAL_9_6_DIV_U24, batch_div_24) {
@@ -13751,7 +13715,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 48; batch_size < 240; batch_size += 24) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u24, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u24);
     }
   }
 
@@ -13760,7 +13724,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 24; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u24, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u24);
     }
   }
 
@@ -13769,7 +13733,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 24 + 1; batch_size < 48; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u24, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u24);
     }
   }
 
@@ -13779,7 +13743,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u24, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u24);
     }
   }
 
@@ -13793,10 +13757,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_fma3_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u24(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -13820,7 +13782,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_FMA3;
     VUnaryMicrokernelTester()
       .batch_size(32)
-      .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u32, xnn_init_f32_tanh_fma3_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u32);
   }
 
   TEST(F32_VTANH__FMA3_RATIONAL_9_6_DIV_U32, batch_div_32) {
@@ -13828,7 +13790,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u32, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u32);
     }
   }
 
@@ -13837,7 +13799,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u32, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u32);
     }
   }
 
@@ -13846,7 +13808,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 32 + 1; batch_size < 64; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u32, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u32);
     }
   }
 
@@ -13856,7 +13818,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u32, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u32);
     }
   }
 
@@ -13870,10 +13832,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_fma3_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u32(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -13897,7 +13857,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_FMA3;
     VUnaryMicrokernelTester()
       .batch_size(8)
-      .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u8, xnn_init_f32_tanh_fma3_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u8);
   }
 
   TEST(F32_VTANH__FMA3_RATIONAL_9_6_NR_U8, batch_div_8) {
@@ -13905,7 +13865,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u8, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u8);
     }
   }
 
@@ -13914,7 +13874,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 8; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u8, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u8);
     }
   }
 
@@ -13923,7 +13883,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u8, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u8);
     }
   }
 
@@ -13933,7 +13893,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u8, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u8);
     }
   }
 
@@ -13947,10 +13907,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_fma3_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u8(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -13974,7 +13932,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_FMA3;
     VUnaryMicrokernelTester()
       .batch_size(16)
-      .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u16, xnn_init_f32_tanh_fma3_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u16);
   }
 
   TEST(F32_VTANH__FMA3_RATIONAL_9_6_NR_U16, batch_div_16) {
@@ -13982,7 +13940,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u16, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u16);
     }
   }
 
@@ -13991,7 +13949,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u16, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u16);
     }
   }
 
@@ -14000,7 +13958,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u16, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u16);
     }
   }
 
@@ -14010,7 +13968,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u16, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u16);
     }
   }
 
@@ -14024,10 +13982,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_fma3_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u16(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -14051,7 +14007,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_FMA3;
     VUnaryMicrokernelTester()
       .batch_size(24)
-      .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u24, xnn_init_f32_tanh_fma3_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u24);
   }
 
   TEST(F32_VTANH__FMA3_RATIONAL_9_6_NR_U24, batch_div_24) {
@@ -14059,7 +14015,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 48; batch_size < 240; batch_size += 24) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u24, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u24);
     }
   }
 
@@ -14068,7 +14024,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 24; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u24, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u24);
     }
   }
 
@@ -14077,7 +14033,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 24 + 1; batch_size < 48; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u24, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u24);
     }
   }
 
@@ -14087,7 +14043,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u24, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u24);
     }
   }
 
@@ -14101,10 +14057,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_fma3_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u24(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -14128,7 +14082,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_FMA3;
     VUnaryMicrokernelTester()
       .batch_size(32)
-      .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u32, xnn_init_f32_tanh_fma3_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u32);
   }
 
   TEST(F32_VTANH__FMA3_RATIONAL_9_6_NR_U32, batch_div_32) {
@@ -14136,7 +14090,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u32, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u32);
     }
   }
 
@@ -14145,7 +14099,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u32, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u32);
     }
   }
 
@@ -14154,7 +14108,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 32 + 1; batch_size < 64; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u32, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u32);
     }
   }
 
@@ -14164,7 +14118,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u32, xnn_init_f32_tanh_fma3_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u32);
     }
   }
 
@@ -14178,10 +14132,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_fma3_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u32(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -27295,7 +27247,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_AVX512F;
     VUnaryMicrokernelTester()
       .batch_size(16)
-      .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u16, xnn_init_f32_tanh_avx512_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u16);
   }
 
   TEST(F32_VTANH__AVX512F_RATIONAL_9_6_DIV_U16, batch_div_16) {
@@ -27303,7 +27255,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u16, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u16);
     }
   }
 
@@ -27312,7 +27264,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u16, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u16);
     }
   }
 
@@ -27321,7 +27273,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u16, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u16);
     }
   }
 
@@ -27331,7 +27283,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u16, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u16);
     }
   }
 
@@ -27345,10 +27297,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_avx512_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u16(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -27372,7 +27322,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_AVX512F;
     VUnaryMicrokernelTester()
       .batch_size(32)
-      .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u32, xnn_init_f32_tanh_avx512_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u32);
   }
 
   TEST(F32_VTANH__AVX512F_RATIONAL_9_6_DIV_U32, batch_div_32) {
@@ -27380,7 +27330,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u32, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u32);
     }
   }
 
@@ -27389,7 +27339,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u32, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u32);
     }
   }
 
@@ -27398,7 +27348,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 32 + 1; batch_size < 64; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u32, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u32);
     }
   }
 
@@ -27408,7 +27358,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u32, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u32);
     }
   }
 
@@ -27422,10 +27372,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_avx512_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u32(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -27449,7 +27397,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_AVX512F;
     VUnaryMicrokernelTester()
       .batch_size(48)
-      .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u48, xnn_init_f32_tanh_avx512_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u48);
   }
 
   TEST(F32_VTANH__AVX512F_RATIONAL_9_6_DIV_U48, batch_div_48) {
@@ -27457,7 +27405,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 96; batch_size < 480; batch_size += 48) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u48, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u48);
     }
   }
 
@@ -27466,7 +27414,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 48; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u48, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u48);
     }
   }
 
@@ -27475,7 +27423,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 48 + 1; batch_size < 96; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u48, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u48);
     }
   }
 
@@ -27485,7 +27433,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u48, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u48);
     }
   }
 
@@ -27499,10 +27447,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_avx512_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u48(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -27526,7 +27472,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_AVX512F;
     VUnaryMicrokernelTester()
       .batch_size(64)
-      .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u64, xnn_init_f32_tanh_avx512_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u64);
   }
 
   TEST(F32_VTANH__AVX512F_RATIONAL_9_6_DIV_U64, batch_div_64) {
@@ -27534,7 +27480,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u64, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u64);
     }
   }
 
@@ -27543,7 +27489,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 64; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u64, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u64);
     }
   }
 
@@ -27552,7 +27498,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 64 + 1; batch_size < 128; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u64, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u64);
     }
   }
 
@@ -27562,7 +27508,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u64, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u64);
     }
   }
 
@@ -27576,10 +27522,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_avx512_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u64(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -27603,7 +27547,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_AVX512F;
     VUnaryMicrokernelTester()
       .batch_size(16)
-      .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u16, xnn_init_f32_tanh_avx512_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u16);
   }
 
   TEST(F32_VTANH__AVX512F_RATIONAL_9_6_NR_U16, batch_div_16) {
@@ -27611,7 +27555,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u16, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u16);
     }
   }
 
@@ -27620,7 +27564,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u16, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u16);
     }
   }
 
@@ -27629,7 +27573,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u16, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u16);
     }
   }
 
@@ -27639,7 +27583,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u16, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u16);
     }
   }
 
@@ -27653,10 +27597,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_avx512_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u16(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -27680,7 +27622,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_AVX512F;
     VUnaryMicrokernelTester()
       .batch_size(32)
-      .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u32, xnn_init_f32_tanh_avx512_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u32);
   }
 
   TEST(F32_VTANH__AVX512F_RATIONAL_9_6_NR_U32, batch_div_32) {
@@ -27688,7 +27630,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u32, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u32);
     }
   }
 
@@ -27697,7 +27639,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u32, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u32);
     }
   }
 
@@ -27706,7 +27648,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 32 + 1; batch_size < 64; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u32, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u32);
     }
   }
 
@@ -27716,7 +27658,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u32, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u32);
     }
   }
 
@@ -27730,10 +27672,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_avx512_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u32(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -27757,7 +27697,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_AVX512F;
     VUnaryMicrokernelTester()
       .batch_size(48)
-      .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u48, xnn_init_f32_tanh_avx512_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u48);
   }
 
   TEST(F32_VTANH__AVX512F_RATIONAL_9_6_NR_U48, batch_div_48) {
@@ -27765,7 +27705,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 96; batch_size < 480; batch_size += 48) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u48, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u48);
     }
   }
 
@@ -27774,7 +27714,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 48; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u48, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u48);
     }
   }
 
@@ -27783,7 +27723,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 48 + 1; batch_size < 96; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u48, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u48);
     }
   }
 
@@ -27793,7 +27733,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u48, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u48);
     }
   }
 
@@ -27807,10 +27747,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_avx512_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u48(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -27834,7 +27772,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     TEST_REQUIRES_X86_AVX512F;
     VUnaryMicrokernelTester()
       .batch_size(64)
-      .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u64, xnn_init_f32_tanh_avx512_rational_9_6_params);
+      .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u64);
   }
 
   TEST(F32_VTANH__AVX512F_RATIONAL_9_6_NR_U64, batch_div_64) {
@@ -27842,7 +27780,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u64, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u64);
     }
   }
 
@@ -27851,7 +27789,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 1; batch_size < 64; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u64, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u64);
     }
   }
 
@@ -27860,7 +27798,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     for (size_t batch_size = 64 + 1; batch_size < 128; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u64, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u64);
     }
   }
 
@@ -27870,7 +27808,7 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u64, xnn_init_f32_tanh_avx512_rational_9_6_params);
+        .Test(xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u64);
     }
   }
 
@@ -27884,10 +27822,8 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
     std::array<float, buffered_size> outputs;
-    union xnn_f32_tanh_params params;
-    xnn_init_f32_tanh_avx512_rational_9_6_params(&params);
     xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u64(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -30160,6 +30096,282 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_nabs_params(&params);
     xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5ts_div_nabs_pmax_u16(
         num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+    for (int i = 0; i < num_elements; i++) {
+      if (std::isfinite(expected[i])) {
+        EXPECT_NEAR(
+            expected[i], outputs[i],
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            << "for input " << inputs[i];
+      } else {
+        EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
+            << "for input " << inputs[i] << " and output " << outputs[i]
+            << " (FP_INFINITE=" << FP_INFINITE << ", FP_NAN=" << FP_NAN
+            << ", FP_NORMAL=" << FP_NORMAL << ", FP_SUBNORMAL=" << FP_SUBNORMAL
+            << ", FP_ZERO=" << FP_ZERO << ")";
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U4, batch_eq_4) {
+    VUnaryMicrokernelTester()
+      .batch_size(4)
+      .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u4);
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U4, batch_div_4) {
+    for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u4);
+    }
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U4, batch_lt_4) {
+    for (size_t batch_size = 1; batch_size < 4; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u4);
+    }
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U4, batch_gt_4) {
+    for (size_t batch_size = 4 + 1; batch_size < 8; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u4);
+    }
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U4, inplace) {
+    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u4);
+    }
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U4, special_values) {
+    constexpr size_t num_elements = 7;
+    constexpr size_t buffered_size =
+        num_elements + XNN_EXTRA_BYTES / sizeof(float);
+    std::array<float, buffered_size> inputs =
+        {0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN};
+    std::array<float, num_elements> expected =
+        {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
+    std::array<float, buffered_size> outputs;
+    xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u4(
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
+    for (int i = 0; i < num_elements; i++) {
+      if (std::isfinite(expected[i])) {
+        EXPECT_NEAR(
+            expected[i], outputs[i],
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            << "for input " << inputs[i];
+      } else {
+        EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
+            << "for input " << inputs[i] << " and output " << outputs[i]
+            << " (FP_INFINITE=" << FP_INFINITE << ", FP_NAN=" << FP_NAN
+            << ", FP_NORMAL=" << FP_NORMAL << ", FP_SUBNORMAL=" << FP_SUBNORMAL
+            << ", FP_ZERO=" << FP_ZERO << ")";
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U8, batch_eq_8) {
+    VUnaryMicrokernelTester()
+      .batch_size(8)
+      .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u8);
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U8, batch_div_8) {
+    for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u8);
+    }
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U8, batch_lt_8) {
+    for (size_t batch_size = 1; batch_size < 8; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u8);
+    }
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U8, batch_gt_8) {
+    for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u8);
+    }
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U8, inplace) {
+    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u8);
+    }
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U8, special_values) {
+    constexpr size_t num_elements = 7;
+    constexpr size_t buffered_size =
+        num_elements + XNN_EXTRA_BYTES / sizeof(float);
+    std::array<float, buffered_size> inputs =
+        {0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN};
+    std::array<float, num_elements> expected =
+        {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
+    std::array<float, buffered_size> outputs;
+    xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u8(
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
+    for (int i = 0; i < num_elements; i++) {
+      if (std::isfinite(expected[i])) {
+        EXPECT_NEAR(
+            expected[i], outputs[i],
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            << "for input " << inputs[i];
+      } else {
+        EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
+            << "for input " << inputs[i] << " and output " << outputs[i]
+            << " (FP_INFINITE=" << FP_INFINITE << ", FP_NAN=" << FP_NAN
+            << ", FP_NORMAL=" << FP_NORMAL << ", FP_SUBNORMAL=" << FP_SUBNORMAL
+            << ", FP_ZERO=" << FP_ZERO << ")";
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U12, batch_eq_12) {
+    VUnaryMicrokernelTester()
+      .batch_size(12)
+      .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u12);
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U12, batch_div_12) {
+    for (size_t batch_size = 24; batch_size < 120; batch_size += 12) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u12);
+    }
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U12, batch_lt_12) {
+    for (size_t batch_size = 1; batch_size < 12; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u12);
+    }
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U12, batch_gt_12) {
+    for (size_t batch_size = 12 + 1; batch_size < 24; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u12);
+    }
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U12, inplace) {
+    for (size_t batch_size = 1; batch_size <= 60; batch_size += 11) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u12);
+    }
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U12, special_values) {
+    constexpr size_t num_elements = 7;
+    constexpr size_t buffered_size =
+        num_elements + XNN_EXTRA_BYTES / sizeof(float);
+    std::array<float, buffered_size> inputs =
+        {0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN};
+    std::array<float, num_elements> expected =
+        {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
+    std::array<float, buffered_size> outputs;
+    xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u12(
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
+    for (int i = 0; i < num_elements; i++) {
+      if (std::isfinite(expected[i])) {
+        EXPECT_NEAR(
+            expected[i], outputs[i],
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            << "for input " << inputs[i];
+      } else {
+        EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
+            << "for input " << inputs[i] << " and output " << outputs[i]
+            << " (FP_INFINITE=" << FP_INFINITE << ", FP_NAN=" << FP_NAN
+            << ", FP_NORMAL=" << FP_NORMAL << ", FP_SUBNORMAL=" << FP_SUBNORMAL
+            << ", FP_ZERO=" << FP_ZERO << ")";
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U16, batch_eq_16) {
+    VUnaryMicrokernelTester()
+      .batch_size(16)
+      .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u16);
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U16, batch_div_16) {
+    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u16);
+    }
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U16, batch_lt_16) {
+    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u16);
+    }
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U16, batch_gt_16) {
+    for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u16);
+    }
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U16, inplace) {
+    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u16);
+    }
+  }
+
+  TEST(F32_VTANH__WASMSIMD_RATIONAL_9_6_DIV_U16, special_values) {
+    constexpr size_t num_elements = 7;
+    constexpr size_t buffered_size =
+        num_elements + XNN_EXTRA_BYTES / sizeof(float);
+    std::array<float, buffered_size> inputs =
+        {0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN};
+    std::array<float, num_elements> expected =
+        {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
+    std::array<float, buffered_size> outputs;
+    xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u16(
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
@@ -32624,6 +32836,606 @@ TEST(F32_VTANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV_U4, special_values) {
     xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params(&params);
     xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5ts_nr2recps_u16(
         num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
+    for (int i = 0; i < num_elements; i++) {
+      if (std::isfinite(expected[i])) {
+        EXPECT_NEAR(
+            expected[i], outputs[i],
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            << "for input " << inputs[i];
+      } else {
+        EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
+            << "for input " << inputs[i] << " and output " << outputs[i]
+            << " (FP_INFINITE=" << FP_INFINITE << ", FP_NAN=" << FP_NAN
+            << ", FP_NORMAL=" << FP_NORMAL << ", FP_SUBNORMAL=" << FP_SUBNORMAL
+            << ", FP_ZERO=" << FP_ZERO << ")";
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U4, batch_eq_4) {
+    TEST_REQUIRES_ARM_NEON;
+    VUnaryMicrokernelTester()
+      .batch_size(4)
+      .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u4);
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U4, batch_div_4) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u4);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U4, batch_lt_4) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size < 4; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u4);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U4, batch_gt_4) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 4 + 1; batch_size < 8; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u4);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U4, inplace) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u4);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U4, special_values) {
+    TEST_REQUIRES_ARM_NEON;
+    constexpr size_t num_elements = 7;
+    constexpr size_t buffered_size =
+        num_elements + XNN_EXTRA_BYTES / sizeof(float);
+    std::array<float, buffered_size> inputs =
+        {0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN};
+    std::array<float, num_elements> expected =
+        {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
+    std::array<float, buffered_size> outputs;
+    xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u4(
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
+    for (int i = 0; i < num_elements; i++) {
+      if (std::isfinite(expected[i])) {
+        EXPECT_NEAR(
+            expected[i], outputs[i],
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            << "for input " << inputs[i];
+      } else {
+        EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
+            << "for input " << inputs[i] << " and output " << outputs[i]
+            << " (FP_INFINITE=" << FP_INFINITE << ", FP_NAN=" << FP_NAN
+            << ", FP_NORMAL=" << FP_NORMAL << ", FP_SUBNORMAL=" << FP_SUBNORMAL
+            << ", FP_ZERO=" << FP_ZERO << ")";
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U8, batch_eq_8) {
+    TEST_REQUIRES_ARM_NEON;
+    VUnaryMicrokernelTester()
+      .batch_size(8)
+      .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u8);
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U8, batch_div_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u8);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U8, batch_lt_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size < 8; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u8);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U8, batch_gt_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u8);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U8, inplace) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u8);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U8, special_values) {
+    TEST_REQUIRES_ARM_NEON;
+    constexpr size_t num_elements = 7;
+    constexpr size_t buffered_size =
+        num_elements + XNN_EXTRA_BYTES / sizeof(float);
+    std::array<float, buffered_size> inputs =
+        {0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN};
+    std::array<float, num_elements> expected =
+        {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
+    std::array<float, buffered_size> outputs;
+    xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u8(
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
+    for (int i = 0; i < num_elements; i++) {
+      if (std::isfinite(expected[i])) {
+        EXPECT_NEAR(
+            expected[i], outputs[i],
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            << "for input " << inputs[i];
+      } else {
+        EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
+            << "for input " << inputs[i] << " and output " << outputs[i]
+            << " (FP_INFINITE=" << FP_INFINITE << ", FP_NAN=" << FP_NAN
+            << ", FP_NORMAL=" << FP_NORMAL << ", FP_SUBNORMAL=" << FP_SUBNORMAL
+            << ", FP_ZERO=" << FP_ZERO << ")";
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U12, batch_eq_12) {
+    TEST_REQUIRES_ARM_NEON;
+    VUnaryMicrokernelTester()
+      .batch_size(12)
+      .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u12);
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U12, batch_div_12) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 24; batch_size < 120; batch_size += 12) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u12);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U12, batch_lt_12) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size < 12; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u12);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U12, batch_gt_12) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 12 + 1; batch_size < 24; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u12);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U12, inplace) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size <= 60; batch_size += 11) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u12);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U12, special_values) {
+    TEST_REQUIRES_ARM_NEON;
+    constexpr size_t num_elements = 7;
+    constexpr size_t buffered_size =
+        num_elements + XNN_EXTRA_BYTES / sizeof(float);
+    std::array<float, buffered_size> inputs =
+        {0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN};
+    std::array<float, num_elements> expected =
+        {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
+    std::array<float, buffered_size> outputs;
+    xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u12(
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
+    for (int i = 0; i < num_elements; i++) {
+      if (std::isfinite(expected[i])) {
+        EXPECT_NEAR(
+            expected[i], outputs[i],
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            << "for input " << inputs[i];
+      } else {
+        EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
+            << "for input " << inputs[i] << " and output " << outputs[i]
+            << " (FP_INFINITE=" << FP_INFINITE << ", FP_NAN=" << FP_NAN
+            << ", FP_NORMAL=" << FP_NORMAL << ", FP_SUBNORMAL=" << FP_SUBNORMAL
+            << ", FP_ZERO=" << FP_ZERO << ")";
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U16, batch_eq_16) {
+    TEST_REQUIRES_ARM_NEON;
+    VUnaryMicrokernelTester()
+      .batch_size(16)
+      .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u16);
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U16, batch_div_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u16);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U16, batch_lt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u16);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U16, batch_gt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u16);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U16, inplace) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u16);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_DIV_U16, special_values) {
+    TEST_REQUIRES_ARM_NEON;
+    constexpr size_t num_elements = 7;
+    constexpr size_t buffered_size =
+        num_elements + XNN_EXTRA_BYTES / sizeof(float);
+    std::array<float, buffered_size> inputs =
+        {0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN};
+    std::array<float, num_elements> expected =
+        {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
+    std::array<float, buffered_size> outputs;
+    xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u16(
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
+    for (int i = 0; i < num_elements; i++) {
+      if (std::isfinite(expected[i])) {
+        EXPECT_NEAR(
+            expected[i], outputs[i],
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            << "for input " << inputs[i];
+      } else {
+        EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
+            << "for input " << inputs[i] << " and output " << outputs[i]
+            << " (FP_INFINITE=" << FP_INFINITE << ", FP_NAN=" << FP_NAN
+            << ", FP_NORMAL=" << FP_NORMAL << ", FP_SUBNORMAL=" << FP_SUBNORMAL
+            << ", FP_ZERO=" << FP_ZERO << ")";
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U4, batch_eq_4) {
+    TEST_REQUIRES_ARM_NEON;
+    VUnaryMicrokernelTester()
+      .batch_size(4)
+      .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u4);
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U4, batch_div_4) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u4);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U4, batch_lt_4) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size < 4; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u4);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U4, batch_gt_4) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 4 + 1; batch_size < 8; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u4);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U4, inplace) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u4);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U4, special_values) {
+    TEST_REQUIRES_ARM_NEON;
+    constexpr size_t num_elements = 7;
+    constexpr size_t buffered_size =
+        num_elements + XNN_EXTRA_BYTES / sizeof(float);
+    std::array<float, buffered_size> inputs =
+        {0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN};
+    std::array<float, num_elements> expected =
+        {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
+    std::array<float, buffered_size> outputs;
+    xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u4(
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
+    for (int i = 0; i < num_elements; i++) {
+      if (std::isfinite(expected[i])) {
+        EXPECT_NEAR(
+            expected[i], outputs[i],
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            << "for input " << inputs[i];
+      } else {
+        EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
+            << "for input " << inputs[i] << " and output " << outputs[i]
+            << " (FP_INFINITE=" << FP_INFINITE << ", FP_NAN=" << FP_NAN
+            << ", FP_NORMAL=" << FP_NORMAL << ", FP_SUBNORMAL=" << FP_SUBNORMAL
+            << ", FP_ZERO=" << FP_ZERO << ")";
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U8, batch_eq_8) {
+    TEST_REQUIRES_ARM_NEON;
+    VUnaryMicrokernelTester()
+      .batch_size(8)
+      .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u8);
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U8, batch_div_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u8);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U8, batch_lt_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size < 8; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u8);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U8, batch_gt_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u8);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U8, inplace) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u8);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U8, special_values) {
+    TEST_REQUIRES_ARM_NEON;
+    constexpr size_t num_elements = 7;
+    constexpr size_t buffered_size =
+        num_elements + XNN_EXTRA_BYTES / sizeof(float);
+    std::array<float, buffered_size> inputs =
+        {0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN};
+    std::array<float, num_elements> expected =
+        {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
+    std::array<float, buffered_size> outputs;
+    xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u8(
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
+    for (int i = 0; i < num_elements; i++) {
+      if (std::isfinite(expected[i])) {
+        EXPECT_NEAR(
+            expected[i], outputs[i],
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            << "for input " << inputs[i];
+      } else {
+        EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
+            << "for input " << inputs[i] << " and output " << outputs[i]
+            << " (FP_INFINITE=" << FP_INFINITE << ", FP_NAN=" << FP_NAN
+            << ", FP_NORMAL=" << FP_NORMAL << ", FP_SUBNORMAL=" << FP_SUBNORMAL
+            << ", FP_ZERO=" << FP_ZERO << ")";
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U12, batch_eq_12) {
+    TEST_REQUIRES_ARM_NEON;
+    VUnaryMicrokernelTester()
+      .batch_size(12)
+      .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u12);
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U12, batch_div_12) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 24; batch_size < 120; batch_size += 12) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u12);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U12, batch_lt_12) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size < 12; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u12);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U12, batch_gt_12) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 12 + 1; batch_size < 24; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u12);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U12, inplace) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size <= 60; batch_size += 11) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u12);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U12, special_values) {
+    TEST_REQUIRES_ARM_NEON;
+    constexpr size_t num_elements = 7;
+    constexpr size_t buffered_size =
+        num_elements + XNN_EXTRA_BYTES / sizeof(float);
+    std::array<float, buffered_size> inputs =
+        {0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN};
+    std::array<float, num_elements> expected =
+        {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
+    std::array<float, buffered_size> outputs;
+    xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u12(
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
+    for (int i = 0; i < num_elements; i++) {
+      if (std::isfinite(expected[i])) {
+        EXPECT_NEAR(
+            expected[i], outputs[i],
+            3 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            << "for input " << inputs[i];
+      } else {
+        EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
+            << "for input " << inputs[i] << " and output " << outputs[i]
+            << " (FP_INFINITE=" << FP_INFINITE << ", FP_NAN=" << FP_NAN
+            << ", FP_NORMAL=" << FP_NORMAL << ", FP_SUBNORMAL=" << FP_SUBNORMAL
+            << ", FP_ZERO=" << FP_ZERO << ")";
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U16, batch_eq_16) {
+    TEST_REQUIRES_ARM_NEON;
+    VUnaryMicrokernelTester()
+      .batch_size(16)
+      .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u16);
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U16, batch_div_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u16);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U16, batch_lt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u16);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U16, batch_gt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u16);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U16, inplace) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+      VUnaryMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u16);
+    }
+  }
+
+  TEST(F32_VTANH__NEON_RATIONAL_9_6_NR_U16, special_values) {
+    TEST_REQUIRES_ARM_NEON;
+    constexpr size_t num_elements = 7;
+    constexpr size_t buffered_size =
+        num_elements + XNN_EXTRA_BYTES / sizeof(float);
+    std::array<float, buffered_size> inputs =
+        {0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN};
+    std::array<float, num_elements> expected =
+        {0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN};
+    std::array<float, buffered_size> outputs;
+    xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u16(
+        num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(

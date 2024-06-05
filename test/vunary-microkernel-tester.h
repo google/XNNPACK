@@ -141,7 +141,7 @@ class VUnaryMicrokernelTester {
       // effective absolute difference computed in `float`s. We therefore use
       // the latter form since it is the true difference between two `float`s
       // within the given relative tolerance.
-      return std::abs(y_ref * (1.0f + rel_tol) - y_ref);
+      return std::abs(y_ref * (1.0f + rel_tol)) - std::abs(y_ref);
     };
   }
 

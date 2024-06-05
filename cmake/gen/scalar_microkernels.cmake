@@ -500,10 +500,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-vtanh/gen/f32-vtanh-scalar-expm1minus-rr1-p6h5ts-div-u1.c
   src/f32-vtanh/gen/f32-vtanh-scalar-expm1minus-rr1-p6h5ts-div-u2.c
   src/f32-vtanh/gen/f32-vtanh-scalar-expm1minus-rr1-p6h5ts-div-u4.c
-  src/f32-vtanh/gen/f32-vtanh-scalar-rational-9-6-u1.c
-  src/f32-vtanh/gen/f32-vtanh-scalar-rational-9-6-u2.c
-  src/f32-vtanh/gen/f32-vtanh-scalar-rational-9-6-u4.c
-  src/f32-vtanh/gen/f32-vtanh-scalar-rational-9-6-u8.c
+  src/f32-vtanh/gen/f32-vtanh-scalar-rational-9-6-div.c
   src/f32-vunary/gen/f32-vabs-scalar.c
   src/f32-vunary/gen/f32-vneg-scalar.c
   src/f32-vunary/gen/f32-vsqr-scalar.c

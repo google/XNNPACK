@@ -19,10 +19,13 @@ static const size_t xnn_simd_log2_size_f32 = 2;
 static const size_t xnn_simd_bytes_f32 = xnn_simd_size_f32 * sizeof(float);
 
 #define XNN_SIMD_CONST_F32(var, val) \
-  const xnn_simd_f32_t var = wasm_f32x4_make((val), (val), (val), (val));
+  static const __f32x4 var = {(val), (val), (val), (val)};
 
 #define XNN_SIMD_CONST_U32(var, val) \
-  const v128_t var = wasm_u32x4_make((val), (val), (val), (val));
+  static const __u32x4 var = {(val), (val), (val), (val)};
+
+// Whether or not this architecture has native fused multiply-add support.
+#define XNN_SIMD_HAS_NATIVE_FMA 0
 
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() {

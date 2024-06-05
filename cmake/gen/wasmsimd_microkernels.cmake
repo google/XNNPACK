@@ -869,6 +869,7 @@ SET(ALL_WASMSIMD_MICROKERNEL_SRCS
   src/f32-vtanh/gen/f32-vtanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-pmax-u8.c
   src/f32-vtanh/gen/f32-vtanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-pmax-u12.c
   src/f32-vtanh/gen/f32-vtanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-pmax-u16.c
+  src/f32-vtanh/gen/f32-vtanh-wasmsimd-rational-9-6-div.c
   src/f32-vunary/gen/f32-vabs-wasmsimd.c
   src/f32-vunary/gen/f32-vneg-wasmsimd.c
   src/f32-vunary/gen/f32-vsqr-wasmsimd.c

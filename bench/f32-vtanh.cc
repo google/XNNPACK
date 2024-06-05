@@ -63,23 +63,23 @@ BENCHMARK_CAPTURE(f32_vtanh, scalar_expm1minus_rr1_p6h5ts_div_u4,
                   xnn_init_f32_tanh_scalar_expm1minus_rr1_p6h5_params)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vtanh, scalar_rational_9_6_u1,
-                  xnn_f32_vtanh_ukernel__scalar_rational_9_6_u1,
+BENCHMARK_CAPTURE(f32_vtanh, scalar_rational_9_6_div_u1,
+                  xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u1,
                   /*init_params=*/nullptr)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vtanh, scalar_rational_9_6_u2,
-                  xnn_f32_vtanh_ukernel__scalar_rational_9_6_u2,
+BENCHMARK_CAPTURE(f32_vtanh, scalar_rational_9_6_div_u2,
+                  xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u2,
                   /*init_params=*/nullptr)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vtanh, scalar_rational_9_6_u4,
-                  xnn_f32_vtanh_ukernel__scalar_rational_9_6_u4,
+BENCHMARK_CAPTURE(f32_vtanh, scalar_rational_9_6_div_u4,
+                  xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u4,
                   /*init_params=*/nullptr)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vtanh, scalar_rational_9_6_u8,
-                  xnn_f32_vtanh_ukernel__scalar_rational_9_6_u8,
+BENCHMARK_CAPTURE(f32_vtanh, scalar_rational_9_6_div_u8,
+                  xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u8,
                   /*init_params=*/nullptr)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
@@ -229,42 +229,42 @@ BENCHMARK_CAPTURE(f32_vtanh, fma_expm1minus_rr1_p6h5ts_div_u4,
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, sse2_rational_9_6_div_u4,
                     xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u4,
-                    xnn_init_f32_tanh_sse_rational_9_6_params)
+                    /*init_params=*/nullptr)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, sse2_rational_9_6_div_u8,
                     xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u8,
-                    xnn_init_f32_tanh_sse_rational_9_6_params)
+                    /*init_params=*/nullptr)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, sse2_rational_9_6_div_u12,
                     xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u12,
-                    xnn_init_f32_tanh_sse_rational_9_6_params)
+                    /*init_params=*/nullptr)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, sse2_rational_9_6_div_u16,
                     xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u16,
-                    xnn_init_f32_tanh_sse_rational_9_6_params)
+                    /*init_params=*/nullptr)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, sse2_rational_9_6_nr_u4,
                     xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u4,
-                    xnn_init_f32_tanh_sse_rational_9_6_params)
+                    /*init_params=*/nullptr)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, sse2_rational_9_6_nr_u8,
                     xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u8,
-                    xnn_init_f32_tanh_sse_rational_9_6_params)
+                    /*init_params=*/nullptr)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, sse2_rational_9_6_nr_u12,
                     xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u12,
-                    xnn_init_f32_tanh_sse_rational_9_6_params)
+                    /*init_params=*/nullptr)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, sse2_rational_9_6_nr_u16,
                     xnn_f32_vtanh_ukernel__sse2_rational_9_6_nr_u16,
-                    xnn_init_f32_tanh_sse_rational_9_6_params)
+                    /*init_params=*/nullptr)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, sse41_expm1minus_rr1_lut8_p4h3ts_div_u4,
@@ -677,49 +677,49 @@ BENCHMARK_CAPTURE(f32_vtanh, fma_expm1minus_rr1_p6h5ts_div_u4,
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, avx_rational_9_6_div_u8,
                     xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u8,
-                    xnn_init_f32_tanh_avx_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, avx_rational_9_6_div_u16,
                     xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u16,
-                    xnn_init_f32_tanh_avx_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, avx_rational_9_6_div_u24,
                     xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u24,
-                    xnn_init_f32_tanh_avx_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, avx_rational_9_6_div_u32,
                     xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u32,
-                    xnn_init_f32_tanh_avx_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, avx_rational_9_6_nr_u8,
                     xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u8,
-                    xnn_init_f32_tanh_avx_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, avx_rational_9_6_nr_u16,
                     xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u16,
-                    xnn_init_f32_tanh_avx_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, avx_rational_9_6_nr_u24,
                     xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u24,
-                    xnn_init_f32_tanh_avx_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, avx_rational_9_6_nr_u32,
                     xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u32,
-                    xnn_init_f32_tanh_avx_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
@@ -1073,49 +1073,49 @@ BENCHMARK_CAPTURE(f32_vtanh, fma_expm1minus_rr1_p6h5ts_div_u4,
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, fma3_rational_9_6_div_u8,
                     xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u8,
-                    xnn_init_f32_tanh_fma3_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckFMA3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, fma3_rational_9_6_div_u16,
                     xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u16,
-                    xnn_init_f32_tanh_fma3_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckFMA3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, fma3_rational_9_6_div_u24,
                     xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u24,
-                    xnn_init_f32_tanh_fma3_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckFMA3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, fma3_rational_9_6_div_u32,
                     xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u32,
-                    xnn_init_f32_tanh_fma3_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckFMA3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, fma3_rational_9_6_nr_u8,
                     xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u8,
-                    xnn_init_f32_tanh_fma3_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckFMA3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, fma3_rational_9_6_nr_u16,
                     xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u16,
-                    xnn_init_f32_tanh_fma3_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckFMA3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, fma3_rational_9_6_nr_u24,
                     xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u24,
-                    xnn_init_f32_tanh_fma3_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckFMA3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, fma3_rational_9_6_nr_u32,
                     xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u32,
-                    xnn_init_f32_tanh_fma3_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckFMA3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
@@ -2141,49 +2141,49 @@ BENCHMARK_CAPTURE(f32_vtanh, fma_expm1minus_rr1_p6h5ts_div_u4,
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, avx512f_rational_9_6_div_u16,
                     xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u16,
-                    xnn_init_f32_tanh_avx512_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, avx512f_rational_9_6_div_u32,
                     xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u32,
-                    xnn_init_f32_tanh_avx512_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, avx512f_rational_9_6_div_u48,
                     xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u48,
-                    xnn_init_f32_tanh_avx512_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, avx512f_rational_9_6_div_u64,
                     xnn_f32_vtanh_ukernel__avx512f_rational_9_6_div_u64,
-                    xnn_init_f32_tanh_avx512_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, avx512f_rational_9_6_nr_u16,
                     xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u16,
-                    xnn_init_f32_tanh_avx512_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, avx512f_rational_9_6_nr_u32,
                     xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u32,
-                    xnn_init_f32_tanh_avx512_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, avx512f_rational_9_6_nr_u48,
                     xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u48,
-                    xnn_init_f32_tanh_avx512_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vtanh, avx512f_rational_9_6_nr_u64,
                     xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u64,
-                    xnn_init_f32_tanh_avx512_rational_9_6_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
@@ -2348,6 +2348,26 @@ BENCHMARK_CAPTURE(f32_vtanh, fma_expm1minus_rr1_p6h5ts_div_u4,
   BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5ts_div_nabs_pmax_u16,
                     xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5ts_div_nabs_pmax_u16,
                     xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_nabs_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_rational_9_6_div_u4,
+                    xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u4,
+                    /*init_params=*/nullptr)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_rational_9_6_div_u8,
+                    xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u8,
+                    /*init_params=*/nullptr)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_rational_9_6_div_u12,
+                    xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u12,
+                    /*init_params=*/nullptr)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_rational_9_6_div_u16,
+                    xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u16,
+                    /*init_params=*/nullptr)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -2546,6 +2566,54 @@ BENCHMARK_CAPTURE(f32_vtanh, fma_expm1minus_rr1_p6h5ts_div_u4,
                     xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5ts_nr2recps_u16,
                     xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params,
                     benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neon_rational_9_6_div_u4,
+                    xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u4,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neon_rational_9_6_div_u8,
+                    xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u8,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neon_rational_9_6_div_u12,
+                    xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u12,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neon_rational_9_6_div_u16,
+                    xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u16,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neon_rational_9_6_nr_u4,
+                    xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u4,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neon_rational_9_6_nr_u8,
+                    xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u8,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neon_rational_9_6_nr_u12,
+                    xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u12,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neon_rational_9_6_nr_u16,
+                    xnn_f32_vtanh_ukernel__neon_rational_9_6_nr_u16,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
