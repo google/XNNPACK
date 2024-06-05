@@ -5,26 +5,30 @@
 
 #pragma once
 
-#include <algorithm>
-#include <cmath>
-#include <functional>
-#include <limits>
-#include <random>
-#include <vector>
-
-#include <benchmark/benchmark.h>
-#include "bench/gemm.h"
-#include <fp16/fp16.h>
-#include "bench/utils.h"
-
+#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
+#include <xnnpack/microparams.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/packw.h>
+
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <limits>
+#include <random>
+#include <vector>
+
+#include <fp16/fp16.h>
+#include "bench/gemm.h"
+#include "bench/utils.h"
+#include <benchmark/benchmark.h>
 
 namespace {
 
@@ -485,7 +489,7 @@ void GEMMBenchmark(benchmark::State& state,
   const size_t kc = state.range(2);
 
   const size_t nc_stride = benchmark::utils::RoundUp(nc, nr);
-  const size_t kc_stride = benchmark::utils::RoundUp(kc, kr * sr) / 2;
+  const size_t kc_stride = (benchmark::utils::RoundUp(kc, kr * sr * 2) + 1) / 2;
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
