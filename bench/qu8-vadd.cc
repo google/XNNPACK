@@ -200,6 +200,21 @@ static void qu8_vadd(
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(qu8_vadd, rvv_u1v,
+                    xnn_qu8_vadd_minmax_ukernel__rvv_u1v,
+                    xnn_init_qu8_add_minmax_rvv_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::BinaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qu8_vadd, rvv_u2v,
+                    xnn_qu8_vadd_minmax_ukernel__rvv_u2v,
+                    xnn_init_qu8_add_minmax_rvv_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::BinaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
 BENCHMARK_CAPTURE(qu8_vadd, scalar_u1,
                   xnn_qu8_vadd_minmax_ukernel__scalar_u1,
                   xnn_init_qu8_add_minmax_scalar_params)
