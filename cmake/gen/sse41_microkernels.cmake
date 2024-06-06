@@ -230,6 +230,9 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4c2-minmax-fp32-sse41-ld128.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4c2s4-minmax-fp32-sse41-ld64.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4c2s4-minmax-fp32-sse41-ld128.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-sse41-c16.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-sse41-c32.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-sse41-c64.c
   src/qs8-requantization/qs8-requantization-fp32-sse41.c
   src/qs8-requantization/qs8-requantization-gemmlowp-sse41.c
   src/qs8-requantization/qs8-requantization-rndna-sse41.c

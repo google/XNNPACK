@@ -1584,8 +1584,8 @@ typedef void (*xnn_qs8_rdsum_ukernel_fn)(
     const int8_t* input,
     size_t input_stride,
     const int8_t* zero,
-    int8_t* output,
-    const union xnn_qs8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    int32_t* output,
+    const union xnn_qs8_rsum_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 // RSUM: Reduce-Sum
 
 typedef void (*xnn_f16_rsum_ukernel_fn)(

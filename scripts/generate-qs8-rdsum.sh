@@ -12,4 +12,9 @@ tools/xngen src/qs8-rdsum/neon.c.in -D CHANNELS=16  -D ACCUMULATORS=7 -D WASM=0 
 tools/xngen src/qs8-rdsum/neon.c.in -D CHANNELS=32  -D ACCUMULATORS=7 -D WASM=0 -o src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-neon-c32.c &
 tools/xngen src/qs8-rdsum/neon.c.in -D CHANNELS=64  -D ACCUMULATORS=7 -D WASM=0 -o src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-neon-c64.c &
 
+################################### x86 SSE ###################################
+tools/xngen src/qs8-rdsum/sse41.c.in -D CHANNELS=16  -D ACCUMULATORS=7 -D WASM=0 -o src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-sse41-c16.c &
+tools/xngen src/qs8-rdsum/sse41.c.in -D CHANNELS=32  -D ACCUMULATORS=7 -D WASM=0 -o src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-sse41-c32.c &
+tools/xngen src/qs8-rdsum/sse41.c.in -D CHANNELS=64  -D ACCUMULATORS=7 -D WASM=0 -o src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-sse41-c64.c &
+
 wait

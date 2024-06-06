@@ -4,13 +4,21 @@
 # LICENSE file in the root directory of this source tree.
 
 # Scalar
-- name: xnn_qs8_rdsum_minmax_fp32_ukernel_7p7x__scalar_c4
-  init: xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params
+- name: xnn_qs8_rdsum_ukernel_7p7x__scalar_c4
+  init: xnn_init_qs8_rsum_scalar_params
 
 # ARM NEON
-- name: xnn_qs8_rdsum_minmax_fp32_ukernel_7p7x__neon_c16
-  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
-- name: xnn_qs8_rdsum_minmax_fp32_ukernel_7p7x__neon_c32
-  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
-- name: xnn_qs8_rdsum_minmax_fp32_ukernel_7p7x__neon_c64
-  init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
+- name: xnn_qs8_rdsum_ukernel_7p7x__neon_c16
+  init: xnn_init_qs8_rsum_neon_params
+- name: xnn_qs8_rdsum_ukernel_7p7x__neon_c32
+  init: xnn_init_qs8_rsum_neon_params
+- name: xnn_qs8_rdsum_ukernel_7p7x__neon_c64
+  init: xnn_init_qs8_rsum_neon_params
+
+# x86 SSE4.1
+- name: xnn_qs8_rdsum_ukernel_7p7x__sse41_c16
+  init: xnn_init_qs8_rsum_sse4_params
+- name: xnn_qs8_rdsum_ukernel_7p7x__sse41_c32
+  init: xnn_init_qs8_rsum_sse4_params
+- name: xnn_qs8_rdsum_ukernel_7p7x__sse41_c64
+  init: xnn_init_qs8_rsum_sse4_params

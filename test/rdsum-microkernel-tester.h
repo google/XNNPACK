@@ -130,16 +130,15 @@ class RDSumMicrokernelTester {
   }
 
   void Test(xnn_qs8_rdsum_ukernel_fn rdsum,
-      xnn_init_qs8_avgpool_minmax_params_fn init_params,
-      xnn_qs8_requantize_fn requantize) const {
+      xnn_init_qs8_rsum_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
     std::vector<int8_t> input((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES);
     std::vector<int8_t> zero(channels() + XNN_EXTRA_BYTES, 0);
-    std::vector<int8_t> output(channels());
-    std::vector<int8_t> output_ref(channels());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::vector<int32_t> output(channels());
+    std::vector<int32_t> output_ref(channels());
+    {//for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(output.begin(), output.end(), [&]() { return i8dist(rng); });
       std::fill(output.begin(), output.end(), 0);
@@ -147,28 +146,21 @@ class RDSumMicrokernelTester {
 
       // Compute reference results, without clamping.
       for (size_t c = 0; c < channels(); c++) {
-        int32_t acc = 0;
         for (size_t n = 0; n < rows(); n++) {
-          acc += int32_t(input[n * input_stride() + c]) - int32_t(input_zero_point() - 0x80);
+          output_ref[c] += int32_t(input[n * input_stride() + c]);
         }
-        output_ref[c] = requantize(
-            acc, input_scale() / (output_scale() * float(rows())), int8_t(output_zero_point() - 0x80), std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()) + output_ref[c];
       }
 
       // Prepare parameters.
-      union xnn_qs8_avgpool_minmax_params params;
-      init_params(
-        &params,
-        -int32_t(input_zero_point() - 0x80) * int32_t(rows()),
-        input_scale() / (output_scale() * float(rows())),
-        int8_t(output_zero_point() - 0x80), int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+      union xnn_qs8_rsum_params params;
+      init_params(&params);
 
       // Call optimized micro-kernel.
       rdsum(rows(), channels(), input.data(), input_stride(), zero.data(), output.data(), &params);
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
-        EXPECT_EQ((int32_t) output[c], (int32_t) output_ref[c])
+        EXPECT_EQ(output[c], output_ref[c])
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
       }
     }

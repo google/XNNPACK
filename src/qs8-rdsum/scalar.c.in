@@ -14,14 +14,14 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $CHANNELS_BATCH = 4
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
-void xnn_qs8_rdsum_minmax_fp32_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__scalar_c4(
+void xnn_qs8_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__scalar_c4(
     size_t rows,
     size_t channels,
     const int8_t* input,
     size_t input_stride,
     const int8_t* zero,
-    int8_t* output,
-    const union xnn_qs8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    int32_t* output,
+    const union xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -29,18 +29,12 @@ void xnn_qs8_rdsum_minmax_fp32_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__scalar_
   assert(output != NULL);
 
   size_t input_increment = ${ACCUMULATORS} * input_stride;
-  const int32_t vinit_bias = params->fp32_scalar_fmagic.init_bias;
-  const float vscale = params->fp32_scalar_fmagic.scale;
-  const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
-  const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
-  const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
-  const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
   for (; channels >= ${CHANNELS_BATCH}; channels -= ${CHANNELS_BATCH}) {
     const int8_t* i0 = input;
     $for ACC in range(1, ACCUMULATORS):
       const int8_t* i${ACC} = (const int8_t*) ((uintptr_t) i${ACC - 1} + input_stride);
     $for C in range(CHANNELS_BATCH):
-      int32_t vacc${C} = vinit_bias;
+      int32_t vacc${C} = 0;
 
     for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
       $for ACC in range(1, ACCUMULATORS, 2):
@@ -58,13 +52,7 @@ void xnn_qs8_rdsum_minmax_fp32_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__scalar_
     }
 
     $for C in range(CHANNELS_BATCH):
-      float vfpacc${C} = (float) vacc${C} * vscale;
-      vfpacc${C} = ${MAX_F32}(vfpacc${C}, voutput_min_less_zero_point);
-      vfpacc${C} = ${MIN_F32}(vfpacc${C}, voutput_max_less_zero_point);
-      vfpacc${C} += vmagic_bias;
-      vacc${C} = (int32_t) float_as_uint32(vfpacc${C}) - vmagic_bias_less_output_zero_point;
-    $for C in range(CHANNELS_BATCH):
-      *output++ += (int8_t) vacc${C};
+      *output++ += vacc${C};
 
     input = (const int8_t*) ((uintptr_t) input + ${CHANNELS_BATCH});
   }
@@ -74,7 +62,7 @@ void xnn_qs8_rdsum_minmax_fp32_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__scalar_
     $for i in range(1, ACCUMULATORS):
       const int8_t* i${i} = (const int8_t*) ((uintptr_t) i${i - 1} + input_stride);
     $for C in range(CHANNELS_BATCH - 1):
-      int32_t vacc${C} = vinit_bias;
+      int32_t vacc${C} = 0;
 
     for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
       $for N in range(1, ACCUMULATORS, 2):
@@ -90,20 +78,14 @@ void xnn_qs8_rdsum_minmax_fp32_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__scalar_
       $for N in range(0, ACCUMULATORS):
         i${N} = (const int8_t*) ((uintptr_t) i${N} + input_increment);
     }
-    $for C in range(CHANNELS_BATCH-1):
-      float vfpacc${C} = (float) vacc${C} * vscale;
-      vfpacc${C} = ${MAX_F32}(vfpacc${C}, voutput_min_less_zero_point);
-      vfpacc${C} = ${MIN_F32}(vfpacc${C}, voutput_max_less_zero_point);
-      vfpacc${C} += vmagic_bias;
-      vacc${C} = (int32_t) float_as_uint32(vfpacc${C}) - vmagic_bias_less_output_zero_point;
 
     if (channels & 2) {
-      *output++ += (int8_t) vacc0;
-      *output++ += (int8_t) vacc1;
+      *output++ += vacc0;
+      *output++ += vacc1;
       vacc0 = vacc2;
     }
     if (channels & 1) {
-      *output += (int8_t) vacc0;
+      *output += vacc0;
     }
   }
 }
