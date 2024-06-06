@@ -460,6 +460,8 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c8-minmax-fp32-avx2.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x8c8-minmax-fp32-avx2.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8c8-minmax-fp32-avx2.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-avx2-c32.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-avx2-c64.c
   src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u32.c
   src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u64-acc2.c
   src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u64.c

@@ -457,6 +457,8 @@ DECLARE_QS8_RDSUM_UKERNEL_FUNCTION(xnn_qs8_rdsum_ukernel_7p7x__neon_c64)
 DECLARE_QS8_RDSUM_UKERNEL_FUNCTION(xnn_qs8_rdsum_ukernel_7p7x__sse41_c16)
 DECLARE_QS8_RDSUM_UKERNEL_FUNCTION(xnn_qs8_rdsum_ukernel_7p7x__sse41_c32)
 DECLARE_QS8_RDSUM_UKERNEL_FUNCTION(xnn_qs8_rdsum_ukernel_7p7x__sse41_c64)
+DECLARE_QS8_RDSUM_UKERNEL_FUNCTION(xnn_qs8_rdsum_ukernel_7p7x__avx2_c32)
+DECLARE_QS8_RDSUM_UKERNEL_FUNCTION(xnn_qs8_rdsum_ukernel_7p7x__avx2_c64)
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -22,3 +22,9 @@
   init: xnn_init_qs8_rsum_sse4_params
 - name: xnn_qs8_rdsum_ukernel_7p7x__sse41_c64
   init: xnn_init_qs8_rsum_sse4_params
+
+# x86 AVX2
+- name: xnn_qs8_rdsum_ukernel_7p7x__avx2_c32
+  init: xnn_init_qs8_rsum_avx2_params
+- name: xnn_qs8_rdsum_ukernel_7p7x__avx2_c64
+  init: xnn_init_qs8_rsum_avx2_params

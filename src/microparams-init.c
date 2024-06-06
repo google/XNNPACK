@@ -1237,11 +1237,24 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_avx2_params(
   assert(scale >= 0x1.0p-32f);
   assert(scale < 256.0f);
 
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->fp32_avx2.shuffle_mask[0] = 0;
+  params->fp32_avx2.shuffle_mask[1] = 4;
+  params->fp32_avx2.shuffle_mask[2] = 1;
+  params->fp32_avx2.shuffle_mask[3] = 5;
+  params->fp32_avx2.shuffle_mask[4] = 2;
+  params->fp32_avx2.shuffle_mask[5] = 6;
+  params->fp32_avx2.shuffle_mask[6] = 3;
+  params->fp32_avx2.shuffle_mask[7] = 7;
+  for (uint32_t i = 0; i < 16; i++) {
+    params->fp32_avx2.output_zero_point[i] = (int16_t) output_zero_point;
+  }
   for (uint32_t i = 0; i < 8; i++) {
     params->fp32_avx2.init_bias[i] = init_bias;
     params->fp32_avx2.scale[i] = scale;
     params->fp32_avx2.magic_bias[i] = 12582912.0f;
     params->fp32_avx2.magic_bias_less_output_zero_point[i] = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+    params->fp32_avx2.output_max_less_zero_point[i] = output_max_less_zero_point;
   }
   for (uint32_t i = 0; i < 32; i++) {
     params->fp32_avx2.output_min[i] = output_min;
