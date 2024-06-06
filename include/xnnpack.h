@@ -6269,6 +6269,8 @@ enum xnn_status xnn_setup_space_to_depth_nhwc_x8(
   const void* input,
   void* output);
 
+// Returns MR for the optimal gemm microkernel.
+int xnn_qd8_f32_qc4w_gemm_mr();
 #ifdef __cplusplus
 }  // extern "C"
 #endif
