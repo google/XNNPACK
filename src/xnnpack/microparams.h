@@ -175,6 +175,12 @@ union xnn_f32_minmax_params {
     XNN_ALIGN(8) float max[2];
   } wasmsimd;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_HEXAGON
+  struct {
+    XNN_ALIGN(128) float min[32];
+    XNN_ALIGN(128) float max[32];
+  } hvx;
+#endif //XNN_ARCH_HEXAGON
 };
 
 union xnn_f16_qc4w_minmax_params {
