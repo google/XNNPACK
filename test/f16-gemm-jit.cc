@@ -22,6 +22,7 @@
 #include <xnnpack/isa-checks.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/pack.h>
+#include <xnnpack/packw.h>
 #include <xnnpack/ppmm.h>
 #include <xnnpack/requantization.h>
 
@@ -324,7 +325,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_generate_f16_gemm_ukernel_1x16__aarch64_neonfp16arith_ld64,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -345,7 +346,7 @@ std::vector<GemmTestParams> CreateTests1(
             .n(16)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_gemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w);
+            .Test(xnn_generate_f16_gemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
         }
       }
     }
@@ -359,7 +360,7 @@ std::vector<GemmTestParams> CreateTests1(
         .n(16)
         .k(4)
         .Test(
-            xnn_generate_f16_gemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w,
+            xnn_generate_f16_gemm_ukernel_1x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8,
             &xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64);
     }
   #endif // XNN_ENABLE_ASSEMBLY
@@ -377,7 +378,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_generate_f16_gemm_ukernel_4x16__aarch64_neonfp16arith_ld64,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -398,7 +399,7 @@ std::vector<GemmTestParams> CreateTests1(
             .n(16)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_gemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w);
+            .Test(xnn_generate_f16_gemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
         }
       }
     }
@@ -414,7 +415,7 @@ std::vector<GemmTestParams> CreateTests1(
         .n(16)
         .k(4)
         .Test(
-            xnn_generate_f16_gemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w,
+            xnn_generate_f16_gemm_ukernel_4x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8,
             &xnn_f16_gemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld64);
     }
   #endif // XNN_ENABLE_ASSEMBLY
@@ -432,7 +433,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -453,7 +454,7 @@ std::vector<GemmTestParams> CreateTests1(
             .n(16)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w);
+            .Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
         }
       }
     }
@@ -469,7 +470,7 @@ std::vector<GemmTestParams> CreateTests1(
         .n(16)
         .k(4)
         .Test(
-            xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w,
+            xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params, xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8,
             &xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55);
     }
   #endif // XNN_ENABLE_ASSEMBLY
@@ -487,7 +488,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -508,7 +509,7 @@ std::vector<GemmTestParams> CreateTests1(
             .n(16)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w);
+            .Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
         }
       }
     }
@@ -524,7 +525,7 @@ std::vector<GemmTestParams> CreateTests1(
         .n(16)
         .k(4)
         .Test(
-            xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w,
+            xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params, xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8,
             &xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55r0);
     }
   #endif // XNN_ENABLE_ASSEMBLY
@@ -542,7 +543,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -563,7 +564,7 @@ std::vector<GemmTestParams> CreateTests1(
             .n(16)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w);
+            .Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
         }
       }
     }
@@ -579,7 +580,7 @@ std::vector<GemmTestParams> CreateTests1(
         .n(16)
         .k(4)
         .Test(
-            xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w,
+            xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params, xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8,
             &xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a75);
     }
   #endif // XNN_ENABLE_ASSEMBLY
@@ -597,7 +598,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_ld64,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -618,7 +619,7 @@ std::vector<GemmTestParams> CreateTests1(
             .n(16)
             .k(k)
             .iterations(1)
-            .Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w);
+            .Test(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
         }
       }
     }
@@ -634,7 +635,7 @@ std::vector<GemmTestParams> CreateTests1(
         .n(16)
         .k(4)
         .Test(
-            xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_pack_f16_gemm_goi_w,
+            xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params, xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8,
             &xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld64);
     }
   #endif // XNN_ENABLE_ASSEMBLY

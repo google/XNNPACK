@@ -35,7 +35,7 @@ void VUnaryMicrokernelTester::Test(xnn_f32_vrelu_ukernel_fn vrelu) const {
       [](float x) { return std::max(x, 0.0f); }, TolExact, -1.0f, 1.0f);
 }
 
-void VUnaryMicrokernelTester::Test(
+void VUnaryMicrokernelTester::TestAbs(
     xnn_bf16_vabs_ukernel_fn vabs,
     xnn_init_bf16_abs_params_fn init_params) const {
   TestBF16(
@@ -43,7 +43,7 @@ void VUnaryMicrokernelTester::Test(
       TolExact16, -1.0f, 1.0f);
 }
 
-void VUnaryMicrokernelTester::Test(
+void VUnaryMicrokernelTester::TestAbs(
     xnn_f16_vabs_ukernel_fn vabs,
     xnn_init_f16_abs_params_fn init_params) const {
   TestFP16(
@@ -51,9 +51,9 @@ void VUnaryMicrokernelTester::Test(
       TolExact16, -1.0f, 1.0f);
 }
 
-void VUnaryMicrokernelTester::Test(
+void VUnaryMicrokernelTester::TestAbs(
     xnn_f32_vabs_ukernel_fn vabs,
-    xnn_init_f32_abs_params_fn init_params) const {
+    xnn_init_f32_default_params_fn init_params) const {
   TestFP32(
       vabs, InitParamsWrapper(init_params), [](float x) { return std::abs(x); },
       TolExact, -1.0f, 1.0f);
@@ -145,7 +145,7 @@ void VUnaryMicrokernelTester::Test(
       -125.0f, 125.0f);
 }
 
-void VUnaryMicrokernelTester::Test(
+void VUnaryMicrokernelTester::TestNeg(
     xnn_f16_vneg_ukernel_fn vneg,
     xnn_init_f16_neg_params_fn init_params) const {
   TestFP16(
@@ -153,9 +153,9 @@ void VUnaryMicrokernelTester::Test(
       TolExact16, -1.0f, 1.0f);
 }
 
-void VUnaryMicrokernelTester::Test(
+void VUnaryMicrokernelTester::TestNeg(
     xnn_f32_vneg_ukernel_fn vneg,
-    xnn_init_f32_neg_params_fn init_params) const {
+    xnn_init_f32_default_params_fn init_params) const {
   TestFP32(
       vneg, InitParamsWrapper(init_params), [](float x) { return -x; },
       TolExact, -1.0f, 1.0f);
@@ -231,7 +231,7 @@ void VUnaryMicrokernelTester::Test(
       TolMixed(5.0e-6f, 1.0e-5f), -125.0f, 125.0f);
 }
 
-void VUnaryMicrokernelTester::Test(
+void VUnaryMicrokernelTester::TestSqr(
     xnn_f16_vsqr_ukernel_fn vsqr,
     xnn_init_f16_default_params_fn init_params) const {
   TestFP16(
@@ -239,7 +239,7 @@ void VUnaryMicrokernelTester::Test(
       TolMixed(1.0e-4f, 5.0e-3f), -10.0f, 10.0f);
 }
 
-void VUnaryMicrokernelTester::Test(
+void VUnaryMicrokernelTester::TestSqr(
     xnn_f32_vsqr_ukernel_fn vsqr,
     xnn_init_f32_default_params_fn init_params) const {
   TestFP32(

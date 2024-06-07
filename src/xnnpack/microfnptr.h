@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -1583,8 +1584,8 @@ typedef void (*xnn_qs8_rdsum_ukernel_fn)(
     const int8_t* input,
     size_t input_stride,
     const int8_t* zero,
-    int8_t* output,
-    const union xnn_qs8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    int32_t* output,
+    const union xnn_qs8_rsum_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 // RSUM: Reduce-Sum
 
 typedef void (*xnn_f16_rsum_ukernel_fn)(
@@ -1689,7 +1690,7 @@ typedef void (*xnn_f32_vabs_ukernel_fn)(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_abs_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // VCLAMP: Vector CLAMP elementwise
 
@@ -1863,7 +1864,7 @@ typedef void (*xnn_f32_vneg_ukernel_fn)(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_neg_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // VRELU: Vector REctified Linear Unit elementwise
 
@@ -2538,9 +2539,6 @@ typedef size_t (*xnn_init_bf16_abs_params_fn)(
 typedef size_t (*xnn_init_f16_abs_params_fn)(
   union xnn_f16_abs_params params[XNN_MIN_ELEMENTS(1)]);
 
-typedef size_t (*xnn_init_f32_abs_params_fn)(
-  union xnn_f32_abs_params params[XNN_MIN_ELEMENTS(1)]);
-
 typedef size_t (*xnn_init_f16_default_params_fn)(
   union xnn_f16_default_params params[XNN_MIN_ELEMENTS(1)]);
 
@@ -2649,9 +2647,6 @@ typedef size_t (*xnn_init_u8_minmax_params_fn)(
 
 typedef size_t (*xnn_init_f16_neg_params_fn)(
   union xnn_f16_neg_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_f32_neg_params_fn)(
-  union xnn_f32_neg_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f16_rnd_params_fn)(
   union xnn_f16_rnd_params params[XNN_MIN_ELEMENTS(1)]);

@@ -71,6 +71,9 @@ struct xnn_hardware_config {
   bool use_wasm_sdot;
   bool use_wasm_fma;
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_HEXAGON
+  bool use_hvx;
+#endif  // XNN_ARCH_HEXAGON
 };
 
 XNN_INTERNAL const struct xnn_hardware_config* xnn_init_hardware_config();
@@ -219,14 +222,12 @@ struct xnn_unary_elementwise_config {
     xnn_init_f16_sigmoid_params_fn f16_sigmoid;
     xnn_init_f16_sqrt_params_fn f16_sqrt;
     xnn_init_f16_tanh_params_fn f16_tanh;
-    xnn_init_f32_abs_params_fn f32_abs;
     xnn_init_f32_default_params_fn f32_default;
     xnn_init_f32_elu_params_fn f32_elu;
     xnn_init_f32_f16_cvt_params_fn f32_f16_cvt;
     xnn_init_f32_hswish_params_fn f32_hswish;
     xnn_init_f32_lrelu_params_fn f32_lrelu;
     xnn_init_f32_minmax_params_fn f32_minmax;
-    xnn_init_f32_neg_params_fn f32_neg;
     xnn_init_f32_qs8_cvt_params_fn f32_qs8_cvt;
     xnn_init_f32_qu8_cvt_params_fn f32_qu8_cvt;
     xnn_init_f32_rnd_params_fn f32_rnd;

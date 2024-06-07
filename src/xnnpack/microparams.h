@@ -130,6 +130,11 @@ union xnn_f16_minmax_params {
     float min;
     float max;
     int8_t sign_mask;
+  } avx512vnni;
+  struct {
+    float min;
+    float max;
+    int8_t sign_mask;
   } avxvnni;
   struct {
     float min;
@@ -197,6 +202,13 @@ union xnn_f16_qc4w_minmax_params {
     int8_t mask;        // 0xF0
     int64_t gfni_shl4;  // 0x01020408
   } avxvnni;
+  struct {
+    float min;
+    float max;
+    int8_t sign_mask;   // 0x80
+    int8_t mask;        // 0xF0
+    int64_t gfni_shl4;  // 0x01020408
+  } avx512vnni;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
@@ -1035,11 +1047,14 @@ union xnn_qs8_avgpool_minmax_params {
   struct {
     XNN_ALIGN(16) int32_t init_bias[8];
     XNN_ALIGN(16) float scale[8];
+    XNN_ALIGN(16) float output_max_less_zero_point[8];
     XNN_ALIGN(16) float magic_bias[8];
     XNN_ALIGN(16) int32_t magic_bias_less_output_zero_point[8];
+    XNN_ALIGN(16) int16_t output_zero_point[16];
     XNN_ALIGN(16) int8_t output_min[32];
     XNN_ALIGN(16) int8_t output_max[32];
     XNN_ALIGN(16) int8_t mask_table[30];
+    XNN_ALIGN(32) uint32_t shuffle_mask[8];
   } fp32_avx2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -1151,27 +1166,6 @@ union xnn_f16_abs_params {
     XNN_ALIGN(16) uint16_t nonsign_mask[8];
   } sse;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-};
-
-union xnn_f32_abs_params {
-  char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) float nonsign_mask[4];
-  } sse;
-  struct {
-    XNN_ALIGN(32) float nonsign_mask[8];
-    int32_t mask_table[14];
-  } avx;
-  struct {
-    uint32_t nonsign_mask;
-  } avx512;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  struct {
-    XNN_ALIGN(8) float nonsign_mask[2];
-  } wasmsimd;
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
 
@@ -2491,27 +2485,6 @@ union xnn_f16_neg_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
-union xnn_f32_neg_params {
-  char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) float sign_mask[4];
-  } sse;
-  struct {
-    XNN_ALIGN(32) float sign_mask[8];
-    int32_t mask_table[14];
-  } avx;
-  struct {
-    uint32_t sign_mask;
-  } avx512;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  struct {
-    XNN_ALIGN(8) float sign_mask[2];
-  } wasmsimd;
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-};
-
 
 // Rnd (Round): used by VRNDNE/VRNDU/VRNDD/VRNDZ microkernels.
 
@@ -2886,214 +2859,6 @@ union xnn_f32_tanh_params {
     float minus_two;
     float one;
   } scalar_expm1minus_rr1_lut8_p4h3;
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) float max_x[4];
-    XNN_ALIGN(16) float min_x[4];
-    XNN_ALIGN(16) float alpha_1[4];
-    XNN_ALIGN(16) float alpha_3[4];
-    XNN_ALIGN(16) float alpha_5[4];
-    XNN_ALIGN(16) float alpha_7[4];
-    XNN_ALIGN(16) float alpha_9[4];
-    XNN_ALIGN(16) float beta_0[4];
-    XNN_ALIGN(16) float beta_2[4];
-    XNN_ALIGN(16) float beta_4[4];
-    XNN_ALIGN(16) float beta_6[4];
-    XNN_ALIGN(16) float two[4];
-  } sse_rational_9_6;
-  struct {
-    float max_abs_x;
-    float alpha_1;
-    float alpha_3;
-    float alpha_5;
-    float alpha_7;
-    float alpha_9;
-    float beta_0;
-    float beta_2;
-    float beta_4;
-    float beta_6;
-    float two;
-    int32_t mask_table[14];
-  } avx_rational_9_6;
-  struct {
-    float max_abs_x;
-    float alpha_1;
-    float alpha_3;
-    float alpha_5;
-    float alpha_7;
-    float alpha_9;
-    float beta_0;
-    float beta_2;
-    float beta_4;
-    float beta_6;
-    float two;
-    int32_t mask_table[14];
-  } fma3_rational_9_6;
-  struct {
-    float max_abs_x;
-    float alpha_1;
-    float alpha_3;
-    float alpha_5;
-    float alpha_7;
-    float alpha_9;
-    float beta_0;
-    float beta_2;
-    float beta_4;
-    float beta_6;
-    float two;
-  } avx512_rational_9_6;
-  struct {
-    XNN_ALIGN(16) float sign_mask[4];
-    XNN_ALIGN(16) float sat_cutoff[4];
-    XNN_ALIGN(16) float log2e[4];
-    XNN_ALIGN(16) float magic_bias[4];
-    XNN_ALIGN(16) float minus_ln2[4];
-    XNN_ALIGN(16) float c6[4];
-    XNN_ALIGN(16) float c5[4];
-    XNN_ALIGN(16) float c4[4];
-    XNN_ALIGN(16) float c3[4];
-    XNN_ALIGN(16) float c2[4];
-    XNN_ALIGN(16) float minus_two[4];
-    XNN_ALIGN(16) float minus_one[4];
-  } sse_expm1minus_rr1_p6h5;
-  struct {
-    XNN_ALIGN(16) float sign_mask[4];
-    XNN_ALIGN(16) float sat_cutoff[4];
-    XNN_ALIGN(16) float log2e[4];
-    XNN_ALIGN(16) float magic_bias[4];
-    XNN_ALIGN(16) uint32_t index_mask[4];
-    XNN_ALIGN(16) float minus_ln2[4];
-    XNN_ALIGN(16) float c4[4];
-    XNN_ALIGN(16) float c3[4];
-    XNN_ALIGN(16) float c2[4];
-    XNN_ALIGN(16) float minus_two[4];
-    XNN_ALIGN(16) float minus_one[4];
-  } sse_expm1minus_rr1_lut8_p4h3;
-  struct {
-    XNN_ALIGN(32) float sign_mask[8];
-    XNN_ALIGN(32) float sat_cutoff[8];
-    XNN_ALIGN(32) float log2e[8];
-    XNN_ALIGN(32) float magic_bias[8];
-    XNN_ALIGN(32) float minus_ln2[8];
-    XNN_ALIGN(32) float c6[8];
-    XNN_ALIGN(32) float c5[8];
-    XNN_ALIGN(32) float c4[8];
-    XNN_ALIGN(32) float c3[8];
-    XNN_ALIGN(32) float c2[8];
-    XNN_ALIGN(32) float two[8];
-    XNN_ALIGN(32) float minus_one[8];
-    int32_t mask_table[14];
-  } avx_expm1minus_rr1_p6h5;
-  struct {
-    XNN_ALIGN(32) float sign_mask[8];
-    XNN_ALIGN(32) float sat_cutoff[8];
-    XNN_ALIGN(32) float log2e[8];
-    XNN_ALIGN(32) float magic_bias[8];
-    XNN_ALIGN(32) uint32_t index_mask[8];
-    XNN_ALIGN(32) float minus_ln2[8];
-    XNN_ALIGN(32) float c4[8];
-    XNN_ALIGN(32) float c3[8];
-    XNN_ALIGN(32) float c2[8];
-    XNN_ALIGN(32) float two[8];
-    XNN_ALIGN(32) float minus_one[8];
-    int32_t mask_table[14];
-  } avx_expm1minus_rr1_lut8_p4h3;
-  struct {
-    XNN_ALIGN(32) float sign_mask[8];
-    XNN_ALIGN(32) float sat_cutoff[8];
-    XNN_ALIGN(32) float log2e[8];
-    XNN_ALIGN(32) float magic_bias[8];
-    XNN_ALIGN(32) float table[8];
-    XNN_ALIGN(32) float minus_ln2[8];
-    XNN_ALIGN(32) float c4[8];
-    XNN_ALIGN(32) float c3[8];
-    XNN_ALIGN(32) float c2[8];
-    XNN_ALIGN(32) float two[8];
-    XNN_ALIGN(32) float minus_one[8];
-    int32_t mask_table[14];
-  } avx_expm1minus_rr1_lut4_p4h2_perm;
-  struct {
-    XNN_ALIGN(32) float sign_mask[8];
-    XNN_ALIGN(32) float sat_cutoff[8];
-    XNN_ALIGN(32) float log2e[8];
-    XNN_ALIGN(32) float magic_bias[8];
-    XNN_ALIGN(32) float table[8];
-    XNN_ALIGN(32) float minus_ln2[8];
-    XNN_ALIGN(32) float c4[8];
-    XNN_ALIGN(32) float c3[8];
-    XNN_ALIGN(32) float c2[8];
-    XNN_ALIGN(32) float two[8];
-    XNN_ALIGN(32) float minus_one[8];
-    int32_t mask_table[14];
-  } avx_expm1minus_rr1_lut4_p4h3_perm;
-  struct {
-    XNN_ALIGN(32) float sign_mask[8];
-    XNN_ALIGN(32) float sat_cutoff[8];
-    XNN_ALIGN(32) float log2e[8];
-    XNN_ALIGN(32) float magic_bias[8];
-    XNN_ALIGN(32) uint32_t table[8];
-    XNN_ALIGN(32) float minus_ln2[8];
-    XNN_ALIGN(32) float c4[8];
-    XNN_ALIGN(32) float c3[8];
-    XNN_ALIGN(32) float c2[8];
-    XNN_ALIGN(32) float two[8];
-    XNN_ALIGN(32) float minus_one[8];
-    int32_t mask_table[14];
-  } avx_expm1minus_rr1_lut8_p4h3_perm;
-  struct {
-    float sat_cutoff;
-    float minus_log2e;
-    float magic_bias;
-    float ln2;
-    float c6;
-    float c5;
-    float c4;
-    float c3;
-    float c2;
-    float minus_two;
-    float one;
-    uint32_t sign_mask;
-  } avx512_expm1minus_rr1_p6h5;
-  struct {
-    float sat_cutoff;
-    float minus_log2e;
-    float magic_bias;
-    uint32_t index_mask;
-    float ln2;
-    float c4;
-    float c3;
-    float c2;
-    float minus_two;
-    float one;
-    uint32_t sign_mask;
-  } avx512_expm1minus_rr1_lut8_p4h3;
-  struct {
-    float sat_cutoff;
-    float minus_log2e;
-    float magic_bias;
-    float ln2;
-    float c4;
-    float c3;
-    float c2;
-    float minus_two;
-    float one;
-    uint32_t sign_mask;
-    XNN_ALIGN(64) float table[16];
-  } avx512_expm1minus_rr1_lut4_p4h3_perm;
-  struct {
-    float sat_cutoff;
-    float minus_log2e;
-    float magic_bias;
-    float ln2;
-    float c4;
-    float c3;
-    float c2;
-    float minus_two;
-    float one;
-    uint32_t sign_mask;
-    XNN_ALIGN(64) uint32_t table[16];
-  } avx512_expm1minus_rr1_lut8_p4h3_perm;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   struct {
     XNN_ALIGN(8) float sat_cutoff[2];

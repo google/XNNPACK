@@ -1322,14 +1322,12 @@ struct univector_strided_context {
     union xnn_f16_neg_params f16_neg;
     union xnn_f16_sigmoid_params f16_sigmoid;
     union xnn_f16_tanh_params f16_tanh;
-    union xnn_f32_abs_params f32_abs;
     union xnn_f32_default_params f32_default;
     union xnn_f32_elu_params f32_elu;
     union xnn_f32_f16_cvt_params f32_f16_cvt;
     union xnn_f32_hswish_params f32_hswish;
     union xnn_f32_lrelu_params f32_lrelu;
     union xnn_f32_minmax_params f32_minmax;
-    union xnn_f32_neg_params f32_neg;
     union xnn_f32_qs8_cvt_params f32_qs8_cvt;
     union xnn_f32_qu8_cvt_params f32_qu8_cvt;
     union xnn_f32_rnd_params f32_rnd;
@@ -1372,14 +1370,12 @@ struct univector_contiguous_context {
     union xnn_f16_minmax_params f16_minmax;
     union xnn_f16_neg_params f16_neg;
     union xnn_f16_sigmoid_params f16_sigmoid;
-    union xnn_f32_abs_params f32_abs;
     union xnn_f32_default_params f32_default;
     union xnn_f32_elu_params f32_elu;
     union xnn_f32_f16_cvt_params f32_f16_cvt;
     union xnn_f32_hswish_params f32_hswish;
     union xnn_f32_lrelu_params f32_lrelu;
     union xnn_f32_minmax_params f32_minmax;
-    union xnn_f32_neg_params f32_neg;
     union xnn_f32_qs8_cvt_params f32_qs8_cvt;
     union xnn_f32_qu8_cvt_params f32_qu8_cvt;
     union xnn_f32_rnd_params f32_rnd;
@@ -1744,15 +1740,19 @@ struct scaled_dot_product_attention_context {
   xnn_vunary_ukernel_fn vtanh_ukernel;
 
   union {
+    union xnn_f16_expminus_params f16;
     union xnn_f32_expminus_params f32;
   } expminus_params;
   union {
+    union xnn_f16_minmax_params f16;
     union xnn_f32_minmax_params f32;
   } minmax_params;
   union {
     union xnn_f16_default_params f16;
+    union xnn_f32_default_params f32;
   } rmax_params;
   union {
+    union xnn_f16_tanh_params f16;
     union xnn_f32_tanh_params f32;
   } tanh_params;
 

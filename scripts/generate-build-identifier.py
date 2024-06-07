@@ -34,6 +34,9 @@ FILE_TEMPLATE = """// Copyright 2024 Google LLC
 
 // Auto-generated file. Do not edit!
 //   Generator: scripts/generate-build-identifier.py
+//
+// The following inputs were used to generate this file.
+{genlist}
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -41,7 +44,7 @@ FILE_TEMPLATE = """// Copyright 2024 Google LLC
 #include <string.h>
 
 static const uint8_t xnn_build_identifier[] = {{
-{}
+{id_data}
 }};
 
 size_t xnn_experimental_get_build_identifier_size() {{
@@ -64,15 +67,13 @@ bool xnn_experimental_check_build_identifier(const void* data, const size_t size
 def main(args) -> None:
   m = hashlib.sha256()
   for path in args.inputs:
-    if any(path.endswith(ext) for ext in [".c", ".S", ".cc", ".h"]):
-      with open(path, "rb") as f:
-        m.update(f.read())
-    else:
-      print(f"generate-build-identifier.py: Unknown file extension for {path}. File was ignored.", file=sys.stderr)
+    with open(path, "rb") as f:
+      m.update(f.read())
   byte_list = ", ".join(str(b).rjust(3, "x") for b in m.digest())
   byte_list = textwrap.indent(textwrap.fill(byte_list, width=40), "  ").replace("x", " ")
+  formated_input_list = "\n".join("// - " + p for p in args.inputs)
   with open(args.output, "w") as out:
-    out.write(FILE_TEMPLATE.format(byte_list))
+    out.write(FILE_TEMPLATE.format(id_data=byte_list, genlist=formated_input_list))
 
 
 if __name__ == "__main__":

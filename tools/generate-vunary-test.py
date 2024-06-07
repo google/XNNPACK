@@ -95,17 +95,17 @@ TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}${BATCH_SUFFIX}) {
     ${ISA_CHECK};
   VUnaryMicrokernelTester()
     .batch_size(${BATCH_TILE}${BATCH_SCALE})
-    .Test(${", ".join(TEST_ARGS)});
+    .${TEST_FN}(${", ".join(TEST_ARGS)});
 }
 
-$if BATCH_TILE > 1:
+$if BATCH_TILE > 1 or BATCH_SCALE != "":
   TEST(${TEST_NAME}, batch_div_${BATCH_TILE}${BATCH_SUFFIX}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t batch_size = ${BATCH_TILE*2}${BATCH_SCALE}; batch_size < ${BATCH_TILE*10}${BATCH_SCALE}; batch_size += ${BATCH_TILE}${BATCH_SCALE}) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(${", ".join(TEST_ARGS)});
+        .${TEST_FN}(${", ".join(TEST_ARGS)});
     }
   }
 
@@ -115,7 +115,7 @@ $if BATCH_TILE > 1:
     for (size_t batch_size = 1; batch_size < ${BATCH_TILE}${BATCH_SCALE}; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(${", ".join(TEST_ARGS)});
+        .${TEST_FN}(${", ".join(TEST_ARGS)});
     }
   }
 
@@ -125,7 +125,7 @@ TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}${BATCH_SUFFIX}) {
   for (size_t batch_size = ${BATCH_TILE}${BATCH_SCALE} + 1; batch_size < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}${BATCH_SCALE}; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
-      .Test(${", ".join(TEST_ARGS)});
+      .${TEST_FN}(${", ".join(TEST_ARGS)});
   }
 }
 
@@ -137,7 +137,7 @@ $if OP_TYPE != "SquareRootShift":
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(${", ".join(TEST_ARGS)});
+        .${TEST_FN}(${", ".join(TEST_ARGS)});
     }
   }
 
@@ -150,7 +150,7 @@ $if OP_TYPE == "Clamp":
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmin(qmin)
-          .Test(${", ".join(TEST_ARGS)});
+          .${TEST_FN}(${", ".join(TEST_ARGS)});
       }
     }
   }
@@ -163,7 +163,7 @@ $if OP_TYPE == "Clamp":
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmax(qmax)
-          .Test(${", ".join(TEST_ARGS)});
+          .${TEST_FN}(${", ".join(TEST_ARGS)});
       }
     }
   }
@@ -177,7 +177,7 @@ $if OP_TYPE == "ELU":
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .prescale(prescale)
-          .Test(${", ".join(TEST_ARGS)});
+          .${TEST_FN}(${", ".join(TEST_ARGS)});
       }
     }
   }
@@ -190,7 +190,7 @@ $if OP_TYPE == "ELU":
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .alpha(alpha)
-          .Test(${", ".join(TEST_ARGS)});
+          .${TEST_FN}(${", ".join(TEST_ARGS)});
       }
     }
   }
@@ -203,7 +203,7 @@ $if OP_TYPE == "ELU":
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .beta(beta)
-          .Test(${", ".join(TEST_ARGS)});
+          .${TEST_FN}(${", ".join(TEST_ARGS)});
       }
     }
   }
@@ -217,7 +217,7 @@ $if OP_TYPE == "LeakyReLU":
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .slope(slope)
-          .Test(${", ".join(TEST_ARGS)});
+          .${TEST_FN}(${", ".join(TEST_ARGS)});
       }
     }
   }
@@ -231,7 +231,7 @@ $if OP_TYPE == "SquareRootShift":
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .shift(shift)
-          .Test(${", ".join(TEST_ARGS)});
+          .${TEST_FN}(${", ".join(TEST_ARGS)});
       }
     }
   }
@@ -320,6 +320,11 @@ def generate_test_cases(
           "OP_TYPE": op_type,
           "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
           "SPECIAL_VALUES_F32": SPECIAL_VALUES_F32,
+          "TEST_FN": {
+              "Square": "TestSqr",
+              "Abs": "TestAbs",
+              "Negate": "TestNeg",
+          }.get(op_type, "Test"),
       },
   )
 

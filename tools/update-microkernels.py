@@ -5,11 +5,12 @@
 # LICENSE file in the root directory of this source tree.
 
 import argparse
+from functools import cmp_to_key
+import io
 import os
 import re
 import sys
-import io
-from functools import cmp_to_key
+import tempfile
 
 import xnncommon
 
@@ -17,103 +18,104 @@ import xnncommon
 TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 ISA_LIST = frozenset({
-  'armsimd32',
-  'avx',
-  'avx2',
-  'avx512f',
-  'avx512skx',
-  'avx512vbmi',
-  'avx512vnni',
-  'avx512vnnigfni',
-  'avx512amx',
-  'avx512fp16',
-  'avxvnni',
-  'f16c',
-  'fma',
-  'fma3',
-  'fp16arith',
-  'hexagon',
-  'hvx',
-  'neon',
-  'neonbf16',
-  'neondot',
-  'neondotfp16arith',
-  'neoni8mm',
-  'neonfma',
-  'neonfp16',
-  'neonfp16arith',
-  'neonv8',
-  'rvv',
-  'rvvfp16arith',
-  'scalar',
-  'sse',
-  'sse2',
-  'sse41',
-  'ssse3',
-  'wasm',
-  'wasmblendvps',
-  'wasmrelaxedsimd',
-  'wasmpshufb',
-  'wasmsdot',
-  'wasmsimd',
+    'armsimd32',
+    'avx',
+    'avx2',
+    'avx512f',
+    'avx512skx',
+    'avx512vbmi',
+    'avx512vnni',
+    'avx512vnnigfni',
+    'avx512amx',
+    'avx512fp16',
+    'avxvnni',
+    'f16c',
+    'fma',
+    'fma3',
+    'fp16arith',
+    'hexagon',
+    'hvx',
+    'neon',
+    'neonbf16',
+    'neondot',
+    'neondotfp16arith',
+    'neoni8mm',
+    'neonfma',
+    'neonfp16',
+    'neonfp16arith',
+    'neonv8',
+    'rvv',
+    'rvvfp16arith',
+    'scalar',
+    'sse',
+    'sse2',
+    'sse41',
+    'ssse3',
+    'wasm',
+    'wasmblendvps',
+    'wasmrelaxedsimd',
+    'wasmpshufb',
+    'wasmsdot',
+    'wasmsimd',
 })
 
 ISA_MAP = {
-  'wasmblendvps': 'wasmrelaxedsimd',
-  'wasmpshufb': 'wasmrelaxedsimd',
-  'wasmsdot': 'wasmrelaxedsimd',
+    'wasmblendvps': 'wasmrelaxedsimd',
+    'wasmpshufb': 'wasmrelaxedsimd',
+    'wasmsdot': 'wasmrelaxedsimd',
 }
 
 ARCH_LIST = frozenset({
-  'aarch32',
-  'aarch64',
-  'wasm32',
-  'wasmsimd32',
-  'wasmrelaxedsimd32',
+    'aarch32',
+    'aarch64',
+    'wasm32',
+    'wasmsimd32',
+    'wasmrelaxedsimd32',
 })
 
 ISA_TO_HEADER_MAP = {
-  'armsimd32': 'arm_acle.h',
-  'avx': 'immintrin.h',
-  'avx2': 'immintrin.h',
-  'avx512f': 'immintrin.h',
-  'avx512skx': 'immintrin.h',
-  'avx512vbmi': 'immintrin.h',
-  'avx512vnni': 'immintrin.h',
-  'avx512vnnigfni': 'immintrin.h',
-  'avx512amx': 'immintrin.h',
-  'avx512fp16': 'immintrin.h',
-  'avxvnni': 'immintrin.h',
-  'f16c': 'immintrin.h',
-  'fma3': 'immintrin.h',
-  'fp16arith': 'arm_fp16.h',
-  'neon': 'arm_neon.h',
-  'neonbf16': 'arm_neon.h',
-  'neondot': 'arm_neon.h',
-  'neondotfp16arith': 'arm_neon.h',
-  'neoni8mm': 'arm_neon.h',
-  'neonfma': 'arm_neon.h',
-  'neonfp16': 'arm_neon.h',
-  'neonfp16arith': 'arm_neon.h',
-  'neonv8': 'arm_neon.h',
-  'rvv': 'riscv_vector.h',
-  'rvvfp16arith': 'riscv_vector.h',
-  'sse': 'immintrin.h',
-  'sse2': 'immintrin.h',
-  'sse41': 'immintrin.h',
-  'ssse3': 'immintrin.h',
-  'wasmrelaxedsimd': 'wasm_simd128.h',
-  'wasmsimd': 'wasm_simd128.h',
+    'armsimd32': 'arm_acle.h',
+    'avx': 'immintrin.h',
+    'avx2': 'immintrin.h',
+    'avx512f': 'immintrin.h',
+    'avx512skx': 'immintrin.h',
+    'avx512vbmi': 'immintrin.h',
+    'avx512vnni': 'immintrin.h',
+    'avx512vnnigfni': 'immintrin.h',
+    'avx512amx': 'immintrin.h',
+    'avx512fp16': 'immintrin.h',
+    'avxvnni': 'immintrin.h',
+    'f16c': 'immintrin.h',
+    'fma3': 'immintrin.h',
+    'fp16arith': 'arm_fp16.h',
+    'neon': 'arm_neon.h',
+    'neonbf16': 'arm_neon.h',
+    'neondot': 'arm_neon.h',
+    'neondotfp16arith': 'arm_neon.h',
+    'neoni8mm': 'arm_neon.h',
+    'neonfma': 'arm_neon.h',
+    'neonfp16': 'arm_neon.h',
+    'neonfp16arith': 'arm_neon.h',
+    'neonv8': 'arm_neon.h',
+    'rvv': 'riscv_vector.h',
+    'rvvfp16arith': 'riscv_vector.h',
+    'sse': 'immintrin.h',
+    'sse2': 'immintrin.h',
+    'sse41': 'immintrin.h',
+    'ssse3': 'immintrin.h',
+    'wasmrelaxedsimd': 'wasm_simd128.h',
+    'wasmsimd': 'wasm_simd128.h',
 }
 
 MICROKERNEL_NAME_REGEX = re.compile(
-  r"\bxnn_(?:[a-z0-9]+(?:_[a-z0-9]+)*)_ukernel(?:_[a-z0-9]+)*__(?:[a-z0-9]+(?:_[a-z0-9]+)*)\b")
+    r'\bxnn_(?:[a-z0-9]+(?:_[a-z0-9]+)*)_ukernel(?:_[a-z0-9]+)*__(?:[a-z0-9]+(?:_[a-z0-9]+)*)\b'
+)
 
 VERIFICATION_IGNORE_SUBDIRS = {
-  os.path.join('src', 'math'),
-  os.path.join('src', 'math', 'gen'),
-  os.path.join('src', 'qs8-requantization'),
-  os.path.join('src', 'qu8-requantization'),
+    os.path.join('src', 'math'),
+    os.path.join('src', 'math', 'gen'),
+    os.path.join('src', 'qs8-requantization'),
+    os.path.join('src', 'qu8-requantization'),
 }
 
 AMALGAMATION_HEADER = """\
@@ -257,9 +259,11 @@ def main(args):
   c_microkernels_per_isa['neonfma_aarch64'] = list()
   c_microkernels_per_isa['neonfp16arith_aarch64'] = list()
   c_microkernels_per_isa['neonbf16_aarch64'] = list()
+  temp_c_microkernels_per_isa = {isa: [] for isa in c_microkernels_per_isa}
   asm_microkernels_per_arch = {arch: [] for arch in ARCH_LIST}
   jit_microkernels_per_arch = {arch: [] for arch in ARCH_LIST}
   microkernel_name_to_filename = dict()
+  microkernel_temp_dir = tempfile.mkdtemp()
   for root, dirs, files in os.walk(src_dir, topdown=False):
     if root in ignore_roots:
       continue
@@ -273,6 +277,7 @@ def main(args):
 
       subdir = os.path.relpath(root, root_dir)
       filepath = os.path.join(subdir, name)
+      temp_filepaths = []
 
       # Build microkernel name -> microkernel filepath mapping
       if options.amalgamate:
@@ -298,8 +303,45 @@ def main(args):
                   else:
                     microkernel_name_to_filename[microkernel] = filepath
               else:
-                microkernels_str = ', '.join(microkernels)
-                print('Multiple microkernels (%s) found in %s' % (microkernels_str, filepath))
+                # Extract the individual function names and their offsets.
+                matches = list(re.finditer(MICROKERNEL_NAME_REGEX, content))
+                header = content[: matches[0].start(0)].rsplit('\n', 1)[0]
+                functions = []
+                for k in range(len(matches) - 1):
+                  functions.append(
+                      content[: matches[k].start(0)].rsplit('\n', 1)[1]
+                      + matches[k].group(0)
+                      + content[
+                          matches[k].end(0) : matches[k + 1].start()
+                      ].rsplit('\n', 1)[0]
+                  )
+                functions.append(
+                    content[: matches[-1].start(0)].rsplit('\n', 1)[1]
+                    + content[matches[-1].start(0) :]
+                )
+
+                # Write them to temporary files.
+                for k in range(len(matches)):
+                  microkernel = matches[k].group(0)
+                  if microkernel in microkernel_name_to_filename:
+                    print(
+                        'Duplicate microkernel definition: %s and %s (%ith'
+                        ' function)'
+                        % (
+                            microkernel_name_to_filename[microkernel],
+                            filepath,
+                            k,
+                        )
+                    )
+                  filename = os.path.join(
+                      microkernel_temp_dir, microkernel + '.c'
+                  )
+                  with open(filename, 'w', encoding='utf-8') as f:
+                    f.write(header)
+                    f.write(functions[k])
+                  microkernel_name_to_filename[microkernel] = filename
+                  temp_filepaths.append(filename)
+
             else:
               microkernel = microkernels[0]
               if microkernel in microkernel_name_to_filename:
@@ -316,6 +358,8 @@ def main(args):
             isa = ISA_MAP.get(component, component)
             key = isa if arch is None else f'{isa}_{arch}'
             c_microkernels_per_isa[key].append(filepath)
+            if temp_filepaths:
+              temp_c_microkernels_per_isa[key].extend(temp_filepaths)
             break
         else:
           print('Unknown ISA for C microkernel %s' % filepath)
@@ -421,9 +465,16 @@ Auto-generated file. Do not edit!
     prod_microkernels = set(map(microkernel_name_to_filename.get, prod_microkernels))
 
     for isa_spec, microkernels in c_microkernels_per_isa.items():
-      microkernels = sorted(prod_microkernels.intersection(microkernels), key=human_sort_key)
+      microkernels = microkernels + temp_c_microkernels_per_isa[isa_spec]
+      microkernels = sorted(
+          prod_microkernels.intersection(microkernels),
+          key=human_sort_key,
+      )
       if microkernels:
-        filepaths = [os.path.join(root_dir, filepath) for filepath in microkernels]
+        filepaths = [
+            fp if os.path.isabs(fp) else os.path.join(root_dir, fp)
+            for fp in microkernels
+        ]
         if '_' in isa_spec:
           isa, arch = isa_spec.split('_')
           amalgam_filename = f'{isa}-{arch}.c'

@@ -1704,14 +1704,16 @@
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_HEXAGON
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   TEST(F32_VSUB_MINMAX__HVX_U32, batch_eq_32) {
+    TEST_REQUIRES_HVX;
     VBinaryMicrokernelTester()
       .batch_size(32)
       .Test(xnn_f32_vsub_minmax_ukernel__hvx_u32, VBinaryMicrokernelTester::OpType::Sub, xnn_init_f32_minmax_scalar_params);
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U32, batch_div_32) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1720,6 +1722,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U32, batch_lt_32) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size < 32; batch_size++) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1728,6 +1731,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U32, batch_gt_32) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 33; batch_size < 64; batch_size++) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1736,6 +1740,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U32, inplace_a) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1745,6 +1750,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U32, inplace_b) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1754,6 +1760,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U32, inplace_a_and_b) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1764,6 +1771,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U32, qmin) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1773,6 +1781,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U32, qmax) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1780,17 +1789,19 @@
         .Test(xnn_f32_vsub_minmax_ukernel__hvx_u32, VBinaryMicrokernelTester::OpType::Sub, xnn_init_f32_minmax_scalar_params);
     }
   }
-#endif  // XNN_ARCH_HEXAGON
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 
-#if XNN_ARCH_HEXAGON
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   TEST(F32_VSUB_MINMAX__HVX_U64, batch_eq_64) {
+    TEST_REQUIRES_HVX;
     VBinaryMicrokernelTester()
       .batch_size(64)
       .Test(xnn_f32_vsub_minmax_ukernel__hvx_u64, VBinaryMicrokernelTester::OpType::Sub, xnn_init_f32_minmax_scalar_params);
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U64, batch_div_64) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1799,6 +1810,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U64, batch_lt_64) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size < 64; batch_size++) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1807,6 +1819,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U64, batch_gt_64) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 65; batch_size < 128; batch_size++) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1815,6 +1828,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U64, inplace_a) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 320; batch_size += 63) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1824,6 +1838,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U64, inplace_b) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 320; batch_size += 63) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1833,6 +1848,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U64, inplace_a_and_b) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 320; batch_size += 63) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1843,6 +1859,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U64, qmin) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 320; batch_size += 63) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1852,6 +1869,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U64, qmax) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 320; batch_size += 63) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1859,17 +1877,19 @@
         .Test(xnn_f32_vsub_minmax_ukernel__hvx_u64, VBinaryMicrokernelTester::OpType::Sub, xnn_init_f32_minmax_scalar_params);
     }
   }
-#endif  // XNN_ARCH_HEXAGON
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 
-#if XNN_ARCH_HEXAGON
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   TEST(F32_VSUB_MINMAX__HVX_U128, batch_eq_128) {
+    TEST_REQUIRES_HVX;
     VBinaryMicrokernelTester()
       .batch_size(128)
       .Test(xnn_f32_vsub_minmax_ukernel__hvx_u128, VBinaryMicrokernelTester::OpType::Sub, xnn_init_f32_minmax_scalar_params);
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U128, batch_div_128) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 256; batch_size < 1280; batch_size += 128) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1878,6 +1898,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U128, batch_lt_128) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size < 128; batch_size++) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1886,6 +1907,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U128, batch_gt_128) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 129; batch_size < 256; batch_size++) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1894,6 +1916,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U128, inplace_a) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 640; batch_size += 127) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1903,6 +1926,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U128, inplace_b) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 640; batch_size += 127) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1912,6 +1936,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U128, inplace_a_and_b) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 640; batch_size += 127) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1922,6 +1947,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U128, qmin) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 640; batch_size += 127) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1931,6 +1957,7 @@
   }
 
   TEST(F32_VSUB_MINMAX__HVX_U128, qmax) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 640; batch_size += 127) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1938,7 +1965,7 @@
         .Test(xnn_f32_vsub_minmax_ukernel__hvx_u128, VBinaryMicrokernelTester::OpType::Sub, xnn_init_f32_minmax_scalar_params);
     }
   }
-#endif  // XNN_ARCH_HEXAGON
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 
 TEST(F32_VSUB_MINMAX__SCALAR_U1, batch_eq_1) {

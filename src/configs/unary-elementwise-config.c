@@ -661,20 +661,16 @@ static void init_f32_abs_config(void) {
     assert(hardware_config != NULL);
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__avx512f_u16;
-      f32_abs_config.init.f32_abs = xnn_init_f32_abs_avx512_params;
       f32_abs_config.element_tile = 16;
     } else if (hardware_config->use_x86_avx) {
       f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__avx_u16;
-      f32_abs_config.init.f32_abs = xnn_init_f32_abs_avx_params;
       f32_abs_config.element_tile = 16;
     } else {
-      f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__sse_u8;
-      f32_abs_config.init.f32_abs = xnn_init_f32_abs_sse_params;
+      f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__sse2_u8;
       f32_abs_config.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__wasmsimd_u8;
-    f32_abs_config.init.f32_abs = xnn_init_f32_abs_wasmsimd_params;
     f32_abs_config.element_tile = 8;
   #elif XNN_ARCH_WASM
     f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__scalar_u4;
@@ -991,20 +987,16 @@ static void init_f32_neg_config(void) {
     assert(hardware_config != NULL);
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__avx512f_u16;
-      f32_neg_config.init.f32_neg = xnn_init_f32_neg_avx512_params;
       f32_neg_config.element_tile = 16;
     } else if (hardware_config->use_x86_avx) {
       f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__avx_u16;
-      f32_neg_config.init.f32_neg = xnn_init_f32_neg_avx_params;
       f32_neg_config.element_tile = 16;
     } else {
-      f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__sse_u8;
-      f32_neg_config.init.f32_neg = xnn_init_f32_neg_sse_params;
+      f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__sse2_u8;
       f32_neg_config.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__wasmsimd_u8;
-    f32_neg_config.init.f32_neg = xnn_init_f32_neg_wasmsimd_params;
     f32_neg_config.element_tile = 8;
   #elif XNN_ARCH_WASM
     f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__scalar_u4;
@@ -1334,7 +1326,7 @@ static void init_f32_sqr_config(void) {
       f32_sqr_config.init.f32_default = xnn_init_f32_default_avx_params;
       f32_sqr_config.element_tile = 16;
     } else {
-      f32_sqr_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__sse_u8;
+      f32_sqr_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__sse2_u8;
       f32_sqr_config.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -1452,8 +1444,7 @@ static void init_f32_tanh_config(void) {
       f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params;
       f32_tanh_config.element_tile = 8;
     } else if (!XNN_PLATFORM_MOBILE) {
-      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__scalar_rational_9_6_u1;
-      f32_tanh_config.init.f32_tanh = NULL;
+      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn)xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u1;
       f32_tanh_config.element_tile = 1;
     }
   #elif XNN_ARCH_ARM64
@@ -1465,19 +1456,15 @@ static void init_f32_tanh_config(void) {
     assert(hardware_config != NULL);
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
       f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u16;
-      f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_avx512_rational_9_6_params;
       f32_tanh_config.element_tile = 16;
     } else if (hardware_config->use_x86_fma3) {
       f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__fma3_rational_9_6_div_u16;
-      f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_fma3_rational_9_6_params;
       f32_tanh_config.element_tile = 16;
     } else if (hardware_config->use_x86_avx) {
       f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__avx_rational_9_6_div_u16;
-      f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_avx_rational_9_6_params;
       f32_tanh_config.element_tile = 16;
     } else {
       f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__sse2_rational_9_6_div_u8;
-      f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_sse_rational_9_6_params;
       f32_tanh_config.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -1496,7 +1483,8 @@ static void init_f32_tanh_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
-      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__scalar_rational_9_6_u1;
+      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn)
+          xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u1;
       f32_tanh_config.init.f32_tanh = NULL;
       f32_tanh_config.element_tile = 1;
     } else {
@@ -1509,9 +1497,10 @@ static void init_f32_tanh_config(void) {
     f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params;
     f32_tanh_config.element_tile = 4;
   #else
-    f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__scalar_rational_9_6_u1;
-    f32_tanh_config.init.f32_tanh = NULL;
-    f32_tanh_config.element_tile = 1;
+  f32_tanh_config.ukernel =
+      (xnn_vunary_ukernel_fn)xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u1;
+  f32_tanh_config.init.f32_tanh = NULL;
+  f32_tanh_config.element_tile = 1;
   #endif
 }
 

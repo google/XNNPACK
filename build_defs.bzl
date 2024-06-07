@@ -77,7 +77,7 @@ def xnnpack_cc_library(
         x86_srcs = [],
         aarch32_srcs = [],
         aarch64_srcs = [],
-        hvx_srcs = [],
+        hexagon_srcs = [],
         riscv_srcs = [],
         wasm_srcs = [],
         wasmsimd_srcs = [],
@@ -93,7 +93,7 @@ def xnnpack_cc_library(
         msvc_x86_64_copts = [],
         aarch32_copts = [],
         aarch64_copts = [],
-        hvx_copts = [],
+        hexagon_copts = [],
         riscv_copts = [],
         wasm_copts = [],
         wasmsimd_copts = [],
@@ -116,7 +116,7 @@ def xnnpack_cc_library(
       x86_srcs: The list of x86-specific source files.
       aarch32_srcs: The list of AArch32-specific source files.
       aarch64_srcs: The list of AArch64-specific source files.
-      hvx_srcs: The list of HVX-specific source files.
+      hexagon_srcs: The list of Hexagon-specific source files.
       riscv_srcs: The list of RISC-V-specific source files.
       wasm_srcs: The list of WebAssembly 1.0-specific source files.
       wasmsimd_srcs: The list of WebAssembly SIMD-specific source files.
@@ -138,7 +138,7 @@ def xnnpack_cc_library(
                          builds.
       aarch32_copts: The list of compiler flags to use in AArch32 builds.
       aarch64_copts: The list of compiler flags to use in AArch64 builds.
-      hvx_copts: The list of compiler flags to use in HVX builds.
+      hexagon_copts: The list of compiler flags to use in hexagon builds.
       riscv_copts: The list of compiler flags to use in RISC-V builds.
       wasm_copts: The list of compiler flags to use in WebAssembly 1.0 builds.
       wasmsimd_copts: The list of compiler flags to use in WebAssembly SIMD
@@ -234,7 +234,7 @@ def xnnpack_aggregate_library(
         x86_deps = [],
         aarch32_deps = [],
         aarch64_deps = [],
-        hvx_deps = [],
+        hexagon_deps = [],
         riscv_deps = [],
         wasm_deps = [],
         wasmsimd_deps = [],
@@ -249,7 +249,7 @@ def xnnpack_aggregate_library(
       x86_deps: The list of libraries to link in x86 and x86-64 builds.
       aarch32_deps: The list of libraries to link in AArch32 builds.
       aarch64_deps: The list of libraries to link in AArch64 builds.
-      hvx_deps: The list of libraries to link in HVX builds.
+      hexagon_deps: The list of libraries to link in Hexagon builds.
       riscv_deps: The list of libraries to link in RISC-V builds.
       wasm_deps: The list of libraries to link in WebAssembly 1.0 builds.
       wasmsimd_deps: The list of libraries to link in WebAssembly SIMD builds.
@@ -432,3 +432,29 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = []):
         }),
         tags = tags,
     )
+
+SrcListInfo = provider("A list of source files.", fields = {"srcs": "sources"})
+
+def _source_list_aspect_impl(_target, ctx):
+    srcs = []
+    if hasattr(ctx.rule.attr, "srcs"):
+        srcs += [s for src in ctx.rule.attr.srcs for s in src.files.to_list()]
+    transitive = [dep[SrcListInfo].srcs for dep in ctx.rule.attr.deps]
+    return [SrcListInfo(srcs = depset(srcs, transitive = transitive))]
+
+source_list_aspect = aspect(
+    implementation = _source_list_aspect_impl,
+    attr_aspects = ["deps"],
+)
+
+def _transitive_source_list_rule_impl(ctx):
+    files = [p for dep in ctx.attr.deps for p in dep[SrcListInfo].srcs.to_list() if p.owner.repo_name == ctx.label.repo_name and p.owner.package.startswith(ctx.label.package)]
+    return [DefaultInfo(files = depset(files))]
+
+xnnpack_transitive_source_list = rule(
+    implementation = _transitive_source_list_rule_impl,
+    attrs = {
+        "deps": attr.label_list(aspects = [source_list_aspect]),
+    },
+)
+

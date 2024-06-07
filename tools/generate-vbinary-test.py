@@ -81,7 +81,7 @@ TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}${BATCH_SUFFIX}) {
     .Test(${", ".join(TEST_ARGS)});
 }
 
-$if BATCH_TILE > 1:
+$if BATCH_TILE > 1 or BATCH_SCALE != "":
   TEST(${TEST_NAME}, batch_div_${BATCH_TILE}${BATCH_SUFFIX}) {
     $if ISA_CHECK:
       ${ISA_CHECK};

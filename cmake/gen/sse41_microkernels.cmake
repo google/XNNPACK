@@ -84,30 +84,6 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-sse41-rr2-p5-div-u16.c
   src/f32-vsigmoid/gen/f32-vsigmoid-sse41-rr2-p5-div-u20.c
   src/f32-vsigmoid/gen/f32-vsigmoid-sse41-rr2-p5-div-u24.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-lut8-p4h3ts-div-u4.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-lut8-p4h3ts-div-u8.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-lut8-p4h3ts-div-u12.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-lut8-p4h3ts-div-u16.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-lut8-p4h3ts-div-u20.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-lut8-p4h3ts-div-u24.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-div-u4.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-div-u8.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-div-u12.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-div-u16.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-div-u20.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-div-u24.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-nr1-u4.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-nr1-u8.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-nr1-u12.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-nr1-u16.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-nr1-u20.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-nr1-u24.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-nr2-u4.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-nr2-u8.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-nr2-u12.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-nr2-u16.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-nr2-u20.c
-  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5ts-nr2-u24.c
   src/math/f16-f32-cvt-sse41-int16.c
   src/math/f16-f32-cvt-sse41-int32.c
   src/math/f32-f16-cvt-sse41.c
@@ -254,6 +230,9 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4c2-minmax-fp32-sse41-ld128.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4c2s4-minmax-fp32-sse41-ld64.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4c2s4-minmax-fp32-sse41-ld128.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-sse41-c16.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-sse41-c32.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-sse41-c64.c
   src/qs8-requantization/qs8-requantization-fp32-sse41.c
   src/qs8-requantization/qs8-requantization-gemmlowp-sse41.c
   src/qs8-requantization/qs8-requantization-rndna-sse41.c

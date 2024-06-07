@@ -7,6 +7,7 @@
 #include <fp16/fp16.h>
 #include <fxdiv.h>
 #include <math.h>
+#include <simd/f32-scalar.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -14376,185 +14377,6 @@ void xnn_f32_vsqrt_ukernel__scalar_sqrt_u1(
     const float vx = *input++;
     const float vy = sqrtf(vx);
     *output++ = vy;
-  }
-}
-
-void xnn_f32_vtanh_ukernel__scalar_rational_9_6_u1(
-    size_t batch,
-    const float* input,
-    float* output,
-    const union xnn_f32_tanh_params params[restrict XNN_MIN_ELEMENTS(1)])
-{
-  assert(batch != 0);
-  assert(batch % sizeof(float) == 0);
-  assert(input != NULL);
-  assert(output != NULL);
-
-  // Cap the inputs to this value as `tanh(x)` will always be `+/-1.0f` beyond
-  // this point. This value is chosen as the first floating point number as of
-  // which the interpolation returns 1.0f.
-  const float max_x = 7.623543739319f;
-  const float min_x = -7.623543739319f;
-  
-  // The monomial coefficients of the numerator polynomial (odd).
-  const float alpha_1 = -9.022999554873e-03f;
-  const float alpha_3 = -1.146968104877e-03f;
-  const float alpha_5 = -2.432360815874e-05f;
-  const float alpha_7 = -6.458659385089e-08f;
-  const float alpha_9 = 5.535878699892e-11f;
-
-  // The monomial coefficients of the denominator polynomial (even).
-  const float beta_0 = -9.023001417518e-03f;
-  const float beta_2 = -4.154618829489e-03f;
-  const float beta_4 = -2.061512641376e-04f;
-  const float beta_6 = -1.774490101525e-06f;
-  
-  for (; batch >= sizeof(float); batch -= sizeof(float)) {
-    float x = *input;
-    input++;
-
-    // Clamp the inputs to the interpolation range. Note that we don't use
-    //`fminf` or `fmaxf` since they let `NaN`s through.
-    x = max_x < x ? max_x : x;
-    x = x < min_x ? min_x : x;
-
-    // Since the polynomials are odd/even, we need x^2.
-    const float x2 = x * x;
-
-    // Evaluate the numerator polynomial p.
-    float p = x2 * alpha_9 + alpha_7;
-    p = x2 * p + alpha_5;
-    p = x2 * p + alpha_3;
-    p = x2 * p + alpha_1;
-    p = x * p;
-
-    // Evaluate the denominator polynomial q.
-    float q = x2 * beta_6 + beta_4;
-    q = x2 * q + beta_2;
-    q = x2 * q + beta_0;
-
-    // Divide the numerator by the denominator.
-    const float y =  p / q;
-
-    *output = y;
-    output++;
-  }
-}
-
-void xnn_f32_vabs_ukernel__scalar_u4(
-    size_t batch,
-    const float* input,
-    float* output,
-    const union xnn_f32_abs_params params[restrict XNN_MIN_ELEMENTS(1)])
-{
-  assert(batch != 0);
-  assert(batch % sizeof(float) == 0);
-  assert(input != NULL);
-  assert(output != NULL);
-
-  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const float vx0 = input[0];
-    const float vx1 = input[1];
-    const float vx2 = input[2];
-    const float vx3 = input[3];
-    input += 4;
-
-    const float vy0 = fabsf(vx0);
-    const float vy1 = fabsf(vx1);
-    const float vy2 = fabsf(vx2);
-    const float vy3 = fabsf(vx3);
-
-    output[0] = vy0;
-    output[1] = vy1;
-    output[2] = vy2;
-    output[3] = vy3;
-    output += 4;
-  }
-  if XNN_UNLIKELY(batch != 0) {
-    do {
-      const float vx = *input++;
-      const float vy = fabsf(vx);
-      *output++ = vy;
-      batch -= sizeof(float);
-    } while (batch != 0);
-  }
-}
-
-void xnn_f32_vneg_ukernel__scalar_u4(
-    size_t batch,
-    const float* input,
-    float* output,
-    const union xnn_f32_neg_params params[restrict XNN_MIN_ELEMENTS(1)])
-{
-  assert(batch != 0);
-  assert(batch % sizeof(float) == 0);
-  assert(input != NULL);
-  assert(output != NULL);
-
-  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const float vx0 = input[0];
-    const float vx1 = input[1];
-    const float vx2 = input[2];
-    const float vx3 = input[3];
-    input += 4;
-
-    const float vy0 = -vx0;
-    const float vy1 = -vx1;
-    const float vy2 = -vx2;
-    const float vy3 = -vx3;
-
-    output[0] = vy0;
-    output[1] = vy1;
-    output[2] = vy2;
-    output[3] = vy3;
-    output += 4;
-  }
-  if XNN_UNLIKELY(batch != 0) {
-    do {
-      const float vx = *input++;
-      const float vy = -vx;
-      *output++ = vy;
-      batch -= sizeof(float);
-    } while (batch != 0);
-  }
-}
-
-void xnn_f32_vsqr_ukernel__scalar_u4(
-    size_t batch,
-    const float* input,
-    float* output,
-    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
-{
-  assert(batch != 0);
-  assert(batch % sizeof(float) == 0);
-  assert(input != NULL);
-  assert(output != NULL);
-
-  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const float vx0 = input[0];
-    const float vx1 = input[1];
-    const float vx2 = input[2];
-    const float vx3 = input[3];
-    input += 4;
-
-    const float vy0 = vx0 * vx0;
-    const float vy1 = vx1 * vx1;
-    const float vy2 = vx2 * vx2;
-    const float vy3 = vx3 * vx3;
-
-    output[0] = vy0;
-    output[1] = vy1;
-    output[2] = vy2;
-    output[3] = vy3;
-    output += 4;
-  }
-  if XNN_UNLIKELY(batch != 0) {
-    do {
-      const float vx = *input++;
-      const float vy = vx * vx;
-      *output++ = vy;
-      batch -= sizeof(float);
-    } while (batch != 0);
   }
 }
 
@@ -30284,4 +30106,225 @@ void xnn_xx_transposev_ukernel__1x1_scalar_memcpy(
     o = (void*) ((uintptr_t) o + output_reset);
     block_width -= 1;
   } while (block_width != 0);
+}
+
+void xnn_f32_vabs_ukernel__scalar_u4(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_f32 == 1);
+
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vx1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
+    const xnn_simd_f32_t vx2 = xnn_loadu_f32(input + 2 * xnn_simd_size_f32);
+    const xnn_simd_f32_t vx3 = xnn_loadu_f32(input + 3 * xnn_simd_size_f32);
+    input += 4 * xnn_simd_size_f32;
+
+    const xnn_simd_f32_t vy0 = xnn_abs_f32(vx0);
+    const xnn_simd_f32_t vy1 = xnn_abs_f32(vx1);
+    const xnn_simd_f32_t vy2 = xnn_abs_f32(vx2);
+    const xnn_simd_f32_t vy3 = xnn_abs_f32(vx3);
+
+    xnn_storeu_f32(output, vy0);
+    xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy1);
+    xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy2);
+    xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy3);
+    output += 4 * xnn_simd_size_f32;
+  }
+
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    const xnn_simd_f32_t vx = xnn_loadu_f32(input);
+    input += xnn_simd_size_f32;
+
+    const xnn_simd_f32_t vy = xnn_abs_f32(vx);
+
+    xnn_storeu_f32(output, vy);
+    output += xnn_simd_size_f32;
+  }
+
+  if XNN_UNLIKELY(batch != 0) {
+    const xnn_simd_f32_t vx =
+        xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
+
+    const xnn_simd_f32_t vy = xnn_abs_f32(vx);
+
+    xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
+  }
+}
+
+void xnn_f32_vneg_ukernel__scalar_u4(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_f32 == 1);
+
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vx1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
+    const xnn_simd_f32_t vx2 = xnn_loadu_f32(input + 2 * xnn_simd_size_f32);
+    const xnn_simd_f32_t vx3 = xnn_loadu_f32(input + 3 * xnn_simd_size_f32);
+    input += 4 * xnn_simd_size_f32;
+
+    const xnn_simd_f32_t vy0 = xnn_neg_f32(vx0);
+    const xnn_simd_f32_t vy1 = xnn_neg_f32(vx1);
+    const xnn_simd_f32_t vy2 = xnn_neg_f32(vx2);
+    const xnn_simd_f32_t vy3 = xnn_neg_f32(vx3);
+
+    xnn_storeu_f32(output, vy0);
+    xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy1);
+    xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy2);
+    xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy3);
+    output += 4 * xnn_simd_size_f32;
+  }
+
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    const xnn_simd_f32_t vx = xnn_loadu_f32(input);
+    input += xnn_simd_size_f32;
+
+    const xnn_simd_f32_t vy = xnn_neg_f32(vx);
+
+    xnn_storeu_f32(output, vy);
+    output += xnn_simd_size_f32;
+  }
+
+  if XNN_UNLIKELY(batch != 0) {
+    const xnn_simd_f32_t vx =
+        xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
+
+    const xnn_simd_f32_t vy = xnn_neg_f32(vx);
+
+    xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
+  }
+}
+
+void xnn_f32_vsqr_ukernel__scalar_u4(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_f32 == 1);
+
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vx1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
+    const xnn_simd_f32_t vx2 = xnn_loadu_f32(input + 2 * xnn_simd_size_f32);
+    const xnn_simd_f32_t vx3 = xnn_loadu_f32(input + 3 * xnn_simd_size_f32);
+    input += 4 * xnn_simd_size_f32;
+
+    const xnn_simd_f32_t vy0 = xnn_mul_f32(vx0, vx0);
+    const xnn_simd_f32_t vy1 = xnn_mul_f32(vx1, vx1);
+    const xnn_simd_f32_t vy2 = xnn_mul_f32(vx2, vx2);
+    const xnn_simd_f32_t vy3 = xnn_mul_f32(vx3, vx3);
+
+    xnn_storeu_f32(output, vy0);
+    xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy1);
+    xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy2);
+    xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy3);
+    output += 4 * xnn_simd_size_f32;
+  }
+
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    const xnn_simd_f32_t vx = xnn_loadu_f32(input);
+    input += xnn_simd_size_f32;
+
+    const xnn_simd_f32_t vy = xnn_mul_f32(vx, vx);
+
+    xnn_storeu_f32(output, vy);
+    output += xnn_simd_size_f32;
+  }
+
+  if XNN_UNLIKELY(batch != 0) {
+    const xnn_simd_f32_t vx =
+        xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
+
+    const xnn_simd_f32_t vy = xnn_mul_f32(vx, vx);
+
+    xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
+  }
+}
+
+void xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u1(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_tanh_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_f32 == 1);
+
+  // Cap the inputs to this value as `tanh(x)` will always be `+/-1.0f` beyond
+  // this point. This value is chosen as the first floating point number as of
+  // which the interpolation returns 1.0f.
+  #if XNN_SIMD_HAS_NATIVE_FMA
+    XNN_SIMD_CONST_F32(vmax_x, 7.646893501282f);
+    XNN_SIMD_CONST_F32(vmin_x, -7.646893501282f);
+  #else
+    XNN_SIMD_CONST_F32(vmax_x, 7.623543739319f);
+    XNN_SIMD_CONST_F32(vmin_x, -7.623543739319f);
+  #endif  // XNN_SIMD_HAS_NATIVE_FMA
+
+  // The monomial coefficients of the numerator polynomial (odd).
+  XNN_SIMD_CONST_F32(valpha_1, -9.022999554873e-03f);
+  XNN_SIMD_CONST_F32(valpha_3, -1.146968104877e-03f);
+  XNN_SIMD_CONST_F32(valpha_5, -2.432360815874e-05f);
+  XNN_SIMD_CONST_F32(valpha_7, -6.458659385089e-08f);
+  XNN_SIMD_CONST_F32(valpha_9, 5.535878699892e-11f);
+
+  // The monomial coefficients of the denominator polynomial (even).
+  XNN_SIMD_CONST_F32(vbeta_0, -9.023001417518e-03f);
+  XNN_SIMD_CONST_F32(vbeta_2, -4.154618829489e-03f);
+  XNN_SIMD_CONST_F32(vbeta_4, -2.061512641376e-04f);
+  XNN_SIMD_CONST_F32(vbeta_6, -1.774490101525e-06f);
+
+
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    xnn_simd_f32_t vx = xnn_loadu_f32(input);
+    input += xnn_simd_size_f32;
+
+    // Clamp the inputs to the interpolation range.
+    vx = xnn_min_f32(vmax_x, vx);
+    vx = xnn_max_f32(vmin_x, vx);
+
+    // Since the polynomials are odd/even, we need x^2.
+    const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
+
+    // Evaluate the numerator polynomial p.
+    xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_9, valpha_7);
+    vp = xnn_fmadd_f32(vx2, vp, valpha_5);
+    vp = xnn_fmadd_f32(vx2, vp, valpha_3);
+    vp = xnn_fmadd_f32(vx2, vp, valpha_1);
+    vp = xnn_mul_f32(vx, vp);
+
+    // Evaluate the denominator polynomial q.
+    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_6, vbeta_4);
+    vq = xnn_fmadd_f32(vx2, vq, vbeta_2);
+    vq = xnn_fmadd_f32(vx2, vq, vbeta_0);
+
+    // Divide the numerator by the denominator.
+    const xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
+
+    xnn_storeu_f32(output, vy);
+    output += xnn_simd_size_f32;
+  }
 }
