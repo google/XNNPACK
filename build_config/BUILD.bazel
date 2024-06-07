@@ -240,6 +240,14 @@ config_setting(
     values = {"cpu": "x64_windows"},
 )
 
+# Dummy hexagon config to avoid bazel errors
+config_setting(
+    name = "hexagon",
+    values = {
+        "cpu": "hexagon",  # Expected to not-match anything
+    },
+)
+
 ######################## Composite build configurations #######################
 
 selects.config_setting_group(

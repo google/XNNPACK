@@ -495,6 +495,17 @@ void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark) {
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_HEXAGON
+  bool CheckHVX(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_hvx) {
+      state.SkipWithError("no HVX extension");
+      return false;
+    }
+    return true;
+  }
+#endif  // XNN_ARCH_HEXAGON
+
 #if XNN_ARCH_WASMRELAXEDSIMD
   bool CheckWAsmPSHUFB(benchmark::State& state) {
     const xnn_hardware_config* hardware_config = xnn_init_hardware_config();

@@ -296,6 +296,9 @@ xnnpack_cc_library(
     }) + select({
         ":avx512fp16_enabled": ["-DXNN_ENABLE_AVX512FP16=1"],
         "//conditions:default": ["-DXNN_ENABLE_AVX512FP16=0"],
+    }) + select({
+        ":hvx_enabled": ["-DXNN_ENABLE_HVX=1"],
+        "//conditions:default": ["-DXNN_ENABLE_HVX=0"],
     }),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -359,6 +362,7 @@ xnnpack_cc_library(
         ":enable_avxvnni",
         ":enable_dwconv_multipass",
         ":enable_gemm_m_specialization",
+        ":enable_hvx",
         ":enable_jit",
         ":experiments_config",
         ":hardware_config",
@@ -1578,7 +1582,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "hvx_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    hvx_srcs = ALL_HEXAGON_MICROKERNEL_SRCS + ALL_HVX_MICROKERNEL_SRCS,
+    hexagon_srcs = ALL_HEXAGON_MICROKERNEL_SRCS + ALL_HVX_MICROKERNEL_SRCS,
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = MICROKERNEL_DEPS,
 )
@@ -1690,6 +1694,9 @@ xnnpack_aggregate_library(
     }) + select({
         ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
         "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
+    }) + select({
+        ":hvx_enabled": ["XNN_ENABLE_HVX=1"],
+        "//conditions:default": ["XNN_ENABLE_HVX=0"],
     }),
     generic_deps = [
         ":scalar_prod_microkernels",
@@ -1723,8 +1730,10 @@ xnnpack_aggregate_library(
     }) + select({
         ":avx512fp16_enabled": [":avx512fp16_prod_microkernels"],
         "//conditions:default": [],
+    }) + select({
+        ":hvx_enabled": [":hvx_microkernels"],
+        "//conditions:default": [],
     }),
-    hvx_deps = [":hvx_microkernels"],
     wasm_deps = [
         ":wasm_prod_microkernels",
         ":asm_microkernels",
@@ -1803,6 +1812,9 @@ xnnpack_aggregate_library(
     }) + select({
         ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
         "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
+    }) + select({
+        ":hvx_enabled": ["XNN_ENABLE_HVX=1"],
+        "//conditions:default": ["XNN_ENABLE_HVX=0"],
     }),
     generic_deps = [
         ":scalar_test_microkernels",
@@ -1839,8 +1851,10 @@ xnnpack_aggregate_library(
     }) + select({
         ":avx512fp16_enabled": [":avx512fp16_test_microkernels"],
         "//conditions:default": [],
+    }) + select({
+        ":hvx_enabled": [":hvx_microkernels"],
+        "//conditions:default": [],
     }),
-    hvx_deps = [":hvx_microkernels"],
     wasm_deps = [
         ":wasm_test_microkernels",
         ":asm_microkernels",
@@ -1925,6 +1939,15 @@ cc_library(
     defines = select({
         ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
         "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
+    }),
+    visibility = xnnpack_visibility(),
+)
+
+cc_library(
+    name = "enable_hvx",
+    defines = select({
+        ":hvx_enabled": ["XNN_ENABLE_HVX=1"],
+        "//conditions:default": ["XNN_ENABLE_HVX=0"],
     }),
     visibility = xnnpack_visibility(),
 )
@@ -2491,6 +2514,18 @@ config_setting(
     define_values = {"xnn_enable_avxvnni": "false"},
 )
 
+# Enables usage of Hexagon HVX kernels.
+config_setting(
+    name = "xnn_enable_hvx_explicit_true",
+    define_values = {"xnn_enable_hvx": "true"},
+)
+
+# Disables usage of Hexagon HVX kernels.
+config_setting(
+    name = "xnn_enable_hvx_explicit_false",
+    define_values = {"xnn_enable_hvx": "false"},
+)
+
 # Enables usage of RISC-V Vector kernels.
 config_setting(
     name = "xnn_enable_riscv_vector_explicit_true",
@@ -2836,6 +2871,22 @@ alias(
         ":xnn_enable_avxvnni_explicit_true": ":xnn_enable_avxvnni_explicit_true",
         ":xnn_enable_avxvnni_explicit_false": ":xnn_enable_avxvnni_explicit_true",
         "//conditions:default": ":avxvnni_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "hvx_enabled_by_default",
+    match_any = [
+        "//build_config:hexagon",
+    ],
+)
+
+alias(
+    name = "hvx_enabled",
+    actual = select({
+        ":xnn_enable_hvx_explicit_true": ":xnn_enable_hvx_explicit_true",
+        ":xnn_enable_hvx_explicit_false": ":xnn_enable_hvx_explicit_true",
+        "//conditions:default": ":hvx_enabled_by_default",
     }),
 )
 

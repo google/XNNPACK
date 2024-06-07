@@ -147,6 +147,14 @@ static void init_hardware_config(void) {
 #endif
   #endif  // !XNN_ARCH_X86 && !XNN_ARCH_X86_64
 
+#if XNN_ARCH_HEXAGON
+#if XNN_ENABLE_HVX
+    hardware_config.use_hvx = 1;
+#else
+    hardware_config.use_hvx = 0;
+#endif  // XNN_ENABLE_HVX
+#endif  // XNN_ARCH_HEXAGON
+
   #if XNN_ARCH_RISCV
     const long hwcap = getauxval(AT_HWCAP);
     xnn_log_debug("getauxval(AT_HWCAP) = %08lX", hwcap);

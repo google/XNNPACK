@@ -71,6 +71,9 @@ struct xnn_hardware_config {
   bool use_wasm_sdot;
   bool use_wasm_fma;
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_HEXAGON
+  bool use_hvx;
+#endif  // XNN_ARCH_HEXAGON
 };
 
 XNN_INTERNAL const struct xnn_hardware_config* xnn_init_hardware_config();
