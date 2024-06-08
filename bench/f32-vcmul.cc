@@ -130,6 +130,21 @@ static void f32_vcmul(
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(f32_vcmul, rvv_u1v,
+                    xnn_f32_vcmul_ukernel__rvv_u1v)
+    ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vcmul, rvv_u2v,
+                    xnn_f32_vcmul_ukernel__rvv_u2v)
+    ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vcmul, rvv_u4v,
+                    xnn_f32_vcmul_ukernel__rvv_u4v)
+    ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
 BENCHMARK_CAPTURE(f32_vcmul, scalar_u1,
                   xnn_f32_vcmul_ukernel__scalar_u1)
   ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)

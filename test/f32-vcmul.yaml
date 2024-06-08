@@ -15,6 +15,11 @@
 - name: xnn_f32_vcmul_ukernel__neon_u12
 - name: xnn_f32_vcmul_ukernel__neon_u16
 
+# RISC-V Vector
+- name: xnn_f32_vcmul_ukernel__rvv_u1v
+- name: xnn_f32_vcmul_ukernel__rvv_u2v
+- name: xnn_f32_vcmul_ukernel__rvv_u4v
+
 # x86 SSE2
 - name: xnn_f32_vcmul_ukernel__sse_u4
 - name: xnn_f32_vcmul_ukernel__sse_u8
