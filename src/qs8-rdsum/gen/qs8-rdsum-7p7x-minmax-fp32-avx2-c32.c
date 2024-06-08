@@ -50,9 +50,8 @@ void xnn_qs8_rdsum_ukernel_7p7x__avx2_c32(
     // 256 int8s may be summed into an int16 before overflowing
     // To prevent handling the tails of the inner 256 loop, we round 256 down to
     // the nearest integer multiple of ACCUMULATORS.
-    int num_batches = floor((rows + 251) / 252);
     int r = rows;
-    for (; num_batches > 0; --num_batches) {
+    while (r > 0) {
       __m256i vacc16_0123456789ABCDEF = _mm256_setzero_si256();
       __m256i vacc16_GHIJKLMNOPQRSTUV = _mm256_setzero_si256();
       for (int current_batch = min(r, 252); current_batch > 0; current_batch -= 7) {
