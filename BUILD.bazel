@@ -1581,7 +1581,9 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "hvx_microkernels",
-    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_copts = xnnpack_gcc_std_copts() + [
+        "-mhvx-ieee-fp",
+    ],
     hexagon_srcs = ALL_HEXAGON_MICROKERNEL_SRCS + ALL_HVX_MICROKERNEL_SRCS,
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = MICROKERNEL_DEPS,
