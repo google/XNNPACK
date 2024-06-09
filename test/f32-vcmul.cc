@@ -518,6 +518,28 @@ TEST(F32_VCMUL__SCALAR_U8, inplace_a_and_b) {
       .Test(xnn_f32_vcmul_ukernel__rvv_u1v);
   }
 
+  TEST(F32_VCMUL__RVV_U1V, batch_div_1v) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t batch_size = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+                batch_size < 10 * xnn_init_hardware_config()->vlenb / sizeof(float);
+                batch_size += 1 * xnn_init_hardware_config()->vlenb / sizeof(float)) {
+      VCMulMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vcmul_ukernel__rvv_u1v);
+    }
+  }
+
+  TEST(F32_VCMUL__RVV_U1V, batch_lt_1v) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t batch_size = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+                batch_size < 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+                batch_size++) {
+      VCMulMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vcmul_ukernel__rvv_u1v);
+    }
+  }
+
   TEST(F32_VCMUL__RVV_U1V, batch_gt_1v) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t batch_size = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
