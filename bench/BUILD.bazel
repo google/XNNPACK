@@ -185,6 +185,16 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qs8_rdsum_bench",
+    srcs = [
+        "qs8-rdsum.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":rsum_benchmark",
+    ],
+)
+
+xnnpack_benchmark(
     name = "qs8_rsum_minmax_fp32_bench",
     srcs = [
         "qs8-rsum-minmax-fp32.cc",

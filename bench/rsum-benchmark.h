@@ -173,7 +173,38 @@ void f32_rdsum(
   init_params(&params, /*scale=*/1.0f / rows);
 
   for (auto _ : state) {
-    rdsum(rows, channels, input.data(), rows * sizeof(float), zero.data(), output.data(), &params);
+    rdsum(rows, channels, input.data(), channels * sizeof(float), zero.data(), output.data(), &params);
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+}
+
+void qs8_rdsum(
+    benchmark::State& state,
+    xnn_qs8_rdsum_ukernel_fn rdsum,
+    xnn_init_qs8_rsum_params_fn init_params,
+    benchmark::utils::IsaCheckFunction isa_check = nullptr)
+{
+  if (isa_check != nullptr && !isa_check(state)) {
+    return;
+  }
+  const size_t rows = state.range(0);
+  const size_t channels = state.range(1);
+
+  std::vector<int8_t, AlignedAllocator<int8_t, 64>> input(rows * channels + XNN_EXTRA_BYTES);
+  std::vector<int32_t> output(channels);
+  std::vector<int8_t> zero(channels + XNN_EXTRA_BYTES, 0);
+  std::fill(input.begin(), input.end(), 0);
+
+  // Prepare parameters.
+  union xnn_qs8_rsum_params params;
+  init_params(&params);
+
+  for (auto _ : state) {
+    rdsum(rows, channels, input.data(), channels * sizeof(int8_t), zero.data(), output.data(), &params);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -204,7 +235,7 @@ void f16_f32acc_rdsum(
   init_params(&params, /*scale=*/1.0f / rows);
 
   for (auto _ : state) {
-    rdsum(rows, channels, input.data(), rows * sizeof(uint16_t), zero.data(), output.data(), &params);
+    rdsum(rows, channels, input.data(), channels * sizeof(uint16_t), zero.data(), output.data(), &params);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
