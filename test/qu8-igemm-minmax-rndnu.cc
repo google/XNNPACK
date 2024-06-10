@@ -10,11 +10,6 @@
 //   Specification: test/qu8-igemm-minmax-rndnu.yaml
 //   Generator: tools/generate-gemm-test.py
 
-#include <cstddef>
-#include <functional>
-#include <string>
-#include <vector>
-
 #include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
@@ -25,6 +20,11 @@
 #include <xnnpack/packw.h>
 #include <xnnpack/ppmm.h>
 #include <xnnpack/requantization.h>
+
+#include <cstddef>
+#include <functional>
+#include <string>
+#include <vector>
 
 #include "gemm-microkernel-tester.h"
 #include <gtest/gtest.h>
@@ -394,10 +394,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   INSTANTIATE_TEST_SUITE_P(
       QU8_IGEMM_MINMAX_RNDNU_1X16__NEON_MLAL_LANE, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -417,10 +414,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   INSTANTIATE_TEST_SUITE_P(
       QU8_IGEMM_MINMAX_RNDNU_2X16__NEON_MLAL_LANE, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -440,10 +434,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   INSTANTIATE_TEST_SUITE_P(
       QU8_IGEMM_MINMAX_RNDNU_3X16__NEON_MLAL_LANE, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -463,10 +454,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   INSTANTIATE_TEST_SUITE_P(
       QU8_IGEMM_MINMAX_RNDNU_4X8__NEON_MLAL_LANE, GemmTest,
       testing::ValuesIn(CreateTests1(

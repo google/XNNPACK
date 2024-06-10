@@ -208,9 +208,16 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
     const uint32_t kr = batch_matrix_multiply_op->ukernel.gemm.kr;
     const uint32_t sr = batch_matrix_multiply_op->ukernel.gemm.sr;
     const size_t extra_bytes = 2 * sizeof(float);
-    const size_t k_stride = round_up_po2(k, kr * sr) << XNN_LOG2_SIZEOF_INT8_T;
+    const size_t k_stride = round_up_po2(k, kr * sr);
     const size_t n_stride = round_up(n, nr);
-    const size_t weights_stride = k_stride + extra_bytes + sizeof(int32_t);
+    const size_t weights_stride =
+        gemm_config->packed_stride_weights_and_biases
+            ? gemm_config->packed_stride_weights_and_biases(
+                  gemm_config, k, k_stride, extra_bytes)
+            : (k_stride << XNN_LOG2_SIZEOF_INT8_T) + extra_bytes +
+                  sizeof(int32_t);
+    assert(weights_stride == (k_stride << XNN_LOG2_SIZEOF_INT8_T) +
+                                 extra_bytes + sizeof(int32_t));
     const size_t packed_size = batch_size_b * n_stride * weights_stride;
     const size_t aligned_size =
         round_up_po2(packed_size, XNN_ALLOCATION_ALIGNMENT);
@@ -232,25 +239,46 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
 
     const struct xnn_qs8_packing_params pack_gemm_params = {
         /*input_zero_point=*/1};
-    if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
-      batch_matrix_multiply_op->ukernel.gemm.packw_gemm_goi(
-          /*groups=*/batch_size_b, n, k, nr, kr, sr, data_b, /*b=*/NULL,
-          /*scale=*/NULL, packed_data, nr * extra_bytes, &pack_gemm_params);
-    } else {
-      batch_matrix_multiply_op->ukernel.gemm.packw_gemm_gio(
-          /*groups=*/batch_size_b, n, k, nr, kr, sr, n, data_b, /*b=*/NULL,
-          /*scale=*/NULL, packed_data, nr * extra_bytes, &pack_gemm_params);
-    }
 
-    if (scale_b != NULL) {
-      for (size_t batch = 0; batch < batch_size_b; batch++) {
-        void* packed_data_batch =
-            (void*)((char*)packed_data + batch * n_stride * weights_stride);
-        void* weights = (void*)((uintptr_t)packed_data_batch +
-                                nr * (k_stride + sizeof(int32_t)));
-        xnn_init_qs8_qc8w_scale_fp32_params(n, nr, nr, nr * weights_stride,
-                                            nr * weights_stride, 0,
-                                            &scale_b[batch * n], weights);
+    if (gemm_config->pack_weights_and_biases) {
+      gemm_config->pack_weights_and_biases(
+          batch_matrix_multiply_op->flags ^ XNN_FLAG_TRANSPOSE_WEIGHTS,
+          gemm_config, /*input_channels=*/k,
+          /*output_channels=*/n,
+          /*groups=*/batch_size_b, k_stride,
+          /*accumulator_init=*/NULL,
+          /*weights=*/data_b,
+          /*int_extra_data0_fn=*/
+          (xnn_init_scale_params_fn)xnn_init_qs8_qc8w_scale_fp32_params,
+          /*extra_data0=*/NULL,
+          /*extra_data0_size=*/sizeof(float),
+          /*init_extra_data1_fn=*/
+          (xnn_init_scale_params_fn)xnn_init_qs8_qc8w_scale_fp32_params,
+          /*extra_data1=*/scale_b,
+          /*extra_data1_size=*/sizeof(float),
+          /*packed_weights_ptr=*/packed_data, &pack_gemm_params);
+    } else {
+      if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+        batch_matrix_multiply_op->ukernel.gemm.packw_gemm_goi(
+            /*groups=*/batch_size_b, n, k, nr, kr, sr, data_b, /*b=*/NULL,
+            /*scale=*/NULL, packed_data, nr * extra_bytes, &pack_gemm_params);
+      } else {
+        batch_matrix_multiply_op->ukernel.gemm.packw_gemm_gio(
+            /*groups=*/batch_size_b, n, k, nr, kr, sr, n, data_b, /*b=*/NULL,
+            /*scale=*/NULL, packed_data, nr * extra_bytes, &pack_gemm_params);
+      }
+
+      if (scale_b != NULL) {
+        for (size_t batch = 0; batch < batch_size_b; batch++) {
+          void* packed_data_batch =
+              (void*)((char*)packed_data + batch * n_stride * weights_stride);
+          void* weights = (void*)((uintptr_t)packed_data_batch +
+                                  nr * ((k_stride << XNN_LOG2_SIZEOF_INT8_T) +
+                                        sizeof(int32_t)));
+          xnn_init_qs8_qc8w_scale_fp32_params(n, nr, nr, nr * weights_stride,
+                                              nr * weights_stride, 0,
+                                              &scale_b[batch * n], weights);
+        }
       }
     }
 

@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import argparse
-from functools import cmp_to_key
 import io
 import itertools
 import os
@@ -293,6 +292,7 @@ def main(args):
   c_microkernels_per_isa['neonfma_aarch64'] = list()
   c_microkernels_per_isa['neonfp16arith_aarch64'] = list()
   c_microkernels_per_isa['neonbf16_aarch64'] = list()
+  c_microkernels_per_isa['neoni8mm_aarch64'] = list()
   temp_c_microkernels_per_isa = {isa: [] for isa in c_microkernels_per_isa}
   asm_microkernels_per_arch = {arch: [] for arch in ARCH_LIST}
   jit_microkernels_per_arch = {arch: [] for arch in ARCH_LIST}
