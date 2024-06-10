@@ -1269,6 +1269,48 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_avx2_params(
   return sizeof(params->fp32_avx2);
 }
 
+size_t xnn_init_qs8_avgpool_minmax_fp32_avx512_params(
+  union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int32_t init_bias,
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->fp32_avx512.shuffle_mask[0] = 0;
+  params->fp32_avx512.shuffle_mask[1] = 4;
+  params->fp32_avx512.shuffle_mask[2] = 8;
+  params->fp32_avx512.shuffle_mask[3] = 12;
+  params->fp32_avx512.shuffle_mask[4] = 1;
+  params->fp32_avx512.shuffle_mask[5] = 5;
+  params->fp32_avx512.shuffle_mask[6] = 9;
+  params->fp32_avx512.shuffle_mask[7] = 13;
+  params->fp32_avx512.shuffle_mask[8] = 2;
+  params->fp32_avx512.shuffle_mask[9] = 6;
+  params->fp32_avx512.shuffle_mask[10] = 10;
+  params->fp32_avx512.shuffle_mask[11] = 14;
+  params->fp32_avx512.shuffle_mask[12] = 3;
+  params->fp32_avx512.shuffle_mask[13] = 7;
+  params->fp32_avx512.shuffle_mask[14] = 11;
+  params->fp32_avx512.shuffle_mask[15] = 15;
+  for (uint32_t i = 0; i < 32; i++) {
+    params->fp32_avx512.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->fp32_avx512.init_bias[i] = init_bias;
+    params->fp32_avx512.scale[i] = scale;
+    params->fp32_avx512.output_max_less_zero_point[i] = output_max_less_zero_point;
+  }
+  for (uint32_t i = 0; i < 64; i++) {
+    params->fp32_avx512.output_min[i] = output_min;
+  }
+  return sizeof(params->fp32_avx512);
+}
+
 void xnn_update_qs8_avgpool_minmax_fp32_sse4_params(
   union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int32_t init_bias,

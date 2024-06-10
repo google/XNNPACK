@@ -28,3 +28,9 @@
   init: xnn_init_qs8_rsum_avx2_params
 - name: xnn_qs8_rdsum_ukernel_7p7x__avx2_c64
   init: xnn_init_qs8_rsum_avx2_params
+
+# x86 AVX512SKX
+- name: xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c64
+  init: xnn_init_qs8_rsum_scalar_params
+- name: xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c128
+  init: xnn_init_qs8_rsum_scalar_params

@@ -1056,6 +1056,14 @@ union xnn_qs8_avgpool_minmax_params {
     XNN_ALIGN(16) int8_t mask_table[30];
     XNN_ALIGN(32) uint32_t shuffle_mask[8];
   } fp32_avx2;
+  struct {
+    XNN_ALIGN(64) int32_t init_bias[16];
+    XNN_ALIGN(64) float scale[16];
+    XNN_ALIGN(64) float output_max_less_zero_point[16];
+    XNN_ALIGN(64) int16_t output_zero_point[32];
+    XNN_ALIGN(64) int8_t output_min[64];
+    XNN_ALIGN(64) uint32_t shuffle_mask[16];
+  } fp32_avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   struct {
