@@ -447,6 +447,10 @@ DECLARE_F32_VNEG_UKERNEL_FUNCTION(xnn_f32_vneg_ukernel__wasmsimd_u4)
 DECLARE_F32_VNEG_UKERNEL_FUNCTION(xnn_f32_vneg_ukernel__wasmsimd_u8)
 DECLARE_F32_VNEG_UKERNEL_FUNCTION(xnn_f32_vneg_ukernel__wasmsimd_u12)
 
+DECLARE_F32_VNEG_UKERNEL_FUNCTION(xnn_f32_vneg_ukernel__hvx_u32)
+DECLARE_F32_VNEG_UKERNEL_FUNCTION(xnn_f32_vneg_ukernel__hvx_u64)
+DECLARE_F32_VNEG_UKERNEL_FUNCTION(xnn_f32_vneg_ukernel__hvx_u128)
+
 #define DECLARE_F16_VRND_UKERNEL_FUNCTION(fn_name) \
   DECLARE_F16_UKERNEL_FUNCTION(fn_name, xnn_f16_rnd_params);
 

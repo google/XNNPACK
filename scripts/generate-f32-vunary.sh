@@ -50,4 +50,7 @@ tools/xngen src/f32-vunary/simd.c.in -D OP=ABS -D ARCH=wasmsimd -D BATCH_TILES="
 tools/xngen src/f32-vunary/simd.c.in -D OP=NEG -D ARCH=wasmsimd -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vneg-wasmsimd.c
 tools/xngen src/f32-vunary/simd.c.in -D OP=SQR -D ARCH=wasmsimd -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vsqr-wasmsimd.c
 
+################################## Hexagon HVX #################################
+tools/xngen src/f32-vunary/vneg-hvx.c.in -D BATCH_TILES="32,64,128" -o src/f32-vunary/gen/f32-vneg-hvx.c
+
 wait
