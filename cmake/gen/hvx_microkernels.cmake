@@ -46,4 +46,8 @@ SET(ALL_HVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsub-minmax-hvx-u128.c
   src/f32-vunary/gen/f32-vabs-hvx.c
   src/f32-vunary/gen/f32-vneg-hvx.c
-  src/f32-vunary/gen/f32-vsqr-hvx.c)
+  src/f32-vunary/gen/f32-vsqr-hvx.c
+  src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u32.c
+  src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u64.c
+  src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u96.c
+  src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u128.c)

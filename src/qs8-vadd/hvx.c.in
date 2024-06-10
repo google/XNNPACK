@@ -1,0 +1,143 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert DATATYPE in ["QS8", "QU8"]
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <hvx_hexagon_protos.h>
+#include <hexagon_protos.h>
+#include <hexagon_types.h>
+
+#include <xnnpack/vbinary.h>
+#include <xnnpack/intrinsics-polyfill.h>
+
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+
+void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__hvx_u${BATCH_TILE}(
+    size_t batch,
+    const ${XINT8_T}* input_a,
+    const ${XINT8_T}* input_b,
+    ${XINT8_T}* output,
+    const union xnn_${DATATYPE.lower()}_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const HVX_Vector vbias = *((const HVX_Vector *)(params->hvx.bias));
+  const HVX_Vector va_multiplier = *((const HVX_Vector *)(params->hvx.a_multiplier));
+  const HVX_Vector vb_multiplier = *((const HVX_Vector *)(params->hvx.b_multiplier));
+  const int32_t vshift = params->hvx.shift;
+  const HVX_Vector voutput_zero_point = *((const HVX_Vector *)(params->hvx.output_zero_point));
+  const HVX_Vector voutput_min = *((const HVX_Vector *)(params->hvx.output_min));
+  const HVX_Vector voutput_max = *((const HVX_Vector *)(params->hvx.output_max));
+  int8_t* ptr_o = output;
+
+  for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+    HVX_Vector va${ABC[0]} = *((HVX_UVector*)input_a);
+    HVX_Vector vb${ABC[0]} = *((HVX_UVector*)input_b);
+    $for N in range(32, BATCH_TILE, 32):
+      HVX_Vector va${ABC[int(N/32)]} = *((HVX_UVector*)(input_a + ${N}));
+      HVX_Vector vb${ABC[int(N/32)]} = *((HVX_UVector*)(input_b + ${N}));
+    input_a += ${BATCH_TILE};
+    input_b += ${BATCH_TILE};
+
+    // unpack: 8 bit to 16 bit
+    $for N in range(0, BATCH_TILE, 32):
+      HVX_Vector va${ABC[int(N/32)]}_i16_lo = Q6_V_lo_W(Q6_Wh_vunpack_Vb(va${ABC[int(N/32)]}));
+      HVX_Vector vb${ABC[int(N/32)]}_i16_lo = Q6_V_lo_W(Q6_Wh_vunpack_Vb(vb${ABC[int(N/32)]}));
+
+    // vacc = vbias + va * va_multiplier
+    $for N in range(0, BATCH_TILE, 32):
+      HVX_Vector va${ABC[int(N/32)]}_mul_e = Q6_Vw_vmpyio_VwVh(va_multiplier, Q6_Vh_vshuffe_VhVh(va${ABC[int(N/32)]}_i16_lo, va${ABC[int(N/32)]}_i16_lo));
+      HVX_Vector va${ABC[int(N/32)]}_mul_o = Q6_Vw_vmpyio_VwVh(va_multiplier, va${ABC[int(N/32)]}_i16_lo);
+      HVX_VectorPair va${ABC[int(N/32)]}_mul = Q6_W_vshuff_VVR(va${ABC[int(N/32)]}_mul_o, va${ABC[int(N/32)]}_mul_e, -4);
+      HVX_Vector vacc${ABC[int(N/32)]} = Q6_Vw_vadd_VwVw(vbias, Q6_V_lo_W(va${ABC[int(N/32)]}_mul));
+
+    // vacc = vacc + vb * vb_multiplier
+    $for N in range(0, BATCH_TILE, 32):
+      HVX_Vector vb${ABC[int(N/32)]}_mul_e = Q6_Vw_vmpyio_VwVh(vb_multiplier, Q6_Vh_vshuffe_VhVh(vb${ABC[int(N/32)]}_i16_lo, vb${ABC[int(N/32)]}_i16_lo));
+      HVX_Vector vb${ABC[int(N/32)]}_mul_o = Q6_Vw_vmpyio_VwVh(vb_multiplier, vb${ABC[int(N/32)]}_i16_lo);
+      HVX_VectorPair vb${ABC[int(N/32)]}_mul = Q6_W_vshuff_VVR(vb${ABC[int(N/32)]}_mul_o, vb${ABC[int(N/32)]}_mul_e, -4);
+      vacc${ABC[int(N/32)]} = Q6_Vw_vadd_VwVw(vacc${ABC[int(N/32)]}, Q6_V_lo_W(vb${ABC[int(N/32)]}_mul));
+
+    // right shift
+    $for N in range(0, BATCH_TILE, 32):
+      vacc${ABC[int(N/32)]} = Q6_Vw_vasr_VwR(vacc${ABC[int(N/32)]}, vshift);
+
+    // pack: 32 bit to 16 bit
+    $for N in range(0, BATCH_TILE, 32):
+      HVX_Vector vout${ABC[int(N/32)]} = Q6_Vh_vadd_VhVh(voutput_zero_point, Q6_Vh_vpack_VwVw_sat(vacc${ABC[int(N/32)]}, vacc${ABC[int(N/32)]}));
+
+    // pack: 16 bit to 8 bit
+    $for N in range(0, BATCH_TILE, 32):
+      vout${ABC[int(N/32)]} = Q6_Vb_vpack_VhVh_sat(vout${ABC[int(N/32)]}, vout${ABC[int(N/32)]});
+
+    // minmax
+    $for N in range(0, BATCH_TILE, 32):
+      vout${ABC[int(N/32)]} = Q6_Vb_vmax_VbVb(voutput_min, vout${ABC[int(N/32)]});
+      vout${ABC[int(N/32)]} = Q6_Vb_vmin_VbVb(voutput_max, vout${ABC[int(N/32)]});
+
+    // store output
+    $for N in range(0, BATCH_TILE, 32):
+      Q6_V_vstu_variable(ptr_o, 32, vout${ABC[int(N/32)]}); ptr_o += 32;
+  }
+  if XNN_UNLIKELY(batch != 0){
+    do {
+      HVX_Vector va = *((HVX_UVector*)input_a);
+      HVX_Vector vb = *((HVX_UVector*)input_b);
+      $if BATCH_TILE > 32:
+        if XNN_LIKELY(batch > (32 * sizeof(${XINT8_T}))) {
+          input_a += 32;
+          input_b += 32;
+        }
+
+      // unpack: 8 bit to 16 bit
+      HVX_Vector va_i16_lo = Q6_V_lo_W(Q6_Wh_vunpack_Vb(va));
+      HVX_Vector vb_i16_lo = Q6_V_lo_W(Q6_Wh_vunpack_Vb(vb));
+
+      // vacc = vbias + va * va_multiplier
+      HVX_Vector va_mul_e = Q6_Vw_vmpyio_VwVh(va_multiplier, Q6_Vh_vshuffe_VhVh(va_i16_lo, va_i16_lo));
+      HVX_Vector va_mul_o = Q6_Vw_vmpyio_VwVh(va_multiplier, va_i16_lo);
+      HVX_VectorPair va_mul = Q6_W_vshuff_VVR(va_mul_o, va_mul_e, -4);
+      HVX_Vector vacc = Q6_Vw_vadd_VwVw(vbias, Q6_V_lo_W(va_mul));
+
+      // vacc = vacc + vb * vb_multiplier
+      HVX_Vector vb_mul_e = Q6_Vw_vmpyio_VwVh(vb_multiplier, Q6_Vh_vshuffe_VhVh(vb_i16_lo, vb_i16_lo));
+      HVX_Vector vb_mul_o = Q6_Vw_vmpyio_VwVh(vb_multiplier, vb_i16_lo);
+      HVX_VectorPair vb_mul = Q6_W_vshuff_VVR(vb_mul_o, vb_mul_e, -4);
+      vacc = Q6_Vw_vadd_VwVw(vacc, Q6_V_lo_W(vb_mul));
+
+      // right shift
+      vacc = Q6_Vw_vasr_VwR(vacc, vshift);
+
+      // pack: 32 bit to 16 bit
+      HVX_Vector vout = Q6_Vh_vadd_VhVh(voutput_zero_point, Q6_Vh_vpack_VwVw_sat(vacc, vacc));
+
+      // pack: 16 bit to 8 bit
+      vout = Q6_Vb_vpack_VhVh_sat(vout, vout);
+
+      // minmax
+      vout = Q6_Vb_vmax_VbVb(voutput_min, vout);
+      vout = Q6_Vb_vmin_VbVb(voutput_max, vout);
+
+      // store output
+      if XNN_LIKELY(batch > (32 * sizeof(${XINT8_T}))) {
+        Q6_V_vstu_variable(ptr_o, 32, vout);
+        ptr_o += 32;
+        batch -=32;
+      }
+      else{
+        Q6_V_vstu_variable(ptr_o, batch, vout);
+        batch = 0;
+      }
+    } while (batch != 0);
+  }
+}

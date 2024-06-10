@@ -816,6 +816,17 @@ union xnn_qs8_add_minmax_params {
     XNN_ALIGN(8) int8_t output_max[8];
   } wasmsimd;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_HEXAGON
+  struct {
+    XNN_ALIGN(128) int32_t bias[32];
+    XNN_ALIGN(128) int32_t a_multiplier[32];
+    XNN_ALIGN(128) int32_t b_multiplier[32];
+    uint32_t shift;
+    XNN_ALIGN(128) int16_t output_zero_point[64];
+    XNN_ALIGN(128) int8_t output_min[128];
+    XNN_ALIGN(128) int8_t output_max[128];
+  } hvx;
+#endif // XNN_ARCH_HEXAGON
 };
 
 union xnn_qu8_add_minmax_params {
