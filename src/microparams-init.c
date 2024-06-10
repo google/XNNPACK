@@ -930,7 +930,7 @@ void xnn_init_qs8_to_qs8_qc8w_scale_fp32_params(
   }
 }
 
-void xnn_init_qs8_qb8w_scale_fp32_params(
+void xnn_init_blockwise_scale_fp32_params(
   size_t channels,
   size_t channels_tile,
   size_t channels_subtile,
