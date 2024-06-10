@@ -1362,3 +1362,7 @@ enum xnn_status xnn_delete_subgraph(
   }
   return xnn_status_success;
 }
+
+uint32_t xnn_subgraph_num_nodes(xnn_subgraph_t subgraph) {
+  return subgraph->num_nodes;
+}
