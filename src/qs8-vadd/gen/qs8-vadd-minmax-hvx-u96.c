@@ -2,7 +2,7 @@
 //   Template: src/qs8-vadd/hvx.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2020 Google LLC
+// Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -30,13 +30,13 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u96(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const HVX_Vector vbias = *((const HVX_Vector *)(params->hvx.bias));
-  const HVX_Vector va_multiplier = *((const HVX_Vector *)(params->hvx.a_multiplier));
-  const HVX_Vector vb_multiplier = *((const HVX_Vector *)(params->hvx.b_multiplier));
+  const HVX_Vector vbias = Q6_V_vsplat_R(*((int32_t *) &params->hvx.bias));
+  const HVX_Vector va_multiplier = Q6_V_vsplat_R(*((int32_t *) &params->hvx.a_multiplier));
+  const HVX_Vector vb_multiplier = Q6_V_vsplat_R(*((int32_t *) &params->hvx.b_multiplier));
   const int32_t vshift = params->hvx.shift;
-  const HVX_Vector voutput_zero_point = *((const HVX_Vector *)(params->hvx.output_zero_point));
-  const HVX_Vector voutput_min = *((const HVX_Vector *)(params->hvx.output_min));
-  const HVX_Vector voutput_max = *((const HVX_Vector *)(params->hvx.output_max));
+  const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(*((int16_t *) &params->hvx.output_zero_point));
+  const HVX_Vector voutput_min = Q6_Vb_vsplat_R(*((int8_t *) &params->hvx.output_min));
+  const HVX_Vector voutput_max = Q6_Vb_vsplat_R(*((int8_t *) &params->hvx.output_max));
   int8_t* ptr_o = output;
 
   for (; batch >= 96 * sizeof(int8_t); batch -= 96 * sizeof(int8_t)) {
@@ -57,32 +57,30 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u96(
     HVX_Vector va2_i16_lo = Q6_V_lo_W(Q6_Wh_vunpack_Vb(va2));
     HVX_Vector vb2_i16_lo = Q6_V_lo_W(Q6_Wh_vunpack_Vb(vb2));
 
-    // vacc = vbias + va * va_multiplier
+    // vacc = vbias + va * va_multiplier + vb * vb_multiplier
     HVX_Vector va0_mul_e = Q6_Vw_vmpyio_VwVh(va_multiplier, Q6_Vh_vshuffe_VhVh(va0_i16_lo, va0_i16_lo));
-    HVX_Vector va0_mul_o = Q6_Vw_vmpyio_VwVh(va_multiplier, va0_i16_lo);
-    HVX_VectorPair va0_mul = Q6_W_vshuff_VVR(va0_mul_o, va0_mul_e, -4);
-    HVX_Vector vacc0 = Q6_Vw_vadd_VwVw(vbias, Q6_V_lo_W(va0_mul));
-    HVX_Vector va1_mul_e = Q6_Vw_vmpyio_VwVh(va_multiplier, Q6_Vh_vshuffe_VhVh(va1_i16_lo, va1_i16_lo));
-    HVX_Vector va1_mul_o = Q6_Vw_vmpyio_VwVh(va_multiplier, va1_i16_lo);
-    HVX_VectorPair va1_mul = Q6_W_vshuff_VVR(va1_mul_o, va1_mul_e, -4);
-    HVX_Vector vacc1 = Q6_Vw_vadd_VwVw(vbias, Q6_V_lo_W(va1_mul));
-    HVX_Vector va2_mul_e = Q6_Vw_vmpyio_VwVh(va_multiplier, Q6_Vh_vshuffe_VhVh(va2_i16_lo, va2_i16_lo));
-    HVX_Vector va2_mul_o = Q6_Vw_vmpyio_VwVh(va_multiplier, va2_i16_lo);
-    HVX_VectorPair va2_mul = Q6_W_vshuff_VVR(va2_mul_o, va2_mul_e, -4);
-    HVX_Vector vacc2 = Q6_Vw_vadd_VwVw(vbias, Q6_V_lo_W(va2_mul));
-
-    // vacc = vacc + vb * vb_multiplier
     HVX_Vector vb0_mul_e = Q6_Vw_vmpyio_VwVh(vb_multiplier, Q6_Vh_vshuffe_VhVh(vb0_i16_lo, vb0_i16_lo));
+    HVX_Vector va0_mul_o = Q6_Vw_vmpyio_VwVh(va_multiplier, va0_i16_lo);
     HVX_Vector vb0_mul_o = Q6_Vw_vmpyio_VwVh(vb_multiplier, vb0_i16_lo);
+    HVX_VectorPair va0_mul = Q6_W_vshuff_VVR(va0_mul_o, va0_mul_e, -4);
     HVX_VectorPair vb0_mul = Q6_W_vshuff_VVR(vb0_mul_o, vb0_mul_e, -4);
+    HVX_Vector vacc0 = Q6_Vw_vadd_VwVw(vbias, Q6_V_lo_W(va0_mul));
     vacc0 = Q6_Vw_vadd_VwVw(vacc0, Q6_V_lo_W(vb0_mul));
+    HVX_Vector va1_mul_e = Q6_Vw_vmpyio_VwVh(va_multiplier, Q6_Vh_vshuffe_VhVh(va1_i16_lo, va1_i16_lo));
     HVX_Vector vb1_mul_e = Q6_Vw_vmpyio_VwVh(vb_multiplier, Q6_Vh_vshuffe_VhVh(vb1_i16_lo, vb1_i16_lo));
+    HVX_Vector va1_mul_o = Q6_Vw_vmpyio_VwVh(va_multiplier, va1_i16_lo);
     HVX_Vector vb1_mul_o = Q6_Vw_vmpyio_VwVh(vb_multiplier, vb1_i16_lo);
+    HVX_VectorPair va1_mul = Q6_W_vshuff_VVR(va1_mul_o, va1_mul_e, -4);
     HVX_VectorPair vb1_mul = Q6_W_vshuff_VVR(vb1_mul_o, vb1_mul_e, -4);
+    HVX_Vector vacc1 = Q6_Vw_vadd_VwVw(vbias, Q6_V_lo_W(va1_mul));
     vacc1 = Q6_Vw_vadd_VwVw(vacc1, Q6_V_lo_W(vb1_mul));
+    HVX_Vector va2_mul_e = Q6_Vw_vmpyio_VwVh(va_multiplier, Q6_Vh_vshuffe_VhVh(va2_i16_lo, va2_i16_lo));
     HVX_Vector vb2_mul_e = Q6_Vw_vmpyio_VwVh(vb_multiplier, Q6_Vh_vshuffe_VhVh(vb2_i16_lo, vb2_i16_lo));
+    HVX_Vector va2_mul_o = Q6_Vw_vmpyio_VwVh(va_multiplier, va2_i16_lo);
     HVX_Vector vb2_mul_o = Q6_Vw_vmpyio_VwVh(vb_multiplier, vb2_i16_lo);
+    HVX_VectorPair va2_mul = Q6_W_vshuff_VVR(va2_mul_o, va2_mul_e, -4);
     HVX_VectorPair vb2_mul = Q6_W_vshuff_VVR(vb2_mul_o, vb2_mul_e, -4);
+    HVX_Vector vacc2 = Q6_Vw_vadd_VwVw(vbias, Q6_V_lo_W(va2_mul));
     vacc2 = Q6_Vw_vadd_VwVw(vacc2, Q6_V_lo_W(vb2_mul));
 
     // right shift

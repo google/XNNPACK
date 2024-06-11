@@ -6435,19 +6435,15 @@ size_t xnn_init_qs8_add_minmax_hvx_params(
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
   const int32_t bias = rounding - a_multiplier * (int32_t) a_zero_point - b_multiplier * (int32_t) b_zero_point;
-  for(uint32_t i = 0; i < 32; i++){
-    params->hvx.bias[i] = bias;
-    params->hvx.a_multiplier[i] = a_multiplier;
-    params->hvx.b_multiplier[i] = b_multiplier;
-  }
+
+  params->hvx.bias = bias;
+  params->hvx.a_multiplier = a_multiplier;
+  params->hvx.b_multiplier = b_multiplier;
   params->hvx.shift = shift;
-  for(uint32_t i = 0; i < 64; i++){
-    params->hvx.output_zero_point[i] = (int8_t) output_zero_point;
-  }
-  for(uint32_t i = 0; i < 128; i++){
-    params->hvx.output_min[i] = output_min;
-    params->hvx.output_max[i] = output_max;
-  }
+  params->hvx.output_zero_point = (int16_t) output_zero_point;
+  params->hvx.output_min = (int8_t) output_min;
+  params->hvx.output_max = (int8_t) output_max;
+
   return sizeof(params->hvx);
 }
 #endif // XNN_ARCH_HEXAGON
