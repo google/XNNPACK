@@ -1914,7 +1914,7 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "packing",
-    srcs = ["src/packing.c"],
+    srcs = ["src/packing.cc"],
     hdrs = ["src/xnnpack/pack.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -2031,7 +2031,7 @@ xnnpack_transitive_source_list(
 genrule(
     name = "generate_build_identifier",
     srcs = [
-        "src/packing.c",
+        "src/packing.cc",
         ":build_identifier_ukernel_srcs",
     ],
     outs = ["src/build_identifier.c"],
