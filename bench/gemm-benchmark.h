@@ -390,6 +390,109 @@ void GEMMBenchmark(benchmark::State& state,
 }
 
 void GEMMBenchmark(benchmark::State& state,
+  xnn_qd8_f16_qb4w_gemm_ukernel_fn gemm,
+  xnn_init_f16_qb4w_minmax_params_fn init_params,
+  xnn_pack_qs8_qb4w_gemm_fn pack,
+  size_t mr, size_t nr, size_t kr, size_t sr,
+  benchmark::utils::IsaCheckFunction isa_check)
+{
+  if (isa_check != nullptr && !isa_check(state)) {
+    return;
+  }
+
+  const size_t mc = state.range(0);
+  const size_t nc = state.range(1);
+  const size_t kc = state.range(2);
+  const size_t bl = round_up_po2(state.range(3), 2 * kr * sr);
+
+  const size_t nc_stride = benchmark::utils::RoundUp(nc, nr);
+  const size_t kc_stride = benchmark::utils::RoundUp(kc, kr * sr) / 2;
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  auto i8rng = std::bind(
+    std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()), std::ref(rng));
+  auto u8rng = std::bind(
+    std::uniform_int_distribution<int32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
+  auto scalerng = 
+    std::bind(std::uniform_real_distribution<float>(0.5f, 2.f), std::ref(rng));
+
+  const size_t planes = 2;  // 4 bit is 2 planes - low nibbles and high nibbles
+  const size_t k2 = round_up_po2(kc, 2);  // tester assumes byte aligned rows
+  const size_t packed_k2 = round_up_po2(kc, kr * sr * planes);  // 2 blocks for nibbles
+
+  const size_t packed_k_bytes = (packed_k2 + 1)/ 2;
+  const size_t num_blocks = packed_k2 / bl;
+  const size_t packed_n = round_up_po2(nc, nr);
+
+  std::vector<int8_t> a(mc * kc + XNN_EXTRA_BYTES);
+  std::generate(a.begin(), a.end(), std::ref(i8rng));
+  std::vector<uint8_t> k(nc * kc / 2);
+  std::generate(k.begin(), k.end(), std::ref(u8rng));
+  std::vector<float> kernel_scale2d(nc * k2 / bl);
+  std::generate(k.begin(), k.end(), std::ref(u8rng));
+  std::generate(kernel_scale2d.begin(), kernel_scale2d.end(), std::ref(scalerng));
+
+  std::vector<xnn_qd8_quantization_params> quantization_params(mc + XNN_EXTRA_QUANTIZATION_PARAMS);
+  const size_t w_bytes = packed_n * packed_k_bytes +
+                         /* vksum */ packed_n * sizeof(float) +
+                         /* scales */ packed_n * num_blocks * sizeof(float) +
+                         /* bias */ packed_n * sizeof(float);
+
+  const size_t c_elements = mc * nc;
+  const size_t num_buffers = 1 +
+    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
+      w_bytes + sizeof(uint16_t) * c_elements);
+
+  std::vector<char, AlignedAllocator<char, 64>> w(w_bytes * num_buffers);
+  std::fill(w.begin(), w.end(), 0);
+
+  const xnn_qs8_qc4w_packing_params packing_params = { /*input_zero_point=*/1, /*kernel_zero_point=*/8 };
+  pack(1, nc, k2, nr, kr, sr, bl, k.data(), /*bias=*/nullptr, /*scale=*/kernel_scale2d.data(),
+       w.data(), sizeof(float) * nr, sizeof(float) * nr, &packing_params);
+  std::vector<uint16_t> c(c_elements * num_buffers);
+  std::fill(c.begin(), c.end(), std::nanf(""));
+
+  // Prepare parameters.
+  xnn_f16_qb4w_minmax_params params;
+  init_params(&params,
+      fp16_ieee_from_fp32_value(std::numeric_limits<int8_t>::min()),
+      fp16_ieee_from_fp32_value(std::numeric_limits<int8_t>::max()), 
+      8,
+      bl);
+
+  size_t buffer_index = 0;
+  for (auto _ : state) {
+    // Use circular buffers (exceeding cache size) and prefetch to control cache state:
+    // - A is always in L1 cache (if fits, otherwise L2, L3, etc)
+    // - W is not in cache (for any cache level)
+    // - C is not in cache (for any cache level)
+    state.PauseTiming();
+    benchmark::utils::PrefetchToL1(a.data(), a.size());
+    buffer_index = (buffer_index + 1) % num_buffers;
+    state.ResumeTiming();
+
+    for (uint32_t m = 0; m < mc; m += mr) {
+      const uint32_t mb = min(mc - m, mr);
+      gemm(
+        mb, nc, kc,
+        a.data() + m * kc, kc * sizeof(int8_t),
+        w.data() + w_bytes * buffer_index,
+        c.data() + (buffer_index * mc + m) * nc, nc * sizeof(uint16_t), nr * sizeof(uint16_t),
+        &params, quantization_params.data() + m);
+    }
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  state.counters["OPS"] = benchmark::Counter(
+    uint64_t(state.iterations()) * 2 * mc * nc * kc, benchmark::Counter::kIsRate);
+}
+
+void GEMMBenchmark(benchmark::State& state,
   xnn_qd8_f16_qc4w_gemm_ukernel_fn gemm,
   xnn_init_f16_qc4w_minmax_params_fn init_params,
   xnn_pack_qs8_qc4w_gemm_fn pack,
@@ -460,6 +563,109 @@ void GEMMBenchmark(benchmark::State& state,
         a.data() + m * kc, kc * sizeof(int8_t),
         w.data() + w_elements * buffer_index,
         c.data() + (buffer_index * mc + m) * nc, nc * sizeof(uint16_t), nr * sizeof(uint16_t),
+        &params, quantization_params.data() + m);
+    }
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  state.counters["OPS"] = benchmark::Counter(
+    uint64_t(state.iterations()) * 2 * mc * nc * kc, benchmark::Counter::kIsRate);
+}
+
+void GEMMBenchmark(benchmark::State& state,
+  xnn_qd8_f32_qb4w_gemm_ukernel_fn gemm,
+  xnn_init_f32_qb4w_minmax_params_fn init_params,
+  xnn_pack_qs8_qb4w_gemm_fn pack,
+  size_t mr, size_t nr, size_t kr, size_t sr,
+  benchmark::utils::IsaCheckFunction isa_check)
+{
+  if (isa_check != nullptr && !isa_check(state)) {
+    return;
+  }
+
+  const size_t mc = state.range(0);
+  const size_t nc = state.range(1);
+  const size_t kc = state.range(2);
+  const size_t bl = round_up_po2(state.range(3), 2 * kr * sr);
+
+  const size_t nc_stride = benchmark::utils::RoundUp(nc, nr);
+  const size_t kc_stride = benchmark::utils::RoundUp(kc, kr * sr) / 2;
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  auto i8rng = std::bind(
+    std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()), std::ref(rng));
+  auto u8rng = std::bind(
+    std::uniform_int_distribution<int32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
+  auto scalerng = 
+    std::bind(std::uniform_real_distribution<float>(0.5f, 2.f), std::ref(rng));
+
+  const size_t planes = 2;  // 4 bit is 2 planes - low nibbles and high nibbles
+  const size_t k2 = round_up_po2(kc, 2);  // tester assumes byte aligned rows
+  const size_t packed_k2 = round_up_po2(kc, kr * sr * planes);  // 2 blocks for nibbles
+
+  const size_t packed_k_bytes = (packed_k2 + 1)/ 2;
+  const size_t num_blocks = packed_k2 / bl;
+  const size_t packed_n = round_up_po2(nc, nr);
+
+  std::vector<int8_t> a(mc * kc + XNN_EXTRA_BYTES);
+  std::generate(a.begin(), a.end(), std::ref(i8rng));
+  std::vector<uint8_t> k(nc * kc / 2);
+  std::generate(k.begin(), k.end(), std::ref(u8rng));
+  std::vector<float> kernel_scale2d(nc * k2 / bl);
+  std::generate(k.begin(), k.end(), std::ref(u8rng));
+  std::generate(kernel_scale2d.begin(), kernel_scale2d.end(), std::ref(scalerng));
+
+  std::vector<xnn_qd8_quantization_params> quantization_params(mc + XNN_EXTRA_QUANTIZATION_PARAMS);
+  const size_t w_bytes = packed_n * packed_k_bytes +
+                         /* vksum */ packed_n * sizeof(float) +
+                         /* scales */ packed_n * num_blocks * sizeof(float) +
+                         /* bias */ packed_n * sizeof(float);
+
+  const size_t c_elements = mc * nc;
+  const size_t num_buffers = 1 +
+    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
+      w_bytes + sizeof(float) * c_elements);
+
+  std::vector<char, AlignedAllocator<char, 64>> w(w_bytes * num_buffers);
+  std::fill(w.begin(), w.end(), 0);
+
+  const xnn_qs8_qc4w_packing_params packing_params = { /*input_zero_point=*/1, /*kernel_zero_point=*/8 };
+  pack(1, nc, k2, nr, kr, sr, bl, k.data(), /*bias=*/nullptr, /*scale=*/kernel_scale2d.data(),
+       w.data(), sizeof(float) * nr, sizeof(float) * nr, &packing_params);
+  std::vector<float> c(c_elements * num_buffers);
+  std::fill(c.begin(), c.end(), std::nanf(""));
+
+  // Prepare parameters.
+  xnn_f32_qb4w_minmax_params params;
+  init_params(&params,
+      std::numeric_limits<int8_t>::min(),
+      std::numeric_limits<int8_t>::max(),
+      8,
+      bl);
+
+  size_t buffer_index = 0;
+  for (auto _ : state) {
+    // Use circular buffers (exceeding cache size) and prefetch to control cache state:
+    // - A is always in L1 cache (if fits, otherwise L2, L3, etc)
+    // - W is not in cache (for any cache level)
+    // - C is not in cache (for any cache level)
+    state.PauseTiming();
+    benchmark::utils::PrefetchToL1(a.data(), a.size());
+    buffer_index = (buffer_index + 1) % num_buffers;
+    state.ResumeTiming();
+
+    for (uint32_t m = 0; m < mc; m += mr) {
+      const uint32_t mb = min(mc - m, mr);
+      gemm(
+        mb, nc, kc,
+        a.data() + m * kc, kc * sizeof(int8_t),
+        w.data() + w_bytes * buffer_index,
+        c.data() + (buffer_index * mc + m) * nc, nc * sizeof(float), nr * sizeof(float),
         &params, quantization_params.data() + m);
     }
   }

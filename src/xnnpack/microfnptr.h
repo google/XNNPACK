@@ -263,6 +263,19 @@ typedef void (*xnn_qd8_f16_qc4w_gemm_ukernel_fn)(
     const union xnn_f16_qc4w_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params* quantization_params);
 
+typedef void (*xnn_qd8_f16_qb4w_gemm_ukernel_fn)(
+    size_t mr,
+    size_t nr,
+    size_t k,
+    const int8_t* a,
+    size_t a_stride,
+    const void* w,
+    uint16_t* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const union xnn_f16_qb4w_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)],
+    const struct xnn_qd8_quantization_params* quantization_params);
+
 typedef void (*xnn_qd8_f32_qc4w_gemm_ukernel_fn)(
     size_t mr,
     size_t nr,
@@ -274,6 +287,19 @@ typedef void (*xnn_qd8_f32_qc4w_gemm_ukernel_fn)(
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_qc4w_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)],
+    const struct xnn_qd8_quantization_params* quantization_params);
+
+typedef void (*xnn_qd8_f32_qb4w_gemm_ukernel_fn)(
+    size_t mr,
+    size_t nr,
+    size_t k,
+    const int8_t* a,
+    size_t a_stride,
+    const void* w,
+    float* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const union xnn_f32_qb4w_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params* quantization_params);
 
 typedef void (*xnn_qs8_qc8w_gemm_minmax_ukernel_fn)(
@@ -2629,11 +2655,25 @@ typedef size_t (*xnn_init_f16_qc4w_minmax_params_fn)(
   uint16_t max,
   uint8_t kernel_zero_point);
 
+typedef size_t (*xnn_init_f16_qb4w_minmax_params_fn)(
+  union xnn_f16_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t min,
+  uint16_t max,
+  uint8_t kernel_zero_point,
+  size_t blocksize);
+
 typedef size_t (*xnn_init_f32_qc4w_minmax_params_fn)(
   union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float min,
   float max,
   uint8_t kernel_zero_point);
+
+typedef size_t (*xnn_init_f32_qb4w_minmax_params_fn)(
+  union xnn_f32_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float min,
+  float max,
+  uint8_t kernel_zero_point,
+  size_t blocksize);
 
 typedef size_t (*xnn_init_s8_minmax_params_fn)(
   union xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],

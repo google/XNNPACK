@@ -108,6 +108,15 @@ class GemmMicrokernelTester {
     return this->ks_;
   }
 
+  inline GemmMicrokernelTester& bl(size_t bl) {
+    this->bl_ = bl;
+    return *this;
+  }
+
+  inline size_t bl() const {
+    return this->bl_;
+  }
+
   size_t packed_k() const {
     return round_up_po2(k(), kr() * sr());
   }
@@ -293,9 +302,19 @@ class GemmMicrokernelTester {
     xnn_pack_qs8_qc4w_gemm_fn pack) const;
 
   void Test(
+    xnn_qd8_f16_qb4w_gemm_ukernel_fn gemm,
+    xnn_init_f16_qb4w_minmax_params_fn init_params,
+    xnn_pack_qs8_qb4w_gemm_fn pack) const;
+
+  void Test(
     xnn_qd8_f32_qc4w_gemm_ukernel_fn gemm,
     xnn_init_f32_qc4w_minmax_params_fn init_params,
     xnn_pack_qs8_qc4w_gemm_fn pack) const;
+
+  void Test(
+    xnn_qd8_f32_qb4w_gemm_ukernel_fn gemm,
+    xnn_init_f32_qb4w_minmax_params_fn init_params,
+    xnn_pack_qs8_qb4w_gemm_fn pack) const;
 
   void Test(
     xnn_qs8_igemm_minmax_ukernel_fn igemm,
@@ -456,6 +475,7 @@ class GemmMicrokernelTester {
   size_t n_{1};
   size_t k_{1};
   size_t ks_{1};
+  size_t bl_{SIZE_MAX};
   size_t a_stride_{0};
   size_t cm_stride_{0};
   size_t cn_stride_{0};
@@ -511,6 +531,10 @@ struct GemmTestParams {
     loop_bzp_ = LoopParams(from, to, step);
     return *this;
   }
+  GemmTestParams& loop_bl(size_t from, size_t to, size_t step = 1) {
+    loop_bl_ = LoopParams(from, to, step);
+    return *this;
+  }
 
   std::string test_name;
   GemmMicrokernelTester tester;
@@ -521,6 +545,7 @@ struct GemmTestParams {
   LoopParams loop_n_;
   LoopParams loop_zi_;
   LoopParams loop_bzp_;
+  LoopParams loop_bl_;
 };
 
 using GemmTest = testing::TestWithParam<GemmTestParams>;
@@ -544,4 +569,3 @@ inline size_t NextPrime(size_t n) {
     }
     return n;
 }
-
