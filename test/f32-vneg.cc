@@ -904,12 +904,14 @@
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   TEST(F32_VNEG__HVX_U32, batch_eq_32) {
+    TEST_REQUIRES_HVX;
     VUnaryMicrokernelTester()
       .batch_size(32)
       .TestNeg(xnn_f32_vneg_ukernel__hvx_u32);
   }
 
   TEST(F32_VNEG__HVX_U32, batch_div_32) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
@@ -918,6 +920,7 @@
   }
 
   TEST(F32_VNEG__HVX_U32, batch_lt_32) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
@@ -926,6 +929,7 @@
   }
 
   TEST(F32_VNEG__HVX_U32, batch_gt_32) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 32 + 1; batch_size < 64; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
@@ -934,6 +938,7 @@
   }
 
   TEST(F32_VNEG__HVX_U32, inplace) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
@@ -941,17 +946,19 @@
         .TestNeg(xnn_f32_vneg_ukernel__hvx_u32);
     }
   }
-#endif // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   TEST(F32_VNEG__HVX_U64, batch_eq_64) {
+    TEST_REQUIRES_HVX;
     VUnaryMicrokernelTester()
       .batch_size(64)
       .TestNeg(xnn_f32_vneg_ukernel__hvx_u64);
   }
 
   TEST(F32_VNEG__HVX_U64, batch_div_64) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
@@ -960,6 +967,7 @@
   }
 
   TEST(F32_VNEG__HVX_U64, batch_lt_64) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size < 64; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
@@ -968,6 +976,7 @@
   }
 
   TEST(F32_VNEG__HVX_U64, batch_gt_64) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 64 + 1; batch_size < 128; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
@@ -976,6 +985,7 @@
   }
 
   TEST(F32_VNEG__HVX_U64, inplace) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 320; batch_size += 63) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
@@ -983,17 +993,19 @@
         .TestNeg(xnn_f32_vneg_ukernel__hvx_u64);
     }
   }
-#endif // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   TEST(F32_VNEG__HVX_U128, batch_eq_128) {
+    TEST_REQUIRES_HVX;
     VUnaryMicrokernelTester()
       .batch_size(128)
       .TestNeg(xnn_f32_vneg_ukernel__hvx_u128);
   }
 
   TEST(F32_VNEG__HVX_U128, batch_div_128) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 256; batch_size < 1280; batch_size += 128) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1002,6 +1014,7 @@
   }
 
   TEST(F32_VNEG__HVX_U128, batch_lt_128) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size < 128; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1010,6 +1023,7 @@
   }
 
   TEST(F32_VNEG__HVX_U128, batch_gt_128) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 128 + 1; batch_size < 256; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1018,6 +1032,7 @@
   }
 
   TEST(F32_VNEG__HVX_U128, inplace) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size <= 640; batch_size += 127) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1025,7 +1040,7 @@
         .TestNeg(xnn_f32_vneg_ukernel__hvx_u128);
     }
   }
-#endif // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 
 TEST(F32_VNEG__SCALAR_U1, batch_eq_1) {
