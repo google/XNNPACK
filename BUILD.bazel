@@ -582,6 +582,7 @@ xnnpack_microkernel_cc_library(
         "-ffp-contract=off",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
+    riscv_srcs_prod = ["src/amalgam/gen/fma.c"],
     srcs_prod = ["src/amalgam/gen/scalar.c"],
     srcs_test = ALL_FMA_MICROKERNEL_SRCS + ALL_SCALAR_MICROKERNEL_SRCS,
     deps = MICROKERNEL_DEPS + [
