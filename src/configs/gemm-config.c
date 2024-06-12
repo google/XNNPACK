@@ -1679,7 +1679,7 @@ static void init_qd8_f32_qc4w_gemm_config(void) {
       qd8_f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_avx512vnni_params;
       qd8_f32_qc4w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_qc4w_gemm_gio_w;
       qd8_f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_qc4w_gemm_goi_w;
-      qd8_f32_qc4w_gemm_config.mr = 14;
+      qd8_f32_qc4w_gemm_config.mr = 7;
       qd8_f32_qc4w_gemm_config.nr = 16;
       qd8_f32_qc4w_gemm_config.log2_kr = 3;
       qd8_f32_qc4w_gemm_config.planes = 2;
