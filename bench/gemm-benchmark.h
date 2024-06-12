@@ -405,9 +405,6 @@ void GEMMBenchmark(benchmark::State& state,
   const size_t kc = state.range(2);
   const size_t bl = round_up_po2(state.range(3), 2 * kr * sr);
 
-  const size_t nc_stride = benchmark::utils::RoundUp(nc, nr);
-  const size_t kc_stride = benchmark::utils::RoundUp(kc, kr * sr) / 2;
-
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto i8rng = std::bind(
@@ -591,9 +588,6 @@ void GEMMBenchmark(benchmark::State& state,
   const size_t nc = state.range(1);
   const size_t kc = state.range(2);
   const size_t bl = round_up_po2(state.range(3), 2 * kr * sr);
-
-  const size_t nc_stride = benchmark::utils::RoundUp(nc, nr);
-  const size_t kc_stride = benchmark::utils::RoundUp(kc, kr * sr) / 2;
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
