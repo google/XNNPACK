@@ -358,6 +358,7 @@ def main(args):
 #include "bench/utils.h"
 
 #include <xnnpack/common.h>
+#include <xnnpack/hardware-config.h>
 #include <xnnpack/packw.h>
 """.format(specification=options.spec, generator=sys.argv[0])
 

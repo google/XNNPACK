@@ -42,7 +42,7 @@
   #include <wasm_simd128.h>
 #endif
 
-#include <xnnpack/config.h>
+#include <xnnpack/hardware-config.h>
 #include <xnnpack/log.h>
 
 #if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)

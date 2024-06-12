@@ -16,7 +16,6 @@
 #include <xnnpack/common.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams.h>
-#include <xnnpack/config.h>
 
 // Indicates that XNNPACK as a whole has initialized.
 // This does not guarantee that any particular microkernels are available.

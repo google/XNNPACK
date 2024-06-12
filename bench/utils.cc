@@ -26,7 +26,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/config.h>
+#include <xnnpack/hardware-config.h>
 
 #include "bench/utils.h"
 

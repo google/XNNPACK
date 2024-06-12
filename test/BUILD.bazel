@@ -42,6 +42,7 @@ OPERATOR_TEST_DEPS = [
     "//:common",
     "//:jit",
     "//:math",
+    "//:microkernel_configs",
     "//:microparams",
     "//:normalization",
     "//:params",
@@ -2568,6 +2569,7 @@ xnnpack_unit_test(
     name = "operator_utils_test",
     srcs = ["operator-utils.cc"],
     deps = [
+        "//:microkernel_configs",
         "//:operator_utils",
         "//:params",
     ],

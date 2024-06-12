@@ -9,7 +9,7 @@
 #pragma once
 
 #include <xnnpack/common.h>
-#include <xnnpack/config.h>
+#include <xnnpack/hardware-config.h>
 
 
 #if XNN_ARCH_X86

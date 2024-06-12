@@ -19,7 +19,6 @@
 #include <xnnpack/common.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/indirection.h>
-#include <xnnpack/operator.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/pack.h>
