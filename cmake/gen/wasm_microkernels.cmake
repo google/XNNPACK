@@ -97,6 +97,11 @@ SET(ALL_WASM_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rminmax-wasm-u3-acc3.c
   src/f32-rminmax/gen/f32-rminmax-wasm-u4-acc2.c
   src/f32-rminmax/gen/f32-rminmax-wasm-u4-acc4.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-wasm-u1.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-wasm-u2-acc2.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-wasm-u3-acc3.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-wasm-u4-acc2.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-wasm-u4-acc4.c
   src/f32-vbinary/gen/f32-vadd-minmax-wasm-u1.c
   src/f32-vbinary/gen/f32-vadd-minmax-wasm-u2.c
   src/f32-vbinary/gen/f32-vadd-minmax-wasm-u4.c

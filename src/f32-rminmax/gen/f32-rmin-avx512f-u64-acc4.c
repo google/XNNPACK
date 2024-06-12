@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-rminmax/avx512f.c.in
+//   Template: src/f32-rminmaxsum/avx512f.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC

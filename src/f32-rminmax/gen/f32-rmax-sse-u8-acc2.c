@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-rminmax/sse.c.in
+//   Template: src/f32-rminmaxsum/sse.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
@@ -54,5 +54,6 @@ void xnn_f32_rmax_ukernel__sse_u8_acc2(
   }
   vmax0 = _mm_max_ps(vmax0, _mm_movehl_ps(vmax0, vmax0));
   vmax0 = _mm_max_ss(vmax0, _mm_shuffle_ps(vmax0, vmax0, _MM_SHUFFLE(1, 1, 1, 1)));
+
   _mm_store_ss(output, vmax0);
 }

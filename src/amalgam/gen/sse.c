@@ -7641,6 +7641,7 @@ void xnn_f32_rmax_ukernel__sse_u16_acc4(
   }
   vmax0 = _mm_max_ps(vmax0, _mm_movehl_ps(vmax0, vmax0));
   vmax0 = _mm_max_ss(vmax0, _mm_shuffle_ps(vmax0, vmax0, _MM_SHUFFLE(1, 1, 1, 1)));
+
   _mm_store_ss(output, vmax0);
 }
 
@@ -7706,6 +7707,7 @@ void xnn_f32_rminmax_ukernel__sse_u16_acc4(
   vmax0 = _mm_max_ps(vmax0, _mm_movehl_ps(vmax0, vmax0));
   vmin0 = _mm_min_ss(vmin0, _mm_shuffle_ps(vmin0, vmin0, _MM_SHUFFLE(1, 1, 1, 1)));
   vmax0 = _mm_max_ss(vmax0, _mm_shuffle_ps(vmax0, vmax0, _MM_SHUFFLE(1, 1, 1, 1)));
+
   _mm_store_ss(output, vmin0);
   _mm_store_ss(output + 1, vmax0);
 }

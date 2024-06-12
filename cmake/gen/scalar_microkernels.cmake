@@ -276,6 +276,11 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rminmax-scalar-u3-acc3.c
   src/f32-rminmax/gen/f32-rminmax-scalar-u4-acc2.c
   src/f32-rminmax/gen/f32-rminmax-scalar-u4-acc4.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-scalar-u1.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-scalar-u2-acc2.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-scalar-u3-acc3.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-scalar-u4-acc2.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-scalar-u4-acc4.c
   src/f32-rsum/gen/f32-rsum-scalar-u1.c
   src/f32-rsum/gen/f32-rsum-scalar-u2-acc2.c
   src/f32-rsum/gen/f32-rsum-scalar-u3-acc3.c

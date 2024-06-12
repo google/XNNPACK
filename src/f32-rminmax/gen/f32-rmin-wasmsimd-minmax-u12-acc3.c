@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-rminmax/wasmsimd.c.in
+//   Template: src/f32-rminmaxsum/wasmsimd.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC

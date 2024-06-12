@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-rminmax/avx.c.in
+//   Template: src/f32-rminmaxsum/avx.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
@@ -25,7 +25,6 @@ void xnn_f32_rmax_ukernel__avx_u8(
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
-  assert(params != NULL);
 
   __m256 vmax0 = _mm256_broadcast_ss(input);
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
@@ -44,6 +43,7 @@ void xnn_f32_rmax_ukernel__avx_u8(
     vmax0 = _mm256_blendv_ps(vmax0, _mm256_max_ps(vmax0, vt), _mm256_castsi256_ps(vmask));
   }
   __m128 vmax = _mm_max_ps(_mm256_castps256_ps128(vmax0), _mm256_extractf128_ps(vmax0, 1));
+
   vmax = _mm_max_ps(vmax, _mm_movehl_ps(vmax, vmax));
   vmax = _mm_max_ss(vmax, _mm_movehdup_ps(vmax));
   _mm_store_ss(output, vmax);
