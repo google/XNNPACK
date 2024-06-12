@@ -17,6 +17,24 @@ $if NR % 4 != 0:
 $if DATATYPE in ["QB4_F16"]:
   #include <fp16/fp16.h>
 
+$#
+$INDENT = 0
+$_ = ""
+$#
+$def SET_INDENT(NEW_INDENT):
+  $global INDENT
+  $global _
+  $INDENT=NEW_INDENT
+  $_ = "  " * INDENT
+$#
+$def BEGIN():
+  $SET_INDENT(INDENT + 1)
+  $return '{'
+$#
+$def END():
+  $SET_INDENT(INDENT - 1)
+  $return _ + '}'
+$#
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QU8": "qu8", "QD8": "qd8_f32_qc8w", "QC4": "qd8_f32_qc4w", "QB4_F16": "qd8_f16_qb4w", "QB4_F32": "qd8_f32_qb4w"}[DATATYPE]
 $VARIANT_SPEC = "_" + VARIANT.lower() if VARIANT else ""
@@ -122,33 +140,34 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
 
     $if BLOCKWISE:
       size_t n_blocks = kc / bl;
-      for (size_t nb=0; nb<n_blocks; ++nb) {
+      for (size_t nb = 0; nb < n_blocks; ++nb) {
         $for M in range(MR):
           $for N in range(NR):
             int32_t vacc${M}x${N} = 0;
         size_t k = bl;
+      $SET_INDENT(1)
     $else:
       size_t k = kc;
     $if DATATYPE in ["QC4", "QB4_F16", "QB4_F32"]:
-      for (; k >= 2 * sizeof(uint8_t); k -= 2 * sizeof(uint8_t)) {
+      ${_}for (; k >= 2 * sizeof(uint8_t); k -= 2 * sizeof(uint8_t)) {
         $for M in range(MR):
-          const int32_t va${M}c0 = (int32_t) a${M}[0];
-          const int32_t va${M}c1 = (int32_t) a${M}[1];
-          a${M} += 2;
+          ${_}const int32_t va${M}c0 = (int32_t) a${M}[0];
+          ${_}const int32_t va${M}c1 = (int32_t) a${M}[1];
+          ${_}a${M} += 2;
 
         $for N in range(NR):
-          const uint8_t vbi${N} = ((const uint8_t*) w)[${N}];
-        w = (const uint8_t*) w + ${NR};
+          ${_}const uint8_t vbi${N} = ((const uint8_t*) w)[${N}];
+        ${_}w = (const uint8_t*) w + ${NR};
         $for N in range(NR):
-          const int32_t vb${N}c0 = (int32_t) (int8_t) (vbi${N} << 4);
-          const int32_t vb${N}c1 = (int32_t) (int8_t) (vbi${N} & 0xF0);
+          ${_}const int32_t vb${N}c0 = (int32_t) (int8_t) (vbi${N} << 4);
+          ${_}const int32_t vb${N}c1 = (int32_t) (int8_t) (vbi${N} & 0xF0);
 
         $for M in range(MR):
           $for N in range(NR):
-            vacc${M}x${N} += va${M}c0 * vb${N}c0;
+            ${_}vacc${M}x${N} += va${M}c0 * vb${N}c0;
         $for M in range(MR):
           $for N in range(NR):
-            vacc${M}x${N} += va${M}c1 * vb${N}c1;
+            ${_}vacc${M}x${N} += va${M}c1 * vb${N}c1;
       }
     $else:
       do {

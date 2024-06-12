@@ -49,27 +49,27 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x2__scalar(
     w = (const float*) w + 2;
 
     size_t n_blocks = kc / bl;
-    for (size_t nb=0; nb<n_blocks; ++nb) {
+    for (size_t nb = 0; nb < n_blocks; ++nb) {
       int32_t vacc0x0 = 0;
       int32_t vacc0x1 = 0;
       size_t k = bl;
-    for (; k >= 2 * sizeof(uint8_t); k -= 2 * sizeof(uint8_t)) {
-      const int32_t va0c0 = (int32_t) a0[0];
-      const int32_t va0c1 = (int32_t) a0[1];
-      a0 += 2;
+      for (; k >= 2 * sizeof(uint8_t); k -= 2 * sizeof(uint8_t)) {
+        const int32_t va0c0 = (int32_t) a0[0];
+        const int32_t va0c1 = (int32_t) a0[1];
+        a0 += 2;
 
-      const uint8_t vbi0 = ((const uint8_t*) w)[0];
-      const uint8_t vbi1 = ((const uint8_t*) w)[1];
-      w = (const uint8_t*) w + 2;
-      const int32_t vb0c0 = (int32_t) (int8_t) (vbi0 << 4);
-      const int32_t vb0c1 = (int32_t) (int8_t) (vbi0 & 0xF0);
-      const int32_t vb1c0 = (int32_t) (int8_t) (vbi1 << 4);
-      const int32_t vb1c1 = (int32_t) (int8_t) (vbi1 & 0xF0);
+        const uint8_t vbi0 = ((const uint8_t*) w)[0];
+        const uint8_t vbi1 = ((const uint8_t*) w)[1];
+        w = (const uint8_t*) w + 2;
+        const int32_t vb0c0 = (int32_t) (int8_t) (vbi0 << 4);
+        const int32_t vb0c1 = (int32_t) (int8_t) (vbi0 & 0xF0);
+        const int32_t vb1c0 = (int32_t) (int8_t) (vbi1 << 4);
+        const int32_t vb1c1 = (int32_t) (int8_t) (vbi1 & 0xF0);
 
-      vacc0x0 += va0c0 * vb0c0;
-      vacc0x1 += va0c0 * vb1c0;
-      vacc0x0 += va0c1 * vb0c1;
-      vacc0x1 += va0c1 * vb1c1;
+        vacc0x0 += va0c0 * vb0c0;
+        vacc0x1 += va0c0 * vb1c0;
+        vacc0x0 += va0c1 * vb0c1;
+        vacc0x1 += va0c1 * vb1c1;
     }
     // accumulate in float
       float vf0x0 = vacc0x0;
