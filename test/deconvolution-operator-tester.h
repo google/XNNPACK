@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <limits>
 #include <memory>
+#include <numeric>
 #include <random>
 #include <utility>
 #include <vector>
@@ -468,7 +469,7 @@ class DeconvolutionOperatorTester {
     return this->iterations_;
   }
 
-  void TestQS8() const {
+  void TestQC8() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
     xnnpack::ReplicableRandomDevice rng;
@@ -477,6 +478,7 @@ class DeconvolutionOperatorTester {
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
     std::uniform_int_distribution<int32_t> w8dist(
       -std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max());
+    std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + groups() * group_input_channels());
@@ -485,6 +487,7 @@ class DeconvolutionOperatorTester {
     std::vector<int8_t> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + groups() * group_output_channels());
     std::vector<int32_t> accumulators(batch_size() * output_height() * output_width() * groups() * group_output_channels());
     std::vector<double> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
+    std::vector<float> requantization_scales(groups() * group_output_channels());
 
     const int8_t input_zero_point = 1;
 
@@ -540,18 +543,39 @@ class DeconvolutionOperatorTester {
       }
 
       // Compute renormalization parameters.
-      const int32_t accumulated_min = *std::min_element(accumulators.cbegin(), accumulators.cend());
-      const int32_t accumulated_max = *std::max_element(accumulators.cbegin(), accumulators.cend());
+      const int8_t output_zero_point = -1;
+      for (size_t c = 0; c < groups() * group_output_channels(); c++) {
+        int32_t accumulated_min = accumulators[c];
+        int32_t accumulated_max = accumulators[c];
+        for (size_t px = 0; px < batch_size() * output_height() * output_width(); px++) {
+          accumulated_min = std::min(accumulated_min, accumulators[px * groups() * group_output_channels() + c]);
+          accumulated_max = std::max(accumulated_max, accumulators[px * groups() * group_output_channels() + c]);
+        }
 
-      const double output_scale = double(uint32_t(accumulated_max - accumulated_min)) / 255.0;
-      const int8_t output_zero_point = int8_t(std::max(std::min(
-        lrint(-0.5 - 0.5 * double(accumulated_min + accumulated_max) / output_scale),
-        long(std::numeric_limits<int8_t>::max())), long(std::numeric_limits<int8_t>::min())));
+        float requantization_scale = 2.328e-10f; //0x1.0p-32f;
+        if (accumulated_max != 0) {
+          requantization_scale = std::max(requantization_scale,
+            float(int32_t(std::numeric_limits<int8_t>::max()) - int32_t(output_zero_point)) / float(accumulated_max));
+        }
+        if (accumulated_min != 0) {
+          requantization_scale = std::max(requantization_scale,
+            float(int32_t(std::numeric_limits<int8_t>::min()) - int32_t(output_zero_point)) / float(accumulated_min));
+        }
+        requantization_scale = std::min(requantization_scale, 1.f);
+
+        requantization_scales[c] = requantization_scale;
+      }
 
       // Renormalize reference results.
-      std::transform(accumulators.cbegin(), accumulators.cend(), output_ref.begin(),
-        [this, output_scale, output_zero_point](int32_t x) -> double {
-          return std::max<double>(std::min<double>(double(x) / output_scale, double(qmax() - 0x80) - output_zero_point), double(qmin() - 0x80) - output_zero_point);
+      for (size_t c = 0; c < groups() * group_output_channels(); c++) {
+        for (size_t px = 0; px < batch_size() * output_height() * output_width(); px++) {
+          output_ref[px * groups() * group_output_channels() + c] = double(int32_t(output_zero_point)) +
+            double(accumulators[px * groups() * group_output_channels() + c]) * double(requantization_scales[c]);
+        }
+      }
+      std::transform(output_ref.cbegin(), output_ref.cend(), output_ref.begin(),
+        [this](double x) -> double {
+          return std::max<double>(std::min<double>(x, double(qmax() - 0x80)), double(qmin() - 0x80));
         });
 
       // Create, setup, run, and destroy Deconvolution operator.
@@ -572,15 +596,16 @@ class DeconvolutionOperatorTester {
 
       ASSERT_EQ(
           xnn_status_success,
-          xnn_create_deconvolution2d_nhwc_qs8(
+          xnn_create_deconvolution2d_nhwc_qs8_qc8w(
               padding_top(), padding_right(), padding_bottom(), padding_left(),
               kernel_height(), kernel_width(), stride_height(), stride_width(),
               dilation_height(), dilation_width(), groups(),
               group_input_channels(), group_output_channels(),
               input_pixel_stride(), output_pixel_stride(), input_zero_point,
-              1.0f /* input scale */, 1.0f /* kernel scale */, kernel.data(),
+              1.0f /* input scale */, requantization_scales.data(), kernel.data(),
+              //1.0f /* input scale */, 1.0f, kernel.data(),
               has_bias() ? bias.data() : nullptr, output_zero_point,
-              output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+              /*output_scale=*/1.f, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
               /*flags=*/0, /*code_cache=*/nullptr, auto_weights_cache.get(), &deconvolution_op));
 
       if (use_weights_cache()) {
@@ -591,7 +616,7 @@ class DeconvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_reshape_deconvolution2d_nhwc_qs8(
+        xnn_reshape_deconvolution2d_nhwc_qs8_qc8w(
           deconvolution_op,
           batch_size(), input_height(), input_width(),
           adjustment_height(), adjustment_width(),
@@ -599,14 +624,14 @@ class DeconvolutionOperatorTester {
           /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_deconvolution2d_nhwc_qs8(
+        xnn_setup_deconvolution2d_nhwc_qs8_qc8w(
           deconvolution_op,
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
 
-      VerifyQS8(output, output_ref, output_zero_point);
+      VerifyQC8(output, output_ref);
 
       if (use_weights_cache()) {
         xnn_operator_t deconvolution_op2 = nullptr;
@@ -614,15 +639,15 @@ class DeconvolutionOperatorTester {
 
         ASSERT_EQ(
             xnn_status_success,
-            xnn_create_deconvolution2d_nhwc_qs8(
+            xnn_create_deconvolution2d_nhwc_qs8_qc8w(
                 padding_top(), padding_right(), padding_bottom(), padding_left(),
                 kernel_height(), kernel_width(), stride_height(), stride_width(),
                 dilation_height(), dilation_width(), groups(),
                 group_input_channels(), group_output_channels(),
                 input_pixel_stride(), output_pixel_stride(), input_zero_point,
-                1.0f /* input scale */, 1.0f /* kernel scale */, kernel.data(),
+                1.0f /* input scale */, requantization_scales.data(), kernel.data(),
                 has_bias() ? bias.data() : nullptr, output_zero_point,
-                output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+                /*output_scale=*/1.0f, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
                 /*flags=*/0, /*code_cache=*/nullptr, auto_weights_cache.get(), &deconvolution_op2));
 
         // Smart pointer to automatically delete deconvolution_op2.
@@ -630,7 +655,7 @@ class DeconvolutionOperatorTester {
         std::vector<int8_t> output2(output.size(), INT8_C(0xA5));
 
         ASSERT_EQ(xnn_status_success,
-                  xnn_reshape_deconvolution2d_nhwc_qs8(
+                  xnn_reshape_deconvolution2d_nhwc_qs8_qc8w(
                       deconvolution_op2,
                       batch_size(), input_height(), input_width(),
                       adjustment_height(), adjustment_width(),
@@ -638,7 +663,7 @@ class DeconvolutionOperatorTester {
                       /*threadpool=*/nullptr));
 
         ASSERT_EQ(xnn_status_success,
-                  xnn_setup_deconvolution2d_nhwc_qs8(
+                  xnn_setup_deconvolution2d_nhwc_qs8_qc8w(
                       deconvolution_op2,
                       input.data(), output2.data()));
 
@@ -646,15 +671,13 @@ class DeconvolutionOperatorTester {
                   xnn_run_operator(deconvolution_op2, /*threadpool=*/nullptr));
 
         VerifyWeightsCache(internal_weights_cache, old_weights_cache_size);
-        VerifyQS8(output2, output_ref, output_zero_point);
+        VerifyQC8(output2, output_ref);
       }
-
     }
   }
 
-  void VerifyQS8(const std::vector<int8_t> &output,
-                 const std::vector<double> &output_ref,
-                 int8_t output_zero_point) const {
+  void VerifyQC8(const std::vector<int8_t> &output,
+                 const std::vector<double> &output_ref) const {
     for (size_t i = 0; i < batch_size(); i++) {
       for (size_t y = 0; y < output_height(); y++) {
         for (size_t x = 0; x < output_width(); x++) {
@@ -666,7 +689,7 @@ class DeconvolutionOperatorTester {
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
               EXPECT_NEAR(
                   output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
-                  double(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
+                  double(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]),
                   0.9)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
             }
