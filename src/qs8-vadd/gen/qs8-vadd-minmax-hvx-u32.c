@@ -16,7 +16,6 @@
 #include <xnnpack/vbinary.h>
 #include <xnnpack/intrinsics-polyfill.h>
 
-
 void xnn_qs8_vadd_minmax_ukernel__hvx_u32(
     size_t batch,
     const int8_t* input_a,
@@ -33,7 +32,7 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u32(
   const HVX_Vector vbias = Q6_V_vsplat_R(*((int32_t *) &params->hvx.bias));
   const HVX_Vector va_multiplier = Q6_V_vsplat_R(*((int32_t *) &params->hvx.a_multiplier));
   const HVX_Vector vb_multiplier = Q6_V_vsplat_R(*((int32_t *) &params->hvx.b_multiplier));
-  const int32_t vshift = params->hvx.shift;
+  const int32_t shift = params->hvx.shift;
   const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(*((int16_t *) &params->hvx.output_zero_point));
   const HVX_Vector voutput_min = Q6_Vb_vsplat_R(*((int8_t *) &params->hvx.output_min));
   const HVX_Vector voutput_max = Q6_Vb_vsplat_R(*((int8_t *) &params->hvx.output_max));
@@ -49,18 +48,16 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u32(
     HVX_Vector va0_i16_lo = Q6_V_lo_W(Q6_Wh_vunpack_Vb(va0));
     HVX_Vector vb0_i16_lo = Q6_V_lo_W(Q6_Wh_vunpack_Vb(vb0));
 
-    // vacc = vbias + va * va_multiplier + vb * vb_multiplier
-    HVX_Vector va0_mul_e = Q6_Vw_vmpyio_VwVh(va_multiplier, Q6_Vh_vshuffe_VhVh(va0_i16_lo, va0_i16_lo));
-    HVX_Vector vb0_mul_e = Q6_Vw_vmpyio_VwVh(vb_multiplier, Q6_Vh_vshuffe_VhVh(vb0_i16_lo, vb0_i16_lo));
-    HVX_Vector va0_mul_o = Q6_Vw_vmpyio_VwVh(va_multiplier, va0_i16_lo);
-    HVX_Vector vb0_mul_o = Q6_Vw_vmpyio_VwVh(vb_multiplier, vb0_i16_lo);
-    HVX_VectorPair va0_mul = Q6_W_vshuff_VVR(va0_mul_o, va0_mul_e, -4);
-    HVX_VectorPair vb0_mul = Q6_W_vshuff_VVR(vb0_mul_o, vb0_mul_e, -4);
-    HVX_Vector vacc0 = Q6_Vw_vadd_VwVw(vbias, Q6_V_lo_W(va0_mul));
-    vacc0 = Q6_Vw_vadd_VwVw(vacc0, Q6_V_lo_W(vb0_mul));
+    // vacc = va * va_multiplier + vb * vb_multiplier
+    HVX_VectorPair va0_mul_lo = Q6_Vw_vmpyi_VwVh(va_multiplier, va0_i16_lo);
+    HVX_VectorPair vb0_mul_lo = Q6_Vw_vmpyi_VwVh(vb_multiplier, vb0_i16_lo);
+    HVX_Vector vacc0 = Q6_Vw_vadd_VwVw(Q6_V_lo_W(va0_mul_lo), Q6_V_lo_W(vb0_mul_lo));
+
+    // vacc = vbias + vacc
+    vacc0 = Q6_Vw_vadd_VwVw(vbias, vacc0);
 
     // right shift
-    vacc0 = Q6_Vw_vasr_VwR(vacc0, vshift);
+    vacc0 = Q6_Vw_vasr_VwR(vacc0, shift);
 
     // pack: 32 bit to 16 bit
     HVX_Vector vout0 = Q6_Vh_vadd_VhVh(voutput_zero_point, Q6_Vh_vpack_VwVw_sat(vacc0, vacc0));
@@ -79,25 +76,23 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u32(
     do {
       HVX_Vector va = *((HVX_UVector*)input_a);
       HVX_Vector vb = *((HVX_UVector*)input_b);
+      if XNN_LIKELY(batch > (32 * sizeof(int8_t))) {
+        input_a += 32;
+        input_b += 32;
+      }
 
       // unpack: 8 bit to 16 bit
-      HVX_Vector va_i16_lo = Q6_V_lo_W(Q6_Wh_vunpack_Vb(va));
-      HVX_Vector vb_i16_lo = Q6_V_lo_W(Q6_Wh_vunpack_Vb(vb));
+      HVX_Vector va_i16 = Q6_V_lo_W(Q6_Wh_vunpack_Vb(va));
+      HVX_Vector vb_i16 = Q6_V_lo_W(Q6_Wh_vunpack_Vb(vb));
 
-      // vacc = vbias + va * va_multiplier
-      HVX_Vector va_mul_e = Q6_Vw_vmpyio_VwVh(va_multiplier, Q6_Vh_vshuffe_VhVh(va_i16_lo, va_i16_lo));
-      HVX_Vector va_mul_o = Q6_Vw_vmpyio_VwVh(va_multiplier, va_i16_lo);
-      HVX_VectorPair va_mul = Q6_W_vshuff_VVR(va_mul_o, va_mul_e, -4);
-      HVX_Vector vacc = Q6_Vw_vadd_VwVw(vbias, Q6_V_lo_W(va_mul));
-
-      // vacc = vacc + vb * vb_multiplier
-      HVX_Vector vb_mul_e = Q6_Vw_vmpyio_VwVh(vb_multiplier, Q6_Vh_vshuffe_VhVh(vb_i16_lo, vb_i16_lo));
-      HVX_Vector vb_mul_o = Q6_Vw_vmpyio_VwVh(vb_multiplier, vb_i16_lo);
-      HVX_VectorPair vb_mul = Q6_W_vshuff_VVR(vb_mul_o, vb_mul_e, -4);
-      vacc = Q6_Vw_vadd_VwVw(vacc, Q6_V_lo_W(vb_mul));
+      // vacc = vbias + va * va_multiplier + vb * vb_multiplier
+      HVX_Vector vmul_a = Q6_V_lo_W(Q6_Vw_vmpyi_VwVh(va_multiplier, va_i16));
+      HVX_Vector vmul_b = Q6_V_lo_W(Q6_Vw_vmpyi_VwVh(vb_multiplier, vb_i16));
+      HVX_Vector vacc = Q6_Vw_vadd_VwVw(vmul_a, vmul_b);
+      vacc = Q6_Vw_vadd_VwVw(vacc, vbias);
 
       // right shift
-      vacc = Q6_Vw_vasr_VwR(vacc, vshift);
+      vacc = Q6_Vw_vasr_VwR(vacc, shift);
 
       // pack: 32 bit to 16 bit
       HVX_Vector vout = Q6_Vh_vadd_VhVh(voutput_zero_point, Q6_Vh_vpack_VwVw_sat(vacc, vacc));

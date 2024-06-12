@@ -294,4 +294,14 @@ void Q6_V_vstu_variable(void *addr, uint32_t n, HVX_Vector vin)
     ql_not = Q6_Q_or_QQn(ql_not, qr);
     Q6_vmem_QnRIV(ql_not, (HVX_Vector*) addr, vin);
 }
+
+static XNN_INTRINSIC
+HVX_VectorPair Q6_Vw_vmpyi_VwVh(HVX_Vector multiplier, HVX_Vector vin)
+{
+    HVX_Vector mul_e = Q6_Vw_vmpyio_VwVh(multiplier, Q6_Vh_vshuffe_VhVh(vin, vin));
+    HVX_Vector mul_o = Q6_Vw_vmpyio_VwVh(multiplier, vin);
+    
+    return Q6_W_vshuff_VVR(mul_o, mul_e, -4);
+}
+
 #endif  // Hexagon
