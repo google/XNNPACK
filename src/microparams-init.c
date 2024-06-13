@@ -6423,10 +6423,10 @@ size_t xnn_init_qs8_add_minmax_hvx_params(
   assert(shift <= 30);
   assert(shift >= 12);
 
-  const int32_t first_shift = (shift < 16)? (shift & 0xF) : 0xF;
+  const int32_t first_shift = min(shift, 15);
   const int32_t rest_shift = shift - first_shift;
-  assert(first_shift <= 15);
-  assert(rest_shift <=15);
+  assert(first_shift < 16);
+  assert(rest_shift < 16);
    
   // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
   const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));

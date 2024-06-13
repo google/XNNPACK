@@ -101,7 +101,10 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__hvx_u${BATCH_TILE}(
 
     // store output
     $for N in range(0, BATCH_TILE, 128):
-      Q6_V_vstu_variable(ptr_o, ${BATCH_TILE}, vout${int(N/32)});
+      $if N + 128 <= BATCH_TILE:
+        *((HVX_UVector *) ptr_o) = vout${int(N/32)};
+      $else:
+        Q6_V_vstu_variable(ptr_o, ${BATCH_TILE}, vout${int(N/32)});
       ptr_o += ${BATCH_TILE};
   }
   if XNN_UNLIKELY(batch != 0){

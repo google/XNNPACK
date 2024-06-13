@@ -85,7 +85,7 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u128(
     vout0 = Q6_Vb_vmin_VbVb(voutput_max, vout0);
 
     // store output
-    Q6_V_vstu_variable(ptr_o, 128, vout0);
+    *((HVX_UVector *) ptr_o) = vout0;
     ptr_o += 128;
   }
   if XNN_UNLIKELY(batch != 0){
