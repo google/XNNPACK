@@ -11,7 +11,8 @@
 
 #include <xnnpack.h>
 #include <xnnpack/common.h>
-#include <xnnpack/config.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams.h>
 #include <xnnpack/math.h>
 
 

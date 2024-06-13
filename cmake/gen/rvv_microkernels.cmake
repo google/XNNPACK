@@ -89,6 +89,9 @@ SET(ALL_RVV_MICROKERNEL_SRCS
   src/f32-vclamp/gen/f32-vclamp-rvv-u2v.c
   src/f32-vclamp/gen/f32-vclamp-rvv-u4v.c
   src/f32-vclamp/gen/f32-vclamp-rvv-u8v.c
+  src/f32-vcmul/gen/f32-vcmul-rvv-u1v.c
+  src/f32-vcmul/gen/f32-vcmul-rvv-u2v.c
+  src/f32-vcmul/gen/f32-vcmul-rvv-u4v.c
   src/f32-vhswish/gen/f32-vhswish-rvv-u1v.c
   src/f32-vhswish/gen/f32-vhswish-rvv-u2v.c
   src/f32-vhswish/gen/f32-vhswish-rvv-u4v.c

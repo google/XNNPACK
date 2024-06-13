@@ -412,6 +412,211 @@ error:
   return status;
 }
 
+enum xnn_status create_deconvolution2d_nhwc_qs8_qc8w(
+    enum xnn_operator_type operator_type,
+    uint32_t output_padding_top,
+    uint32_t output_padding_right,
+    uint32_t output_padding_bottom,
+    uint32_t output_padding_left,
+    uint32_t kernel_height,
+    uint32_t kernel_width,
+    uint32_t stride_height,
+    uint32_t stride_width,
+    uint32_t dilation_height,
+    uint32_t dilation_width,
+    uint32_t groups,
+    size_t group_input_channels,
+    size_t group_output_channels,
+    size_t input_pixel_stride,
+    size_t output_pixel_stride,
+    int8_t input_zero_point,
+    float input_scale,
+    const float* kernel_scale,
+    const int8_t* kernel,
+    const int32_t* bias,
+    int8_t output_zero_point,
+    float output_scale,
+    int8_t output_min,
+    int8_t output_max,
+    uint32_t flags,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* deconvolution_op_out)
+{
+  if (input_scale <= 0.0f || !isnormal(input_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(operator_type), input_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  float* requantization_scale = xnn_allocate_simd_memory(groups * group_output_channels * sizeof(float));
+  if (requantization_scale == NULL) {
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator packed weights",
+      groups * group_output_channels * sizeof(float),
+      xnn_operator_type_to_string(operator_type));
+    return xnn_status_out_of_memory;
+  }
+  for (size_t output_channel = 0; output_channel < groups * group_output_channels; output_channel++) {
+    requantization_scale[output_channel] = kernel_scale[output_channel];
+    if (requantization_scale[output_channel] >= 256.0f) {
+      xnn_log_error(
+        "failed to create %s operator with %.7g input scale, %.7g kernel scale, and %.7g output scale in output channel #%zu: "
+        "requantization scale %.7g is greater or equal to 256.0",
+        xnn_operator_type_to_string(operator_type),
+        input_scale, kernel_scale[output_channel], output_scale,
+        output_channel, requantization_scale[output_channel]);
+
+      xnn_release_simd_memory(requantization_scale);
+      return xnn_status_unsupported_parameter;
+    }
+  }
+
+  if (output_scale <= 0.0f || !isnormal(output_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g output scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(operator_type), output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_min > output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be less than or equal to upper bound",
+      xnn_operator_type_to_string(operator_type), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc8w_gemm_config();
+  assert(gemm_config != NULL);
+
+  union xnn_qs8_qc8w_conv_minmax_params params;
+  if XNN_LIKELY(gemm_config->init.qs8_qc8w != NULL) {
+    gemm_config->init.qs8_qc8w(&params,
+      output_zero_point, output_min, output_max);
+  }
+  const struct xnn_qs8_packing_params packing_params = {
+    .input_zero_point = input_zero_point,
+  };
+  enum xnn_status status = create_deconvolution2d_nhwc(
+    output_padding_top, output_padding_right, output_padding_bottom, output_padding_left,
+    kernel_height, kernel_width,
+    stride_height, stride_width,
+    dilation_height, dilation_width,
+    groups, group_input_channels, group_output_channels,
+    input_pixel_stride, output_pixel_stride,
+    kernel, bias, flags,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*bias_element_size=*/sizeof(int32_t),
+    (xnn_pack_conv_goki_w_fn) gemm_config->pack_igemm_goki,
+    (xnn_pack_deconv_goki_w_fn) gemm_config->pack_deconv_goki,
+    &packing_params, input_zero_point /* input padding byte */, 0 /* packed weights padding byte */,
+    /*extra_weights_bytes=*/sizeof(float),
+    /*init_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
+    /*scale_params=*/requantization_scale,
+    /*init_kernel_scale_params=*/NULL,
+    /*kernel_scale_params=*/NULL,
+    &params, sizeof(params),
+    /*jit_gemm_params=*/NULL,
+    gemm_config, &gemm_config->minmax,
+    operator_type,
+    /*dynamic_quantization=*/false,
+    /*code_cache=*/code_cache,
+    /*weights_cache=*/weights_cache,
+    deconvolution_op_out);
+
+  xnn_release_simd_memory(requantization_scale);
+  return status;
+}
+
+enum xnn_status xnn_create_deconvolution2d_nhwc_qs8_qc8w(
+    uint32_t output_padding_top,
+    uint32_t output_padding_right,
+    uint32_t output_padding_bottom,
+    uint32_t output_padding_left,
+    uint32_t kernel_height,
+    uint32_t kernel_width,
+    uint32_t stride_height,
+    uint32_t stride_width,
+    uint32_t dilation_height,
+    uint32_t dilation_width,
+    uint32_t groups,
+    size_t group_input_channels,
+    size_t group_output_channels,
+    size_t input_pixel_stride,
+    size_t output_pixel_stride,
+    int8_t input_zero_point,
+    float input_scale,
+    const float* kernel_scale,
+    const int8_t* kernel,
+    const int32_t* bias,
+    int8_t output_zero_point,
+    float output_scale,
+    int8_t output_min,
+    int8_t output_max,
+    uint32_t flags,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* deconvolution_op_out)
+{
+  float* requantization_scale = xnn_allocate_simd_memory(groups * group_output_channels * sizeof(float));
+  if (requantization_scale == NULL) {
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator packed weights",
+      groups * group_output_channels * sizeof(float),
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qs8_qc8w));
+    return xnn_status_out_of_memory;
+  }
+
+  for (size_t output_channel = 0; output_channel < groups * group_output_channels; output_channel++) {
+    requantization_scale[output_channel] = input_scale * kernel_scale[output_channel] / output_scale;
+    if (requantization_scale[output_channel] >= 256.0f) {
+      xnn_log_error(
+        "failed to create %s operator with %.7g input scale, %.7g kernel scale, and %.7g output scale in output channel #%zu: "
+        "requantization scale %.7g is greater or equal to 256.0",
+        xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qs8_qc8w),
+        input_scale, kernel_scale[output_channel], output_scale,
+        output_channel, requantization_scale[output_channel]);
+
+      xnn_release_simd_memory(requantization_scale);
+      return xnn_status_unsupported_parameter;
+    }
+  }
+
+  enum xnn_status status =  create_deconvolution2d_nhwc_qs8_qc8w(
+      xnn_operator_type_deconvolution_nhwc_qs8_qc8w,
+    output_padding_top,
+    output_padding_right,
+    output_padding_bottom,
+    output_padding_left,
+    kernel_height,
+    kernel_width,
+    stride_height,
+    stride_width,
+    dilation_height,
+    dilation_width,
+    groups,
+    group_input_channels,
+    group_output_channels,
+    input_pixel_stride,
+    output_pixel_stride,
+    input_zero_point,
+    input_scale,
+    requantization_scale,
+    kernel,
+    bias,
+    output_zero_point,
+    output_scale,
+    output_min,
+    output_max,
+    flags,
+    code_cache,
+    weights_cache, deconvolution_op_out);
+  xnn_release_simd_memory(requantization_scale);
+  return status;
+}
+
 enum xnn_status xnn_create_deconvolution2d_nhwc_qs8(
     uint32_t output_padding_top,
     uint32_t output_padding_right,
@@ -442,34 +647,6 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qs8(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* deconvolution_op_out)
 {
-  if (input_scale <= 0.0f || !isnormal(input_scale)) {
-    xnn_log_error(
-      "failed to create %s operator with %.7g input scale: scale must be finite, normalized, and positive",
-      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_qs8), input_scale);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (kernel_scale <= 0.0f || !isnormal(kernel_scale)) {
-    xnn_log_error(
-      "failed to create %s operator with %.7g kernel scale: scale must be finite, normalized, and positive",
-      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_qs8), kernel_scale);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (output_scale <= 0.0f || !isnormal(output_scale)) {
-    xnn_log_error(
-      "failed to create %s operator with %.7g output scale: scale must be finite, normalized, and positive",
-      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_qs8), output_scale);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_qs8), output_min, output_max);
-    return xnn_status_invalid_parameter;
-  }
-
   const float requantization_scale = input_scale * kernel_scale / output_scale;
   if (requantization_scale >= 256.0f) {
     xnn_log_error(
@@ -479,7 +656,6 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qs8(
       input_scale, kernel_scale, output_scale, requantization_scale);
     return xnn_status_unsupported_parameter;
   }
-
   float* duplicated_requantization_scale = xnn_allocate_simd_memory(groups * group_output_channels * sizeof(float));
   if (duplicated_requantization_scale == NULL) {
     xnn_log_error(
@@ -492,46 +668,38 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qs8(
     duplicated_requantization_scale[output_channel] = requantization_scale;
   }
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc8w_gemm_config();
-  assert(gemm_config != NULL);
-
-  union xnn_qs8_qc8w_conv_minmax_params params;
-  if XNN_LIKELY(gemm_config->init.qs8_qc8w != NULL) {
-    gemm_config->init.qs8_qc8w(&params,
-      output_zero_point, output_min, output_max);
-  }
-  const struct xnn_qs8_packing_params packing_params = {
-    .input_zero_point = input_zero_point,
-  };
-  enum xnn_status status = create_deconvolution2d_nhwc(
-    output_padding_top, output_padding_right, output_padding_bottom, output_padding_left,
-    kernel_height, kernel_width,
-    stride_height, stride_width,
-    dilation_height, dilation_width,
-    groups, group_input_channels, group_output_channels,
-    input_pixel_stride, output_pixel_stride,
-    kernel, bias, flags,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*bias_element_size=*/sizeof(int32_t),
-    (xnn_pack_conv_goki_w_fn) gemm_config->pack_igemm_goki,
-    (xnn_pack_deconv_goki_w_fn) gemm_config->pack_deconv_goki,
-    &packing_params, input_zero_point /* input padding byte */, 0 /* packed weights padding byte */,
-    /*extra_weights_bytes=*/sizeof(float),
-    /*init_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
-    /*scale_params=*/duplicated_requantization_scale,
-    /*init_kernel_scale_params=*/NULL,
-    /*kernel_scale_params=*/NULL,
-    &params, sizeof(params),
-    /*jit_gemm_params=*/NULL,
-    gemm_config, &gemm_config->minmax,
-    xnn_operator_type_deconvolution_nhwc_qs8,
-    /*dynamic_quantization=*/false,
-    /*code_cache=*/code_cache,
-    /*weights_cache=*/weights_cache,
-    deconvolution_op_out);
-
+  enum xnn_status status = create_deconvolution2d_nhwc_qs8_qc8w(
+      xnn_operator_type_deconvolution_nhwc_qs8,
+    output_padding_top,
+    output_padding_right,
+    output_padding_bottom,
+    output_padding_left,
+    kernel_height,
+    kernel_width,
+    stride_height,
+    stride_width,
+    dilation_height,
+    dilation_width,
+    groups,
+    group_input_channels,
+    group_output_channels,
+    input_pixel_stride,
+    output_pixel_stride,
+    input_zero_point,
+    input_scale,
+    duplicated_requantization_scale,
+    kernel,
+    bias,
+    output_zero_point,
+    output_scale,
+    output_min,
+    output_max,
+    flags,
+    code_cache,
+    weights_cache, deconvolution_op_out
+    );
   xnn_release_simd_memory(duplicated_requantization_scale);
+
   return status;
 }
 
@@ -1568,6 +1736,38 @@ enum xnn_status xnn_reshape_deconvolution2d_nhwc_qs8(
     threadpool);
 }
 
+enum xnn_status xnn_reshape_deconvolution2d_nhwc_qs8_qc8w(
+  xnn_operator_t deconvolution_op,
+  size_t batch_size,
+  size_t input_height,
+  size_t input_width,
+  uint32_t adjustment_height,
+  uint32_t adjustment_width,
+  size_t* output_height_out,
+  size_t* output_width_out,
+  pthreadpool_t threadpool)
+{
+  if (deconvolution_op->type != xnn_operator_type_deconvolution_nhwc_qs8_qc8w) {
+    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_qs8_qc8w),
+      xnn_operator_type_to_string(deconvolution_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  return reshape_deconvolution2d_nhwc(
+    deconvolution_op,
+    batch_size, input_height, input_width,
+    adjustment_height, adjustment_width,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*extra_weights_element_size=*/sizeof(int32_t) + sizeof(float),
+    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*dynamic_quantization=*/false,
+    &deconvolution_op->params.qs8_qc8w_conv_minmax, sizeof(deconvolution_op->params.qs8_qc8w_conv_minmax),
+    output_height_out, output_width_out,
+    threadpool);
+}
+
 enum xnn_status xnn_reshape_deconvolution2d_nhwc_qu8(
   xnn_operator_t deconvolution_op,
   size_t batch_size,
@@ -1818,6 +2018,14 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_qs8(
     int8_t* output)
 {
   return setup_deconvolution2d_nhwc(deconvolution_op, xnn_operator_type_deconvolution_nhwc_qs8, input, /*quantization_params=*/NULL, output);
+}
+
+enum xnn_status xnn_setup_deconvolution2d_nhwc_qs8_qc8w(
+    xnn_operator_t deconvolution_op,
+    const int8_t* input,
+    int8_t* output)
+{
+  return setup_deconvolution2d_nhwc(deconvolution_op, xnn_operator_type_deconvolution_nhwc_qs8_qc8w, input, /*quantization_params=*/NULL, output);
 }
 
 enum xnn_status xnn_setup_deconvolution2d_nhwc_qu8(

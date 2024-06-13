@@ -26,6 +26,11 @@ tools/xngen src/f32-vcmul/wasmsimd.c.in -D BATCH_TILE=8  -o src/f32-vcmul/gen/f3
 tools/xngen src/f32-vcmul/wasmsimd.c.in -D BATCH_TILE=12 -o src/f32-vcmul/gen/f32-vcmul-wasmsimd-u12.c &
 tools/xngen src/f32-vcmul/wasmsimd.c.in -D BATCH_TILE=16 -o src/f32-vcmul/gen/f32-vcmul-wasmsimd-u16.c &
 
+################################ RISC-V Vector ################################
+tools/xngen src/f32-vcmul/rvv.c.in -D LMUL=1 -o src/f32-vcmul/gen/f32-vcmul-rvv-u1v.c &
+tools/xngen src/f32-vcmul/rvv.c.in -D LMUL=2 -o src/f32-vcmul/gen/f32-vcmul-rvv-u2v.c &
+tools/xngen src/f32-vcmul/rvv.c.in -D LMUL=4 -o src/f32-vcmul/gen/f32-vcmul-rvv-u4v.c &
+
 #################################### Scalar ###################################
 tools/xngen src/f32-vcmul/scalar.c.in -D BATCH_TILE=1 -o src/f32-vcmul/gen/f32-vcmul-scalar-u1.c &
 tools/xngen src/f32-vcmul/scalar.c.in -D BATCH_TILE=2 -o src/f32-vcmul/gen/f32-vcmul-scalar-u2.c &

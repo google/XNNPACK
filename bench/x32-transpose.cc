@@ -15,7 +15,7 @@
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
-#include <xnnpack/config.h>
+#include <xnnpack/hardware-config.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/transpose.h>

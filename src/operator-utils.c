@@ -11,7 +11,6 @@
 #include <xnnpack.h>  // For xnn_operator_t.
 #include <xnnpack/allocator.h>
 #include <xnnpack/common.h>  // For XNN_ALLOCATION_ALIGNMENT.
-#include <xnnpack/config.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
 #include <xnnpack/operator-utils.h>

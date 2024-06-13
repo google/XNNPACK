@@ -1,19 +1,6 @@
-name: Build using CMake
+name: Build and Run Tests
 on:
-  push:
-    paths:
-      - '**.S'
-      - '**.c'
-      - '**.cc'
-      - '**.h'
-      - 'BUILD.bazel'
-      - 'build_config/BUILD.bazel'
-      - '**.bzl'
-      - 'CMakeLists.txt'
-      - 'cmake/**'
-      - 'scripts/build-*.sh'
-      - '.github/**/*.yml'
-      - 'WORKSPACE'
+  workflow_call:
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true

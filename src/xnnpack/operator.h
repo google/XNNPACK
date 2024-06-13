@@ -13,7 +13,7 @@
 #include <xnnpack/allocator.h>
 #include <xnnpack/cache.h>
 #include <xnnpack/compute.h>
-#include <xnnpack/config.h>
+#include <xnnpack/microparams.h>
 #include <xnnpack/microkernel-type.h>
 #include <xnnpack/operator-type.h>
 #include <xnnpack/params.h>

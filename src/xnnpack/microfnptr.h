@@ -263,6 +263,19 @@ typedef void (*xnn_qd8_f16_qc4w_gemm_ukernel_fn)(
     const union xnn_f16_qc4w_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params* quantization_params);
 
+typedef void (*xnn_qd8_f16_qb4w_gemm_ukernel_fn)(
+    size_t mr,
+    size_t nr,
+    size_t k,
+    const int8_t* a,
+    size_t a_stride,
+    const void* w,
+    uint16_t* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const union xnn_f16_qb4w_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)],
+    const struct xnn_qd8_quantization_params* quantization_params);
+
 typedef void (*xnn_qd8_f32_qc4w_gemm_ukernel_fn)(
     size_t mr,
     size_t nr,
@@ -274,6 +287,19 @@ typedef void (*xnn_qd8_f32_qc4w_gemm_ukernel_fn)(
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_qc4w_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)],
+    const struct xnn_qd8_quantization_params* quantization_params);
+
+typedef void (*xnn_qd8_f32_qb4w_gemm_ukernel_fn)(
+    size_t mr,
+    size_t nr,
+    size_t k,
+    const int8_t* a,
+    size_t a_stride,
+    const void* w,
+    float* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const union xnn_f32_qb4w_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params* quantization_params);
 
 typedef void (*xnn_qs8_qc8w_gemm_minmax_ukernel_fn)(
@@ -2629,11 +2655,25 @@ typedef size_t (*xnn_init_f16_qc4w_minmax_params_fn)(
   uint16_t max,
   uint8_t kernel_zero_point);
 
+typedef size_t (*xnn_init_f16_qb4w_minmax_params_fn)(
+  union xnn_f16_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t min,
+  uint16_t max,
+  uint8_t kernel_zero_point,
+  size_t blocksize);
+
 typedef size_t (*xnn_init_f32_qc4w_minmax_params_fn)(
   union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float min,
   float max,
   uint8_t kernel_zero_point);
+
+typedef size_t (*xnn_init_f32_qb4w_minmax_params_fn)(
+  union xnn_f32_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float min,
+  float max,
+  uint8_t kernel_zero_point,
+  size_t blocksize);
 
 typedef size_t (*xnn_init_s8_minmax_params_fn)(
   union xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2796,3 +2836,66 @@ typedef void (*xnn_indirection_init_resize_bilinear2d_hwc_fn)(
   void* packed_weights,
   bool align_corners,
   bool tensorflow_legacy);
+
+struct xnn_generated_code_chunk {
+  size_t offset;
+  size_t offset_end;
+};
+
+struct xnn_hmp_dqgemm_ukernel {
+  xnn_dqgemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
+#if XNN_PLATFORM_JIT
+  struct xnn_generated_code_chunk generated_code_chunk[XNN_MAX_UARCH_TYPES];
+#endif  // XNN_PLATFORM_JIT
+};
+
+struct xnn_hmp_gemm_ukernel {
+  xnn_gemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
+#if XNN_PLATFORM_JIT
+  struct xnn_generated_code_chunk generated_code_chunk[XNN_MAX_UARCH_TYPES];
+#endif  // XNN_PLATFORM_JIT
+};
+
+struct xnn_hmp_dqigemm_ukernel {
+  xnn_dqigemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
+#if XNN_PLATFORM_JIT
+  struct xnn_generated_code_chunk generated_code_chunk[XNN_MAX_UARCH_TYPES];
+#endif  // XNN_PLATFORM_JIT
+};
+
+struct xnn_hmp_igemm_ukernel {
+  xnn_igemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
+#if XNN_PLATFORM_JIT
+  struct xnn_generated_code_chunk generated_code_chunk[XNN_MAX_UARCH_TYPES];
+#endif  // XNN_PLATFORM_JIT
+};
+
+// Largest GEMM/IGEMM MR used in init.c is 16 (x86 AVX512AMX).
+// Largest GEMM/IGEMM MR is 8 in e2e benchmarks.
+#define XNN_MAX_MR 16
+
+struct gemm_fused_ukernels {
+  union {
+    struct xnn_hmp_gemm_ukernel gemm[XNN_MAX_MR];
+    struct xnn_hmp_dqgemm_ukernel dqgemm[XNN_MAX_MR];
+  };
+  union {
+    struct xnn_hmp_igemm_ukernel igemm[XNN_MAX_MR];
+    struct xnn_hmp_dqigemm_ukernel dqigemm[XNN_MAX_MR];
+  };
+};
+
+#if XNN_PLATFORM_JIT
+struct xnn_hmp_gemm_codegen {
+  xnn_jit_gemm_code_generator_fn function[XNN_MAX_UARCH_TYPES];
+};
+
+struct xnn_hmp_igemm_codegen {
+  xnn_jit_igemm_code_generator_fn function[XNN_MAX_UARCH_TYPES];
+};
+
+struct gemm_codegens {
+  struct xnn_hmp_gemm_codegen gemm[XNN_MAX_MR];
+  struct xnn_hmp_igemm_codegen igemm[XNN_MAX_MR];
+};
+#endif  // XNN_PLATFORM_JIT

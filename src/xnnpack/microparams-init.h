@@ -121,7 +121,7 @@ XNN_INTERNAL void xnn_init_qs8_qc8w_scale_fp32_params(
   const float scale[XNN_MIN_ELEMENTS(1)],
   void* packed_w);
 
-XNN_INTERNAL void xnn_init_qs8_qb8w_scale_fp32_params(
+XNN_INTERNAL void xnn_init_blockwise_scale_fp32_params(
   size_t channels,
   size_t channels_tile,
   size_t channels_subtile,
@@ -133,7 +133,6 @@ XNN_INTERNAL void xnn_init_qs8_qb8w_scale_fp32_params(
   size_t stride_offset,
   const float scale[XNN_MIN_ELEMENTS(1)],
   void* packed_w);
-
 
 XNN_INTERNAL void xnn_init_qs8_to_qs8_qc8w_scale_fp32_params(
   size_t channels,
@@ -168,6 +167,7 @@ DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_scalar
   DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_ssse3_params)
   DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_sse4_params)
   DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_avx2_params)
+  DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_avx512_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_wasmsimd_params)
@@ -438,13 +438,29 @@ DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(xnn_init_f32_minmax_scalar_params)
     uint16_t output_max,                                          \
     uint8_t kernel_zero_point);
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_scalar_params)
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_scalar_params)
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_avx_params)
   DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_avxvnni_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#define DECLARE_INIT_F16_QB4W_MINMAX_PARAMS_FUNCTION(fn_name)     \
+  XNN_INTERNAL size_t fn_name(                                    \
+    union xnn_f16_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)], \
+    uint16_t output_min,                                          \
+    uint16_t output_max,                                          \
+    uint8_t kernel_zero_point,                                    \
+    size_t blocksize);
+
+DECLARE_INIT_F16_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qb4w_minmax_scalar_params)
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_F16_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qb4w_minmax_avx_params)
+  DECLARE_INIT_F16_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qb4w_minmax_avxvnni_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 
 #define DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                    \
@@ -465,6 +481,25 @@ DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_scalar_par
   DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_wasmsimd_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#define DECLARE_INIT_F32_QB4W_MINMAX_PARAMS_FUNCTION(fn_name)     \
+  XNN_INTERNAL size_t fn_name(                                    \
+    union xnn_f32_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)], \
+    float output_min,                                             \
+    float output_max,                                             \
+    uint8_t kernel_zero_point,                                    \
+    size_t blocksize);
+
+DECLARE_INIT_F32_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qb4w_minmax_scalar_params)
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_F32_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qb4w_minmax_sse_params)
+  DECLARE_INIT_F32_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qb4w_minmax_avx_params)
+  DECLARE_INIT_F32_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qb4w_minmax_avx512_params)
+  DECLARE_INIT_F32_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qb4w_minmax_avx512vnni_params)
+  DECLARE_INIT_F32_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qb4w_minmax_avxvnni_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  DECLARE_INIT_F32_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qb4w_minmax_wasmsimd_params)
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #define DECLARE_INIT_F16_HSWISH_PARAMS_FUNCTION(fn_name) \
   XNN_INTERNAL size_t fn_name(                           \
