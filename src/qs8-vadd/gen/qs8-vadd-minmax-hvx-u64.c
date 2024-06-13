@@ -45,40 +45,41 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u64(
     input_b += 64;
 
     // unpack: 8 bit to 16 bit
-    HVX_Vector va0_i16_lo = Q6_V_lo_W(Q6_Wh_vunpack_Vb(va0));
-    HVX_Vector vb0_i16_lo = Q6_V_lo_W(Q6_Wh_vunpack_Vb(vb0));
+    HVX_VectorPair va0_i16 = Q6_Wh_vsxt_Vb(va0);
+    HVX_Vector va0_i16_even = Q6_V_lo_W(va0_i16);
+    HVX_Vector va0_i16_odd = Q6_V_hi_W(va0_i16);
 
-    // vacc = va * va_multiplier + vb * vb_multiplier
-    HVX_VectorPair va0_mul_lo = Q6_Vw_vmpyi_VwVh(va_multiplier, va0_i16_lo);
-    HVX_VectorPair vb0_mul_lo = Q6_Vw_vmpyi_VwVh(vb_multiplier, vb0_i16_lo);
-    HVX_Vector vacc0 = Q6_Vw_vadd_VwVw(Q6_V_lo_W(va0_mul_lo), Q6_V_lo_W(vb0_mul_lo));
-    HVX_Vector vacc1 = Q6_Vw_vadd_VwVw(Q6_V_hi_W(va0_mul_lo), Q6_V_hi_W(vb0_mul_lo));    
+    HVX_VectorPair vb0_i16 = Q6_Wh_vsxt_Vb(vb0);
+    HVX_Vector vb0_i16_even = Q6_V_lo_W(vb0_i16);
+    HVX_Vector vb0_i16_odd = Q6_V_hi_W(vb0_i16);
+
+    // vacc = va * va_multiplier + vb * vb_multiplier with expanding to 32 bit
+    HVX_VectorPair va0_mul_even = Q6_Vw_vmpyi_VwVh(va_multiplier, va0_i16_even);
+    HVX_VectorPair va0_mul_odd = Q6_Vw_vmpyi_VwVh(va_multiplier, va0_i16_odd);
+    HVX_VectorPair vb0_mul_even = Q6_Vw_vmpyi_VwVh(vb_multiplier, vb0_i16_even);
+    HVX_VectorPair vb0_mul_odd = Q6_Vw_vmpyi_VwVh(vb_multiplier, vb0_i16_odd);
+
+    HVX_Vector vacc0_even = Q6_Vw_vadd_VwVw(Q6_V_lo_W(va0_mul_even), Q6_V_lo_W(vb0_mul_even));
+    HVX_Vector vacc0_odd = Q6_Vw_vadd_VwVw(Q6_V_lo_W(va0_mul_odd), Q6_V_lo_W(vb0_mul_odd));
 
     // vacc = vbias + vacc
-    vacc0 = Q6_Vw_vadd_VwVw(vbias, vacc0);
-    vacc1 = Q6_Vw_vadd_VwVw(vbias, vacc1);
+    vacc0_even = Q6_Vw_vadd_VwVw(vbias, vacc0_even);
+    vacc0_odd = Q6_Vw_vadd_VwVw(vbias, vacc0_odd);
 
-    // right shift
-    vacc0 = Q6_Vw_vasr_VwR(vacc0, shift);
-    vacc1 = Q6_Vw_vasr_VwR(vacc1, shift);
-
-    // pack: 32 bit to 16 bit
-    HVX_Vector vout0 = Q6_Vh_vadd_VhVh(voutput_zero_point, Q6_Vh_vpack_VwVw_sat(vacc0, vacc0));
-    HVX_Vector vout1 = Q6_Vh_vadd_VhVh(voutput_zero_point, Q6_Vh_vpack_VwVw_sat(vacc1, vacc1));
+    // right shift, lower to 16 bit, add output_zero_point
+    HVX_Vector vacc0 = Q6_Vh_vasr_VwVwR_sat(Q6_Vw_vasr_VwR(vacc0_odd, shift), Q6_Vw_vasr_VwR(vacc0_even, shift), 0);
+    vacc0 = Q6_Vh_vadd_VhVh(voutput_zero_point, vacc0);
 
     // pack: 16 bit to 8 bit
-    vout0 = Q6_Vb_vpack_VhVh_sat(vout0, vout0);
-    vout1 = Q6_Vb_vpack_VhVh_sat(vout1, vout1);
+    HVX_Vector vout0 = Q6_Vb_vpack_VhVh_sat(vacc0, vacc0);
 
     // minmax
     vout0 = Q6_Vb_vmax_VbVb(voutput_min, vout0);
     vout0 = Q6_Vb_vmin_VbVb(voutput_max, vout0);
-    vout1 = Q6_Vb_vmax_VbVb(voutput_min, vout1);
-    vout1 = Q6_Vb_vmin_VbVb(voutput_max, vout1);
 
     // store output
-    Q6_V_vstu_variable(ptr_o, 32, vout0); ptr_o += 32;
-    Q6_V_vstu_variable(ptr_o, 32, vout1); ptr_o += 32;
+    Q6_V_vstu_variable(ptr_o, 64, vout0);
+    ptr_o += 64;
   }
   if XNN_UNLIKELY(batch != 0){
     do {
