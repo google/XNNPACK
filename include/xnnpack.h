@@ -1690,6 +1690,19 @@ enum xnn_status xnn_define_leaky_relu(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Log Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
+///                    shape must match the shape of the input tensor.
+/// @param flags - binary features of the Log Node. No supported flags are currently defined.
+enum xnn_status xnn_define_log(
+  xnn_subgraph_t subgraph,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a Negate Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
@@ -4743,6 +4756,23 @@ enum xnn_status xnn_create_leaky_relu_nc_qu8(
   float output_scale,
   uint32_t flags,
   xnn_operator_t* leaky_relu_op_out);
+
+enum xnn_status xnn_create_log_nc_f32(
+  uint32_t flags,
+  xnn_operator_t* log_op_out);
+
+enum xnn_status xnn_reshape_log_nc_f32(
+  xnn_operator_t log_op,
+  size_t batch_size,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_log_nc_f32(
+  xnn_operator_t log_op,
+  const float* input,
+  float* output);
 
 enum xnn_status xnn_reshape_leaky_relu_nc_qu8(
   xnn_operator_t leaky_relu_op,
