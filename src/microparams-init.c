@@ -6423,6 +6423,11 @@ size_t xnn_init_qs8_add_minmax_hvx_params(
   assert(shift <= 30);
   assert(shift >= 12);
 
+  const int32_t first_shift = (shift < 16)? (shift & 0xF) : 0xF;
+  const int32_t rest_shift = shift - first_shift;
+  assert(first_shift <= 15);
+  assert(rest_shift <=15);
+   
   // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
   const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
   const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
@@ -6439,7 +6444,8 @@ size_t xnn_init_qs8_add_minmax_hvx_params(
   params->hvx.bias = bias;
   params->hvx.a_multiplier = a_multiplier;
   params->hvx.b_multiplier = b_multiplier;
-  params->hvx.shift = shift;
+  params->hvx.first_shift = first_shift;
+  params->hvx.rest_shift = rest_shift;
   params->hvx.output_zero_point = (int16_t) output_zero_point;
   params->hvx.output_min = (int8_t) output_min;
   params->hvx.output_max = (int8_t) output_max;

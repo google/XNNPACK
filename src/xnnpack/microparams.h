@@ -821,7 +821,8 @@ union xnn_qs8_add_minmax_params {
     int32_t bias;
     int32_t a_multiplier;
     int32_t b_multiplier;
-    uint32_t shift;
+    uint32_t first_shift;
+    uint32_t rest_shift;
     int16_t output_zero_point;
     int8_t output_min;
     int8_t output_max;
