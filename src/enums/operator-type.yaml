@@ -115,6 +115,8 @@
   string: "Deconvolution (NHWC, QD8, F32, QC8W)"
 - name: xnn_operator_type_deconvolution_nhwc_qs8
   string: "Deconvolution (NHWC, QS8)"
+- name: xnn_operator_type_deconvolution_nhwc_qs8_qc8w
+  string: "Deconvolution (NC, QS8, QC8W)"
 - name: xnn_operator_type_deconvolution_nhwc_qu8
   string: "Deconvolution (NHWC, QU8)"
 - name: xnn_operator_type_depth_to_space_nchw2nhwc_x16

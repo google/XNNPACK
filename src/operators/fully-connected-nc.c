@@ -1148,7 +1148,7 @@ enum xnn_status xnn_create_fully_connected_nc_qs8_qc8w(
       xnn_log_error(
         "failed to create %s operator with %.7g input scale, %.7g kernel scale, and %.7g output scale in output channel #%zu: "
         "requantization scale %.7g is greater or equal to 256.0",
-        xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qc8),
+        xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qs8_qc8w),
         input_scale, kernel_scale[output_channel], output_scale,
         output_channel, requantization_scale[output_channel]);
 
