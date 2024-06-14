@@ -168,6 +168,11 @@ static void init_hardware_config(void) {
       __asm__(".word 0xC22022F3"  /* CSRR t0, vlenb */ : "=r" (vlenb));
       hardware_config.vlenb = vlenb;
       xnn_log_info("RISC-V VLENB: %" PRIu32, vlenb);
+
+      // Assume a uarch with long vectors supports fp16 as well
+      if (vlenb >= 64) {
+        hardware_config.use_riscv_vector_fp16_arith = true;
+      }
     }
   #endif
 
