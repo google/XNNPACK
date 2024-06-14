@@ -138,6 +138,14 @@ xnnpack_cc_library(
     deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library(),
 )
 
+xnnpack_cc_library(
+    name = "packq_microkernel_tester",
+    testonly = True,
+    srcs = ["packq-microkernel-tester.cc"],
+    hdrs = ["packq-microkernel-tester.h"],
+    deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library(),
+)
+
 ######################### Unit tests for micro-kernels #########################
 
 [xnnpack_unit_test(
@@ -1309,6 +1317,16 @@ xnnpack_unit_test(
         "x32-packb.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "x8_packq_test",
+    srcs = [
+        "x8-packq.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":packq_microkernel_tester",
+    ],
 )
 
 [xnnpack_unit_test(

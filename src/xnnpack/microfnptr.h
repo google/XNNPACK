@@ -1378,6 +1378,22 @@ typedef void (*xnn_x32_zerob_gemm_ukernel_fn)(
     size_t channel_subtile_stride,
     const union xnn_x32_packb_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+// PACKQ: PACK and Quantize (weights) the left-hand operator for GEMM matrix
+// multiplication.
+
+typedef void (*xnn_x8_packq_f32qp8_ukernel_fn)(
+    size_t m,   // Number of rows to pack.
+    size_t k,   // Number of columns/channels per row.
+    size_t mr,  // Number of rows to interleave in the same output row.
+    size_t kr,  // Number of columns/channels loaded per step in the matmul
+                // microkernel.
+    size_t sr,  // Number of `kr` splits.
+    size_t m_idx_start,         // Starting index in `lhs_packed`.
+    const float* XNN_RESTRICT lhs,  // Left-hand operator to pack.
+    size_t lhs_stride,          // Stride in bytes between the rows of `lhs`.
+    void* XNN_RESTRICT lhs_packed   // The quantized and packed output.
+);
+
 // PACKW: PACK W (weights) for GEMM matrix multiplication
 // Weights in GOI layout: Groups, Output channels, Input channels.
 

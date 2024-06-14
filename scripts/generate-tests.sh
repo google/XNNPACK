@@ -7,6 +7,9 @@
 ### Tests for packing micro-kernels
 tools/generate-pack-test.py --spec test/x32-packx.yaml --output test/x32-packx.cc &
 
+### Tests for Pack quantized micro-kernels
+tools/generate-packq-test.py --spec test/x8-packq.yaml --output test/x8-packq.cc --output-bench bench/x8-packq.cc &
+
 ### Tests for Pack Weights micro-kernels
 tools/generate-packw-test.py --spec test/x8-packw.yaml --output test/x8-packw.cc --output-bench bench/x8-packw.cc &
 tools/generate-packw-test.py --spec test/x16-packw.yaml --output test/x16-packw.cc --output-bench bench/x16-packw.cc &

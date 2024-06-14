@@ -20,6 +20,7 @@ load(
 
 MICROKERNEL_BENCHMARK_DEPS = [
     ":bench_utils",
+    "@FP16",
     "//:aligned_allocator",
     "//:test_microkernels",
     "//:common",
@@ -27,12 +28,11 @@ MICROKERNEL_BENCHMARK_DEPS = [
     "//:hardware_config",
     "//:jit",
     "//:microkernels_h",
+    "//:microparams_init",
+    "//:microparams",
     "//:packing",
     "//:params",
-    "//:microparams",
-    "//:microparams_init",
     "//:xnnpack_h",
-    "@FP16",
 ]
 
 OPERATOR_BENCHMARK_DEPS = [
@@ -958,6 +958,31 @@ xnnpack_benchmark(
         "x8-lut.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_cc_library(
+    name = "packq_benchmark",
+    srcs = [
+        "bgemm.h",
+        "packq-benchmark.cc",
+    ],
+    hdrs = ["packq-benchmark.h"],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "@com_google_benchmark//:benchmark",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "x8_packq_bench",
+    srcs = [
+        "bgemm.h",
+        "x8-packq.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":packq_benchmark",
+        "//:allocator",
+        "//:math",
+    ],
 )
 
 xnnpack_benchmark(

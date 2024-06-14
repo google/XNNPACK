@@ -1,0 +1,12 @@
+# Copyright 2024 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+
+# Scalar
+- name: xnn_x8_packq_f32qp8_ukernel__scalar_u1
+
+# Aarch64 NEON
+- name: xnn_x8_packq_f32qp8_ukernel__aarch64_neon_u2
+  cpp-check: XNN_ENABLE_KLEIDIAI

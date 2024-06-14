@@ -1061,6 +1061,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x8-lut/gen/x8-lut-scalar-u4.c
   src/x8-lut/gen/x8-lut-scalar-u8.c
   src/x8-lut/gen/x8-lut-scalar-u16.c
+  src/x8-packq/x8-packq-scalar-f32qp8-u1.c
   src/x8-packw/gen/x8-packw-x2-gemm-goi-scalar-int-u2.c
   src/x8-packw/gen/x8-packw-x2-gemm-goi-scalar-int-u4.c
   src/x8-packw/gen/x8-packw-x4-gemm-goi-scalar-int-u2.c

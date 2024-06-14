@@ -7,6 +7,7 @@
 import argparse
 from functools import cmp_to_key
 import io
+import itertools
 import os
 import re
 import sys
@@ -126,11 +127,29 @@ AMALGAMATION_HEADER = """\
 
 """
 
+UNWANTED_INCLUDES = (
+    'arm_acle.h',
+    'arm_fp16.h',
+    'arm_neon.h',
+    'emmintrin.h',
+    'immintrin.h',
+    'nmmintrin.h',
+    'smmintrin.h',
+    'tmmintrin.h',
+    'xmmintrin.h',
+    'riscv_vector.h',
+    'wasm_simd128.h',
+)
 
 parser = argparse.ArgumentParser(
-  description='Utility for re-generating microkernel lists')
-parser.add_argument('-a', '--amalgamate', action='store_true',
-                    help='Amalgamate production microkernels')
+    description='Utility for re-generating microkernel lists'
+)
+parser.add_argument(
+    '-a',
+    '--amalgamate',
+    action='store_true',
+    help='Amalgamate production microkernels',
+)
 
 
 def human_sort_key(text):
@@ -141,9 +160,14 @@ def human_sort_key(text):
   ]
 
 
+def _discard(l, val):
+  if val in l:
+    l.remove(val)
+
+
 def amalgamate_microkernel_sources(source_paths, include_header):
   amalgam_lines = list()
-  amalgam_includes = set()
+  amalgam_includes = []
   for filepath in sorted(source_paths):
     with open(filepath, 'r', encoding='utf-8') as file:
       source_lines = file.read().splitlines()
@@ -157,7 +181,8 @@ def amalgamate_microkernel_sources(source_paths, include_header):
           continue
       elif line.lstrip().startswith('#'):
         if not consumed_includes:
-          amalgam_includes.add(line)
+          if line not in amalgam_includes:
+            amalgam_includes.append(line)
           continue
         consumed_license = True
       elif not line:
@@ -173,29 +198,29 @@ def amalgamate_microkernel_sources(source_paths, include_header):
     amalgam_lines.append('')
 
   # Multi-line sequence for XOP intrinsics, which don't have a standardized header
-  amalgam_includes.discard('#ifdef _MSC_VER')
-  amalgam_includes.discard('  #include <intrin.h>')
-  amalgam_includes.discard('#else')
-  amalgam_includes.discard('  #include <x86intrin.h>')
-  amalgam_includes.discard('#endif')
+  _discard(amalgam_includes, '#ifdef _MSC_VER')
+  _discard(amalgam_includes, '  #include <intrin.h>')
+  _discard(amalgam_includes, '#else')
+  _discard(amalgam_includes, '  #include <x86intrin.h>')
+  _discard(amalgam_includes, '#endif')
 
   # Single-line sequences for intrinsics with a standardized header
-  amalgam_includes.discard('#include <arm_acle.h>')
-  amalgam_includes.discard('#include <arm_fp16.h>')
-  amalgam_includes.discard('#include <arm_neon.h>')
-  amalgam_includes.discard('#include <emmintrin.h>')
-  amalgam_includes.discard('#include <immintrin.h>')
-  amalgam_includes.discard('#include <nmmintrin.h>')
-  amalgam_includes.discard('#include <smmintrin.h>')
-  amalgam_includes.discard('#include <tmmintrin.h>')
-  amalgam_includes.discard('#include <xmmintrin.h>')
-  amalgam_includes.discard('#include <riscv_vector.h>')
-  amalgam_includes.discard('#include <wasm_simd128.h>')
+  for filename in UNWANTED_INCLUDES:
+    _discard(amalgam_includes, f'#include <{filename}>')
 
   amalgam_text = AMALGAMATION_HEADER
 
-  amalgam_text += "\n".join(sorted(inc for inc in amalgam_includes if
-                                   not inc.startswith('#include <xnnpack/')))
+  amalgam_text += '\n'.join(
+      '\n'.join(sorted(g))
+      for _, g in itertools.groupby(
+          [
+              inc
+              for inc in amalgam_includes
+              if not inc.startswith('#include <xnnpack/')
+          ],
+          lambda x: True if x.startswith('#include ') else x,
+      )
+  )
   if include_header:
     if include_header == 'xopintrin.h':
       amalgam_text += '\n\n'
@@ -208,15 +233,22 @@ def amalgamate_microkernel_sources(source_paths, include_header):
       amalgam_text += '\n\n#include <%s>\n\n' % include_header
   else:
     amalgam_text += '\n\n'
-  amalgam_text += '\n'.join(sorted(inc for inc in amalgam_includes if
-                                   inc.startswith('#include <xnnpack/')))
+  amalgam_text += '\n'.join(
+      sorted(
+          inc
+          for inc in amalgam_includes
+          if inc.startswith('#include <xnnpack/')
+      )
+  )
   amalgam_text += '\n\n\n'
   amalgam_text += '\n'.join(amalgam_lines)
 
   return amalgam_text
 
+
 def make_variable_name(prefix, key, suffix):
   return '_'.join(token for token in [prefix, key.upper(), suffix] if token)
+
 
 def write_grouped_microkernels_bzl(file, key, microkernels, prefix, suffix):
   if key not in microkernels:
@@ -228,6 +260,7 @@ def write_grouped_microkernels_bzl(file, key, microkernels, prefix, suffix):
   file.write(']\n')
   return [variable_name]
 
+
 def write_grouped_microkernels_cmake(file, key, microkernels, prefix, suffix):
   if key not in microkernels:
     return
@@ -237,21 +270,22 @@ def write_grouped_microkernels_cmake(file, key, microkernels, prefix, suffix):
     file.write(f'\n  {microkernel}')
   file.write(')\n')
 
+
 def main(args):
   options = parser.parse_args(args)
   root_dir = os.path.normpath(os.path.join(TOOLS_DIR, '..'))
   src_dir = os.path.join(root_dir, 'src')
   configs_dir = os.path.join(src_dir, 'configs')
   ignore_roots = {
-    src_dir,
-    os.path.join(src_dir, 'amalgam', 'gen'),
-    os.path.join(src_dir, 'configs'),
-    os.path.join(src_dir, 'enums'),
-    os.path.join(src_dir, 'jit'),
-    os.path.join(src_dir, 'operators'),
-    os.path.join(src_dir, 'subgraph'),
-    os.path.join(src_dir, 'tables'),
-    os.path.join(src_dir, 'xnnpack'),
+      src_dir,
+      os.path.join(src_dir, 'amalgam', 'gen'),
+      os.path.join(src_dir, 'configs'),
+      os.path.join(src_dir, 'enums'),
+      os.path.join(src_dir, 'jit'),
+      os.path.join(src_dir, 'operators'),
+      os.path.join(src_dir, 'subgraph'),
+      os.path.join(src_dir, 'tables'),
+      os.path.join(src_dir, 'xnnpack'),
   }
   c_microkernels_per_isa = {isa: [] for isa in ISA_LIST if isa not in ISA_MAP}
   c_microkernels_per_isa['neon_aarch64'] = list()
@@ -293,13 +327,23 @@ def main(args):
               if ext == '.cc':
                 # In generators it is normal to have multiple implementations in the same file.
                 # We need to filter out non-generators though.
-                microkernels = sorted(filter(lambda fn: fn.startswith('xnn_generate_'), microkernels))
-                if not microkernels and subdir not in VERIFICATION_IGNORE_SUBDIRS:
+                microkernels = sorted(
+                    filter(
+                        lambda fn: fn.startswith('xnn_generate_'), microkernels
+                    )
+                )
+                if (
+                    not microkernels
+                    and subdir not in VERIFICATION_IGNORE_SUBDIRS
+                ):
                   print('No microkernel generator found in %s' % filepath)
 
                 for microkernel in microkernels:
                   if microkernel in microkernel_name_to_filename:
-                    print('Duplicate microkernel generator definition: %s and %s' % (microkernel_name_to_filename[microkernel], filepath))
+                    print(
+                        'Duplicate microkernel generator definition: %s and %s'
+                        % (microkernel_name_to_filename[microkernel], filepath)
+                    )
                   else:
                     microkernel_name_to_filename[microkernel] = filepath
               else:
@@ -345,7 +389,10 @@ def main(args):
             else:
               microkernel = microkernels[0]
               if microkernel in microkernel_name_to_filename:
-                print('Duplicate microkernel definition: %s and %s' % (microkernel_name_to_filename[microkernel], filepath))
+                print(
+                    'Duplicate microkernel definition: %s and %s'
+                    % (microkernel_name_to_filename[microkernel], filepath)
+                )
               else:
                 microkernel_name_to_filename[microkernel] = filepath
 
@@ -388,8 +435,10 @@ Auto-generated file. Do not edit!
 """
 
 ''')
-    keys = set(c_microkernels_per_isa.keys()).union(asm_microkernels_per_arch.keys(), jit_microkernels_per_arch.keys())
-    keys = sorted(keys, key=lambda key: key + "_microkernels.bzl")
+    keys = set(c_microkernels_per_isa.keys()).union(
+        asm_microkernels_per_arch.keys(), jit_microkernels_per_arch.keys()
+    )
+    keys = sorted(keys, key=lambda key: key + '_microkernels.bzl')
     exports = ['\n']
     for key in keys:
       arch_microkernels_bzl_filename = key + '_microkernels.bzl'
@@ -402,18 +451,44 @@ Auto-generated file. Do not edit!
   Generator: tools/update-microkernels.py
 """
 ''')
-        vars = write_grouped_microkernels_bzl(arch_microkernels_bzl, key, c_microkernels_per_isa, 'ALL', 'MICROKERNEL_SRCS')
-        vars = vars + write_grouped_microkernels_bzl(arch_microkernels_bzl, key, asm_microkernels_per_arch, '', 'ASM_MICROKERNEL_SRCS')
-        vars = vars + write_grouped_microkernels_bzl(arch_microkernels_bzl, key, jit_microkernels_per_arch, '', 'JIT_MICROKERNEL_SRCS')
+        vars = write_grouped_microkernels_bzl(
+            arch_microkernels_bzl,
+            key,
+            c_microkernels_per_isa,
+            'ALL',
+            'MICROKERNEL_SRCS',
+        )
+        vars = vars + write_grouped_microkernels_bzl(
+            arch_microkernels_bzl,
+            key,
+            asm_microkernels_per_arch,
+            '',
+            'ASM_MICROKERNEL_SRCS',
+        )
+        vars = vars + write_grouped_microkernels_bzl(
+            arch_microkernels_bzl,
+            key,
+            jit_microkernels_per_arch,
+            '',
+            'JIT_MICROKERNEL_SRCS',
+        )
         arch_microkernels_bzl.seek(0)
-        xnncommon.overwrite_if_changed(os.path.join(root_dir, 'gen', arch_microkernels_bzl_filename), arch_microkernels_bzl.read())
+        xnncommon.overwrite_if_changed(
+            os.path.join(root_dir, 'gen', arch_microkernels_bzl_filename),
+            arch_microkernels_bzl.read(),
+        )
         imports = ', '.join(f'_{var} = "{var}"' for var in vars)
-        microkernels_bzl.write(f'load("{arch_microkernels_bzl_filename}", {imports})\n')
+        microkernels_bzl.write(
+            f'load("{arch_microkernels_bzl_filename}", {imports})\n'
+        )
         for var in vars:
           exports.append(f'{var} = _{var}\n')
     microkernels_bzl.write(''.join(exports))
     microkernels_bzl.seek(0)
-    xnncommon.overwrite_if_changed(os.path.join(root_dir, 'gen', 'microkernels.bzl'), microkernels_bzl.read())
+    xnncommon.overwrite_if_changed(
+        os.path.join(root_dir, 'gen', 'microkernels.bzl'),
+        microkernels_bzl.read(),
+    )
 
   with io.StringIO() as microkernels_cmake:
     microkernels_cmake.write("""\
@@ -428,7 +503,11 @@ Auto-generated file. Do not edit!
 #   Generator: tools/update-microkernels.py
 
 """)
-    keys = sorted(set(c_microkernels_per_isa.keys()).union(asm_microkernels_per_arch.keys(), jit_microkernels_per_arch.keys()))
+    keys = sorted(
+        set(c_microkernels_per_isa.keys()).union(
+            asm_microkernels_per_arch.keys(), jit_microkernels_per_arch.keys()
+        )
+    )
     for key in keys:
       arch_microkernels_cmake_filename = key + '_microkernels.cmake'
       with io.StringIO() as arch_microkernels_cmake:
@@ -444,25 +523,57 @@ Auto-generated file. Do not edit!
 #   Generator: tools/update-microkernels.py
 
 """)
-        write_grouped_microkernels_cmake(arch_microkernels_cmake, key, c_microkernels_per_isa, 'ALL', 'MICROKERNEL_SRCS')
-        write_grouped_microkernels_cmake(arch_microkernels_cmake, key, asm_microkernels_per_arch, '', 'ASM_MICROKERNEL_SRCS')
-        write_grouped_microkernels_cmake(arch_microkernels_cmake, key, jit_microkernels_per_arch, '', 'JIT_MICROKERNEL_SRCS')
+        write_grouped_microkernels_cmake(
+            arch_microkernels_cmake,
+            key,
+            c_microkernels_per_isa,
+            'ALL',
+            'MICROKERNEL_SRCS',
+        )
+        write_grouped_microkernels_cmake(
+            arch_microkernels_cmake,
+            key,
+            asm_microkernels_per_arch,
+            '',
+            'ASM_MICROKERNEL_SRCS',
+        )
+        write_grouped_microkernels_cmake(
+            arch_microkernels_cmake,
+            key,
+            jit_microkernels_per_arch,
+            '',
+            'JIT_MICROKERNEL_SRCS',
+        )
         arch_microkernels_cmake.seek(0)
-        xnncommon.overwrite_if_changed(os.path.join(root_dir, 'cmake', 'gen', arch_microkernels_cmake_filename), arch_microkernels_cmake.read())
-        microkernels_cmake.write(f'INCLUDE(cmake/gen/{arch_microkernels_cmake_filename})\n')
+        xnncommon.overwrite_if_changed(
+            os.path.join(
+                root_dir, 'cmake', 'gen', arch_microkernels_cmake_filename
+            ),
+            arch_microkernels_cmake.read(),
+        )
+        microkernels_cmake.write(
+            f'INCLUDE(cmake/gen/{arch_microkernels_cmake_filename})\n'
+        )
 
     microkernels_cmake.seek(0)
-    xnncommon.overwrite_if_changed(os.path.join(root_dir, 'cmake', 'gen', 'microkernels.cmake'), microkernels_cmake.read())
+    xnncommon.overwrite_if_changed(
+        os.path.join(root_dir, 'cmake', 'gen', 'microkernels.cmake'),
+        microkernels_cmake.read(),
+    )
 
   if options.amalgamate:
     # Collect filenames of production microkernels as a set
     prod_microkernels = set()
     for configs_filepath in os.listdir(configs_dir):
-      with open(os.path.join(configs_dir, configs_filepath), 'r', encoding='utf-8') as config_file:
+      with open(
+          os.path.join(configs_dir, configs_filepath), 'r', encoding='utf-8'
+      ) as config_file:
         content = config_file.read()
         microkernels = re.findall(MICROKERNEL_NAME_REGEX, content)
         prod_microkernels.update(microkernels)
-    prod_microkernels = set(map(microkernel_name_to_filename.get, prod_microkernels))
+    prod_microkernels = set(
+        map(microkernel_name_to_filename.get, prod_microkernels)
+    )
 
     for isa_spec, microkernels in c_microkernels_per_isa.items():
       microkernels = microkernels + temp_c_microkernels_per_isa[isa_spec]
@@ -482,8 +593,13 @@ Auto-generated file. Do not edit!
           isa = isa_spec
           amalgam_filename = f'{isa}.c'
         header = ISA_TO_HEADER_MAP.get(isa)
-        amalgam_text = amalgamate_microkernel_sources(filepaths, include_header=header)
-        xnncommon.overwrite_if_changed(os.path.join(src_dir, 'amalgam', 'gen', amalgam_filename), amalgam_text)
+        amalgam_text = amalgamate_microkernel_sources(
+            filepaths, include_header=header
+        )
+        xnncommon.overwrite_if_changed(
+            os.path.join(src_dir, 'amalgam', 'gen', amalgam_filename),
+            amalgam_text,
+        )
 
 
 if __name__ == '__main__':
