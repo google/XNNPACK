@@ -429,6 +429,7 @@ struct xnn_operator {
     struct u8_softmax_context u8_softmax;
     struct f16_qd8_convert_context f16_qd8_convert;
     struct f32_qd8_convert_context f32_qd8_convert;
+    struct f32_qp8_convert_context f32_qp8_convert;
     struct univector_contiguous_context univector_contiguous;
     struct univector_strided_context univector_strided;
     struct unpooling_context unpooling;

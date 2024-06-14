@@ -67,6 +67,8 @@
   string: "Convert (NC, F32, F16)"
 - name: xnn_operator_type_convert_nc_f32_qd8
   string: "Convert (NC, F32, QD8)"
+- name: xnn_operator_type_convert_nc_f32_qp8
+  string: "Convert (NC, F32, QP8)"
 - name: xnn_operator_type_convert_nc_f32_qs8
   string: "Convert (NC, F32, QS8)"
 - name: xnn_operator_type_convert_nc_f32_qu8

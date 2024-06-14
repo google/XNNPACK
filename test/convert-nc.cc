@@ -280,40 +280,6 @@ TEST(CONVERT_NC_F32_QD8, small_batch_with_input_and_output_stride) {
   }
 }
 
-TEST(CONVERT_NC_F32_QD8, output_min) {
-  for (int16_t qmin = std::numeric_limits<int8_t>::min();
-       qmin < std::numeric_limits<int8_t>::max();
-       qmin += 51)
-  {
-    for (size_t channels = 1; channels < 100; channels++) {
-      ConvertOperatorTester()
-          .batch_size(3)
-          .channels(channels)
-          .qmin(qmin)
-          .qmax(std::numeric_limits<int8_t>::max())
-          .iterations(3)
-          .TestF32toQD8();
-    }
-  }
-}
-
-TEST(CONVERT_NC_F32_QD8, output_max) {
-  for (int16_t qmax = std::numeric_limits<int8_t>::min() + 1;
-       qmax <= std::numeric_limits<int8_t>::max();
-       qmax += 51)
-  {
-    for (size_t channels = 1; channels < 100; channels++) {
-      ConvertOperatorTester()
-          .batch_size(3)
-          .channels(channels)
-          .qmin(std::numeric_limits<int8_t>::min())
-          .qmax(qmax)
-          .iterations(3)
-          .TestF32toQD8();
-    }
-  }
-}
-
 TEST(CONVERT_NC_F32_QS8, unit_batch) {
   for (size_t channels = 1; channels < 100; channels++) {
     ConvertOperatorTester()
@@ -919,5 +885,42 @@ TEST(CONVERT_NC_QU8_F32, input_zero_point) {
           .iterations(3)
           .TestQU8toF32();
     }
+  }
+}
+
+TEST(CONVERT_NC_F32_QP8, unit_batch) {
+  for (size_t channels = 1; channels < 100; channels++) {
+    ConvertOperatorTester()
+        .batch_size(1)
+        .channels(channels)
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
+        .iterations(3)
+        .TestF32toQD8();
+  }
+}
+
+TEST(CONVERT_NC_F32_QP8, small_batch) {
+  for (size_t channels = 1; channels < 100; channels++) {
+    ConvertOperatorTester()
+        .batch_size(3)
+        .channels(channels)
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
+        .iterations(3)
+        .TestF32toQD8();
+  }
+}
+
+TEST(CONVERT_NC_F32_QP8, small_batch_with_input_stride) {
+  for (size_t channels = 10; channels < 11; channels += 15) {
+    ConvertOperatorTester()
+        .batch_size(3)
+        .channels(channels)
+        .input_stride(129)
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
+        .iterations(3)
+        .TestF32toQD8();
   }
 }

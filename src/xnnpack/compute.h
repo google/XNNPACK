@@ -1584,16 +1584,35 @@ struct f32_qd8_convert_context {
       size_t batch_index);
 #endif
 
-struct u8_softmax_context {
-  size_t n;
-  const uint8_t* x;
-  size_t x_stride;
-  const uint32_t* t;
-  uint8_t* y;
-  size_t y_stride;
-  xnn_u8_rmax_ukernel_fn rmax_ukernel;
-  xnn_u8_lut32norm_ukernel_fn lut_norm_ukernel;
+struct f32_qp8_convert_context {
+  size_t m;
+  size_t k;
+  size_t mr;
+  size_t kr;
+  size_t sr;
+  const float* XNN_RESTRICT lhs;
+  size_t lhs_stride;
+  int8_t* XNN_RESTRICT lhs_packed;
+  xnn_x8_packq_f32qp8_ukernel_fn packq_ukernel;
 };
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_f32_qp8_convert(
+      const struct f32_qp8_convert_context
+          context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t m_idx_start);
+#endif
+
+  struct u8_softmax_context {
+    size_t n;
+    const uint8_t* x;
+    size_t x_stride;
+    const uint32_t* t;
+    uint8_t* y;
+    size_t y_stride;
+    xnn_u8_rmax_ukernel_fn rmax_ukernel;
+    xnn_u8_lut32norm_ukernel_fn lut_norm_ukernel;
+  };
 
 #ifndef __cplusplus
   XNN_PRIVATE void xnn_compute_u8_softmax(

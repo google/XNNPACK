@@ -22,6 +22,7 @@
 #include <xnnpack/microparams.h>
 #include <xnnpack/operator-type.h>
 #include <xnnpack/operator.h>
+#include <xnnpack/packq.h>
 #include <xnnpack/quantization.h>
 
 #include "pthreadpool.h"
@@ -2245,6 +2246,21 @@ void xnn_compute_f32_qd8_convert(
   union xnn_f32_qs8_cvt_params params;
   context->init_params(&params, 1.0f / context->quantization_params[batch_index].inv_scale, context->quantization_params[batch_index].zero_point, INT8_MIN, INT8_MAX);
   context->convert_ukernel(n, input, output, &params);
+}
+
+void xnn_compute_f32_qp8_convert(
+    const struct f32_qp8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t m_idx_start) {
+  const float* lhs = (const float*)((const char*)context->lhs +
+                                    m_idx_start * context->lhs_stride);
+  int8_t* lhs_packed =
+      context->lhs_packed +
+      xnn_x8_packq_f32qp8_packed_offset(m_idx_start, context->k, context->mr,
+                                        context->kr, context->sr);
+
+  context->packq_ukernel(/*m=*/1, context->k, context->mr, context->kr,
+                         context->sr, m_idx_start, lhs, context->lhs_stride,
+                         lhs_packed);
 }
 
 void xnn_compute_u8_softmax(

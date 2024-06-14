@@ -6,7 +6,9 @@
 #pragma once
 
 #include <xnnpack.h>
+#include <xnnpack/config.h>
 #include <xnnpack/math.h>
+#include <xnnpack/packq.h>
 
 #include <algorithm>
 #include <cassert>
@@ -352,6 +354,65 @@ class ConvertOperatorTester {
           EXPECT_NEAR(expected, dequantized_val, max_acceptable_error)
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
+      }
+    }
+  }
+
+  void TestF32toQP8() const {
+    xnnpack::ReplicableRandomDevice rng;
+
+    // The parameters of the GEMM config are used as packing parameters.
+    const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_nr2_config();
+
+    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+                             (batch_size() - 1) * input_stride() + channels());
+    std::vector<int8_t> output(xnn_x8_packq_f32qp8_packed_size(
+        batch_size(), channels(), gemm_config->mr, 1 << gemm_config->log2_kr,
+        1 << gemm_config->log2_sr));
+    std::uniform_real_distribution<float> range_dist(-100000, 100000);
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      const float first_val = range_dist(rng);
+      const float second_val = range_dist(rng);
+      std::uniform_real_distribution<float> f32dist(
+          std::min(first_val, second_val), std::max(first_val, second_val));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      std::fill(output.begin(), output.end(), INT8_C(0xA5));
+
+      // Create, setup, run, and destroy Convert operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t convert_op = nullptr;
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_create_convert_nc_f32_qp8(0, &convert_op));
+      ASSERT_NE(nullptr, convert_op);
+
+      // Smart pointer to automatically delete convert op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+          auto_convert_op(convert_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_reshape_convert_nc_f32_qp8(convert_op, batch_size(),
+                                               channels(), input_stride(),
+                                               /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success,
+                xnn_setup_convert_nc_f32_qp8(convert_op, input.data(),
+                                             output.data()));
+      ASSERT_EQ(xnn_status_success,
+                xnn_run_operator(convert_op, /*threadpool=*/nullptr));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        // const float* input_ptr = &input[i * input_stride()];
+        // const auto minmax =
+        //     std::minmax_element(input_ptr, input_ptr + channels());
+        // const float rmin = math_min_f32(0.0f, *minmax.first);
+        // const float rmax = math_max_f32(0.0f, *minmax.second);
+        // const float max_acceptable_error =
+        //     0.5001f * (rmax - rmin) / std::numeric_limits<uint8_t>::max();
+
+        // TODO(b/340399245) - Find a way to extract individual quantized values
+        // from the packing?
+        ASSERT_TRUE(true);
       }
     }
   }

@@ -16,10 +16,10 @@
 #include <xnnpack/config.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
+#include <xnnpack/packq.h>
 #include <xnnpack/vcvt.h>
 #include <xnnpack/vlrelu.h>
 #include <xnnpack/vunary.h>
-
 
 static struct xnn_unary_elementwise_config f16_abs_config = {0};
 static struct xnn_unary_elementwise_config f16_clamp_config = {0};
@@ -56,6 +56,7 @@ static struct xnn_unary_elementwise_config f32_sqrt_config = {0};
 static struct xnn_unary_elementwise_config f32_tanh_config = {0};
 static struct xnn_unary_elementwise_config f32_to_f16_cvt_config = {0};
 static struct xnn_unary_elementwise_config f32_to_qs8_cvt_config = {0};
+static struct xnn_unary_elementwise_config f32_to_qp8_cvt_config = {0};
 static struct xnn_unary_elementwise_config f32_to_qu8_cvt_config = {0};
 static struct xnn_unary_elementwise_config qs8_cvt_config = {0};
 static struct xnn_unary_elementwise_config qs8_lrelu_config = {0};
@@ -105,6 +106,7 @@ static struct xnn_unary_elementwise_config xx_copy_config = {0};
   static INIT_ONCE init_guard_f32_sqrt = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_tanh = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_to_f16_cvt = INIT_ONCE_STATIC_INIT;
+  static INIT_ONCE init_guard_f32_to_qp8_cvt = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_to_qs8_cvt = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_to_qu8_cvt = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_qs8_cvt = INIT_ONCE_STATIC_INIT;
@@ -154,6 +156,7 @@ static struct xnn_unary_elementwise_config xx_copy_config = {0};
   static pthread_once_t init_guard_f32_tanh = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_to_f16_cvt = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_to_qs8_cvt = PTHREAD_ONCE_INIT;
+  static pthread_once_t init_guard_f32_to_qp8_cvt = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_to_qu8_cvt = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_qs8_cvt = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_qs16_to_qs8_cvt = PTHREAD_ONCE_INIT;
@@ -1573,6 +1576,16 @@ static void init_f32_to_f16_cvt_config(void) {
   #endif
 }
 
+static void init_f32_to_qp8_cvt_config(void) {
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+  f32_to_qp8_cvt_config.ukernel =
+      (xnn_vunary_ukernel_fn)xnn_x8_packq_f32qp8_ukernel__aarch64_neon_u2;
+#else
+  f32_to_qp8_cvt_config.ukernel =
+      (xnn_vunary_ukernel_fn)xnn_x8_packq_f32qp8_ukernel__scalar_u1;
+#endif
+}
+
 static void init_f32_to_qs8_cvt_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -2536,6 +2549,11 @@ static void init_xx_copy_config(void) {
     return TRUE;
   }
 
+  static BOOL CALLBACK init_f32_to_qp8_cvt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
+    init_f32_to_qp8_cvt_config();
+    return TRUE;
+  }
+
   static BOOL CALLBACK init_f32_to_qs8_cvt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
     init_f32_to_qs8_cvt_config();
     return TRUE;
@@ -3025,6 +3043,21 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_to_f16_cvt_config() {
     pthread_once(&init_guard_f32_to_f16_cvt, &init_f32_to_f16_cvt_config);
   #endif
   return &f32_to_f16_cvt_config;
+}
+
+const struct xnn_unary_elementwise_config* xnn_init_f32_to_qp8_cvt_config() {
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+#if XNN_PLATFORM_WINDOWS
+  InitOnceExecuteOnce(&init_guard_f32_to_qp8_cvt,
+                      &init_f32_to_qp8_cvt_config_windows, NULL, NULL);
+#else
+  pthread_once(&init_guard_f32_to_qp8_cvt, &init_f32_to_qp8_cvt_config);
+#endif
+  return &f32_to_qp8_cvt_config;
 }
 
 const struct xnn_unary_elementwise_config* xnn_init_f32_to_qs8_cvt_config() {
