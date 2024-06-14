@@ -1738,7 +1738,7 @@ static void init_qs8_cvt_config(void) {
       qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__neon_u32;
       qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_neon_params;
       qs8_cvt_config.element_tile = 32;
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__armsimd32_u8;
       qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_armsimd32_params;
       qs8_cvt_config.element_tile = 8;
