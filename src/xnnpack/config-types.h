@@ -321,7 +321,11 @@ struct xnn_gemm_config {
     xnn_init_qs8_qc8w_conv_minmax_params_fn qs8_qc8w;
     xnn_init_qu8_conv_minmax_params_fn qu8;
   } init;
+  // TODO(b/346765736): Replace all uses of packing functions with this.
+  xnn_pack_weights_and_biases_fn pack_weights_and_biases;
+  // Deprecated. Use pack_weights_and_biases instead.
   xnn_packw_gemm_gio_ukernel_fn pack_gemm_gio;
+  // Deprecated. Use pack_weights_and_biases instead.
   xnn_packw_gemm_goi_ukernel_fn pack_gemm_goi;
   xnn_pack_conv_goki_w_fn pack_igemm_goki;
   xnn_pack_conv_kgo_w_fn pack_igemm_kgo;

@@ -13,6 +13,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/common.h>
+#include <xnnpack/config-types.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
 #include <xnnpack/operator.h>
@@ -1302,6 +1303,107 @@ void xnn_pack_qs8_gemm_gio_w(
       b += nc;
     }
   } while (--g != 0);
+}
+
+void pack_weights_and_biases(
+  uint32_t flags,
+  const struct xnn_gemm_config* gemm_config,
+  size_t input_channels,
+  size_t output_channels,
+  size_t groups,
+  size_t k_stride,
+  size_t weights_stride,
+  xnn_packw_gemm_gio_ukernel_fn pack_gemm_gio_w,
+  xnn_packw_gemm_goi_ukernel_fn pack_gemm_goi_w,
+  const void* accumulator_init,
+  const void* weights,
+  xnn_init_qs8_qc8w_scale_params_fn init_extra_data0_fn,
+  const void* extra_data0,
+  size_t extra_data0_element_size,
+  xnn_init_qs8_qc8w_scale_params_fn init_extra_data1_fn,
+  const void* extra_data1,
+  size_t extra_data1_element_size,
+  void* packed_weights_ptr,
+  size_t extra_bytes,
+  size_t log2_filter_element_size,
+  const void* params)
+{
+  const uint32_t nr = gemm_config->nr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    pack_gemm_gio_w(
+      groups, output_channels, input_channels,
+      nr, kr, sr,
+      output_channels,
+      weights, accumulator_init, /*scale=*/NULL,
+      packed_weights_ptr,
+      nr * extra_bytes,
+      params);
+  } else {
+    pack_gemm_goi_w(
+      groups, output_channels, input_channels,
+      nr, kr, sr,
+      weights, accumulator_init, /*scale=*/NULL,
+      packed_weights_ptr,
+      nr * extra_bytes,
+      params);
+  }
+  if (extra_data1 != NULL) {
+    assert(init_extra_data1_fn != NULL);
+
+    void* weights = (void*) ((uintptr_t) packed_weights_ptr +
+      nr * ((k_stride << log2_filter_element_size) + extra_data1_element_size));
+    init_extra_data1_fn(
+        output_channels, nr, nr,
+        nr * weights_stride, nr * weights_stride, 0,
+        extra_data1, weights);
+  }
+
+  if (extra_data0 != NULL) {
+    assert(init_extra_data0_fn != NULL);
+    void* weights = (void*) ((uintptr_t) packed_weights_ptr +
+      nr * ((k_stride << log2_filter_element_size) + extra_data0_element_size));
+    if (extra_data1 != NULL) {
+      weights = (void*) ((uintptr_t) weights + nr * sizeof(float));
+    }
+    init_extra_data0_fn(
+        output_channels, nr, nr,
+        nr * weights_stride, nr * weights_stride, 0,
+        extra_data0, weights);
+  }
+}
+
+void xnn_pack_qs8_weights_and_biases(
+  uint32_t flags,
+  const struct xnn_gemm_config* gemm_config,
+  size_t input_channels,
+  size_t output_channels,
+  size_t groups,
+  size_t k_stride,
+  size_t weights_stride,
+  const void* accumulator_init,
+  const void* weights,
+  xnn_init_qs8_qc8w_scale_params_fn init_extra_data0_fn,
+  const float* extra_data0,
+  size_t extra_data0_element_size,
+  xnn_init_qs8_qc8w_scale_params_fn init_extra_data1_fn,
+  const float* extra_data1,
+  size_t extra_data1_element_size,
+  void* packed_weights_ptr,
+  const void* params)
+{
+  const size_t extra_bytes = extra_data0_element_size + extra_data1_element_size;
+  return pack_weights_and_biases(flags, gemm_config,
+                                 input_channels, output_channels,
+                                 groups, k_stride, weights_stride,
+                                 (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w,
+                                 (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w,
+                                 accumulator_init, weights,
+                                 init_extra_data0_fn, extra_data0, extra_data0_element_size,
+                                 init_extra_data1_fn, extra_data1, extra_data1_element_size,
+                                 packed_weights_ptr, extra_bytes, /*log2_filter_element_size=*/0,
+                                 params);
 }
 
 void xnn_pack_f32_qs8w_gemm_gio_w(

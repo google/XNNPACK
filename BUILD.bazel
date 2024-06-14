@@ -312,6 +312,14 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "config_hdrs",
+    hdrs = [
+        "src/xnnpack/config.h",
+        "src/xnnpack/config-types.h",
+    ],
+)
+
+xnnpack_cc_library(
     name = "microkernel_configs",
     srcs = [
         "src/configs/argmaxpool-config.c",
@@ -357,6 +365,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
+        ":config_hdrs",
         ":enable_assembly",
         ":enable_avx512amx",
         ":enable_avx512fp16",
@@ -1481,6 +1490,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
+        ":config_hdrs",
         ":math",
         ":operator_h",
         ":unaligned",

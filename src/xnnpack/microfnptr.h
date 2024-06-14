@@ -2750,6 +2750,16 @@ typedef size_t (*xnn_init_f16_tanh_params_fn)(
 typedef size_t (*xnn_init_f32_tanh_params_fn)(
   union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)]);
 
+typedef void (*xnn_init_scale_params_fn)(
+  size_t channels,
+  size_t channels_tile,
+  size_t channels_subtile,
+  size_t stride,
+  size_t substride,
+  size_t stride_offset,
+  const void* scale[XNN_MIN_ELEMENTS(1)],
+  void* packed_w);
+
 typedef void (*xnn_init_qs8_qc8w_scale_params_fn)(
   size_t channels,
   size_t channels_tile,
@@ -2759,6 +2769,36 @@ typedef void (*xnn_init_qs8_qc8w_scale_params_fn)(
   size_t stride_offset,
   const float scale[XNN_MIN_ELEMENTS(1)],
   void* packed_w);
+
+struct xnn_gemm_config;
+
+// Pack weights and biases for GEMM microkernels.
+//
+// Implementations call the correct packing function selected using flags and
+// pack any extra data required using init_extra_data_fns. Accumulators are
+// initialized with accumulator_init.
+typedef void (*xnn_pack_weights_and_biases_fn)(
+  uint32_t flags,
+  const struct xnn_gemm_config* gemm_config,
+  size_t input_channels,
+  size_t output_channels,
+  size_t groups,
+  // We tile packing by output channels, in GIO layout, the k (row) index needs to be able to skip by the actual number
+  // of output channels, and not just the argument nc. E.g. if weights is 1x3x5, and nr is 2, we tile the packing by
+  // output channels, 2 + 2 + 1, with 3 calls to this packing function. In the first call nc == nr == 2, but to address
+  // the second row of k, we need to skip by 5 elements, not 2 (nc). So k_stride should be set to 5.
+  size_t k_stride,
+  size_t weights_stride,
+  const void* accumulator_init,
+  const void* weights,
+  xnn_init_scale_params_fn init_extra_data0_fn,
+  const void* extra_data0,
+  size_t extra_data0_element_size,
+  xnn_init_scale_params_fn init_extra_data1_fn,
+  const void* extra_data1,
+  size_t extra_data1_element_size,
+  void* packed_weights_ptr,
+  const void* params);
 
 typedef size_t (*xnn_init_f16_gavgpool_neon_params_fn)(
   union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],

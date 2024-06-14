@@ -382,6 +382,26 @@ XNN_INTERNAL void xnn_pack_qs8_gemm_gio_w(
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params);
 
+// Packs weights, kernel scales and biases for qs8-qc8w gemm microkernels.
+XNN_INTERNAL void xnn_pack_qs8_weights_and_biases(
+  uint32_t flags,
+  const struct xnn_gemm_config* gemm_config,
+  size_t input_channels,
+  size_t output_channels,
+  size_t groups,
+  size_t k_stride,
+  size_t weights_stride,
+  const void* accumulator_init,
+  const void* weights,
+  xnn_init_qs8_qc8w_scale_params_fn init_extra_data0_fn,
+  const float* extra_data0,
+  size_t extra_data0_element_size,
+  xnn_init_qs8_qc8w_scale_params_fn init_extra_data1_fn,
+  const float* extra_data1,
+  size_t extra_data1_element_size,
+  void* packed_weights_ptr,
+  const void* params);
+
 XNN_INTERNAL void xnn_pack_qs8_to_qu8_gemm_gio_w(
   size_t g,
   size_t nc,
