@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert DATATYPE in ["QS8", "QU8"]
-$assert BATCH_TILE % 8 == 0
-$assert BATCH_TILE >= 8
+$assert BATCH_TILE % 32 == 0
+$assert BATCH_TILE >= 32
 #include <assert.h>
 
 #include <hvx_hexagon_protos.h>
@@ -31,7 +31,11 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__hvx_u${BATCH_TILE}(
 
   const HVX_Vector vbias = Q6_V_vsplat_R(*((int32_t *) &params->hvx.bias));
   const HVX_Vector va_multiplier = Q6_V_vsplat_R(*((int32_t *) &params->hvx.a_multiplier));
+  const HVX_Vector va_multiplier_lo = Q6_V_vsplat_R(*((uint16_t *) &params->hvx.a_multiplier_lo));
+  const HVX_Vector va_multiplier_hi = Q6_V_vsplat_R(*((uint16_t *) &params->hvx.a_multiplier_hi));
   const HVX_Vector vb_multiplier = Q6_V_vsplat_R(*((int32_t *) &params->hvx.b_multiplier));
+  const HVX_Vector vb_multiplier_lo = Q6_V_vsplat_R(*((uint16_t *) &params->hvx.b_multiplier_lo));
+  const HVX_Vector vb_multiplier_hi = Q6_V_vsplat_R(*((uint16_t *) &params->hvx.b_multiplier_hi));
   const int32_t first_shift = params->hvx.first_shift;
   const int32_t rest_shift = params->hvx.rest_shift;
   const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(*((int16_t *) &params->hvx.output_zero_point));
@@ -48,63 +52,72 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__hvx_u${BATCH_TILE}(
     input_a += ${BATCH_TILE};
     input_b += ${BATCH_TILE};
 
-    // widen: 8-bit to 16-bit
+    // widen 8-bit to 16-bit
     $for N in range(0, BATCH_TILE, 128):
-      HVX_VectorPair va${int(N/32)}_i16 = Q6_Wh_vsxt_Vb(va${int(N/32)});
-      HVX_Vector va${int(N/32)}_i16_even = Q6_V_lo_W(va${int(N/32)}_i16);
-      HVX_Vector va${int(N/32)}_i16_odd = Q6_V_hi_W(va${int(N/32)}_i16);
+      HVX_VectorPair va${int(N/128)}_i16 = Q6_Wh_vunpack_Vb(va${int(N/128)});
+      HVX_VectorPair vb${int(N/128)}_i16 = Q6_Wh_vunpack_Vb(vb${int(N/128)});
+      HVX_Vector va${int(N/128)}_lo = Q6_V_lo_W(va${int(N/128)}_i16);
+      $if N + 64 < BATCH_TILE:
+        HVX_Vector va${int(N/128)}_hi = Q6_V_hi_W(va${int(N/128)}_i16);
+      HVX_Vector vb${int(N/128)}_lo = Q6_V_lo_W(vb${int(N/128)}_i16);
+      $if N + 64 < BATCH_TILE:
+        HVX_Vector vb${int(N/128)}_hi = Q6_V_hi_W(vb${int(N/128)}_i16);
 
-      HVX_VectorPair vb${int(N/32)}_i16 = Q6_Wh_vsxt_Vb(vb${int(N/32)});
-      HVX_Vector vb${int(N/32)}_i16_even = Q6_V_lo_W(vb${int(N/32)}_i16);
-      HVX_Vector vb${int(N/32)}_i16_odd = Q6_V_hi_W(vb${int(N/32)}_i16);
-
-    // vacc = va * va_multiplier + vb * vb_multiplier with widening to 32-bit
+    // vacc = va * va_multiplier + vb * vb_multiplier with widening 16-bit to 32-bit
     $for N in range(0, BATCH_TILE, 128):
-      HVX_VectorPair va${int(N/32)}_mul_even = Q6_Vw_vmpyi_VwVh(va_multiplier, va${int(N/32)}_i16_even);
-      HVX_VectorPair va${int(N/32)}_mul_odd = Q6_Vw_vmpyi_VwVh(va_multiplier, va${int(N/32)}_i16_odd);
-      HVX_VectorPair vb${int(N/32)}_mul_even = Q6_Vw_vmpyi_VwVh(vb_multiplier, vb${int(N/32)}_i16_even);
-      HVX_VectorPair vb${int(N/32)}_mul_odd = Q6_Vw_vmpyi_VwVh(vb_multiplier, vb${int(N/32)}_i16_odd);
+      HVX_Vector va${int(N/128)}_lo_mul_even = Q6_Vw_vmpyie_VwVh(va_multiplier_lo, va_multiplier_hi, va${int(N/128)}_lo);
+      HVX_Vector va${int(N/128)}_lo_mul_odd = Q6_Vw_vmpyio_VwVh(va_multiplier, va${int(N/128)}_lo);
 
-      HVX_Vector vacc${int(N/32)}_even = Q6_Vw_vadd_VwVw(Q6_V_lo_W(va${int(N/32)}_mul_even), Q6_V_lo_W(vb${int(N/32)}_mul_even));
-      HVX_Vector vacc${int(N/32)}_odd = Q6_Vw_vadd_VwVw(Q6_V_lo_W(va${int(N/32)}_mul_odd), Q6_V_lo_W(vb${int(N/32)}_mul_odd));
-      $if BATCH_TILE > N + 64:
-        HVX_Vector vacc${int((N+32)/32)}_even = Q6_Vw_vadd_VwVw(Q6_V_hi_W(va${int(N/32)}_mul_even), Q6_V_hi_W(vb${int(N/32)}_mul_even));
-        HVX_Vector vacc${int((N+32)/32)}_odd = Q6_Vw_vadd_VwVw(Q6_V_hi_W(va${int(N/32)}_mul_odd), Q6_V_hi_W(vb${int(N/32)}_mul_odd));
+      HVX_Vector vb${int(N/128)}_lo_mul_even = Q6_Vw_vmpyie_VwVh(vb_multiplier_lo, vb_multiplier_hi, vb${int(N/128)}_lo);
+      HVX_Vector vb${int(N/128)}_lo_mul_odd = Q6_Vw_vmpyio_VwVh(vb_multiplier, vb${int(N/128)}_lo);
 
-    // vacc = vbias + vacc
+      HVX_Vector vacc${int(N/128)}_lo_even = Q6_Vw_vadd_VwVw(va${int(N/128)}_lo_mul_even, vb${int(N/128)}_lo_mul_even);
+      HVX_Vector vacc${int(N/128)}_lo_odd = Q6_Vw_vadd_VwVw(va${int(N/128)}_lo_mul_odd, vb${int(N/128)}_lo_mul_odd);
+
+      $if N + 64 < BATCH_TILE:
+        HVX_Vector va${int(N/128)}_hi_mul_even = Q6_Vw_vmpyie_VwVh(va_multiplier_lo, va_multiplier_hi, va${int(N/128)}_hi);
+        HVX_Vector va${int(N/128)}_hi_mul_odd = Q6_Vw_vmpyio_VwVh(va_multiplier, va${int(N/128)}_hi);
+
+        HVX_Vector vb${int(N/128)}_hi_mul_even = Q6_Vw_vmpyie_VwVh(vb_multiplier_lo, vb_multiplier_hi, vb${int(N/128)}_hi);
+        HVX_Vector vb${int(N/128)}_hi_mul_odd = Q6_Vw_vmpyio_VwVh(vb_multiplier, vb${int(N/128)}_hi);
+
+        HVX_Vector vacc${int(N/128)}_hi_even = Q6_Vw_vadd_VwVw(va${int(N/128)}_hi_mul_even, vb${int(N/128)}_hi_mul_even);
+        HVX_Vector vacc${int(N/128)}_hi_odd = Q6_Vw_vadd_VwVw(va${int(N/128)}_hi_mul_odd, vb${int(N/128)}_hi_mul_odd);
+
+      // vacc = vacc + vbias
+      vacc${int(N/128)}_lo_even = Q6_Vw_vadd_VwVw(vbias, vacc${int(N/128)}_lo_even);
+      vacc${int(N/128)}_lo_odd = Q6_Vw_vadd_VwVw(vbias, vacc${int(N/128)}_lo_odd);
+      $if N + 64 < BATCH_TILE:
+        vacc${int(N/128)}_hi_even = Q6_Vw_vadd_VwVw(vbias, vacc${int(N/128)}_hi_even);
+        vacc${int(N/128)}_hi_odd = Q6_Vw_vadd_VwVw(vbias, vacc${int(N/128)}_hi_odd);
+      
+    // narrow shift to 16-bit
+    // vacc = vacc + voutput_zero_point
     $for N in range(0, BATCH_TILE, 128):
-      vacc${int(N/32)}_even = Q6_Vw_vadd_VwVw(vbias, vacc${int(N/32)}_even);
-      vacc${int(N/32)}_odd = Q6_Vw_vadd_VwVw(vbias, vacc${int(N/32)}_odd);
-      $if BATCH_TILE > N + 64:
-        vacc${int((N+32)/32)}_even = Q6_Vw_vadd_VwVw(vbias, vacc${int((N+32)/32)}_even);
-        vacc${int((N+32)/32)}_odd = Q6_Vw_vadd_VwVw(vbias, vacc${int((N+32)/32)}_odd);
+      HVX_Vector vacc${int(N/128)}_lo = Q6_Vh_vasr_VwVwR_sat(vacc${int(N/128)}_lo_odd, vacc${int(N/128)}_lo_even, first_shift);
+      vacc${int(N/128)}_lo = Q6_Vh_vadd_VhVh(voutput_zero_point, Q6_Vh_vasr_VhR(vacc${int(N/128)}_lo, rest_shift));
+      $if N + 64 < BATCH_TILE:
+        HVX_Vector vacc${int(N/128)}_hi = Q6_Vh_vasr_VwVwR_sat(vacc${int(N/128)}_hi_odd, vacc${int(N/128)}_hi_even, first_shift);
+        vacc${int(N/128)}_hi = Q6_Vh_vadd_VhVh(voutput_zero_point, Q6_Vh_vasr_VhR(vacc${int(N/128)}_hi, rest_shift));
 
-    // vacc = shift and narrow to 16-bit. Add voutput_zero_point
+    // narrow 16-bit to 8-bit
     $for N in range(0, BATCH_TILE, 128):
-      HVX_Vector vacc${int(N/32)} = Q6_Vh_vasr_VwVwR_sat(vacc${int(N/32)}_odd, vacc${int(N/32)}_even, first_shift);
-      vacc${int(N/32)} = Q6_Vh_vadd_VhVh(voutput_zero_point, Q6_Vh_vasr_VhR(vacc${int(N/32)}, rest_shift));
-      $if BATCH_TILE > N + 64:
-        HVX_Vector vacc${int((N+32)/32)} = Q6_Vh_vasr_VwVwR_sat(vacc${int((N+32)/32)}_odd, vacc${int((N+32)/32)}_even, first_shift);
-        vacc${int((N+32)/32)} = Q6_Vh_vadd_VhVh(voutput_zero_point, Q6_Vh_vasr_VhR(vacc${int((N+32)/32)}, rest_shift));
-
-    // narrow: 16-bit to 8-bit
-    $for N in range(0, BATCH_TILE, 128):
-      $if BATCH_TILE > N + 64:
-        HVX_Vector vout${int(N/32)} = Q6_Vb_vpack_VhVh_sat(vacc${int((N+32)/32)}, vacc${int(N/32)});
+      $if N + 64 < BATCH_TILE:
+        HVX_Vector vout${int(N/128)} = Q6_Vb_vpack_VhVh_sat(vacc${int(N/128)}_hi, vacc${int(N/128)}_lo);
       $else:
-        HVX_Vector vout${int(N/32)} = Q6_Vb_vpack_VhVh_sat(vacc${int(N/32)}, vacc${int(N/32)});
+        HVX_Vector vout${int(N/128)} = Q6_Vb_vpack_VhVh_sat(vacc${int(N/128)}_lo, vacc${int(N/128)}_lo);
 
     // minmax
     $for N in range(0, BATCH_TILE, 128):
-      vout${int(N/32)} = Q6_Vb_vmax_VbVb(voutput_min, vout${int(N/32)});
-      vout${int(N/32)} = Q6_Vb_vmin_VbVb(voutput_max, vout${int(N/32)});
+      vout${int(N/128)} = Q6_Vb_vmax_VbVb(voutput_min, vout${int(N/128)});
+      vout${int(N/128)} = Q6_Vb_vmin_VbVb(voutput_max, vout${int(N/128)});
 
     // store output
     $for N in range(0, BATCH_TILE, 128):
       $if N + 128 <= BATCH_TILE:
-        *((HVX_UVector *) ptr_o) = vout${int(N/32)};
+        *((HVX_UVector *) ptr_o) = vout${int(N/128)};
       $else:
-        Q6_V_vstu_variable(ptr_o, ${BATCH_TILE}, vout${int(N/32)});
+        Q6_V_vstu_variable(ptr_o, ${BATCH_TILE}, vout${int(N/128)});
       ptr_o += ${BATCH_TILE};
   }
   if XNN_UNLIKELY(batch != 0){
@@ -116,21 +129,20 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__hvx_u${BATCH_TILE}(
         input_b += 32;
       }
 
-      HVX_VectorPair va_i16 = Q6_Wh_vsxt_Vb(va);
-      HVX_Vector va_i16_even = Q6_V_lo_W(va_i16);
-      HVX_Vector va_i16_odd = Q6_V_hi_W(va_i16);
+      HVX_VectorPair va_i16 = Q6_Wh_vunpack_Vb(va);
+      HVX_Vector va_lo = Q6_V_lo_W(va_i16);
 
-      HVX_VectorPair vb_i16 = Q6_Wh_vsxt_Vb(vb);
-      HVX_Vector vb_i16_even = Q6_V_lo_W(vb_i16);
-      HVX_Vector vb_i16_odd = Q6_V_hi_W(vb_i16);
+      HVX_VectorPair vb_i16 = Q6_Wh_vunpack_Vb(vb);
+      HVX_Vector vb_lo = Q6_V_lo_W(vb_i16);
 
-      HVX_VectorPair va_mul_even = Q6_Vw_vmpyi_VwVh(va_multiplier, va_i16_even);
-      HVX_VectorPair va_mul_odd = Q6_Vw_vmpyi_VwVh(va_multiplier, va_i16_odd);
-      HVX_VectorPair vb_mul_even = Q6_Vw_vmpyi_VwVh(vb_multiplier, vb_i16_even);
-      HVX_VectorPair vb_mul_odd = Q6_Vw_vmpyi_VwVh(vb_multiplier, vb_i16_odd);
+      HVX_Vector va_lo_mul_even = Q6_Vw_vmpyie_VwVh(va_multiplier_lo, va_multiplier_hi, va_lo);
+      HVX_Vector va_lo_mul_odd = Q6_Vw_vmpyio_VwVh(va_multiplier, va_lo);
 
-      HVX_Vector vacc_even = Q6_Vw_vadd_VwVw(Q6_V_lo_W(va_mul_even), Q6_V_lo_W(vb_mul_even));
-      HVX_Vector vacc_odd = Q6_Vw_vadd_VwVw(Q6_V_lo_W(va_mul_odd), Q6_V_lo_W(vb_mul_odd));
+      HVX_Vector vb_lo_mul_even = Q6_Vw_vmpyie_VwVh(vb_multiplier_lo, vb_multiplier_hi, vb_lo);
+      HVX_Vector vb_lo_mul_odd = Q6_Vw_vmpyio_VwVh(vb_multiplier, vb_lo);
+
+      HVX_Vector vacc_even = Q6_Vw_vadd_VwVw(va_lo_mul_even, vb_lo_mul_even);
+      HVX_Vector vacc_odd = Q6_Vw_vadd_VwVw(va_lo_mul_odd, vb_lo_mul_odd);
 
       vacc_even = Q6_Vw_vadd_VwVw(vbias, vacc_even);
       vacc_odd = Q6_Vw_vadd_VwVw(vbias, vacc_odd);
@@ -139,6 +151,7 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__hvx_u${BATCH_TILE}(
       vacc = Q6_Vh_vadd_VhVh(voutput_zero_point, Q6_Vh_vasr_VhR(vacc, rest_shift));
 
       HVX_Vector vout = Q6_Vb_vpack_VhVh_sat(vacc, vacc);
+
       vout = Q6_Vb_vmax_VbVb(voutput_min, vout);
       vout = Q6_Vb_vmin_VbVb(voutput_max, vout);
 

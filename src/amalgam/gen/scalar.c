@@ -5,6 +5,7 @@
 
 #include <assert.h>
 #include <float.h>
+#include <fp16/fp16.h>
 #include <fxdiv.h>
 #include <math.h>
 #include <simd/f32-scalar.h>

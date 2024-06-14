@@ -6441,9 +6441,18 @@ size_t xnn_init_qs8_add_minmax_hvx_params(
   const int32_t rounding = INT32_C(1) << (shift - 1);
   const int32_t bias = rounding - a_multiplier * (int32_t) a_zero_point - b_multiplier * (int32_t) b_zero_point;
 
+  const uint16_t a_multiplier_lo = (uint16_t) a_multiplier;
+  const uint16_t a_multiplier_hi = (uint16_t) ((uint32_t) a_multiplier >> 16);
+  const uint16_t b_multiplier_lo = (uint16_t) b_multiplier;
+  const uint16_t b_multiplier_hi = (uint16_t) ((uint32_t) b_multiplier >> 16);
+
   params->hvx.bias = bias;
   params->hvx.a_multiplier = a_multiplier;
+  params->hvx.a_multiplier_lo = a_multiplier_lo;
+  params->hvx.a_multiplier_hi = a_multiplier_hi;
   params->hvx.b_multiplier = b_multiplier;
+  params->hvx.b_multiplier_lo = b_multiplier_lo;
+  params->hvx.b_multiplier_hi = b_multiplier_hi;
   params->hvx.first_shift = first_shift;
   params->hvx.rest_shift = rest_shift;
   params->hvx.output_zero_point = (int16_t) output_zero_point;

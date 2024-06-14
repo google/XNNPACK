@@ -31,7 +31,11 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u32(
 
   const HVX_Vector vbias = Q6_V_vsplat_R(*((int32_t *) &params->hvx.bias));
   const HVX_Vector va_multiplier = Q6_V_vsplat_R(*((int32_t *) &params->hvx.a_multiplier));
+  const HVX_Vector va_multiplier_lo = Q6_V_vsplat_R(*((uint16_t *) &params->hvx.a_multiplier_lo));
+  const HVX_Vector va_multiplier_hi = Q6_V_vsplat_R(*((uint16_t *) &params->hvx.a_multiplier_hi));
   const HVX_Vector vb_multiplier = Q6_V_vsplat_R(*((int32_t *) &params->hvx.b_multiplier));
+  const HVX_Vector vb_multiplier_lo = Q6_V_vsplat_R(*((uint16_t *) &params->hvx.b_multiplier_lo));
+  const HVX_Vector vb_multiplier_hi = Q6_V_vsplat_R(*((uint16_t *) &params->hvx.b_multiplier_hi));
   const int32_t first_shift = params->hvx.first_shift;
   const int32_t rest_shift = params->hvx.rest_shift;
   const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(*((int16_t *) &params->hvx.output_zero_point));
@@ -45,34 +49,34 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u32(
     input_a += 32;
     input_b += 32;
 
-    // widen: 8-bit to 16-bit
-    HVX_VectorPair va0_i16 = Q6_Wh_vsxt_Vb(va0);
-    HVX_Vector va0_i16_even = Q6_V_lo_W(va0_i16);
-    HVX_Vector va0_i16_odd = Q6_V_hi_W(va0_i16);
+    // widen 8-bit to 16-bit
+    HVX_VectorPair va0_i16 = Q6_Wh_vunpack_Vb(va0);
+    HVX_VectorPair vb0_i16 = Q6_Wh_vunpack_Vb(vb0);
+    HVX_Vector va0_lo = Q6_V_lo_W(va0_i16);
+    HVX_Vector vb0_lo = Q6_V_lo_W(vb0_i16);
 
-    HVX_VectorPair vb0_i16 = Q6_Wh_vsxt_Vb(vb0);
-    HVX_Vector vb0_i16_even = Q6_V_lo_W(vb0_i16);
-    HVX_Vector vb0_i16_odd = Q6_V_hi_W(vb0_i16);
+    // vacc = va * va_multiplier + vb * vb_multiplier with widening 16-bit to 32-bit
+    HVX_Vector va0_lo_mul_even = Q6_Vw_vmpyie_VwVh(va_multiplier_lo, va_multiplier_hi, va0_lo);
+    HVX_Vector va0_lo_mul_odd = Q6_Vw_vmpyio_VwVh(va_multiplier, va0_lo);
 
-    // vacc = va * va_multiplier + vb * vb_multiplier with widening to 32-bit
-    HVX_VectorPair va0_mul_even = Q6_Vw_vmpyi_VwVh(va_multiplier, va0_i16_even);
-    HVX_VectorPair va0_mul_odd = Q6_Vw_vmpyi_VwVh(va_multiplier, va0_i16_odd);
-    HVX_VectorPair vb0_mul_even = Q6_Vw_vmpyi_VwVh(vb_multiplier, vb0_i16_even);
-    HVX_VectorPair vb0_mul_odd = Q6_Vw_vmpyi_VwVh(vb_multiplier, vb0_i16_odd);
+    HVX_Vector vb0_lo_mul_even = Q6_Vw_vmpyie_VwVh(vb_multiplier_lo, vb_multiplier_hi, vb0_lo);
+    HVX_Vector vb0_lo_mul_odd = Q6_Vw_vmpyio_VwVh(vb_multiplier, vb0_lo);
 
-    HVX_Vector vacc0_even = Q6_Vw_vadd_VwVw(Q6_V_lo_W(va0_mul_even), Q6_V_lo_W(vb0_mul_even));
-    HVX_Vector vacc0_odd = Q6_Vw_vadd_VwVw(Q6_V_lo_W(va0_mul_odd), Q6_V_lo_W(vb0_mul_odd));
+    HVX_Vector vacc0_lo_even = Q6_Vw_vadd_VwVw(va0_lo_mul_even, vb0_lo_mul_even);
+    HVX_Vector vacc0_lo_odd = Q6_Vw_vadd_VwVw(va0_lo_mul_odd, vb0_lo_mul_odd);
 
-    // vacc = vbias + vacc
-    vacc0_even = Q6_Vw_vadd_VwVw(vbias, vacc0_even);
-    vacc0_odd = Q6_Vw_vadd_VwVw(vbias, vacc0_odd);
 
-    // vacc = shift and narrow to 16-bit. Add voutput_zero_point
-    HVX_Vector vacc0 = Q6_Vh_vasr_VwVwR_sat(vacc0_odd, vacc0_even, first_shift);
-    vacc0 = Q6_Vh_vadd_VhVh(voutput_zero_point, Q6_Vh_vasr_VhR(vacc0, rest_shift));
+    // vacc = vacc + vbias
+    vacc0_lo_even = Q6_Vw_vadd_VwVw(vbias, vacc0_lo_even);
+    vacc0_lo_odd = Q6_Vw_vadd_VwVw(vbias, vacc0_lo_odd);
+    
+    // narrow shift to 16-bit
+    // vacc = vacc + voutput_zero_point
+    HVX_Vector vacc0_lo = Q6_Vh_vasr_VwVwR_sat(vacc0_lo_odd, vacc0_lo_even, first_shift);
+    vacc0_lo = Q6_Vh_vadd_VhVh(voutput_zero_point, Q6_Vh_vasr_VhR(vacc0_lo, rest_shift));
 
-    // narrow: 16-bit to 8-bit
-    HVX_Vector vout0 = Q6_Vb_vpack_VhVh_sat(vacc0, vacc0);
+    // narrow 16-bit to 8-bit
+    HVX_Vector vout0 = Q6_Vb_vpack_VhVh_sat(vacc0_lo, vacc0_lo);
 
     // minmax
     vout0 = Q6_Vb_vmax_VbVb(voutput_min, vout0);
@@ -91,21 +95,20 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u32(
         input_b += 32;
       }
 
-      HVX_VectorPair va_i16 = Q6_Wh_vsxt_Vb(va);
-      HVX_Vector va_i16_even = Q6_V_lo_W(va_i16);
-      HVX_Vector va_i16_odd = Q6_V_hi_W(va_i16);
+      HVX_VectorPair va_i16 = Q6_Wh_vunpack_Vb(va);
+      HVX_Vector va_lo = Q6_V_lo_W(va_i16);
 
-      HVX_VectorPair vb_i16 = Q6_Wh_vsxt_Vb(vb);
-      HVX_Vector vb_i16_even = Q6_V_lo_W(vb_i16);
-      HVX_Vector vb_i16_odd = Q6_V_hi_W(vb_i16);
+      HVX_VectorPair vb_i16 = Q6_Wh_vunpack_Vb(vb);
+      HVX_Vector vb_lo = Q6_V_lo_W(vb_i16);
 
-      HVX_VectorPair va_mul_even = Q6_Vw_vmpyi_VwVh(va_multiplier, va_i16_even);
-      HVX_VectorPair va_mul_odd = Q6_Vw_vmpyi_VwVh(va_multiplier, va_i16_odd);
-      HVX_VectorPair vb_mul_even = Q6_Vw_vmpyi_VwVh(vb_multiplier, vb_i16_even);
-      HVX_VectorPair vb_mul_odd = Q6_Vw_vmpyi_VwVh(vb_multiplier, vb_i16_odd);
+      HVX_Vector va_lo_mul_even = Q6_Vw_vmpyie_VwVh(va_multiplier_lo, va_multiplier_hi, va_lo);
+      HVX_Vector va_lo_mul_odd = Q6_Vw_vmpyio_VwVh(va_multiplier, va_lo);
 
-      HVX_Vector vacc_even = Q6_Vw_vadd_VwVw(Q6_V_lo_W(va_mul_even), Q6_V_lo_W(vb_mul_even));
-      HVX_Vector vacc_odd = Q6_Vw_vadd_VwVw(Q6_V_lo_W(va_mul_odd), Q6_V_lo_W(vb_mul_odd));
+      HVX_Vector vb_lo_mul_even = Q6_Vw_vmpyie_VwVh(vb_multiplier_lo, vb_multiplier_hi, vb_lo);
+      HVX_Vector vb_lo_mul_odd = Q6_Vw_vmpyio_VwVh(vb_multiplier, vb_lo);
+
+      HVX_Vector vacc_even = Q6_Vw_vadd_VwVw(va_lo_mul_even, vb_lo_mul_even);
+      HVX_Vector vacc_odd = Q6_Vw_vadd_VwVw(va_lo_mul_odd, vb_lo_mul_odd);
 
       vacc_even = Q6_Vw_vadd_VwVw(vbias, vacc_even);
       vacc_odd = Q6_Vw_vadd_VwVw(vbias, vacc_odd);
@@ -114,6 +117,7 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u32(
       vacc = Q6_Vh_vadd_VhVh(voutput_zero_point, Q6_Vh_vasr_VhR(vacc, rest_shift));
 
       HVX_Vector vout = Q6_Vb_vpack_VhVh_sat(vacc, vacc);
+
       vout = Q6_Vb_vmax_VbVb(voutput_min, vout);
       vout = Q6_Vb_vmin_VbVb(voutput_max, vout);
 
