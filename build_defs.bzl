@@ -71,6 +71,18 @@ def xnnpack_slinky_deps():
 def xnnpack_slinky_defines():
     return []
 
+def xnnpack_if_kleidiai_enabled(enabled = [], not_enabled = []):
+    return select({
+        ":kleidiai_enabled": enabled,
+        "//conditions:default": not_enabled,
+    })
+
+def xnnpack_kleidiai_defines():
+    return xnnpack_if_kleidiai_enabled(
+        enabled = ["XNN_ENABLE_KLEIDIAI=1"],
+        not_enabled = ["XNN_ENABLE_KLEIDIAI=0"],
+    )
+
 def xnnpack_cc_library(
         name,
         srcs = [],
