@@ -256,6 +256,15 @@ void VUnaryMicrokernelTester::Test(
       10.0f);
 }
 
+void VUnaryMicrokernelTester::TestLog(
+    xnn_f32_vlog_ukernel_fn vlog,
+    xnn_init_f32_default_params_fn init_params) const {
+  TestFP32(
+      vlog, InitParamsWrapper(init_params),
+      [](float x) { return std::log(x); },
+      TolRelative(2.5f * std::numeric_limits<float>::epsilon()), 0.0f, 10.0f);
+}
+
 void VUnaryMicrokernelTester::Test(
     xnn_f32_vsqrt_ukernel_fn vsqrt,
     xnn_init_f32_sqrt_params_fn init_params) const {

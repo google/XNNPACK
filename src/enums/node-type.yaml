@@ -69,6 +69,8 @@
   string: "Global Sum Pooling 2D"
 - name: xnn_node_type_hardswish
   string: "HardSwish"
+- name: xnn_node_type_log
+  string: "Log"
 - name: xnn_node_type_leaky_relu
   string: "Leaky ReLU"
 - name: xnn_node_type_max_pooling_2d

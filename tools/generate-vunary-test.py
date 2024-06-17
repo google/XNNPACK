@@ -39,7 +39,7 @@ parser.set_defaults(defines=list())
 
 def split_ukernel_name(name):
   match = re.fullmatch(
-      r"(?:xnn_|xnn_generate_)(s8|u8|bf16|f16|f32|u32|u64)(_(s8|u8|bf16|f16|f32|u32|u64))*_v(abs|clamp|elu|hswish|lrelu|neg|relu|rndd|rndne|rndu|rndz|rsqrt|sigmoid|sqr|sqrt|sqrtshift|tanh)_(fact_)?ukernel__(.+)_u(\d+)(v)?",
+      r"(?:xnn_|xnn_generate_)(s8|u8|bf16|f16|f32|u32|u64)(_(s8|u8|bf16|f16|f32|u32|u64))*_v(abs|clamp|elu|hswish|log|lrelu|neg|relu|rndd|rndne|rndu|rndz|rsqrt|sigmoid|sqr|sqrt|sqrtshift|tanh)_(fact_)?ukernel__(.+)_u(\d+)(v)?",
       name,
   )
   if match is None:
@@ -49,6 +49,7 @@ def split_ukernel_name(name):
       "clamp": "Clamp",
       "elu": "ELU",
       "hswish": "HardSwish",
+      "log": "Log",
       "lrelu": "LeakyReLU",
       "neg": "Negate",
       "relu": "ReLU",
@@ -323,6 +324,7 @@ def generate_test_cases(
           "TEST_FN": {
               "Square": "TestSqr",
               "Abs": "TestAbs",
+              "Log": "TestLog",
               "Negate": "TestNeg",
           }.get(op_type, "Test"),
       },

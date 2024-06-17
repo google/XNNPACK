@@ -344,6 +344,11 @@ class UnaryOperatorTester {
                                       threadpool);                           \
   }
 
+#define CREATE_STANDARD_OP_OVERRIDES_F32(op_name)   \
+  CREATE_OP_CREATE_OVERRIDE_F32(op_name);  \
+  CREATE_OP_RESHAPE_OVERRIDE_F32(op_name); \
+  CREATE_OP_SETUP_OVERRIDE_F32(op_name);
+
 #define CREATE_OP_OVERRIDES_F32(op_name)   \
   CREATE_OP_CREATE_OVERRIDE_F32(op_name);  \
   CREATE_OP_RESHAPE_OVERRIDE_F32(op_name); \
