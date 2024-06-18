@@ -323,6 +323,7 @@ struct xnn_gemm_config {
   } init;
   // TODO(b/346765736): Replace all uses of packing functions with this.
   xnn_pack_weights_and_biases_fn pack_weights_and_biases;
+  xnn_packed_stride_weights_and_biases_fn packed_stride_weights_and_biases;
   // Deprecated. Use pack_weights_and_biases instead.
   xnn_packw_gemm_gio_ukernel_fn pack_gemm_gio;
   // Deprecated. Use pack_weights_and_biases instead.

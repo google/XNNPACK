@@ -407,7 +407,7 @@ def xnnpack_aggregate_library(
         visibility = ["//:__subpackages__"],
     )
 
-def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = [], linkopts = [], automatic = True, timeout = "short", shard_count = 1):
+def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = [], linkopts = [], defines = [], automatic = True, timeout = "short", shard_count = 1):
     """Unit test binary based on Google Test.
 
     Args:
@@ -422,6 +422,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
             (with main() function) is always added as a dependency and does not
             need to be explicitly specified.
       linkopts: The list of linking options
+      defines: List of predefines macros to be added to the compile line.
       tags: List of arbitrary text tags.
       automatic: Whether to create the test or testable binary.
       timeout: How long the test is expected to run before returning.
@@ -451,6 +452,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
                 "//conditions:default": [],
             }) + linkopts,
             linkstatic = True,
+            defines = defines,
             deps = [
                 "@com_google_googletest//:gtest_main",
             ] + deps + select({
@@ -484,6 +486,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
                 "//conditions:default": [],
             }),
             linkstatic = True,
+            defines = defines,
             deps = [
                 "@com_google_googletest//:gtest_main",
             ] + deps + select({
@@ -521,7 +524,7 @@ def xnnpack_binary(name, srcs, copts = [], deps = [], linkopts = []):
         deps = deps,
     )
 
-def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = []):
+def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = [], defines = []):
     """Microbenchmark binary based on Google Benchmark
 
     Args:
@@ -533,6 +536,8 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = []):
       deps: The list of additional libraries to be linked. Google Benchmark
             library is always added as a dependency and does not need to be
             explicitly specified.
+      tags: The list of arbitrary text tags.
+      defines: The list of arbitrary defines tags.
     """
     native.cc_binary(
         name = name,
@@ -561,6 +566,7 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = []):
             "//conditions:default": [],
         }),
         tags = tags,
+        defines = defines,
     )
 
 SrcListInfo = provider("A list of source files.", fields = {"srcs": "sources"})

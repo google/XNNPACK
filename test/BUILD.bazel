@@ -7,6 +7,7 @@ load(
     "//:build_defs.bzl",
     "xnnpack_binary",
     "xnnpack_cc_library",
+    "xnnpack_kleidiai_defines",
     "xnnpack_test_deps_for_library",
     "xnnpack_unit_test",
 )
@@ -960,6 +961,18 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qp8_f32_qc4w_gemm_minmax_test",
+    timeout = "moderate",
+    srcs = [
+        "qp8-f32-qc4w-gemm-minmax.cc",
+    ],
+    defines = xnnpack_kleidiai_defines(),
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "qs8_qc8w_gemm_jit_fp32_test",
     srcs = [
         "qs8-qc8w-gemm-jit-fp32.cc",
@@ -1649,7 +1662,9 @@ xnnpack_unit_test(
         "fully-connected-nc.cc",
         "fully-connected-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + [
+        "//:microkernels_h",
+    ],
 )
 
 xnnpack_unit_test(

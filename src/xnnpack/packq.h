@@ -8,6 +8,7 @@
 
 #include <assert.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 
@@ -18,19 +19,21 @@ extern "C" {
 // These functions have been adapted from KleidiAI's
 // `kai_run_lhs_quant_pack_qai8dxp_f32` as a reference scalar implementation.
 
-inline static size_t kai_k_roundedup(size_t k, size_t kr, size_t sr) {
+inline static size_t k_roundedup(size_t k, size_t kr, size_t sr) {
   // Since we pack a float and int32 value at the end of the row,
   // we must make sure that k is a multiple of 4 for memory alignment.
   size_t kr_sr_roundedup4 = round_up(kr * sr, 4);
   return round_up(k, kr_sr_roundedup4);
 }
 
-inline static size_t kai_lhs_packed_stride(size_t k, size_t mr, size_t kr,
-                                           size_t sr) {
-  const size_t k_internal = kai_k_roundedup(k, kr, sr);
+inline static size_t lhs_packed_stride(size_t k, size_t mr, size_t kr,
+                                       size_t sr) {
+  const size_t k_internal = k_roundedup(k, kr, sr);
 
   assert((k_internal % 2) == 0);
 
+  // Assuming the same sizeof() for kai_num_bytes_per_offset and
+  // kai_num_bytes_per_multiplier
   static const size_t kai_num_bytes_per_multiplier = sizeof(float);
   static const size_t kai_num_bytes_per_offset = sizeof(int32_t);
 
@@ -38,18 +41,60 @@ inline static size_t kai_lhs_packed_stride(size_t k, size_t mr, size_t kr,
                kai_num_bytes_per_offset);
 }
 
-XNN_INLINE size_t xnn_x8_packq_f32qp8_packed_offset(size_t m_idx, size_t k,
-                                                    size_t mr, size_t kr,
-                                                    size_t sr) {
+XNN_INLINE static size_t xnn_x8_packq_f32qp8_packed_offset(size_t m_idx,
+                                                           size_t k, size_t mr,
+                                                           size_t kr,
+                                                           size_t sr) {
   // It always points to the beginning of the row
-  return (m_idx / mr) * kai_lhs_packed_stride(k, mr, kr, sr);
+  return (m_idx / mr) * lhs_packed_stride(k, mr, kr, sr);
 }
 
-XNN_INLINE size_t xnn_x8_packq_f32qp8_packed_size(size_t m, size_t k, size_t mr,
-                                                  size_t kr, size_t sr) {
-    const size_t num_rows = round_up(m, mr) / mr;
+XNN_INLINE static size_t xnn_x8_packq_f32qp8_packed_size(size_t m, size_t k,
+                                                         size_t mr, size_t kr,
+                                                         size_t sr) {
+  const size_t num_rows = round_up(m, mr) / mr;
 
-    return num_rows * kai_lhs_packed_stride(k, mr, kr, sr);
+  return num_rows * lhs_packed_stride(k, mr, kr, sr);
+}
+
+XNN_INLINE static int8_t xnn_x8_packq_f32qp8_get_quantized(
+    size_t m_idx, size_t k_idx, const int8_t* lhs_packed, size_t k, size_t mr,
+    size_t kr, size_t sr) {
+  const int32_t k_block_len = (int32_t)(kr / sr);
+  const size_t dst_x = (m_idx % mr);
+  const size_t packed_offset =
+      xnn_x8_packq_f32qp8_packed_offset(m_idx, k, mr, kr, sr);
+  const int8_t* dst_ptr = lhs_packed + packed_offset + dst_x * k_block_len;
+
+  dst_ptr += (k_idx / k_block_len) * (mr - 1) * k_block_len;
+  dst_ptr += k_idx;
+
+  return *dst_ptr;
+}
+
+XNN_INLINE static float xnn_x8_packq_f32qp8_get_dequantized(
+    size_t m_idx, size_t k_idx, const int8_t* lhs_packed, size_t k, size_t mr,
+    size_t kr, size_t sr) {
+  const size_t k_internal = k_roundedup(k, kr, sr);
+  const int32_t k_block_len = (int32_t)(kr / sr);
+  const size_t dst_x = (m_idx % mr);
+  const size_t packed_offset =
+      xnn_x8_packq_f32qp8_packed_offset(m_idx, k, mr, kr, sr);
+  const int8_t* dst_ptr = lhs_packed + packed_offset + dst_x * k_block_len;
+
+  // Get the quantized value.
+  dst_ptr += (k_idx / k_block_len) * (mr - 1) * k_block_len;
+  dst_ptr += k_idx;
+  const int32_t val = *dst_ptr;
+
+  // Get the quantization parameters.
+  dst_ptr = lhs_packed + packed_offset + mr * k_internal;
+  dst_ptr += dst_x * sizeof(int32_t);
+  const int32_t neg_nudged_zero_point = *(const int32_t*)dst_ptr;
+  dst_ptr += mr * sizeof(float);
+  const float recip_scale = *(const float*)dst_ptr;
+
+  return (val + neg_nudged_zero_point) * recip_scale;
 }
 
 #define DECLARE_X8_PACKQ_UKERNEL_FUNCTION(fn_name)                            \
