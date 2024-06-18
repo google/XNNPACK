@@ -1558,6 +1558,7 @@ xnnpack_cc_library(
     name = "packing",
     srcs = ["src/packing.c"],
     hdrs = ["src/xnnpack/pack.h"],
+    defines = xnnpack_kleidiai_defines(),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -1567,7 +1568,7 @@ xnnpack_cc_library(
         ":operator_h",
         ":unaligned",
         "@FP16",
-    ],
+    ] + xnnpack_if_kleidiai_enabled(["@KleidiAI//:kleidiai_common"]),
 )
 
 cc_library(

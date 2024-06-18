@@ -20,6 +20,10 @@
 #include <xnnpack/pack.h>
 #include <xnnpack/unaligned.h>
 
+#if XNN_ENABLE_KLEIDIAI
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qsu4cxs1s0.h"
+#endif  // XNN_ENABLE_KLEIDIAI
+
 #include <fp16/fp16.h>
 
 void xnn_pack_f32_gemm_goi_w(
@@ -1474,6 +1478,47 @@ void xnn_pack_qu8_weights_and_biases(
       init_extra_data1_fn, extra_data1, extra_data1_element_size,
       packed_weights_ptr, extra_bytes, params);
 }
+
+#if XNN_ENABLE_KLEIDIAI
+size_t xnn_packed_stride_kai_qs8_weights_and_biases(
+    const struct xnn_gemm_config* gemm_config, size_t k, size_t unused_k_stride,
+    size_t extra_bytes) {
+  const uint32_t nr = gemm_config->nr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  return kai_get_rhs_packed_offset_rhs_pack_nxk_qsi4cxp_qsu4cxs1s0(nr, k, nr,
+                                                                   kr, sr) /
+         nr;
+}
+
+void xnn_pack_kai_qs8_weights_and_biases(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    size_t input_channels, size_t output_channels, size_t groups,
+    size_t k_stride, const void* accumulator_init, const void* weights,
+    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
+    size_t extra_data0_element_size,
+    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
+    size_t extra_data1_element_size, void* packed_weights_ptr,
+    const void* params) {
+  const uint32_t nr = gemm_config->nr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+
+  // Repack the packing params.
+  const struct xnn_qs8_qc4w_packing_params* xnn_params = params;
+  struct kai_rhs_pack_nxk_qsi4cxp_qsu4cxs1s0_params kai_params;
+  kai_params.lhs_zero_point = xnn_params->input_zero_point;
+  kai_params.rhs_zero_point = xnn_params->kernel_zero_point;
+
+  kai_run_rhs_pack_nxk_qsi4cxp_qsu4cxs1s0(groups, output_channels,
+                                          input_channels, nr, kr, sr,
+                                          weights,             // RHS
+                                          accumulator_init,    // Bias
+                                          extra_data1,         // Scale
+                                          packed_weights_ptr,  // DST
+                                          0, &kai_params);
+}
+#endif  // XNN_ENABLE_KLEIDIAI
 
 void xnn_pack_f32_qs8w_gemm_gio_w(
   size_t g,
