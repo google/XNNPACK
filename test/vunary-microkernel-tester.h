@@ -177,6 +177,9 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f32_vlrelu_ukernel_fn vlrelu,
             xnn_init_f32_lrelu_params_fn init_params) const;
 
+  void TestLog(xnn_f32_vlog_ukernel_fn vlog,
+            xnn_init_f32_default_params_fn init_params = nullptr) const;
+
   void TestNeg(xnn_f16_vneg_ukernel_fn vneg,
             xnn_init_f16_neg_params_fn init_params = nullptr) const;
 

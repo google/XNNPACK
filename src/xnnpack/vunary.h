@@ -1350,6 +1350,13 @@ DECLARE_F32_VHSWISH_UKERNEL_FUNCTION(xnn_f32_vhswish_ukernel__scalar_u2)
 DECLARE_F32_VHSWISH_UKERNEL_FUNCTION(xnn_f32_vhswish_ukernel__scalar_u4)
 
 
+#define DECLARE_F32_VLOG_UKERNEL_FUNCTION(fn_name) \
+  DECLARE_F32_UKERNEL_FUNCTION(fn_name, xnn_f32_default_params);
+
+DECLARE_F32_VLOG_UKERNEL_FUNCTION(xnn_f32_vlog_ukernel__scalar_log_u1)
+DECLARE_F32_VLOG_UKERNEL_FUNCTION(xnn_f32_vlog_ukernel__scalar_log_u2)
+DECLARE_F32_VLOG_UKERNEL_FUNCTION(xnn_f32_vlog_ukernel__scalar_log_u4)
+
 #define DECLARE_F16_VLRELU_UKERNEL_FUNCTION(fn_name) \
   DECLARE_F16_UKERNEL_FUNCTION(fn_name, xnn_f16_lrelu_params);
 

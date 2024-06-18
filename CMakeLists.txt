@@ -2705,6 +2705,12 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vlrelu-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME f32-vlrelu-test COMMAND f32-vlrelu-test)
 
+  ADD_EXECUTABLE(f32-vlog-test test/f32-vlog.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-vlog-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f32-vlog-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(f32-vlog-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME f32-vlog-test COMMAND f32-vlog-test)
+
   ADD_EXECUTABLE(f32-vmax-test test/f32-vmax.cc)
   SET_TARGET_PROPERTIES(f32-vmax-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f32-vmax-test PRIVATE include src test)

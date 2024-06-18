@@ -453,6 +453,7 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/f32-vhswish/gen/f32-vhswish-scalar-u1.c",
     "src/f32-vhswish/gen/f32-vhswish-scalar-u2.c",
     "src/f32-vhswish/gen/f32-vhswish-scalar-u4.c",
+    "src/f32-vlog/gen/f32-vlog-scalar-log.c",
     "src/f32-vlrelu/gen/f32-vlrelu-scalar-u1.c",
     "src/f32-vlrelu/gen/f32-vlrelu-scalar-u2.c",
     "src/f32-vlrelu/gen/f32-vlrelu-scalar-u4.c",
