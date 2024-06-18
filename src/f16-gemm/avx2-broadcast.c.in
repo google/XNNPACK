@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert NR % 8 == 0
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert ACCTYPE in ["F16", "F32"]
 $ACC_SUFFIX = "_f32acc" if ACCTYPE == "F32" else ""
 #include <assert.h>
@@ -58,12 +57,12 @@ void xnn_f16${ACC_SUFFIX}_gemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
       }
 
   do {
-    __m256 vacc0x${ABC[0:8]} = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) w));
+    __m256 vacc0x0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) w));
     $for N in range(8, NR, 8):
-      __m256 vacc0x${ABC[N:N+8]} = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) ((const uint16_t*) w + ${N})));
+      __m256 vacc0x${N//8} = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) ((const uint16_t*) w + ${N})));
     $for M in range(1, MR):
       $for N in range(0, NR, 8):
-        __m256 vacc${M}x${ABC[N:N+8]} = vacc0x${ABC[N:N+8]};
+        __m256 vacc${M}x${N//8} = vacc0x${N//8};
     w = (const uint16_t*) w + ${NR};
 
     size_t k = kc;
@@ -72,17 +71,17 @@ void xnn_f16${ACC_SUFFIX}_gemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
         const __m256 va${M} = _mm256_cvtph_ps(_mm_set1_epi16((short) *a${M}));
         a${M} += 1;
 
-      const __m256 vb${ABC[0:8]} = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) w));
+      const __m256 vb0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) w));
       $for N in range(8, NR, 8):
-        const __m256 vb${ABC[N:N+8]} = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) ((const uint16_t*) w + ${N})));
+        const __m256 vb${N//8} = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) ((const uint16_t*) w + ${N})));
       w = (const uint16_t*) w + ${NR};
 
       $for N in range(0, NR, 8):
         $for M in range(MR):
           $if ACCTYPE == "F32":
-            vacc${M}x${ABC[N:N+8]} = _mm256_fmadd_ps(va${M}, vb${ABC[N:N+8]}, vacc${M}x${ABC[N:N+8]});
+            vacc${M}x${N//8} = _mm256_fmadd_ps(va${M}, vb${N//8}, vacc${M}x${N//8});
           $else:
-            vacc${M}x${ABC[N:N+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va${M}, vb${ABC[N:N+8]}, vacc${M}x${ABC[N:N+8]}), _MM_FROUND_TO_NEAREST_INT));
+            vacc${M}x${N//8} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va${M}, vb${N//8}, vacc${M}x${N//8}), _MM_FROUND_TO_NEAREST_INT));
 
       k -= sizeof(uint16_t);
     } while (k != 0);
@@ -90,18 +89,18 @@ void xnn_f16${ACC_SUFFIX}_gemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
     const __m256 vmin = _mm256_load_ps(params->avx.min);
     $for N in range(0, NR, 8):
       $for M in range(MR):
-        vacc${M}x${ABC[N:N+8]} = _mm256_max_ps(vacc${M}x${ABC[N:N+8]}, vmin);
+        vacc${M}x${N//8} = _mm256_max_ps(vacc${M}x${N//8}, vmin);
 
     const __m256 vmax = _mm256_load_ps(params->avx.max);
     $for N in range(0, NR, 8):
       $for M in range(MR):
-        vacc${M}x${ABC[N:N+8]} = _mm256_min_ps(vacc${M}x${ABC[N:N+8]}, vmax);
+        vacc${M}x${N//8} = _mm256_min_ps(vacc${M}x${N//8}, vmax);
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in range(MR):
-        _mm_storeu_si128((__m128i*) c${M}, _mm256_cvtps_ph(vacc${M}x${ABC[0:8]}, _MM_FROUND_TO_NEAREST_INT));
+        _mm_storeu_si128((__m128i*) c${M}, _mm256_cvtps_ph(vacc${M}x0, _MM_FROUND_TO_NEAREST_INT));
         $for N in range(8, NR, 8):
-          _mm_storeu_si128((__m128i*) (c${M} + ${N}), _mm256_cvtps_ph(vacc${M}x${ABC[N:N+8]}, _MM_FROUND_TO_NEAREST_INT));
+          _mm_storeu_si128((__m128i*) (c${M} + ${N}), _mm256_cvtps_ph(vacc${M}x${N//8}, _MM_FROUND_TO_NEAREST_INT));
         c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
 
       $for M in range(MR):
@@ -112,51 +111,51 @@ void xnn_f16${ACC_SUFFIX}_gemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
       $for LOG2N in reversed(range(NR.bit_length())):
         $if LOG2N == 3:
           $for M in range(MR):
-            __m128i vh${M}x${ABC[0:8]} = _mm256_cvtps_ph(vacc${M}x${ABC[0:8]}, _MM_FROUND_TO_NEAREST_INT);
+            __m128i vh${M}x0 = _mm256_cvtps_ph(vacc${M}x0, _MM_FROUND_TO_NEAREST_INT);
         $if NR != 1 << LOG2N:
           if (nc & ${1 << LOG2N}) {
             $if LOG2N >= 4:
               $for M in range(MR):
-                _mm_storeu_si128((__m128i*) c${M}, _mm256_cvtps_ph(vacc${M}x${ABC[0:8]}, _MM_FROUND_TO_NEAREST_INT));
+                _mm_storeu_si128((__m128i*) c${M}, _mm256_cvtps_ph(vacc${M}x0, _MM_FROUND_TO_NEAREST_INT));
                 $for N in range(8, 1 << LOG2N, 8):
-                  _mm_storeu_si128((__m128i*) (c${M} + ${N}), _mm256_cvtps_ph(vacc${M}x${ABC[N:N+8]}, _MM_FROUND_TO_NEAREST_INT));
+                  _mm_storeu_si128((__m128i*) (c${M} + ${N}), _mm256_cvtps_ph(vacc${M}x${N//8}, _MM_FROUND_TO_NEAREST_INT));
 
               $for M in range(MR):
                 $for N in range(0, NR - (1 << LOG2N), 8):
-                  vacc${M}x${ABC[N:N+8]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+8]};
+                  vacc${M}x${N//8} = vacc${M}x${(N + (1 << LOG2N))//8};
 
               $for M in range(MR):
                 c${M} += ${1 << LOG2N};
             $elif LOG2N == 3:
               $for M in range(MR):
-                _mm_storeu_si128((__m128i*) c${M}, vh${M}x${ABC[0:8]});
+                _mm_storeu_si128((__m128i*) c${M}, vh${M}x0);
 
               $for M in range(MR):
-                vh${M}x${ABC[0:8]} = _mm256_cvtps_ph(vacc${M}x${ABC[8:16]}, _MM_FROUND_TO_NEAREST_INT);
+                vh${M}x0 = _mm256_cvtps_ph(vacc${M}x${ABC[8:16]}, _MM_FROUND_TO_NEAREST_INT);
 
               $for M in range(MR):
                 c${M} += ${1 << LOG2N};
             $elif LOG2N == 2:
               $for M in range(MR):
-                _mm_storel_epi64((__m128i*) c${M}, vh${M}x${ABC[0:8]});
+                _mm_storel_epi64((__m128i*) c${M}, vh${M}x0);
 
               $for M in range(MR):
-                vh${M}x${ABC[0:8]} = _mm_unpackhi_epi64(vh${M}x${ABC[0:8]}, vh${M}x${ABC[0:8]});
+                vh${M}x0 = _mm_unpackhi_epi64(vh${M}x0, vh${M}x0);
 
               $for M in range(MR):
                 c${M} += 4;
             $elif LOG2N == 1:
               $for M in range(MR):
-                _mm_storeu_si32(c${M}, vh${M}x${ABC[0:8]});
+                _mm_storeu_si32(c${M}, vh${M}x0);
 
               $for M in range(MR):
-                vh${M}x${ABC[0:8]} = _mm_srli_epi64(vh${M}x${ABC[0:8]}, 32);
+                vh${M}x0 = _mm_srli_epi64(vh${M}x0, 32);
 
               $for M in range(MR):
                 c${M} += 2;
             $elif LOG2N == 0:
               $for M in range(MR):
-                *c${M} = (uint16_t) _mm_extract_epi16(vh${M}x${ABC[0:8]}, 0);
+                *c${M} = (uint16_t) _mm_extract_epi16(vh${M}x0, 0);
           }
 
       nc = 0;

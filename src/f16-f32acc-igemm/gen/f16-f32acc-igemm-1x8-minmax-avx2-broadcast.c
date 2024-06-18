@@ -44,7 +44,7 @@ void xnn_f16_f32acc_igemm_minmax_ukernel_1x8__avx2_broadcast(
   uint16_t* c0 = c;
 
   do {
-    __m256 vacc0x01234567 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) w));
+    __m256 vacc0x0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) w));
     w = (const uint16_t*) w + 8;
 
     size_t p = ks;
@@ -58,13 +58,13 @@ void xnn_f16_f32acc_igemm_minmax_ukernel_1x8__avx2_broadcast(
 
       size_t k = kc;
       do {
-        const __m256 vb01234567 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) w));
+        const __m256 vb0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) w));
         w = (const uint16_t*) w + 8;
 
         const __m256 va0 = _mm256_cvtph_ps(_mm_set1_epi16((short) *a0));
         a0 += 1;
 
-        vacc0x01234567 = _mm256_fmadd_ps(va0, vb01234567, vacc0x01234567);
+        vacc0x0 = _mm256_fmadd_ps(va0, vb0, vacc0x0);
 
         k -= sizeof(uint16_t);
       } while (k != 0);
@@ -72,35 +72,35 @@ void xnn_f16_f32acc_igemm_minmax_ukernel_1x8__avx2_broadcast(
     } while (p != 0);
 
     const __m256 vmin = _mm256_load_ps(params->avx.min);
-    vacc0x01234567 = _mm256_max_ps(vacc0x01234567, vmin);
+    vacc0x0 = _mm256_max_ps(vacc0x0, vmin);
 
     const __m256 vmax = _mm256_load_ps(params->avx.max);
-    vacc0x01234567 = _mm256_min_ps(vacc0x01234567, vmax);
+    vacc0x0 = _mm256_min_ps(vacc0x0, vmax);
 
     if XNN_LIKELY(nc >= 8) {
-      _mm_storeu_si128((__m128i*) c0, _mm256_cvtps_ph(vacc0x01234567, _MM_FROUND_TO_NEAREST_INT));
+      _mm_storeu_si128((__m128i*) c0, _mm256_cvtps_ph(vacc0x0, _MM_FROUND_TO_NEAREST_INT));
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
 
       a = (const void**restrict) ((uintptr_t) a - ks);
       nc -= 8;
     } else {
-      __m128i vh0x01234567 = _mm256_cvtps_ph(vacc0x01234567, _MM_FROUND_TO_NEAREST_INT);
+      __m128i vh0x0 = _mm256_cvtps_ph(vacc0x0, _MM_FROUND_TO_NEAREST_INT);
       if (nc & 4) {
-        _mm_storel_epi64((__m128i*) c0, vh0x01234567);
+        _mm_storel_epi64((__m128i*) c0, vh0x0);
 
-        vh0x01234567 = _mm_unpackhi_epi64(vh0x01234567, vh0x01234567);
+        vh0x0 = _mm_unpackhi_epi64(vh0x0, vh0x0);
 
         c0 += 4;
       }
       if (nc & 2) {
-        _mm_storeu_si32(c0, vh0x01234567);
+        _mm_storeu_si32(c0, vh0x0);
 
-        vh0x01234567 = _mm_srli_epi64(vh0x01234567, 32);
+        vh0x0 = _mm_srli_epi64(vh0x0, 32);
 
         c0 += 2;
       }
       if (nc & 1) {
-        *c0 = _mm_extract_epi16(vh0x01234567, 0);
+        *c0 = _mm_extract_epi16(vh0x0, 0);
       }
 
       nc = 0;

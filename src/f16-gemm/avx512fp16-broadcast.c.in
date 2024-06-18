@@ -5,7 +5,6 @@
 
 $assert DATATYPE in ["F16"]
 $assert NR % 32 == 0
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <immintrin.h>
@@ -63,25 +62,25 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast(
       }
 
   do {
-    __m512h vacc0x${ABC[0:32]} = _mm512_load_ph(w);
+    __m512h vacc0x0 = _mm512_load_ph(w);
     $for N in range(32, NR, 32):
-      __m512h vacc0x${ABC[N:N+32]} = _mm512_load_ph((const uint16_t*) w + ${N});
+      __m512h vacc0x${N//32} = _mm512_load_ph((const uint16_t*) w + ${N});
     $for M in range(1, MR):
       $for N in range(0, NR, 32):
-        __m512h vacc${M}x${ABC[N:N+32]} = vacc0x${ABC[N:N+32]};
+        __m512h vacc${M}x${N//32} = vacc0x${N//32};
     w = (const uint16_t*) w + ${NR};
 
     size_t k = kc;
     do {
-      const __m512h vb${ABC[0:32]} = _mm512_load_ph(w);
+      const __m512h vb0 = _mm512_load_ph(w);
       $for N in range(32, NR, 32):
-        const __m512h vb${ABC[N:N+32]} = _mm512_load_ph((const uint16_t*) w + ${N});
+        const __m512h vb${N//32} = _mm512_load_ph((const uint16_t*) w + ${N});
       w = (const uint16_t*) w + ${NR};
 
       $for M in range(MR):
         const __m512h va${M} = _mm512_castsi512_ph(_mm512_set1_epi16(*a${M}));
         $for N in range(0, NR, 32):
-          vacc${M}x${ABC[N:N+32]} = _mm512_fmadd_ph(va${M}, vb${ABC[N:N+32]}, vacc${M}x${ABC[N:N+32]});
+          vacc${M}x${N//32} = _mm512_fmadd_ph(va${M}, vb${N//32}, vacc${M}x${N//32});
 
       $for M in range(MR):
         a${M} += 1;
@@ -92,18 +91,18 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast(
     const __m512h vmin = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.min));
     $for N in range(0, NR, 32):
       $for M in range(MR):
-        vacc${M}x${ABC[N:N+32]} = _mm512_max_ph(vmin, vacc${M}x${ABC[N:N+32]});
+        vacc${M}x${N//32} = _mm512_max_ph(vmin, vacc${M}x${N//32});
 
     const __m512h vmax = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.max));
     $for N in range(0, NR, 32):
       $for M in range(MR):
-        vacc${M}x${ABC[N:N+32]} = _mm512_min_ph(vmax, vacc${M}x${ABC[N:N+32]});
+        vacc${M}x${N//32} = _mm512_min_ph(vmax, vacc${M}x${N//32});
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in RANGE_MR:
-        _mm512_storeu_ph(c${M}, vacc${M}x${ABC[0:32]});
+        _mm512_storeu_ph(c${M}, vacc${M}x0);
         $for N in range(32, NR, 32):
-          _mm512_storeu_ph((uint16_t*) c${M} + ${N}, vacc${M}x${ABC[N:N+32]});
+          _mm512_storeu_ph((uint16_t*) c${M} + ${N}, vacc${M}x${N//32});
         c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
 
       $for M in RANGE_MR:
@@ -116,13 +115,13 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast(
           if (nc & ${1 << LOG2N}) {
             $if LOG2N >= 5:
               $for M in RANGE_MR:
-                _mm512_storeu_ph(c${M}, vacc${M}x${ABC[0:32]});
+                _mm512_storeu_ph(c${M}, vacc${M}x0);
                 $for N in range(32, 1 << LOG2N, 32):
-                  _mm512_storeu_ph((uint16_t*) c${M} + ${N}, vacc${M}x${ABC[N:N+32]});
+                  _mm512_storeu_ph((uint16_t*) c${M} + ${N}, vacc${M}x${N//32});
 
               $for M in RANGE_MR:
                 $for N in range(0, NR - (1 << LOG2N), 32):
-                  vacc${M}x${ABC[N:N+32]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+32]};
+                  vacc${M}x${N//32} = vacc${M}x${(N + (1 << LOG2N))//32};
 
               $for M in RANGE_MR:
                 c${M} += ${1 << LOG2N};
@@ -133,7 +132,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast(
               // Prepare mask for valid 16-bit elements (depends on nc).
               const __mmask32 vmask = _cvtu32_mask32((uint32_t) (UINT32_C(1) << (nc & 31)) - UINT32_C(1));
               $for M in RANGE_MR:
-                _mm512_mask_storeu_epi16(c${M}, vmask, _mm512_castph_si512(vacc${M}x${ABC[0:32]}));
+                _mm512_mask_storeu_epi16(c${M}, vmask, _mm512_castph_si512(vacc${M}x0));
             }
           $else:
             assert(nc != 0);
@@ -141,7 +140,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast(
             // Prepare mask for valid 16-bit elements (depends on nc).
             const __mmask32 vmask = _cvtu32_mask32((uint32_t) (UINT32_C(1) << nc) - UINT32_C(1));
             $for M in RANGE_MR:
-              _mm512_mask_storeu_epi16(c${M}, vmask, _mm512_castph_si512(vacc${M}x${ABC[0:32]}));
+              _mm512_mask_storeu_epi16(c${M}, vmask, _mm512_castph_si512(vacc${M}x0));
       nc = 0;
     }
   } while (nc != 0);
