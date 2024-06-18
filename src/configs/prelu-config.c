@@ -129,6 +129,11 @@ static void init_f32_prelu_config(void) {
       f32_prelu_config.row_tile = 2;
       f32_prelu_config.channel_tile = 4;
     }
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    f32_prelu_config.ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__rvv_2x4v;
+    f32_prelu_config.row_tile = 4;
+    f32_prelu_config.channel_tile = 32;
   #else
     f32_prelu_config.ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__scalar_2x4;
     f32_prelu_config.row_tile = 4;
