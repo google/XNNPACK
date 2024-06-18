@@ -945,15 +945,15 @@
   init: xnn_init_f32_minmax_hvx_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
-- name: xnn_f32_gemm_minmax_ukernel_8x32__hvx_broadcast
-  init: xnn_init_f32_minmax_hvx_params
-  pack: xnn_pack_f32_gemm_goi_w
-  k-block: 1
-- name: xnn_f32_gemm_minmax_ukernel_16x32__hvx_broadcast
-  init: xnn_init_f32_minmax_hvx_params
-  pack: xnn_pack_f32_gemm_goi_w
-  k-block: 1
 - name: xnn_f32_gemm_minmax_ukernel_1x64__hvx_broadcast
+  init: xnn_init_f32_minmax_hvx_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_1x128__hvx_broadcast
+  init: xnn_init_f32_minmax_hvx_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_2x128__hvx_broadcast
   init: xnn_init_f32_minmax_hvx_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
@@ -965,11 +965,11 @@
   init: xnn_init_f32_minmax_hvx_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
-- name: xnn_f32_gemm_minmax_ukernel_1x128__hvx_broadcast
+- name: xnn_f32_gemm_minmax_ukernel_8x32__hvx_broadcast
   init: xnn_init_f32_minmax_hvx_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
-- name: xnn_f32_gemm_minmax_ukernel_2x128__hvx_broadcast
+- name: xnn_f32_gemm_minmax_ukernel_16x32__hvx_broadcast
   init: xnn_init_f32_minmax_hvx_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1

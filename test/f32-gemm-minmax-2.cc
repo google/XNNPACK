@@ -3194,7 +3194,7 @@ INSTANTIATE_TEST_SUITE_P(
     });
 
 
-#if XNN_ARCH_HEXAGON
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   INSTANTIATE_TEST_SUITE_P(
       F32_GEMM_MINMAX_1X32__HVX_BROADCAST, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -3206,14 +3206,17 @@ INSTANTIATE_TEST_SUITE_P(
             tester.Test(xnn_f32_gemm_minmax_ukernel_1x32__hvx_broadcast,
                         xnn_init_f32_minmax_hvx_params,
                         xnn_pack_f32_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_HVX;
           })),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_HEXAGON
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 
-#if XNN_ARCH_HEXAGON
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   INSTANTIATE_TEST_SUITE_P(
       F32_GEMM_MINMAX_1X64__HVX_BROADCAST, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -3225,14 +3228,17 @@ INSTANTIATE_TEST_SUITE_P(
             tester.Test(xnn_f32_gemm_minmax_ukernel_1x64__hvx_broadcast,
                         xnn_init_f32_minmax_hvx_params,
                         xnn_pack_f32_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_HVX;
           })),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_HEXAGON
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 
-#if XNN_ARCH_HEXAGON
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   INSTANTIATE_TEST_SUITE_P(
       F32_GEMM_MINMAX_4X64__HVX_BROADCAST, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -3244,8 +3250,11 @@ INSTANTIATE_TEST_SUITE_P(
             tester.Test(xnn_f32_gemm_minmax_ukernel_4x64__hvx_broadcast,
                         xnn_init_f32_minmax_hvx_params,
                         xnn_pack_f32_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_HVX;
           })),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_HEXAGON
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
