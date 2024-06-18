@@ -33,6 +33,7 @@ XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vmul_confi
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vsub_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vsqrdiff_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vadd_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vcopysign_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vdiv_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vmax_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vmin_config();
