@@ -67,17 +67,17 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) { return -a; }
 
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a, xnn_simd_f32_t b) {
-  const uint32_t res = *(const uint32_t *)&a & *(const uint32_t *)&a;
+  const uint32_t res = *(const uint32_t *)&a & *(const uint32_t *)&b;
   return *(const xnn_simd_f32_t *)&res;
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_or_f32(xnn_simd_f32_t a, xnn_simd_f32_t b) {
-  const uint32_t res = *(const uint32_t *)&a | *(const uint32_t *)&a;
+  const uint32_t res = *(const uint32_t *)&a | *(const uint32_t *)&b;
   return *(const xnn_simd_f32_t *)&res;
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a, xnn_simd_f32_t b) {
-  const uint32_t res = *(const uint32_t *)&a ^ *(const uint32_t *)&a;
+  const uint32_t res = *(const uint32_t *)&a ^ *(const uint32_t *)&b;
   return *(const xnn_simd_f32_t *)&res;
 }
 
