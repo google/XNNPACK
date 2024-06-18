@@ -190,8 +190,9 @@ static enum xnn_status create_binary_elementwise_nd_f32(
   }
 
   union xnn_f32_minmax_params params;
-  assert(config->init.f32_minmax != NULL);
-  config->init.f32_minmax(&params, output_min, output_max);
+  if (config->init.f32_minmax != NULL) {
+    config->init.f32_minmax(&params, output_min, output_max);
+  }
 
   return create_binary_elementwise_nd(
     flags,
@@ -412,6 +413,19 @@ enum xnn_status xnn_create_divide_nd_f16(
     xnn_operator_type_divide_nd_f16,
     xnn_init_f16_vdiv_config(),
     divide_op_out);
+}
+
+enum xnn_status xnn_create_copysign_nd_f32(
+    uint32_t flags,
+    xnn_operator_t* copysign_op_out)
+{
+  return create_binary_elementwise_nd_f32(
+    -INFINITY,
+    INFINITY,
+    flags,
+    xnn_operator_type_copysign_nd_f32,
+    xnn_init_f32_vcopysign_config(),
+    copysign_op_out);
 }
 
 enum xnn_status xnn_create_divide_nd_f32(
@@ -1286,6 +1300,21 @@ enum xnn_status xnn_reshape_divide_nd_f32(
     threadpool);
 }
 
+enum xnn_status xnn_reshape_copysign_nd_f32(
+    xnn_operator_t copysign_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    pthreadpool_t threadpool)
+{
+  return reshape_binary_elementwise_nd_f32(
+    copysign_op, xnn_operator_type_copysign_nd_f32,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    threadpool);
+}
+
 enum xnn_status xnn_reshape_maximum_nd_f16(
     xnn_operator_t maximum_op,
     size_t num_input1_dims,
@@ -1615,6 +1644,17 @@ enum xnn_status xnn_setup_divide_nd_f32(
 {
   return setup_binary_elementwise_nd(
     divide_op, xnn_operator_type_divide_nd_f32,
+    input1, input2, output);
+}
+
+enum xnn_status xnn_setup_copysign_nd_f32(
+    xnn_operator_t copysign_op,
+    const float* input1,
+    const float* input2,
+    float* output)
+{
+  return setup_binary_elementwise_nd(
+    copysign_op, xnn_operator_type_copysign_nd_f32,
     input1, input2, output);
 }
 

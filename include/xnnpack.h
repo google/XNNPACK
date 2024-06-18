@@ -1357,6 +1357,22 @@ enum xnn_status xnn_define_concatenate5(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Copy Sign Node and add it to a Subgraph.
+///
+/// The Copy Sign Node copies the sign of the second input to the first input.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input1_id - Value ID for the first input tensor. The input tensor must be defined in the @a subgraph.
+/// @param input2_id - Value ID for the second input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor.
+/// @param flags - binary features of the Copy Sign Node. No supported flags are currently defined.
+enum xnn_status xnn_define_copysign(
+  xnn_subgraph_t subgraph,
+  uint32_t input1_id,
+  uint32_t input2_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a Copy Node and add it to a Subgraph.
 ///
 /// The Copy Node copies an input tensor to an output tensor.
@@ -3961,6 +3977,24 @@ enum xnn_status xnn_setup_divide_nd_f16(
   const void* input1,
   const void* input2,
   void* output);
+
+enum xnn_status xnn_create_copysign_nd_f32(
+  uint32_t flags,
+  xnn_operator_t* copysign_op_out);
+
+enum xnn_status xnn_reshape_copysign_nd_f32(
+  xnn_operator_t copysign_op,
+  size_t mag_dims,
+  const size_t* mag_shape,
+  size_t sign_dims,
+  const size_t* sign_shape,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_copysign_nd_f32(
+  xnn_operator_t copysign_op,
+  const float* mag,
+  const float* sign,
+  float* output);
 
 enum xnn_status xnn_create_divide_nd_f32(
   float output_min,
