@@ -3,7 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $BATCH_TILES = tuple(int(bt) for bt in BATCH_TILES.split(","))
 
 #include <assert.h>
@@ -40,13 +39,13 @@ $for BATCH_TILE in BATCH_TILES:
     $if BATCH_TILE > 32:
       for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
         $for N in range(SIMD_TILE):
-          HVX_Vector vx${ABC[N]} = *vptr++;
+          HVX_Vector vx${N} = *vptr++;
 
         $for N in range(SIMD_TILE):
-          HVX_Vector vacc${ABC[N]} = Q6_Vsf_vsub_VsfVsf(v0, vx${ABC[N]});
+          HVX_Vector vacc${N} = Q6_Vsf_vsub_VsfVsf(v0, vx${N});
 
         $for N in range(SIMD_TILE):
-          *vptr_o++ = vacc${ABC[N]};
+          *vptr_o++ = vacc${N};
       }
 
     for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {

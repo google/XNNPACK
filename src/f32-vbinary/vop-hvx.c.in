@@ -2,7 +2,6 @@
 $assert BATCH_TILE % 32 == 0
 $assert BATCH_TILE >= 32
 $SIMD_TILE = BATCH_TILE // 32
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "MAX", "MIN", "MUL", "SUB", "SQRDIFF"]
 $assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
@@ -50,25 +49,25 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__hvx_u${BATCH_TILE}(
   $if BATCH_TILE > 32:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       $for N in range(SIMD_TILE):
-        HVX_Vector va${ABC[N]} = *vptr_a++;
+        HVX_Vector va${N} = *vptr_a++;
       $for N in range(SIMD_TILE):
-        HVX_Vector vb${ABC[N]} = *vptr_b++;
+        HVX_Vector vb${N} = *vptr_b++;
 
       $for N in range(SIMD_TILE):
-        HVX_Vector vacc${ABC[N]} = ${_HEXAGON_OP_HVX}(va${ABC[N]}, vb${ABC[N]});
+        HVX_Vector vacc${N} = ${_HEXAGON_OP_HVX}(va${N}, vb${N});
 
       $if OP == "SQRDIFF":
         $for N in range(SIMD_TILE):
-          vacc${ABC[N]} = Q6_Vsf_vmpy_VsfVsf(vacc${ABC[N]}, vacc${ABC[N]});
+          vacc${N} = Q6_Vsf_vmpy_VsfVsf(vacc${N}, vacc${N});
       $if ACTIVATION == "MINMAX":
         $for N in range(SIMD_TILE):
-          vacc${ABC[N]} = Q6_Vsf_vmax_VsfVsf(vacc${ABC[N]}, voutput_min);
+          vacc${N} = Q6_Vsf_vmax_VsfVsf(vacc${N}, voutput_min);
 
         $for N in range(SIMD_TILE):
-          vacc${ABC[N]} = Q6_Vsf_vmin_VsfVsf(vacc${ABC[N]}, voutput_max);
+          vacc${N} = Q6_Vsf_vmin_VsfVsf(vacc${N}, voutput_max);
 
       $for N in range(SIMD_TILE):
-        *vptr_o++ = vacc${ABC[N]};
+        *vptr_o++ = vacc${N};
     }
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     HVX_Vector va = *vptr_a++;

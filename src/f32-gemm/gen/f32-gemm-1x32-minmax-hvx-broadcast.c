@@ -2,7 +2,7 @@
 //   Template: src/f32-gemm/hvx-broadcast.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2019 Google LLC
+// Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -60,7 +60,7 @@ void xnn_f32_gemm_minmax_ukernel_1x32__hvx_broadcast(
       const HVX_Vector vb0 = *((const HVX_Vector *)(w));
       w += 32;
 
-      vacc0x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va0, vb0),vacc0x0)); 
+      vacc0x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va0, vb0),vacc0x0));
 
       k -= sizeof(float);
     } while (k != 0);

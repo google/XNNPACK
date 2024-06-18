@@ -2,7 +2,7 @@
 //   Template: src/f32-igemm/hvx-broadcast.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2019 Google LLC
+// Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -170,10 +170,10 @@ void xnn_f32_igemm_minmax_ukernel_4x64__hvx_broadcast(
         *((HVX_UVector *)c1) = vacc1x0;
         *((HVX_UVector *)c0) = vacc0x0;
 
-        vacc3x0 = vacc3x1; 
-        vacc2x0 = vacc2x1; 
-        vacc1x0 = vacc1x1; 
-        vacc0x0 = vacc0x1; 
+        vacc3x0 = vacc3x1;
+        vacc2x0 = vacc2x1;
+        vacc1x0 = vacc1x1;
+        vacc0x0 = vacc0x1;
 
         c3 += 32;
         c2 += 32;
