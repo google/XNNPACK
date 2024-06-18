@@ -27,30 +27,50 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(f16|f32)_prelu_ukernel__(.+)_(\d+)x(\d+)", name)
+  match = re.fullmatch(r"xnn_(f16|f32)_prelu_ukernel__(.+)_(\d+)x(\d+)(v)?", name)
   assert match is not None
   row_tile = int(match.group(3))
   channel_tile = int(match.group(4))
+  vector_tile = bool(match.group(5))
 
   arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(2))
-  return row_tile, channel_tile, arch, isa
+  return row_tile, channel_tile, vector_tile, arch, isa
 
 
 PRELU_TEST_TEMPLATE = """\
-TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}) {
+TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   PReLUMicrokernelTester()
     .rows(${ROW_TILE})
-    .channels(${CHANNEL_TILE})
+    .channels(${CHANNEL_SCALED_TILE})
     .Test(${", ".join(TEST_ARGS)});
 }
 
-$if CHANNEL_TILE > 1:
-  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}) {
+$if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
+  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*10}; channels += ${CHANNEL_TILE}) {
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*10}; channels += ${CHANNEL_TILE}) {
+        PReLUMicrokernelTester()
+          .rows(${ROW_TILE})
+          .channels(channels)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    $else:
+      for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*10; channels += ${CHANNEL_SCALED_TILE}) {
+        PReLUMicrokernelTester()
+          .rows(${ROW_TILE})
+          .channels(channels)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+  }
+
+  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
       PReLUMicrokernelTester()
         .rows(${ROW_TILE})
         .channels(channels)
@@ -58,26 +78,23 @@ $if CHANNEL_TILE > 1:
     }
   }
 
-  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
-      PReLUMicrokernelTester()
-        .rows(${ROW_TILE})
-        .channels(channels)
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-
-TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}) {
+TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-    PReLUMicrokernelTester()
-      .rows(${ROW_TILE})
-      .channels(channels)
-      .Test(${", ".join(TEST_ARGS)});
-  }
+  $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
+      PReLUMicrokernelTester()
+        .rows(${ROW_TILE})
+        .channels(channels)
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  $else:
+    for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+      PReLUMicrokernelTester()
+        .rows(${ROW_TILE})
+        .channels(channels)
+        .Test(${", ".join(TEST_ARGS)});
+    }
 }
 
 $if ROW_TILE > 1:
@@ -85,12 +102,20 @@ $if ROW_TILE > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t rows = 1; rows < ${ROW_TILE}; rows++) {
-      for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
-        PReLUMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(${", ".join(TEST_ARGS)});
-      }
+      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+        for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
+          PReLUMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      $else:
+        for (size_t channels = 1; channels <= ${CHANNEL_SCALED_TILE}*5; channels += ${CHANNEL_SCALED_TILE}-1) {
+          PReLUMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
     }
   }
 
@@ -98,12 +123,20 @@ $if ROW_TILE > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t rows = ${ROW_TILE*2}; rows <= ${ROW_TILE*4}; rows += ${ROW_TILE}) {
-      for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
-        PReLUMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(${", ".join(TEST_ARGS)});
-      }
+      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+        for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
+          PReLUMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      $else:
+        for (size_t channels = 1; channels <= ${CHANNEL_SCALED_TILE}*5; channels += ${CHANNEL_SCALED_TILE}-1) {
+          PReLUMicrokernelTester()
+            .rows(rows)
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
     }
   }
 
@@ -111,12 +144,20 @@ TEST(${TEST_NAME}, rows_gt_${ROW_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t rows = ${ROW_TILE+1}; rows < ${ROW_TILE*2}; rows++) {
-    for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
-      PReLUMicrokernelTester()
-        .rows(rows)
-        .channels(channels)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    $else:
+      for (size_t channels = 1; channels <= ${CHANNEL_SCALED_TILE}*5; channels += ${CHANNEL_SCALED_TILE}-1) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(${", ".join(TEST_ARGS)});
+      }
   }
 }
 
@@ -124,14 +165,24 @@ TEST(${TEST_NAME}, input_stride) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t rows = 1; rows <= ${ROW_TILE*3}; rows += ${max(1, ROW_TILE-1)}) {
-    for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
-      PReLUMicrokernelTester()
-        .rows(rows)
-        .channels(channels)
-        .input_stride(${next_prime(CHANNEL_TILE*5+1)})
-        .iterations(1)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride(${next_prime(CHANNEL_TILE*5+1)})
+          .iterations(1)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    $else:
+      for (size_t channels = 1; channels <= ${CHANNEL_SCALED_TILE}*5; channels += ${CHANNEL_SCALED_TILE}-1) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride(${CHANNEL_SCALED_TILE}*5+1)
+          .iterations(1)
+          .Test(${", ".join(TEST_ARGS)});
+      }
   }
 }
 
@@ -139,14 +190,24 @@ TEST(${TEST_NAME}, output_stride) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t rows = 1; rows <= ${ROW_TILE*3}; rows += ${max(1, ROW_TILE-1)}) {
-    for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
-      PReLUMicrokernelTester()
-        .rows(rows)
-        .channels(channels)
-        .output_stride(${next_prime(CHANNEL_TILE*5+1)})
-        .iterations(1)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .output_stride(${next_prime(CHANNEL_TILE*5+1)})
+          .iterations(1)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    $else:
+      for (size_t channels = 1; channels <= ${CHANNEL_SCALED_TILE}*5; channels += ${CHANNEL_SCALED_TILE}-1) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .output_stride(${CHANNEL_SCALED_TILE}*5+1)
+          .iterations(1)
+          .Test(${", ".join(TEST_ARGS)});
+      }
   }
 }
 
@@ -154,20 +215,30 @@ TEST(${TEST_NAME}, inplace) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t rows = 1; rows <= ${ROW_TILE*3}; rows += ${max(1, ROW_TILE-1)}) {
-    for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
-      PReLUMicrokernelTester()
-        .rows(rows)
-        .channels(channels)
-        .inplace(true)
-        .iterations(1)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .inplace(true)
+          .iterations(1)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    $else:
+      for (size_t channels = 1; channels <= ${CHANNEL_SCALED_TILE}*5; channels += ${CHANNEL_SCALED_TILE}-1) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .inplace(true)
+          .iterations(1)
+          .Test(${", ".join(TEST_ARGS)});
+      }
   }
 }
 """
 
 
-def generate_test_cases(ukernel, row_tile, channel_tile, isa):
+def generate_test_cases(ukernel, row_tile, channel_tile, vector_tile, isa):
   """Generates all tests cases for a PRELU micro-kernel.
 
   Args:
@@ -176,6 +247,8 @@ def generate_test_cases(ukernel, row_tile, channel_tile, isa):
               loop of the micro-kernel.
     channel_tile: Number of channels processed per one iteration of the inner
                   loop of the micro-kernel.
+    vector_tile: Indicates if channels are specified in vectors rather than
+                 elements.
     isa: instruction set required to run the micro-kernel. Generated unit test
          will skip execution if the host processor doesn't support this ISA.
 
@@ -184,12 +257,18 @@ def generate_test_cases(ukernel, row_tile, channel_tile, isa):
   """
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
+  channel_scaled_tile = channel_tile
+  if vector_tile:
+    ctype = {"f16": "uint16_t", "f32": "float"}[datatype]
+    channel_scaled_tile = {"rvv": "(%s*xnn_init_hardware_config()->vlenb/sizeof(%s))" % (str(channel_tile), ctype)}[isa]
   return xngen.preprocess(PRELU_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": [ukernel],
       "DATATYPE": datatype,
       "ROW_TILE": row_tile,
       "CHANNEL_TILE": channel_tile,
+      "CHANNEL_SCALED_TILE": channel_scaled_tile,
+      "CHANNEL_SUFFIX": "v" if vector_tile else "",
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
     })
@@ -225,9 +304,9 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
-      row_tile, channel_tile, arch, isa = split_ukernel_name(name)
+      row_tile, channel_tile, vector_tile, arch, isa = split_ukernel_name(name)
 
-      test_case = generate_test_cases(name, row_tile, channel_tile, isa)
+      test_case = generate_test_cases(name, row_tile, channel_tile, vector_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     xnncommon.overwrite_if_changed(options.output, tests)
