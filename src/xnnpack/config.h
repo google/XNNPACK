@@ -66,6 +66,7 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_abs_config(
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_clamp_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_elu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_hswish_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_log_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_lrelu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_neg_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_relu_config();

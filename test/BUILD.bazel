@@ -1446,6 +1446,7 @@ xnnpack_binary(
     "floor_nc",
     "hardswish_nc",
     "leaky_relu_nc",
+    "log_nc",
     "negate_nc",
     "reciprocal_square_root_nc",
     "sigmoid_nc",

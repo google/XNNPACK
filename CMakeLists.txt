@@ -1413,6 +1413,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(leaky-relu-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME leaky-relu-nc-test COMMAND leaky-relu-nc-test)
 
+    ADD_EXECUTABLE(log-nc-test test/log-nc.cc)
+    TARGET_INCLUDE_DIRECTORIES(log-nc-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(log-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME log-nc-test COMMAND log-nc-test)
+
     ADD_EXECUTABLE(max-pooling-nhwc-test test/max-pooling-nhwc.cc)
     TARGET_INCLUDE_DIRECTORIES(max-pooling-nhwc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(max-pooling-nhwc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)

@@ -102,6 +102,7 @@ struct xnn_unary_elementwise_config {
     xnn_init_f32_elu_params_fn f32_elu;
     xnn_init_f32_f16_cvt_params_fn f32_f16_cvt;
     xnn_init_f32_hswish_params_fn f32_hswish;
+    xnn_init_f32_log_params_fn f32_log;
     xnn_init_f32_lrelu_params_fn f32_lrelu;
     xnn_init_f32_minmax_params_fn f32_minmax;
     xnn_init_f32_qs8_cvt_params_fn f32_qs8_cvt;
