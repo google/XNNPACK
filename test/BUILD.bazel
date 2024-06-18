@@ -1904,6 +1904,7 @@ xnnpack_cc_library(
     "floor",
     "hardswish",
     "leaky_relu",
+    "log",
     "negate",
     "reciprocal_square_root",
     "sigmoid",

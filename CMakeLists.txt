@@ -327,6 +327,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/global-average-pooling.c
   src/subgraph/global-sum-pooling.c
   src/subgraph/hardswish.c
+  src/subgraph/log.c
   src/subgraph/leaky-relu.c
   src/subgraph/max-pooling-2d.c
   src/subgraph/maximum2.c
@@ -1782,6 +1783,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(leaky-relu-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(leaky-relu-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME leaky-relu-test COMMAND leaky-relu-test)
+
+    ADD_EXECUTABLE(log-test test/log.cc)
+    TARGET_INCLUDE_DIRECTORIES(log-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(log-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main fp16)
+    ADD_TEST(NAME log-test COMMAND log-test)
 
     ADD_EXECUTABLE(max-pooling-2d-test test/max-pooling-2d.cc)
     TARGET_INCLUDE_DIRECTORIES(max-pooling-2d-test PRIVATE src test)
