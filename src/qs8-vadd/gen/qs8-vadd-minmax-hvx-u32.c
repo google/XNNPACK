@@ -79,10 +79,6 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u32(
     do {
       HVX_Vector va = *((HVX_UVector*)input_a);
       HVX_Vector vb = *((HVX_UVector*)input_b);
-      if XNN_LIKELY(batch > (32 * sizeof(int8_t))) {
-        input_a += 32;
-        input_b += 32;
-      }
 
       HVX_VectorPair va_i16 = Q6_Wh_vunpack_Vb(va);
       HVX_Vector va_lo = Q6_V_lo_W(va_i16);
@@ -105,15 +101,8 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u32(
       vout = Q6_Vb_vmax_VbVb(voutput_min, vout);
       vout = Q6_Vb_vmin_VbVb(voutput_max, vout);
 
-      if XNN_LIKELY(batch > (32 * sizeof(int8_t))) {
-        Q6_V_vstu_variable(ptr_o, 32, vout);
-        ptr_o += 32;
-        batch -=32;
-      }
-      else{
-        Q6_V_vstu_variable(ptr_o, batch, vout);
-        batch = 0;
-      }
+      Q6_V_vstu_variable(ptr_o, batch, vout);
+      batch = 0;
     } while (batch != 0);
   }
 }
