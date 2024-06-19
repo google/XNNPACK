@@ -132,6 +132,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/convert.c",
     "src/subgraph/convolution-2d.c",
     "src/subgraph/copy.c",
+    "src/subgraph/copysign.c",
     "src/subgraph/deconvolution-2d.c",
     "src/subgraph/depth-to-space-2d.c",
     "src/subgraph/depthwise-convolution-2d.c",

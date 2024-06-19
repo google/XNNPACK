@@ -163,6 +163,9 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsubc-minmax-avx-u16.c
   src/f32-vclamp/gen/f32-vclamp-avx-u8.c
   src/f32-vclamp/gen/f32-vclamp-avx-u16.c
+  src/f32-vcopysign/gen/f32-vcopysign-avx.c
+  src/f32-vcopysign/gen/f32-vcopysignc-avx.c
+  src/f32-vcopysign/gen/f32-vrcopysignc-avx.c
   src/f32-velu/gen/f32-velu-avx-rr2-lut4-p4-perm-u8.c
   src/f32-velu/gen/f32-velu-avx-rr2-lut4-p4-perm-u16.c
   src/f32-velu/gen/f32-velu-avx-rr2-lut4-p4-perm-u24.c
