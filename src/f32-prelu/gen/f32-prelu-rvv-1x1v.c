@@ -32,12 +32,12 @@ void xnn_f32_prelu_ukernel__rvv_1x1v(
 
   const float* i0 = input;
   float* o0 = output;
+  float zero = 0.0f;
 
 
   const size_t input_increment = input_stride * 1 - channels;
   const size_t output_increment = output_stride * 1 - channels;
 
-  vfloat32m1_t zero_f32v = __riscv_vfmv_v_f_f32m1(0.0f, __riscv_vsetvl_e32m1(channels));
   do {
 
     const float* w = weights;
@@ -48,7 +48,7 @@ void xnn_f32_prelu_ukernel__rvv_1x1v(
       vfloat32m1_t w_f32v = __riscv_vle32_v_f32m1(w, n); w += n;
 
       vfloat32m1_t in0_f32v = __riscv_vle32_v_f32m1(i0, n); i0 += n;
-      vbool32_t mask0_f32v = __riscv_vmflt_vv_f32m1_b32(in0_f32v, zero_f32v, n);
+      vbool32_t mask0_f32v = __riscv_vmflt_vf_f32m1_b32(in0_f32v, zero, n);
       vfloat32m1_t out0_f32v = __riscv_vfmul_vv_f32m1_mu(mask0_f32v, in0_f32v, w_f32v, in0_f32v, n);
       __riscv_vse32_v_f32m1(o0, out0_f32v, n); o0 += n;
     }

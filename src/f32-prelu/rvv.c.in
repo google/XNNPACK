@@ -30,6 +30,7 @@ void xnn_f32_prelu_ukernel__rvv_${ROW_TILE}x${LMUL}v(
 
   const float* i0 = input;
   float* o0 = output;
+  float zero = 0.0f;
 
   $for M in range(1, ROW_TILE):
     const float* i${M} = i${M-1} + input_stride;
@@ -38,7 +39,6 @@ void xnn_f32_prelu_ukernel__rvv_${ROW_TILE}x${LMUL}v(
   const size_t input_increment = input_stride * ${ROW_TILE} - channels;
   const size_t output_increment = output_stride * ${ROW_TILE} - channels;
 
-  vfloat32m${LMUL}_t zero_f32v = __riscv_vfmv_v_f_f32m${LMUL}(0.0f, __riscv_vsetvl_e32m${LMUL}(channels));
   do {
     $for M in range(1, ROW_TILE):
       $if M % 2 == 0:
@@ -62,7 +62,7 @@ void xnn_f32_prelu_ukernel__rvv_${ROW_TILE}x${LMUL}v(
       $for M in range(ROW_TILE):
         vfloat32m${LMUL}_t in${M}_f32v = __riscv_vle32_v_f32m${LMUL}(i${M}, n); i${M} += n;
       $for M in range(ROW_TILE):
-        vbool${32//LMUL}_t mask${M}_f32v = __riscv_vmflt_vv_f32m${LMUL}_b${32//LMUL}(in${M}_f32v, zero_f32v, n);
+        vbool${32//LMUL}_t mask${M}_f32v = __riscv_vmflt_vf_f32m${LMUL}_b${32//LMUL}(in${M}_f32v, zero, n);
       $for M in range(ROW_TILE):
         vfloat32m${LMUL}_t out${M}_f32v = __riscv_vfmul_vv_f32m${LMUL}_mu(mask${M}_f32v, in${M}_f32v, w_f32v, in${M}_f32v, n);
       $for M in range(ROW_TILE):

@@ -32,6 +32,7 @@ void xnn_f32_prelu_ukernel__rvv_4x4v(
 
   const float* i0 = input;
   float* o0 = output;
+  float zero = 0.0f;
 
   const float* i1 = i0 + input_stride;
   float* o1 = o0 + output_stride;
@@ -43,7 +44,6 @@ void xnn_f32_prelu_ukernel__rvv_4x4v(
   const size_t input_increment = input_stride * 4 - channels;
   const size_t output_increment = output_stride * 4 - channels;
 
-  vfloat32m4_t zero_f32v = __riscv_vfmv_v_f_f32m4(0.0f, __riscv_vsetvl_e32m4(channels));
   do {
     if XNN_UNPREDICTABLE(rows < 2) {
       i1 = i0;
@@ -69,10 +69,10 @@ void xnn_f32_prelu_ukernel__rvv_4x4v(
       vfloat32m4_t in1_f32v = __riscv_vle32_v_f32m4(i1, n); i1 += n;
       vfloat32m4_t in2_f32v = __riscv_vle32_v_f32m4(i2, n); i2 += n;
       vfloat32m4_t in3_f32v = __riscv_vle32_v_f32m4(i3, n); i3 += n;
-      vbool8_t mask0_f32v = __riscv_vmflt_vv_f32m4_b8(in0_f32v, zero_f32v, n);
-      vbool8_t mask1_f32v = __riscv_vmflt_vv_f32m4_b8(in1_f32v, zero_f32v, n);
-      vbool8_t mask2_f32v = __riscv_vmflt_vv_f32m4_b8(in2_f32v, zero_f32v, n);
-      vbool8_t mask3_f32v = __riscv_vmflt_vv_f32m4_b8(in3_f32v, zero_f32v, n);
+      vbool8_t mask0_f32v = __riscv_vmflt_vf_f32m4_b8(in0_f32v, zero, n);
+      vbool8_t mask1_f32v = __riscv_vmflt_vf_f32m4_b8(in1_f32v, zero, n);
+      vbool8_t mask2_f32v = __riscv_vmflt_vf_f32m4_b8(in2_f32v, zero, n);
+      vbool8_t mask3_f32v = __riscv_vmflt_vf_f32m4_b8(in3_f32v, zero, n);
       vfloat32m4_t out0_f32v = __riscv_vfmul_vv_f32m4_mu(mask0_f32v, in0_f32v, w_f32v, in0_f32v, n);
       vfloat32m4_t out1_f32v = __riscv_vfmul_vv_f32m4_mu(mask1_f32v, in1_f32v, w_f32v, in1_f32v, n);
       vfloat32m4_t out2_f32v = __riscv_vfmul_vv_f32m4_mu(mask2_f32v, in2_f32v, w_f32v, in2_f32v, n);
