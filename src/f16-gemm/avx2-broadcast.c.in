@@ -131,7 +131,7 @@ void xnn_f16${ACC_SUFFIX}_gemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
                 _mm_storeu_si128((__m128i*) c${M}, vh${M}x0);
 
               $for M in range(MR):
-                vh${M}x0 = _mm256_cvtps_ph(vacc${M}x${ABC[8:16]}, _MM_FROUND_TO_NEAREST_INT);
+                vh${M}x0 = _mm256_cvtps_ph(vacc${M}x1, _MM_FROUND_TO_NEAREST_INT);
 
               $for M in range(MR):
                 c${M} += ${1 << LOG2N};
