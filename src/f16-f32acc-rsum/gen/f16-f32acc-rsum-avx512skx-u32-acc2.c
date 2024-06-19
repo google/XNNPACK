@@ -20,7 +20,7 @@
 void xnn_f16_f32acc_rsum_ukernel__avx512skx_u32_acc2(
     size_t batch,
     const void* input,
-    void* output,
+    float* output,
     const union xnn_f16_f32acc_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
@@ -64,9 +64,6 @@ void xnn_f16_f32acc_rsum_ukernel__avx512skx_u32_acc2(
   vacc = _mm_add_ss(vacc, _mm_movehdup_ps(vacc));
   vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->scalar.scale));
 
-  const __m128 vout_acc = _mm_cvtph_ps(_mm_set1_epi16(unaligned_load_u16(output)));
-  vacc = _mm_add_ss(vacc, vout_acc);
-
-  const __m128i vout = _mm_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT);
-  unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout, 0));
+  float vout = _mm_cvtss_f32(vacc);
+  *output += vout;
 }

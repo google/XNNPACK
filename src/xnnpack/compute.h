@@ -1406,25 +1406,25 @@ struct univector_contiguous_context {
 struct reduce_context {
   const void* input;
   void* output;
+  void* workspace;
   const void* zero;
   size_t input_shape[XNN_MAX_TENSOR_DIMS];
   size_t input_stride[XNN_MAX_TENSOR_DIMS];
   size_t output_stride[XNN_MAX_TENSOR_DIMS];
-  size_t scaled_elements;
   size_t channels;
-  size_t element_size;
-  size_t input_pixel_stride;
-  size_t output_pixel_stride;
-  size_t input_batch_stride;
-  size_t output_batch_stride;
+  size_t accumulation_element_size;
+  size_t output_element_size;
   union {
     xnn_reduce_ukernel_fn rsum;
     xnn_rdsum_ukernel_fn rdsum;
   } ukernel;
+  xnn_vunary_ukernel_fn cvt_ukernel;
   union {
     union xnn_f32_default_params f32_default;
+    union xnn_f16_f32acc_scale_params scale_params;
     union xnn_f32_scale_params f32_scale;
   } params;
+  union xnn_f32_f16_cvt_params cvt_params;
 };
 
 #ifndef __cplusplus

@@ -22,7 +22,7 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c128(
     const void* input,
     size_t input_stride,
     const void* zero,
-    void* output,
+    float* output,
     const union xnn_f16_f32acc_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
@@ -207,15 +207,14 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c128(
     vacc6 = _mm512_mul_ps(vacc6, vscale);
     vacc7 = _mm512_mul_ps(vacc7, vscale);
 
-    const uint16_t* o = output;
-    __m512 vo0 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) o)); o = (const void*) ((uintptr_t) o + 16 * sizeof(uint16_t));
-    __m512 vo1 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) o)); o = (const void*) ((uintptr_t) o + 16 * sizeof(uint16_t));
-    __m512 vo2 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) o)); o = (const void*) ((uintptr_t) o + 16 * sizeof(uint16_t));
-    __m512 vo3 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) o)); o = (const void*) ((uintptr_t) o + 16 * sizeof(uint16_t));
-    __m512 vo4 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) o)); o = (const void*) ((uintptr_t) o + 16 * sizeof(uint16_t));
-    __m512 vo5 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) o)); o = (const void*) ((uintptr_t) o + 16 * sizeof(uint16_t));
-    __m512 vo6 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) o)); o = (const void*) ((uintptr_t) o + 16 * sizeof(uint16_t));
-    __m512 vo7 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) o)); o = (const void*) ((uintptr_t) o + 16 * sizeof(uint16_t));
+    __m512 vo0 = _mm512_loadu_ps(output + 0 * 16);
+    __m512 vo1 = _mm512_loadu_ps(output + 1 * 16);
+    __m512 vo2 = _mm512_loadu_ps(output + 2 * 16);
+    __m512 vo3 = _mm512_loadu_ps(output + 3 * 16);
+    __m512 vo4 = _mm512_loadu_ps(output + 4 * 16);
+    __m512 vo5 = _mm512_loadu_ps(output + 5 * 16);
+    __m512 vo6 = _mm512_loadu_ps(output + 6 * 16);
+    __m512 vo7 = _mm512_loadu_ps(output + 7 * 16);
     vacc0 = _mm512_add_ps(vo0, vacc0);
     vacc1 = _mm512_add_ps(vo1, vacc1);
     vacc2 = _mm512_add_ps(vo2, vacc2);
@@ -224,14 +223,14 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c128(
     vacc5 = _mm512_add_ps(vo5, vacc5);
     vacc6 = _mm512_add_ps(vo6, vacc6);
     vacc7 = _mm512_add_ps(vo7, vacc7);
-    _mm256_storeu_si256((__m256i*) output, _mm512_cvtps_ph(vacc0, _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 16 * sizeof(uint16_t));
-    _mm256_storeu_si256((__m256i*) output, _mm512_cvtps_ph(vacc1, _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 16 * sizeof(uint16_t));
-    _mm256_storeu_si256((__m256i*) output, _mm512_cvtps_ph(vacc2, _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 16 * sizeof(uint16_t));
-    _mm256_storeu_si256((__m256i*) output, _mm512_cvtps_ph(vacc3, _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 16 * sizeof(uint16_t));
-    _mm256_storeu_si256((__m256i*) output, _mm512_cvtps_ph(vacc4, _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 16 * sizeof(uint16_t));
-    _mm256_storeu_si256((__m256i*) output, _mm512_cvtps_ph(vacc5, _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 16 * sizeof(uint16_t));
-    _mm256_storeu_si256((__m256i*) output, _mm512_cvtps_ph(vacc6, _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 16 * sizeof(uint16_t));
-    _mm256_storeu_si256((__m256i*) output, _mm512_cvtps_ph(vacc7, _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 16 * sizeof(uint16_t));
+    _mm512_storeu_ps(output, vacc0); output = (void*) ((uintptr_t) output + 16 * sizeof(float));
+    _mm512_storeu_ps(output, vacc1); output = (void*) ((uintptr_t) output + 16 * sizeof(float));
+    _mm512_storeu_ps(output, vacc2); output = (void*) ((uintptr_t) output + 16 * sizeof(float));
+    _mm512_storeu_ps(output, vacc3); output = (void*) ((uintptr_t) output + 16 * sizeof(float));
+    _mm512_storeu_ps(output, vacc4); output = (void*) ((uintptr_t) output + 16 * sizeof(float));
+    _mm512_storeu_ps(output, vacc5); output = (void*) ((uintptr_t) output + 16 * sizeof(float));
+    _mm512_storeu_ps(output, vacc6); output = (void*) ((uintptr_t) output + 16 * sizeof(float));
+    _mm512_storeu_ps(output, vacc7); output = (void*) ((uintptr_t) output + 16 * sizeof(float));
 
     input = (const uint16_t*) ((uintptr_t) input + 128 * sizeof(uint16_t));
   }
@@ -315,20 +314,19 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c128(
     }
 
     __m512 vo[8];
-    const uint16_t* o = output;
     for (int i = 0; i < num_full_chunks; ++i) {
-      vo[i] = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) o)); o = (const void*) ((uintptr_t) o + 16 * sizeof(uint16_t));
+      vo[i] = _mm512_loadu_ps(output + i * 16);
     }
     for (int i = 0; i < num_full_chunks; ++i) {
       vacc[i] = _mm512_add_ps(vo[i], vacc[i]);
     }
     for (int i = 0; i < num_full_chunks; ++i) {
-      _mm256_storeu_si256((__m256i*) output, _mm512_cvtps_ph(vacc[i], _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 16 * sizeof(uint16_t));
+      _mm512_storeu_ps(output, vacc[i]); output = (void*) ((uintptr_t) output + 16 * sizeof(float));
     }
     if (remainder) {
       __m512 vout = vacc[num_full_chunks];
-      vout = _mm512_maskz_add_ps(vmask, vout,  _mm512_cvtph_ps(_mm256_maskz_loadu_epi16(vmask, output)));
-      _mm256_mask_storeu_epi16(output, vmask, _mm512_cvtps_ph(vout, _MM_FROUND_TO_NEAREST_INT));
+      vout = _mm512_maskz_add_ps(vmask, vout,  _mm512_maskz_loadu_ps(vmask, output));
+      _mm512_mask_storeu_ps(output, vmask, vout);
     }
   }
 }

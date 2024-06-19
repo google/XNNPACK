@@ -22,7 +22,7 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c16(
     const void* input,
     size_t input_stride,
     const void* zero,
-    void* output,
+    float* output,
     const union xnn_f16_f32acc_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
@@ -88,10 +88,9 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c16(
     }
     vacc0 = _mm512_mul_ps(vacc0, vscale);
 
-    const uint16_t* o = output;
-    __m512 vo0 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) o)); o = (const void*) ((uintptr_t) o + 16 * sizeof(uint16_t));
+    __m512 vo0 = _mm512_loadu_ps(output + 0 * 16);
     vacc0 = _mm512_add_ps(vo0, vacc0);
-    _mm256_storeu_si256((__m256i*) output, _mm512_cvtps_ph(vacc0, _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 16 * sizeof(uint16_t));
+    _mm512_storeu_ps(output, vacc0); output = (void*) ((uintptr_t) output + 16 * sizeof(float));
 
     input = (const uint16_t*) ((uintptr_t) input + 16 * sizeof(uint16_t));
   }
@@ -168,20 +167,19 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c16(
     }
 
     __m512 vo[1];
-    const uint16_t* o = output;
     for (int i = 0; i < num_full_chunks; ++i) {
-      vo[i] = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) o)); o = (const void*) ((uintptr_t) o + 16 * sizeof(uint16_t));
+      vo[i] = _mm512_loadu_ps(output + i * 16);
     }
     for (int i = 0; i < num_full_chunks; ++i) {
       vacc[i] = _mm512_add_ps(vo[i], vacc[i]);
     }
     for (int i = 0; i < num_full_chunks; ++i) {
-      _mm256_storeu_si256((__m256i*) output, _mm512_cvtps_ph(vacc[i], _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 16 * sizeof(uint16_t));
+      _mm512_storeu_ps(output, vacc[i]); output = (void*) ((uintptr_t) output + 16 * sizeof(float));
     }
     if (remainder) {
       __m512 vout = vacc[num_full_chunks];
-      vout = _mm512_maskz_add_ps(vmask, vout,  _mm512_cvtph_ps(_mm256_maskz_loadu_epi16(vmask, output)));
-      _mm256_mask_storeu_epi16(output, vmask, _mm512_cvtps_ph(vout, _MM_FROUND_TO_NEAREST_INT));
+      vout = _mm512_maskz_add_ps(vmask, vout,  _mm512_maskz_loadu_ps(vmask, output));
+      _mm512_mask_storeu_ps(output, vmask, vout);
     }
   }
 }

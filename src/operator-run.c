@@ -2118,14 +2118,24 @@ void xnn_compute_contiguous_reduce(
 
   // input dimensions 1, 3 & 5 are reduced so the entirety of these dimensions
   // are processed so their indices are always 0.
-  size_t input_offset = input_stride[0] * output_idx0 + input_stride[2] * output_idx1 + input_stride[4] * output_idx2;
-  size_t output_offset = output_stride[0] * output_idx0 + output_stride[1] * output_idx1 + output_stride[2] * output_idx2;
+  size_t input_offset = input_stride[0] * output_idx0 + input_stride[2] * output_idx1
+      + input_stride[4] * output_idx2;
+  size_t output_offset = (output_stride[0] * output_idx0 + output_stride[1] * output_idx1
+                          + output_stride[2] * output_idx2) * context->output_element_size;
+  size_t workspace_offset = (output_stride[0] * output_idx0 + output_stride[1] * output_idx1
+                             + output_stride[2] * output_idx2) * context->accumulation_element_size;
   int input_shape1 = context->input_shape[1];
   int input_shape3 = context->input_shape[3];
 
-  void* output = (void*) ((uintptr_t) context->output + output_offset);
+  void* output_ptr = NULL;
+  if (context->workspace) {
+    output_ptr = context->workspace;
+  } else {
+    output_ptr = context->output;
+  }
+  void* output = (void*) ((uintptr_t) output_ptr + workspace_offset);
   // Rsum microkernels accumulate into the output buffer.
-  memset(output, 0, context->element_size * output2_block_size);
+  memset(output, 0, context->accumulation_element_size * output2_block_size);
 
   // Input dimension 1 is reduced.
   for (size_t i = 0; i < input_shape1; ++i) {
@@ -2136,21 +2146,28 @@ void xnn_compute_contiguous_reduce(
       // output2_block_size output elements are written.
       for (size_t k = 0; k < output2_block_size; ++k) {
         // The microkernel reduces input dimension 5.
-        context->ukernel.rsum(context->scaled_elements, input_row, output, &context->params);
+        context->ukernel.rsum(context->channels, input_row, output, &context->params);
         // input_stride[4] is the number of bytes of input which have been
         // processed by the microkernel call.
         input_row = (const void*) ((uintptr_t) input_row + input_stride[4]);
         // Increment output pointer by the number of output bytes which have
         // been written.
-        output = (void*) ((uintptr_t) output + output_stride[2]);
+        output = (void*) ((uintptr_t) output + context->accumulation_element_size);
       }
       // Reset the output pointer.
-      output = (void*) ((uintptr_t) context->output + output_offset);
+      output = (void*) ((uintptr_t) output_ptr + workspace_offset);
       // Iterating over input_shape[3].
       input = (const void*) ((uintptr_t) input + input_stride[3]);
     }
     // Iterating over input_shape[1].
     input_offset += input_stride[1];
+  }
+  // Convert to output datatype if accumulation type != output type.
+  if (context->workspace) {
+    const void* workspace_ptr = (void*) ((uintptr_t) context->workspace + workspace_offset);
+    output_ptr = (void*) ((uintptr_t) context->output + output_offset);
+    context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
+                         output_ptr, &context->cvt_params);
   }
 }
 
@@ -2169,13 +2186,22 @@ void xnn_compute_discontiguous_reduce(
   // input dimensions 0, 2 & 4 are reduced so the entirety of these dimensions
   // are processed so their indices are always 0.
   size_t input_offset = input_stride[1] * output_idx0 + input_stride[3] * output_idx1 + input_stride[5] * output_idx2;
-  size_t output_offset = output_stride[0] * output_idx0 + output_stride[1] * output_idx1 + output_stride[2] * output_idx2;
+  size_t output_offset = (output_stride[0] * output_idx0 + output_stride[1] * output_idx1
+                          + output_stride[2] * output_idx2) * context->output_element_size;
+  size_t workspace_offset = (output_stride[0] * output_idx0 + output_stride[1] * output_idx1
+                             + output_stride[2] * output_idx2) * context->accumulation_element_size;
   int input_shape0 = context->input_shape[0];
   int input_shape2 = context->input_shape[2];
 
-  void* output = (void*) ((uintptr_t) context->output + output_offset);
+  void* output_ptr = NULL;
+  if (context->workspace) {
+    output_ptr = context->workspace;
+  } else {
+    output_ptr = context->output;
+  }
+  void* output = (void*) ((uintptr_t) output_ptr + workspace_offset);
   // RDsum microkernels accumulate into the output buffer.
-  memset(output, 0, context->element_size * output2_block_size);
+  memset(output, 0, context->accumulation_element_size * output2_block_size);
 
   // Input dimension 0 is reduced.
   for (size_t i = 0; i < input_shape0; ++i) {
@@ -2184,17 +2210,25 @@ void xnn_compute_discontiguous_reduce(
     for (size_t j = 0; j < input_shape2; ++j) {
       const void* input_row = input;
       // The microkernel reduces input dimension 4 and iterates over output_block_size elements of dimension 5.
-      context->ukernel.rdsum(context->scaled_elements, output2_block_size, input_row, input_stride[4], context->zero, output, &context->params);
+      context->ukernel.rdsum(context->channels, output2_block_size, input_row, input_stride[4],
+                             context->zero, output, &context->params);
       // input_stride[4] is the number of bytes of input which have been
       // processed by the microkernel call.
       input_row = (const void*) ((uintptr_t) input_row + input_stride[4]);
       // Reset the output pointer.
-      output = (void*) ((uintptr_t) context->output + output_offset);
+      output = (void*) ((uintptr_t) output_ptr + workspace_offset);
       // Iterating over input_shape[2].
       input = (const void*) ((uintptr_t) input + input_stride[2]);
     }
     // Iterating over input_shape[0].
     input_offset += input_stride[0];
+  }
+  // Convert to output datatype if accumulation type != output type.
+  if (context->workspace) {
+    const void* workspace_ptr = (void*) ((uintptr_t) context->workspace + workspace_offset);
+    output_ptr = (void*) ((uintptr_t) context->output + output_offset);
+    context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
+                         output_ptr, &context->cvt_params);
   }
 }
 

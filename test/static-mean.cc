@@ -180,13 +180,19 @@ TEST_F(MeanTestF16, matches_operator_api)
 
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
+  size_t workspace_size = SIZE_MAX;
+  size_t workspace_alignment = SIZE_MAX;
   ASSERT_EQ(xnn_status_success,
     xnn_reshape_mean_nd_f16(op,
       reduction_axes.size(), reduction_axes.data(),
       input_shape.size(), input_shape.data(),
+      &workspace_size, &workspace_alignment,
       /*threadpool=*/nullptr));
 
-  ASSERT_EQ(xnn_status_success, xnn_setup_mean_nd_f16(op, input.data(), operator_output.data()));
+  ASSERT_NE(workspace_size, SIZE_MAX);
+  ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  ASSERT_EQ(xnn_status_success, xnn_setup_mean_nd_f16(op, workspace.data(), input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

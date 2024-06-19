@@ -60,7 +60,7 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c64(
     const void* input,
     size_t input_stride,
     const void* zero,
-    void* output,
+    float* output,
     const union xnn_f16_f32acc_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
@@ -177,19 +177,19 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c64(
     vacc2 = _mm512_mul_ps(vacc2, vscale);
     vacc3 = _mm512_mul_ps(vacc3, vscale);
 
-    const uint16_t* o = output;
-    __m512 vo0 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) o)); o = (const void*) ((uintptr_t) o + 16 * sizeof(uint16_t));
-    __m512 vo1 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) o)); o = (const void*) ((uintptr_t) o + 16 * sizeof(uint16_t));
-    __m512 vo2 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) o)); o = (const void*) ((uintptr_t) o + 16 * sizeof(uint16_t));
-    __m512 vo3 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) o)); o = (const void*) ((uintptr_t) o + 16 * sizeof(uint16_t));
+    const float* o = output;
+    __m512 vo0 = _mm512_loadu_ps(o); o = (const void*) ((uintptr_t) o + 16 * sizeof(float));
+    __m512 vo1 = _mm512_loadu_ps(o); o = (const void*) ((uintptr_t) o + 16 * sizeof(float));
+    __m512 vo2 = _mm512_loadu_ps(o); o = (const void*) ((uintptr_t) o + 16 * sizeof(float));
+    __m512 vo3 = _mm512_loadu_ps(o); o = (const void*) ((uintptr_t) o + 16 * sizeof(float));
     vacc0 = _mm512_add_ps(vo0, vacc0);
     vacc1 = _mm512_add_ps(vo1, vacc1);
     vacc2 = _mm512_add_ps(vo2, vacc2);
     vacc3 = _mm512_add_ps(vo3, vacc3);
-    _mm256_storeu_si256((__m256i*) output, _mm512_cvtps_ph(vacc0, _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 16 * sizeof(uint16_t));
-    _mm256_storeu_si256((__m256i*) output, _mm512_cvtps_ph(vacc1, _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 16 * sizeof(uint16_t));
-    _mm256_storeu_si256((__m256i*) output, _mm512_cvtps_ph(vacc2, _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 16 * sizeof(uint16_t));
-    _mm256_storeu_si256((__m256i*) output, _mm512_cvtps_ph(vacc3, _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 16 * sizeof(uint16_t));
+    _mm512_storeu_ps(output, vacc0); output = (void*) ((uintptr_t) output + 16 * sizeof(float));
+    _mm512_storeu_ps(output, vacc1); output = (void*) ((uintptr_t) output + 16 * sizeof(float));
+    _mm512_storeu_ps(output, vacc2); output = (void*) ((uintptr_t) output + 16 * sizeof(float));
+    _mm512_storeu_ps(output, vacc3); output = (void*) ((uintptr_t) output + 16 * sizeof(float));
 
     input = (const uint16_t*) ((uintptr_t) input + 64 * sizeof(uint16_t));
   }
@@ -269,20 +269,20 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c64(
     }
 
     __m512 vo[4];
-    const uint16_t* o = output;
+    const float* o = output;
     for (int i = 0; i < num_full_chunks; ++i) {
-      vo[i] = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) o)); o = (const void*) ((uintptr_t) o + 16 * sizeof(uint16_t));
+      vo[i] = _mm512_loadu_ps(o); o = (const void*) ((uintptr_t) o + 16 * sizeof(float));
     }
     for (int i = 0; i < num_full_chunks; ++i) {
       vacc[i] = _mm512_add_ps(vo[i], vacc[i]);
     }
     for (int i = 0; i < num_full_chunks; ++i) {
-      _mm256_storeu_si256((__m256i*) output, _mm512_cvtps_ph(vacc[i], _MM_FROUND_TO_NEAREST_INT)); output = (void*) ((uintptr_t) output + 16 * sizeof(uint16_t));
+      _mm512_storeu_ps(output, vacc[i]); output = (void*) ((uintptr_t) output + 16 * sizeof(float));
     }
     if (remainder) {
       __m512 vout = vacc[num_full_chunks];
-      vout = _mm512_maskz_add_ps(vmask, vout,  _mm512_cvtph_ps(_mm256_maskz_loadu_epi16(vmask, output)));
-      _mm256_mask_storeu_epi16(output, vmask, _mm512_cvtps_ph(vout, _MM_FROUND_TO_NEAREST_INT));
+      vout = _mm512_maskz_add_ps(vmask, vout,  _mm512_maskz_loadu_ps(vmask, output));
+      _mm512_mask_storeu_ps(output, vmask, vout);
     }
   }
 }
@@ -290,7 +290,7 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c64(
 void xnn_f16_f32acc_rsum_ukernel__avx512skx_u64_acc4(
     size_t batch,
     const void* input,
-    void* output,
+    float* output,
     const union xnn_f16_f32acc_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
@@ -342,11 +342,8 @@ void xnn_f16_f32acc_rsum_ukernel__avx512skx_u64_acc4(
   vacc = _mm_add_ss(vacc, _mm_movehdup_ps(vacc));
   vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->scalar.scale));
 
-  const __m128 vout_acc = _mm_cvtph_ps(_mm_set1_epi16(unaligned_load_u16(output)));
-  vacc = _mm_add_ss(vacc, vout_acc);
-
-  const __m128i vout = _mm_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT);
-  unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout, 0));
+  float vout = _mm_cvtss_f32(vacc);
+  *output += vout;
 }
 
 void xnn_f16_rmax_ukernel__avx512skx_u64_acc4(

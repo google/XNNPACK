@@ -1608,7 +1608,7 @@ typedef void (*xnn_f16_f32acc_rdsum_ukernel_fn)(
     const void* input,
     size_t input_stride,
     const void* zero,
-    void* output,
+    float* output,
     const union xnn_f16_f32acc_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_rdsum_ukernel_fn)(
@@ -1639,7 +1639,7 @@ typedef void (*xnn_f16_rsum_ukernel_fn)(
 typedef void (*xnn_f16_f32acc_rsum_ukernel_fn)(
     size_t batch,
     const void* input,
-    void* output,
+    float* output,
     const union xnn_f16_f32acc_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_rsum_ukernel_fn)(

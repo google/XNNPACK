@@ -39,7 +39,7 @@ DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__avx512fp16_u128_acc4)
   XNN_INTERNAL void fn_name(                              \
       size_t batch,                                       \
       const void* input,                                  \
-      void* output,                                       \
+      float* output,                                       \
       const union xnn_f16_f32acc_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u4)
@@ -425,7 +425,7 @@ DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64)
       const void* input,                                   \
       size_t input_stride,                                 \
       const void* zero,                                    \
-      void* output,                                        \
+      float* output,                                        \
       const union xnn_f16_f32acc_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c16)

@@ -172,13 +172,13 @@ class RDSumMicrokernelTester {
 
     std::vector<uint16_t> input((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(uint16_t), 0);
-    std::vector<uint16_t> output(channels());
+    std::vector<float> output(channels());
     std::vector<float> output_ref(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      std::generate(output.begin(), output.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(output.begin(), output.end(), [&]() { return f32dist(rng); });
       for (size_t i = 0; i < output.size(); ++i) {
-        output_ref[i] = fp16_ieee_to_fp32_value(output[i]);
+        output_ref[i] = output[i];
       }
 
       // Compute reference results, without clamping.
@@ -199,7 +199,7 @@ class RDSumMicrokernelTester {
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
-        EXPECT_NEAR(fp16_ieee_to_fp32_value(output[c]), output_ref[c], std::abs(output_ref[c]) * 1.0e-3f)
+        EXPECT_NEAR(output[c], output_ref[c], std::abs(output_ref[c]) * 1.0e-5f)
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
       }
     }
