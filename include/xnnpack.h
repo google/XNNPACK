@@ -92,7 +92,7 @@ extern "C" {
 /// The caller must allocate at least this many extra xnn_dynamic_quantization_params before passing the array to XNNPACK.
 ///
 /// Note: XNNPACK reads, but never writes beyond array bounds.
-#define XNN_EXTRA_QUANTIZATION_PARAMS 8
+#define XNN_EXTRA_QUANTIZATION_PARAMS 10
 
 struct xnn_dynamic_quantization_params {
   int32_t zero_point;
