@@ -107,7 +107,9 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c16(
     vacc[0] = _mm512_setzero_ps();
 
     const size_t num_full_chunks = channels >> 4;
+    // AVX512 has 16 float lanes.
     const size_t num_chunks = round_up_po2(channels, 16) >> 4;
+    // 0xF masks the remainder.
     const size_t remainder = channels & 0xF;
     const size_t batch = channels & 0xF;
     __mmask16 vmask;

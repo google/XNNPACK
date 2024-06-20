@@ -177,11 +177,10 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c64(
     vacc2 = _mm512_mul_ps(vacc2, vscale);
     vacc3 = _mm512_mul_ps(vacc3, vscale);
 
-    const float* o = output;
-    __m512 vo0 = _mm512_loadu_ps(o); o = (const void*) ((uintptr_t) o + 16 * sizeof(float));
-    __m512 vo1 = _mm512_loadu_ps(o); o = (const void*) ((uintptr_t) o + 16 * sizeof(float));
-    __m512 vo2 = _mm512_loadu_ps(o); o = (const void*) ((uintptr_t) o + 16 * sizeof(float));
-    __m512 vo3 = _mm512_loadu_ps(o); o = (const void*) ((uintptr_t) o + 16 * sizeof(float));
+    __m512 vo0 = _mm512_loadu_ps(output + 0 * 16);
+    __m512 vo1 = _mm512_loadu_ps(output + 1 * 16);
+    __m512 vo2 = _mm512_loadu_ps(output + 2 * 16);
+    __m512 vo3 = _mm512_loadu_ps(output + 3 * 16);
     vacc0 = _mm512_add_ps(vo0, vacc0);
     vacc1 = _mm512_add_ps(vo1, vacc1);
     vacc2 = _mm512_add_ps(vo2, vacc2);
@@ -209,7 +208,9 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c64(
     vacc[3] = _mm512_setzero_ps();
 
     const size_t num_full_chunks = channels >> 4;
+    // AVX512 has 16 float lanes.
     const size_t num_chunks = round_up_po2(channels, 16) >> 4;
+    // 0xF masks the remainder.
     const size_t remainder = channels & 0xF;
     const size_t batch = channels & 0xF;
     __mmask16 vmask;
@@ -269,9 +270,8 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c64(
     }
 
     __m512 vo[4];
-    const float* o = output;
     for (int i = 0; i < num_full_chunks; ++i) {
-      vo[i] = _mm512_loadu_ps(o); o = (const void*) ((uintptr_t) o + 16 * sizeof(float));
+      vo[i] = _mm512_loadu_ps(output + i * 16);
     }
     for (int i = 0; i < num_full_chunks; ++i) {
       vacc[i] = _mm512_add_ps(vo[i], vacc[i]);

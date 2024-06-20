@@ -81,8 +81,6 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast(
         const __m512h va${M} = _mm512_castsi512_ph(_mm512_set1_epi16(*a${M}));
         $for N in range(0, NR, 32):
           vacc${M}x${N//32} = _mm512_fmadd_ph(va${M}, vb${N//32}, vacc${M}x${N//32});
-
-      $for M in range(MR):
         a${M} += 1;
 
       k -= sizeof(uint16_t);
@@ -102,11 +100,9 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast(
       $for M in RANGE_MR:
         _mm512_storeu_ph(c${M}, vacc${M}x0);
         $for N in range(32, NR, 32):
-          _mm512_storeu_ph((uint16_t*) c${M} + ${N}, vacc${M}x${N//32});
-        c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
-
-      $for M in RANGE_MR:
+          _mm512_storeu_ph((uint16_t*) c${M} + ${N//32}, vacc${M}x${N//32});
         a${M} = (const uint16_t*) ((uintptr_t) a${M} - kc);
+        c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
 
       nc -= ${NR};
     } else {
@@ -117,13 +113,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast(
               $for M in RANGE_MR:
                 _mm512_storeu_ph(c${M}, vacc${M}x0);
                 $for N in range(32, 1 << LOG2N, 32):
-                  _mm512_storeu_ph((uint16_t*) c${M} + ${N}, vacc${M}x${N//32});
+                  _mm512_storeu_ph((uint16_t*) c${M} + ${N//32}, vacc${M}x${N//32});
 
               $for M in RANGE_MR:
                 $for N in range(0, NR - (1 << LOG2N), 32):
-                  vacc${M}x${N//32} = vacc${M}x${(N + (1 << LOG2N))//32};
-
-              $for M in RANGE_MR:
+                  vacc${M}x${N//32} = vacc${M}x${(N+(1<<LOG2N))//32};
                 c${M} += ${1 << LOG2N};
           }
         $if LOG2N == 5:

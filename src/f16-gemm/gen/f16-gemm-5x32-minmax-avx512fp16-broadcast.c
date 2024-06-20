@@ -79,19 +79,18 @@ void xnn_f16_gemm_minmax_ukernel_5x32__avx512fp16_broadcast(
 
       const __m512h va0 = _mm512_castsi512_ph(_mm512_set1_epi16(*a0));
       vacc0x0 = _mm512_fmadd_ph(va0, vb0, vacc0x0);
+      a0 += 1;
       const __m512h va1 = _mm512_castsi512_ph(_mm512_set1_epi16(*a1));
       vacc1x0 = _mm512_fmadd_ph(va1, vb0, vacc1x0);
+      a1 += 1;
       const __m512h va2 = _mm512_castsi512_ph(_mm512_set1_epi16(*a2));
       vacc2x0 = _mm512_fmadd_ph(va2, vb0, vacc2x0);
+      a2 += 1;
       const __m512h va3 = _mm512_castsi512_ph(_mm512_set1_epi16(*a3));
       vacc3x0 = _mm512_fmadd_ph(va3, vb0, vacc3x0);
+      a3 += 1;
       const __m512h va4 = _mm512_castsi512_ph(_mm512_set1_epi16(*a4));
       vacc4x0 = _mm512_fmadd_ph(va4, vb0, vacc4x0);
-
-      a0 += 1;
-      a1 += 1;
-      a2 += 1;
-      a3 += 1;
       a4 += 1;
 
       k -= sizeof(uint16_t);
@@ -113,21 +112,20 @@ void xnn_f16_gemm_minmax_ukernel_5x32__avx512fp16_broadcast(
 
     if XNN_LIKELY(nc >= 32) {
       _mm512_storeu_ph(c0, vacc0x0);
+      a0 = (const uint16_t*) ((uintptr_t) a0 - kc);
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
       _mm512_storeu_ph(c1, vacc1x0);
+      a1 = (const uint16_t*) ((uintptr_t) a1 - kc);
       c1 = (uint16_t*) ((uintptr_t) c1 + cn_stride);
       _mm512_storeu_ph(c2, vacc2x0);
+      a2 = (const uint16_t*) ((uintptr_t) a2 - kc);
       c2 = (uint16_t*) ((uintptr_t) c2 + cn_stride);
       _mm512_storeu_ph(c3, vacc3x0);
+      a3 = (const uint16_t*) ((uintptr_t) a3 - kc);
       c3 = (uint16_t*) ((uintptr_t) c3 + cn_stride);
       _mm512_storeu_ph(c4, vacc4x0);
-      c4 = (uint16_t*) ((uintptr_t) c4 + cn_stride);
-
-      a0 = (const uint16_t*) ((uintptr_t) a0 - kc);
-      a1 = (const uint16_t*) ((uintptr_t) a1 - kc);
-      a2 = (const uint16_t*) ((uintptr_t) a2 - kc);
-      a3 = (const uint16_t*) ((uintptr_t) a3 - kc);
       a4 = (const uint16_t*) ((uintptr_t) a4 - kc);
+      c4 = (uint16_t*) ((uintptr_t) c4 + cn_stride);
 
       nc -= 32;
     } else {

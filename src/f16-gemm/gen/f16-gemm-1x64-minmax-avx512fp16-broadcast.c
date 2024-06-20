@@ -54,7 +54,6 @@ void xnn_f16_gemm_minmax_ukernel_1x64__avx512fp16_broadcast(
       const __m512h va0 = _mm512_castsi512_ph(_mm512_set1_epi16(*a0));
       vacc0x0 = _mm512_fmadd_ph(va0, vb0, vacc0x0);
       vacc0x1 = _mm512_fmadd_ph(va0, vb1, vacc0x1);
-
       a0 += 1;
 
       k -= sizeof(uint16_t);
@@ -70,10 +69,9 @@ void xnn_f16_gemm_minmax_ukernel_1x64__avx512fp16_broadcast(
 
     if XNN_LIKELY(nc >= 64) {
       _mm512_storeu_ph(c0, vacc0x0);
-      _mm512_storeu_ph((uint16_t*) c0 + 32, vacc0x1);
-      c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
-
+      _mm512_storeu_ph((uint16_t*) c0 + 1, vacc0x1);
       a0 = (const uint16_t*) ((uintptr_t) a0 - kc);
+      c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
 
       nc -= 64;
     } else {
@@ -81,7 +79,6 @@ void xnn_f16_gemm_minmax_ukernel_1x64__avx512fp16_broadcast(
         _mm512_storeu_ph(c0, vacc0x0);
 
         vacc0x0 = vacc0x1;
-
         c0 += 32;
       }
       if (nc & 31) {
