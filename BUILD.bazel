@@ -59,6 +59,7 @@ load(
     "ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS",
     "ALL_NEONFP16ARITH_MICROKERNEL_SRCS",
     "ALL_NEONFP16_MICROKERNEL_SRCS",
+    "ALL_NEONI8MM_AARCH64_MICROKERNEL_SRCS",
     "ALL_NEONI8MM_MICROKERNEL_SRCS",
     "ALL_NEONV8_MICROKERNEL_SRCS",
     "ALL_NEON_AARCH64_MICROKERNEL_SRCS",
@@ -243,6 +244,7 @@ MICROKERNEL_DEPS = [
     ":prefetch",
     ":tables",
     ":unaligned",
+    ":logging",
 ]
 
 SIMD_HEADERS = [
@@ -430,6 +432,7 @@ xnnpack_cc_library(
         ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
         "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
     }),
+    defines = xnnpack_kleidiai_defines(),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -870,9 +873,10 @@ xnnpack_microkernel_cc_library(
         "src/amalgam/gen/neondot.c",
     ],
     aarch64_srcs_test = ALL_NEONDOT_MICROKERNEL_SRCS + ALL_NEONDOT_AARCH64_MICROKERNEL_SRCS,
+    defines = xnnpack_kleidiai_defines(),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS,
+    deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled(["@KleidiAI//:kleidiai_dotprod"]),
 )
 
 xnnpack_microkernel_cc_library(
@@ -885,11 +889,15 @@ xnnpack_microkernel_cc_library(
     aarch32_srcs_prod = ["src/amalgam/gen/neoni8mm.c"],
     aarch32_srcs_test = ALL_NEONI8MM_MICROKERNEL_SRCS,
     aarch64_copts = ["-march=armv8.2-a+i8mm+fp16"],
-    aarch64_srcs_prod = ["src/amalgam/gen/neoni8mm.c"],
-    aarch64_srcs_test = ALL_NEONI8MM_MICROKERNEL_SRCS,
+    aarch64_srcs_prod = [
+        "src/amalgam/gen/neoni8mm.c",
+        "src/amalgam/gen/neoni8mm-aarch64.c",
+    ],
+    aarch64_srcs_test = ALL_NEONI8MM_MICROKERNEL_SRCS + ALL_NEONI8MM_AARCH64_MICROKERNEL_SRCS,
+    defines = xnnpack_kleidiai_defines(),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS,
+    deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled(["@KleidiAI//:kleidiai_i8mm"]),
 )
 
 xnnpack_microkernel_cc_library(

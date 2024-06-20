@@ -521,7 +521,7 @@ def xnnpack_binary(name, srcs, copts = [], deps = [], linkopts = []):
         deps = deps,
     )
 
-def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = []):
+def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = [], defines = []):
     """Microbenchmark binary based on Google Benchmark
 
     Args:
@@ -533,6 +533,8 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = []):
       deps: The list of additional libraries to be linked. Google Benchmark
             library is always added as a dependency and does not need to be
             explicitly specified.
+      tags: The list of arbitrary text tags.
+      defines: The list of arbitrary defines tags.
     """
     native.cc_binary(
         name = name,
@@ -561,6 +563,7 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = []):
             "//conditions:default": [],
         }),
         tags = tags,
+        defines = defines,
     )
 
 SrcListInfo = provider("A list of source files.", fields = {"srcs": "sources"})

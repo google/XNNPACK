@@ -28225,28 +28225,6 @@ void xnn_x8_lut_ukernel__scalar_u4(
   }
 }
 
-inline static size_t k_roundedup(size_t k, size_t kr, size_t sr) {
-  // Since we pack a float and int32 value at the end of the row,
-  // we must make sure that k is a multiple of 4 for memory alignment.
-  size_t kr_sr_roundedup4 = round_up(kr * sr, 4);
-  return round_up(k, kr_sr_roundedup4);
-}
-
-inline static size_t lhs_packed_stride(size_t k, size_t mr, size_t kr,
-                                       size_t sr) {
-  const size_t k_internal = k_roundedup(k, kr, sr);
-
-  assert((k_internal % 2) == 0);
-
-  // Assuming the same sizeof() for kai_num_bytes_per_offset and
-  // kai_num_bytes_per_multiplier
-  static const size_t num_bytes_per_multiplier = sizeof(float);
-  static const size_t num_bytes_per_offset = sizeof(int32_t);
-
-  return mr * (k_internal * sizeof(int8_t) + num_bytes_per_multiplier +
-               num_bytes_per_offset);
-}
-
 void xnn_x8_packq_f32qp8_ukernel__scalar_u1(size_t m, size_t k, size_t mr,
                                             size_t kr, size_t sr,
                                             size_t m_idx_start,
@@ -28278,8 +28256,7 @@ void xnn_x8_packq_f32qp8_ukernel__scalar_u1(size_t m, size_t k, size_t mr,
     float min0 = 0.0f;
 
     // Find min/max for each channel
-    int32_t k_idx = 0;
-    for (; k_idx < (int32_t)k; ++k_idx) {
+    for (int32_t k_idx = 0; k_idx < (int32_t)k; ++k_idx) {
       const float src0_0 = *(src_ptr + (size_t)k_idx);
       max0 = math_max_f32(src0_0, max0);
       min0 = math_min_f32(src0_0, min0);
@@ -28317,12 +28294,11 @@ void xnn_x8_packq_f32qp8_ukernel__scalar_u1(size_t m, size_t k, size_t mr,
         (uint8_t*)lhs_packed + dst_x * k_block_len * sizeof(int8_t);
 
     // Quantize the channels
-    k_idx = 0;
-    for (; k_idx < (int32_t)k_internal; k_idx += k_block_len) {
+    for (int32_t k_idx = 0; k_idx < (int32_t)k_internal; k_idx += k_block_len) {
       for (size_t k_block_idx = 0; k_block_idx < (size_t)k_block_len;
            ++k_block_idx) {
         // Clamp at the last valid k-index
-        const size_t k_idx_start = min((size_t)k_idx + k_block_idx, k);
+        const size_t k_idx_start = min((size_t)k_idx + k_block_idx, k - 1);
 
         const float src0_0 = *(src_ptr + k_idx_start);
 

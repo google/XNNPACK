@@ -326,6 +326,20 @@ typedef void (*xnn_qu8_gemm_minmax_ukernel_fn)(
     size_t cn_stride,
     const union xnn_qu8_conv_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+// GEMM: GEneral Matrix Multiplication with packed and quantized LHS operand.
+
+typedef void (*xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn)(
+    size_t m,
+    size_t n,
+    size_t k,
+    const int8_t* lhs_packed,
+    const void* rhs_packed,
+    float* dst,
+    size_t dst_stride_row,
+    size_t dst_stride_col,
+    union xnn_f32_minmax_params
+        minmax_params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 // GEMMINC: GEMM INCremental with Min+Max activation
 
 typedef void (*xnn_f32_gemminc_minmax_ukernel_fn)(
