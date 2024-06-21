@@ -41,43 +41,43 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x32__avx512skx_broadcast(
   float* c0 = c;
 
   do {
-    __m512 vacc0x0123456789ABCDEF = _mm512_loadu_ps(w);
-    __m512 vacc0xGHIJKLMNOPQRSTUV = _mm512_loadu_ps((const float*) w + 16);
+    __m512 vacc0x0 = _mm512_loadu_ps(w);
+    __m512 vacc0x1 = _mm512_loadu_ps((const float*) w + 16);
     w = (const float*) w + 32;
 
     size_t k = kc;
     do {
-      const __m512i vbi0123456789ABCDEF = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) w));
-      const __m512i vbiGHIJKLMNOPQRSTUV  = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) ((const int8_t*) w + 16)));
-      const __m512 vb0123456789ABCDEF  = _mm512_cvtepi32_ps(vbi0123456789ABCDEF);
-      const __m512 vbGHIJKLMNOPQRSTUV  = _mm512_cvtepi32_ps(vbiGHIJKLMNOPQRSTUV);
+      const __m512i vbi0 = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) w));
+      const __m512i vbi1  = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) ((const int8_t*) w + 16)));
+      const __m512 vb0  = _mm512_cvtepi32_ps(vbi0);
+      const __m512 vb1  = _mm512_cvtepi32_ps(vbi1);
       w = (const int8_t*) w + 32;
 
       const __m512 va0 = _mm512_set1_ps(*a0);
-      vacc0x0123456789ABCDEF = _mm512_fmadd_ps(va0, vb0123456789ABCDEF, vacc0x0123456789ABCDEF);
-      vacc0xGHIJKLMNOPQRSTUV = _mm512_fmadd_ps(va0, vbGHIJKLMNOPQRSTUV, vacc0xGHIJKLMNOPQRSTUV);
+      vacc0x0 = _mm512_fmadd_ps(va0, vb0, vacc0x0);
+      vacc0x1 = _mm512_fmadd_ps(va0, vb1, vacc0x1);
 
       a0 += 1;
 
       k -= sizeof(float);
     } while (k != 0);
 
-    const __m512 vscale0123456789ABCDEF = _mm512_loadu_ps((const float*) w + 0);
-    vacc0x0123456789ABCDEF = _mm512_mul_ps(vacc0x0123456789ABCDEF, vscale0123456789ABCDEF);
-    const __m512 vscaleGHIJKLMNOPQRSTUV = _mm512_loadu_ps((const float*) w + 16);
-    vacc0xGHIJKLMNOPQRSTUV = _mm512_mul_ps(vacc0xGHIJKLMNOPQRSTUV, vscaleGHIJKLMNOPQRSTUV);
+    const __m512 vscale0 = _mm512_loadu_ps((const float*) w + 0);
+    vacc0x0 = _mm512_mul_ps(vacc0x0, vscale0);
+    const __m512 vscale1 = _mm512_loadu_ps((const float*) w + 16);
+    vacc0x1 = _mm512_mul_ps(vacc0x1, vscale1);
     w = (const float*) w + 32;
     const __m512 vmin = _mm512_set1_ps(params->scalar.min);
-    vacc0x0123456789ABCDEF = _mm512_max_ps(vmin, vacc0x0123456789ABCDEF);
-    vacc0xGHIJKLMNOPQRSTUV = _mm512_max_ps(vmin, vacc0xGHIJKLMNOPQRSTUV);
+    vacc0x0 = _mm512_max_ps(vmin, vacc0x0);
+    vacc0x1 = _mm512_max_ps(vmin, vacc0x1);
 
     const __m512 vmax = _mm512_set1_ps(params->scalar.max);
-    vacc0x0123456789ABCDEF = _mm512_min_ps(vmax, vacc0x0123456789ABCDEF);
-    vacc0xGHIJKLMNOPQRSTUV = _mm512_min_ps(vmax, vacc0xGHIJKLMNOPQRSTUV);
+    vacc0x0 = _mm512_min_ps(vmax, vacc0x0);
+    vacc0x1 = _mm512_min_ps(vmax, vacc0x1);
 
     if XNN_LIKELY(nc >= 32) {
-      _mm512_storeu_ps(c0, vacc0x0123456789ABCDEF);
-      _mm512_storeu_ps(c0 + 16, vacc0xGHIJKLMNOPQRSTUV);
+      _mm512_storeu_ps(c0, vacc0x0);
+      _mm512_storeu_ps(c0 + 16, vacc0x1);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
 
       a0 = (const float*) ((uintptr_t) a0 - kc);
@@ -85,16 +85,16 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x32__avx512skx_broadcast(
       nc -= 32;
     } else {
       if (nc & 16) {
-        _mm512_storeu_ps(c0, vacc0x0123456789ABCDEF);
+        _mm512_storeu_ps(c0, vacc0x0);
 
-        vacc0x0123456789ABCDEF = vacc0xGHIJKLMNOPQRSTUV;
+        vacc0x0 = vacc0x1;
 
         c0 += 16;
       }
       if (nc & 15) {
         // Prepare mask for valid 32-bit elements (depends on nc).
         const __mmask16 vmask = _cvtu32_mask16((uint32_t) (UINT32_C(1) << (nc & 15)) - UINT32_C(1));
-        _mm512_mask_storeu_ps(c0, vmask, vacc0x0123456789ABCDEF);
+        _mm512_mask_storeu_ps(c0, vmask, vacc0x0);
       }
       nc = 0;
     }

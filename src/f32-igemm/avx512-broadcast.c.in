@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert NR % 16 == 0
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <immintrin.h>
@@ -56,12 +55,12 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__avx512f_broadcast(
       }
 
   do {
-    __m512 vacc0x${ABC[0:16]} = _mm512_load_ps(w);
+    __m512 vacc0x0 = _mm512_load_ps(w);
     $for N in range(16, NR, 16):
-      __m512 vacc0x${ABC[N:N+16]} = _mm512_load_ps(w + ${N});
+      __m512 vacc0x${N//16} = _mm512_load_ps(w + ${N});
     $for M in range(1, MR):
       $for N in range(0, NR, 16):
-        __m512 vacc${M}x${ABC[N:N+16]} = vacc0x${ABC[N:N+16]};
+        __m512 vacc${M}x${N//16} = vacc0x${N//16};
     w += ${NR};
 
     size_t p = ks;
@@ -76,15 +75,15 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__avx512f_broadcast(
 
       size_t k = kc;
       do {
-        const __m512 vb${ABC[0:16]} = _mm512_load_ps(w);
+        const __m512 vb0 = _mm512_load_ps(w);
         $for N in range(16, NR, 16):
-          const __m512 vb${ABC[N:N+16]} = _mm512_load_ps(w + ${N});
+          const __m512 vb${N//16} = _mm512_load_ps(w + ${N});
         w += ${NR};
 
         $for M in range(MR):
           const __m512 va${M} = _mm512_set1_ps(*a${M});
           $for N in range(0, NR, 16):
-            vacc${M}x${ABC[N:N+16]} = _mm512_fmadd_ps(va${M}, vb${ABC[N:N+16]}, vacc${M}x${ABC[N:N+16]});
+            vacc${M}x${N//16} = _mm512_fmadd_ps(va${M}, vb${N//16}, vacc${M}x${N//16});
 
         $for M in range(MR):
           a${M} += 1;
@@ -97,18 +96,18 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__avx512f_broadcast(
     const __m512 vmin = _mm512_set1_ps(params->scalar.min);
     $for N in range(0, NR, 16):
       $for M in range(MR):
-        vacc${M}x${ABC[N:N+16]} = _mm512_max_ps(vmin, vacc${M}x${ABC[N:N+16]});
+        vacc${M}x${N//16} = _mm512_max_ps(vmin, vacc${M}x${N//16});
 
     const __m512 vmax = _mm512_set1_ps(params->scalar.max);
     $for N in range(0, NR, 16):
       $for M in range(MR):
-        vacc${M}x${ABC[N:N+16]} = _mm512_min_ps(vmax, vacc${M}x${ABC[N:N+16]});
+        vacc${M}x${N//16} = _mm512_min_ps(vmax, vacc${M}x${N//16});
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):
-        _mm512_storeu_ps(c${M}, vacc${M}x${ABC[0:16]});
+        _mm512_storeu_ps(c${M}, vacc${M}x0);
         $for N in range(16, NR, 16):
-          _mm512_storeu_ps(c${M} + ${N}, vacc${M}x${ABC[N:N+16]});
+          _mm512_storeu_ps(c${M} + ${N}, vacc${M}x${N//16});
         c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
       a = (const float**restrict) ((uintptr_t) a - ks);
@@ -119,13 +118,13 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__avx512f_broadcast(
           if (nc & ${1 << LOG2N}) {
             $if LOG2N >= 4:
               $for M in reversed(range(MR)):
-                _mm512_storeu_ps(c${M}, vacc${M}x${ABC[0:16]});
+                _mm512_storeu_ps(c${M}, vacc${M}x0);
                 $for N in range(16, 1 << LOG2N, 16):
-                  _mm512_storeu_ps(c${M} + ${N}, vacc${M}x${ABC[N:N+16]});
+                  _mm512_storeu_ps(c${M} + ${N}, vacc${M}x${N//16});
 
               $for M in reversed(range(MR)):
                 $for N in range(0, NR - (1 << LOG2N), 16):
-                  vacc${M}x${ABC[N:N+16]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+16]};
+                  vacc${M}x${N//16} = vacc${M}x${(N + (1 << LOG2N))//16};
 
               $for M in reversed(range(MR)):
                 c${M} += ${1 << LOG2N};
@@ -136,7 +135,7 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__avx512f_broadcast(
             const __mmask16 vmask = _cvtu32_mask16((uint32_t) (UINT32_C(1) << nc) - UINT32_C(1));
 
             $for M in reversed(range(MR)):
-              _mm512_mask_storeu_ps(c${M}, vmask, vacc${M}x${ABC[0:16]});
+              _mm512_mask_storeu_ps(c${M}, vmask, vacc${M}x0);
           }
 
       nc = 0;

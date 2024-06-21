@@ -327,8 +327,8 @@ SET(SUBGRAPH_SRCS
   src/subgraph/global-average-pooling.c
   src/subgraph/global-sum-pooling.c
   src/subgraph/hardswish.c
-  src/subgraph/log.c
   src/subgraph/leaky-relu.c
+  src/subgraph/log.c
   src/subgraph/max-pooling-2d.c
   src/subgraph/maximum2.c
   src/subgraph/minimum2.c

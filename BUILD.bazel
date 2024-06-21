@@ -890,8 +890,8 @@ xnnpack_microkernel_cc_library(
     aarch32_srcs_test = ALL_NEONI8MM_MICROKERNEL_SRCS,
     aarch64_copts = ["-march=armv8.2-a+i8mm+fp16"],
     aarch64_srcs_prod = [
-        "src/amalgam/gen/neoni8mm.c",
         "src/amalgam/gen/neoni8mm-aarch64.c",
+        "src/amalgam/gen/neoni8mm.c",
     ],
     aarch64_srcs_test = ALL_NEONI8MM_MICROKERNEL_SRCS + ALL_NEONI8MM_AARCH64_MICROKERNEL_SRCS,
     defines = xnnpack_kleidiai_defines(),
