@@ -1514,6 +1514,28 @@ void xnn_f32_vcmul_ukernel__rvv_u2v(
   }
 }
 
+void xnn_f32_vrelu_ukernel__rvv_u4v(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_relu_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  float zero = 0.0f;
+  size_t batch_ = batch >> XNN_LOG2_SIZEOF_FLOAT;
+
+  for (; batch_ > 0; ) {
+    size_t n = __riscv_vsetvl_e32m4(batch_); batch_ -= n;
+    vfloat32m4_t in_f32v = __riscv_vle32_v_f32m4(input, n); input += n;
+    vfloat32m4_t out_f32v = __riscv_vfmax_vf_f32m4(in_f32v, zero, n);
+    __riscv_vse32_v_f32m4(output, out_f32v, n); output += n;
+  }
+}
+
 void xnn_qs8_vmul_minmax_fp32_ukernel__rvv_u2v(
     size_t batch,
     const int8_t* input_a,
