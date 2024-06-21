@@ -22,7 +22,11 @@ extern "C" {
 /// The caller must allocate at least this many extra bytes after the tensor data passed to XNNPACK.
 ///
 /// Note: XNNPACK reads, but never writes beyond array bounds.
+#if XNN_ARCH_HEXAGON
+#define XNN_EXTRA_BYTES 32
+#else
 #define XNN_EXTRA_BYTES 16
+#endif  // XNN_ARCH_HEXAGON
 
 /// Maximum number of dimensions in tensor shape.
 #define XNN_MAX_TENSOR_DIMS 6

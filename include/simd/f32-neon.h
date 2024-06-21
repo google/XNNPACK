@@ -10,13 +10,15 @@
 #include <arm_neon.h>
 #include <assert.h>
 #include <stddef.h>
+
 #include <xnnpack/common.h>
+
 
 // SIMD vector type for f32 using NEON.
 typedef float32x4_t xnn_simd_f32_t;
 #define xnn_simd_size_f32 4
-static const size_t xnn_simd_log2_size_f32 = 2;
-static const size_t xnn_simd_bytes_f32 = xnn_simd_size_f32 * sizeof(float);
+#define xnn_simd_log2_size_f32 2
+#define xnn_simd_bytes_f32 xnn_simd_size_f32 * sizeof(float)
 
 #define XNN_SIMD_CONST_F32(var, val) \
   const float32x4_t var = vdupq_n_f32(val);

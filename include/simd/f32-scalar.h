@@ -11,13 +11,15 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
+
 #include <xnnpack/common.h>
+
 
 // SIMD vector type for f32 using SCALAR.
 typedef float xnn_simd_f32_t;
 #define xnn_simd_size_f32 1
-static const size_t xnn_simd_log2_size_f32 = 0;
-static const size_t xnn_simd_bytes_f32 = xnn_simd_size_f32 * sizeof(float);
+#define xnn_simd_log2_size_f32 0
+#define xnn_simd_bytes_f32 xnn_simd_size_f32 * sizeof(float)
 
 #define XNN_SIMD_CONST_F32(var, val) \
   static const xnn_simd_f32_t var = val;
@@ -67,8 +69,8 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) { return -a; }
 
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a, xnn_simd_f32_t b) {
-  const uint32_t res = *(const uint32_t *)&a & *(const uint32_t *)&a;
-  return *(const xnn_simd_f32_t *)&res;
+  const uint32_t res = *(const uint32_t *) &a & *(const uint32_t *) &a;
+  return *(const xnn_simd_f32_t *) &res;
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_or_f32(xnn_simd_f32_t a, xnn_simd_f32_t b) {

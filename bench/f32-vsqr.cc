@@ -153,6 +153,27 @@ void f32_vsqr(benchmark::State& state, xnn_f32_vsqr_ukernel_fn ukernel,
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  BENCHMARK_CAPTURE(f32_vsqr, hvx_u32,
+                    xnn_f32_vsqr_ukernel__hvx_u32,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckHVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsqr, hvx_u64,
+                    xnn_f32_vsqr_ukernel__hvx_u64,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckHVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsqr, hvx_u128,
+                    xnn_f32_vsqr_ukernel__hvx_u128,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckHVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
 BENCHMARK_CAPTURE(f32_vsqr, scalar_u1,
                   xnn_f32_vsqr_ukernel__scalar_u1,
                   /*init_params=*/nullptr)

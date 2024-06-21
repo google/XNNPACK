@@ -8,16 +8,19 @@
 #define THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_AVX_BASE_H_
 
 #include <assert.h>
-#include <immintrin.h>
 #include <stddef.h>
 #include <stdint.h>
+
+#include <immintrin.h>
+
 #include <xnnpack/common.h>
+
 
 // SIMD vector type for f32 using AVX.
 typedef __m256 xnn_simd_f32_t;
 #define xnn_simd_size_f32 8
-static const size_t xnn_simd_log2_size_f32 = 3;
-static const size_t xnn_simd_bytes_f32 = xnn_simd_size_f32 * sizeof(float);
+#define xnn_simd_log2_size_f32 3
+#define xnn_simd_bytes_f32 xnn_simd_size_f32 * sizeof(float)
 
 #define XNN_SIMD_CONST_F32(var, val) \
   const xnn_simd_f32_t var = _mm256_set1_ps(val);

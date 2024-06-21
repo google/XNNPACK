@@ -11,13 +11,15 @@
 #include <immintrin.h>
 #include <stddef.h>
 #include <stdint.h>
+
 #include <xnnpack/common.h>
+
 
 // SIMD vector type for f32 using AVX512F.
 typedef __m512 xnn_simd_f32_t;
 #define xnn_simd_size_f32 16
-static const size_t xnn_simd_log2_size_f32 = 4;
-static const size_t xnn_simd_bytes_f32 = xnn_simd_size_f32 * sizeof(float);
+#define xnn_simd_log2_size_f32 4
+#define xnn_simd_bytes_f32 xnn_simd_size_f32 * sizeof(float)
 
 #define XNN_SIMD_CONST_F32(var, val) \
   const xnn_simd_f32_t var = _mm512_set1_ps(val);

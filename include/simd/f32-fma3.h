@@ -10,6 +10,7 @@
 #include <simd/f32-avx-base.h>
 #include <xnnpack/common.h>
 
+
 static XNN_INLINE xnn_simd_f32_t xnn_fmadd_f32(xnn_simd_f32_t a,
                                                xnn_simd_f32_t b,
                                                xnn_simd_f32_t c) {
