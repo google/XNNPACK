@@ -107,10 +107,6 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_2x2__scalar(
       w = (const float*) w + 2;
     }
 
-    vout0x0 /= 16;
-    vout0x1 /= 16;
-    vout1x0 /= 16;
-    vout1x1 /= 16;
 
     const float vinput_scale0 = quantization_params[0].inv_scale;
     vout0x0 *= vinput_scale0;

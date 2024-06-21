@@ -211,9 +211,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
     $if DATATYPE in ["QD8", "QC4", "QB4_F16", "QB4_F32"]:
       $for M in range(MR):
         $for N in range(NR):
-          $if BLOCKWISE:
-            vout${M}x${N} /= 16;
-          $else:
+          $if not BLOCKWISE:
             $if DATATYPE == "QC4":
               float vout${M}x${N} = (float) math_asr_s32(vacc${M}x${N}, 4);
             $else:
