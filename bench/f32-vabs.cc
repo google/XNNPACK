@@ -135,24 +135,6 @@ void f32_vabs(benchmark::State& state, xnn_f32_vabs_ukernel_fn ukernel,
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(f32_vabs, wasmsimd_u4,
-                    xnn_f32_vabs_ukernel__wasmsimd_u4,
-                    /*init_params=*/nullptr)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vabs, wasmsimd_u8,
-                    xnn_f32_vabs_ukernel__wasmsimd_u8,
-                    /*init_params=*/nullptr)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vabs, wasmsimd_u12,
-                    xnn_f32_vabs_ukernel__wasmsimd_u12,
-                    /*init_params=*/nullptr)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   BENCHMARK_CAPTURE(f32_vabs, hvx_u32,
                     xnn_f32_vabs_ukernel__hvx_u32,
@@ -173,6 +155,24 @@ void f32_vabs(benchmark::State& state, xnn_f32_vabs_ukernel_fn ukernel,
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_vabs, wasmsimd_u4,
+                    xnn_f32_vabs_ukernel__wasmsimd_u4,
+                    /*init_params=*/nullptr)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vabs, wasmsimd_u8,
+                    xnn_f32_vabs_ukernel__wasmsimd_u8,
+                    /*init_params=*/nullptr)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vabs, wasmsimd_u12,
+                    xnn_f32_vabs_ukernel__wasmsimd_u12,
+                    /*init_params=*/nullptr)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 BENCHMARK_CAPTURE(f32_vabs, scalar_u1,
                   xnn_f32_vabs_ukernel__scalar_u1,
