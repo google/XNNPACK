@@ -7,7 +7,6 @@
 #ifndef THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_SCALAR_H_
 #define THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_SCALAR_H_
 
-#include <assert.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -19,7 +18,7 @@
 typedef float xnn_simd_f32_t;
 #define xnn_simd_size_f32 1
 #define xnn_simd_log2_size_f32 0
-#define xnn_simd_bytes_f32 xnn_simd_size_f32 * sizeof(float)
+#define xnn_simd_bytes_f32 (xnn_simd_size_f32 * sizeof(float))
 
 #define XNN_SIMD_CONST_F32(var, val) \
   static const xnn_simd_f32_t var = val;
@@ -29,21 +28,25 @@ typedef float xnn_simd_f32_t;
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return 0.0f; }
 
-static XNN_INLINE xnn_simd_f32_t xnn_add_f32(xnn_simd_f32_t a, xnn_simd_f32_t b) {
+static XNN_INLINE xnn_simd_f32_t xnn_add_f32(xnn_simd_f32_t a,
+                                             xnn_simd_f32_t b) {
   return a + b;
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_mul_f32(xnn_simd_f32_t a, xnn_simd_f32_t b) {
+static XNN_INLINE xnn_simd_f32_t xnn_mul_f32(xnn_simd_f32_t a,
+                                             xnn_simd_f32_t b) {
   return a * b;
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_fmadd_f32(xnn_simd_f32_t a, xnn_simd_f32_t b,
-                                        xnn_simd_f32_t c) {
+static XNN_INLINE xnn_simd_f32_t xnn_fmadd_f32(xnn_simd_f32_t a,
+                                               xnn_simd_f32_t b,
+                                               xnn_simd_f32_t c) {
   return (a * b) + c;
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_f32(xnn_simd_f32_t a, xnn_simd_f32_t b,
-                                         xnn_simd_f32_t c) {
+static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_f32(xnn_simd_f32_t a,
+                                                xnn_simd_f32_t b,
+                                                xnn_simd_f32_t c) {
   return c - (a * b);
 }
 
@@ -102,12 +105,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_set1_or_load_f32(const float *v) { return *
 
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_f32_t xnn_load_tail_f32(const float *input,
-                                            size_t num_elements) XNN_OOB_READS {
+                                                   size_t num_elements) {
   return *input;
 }
 
 static XNN_INLINE void xnn_store_tail_f32(float *output, xnn_simd_f32_t v,
-                                   size_t num_elements) {
+                                          size_t num_elements) {
   *output = v;
 }
 

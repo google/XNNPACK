@@ -9,6 +9,7 @@
 
 #include <assert.h>
 #include <stddef.h>
+
 #include <wasm_simd128.h>
 
 #include <xnnpack/common.h>
@@ -18,7 +19,7 @@
 typedef v128_t xnn_simd_f32_t;
 #define xnn_simd_size_f32 4
 #define xnn_simd_log2_size_f32 2
-#define xnn_simd_bytes_f32 xnn_simd_size_f32 * sizeof(float)
+#define xnn_simd_bytes_f32 (xnn_simd_size_f32 * sizeof(float))
 
 #define XNN_SIMD_CONST_F32(var, val) \
   static const __f32x4 var = {(val), (val), (val), (val)};

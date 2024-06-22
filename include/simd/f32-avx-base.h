@@ -20,7 +20,7 @@
 typedef __m256 xnn_simd_f32_t;
 #define xnn_simd_size_f32 8
 #define xnn_simd_log2_size_f32 3
-#define xnn_simd_bytes_f32 xnn_simd_size_f32 * sizeof(float)
+#define xnn_simd_bytes_f32 (xnn_simd_size_f32 * sizeof(float))
 
 #define XNN_SIMD_CONST_F32(var, val) \
   const xnn_simd_f32_t var = _mm256_set1_ps(val);

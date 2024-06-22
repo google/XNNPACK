@@ -18,7 +18,7 @@
 typedef __m128 xnn_simd_f32_t;
 #define xnn_simd_size_f32 4
 #define xnn_simd_log2_size_f32 2
-#define xnn_simd_bytes_f32 xnn_simd_size_f32 * sizeof(float)
+#define xnn_simd_bytes_f32 (xnn_simd_size_f32 * sizeof(float))
 
 #define XNN_SIMD_CONST_F32(var, val) \
   const xnn_simd_f32_t var = _mm_set1_ps(val);

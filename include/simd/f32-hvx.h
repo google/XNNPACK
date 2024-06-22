@@ -7,6 +7,7 @@
 #ifndef THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_HVX_H_
 #define THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_HVX_H_
 
+#include <assert.h>
 #include <stddef.h>
 
 #include <hvx_hexagon_protos.h>
@@ -20,7 +21,7 @@
 typedef HVX_Vector xnn_simd_f32_t;
 #define xnn_simd_size_f32 32
 #define xnn_simd_log2_size_f32 5
-#define xnn_simd_bytes_f32 xnn_simd_size_f32 * sizeof(float)
+#define xnn_simd_bytes_f32 (xnn_simd_size_f32 * sizeof(float))
 
 #define XNN_SIMD_CONST_F32(var, val) \
   const xnn_simd_f32_t var = Q6_V_vsplat_R(val);
