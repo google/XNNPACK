@@ -1,0 +1,99 @@
+
+$assert BATCH_TILE % 32 == 0
+$assert BATCH_TILE >= 32
+$SIMD_TILE = BATCH_TILE // 32
+$assert OP in ["ADD", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
+#include <assert.h>
+
+#include <hvx_hexagon_protos.h>
+#include <hexagon_protos.h>
+#include <hexagon_types.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/math.h>
+#include <xnnpack/vbinary.h>
+
+$_HEXAGON_OP_HVX = {
+$  "ADD": lambda x: "Q6_Vsf_vadd_VsfVsf(%s, vb)" % x,
+$  "MAX": lambda x: "Q6_Vsf_vmax_VsfVsf(%s, vb)" % x,
+$  "MIN": lambda x: "Q6_Vsf_vmin_VsfVsf(%s, vb)" % x,
+$  "MUL": lambda x: "Q6_Vsf_vmpy_VsfVsf(%s, vb)" % x,
+$  "SUB": lambda x: "Q6_Vsf_vsub_VsfVsf(%s, vb)" % x,
+$  "RSUB": lambda x: "Q6_Vsf_vsub_VsfVsf(vb, %s)" % x,
+$  "SQRDIFF": lambda x: "Q6_Vsf_vsub_VsfVsf(%s, vb)" % x,
+$}[OP]
+$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "xnn_f32_default_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
+void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__hvx_u${BATCH_TILE}(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  $if ACTIVATION == "MINMAX":
+    const HVX_Vector voutput_min = Q6_V_vsplat_R(*((uint32_t *) &params->scalar.min));
+    const HVX_Vector voutput_max = Q6_V_vsplat_R(*((uint32_t *) &params->scalar.max));
+  HVX_Vector vb = Q6_V_vsplat_R(*(int32_t*)input_b);
+
+  $if BATCH_TILE > 32:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      HVX_Vector va0 = *((HVX_UVector*)input_a);
+      $for N in range(32, BATCH_TILE, 32):
+        HVX_Vector va${int(N/32)} = *((HVX_UVector*)(input_a + ${N}));
+      input_a += ${BATCH_TILE};       
+
+      $for N in range(SIMD_TILE):
+        HVX_Vector vacc${N} = ${_HEXAGON_OP_HVX("va" + str(N))};
+
+      $if OP == "SQRDIFF":
+        $for N in range(SIMD_TILE):
+          vacc${N} = Q6_Vsf_vmpy_VsfVsf(vacc${N}, vacc${N});
+
+      $if ACTIVATION == "MINMAX":
+        $for N in range(SIMD_TILE):
+          vacc${N} = Q6_Vsf_vmax_VsfVsf(vacc${N}, voutput_min);
+
+        $for N in range(SIMD_TILE):
+          vacc${N} = Q6_Vsf_vmin_VsfVsf(vacc${N}, voutput_max);
+
+      *((HVX_UVector *)output) = vacc0;
+      $for N in range(32, BATCH_TILE, 32):
+        *((HVX_UVector *)(output + ${N})) = vacc${int(N/32)};
+      output += ${BATCH_TILE};
+    }
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    HVX_Vector va = *((HVX_UVector*)input_a);
+    input_a += 32;       
+
+    HVX_Vector vacc = ${_HEXAGON_OP_HVX("va")};
+    $if OP == "SQRDIFF":
+      vacc = Q6_Vsf_vmpy_VsfVsf(vacc, vacc);
+    $if ACTIVATION == "MINMAX":
+      vacc = Q6_Vsf_vmax_VsfVsf(vacc, voutput_min);
+      vacc = Q6_Vsf_vmin_VsfVsf(vacc, voutput_max);
+
+    *((HVX_UVector *)output) = vacc;
+    output+= 32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    HVX_Vector va = *((HVX_UVector*)input_a);
+
+    HVX_Vector vacc = ${_HEXAGON_OP_HVX("va")};
+    $if OP == "SQRDIFF":
+      vacc = Q6_Vsf_vmpy_VsfVsf(vacc, vacc);
+    $if ACTIVATION == "MINMAX":
+      vacc = Q6_Vsf_vmax_VsfVsf(vacc, voutput_min);
+      vacc = Q6_Vsf_vmin_VsfVsf(vacc, voutput_max);
+
+    Q6_V_vstu_variable(output, batch, vacc);
+  }
+}
