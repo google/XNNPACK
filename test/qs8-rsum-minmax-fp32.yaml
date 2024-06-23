@@ -50,13 +50,7 @@
 # x86 SSE4.1
 - name: xnn_qs8_rsum_ukernel__sse41_u16
   init: xnn_init_qs8_rsum_sse4_params
-- name: xnn_qs8_rsum_ukernel__sse41_u32
-  init: xnn_init_qs8_rsum_sse4_params
 - name: xnn_qs8_rsum_ukernel__sse41_u32_acc2
-  init: xnn_init_qs8_rsum_sse4_params
-- name: xnn_qs8_rsum_ukernel__sse41_u64
-  init: xnn_init_qs8_rsum_sse4_params
-- name: xnn_qs8_rsum_ukernel__sse41_u64_acc2
   init: xnn_init_qs8_rsum_sse4_params
 - name: xnn_qs8_rsum_ukernel__sse41_u64_acc4
   init: xnn_init_qs8_rsum_sse4_params
