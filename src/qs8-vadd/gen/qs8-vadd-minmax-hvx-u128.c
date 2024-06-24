@@ -37,7 +37,6 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u128(
   const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(*((int16_t *) &params->hvx.output_zero_point));
   const HVX_Vector voutput_min = Q6_Vb_vsplat_R(*((int8_t *) &params->hvx.output_min));
   const HVX_Vector voutput_max = Q6_Vb_vsplat_R(*((int8_t *) &params->hvx.output_max));
-  int8_t* ptr_o = output;
 
   for (; batch >= 128 * sizeof(int8_t); batch -= 128 * sizeof(int8_t)) {
     HVX_Vector va0 = *((HVX_UVector*)input_a);
@@ -83,8 +82,8 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u128(
     vout0 = Q6_Vb_vmin_VbVb(voutput_max, vout0);
 
     // store output
-    *((HVX_UVector *) ptr_o) = vout0;
-    ptr_o += 128;
+    *((HVX_UVector *) output) = vout0;
+    output += 128;
   }
   if XNN_UNLIKELY(batch != 0){
     do {
@@ -117,12 +116,12 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u128(
       vout = Q6_Vb_vmin_VbVb(voutput_max, vout);
 
       if XNN_LIKELY(batch > (32 * sizeof(int8_t))) {
-        Q6_V_vstu_variable(ptr_o, 32, vout);
-        ptr_o += 32;
+        Q6_V_vstu_variable(output, 32, vout);
+        output += 32;
         batch -=32;
       }
       else{
-        Q6_V_vstu_variable(ptr_o, batch, vout);
+        Q6_V_vstu_variable(output, batch, vout);
         batch = 0;
       }
     } while (batch != 0);

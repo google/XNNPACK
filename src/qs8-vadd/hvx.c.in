@@ -37,7 +37,6 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__hvx_u${BATCH_TILE}(
   const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(*((int16_t *) &params->hvx.output_zero_point));
   const HVX_Vector voutput_min = Q6_Vb_vsplat_R(*((int8_t *) &params->hvx.output_min));
   const HVX_Vector voutput_max = Q6_Vb_vsplat_R(*((int8_t *) &params->hvx.output_max));
-  int8_t* ptr_o = output;
 
   for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
     HVX_Vector va0 = *((HVX_UVector*)input_a);
@@ -100,11 +99,11 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__hvx_u${BATCH_TILE}(
     // store output
     $for N in range(0, BATCH_TILE, 128):
       $if N + 128 <= BATCH_TILE:
-        *((HVX_UVector *) ptr_o) = vout${int(N/128)};
-        ptr_o += 128;
+        *((HVX_UVector *) output) = vout${int(N/128)};
+        output += 128;
       $else:
-        Q6_V_vstu_variable(ptr_o, ${BATCH_TILE - N}, vout${int(N/128)});
-        ptr_o += ${BATCH_TILE - N};
+        Q6_V_vstu_variable(output, ${BATCH_TILE - N}, vout${int(N/128)});
+        output += ${BATCH_TILE - N};
   }
   if XNN_UNLIKELY(batch != 0){
     do {
@@ -139,16 +138,16 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__hvx_u${BATCH_TILE}(
 
       $if BATCH_TILE > 32:
         if XNN_LIKELY(batch > (32 * sizeof(int8_t))) {
-          Q6_V_vstu_variable(ptr_o, 32, vout);
-          ptr_o += 32;
+          Q6_V_vstu_variable(output, 32, vout);
+          output += 32;
           batch -=32;
         }
         else{
-          Q6_V_vstu_variable(ptr_o, batch, vout);
+          Q6_V_vstu_variable(output, batch, vout);
           batch = 0;
         }
       $else:
-        Q6_V_vstu_variable(ptr_o, batch, vout);
+        Q6_V_vstu_variable(output, batch, vout);
         batch = 0;
     } while (batch != 0);
   }
