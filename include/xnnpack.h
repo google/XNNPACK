@@ -1246,6 +1246,13 @@ enum xnn_status xnn_define_static_constant_pad(
   uint32_t output_id,
   uint32_t flags);
 
+enum xnn_status xnn_define_static_expand_dims(
+  xnn_subgraph_t subgraph,
+  size_t num_new_axes,
+  const size_t* new_axes,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
 /// Define a Mean Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.

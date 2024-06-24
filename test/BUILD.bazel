@@ -1959,6 +1959,7 @@ xnnpack_cxx_library(
     "square",
     "square_root",
     "static_constant_pad",
+    "static_expand_dims",
     "static_reshape",
     "reshape_2d",
     "static_slice",
