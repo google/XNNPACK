@@ -55,6 +55,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_f32(xnn_simd_f32_t a,
   return _mm512_fnmadd_ps(a, b, c);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
+                                               xnn_simd_f32_t b,
+                                               xnn_simd_f32_t c) {
+  return _mm512_fmsub_ps(a, b, c);
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_sub_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
   return _mm512_sub_ps(a, b);

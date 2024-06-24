@@ -23,7 +23,8 @@ typedef __m128 xnn_simd_f32_t;
 #define XNN_SIMD_CONST_F32(var, val) \
   const xnn_simd_f32_t var = _mm_set1_ps(val);
 
-#define XNN_SIMD_CONST_U32(var, val) const __m128i var = _mm_set1_epi32(val);
+#define XNN_SIMD_CONST_U32(var, val) \
+  const xnn_simd_f32_t var = _mm_castsi128_ps(_mm_set1_epi32(val));
 
 // Whether or not this architecture has native fused multiply-add support.
 #define XNN_SIMD_HAS_NATIVE_FMA 0
@@ -54,6 +55,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_f32(xnn_simd_f32_t a,
   return _mm_sub_ps(c, _mm_mul_ps(a, b));
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
+                                               xnn_simd_f32_t b,
+                                               xnn_simd_f32_t c) {
+  return _mm_sub_ps(_mm_mul_ps(a, b), c);
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_sub_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
   return _mm_sub_ps(a, b);
@@ -76,7 +83,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_min_f32(xnn_simd_f32_t a,
 
 static XNN_INLINE xnn_simd_f32_t xnn_abs_f32(xnn_simd_f32_t a) {
   XNN_SIMD_CONST_U32(vnonsign_mask, 0x7FFFFFFFUL);
-  return _mm_and_ps(a, _mm_castsi128_ps(vnonsign_mask));
+  return _mm_and_ps(a, vnonsign_mask);
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {

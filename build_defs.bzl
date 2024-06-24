@@ -83,6 +83,49 @@ def xnnpack_kleidiai_defines():
         not_enabled = ["XNN_ENABLE_KLEIDIAI=0"],
     )
 
+_XNNPACK_ARCH_COPT_MAPPING = {
+    "avx": select({
+        "//build_config:x86": ["-mavx"],
+        "//conditions:default": [],
+    }),
+    "avx2": select({
+        "//build_config:x86": ["-mavx2"],
+        "//conditions:default": [],
+    }),
+    "avx512f": select({
+        "//build_config:x86": ["-mavx512f"],
+        "//conditions:default": [],
+    }),
+    "fma3": select({
+        "//build_config:x86": ["-mfma"],
+        "//conditions:default": [],
+    }),
+    "hvx": select({
+        "//build_config:hexagon": ["-mhvx-ieee-fp"],
+        "//conditions:default": [],
+    }),
+    "neon": select({
+        "//build_config:aarch32": [
+            "-marm",
+            "-march=armv7-a",
+            "-mfpu=neon",
+        ],
+        "//conditions:default": [],
+    }),
+    "scalar": [],
+    "sse2": select({
+        "//build_config:x86": ["-msse2"],
+        "//conditions:default": [],
+    }),
+    "wasmsimd": [],
+}
+
+def xnnpack_simd_archs():
+    return _XNNPACK_ARCH_COPT_MAPPING.keys()
+
+def xnnpack_simd_copts_for_arch(arch):
+    return _XNNPACK_ARCH_COPT_MAPPING[arch]
+
 def xnnpack_cc_library(
         name,
         srcs = [],

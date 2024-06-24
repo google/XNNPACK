@@ -4,6 +4,18 @@
 // LICENSE file in the root directory of this source tree.
 //
 
+// This header file contains portable SIMD wrappers common to AVX, AVX2, and
+// FMA3. Do not include this header directly.
+//
+// Portable SIMD wrapper headers including this file need to implement the
+// following wrappers themselves:
+//
+//   - xnn_fmadd_f32
+//   - xnn_fnmadd_f32
+//   - xnn_fmsub_f32
+//   - xnn_shiftl_f32
+//   - xnn_shiftr_f32
+
 #ifndef THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_AVX_BASE_H_
 #define THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_AVX_BASE_H_
 

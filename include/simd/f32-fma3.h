@@ -11,6 +11,9 @@
 #include <xnnpack/common.h>
 
 
+// Whether or not this architecture has native fused multiply-add support.
+#define XNN_SIMD_HAS_NATIVE_FMA 1
+
 static XNN_INLINE xnn_simd_f32_t xnn_fmadd_f32(xnn_simd_f32_t a,
                                                xnn_simd_f32_t b,
                                                xnn_simd_f32_t c) {
@@ -21,6 +24,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_f32(xnn_simd_f32_t a,
                                                 xnn_simd_f32_t b,
                                                 xnn_simd_f32_t c) {
   return _mm256_fnmadd_ps(a, b, c);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
+                                               xnn_simd_f32_t b,
+                                               xnn_simd_f32_t c) {
+  return _mm256_fmsub_ps(a, b, c);
 }
 
 #endif  // THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_FMA3_H_

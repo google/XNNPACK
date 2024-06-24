@@ -23,7 +23,9 @@ typedef float xnn_simd_f32_t;
 #define XNN_SIMD_CONST_F32(var, val) \
   static const xnn_simd_f32_t var = val;
 
-#define XNN_SIMD_CONST_U32(var, val) static const __m128i var = val;
+#define XNN_SIMD_CONST_U32(var, val)             \
+  static const int32_t _##var##_int_value = val; \
+  const xnn_simd_f32_t var = *(const float *)&_##var##_int_value;
 
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return 0.0f; }
@@ -50,6 +52,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_f32(xnn_simd_f32_t a,
   return c - (a * b);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
+                                               xnn_simd_f32_t b,
+                                               xnn_simd_f32_t c) {
+  return (a * b) - c;
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_sub_f32(xnn_simd_f32_t a, xnn_simd_f32_t b) {
   return a - b;
 }
@@ -72,17 +80,17 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) { return -a; }
 
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a, xnn_simd_f32_t b) {
-  const uint32_t res = *(const uint32_t *) &a & *(const uint32_t *) &a;
-  return *(const xnn_simd_f32_t *) &res;
+  const uint32_t res = *(const uint32_t *)&a & *(const uint32_t *)&b;
+  return *(const xnn_simd_f32_t *)&res;
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_or_f32(xnn_simd_f32_t a, xnn_simd_f32_t b) {
-  const uint32_t res = *(const uint32_t *)&a | *(const uint32_t *)&a;
+  const uint32_t res = *(const uint32_t *)&a | *(const uint32_t *)&b;
   return *(const xnn_simd_f32_t *)&res;
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a, xnn_simd_f32_t b) {
-  const uint32_t res = *(const uint32_t *)&a ^ *(const uint32_t *)&a;
+  const uint32_t res = *(const uint32_t *)&a ^ *(const uint32_t *)&b;
   return *(const xnn_simd_f32_t *)&res;
 }
 

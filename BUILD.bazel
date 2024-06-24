@@ -19,6 +19,7 @@ load(
     "xnnpack_microkernel_cc_library",
     "xnnpack_min_size_copts",
     "xnnpack_msvc_std_copts",
+    "xnnpack_simd_archs",
     "xnnpack_slinky_defines",
     "xnnpack_slinky_deps",
     "xnnpack_slinky_srcs",
@@ -247,17 +248,11 @@ MICROKERNEL_DEPS = [
     ":logging",
 ]
 
-SIMD_HEADERS = [
+SIMD_HEADERS = ["include/simd/f32-" + arch + ".h" for arch in xnnpack_simd_archs()] + [
     "include/simd/f32-avx-base.h",
-    "include/simd/f32-avx.h",
-    "include/simd/f32-avx512f.h",
-    "include/simd/f32-fma3.h",
-    "include/simd/f32-hvx.h",
-    "include/simd/f32-neon.h",
-    "include/simd/f32-scalar.h",
-    "include/simd/f32-sse2.h",
-    "include/simd/f32-wasmsimd.h",
 ]
+
+exports_files(SIMD_HEADERS)
 
 INTERNAL_MICROKERNEL_HDRS = MICROKERNEL_HDRS + SIMD_HEADERS + [
     "src/xnnpack/cache.h",

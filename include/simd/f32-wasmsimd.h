@@ -57,6 +57,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_f32(xnn_simd_f32_t a,
   return wasm_f32x4_sub(c, wasm_f32x4_mul(a, b));
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
+                                               xnn_simd_f32_t b,
+                                               xnn_simd_f32_t c) {
+  return wasm_f32x4_sub(wasm_f32x4_mul(a, b), c);
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_sub_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
   return wasm_f32x4_sub(a, b);

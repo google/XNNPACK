@@ -27,6 +27,13 @@ typedef float32x4_t xnn_simd_f32_t;
 #define XNN_SIMD_CONST_U32(var, val) \
   const uint32x4_t var = vdupq_n_u32(val);
 
+// Whether or not this architecture has native fused multiply-add support.
+#if __ARM_FEATURE_FMA
+#define XNN_SIMD_HAS_NATIVE_FMA 1
+#else
+#define XNN_SIMD_HAS_NATIVE_FMA 0
+#endif  // __ARM_FEATURE_FMA
+
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return vdupq_n_f32(0.f); }
 
@@ -48,13 +55,31 @@ static XNN_INLINE xnn_simd_f32_t xnn_sub_f32(xnn_simd_f32_t a,
 static XNN_INLINE xnn_simd_f32_t xnn_fmadd_f32(xnn_simd_f32_t a,
                                                xnn_simd_f32_t b,
                                                xnn_simd_f32_t c) {
+#if __ARM_FEATURE_FMA
+  return vfmaq_f32(c, a, b);
+#else
   return vmlaq_f32(c, a, b);
+#endif  // __ARM_FEATURE_FMA
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_f32(xnn_simd_f32_t a,
                                                 xnn_simd_f32_t b,
                                                 xnn_simd_f32_t c) {
+#if __ARM_FEATURE_FMA
+  return vfmsq_f32(c, a, b);
+#else
   return vmlsq_f32(c, a, b);
+#endif  // __ARM_FEATURE_FMA
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
+                                               xnn_simd_f32_t b,
+                                               xnn_simd_f32_t c) {
+#if __ARM_FEATURE_FMA
+  return vfmaq_f32(vnegq_f32(c), a, b);
+#else
+  return vmlaq_f32(vnegq_f32(c), a, b);
+#endif  // __ARM_FEATURE_FMA
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_div_f32(xnn_simd_f32_t a,
