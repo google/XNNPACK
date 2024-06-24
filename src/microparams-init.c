@@ -985,7 +985,7 @@ size_t xnn_init_qs8_rsum_ssse3_params(
   for (uint32_t i = 16; i < 32; i++) {
     params->ssse3.onemask_table[i] = 0;
   }
-  return sizeof(params->sse4);
+  return sizeof(params->ssse3);
 }
 
 size_t xnn_init_qs8_rsum_sse4_params(
