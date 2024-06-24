@@ -172,14 +172,18 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
           __m128i vacc${M}x3 = _mm_unpackhi_epi64(vksum23${M}, vzero);
     $elif DATATYPE == "QB4":
       const __m128 vksum = _mm_load_ps((const float*) w);
-      $for M in range(0, MR, 2):
-        $if M + 1 == MR:
-          __m128i vinput_zero_point${M} = _mm_cvtsi32_si128(*((const int*) &quantization_params[${M}].zero_point));
-          vinput_zero_point${M} = _mm_shuffle_epi32(vinput_zero_point${M}, _MM_SHUFFLE(0, 0, 0, 0));
-        $else:
-          const __m128i vinput_zero_point${ABC[M:M+2]} = _mm_loadu_si128((const __m128i*) &quantization_params[${M}]);
-          const __m128i vinput_zero_point${M} = _mm_shuffle_epi32(vinput_zero_point${ABC[M:M+2]}, _MM_SHUFFLE(0, 0, 0, 0));
-          const __m128i vinput_zero_point${M+1} = _mm_shuffle_epi32(vinput_zero_point${ABC[M:M+2]}, _MM_SHUFFLE(2, 2, 2, 2));
+      $if AVX:
+        $for M in range(MR):
+          const __m128i vinput_zero_point${M} = _mm_castps_si128(_mm_broadcast_ss((const float*) &quantization_params[${M}].zero_point));
+      $else:
+        $for M in range(0, MR, 2):
+          $if M + 1 == MR:
+            __m128i vinput_zero_point${M} = _mm_cvtsi32_si128(*((const int*) &quantization_params[${M}].zero_point));
+            vinput_zero_point${M} = _mm_shuffle_epi32(vinput_zero_point${M}, _MM_SHUFFLE(0, 0, 0, 0));
+          $else:
+            const __m128i vinput_zero_point${ABC[M:M+2]} = _mm_loadu_si128((const __m128i*) &quantization_params[${M}]);
+            const __m128i vinput_zero_point${M} = _mm_shuffle_epi32(vinput_zero_point${ABC[M:M+2]}, _MM_SHUFFLE(0, 0, 0, 0));
+            const __m128i vinput_zero_point${M+1} = _mm_shuffle_epi32(vinput_zero_point${ABC[M:M+2]}, _MM_SHUFFLE(2, 2, 2, 2));
 
       $for M in range(0, MR):
         __m128 vinput_zero_point${M}_float = _mm_cvtepi32_ps(vinput_zero_point${M});
