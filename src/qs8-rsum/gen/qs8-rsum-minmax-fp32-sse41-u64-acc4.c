@@ -61,8 +61,8 @@ void xnn_qs8_rsum_ukernel__sse41_u64_acc4(
       vacc16 = _mm_add_epi16(vacc16, vt);
     }
     if (XNN_UNLIKELY(batch != 0)) {
-      const __m128i vmask = _mm_loadu_si128((const __m128i*) &params->sse4.mask_table[15 - batch]);
-      const __m128i vt = _mm_maddubs_epi16(vmask, _mm_loadu_si128((const __m128i*) input));
+      const __m128i vonemask = _mm_loadu_si128((const __m128i*) &params->ssse3.onemask_table[16 - batch]);
+      const __m128i vt = _mm_maddubs_epi16(vonemask, _mm_loadu_si128((const __m128i*) input));
       vacc16 = _mm_add_epi16(vacc16, vt);
     }
     vacc = _mm_add_epi32(vacc, _mm_add_epi32(_mm_cvtepi16_epi32(vacc16), _mm_cvtepi16_epi32(_mm_srli_si128(vacc16, 8))));
