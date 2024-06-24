@@ -5,9 +5,9 @@
 # LICENSE file in the root directory of this source tree.
 
 #################################### Scalar ###################################
-tools/xngen src/qs8-rsum/scalar.c.in -D CHANNEL_TILE=1  -D ACCUMULATORS=1 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-scalar-imagic-u1.c &
-tools/xngen src/qs8-rsum/scalar.c.in -D CHANNEL_TILE=2  -D ACCUMULATORS=1 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-scalar-imagic-u2.c &
-tools/xngen src/qs8-rsum/scalar.c.in -D CHANNEL_TILE=4  -D ACCUMULATORS=1 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-scalar-imagic-u4.c &
+tools/xngen src/qs8-rsum/scalar.c.in -D CHANNEL_TILE=1  -D ACCUMULATORS=1 -o src/qs8-rsum/gen/qs8-rsum-scalar-u1.c &
+tools/xngen src/qs8-rsum/scalar.c.in -D CHANNEL_TILE=2  -D ACCUMULATORS=1 -o src/qs8-rsum/gen/qs8-rsum-scalar-u2.c &
+tools/xngen src/qs8-rsum/scalar.c.in -D CHANNEL_TILE=4  -D ACCUMULATORS=1 -o src/qs8-rsum/gen/qs8-rsum-scalar-u4.c &
 
 ################################## ARM NEON ###################################
 tools/xngen src/qs8-rsum/neon.c.in   -D CHANNEL_TILE=16 -D ACCUMULATORS=1 -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-neon-u16.c &
