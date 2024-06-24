@@ -19,6 +19,24 @@ $assert not DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"] or not REQU
 $if PREFETCH:
   #include "xnnpack/prefetch.h"
 
+$#
+$INDENT = 0
+$_ = ""
+$#
+$def SET_INDENT(NEW_INDENT):
+  $global INDENT
+  $global _
+  $INDENT=NEW_INDENT
+  $_ = "  " * INDENT
+$#
+$def BEGIN():
+  $SET_INDENT(INDENT + 1)
+  $return '{'
+$#
+$def END():
+  $SET_INDENT(INDENT - 1)
+  $return _ + '}'
+$#
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QU8": "qu8", "QD8_F16" : "qd8_f16_qc8w", "QD8_F32": "qd8_f32_qc8w", "QC4_F16": "qd8_f16_qc4w", "QC4_F32": "qd8_f32_qc4w", "QB4_F16": "qd8_f16_qb4w", "QB4_F32": "qd8_f32_qb4w"}[DATATYPE]
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
@@ -120,101 +138,102 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
 
     $if BLOCKWISE:
       size_t n_blocks = kc / bl;
-      for (size_t nb=0; nb<n_blocks; ++nb) {
+      for (size_t nb = 0; nb < n_blocks; ++nb) {
         $for M in range(MR):
           $for N in range(0, 8, 2):
             __m256i vacc${M}x${N}${N+1} = _mm256_setzero_si256();
 
         size_t k = bl;
+        $SET_INDENT(1)
     $else:
       size_t k = kc;
     $if DATATYPE in ["QC4_F16", "QC4_F32", "QB4_F16", "QB4_F32"]:
-      while (k >= 16 * sizeof(${XINT8_T})) {
+      ${_}while (k >= 16 * sizeof(${XINT8_T})) {
         $for M in range(MR):
-          __m128i va${M} = _mm_broadcastq_epi64(_mm_loadl_epi64((const __m128i*) a${M}));
+          ${_}__m128i va${M} = _mm_broadcastq_epi64(_mm_loadl_epi64((const __m128i*) a${M}));
           $if DATATYPE == "QU8":
-            __m256i vxa${M} = _mm256_cvtepu8_epi16(va${M});
+            ${_}__m256i vxa${M} = _mm256_cvtepu8_epi16(va${M});
           $else:
-            __m256i vxa${M} = _mm256_cvtepi8_epi16(va${M});
-          a${M} += 8;
+            ${_}__m256i vxa${M} = _mm256_cvtepi8_epi16(va${M});
+          ${_}a${M} += 8;
 
         $for N in range(0, 8, 2):
           $if N == 0:
-            __m128i vb${ABC[N:N+2]} = _mm_load_si128((const __m128i*) w);
+            ${_}__m128i vb${ABC[N:N+2]} = _mm_load_si128((const __m128i*) w);
           $else:
-            __m128i vb${ABC[N:N+2]} = _mm_load_si128((const __m128i*) ((const ${XINT8_T}*) w + ${N * 8}));
-          __m128i vbs${ABC[N:N+2]} = _mm_slli_epi32(vb${ABC[N:N+2]}, 4);
-          __m128i vbm${ABC[N:N+2]} = _mm_and_si128(vbs${ABC[N:N+2]}, vmask);
-          __m256i vxb${ABC[N:N+2]} = _mm256_cvtepi8_epi16(vbm${ABC[N:N+2]});
+            ${_}__m128i vb${ABC[N:N+2]} = _mm_load_si128((const __m128i*) ((const ${XINT8_T}*) w + ${N * 8}));
+          ${_}__m128i vbs${ABC[N:N+2]} = _mm_slli_epi32(vb${ABC[N:N+2]}, 4);
+          ${_}__m128i vbm${ABC[N:N+2]} = _mm_and_si128(vbs${ABC[N:N+2]}, vmask);
+          ${_}__m256i vxb${ABC[N:N+2]} = _mm256_cvtepi8_epi16(vbm${ABC[N:N+2]});
 
           $for M in range(MR):
-            vacc${M}x${ABC[N:N+2]} = _mm256_add_epi32(vacc${M}x${ABC[N:N+2]}, _mm256_madd_epi16(vxa${M}, vxb${ABC[N:N+2]}));
+            ${_}vacc${M}x${ABC[N:N+2]} = _mm256_add_epi32(vacc${M}x${ABC[N:N+2]}, _mm256_madd_epi16(vxa${M}, vxb${ABC[N:N+2]}));
 
         $for M in range(MR):
-          va${M} = _mm_broadcastq_epi64(_mm_loadl_epi64((const __m128i*) a${M}));
+          ${_}va${M} = _mm_broadcastq_epi64(_mm_loadl_epi64((const __m128i*) a${M}));
           $if DATATYPE == "QU8":
-            vxa${M} = _mm256_cvtepu8_epi16(va${M});
+            ${_}vxa${M} = _mm256_cvtepu8_epi16(va${M});
           $else:
-            vxa${M} = _mm256_cvtepi8_epi16(va${M});
-          a${M} += 8;
+            ${_}vxa${M} = _mm256_cvtepi8_epi16(va${M});
+          ${_}a${M} += 8;
 
         $for N in range(0, 8, 2):
-          vbm${ABC[N:N+2]} = _mm_and_si128(vb${ABC[N:N+2]}, vmask);
-          vxb${ABC[N:N+2]} = _mm256_cvtepi8_epi16(vbm${ABC[N:N+2]});
+          ${_}vbm${ABC[N:N+2]} = _mm_and_si128(vb${ABC[N:N+2]}, vmask);
+          ${_}vxb${ABC[N:N+2]} = _mm256_cvtepi8_epi16(vbm${ABC[N:N+2]});
 
           $for M in range(MR):
-            vacc${M}x${ABC[N:N+2]} = _mm256_add_epi32(vacc${M}x${ABC[N:N+2]}, _mm256_madd_epi16(vxa${M}, vxb${ABC[N:N+2]}));
+            ${_}vacc${M}x${ABC[N:N+2]} = _mm256_add_epi32(vacc${M}x${ABC[N:N+2]}, _mm256_madd_epi16(vxa${M}, vxb${ABC[N:N+2]}));
 
-        w = (const ${XINT8_T}*) w + 64;
-        k -= 16 * sizeof(${XINT8_T});
-      }
+        ${_}w = (const ${XINT8_T}*) w + 64;
+        ${_}k -= 16 * sizeof(${XINT8_T});
+      ${_}}
 
-    while (k >= 8 * sizeof(${XINT8_T})) {
+    ${_}while (k >= 8 * sizeof(${XINT8_T})) {
       $for M in range(MR):
-        const __m128i va${M} = _mm_broadcastq_epi64(_mm_loadl_epi64((const __m128i*) a${M}));
+        ${_}const __m128i va${M} = _mm_broadcastq_epi64(_mm_loadl_epi64((const __m128i*) a${M}));
         $if DATATYPE == "QU8":
-          const __m256i vxa${M} = _mm256_cvtepu8_epi16(va${M});
+          ${_}const __m256i vxa${M} = _mm256_cvtepu8_epi16(va${M});
         $else:
-          const __m256i vxa${M} = _mm256_cvtepi8_epi16(va${M});
-        a${M} += 8;
+          ${_}const __m256i vxa${M} = _mm256_cvtepi8_epi16(va${M});
+        ${_}a${M} += 8;
 
       $for N in range(0, 8, 2):
         $if DATATYPE in ["QC4_F16", "QC4_F32", "QB4_F16", "QB4_F32"]:
           $if N == 0:
-            const __m128i vb${ABC[N:N+2]} = _mm_load_si128((const __m128i*) w);
+            ${_}const __m128i vb${ABC[N:N+2]} = _mm_load_si128((const __m128i*) w);
           $else:
-            const __m128i vb${ABC[N:N+2]} = _mm_load_si128((const __m128i*) ((const ${XINT8_T}*) w + ${N * 8}));
-          const __m128i vbs${ABC[N:N+2]} = _mm_slli_epi32(vb${ABC[N:N+2]}, 4);
-          const __m128i vbm${ABC[N:N+2]} = _mm_and_si128(vbs${ABC[N:N+2]}, vmask);
-          const __m256i vxb${ABC[N:N+2]} = _mm256_cvtepi8_epi16(vbm${ABC[N:N+2]});
+            ${_}const __m128i vb${ABC[N:N+2]} = _mm_load_si128((const __m128i*) ((const ${XINT8_T}*) w + ${N * 8}));
+          ${_}const __m128i vbs${ABC[N:N+2]} = _mm_slli_epi32(vb${ABC[N:N+2]}, 4);
+          ${_}const __m128i vbm${ABC[N:N+2]} = _mm_and_si128(vbs${ABC[N:N+2]}, vmask);
+          ${_}const __m256i vxb${ABC[N:N+2]} = _mm256_cvtepi8_epi16(vbm${ABC[N:N+2]});
         $elif DATATYPE == "QU8":
           $if N == 0:
-            const __m256i vxb${ABC[N:N+2]} = _mm256_sub_epi16(_mm256_cvtepu8_epi16(_mm_load_si128((const __m128i*) w)), vb_zero_point);
+            ${_}const __m256i vxb${ABC[N:N+2]} = _mm256_sub_epi16(_mm256_cvtepu8_epi16(_mm_load_si128((const __m128i*) w)), vb_zero_point);
           $else:
-            const __m256i vxb${ABC[N:N+2]} = _mm256_sub_epi16(_mm256_cvtepu8_epi16(_mm_load_si128((const __m128i*) ((const ${XINT8_T}*) w + ${N * 8}))), vb_zero_point);
+            ${_}const __m256i vxb${ABC[N:N+2]} = _mm256_sub_epi16(_mm256_cvtepu8_epi16(_mm_load_si128((const __m128i*) ((const ${XINT8_T}*) w + ${N * 8}))), vb_zero_point);
         $else:
           $if N == 0:
-            const __m256i vxb${ABC[N:N+2]} = _mm256_cvtepi8_epi16(_mm_load_si128((const __m128i*) w));
+            ${_}const __m256i vxb${ABC[N:N+2]} = _mm256_cvtepi8_epi16(_mm_load_si128((const __m128i*) w));
           $else:
-            const __m256i vxb${ABC[N:N+2]} = _mm256_cvtepi8_epi16(_mm_load_si128((const __m128i*) ((const ${XINT8_T}*) w + ${N * 8})));
+            ${_}const __m256i vxb${ABC[N:N+2]} = _mm256_cvtepi8_epi16(_mm_load_si128((const __m128i*) ((const ${XINT8_T}*) w + ${N * 8})));
 
         $for M in range(MR):
-          vacc${M}x${ABC[N:N+2]} = _mm256_add_epi32(vacc${M}x${ABC[N:N+2]}, _mm256_madd_epi16(vxa${M}, vxb${ABC[N:N+2]}));
+          ${_}vacc${M}x${ABC[N:N+2]} = _mm256_add_epi32(vacc${M}x${ABC[N:N+2]}, _mm256_madd_epi16(vxa${M}, vxb${ABC[N:N+2]}));
 
-      w = (const ${XINT8_T}*) w + 64;
-      k -= 8 * sizeof(${XINT8_T});
-    }
+      ${_}w = (const ${XINT8_T}*) w + 64;
+      ${_}k -= 8 * sizeof(${XINT8_T});
+    ${_}}
 
     $if BLOCKWISE:
       $for N in range(0, 8, 2):
-        const __m128 vfilter_output_scale${N} = _mm_broadcast_ss(&((const float*) w)[${N}]);
-        const __m128 vfilter_output_scale${N+1} = _mm_broadcast_ss(&((const float*) w)[${N+1}]);
-        const __m256 vfilter_output_scale${N}${N+1} = _mm256_insertf128_ps(
-            _mm256_castps128_ps256(vfilter_output_scale${N}), vfilter_output_scale${N+1}, 1);
+        ${_}const __m128 vfilter_output_scale${N} = _mm_broadcast_ss(&((const float*) w)[${N}]);
+        ${_}const __m128 vfilter_output_scale${N+1} = _mm_broadcast_ss(&((const float*) w)[${N+1}]);
+        ${_}const __m256 vfilter_output_scale${N}${N+1} = _mm256_insertf128_ps(
+            ${_}_mm256_castps128_ps256(vfilter_output_scale${N}), vfilter_output_scale${N+1}, 1);
         $for M in range(MR):
-          vout${M}x${N}${N+1} = _mm256_fmadd_ps(_mm256_cvtepi32_ps(vacc${M}x${N}${N+1}), vfilter_output_scale${N}${N+1}, vout${M}x${N}${N+1});
+          ${_}vout${M}x${N}${N+1} = _mm256_fmadd_ps(_mm256_cvtepi32_ps(vacc${M}x${N}${N+1}), vfilter_output_scale${N}${N+1}, vout${M}x${N}${N+1});
 
-      w = (const float*) w + 8;
+      ${_}w = (const float*) w + 8;
       }
 
       $for M in range(MR):
