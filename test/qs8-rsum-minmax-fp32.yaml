@@ -49,11 +49,11 @@
 
 # x86 SSE4.1
 - name: xnn_qs8_rsum_ukernel__sse41_u16
-  init: xnn_init_qs8_rsum_sse4_params
+  init: xnn_init_qs8_rsum_ssse3_params
 - name: xnn_qs8_rsum_ukernel__sse41_u32_acc2
-  init: xnn_init_qs8_rsum_sse4_params
+  init: xnn_init_qs8_rsum_ssse3_params
 - name: xnn_qs8_rsum_ukernel__sse41_u64_acc4
-  init: xnn_init_qs8_rsum_sse4_params
+  init: xnn_init_qs8_rsum_ssse3_params
 
 # x86 AVX2
 - name: xnn_qs8_rsum_ukernel__avx2_u32

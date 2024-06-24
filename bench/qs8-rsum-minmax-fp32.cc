@@ -190,7 +190,7 @@ BENCHMARK_CAPTURE(qs8_rsum, scalar_u4,
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_rsum, sse41_u16,
                     xnn_qs8_rsum_ukernel__sse41_u16,
-                    xnn_init_qs8_rsum_sse4_params,
+                    xnn_init_qs8_rsum_ssse3_params,
                     benchmark::utils::CheckSSE41)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
@@ -200,7 +200,7 @@ BENCHMARK_CAPTURE(qs8_rsum, scalar_u4,
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_rsum, sse41_u32_acc2,
                     xnn_qs8_rsum_ukernel__sse41_u32_acc2,
-                    xnn_init_qs8_rsum_sse4_params,
+                    xnn_init_qs8_rsum_ssse3_params,
                     benchmark::utils::CheckSSE41)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
@@ -210,7 +210,7 @@ BENCHMARK_CAPTURE(qs8_rsum, scalar_u4,
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_rsum, sse41_u64_acc4,
                     xnn_qs8_rsum_ukernel__sse41_u64_acc4,
-                    xnn_init_qs8_rsum_sse4_params,
+                    xnn_init_qs8_rsum_ssse3_params,
                     benchmark::utils::CheckSSE41)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();

@@ -952,7 +952,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
     TEST_REQUIRES_X86_SSE41;
     RSumMicrokernelTester()
       .batch_size(16)
-      .Test(xnn_qs8_rsum_ukernel__sse41_u16, xnn_init_qs8_rsum_sse4_params);
+      .Test(xnn_qs8_rsum_ukernel__sse41_u16, xnn_init_qs8_rsum_ssse3_params);
   }
 
   TEST(QS8_RSUM__SSE41_U16, batch_div_16) {
@@ -960,7 +960,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
     for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_rsum_ukernel__sse41_u16, xnn_init_qs8_rsum_sse4_params);
+        .Test(xnn_qs8_rsum_ukernel__sse41_u16, xnn_init_qs8_rsum_ssse3_params);
     }
   }
 
@@ -969,7 +969,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
     for (size_t batch_size = 1; batch_size < 16; batch_size++) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_rsum_ukernel__sse41_u16, xnn_init_qs8_rsum_sse4_params);
+        .Test(xnn_qs8_rsum_ukernel__sse41_u16, xnn_init_qs8_rsum_ssse3_params);
     }
   }
 
@@ -978,7 +978,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
     for (size_t batch_size = 17; batch_size < 32; batch_size++) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_rsum_ukernel__sse41_u16, xnn_init_qs8_rsum_sse4_params);
+        .Test(xnn_qs8_rsum_ukernel__sse41_u16, xnn_init_qs8_rsum_ssse3_params);
     }
   }
 
@@ -988,7 +988,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
       RSumMicrokernelTester()
         .batch_size(17)
         .scale(scale)
-        .Test(xnn_qs8_rsum_ukernel__sse41_u16, xnn_init_qs8_rsum_sse4_params);
+        .Test(xnn_qs8_rsum_ukernel__sse41_u16, xnn_init_qs8_rsum_ssse3_params);
     }
   }
 
@@ -996,7 +996,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
     TEST_REQUIRES_X86_SSE41;
     RSumMicrokernelTester()
       .batch_size(2048)
-      .Test(xnn_qs8_rsum_ukernel__sse41_u16, xnn_init_qs8_rsum_sse4_params);
+      .Test(xnn_qs8_rsum_ukernel__sse41_u16, xnn_init_qs8_rsum_ssse3_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -1006,7 +1006,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
     TEST_REQUIRES_X86_SSE41;
     RSumMicrokernelTester()
       .batch_size(32)
-      .Test(xnn_qs8_rsum_ukernel__sse41_u32_acc2, xnn_init_qs8_rsum_sse4_params);
+      .Test(xnn_qs8_rsum_ukernel__sse41_u32_acc2, xnn_init_qs8_rsum_ssse3_params);
   }
 
   TEST(QS8_RSUM__SSE41_U32_ACC2, batch_div_32) {
@@ -1014,7 +1014,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
     for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_rsum_ukernel__sse41_u32_acc2, xnn_init_qs8_rsum_sse4_params);
+        .Test(xnn_qs8_rsum_ukernel__sse41_u32_acc2, xnn_init_qs8_rsum_ssse3_params);
     }
   }
 
@@ -1023,7 +1023,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
     for (size_t batch_size = 1; batch_size < 32; batch_size++) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_rsum_ukernel__sse41_u32_acc2, xnn_init_qs8_rsum_sse4_params);
+        .Test(xnn_qs8_rsum_ukernel__sse41_u32_acc2, xnn_init_qs8_rsum_ssse3_params);
     }
   }
 
@@ -1032,7 +1032,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
     for (size_t batch_size = 33; batch_size < 64; batch_size++) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_rsum_ukernel__sse41_u32_acc2, xnn_init_qs8_rsum_sse4_params);
+        .Test(xnn_qs8_rsum_ukernel__sse41_u32_acc2, xnn_init_qs8_rsum_ssse3_params);
     }
   }
 
@@ -1042,7 +1042,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
       RSumMicrokernelTester()
         .batch_size(33)
         .scale(scale)
-        .Test(xnn_qs8_rsum_ukernel__sse41_u32_acc2, xnn_init_qs8_rsum_sse4_params);
+        .Test(xnn_qs8_rsum_ukernel__sse41_u32_acc2, xnn_init_qs8_rsum_ssse3_params);
     }
   }
 
@@ -1050,7 +1050,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
     TEST_REQUIRES_X86_SSE41;
     RSumMicrokernelTester()
       .batch_size(4096)
-      .Test(xnn_qs8_rsum_ukernel__sse41_u32_acc2, xnn_init_qs8_rsum_sse4_params);
+      .Test(xnn_qs8_rsum_ukernel__sse41_u32_acc2, xnn_init_qs8_rsum_ssse3_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -1060,7 +1060,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
     TEST_REQUIRES_X86_SSE41;
     RSumMicrokernelTester()
       .batch_size(64)
-      .Test(xnn_qs8_rsum_ukernel__sse41_u64_acc4, xnn_init_qs8_rsum_sse4_params);
+      .Test(xnn_qs8_rsum_ukernel__sse41_u64_acc4, xnn_init_qs8_rsum_ssse3_params);
   }
 
   TEST(QS8_RSUM__SSE41_U64_ACC4, batch_div_64) {
@@ -1068,7 +1068,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
     for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_rsum_ukernel__sse41_u64_acc4, xnn_init_qs8_rsum_sse4_params);
+        .Test(xnn_qs8_rsum_ukernel__sse41_u64_acc4, xnn_init_qs8_rsum_ssse3_params);
     }
   }
 
@@ -1077,7 +1077,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
     for (size_t batch_size = 1; batch_size < 64; batch_size++) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_rsum_ukernel__sse41_u64_acc4, xnn_init_qs8_rsum_sse4_params);
+        .Test(xnn_qs8_rsum_ukernel__sse41_u64_acc4, xnn_init_qs8_rsum_ssse3_params);
     }
   }
 
@@ -1086,7 +1086,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
     for (size_t batch_size = 65; batch_size < 128; batch_size++) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_rsum_ukernel__sse41_u64_acc4, xnn_init_qs8_rsum_sse4_params);
+        .Test(xnn_qs8_rsum_ukernel__sse41_u64_acc4, xnn_init_qs8_rsum_ssse3_params);
     }
   }
 
@@ -1096,7 +1096,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
       RSumMicrokernelTester()
         .batch_size(65)
         .scale(scale)
-        .Test(xnn_qs8_rsum_ukernel__sse41_u64_acc4, xnn_init_qs8_rsum_sse4_params);
+        .Test(xnn_qs8_rsum_ukernel__sse41_u64_acc4, xnn_init_qs8_rsum_ssse3_params);
     }
   }
 
@@ -1104,7 +1104,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
     TEST_REQUIRES_X86_SSE41;
     RSumMicrokernelTester()
       .batch_size(8192)
-      .Test(xnn_qs8_rsum_ukernel__sse41_u64_acc4, xnn_init_qs8_rsum_sse4_params);
+      .Test(xnn_qs8_rsum_ukernel__sse41_u64_acc4, xnn_init_qs8_rsum_ssse3_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
