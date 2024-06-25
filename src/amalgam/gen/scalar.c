@@ -3,9 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <fp16/fp16.h>
 #include <assert.h>
 #include <float.h>
-#include <fp16/fp16.h>
 #include <fxdiv.h>
 #include <math.h>
 #include "xnnpack/simd/f32-scalar.h"

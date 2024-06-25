@@ -11,11 +11,11 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/reduce.h"
+#include <xnnpack/common.h>
+#include <xnnpack/math.h>
+#include <xnnpack/reduce.h>
 
-void xnn_qs8_rsum_ukernel__neon_u64(
+void xnn_qs8_rsum_ukernel__neon_u16(
     size_t batch,
     const int8_t* input,
     int32_t* output,
@@ -28,34 +28,13 @@ void xnn_qs8_rsum_ukernel__neon_u64(
 
   int32x4_t vacc0 = vmovq_n_s32(0);
 
-  for (; batch >= 128; batch -= 128) {
-    int16x8_t vacc16_0 = vmovq_n_s16(0);
-    for (size_t current_batch = 128; current_batch > 0; current_batch -= 64) {
-      const int8x16_t vt0 = vld1q_s8(input); input += 16;
-      const int8x16_t vt1 = vld1q_s8(input); input += 16;
-      const int8x16_t vt2 = vld1q_s8(input); input += 16;
-      const int8x16_t vt3 = vld1q_s8(input); input += 16;
-
-      vacc16_0 = vpadalq_s8(vacc16_0, vt0);
-      vacc16_0 = vpadalq_s8(vacc16_0, vt1);
-      vacc16_0 = vpadalq_s8(vacc16_0, vt2);
-      vacc16_0 = vpadalq_s8(vacc16_0, vt3);
-    }
-    vacc0 = vpadalq_s16(vacc0, vacc16_0);
-  }
 
   if (XNN_UNLIKELY(batch != 0)) {
     int16x8_t vacc16_0 = vmovq_n_s16(0);
-    for (; batch >= 64; batch -= 64) {
+    for (; batch >= 16; batch -= 16) {
       const int8x16_t vt0 = vld1q_s8(input); input += 16;
-      const int8x16_t vt1 = vld1q_s8(input); input += 16;
-      const int8x16_t vt2 = vld1q_s8(input); input += 16;
-      const int8x16_t vt3 = vld1q_s8(input); input += 16;
 
       vacc16_0 = vpadalq_s8(vacc16_0, vt0);
-      vacc16_0 = vpadalq_s8(vacc16_0, vt1);
-      vacc16_0 = vpadalq_s8(vacc16_0, vt2);
-      vacc16_0 = vpadalq_s8(vacc16_0, vt3);
     }
     for (; batch >= 16; batch -= 16) {
       const int8x16_t vt = vld1q_s8(input); input += 16;

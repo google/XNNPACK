@@ -11,11 +11,11 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/reduce.h"
+#include <xnnpack/common.h>
+#include <xnnpack/math.h>
+#include <xnnpack/reduce.h>
 
-void xnn_qs8_rsum_ukernel__avx512vnni_u64(
+void xnn_qs8_rsum_ukernel__avx512vnni_u128_acc2(
     size_t batch,
     const int8_t* input,
     int32_t* output,
@@ -26,9 +26,11 @@ void xnn_qs8_rsum_ukernel__avx512vnni_u64(
   assert(output != NULL);
 
   __m512i vacc0 = _mm512_setzero_si512();
+  __m512i vacc1 = _mm512_setzero_si512();
   const __m512i vone = _mm512_set1_epi8(1);
-  for (; batch >= 64; batch -= 64) {
+  for (; batch >= 128; batch -= 128) {
     vacc0 = _mm512_dpbusd_epi32(vacc0, vone, _mm512_loadu_si512((const __m512i*) input)); input += 64;
+    vacc1 = _mm512_dpbusd_epi32(vacc1, vone, _mm512_loadu_si512((const __m512i*) input)); input += 64;
   }
   if (XNN_UNLIKELY(batch != 0)) {
     for (; batch >= 64; batch -= 64) {
@@ -41,6 +43,7 @@ void xnn_qs8_rsum_ukernel__avx512vnni_u64(
     }
   }
 
+  vacc0 = _mm512_add_epi32(vacc0, vacc1);
 
   int32_t res = _mm512_reduce_add_epi32(vacc0);
 

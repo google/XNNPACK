@@ -4,17 +4,17 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: test/qs8-rsum-minmax-fp32.yaml
+//   Specification: test/qs8-rsum.yaml
 //   Generator: tools/generate-reduce-test.py
 
 
 #include <gtest/gtest.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
+#include <xnnpack/common.h>
+#include <xnnpack/isa-checks.h>
 
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/reduce.h"
+#include <xnnpack/microparams-init.h>
+#include <xnnpack/reduce.h>
 #include "rsum-microkernel-tester.h"
 
 

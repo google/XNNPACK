@@ -4,19 +4,19 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: test/qs8-rsum-minmax-fp32.yaml
+//   Specification: test/qs8-rsum.yaml
 //   Generator: tools/generate-rdsum-benchmark.py
 
 #include "bench/rsum-benchmark.h"
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
-#include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
+#include <xnnpack.h>
+#include <xnnpack/aligned-allocator.h>
+#include <xnnpack/common.h>
+#include <xnnpack/reduce.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
 
 
 BENCHMARK_CAPTURE(qs8_rsum, scalar_u1,
