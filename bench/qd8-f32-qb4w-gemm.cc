@@ -19,6 +19,20 @@
 #include "bench/utils.h"
 
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  static void qd8_f32_qb4w_gemm_minmax_ukernel_1x16c8__avx512skx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x16c8__avx512skx,
+      xnn_init_f32_qb4w_minmax_scalar_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/1, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX512SKX);
+  }
+
+  BENCHMARK_GEMM_BL(qd8_f32_qb4w_gemm_minmax_ukernel_1x16c8__avx512skx)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
 static void qd8_f32_qb4w_gemm_minmax_ukernel_1x2__scalar(benchmark::State& state, const char* net) {
   GEMMBenchmark(state,
     xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x2__scalar,

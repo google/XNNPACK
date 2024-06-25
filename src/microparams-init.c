@@ -13,6 +13,7 @@
 #include <xnnpack/microparams.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/unaligned.h>
+#include <stdio.h>
 
 #include <fp16/fp16.h>
 
