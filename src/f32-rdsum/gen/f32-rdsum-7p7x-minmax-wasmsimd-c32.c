@@ -10,9 +10,9 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/math.h>
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/math.h"
 
 void xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32(
     size_t rows,

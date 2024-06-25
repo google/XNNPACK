@@ -8,8 +8,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math-stubs.h"
 
 
 // Table of exp2(k / 16) values decremented (as integer) by (k << 19), k = 0..15

@@ -6,11 +6,11 @@
 #ifndef __XNNPACK_BENCH_PACKQ_BENCHMARK_H
 #define __XNNPACK_BENCH_PACKQ_BENCHMARK_H
 
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/packq.h>
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/pack.h"
+#include "xnnpack/packq.h"
 
 #include <cstddef>
 

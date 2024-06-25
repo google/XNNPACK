@@ -7,8 +7,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/math.h>
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/math.h"
 
 
 void xnn_f32_gavgpool_cw_ukernel__neon_u4(

@@ -7,7 +7,7 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/pavgpool.h>
+#include "xnnpack/pavgpool.h"
 
 
 void xnn_f32_pavgpool_minmax_ukernel_9x__wasmsimd_x86_c4(

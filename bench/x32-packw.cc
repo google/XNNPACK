@@ -13,9 +13,9 @@
 #include "bench/packw-benchmark.h"
 #include "bench/utils.h"
 
-#include <xnnpack/common.h>
-#include <xnnpack/hardware-config.h>
-#include <xnnpack/packw.h>
+#include "xnnpack/common.h"
+#include "xnnpack/hardware-config.h"
+#include "xnnpack/packw.h"
 
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV

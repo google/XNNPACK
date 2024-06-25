@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/reduce.h>
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
 
 
 void xnn_f32_rdsum_ukernel_7p7x__scalar_c4(

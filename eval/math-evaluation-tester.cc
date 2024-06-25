@@ -17,10 +17,10 @@
 
 #include "math-evaluation-tester.h"
 
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/math-stubs.h"
 
 
 void MathEvaluationTester::TestOutputMatchReference(xnn_f16_unary_math_fn math_fn, float output_value) const {

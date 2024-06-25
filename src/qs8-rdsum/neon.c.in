@@ -9,9 +9,9 @@ $import math
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/math.h>
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/math.h"
 
 
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcderfghijlmnopqrstuvqxyz01234567"

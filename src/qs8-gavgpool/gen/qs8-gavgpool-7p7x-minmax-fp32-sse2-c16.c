@@ -11,9 +11,9 @@
 
 #include <emmintrin.h>
 
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/math.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/math.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__sse2_c16(

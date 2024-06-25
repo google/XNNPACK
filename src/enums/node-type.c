@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <stdint.h>
 
-#include <xnnpack/node-type.h>
+#include "xnnpack/node-type.h"
 
 #if XNN_LOG_LEVEL > 0
 static const uint16_t offset[59] = {

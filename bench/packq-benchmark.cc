@@ -5,11 +5,11 @@
 
 #include "packq-benchmark.h"
 
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/packq.h>
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/pack.h"
+#include "xnnpack/packq.h"
 
 #include <algorithm>
 #include <cstddef>

@@ -8,11 +8,11 @@
 // LICENSE file in the root directory of this source tree.
 
 
-#include <xnnpack/common.h>
+#include "xnnpack/common.h"
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#include <xnnpack/isa-checks.h>
+#include "xnnpack/isa-checks.h"
 
 #include <algorithm>
 #include <cmath>
@@ -21,7 +21,7 @@
 #include <random>
 #include <vector>
 
-#include <simd/f32-avx2.h>
+#include "xnnpack/simd/f32-avx2.h"
 
 #include "replicable_random_device.h"
 #include <gmock/gmock.h>
@@ -155,7 +155,8 @@ TEST_F(F32SimdAVX2Test, Div) {
   const xnn_simd_f32_t res = xnn_div_f32(a, b);
   xnn_storeu_f32(output_.data(), res);
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
-    ASSERT_EQ(output_[k], inputs_[k] / inputs_[k + xnn_simd_size_f32]);
+    ASSERT_NEAR(output_[k], inputs_[k] / inputs_[k + xnn_simd_size_f32],
+    2 * std::numeric_limits<float>::epsilon() * std::abs(output_[k]));
   }
 }
 

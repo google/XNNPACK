@@ -7,12 +7,12 @@
 //   Specification: test/f32-gemm-goi-minmax.yaml
 //   Generator: tools/generate-gemm-test.py
 
-#include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/pack.h>
+#include "xnnpack/common.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/pack.h"
 
 #include <benchmark/benchmark.h>
 #include "bench/gemm-benchmark.h"

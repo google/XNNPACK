@@ -7,8 +7,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/maxpool.h>
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/maxpool.h"
 
 
 void xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8(

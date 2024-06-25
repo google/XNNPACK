@@ -12,9 +12,9 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <immintrin.h>
 
-#include <xnnpack/gemm.h>
+#include "xnnpack/gemm.h"
 $if AVX == 1 and DATATYPE == "QC8":
-  #include <xnnpack/unaligned.h>
+  #include "xnnpack/unaligned.h"
 
 
 $RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))

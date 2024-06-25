@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <xnnpack/memory.h>
+#include "xnnpack/memory.h"
 
 #include <array>
 #include <cstdint>

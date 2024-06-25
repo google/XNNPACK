@@ -12,8 +12,8 @@
 
 #include <smmintrin.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/requantization-stubs.h>
+#include "xnnpack/math.h"
+#include "xnnpack/requantization-stubs.h"
 
 
 void xnn_qs8_requantize_rndna__sse41(

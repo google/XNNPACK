@@ -11,9 +11,9 @@
 
 #include <assert.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/transpose.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/transpose.h"
 
 void xnn_x16_transposec_ukernel__8x8_multi_mov_zip_neon(
     const uint16_t* input,

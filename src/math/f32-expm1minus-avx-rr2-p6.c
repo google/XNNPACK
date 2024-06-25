@@ -8,7 +8,7 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/math-stubs.h"
 
 
 void xnn_math_f32_expm1minus__avx_rr2_p6(

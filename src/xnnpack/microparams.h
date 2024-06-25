@@ -8,7 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/common.h>
+#include "xnnpack/common.h"
 
 
 // Default: serves to differentiate pointer types for micro-kernels without fused activation.

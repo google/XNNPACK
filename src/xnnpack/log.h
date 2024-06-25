@@ -12,9 +12,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-#include <xnnpack.h>
-#include <xnnpack/node-type.h>
-#include <xnnpack/common.h>
+#include "xnnpack.h"
+#include "xnnpack/node-type.h"
+#include "xnnpack/common.h"
 
 #ifndef XNN_LOG_LEVEL
   #error "Undefined XNN_LOG_LEVEL"

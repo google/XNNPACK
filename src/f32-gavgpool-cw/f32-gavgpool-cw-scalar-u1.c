@@ -5,8 +5,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/math.h>
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/math.h"
 
 
 void xnn_f32_gavgpool_cw_ukernel__scalar_u1(

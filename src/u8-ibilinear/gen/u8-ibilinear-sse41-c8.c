@@ -11,9 +11,9 @@
 
 #include <smmintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/ibilinear.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/common.h"
+#include "xnnpack/ibilinear.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_u8_ibilinear_ukernel__sse41_c8(

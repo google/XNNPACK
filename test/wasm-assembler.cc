@@ -2,12 +2,12 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
-#include <xnnpack/common.h>
+#include "xnnpack/common.h"
 
 #if XNN_PLATFORM_WEB
 
-#include <xnnpack/memory.h>
-#include <xnnpack/wasm-assembler.h>
+#include "xnnpack/memory.h"
+#include "xnnpack/wasm-assembler.h"
 
 #include <array>
 #include <cstdint>

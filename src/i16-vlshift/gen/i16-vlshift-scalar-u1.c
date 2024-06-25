@@ -11,8 +11,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/vlshift.h>
+#include "xnnpack/math.h"
+#include "xnnpack/vlshift.h"
 
 
 void xnn_i16_vlshift_ukernel__scalar_u1(

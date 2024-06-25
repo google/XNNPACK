@@ -10,19 +10,19 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/avgpool.h>
-#include <xnnpack/common.h>
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/maxpool.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/prelu.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/unaligned.h>
-#include <xnnpack/vbinary.h>
-#include <xnnpack/vcvt.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/avgpool.h"
+#include "xnnpack/common.h"
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/maxpool.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/prelu.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/unaligned.h"
+#include "xnnpack/vbinary.h"
+#include "xnnpack/vcvt.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f16_avgpool_minmax_ukernel_9p8x__f16c_c8(

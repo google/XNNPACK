@@ -12,11 +12,11 @@
 #include "bench/utils.h"
 #include "bench/vcvt-benchmark.h"
 
-#include <xnnpack.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/vcvt.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/vcvt.h"
 
 
 #if XNN_ARCH_WASMRELAXEDSIMD

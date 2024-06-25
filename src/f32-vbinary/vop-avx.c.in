@@ -13,8 +13,8 @@ $assert ACTIVATION in ["LINEAR", "MINMAX"]
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vbinary.h"
 
 
 $_MM256_OP_PS = {

@@ -8,8 +8,8 @@
 #include <stdint.h>
 #include <math.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/math.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_u1(

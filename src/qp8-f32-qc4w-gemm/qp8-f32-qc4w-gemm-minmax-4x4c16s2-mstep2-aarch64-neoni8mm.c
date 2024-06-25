@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <stddef.h>
-#include <xnnpack/log.h>
-#include <xnnpack/microparams.h>
+#include "xnnpack/log.h"
+#include "xnnpack/microparams.h"
 
 #if XNN_ENABLE_KLEIDIAI
 #include "kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi4cxp/kai_matmul_clamp_f32_qai8dxp4x8_qsi4cxp4x8_8x4x32_neon_i8mm.h"

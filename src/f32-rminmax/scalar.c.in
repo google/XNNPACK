@@ -7,10 +7,10 @@ $assert BATCH_TILE >= 1
 $assert OP in ["MAX", "MIN", "MINMAX"]
 #include <assert.h>
 
-#include <xnnpack/common.h>
+#include "xnnpack/common.h"
 $if not WASM:
-  #include <xnnpack/math.h>
-#include <xnnpack/reduce.h>
+  #include "xnnpack/math.h"
+#include "xnnpack/reduce.h"
 $if DATATYPE == "F16":
   #include <fp16/fp16.h>
 

@@ -6,9 +6,9 @@
 #include <numeric>
 #include <utility>
 
-#include <xnnpack/assembler.h>
-#include <xnnpack/leb128.h>
-#include <xnnpack/wasm-assembler.h>
+#include "xnnpack/assembler.h"
+#include "xnnpack/leb128.h"
+#include "xnnpack/wasm-assembler.h"
 
 
 using ::xnnpack::internal::Function;

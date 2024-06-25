@@ -13,9 +13,9 @@ $if ACTIVATION == "MINMAX":
 
 #include <arm_fp16.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/vbinary.h"
 
 
 $VOPH_F16 = {

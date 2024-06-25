@@ -10,10 +10,10 @@
 
 #include <gtest/gtest.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
+#include "xnnpack/common.h"
+#include "xnnpack/isa-checks.h"
 
-#include <xnnpack/vscaleexpminusmax.h>
+#include "xnnpack/vscaleexpminusmax.h"
 #include "vscaleexpminusmax-microkernel-tester.h"
 
 

@@ -7,9 +7,9 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/gemm.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/math.h>
+#include "xnnpack/gemm.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/math.h"
 
 
 void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_1x16c4__neondotfp16arith(

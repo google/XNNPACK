@@ -15,9 +15,9 @@ $LUT = 1 << LOG2LUT
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vunary.h"
 
 // Table of exp2(k / ${LUT}) values decremented (as integer) by (k << ${23-LOG2LUT}), k = 0..${LUT-1}
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_${LUT}[${LUT}];

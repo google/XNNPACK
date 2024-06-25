@@ -11,9 +11,9 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/ppmm.h>
-#include <xnnpack/prefetch.h>
+#include "xnnpack/common.h"
+#include "xnnpack/ppmm.h"
+#include "xnnpack/prefetch.h"
 
 
 void xnn_f32_ppmm_minmax_ukernel_8x8__neon_prfm(

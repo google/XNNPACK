@@ -6,11 +6,11 @@
 #include <stddef.h>
 #include <string.h>
 
-#include <xnnpack/allocator.h>
-#include <xnnpack/config.h>
-#include <xnnpack/log.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/post-operation.h>
+#include "xnnpack/allocator.h"
+#include "xnnpack/config.h"
+#include "xnnpack/log.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/post-operation.h"
 
 char* allocate_and_initialize_post_operation_params(
     size_t num_post_operations,

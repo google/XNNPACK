@@ -11,8 +11,8 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vhswish.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vhswish.h"
 
 
 void xnn_qu8_vhswish_ukernel__wasmsimd_u8(

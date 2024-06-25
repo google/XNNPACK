@@ -17,7 +17,7 @@
 #include <numeric>
 #include <vector>
 
-#include <xnnpack.h>
+#include "xnnpack.h"
 
 class BinaryElementwiseOperatorTester {
  public:

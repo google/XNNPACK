@@ -16,10 +16,10 @@ $SIMD_TILE = BATCH_TILE // 8
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vunary.h"
 
 
 $POLY_SUFFIX = "p%dh%dt2" % (P, H)

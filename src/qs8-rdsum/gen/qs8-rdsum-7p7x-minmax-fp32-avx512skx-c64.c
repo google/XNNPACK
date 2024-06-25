@@ -12,10 +12,10 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/unaligned.h>
-#include <xnnpack/common.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/math.h>
+#include "xnnpack/unaligned.h"
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/math.h"
 
 
 void xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c64(

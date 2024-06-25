@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include <xnnpack.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams.h>
+#include "xnnpack.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams.h"
 
 #include <algorithm>
 #include <cassert>

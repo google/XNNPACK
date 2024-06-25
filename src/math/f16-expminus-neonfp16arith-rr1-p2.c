@@ -8,7 +8,7 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/math-stubs.h"
 
 
 void xnn_math_f16_expminus__neonfp16arith_rr1_p2(

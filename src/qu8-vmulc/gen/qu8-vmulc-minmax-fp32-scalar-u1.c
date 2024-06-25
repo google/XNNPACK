@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/math.h"
+#include "xnnpack/vbinary.h"
 
 
 void xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_u1(

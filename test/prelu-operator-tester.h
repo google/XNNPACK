@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <xnnpack.h>
-#include <xnnpack/cache.h>
+#include "xnnpack.h"
+#include "xnnpack/cache.h"
 
 #include <algorithm>
 #include <cassert>

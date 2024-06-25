@@ -8,7 +8,7 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/math-stubs.h"
 
 
 void xnn_math_f32_sigmoid__aarch64_neonfma_rr2_p5_div(

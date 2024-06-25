@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <xnnpack/quantization.h>
+#include "xnnpack/quantization.h"
 
 #include <cstddef>
 #include <cstdint>

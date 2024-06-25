@@ -11,7 +11,7 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/spmm.h>
+#include "xnnpack/spmm.h"
 
 
 void xnn_f32_spmm_minmax_ukernel_4x1__sse(

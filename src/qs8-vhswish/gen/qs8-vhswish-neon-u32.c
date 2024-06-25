@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vhswish.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vhswish.h"
 
 
 void xnn_qs8_vhswish_ukernel__neon_u32(

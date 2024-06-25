@@ -9,7 +9,7 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/requantization-stubs.h>
+#include "xnnpack/requantization-stubs.h"
 
 
 void xnn_qu8_requantize_fp32__wasmsimd(

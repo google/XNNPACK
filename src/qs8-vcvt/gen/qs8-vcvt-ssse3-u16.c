@@ -11,9 +11,9 @@
 
 #include <tmmintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vcvt.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vcvt.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_qs8_vcvt_ukernel__ssse3_u16(

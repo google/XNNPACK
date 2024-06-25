@@ -11,9 +11,9 @@
 #include "bench/spmm-benchmark.h"
 #include "bench/utils.h"
 
-#include <xnnpack/gemm.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
+#include "xnnpack/gemm.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
 
 
 #if XNN_ARCH_WASMRELAXEDSIMD

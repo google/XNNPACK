@@ -7,8 +7,8 @@
 #ifndef THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_FMA3_H_
 #define THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_FMA3_H_
 
-#include <simd/f32-avx-base.h>
-#include <xnnpack/common.h>
+#include "xnnpack/simd/f32-avx-base.h"
+#include "xnnpack/common.h"
 
 
 // Whether or not this architecture has native fused multiply-add support.

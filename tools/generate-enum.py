@@ -137,7 +137,7 @@ def generate_header(enum_name, spec_path, output_path, debug_only):
 
 #pragma once
 
-#include <xnnpack/common.h>
+#include "xnnpack/common.h"
 
 
 #ifdef __cplusplus

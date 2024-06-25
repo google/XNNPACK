@@ -12,13 +12,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <xnnpack.h>
-#include <xnnpack/allocation-type.h>
-#include <xnnpack/common.h>
-#include <xnnpack/log.h>
-#include <xnnpack/math.h>
-#include <xnnpack/params.h>
-#include <xnnpack/subgraph.h>
+#include "xnnpack.h"
+#include "xnnpack/allocation-type.h"
+#include "xnnpack/common.h"
+#include "xnnpack/log.h"
+#include "xnnpack/math.h"
+#include "xnnpack/params.h"
+#include "xnnpack/subgraph.h"
 
 static void set_allocation_type(struct xnn_value* value)
 {

@@ -11,7 +11,7 @@
 
 #include <xmmintrin.h>
 
-#include <xnnpack/gemm.h>
+#include "xnnpack/gemm.h"
 
 
 void xnn_f32_gemm_minmax_ukernel_1x8s4__sse(

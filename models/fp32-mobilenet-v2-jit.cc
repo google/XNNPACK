@@ -5,7 +5,7 @@
 //
 // Auto-generated file. Do not edit!
 
-#include <xnnpack.h>
+#include "xnnpack.h"
 
 #include <array>
 #include <algorithm>
@@ -14,12 +14,12 @@
 #include <limits>
 #include <random>
 
-#include <xnnpack/cache.h>
-#include <xnnpack/common.h>
+#include "xnnpack/cache.h"
+#include "xnnpack/common.h"
 #if XNN_PLATFORM_JIT
-  #include <xnnpack/memory.h>
+  #include "xnnpack/memory.h"
 #endif  // XNN_PLATFORM_JIT
-#include <xnnpack/models.h>
+#include "xnnpack/models.h"
 
 namespace models {
 

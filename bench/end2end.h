@@ -7,7 +7,7 @@
 
 #include <benchmark/benchmark.h>
 
-#include <xnnpack/models.h>
+#include "xnnpack/models.h"
 
 
 #define BENCHMARK_FP16_END2END(benchmark_fn) \

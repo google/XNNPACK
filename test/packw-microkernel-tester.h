@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/pack.h>
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/pack.h"
 
 #include <algorithm>
 #include <cassert>

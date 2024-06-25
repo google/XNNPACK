@@ -15,10 +15,10 @@
 #if XNN_ENABLE_CPUINFO
   #include <cpuinfo.h>
 #endif  // XNN_ENABLE_CPUINFO
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/math-stubs.h>
-#include <xnnpack/math.h>
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/math-stubs.h"
+#include "xnnpack/math.h"
 
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>

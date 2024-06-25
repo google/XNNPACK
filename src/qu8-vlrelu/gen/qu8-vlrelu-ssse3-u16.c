@@ -11,9 +11,9 @@
 
 #include <tmmintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vlrelu.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vlrelu.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_qu8_vlrelu_ukernel__ssse3_u16(

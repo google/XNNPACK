@@ -16,17 +16,17 @@
 #include <random>
 #include <vector>
 
-#include <xnnpack.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams.h"
 
 #include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
 #if XNN_PLATFORM_JIT
-  #include <xnnpack/memory.h>
+  #include "xnnpack/memory.h"
 #endif
 
 void VUnaryMicrokernelTester::Test(xnn_f32_vrelu_ukernel_fn vrelu) const {

@@ -14,7 +14,7 @@
 #include <hexagon_protos.h>
 #include <hexagon_types.h>
 
-#include <xnnpack/vsquareabs.h>
+#include "xnnpack/vsquareabs.h"
 
 
 void xnn_cs16_vsquareabs_ukernel__hexagon_x6(

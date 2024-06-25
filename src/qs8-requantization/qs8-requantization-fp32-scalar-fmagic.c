@@ -11,8 +11,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/requantization-stubs.h>
+#include "xnnpack/math.h"
+#include "xnnpack/requantization-stubs.h"
 
 
 void xnn_qs8_requantize_fp32__scalar_fmagic(

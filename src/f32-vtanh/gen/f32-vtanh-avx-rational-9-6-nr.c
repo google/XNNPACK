@@ -11,11 +11,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <simd/f32-avx.h>
+#include "xnnpack/simd/f32-avx.h"
 
-#include <xnnpack/common.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f32_vtanh_ukernel__avx_rational_9_6_nr_u8(

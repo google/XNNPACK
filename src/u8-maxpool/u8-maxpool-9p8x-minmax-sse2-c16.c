@@ -10,8 +10,8 @@
 
 #include <emmintrin.h>
 
-#include <xnnpack/maxpool.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/maxpool.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16(

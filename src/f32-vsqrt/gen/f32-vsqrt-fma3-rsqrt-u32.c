@@ -12,9 +12,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <xmmintrin.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vunary.h"
 
 
 // In the following, we first compute the _reciprocal_ square root of an input

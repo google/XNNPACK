@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <xnnpack/requantization-stubs.h>
-#include <xnnpack/requantization.h>
+#include "xnnpack/requantization-stubs.h"
+#include "xnnpack/requantization.h"
 
 #include <algorithm>
 #include <cassert>

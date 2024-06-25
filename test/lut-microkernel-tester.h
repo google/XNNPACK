@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include <xnnpack.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microfnptr.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
 
 #include <algorithm>
 #include <array>

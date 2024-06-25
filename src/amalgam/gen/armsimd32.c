@@ -7,12 +7,12 @@
 
 #include <arm_acle.h>
 
-#include <xnnpack/gemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/unaligned.h>
-#include <xnnpack/vcvt.h>
-#include <xnnpack/vlrelu.h>
+#include "xnnpack/gemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/unaligned.h"
+#include "xnnpack/vcvt.h"
+#include "xnnpack/vlrelu.h"
 
 
 void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x2c4__armsimd32(

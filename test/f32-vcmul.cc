@@ -10,11 +10,11 @@
 
 #include <gtest/gtest.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
+#include "xnnpack/common.h"
+#include "xnnpack/isa-checks.h"
 
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/vbinary.h"
 #include "vcmul-microkernel-tester.h"
 
 

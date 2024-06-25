@@ -10,14 +10,14 @@
 
 // The following `#include`s are needed to trick some compilers and/or build
 // systems into pulling in the correct SIMD header defined above.
-#include <simd/f32-avx-base.h>
-#include <simd/f32-avx.h>
-#include <simd/f32-avx512f.h>
-#include <simd/f32-fma3.h>
-#include <simd/f32-neon.h>
-#include <simd/f32-scalar.h>
-#include <simd/f32-sse2.h>
-#include <simd/f32-wasmsimd.h>
+#include "xnnpack/simd/f32-avx-base.h"
+#include "xnnpack/simd/f32-avx.h"
+#include "xnnpack/simd/f32-avx512f.h"
+#include "xnnpack/simd/f32-fma3.h"
+#include "xnnpack/simd/f32-neon.h"
+#include "xnnpack/simd/f32-scalar.h"
+#include "xnnpack/simd/f32-sse2.h"
+#include "xnnpack/simd/f32-wasmsimd.h"
 #endif  // defined(SIMD_HEADER)
 
 #include <algorithm>

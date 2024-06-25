@@ -10,19 +10,19 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/dwconv.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/ibilinear.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/math-stubs.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/prefetch.h>
-#include <xnnpack/raddstoreexpminusmax.h>
-#include <xnnpack/spmm.h>
-#include <xnnpack/vmulcaddc.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/dwconv.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/ibilinear.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/math-stubs.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/prefetch.h"
+#include "xnnpack/raddstoreexpminusmax.h"
+#include "xnnpack/spmm.h"
+#include "xnnpack/vmulcaddc.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f32_dwconv_minmax_ukernel_25p8c__neonfma_acc2(

@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/vlrelu.h>
+#include "xnnpack/math.h"
+#include "xnnpack/vlrelu.h"
 
 
 void xnn_qs8_vlrelu_ukernel__scalar_andxor_u1(

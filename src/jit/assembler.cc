@@ -6,8 +6,8 @@
 #include <assert.h>
 #include <cstdint>
 
-#include <xnnpack/assembler.h>
-#include <xnnpack/memory.h>
+#include "xnnpack/assembler.h"
+#include "xnnpack/memory.h"
 
 namespace xnnpack {
 

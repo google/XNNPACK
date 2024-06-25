@@ -15,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-#include <xnnpack.h>
+#include "xnnpack.h"
 
 #include <benchmark/benchmark.h>
 #include "bench/utils.h"

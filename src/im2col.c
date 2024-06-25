@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <xnnpack/im2col.h>
+#include "xnnpack/im2col.h"
 
 
 void xnn_im2col_conv2d(

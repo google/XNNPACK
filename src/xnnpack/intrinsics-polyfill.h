@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <xnnpack/common.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/common.h"
+#include "xnnpack/unaligned.h"
 
 
 #if defined(__SSE2__)

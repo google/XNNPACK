@@ -10,7 +10,7 @@
 
 #include <emmintrin.h>
 
-#include <xnnpack/reduce.h>
+#include "xnnpack/reduce.h"
 
 
 void xnn_u8_rmax_ukernel__sse2_u16(

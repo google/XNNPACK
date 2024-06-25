@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams.h>
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams.h"
 
 #include <algorithm>
 #include <cassert>

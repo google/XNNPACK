@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/ibilinear.h>
-#include <xnnpack/math.h>
+#include "xnnpack/ibilinear.h"
+#include "xnnpack/math.h"
 
 
 void xnn_u8_ibilinear_ukernel__scalar_c2(

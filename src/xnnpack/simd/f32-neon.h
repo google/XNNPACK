@@ -4,136 +4,169 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_WASMSIMD_H_
-#define THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_WASMSIMD_H_
+#ifndef THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_NEON_H_
+#define THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_NEON_H_
 
 #include <assert.h>
 #include <stddef.h>
 
-#include <wasm_simd128.h>
+#include <arm_neon.h>
 
-#include <xnnpack/common.h>
+#include "xnnpack/common.h"
 
 
-// SIMD vector type for f32 using WASMSIMD.
-typedef v128_t xnn_simd_f32_t;
+// SIMD vector type for f32 using NEON.
+typedef float32x4_t xnn_simd_f32_t;
 #define xnn_simd_size_f32 4
 #define xnn_simd_log2_size_f32 2
 #define xnn_simd_bytes_f32 (xnn_simd_size_f32 * sizeof(float))
 
 #define XNN_SIMD_CONST_F32(var, val) \
-  static const __f32x4 var = {(val), (val), (val), (val)};
+  const float32x4_t var = vdupq_n_f32(val);
 
 #define XNN_SIMD_CONST_U32(var, val) \
-  static const __u32x4 var = {(val), (val), (val), (val)};
+  const uint32x4_t var = vdupq_n_u32(val);
 
 // Whether or not this architecture has native fused multiply-add support.
+#if __ARM_FEATURE_FMA
+#define XNN_SIMD_HAS_NATIVE_FMA 1
+#else
 #define XNN_SIMD_HAS_NATIVE_FMA 0
+#endif  // __ARM_FEATURE_FMA
 
 // Arithmetic operations.
-static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() {
-  return wasm_f32x4_const_splat(0.0f);
-}
+static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return vdupq_n_f32(0.f); }
 
 static XNN_INLINE xnn_simd_f32_t xnn_add_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
-  return wasm_f32x4_add(a, b);
+  return vaddq_f32(a, b);
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_mul_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
-  return wasm_f32x4_mul(a, b);
+  return vmulq_f32(a, b);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_sub_f32(xnn_simd_f32_t a,
+                                             xnn_simd_f32_t b) {
+  return vsubq_f32(a, b);
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_fmadd_f32(xnn_simd_f32_t a,
                                                xnn_simd_f32_t b,
                                                xnn_simd_f32_t c) {
-  return wasm_f32x4_add(wasm_f32x4_mul(a, b), c);
+#if __ARM_FEATURE_FMA
+  return vfmaq_f32(c, a, b);
+#else
+  return vmlaq_f32(c, a, b);
+#endif  // __ARM_FEATURE_FMA
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_f32(xnn_simd_f32_t a,
                                                 xnn_simd_f32_t b,
                                                 xnn_simd_f32_t c) {
-  return wasm_f32x4_sub(c, wasm_f32x4_mul(a, b));
+#if __ARM_FEATURE_FMA
+  return vfmsq_f32(c, a, b);
+#else
+  return vmlsq_f32(c, a, b);
+#endif  // __ARM_FEATURE_FMA
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
                                                xnn_simd_f32_t b,
                                                xnn_simd_f32_t c) {
-  return wasm_f32x4_sub(wasm_f32x4_mul(a, b), c);
-}
-
-static XNN_INLINE xnn_simd_f32_t xnn_sub_f32(xnn_simd_f32_t a,
-                                             xnn_simd_f32_t b) {
-  return wasm_f32x4_sub(a, b);
+#if __ARM_FEATURE_FMA
+  return vfmaq_f32(vnegq_f32(c), a, b);
+#else
+  return vmlaq_f32(vnegq_f32(c), a, b);
+#endif  // __ARM_FEATURE_FMA
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_div_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
-  return wasm_f32x4_div(a, b);
+#if XNN_ARCH_ARM64
+  return vdivq_f32(a, b);
+#else
+  float32x4_t rb = vrecpeq_f32(b);
+  rb = vmulq_f32(rb, vrecpsq_f32(rb, b));
+  rb = vmulq_f32(rb, vrecpsq_f32(rb, b));
+  return vmulq_f32(vmulq_f32(a, rb), vrecpsq_f32(rb, b));
+#endif  // XNN_ARCH_ARM64
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_max_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
-  return wasm_f32x4_max(a, b);
+  return vmaxq_f32(a, b);
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_min_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
-  return wasm_f32x4_min(a, b);
+  return vminq_f32(a, b);
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_abs_f32(xnn_simd_f32_t a) {
-  return wasm_f32x4_abs(a);
+  return vabsq_f32(a);
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
-  return wasm_f32x4_neg(a);
+  return vnegq_f32(a);
 }
 
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
-  return wasm_v128_and(a, b);
+  return vreinterpretq_f32_s32(
+      vandq_s32(vreinterpretq_s32_f32(a), vreinterpretq_s32_f32(b)));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_or_f32(xnn_simd_f32_t a,
                                             xnn_simd_f32_t b) {
-  return wasm_v128_or(a, b);
+  return vreinterpretq_f32_s32(
+      vorrq_s32(vreinterpretq_s32_f32(a), vreinterpretq_s32_f32(b)));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
-  return wasm_v128_xor(a, b);
+  return vreinterpretq_f32_s32(
+      veorq_s32(vreinterpretq_s32_f32(a), vreinterpretq_s32_f32(b)));
 }
 
 // Special functions.
-#define XNN_SIMD_HAVE_RCP_F32 0
-#define XNN_SIMD_HAVE_RSQRT_F32 0
+#define XNN_SIMD_HAVE_RCP_F32 1
+#define XNN_SIMD_NUM_RCP_ITER_F32 2
+static XNN_INLINE xnn_simd_f32_t xnn_rcp_f32(xnn_simd_f32_t a) {
+  return vrecpeq_f32(a);
+}
+
+#define XNN_SIMD_HAVE_RSQRT_F32 1
+#define XNN_SIMD_NUM_RSQRT_ITER_F32 2
+static XNN_INLINE xnn_simd_f32_t xnn_rsqrt_f32(xnn_simd_f32_t a) {
+  return vrsqrteq_f32(a);
+}
 
 // Load/store operations.
 static XNN_INLINE xnn_simd_f32_t xnn_loadu_f32(const float* ptr) {
-  return wasm_v128_load(ptr);
+  return vld1q_f32(ptr);
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_load_f32(const float* ptr) {
-  return wasm_v128_load(ptr);
+  return vld1q_f32(ptr);
 }
 
 static XNN_INLINE void xnn_storeu_f32(float* ptr, xnn_simd_f32_t v) {
-  wasm_v128_store(ptr, v);
+  vst1q_f32(ptr, v);
 }
 
 static XNN_INLINE void xnn_store_f32(float* ptr, xnn_simd_f32_t v) {
-  wasm_v128_store(ptr, v);
+  vst1q_f32(ptr, v);
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_set1_f32(float v) {
-  return wasm_f32x4_splat(v);
+  return vld1q_dup_f32(&v);
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_set1_or_load_f32(const float* v) {
-  return wasm_f32x4_splat(*v);
+  return vld1q_dup_f32(v);
 }
 
 // Tail load/store operations.
@@ -141,7 +174,7 @@ static XNN_INLINE xnn_simd_f32_t
 xnn_load_tail_f32(const float* input, size_t num_elements) XNN_OOB_READS {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_f32);
-  return wasm_v128_load(input);
+  return vld1q_f32(input);
 }
 
 static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,
@@ -149,14 +182,15 @@ static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_f32);
 
+  float32x2_t v_low = vget_low_f32(v);
   if (num_elements & 2) {
-    wasm_v128_store64_lane(output, v, 0);
-    v = wasm_v64x2_shuffle(v, v, 1, 1);
+    vst1_f32(output, v_low);
     output += 2;
+    v_low = vget_high_f32(v);
   }
   if (num_elements & 1) {
-    wasm_v128_store32_lane(output, v, 0);
+    vst1_lane_f32(output, v_low, 0);
   }
 }
 
-#endif  // THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_WASMSIMD_H_
+#endif  // THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_NEON_H_

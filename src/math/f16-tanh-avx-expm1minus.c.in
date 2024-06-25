@@ -14,9 +14,9 @@ $assert AVX != 2 or FMA == 3
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/math-stubs.h"
 
 $COEFFS = {3: ["0x1.01E2A2p+1", "0x1.560722p+0"]}[P]
 $POLYNOMIAL = "c%d" % P
