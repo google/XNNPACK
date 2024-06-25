@@ -13,8 +13,8 @@
 #include <hexagon_protos.h>
 #include <hexagon_types.h>
 
-#include <xnnpack/vbinary.h>
-#include <xnnpack/intrinsics-polyfill.h>
+#include "xnnpack/vbinary.h"
+#include "xnnpack/intrinsics-polyfill.h"
 
 void xnn_qs8_vadd_minmax_ukernel__hvx_u64(
     size_t batch,

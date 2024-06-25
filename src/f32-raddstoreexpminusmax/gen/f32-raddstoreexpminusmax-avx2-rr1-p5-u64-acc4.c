@@ -11,7 +11,7 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/raddstoreexpminusmax.h>
+#include "xnnpack/raddstoreexpminusmax.h"
 
 
 void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u64_acc4(

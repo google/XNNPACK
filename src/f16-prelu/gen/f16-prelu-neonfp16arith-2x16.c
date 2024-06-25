@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/prelu.h>
+#include "xnnpack/math.h"
+#include "xnnpack/prelu.h"
 
 
 void xnn_f16_prelu_ukernel__neonfp16arith_2x16(

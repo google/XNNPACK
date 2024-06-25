@@ -12,9 +12,9 @@
 #include <stdint.h>
 #include <math.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/math-stubs.h"
 
 
 // Table of exp2(k / 32) values decremented (as integer) by (k << 18), k = 0..31

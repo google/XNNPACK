@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/dwconv.h>
-#include <xnnpack/intrinsics-polyfill.h>
+#include "xnnpack/dwconv.h"
+#include "xnnpack/intrinsics-polyfill.h"
 
 
 void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_6f6m7l16c16s1r__avx512skx_mul32(

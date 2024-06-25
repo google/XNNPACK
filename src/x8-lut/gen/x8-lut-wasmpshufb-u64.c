@@ -11,8 +11,8 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/lut.h>
+#include "xnnpack/common.h"
+#include "xnnpack/lut.h"
 
 
 void xnn_x8_lut_ukernel__wasmpshufb_u64(
