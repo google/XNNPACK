@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_FMA3_H_
-#define THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_FMA3_H_
+#ifndef __XNNPACK_SRC_XNNPACK_SIMD_F32_FMA3_H_
+#define __XNNPACK_SRC_XNNPACK_SIMD_F32_FMA3_H_
 
 #include "xnnpack/simd/f32-avx-base.h"
 #include "xnnpack/common.h"
@@ -32,4 +32,4 @@ static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
   return _mm256_fmsub_ps(a, b, c);
 }
 
-#endif  // THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_FMA3_H_
+#endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_FMA3_H_

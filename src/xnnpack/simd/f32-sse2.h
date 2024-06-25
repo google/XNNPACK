@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_SSE2_H_
-#define THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_SSE2_H_
+#ifndef __XNNPACK_SRC_XNNPACK_SIMD_F32_SSE2_H_
+#define __XNNPACK_SRC_XNNPACK_SIMD_F32_SSE2_H_
 
 #include <assert.h>
 #include <emmintrin.h>
@@ -176,4 +176,4 @@ static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,
   }
 }
 
-#endif  // THIRD_PARTY_XNNPACK_INCLUDE_SIMD_F32_SSE2_H_
+#endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_SSE2_H_
