@@ -13,6 +13,9 @@
 #include <utility>
 #include <vector>
 
+// align a size up to XNN_EXTRA_BYTES
+#define XNN_PAD_EXTRA_BYTES(s, t) (((s) + XNN_EXTRA_BYTES / sizeof(t) - 1) & ~(XNN_EXTRA_BYTES / sizeof(t) - 1))
+
 namespace models {
 
 typedef std::vector<std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>> Operators;
