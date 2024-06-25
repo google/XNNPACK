@@ -23,7 +23,7 @@ extern "C" {
 ///
 /// Note: XNNPACK reads, but never writes beyond array bounds.
 #if XNN_ARCH_HEXAGON
-#define XNN_EXTRA_BYTES 32
+#define XNN_EXTRA_BYTES 128
 #else
 #define XNN_EXTRA_BYTES 16
 #endif  // XNN_ARCH_HEXAGON
