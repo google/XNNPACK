@@ -3200,12 +3200,12 @@ union xnn_x24_transpose_params {
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
-    uint8_t pos0[16];
-    uint8_t pos1[16];
-    uint8_t pos2[16];
-    uint8_t pos3[16];
-    uint8_t pos4[16];
-    uint8_t pos5[16];
+        XNN_ALIGN(16) uint8_t pos0[16];
+        XNN_ALIGN(16) uint8_t pos1[16];
+        XNN_ALIGN(16) uint8_t pos2[16];
+        XNN_ALIGN(16) uint8_t pos3[16];
+        XNN_ALIGN(16) uint8_t pos4[16];
+        XNN_ALIGN(16) uint8_t pos5[16];
   } ssse3;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
