@@ -1199,7 +1199,6 @@
   BENCHMARK_GEMM_BL(qd8_f32_qb4w_gemm_minmax_ukernel_4x4c8__sse2_ld64)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-
 static void qd8_f32_qb4w_gemm_minmax_ukernel_1x2__scalar(benchmark::State& state, const char* net) {
   GEMMBenchmark(state,
     xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x2__scalar,

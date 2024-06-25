@@ -14,7 +14,6 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
-#include <stdio.h>
 
 void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x16c8__avx512skx(
     size_t mr,
@@ -62,6 +61,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x16c8__avx512skx(
       __m512i vacc0x4567 = _mm512_setzero_si512();
       __m512i vacc0x89AB = _mm512_setzero_si512();
       __m512i vacc0xCDEF = _mm512_setzero_si512();
+
       size_t k = bl;
       while (k >= 16 * sizeof(int8_t)) {
         __m512i va0 = _mm512_broadcast_i32x4(_mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) a0)));
@@ -147,10 +147,9 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x16c8__avx512skx(
 
         w = (const int8_t*) w + 128;
         k -= 8 * sizeof(int8_t);
-      }
+    }
 
-      // Accumulate floats
-      // Add 4 adjacent sums
+    // Add 4 adjacent sums
       const __m512i vacc0x04152637 = _mm512_add_epi32(_mm512_unpacklo_epi32(vacc0x0123, vacc0x4567), _mm512_unpackhi_epi32(vacc0x0123, vacc0x4567));
       const __m512i vacc0x8C9DAEBF = _mm512_add_epi32(_mm512_unpacklo_epi32(vacc0x89AB, vacc0xCDEF), _mm512_unpackhi_epi32(vacc0x89AB, vacc0xCDEF));
 
@@ -158,23 +157,23 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x16c8__avx512skx(
 
       const __m512i vidx = _mm512_set_epi32(15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0);
       __m512i vacc0x0123456789ABCDEF = _mm512_permutexvar_epi32(vidx, vacc0x084C195D2A6E3B7F);
+
+
       const __m512 vfilter_output_scale0123456789ABCDEF = _mm512_load_ps((const float*) w);
       w = (const float*) w + 16;
-
       vout0x0123456789ABCDEF = _mm512_fmadd_ps(_mm512_cvtepi32_ps(vacc0x0123456789ABCDEF), vfilter_output_scale0123456789ABCDEF, vout0x0123456789ABCDEF);
     }
+
     __m512 one_sixteenth = _mm512_set1_ps(1.0f/16);
     vout0x0123456789ABCDEF = _mm512_mul_ps(vout0x0123456789ABCDEF, one_sixteenth);
-
+    
     const __m512 vbias0123456789ABCDEF = _mm512_load_ps((const float*) w);
     w = (const float*) w + 16;
-
     vout0x0123456789ABCDEF = _mm512_fmadd_ps(vout0x0123456789ABCDEF, _mm512_set1_ps(quantization_params[0].inv_scale), vbias0123456789ABCDEF);
 
     vout0x0123456789ABCDEF = _mm512_max_ps(vout0x0123456789ABCDEF, voutput_min);
 
     vout0x0123456789ABCDEF = _mm512_min_ps(vout0x0123456789ABCDEF, voutput_max);
-
     if XNN_LIKELY(nc >= 16) {
       _mm512_storeu_ps(c0, vout0x0123456789ABCDEF);
 
