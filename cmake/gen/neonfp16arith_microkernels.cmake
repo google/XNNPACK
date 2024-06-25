@@ -353,6 +353,16 @@ SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
   src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1recpsadj.c
   src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpe.c
   src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpeadj.c
+  src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-1x16-minmax-neonfp16arith-mlal-lane-prfm.c
+  src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-1x16-minmax-neonfp16arith-mlal-lane.c
+  src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-2x16-minmax-neonfp16arith-mlal-lane-prfm.c
+  src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-2x16-minmax-neonfp16arith-mlal-lane.c
+  src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-3x16-minmax-neonfp16arith-mlal-lane-prfm.c
+  src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-3x16-minmax-neonfp16arith-mlal-lane.c
+  src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-4x16-minmax-neonfp16arith-mlal-lane-prfm.c
+  src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-4x16-minmax-neonfp16arith-mlal-lane.c
+  src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-6x16-minmax-neonfp16arith-mlal-lane-prfm.c
+  src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-6x16-minmax-neonfp16arith-mlal-lane.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x16-minmax-neonfp16arith-mlal-lane-prfm.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x16-minmax-neonfp16arith-mlal-lane.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x16-minmax-neonfp16arith-mlal-lane-prfm.c
