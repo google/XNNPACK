@@ -1049,7 +1049,7 @@ union xnn_qs8_rsum_params {
     XNN_ALIGN(16) int8_t mask_table[30];
   } sse4;
   struct {
-    XNN_ALIGN(16) int8_t mask_table[30];
+    int8_t onemask_table[64];  // 32 ones, 32 zeros
   } avx2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
