@@ -294,4 +294,27 @@ void Q6_V_vstu_variable(void *addr, uint32_t n, HVX_Vector vin)
     ql_not = Q6_Q_or_QQn(ql_not, qr);
     Q6_vmem_QnRIV(ql_not, (HVX_Vector*) addr, vin);
 }
+
+// 32x16 signed integer multiply:
+// vout is in HVX_VectorPair format, keeping the same order as vin.
+static XNN_INTRINSIC
+HVX_VectorPair Q6_Vw_vmpyi_VwVh(HVX_Vector multiplier, HVX_Vector vin)
+{
+    vin = Q6_Vh_vshuffe_VhVh(vin, vin);
+    HVX_Vector mul_e = Q6_Vw_vmpyio_VwVh(multiplier, vin);
+    HVX_Vector mul_o = Q6_Vw_vmpyio_VwVh(multiplier, vin);
+    
+    return Q6_W_vshuff_VVR(mul_o, mul_e, -4);
+}
+
+// 32x16 integer multiply of even elements in vin.
+static XNN_INTRINSIC
+HVX_Vector Q6_Vw_vmpyie_VwVh(HVX_Vector multiplier_lo, HVX_Vector multiplier_hi, HVX_Vector vin)
+{
+    multiplier_hi = Q6_Vh_vshuffe_VhVh(multiplier_hi, multiplier_hi);
+    HVX_Vector vout = Q6_Vw_vmpyieo_VhVh(vin, multiplier_hi);
+    vout = Q6_Vw_vmpyieacc_VwVwVh(vout, multiplier_lo, vin);
+
+    return vout;
+}
 #endif  // Hexagon
