@@ -16,11 +16,11 @@
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/microfnptr.h>
+#include "xnnpack.h"
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/microfnptr.h"
 
 namespace {
 void f16_rsum(
@@ -68,7 +68,7 @@ void f16_f32acc_rsum(
   const size_t batch = state.range(0);
 
   std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> input(rows * batch + XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::vector<uint16_t> output(rows);
+  std::vector<float> output(rows);
   std::iota(input.begin(), input.end(), 1);
 
   // Prepare parameters.
@@ -226,7 +226,7 @@ void f16_f32acc_rdsum(
   const size_t channels = state.range(1);
 
   std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> input(rows * channels + XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::vector<uint16_t> output(channels);
+  std::vector<float> output(channels);
   std::vector<uint16_t> zero(channels + XNN_EXTRA_BYTES / sizeof(uint16_t), 0);
   std::iota(input.begin(), input.end(), 0.0f);
 

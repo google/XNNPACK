@@ -12,8 +12,8 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/requantization-stubs.h>
+#include "xnnpack/math.h"
+#include "xnnpack/requantization-stubs.h"
 
 
 void xnn_qu8_requantize_gemmlowp__wasmsimd(

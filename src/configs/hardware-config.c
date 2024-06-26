@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include <xnnpack/common.h>
+#include "xnnpack/common.h"
 
 #if _WIN32
   #include <windows.h>
@@ -42,8 +42,8 @@
   #include <wasm_simd128.h>
 #endif
 
-#include <xnnpack/hardware-config.h>
-#include <xnnpack/log.h>
+#include "xnnpack/hardware-config.h"
+#include "xnnpack/log.h"
 
 #if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)
 ssize_t xnn_syscall(size_t rax, size_t rdi, size_t rsi, size_t rdx) {

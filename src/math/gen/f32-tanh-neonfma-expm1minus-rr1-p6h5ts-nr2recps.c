@@ -14,9 +14,9 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/math-stubs.h"
 
 
 void xnn_math_f32_tanh__neonfma_expm1minus_rr1_p6h5ts_nr2recps(

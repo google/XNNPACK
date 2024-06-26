@@ -12,8 +12,8 @@ $assert ACTIVATION in ["LINEAR", "MINMAX"]
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vbinary.h"
 
 
 $VOPQ_f16 = {

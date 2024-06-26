@@ -11,7 +11,7 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/dwconv.h>
+#include "xnnpack/dwconv.h"
 
 
 void xnn_f32_dwconv_minmax_ukernel_9p8c__avx(

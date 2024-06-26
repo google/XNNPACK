@@ -11,8 +11,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/vsquareabs.h>
+#include "xnnpack/math.h"
+#include "xnnpack/vsquareabs.h"
 
 
 void xnn_cs16_vsquareabs_ukernel__scalar_x1(

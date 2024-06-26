@@ -11,8 +11,8 @@
 
 #include <smmintrin.h>
 
-#include <xnnpack/vunary.h>
-#include <xnnpack/common.h>
+#include "xnnpack/vunary.h"
+#include "xnnpack/common.h"
 
 
 void xnn_f32_velu_ukernel__sse41_rr2_p6_u16(

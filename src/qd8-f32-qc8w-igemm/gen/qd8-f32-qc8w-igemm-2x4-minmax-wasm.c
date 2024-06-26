@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/gemm.h>
+#include "xnnpack/math.h"
+#include "xnnpack/gemm.h"
 
 
 void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x4__wasm(

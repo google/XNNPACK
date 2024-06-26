@@ -10,8 +10,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/requantization-stubs.h>
+#include "xnnpack/math.h"
+#include "xnnpack/requantization-stubs.h"
 
 
 void xnn_qu8_requantize_gemmlowp__scalar(

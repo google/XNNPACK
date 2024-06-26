@@ -13,8 +13,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/dwconv.h>
-#include <xnnpack/math.h>
+#include "xnnpack/dwconv.h"
+#include "xnnpack/math.h"
 
 
 void xnn_f32_dwconv_minmax_ukernel_7f6m6l16c8s4r__fma3_acc2(

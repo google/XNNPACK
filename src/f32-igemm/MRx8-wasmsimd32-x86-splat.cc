@@ -7,11 +7,11 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/assembler.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/post-operation.h>
-#include <xnnpack/wasm-assembler.h>
-#include <xnnpack/wasmsimd-gemm-igemm-commons.h>
+#include "xnnpack/assembler.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/post-operation.h"
+#include "xnnpack/wasm-assembler.h"
+#include "xnnpack/wasmsimd-gemm-igemm-commons.h"
 
 
 namespace xnnpack {

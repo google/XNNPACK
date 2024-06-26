@@ -11,12 +11,12 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include <simd/f32-wasmsimd.h>
+#include "xnnpack/simd/f32-wasmsimd.h"
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/vunary.h>
-#include <xnnpack/microparams.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/vunary.h"
+#include "xnnpack/microparams.h"
 
 
 void xnn_f32_vneg_ukernel__wasmsimd_u4(

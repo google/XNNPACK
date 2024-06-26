@@ -7,14 +7,16 @@
 //   Specification: test/f32-gemm-goi-minmax.yaml
 //   Generator: tools/generate-gemm-test.py
 
+#include "xnnpack/common.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/pack.h"
+
 #include <benchmark/benchmark.h>
 #include "bench/gemm-benchmark.h"
 #include "bench/utils.h"
-
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
 
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
@@ -27,10 +29,7 @@
   }
 
   BENCHMARK_GEMM(f32_gemm_goi_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128)
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
-
-#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   static void f32_gemm_goi_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_prfm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_gemm_goi_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_prfm,
@@ -40,10 +39,7 @@
   }
 
   BENCHMARK_GEMM(f32_gemm_goi_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_prfm)
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
-
-#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   static void f32_gemm_goi_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_gemm_goi_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128,

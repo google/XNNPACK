@@ -8,7 +8,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include <xnnpack/gavgpool.h>
+#include "xnnpack/gavgpool.h"
 #include <riscv_vector.h>
 
 void xnn_f32_gavgpool_minmax_ukernel_7x__rvv_c1v(

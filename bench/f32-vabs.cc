@@ -10,13 +10,13 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack.h"
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vunary.h"
 
 #include "bench/f32-vunary-benchmark.h"
 #include "bench/utils.h"
@@ -134,6 +134,27 @@ void f32_vabs(benchmark::State& state, xnn_f32_vabs_ukernel_fn ukernel,
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  BENCHMARK_CAPTURE(f32_vabs, hvx_u32,
+                    xnn_f32_vabs_ukernel__hvx_u32,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckHVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vabs, hvx_u64,
+                    xnn_f32_vabs_ukernel__hvx_u64,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckHVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vabs, hvx_u128,
+                    xnn_f32_vabs_ukernel__hvx_u128,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckHVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(f32_vabs, wasmsimd_u4,

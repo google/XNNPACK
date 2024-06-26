@@ -9,9 +9,9 @@
 
 #include <assert.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/raddstoreexpminusmax.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/raddstoreexpminusmax.h"
 
 
 // Note redefine as uint32[] to avoid redundant bitcasts.

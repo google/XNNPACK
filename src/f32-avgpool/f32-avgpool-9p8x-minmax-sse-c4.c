@@ -7,7 +7,7 @@
 
 #include <xmmintrin.h>
 
-#include <xnnpack/avgpool.h>
+#include "xnnpack/avgpool.h"
 
 
 void xnn_f32_avgpool_minmax_ukernel_9p8x__sse_c4(

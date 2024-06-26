@@ -7,7 +7,7 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/pavgpool.h>
+#include "xnnpack/pavgpool.h"
 
 
 void xnn_f16_pavgpool_minmax_ukernel_9p8x__neonfp16arith_c8(

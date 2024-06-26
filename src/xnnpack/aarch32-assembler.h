@@ -9,11 +9,11 @@
 #include <cstdint>
 #include <initializer_list>
 
-#include <xnnpack/assembler.h>
+#include "xnnpack/assembler.h"
 
 // MSVC defines these tokens using macros, causing name collisions. We use these name in our assembler, so undef them.
 // These macros are pulled in via xnnpack/math.h -> intrin.h -> arm_neon.h.
-#include <xnnpack/math.h>
+#include "xnnpack/math.h"
 #ifdef vabs_f32
   #undef vabs_f32
 #endif

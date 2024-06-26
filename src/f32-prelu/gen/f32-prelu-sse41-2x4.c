@@ -11,8 +11,8 @@
 
 #include <smmintrin.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/prelu.h>
+#include "xnnpack/math.h"
+#include "xnnpack/prelu.h"
 
 
 void xnn_f32_prelu_ukernel__sse41_2x4(

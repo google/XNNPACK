@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include <xnnpack.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/microparams.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/microparams.h"
 
 #include <algorithm>
 #include <cassert>
@@ -26,7 +26,7 @@
 #include <fp16/fp16.h>
 
 #if XNN_PLATFORM_JIT
-  #include <xnnpack/memory.h>
+  #include "xnnpack/memory.h"
 #endif
 
 class VUnaryMicrokernelTester {
@@ -176,6 +176,9 @@ class VUnaryMicrokernelTester {
 
   void Test(xnn_f32_vlrelu_ukernel_fn vlrelu,
             xnn_init_f32_lrelu_params_fn init_params) const;
+
+  void TestLog(xnn_f32_vlog_ukernel_fn vlog,
+            xnn_init_f32_default_params_fn init_params = nullptr) const;
 
   void TestNeg(xnn_f16_vneg_ukernel_fn vneg,
             xnn_init_f16_neg_params_fn init_params = nullptr) const;

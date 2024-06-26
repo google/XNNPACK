@@ -1,16 +1,15 @@
-// Copyright 2019 Google LLC
+// Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 $assert NR % 32 == 0
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <assert.h>
 #include <hexagon_types.h>
 #include <hexagon_protos.h>
 #include <hvx_hexagon_protos.h>
-#include <xnnpack/gemm.h>
+#include "xnnpack/gemm.h"
 
 static XNN_INLINE
 void vstu_variable_scalar(char *bytes, size_t num_bytes, HVX_Vector vin) {
@@ -67,10 +66,10 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
 
   do {
     $for N in range(0, NR, 32):
-        HVX_Vector vacc0x${ABC[int(N/32)]} = *((HVX_Vector *)(w + ${N}));
+        HVX_Vector vacc0x${N//32} = *((HVX_Vector *)(w + ${N}));
     $for M in range(1, MR):
       $for N in range(0, NR, 32):
-        HVX_Vector vacc${M}x${ABC[int(N/32)]} = vacc0x${ABC[int(N/32)]};
+        HVX_Vector vacc${M}x${N//32} = vacc0x${N//32};
     w += ${NR};
 
     size_t k = kc;
@@ -79,14 +78,14 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
         const HVX_Vector va${M} = Q6_V_vsplat_R(*(uint32_t *)a${M});
         a${M} += 1;
 
-      const HVX_Vector vb${ABC[0]} = *((const HVX_Vector *)(w));
+      const HVX_Vector vb0 = *((const HVX_Vector *)(w));
       $for N in range(32, NR, 32):
-        const HVX_Vector vb${ABC[int(N/32)]} = *((const HVX_Vector *)(w + ${N}));
+        const HVX_Vector vb${N//32} = *((const HVX_Vector *)(w + ${N}));
       w += ${NR};
 
       $for N in range(0, NR, 32):
         $for M in range(MR):
-            vacc${M}x${ABC[int(N/32)]} = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va${M}, vb${ABC[int(N/32)]}),vacc${M}x${ABC[int(N/32)]})); 
+            vacc${M}x${N//32} = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va${M}, vb${N//32}),vacc${M}x${N//32}));
 
       k -= sizeof(float);
     } while (k != 0);
@@ -94,18 +93,18 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
     const HVX_Vector vmin = *(const HVX_Vector *)((params->hvx.min));
     $for N in range(0, NR, 32):
       $for M in range(MR):
-        vacc${M}x${ABC[int(N/32)]} = Q6_Vw_vmax_VwVw(vmin, vacc${M}x${ABC[int(N/32)]});
+        vacc${M}x${N//32} = Q6_Vw_vmax_VwVw(vmin, vacc${M}x${N//32});
 
     const HVX_Vector vmax = *(const HVX_Vector *)((params->hvx.max));
     $for N in range(0, NR, 32):
       $for M in range(MR):
-        vacc${M}x${ABC[int(N/32)]} = Q6_Vw_vmin_VwVw(vmax, vacc${M}x${ABC[int(N/32)]});
+        vacc${M}x${N//32} = Q6_Vw_vmin_VwVw(vmax, vacc${M}x${N//32});
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in RANGE_MR:
-        *((HVX_UVector *)c${M}) = vacc${M}x${ABC[0]};
+        *((HVX_UVector *)c${M}) = vacc${M}x0;
         $for N in range(32, NR, 32):
-          *((HVX_UVector *)(c${M} + ${N})) = vacc${M}x${ABC[int(N/32)]};
+          *((HVX_UVector *)(c${M} + ${N})) = vacc${M}x${N//32};
         c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
       $for M in RANGE_MR:
@@ -118,13 +117,13 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
           $if LOG2N >= 5:
             if (nc & ${1 << LOG2N}) {
               $for M in RANGE_MR:
-                *((HVX_UVector *)c${M}) = vacc${M}x${ABC[0]};
+                *((HVX_UVector *)c${M}) = vacc${M}x0;
                 $for N in range(32, 1 << LOG2N, 32):
-                  *((HVX_UVector *)(c${M} + ${N})) = vacc${M}x${ABC[int(N/32)]};
+                  *((HVX_UVector *)(c${M} + ${N})) = vacc${M}x${N//32};
 
               $for M in RANGE_MR:
                 $for N in range(0, 1 << LOG2N, 32):
-                  vacc${M}x${ABC[int(N/32)]} = vacc${M}x${ABC[int((N + (1<<LOG2N))/32)]}; 
+                  vacc${M}x${N//32} = vacc${M}x${(N + (1<<LOG2N))//32};
 
               $for M in RANGE_MR:
                 c${M} += ${1 << LOG2N};
@@ -132,11 +131,11 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
             }
           $else:
             $for M in RANGE_MR:
-              vstu_variable_scalar((char*)c${M}, nc*sizeof(float), vacc${M}x${ABC[0]});
+              vstu_variable_scalar((char*)c${M}, nc*sizeof(float), vacc${M}x0);
             $break
         $elif LOG2N == 5:
             $for M in RANGE_MR:
-              vstu_variable_scalar((char*)c${M}, nc*sizeof(float), vacc${M}x${ABC[0]});
+              vstu_variable_scalar((char*)c${M}, nc*sizeof(float), vacc${M}x0);
             $break  
       nc = 0;
     }

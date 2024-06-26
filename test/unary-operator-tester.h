@@ -7,7 +7,7 @@
 #define __XNNPACK_TEST_UNARY_OPERATOR_TESTER_H_
 
 #include <sys/types.h>
-#include <xnnpack.h>
+#include "xnnpack.h"
 
 #include <algorithm>
 #include <cassert>
@@ -343,6 +343,11 @@ class UnaryOperatorTester {
                                       batch_size, input, output, flags,      \
                                       threadpool);                           \
   }
+
+#define CREATE_STANDARD_OP_OVERRIDES_F32(op_name)   \
+  CREATE_OP_CREATE_OVERRIDE_F32(op_name);  \
+  CREATE_OP_RESHAPE_OVERRIDE_F32(op_name); \
+  CREATE_OP_SETUP_OVERRIDE_F32(op_name);
 
 #define CREATE_OP_OVERRIDES_F32(op_name)   \
   CREATE_OP_CREATE_OVERRIDE_F32(op_name);  \

@@ -3,12 +3,12 @@
 #include <iterator>
 #include <limits>
 
-#include <xnnpack/assembler.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/post-operation.h>
-#include <xnnpack/wasm-assembler.h>
-#include <xnnpack/wasmsimd-gemm-igemm-loadsplat-commons.h>
+#include "xnnpack/assembler.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/post-operation.h"
+#include "xnnpack/wasm-assembler.h"
+#include "xnnpack/wasmsimd-gemm-igemm-loadsplat-commons.h"
 
 
 namespace xnnpack {

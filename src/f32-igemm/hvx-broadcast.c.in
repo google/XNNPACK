@@ -1,16 +1,15 @@
-// Copyright 2019 Google LLC
+// Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 $assert NR % 32 == 0
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 #include <hexagon_types.h>
 #include <hexagon_protos.h>
 #include <hvx_hexagon_protos.h>
 
-#include <xnnpack/igemm.h>
+#include "xnnpack/igemm.h"
 
 static XNN_INLINE
 void vstu_variable_scalar(char *bytes, size_t num_bytes, HVX_Vector vin) {
@@ -65,12 +64,12 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
       }
 
   do {
-    HVX_Vector vacc0x${ABC[0]} = *((HVX_Vector *)(w));
+    HVX_Vector vacc0x0 = *((HVX_Vector *)(w));
     $for N in range(32, NR, 32):
-      HVX_Vector vacc0x${ABC[int(N/32)]} = *((HVX_Vector *)(w + ${N}));
+      HVX_Vector vacc0x${N//32} = *((HVX_Vector *)(w + ${N}));
     $for M in range(1, MR):
       $for N in range(0, NR, 32):
-        HVX_Vector vacc${M}x${ABC[int(N/32)]} = vacc0x${ABC[int(N/32)]};
+        HVX_Vector vacc${M}x${N//32} = vacc0x${N//32};
     w += ${NR};
 
     size_t p = ks;
@@ -85,9 +84,9 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
 
       size_t k = kc;
       do {
-        const HVX_Vector vb${ABC[0]} = *((HVX_Vector *)(w));
+        const HVX_Vector vb0 = *((HVX_Vector *)(w));
         $for N in range(32, NR, 32):
-          const HVX_Vector vb${ABC[int(N/32)]} = *((HVX_Vector *)(w + ${N}));
+          const HVX_Vector vb${N//32} = *((HVX_Vector *)(w + ${N}));
         w += ${NR};
 
         $for M in range(MR):
@@ -96,7 +95,7 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
 
         $for M in range(MR):
           $for N in range(0, NR, 32):
-              vacc${M}x${ABC[int(N/32)]} = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va${M}, vb${ABC[int(N/32)]}), vacc${M}x${ABC[int(N/32)]}));
+              vacc${M}x${N//32} = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va${M}, vb${N//32}), vacc${M}x${N//32}));
         k -= sizeof(float);
       } while (k != 0);
       p -= ${MR} * sizeof(void*);
@@ -105,16 +104,16 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
     const HVX_Vector vmin = *((HVX_Vector *)(params->hvx.min));
     $for N in range(0, NR, 32):
       $for M in range(MR):
-        vacc${M}x${ABC[int(N/32)]} = Q6_Vw_vmax_VwVw(vmin, vacc${M}x${ABC[int(N/32)]});
+        vacc${M}x${N//32} = Q6_Vw_vmax_VwVw(vmin, vacc${M}x${N//32});
 
     const HVX_Vector vmax = *((HVX_Vector *)(params->hvx.max));
     $for N in range(0, NR, 32):
       $for M in range(MR):
-        vacc${M}x${ABC[int(N/32)]} = Q6_Vw_vmin_VwVw(vmax, vacc${M}x${ABC[int(N/32)]});
+        vacc${M}x${N//32} = Q6_Vw_vmin_VwVw(vmax, vacc${M}x${N//32});
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):
-        *((HVX_UVector *)(c${M})) = vacc${M}x${ABC[0]};
+        *((HVX_UVector *)(c${M})) = vacc${M}x0;
         $for N in range(32, NR, 32):
           *((HVX_UVector *)(c${M} + ${N})) = vacc${M}x${int(N/32)};
         c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
@@ -127,13 +126,13 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
           $if LOG2N >= 5:
             if (nc & ${1 << LOG2N}) {
               $for M in reversed(range(MR)):
-                *((HVX_UVector *)c${M}) = vacc${M}x${ABC[0]};
+                *((HVX_UVector *)c${M}) = vacc${M}x0;
                 $for N in range(32, 1 << LOG2N, 32):
-                  *((HVX_UVector *)(c${M} + ${N})) = vacc${M}x${ABC[int(N/32)]};
+                  *((HVX_UVector *)(c${M} + ${N})) = vacc${M}x${N//32};
 
               $for M in reversed(range(MR)):
                 $for N in range(0, 1 << LOG2N, 32):
-                  vacc${M}x${ABC[int(N/32)]} = vacc${M}x${ABC[int((N + (1<<LOG2N))/32)]}; 
+                  vacc${M}x${N//32} = vacc${M}x${(N + (1<<LOG2N))//32};
 
               $for M in reversed(range(MR)):
                 c${M} += ${1 << LOG2N};
@@ -141,11 +140,11 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
             }
           $else:
             $for M in reversed(range(MR)):
-              vstu_variable_scalar((char*)c${M}, nc*sizeof(float), vacc${M}x${ABC[0]});
+              vstu_variable_scalar((char*)c${M}, nc*sizeof(float), vacc${M}x0);
             $break
         $elif LOG2N == 5:
             $for M in reversed(range(MR)):
-              vstu_variable_scalar((char*)c${M}, nc*sizeof(float), vacc${M}x${ABC[0]});
+              vstu_variable_scalar((char*)c${M}, nc*sizeof(float), vacc${M}x0);
             $break  
 
       nc = 0;

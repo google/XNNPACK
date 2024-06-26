@@ -5,7 +5,7 @@
 //
 // Auto-generated file. Do not edit!
 
-#include <xnnpack.h>
+#include "xnnpack.h"
 
 #include <array>
 #include <algorithm>
@@ -14,101 +14,101 @@
 #include <limits>
 #include <random>
 
-#include <xnnpack/cache.h>
-#include <xnnpack/common.h>
-#include <xnnpack/models.h>
+#include "xnnpack/cache.h"
+#include "xnnpack/common.h"
+#include "xnnpack/models.h"
 
 namespace models {
 
 ExecutionPlan QU8MobileNetV1(pthreadpool_t threadpool) {
-  alignas(16) static std::array<uint8_t, 150528 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v0;
-  alignas(16) static std::array<uint8_t, 401408 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v1;
-  alignas(16) static std::array<uint8_t, 401408 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v2;
-  alignas(16) static std::array<uint8_t, 802816 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v3;
-  alignas(16) static std::array<uint8_t, 200704 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v4;
-  alignas(16) static std::array<uint8_t, 401408 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v5;
-  alignas(16) static std::array<uint8_t, 401408 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v6;
-  alignas(16) static std::array<uint8_t, 401408 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v7;
-  alignas(16) static std::array<uint8_t, 100352 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v8;
-  alignas(16) static std::array<uint8_t, 200704 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v9;
-  alignas(16) static std::array<uint8_t, 200704 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v10;
-  alignas(16) static std::array<uint8_t, 200704 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v11;
-  alignas(16) static std::array<uint8_t, 50176 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v12;
-  alignas(16) static std::array<uint8_t, 100352 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v13;
-  alignas(16) static std::array<uint8_t, 100352 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v14;
-  alignas(16) static std::array<uint8_t, 100352 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v15;
-  alignas(16) static std::array<uint8_t, 100352 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v16;
-  alignas(16) static std::array<uint8_t, 100352 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v17;
-  alignas(16) static std::array<uint8_t, 100352 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v18;
-  alignas(16) static std::array<uint8_t, 100352 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v19;
-  alignas(16) static std::array<uint8_t, 100352 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v20;
-  alignas(16) static std::array<uint8_t, 100352 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v21;
-  alignas(16) static std::array<uint8_t, 100352 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v22;
-  alignas(16) static std::array<uint8_t, 100352 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v23;
-  alignas(16) static std::array<uint8_t, 25088 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v24;
-  alignas(16) static std::array<uint8_t, 50176 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v25;
-  alignas(16) static std::array<uint8_t, 50176 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v26;
-  alignas(16) static std::array<uint8_t, 50176 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v27;
-  alignas(16) static std::array<uint8_t, 1024 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v28;
-  alignas(16) static std::array<uint8_t, 1001 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v29;
-  alignas(16) static std::array<uint8_t, 1001 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v30;
-  alignas(16) static std::array<uint8_t, 1001 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v31;
-  alignas(16) static std::array<uint8_t, 864 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w32;
-  alignas(16) static std::array<int32_t, 32 + XNN_EXTRA_BYTES / sizeof(int32_t)> w33;
-  alignas(16) static std::array<uint8_t, 288 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w34;
-  alignas(16) static std::array<int32_t, 32 + XNN_EXTRA_BYTES / sizeof(int32_t)> w35;
-  alignas(16) static std::array<uint8_t, 2048 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w36;
-  alignas(16) static std::array<int32_t, 64 + XNN_EXTRA_BYTES / sizeof(int32_t)> w37;
-  alignas(16) static std::array<uint8_t, 576 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w38;
-  alignas(16) static std::array<int32_t, 64 + XNN_EXTRA_BYTES / sizeof(int32_t)> w39;
-  alignas(16) static std::array<uint8_t, 8192 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w40;
-  alignas(16) static std::array<int32_t, 128 + XNN_EXTRA_BYTES / sizeof(int32_t)> w41;
-  alignas(16) static std::array<uint8_t, 1152 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w42;
-  alignas(16) static std::array<int32_t, 128 + XNN_EXTRA_BYTES / sizeof(int32_t)> w43;
-  alignas(16) static std::array<uint8_t, 16384 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w44;
-  alignas(16) static std::array<int32_t, 128 + XNN_EXTRA_BYTES / sizeof(int32_t)> w45;
-  alignas(16) static std::array<uint8_t, 1152 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w46;
-  alignas(16) static std::array<int32_t, 128 + XNN_EXTRA_BYTES / sizeof(int32_t)> w47;
-  alignas(16) static std::array<uint8_t, 32768 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w48;
-  alignas(16) static std::array<int32_t, 256 + XNN_EXTRA_BYTES / sizeof(int32_t)> w49;
-  alignas(16) static std::array<uint8_t, 2304 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w50;
-  alignas(16) static std::array<int32_t, 256 + XNN_EXTRA_BYTES / sizeof(int32_t)> w51;
-  alignas(16) static std::array<uint8_t, 65536 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w52;
-  alignas(16) static std::array<int32_t, 256 + XNN_EXTRA_BYTES / sizeof(int32_t)> w53;
-  alignas(16) static std::array<uint8_t, 2304 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w54;
-  alignas(16) static std::array<int32_t, 256 + XNN_EXTRA_BYTES / sizeof(int32_t)> w55;
-  alignas(16) static std::array<uint8_t, 131072 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w56;
-  alignas(16) static std::array<int32_t, 512 + XNN_EXTRA_BYTES / sizeof(int32_t)> w57;
-  alignas(16) static std::array<uint8_t, 4608 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w58;
-  alignas(16) static std::array<int32_t, 512 + XNN_EXTRA_BYTES / sizeof(int32_t)> w59;
-  alignas(16) static std::array<uint8_t, 262144 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w60;
-  alignas(16) static std::array<int32_t, 512 + XNN_EXTRA_BYTES / sizeof(int32_t)> w61;
-  alignas(16) static std::array<uint8_t, 4608 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w62;
-  alignas(16) static std::array<int32_t, 512 + XNN_EXTRA_BYTES / sizeof(int32_t)> w63;
-  alignas(16) static std::array<uint8_t, 262144 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w64;
-  alignas(16) static std::array<int32_t, 512 + XNN_EXTRA_BYTES / sizeof(int32_t)> w65;
-  alignas(16) static std::array<uint8_t, 4608 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w66;
-  alignas(16) static std::array<int32_t, 512 + XNN_EXTRA_BYTES / sizeof(int32_t)> w67;
-  alignas(16) static std::array<uint8_t, 262144 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w68;
-  alignas(16) static std::array<int32_t, 512 + XNN_EXTRA_BYTES / sizeof(int32_t)> w69;
-  alignas(16) static std::array<uint8_t, 4608 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w70;
-  alignas(16) static std::array<int32_t, 512 + XNN_EXTRA_BYTES / sizeof(int32_t)> w71;
-  alignas(16) static std::array<uint8_t, 262144 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w72;
-  alignas(16) static std::array<int32_t, 512 + XNN_EXTRA_BYTES / sizeof(int32_t)> w73;
-  alignas(16) static std::array<uint8_t, 4608 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w74;
-  alignas(16) static std::array<int32_t, 512 + XNN_EXTRA_BYTES / sizeof(int32_t)> w75;
-  alignas(16) static std::array<uint8_t, 262144 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w76;
-  alignas(16) static std::array<int32_t, 512 + XNN_EXTRA_BYTES / sizeof(int32_t)> w77;
-  alignas(16) static std::array<uint8_t, 4608 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w78;
-  alignas(16) static std::array<int32_t, 512 + XNN_EXTRA_BYTES / sizeof(int32_t)> w79;
-  alignas(16) static std::array<uint8_t, 524288 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w80;
-  alignas(16) static std::array<int32_t, 1024 + XNN_EXTRA_BYTES / sizeof(int32_t)> w81;
-  alignas(16) static std::array<uint8_t, 9216 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w82;
-  alignas(16) static std::array<int32_t, 1024 + XNN_EXTRA_BYTES / sizeof(int32_t)> w83;
-  alignas(16) static std::array<uint8_t, 1048576 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w84;
-  alignas(16) static std::array<int32_t, 1024 + XNN_EXTRA_BYTES / sizeof(int32_t)> w85;
-  alignas(16) static std::array<uint8_t, 1025024 + XNN_EXTRA_BYTES / sizeof(uint8_t)> w86;
-  alignas(16) static std::array<int32_t, 1001 + XNN_EXTRA_BYTES / sizeof(int32_t)> w87;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(150528, uint8_t)> v0;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(401408, uint8_t)> v1;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(401408, uint8_t)> v2;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(802816, uint8_t)> v3;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(200704, uint8_t)> v4;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(401408, uint8_t)> v5;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(401408, uint8_t)> v6;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(401408, uint8_t)> v7;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(100352, uint8_t)> v8;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(200704, uint8_t)> v9;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(200704, uint8_t)> v10;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(200704, uint8_t)> v11;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(50176, uint8_t)> v12;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(100352, uint8_t)> v13;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(100352, uint8_t)> v14;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(100352, uint8_t)> v15;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(100352, uint8_t)> v16;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(100352, uint8_t)> v17;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(100352, uint8_t)> v18;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(100352, uint8_t)> v19;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(100352, uint8_t)> v20;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(100352, uint8_t)> v21;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(100352, uint8_t)> v22;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(100352, uint8_t)> v23;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(25088, uint8_t)> v24;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(50176, uint8_t)> v25;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(50176, uint8_t)> v26;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(50176, uint8_t)> v27;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(1024, uint8_t)> v28;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(1001, uint8_t)> v29;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(1001, uint8_t)> v30;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(1001, uint8_t)> v31;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(864, uint8_t)> w32;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(32, int32_t)> w33;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(288, uint8_t)> w34;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(32, int32_t)> w35;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(2048, uint8_t)> w36;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(64, int32_t)> w37;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(576, uint8_t)> w38;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(64, int32_t)> w39;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(8192, uint8_t)> w40;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(128, int32_t)> w41;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(1152, uint8_t)> w42;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(128, int32_t)> w43;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(16384, uint8_t)> w44;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(128, int32_t)> w45;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(1152, uint8_t)> w46;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(128, int32_t)> w47;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(32768, uint8_t)> w48;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(256, int32_t)> w49;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(2304, uint8_t)> w50;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(256, int32_t)> w51;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(65536, uint8_t)> w52;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(256, int32_t)> w53;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(2304, uint8_t)> w54;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(256, int32_t)> w55;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(131072, uint8_t)> w56;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(512, int32_t)> w57;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(4608, uint8_t)> w58;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(512, int32_t)> w59;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(262144, uint8_t)> w60;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(512, int32_t)> w61;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(4608, uint8_t)> w62;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(512, int32_t)> w63;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(262144, uint8_t)> w64;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(512, int32_t)> w65;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(4608, uint8_t)> w66;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(512, int32_t)> w67;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(262144, uint8_t)> w68;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(512, int32_t)> w69;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(4608, uint8_t)> w70;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(512, int32_t)> w71;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(262144, uint8_t)> w72;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(512, int32_t)> w73;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(4608, uint8_t)> w74;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(512, int32_t)> w75;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(262144, uint8_t)> w76;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(512, int32_t)> w77;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(4608, uint8_t)> w78;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(512, int32_t)> w79;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(524288, uint8_t)> w80;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(1024, int32_t)> w81;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(9216, uint8_t)> w82;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(1024, int32_t)> w83;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(1048576, uint8_t)> w84;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(1024, int32_t)> w85;
+  alignas(16) static std::array<uint8_t, XNN_PAD_EXTRA_BYTES(1025024, uint8_t)> w86;
+  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(1001, int32_t)> w87;
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());

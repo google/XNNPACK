@@ -7,7 +7,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <xnnpack/assembly.h>
+#include "xnnpack/assembly.h"
 
 # void xnn_f16_gemminc_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld32(
 #     size_t mr,                x0

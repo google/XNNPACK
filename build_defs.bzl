@@ -83,6 +83,49 @@ def xnnpack_kleidiai_defines():
         not_enabled = ["XNN_ENABLE_KLEIDIAI=0"],
     )
 
+_XNNPACK_ARCH_COPT_MAPPING = {
+    "avx": select({
+        "//build_config:x86": ["-mavx"],
+        "//conditions:default": [],
+    }),
+    "avx2": select({
+        "//build_config:x86": ["-mavx2"],
+        "//conditions:default": [],
+    }),
+    "avx512f": select({
+        "//build_config:x86": ["-mavx512f"],
+        "//conditions:default": [],
+    }),
+    "fma3": select({
+        "//build_config:x86": ["-mfma"],
+        "//conditions:default": [],
+    }),
+    "hvx": select({
+        "//build_config:hexagon": ["-mhvx-ieee-fp"],
+        "//conditions:default": [],
+    }),
+    "neon": select({
+        "//build_config:aarch32": [
+            "-marm",
+            "-march=armv7-a",
+            "-mfpu=neon",
+        ],
+        "//conditions:default": [],
+    }),
+    "scalar": [],
+    "sse2": select({
+        "//build_config:x86": ["-msse2"],
+        "//conditions:default": [],
+    }),
+    "wasmsimd": [],
+}
+
+def xnnpack_simd_archs():
+    return _XNNPACK_ARCH_COPT_MAPPING.keys()
+
+def xnnpack_simd_copts_for_arch(arch):
+    return _XNNPACK_ARCH_COPT_MAPPING[arch]
+
 def xnnpack_cc_library(
         name,
         srcs = [],
@@ -521,7 +564,7 @@ def xnnpack_binary(name, srcs, copts = [], deps = [], linkopts = []):
         deps = deps,
     )
 
-def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = []):
+def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = [], defines = []):
     """Microbenchmark binary based on Google Benchmark
 
     Args:
@@ -533,6 +576,8 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = []):
       deps: The list of additional libraries to be linked. Google Benchmark
             library is always added as a dependency and does not need to be
             explicitly specified.
+      tags: The list of arbitrary text tags.
+      defines: The list of arbitrary defines tags.
     """
     native.cc_binary(
         name = name,
@@ -561,6 +606,7 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = []):
             "//conditions:default": [],
         }),
         tags = tags,
+        defines = defines,
     )
 
 SrcListInfo = provider("A list of source files.", fields = {"srcs": "sources"})
@@ -578,7 +624,8 @@ source_list_aspect = aspect(
 )
 
 def _transitive_source_list_rule_impl(ctx):
-    files = [p for dep in ctx.attr.deps for p in dep[SrcListInfo].srcs.to_list() if p.owner.repo_name == ctx.label.repo_name and p.owner.package.startswith(ctx.label.package)]
+    get_repo_name = lambda x: getattr(x, "repo_name", getattr(x, "workspace_name"))
+    files = [p for dep in ctx.attr.deps for p in dep[SrcListInfo].srcs.to_list() if get_repo_name(p.owner) == get_repo_name(ctx.label) and p.owner.package.startswith(ctx.label.package)]
     return [DefaultInfo(files = depset(files))]
 
 xnnpack_transitive_source_list = rule(

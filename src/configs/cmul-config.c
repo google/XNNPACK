@@ -12,10 +12,10 @@
   #include <pthread.h>
 #endif
 
-#include <xnnpack/common.h>
-#include <xnnpack/config.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/config.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/vbinary.h"
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   static struct xnn_cmul_config f16_cmul_config = {0};

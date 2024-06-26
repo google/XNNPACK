@@ -13,27 +13,26 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include "xnnpack.h"
+#include "xnnpack/allocator.h"
+#include "xnnpack/cache.h"
+#include "xnnpack/common.h"
+#include "xnnpack/compute.h"
+#include "xnnpack/config.h"
+#include "xnnpack/log.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microkernel-type.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/operator-type.h"
+#include "xnnpack/operator-utils.h"
+#include "xnnpack/operator.h"
+#include "xnnpack/pack.h"
+#include "xnnpack/params.h"
 
-#include <xnnpack.h>
-#include <xnnpack/allocator.h>
-#include <xnnpack/cache.h>
-#include <xnnpack/common.h>
-#include <xnnpack/compute.h>
-#include <xnnpack/config.h>
-#include <xnnpack/log.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microkernel-type.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/operator-type.h>
-#include <xnnpack/operator-utils.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/params.h>
-
-#include "pthreadpool.h"
 #include <fp16/fp16.h>
+#include "pthreadpool.h"
 
 static enum xnn_status create_fully_connected_nc(
     size_t input_channels,
@@ -143,7 +142,12 @@ static enum xnn_status create_fully_connected_nc(
     k_stride = round_up_po2(k_stride, 2) >> 1;
   }
 
-  const size_t weights_stride = (k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
+  const size_t weights_stride =
+      gemm_config->packed_stride_weights_and_biases
+          ? gemm_config->packed_stride_weights_and_biases(
+                gemm_config, input_channels, k_stride, extra_weights_bytes)
+          : (k_stride << log2_filter_element_size) + bias_element_size +
+                extra_weights_bytes;
   const size_t packed_weights_size = n_stride * weights_stride;
   fully_connected_op->weights_stride = weights_stride;
   size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
@@ -176,23 +180,19 @@ static enum xnn_status create_fully_connected_nc(
 
     if (gemm_config->pack_weights_and_biases) {
       gemm_config->pack_weights_and_biases(
-        flags,
-        gemm_config,
-        input_channels,
-        output_channels,
-        /*groups=*/1,
-        k_stride,
-        weights_stride,
-        /*accumulator_init=*/bias,
-        /*weights=*/kernel,
-        /*int_extra_data0_fn=*/(xnn_init_scale_params_fn) init_scale_params,
-        /*extra_data0=*/scale_params,
-        /*extra_data0_size=*/bias_element_size,
-        /*init_extra_data1_fn=*/(xnn_init_scale_params_fn) init_kernel_scale_params,
-        /*extra_data1=*/kernel_scale_params,
-        /*extra_data1_size=*/bias_element_size,
-        /*packed_weights_ptr=*/weights_ptr,
-        packing_params);
+          flags, gemm_config, input_channels, output_channels,
+          /*groups=*/1, k_stride,
+          /*accumulator_init=*/bias,
+          /*weights=*/kernel,
+          /*int_extra_data0_fn=*/(xnn_init_scale_params_fn)init_scale_params,
+          /*extra_data0=*/scale_params,
+          /*extra_data0_size=*/init_scale_params != NULL ? sizeof(float) : 0,
+          /*init_extra_data1_fn=*/
+          (xnn_init_scale_params_fn)init_kernel_scale_params,
+          /*extra_data1=*/kernel_scale_params,
+          /*extra_data1_size=*/init_kernel_scale_params != NULL ? sizeof(float)
+                                                                : 0,
+          /*packed_weights_ptr=*/weights_ptr, packing_params);
     } else {
       if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
         pack_gemm_gio_w(

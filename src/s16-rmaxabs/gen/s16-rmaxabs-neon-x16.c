@@ -13,8 +13,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/rmaxabs.h>
+#include "xnnpack/math.h"
+#include "xnnpack/rmaxabs.h"
 
 
 void xnn_s16_rmaxabs_ukernel__neon_x16(

@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/math.h>
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/math.h"
 
 
 void xnn_qs8_gavgpool_minmax_rndnu_ukernel_7p7x__neon_c16(

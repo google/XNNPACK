@@ -13,9 +13,9 @@ $assert ACTIVATION in ["LINEAR", "MINMAX"]
 
 #include <xmmintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/vbinary.h"
 
 
 $_MM_OP_PS = {

@@ -7,7 +7,7 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/math-stubs.h"
 
 
 void xnn_math_f32_exp__avx512f_rr2_p5_scalef(

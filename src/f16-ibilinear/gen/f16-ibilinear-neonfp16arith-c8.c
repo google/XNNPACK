@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/ibilinear.h>
+#include "xnnpack/common.h"
+#include "xnnpack/ibilinear.h"
 
 
 void xnn_f16_ibilinear_ukernel__neonfp16arith_c8(

@@ -7,7 +7,7 @@
 //   Specification: test/u8-lut32norm.yaml
 //   Generator: tools/generate-lut-norm-test.py
 
-#include <xnnpack/lut.h>
+#include "xnnpack/lut.h"
 
 #include <cstddef>
 

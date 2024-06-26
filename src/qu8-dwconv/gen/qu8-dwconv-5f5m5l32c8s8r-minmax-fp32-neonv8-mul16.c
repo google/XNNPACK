@@ -12,9 +12,9 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/dwconv.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
+#include "xnnpack/dwconv.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
 
 
 void xnn_qu8_dwconv_minmax_fp32_ukernel_5f5m5l32c8s8r__neonv8_mul16(

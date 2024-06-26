@@ -1,6 +1,6 @@
-#include <xnnpack/wasmsimd-gemm-igemm-loadsplat-commons.h>
+#include "xnnpack/wasmsimd-gemm-igemm-loadsplat-commons.h"
 
-#include <xnnpack/common.h>
+#include "xnnpack/common.h"
 
 namespace xnnpack {
 namespace {

@@ -10,21 +10,21 @@
 //   Specification: test/qd8-f16-qc4w-gemm-minmax.yaml
 //   Generator: tools/generate-gemm-test.py
 
+#include "xnnpack/allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/pack.h"
+#include "xnnpack/packw.h"
+#include "xnnpack/ppmm.h"
+#include "xnnpack/requantization.h"
+
 #include <cstddef>
 #include <functional>
 #include <string>
 #include <vector>
-
-#include <xnnpack/allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/packw.h>
-#include <xnnpack/ppmm.h>
-#include <xnnpack/requantization.h>
 
 #include "gemm-microkernel-tester.h"
 #include <gtest/gtest.h>
@@ -354,10 +354,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
-
-#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_4X8C8__NEONI8MM, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -376,10 +373,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
-
-#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_4X32C8__NEONI8MM, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -398,10 +392,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
-
-#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_5X8C8__NEONI8MM, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -420,10 +411,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
-
-#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_6X16C8__NEONI8MM, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -442,10 +430,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
-
-#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_8X8C8__NEONI8MM, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -464,10 +449,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
-
-#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_8X32C8__NEONI8MM, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -508,10 +490,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
-
-#if XNN_ENABLE_ARM_DOTPROD && XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_5X16C4__NEONDOTFP16ARITH, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -530,10 +509,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
-
-#if XNN_ENABLE_ARM_DOTPROD && XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_6X8C4__NEONDOTFP16ARITH, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -552,10 +528,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
-
-#if XNN_ENABLE_ARM_DOTPROD && XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_6X16C4__NEONDOTFP16ARITH, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -596,10 +569,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_10X8C8__AVX512VNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -640,10 +610,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_AVX512VNNIGFNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-
-#if XNN_ENABLE_AVX512VNNIGFNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_9X8C8__AVX512VNNIGFNI, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -662,10 +629,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_AVX512VNNIGFNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-
-#if XNN_ENABLE_AVX512VNNIGFNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_1X8C8__AVX512VNNIGFNI_PRFM, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -684,10 +648,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_AVX512VNNIGFNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-
-#if XNN_ENABLE_AVX512VNNIGFNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_9X8C8__AVX512VNNIGFNI_PRFM, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -706,10 +667,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_AVX512VNNIGFNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-
-#if XNN_ENABLE_AVX512VNNIGFNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_12X8C8__AVX512VNNIGFNI_PRFM, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -750,10 +708,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-
-#if XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_6X8C8__AVXVNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -772,10 +727,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-
-#if XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_8X8C8__AVXVNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -794,10 +746,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-
-#if XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_1X8C8__AVXVNNI_PRFM, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -838,10 +787,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_3X8C8__AVX2, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -860,10 +806,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   INSTANTIATE_TEST_SUITE_P(
       QD8_F16_QC4W_GEMM_MINMAX_8X8C8__AVX512SKX, GemmTest,
       testing::ValuesIn(CreateTests1(

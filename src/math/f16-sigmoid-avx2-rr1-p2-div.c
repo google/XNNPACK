@@ -8,7 +8,7 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/math-stubs.h"
 
 
 void xnn_math_f16_sigmoid__avx2_rr1_p2_div(

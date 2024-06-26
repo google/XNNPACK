@@ -5,15 +5,14 @@
 
 $assert DATATYPE in ["F32", "QC4", "QC8"]
 $assert NR % 16 == 0
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <immintrin.h>
 $if DATATYPE in ["QC8", "QC4"]:
   #include <smmintrin.h>
 
-#include <xnnpack/gemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
+#include "xnnpack/gemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
 
 
 $RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))
@@ -78,21 +77,21 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
     $if INC:
       $for M in range(MR):
         $for N in range(0, NR, 16):
-          __m512 vacc${M}x${ABC[N:N+16]} = _mm512_load_ps(acc + ${M*NR+N});
+          __m512 vacc${M}x${N//16} = _mm512_load_ps(acc + ${M*NR+N});
       acc += ${MR*NR};
     $else:
       $if DATATYPE == "F32":
-        __m512 vacc0x${ABC[0:16]} = _mm512_load_ps(w);
+        __m512 vacc0x0 = _mm512_load_ps(w);
       $else:
-        __m512 vacc0x${ABC[0:16]} = _mm512_loadu_ps(w);
+        __m512 vacc0x0 = _mm512_loadu_ps(w);
       $for N in range(16, NR, 16):
         $if DATATYPE == "F32":
-          __m512 vacc0x${ABC[N:N+16]} = _mm512_load_ps(w + ${N});
+          __m512 vacc0x${N//16} = _mm512_load_ps(w + ${N});
         $else:
-          __m512 vacc0x${ABC[N:N+16]} = _mm512_loadu_ps((const float*) w + ${N});
+          __m512 vacc0x${N//16} = _mm512_loadu_ps((const float*) w + ${N});
       $for M in range(1, MR):
         $for N in range(0, NR, 16):
-          __m512 vacc${M}x${ABC[N:N+16]} = vacc0x${ABC[N:N+16]};
+          __m512 vacc${M}x${N//16} = vacc0x${N//16};
       $if DATATYPE == "F32":
         w += ${NR};
       $else:
@@ -101,22 +100,22 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
     size_t k = kc;
     do {
       $if DATATYPE == "F32":
-        const __m512 vb${ABC[0:16]} = _mm512_load_ps(w);
+        const __m512 vb0 = _mm512_load_ps(w);
         $for N in range(16, NR, 16):
-          const __m512 vb${ABC[N:N+16]} = _mm512_loadu_ps(w + ${N});
+          const __m512 vb${N//16} = _mm512_loadu_ps(w + ${N});
         w += ${NR};
       $else:
-        const __m512i vbi${ABC[0:16]} = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) w));
+        const __m512i vbi0 = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) w));
         $for N in range(16, NR, 16):
-          const __m512i vbi${ABC[N:N+16]}  = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) ((const int8_t*) w + ${N})));
+          const __m512i vbi${N//16}  = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) ((const int8_t*) w + ${N})));
         $for N in range(0, NR, 16):
-          const __m512 vb${ABC[N:N+16]}  = _mm512_cvtepi32_ps(vbi${ABC[N:N+16]});
+          const __m512 vb${N//16}  = _mm512_cvtepi32_ps(vbi${N//16});
         w = (const int8_t*) w + ${NR};
 
       $for M in range(MR):
         const __m512 va${M} = _mm512_set1_ps(*a${M});
         $for N in range(0, NR, 16):
-          vacc${M}x${ABC[N:N+16]} = _mm512_fmadd_ps(va${M}, vb${ABC[N:N+16]}, vacc${M}x${ABC[N:N+16]});
+          vacc${M}x${N//16} = _mm512_fmadd_ps(va${M}, vb${N//16}, vacc${M}x${N//16});
 
       $for M in range(MR):
         a${M} += 1;
@@ -126,25 +125,25 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
 
     $if DATATYPE in ["QC8", "QC4"]:
       $for N in range(0, NR, 16):
-        const __m512 vscale${ABC[N:N+16]} = _mm512_loadu_ps((const float*) w + ${N});
+        const __m512 vscale${N//16} = _mm512_loadu_ps((const float*) w + ${N});
         $for M in range(MR):
-          vacc${M}x${ABC[N:N+16]} = _mm512_mul_ps(vacc${M}x${ABC[N:N+16]}, vscale${ABC[N:N+16]});
+          vacc${M}x${N//16} = _mm512_mul_ps(vacc${M}x${N//16}, vscale${N//16});
       w = (const float*) w + ${NR};
     const __m512 vmin = _mm512_set1_ps(params->scalar.min);
     $for N in range(0, NR, 16):
       $for M in range(MR):
-        vacc${M}x${ABC[N:N+16]} = _mm512_max_ps(vmin, vacc${M}x${ABC[N:N+16]});
+        vacc${M}x${N//16} = _mm512_max_ps(vmin, vacc${M}x${N//16});
 
     const __m512 vmax = _mm512_set1_ps(params->scalar.max);
     $for N in range(0, NR, 16):
       $for M in range(MR):
-        vacc${M}x${ABC[N:N+16]} = _mm512_min_ps(vmax, vacc${M}x${ABC[N:N+16]});
+        vacc${M}x${N//16} = _mm512_min_ps(vmax, vacc${M}x${N//16});
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in RANGE_MR:
-        _mm512_storeu_ps(c${M}, vacc${M}x${ABC[0:16]});
+        _mm512_storeu_ps(c${M}, vacc${M}x0);
         $for N in range(16, NR, 16):
-          _mm512_storeu_ps(c${M} + ${N}, vacc${M}x${ABC[N:N+16]});
+          _mm512_storeu_ps(c${M} + ${N}, vacc${M}x${N//16});
         c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
       $for M in RANGE_MR:
@@ -157,13 +156,13 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
           if (nc & ${1 << LOG2N}) {
             $if LOG2N >= 4:
               $for M in RANGE_MR:
-                _mm512_storeu_ps(c${M}, vacc${M}x${ABC[0:16]});
+                _mm512_storeu_ps(c${M}, vacc${M}x0);
                 $for N in range(16, 1 << LOG2N, 16):
-                  _mm512_storeu_ps(c${M} + ${N}, vacc${M}x${ABC[N:N+16]});
+                  _mm512_storeu_ps(c${M} + ${N}, vacc${M}x${N//16});
 
               $for M in RANGE_MR:
                 $for N in range(0, NR - (1 << LOG2N), 16):
-                  vacc${M}x${ABC[N:N+16]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+16]};
+                  vacc${M}x${N//16} = vacc${M}x${(N + (1 << LOG2N))//16};
 
               $for M in RANGE_MR:
                 c${M} += ${1 << LOG2N};
@@ -174,7 +173,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
               // Prepare mask for valid 32-bit elements (depends on nc).
               const __mmask16 vmask = _cvtu32_mask16((uint32_t) (UINT32_C(1) << (nc & 15)) - UINT32_C(1));
               $for M in RANGE_MR:
-                _mm512_mask_storeu_ps(c${M}, vmask, vacc${M}x${ABC[0:16]});
+                _mm512_mask_storeu_ps(c${M}, vmask, vacc${M}x0);
             }
           $else:
             assert(nc != 0);
@@ -182,7 +181,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
             // Prepare mask for valid 32-bit elements (depends on nc).
             const __mmask16 vmask = _cvtu32_mask16((uint32_t) (UINT32_C(1) << nc) - UINT32_C(1));
             $for M in RANGE_MR:
-              _mm512_mask_storeu_ps(c${M}, vmask, vacc${M}x${ABC[0:16]});
+              _mm512_mask_storeu_ps(c${M}, vmask, vacc${M}x0);
       nc = 0;
     }
   } while (nc != 0);

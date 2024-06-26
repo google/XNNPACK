@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include <xnnpack.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/requantization.h>
+#include "xnnpack.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/requantization.h"
 
 #include <algorithm>
 #include <cassert>
@@ -182,11 +182,11 @@ class RSumMicrokernelTester {
       init_params(&params, scale());
 
       // Call optimized micro-kernel.
-      uint16_t output = fp16_ieee_from_fp32_value(0.f);
+      float output = 0.f;
       rsum(batch_size() * sizeof(uint16_t), input.data(), &output, &params);
 
       // Verify results.
-      EXPECT_NEAR(fp16_ieee_to_fp32_value(output), output_ref, std::abs(output_ref) * 1.0e-3f)
+      EXPECT_NEAR(output, output_ref, std::abs(output_ref) * 1.0e-5f)
         << "with batch " << batch_size() << ", scale " << scale();
     }
   }

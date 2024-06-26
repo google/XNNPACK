@@ -11,8 +11,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <emmintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/raddstoreexpminusmax.h>
+#include "xnnpack/common.h"
+#include "xnnpack/raddstoreexpminusmax.h"
 
 
 void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_u${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(

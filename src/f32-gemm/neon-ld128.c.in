@@ -13,7 +13,7 @@ $VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
 
 #include <arm_neon.h>
 
-#include <xnnpack/gemm.h>
+#include "xnnpack/gemm.h"
 
 
 $RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))
@@ -78,16 +78,16 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
     $if INC:
       $for M in range(MR):
         $for N in range(0, NR, 4):
-          float32x4_t vacc${M}x${ABC[N:N+4]} = vld1q_f32(acc); acc += 4;
+          float32x4_t vacc${M}x${N//4} = vld1q_f32(acc); acc += 4;
     $else:
       $for N in range(0, NR, 4):
         $if DATATYPE == "F32":
-          float32x4_t vacc0x${ABC[N:N+4]} = vld1q_f32(w); w += 4;
+          float32x4_t vacc0x${N//4} = vld1q_f32(w); w += 4;
         $else:
-          float32x4_t vacc0x${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
+          float32x4_t vacc0x${N//4} = vld1q_f32(w); w = (const float*) w + 4;
       $for M in range(1, MR):
         $for N in range(0, NR, 4):
-          float32x4_t vacc${M}x${ABC[N:N+4]} = vacc0x${ABC[N:N+4]};
+          float32x4_t vacc${M}x${N//4} = vacc0x${N//4};
 
     size_t k = kc;
     if XNN_LIKELY(k >= 4 * sizeof(float)) {
@@ -132,11 +132,11 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
               const float32x4_t va${M}c${L} = vdupq_lane_f32(${VGET_PART_F32}(va${M}), ${L % 2});
             $for N in range(0, NR, 4):
               $for M in range(MR):
-                vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_F32}(vacc${M}x${ABC[N:N+4]}, va${M}c${L}, vb${ABC[N:N+4]}c${L});
+                vacc${M}x${N//4} = ${VMULADDQ_F32}(vacc${M}x${N//4}, va${M}c${L}, vb${ABC[N:N+4]}c${L});
           $else:
             $for N in range(0, NR, 4):
               $for M in range(MR):
-                vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_LANE_F32}(vacc${M}x${ABC[N:N+4]}, vb${ABC[N:N+4]}c${L}, ${VGET_PART_F32}(va${M}), ${L % 2});
+                vacc${M}x${N//4} = ${VMULADDQ_LANE_F32}(vacc${M}x${N//4}, vb${ABC[N:N+4]}c${L}, ${VGET_PART_F32}(va${M}), ${L % 2});
         k -= 4 * sizeof(float);
       } while (k >= 4 * sizeof(float));
     }
@@ -180,11 +180,11 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
               const float32x4_t va${M}c${L} = vdupq_lane_f32(va${M}, ${L});
             $for N in range(0, NR, 4):
               $for M in range(MR):
-                vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_F32}(vacc${M}x${ABC[N:N+4]}, va${M}c${L}, vb${ABC[N:N+4]}c${L});
+                vacc${M}x${N//4} = ${VMULADDQ_F32}(vacc${M}x${N//4}, va${M}c${L}, vb${ABC[N:N+4]}c${L});
           $else:
             $for N in range(0, NR, 4):
               $for M in range(MR):
-                vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_LANE_F32}(vacc${M}x${ABC[N:N+4]}, vb${ABC[N:N+4]}c${L}, va${M}, ${L});
+                vacc${M}x${N//4} = ${VMULADDQ_LANE_F32}(vacc${M}x${N//4}, vb${ABC[N:N+4]}c${L}, va${M}, ${L});
       }
       if XNN_UNLIKELY(k & (1 * sizeof(float))) {
         $for M in range(MR):
@@ -216,7 +216,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
 
         $for N in range(0, NR, 4):
           $for M in range(MR):
-            vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_F32}(vacc${M}x${ABC[N:N+4]}, va${M}, vb${ABC[N:N+4]});
+            vacc${M}x${N//4} = ${VMULADDQ_F32}(vacc${M}x${N//4}, va${M}, vb${ABC[N:N+4]});
       }
     }
     $if DATATYPE in ["QC8", "QC4"]:
@@ -224,22 +224,22 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32(w); w = ((const float*) w + 4);
       $for N in range(0, NR, 4):
         $for M in range(MR):
-          vacc${M}x${ABC[N:N+4]} = vmulq_f32(vacc${M}x${ABC[N:N+4]}, vscale${ABC[N:N+4]});
+          vacc${M}x${N//4} = vmulq_f32(vacc${M}x${N//4}, vscale${ABC[N:N+4]});
     const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
     $for N in range(0, NR, 4):
       $for M in range(MR):
-        vacc${M}x${ABC[N:N+4]} = vminq_f32(vacc${M}x${ABC[N:N+4]}, vmax);
+        vacc${M}x${N//4} = vminq_f32(vacc${M}x${N//4}, vmax);
 
     const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
     $for N in range(0, NR, 4):
       $for M in range(MR):
-        vacc${M}x${ABC[N:N+4]} = vmaxq_f32(vacc${M}x${ABC[N:N+4]}, vmin);
+        vacc${M}x${N//4} = vmaxq_f32(vacc${M}x${N//4}, vmin);
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in RANGE_MR:
-        vst1q_f32(c${M}, vacc${M}x${ABC[0:4]});
+        vst1q_f32(c${M}, vacc${M}x0);
         $for N in range(4, NR, 4):
-          vst1q_f32(c${M} + ${N}, vacc${M}x${ABC[N:N+4]});
+          vst1q_f32(c${M} + ${N}, vacc${M}x${N//4});
         c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
       $for M in RANGE_MR:
@@ -254,24 +254,24 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
             $if LOG2N >= 2:
               $for N in range(0, 1 << LOG2N, 4):
                 $for M in RANGE_MR:
-                  vst1q_f32(c${M}, vacc${M}x${ABC[N:N+4]}); c${M} += 4;
+                  vst1q_f32(c${M}, vacc${M}x${N//4}); c${M} += 4;
 
               $for M in RANGE_MR:
                 $for N in range(0, NR - (1 << LOG2N), 4):
-                  vacc${M}x${ABC[N:N+4]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 <<   LOG2N)+4]};
+                  vacc${M}x${N//4} = vacc${M}x${(N + (1 << LOG2N))//4};
             $elif LOG2N == 1:
               $for M in RANGE_MR:
-                vst1_f32(c${M}, vacc${M}x${ABC[0:2]}); c${M} += 2;
+                vst1_f32(c${M}, vacc${M}); c${M} += 2;
 
               $for M in RANGE_MR:
-                vacc${M}x${ABC[0:2]} = vget_high_f32(vacc${M}x${ABC[0:4]});
+                vacc${M} = vget_high_f32(vacc${M}x0);
             $elif LOG2N == 0:
               $for M in RANGE_MR:
-                vst1_lane_f32(c${M}, vacc${M}x${ABC[0:2]}, 0);
+                vst1_lane_f32(c${M}, vacc${M}, 0);
           }
           $if LOG2N == 2:
             $for M in RANGE_MR:
-              float32x2_t vacc${M}x${ABC[0:2]} = vget_low_f32(vacc${M}x${ABC[0:4]});
+              float32x2_t vacc${M} = vget_low_f32(vacc${M}x0);
 
       nc = 0;
     }

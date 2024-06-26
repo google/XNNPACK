@@ -7,21 +7,21 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/dwconv.h>
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/ibilinear.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/maxpool.h>
-#include <xnnpack/prelu.h>
-#include <xnnpack/unaligned.h>
-#include <xnnpack/vbinary.h>
-#include <xnnpack/vcvt.h>
-#include <xnnpack/vlrelu.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/dwconv.h"
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/ibilinear.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/maxpool.h"
+#include "xnnpack/prelu.h"
+#include "xnnpack/unaligned.h"
+#include "xnnpack/vbinary.h"
+#include "xnnpack/vcvt.h"
+#include "xnnpack/vlrelu.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f16_f32_vcvt_ukernel__sse41_int16_u16(

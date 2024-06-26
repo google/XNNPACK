@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/prelu.h>
+#include "xnnpack/math.h"
+#include "xnnpack/prelu.h"
 
 
 void xnn_f32_prelu_ukernel__wasm_2x4(

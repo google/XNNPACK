@@ -2,7 +2,7 @@
 //   Template: src/f32-gemm/hvx-broadcast.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2019 Google LLC
+// Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -12,7 +12,7 @@
 #include <hexagon_types.h>
 #include <hexagon_protos.h>
 #include <hvx_hexagon_protos.h>
-#include <xnnpack/gemm.h>
+#include "xnnpack/gemm.h"
 
 static XNN_INLINE
 void vstu_variable_scalar(char *bytes, size_t num_bytes, HVX_Vector vin) {
@@ -78,14 +78,14 @@ void xnn_f32_gemm_minmax_ukernel_2x128__hvx_broadcast(
       const HVX_Vector vb3 = *((const HVX_Vector *)(w + 96));
       w += 128;
 
-      vacc0x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va0, vb0),vacc0x0)); 
-      vacc1x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va1, vb0),vacc1x0)); 
-      vacc0x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va0, vb1),vacc0x1)); 
-      vacc1x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va1, vb1),vacc1x1)); 
-      vacc0x2 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va0, vb2),vacc0x2)); 
-      vacc1x2 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va1, vb2),vacc1x2)); 
-      vacc0x3 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va0, vb3),vacc0x3)); 
-      vacc1x3 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va1, vb3),vacc1x3)); 
+      vacc0x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va0, vb0),vacc0x0));
+      vacc1x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va1, vb0),vacc1x0));
+      vacc0x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va0, vb1),vacc0x1));
+      vacc1x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va1, vb1),vacc1x1));
+      vacc0x2 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va0, vb2),vacc0x2));
+      vacc1x2 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va1, vb2),vacc1x2));
+      vacc0x3 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va0, vb3),vacc0x3));
+      vacc1x3 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va1, vb3),vacc1x3));
 
       k -= sizeof(float);
     } while (k != 0);
@@ -133,10 +133,10 @@ void xnn_f32_gemm_minmax_ukernel_2x128__hvx_broadcast(
         *((HVX_UVector *)c1) = vacc1x0;
         *((HVX_UVector *)(c1 + 32)) = vacc1x1;
 
-        vacc0x0 = vacc0x2; 
-        vacc0x1 = vacc0x3; 
-        vacc1x0 = vacc1x2; 
-        vacc1x1 = vacc1x3; 
+        vacc0x0 = vacc0x2;
+        vacc0x1 = vacc0x3;
+        vacc1x0 = vacc1x2;
+        vacc1x1 = vacc1x3;
 
         c0 += 64;
         c1 += 64;
@@ -146,8 +146,8 @@ void xnn_f32_gemm_minmax_ukernel_2x128__hvx_broadcast(
         *((HVX_UVector *)c0) = vacc0x0;
         *((HVX_UVector *)c1) = vacc1x0;
 
-        vacc0x0 = vacc0x1; 
-        vacc1x0 = vacc1x1; 
+        vacc0x0 = vacc0x1;
+        vacc1x0 = vacc1x1;
 
         c0 += 32;
         c1 += 32;

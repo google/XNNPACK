@@ -3512,11 +3512,11 @@ def main(args):
 //   Generator: {generator}
 
 
-#include <xnnpack/avgpool.h>
-#include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/pavgpool.h>
+#include "xnnpack/avgpool.h"
+#include "xnnpack/common.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/pavgpool.h"
 
 #include "avgpool-microkernel-tester.h"
 #include <gtest/gtest.h>

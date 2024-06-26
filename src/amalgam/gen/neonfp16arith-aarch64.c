@@ -7,10 +7,10 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vbinary.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vbinary.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f16_vdiv_minmax_ukernel__aarch64_neonfp16arith_u8(

@@ -11,17 +11,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <xnnpack.h>
-#include <xnnpack/allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/compute.h>
-#include <xnnpack/config.h>
-#include <xnnpack/log.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/operator-type.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/params.h>
+#include "xnnpack.h"
+#include "xnnpack/allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/compute.h"
+#include "xnnpack/config.h"
+#include "xnnpack/log.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/operator-type.h"
+#include "xnnpack/operator.h"
+#include "xnnpack/params.h"
 
 #include "pthreadpool.h"
 #include <fp16/fp16.h>
@@ -1074,6 +1074,53 @@ enum xnn_status xnn_create_leaky_relu_nc_f32(
     flags, f32_lrelu_config, /*rminmax_config=*/NULL,
     &params, sizeof(params),
     xnn_operator_type_leaky_relu_nc_f32, leaky_relu_op_out);
+}
+
+enum xnn_status xnn_create_log_nc_f32(
+  uint32_t flags,
+  xnn_operator_t* log_op_out)
+{
+  const struct xnn_unary_elementwise_config* f32_log_config = xnn_init_f32_log_config();
+
+  union xnn_f32_default_params params;
+  if XNN_LIKELY(f32_log_config != NULL) {
+    if (f32_log_config->init.f32_default != NULL) {
+      f32_log_config->init.f32_default(&params);
+    }
+  }
+
+  return create_unary_elementwise_nc(
+    flags, f32_log_config, /*rminmax_config=*/NULL,
+    &params, sizeof(params),
+    xnn_operator_type_log_nc_f32, log_op_out);
+}
+
+enum xnn_status xnn_reshape_log_nc_f32(
+  xnn_operator_t log_op,
+  size_t batch_size,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  pthreadpool_t threadpool)
+{
+  return reshape_unary_elementwise_nc(
+    log_op, xnn_operator_type_log_nc_f32,
+    batch_size,
+    channels, input_stride, output_stride,
+    /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    &log_op->params.f32_default, sizeof(log_op->params.f32_default),
+    threadpool);
+}
+
+enum xnn_status xnn_setup_log_nc_f32(
+  xnn_operator_t log_op,
+  const float* input,
+  float* output)
+{
+  return setup_unary_elementwise_nc(
+    log_op, xnn_operator_type_log_nc_f32,
+    input, output);
 }
 
 enum xnn_status xnn_create_leaky_relu_nc_qs8(

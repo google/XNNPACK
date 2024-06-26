@@ -14,8 +14,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/packw.h>
-#include <xnnpack/prefetch.h>
+#include "xnnpack/packw.h"
+#include "xnnpack/prefetch.h"
 
 
 void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4_prfm(

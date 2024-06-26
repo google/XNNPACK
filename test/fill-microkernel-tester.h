@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <xnnpack/microfnptr.h>
+#include "xnnpack/microfnptr.h"
 
 #include <algorithm>
 #include <array>

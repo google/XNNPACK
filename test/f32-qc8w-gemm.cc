@@ -10,21 +10,21 @@
 //   Specification: test/f32-qc8w-gemm.yaml
 //   Generator: tools/generate-gemm-test.py
 
+#include "xnnpack/allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/pack.h"
+#include "xnnpack/packw.h"
+#include "xnnpack/ppmm.h"
+#include "xnnpack/requantization.h"
+
 #include <cstddef>
 #include <functional>
 #include <string>
 #include <vector>
-
-#include <xnnpack/allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/packw.h>
-#include <xnnpack/ppmm.h>
-#include <xnnpack/requantization.h>
 
 #include "gemm-microkernel-tester.h"
 #include <gtest/gtest.h>
@@ -307,10 +307,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_1X8__WASMSIMD_SPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -325,10 +322,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_1X8S4__WASMSIMD, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -343,10 +337,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_3X8__WASMSIMD_LOADSPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -361,10 +352,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_3X8__WASMSIMD_SPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -379,10 +367,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_3X8S4__WASMSIMD, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -397,10 +382,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_4X2C4__WASMSIMD, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -415,10 +397,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_4X8__WASMSIMD_LOADSPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -433,10 +412,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_4X8__WASMSIMD_SPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -451,10 +427,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_4X8S4__WASMSIMD, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -469,10 +442,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_5X8__WASMSIMD_LOADSPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -487,10 +457,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_5X8__WASMSIMD_SPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -505,10 +472,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_5X8S4__WASMSIMD, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -523,10 +487,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_6X8__WASMSIMD_LOADSPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -541,10 +502,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_6X8__WASMSIMD_SPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -559,10 +517,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_6X8S4__WASMSIMD, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -595,10 +550,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_1X8__WASMRELAXEDSIMD_FMA_SPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -613,10 +565,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_1X8S4__WASMRELAXEDSIMD_FMA, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -631,10 +580,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_3X8__WASMRELAXEDSIMD_FMA_LOADSPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -649,10 +595,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_3X8__WASMRELAXEDSIMD_FMA_SPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -667,10 +610,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_3X8S4__WASMRELAXEDSIMD_FMA, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -685,10 +625,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_4X2C4__WASMRELAXEDSIMD_FMA, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -703,10 +640,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_4X8__WASMRELAXEDSIMD_FMA_LOADSPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -721,10 +655,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_4X8__WASMRELAXEDSIMD_FMA_SPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -739,10 +670,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_4X8S4__WASMRELAXEDSIMD_FMA, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -757,10 +685,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_5X8__WASMRELAXEDSIMD_FMA_LOADSPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -775,10 +700,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_5X8__WASMRELAXEDSIMD_FMA_SPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -793,10 +715,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_5X8S4__WASMRELAXEDSIMD_FMA, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -811,10 +730,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_6X8__WASMRELAXEDSIMD_FMA_LOADSPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -829,10 +745,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_6X8__WASMRELAXEDSIMD_FMA_SPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -847,10 +760,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
-
-#if XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F32_QC8W_GEMM_6X8S4__WASMRELAXEDSIMD_FMA, GemmTest,
       testing::ValuesIn(CreateTests1(

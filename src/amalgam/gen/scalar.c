@@ -8,42 +8,42 @@
 #include <float.h>
 #include <fxdiv.h>
 #include <math.h>
-#include <simd/f32-scalar.h>
+#include "xnnpack/simd/f32-scalar.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 
-#include <xnnpack/argmaxpool.h>
-#include <xnnpack/avgpool.h>
-#include <xnnpack/common.h>
-#include <xnnpack/conv.h>
-#include <xnnpack/dwconv.h>
-#include <xnnpack/fill.h>
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/ibilinear.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/lut.h>
-#include <xnnpack/math.h>
-#include <xnnpack/maxpool.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/packq.h>
-#include <xnnpack/packw.h>
-#include <xnnpack/pad.h>
-#include <xnnpack/pavgpool.h>
-#include <xnnpack/prelu.h>
-#include <xnnpack/raddstoreexpminusmax.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/spmm.h>
-#include <xnnpack/transpose.h>
-#include <xnnpack/unaligned.h>
-#include <xnnpack/unpool.h>
-#include <xnnpack/vbinary.h>
-#include <xnnpack/vcvt.h>
-#include <xnnpack/vlrelu.h>
-#include <xnnpack/vmulcaddc.h>
-#include <xnnpack/vunary.h>
-#include <xnnpack/zip.h>
+#include "xnnpack/argmaxpool.h"
+#include "xnnpack/avgpool.h"
+#include "xnnpack/common.h"
+#include "xnnpack/conv.h"
+#include "xnnpack/dwconv.h"
+#include "xnnpack/fill.h"
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/ibilinear.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/lut.h"
+#include "xnnpack/math.h"
+#include "xnnpack/maxpool.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/packq.h"
+#include "xnnpack/packw.h"
+#include "xnnpack/pad.h"
+#include "xnnpack/pavgpool.h"
+#include "xnnpack/prelu.h"
+#include "xnnpack/raddstoreexpminusmax.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/spmm.h"
+#include "xnnpack/transpose.h"
+#include "xnnpack/unaligned.h"
+#include "xnnpack/unpool.h"
+#include "xnnpack/vbinary.h"
+#include "xnnpack/vcvt.h"
+#include "xnnpack/vlrelu.h"
+#include "xnnpack/vmulcaddc.h"
+#include "xnnpack/vunary.h"
+#include "xnnpack/zip.h"
 
 
 void xnn_f16_f32_vcvt_ukernel__scalar_u1(
@@ -28225,28 +28225,6 @@ void xnn_x8_lut_ukernel__scalar_u4(
   }
 }
 
-inline static size_t k_roundedup(size_t k, size_t kr, size_t sr) {
-  // Since we pack a float and int32 value at the end of the row,
-  // we must make sure that k is a multiple of 4 for memory alignment.
-  size_t kr_sr_roundedup4 = round_up(kr * sr, 4);
-  return round_up(k, kr_sr_roundedup4);
-}
-
-inline static size_t lhs_packed_stride(size_t k, size_t mr, size_t kr,
-                                       size_t sr) {
-  const size_t k_internal = k_roundedup(k, kr, sr);
-
-  assert((k_internal % 2) == 0);
-
-  // Assuming the same sizeof() for kai_num_bytes_per_offset and
-  // kai_num_bytes_per_multiplier
-  static const size_t num_bytes_per_multiplier = sizeof(float);
-  static const size_t num_bytes_per_offset = sizeof(int32_t);
-
-  return mr * (k_internal * sizeof(int8_t) + num_bytes_per_multiplier +
-               num_bytes_per_offset);
-}
-
 void xnn_x8_packq_f32qp8_ukernel__scalar_u1(size_t m, size_t k, size_t mr,
                                             size_t kr, size_t sr,
                                             size_t m_idx_start,
@@ -28278,8 +28256,7 @@ void xnn_x8_packq_f32qp8_ukernel__scalar_u1(size_t m, size_t k, size_t mr,
     float min0 = 0.0f;
 
     // Find min/max for each channel
-    int32_t k_idx = 0;
-    for (; k_idx < (int32_t)k; ++k_idx) {
+    for (int32_t k_idx = 0; k_idx < (int32_t)k; ++k_idx) {
       const float src0_0 = *(src_ptr + (size_t)k_idx);
       max0 = math_max_f32(src0_0, max0);
       min0 = math_min_f32(src0_0, min0);
@@ -28317,12 +28294,11 @@ void xnn_x8_packq_f32qp8_ukernel__scalar_u1(size_t m, size_t k, size_t mr,
         (uint8_t*)lhs_packed + dst_x * k_block_len * sizeof(int8_t);
 
     // Quantize the channels
-    k_idx = 0;
-    for (; k_idx < (int32_t)k_internal; k_idx += k_block_len) {
+    for (int32_t k_idx = 0; k_idx < (int32_t)k_internal; k_idx += k_block_len) {
       for (size_t k_block_idx = 0; k_block_idx < (size_t)k_block_len;
            ++k_block_idx) {
         // Clamp at the last valid k-index
-        const size_t k_idx_start = min((size_t)k_idx + k_block_idx, k);
+        const size_t k_idx_start = min((size_t)k_idx + k_block_idx, k - 1);
 
         const float src0_0 = *(src_ptr + k_idx_start);
 
@@ -30292,6 +30268,45 @@ void xnn_f32_vabs_ukernel__scalar_u4(
     const xnn_simd_f32_t vy = xnn_abs_f32(vx);
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
+  }
+}
+
+void xnn_f32_vlog_ukernel__scalar_log_u4(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const float vx0 = input[0];
+    const float vx1 = input[1];
+    const float vx2 = input[2];
+    const float vx3 = input[3];
+    input += 4;
+
+    const float vy0 = logf(vx0);
+    const float vy1 = logf(vx1);
+    const float vy2 = logf(vx2);
+    const float vy3 = logf(vx3);
+
+    output[0] = vy0;
+    output[1] = vy1;
+    output[2] = vy2;
+    output[3] = vy3;
+    output += 4;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    do {
+      const float vx = *input++;
+      const float vy = logf(vx);
+      *output++ = vy;
+      batch -= sizeof(float);
+    } while (batch != 0);
   }
 }
 

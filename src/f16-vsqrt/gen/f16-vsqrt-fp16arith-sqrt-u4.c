@@ -12,9 +12,9 @@
 
 #include <arm_fp16.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f16_vsqrt_ukernel__fp16arith_sqrt_u4(

@@ -9,9 +9,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams.h>
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -102,6 +102,7 @@ struct xnn_unary_elementwise_config {
     xnn_init_f32_elu_params_fn f32_elu;
     xnn_init_f32_f16_cvt_params_fn f32_f16_cvt;
     xnn_init_f32_hswish_params_fn f32_hswish;
+    xnn_init_f32_log_params_fn f32_log;
     xnn_init_f32_lrelu_params_fn f32_lrelu;
     xnn_init_f32_minmax_params_fn f32_minmax;
     xnn_init_f32_qs8_cvt_params_fn f32_qs8_cvt;
@@ -323,6 +324,7 @@ struct xnn_gemm_config {
   } init;
   // TODO(b/346765736): Replace all uses of packing functions with this.
   xnn_pack_weights_and_biases_fn pack_weights_and_biases;
+  xnn_packed_stride_weights_and_biases_fn packed_stride_weights_and_biases;
   // Deprecated. Use pack_weights_and_biases instead.
   xnn_packw_gemm_gio_ukernel_fn pack_gemm_gio;
   // Deprecated. Use pack_weights_and_biases instead.

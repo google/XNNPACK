@@ -8,8 +8,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math-stubs.h"
 
 
 // Table of exp2(k / 64) values, k = 0..63

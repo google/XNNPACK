@@ -11,12 +11,12 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include <simd/f32-avx512f.h>
+#include "xnnpack/simd/f32-avx512f.h"
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/vunary.h>
-#include <xnnpack/microparams.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/vunary.h"
+#include "xnnpack/microparams.h"
 
 
 void xnn_f32_vsqr_ukernel__avx512f_u16(

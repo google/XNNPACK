@@ -11,9 +11,9 @@
 
 #include <smmintrin.h>
 
-#include <xnnpack/gemm.h>
-#include <xnnpack/math.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/gemm.h"
+#include "xnnpack/math.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_qu8_gemm_minmax_fp32_ukernel_2x4c8__sse41_ld128(

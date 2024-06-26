@@ -13,23 +13,23 @@
 #include <functional>
 #include <string>
 
-#include <xnnpack/allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/ppmm.h>
-#include <xnnpack/requantization.h>
+#include "xnnpack/allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/pack.h"
+#include "xnnpack/ppmm.h"
+#include "xnnpack/requantization.h"
 
 #include <gtest/gtest.h>
 
 #if XNN_PLATFORM_JIT
 #include <vector>
-#include <xnnpack/post-operation.h>
+#include "xnnpack/post-operation.h"
 #endif  // XNN_PLATFORM_JIT
 
 
@@ -394,6 +394,11 @@ class GemmMicrokernelTester {
     xnn_f32_igemm_minmax_ukernel_fn igemm_minmax,
     xnn_init_f32_minmax_params_fn init_params,
     xnn_pack_f32_igemm_fn pack) const;
+
+  void Test(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn gemm,
+            xnn_init_f32_minmax_params_fn init_minmax_params,
+            xnn_pack_weights_and_biases_fn pack,
+            xnn_packed_stride_weights_and_biases_fn packed_stride);
 
 #if XNN_PLATFORM_JIT
   void Test(

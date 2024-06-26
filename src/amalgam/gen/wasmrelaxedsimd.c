@@ -9,19 +9,19 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/dwconv.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/ibilinear.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/lut.h>
-#include <xnnpack/math.h>
-#include <xnnpack/prelu.h>
-#include <xnnpack/raddstoreexpminusmax.h>
-#include <xnnpack/spmm.h>
-#include <xnnpack/vcvt.h>
-#include <xnnpack/vmulcaddc.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/dwconv.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/ibilinear.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/lut.h"
+#include "xnnpack/math.h"
+#include "xnnpack/prelu.h"
+#include "xnnpack/raddstoreexpminusmax.h"
+#include "xnnpack/spmm.h"
+#include "xnnpack/vcvt.h"
+#include "xnnpack/vmulcaddc.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f16_f32_vcvt_ukernel__wasmrelaxedsimd_int16_u16(

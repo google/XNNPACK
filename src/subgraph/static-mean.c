@@ -9,14 +9,14 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <xnnpack.h>
-#include <xnnpack/common.h>
-#include <xnnpack/log.h>
-#include <xnnpack/node-type.h>
-#include <xnnpack/operator-type.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/subgraph-validation.h>
-#include <xnnpack/subgraph.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
+#include "xnnpack/log.h"
+#include "xnnpack/node-type.h"
+#include "xnnpack/operator-type.h"
+#include "xnnpack/operator.h"
+#include "xnnpack/subgraph-validation.h"
+#include "xnnpack/subgraph.h"
 
 #include "pthreadpool.h"
 
@@ -80,6 +80,8 @@ static enum xnn_status reshape_mean_operator(
         opdata->reduction_axes,
         input_value->shape.num_dims,
         input_value->shape.dim,
+        &opdata->workspace_size,
+        &opdata->workspace_alignment,
         threadpool);
       break;
     case xnn_operator_type_mean_nd_f32:
@@ -166,6 +168,7 @@ static enum xnn_status setup_mean_operator(
     case xnn_operator_type_mean_nd_f16:
       return xnn_setup_mean_nd_f16(
         opdata->operator_objects[0],
+        opdata->workspace,
         input_data, output_data);
     case xnn_operator_type_mean_nd_f32:
       return xnn_setup_mean_nd_f32(

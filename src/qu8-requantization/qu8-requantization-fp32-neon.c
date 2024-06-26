@@ -12,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/requantization-stubs.h>
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/requantization-stubs.h"
 
 
 void xnn_qu8_requantize_fp32__neon(

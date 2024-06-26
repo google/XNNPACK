@@ -16,9 +16,9 @@ $LUT = 1 << LOG2LUT
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vunary.h"
 
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
 $POLY_SUFFIX = "p%dh%d%s" % (P, H, "ps" if PS else "ts")

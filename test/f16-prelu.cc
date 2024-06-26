@@ -10,10 +10,10 @@
 
 #include <gtest/gtest.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
+#include "xnnpack/common.h"
+#include "xnnpack/isa-checks.h"
 
-#include <xnnpack/prelu.h>
+#include "xnnpack/prelu.h"
 #include "prelu-microkernel-tester.h"
 
 

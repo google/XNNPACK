@@ -12,7 +12,7 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/raddextexp.h>
+#include "xnnpack/raddextexp.h"
 
 
 static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};

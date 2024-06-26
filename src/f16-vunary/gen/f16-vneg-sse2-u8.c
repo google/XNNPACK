@@ -11,10 +11,10 @@
 
 #include <emmintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/unaligned.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/unaligned.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f16_vneg_ukernel__sse2_u8(

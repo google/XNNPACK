@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/gemm.h>
-#include <xnnpack/math.h>
+#include "xnnpack/gemm.h"
+#include "xnnpack/math.h"
 
 
 void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_8x32c8__neoni8mm(

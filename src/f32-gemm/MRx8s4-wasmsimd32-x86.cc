@@ -5,11 +5,11 @@
 
 #include <cstddef>
 
-#include <xnnpack/assembler.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/post-operation.h>
-#include <xnnpack/wasm-assembler.h>
-#include <xnnpack/wasmsimd-gemm-igemm-s4-commons.h>
+#include "xnnpack/assembler.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/post-operation.h"
+#include "xnnpack/wasm-assembler.h"
+#include "xnnpack/wasmsimd-gemm-igemm-s4-commons.h"
 
 
 namespace xnnpack {

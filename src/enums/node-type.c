@@ -10,13 +10,13 @@
 #include <assert.h>
 #include <stdint.h>
 
-#include <xnnpack/node-type.h>
+#include "xnnpack/node-type.h"
 
 #if XNN_LOG_LEVEL > 0
-static const uint16_t offset[58] = {
+static const uint16_t offset[59] = {
   0, 8, 12, 17, 35, 54, 71, 93, 101, 107, 120, 133, 146, 159, 167, 182, 187, 204, 222, 247, 254, 258, 270, 282, 294,
-  300, 316, 339, 365, 391, 413, 435, 445, 456, 471, 480, 489, 499, 506, 512, 535, 546, 551, 580, 588, 596, 614, 621,
-  633, 652, 672, 684, 699, 725, 738, 755, 764, 769
+  300, 316, 339, 365, 391, 413, 435, 445, 449, 460, 475, 484, 493, 503, 510, 516, 539, 550, 555, 584, 592, 600, 618,
+  625, 637, 656, 676, 688, 703, 729, 742, 759, 768, 773
 };
 
 static const char data[] =
@@ -52,6 +52,7 @@ static const char data[] =
   "Global Sum Pooling 1D\0"
   "Global Sum Pooling 2D\0"
   "HardSwish\0"
+  "Log\0"
   "Leaky ReLU\0"
   "Max Pooling 2D\0"
   "Maximum2\0"

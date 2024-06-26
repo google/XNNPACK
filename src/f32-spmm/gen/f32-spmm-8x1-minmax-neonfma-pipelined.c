@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/prefetch.h>
-#include <xnnpack/spmm.h>
+#include "xnnpack/prefetch.h"
+#include "xnnpack/spmm.h"
 
 
 void xnn_f32_spmm_minmax_ukernel_8x1__neonfma_pipelined(

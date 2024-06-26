@@ -7,7 +7,7 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/maxpool.h>
+#include "xnnpack/maxpool.h"
 
 
 void xnn_u8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16(

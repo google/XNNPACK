@@ -6,9 +6,9 @@
 #include <cassert>
 #include <cmath>
 
-#include <xnnpack/aarch64-assembler.h>
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
+#include "xnnpack/aarch64-assembler.h"
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
 
 
 namespace xnnpack {

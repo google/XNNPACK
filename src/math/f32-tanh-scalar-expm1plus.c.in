@@ -15,9 +15,9 @@ $LUT = 1 << LOG2LUT
 #include <stdint.h>
 #include <math.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/math-stubs.h"
 
 $if LOG2LUT != 0:
 

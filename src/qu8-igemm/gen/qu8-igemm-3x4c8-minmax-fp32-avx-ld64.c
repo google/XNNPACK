@@ -15,9 +15,9 @@
   #include <x86intrin.h>
 #endif
 
-#include <xnnpack/igemm.h>
-#include <xnnpack/math.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/igemm.h"
+#include "xnnpack/math.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__avx_ld64(

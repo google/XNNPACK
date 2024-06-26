@@ -7,8 +7,8 @@
 #include <stddef.h>
 #include <math.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math-stubs.h"
 
 
 void xnn_math_u32_sqrt__scalar_cvtu32_sqrtf_lrintf(

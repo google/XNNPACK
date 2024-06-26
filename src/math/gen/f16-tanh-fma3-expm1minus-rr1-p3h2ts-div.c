@@ -14,9 +14,9 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/math-stubs.h"
 
 void xnn_math_f16_tanh__fma3_expm1minus_rr1_p3h2ts_div(
     size_t n,

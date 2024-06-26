@@ -11,8 +11,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vscaleexpminusmax.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vscaleexpminusmax.h"
 
 
 static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};

@@ -12,10 +12,10 @@
 #include <cstdlib>
 #include <limits>
 
-#include <xnnpack.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
+#include "xnnpack.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
 
 class VCvtMicrokernelTester {
  public:

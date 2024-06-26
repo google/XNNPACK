@@ -11,7 +11,7 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/igemm.h>
+#include "xnnpack/igemm.h"
 
 
 void xnn_f32_igemm_minmax_ukernel_1x16__avx_broadcast(

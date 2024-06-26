@@ -5,8 +5,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/pavgpool.h>
-#include <xnnpack/math.h>
+#include "xnnpack/pavgpool.h"
+#include "xnnpack/math.h"
 
 
 void xnn_f32_pavgpool_minmax_ukernel_9p8x__wasm_c1(

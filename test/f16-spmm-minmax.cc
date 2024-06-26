@@ -8,10 +8,10 @@
 //   Generator: tools/generate-spmm-test.py
 
 
-#include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/spmm.h>
+#include "xnnpack/common.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/spmm.h"
 
 #include "spmm-microkernel-tester.h"
 #include <gtest/gtest.h>

@@ -10,21 +10,21 @@
 //   Specification: test/qu8-igemm-minmax-rndnu.yaml
 //   Generator: tools/generate-gemm-test.py
 
+#include "xnnpack/allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/pack.h"
+#include "xnnpack/packw.h"
+#include "xnnpack/ppmm.h"
+#include "xnnpack/requantization.h"
+
 #include <cstddef>
 #include <functional>
 #include <string>
 #include <vector>
-
-#include <xnnpack/allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/packw.h>
-#include <xnnpack/ppmm.h>
-#include <xnnpack/requantization.h>
 
 #include "gemm-microkernel-tester.h"
 #include <gtest/gtest.h>
@@ -348,10 +348,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
-
-#if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
   INSTANTIATE_TEST_SUITE_P(
       QU8_IGEMM_MINMAX_RNDNU_1X8__ASM_AARCH32_NEON_MLAL_LANE_CORTEX_A7_PRFM, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -371,10 +368,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
-
-#if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
   INSTANTIATE_TEST_SUITE_P(
       QU8_IGEMM_MINMAX_RNDNU_4X8__ASM_AARCH32_NEON_MLAL_LANE_CORTEX_A53, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -394,10 +388,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
-
-#if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
   INSTANTIATE_TEST_SUITE_P(
       QU8_IGEMM_MINMAX_RNDNU_4X8__ASM_AARCH32_NEON_MLAL_LANE_LD64, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -417,10 +408,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
-
-#if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
   INSTANTIATE_TEST_SUITE_P(
       QU8_IGEMM_MINMAX_RNDNU_4X8__ASM_AARCH32_NEON_MLAL_LANE_LD64_PRFM, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -463,10 +451,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
-
-#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   INSTANTIATE_TEST_SUITE_P(
       QU8_IGEMM_MINMAX_RNDNU_4X16__ASM_AARCH64_NEON_MLAL_LANE_CORTEX_A75, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -486,10 +471,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
-
-#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   INSTANTIATE_TEST_SUITE_P(
       QU8_IGEMM_MINMAX_RNDNU_4X16__ASM_AARCH64_NEON_MLAL_LANE_CORTEX_A75_PRFM, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -509,10 +491,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
-
-#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   INSTANTIATE_TEST_SUITE_P(
       QU8_IGEMM_MINMAX_RNDNU_4X16__ASM_AARCH64_NEON_MLAL_LANE_LD64, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -532,10 +511,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
-
-#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   INSTANTIATE_TEST_SUITE_P(
       QU8_IGEMM_MINMAX_RNDNU_4X16__ASM_AARCH64_NEON_MLAL_LANE_LD64_PRFM, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -578,10 +554,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   INSTANTIATE_TEST_SUITE_P(
       QU8_IGEMM_MINMAX_RNDNU_3X8__NEON_MLAL_LANE, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -601,10 +574,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   INSTANTIATE_TEST_SUITE_P(
       QU8_IGEMM_MINMAX_RNDNU_4X16__NEON_MLAL_LANE, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -624,10 +594,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   INSTANTIATE_TEST_SUITE_P(
       QU8_IGEMM_MINMAX_RNDNU_6X8__NEON_MLAL_LANE, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -647,10 +614,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   INSTANTIATE_TEST_SUITE_P(
       QU8_IGEMM_MINMAX_RNDNU_6X16__NEON_MLAL_LANE, GemmTest,
       testing::ValuesIn(CreateTests1(

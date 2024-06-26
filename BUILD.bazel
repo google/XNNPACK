@@ -19,6 +19,7 @@ load(
     "xnnpack_microkernel_cc_library",
     "xnnpack_min_size_copts",
     "xnnpack_msvc_std_copts",
+    "xnnpack_simd_archs",
     "xnnpack_slinky_defines",
     "xnnpack_slinky_deps",
     "xnnpack_slinky_srcs",
@@ -59,6 +60,7 @@ load(
     "ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS",
     "ALL_NEONFP16ARITH_MICROKERNEL_SRCS",
     "ALL_NEONFP16_MICROKERNEL_SRCS",
+    "ALL_NEONI8MM_AARCH64_MICROKERNEL_SRCS",
     "ALL_NEONI8MM_MICROKERNEL_SRCS",
     "ALL_NEONV8_MICROKERNEL_SRCS",
     "ALL_NEON_AARCH64_MICROKERNEL_SRCS",
@@ -145,6 +147,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/global-sum-pooling.c",
     "src/subgraph/hardswish.c",
     "src/subgraph/leaky-relu.c",
+    "src/subgraph/log.c",
     "src/subgraph/max-pooling-2d.c",
     "src/subgraph/maximum2.c",
     "src/subgraph/minimum2.c",
@@ -242,18 +245,14 @@ MICROKERNEL_DEPS = [
     ":prefetch",
     ":tables",
     ":unaligned",
+    ":logging",
 ]
 
-SIMD_HEADERS = [
-    "include/simd/f32-avx-base.h",
-    "include/simd/f32-avx.h",
-    "include/simd/f32-avx512f.h",
-    "include/simd/f32-fma3.h",
-    "include/simd/f32-neon.h",
-    "include/simd/f32-scalar.h",
-    "include/simd/f32-sse2.h",
-    "include/simd/f32-wasmsimd.h",
+SIMD_HEADERS = ["src/xnnpack/simd/f32-" + arch + ".h" for arch in xnnpack_simd_archs()] + [
+    "src/xnnpack/simd/f32-avx-base.h",
 ]
+
+exports_files(SIMD_HEADERS)
 
 INTERNAL_MICROKERNEL_HDRS = MICROKERNEL_HDRS + SIMD_HEADERS + [
     "src/xnnpack/cache.h",
@@ -429,6 +428,7 @@ xnnpack_cc_library(
         ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
         "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
     }),
+    defines = xnnpack_kleidiai_defines(),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -869,9 +869,10 @@ xnnpack_microkernel_cc_library(
         "src/amalgam/gen/neondot.c",
     ],
     aarch64_srcs_test = ALL_NEONDOT_MICROKERNEL_SRCS + ALL_NEONDOT_AARCH64_MICROKERNEL_SRCS,
+    defines = xnnpack_kleidiai_defines(),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS,
+    deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled(["@KleidiAI//:kleidiai_dotprod"]),
 )
 
 xnnpack_microkernel_cc_library(
@@ -884,11 +885,15 @@ xnnpack_microkernel_cc_library(
     aarch32_srcs_prod = ["src/amalgam/gen/neoni8mm.c"],
     aarch32_srcs_test = ALL_NEONI8MM_MICROKERNEL_SRCS,
     aarch64_copts = ["-march=armv8.2-a+i8mm+fp16"],
-    aarch64_srcs_prod = ["src/amalgam/gen/neoni8mm.c"],
-    aarch64_srcs_test = ALL_NEONI8MM_MICROKERNEL_SRCS,
+    aarch64_srcs_prod = [
+        "src/amalgam/gen/neoni8mm-aarch64.c",
+        "src/amalgam/gen/neoni8mm.c",
+    ],
+    aarch64_srcs_test = ALL_NEONI8MM_MICROKERNEL_SRCS + ALL_NEONI8MM_AARCH64_MICROKERNEL_SRCS,
+    defines = xnnpack_kleidiai_defines(),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS,
+    deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled(["@KleidiAI//:kleidiai_i8mm"]),
 )
 
 xnnpack_microkernel_cc_library(
@@ -1558,6 +1563,7 @@ xnnpack_cc_library(
     name = "packing",
     srcs = ["src/packing.c"],
     hdrs = ["src/xnnpack/pack.h"],
+    defines = xnnpack_kleidiai_defines(),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -1567,7 +1573,7 @@ xnnpack_cc_library(
         ":operator_h",
         ":unaligned",
         "@FP16",
-    ],
+    ] + xnnpack_if_kleidiai_enabled(["@KleidiAI//:kleidiai_common"]),
 )
 
 cc_library(

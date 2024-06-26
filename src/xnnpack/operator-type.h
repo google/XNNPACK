@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <xnnpack/common.h>
+#include "xnnpack/common.h"
 
 
 #ifdef __cplusplus
@@ -114,6 +114,7 @@ enum xnn_operator_type {
   xnn_operator_type_leaky_relu_nc_f32,
   xnn_operator_type_leaky_relu_nc_qs8,
   xnn_operator_type_leaky_relu_nc_qu8,
+  xnn_operator_type_log_nc_f32,
   xnn_operator_type_max_pooling_nhwc_f16,
   xnn_operator_type_max_pooling_nhwc_f32,
   xnn_operator_type_max_pooling_nhwc_s8,

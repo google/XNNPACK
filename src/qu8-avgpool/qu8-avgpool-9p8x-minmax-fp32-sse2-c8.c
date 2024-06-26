@@ -10,8 +10,8 @@
 
 #include <emmintrin.h>
 
-#include <xnnpack/avgpool.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/avgpool.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8(

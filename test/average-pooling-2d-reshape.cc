@@ -11,9 +11,9 @@
 
 #include <gtest/gtest.h>
 
-#include <xnnpack.h>
-#include <xnnpack/node-type.h>
-#include <xnnpack/subgraph.h>
+#include "xnnpack.h"
+#include "xnnpack/node-type.h"
+#include "xnnpack/subgraph.h"
 
 TEST(AveragePooling2DTestF32, Reshape)
 {

@@ -12,11 +12,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack.h>
-#include <xnnpack/common.h>
-#include <xnnpack/indirection.h>
-#include <xnnpack/math.h>
-#include <xnnpack/operator.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
+#include "xnnpack/indirection.h"
+#include "xnnpack/math.h"
+#include "xnnpack/operator.h"
 
 #include <fp16/fp16.h>
 

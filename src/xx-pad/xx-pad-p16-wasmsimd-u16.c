@@ -7,8 +7,8 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/pad.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/pad.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_xx_pad_ukernel_p16__wasmsimd_u16(

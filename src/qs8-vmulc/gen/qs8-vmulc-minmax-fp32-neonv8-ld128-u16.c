@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/vbinary.h"
 
 
 void xnn_qs8_vmulc_minmax_fp32_ukernel__neonv8_ld128_u16(

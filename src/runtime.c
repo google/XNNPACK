@@ -15,20 +15,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <xnnpack.h>
-#include <xnnpack/allocation-type.h>
-#include <xnnpack/allocator.h>
-#include <xnnpack/cache.h>
-#include <xnnpack/common.h>
-#include <xnnpack/log.h>
-#include <xnnpack/memory-planner.h>
-#include <xnnpack/memory.h>
-#include <xnnpack/microkernel-type.h>
-#include <xnnpack/node-type.h>
-#include <xnnpack/operator-type.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/params.h>
-#include <xnnpack/subgraph.h>
+#include "xnnpack.h"
+#include "xnnpack/allocation-type.h"
+#include "xnnpack/allocator.h"
+#include "xnnpack/cache.h"
+#include "xnnpack/common.h"
+#include "xnnpack/log.h"
+#include "xnnpack/memory-planner.h"
+#include "xnnpack/memory.h"
+#include "xnnpack/microkernel-type.h"
+#include "xnnpack/node-type.h"
+#include "xnnpack/operator-type.h"
+#include "xnnpack/operator.h"
+#include "xnnpack/params.h"
+#include "xnnpack/subgraph.h"
 
 #include "pthreadpool.h"
 

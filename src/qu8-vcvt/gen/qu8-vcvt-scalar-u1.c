@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/vcvt.h>
+#include "xnnpack/math.h"
+#include "xnnpack/vcvt.h"
 
 
 void xnn_qu8_vcvt_ukernel__scalar_u1(

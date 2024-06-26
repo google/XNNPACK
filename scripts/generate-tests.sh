@@ -79,6 +79,8 @@ tools/generate-gemm-test.py --spec test/qd8-f16-qc8w-gemm-minmax.yaml --output-t
 tools/generate-gemm-test.py --spec test/qd8-f32-qc8w-gemm-minmax.yaml --output-test test/qd8-f32-qc8w-gemm-minmax.cc  --output-test test/qd8-f32-qc8w-gemm-minmax-2.cc  --output-test test/qd8-f32-qc8w-gemm-minmax-3.cc  --output-test test/qd8-f32-qc8w-gemm-minmax-4.cc --output-bench bench/qd8-f32-qc8w-gemm.cc &
 tools/generate-gemm-test.py --spec test/qd8-f32-qc4w-gemm-minmax.yaml --output-test test/qd8-f32-qc4w-gemm-minmax.cc  --output-test test/qd8-f32-qc4w-gemm-minmax-2.cc  --output-test test/qd8-f32-qc4w-gemm-minmax-3.cc  --output-test test/qd8-f32-qc4w-gemm-minmax-4.cc --output-bench bench/qd8-f32-qc4w-gemm.cc &
 
+tools/generate-gemm-test.py --spec test/qp8-f32-qc4w-gemm-minmax.yaml --output-test test/qp8-f32-qc4w-gemm-minmax.cc --output-bench bench/qp8-f32-qc4w-gemm.cc &
+
 tools/generate-gemm-test.py --spec test/qs8-qc8w-gemm-minmax-fp32.yaml --output-test test/qs8-qc8w-gemm-minmax-fp32.cc --output-test test/qs8-qc8w-gemm-minmax-fp32-2.cc --output-test test/qs8-qc8w-gemm-minmax-fp32-3.cc --output-bench bench/qs8-qc8w-gemm-fp32.cc &
 tools/generate-gemm-test.py --spec test/qs8-qc8w-gemm-jit-fp32.yaml --output-test test/qs8-qc8w-gemm-jit-fp32.cc &
 
@@ -204,6 +206,7 @@ tools/generate-vunary-test.py --spec test/f16-vtanh.yaml --output test/f16-vtanh
 tools/generate-vunary-test.py --spec test/f32-vabs.yaml --output test/f32-vabs.cc &
 tools/generate-vunary-test.py --spec test/f32-vclamp.yaml --output test/f32-vclamp.cc &
 tools/generate-vunary-test.py --spec test/f32-velu.yaml --output test/f32-velu.cc &
+tools/generate-vunary-test.py --spec test/f32-vlog.yaml --output test/f32-vlog.cc &
 tools/generate-vunary-test.py --spec test/f32-vneg.yaml --output test/f32-vneg.cc &
 tools/generate-vunary-test.py --spec test/f32-vrelu.yaml --output test/f32-vrelu.cc &
 tools/generate-vunary-test.py --spec test/f32-vrndd.yaml  --output test/f32-vrndd.cc &
@@ -238,7 +241,7 @@ tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f32-r
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f32-rmin.yaml --output test/f32-rmin.cc &
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f32-rminmax.yaml --output test/f32-rminmax.cc &
 
-tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/qs8-rsum-minmax-fp32.yaml --output test/qs8-rsum-minmax-fp32.cc &
+tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/qs8-rsum.yaml --output test/qs8-rsum.cc &
 tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/f32-rsum.yaml --output test/f32-rsum.cc &
 
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/u8-rmax.yaml --output test/u8-rmax.cc &
@@ -377,5 +380,16 @@ tools/generate-filterbank-accumulate-test.py --spec test/u32-filterbank-accumula
 
 ### Tests for FilterBank subtract micro-kernels
 tools/generate-filterbank-subtract-test.py --spec test/u32-filterbank-subtract.yaml --output test/u32-filterbank-subtract.cc &
+
+### Tests for the portable SIMD wrappers.
+tools/xngen test/f32-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/f32-simd-scalar.cc &
+tools/xngen test/f32-simd.cc.in -D ARCH=sse2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_SSE2 -o test/f32-simd-sse2.cc &
+tools/xngen test/f32-simd.cc.in -D ARCH=avx -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_AVX -o test/f32-simd-avx.cc &
+tools/xngen test/f32-simd.cc.in -D ARCH=avx2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_AVX2 -o test/f32-simd-avx2.cc &
+tools/xngen test/f32-simd.cc.in -D ARCH=fma3 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_FMA3 -o test/f32-simd-fma3.cc &
+tools/xngen test/f32-simd.cc.in -D ARCH=avx512f -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_AVX512F -o test/f32-simd-avx512f.cc &
+tools/xngen test/f32-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES=TEST_REQUIRES_ARM_NEON -o test/f32-simd-neon.cc &
+tools/xngen test/f32-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/f32-simd-wasmsimd.cc &
+tools/xngen test/f32-simd.cc.in -D ARCH=hvx -D ARCH_MACRO=XNN_ARCH_HEXAGON -D TEST_REQUIRES=TEST_REQUIRES_HVX -o test/f32-simd-hvx.cc &
 
 wait

@@ -8,9 +8,9 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/math.h>
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/math.h"
 
 
 $UNROLL = CHANNELS_BATCH >> 2
@@ -20,7 +20,7 @@ void xnn_f16_f32acc_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neonfp16arit
     const void* input,
     size_t input_stride,
     const void* zero,
-    void* output,
+    float* output,
     const union xnn_f16_f32acc_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
@@ -60,13 +60,13 @@ void xnn_f16_f32acc_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neonfp16arit
     $for i in range(UNROLL):
       vacc${i} = vmulq_f32(vacc${i}, vscale);
 
-    const uint16_t* o = (const uint16_t*) output;
+    const float* o = (const float*) output;
     $for i in range(0, UNROLL):
-      float16x4_t vo${i} = vreinterpret_f16_u16(vld1_u16(o)); o += 4;
+      float32x4_t vo${i} = vld1q_f32(o); o += 4;
     $for i in range(0, UNROLL):
-      float16x4_t vfp16_out${i} = vadd_f16(vo${i}, vcvt_f16_f32(vacc${i}));
+      float32x4_t v_out${i} = vaddq_f32(vo${i}, vacc${i});
     $for i in range(0, UNROLL):
-      vst1_u16(output, vreinterpret_u16_f16(vfp16_out${i})); output = (void*) ((uintptr_t) output + 4 * sizeof(uint16_t));
+      vst1q_f32(output, v_out${i}); output = (void*) ((uintptr_t) output + 4 * sizeof(float));
 
     input = (const uint16_t*) ((uintptr_t) input + ${CHANNELS_BATCH} * sizeof(uint16_t));
   }
@@ -100,28 +100,28 @@ void xnn_f16_f32acc_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neonfp16arit
       vacc[i] = vmulq_f32(vacc[i], vscale);
     }
 
-    float16x4_t vo[${UNROLL}];
-    const uint16_t* o = (const uint16_t*) output;
+    float32x4_t vo[${UNROLL}];
+    const float* o = (const float*) output;
     for (int i = 0; i < num_full_chunks; ++i) {
-      vo[i] = vreinterpret_f16_u16(vld1_u16(o)); o += 4;
+      vo[i] = vld1q_f32(o); o += 4;
     }
-    float16x4_t vfp16_out[${UNROLL}];
+    float32x4_t v_out[${UNROLL}];
     for (int i = 0; i < num_full_chunks; ++i) {
-      vfp16_out[i] = vadd_f16(vo[i], vcvt_f16_f32(vacc[i]));
+      v_out[i] = vaddq_f32(vo[i], vacc[i]);
     }
     for (int i = 0; i < num_full_chunks; ++i) {
-      vst1_u16(output, vreinterpret_u16_f16(vfp16_out[i])); output = (void*) ((uintptr_t) output + 4 * sizeof(uint16_t));
+      vst1q_f32(output, v_out[i]); output = (void*) ((uintptr_t) output + 4 * sizeof(float));
     }
 
     const size_t pos = channels >> 2;
     channels &= 0x3;
-    float16x4_t vacc_low = vcvt_f16_f32(vacc[pos]);
+    float32x2_t vacc_low = vget_low_f32(vacc[pos]);
     if (channels & 2) {
-      vst1_lane_u32(output, vreinterpret_u32_f16(vadd_f16(vacc_low, vreinterpret_f16_u32(vld1_dup_u32(output)))), 0); output = (void*) ((uintptr_t) output + 2 * sizeof(uint16_t));
-      vacc_low = vext_f16(vacc_low, vacc_low, 2);
+      vst1_f32(output, vadd_f32(vacc_low, vld1_f32(output))); output = (void*) ((uintptr_t) output + 2 * sizeof(float));
+      vacc_low = vget_high_f32(vacc[pos]);
     }
     if (channels & 1) {
-      vst1_lane_u16(output, vreinterpret_u16_f16(vadd_f16(vacc_low, vreinterpret_f16_u16(vld1_dup_u16(output)))), 0);
+      vst1_lane_f32(output, vadd_f32(vacc_low, vld1_dup_f32(output)), 0);
     }
   }
 }

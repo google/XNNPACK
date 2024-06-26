@@ -12,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/packx.h>
-#include <xnnpack/prefetch.h>
+#include "xnnpack/packx.h"
+#include "xnnpack/prefetch.h"
 
 
 void xnn_x32_packx_ukernel_4x__neon_st4_x4_prfm(

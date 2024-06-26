@@ -9,7 +9,7 @@
   #include <intrin.h>
 #endif
 
-#include <xnnpack/common.h>
+#include "xnnpack/common.h"
 
 
 XNN_INLINE static void xnn_prefetch_to_l1(const void* address) {

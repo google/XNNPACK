@@ -17,10 +17,10 @@ $LUT = 1 << LOG2LUT
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vunary.h"
 
 $if LOG2LUT != 0 and not PERM:
 

@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-vunary/vneg-hvx.c.in
+//   Template: src/f32-vunary/simd.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 Google LLC
@@ -9,14 +9,14 @@
 
 
 #include <assert.h>
+#include <stddef.h>
 
-#include <hvx_hexagon_protos.h>
-#include <hexagon_protos.h>
-#include <hexagon_types.h>
+#include "xnnpack/simd/f32-hvx.h"
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/vunary.h"
+#include "xnnpack/microparams.h"
 
 
 void xnn_f32_vneg_ukernel__hvx_u32(
@@ -29,28 +29,26 @@ void xnn_f32_vneg_ukernel__hvx_u32(
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
-
-  const HVX_UVector *vptr = (const HVX_UVector *) input;
-  HVX_UVector *vptr_o = (HVX_UVector*) output;
-
-  HVX_Vector v0 = Q6_V_vsplat_R(0);
+  assert(xnn_simd_size_f32 == 32);
 
 
-  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
-    HVX_Vector vx = *vptr++;
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    const xnn_simd_f32_t vx = xnn_loadu_f32(input);
+    input += xnn_simd_size_f32;
 
-    HVX_Vector vacc = Q6_Vsf_vsub_VsfVsf(v0, vx);
+    const xnn_simd_f32_t vy = xnn_neg_f32(vx);
 
-
-    *vptr_o++ = vacc;
+    xnn_storeu_f32(output, vy);
+    output += xnn_simd_size_f32;
   }
 
   if XNN_UNLIKELY(batch != 0) {
-    HVX_Vector vx = *vptr;
+    const xnn_simd_f32_t vx =
+        xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
-    HVX_Vector vacc = Q6_Vsf_vsub_VsfVsf(v0, vx);
+    const xnn_simd_f32_t vy = xnn_neg_f32(vx);
 
-    Q6_V_vstu_variable(vptr_o, batch, vacc);
+    xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
 }
 
@@ -64,38 +62,38 @@ void xnn_f32_vneg_ukernel__hvx_u64(
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
-
-  const HVX_UVector *vptr = (const HVX_UVector *) input;
-  HVX_UVector *vptr_o = (HVX_UVector*) output;
-
-  HVX_Vector v0 = Q6_V_vsplat_R(0);
+  assert(xnn_simd_size_f32 == 32);
 
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
-    HVX_Vector vx0 = *vptr++;
-    HVX_Vector vx1 = *vptr++;
+    const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vx1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
+    input += 2 * xnn_simd_size_f32;
 
-    HVX_Vector vacc0 = Q6_Vsf_vsub_VsfVsf(v0, vx0);
-    HVX_Vector vacc1 = Q6_Vsf_vsub_VsfVsf(v0, vx1);
+    const xnn_simd_f32_t vy0 = xnn_neg_f32(vx0);
+    const xnn_simd_f32_t vy1 = xnn_neg_f32(vx1);
 
-    *vptr_o++ = vacc0;
-    *vptr_o++ = vacc1;
+    xnn_storeu_f32(output, vy0);
+    xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy1);
+    output += 2 * xnn_simd_size_f32;
   }
 
-  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
-    HVX_Vector vx = *vptr++;
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    const xnn_simd_f32_t vx = xnn_loadu_f32(input);
+    input += xnn_simd_size_f32;
 
-    HVX_Vector vacc = Q6_Vsf_vsub_VsfVsf(v0, vx);
+    const xnn_simd_f32_t vy = xnn_neg_f32(vx);
 
-
-    *vptr_o++ = vacc;
+    xnn_storeu_f32(output, vy);
+    output += xnn_simd_size_f32;
   }
 
   if XNN_UNLIKELY(batch != 0) {
-    HVX_Vector vx = *vptr;
+    const xnn_simd_f32_t vx =
+        xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
-    HVX_Vector vacc = Q6_Vsf_vsub_VsfVsf(v0, vx);
+    const xnn_simd_f32_t vy = xnn_neg_f32(vx);
 
-    Q6_V_vstu_variable(vptr_o, batch, vacc);
+    xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
 }
 
@@ -109,43 +107,43 @@ void xnn_f32_vneg_ukernel__hvx_u128(
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
-
-  const HVX_UVector *vptr = (const HVX_UVector *) input;
-  HVX_UVector *vptr_o = (HVX_UVector*) output;
-
-  HVX_Vector v0 = Q6_V_vsplat_R(0);
+  assert(xnn_simd_size_f32 == 32);
 
   for (; batch >= 128 * sizeof(float); batch -= 128 * sizeof(float)) {
-    HVX_Vector vx0 = *vptr++;
-    HVX_Vector vx1 = *vptr++;
-    HVX_Vector vx2 = *vptr++;
-    HVX_Vector vx3 = *vptr++;
+    const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vx1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
+    const xnn_simd_f32_t vx2 = xnn_loadu_f32(input + 2 * xnn_simd_size_f32);
+    const xnn_simd_f32_t vx3 = xnn_loadu_f32(input + 3 * xnn_simd_size_f32);
+    input += 4 * xnn_simd_size_f32;
 
-    HVX_Vector vacc0 = Q6_Vsf_vsub_VsfVsf(v0, vx0);
-    HVX_Vector vacc1 = Q6_Vsf_vsub_VsfVsf(v0, vx1);
-    HVX_Vector vacc2 = Q6_Vsf_vsub_VsfVsf(v0, vx2);
-    HVX_Vector vacc3 = Q6_Vsf_vsub_VsfVsf(v0, vx3);
+    const xnn_simd_f32_t vy0 = xnn_neg_f32(vx0);
+    const xnn_simd_f32_t vy1 = xnn_neg_f32(vx1);
+    const xnn_simd_f32_t vy2 = xnn_neg_f32(vx2);
+    const xnn_simd_f32_t vy3 = xnn_neg_f32(vx3);
 
-    *vptr_o++ = vacc0;
-    *vptr_o++ = vacc1;
-    *vptr_o++ = vacc2;
-    *vptr_o++ = vacc3;
+    xnn_storeu_f32(output, vy0);
+    xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy1);
+    xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy2);
+    xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy3);
+    output += 4 * xnn_simd_size_f32;
   }
 
-  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
-    HVX_Vector vx = *vptr++;
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    const xnn_simd_f32_t vx = xnn_loadu_f32(input);
+    input += xnn_simd_size_f32;
 
-    HVX_Vector vacc = Q6_Vsf_vsub_VsfVsf(v0, vx);
+    const xnn_simd_f32_t vy = xnn_neg_f32(vx);
 
-
-    *vptr_o++ = vacc;
+    xnn_storeu_f32(output, vy);
+    output += xnn_simd_size_f32;
   }
 
   if XNN_UNLIKELY(batch != 0) {
-    HVX_Vector vx = *vptr;
+    const xnn_simd_f32_t vx =
+        xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
-    HVX_Vector vacc = Q6_Vsf_vsub_VsfVsf(v0, vx);
+    const xnn_simd_f32_t vy = xnn_neg_f32(vx);
 
-    Q6_V_vstu_variable(vptr_o, batch, vacc);
+    xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
 }

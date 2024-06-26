@@ -10,9 +10,9 @@
 
 #include <assert.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/transpose.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/transpose.h"
 
 void xnn_x8_transposec_ukernel__1x2_scalar_int(
     const uint8_t *input,

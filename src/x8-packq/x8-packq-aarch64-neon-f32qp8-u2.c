@@ -9,9 +9,9 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/packq.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/packq.h"
 
 #if XNN_ENABLE_KLEIDIAI
 #include "kai/ukernels/matmul/pack/kai_lhs_quant_pack_qai8dxp_f32.h"

@@ -201,10 +201,10 @@ def main(args):
 //   Generator: {generator}
 
 
-#include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/vlrelu.h>
+#include "xnnpack/common.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/vlrelu.h"
 
 #include <gtest/gtest.h>
 #include "vlrelu-microkernel-tester.h"

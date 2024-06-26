@@ -8,8 +8,8 @@ $assert BATCH_TILE == 1
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/filterbank.h>
-#include <xnnpack/math.h>
+#include "xnnpack/filterbank.h"
+#include "xnnpack/math.h"
 
 
 void xnn_u32_filterbank_accumulate_ukernel__scalar_x${BATCH_TILE}(

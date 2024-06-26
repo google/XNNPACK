@@ -9,8 +9,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/microparams.h>
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
 
 
 /****************** Microkernel pointers for dense inference *****************/
@@ -325,6 +325,20 @@ typedef void (*xnn_qu8_gemm_minmax_ukernel_fn)(
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_qu8_conv_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+// GEMM: GEneral Matrix Multiplication with packed and quantized LHS operand.
+
+typedef void (*xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn)(
+    size_t m,
+    size_t n,
+    size_t k,
+    const int8_t* lhs_packed,
+    const void* rhs_packed,
+    float* dst,
+    size_t dst_stride_row,
+    size_t dst_stride_col,
+    union xnn_f32_minmax_params
+        minmax_params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // GEMMINC: GEMM INCremental with Min+Max activation
 
@@ -1608,7 +1622,7 @@ typedef void (*xnn_f16_f32acc_rdsum_ukernel_fn)(
     const void* input,
     size_t input_stride,
     const void* zero,
-    void* output,
+    float* output,
     const union xnn_f16_f32acc_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_rdsum_ukernel_fn)(
@@ -1639,7 +1653,7 @@ typedef void (*xnn_f16_rsum_ukernel_fn)(
 typedef void (*xnn_f16_f32acc_rsum_ukernel_fn)(
     size_t batch,
     const void* input,
-    void* output,
+    float* output,
     const union xnn_f16_f32acc_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_rsum_ukernel_fn)(
@@ -2009,6 +2023,14 @@ typedef void (*xnn_f32_vtanh_ukernel_fn)(
     const float* input,
     float* output,
     const union xnn_f32_tanh_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+// VLOG: Vector Log elementwise
+
+typedef void (*xnn_f32_vlog_ukernel_fn)(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // LUT: vector LookUp Table elementwise
 
@@ -2633,6 +2655,9 @@ typedef size_t (*xnn_init_f32_lrelu_params_fn)(
   union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float slope);
 
+typedef size_t (*xnn_init_f32_log_params_fn)(
+  union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
+
 typedef size_t (*xnn_init_f32_relu_params_fn)(
   union xnn_f32_relu_params params[XNN_MIN_ELEMENTS(1)]);
 
@@ -2794,27 +2819,39 @@ struct xnn_gemm_config;
 // pack any extra data required using init_extra_data_fns. Accumulators are
 // initialized with accumulator_init.
 typedef void (*xnn_pack_weights_and_biases_fn)(
-  uint32_t flags,
-  const struct xnn_gemm_config* gemm_config,
-  size_t input_channels,
-  size_t output_channels,
-  size_t groups,
-  // We tile packing by output channels, in GIO layout, the k (row) index needs to be able to skip by the actual number
-  // of output channels, and not just the argument nc. E.g. if weights is 1x3x5, and nr is 2, we tile the packing by
-  // output channels, 2 + 2 + 1, with 3 calls to this packing function. In the first call nc == nr == 2, but to address
-  // the second row of k, we need to skip by 5 elements, not 2 (nc). So k_stride should be set to 5.
-  size_t k_stride,
-  size_t weights_stride,
-  const void* accumulator_init,
-  const void* weights,
-  xnn_init_scale_params_fn init_extra_data0_fn,
-  const void* extra_data0,
-  size_t extra_data0_element_size,
-  xnn_init_scale_params_fn init_extra_data1_fn,
-  const void* extra_data1,
-  size_t extra_data1_element_size,
-  void* packed_weights_ptr,
-  const void* params);
+    uint32_t flags,                             //
+    const struct xnn_gemm_config* gemm_config,  //
+    size_t input_channels,                      //
+    size_t output_channels,                     //
+    size_t groups,                              //
+    // We tile packing by output channels, in GIO layout, the k (row) index
+    // needs to be able to skip by the actual number of output channels, and not
+    // just the argument nc. E.g. if weights is 1x3x5, and nr is 2, we tile the
+    // packing by output channels, 2 + 2 + 1, with 3 calls to this packing
+    // function. In the first call nc == nr == 2, but to address the second row
+    // of k, we need to skip by 5 elements, not 2 (nc). So k_stride should be
+    // set to 5.
+    size_t k_stride,                               //
+    const void* accumulator_init,                  //
+    const void* weights,                           //
+    xnn_init_scale_params_fn init_extra_data0_fn,  //
+    const void* extra_data0,                       //
+    size_t extra_data0_element_size,               //
+    xnn_init_scale_params_fn init_extra_data1_fn,  //
+    const void* extra_data1,                       //
+    size_t extra_data1_element_size,               //
+    void* packed_weights_ptr,                      //
+    const void* params);
+
+// Computes the stride of the packing used by a corresponding
+// `xnn_pack_weights_and_biases_fn`. The `k_stride` parameter is provided for
+// our older packing functions, new wrappers should rely on `gemm_config` and
+// `k` instead.
+typedef size_t (*xnn_packed_stride_weights_and_biases_fn)(
+    const struct xnn_gemm_config* gemm_config,  //
+    size_t k,                                   //
+    size_t k_stride,                            //
+    size_t extra_bytes);
 
 typedef size_t (*xnn_init_f16_gavgpool_neon_params_fn)(
   union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],

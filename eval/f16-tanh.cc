@@ -14,7 +14,7 @@
 
 #include "math-evaluation-tester.h"
 
-#include <xnnpack/isa-checks.h>
+#include "xnnpack/isa-checks.h"
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64

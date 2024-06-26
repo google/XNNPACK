@@ -8,12 +8,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack.h>
-#include <xnnpack/allocation-type.h>
-#include <xnnpack/cache.h>
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/node-type.h>
+#include "xnnpack.h"
+#include "xnnpack/allocation-type.h"
+#include "xnnpack/cache.h"
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/node-type.h"
 
 #if defined(EMSCRIPTEN)
 #include <emscripten/emscripten.h>

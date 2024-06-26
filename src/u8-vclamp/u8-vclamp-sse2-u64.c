@@ -7,8 +7,8 @@
 
 #include <emmintrin.h>
 
-#include <xnnpack/unaligned.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/unaligned.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_u8_vclamp_ukernel__sse2_u64(

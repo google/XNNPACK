@@ -22,7 +22,11 @@ extern "C" {
 /// The caller must allocate at least this many extra bytes after the tensor data passed to XNNPACK.
 ///
 /// Note: XNNPACK reads, but never writes beyond array bounds.
+#if XNN_ARCH_HEXAGON
+#define XNN_EXTRA_BYTES 128
+#else
 #define XNN_EXTRA_BYTES 16
+#endif  // XNN_ARCH_HEXAGON
 
 /// Maximum number of dimensions in tensor shape.
 #define XNN_MAX_TENSOR_DIMS 6
@@ -92,7 +96,7 @@ extern "C" {
 /// The caller must allocate at least this many extra xnn_dynamic_quantization_params before passing the array to XNNPACK.
 ///
 /// Note: XNNPACK reads, but never writes beyond array bounds.
-#define XNN_EXTRA_QUANTIZATION_PARAMS 8
+#define XNN_EXTRA_QUANTIZATION_PARAMS 10
 
 struct xnn_dynamic_quantization_params {
   int32_t zero_point;
@@ -1686,6 +1690,19 @@ enum xnn_status xnn_define_hardswish(
 enum xnn_status xnn_define_leaky_relu(
   xnn_subgraph_t subgraph,
   float negative_slope,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
+/// Define a Log Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
+///                    shape must match the shape of the input tensor.
+/// @param flags - binary features of the Log Node. No supported flags are currently defined.
+enum xnn_status xnn_define_log(
+  xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
   uint32_t flags);
@@ -4744,6 +4761,23 @@ enum xnn_status xnn_create_leaky_relu_nc_qu8(
   uint32_t flags,
   xnn_operator_t* leaky_relu_op_out);
 
+enum xnn_status xnn_create_log_nc_f32(
+  uint32_t flags,
+  xnn_operator_t* log_op_out);
+
+enum xnn_status xnn_reshape_log_nc_f32(
+  xnn_operator_t log_op,
+  size_t batch_size,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_log_nc_f32(
+  xnn_operator_t log_op,
+  const float* input,
+  float* output);
+
 enum xnn_status xnn_reshape_leaky_relu_nc_qu8(
   xnn_operator_t leaky_relu_op,
   size_t batch_size,
@@ -4946,10 +4980,13 @@ enum xnn_status xnn_reshape_mean_nd_f16(
   const size_t* reduction_axes,
   size_t num_input_dims,
   const size_t* input_shape,
+  size_t* workspace_size,
+  size_t* workspace_alignment,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_mean_nd_f16(
   xnn_operator_t mean_op,
+  void* workspace,
   const void* input,
   void* output);
 

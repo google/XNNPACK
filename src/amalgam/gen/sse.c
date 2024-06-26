@@ -9,24 +9,24 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/avgpool.h>
-#include <xnnpack/common.h>
-#include <xnnpack/conv.h>
-#include <xnnpack/dwconv.h>
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/ibilinear.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/maxpool.h>
-#include <xnnpack/pavgpool.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/spmm.h>
-#include <xnnpack/transpose.h>
-#include <xnnpack/vbinary.h>
-#include <xnnpack/vmulcaddc.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/avgpool.h"
+#include "xnnpack/common.h"
+#include "xnnpack/conv.h"
+#include "xnnpack/dwconv.h"
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/ibilinear.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/maxpool.h"
+#include "xnnpack/pavgpool.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/spmm.h"
+#include "xnnpack/transpose.h"
+#include "xnnpack/vbinary.h"
+#include "xnnpack/vmulcaddc.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f32_avgpool_minmax_ukernel_9p8x__sse_c4(

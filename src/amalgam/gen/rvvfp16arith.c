@@ -7,5 +7,5 @@
 
 #include <riscv_vector.h>
 
-#include <xnnpack/vbinary.h>
+#include "xnnpack/vbinary.h"
 

@@ -199,6 +199,8 @@
   string: "Leaky ReLU (NC, QS8)"
 - name: xnn_operator_type_leaky_relu_nc_qu8
   string: "Leaky ReLU (NC, QU8)"
+- name: xnn_operator_type_log_nc_f32
+  string: "Log (NC, F32)"
 - name: xnn_operator_type_max_pooling_nhwc_f16
   string: "Max Pooling (NHWC, F16)"
 - name: xnn_operator_type_max_pooling_nhwc_f32

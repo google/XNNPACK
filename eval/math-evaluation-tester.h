@@ -7,7 +7,7 @@
 
 #include <cmath>
 
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/math-stubs.h"
 
 
 class MathEvaluationTester {

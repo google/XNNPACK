@@ -12,8 +12,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/packw.h>
+#include "xnnpack/math.h"
+#include "xnnpack/packw.h"
 
 
 

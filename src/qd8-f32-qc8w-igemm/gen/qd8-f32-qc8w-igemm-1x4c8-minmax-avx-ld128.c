@@ -15,8 +15,8 @@
   #include <x86intrin.h>
 #endif
 
-#include <xnnpack/igemm.h>
-#include <xnnpack/math.h>
+#include "xnnpack/igemm.h"
+#include "xnnpack/math.h"
 
 
 void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4c8__avx_ld128(

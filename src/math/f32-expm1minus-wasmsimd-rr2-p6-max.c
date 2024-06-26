@@ -8,7 +8,7 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/math-stubs.h"
 
 
 void xnn_math_f32_expm1minus__wasmsimd_rr2_p6_max(

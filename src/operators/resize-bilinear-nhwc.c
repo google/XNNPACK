@@ -10,18 +10,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <xnnpack.h>
-#include <xnnpack/allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/compute.h>
-#include <xnnpack/config.h>
-#include <xnnpack/indirection.h>
-#include <xnnpack/log.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/operator-type.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/params.h>
+#include "xnnpack.h"
+#include "xnnpack/allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/compute.h"
+#include "xnnpack/config.h"
+#include "xnnpack/indirection.h"
+#include "xnnpack/log.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/operator-type.h"
+#include "xnnpack/operator.h"
+#include "xnnpack/params.h"
 
 #include "pthreadpool.h"
 
