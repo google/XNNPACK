@@ -72,7 +72,11 @@ extern "C" {
   #endif
 #endif
 
-XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_debug(const char* format, ...) {
+#define xnn_log_debug(format, ...)                                             \
+  xnn_log_debug_(format " (%s, %s:%i)", ##__VA_ARGS__, __FUNCTION__, __FILE__, \
+                 __LINE__)
+
+XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_debug_(const char* format, ...) {
   #if XNN_LOG_LEVEL >= XNN_LOG_DEBUG
     va_list args;
     va_start(args, format);
@@ -81,7 +85,11 @@ XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_debug(const char* format, ..
   #endif
 }
 
-XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_info(const char* format, ...) {
+#define xnn_log_info(format, ...)                                             \
+  xnn_log_info_(format " (%s, %s:%i)", ##__VA_ARGS__, __FUNCTION__, __FILE__, \
+                __LINE__)
+
+XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_info_(const char* format, ...) {
   #if XNN_LOG_LEVEL >= XNN_LOG_INFO
     va_list args;
     va_start(args, format);
@@ -90,7 +98,11 @@ XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_info(const char* format, ...
   #endif
 }
 
-XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_warning(const char* format, ...) {
+#define xnn_log_warning(format, ...)                                   \
+  xnn_log_warning_(format " (%s, %s:%i)", ##__VA_ARGS__, __FUNCTION__, \
+                   __FILE__, __LINE__)
+
+XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_warning_(const char* format, ...) {
   #if XNN_LOG_LEVEL >= XNN_LOG_WARNING
     va_list args;
     va_start(args, format);
@@ -99,7 +111,11 @@ XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_warning(const char* format, 
   #endif
 }
 
-XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_error(const char* format, ...) {
+#define xnn_log_error(format, ...)                                             \
+  xnn_log_error_(format " (%s, %s:%i)", ##__VA_ARGS__, __FUNCTION__, __FILE__, \
+                 __LINE__)
+
+XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_error_(const char* format, ...) {
   #if XNN_LOG_LEVEL >= XNN_LOG_ERROR
     va_list args;
     va_start(args, format);
@@ -108,7 +124,11 @@ XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_error(const char* format, ..
   #endif
 }
 
-XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_fatal(const char* format, ...) {
+#define xnn_log_fatal(format, ...)                                             \
+  xnn_log_fatal_(format " (%s, %s:%i)", ##__VA_ARGS__, __FUNCTION__, __FILE__, \
+                 __LINE__)
+
+XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_fatal_(const char* format, ...) {
   #if XNN_LOG_LEVEL >= XNN_LOG_FATAL
     va_list args;
     va_start(args, format);
