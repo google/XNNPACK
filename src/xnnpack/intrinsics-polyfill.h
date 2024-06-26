@@ -272,6 +272,10 @@ uint8x16x4_t vld1q_u8_x4(const uint8_t* address) {
 #include <hvx_hexagon_protos.h>
 #include <hexagon_types.h>
 
+// Conditional Store:
+// - addr: destination
+// - n: number of elements * sizeof(datatype) where n <= 128
+// - vin: input
 static XNN_INTRINSIC
 void Q6_V_vstu_variable(void *addr, uint32_t n, HVX_Vector vin)
 {
@@ -295,8 +299,11 @@ void Q6_V_vstu_variable(void *addr, uint32_t n, HVX_Vector vin)
     Q6_vmem_QnRIV(ql_not, (HVX_Vector*) addr, vin);
 }
 
-// 32x16 signed integer multiply:
-// vout is in HVX_VectorPair format, keeping the same order as vin.
+// 32x16 Integer Multiplication:
+// - multiplier: 32-bit integer
+// - vin: 16-bit signed integer
+// - Return 'HVX_VectorPair' keeping the same order as vin
+//   but with elements widened to 32-bit.
 static XNN_INTRINSIC
 HVX_VectorPair Q6_Vw_vmpyi_VwVh(HVX_Vector multiplier, HVX_Vector vin)
 {
@@ -307,7 +314,13 @@ HVX_VectorPair Q6_Vw_vmpyi_VwVh(HVX_Vector multiplier, HVX_Vector vin)
     return Q6_W_vshuff_VVR(mul_o, mul_e, -4);
 }
 
-// 32x16 integer multiply of even elements in vin.
+// 32x16 Integer Multiplication of even elements in the 'vin':
+// multiplier_hi: upper part of 32-bit integer multiplier
+// multiplier_lo: lower part of 32-bit integer multiplier
+// vin: 16-bit signed integer
+// - Return 'vout' in the HVX_Vector format,
+//   containing only the multiplication results of the even elements from 'vin' and
+//   widened to 32-bit.
 static XNN_INTRINSIC
 HVX_Vector Q6_Vw_vmpyie_VwVh(HVX_Vector multiplier_lo, HVX_Vector multiplier_hi, HVX_Vector vin)
 {
@@ -317,4 +330,41 @@ HVX_Vector Q6_Vw_vmpyie_VwVh(HVX_Vector multiplier_lo, HVX_Vector multiplier_hi,
 
     return vout;
 }
-#endif  // Hexagon
+
+// Vector Muliply-Add
+// vin1 - vin3: 32-bit float
+// vout = vin1 + (vin2 * vin3)
+// vout: 32-bit float
+static XNN_INTRINSIC
+HVX_Vector Q6_Vsf_vmpyadd_VsfVsf(HVX_Vector vin1, HVX_Vector vin2, HVX_Vector vin3)
+{
+    HVX_Vector vout = Q6_Vsf_vmpy_VsfVsf(vin1, vin2);
+    vout = Q6_Vsf_vadd_VsfVsf(vout, vin3);
+    return vout;
+}
+
+// Horizontal addition by pairwise addition.
+// To calculate less number of elements than 32 in vin, use
+//   vin = Q6_V_vand_QV(Q6_Q_vsetq_R(batch), vin);
+// before calling this intrinsic.
+static XNN_INTRINSIC
+float Q6_f32_vrsum_Vsf(HVX_Vector vin){
+    HVX_VectorPair vsum_pair = Q6_W_vshuff_VVR(vin, vin, 64);
+    vin = Q6_Vsf_vadd_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
+
+    vsum_pair = Q6_W_vshuff_VVR(vin, vin, 32);
+    vin = Q6_Vsf_vadd_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
+
+    vsum_pair = Q6_W_vshuff_VVR(vin, vin, 16);
+    vin = Q6_Vsf_vadd_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
+
+    vsum_pair = Q6_W_vshuff_VVR(vin, vin, 8);
+    vin = Q6_Vsf_vadd_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
+
+    vsum_pair = Q6_W_vshuff_VVR(vin, vin, 4);
+    vin = Q6_Vsf_vadd_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
+
+    return *((float *) &vin);
+}
+
+#endif  // XNN_ARCH_HEXAGON
