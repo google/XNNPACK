@@ -5,8 +5,11 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 # Bazel rule definitions
 http_archive(
     name = "rules_cc",
-    strip_prefix = "rules_cc-main",
-    urls = ["https://github.com/bazelbuild/rules_cc/archive/main.zip"],
+    sha256 = "3868eab488bd5be37a6acedbd222a196bea14408a2857916f33cce7b4780897d",
+    strip_prefix = "rules_cc-5e848c1434d3458018734238dbc4781f43992ea5",
+    urls = [
+        "https://github.com/bazelbuild/rules_cc/archive/5e848c1434d3458018734238dbc4781f43992ea5.zip",
+    ],
 )
 
 # Bazel Python rule definitions.
@@ -93,7 +96,7 @@ http_archive(
     sha256 = "a615cac78fad03952cc3e1fd231ce789a8df6e81a5957b64350cb8200364b385",
     strip_prefix = "cpuinfo-d6860c477c99f1fce9e28eb206891af3c0e1a1d7",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/d6860c477c99f1fce9e28eb206891af3c0e1a1d7.zip"
+        "https://github.com/pytorch/cpuinfo/archive/d6860c477c99f1fce9e28eb206891af3c0e1a1d7.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadCpuinfo.cmake)
@@ -105,7 +108,7 @@ http_archive(
     sha256 = "39b26d8840ec719afaa480b0622a77952d0f22dbb8e8ba58ec9f93e39895a205",
     strip_prefix = "kleidiai-1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53",
     urls = [
-        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53/kleidiai-1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53.zip"
+        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53/kleidiai-1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadKleidiAI.cmake)
