@@ -136,6 +136,18 @@ tools/xngen src/f32-raddstoreexpminusmax/wasmsimd-rr2-p5.c.in -D BATCH_TILE=20 -
 tools/xngen src/f32-raddstoreexpminusmax/wasmsimd-rr2-p5.c.in -D BATCH_TILE=20 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmrelaxedsimd-rr2-p5-u20-acc2.c &
 tools/xngen src/f32-raddstoreexpminusmax/wasmsimd-rr2-p5.c.in -D BATCH_TILE=20 -D ACCUMULATORS=5 -D FMA=1 -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmrelaxedsimd-rr2-p5-u20-acc5.c &
 
+################################## Hexagon HVX ##################################
+tools/xngen src/f32-raddstoreexpminusmax/hvx-rr2-p5.c.in -D BATCH_TILE=32 -D ACCUMULATORS=1 -D -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-hvx-rr2-p5-u32.c &
+tools/xngen src/f32-raddstoreexpminusmax/hvx-rr2-p5.c.in -D BATCH_TILE=64 -D ACCUMULATORS=1 -D -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-hvx-rr2-p5-u64.c &
+tools/xngen src/f32-raddstoreexpminusmax/hvx-rr2-p5.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -D -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-hvx-rr2-p5-u64-acc2.c &
+tools/xngen src/f32-raddstoreexpminusmax/hvx-rr2-p5.c.in -D BATCH_TILE=96 -D ACCUMULATORS=1 -D -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-hvx-rr2-p5-u96.c &
+tools/xngen src/f32-raddstoreexpminusmax/hvx-rr2-p5.c.in -D BATCH_TILE=96 -D ACCUMULATORS=2 -D -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-hvx-rr2-p5-u96-acc2.c &
+tools/xngen src/f32-raddstoreexpminusmax/hvx-rr2-p5.c.in -D BATCH_TILE=96 -D ACCUMULATORS=3 -D -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-hvx-rr2-p5-u96-acc3.c &
+tools/xngen src/f32-raddstoreexpminusmax/hvx-rr2-p5.c.in -D BATCH_TILE=128 -D ACCUMULATORS=1 -D -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-hvx-rr2-p5-u128.c &
+tools/xngen src/f32-raddstoreexpminusmax/hvx-rr2-p5.c.in -D BATCH_TILE=128 -D ACCUMULATORS=2 -D -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-hvx-rr2-p5-u128-acc2.c &
+tools/xngen src/f32-raddstoreexpminusmax/hvx-rr2-p5.c.in -D BATCH_TILE=128 -D ACCUMULATORS=3 -D -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-hvx-rr2-p5-u128-acc3.c &
+tools/xngen src/f32-raddstoreexpminusmax/hvx-rr2-p5.c.in -D BATCH_TILE=128 -D ACCUMULATORS=4 -D -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-hvx-rr2-p5-u128-acc4.c &
+
 ################################### Scalar ####################################
 tools/xngen src/f32-raddstoreexpminusmax/scalar-rr2-p5.c.in -D BATCH_TILE=1 -D ACCUMULATORS=1 -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-scalar-rr2-p5-u1.c &
 tools/xngen src/f32-raddstoreexpminusmax/scalar-rr2-p5.c.in -D BATCH_TILE=2 -D ACCUMULATORS=1 -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-scalar-rr2-p5-u2.c &

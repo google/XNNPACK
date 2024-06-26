@@ -331,6 +331,9 @@ HVX_Vector Q6_Vw_vmpyie_VwVh(HVX_Vector multiplier_lo, HVX_Vector multiplier_hi,
     return vout;
 }
 
+// Temporary div implementation for HVX.
+// TODO: improve the implementation 
+//       e.g., use reprocical with newton-raphson approximation
 static XNN_INTRINSIC
 HVX_Vector Q6_Vsf_vdiv_VsfVsf(HVX_Vector vin1, HVX_Vector vin2){
     float* svin1 = (float *) &vin1;
@@ -341,4 +344,28 @@ HVX_Vector Q6_Vsf_vdiv_VsfVsf(HVX_Vector vin1, HVX_Vector vin2){
 
     return *((HVX_UVector *) svin1);
 }
-#endif  // Hexagon
+
+// Horizontal addition by pairwise addition.
+// To calculate less number of elements than 32 in vin, use
+//   vin = Q6_V_vand_QV(Q6_Q_vsetq_R(batch), vin);
+// before calling this intrinsic.
+static XNN_INTRINSIC
+float Q6_f32_vrsum_Vsf(HVX_Vector vin){
+    HVX_VectorPair vsum_pair = Q6_W_vshuff_VVR(vin, vin, 64);
+    vin = Q6_Vsf_vadd_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
+
+    vsum_pair = Q6_W_vshuff_VVR(vin, vin, 32);
+    vin = Q6_Vsf_vadd_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
+
+    vsum_pair = Q6_W_vshuff_VVR(vin, vin, 16);
+    vin = Q6_Vsf_vadd_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
+
+    vsum_pair = Q6_W_vshuff_VVR(vin, vin, 8);
+    vin = Q6_Vsf_vadd_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
+
+    vsum_pair = Q6_W_vshuff_VVR(vin, vin, 4);
+    vin = Q6_Vsf_vadd_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
+
+    return *((float *) &vin);
+}
+#endif  // XNN_ARCH_HEXAGON
