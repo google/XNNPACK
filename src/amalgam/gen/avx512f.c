@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include "xnnpack/simd/f32-avx512f.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -21,6 +20,7 @@
 #include "xnnpack/prefetch.h"
 #include "xnnpack/prelu.h"
 #include "xnnpack/reduce.h"
+#include "xnnpack/simd/f32-avx512f.h"
 #include "xnnpack/vbinary.h"
 #include "xnnpack/vunary.h"
 

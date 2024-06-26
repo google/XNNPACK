@@ -5,7 +5,6 @@
 
 #include <assert.h>
 #include <math.h>
-#include "xnnpack/simd/f32-neon.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -33,6 +32,7 @@
 #include "xnnpack/prelu.h"
 #include "xnnpack/raddstoreexpminusmax.h"
 #include "xnnpack/reduce.h"
+#include "xnnpack/simd/f32-neon.h"
 #include "xnnpack/spmm.h"
 #include "xnnpack/transpose.h"
 #include "xnnpack/unpool.h"

@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include "xnnpack/simd/f32-sse2.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -28,6 +27,7 @@
 #include "xnnpack/prelu.h"
 #include "xnnpack/raddstoreexpminusmax.h"
 #include "xnnpack/reduce.h"
+#include "xnnpack/simd/f32-sse2.h"
 #include "xnnpack/transpose.h"
 #include "xnnpack/unaligned.h"
 #include "xnnpack/unpool.h"

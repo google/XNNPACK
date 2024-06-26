@@ -5,7 +5,6 @@
 
 #include <assert.h>
 #include <math.h>
-#include "xnnpack/simd/f32-fma3.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -20,6 +19,7 @@
 #include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/prefetch.h"
+#include "xnnpack/simd/f32-fma3.h"
 #include "xnnpack/unaligned.h"
 #include "xnnpack/vmulcaddc.h"
 #include "xnnpack/vunary.h"
