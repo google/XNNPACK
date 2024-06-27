@@ -532,7 +532,7 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
     size_t nr_block_start = 0;
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      int32_t* packed_b = (int32_t*) packed_weights;
+      float* packed_b = (float*) packed_weights;
       packed_weights = (float*) packed_weights + nr_block_size;
       packed_weights = (float*) packed_weights + (nr - nr_block_size);
 
