@@ -1358,9 +1358,9 @@ void pack_weights_and_biases(uint32_t flags,                                 //
                                        group * n_stride * weights_stride);
       void* weights = (void*)((uintptr_t)packed_group_ptr +
                               nr * (weights_stride - extra_bytes));
-      void* extra_data_ptr =
-          (void*)((uintptr_t)extra_data1 +
-                  extra_data1_element_size * output_channels * group);
+      const float* extra_data_ptr =
+          (const float*)((uintptr_t)extra_data1 +
+                         extra_data1_element_size * output_channels * group);
       init_extra_data1_fn(output_channels, nr, nr, nr * weights_stride,
                           nr * weights_stride, 0, extra_data_ptr, weights);
     }
