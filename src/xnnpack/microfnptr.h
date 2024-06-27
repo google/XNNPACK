@@ -74,6 +74,19 @@ typedef void (*xnn_dqgemm_ukernel_fn)(
     const void* params,
     const struct xnn_qd8_quantization_params* quantization_params);
 
+typedef void (*xnn_dqgemm_bl_ukernel_fn)(
+    size_t mr,
+    size_t nr,
+    size_t k,
+    const void* a,
+    size_t a_stride,
+    const void* w,
+    void* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const void* params,
+    const struct xnn_qd8_quantization_params* quantization_params);
+
 typedef void (*xnn_f32_gemm_ukernel_fn)(
     size_t mr,
     size_t nr,
@@ -1423,6 +1436,23 @@ typedef void (*xnn_packw_gemm_goi_ukernel_fn)(
     const void* scale,
     void* packed_weights,
     size_t extra_bytes,
+    const void* params);
+
+// TODO - Colsolidate packing w/ per_channel and blockwise quant
+typedef void (*xnn_packw_gemm_goi_bl_ukernel_fn)(
+    size_t g,
+    size_t nc,
+    size_t kc,
+    size_t nr,
+    size_t kr,
+    size_t sr,
+    size_t bl,
+    const void* k,
+    const void* b,
+    const void* scale,
+    void* packed_weights,
+    size_t extra_bytes_bl,
+    size_t extra_bytes_n,
     const void* params);
 
 typedef void (*xnn_x8_packw_gemm_goi_ukernel_fn)(
@@ -2990,6 +3020,13 @@ struct xnn_hmp_dqgemm_ukernel {
 #endif  // XNN_PLATFORM_JIT
 };
 
+struct xnn_hmp_dqgemm_bl_ukernel {
+  xnn_dqgemm_bl_ukernel_fn function[XNN_MAX_UARCH_TYPES];
+#if XNN_PLATFORM_JIT
+  struct xnn_generated_code_chunk generated_code_chunk[XNN_MAX_UARCH_TYPES];
+#endif  // XNN_PLATFORM_JIT
+};
+
 struct xnn_hmp_gemm_ukernel {
   xnn_gemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
 #if XNN_PLATFORM_JIT
@@ -3027,6 +3064,7 @@ struct gemm_fused_ukernels {
     struct xnn_hmp_gemm_ukernel gemm[XNN_MAX_MR];
     struct xnn_hmp_dqgemm_ukernel dqgemm[XNN_MAX_MR];
     struct xnn_hmp_qp8gemm_ukernel qp8gemm[XNN_MAX_MR];
+    struct xnn_hmp_dqgemm_bl_ukernel dqgemm_bl[XNN_MAX_MR];
   };
   union {
     struct xnn_hmp_igemm_ukernel igemm[XNN_MAX_MR];

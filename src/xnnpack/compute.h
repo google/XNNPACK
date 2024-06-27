@@ -331,6 +331,7 @@ struct gemm_context {
     struct xnn_hmp_gemm_ukernel ukernel;
     struct xnn_hmp_dqgemm_ukernel dq_ukernel;
     struct xnn_hmp_qp8gemm_ukernel qp8_ukernel;
+    struct xnn_hmp_dqgemm_bl_ukernel dq_bl_ukernel;
   };
   // Parameters for dynamically quantized inputs.
   const struct xnn_qd8_quantization_params* quantization_params;
@@ -364,6 +365,13 @@ struct gemm_context {
       size_t nr_block_size);
 
   XNN_PRIVATE void xnn_compute_gemm(
+      const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t mr_block_start,
+      size_t nr_block_start,
+      size_t mr_block_size,
+      size_t nr_block_size);
+    
+  XNN_PRIVATE void xnn_compute_dqgemm_bl(
       const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t mr_block_start,
       size_t nr_block_start,
@@ -405,7 +413,15 @@ struct gemm_context {
         const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
         uint32_t uarch_index, size_t mr_block_start, size_t nr_block_start,
         size_t mr_block_size, size_t nr_block_size);
-#endif  // XNN_MAX_UARCH_TYPES > 1
+      
+    XNN_PRIVATE void xnn_compute_hmp_dqgemm_bl(
+        const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+        uint32_t uarch_index,
+        size_t mr_block_start,
+        size_t nr_block_start,
+        size_t mr_block_size,
+        size_t nr_block_size);
+  #endif  // XNN_MAX_UARCH_TYPES > 1
 #endif
 
     // Context for Sparse Matrix-Dense Matrix Multiplication.

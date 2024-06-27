@@ -181,6 +181,8 @@ struct xnn_operator {
   void* output;
   const void* quantization_params;
 
+  size_t k_block_size;
+
   union {
     // Pointer to allocated packed weights. Use this if weights_cache is NULL.
     void* pointer;
@@ -263,6 +265,7 @@ struct xnn_operator {
     union xnn_f16_chw_params f16_chw;
     union xnn_f32_chw_params f32_chw;
     union xnn_f32_f16_cvt_params f32_f16_cvt;
+    union xnn_f32_qb4w_minmax_params f32_qb4w_minmax;
     union xnn_f32_qc4w_minmax_params f32_qc4w_minmax;
     union xnn_f32_qs8_cvt_params f32_qs8_cvt;
     union xnn_f32_qu8_cvt_params f32_qu8_cvt;
