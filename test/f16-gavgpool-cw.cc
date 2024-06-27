@@ -8,10 +8,10 @@
 //   Generator: tools/generate-gavgpool-cw-test.py
 
 
-#include <xnnpack/common.h>
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/microparams-init.h>
+#include "xnnpack/common.h"
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/microparams-init.h"
 
 #include "gavgpool-cw-microkernel-tester.h"
 #include <gtest/gtest.h>

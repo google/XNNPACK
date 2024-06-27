@@ -11,10 +11,10 @@
 
 #include <arm_acle.h>
 
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/unaligned.h>
-#include <xnnpack/vcvt.h>
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/unaligned.h"
+#include "xnnpack/vcvt.h"
 
 
 void xnn_qs8_vcvt_ukernel__armsimd32_u8(

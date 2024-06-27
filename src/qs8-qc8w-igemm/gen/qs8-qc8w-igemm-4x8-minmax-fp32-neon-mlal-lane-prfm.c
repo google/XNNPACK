@@ -12,9 +12,9 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/prefetch.h>
+#include "xnnpack/common.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/prefetch.h"
 
 
 void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x8__neon_mlal_lane_prfm(

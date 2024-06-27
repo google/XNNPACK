@@ -50,5 +50,5 @@ tools/generate-rdsum-benchmark.py  --spec test/qs8-rdsum-minmax-fp32.yaml --outp
 tools/generate-rdsum-benchmark.py  --spec test/f16-rsum.yaml --output bench/f16-rsum.cc &
 tools/generate-rdsum-benchmark.py  --spec test/f16-f32acc-rsum.yaml --output bench/f16-f32acc-rsum.cc &
 tools/generate-rdsum-benchmark.py  --spec test/f32-rsum.yaml --output bench/f32-rsum.cc &
-tools/generate-rdsum-benchmark.py  --spec test/qs8-rsum-minmax-fp32.yaml --output bench/qs8-rsum-minmax-fp32.cc &
+tools/generate-rdsum-benchmark.py  --spec test/qs8-rsum.yaml --output bench/qs8-rsum.cc &
 wait

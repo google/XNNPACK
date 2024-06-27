@@ -11,9 +11,9 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/reduce.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/reduce.h"
 
 void xnn_qs8_rsum_minmax_fp32_ukernel__neon_u16_acc2(
     size_t batch,

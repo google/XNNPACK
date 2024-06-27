@@ -11,8 +11,8 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vcvt.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vcvt.h"
 
 
 void xnn_qs8_vlrelu_ukernel__wasmsimd_x86_u32(

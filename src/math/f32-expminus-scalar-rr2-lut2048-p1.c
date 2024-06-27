@@ -6,9 +6,9 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/math-stubs.h"
 
 
 // Table of exp2(k / 2048) values decremented (as integer) by (k << 12), k = 0..2048

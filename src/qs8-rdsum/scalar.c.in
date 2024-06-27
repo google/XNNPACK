@@ -6,9 +6,9 @@
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/reduce.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/reduce.h"
 
 
 $CHANNELS_BATCH = 4

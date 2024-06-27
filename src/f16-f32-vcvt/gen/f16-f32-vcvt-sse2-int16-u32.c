@@ -11,8 +11,8 @@
 
 #include <emmintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vcvt.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vcvt.h"
 
 
 void xnn_f16_f32_vcvt_ukernel__sse2_int16_u32(

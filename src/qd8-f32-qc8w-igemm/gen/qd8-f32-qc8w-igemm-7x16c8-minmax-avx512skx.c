@@ -11,9 +11,9 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/igemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
+#include "xnnpack/igemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
 
 
 void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c8__avx512skx(

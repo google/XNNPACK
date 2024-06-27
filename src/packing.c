@@ -10,15 +10,15 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include <xnnpack.h>
-#include <xnnpack/common.h>
-#include <xnnpack/config-types.h>
-#include <xnnpack/log.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
+#include "xnnpack/config-types.h"
+#include "xnnpack/log.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/operator.h"
+#include "xnnpack/pack.h"
+#include "xnnpack/unaligned.h"
 
 #if XNN_ENABLE_KLEIDIAI
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qsu4cxs1s0.h"

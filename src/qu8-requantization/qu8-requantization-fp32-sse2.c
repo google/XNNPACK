@@ -12,7 +12,7 @@
 
 #include <emmintrin.h>
 
-#include <xnnpack/requantization-stubs.h>
+#include "xnnpack/requantization-stubs.h"
 
 
 void xnn_qu8_requantize_fp32__sse2(

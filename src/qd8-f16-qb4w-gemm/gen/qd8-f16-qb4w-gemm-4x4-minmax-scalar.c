@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/gemm.h>
-#include <xnnpack/math.h>
+#include "xnnpack/gemm.h"
+#include "xnnpack/math.h"
 #include <fp16/fp16.h>
 
 

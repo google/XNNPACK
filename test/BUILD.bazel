@@ -7,6 +7,8 @@ load(
     "//:build_defs.bzl",
     "xnnpack_binary",
     "xnnpack_cc_library",
+    "xnnpack_simd_archs",
+    "xnnpack_simd_copts_for_arch",
     "xnnpack_test_deps_for_library",
     "xnnpack_unit_test",
 )
@@ -145,6 +147,21 @@ xnnpack_cc_library(
     hdrs = ["packq-microkernel-tester.h"],
     deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library(),
 )
+
+######################### Unit tests for simd wrappers #########################
+[xnnpack_unit_test(
+    name = "f32_simd_" + arch + "_test",
+    srcs = [
+        "f32-simd-" + arch + ".cc",
+    ],
+    copts = xnnpack_simd_copts_for_arch(arch),
+    deps = [
+        ":replicable_random_device",
+        "//:common",
+        "//:isa_checks",
+        "//:microkernels_h",
+    ],
+) for arch in xnnpack_simd_archs()]
 
 ######################### Unit tests for micro-kernels #########################
 
@@ -322,7 +339,7 @@ xnnpack_cc_library(
     "f16_rsum",
     "f16_f32acc_rsum",
     "f32_rsum",
-    "qs8_rsum_minmax_fp32",
+    "qs8_rsum",
 ]]
 
 [xnnpack_unit_test(

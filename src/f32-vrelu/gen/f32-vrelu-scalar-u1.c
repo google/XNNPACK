@@ -9,9 +9,9 @@
 
 #include <assert.h>
 
-#include <xnnpack/vunary.h>
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
+#include "xnnpack/vunary.h"
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
 
 void xnn_f32_vrelu_ukernel__scalar_u1(
     size_t batch,

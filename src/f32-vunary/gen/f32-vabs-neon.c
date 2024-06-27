@@ -11,12 +11,12 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include <simd/f32-neon.h>
+#include "xnnpack/simd/f32-neon.h"
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/vunary.h>
-#include <xnnpack/microparams.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/vunary.h"
+#include "xnnpack/microparams.h"
 
 
 void xnn_f32_vabs_ukernel__neon_u4(

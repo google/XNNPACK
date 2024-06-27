@@ -8,7 +8,7 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/math-stubs.h"
 
 
 void xnn_math_f16_sigmoid__aarch64_neonfp16arith_rr2_p3_div(

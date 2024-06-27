@@ -10,8 +10,8 @@
 #include <cstddef>
 #include <vector>
 
-#include <xnnpack.h>
-#include <xnnpack/normalization.h>
+#include "xnnpack.h"
+#include "xnnpack/normalization.h"
 
 #include <gtest/gtest.h>
 

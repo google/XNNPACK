@@ -15,13 +15,13 @@
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
-#include <xnnpack.h>
-#include <xnnpack/config.h>
-#include <xnnpack/dwconv.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/models.h>
-#include <xnnpack/params.h>
+#include "xnnpack.h"
+#include "xnnpack/config.h"
+#include "xnnpack/dwconv.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/models.h"
+#include "xnnpack/params.h"
 
 
 static void DWConvEnd2EndBenchmark(

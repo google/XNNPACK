@@ -11,9 +11,9 @@
 
 #include <xmmintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/vbinary.h"
 
 
 void xnn_f32_vmulc_minmax_ukernel__sse_u8(

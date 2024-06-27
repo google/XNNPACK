@@ -11,10 +11,10 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_f16_f32acc_rsum_ukernel__f16c_u32_acc4(

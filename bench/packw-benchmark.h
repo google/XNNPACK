@@ -12,10 +12,10 @@
 #include "bench/bgemm.h"
 #include "bench/utils.h"
 
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/packw.h>
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/pack.h"
+#include "xnnpack/packw.h"
 
 
 static void x8_packw(benchmark::State& state,

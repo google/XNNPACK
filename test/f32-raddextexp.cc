@@ -10,10 +10,10 @@
 
 #include <gtest/gtest.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
+#include "xnnpack/common.h"
+#include "xnnpack/isa-checks.h"
 
-#include <xnnpack/raddextexp.h>
+#include "xnnpack/raddextexp.h"
 #include "raddextexp-microkernel-tester.h"
 
 

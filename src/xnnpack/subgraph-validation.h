@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <xnnpack.h>
-#include <xnnpack/subgraph.h>
+#include "xnnpack.h"
+#include "xnnpack/subgraph.h"
 
 #ifdef __cplusplus
 extern "C" {

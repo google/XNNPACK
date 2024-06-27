@@ -13,7 +13,7 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/dwconv.h>
+#include "xnnpack/dwconv.h"
 
 
 void xnn_f32_dwconv_minmax_ukernel_5f5m5l32c16s1r__avx512f_acc2(

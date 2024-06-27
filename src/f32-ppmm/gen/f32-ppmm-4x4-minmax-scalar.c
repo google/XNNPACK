@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/ppmm.h>
+#include "xnnpack/math.h"
+#include "xnnpack/ppmm.h"
 
 
 void xnn_f32_ppmm_minmax_ukernel_4x4__scalar(

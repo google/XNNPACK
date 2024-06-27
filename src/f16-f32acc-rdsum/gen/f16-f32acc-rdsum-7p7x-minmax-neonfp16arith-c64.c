@@ -11,9 +11,9 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/math.h>
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/math.h"
 
 
 void xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_c64(

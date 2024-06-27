@@ -8,7 +8,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include <xnnpack/avgpool.h>
+#include "xnnpack/avgpool.h"
 #include <riscv_vector.h>
 
 void xnn_f32_avgpool_minmax_ukernel_9x__rvv_c2v(

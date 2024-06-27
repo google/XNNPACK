@@ -1748,10 +1748,10 @@ def main(args):
 //   Generator: {generator}
 
 
-#include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/maxpool.h>
-#include <xnnpack/microparams-init.h>
+#include "xnnpack/common.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/maxpool.h"
+#include "xnnpack/microparams-init.h"
 
 #include "maxpool-microkernel-tester.h"
 #include <gtest/gtest.h>

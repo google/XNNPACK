@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/dwconv.h>
-#include <xnnpack/math.h>
+#include "xnnpack/dwconv.h"
+#include "xnnpack/math.h"
 
 void xnn_qu8_dwconv_minmax_rndnu_ukernel_5f5m5l32c8s8r__neon_mul8(
     size_t channels,

@@ -10,8 +10,8 @@
 #include <assert.h>
 #include <math.h>
 
-#include <xnnpack/dwconv.h>
-#include <xnnpack/math.h>
+#include "xnnpack/dwconv.h"
+#include "xnnpack/math.h"
 
 
 void xnn_qu8_dwconv_minmax_fp32_ukernel_9p4c__scalar_lrintf(

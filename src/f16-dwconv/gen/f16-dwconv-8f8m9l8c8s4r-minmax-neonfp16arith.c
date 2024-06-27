@@ -13,8 +13,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/dwconv.h>
-#include <xnnpack/math.h>
+#include "xnnpack/dwconv.h"
+#include "xnnpack/math.h"
 
 
 void xnn_f16_dwconv_minmax_ukernel_8f8m9l8c8s4r__neonfp16arith(

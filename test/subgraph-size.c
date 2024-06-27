@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 
-#include <xnnpack.h>
+#include "xnnpack.h"
 
 
 // A dummy program that calls every Subgraph API function in XNNPACK, for size estimation.

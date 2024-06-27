@@ -15,10 +15,10 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_u48(

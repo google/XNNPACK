@@ -116,6 +116,7 @@ VERIFICATION_IGNORE_SUBDIRS = {
     os.path.join('src', 'math', 'gen'),
     os.path.join('src', 'qs8-requantization'),
     os.path.join('src', 'qu8-requantization'),
+    os.path.join('src', 'xnnpack', 'simd'),
 }
 
 AMALGAMATION_HEADER = """\
@@ -127,17 +128,17 @@ AMALGAMATION_HEADER = """\
 """
 
 UNWANTED_INCLUDES = (
-    'arm_acle.h',
-    'arm_fp16.h',
-    'arm_neon.h',
-    'emmintrin.h',
-    'immintrin.h',
-    'nmmintrin.h',
-    'smmintrin.h',
-    'tmmintrin.h',
-    'xmmintrin.h',
-    'riscv_vector.h',
-    'wasm_simd128.h',
+    '<arm_acle.h>',
+    '<arm_fp16.h>',
+    '<arm_neon.h>',
+    '<emmintrin.h>',
+    '<immintrin.h>',
+    '<nmmintrin.h>',
+    '<smmintrin.h>',
+    '<tmmintrin.h>',
+    '<xmmintrin.h>',
+    '<riscv_vector.h>',
+    '<wasm_simd128.h>',
 )
 
 parser = argparse.ArgumentParser(
@@ -160,7 +161,7 @@ def human_sort_key(text):
 
 
 def _discard(l, val):
-  if val in l:
+  while val in l:
     l.remove(val)
 
 
@@ -205,7 +206,7 @@ def amalgamate_microkernel_sources(source_paths, include_header):
 
   # Single-line sequences for intrinsics with a standardized header
   for filename in UNWANTED_INCLUDES:
-    _discard(amalgam_includes, f'#include <{filename}>')
+    _discard(amalgam_includes, f'#include {filename}')
 
   amalgam_text = AMALGAMATION_HEADER
 
@@ -215,7 +216,7 @@ def amalgamate_microkernel_sources(source_paths, include_header):
           [
               inc
               for inc in amalgam_includes
-              if not inc.startswith('#include <xnnpack/')
+              if 'xnnpack' not in inc
           ],
           lambda x: True if x.startswith('#include ') else x,
       )
@@ -236,7 +237,7 @@ def amalgamate_microkernel_sources(source_paths, include_header):
       sorted(
           inc
           for inc in amalgam_includes
-          if inc.startswith('#include <xnnpack/')
+          if 'xnnpack' in inc
       )
   )
   amalgam_text += '\n\n\n'

@@ -9,9 +9,9 @@ $assert ODATATYPE in ["QS8", "QU8"]
 $assert IDATATYPE == "F16" and ODATATYPE == "QS8" or IDATATYPE == "F32"
 #include <assert.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/vcvt.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/vcvt.h"
 $if IDATATYPE == "F16":
   #include <fp16/fp16.h>
 

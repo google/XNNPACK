@@ -13,7 +13,7 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/vsquareabs.h>
+#include "xnnpack/vsquareabs.h"
 
 
 void xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x16(

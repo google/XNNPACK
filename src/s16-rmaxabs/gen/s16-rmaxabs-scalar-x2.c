@@ -11,8 +11,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/rmaxabs.h>
+#include "xnnpack/math.h"
+#include "xnnpack/rmaxabs.h"
 
 
 void xnn_s16_rmaxabs_ukernel__scalar_x2(

@@ -11,8 +11,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/vlog.h>
+#include "xnnpack/math.h"
+#include "xnnpack/vlog.h"
 
 extern XNN_INTERNAL const uint16_t xnn_table_vlog[129];
 

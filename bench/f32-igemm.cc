@@ -15,13 +15,13 @@
 #include "bench/conv.h"
 #include "bench/utils.h"
 
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/indirection.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/pack.h>
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/indirection.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/pack.h"
 
 
 static void f32_igemm(benchmark::State& state,

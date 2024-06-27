@@ -8,11 +8,11 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/config-types.h>
-#include <xnnpack/hardware-config.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams.h>
+#include "xnnpack/common.h"
+#include "xnnpack/config-types.h"
+#include "xnnpack/hardware-config.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -12,9 +12,9 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/math.h>
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/math.h"
 
 
 void xnn_qs8_rdsum_ukernel_7p7x__neon_c32(

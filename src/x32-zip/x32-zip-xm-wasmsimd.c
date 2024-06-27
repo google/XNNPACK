@@ -7,7 +7,7 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/zip.h>
+#include "xnnpack/zip.h"
 
 
 void xnn_x32_zip_xm_ukernel__wasmsimd(

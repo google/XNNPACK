@@ -11,7 +11,7 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/gemm.h>
+#include "xnnpack/gemm.h"
 
 
 void xnn_f32_gemm_minmax_ukernel_7x8__avx_broadcast(

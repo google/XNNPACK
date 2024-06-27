@@ -8,8 +8,8 @@
 
 #include <emmintrin.h>
 
-#include <xnnpack/zip.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/zip.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_x8_zip_xm_ukernel__sse2(

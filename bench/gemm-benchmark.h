@@ -6,17 +6,17 @@
 #ifndef __XNNPACK_BENCH_GEMM_BENCHMARK_H__
 #define __XNNPACK_BENCH_GEMM_BENCHMARK_H__
 
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/packq.h>
-#include <xnnpack/packw.h>
+#include "xnnpack.h"
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/pack.h"
+#include "xnnpack/packq.h"
+#include "xnnpack/packw.h"
 
 #include <cstddef>
 

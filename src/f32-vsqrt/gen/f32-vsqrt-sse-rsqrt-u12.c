@@ -11,8 +11,8 @@
 
 #include <xmmintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vunary.h"
 
 // In the following, we first compute the _reciprocal_ square root of an input
 // `a` and then multiply it with `a` to produce the square root.

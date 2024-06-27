@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include <xnnpack.h>
-#include <xnnpack/config.h>
-#include <xnnpack/math.h>
-#include <xnnpack/packq.h>
+#include "xnnpack.h"
+#include "xnnpack/config.h"
+#include "xnnpack/math.h"
+#include "xnnpack/packq.h"
 
 #include <algorithm>
 #include <cassert>

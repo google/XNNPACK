@@ -11,9 +11,9 @@
 
 #include <tmmintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/lut.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/common.h"
+#include "xnnpack/lut.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_x8_lut_ukernel__ssse3_u32(

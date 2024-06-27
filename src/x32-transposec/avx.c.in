@@ -27,10 +27,10 @@ $CASTX = {32: "(__m64*) ", 64: ""}[SIZE]
 
 #include <assert.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/transpose.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/transpose.h"
+#include "xnnpack/unaligned.h"
 
 void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower()}_${OUT_PTRS.lower()}_avx(
     const uint${SIZE}_t* input,

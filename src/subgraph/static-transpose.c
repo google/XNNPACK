@@ -9,14 +9,14 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <xnnpack.h>
-#include <xnnpack/common.h>
-#include <xnnpack/log.h>
-#include <xnnpack/node-type.h>
-#include <xnnpack/operator-type.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/subgraph-validation.h>
-#include <xnnpack/subgraph.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
+#include "xnnpack/log.h"
+#include "xnnpack/node-type.h"
+#include "xnnpack/operator-type.h"
+#include "xnnpack/operator.h"
+#include "xnnpack/subgraph-validation.h"
+#include "xnnpack/subgraph.h"
 
 #include "pthreadpool.h"
 

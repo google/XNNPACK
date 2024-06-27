@@ -5,8 +5,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/math.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_s8_vclamp_ukernel__scalar_u4(

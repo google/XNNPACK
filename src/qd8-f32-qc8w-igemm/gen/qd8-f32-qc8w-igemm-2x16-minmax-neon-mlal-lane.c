@@ -12,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/igemm.h>
+#include "xnnpack/common.h"
+#include "xnnpack/igemm.h"
 
 
 void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x16__neon_mlal_lane(

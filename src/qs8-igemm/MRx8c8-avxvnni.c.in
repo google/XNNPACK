@@ -10,12 +10,12 @@ $assert DATATYPE in ["QC8", "QD8_F16", "QD8_F32"]
 
 #include <immintrin.h>
 
-#include <xnnpack/gemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/gemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/unaligned.h"
 $if PREFETCH:
-  #include <xnnpack/prefetch.h>
+  #include "xnnpack/prefetch.h"
 
 
 $GFNI = 0

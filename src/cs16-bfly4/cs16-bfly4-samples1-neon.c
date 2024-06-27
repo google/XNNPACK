@@ -7,8 +7,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/fft.h>
+#include "xnnpack/math.h"
+#include "xnnpack/fft.h"
 
 #include <arm_neon.h>
 

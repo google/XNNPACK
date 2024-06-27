@@ -12,9 +12,9 @@
 #include <stdint.h>
 #include <math.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/math-stubs.h"
 
 
 void xnn_math_f32_tanh__scalar_expm1plus_rr2_p6h5ts_div(

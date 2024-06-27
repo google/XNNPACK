@@ -8,11 +8,11 @@
 
 #include <stdlib.h>
 
-#include <xnnpack.h>
-#include <xnnpack/allocator.h>
-#include <xnnpack/log.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/params.h>
+#include "xnnpack.h"
+#include "xnnpack/allocator.h"
+#include "xnnpack/log.h"
+#include "xnnpack/operator.h"
+#include "xnnpack/params.h"
 
 
 enum xnn_status xnn_delete_operator(xnn_operator_t op)

@@ -8,10 +8,10 @@
 
 #pragma once
 
-#include <xnnpack.h>
-#include <xnnpack/cache.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microparams.h>
+#include "xnnpack.h"
+#include "xnnpack/cache.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
 
 #include <algorithm>
 #include <cassert>

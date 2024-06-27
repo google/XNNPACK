@@ -12,11 +12,11 @@
   #include <pthread.h>
 #endif
 
-#include <xnnpack/common.h>
-#include <xnnpack/config.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/config.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/vbinary.h"
 
 static struct xnn_binary_elementwise_config f16_vadd_config = {0};
 static struct xnn_binary_elementwise_config f16_vdiv_config = {0};

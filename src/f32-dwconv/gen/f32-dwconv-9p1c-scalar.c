@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/dwconv.h>
-#include <xnnpack/math.h>
+#include "xnnpack/dwconv.h"
+#include "xnnpack/math.h"
 
 
 void xnn_f32_dwconv_ukernel_9p1c__scalar(

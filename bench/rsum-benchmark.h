@@ -16,11 +16,11 @@
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/microfnptr.h>
+#include "xnnpack.h"
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/microfnptr.h"
 
 namespace {
 void f16_rsum(

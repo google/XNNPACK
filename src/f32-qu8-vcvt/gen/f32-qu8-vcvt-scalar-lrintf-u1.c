@@ -10,9 +10,9 @@
 #include <assert.h>
 #include <math.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/vcvt.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/vcvt.h"
 
 
 void xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_u1(

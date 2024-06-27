@@ -6,10 +6,10 @@
 
 #include <cassert>
 
-#include <xnnpack.h>
-#include <xnnpack/aarch32-assembler.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/memory.h>
+#include "xnnpack.h"
+#include "xnnpack/aarch32-assembler.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/memory.h"
 
 
 namespace xnnpack {

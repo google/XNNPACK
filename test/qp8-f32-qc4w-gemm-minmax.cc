@@ -10,16 +10,16 @@
 //   Specification: test/qp8-f32-qc4w-gemm-minmax.yaml
 //   Generator: tools/generate-gemm-test.py
 
-#include <xnnpack/allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/packw.h>
-#include <xnnpack/ppmm.h>
-#include <xnnpack/requantization.h>
+#include "xnnpack/allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/pack.h"
+#include "xnnpack/packw.h"
+#include "xnnpack/ppmm.h"
+#include "xnnpack/requantization.h"
 
 #include <cstddef>
 #include <functional>
@@ -381,14 +381,14 @@ std::vector<GemmTestParams> CreateTests1(
 
 
   INSTANTIATE_TEST_SUITE_P(
-      QP8_F32_QC4W_GEMM_MINMAX_4X8C16S2__AARCH64_NEONI8MM, GemmTest,
+      QP8_F32_QC4W_GEMM_MINMAX_4X4C16S2__AARCH64_NEONI8MM_MSTEP2, GemmTest,
       testing::ValuesIn(CreateTests1(
           /*k_block=*/2,
           /*adj_k_block=*/2,
-          /*mr=*/4, /*nr=*/8, /*kr=*/16, /*sr=*/2,
+          /*mr=*/4, /*nr=*/4, /*kr=*/16, /*sr=*/2,
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_4x8c16s2__aarch64_neoni8mm,
+            tester.Test(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_4x4c16s2__aarch64_neoni8mm_mstep2,
                         xnn_init_f32_minmax_scalar_params,
                         xnn_pack_kai_qs8_weights_and_biases,
                         xnn_packed_stride_kai_qs8_weights_and_biases);
@@ -402,14 +402,14 @@ std::vector<GemmTestParams> CreateTests1(
 
 
   INSTANTIATE_TEST_SUITE_P(
-      QP8_F32_QC4W_GEMM_MINMAX_4X4C16S2__AARCH64_NEONI8MM_MSTEP2, GemmTest,
+      QP8_F32_QC4W_GEMM_MINMAX_4X8C16S2__AARCH64_NEONI8MM, GemmTest,
       testing::ValuesIn(CreateTests1(
           /*k_block=*/2,
           /*adj_k_block=*/2,
-          /*mr=*/4, /*nr=*/4, /*kr=*/16, /*sr=*/2,
+          /*mr=*/4, /*nr=*/8, /*kr=*/16, /*sr=*/2,
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_4x4c16s2__aarch64_neoni8mm_mstep2,
+            tester.Test(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_4x8c16s2__aarch64_neoni8mm,
                         xnn_init_f32_minmax_scalar_params,
                         xnn_pack_kai_qs8_weights_and_biases,
                         xnn_packed_stride_kai_qs8_weights_and_biases);

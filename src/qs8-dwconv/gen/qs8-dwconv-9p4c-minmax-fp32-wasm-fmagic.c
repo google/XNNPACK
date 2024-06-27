@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/dwconv.h>
-#include <xnnpack/math.h>
+#include "xnnpack/dwconv.h"
+#include "xnnpack/math.h"
 
 
 void xnn_qs8_dwconv_minmax_fp32_ukernel_9p4c__wasm_fmagic(

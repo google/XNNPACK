@@ -12,12 +12,12 @@
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
+#include "xnnpack.h"
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
 
 
 void f16_gavgpool_cw(

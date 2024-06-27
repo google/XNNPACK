@@ -17,11 +17,11 @@
 
 #include <fp16/fp16.h>
 
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/math.h>
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/math.h"
+#include "xnnpack/math-stubs.h"
 
 
 constexpr int kBlockSize = 1024;

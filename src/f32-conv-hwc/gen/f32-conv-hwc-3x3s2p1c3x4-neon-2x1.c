@@ -12,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/conv.h>
-#include <xnnpack/math.h>
+#include "xnnpack/conv.h"
+#include "xnnpack/math.h"
 
 
 void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1(

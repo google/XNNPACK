@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <xnnpack.h>
-#include <xnnpack/allocator.h>
-#include <xnnpack/params.h>
+#include "xnnpack.h"
+#include "xnnpack/allocator.h"
+#include "xnnpack/params.h"
 
 #include <cstddef>
 #include <cstring>

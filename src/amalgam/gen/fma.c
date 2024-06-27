@@ -8,10 +8,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vunary.h"
 
 
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];

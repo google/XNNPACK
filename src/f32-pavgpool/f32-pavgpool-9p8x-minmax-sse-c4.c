@@ -7,7 +7,7 @@
 
 #include <xmmintrin.h>
 
-#include <xnnpack/pavgpool.h>
+#include "xnnpack/pavgpool.h"
 
 
 void xnn_f32_pavgpool_minmax_ukernel_9p8x__sse_c4(

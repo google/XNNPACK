@@ -8,7 +8,7 @@
 #include <cstring>
 #include <mutex>
 
-#include <xnnpack/common.h>
+#include "xnnpack/common.h"
 
 #ifdef __linux__
   #include <sched.h>
@@ -24,9 +24,9 @@
   #include <cpuinfo.h>
 #endif  // XNN_ENABLE_CPUINFO
 
-#include <xnnpack.h>
-#include <xnnpack/allocator.h>
-#include <xnnpack/hardware-config.h>
+#include "xnnpack.h"
+#include "xnnpack/allocator.h"
+#include "xnnpack/hardware-config.h"
 
 #include "bench/utils.h"
 

@@ -11,8 +11,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/dwconv.h>
-#include <xnnpack/math.h>
+#include "xnnpack/dwconv.h"
+#include "xnnpack/math.h"
 
 
 void xnn_f32_dwconv_ukernel_6f6m7l1c1s1r__scalar_acc2(

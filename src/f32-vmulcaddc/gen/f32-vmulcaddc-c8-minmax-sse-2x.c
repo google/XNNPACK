@@ -11,8 +11,8 @@
 
 #include <xmmintrin.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/vmulcaddc.h>
+#include "xnnpack/math.h"
+#include "xnnpack/vmulcaddc.h"
 
 
 void xnn_f32_vmulcaddc_minmax_ukernel_c8__sse_2x(

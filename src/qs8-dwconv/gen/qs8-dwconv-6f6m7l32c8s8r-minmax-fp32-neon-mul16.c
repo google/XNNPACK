@@ -12,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/dwconv.h>
-#include <xnnpack/math.h>
+#include "xnnpack/dwconv.h"
+#include "xnnpack/math.h"
 
 
 void xnn_qs8_dwconv_minmax_fp32_ukernel_6f6m7l32c8s8r__neon_mul16(

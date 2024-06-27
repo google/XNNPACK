@@ -12,9 +12,9 @@ $assert OP in ["RNDNE", "RNDZ", "RNDU", "RNDD"]
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/vunary.h"
 
 
 $VRNDQ_F16 = {

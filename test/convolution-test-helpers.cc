@@ -5,7 +5,7 @@
 
 #include "convolution-test-helpers.h"
 
-#include <xnnpack/microparams.h>
+#include "xnnpack/microparams.h"
 
 #include <algorithm>
 #include <cstddef>

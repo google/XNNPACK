@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <xnnpack/common.h>
+#include "xnnpack/common.h"
 
 
 #ifdef __cplusplus

@@ -4,29 +4,29 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include <simd/f32-avx.h>
 #include <stddef.h>
 #include <stdint.h>
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/dwconv.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/lut.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/packw.h>
-#include <xnnpack/prelu.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/transpose.h>
-#include <xnnpack/unaligned.h>
-#include <xnnpack/vbinary.h>
-#include <xnnpack/vcvt.h>
-#include <xnnpack/vlrelu.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/dwconv.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/lut.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/packw.h"
+#include "xnnpack/prelu.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/simd/f32-avx.h"
+#include "xnnpack/transpose.h"
+#include "xnnpack/unaligned.h"
+#include "xnnpack/vbinary.h"
+#include "xnnpack/vcvt.h"
+#include "xnnpack/vlrelu.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f16_f32_vcvt_ukernel__avx_int16_u16(

@@ -11,10 +11,10 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/gemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/prefetch.h>
+#include "xnnpack/gemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/prefetch.h"
 
 void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_8x16c8__avx512skx_prfm(
     size_t mr,

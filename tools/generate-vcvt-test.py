@@ -385,10 +385,10 @@ def main(args):
 
 #include <gtest/gtest.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
+#include "xnnpack/common.h"
+#include "xnnpack/isa-checks.h"
 
-#include <xnnpack/vcvt.h>
+#include "xnnpack/vcvt.h"
 #include "vcvt-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
@@ -407,11 +407,11 @@ def main(args):
 #include "bench/utils.h"
 #include "bench/vcvt-benchmark.h"
 
-#include <xnnpack.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/vcvt.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/vcvt.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     isa_hierarchy = xnncommon._ISA_HIERARCHY_MAP

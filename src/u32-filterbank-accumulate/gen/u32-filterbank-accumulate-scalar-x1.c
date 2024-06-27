@@ -11,8 +11,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/filterbank.h>
-#include <xnnpack/math.h>
+#include "xnnpack/filterbank.h"
+#include "xnnpack/math.h"
 
 
 void xnn_u32_filterbank_accumulate_ukernel__scalar_x1(

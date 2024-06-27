@@ -9,23 +9,23 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/dwconv.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/lut.h>
-#include <xnnpack/math.h>
-#include <xnnpack/packw.h>
-#include <xnnpack/pavgpool.h>
-#include <xnnpack/prefetch.h>
-#include <xnnpack/raddstoreexpminusmax.h>
-#include <xnnpack/transpose.h>
-#include <xnnpack/unaligned.h>
-#include <xnnpack/vbinary.h>
-#include <xnnpack/vcvt.h>
-#include <xnnpack/vlrelu.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/dwconv.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/lut.h"
+#include "xnnpack/math.h"
+#include "xnnpack/packw.h"
+#include "xnnpack/pavgpool.h"
+#include "xnnpack/prefetch.h"
+#include "xnnpack/raddstoreexpminusmax.h"
+#include "xnnpack/transpose.h"
+#include "xnnpack/unaligned.h"
+#include "xnnpack/vbinary.h"
+#include "xnnpack/vcvt.h"
+#include "xnnpack/vlrelu.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f16_f32acc_gemm_minmax_ukernel_1x16__avx2_broadcast(

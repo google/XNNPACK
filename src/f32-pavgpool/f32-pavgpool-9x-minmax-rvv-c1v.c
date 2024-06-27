@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include <xnnpack/pavgpool.h>
+#include "xnnpack/pavgpool.h"
 #include <riscv_vector.h>
 
 void xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v(

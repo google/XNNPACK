@@ -8,8 +8,8 @@
 #include <stddef.h>
 #include <string.h>
 
-#include <xnnpack.h>
-#include <xnnpack/common.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
 
 
 #ifdef __cplusplus

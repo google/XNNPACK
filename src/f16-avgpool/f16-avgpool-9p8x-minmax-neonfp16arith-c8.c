@@ -7,7 +7,7 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/avgpool.h>
+#include "xnnpack/avgpool.h"
 
 
 void xnn_f16_avgpool_minmax_ukernel_9p8x__neonfp16arith_c8(

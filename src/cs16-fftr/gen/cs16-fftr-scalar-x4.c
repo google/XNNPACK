@@ -11,8 +11,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/fft.h>
+#include "xnnpack/math.h"
+#include "xnnpack/fft.h"
 
 
 void xnn_cs16_fftr_ukernel__scalar_x4(

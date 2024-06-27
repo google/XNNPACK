@@ -12,9 +12,9 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/raddextexp.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/raddextexp.h"
 
 
 void xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_u192(

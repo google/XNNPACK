@@ -11,9 +11,9 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/gemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
+#include "xnnpack/gemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
 
 void xnn_qu8_gemm_minmax_fp32_ukernel_7x16c8__avx512skx(
     size_t mr,

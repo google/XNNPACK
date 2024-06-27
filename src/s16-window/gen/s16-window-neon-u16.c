@@ -13,8 +13,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/window.h>
+#include "xnnpack/math.h"
+#include "xnnpack/window.h"
 
 
 void xnn_s16_window_ukernel__neon_u16(

@@ -13,8 +13,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <smmintrin.h>
 
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/unaligned.h"
 
 
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"

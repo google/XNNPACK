@@ -8,9 +8,9 @@
 #include <cstddef>
 #include <cstdint>
 
-#include <xnnpack.h>
-#include <xnnpack/common.h>
-#include <xnnpack/memory.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
+#include "xnnpack/memory.h"
 
 #include <benchmark/benchmark.h>
 

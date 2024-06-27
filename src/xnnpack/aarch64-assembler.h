@@ -8,8 +8,8 @@
 #include <cstddef>
 #include <cstdint>
 
-#include <xnnpack/assembler.h>
-#include <xnnpack/microparams.h>
+#include "xnnpack/assembler.h"
+#include "xnnpack/microparams.h"
 
 
 namespace xnnpack {

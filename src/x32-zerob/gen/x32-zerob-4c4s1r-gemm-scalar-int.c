@@ -10,9 +10,9 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/packb.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/math.h"
+#include "xnnpack/packb.h"
+#include "xnnpack/unaligned.h"
 
 void xnn_x32_zerob_gemm_ukernel_4c4s1r__scalar_int(
   size_t groups,

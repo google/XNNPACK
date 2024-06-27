@@ -7,8 +7,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/filterbank.h>
+#include "xnnpack/math.h"
+#include "xnnpack/filterbank.h"
 
 
 void xnn_u32_filterbank_subtract_ukernel__scalar_x2(

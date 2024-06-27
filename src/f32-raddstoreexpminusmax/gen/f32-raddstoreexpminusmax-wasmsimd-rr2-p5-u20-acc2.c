@@ -11,8 +11,8 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/raddstoreexpminusmax.h>
+#include "xnnpack/common.h"
+#include "xnnpack/raddstoreexpminusmax.h"
 
 
 void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_u20_acc2(

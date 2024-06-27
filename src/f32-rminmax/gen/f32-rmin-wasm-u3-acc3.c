@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/reduce.h>
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
 
 void xnn_f32_rmin_ukernel__wasm_u3_acc3(
     size_t batch,

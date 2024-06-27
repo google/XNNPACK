@@ -20,10 +20,10 @@
 #include "ruy/ruy.h"
 #endif  // BENCHMARK_RUY
 
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
 
 
 #ifdef BENCHMARK_RUY

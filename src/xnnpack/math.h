@@ -18,7 +18,7 @@
   #include <stdlib.h> // For _rotl.
 #endif
 
-#include <xnnpack/common.h>
+#include "xnnpack/common.h"
 
 
 // stdlib.h from Windows 10 SDK defines min & max macros.

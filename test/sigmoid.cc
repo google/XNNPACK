@@ -12,10 +12,10 @@
 #include <fp16/fp16.h>
 #include <gtest/gtest.h>
 
-#include <xnnpack.h>
-#include <xnnpack/node-type.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/subgraph.h>
+#include "xnnpack.h"
+#include "xnnpack/node-type.h"
+#include "xnnpack/operator.h"
+#include "xnnpack/subgraph.h"
 
 #include "subgraph-unary-tester.h"
 

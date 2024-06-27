@@ -12,7 +12,7 @@
 #include <hexagon_protos.h>
 #include <hvx_hexagon_protos.h>
 
-#include <xnnpack/igemm.h>
+#include "xnnpack/igemm.h"
 
 static XNN_INLINE
 void vstu_variable_scalar(char *bytes, size_t num_bytes, HVX_Vector vin) {

@@ -8,10 +8,10 @@
 //   Generator: tools/generate-vhswish-test.py
 
 
-#include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/vhswish.h>
+#include "xnnpack/common.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/vhswish.h"
 
 #include <vector>
 

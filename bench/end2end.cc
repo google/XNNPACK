@@ -14,8 +14,8 @@
 
 #include "bench/utils.h"
 
-#include <xnnpack.h>
-#include <xnnpack/models.h>
+#include "xnnpack.h"
+#include "xnnpack/models.h"
 
 
 static void End2EndBenchmark(

@@ -13,10 +13,10 @@ $LUT = 1 << LOG2LUT
 #include <stdint.h>
 #include <math.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vunary.h"
 
 $if LOG2LUT != 0:
 

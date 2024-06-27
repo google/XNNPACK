@@ -7,8 +7,8 @@
 
 #include <stddef.h>
 
-#include <xnnpack.h>
-#include <xnnpack/common.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
 
 #ifdef __cplusplus
 extern "C" {

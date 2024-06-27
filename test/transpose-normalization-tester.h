@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <xnnpack.h>
-#include <xnnpack/normalization.h>
+#include "xnnpack.h"
+#include "xnnpack/normalization.h"
 
 #include <cassert>
 #include <cstddef>

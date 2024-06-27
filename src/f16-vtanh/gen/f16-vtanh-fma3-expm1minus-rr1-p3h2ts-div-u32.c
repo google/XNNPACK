@@ -13,10 +13,10 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vunary.h"
 
 void xnn_f16_vtanh_ukernel__fma3_expm1minus_rr1_p3h2ts_div_u32(
     size_t batch,

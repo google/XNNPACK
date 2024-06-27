@@ -11,9 +11,9 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
 
 
 void xnn_qu8_gavgpool_minmax_fp32_ukernel_7p7x__neonv8_c32(

@@ -29,19 +29,46 @@ SET(ALL_HVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vadd-minmax-hvx-u32.c
   src/f32-vbinary/gen/f32-vadd-minmax-hvx-u64.c
   src/f32-vbinary/gen/f32-vadd-minmax-hvx-u128.c
+  src/f32-vbinary/gen/f32-vaddc-minmax-hvx-u32.c
+  src/f32-vbinary/gen/f32-vaddc-minmax-hvx-u64.c
+  src/f32-vbinary/gen/f32-vaddc-minmax-hvx-u128.c
   src/f32-vbinary/gen/f32-vmax-hvx-u32.c
   src/f32-vbinary/gen/f32-vmax-hvx-u64.c
   src/f32-vbinary/gen/f32-vmax-hvx-u128.c
+  src/f32-vbinary/gen/f32-vmaxc-hvx-u32.c
+  src/f32-vbinary/gen/f32-vmaxc-hvx-u64.c
+  src/f32-vbinary/gen/f32-vmaxc-hvx-u128.c
   src/f32-vbinary/gen/f32-vmin-hvx-u32.c
   src/f32-vbinary/gen/f32-vmin-hvx-u64.c
   src/f32-vbinary/gen/f32-vmin-hvx-u128.c
+  src/f32-vbinary/gen/f32-vminc-hvx-u32.c
+  src/f32-vbinary/gen/f32-vminc-hvx-u64.c
+  src/f32-vbinary/gen/f32-vminc-hvx-u128.c
   src/f32-vbinary/gen/f32-vmul-minmax-hvx-u32.c
   src/f32-vbinary/gen/f32-vmul-minmax-hvx-u64.c
   src/f32-vbinary/gen/f32-vmul-minmax-hvx-u128.c
+  src/f32-vbinary/gen/f32-vmulc-minmax-hvx-u32.c
+  src/f32-vbinary/gen/f32-vmulc-minmax-hvx-u64.c
+  src/f32-vbinary/gen/f32-vmulc-minmax-hvx-u128.c
+  src/f32-vbinary/gen/f32-vrsubc-minmax-hvx-u32.c
+  src/f32-vbinary/gen/f32-vrsubc-minmax-hvx-u64.c
+  src/f32-vbinary/gen/f32-vrsubc-minmax-hvx-u128.c
   src/f32-vbinary/gen/f32-vsqrdiff-hvx-u32.c
   src/f32-vbinary/gen/f32-vsqrdiff-hvx-u64.c
   src/f32-vbinary/gen/f32-vsqrdiff-hvx-u128.c
+  src/f32-vbinary/gen/f32-vsqrdiffc-hvx-u32.c
+  src/f32-vbinary/gen/f32-vsqrdiffc-hvx-u64.c
+  src/f32-vbinary/gen/f32-vsqrdiffc-hvx-u128.c
   src/f32-vbinary/gen/f32-vsub-minmax-hvx-u32.c
   src/f32-vbinary/gen/f32-vsub-minmax-hvx-u64.c
   src/f32-vbinary/gen/f32-vsub-minmax-hvx-u128.c
-  src/f32-vunary/gen/f32-vneg-hvx.c)
+  src/f32-vbinary/gen/f32-vsubc-minmax-hvx-u32.c
+  src/f32-vbinary/gen/f32-vsubc-minmax-hvx-u64.c
+  src/f32-vbinary/gen/f32-vsubc-minmax-hvx-u128.c
+  src/f32-vunary/gen/f32-vabs-hvx.c
+  src/f32-vunary/gen/f32-vneg-hvx.c
+  src/f32-vunary/gen/f32-vsqr-hvx.c
+  src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u32.c
+  src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u64.c
+  src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u96.c
+  src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u128.c)

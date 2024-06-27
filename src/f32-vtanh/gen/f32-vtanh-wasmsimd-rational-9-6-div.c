@@ -11,11 +11,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <simd/f32-wasmsimd.h>
+#include "xnnpack/simd/f32-wasmsimd.h"
 
-#include <xnnpack/common.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f32_vtanh_ukernel__wasmsimd_rational_9_6_div_u4(

@@ -11,9 +11,9 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/igemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
+#include "xnnpack/igemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
 
 
 void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c8__neonv8_mlal(

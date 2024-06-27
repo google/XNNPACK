@@ -1,19 +1,19 @@
 #include "gemm-microkernel-tester.h"
 
 #include <stdint.h>
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/config-types.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/packq.h>
-#include <xnnpack/quantization.h>
-#include <xnnpack/requantization.h>
+#include "xnnpack.h"
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/config-types.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/pack.h"
+#include "xnnpack/packq.h"
+#include "xnnpack/quantization.h"
+#include "xnnpack/requantization.h"
 
 #include <algorithm>
 #include <cassert>
@@ -32,10 +32,10 @@
 #include <fp16/fp16.h>
 
 #if XNN_ARCH_ARM64
-#include <xnnpack/aarch64-assembler.h>
+#include "xnnpack/aarch64-assembler.h"
 #endif  // XNN_ARCH_ARM64
 #if XNN_ARCH_ARM
-#include <xnnpack/aarch32-assembler.h>
+#include "xnnpack/aarch32-assembler.h"
 #endif  // XNN_ARCH_ARM
 
 TEST_P(GemmTest, Test) {
@@ -76,19 +76,18 @@ TEST_P(GemmTest, Test) {
             if (params.loop_bzp_.is_set) {
               tester.b_zero_point(bzp);
             }
-            for (size_t bl = params.loop_bl_.from; bl <= tester.k() / 2;
-               bl += params.loop_bl_.step) {
-              
-               if (params.loop_bl_.is_set) {
+            for (size_t bl = params.loop_bl_.from; bl <= params.loop_bl_.to;
+                 bl += params.loop_bl_.step) {
+              if (params.loop_bl_.is_set) {
                 // Require block size to divide (padded) column size.
                 if (round_up_po2(k, params.loop_bl_.step) % bl != 0) {
                   continue;
                 }
                 tester.bl(bl);
-               }
+              }
 
-               // Call the test function.
-               params.test_func(tester);
+              // Call the test function.
+              params.test_func(tester);
             }
           }
         }
