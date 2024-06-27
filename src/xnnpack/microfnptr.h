@@ -2798,7 +2798,7 @@ typedef void (*xnn_init_scale_params_fn)(
   size_t stride,
   size_t substride,
   size_t stride_offset,
-  const void* scale[XNN_MIN_ELEMENTS(1)],
+  const void* scale,
   void* packed_w);
 
 typedef void (*xnn_init_qs8_qc8w_scale_params_fn)(
