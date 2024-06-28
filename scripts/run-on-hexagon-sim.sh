@@ -61,7 +61,7 @@ cp -f ${HEXAGON_LIBC_DIR}/libc++.so.1.0 ${HVX_SIM_TEMP_DIR}/
 ### Invoke the simulator for executable
 cd ${HVX_SIM_TEMP_DIR}
 
-LD_DEBUG=all LD_LIBRARY_PATH=${HVX_SIM_TEMP_DIR}:${LD_LIBRARY_PATH} \
+LD_LIBRARY_PATH=${HVX_SIM_TEMP_DIR}:${LD_LIBRARY_PATH} \
   ${HEXAGON_SIM} \
   -m${HEXAGON_ARCH} \
   --simulated_returnval \
