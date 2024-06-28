@@ -226,6 +226,7 @@ ALL_AVX2_MICROKERNEL_SRCS = [
     "src/f32-velu/gen/f32-velu-avx2-rr1-p6-u64.c",
     "src/f32-velu/gen/f32-velu-avx2-rr1-p6-u72.c",
     "src/f32-velu/gen/f32-velu-avx2-rr1-p6-u80.c",
+    "src/f32-vlog/gen/f32-vlog-avx2-rational-3-3-div.c",
     "src/f32-vscaleexpminusmax/gen/f32-vscaleexpminusmax-avx2-p5-u8.c",
     "src/f32-vscaleexpminusmax/gen/f32-vscaleexpminusmax-avx2-p5-u16.c",
     "src/f32-vscaleexpminusmax/gen/f32-vscaleexpminusmax-avx2-p5-u24.c",

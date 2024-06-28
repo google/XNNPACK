@@ -548,6 +548,7 @@ xnnpack_benchmark(
     "f32_vabs",
     "f32_velu",
     "f32_vhswish",
+    "f32_vlog",
     "f32_vlrelu",
     "f32_vneg",
     "f32_vrelu",
