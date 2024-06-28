@@ -101,16 +101,17 @@ http_archive(
 )
 # LINT.ThenChange(cmake/DownloadCpuinfo.cmake)
 
+# TODO: b/349993583 - Uncomment when KleidiAI has an official BUILD file.
 # LINT.IfChange
 # KleidiAI library, used for ARM microkernels.
-http_archive(
-    name = "KleidiAI",
-    sha256 = "39b26d8840ec719afaa480b0622a77952d0f22dbb8e8ba58ec9f93e39895a205",
-    strip_prefix = "kleidiai-1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53",
-    urls = [
-        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53/kleidiai-1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53.zip",
-    ],
-)
+# http_archive(
+#     name = "KleidiAI",
+#     sha256 = "39b26d8840ec719afaa480b0622a77952d0f22dbb8e8ba58ec9f93e39895a205",
+#     strip_prefix = "kleidiai-1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53",
+#     urls = [
+#         "https://gitlab.arm.com/kleidi/kleidiai/-/archive/1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53/kleidiai-1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53.zip",
+#     ],
+# )
 # LINT.ThenChange(cmake/DownloadKleidiAI.cmake)
 
 # Ruy library, used to benchmark against
