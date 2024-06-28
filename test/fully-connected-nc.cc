@@ -1396,50 +1396,50 @@ TEST(FULLY_CONNECTED_NC_QD8_F32_QC4W, weights_cache_unit_batch_transpose_weights
     .TestQD8F32QC4W();
 }
 
-// TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, bl_lt_ic) {
-//   for (size_t ic=16; ic<=32; ic+=8){
-//     for (size_t bs=ic/2; bs<=ic; bs+=ic/2) {
-//       if (bs % 8 /*MAX_KR*/ != 0) {
-//         continue;
-//       }
-//       FullyConnectedOperatorTester()
-//         .batch_size(1)
-//         .output_channels(18)
-//         .input_channels(ic)
-//         .block_size(bs)
-//         .kernel_zero_point(8)
-//         .iterations(3)
-//         .TestQD8F32QB4W();
-//     }
-//   }
-// }
-// 
-// TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, bl_eq_kr) {
-//   for (size_t ic=16; ic<=32; ic+=8){
-//     FullyConnectedOperatorTester()
-//       .batch_size(1)
-//       .output_channels(21)
-//       .input_channels(ic)
-//       .block_size(8)
-//       .kernel_zero_point(8)
-//       .iterations(3)
-//       .TestQD8F32QB4W();
-//   }
-// }
-// 
-// TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, bl_eq_kr_no_bias) {
-//   for (size_t ic=16; ic<=32; ic+=8){
-//     FullyConnectedOperatorTester()
-//       .has_bias(false)
-//       .batch_size(1)
-//       .output_channels(23)
-//       .input_channels(ic)
-//       .block_size(8)
-//       .kernel_zero_point(8)
-//       .iterations(3)
-//       .TestQD8F32QB4W();
-//     }
-// }
+TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, bl_lt_ic) {
+  for (size_t ic=16; ic<=32; ic+=8){
+    for (size_t bs=ic/2; bs<=ic; bs+=ic/2) {
+      if (bs % 8 /*MAX_KR*/ != 0) {
+        continue;
+      }
+      FullyConnectedOperatorTester()
+        .batch_size(12)
+        .output_channels(18)
+        .input_channels(ic)
+        .block_size(bs)
+        .kernel_zero_point(8)
+        .iterations(3)
+        .TestQD8F32QB4W();
+    }
+  }
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, bl_eq_kr) {
+  for (size_t ic=16; ic<=32; ic+=8){
+    FullyConnectedOperatorTester()
+      .batch_size(12)
+      .output_channels(21)
+      .input_channels(ic)
+      .block_size(8)
+      .kernel_zero_point(8)
+      .iterations(3)
+      .TestQD8F32QB4W();
+  }
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, bl_eq_kr_no_bias) {
+  for (size_t ic=16; ic<=32; ic+=8){
+    FullyConnectedOperatorTester()
+      .has_bias(false)
+      .batch_size(12)
+      .output_channels(23)
+      .input_channels(ic)
+      .block_size(8)
+      .kernel_zero_point(8)
+      .iterations(3)
+      .TestQD8F32QB4W();
+    }
+}
 
 TEST(FULLY_CONNECTED_NC_QD8_F32_QC8W, unit_batch) {
   FullyConnectedOperatorTester()
@@ -2085,7 +2085,7 @@ TEST(FULLY_CONNECTED_NC_QD8_F16_QB4W, bl_lt_ic) {
         continue;
       }
       FullyConnectedOperatorTester()
-        .batch_size(1)
+        .batch_size(12)
         .output_channels(18)
         .input_channels(ic)
         .block_size(bs)
@@ -2099,7 +2099,7 @@ TEST(FULLY_CONNECTED_NC_QD8_F16_QB4W, bl_lt_ic) {
 TEST(FULLY_CONNECTED_NC_QD8_F16_QB4W, bl_eq_kr) {
   for (size_t ic=16; ic<=32; ic+=8){
     FullyConnectedOperatorTester()
-      .batch_size(1)
+      .batch_size(12)
       .output_channels(21)
       .input_channels(ic)
       .block_size(8)
@@ -2113,7 +2113,7 @@ TEST(FULLY_CONNECTED_NC_QD8_F16_QB4W, bl_eq_kr_no_bias) {
   for (size_t ic=16; ic<=32; ic+=8){
     FullyConnectedOperatorTester()
       .has_bias(false)
-      .batch_size(1)
+      .batch_size(12)
       .output_channels(23)
       .input_channels(ic)
       .block_size(8)
