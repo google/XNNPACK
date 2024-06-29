@@ -125,7 +125,7 @@ static void init_hardware_config(void) {
     hardware_config.use_x86_avx512fp16 = 0;
 #endif
 #if XNN_ENABLE_AVX512AMX
-    // TODO(fbarchard): Use cpuinfo_has_x86_amx_int8 when available.
+    // Use cpuinfo_has_x86_amx_int8 when available.
     // Infer AMX support from Sapphire Rapids having fp16 and amx.
     hardware_config.use_x86_avx512amx = hardware_config.use_x86_avx512vnnigfni && cpuinfo_has_x86_avx512fp16();
 #if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)
@@ -145,7 +145,13 @@ static void init_hardware_config(void) {
 #else
     hardware_config.use_x86_avxvnni = 0;
 #endif
-  #endif  // !XNN_ARCH_X86 && !XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX256SKX
+    // Use cpuinfo_has_x86_avx10 when available.
+    hardware_config.use_x86_avx256skx = hardware_config.use_x86_avx512skx;
+#else
+    hardware_config.use_x86_avx256skx = 0;
+#endif
+#endif  // !XNN_ARCH_X86 && !XNN_ARCH_X86_64
 
 #if XNN_ARCH_HEXAGON
 #if XNN_ENABLE_HVX
