@@ -1097,14 +1097,17 @@
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   TEST(F32_RSUM__HVX_U32, batch_eq_32) {
+    TEST_REQUIRES_HVX;
     RSumMicrokernelTester()
       .batch_size(32)
       .Test(xnn_f32_rsum_ukernel__hvx_u32, xnn_init_f32_scale_scalar_params);
   }
 
   TEST(F32_RSUM__HVX_U32, batch_div_32) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
@@ -1113,6 +1116,7 @@
   }
 
   TEST(F32_RSUM__HVX_U32, batch_lt_32) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size < 32; batch_size++) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
@@ -1121,6 +1125,7 @@
   }
 
   TEST(F32_RSUM__HVX_U32, batch_gt_32) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 33; batch_size < 64; batch_size++) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
@@ -1129,6 +1134,7 @@
   }
 
   TEST(F32_RSUM__HVX_U32, scale) {
+    TEST_REQUIRES_HVX;
     for (float scale = 0.3f; scale < 5.0f; scale *= 3.0f) {
       RSumMicrokernelTester()
         .batch_size(33)
@@ -1138,20 +1144,24 @@
   }
 
   TEST(F32_RSUM__HVX_U32, overflow_accumulator) {
+    TEST_REQUIRES_HVX;
     RSumMicrokernelTester()
-      .batch_size(512)
+      .batch_size(4096)
       .Test(xnn_f32_rsum_ukernel__hvx_u32, xnn_init_f32_scale_scalar_params);
   }
-#endif // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   TEST(F32_RSUM__HVX_U64_ACC2, batch_eq_64) {
+    TEST_REQUIRES_HVX;
     RSumMicrokernelTester()
       .batch_size(64)
       .Test(xnn_f32_rsum_ukernel__hvx_u64_acc2, xnn_init_f32_scale_scalar_params);
   }
 
   TEST(F32_RSUM__HVX_U64_ACC2, batch_div_64) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
@@ -1160,6 +1170,7 @@
   }
 
   TEST(F32_RSUM__HVX_U64_ACC2, batch_lt_64) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size < 64; batch_size++) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
@@ -1168,6 +1179,7 @@
   }
 
   TEST(F32_RSUM__HVX_U64_ACC2, batch_gt_64) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 65; batch_size < 128; batch_size++) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
@@ -1176,6 +1188,7 @@
   }
 
   TEST(F32_RSUM__HVX_U64_ACC2, scale) {
+    TEST_REQUIRES_HVX;
     for (float scale = 0.3f; scale < 5.0f; scale *= 3.0f) {
       RSumMicrokernelTester()
         .batch_size(65)
@@ -1185,20 +1198,24 @@
   }
 
   TEST(F32_RSUM__HVX_U64_ACC2, overflow_accumulator) {
+    TEST_REQUIRES_HVX;
     RSumMicrokernelTester()
-      .batch_size(1024)
+      .batch_size(8192)
       .Test(xnn_f32_rsum_ukernel__hvx_u64_acc2, xnn_init_f32_scale_scalar_params);
   }
-#endif // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   TEST(F32_RSUM__HVX_U96_ACC3, batch_eq_96) {
+    TEST_REQUIRES_HVX;
     RSumMicrokernelTester()
       .batch_size(96)
       .Test(xnn_f32_rsum_ukernel__hvx_u96_acc3, xnn_init_f32_scale_scalar_params);
   }
 
   TEST(F32_RSUM__HVX_U96_ACC3, batch_div_96) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 192; batch_size < 960; batch_size += 96) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
@@ -1207,6 +1224,7 @@
   }
 
   TEST(F32_RSUM__HVX_U96_ACC3, batch_lt_96) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size < 96; batch_size++) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
@@ -1215,6 +1233,7 @@
   }
 
   TEST(F32_RSUM__HVX_U96_ACC3, batch_gt_96) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 97; batch_size < 192; batch_size++) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
@@ -1223,6 +1242,7 @@
   }
 
   TEST(F32_RSUM__HVX_U96_ACC3, scale) {
+    TEST_REQUIRES_HVX;
     for (float scale = 0.3f; scale < 5.0f; scale *= 3.0f) {
       RSumMicrokernelTester()
         .batch_size(97)
@@ -1232,20 +1252,24 @@
   }
 
   TEST(F32_RSUM__HVX_U96_ACC3, overflow_accumulator) {
+    TEST_REQUIRES_HVX;
     RSumMicrokernelTester()
-      .batch_size(1536)
+      .batch_size(12288)
       .Test(xnn_f32_rsum_ukernel__hvx_u96_acc3, xnn_init_f32_scale_scalar_params);
   }
-#endif // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   TEST(F32_RSUM__HVX_U128_ACC2, batch_eq_128) {
+    TEST_REQUIRES_HVX;
     RSumMicrokernelTester()
       .batch_size(128)
       .Test(xnn_f32_rsum_ukernel__hvx_u128_acc2, xnn_init_f32_scale_scalar_params);
   }
 
   TEST(F32_RSUM__HVX_U128_ACC2, batch_div_128) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 256; batch_size < 1280; batch_size += 128) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
@@ -1254,6 +1278,7 @@
   }
 
   TEST(F32_RSUM__HVX_U128_ACC2, batch_lt_128) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size < 128; batch_size++) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
@@ -1262,6 +1287,7 @@
   }
 
   TEST(F32_RSUM__HVX_U128_ACC2, batch_gt_128) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 129; batch_size < 256; batch_size++) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
@@ -1270,6 +1296,7 @@
   }
 
   TEST(F32_RSUM__HVX_U128_ACC2, scale) {
+    TEST_REQUIRES_HVX;
     for (float scale = 0.3f; scale < 5.0f; scale *= 3.0f) {
       RSumMicrokernelTester()
         .batch_size(129)
@@ -1279,20 +1306,24 @@
   }
 
   TEST(F32_RSUM__HVX_U128_ACC2, overflow_accumulator) {
+    TEST_REQUIRES_HVX;
     RSumMicrokernelTester()
-      .batch_size(2056)
+      .batch_size(16384)
       .Test(xnn_f32_rsum_ukernel__hvx_u128_acc2, xnn_init_f32_scale_scalar_params);
   }
-#endif // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   TEST(F32_RSUM__HVX_U128_ACC4, batch_eq_128) {
+    TEST_REQUIRES_HVX;
     RSumMicrokernelTester()
       .batch_size(128)
       .Test(xnn_f32_rsum_ukernel__hvx_u128_acc4, xnn_init_f32_scale_scalar_params);
   }
 
   TEST(F32_RSUM__HVX_U128_ACC4, batch_div_128) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 256; batch_size < 1280; batch_size += 128) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
@@ -1301,6 +1332,7 @@
   }
 
   TEST(F32_RSUM__HVX_U128_ACC4, batch_lt_128) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 1; batch_size < 128; batch_size++) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
@@ -1309,6 +1341,7 @@
   }
 
   TEST(F32_RSUM__HVX_U128_ACC4, batch_gt_128) {
+    TEST_REQUIRES_HVX;
     for (size_t batch_size = 129; batch_size < 256; batch_size++) {
       RSumMicrokernelTester()
         .batch_size(batch_size)
@@ -1317,6 +1350,7 @@
   }
 
   TEST(F32_RSUM__HVX_U128_ACC4, scale) {
+    TEST_REQUIRES_HVX;
     for (float scale = 0.3f; scale < 5.0f; scale *= 3.0f) {
       RSumMicrokernelTester()
         .batch_size(129)
@@ -1326,11 +1360,13 @@
   }
 
   TEST(F32_RSUM__HVX_U128_ACC4, overflow_accumulator) {
+    TEST_REQUIRES_HVX;
     RSumMicrokernelTester()
-      .batch_size(2056)
+      .batch_size(16384)
       .Test(xnn_f32_rsum_ukernel__hvx_u128_acc4, xnn_init_f32_scale_scalar_params);
   }
-#endif // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_RSUM__WASMSIMD_U4, batch_eq_4) {
@@ -1570,6 +1606,7 @@
       .Test(xnn_f32_rsum_ukernel__wasmsimd_u16_acc4, xnn_init_f32_scale_scalar_params);
   }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   TEST(F32_RSUM__RVV_U1V, batch_eq_1v) {
