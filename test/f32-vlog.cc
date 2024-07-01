@@ -48,13 +48,13 @@ TEST(F32_VLOG__SCALAR_LOG_U1, inplace) {
 }
 
 TEST(F32_VLOG__SCALAR_LOG_U1, special_values) {
-  constexpr size_t num_elements = 1;
+  constexpr size_t num_elements = 4;
   constexpr size_t buffered_size =
       num_elements + XNN_EXTRA_BYTES / sizeof(float);
   std::array<float, buffered_size> inputs =
-      {1.0f};
+      {1.0f, -1.0f, 0.0f, -0.0f};
   std::array<float, num_elements> expected =
-      {0.0f};
+      {0.0f, NAN, -INFINITY, -INFINITY};
   std::array<float, buffered_size> outputs;
   xnn_f32_vlog_ukernel__scalar_log_u1(
       num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -62,7 +62,7 @@ TEST(F32_VLOG__SCALAR_LOG_U1, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -114,13 +114,13 @@ TEST(F32_VLOG__SCALAR_LOG_U2, inplace) {
 }
 
 TEST(F32_VLOG__SCALAR_LOG_U2, special_values) {
-  constexpr size_t num_elements = 1;
+  constexpr size_t num_elements = 4;
   constexpr size_t buffered_size =
       num_elements + XNN_EXTRA_BYTES / sizeof(float);
   std::array<float, buffered_size> inputs =
-      {1.0f};
+      {1.0f, -1.0f, 0.0f, -0.0f};
   std::array<float, num_elements> expected =
-      {0.0f};
+      {0.0f, NAN, -INFINITY, -INFINITY};
   std::array<float, buffered_size> outputs;
   xnn_f32_vlog_ukernel__scalar_log_u2(
       num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -128,7 +128,7 @@ TEST(F32_VLOG__SCALAR_LOG_U2, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -180,13 +180,13 @@ TEST(F32_VLOG__SCALAR_LOG_U4, inplace) {
 }
 
 TEST(F32_VLOG__SCALAR_LOG_U4, special_values) {
-  constexpr size_t num_elements = 1;
+  constexpr size_t num_elements = 4;
   constexpr size_t buffered_size =
       num_elements + XNN_EXTRA_BYTES / sizeof(float);
   std::array<float, buffered_size> inputs =
-      {1.0f};
+      {1.0f, -1.0f, 0.0f, -0.0f};
   std::array<float, num_elements> expected =
-      {0.0f};
+      {0.0f, NAN, -INFINITY, -INFINITY};
   std::array<float, buffered_size> outputs;
   xnn_f32_vlog_ukernel__scalar_log_u4(
       num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -194,7 +194,7 @@ TEST(F32_VLOG__SCALAR_LOG_U4, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -230,13 +230,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U1, inplace) {
 }
 
 TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U1, special_values) {
-  constexpr size_t num_elements = 1;
+  constexpr size_t num_elements = 4;
   constexpr size_t buffered_size =
       num_elements + XNN_EXTRA_BYTES / sizeof(float);
   std::array<float, buffered_size> inputs =
-      {1.0f};
+      {1.0f, -1.0f, 0.0f, -0.0f};
   std::array<float, num_elements> expected =
-      {0.0f};
+      {0.0f, NAN, -INFINITY, -INFINITY};
   std::array<float, buffered_size> outputs;
   xnn_f32_vlog_ukernel__scalar_rational_3_3_div_u1(
       num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -244,7 +244,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U1, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -296,13 +296,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U2, inplace) {
 }
 
 TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U2, special_values) {
-  constexpr size_t num_elements = 1;
+  constexpr size_t num_elements = 4;
   constexpr size_t buffered_size =
       num_elements + XNN_EXTRA_BYTES / sizeof(float);
   std::array<float, buffered_size> inputs =
-      {1.0f};
+      {1.0f, -1.0f, 0.0f, -0.0f};
   std::array<float, num_elements> expected =
-      {0.0f};
+      {0.0f, NAN, -INFINITY, -INFINITY};
   std::array<float, buffered_size> outputs;
   xnn_f32_vlog_ukernel__scalar_rational_3_3_div_u2(
       num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -310,7 +310,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U2, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -362,13 +362,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U4, inplace) {
 }
 
 TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U4, special_values) {
-  constexpr size_t num_elements = 1;
+  constexpr size_t num_elements = 4;
   constexpr size_t buffered_size =
       num_elements + XNN_EXTRA_BYTES / sizeof(float);
   std::array<float, buffered_size> inputs =
-      {1.0f};
+      {1.0f, -1.0f, 0.0f, -0.0f};
   std::array<float, num_elements> expected =
-      {0.0f};
+      {0.0f, NAN, -INFINITY, -INFINITY};
   std::array<float, buffered_size> outputs;
   xnn_f32_vlog_ukernel__scalar_rational_3_3_div_u4(
       num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -376,7 +376,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U4, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -428,13 +428,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, inplace) {
 }
 
 TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
-  constexpr size_t num_elements = 1;
+  constexpr size_t num_elements = 4;
   constexpr size_t buffered_size =
       num_elements + XNN_EXTRA_BYTES / sizeof(float);
   std::array<float, buffered_size> inputs =
-      {1.0f};
+      {1.0f, -1.0f, 0.0f, -0.0f};
   std::array<float, num_elements> expected =
-      {0.0f};
+      {0.0f, NAN, -INFINITY, -INFINITY};
   std::array<float, buffered_size> outputs;
   xnn_f32_vlog_ukernel__scalar_rational_3_3_div_u8(
       num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -442,7 +442,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
     if (std::isfinite(expected[i])) {
       EXPECT_NEAR(
           expected[i], outputs[i],
-          1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+          0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
           << "for input " << inputs[i];
     } else {
       EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -501,13 +501,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__SSE2_RATIONAL_3_3_DIV_U4, special_values) {
     TEST_REQUIRES_X86_SSE2;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__sse2_rational_3_3_div_u4(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -515,7 +515,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -576,13 +576,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__SSE2_RATIONAL_3_3_DIV_U8, special_values) {
     TEST_REQUIRES_X86_SSE2;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__sse2_rational_3_3_div_u8(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -590,7 +590,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -651,13 +651,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__SSE2_RATIONAL_3_3_DIV_U12, special_values) {
     TEST_REQUIRES_X86_SSE2;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__sse2_rational_3_3_div_u12(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -665,7 +665,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -726,13 +726,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__SSE2_RATIONAL_3_3_DIV_U16, special_values) {
     TEST_REQUIRES_X86_SSE2;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__sse2_rational_3_3_div_u16(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -740,7 +740,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -801,13 +801,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__AVX2_RATIONAL_3_3_DIV_U8, special_values) {
     TEST_REQUIRES_X86_AVX2;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u8(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -815,7 +815,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -876,13 +876,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__AVX2_RATIONAL_3_3_DIV_U16, special_values) {
     TEST_REQUIRES_X86_AVX2;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u16(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -890,7 +890,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -951,13 +951,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__AVX2_RATIONAL_3_3_DIV_U24, special_values) {
     TEST_REQUIRES_X86_AVX2;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u24(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -965,7 +965,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1026,13 +1026,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__AVX2_RATIONAL_3_3_DIV_U32, special_values) {
     TEST_REQUIRES_X86_AVX2;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u32(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -1040,7 +1040,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1101,13 +1101,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__FMA3_RATIONAL_3_3_DIV_U8, special_values) {
     TEST_REQUIRES_X86_FMA3;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__fma3_rational_3_3_div_u8(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -1115,7 +1115,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1176,13 +1176,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__FMA3_RATIONAL_3_3_DIV_U16, special_values) {
     TEST_REQUIRES_X86_FMA3;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__fma3_rational_3_3_div_u16(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -1190,7 +1190,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1251,13 +1251,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__FMA3_RATIONAL_3_3_DIV_U24, special_values) {
     TEST_REQUIRES_X86_FMA3;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__fma3_rational_3_3_div_u24(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -1265,7 +1265,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1326,13 +1326,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__FMA3_RATIONAL_3_3_DIV_U32, special_values) {
     TEST_REQUIRES_X86_FMA3;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__fma3_rational_3_3_div_u32(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -1340,7 +1340,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1401,13 +1401,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__AVX512F_RATIONAL_3_3_DIV_U16, special_values) {
     TEST_REQUIRES_X86_AVX512F;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u16(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -1415,7 +1415,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1476,13 +1476,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__AVX512F_RATIONAL_3_3_DIV_U32, special_values) {
     TEST_REQUIRES_X86_AVX512F;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u32(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -1490,7 +1490,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1551,13 +1551,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__AVX512F_RATIONAL_3_3_DIV_U48, special_values) {
     TEST_REQUIRES_X86_AVX512F;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u48(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -1565,7 +1565,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1626,13 +1626,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__AVX512F_RATIONAL_3_3_DIV_U64, special_values) {
     TEST_REQUIRES_X86_AVX512F;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u64(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -1640,7 +1640,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1701,13 +1701,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__NEON_RATIONAL_3_3_DIV_U4, special_values) {
     TEST_REQUIRES_ARM_NEON;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__neon_rational_3_3_div_u4(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -1715,7 +1715,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1776,13 +1776,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__NEON_RATIONAL_3_3_DIV_U8, special_values) {
     TEST_REQUIRES_ARM_NEON;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__neon_rational_3_3_div_u8(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -1790,7 +1790,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1851,13 +1851,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__NEON_RATIONAL_3_3_DIV_U12, special_values) {
     TEST_REQUIRES_ARM_NEON;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__neon_rational_3_3_div_u12(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -1865,7 +1865,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1926,13 +1926,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
 
   TEST(F32_VLOG__NEON_RATIONAL_3_3_DIV_U16, special_values) {
     TEST_REQUIRES_ARM_NEON;
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__neon_rational_3_3_div_u16(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -1940,7 +1940,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -1995,13 +1995,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
   }
 
   TEST(F32_VLOG__WASMSIMD_RATIONAL_3_3_DIV_U4, special_values) {
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u4(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -2009,7 +2009,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -2064,13 +2064,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
   }
 
   TEST(F32_VLOG__WASMSIMD_RATIONAL_3_3_DIV_U8, special_values) {
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u8(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -2078,7 +2078,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -2133,13 +2133,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
   }
 
   TEST(F32_VLOG__WASMSIMD_RATIONAL_3_3_DIV_U12, special_values) {
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u12(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -2147,7 +2147,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
@@ -2202,13 +2202,13 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
   }
 
   TEST(F32_VLOG__WASMSIMD_RATIONAL_3_3_DIV_U16, special_values) {
-    constexpr size_t num_elements = 1;
+    constexpr size_t num_elements = 4;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
     std::array<float, buffered_size> inputs =
-        {1.0f};
+        {1.0f, -1.0f, 0.0f, -0.0f};
     std::array<float, num_elements> expected =
-        {0.0f};
+        {0.0f, NAN, -INFINITY, -INFINITY};
     std::array<float, buffered_size> outputs;
     xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u16(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
@@ -2216,7 +2216,7 @@ TEST(F32_VLOG__SCALAR_RATIONAL_3_3_DIV_U8, special_values) {
       if (std::isfinite(expected[i])) {
         EXPECT_NEAR(
             expected[i], outputs[i],
-            1 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
+            0 * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
       } else {
         EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
