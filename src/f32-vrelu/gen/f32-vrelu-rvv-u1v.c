@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/vunary.h>
-#include <xnnpack/common.h>
+#include "xnnpack/vunary.h"
+#include "xnnpack/common.h"
 #include <riscv_vector.h>
 
 void xnn_f32_vrelu_ukernel__rvv_u1v(
