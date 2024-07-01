@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <xnnpack/math.h>
-#include <xnnpack/microfnptr.h>
+#include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
 
 #include <algorithm>
 #include <cassert>

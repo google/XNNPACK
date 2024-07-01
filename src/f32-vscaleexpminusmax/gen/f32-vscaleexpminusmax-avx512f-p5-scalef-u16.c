@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vscaleexpminusmax.h>
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/vscaleexpminusmax.h"
 
 
 void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u16(

@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/vunary.h>
-#include <xnnpack/common.h>
+#include "xnnpack/vunary.h"
+#include "xnnpack/common.h"
 
 
 void xnn_f32_velu_ukernel__neonfma_rr1_p6_u16(

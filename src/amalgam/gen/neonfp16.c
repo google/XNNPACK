@@ -2,13 +2,16 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Generator: tools/update-microkernels.py -a
 
 #include <assert.h>
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vcvt.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vcvt.h"
 
 
 void xnn_f16_f32_vcvt_ukernel__neonfp16_u16(

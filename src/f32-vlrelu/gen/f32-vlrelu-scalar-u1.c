@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f32_vlrelu_ukernel__scalar_u1(

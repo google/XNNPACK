@@ -11,9 +11,9 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vcvt.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/vcvt.h"
 
 $ISA = "avx" if AVX else "sse41"
 void xnn_qs16_qs8_vcvt_ukernel__${ISA}_u${BATCH_TILE}(

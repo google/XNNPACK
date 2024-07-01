@@ -10,9 +10,9 @@
 #include <assert.h>
 #include <math.h>
 
-#include <xnnpack/dwconv.h>
-#include <xnnpack/math.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/dwconv.h"
+#include "xnnpack/math.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_8f8m9l2c1s1r__scalar_lrintf(

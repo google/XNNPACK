@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/math.h>
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/math.h"
 
 
 void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__scalar_fmagic_c2(

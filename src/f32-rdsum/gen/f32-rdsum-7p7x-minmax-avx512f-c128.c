@@ -11,9 +11,9 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/math.h>
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/math.h"
 
 
 void xnn_f32_rdsum_ukernel_7p7x__avx512f_c128(

@@ -12,11 +12,11 @@
   #include <pthread.h>
 #endif
 
-#include <xnnpack/common.h>
-#include <xnnpack/config.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/raddstoreexpminusmax.h>
+#include "xnnpack/common.h"
+#include "xnnpack/config.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/raddstoreexpminusmax.h"
 
 static struct xnn_raddstoreexpminusmax_config f16_raddstoreexpminusmax_config = {0};
 static struct xnn_raddstoreexpminusmax_config f32_raddstoreexpminusmax_config = {0};

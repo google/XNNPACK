@@ -11,7 +11,7 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/gavgpool.h>
+#include "xnnpack/gavgpool.h"
 
 
 void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__wasmsimd_c16(

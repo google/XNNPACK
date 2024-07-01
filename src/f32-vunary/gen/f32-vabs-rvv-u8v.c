@@ -11,8 +11,8 @@
 
 #include <riscv_vector.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f32_vabs_ukernel__rvv_u8v(

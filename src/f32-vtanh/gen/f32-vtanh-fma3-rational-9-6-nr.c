@@ -11,11 +11,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <simd/f32-fma3.h>
+#include "xnnpack/simd/f32-fma3.h"
 
-#include <xnnpack/common.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f32_vtanh_ukernel__fma3_rational_9_6_nr_u8(

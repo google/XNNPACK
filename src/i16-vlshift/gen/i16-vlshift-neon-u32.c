@@ -13,8 +13,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/vlshift.h>
+#include "xnnpack/math.h"
+#include "xnnpack/vlshift.h"
 
 
 void xnn_i16_vlshift_ukernel__neon_u32(

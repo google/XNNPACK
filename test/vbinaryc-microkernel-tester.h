@@ -11,10 +11,10 @@
 #include <cstdint>
 #include <cstdlib>
 
-#include <xnnpack.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/requantization.h>
+#include "xnnpack.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/requantization.h"
 
 class VBinaryCMicrokernelTester {
  public:

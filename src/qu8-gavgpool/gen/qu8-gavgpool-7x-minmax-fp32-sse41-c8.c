@@ -11,8 +11,8 @@
 
 #include <smmintrin.h>
 
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_qu8_gavgpool_minmax_fp32_ukernel_7x__sse41_c8(

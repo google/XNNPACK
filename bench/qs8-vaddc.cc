@@ -13,12 +13,12 @@
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack.h"
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/vbinary.h"
 
 
 static void qs8_vaddc(

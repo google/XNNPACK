@@ -12,10 +12,10 @@
   #include <pthread.h>
 #endif
 
-#include <xnnpack/common.h>
-#include <xnnpack/config.h>
-#include <xnnpack/ibilinear.h>
-#include <xnnpack/microfnptr.h>
+#include "xnnpack/common.h"
+#include "xnnpack/config.h"
+#include "xnnpack/ibilinear.h"
+#include "xnnpack/microfnptr.h"
 
 static struct xnn_ibilinear_chw_config f16_ibilinear_chw_config = {0};
 static struct xnn_ibilinear_chw_config f32_ibilinear_chw_config = {0};

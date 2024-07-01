@@ -14,8 +14,8 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/packw.h>
+#include "xnnpack/common.h"
+#include "xnnpack/packw.h"
 
 
 void xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_u4(

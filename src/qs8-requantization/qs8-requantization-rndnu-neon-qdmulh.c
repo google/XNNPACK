@@ -9,8 +9,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/requantization-stubs.h>
+#include "xnnpack/math.h"
+#include "xnnpack/requantization-stubs.h"
 
 
 void xnn_qs8_requantize_rndnu__neon_qdmulh(

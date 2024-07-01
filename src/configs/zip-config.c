@@ -12,10 +12,10 @@
   #include <pthread.h>
 #endif
 
-#include <xnnpack/common.h>
-#include <xnnpack/config.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/zip.h>
+#include "xnnpack/common.h"
+#include "xnnpack/config.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/zip.h"
 
 static struct xnn_zip_config x8_zip_config = {0};
 static struct xnn_zip_config x32_zip_config = {0};

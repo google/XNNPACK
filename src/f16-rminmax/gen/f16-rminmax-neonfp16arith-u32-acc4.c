@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/reduce.h>
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
 
 
 void xnn_f16_rminmax_ukernel__neonfp16arith_u32_acc4(

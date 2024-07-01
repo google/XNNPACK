@@ -33,6 +33,7 @@ tools/generate-vunary-benchmark.py --spec test/f32-vsigmoid.yaml --output bench/
 tools/generate-vunary-benchmark.py --spec test/f32-vsqr.yaml --output bench/f32-vsqr.cc &
 tools/generate-vunary-benchmark.py --spec test/f32-vsqrt.yaml --output bench/f32-vsqrt.cc &
 tools/generate-vunary-benchmark.py --spec test/f32-vtanh.yaml --output bench/f32-vtanh.cc &
+tools/generate-vunary-benchmark.py --spec test/f32-vlog.yaml --output bench/f32-vlog.cc &
 
 ### Tests for VLRelu micro-kernels
 tools/generate-vunary-benchmark.py --spec test/f16-vlrelu.yaml --output bench/f16-vlrelu.cc &
@@ -50,5 +51,5 @@ tools/generate-rdsum-benchmark.py  --spec test/qs8-rdsum-minmax-fp32.yaml --outp
 tools/generate-rdsum-benchmark.py  --spec test/f16-rsum.yaml --output bench/f16-rsum.cc &
 tools/generate-rdsum-benchmark.py  --spec test/f16-f32acc-rsum.yaml --output bench/f16-f32acc-rsum.cc &
 tools/generate-rdsum-benchmark.py  --spec test/f32-rsum.yaml --output bench/f32-rsum.cc &
-tools/generate-rdsum-benchmark.py  --spec test/qs8-rsum-minmax-fp32.yaml --output bench/qs8-rsum-minmax-fp32.cc &
+tools/generate-rdsum-benchmark.py  --spec test/qs8-rsum.yaml --output bench/qs8-rsum.cc &
 wait

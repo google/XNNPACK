@@ -11,10 +11,10 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/math.h>
-#include <xnnpack/prefetch.h>
+#include "xnnpack/common.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/math.h"
+#include "xnnpack/prefetch.h"
 
 
 void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x16__neon_mlal_lane_prfm(

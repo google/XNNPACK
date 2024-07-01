@@ -14,7 +14,7 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/packw.h>
+#include "xnnpack/packw.h"
 
 
 void xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16(

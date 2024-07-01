@@ -8,8 +8,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/microparams.h>
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
 
 
 #ifdef __cplusplus
@@ -990,7 +990,9 @@ DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_scalar_param
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_wasmsimd_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
+#if XNN_ARCH_HEXAGON
+  DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_hvx_params)
+#endif // XNN_ARCH_HEXAGON
 
 #define DECLARE_INIT_QU8_ADD_MINMAX_PARAMS_FUNCTION(fn_name)        \
   XNN_INTERNAL size_t fn_name(                                      \

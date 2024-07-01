@@ -11,9 +11,9 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_u56(

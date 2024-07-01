@@ -2,15 +2,18 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Generator: tools/update-microkernels.py -a
 
 #include <assert.h>
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vbinary.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vbinary.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f16_vdiv_minmax_ukernel__aarch64_neonfp16arith_u8(

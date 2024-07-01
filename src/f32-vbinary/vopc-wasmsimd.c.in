@@ -13,8 +13,8 @@ $assert ACTIVATION in ["LINEAR", "MINMAX", "RELU"]
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vbinary.h"
 
 
 $WASM_F32X4_OP = {

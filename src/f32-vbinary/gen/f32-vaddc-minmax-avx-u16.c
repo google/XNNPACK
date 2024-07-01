@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vbinary.h"
 
 
 void xnn_f32_vaddc_minmax_ukernel__avx_u16(

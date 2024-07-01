@@ -22,9 +22,12 @@ SET(ALL_SSSE3_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-ssse3-6x4.c
   src/qs8-requantization/qs8-requantization-gemmlowp-ssse3.c
   src/qs8-requantization/qs8-requantization-rndna-ssse3.c
-  src/qs8-rsum/gen/qs8-rsum-minmax-fp32-ssse3-u16.c
-  src/qs8-rsum/gen/qs8-rsum-minmax-fp32-ssse3-u32-acc2.c
-  src/qs8-rsum/gen/qs8-rsum-minmax-fp32-ssse3-u64-acc4.c
+  src/qs8-rsum/gen/qs8-rsum-ssse3-u16.c
+  src/qs8-rsum/gen/qs8-rsum-ssse3-u32-acc2.c
+  src/qs8-rsum/gen/qs8-rsum-ssse3-u32.c
+  src/qs8-rsum/gen/qs8-rsum-ssse3-u64-acc2.c
+  src/qs8-rsum/gen/qs8-rsum-ssse3-u64-acc4.c
+  src/qs8-rsum/gen/qs8-rsum-ssse3-u64.c
   src/qs8-vcvt/gen/qs8-vcvt-ssse3-u16.c
   src/qs8-vcvt/gen/qs8-vcvt-ssse3-u32.c
   src/qs8-vhswish/gen/qs8-vhswish-ssse3-u16.c

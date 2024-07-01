@@ -799,6 +799,7 @@ ALL_WASMSIMD_MICROKERNEL_SRCS = [
     "src/f32-vhswish/gen/f32-vhswish-wasmsimd-u4.c",
     "src/f32-vhswish/gen/f32-vhswish-wasmsimd-u8.c",
     "src/f32-vhswish/gen/f32-vhswish-wasmsimd-u16.c",
+    "src/f32-vlog/gen/f32-vlog-wasmsimd-rational-3-3-div.c",
     "src/f32-vlrelu/gen/f32-vlrelu-wasmsimd-iminmax-u4.c",
     "src/f32-vlrelu/gen/f32-vlrelu-wasmsimd-iminmax-u8.c",
     "src/f32-vlrelu/gen/f32-vlrelu-wasmsimd-laneselect-u4.c",

@@ -7,9 +7,9 @@
 
 #include <benchmark/benchmark.h>
 
-#include <xnnpack/gemm.h>
-#include <xnnpack/memory.h>
-#include <xnnpack/microparams.h>
+#include "xnnpack/gemm.h"
+#include "xnnpack/memory.h"
+#include "xnnpack/microparams.h"
 
 
 void reset_code_buffer(xnn_code_buffer* code_buffer, void* start) {

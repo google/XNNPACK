@@ -7,8 +7,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/fft.h>
+#include "xnnpack/math.h"
+#include "xnnpack/fft.h"
 
 
 void xnn_cs16_bfly4_samples4_ukernel__scalar(

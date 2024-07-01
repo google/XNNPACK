@@ -7,7 +7,7 @@
 
 #include <xmmintrin.h>
 
-#include <xnnpack/gavgpool.h>
+#include "xnnpack/gavgpool.h"
 
 
 void xnn_f32_gavgpool_minmax_ukernel_7x__sse_c4(

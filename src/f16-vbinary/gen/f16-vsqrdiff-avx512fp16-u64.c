@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vbinary.h"
 
 
 void xnn_f16_vsqrdiff_ukernel__avx512fp16_u64(

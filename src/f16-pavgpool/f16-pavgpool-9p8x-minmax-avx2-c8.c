@@ -7,8 +7,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/pavgpool.h>
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/pavgpool.h"
 
 
 void xnn_f16_pavgpool_minmax_ukernel_9p8x__avx2_c8(

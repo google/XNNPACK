@@ -12,11 +12,11 @@
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/window.h>
+#include "xnnpack.h"
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/window.h"
 
 
 void s16_window(

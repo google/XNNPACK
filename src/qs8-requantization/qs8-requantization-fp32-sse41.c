@@ -12,7 +12,7 @@
 
 #include <nmmintrin.h>
 
-#include <xnnpack/requantization-stubs.h>
+#include "xnnpack/requantization-stubs.h"
 
 
 void xnn_qs8_requantize_fp32__sse41(

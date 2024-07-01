@@ -9,9 +9,9 @@
 
 #include <assert.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/vbinary.h"
 
 
 void xnn_f32_vsub_ukernel__scalar_u1(

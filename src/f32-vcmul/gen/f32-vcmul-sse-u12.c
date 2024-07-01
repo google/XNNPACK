@@ -11,8 +11,8 @@
 
 #include <xmmintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vbinary.h"
 
 
 void xnn_f32_vcmul_ukernel__sse_u12(

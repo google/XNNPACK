@@ -14,8 +14,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/packw.h>
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/packw.h"
 
 
 void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4(

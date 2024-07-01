@@ -12,10 +12,10 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
+#include "xnnpack/common.h"
 
-#include <xnnpack/gemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
+#include "xnnpack/gemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
 
 
 void xnn_f16_gemminc_minmax_ukernel_1x8__neonfp16arith_ld64(

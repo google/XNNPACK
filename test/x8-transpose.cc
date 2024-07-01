@@ -8,10 +8,10 @@
 //   Generator: tools/generate-transpose-test.py
 
 
-#include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/transpose.h>
+#include "xnnpack/common.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/transpose.h"
 
 #include <gtest/gtest.h>
 #include "transpose-microkernel-tester.h"

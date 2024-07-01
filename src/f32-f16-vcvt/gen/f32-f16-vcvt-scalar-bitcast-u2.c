@@ -9,9 +9,9 @@
 
 #include <assert.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/vcvt.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/vcvt.h"
 
 
 void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_u2(

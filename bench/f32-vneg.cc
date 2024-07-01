@@ -10,13 +10,13 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack.h"
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vunary.h"
 
 #include "bench/f32-vunary-benchmark.h"
 #include "bench/utils.h"

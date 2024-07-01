@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/common.h>
+#include "xnnpack/common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,6 +48,7 @@ struct xnn_hardware_config {
   bool use_x86_avx512amx;
   bool use_x86_avx512fp16;
   bool use_x86_avxvnni;
+  bool use_x86_avx256skx;
 #endif
 #if XNN_ARCH_RISCV
   bool use_riscv_vector;

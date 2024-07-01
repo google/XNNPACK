@@ -192,9 +192,9 @@ def main(args):
 //   Generator: {generator}
 
 
-#include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/packq.h>
+#include "xnnpack/common.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/packq.h"
 
 #include <cstddef>
 
@@ -217,8 +217,8 @@ namespace xnnpack {{""".format(
 //   Generator: {generator}
 
 
-#include <xnnpack/common.h>
-#include <xnnpack/packq.h>
+#include "xnnpack/common.h"
+#include "xnnpack/packq.h"
 
 #include <benchmark/benchmark.h>
 #include "bench/bgemm.h"

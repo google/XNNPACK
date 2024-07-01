@@ -12,8 +12,8 @@ $SIMD_TILE = CHANNEL_TILE // 8
 
 #include <arm_neon.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/window.h>
+#include "xnnpack/math.h"
+#include "xnnpack/window.h"
 
 $SHIFT_VARIANT = "_shift%s" % SHIFT if SHIFT else ""
 

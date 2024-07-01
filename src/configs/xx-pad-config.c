@@ -12,10 +12,10 @@
   #include <pthread.h>
 #endif
 
-#include <xnnpack/common.h>
-#include <xnnpack/config.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/pad.h>
+#include "xnnpack/common.h"
+#include "xnnpack/config.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/pad.h"
 
 static struct xnn_xx_pad_config xx_pad_config = {0};
 

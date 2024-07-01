@@ -2,16 +2,19 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Generator: tools/update-microkernels.py -a
 
 #include <assert.h>
 #include <string.h>
 
 #include <arm_fp16.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/vbinary.h"
 
 
 void xnn_f16_vdiv_minmax_ukernel__fp16arith_u2(

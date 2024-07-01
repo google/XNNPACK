@@ -7,13 +7,13 @@
 #include <cstddef>
 #include <limits>
 
-#include <xnnpack.h>
-#include <xnnpack/aarch64-assembler.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/log.h>
-#include <xnnpack/memory.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/post-operation.h>
+#include "xnnpack.h"
+#include "xnnpack/aarch64-assembler.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/log.h"
+#include "xnnpack/memory.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/post-operation.h"
 
 namespace xnnpack {
 namespace aarch64 {

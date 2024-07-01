@@ -11,12 +11,12 @@
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
+#include "xnnpack.h"
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -212,6 +212,50 @@
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  BENCHMARK_CAPTURE(f32_rsum, hvx_u32,
+                    xnn_f32_rsum_ukernel__hvx_u32,
+                    xnn_init_f32_scale_scalar_params)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  BENCHMARK_CAPTURE(f32_rsum, hvx_u64_acc2,
+                    xnn_f32_rsum_ukernel__hvx_u64_acc2,
+                    xnn_init_f32_scale_scalar_params)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  BENCHMARK_CAPTURE(f32_rsum, hvx_u96_acc3,
+                    xnn_f32_rsum_ukernel__hvx_u96_acc3,
+                    xnn_init_f32_scale_scalar_params)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  BENCHMARK_CAPTURE(f32_rsum, hvx_u128_acc2,
+                    xnn_f32_rsum_ukernel__hvx_u128_acc2,
+                    xnn_init_f32_scale_scalar_params)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  BENCHMARK_CAPTURE(f32_rsum, wasmsimd_u128_acc4,
+                    xnn_f32_rsum_ukernel__hvx_u128_acc4,
+                    xnn_init_f32_scale_scalar_params)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

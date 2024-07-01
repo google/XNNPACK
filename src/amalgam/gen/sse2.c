@@ -2,40 +2,43 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Generator: tools/update-microkernels.py -a
 
 #include <assert.h>
-#include <simd/f32-sse2.h>
 #include <stddef.h>
 #include <stdint.h>
 
 #include <immintrin.h>
 
-#include <xnnpack/argmaxpool.h>
-#include <xnnpack/avgpool.h>
-#include <xnnpack/common.h>
-#include <xnnpack/dwconv.h>
-#include <xnnpack/fill.h>
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/ibilinear.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/maxpool.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/packw.h>
-#include <xnnpack/pad.h>
-#include <xnnpack/prelu.h>
-#include <xnnpack/raddstoreexpminusmax.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/transpose.h>
-#include <xnnpack/unaligned.h>
-#include <xnnpack/unpool.h>
-#include <xnnpack/vbinary.h>
-#include <xnnpack/vcvt.h>
-#include <xnnpack/vlrelu.h>
-#include <xnnpack/vunary.h>
-#include <xnnpack/zip.h>
+#include "xnnpack/argmaxpool.h"
+#include "xnnpack/avgpool.h"
+#include "xnnpack/common.h"
+#include "xnnpack/dwconv.h"
+#include "xnnpack/fill.h"
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/ibilinear.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/maxpool.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/packw.h"
+#include "xnnpack/pad.h"
+#include "xnnpack/prelu.h"
+#include "xnnpack/raddstoreexpminusmax.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/simd/f32-sse2.h"
+#include "xnnpack/transpose.h"
+#include "xnnpack/unaligned.h"
+#include "xnnpack/unpool.h"
+#include "xnnpack/vbinary.h"
+#include "xnnpack/vcvt.h"
+#include "xnnpack/vlrelu.h"
+#include "xnnpack/vunary.h"
+#include "xnnpack/zip.h"
 
 
 void xnn_f16_f32_vcvt_ukernel__sse2_int16_u32(

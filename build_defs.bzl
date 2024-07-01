@@ -73,7 +73,8 @@ def xnnpack_slinky_defines():
 
 def xnnpack_if_kleidiai_enabled(enabled = [], not_enabled = []):
     return select({
-        ":kleidiai_enabled": enabled,
+        # TODO: b/349993583 - Uncomment when KleidiAI has an official BUILD file.
+        # ":kleidiai_enabled": enabled,
         "//conditions:default": not_enabled,
     })
 
@@ -624,7 +625,8 @@ source_list_aspect = aspect(
 )
 
 def _transitive_source_list_rule_impl(ctx):
-    files = [p for dep in ctx.attr.deps for p in dep[SrcListInfo].srcs.to_list() if p.owner.repo_name == ctx.label.repo_name and p.owner.package.startswith(ctx.label.package)]
+    get_repo_name = lambda x: getattr(x, "repo_name", getattr(x, "workspace_name"))
+    files = [p for dep in ctx.attr.deps for p in dep[SrcListInfo].srcs.to_list() if get_repo_name(p.owner) == get_repo_name(ctx.label) and p.owner.package.startswith(ctx.label.package)]
     return [DefaultInfo(files = depset(files))]
 
 xnnpack_transitive_source_list = rule(

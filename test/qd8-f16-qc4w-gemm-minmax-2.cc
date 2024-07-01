@@ -10,16 +10,16 @@
 //   Specification: test/qd8-f16-qc4w-gemm-minmax.yaml
 //   Generator: tools/generate-gemm-test.py
 
-#include <xnnpack/allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/packw.h>
-#include <xnnpack/ppmm.h>
-#include <xnnpack/requantization.h>
+#include "xnnpack/allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/pack.h"
+#include "xnnpack/packw.h"
+#include "xnnpack/ppmm.h"
+#include "xnnpack/requantization.h"
 
 #include <cstddef>
 #include <functional>
@@ -943,3 +943,25 @@ std::vector<GemmTestParams> CreateTests1(
         return info.param.test_name;
       });
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ENABLE_AVX256SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F16_QC4W_GEMM_MINMAX_8X8C8__AVX256SKX, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
+          /*mr=*/8, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+          /*is_igemm=*/false,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f16_qc4w_gemm_minmax_ukernel_8x8c8__avx256skx,
+                        xnn_init_f16_qc4w_minmax_avx_params,
+                        xnn_pack_qs8_qc4w_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_X86_AVX256SKX;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+#endif  // XNN_ENABLE_AVX256SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

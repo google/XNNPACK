@@ -7,7 +7,7 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/vunary.h>
+#include "xnnpack/vunary.h"
 
 
 void xnn_u8_vclamp_ukernel__neon_u64(

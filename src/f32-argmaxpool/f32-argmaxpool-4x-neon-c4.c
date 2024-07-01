@@ -7,7 +7,7 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/argmaxpool.h>
+#include "xnnpack/argmaxpool.h"
 
 
 void xnn_f32_argmaxpool_ukernel_4x__neon_c4(

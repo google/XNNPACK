@@ -7,7 +7,7 @@
 
 #include <xmmintrin.h>
 
-#include <xnnpack/maxpool.h>
+#include "xnnpack/maxpool.h"
 
 
 void xnn_f32_maxpool_minmax_ukernel_9p8x__sse_c4(

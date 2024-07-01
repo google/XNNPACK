@@ -13,9 +13,9 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/math-stubs.h"
 
 
 void xnn_math_f32_tanh__wasmsimd_expm1minus_rr1_p6h5ts_div_nabs_max(

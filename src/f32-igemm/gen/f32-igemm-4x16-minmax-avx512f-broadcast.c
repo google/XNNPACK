@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/igemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
+#include "xnnpack/igemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
 
 
 void xnn_f32_igemm_minmax_ukernel_4x16__avx512f_broadcast(

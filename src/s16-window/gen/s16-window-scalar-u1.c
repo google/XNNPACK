@@ -11,8 +11,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/window.h>
+#include "xnnpack/math.h"
+#include "xnnpack/window.h"
 
 
 void xnn_s16_window_ukernel__scalar_u1(

@@ -24,6 +24,10 @@
 - name: xnn_f32_vsqrdiffc_ukernel__wasmsimd_u4
 - name: xnn_f32_vsqrdiffc_ukernel__wasmsimd_u8
 - name: xnn_f32_vsqrdiffc_ukernel__wasmsimd_u16
+# Hexagon HVX
+- name: xnn_f32_vsqrdiffc_ukernel__hvx_u32 
+- name: xnn_f32_vsqrdiffc_ukernel__hvx_u64
+- name: xnn_f32_vsqrdiffc_ukernel__hvx_u128
 # Scalar
 - name: xnn_f32_vsqrdiffc_ukernel__scalar_u1
 - name: xnn_f32_vsqrdiffc_ukernel__scalar_u2

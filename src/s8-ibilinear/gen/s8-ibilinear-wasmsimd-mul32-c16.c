@@ -11,8 +11,8 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/ibilinear.h>
+#include "xnnpack/common.h"
+#include "xnnpack/ibilinear.h"
 
 
 void xnn_s8_ibilinear_ukernel__wasmsimd_mul32_c16(

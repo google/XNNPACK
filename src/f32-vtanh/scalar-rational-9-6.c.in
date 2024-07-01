@@ -9,9 +9,9 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vunary.h"
 
 void xnn_f32_vtanh_ukernel__scalar_rational_9_6_u${BATCH_TILE}(
     size_t batch,

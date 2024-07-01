@@ -12,12 +12,12 @@
 #include <benchmark/benchmark.h>
 #include "bench/utils.h"
 
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/vhswish.h>
+#include "xnnpack.h"
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/vhswish.h"
 
 
 static void qs8_vhswish(

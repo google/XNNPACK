@@ -9,10 +9,10 @@ $import math
 
 #include <immintrin.h>
 
-#include <xnnpack/unaligned.h>
-#include <xnnpack/common.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/math.h>
+#include "xnnpack/unaligned.h"
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/math.h"
 
 
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcderfghijlmnopqrstuvqxyz01234567"

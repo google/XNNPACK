@@ -11,9 +11,9 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/prelu.h>
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/prelu.h"
 
 
 void xnn_f32_prelu_ukernel__avx512f_2x16(

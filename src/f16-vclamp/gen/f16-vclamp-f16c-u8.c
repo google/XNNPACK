@@ -11,9 +11,9 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f16_vclamp_ukernel__f16c_u8(

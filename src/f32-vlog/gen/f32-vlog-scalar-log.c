@@ -10,8 +10,8 @@
 #include <assert.h>
 #include <math.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f32_vlog_ukernel__scalar_log_u1(

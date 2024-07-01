@@ -8,8 +8,8 @@
 //   Generator: tools/generate-packq-test.py
 
 
-#include <xnnpack/common.h>
-#include <xnnpack/packq.h>
+#include "xnnpack/common.h"
+#include "xnnpack/packq.h"
 
 #include <benchmark/benchmark.h>
 #include "bench/bgemm.h"

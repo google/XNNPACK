@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/gemm.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/gemm.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_f32_qc4w_gemm_minmax_ukernel_8x16__avx_broadcast(

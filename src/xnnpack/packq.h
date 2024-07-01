@@ -9,8 +9,8 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -14,8 +14,8 @@ $assert REQUANTIZATION == "FP32"
 $if VARIANT == "LRINTF":
   #include <math.h>
 
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/math.h>
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/math.h"
 
 
 $PARAMS_STRUCT = "fp32_scalar_" + VARIANT.lower()

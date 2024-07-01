@@ -11,7 +11,7 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/dwconv.h>
+#include "xnnpack/dwconv.h"
 
 
 void xnn_f32_dwconv_minmax_ukernel_9p4c__wasmsimd_x86_acc2(

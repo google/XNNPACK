@@ -11,10 +11,10 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/gemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/gemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_14x16c8__avx512vnni(

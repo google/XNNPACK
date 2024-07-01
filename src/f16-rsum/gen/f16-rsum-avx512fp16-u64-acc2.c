@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/reduce.h>
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
 
 
 void xnn_f16_rsum_ukernel__avx512fp16_u64_acc2(

@@ -2,17 +2,20 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Generator: tools/update-microkernels.py -a
 
 #include <assert.h>
 
 #include <arm_acle.h>
 
-#include <xnnpack/gemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/unaligned.h>
-#include <xnnpack/vcvt.h>
-#include <xnnpack/vlrelu.h>
+#include "xnnpack/gemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/unaligned.h"
+#include "xnnpack/vcvt.h"
+#include "xnnpack/vlrelu.h"
 
 
 void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x2c4__armsimd32(

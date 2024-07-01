@@ -13,9 +13,9 @@ $assert SAT in ["MINMAX", "SELECT"]
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/math-stubs.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/math-stubs.h"
 
 $POLYNOMIAL = "c%d" % P
 $for i in reversed(range(P-2)):

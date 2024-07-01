@@ -8,9 +8,9 @@
 //   Generator: tools/generate-packq-test.py
 
 
-#include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/packq.h>
+#include "xnnpack/common.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/packq.h"
 
 #include <cstddef>
 

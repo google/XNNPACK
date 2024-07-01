@@ -12,7 +12,7 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/igemm.h>
+#include "xnnpack/igemm.h"
 
 
 void xnn_f32_igemm_minmax_ukernel_3x16__aarch64_neonfma_lane_ld128(

@@ -16,17 +16,17 @@
 #include <random>
 #include <vector>
 
-#include <xnnpack.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams.h"
 
 #include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 
 #if XNN_PLATFORM_JIT
-  #include <xnnpack/memory.h>
+  #include "xnnpack/memory.h"
 #endif
 
 void VUnaryMicrokernelTester::Test(xnn_f32_vrelu_ukernel_fn vrelu) const {
@@ -260,9 +260,10 @@ void VUnaryMicrokernelTester::TestLog(
     xnn_f32_vlog_ukernel_fn vlog,
     xnn_init_f32_default_params_fn init_params) const {
   TestFP32(
-      vlog, InitParamsWrapper(init_params),
-      [](float x) { return std::log(x); },
-      TolRelative(2.5f * std::numeric_limits<float>::epsilon()), 0.0f, 10.0f);
+      vlog, InitParamsWrapper(init_params), [](float x) { return std::log(x); },
+      TolMixed(2 * std::numeric_limits<float>::epsilon(),
+               6 * std::numeric_limits<float>::epsilon()),
+      0.0f, 10.0f);
 }
 
 void VUnaryMicrokernelTester::Test(

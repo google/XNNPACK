@@ -11,9 +11,9 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
+#include "xnnpack/common.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
 
 
 void xnn_qu8_gemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane(

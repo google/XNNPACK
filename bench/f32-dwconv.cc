@@ -15,15 +15,15 @@
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/dwconv.h>
-#include <xnnpack/indirection.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microkernel-utils.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/pack.h>
+#include "xnnpack.h"
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/dwconv.h"
+#include "xnnpack/indirection.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microkernel-utils.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/pack.h"
 
 
 static void f32_dwconv(benchmark::State& state,

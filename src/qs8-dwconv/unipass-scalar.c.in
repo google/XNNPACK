@@ -11,10 +11,10 @@ $assert DATATYPE in ["QC8", "QS8", "QU8"]
 $if VARIANT == "LRINTF":
   #include <math.h>
 
-#include <xnnpack/dwconv.h>
-#include <xnnpack/math.h>
+#include "xnnpack/dwconv.h"
+#include "xnnpack/math.h"
 $if CHANNEL_TILE % 4 != 0:
-  #include <xnnpack/unaligned.h>
+  #include "xnnpack/unaligned.h"
 
 
 $DATATYPE_SPEC = {"QS8": "qs8", "QC8": "qs8_qc8w", "QU8": "qu8"}[DATATYPE]

@@ -11,7 +11,7 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/raddexpminusmax.h>
+#include "xnnpack/raddexpminusmax.h"
 
 
 static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};

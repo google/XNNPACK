@@ -10,8 +10,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/avgpool.h>
-#include <xnnpack/common.h>
+#include "xnnpack/avgpool.h"
+#include "xnnpack/common.h"
 
 
 void xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8(

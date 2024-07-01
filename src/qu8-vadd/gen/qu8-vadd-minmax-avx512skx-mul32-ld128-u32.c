@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/vbinary.h"
 
 
 void xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_u32(

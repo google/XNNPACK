@@ -68,7 +68,7 @@ def generate_source(enum_name, spec_path, output_path, header_path, debug_only):
 #include <assert.h>
 #include <stdint.h>
 
-#include <{header_path}>\n\n"""
+#include "src//{header_path}"\n\n"""
 
     max_offset = sum(len(entry['string']) + 1 for entry in spec_yaml[:-1])
     if max_offset < 256:
@@ -137,7 +137,7 @@ def generate_header(enum_name, spec_path, output_path, debug_only):
 
 #pragma once
 
-#include <xnnpack/common.h>
+#include "xnnpack/common.h"
 
 
 #ifdef __cplusplus

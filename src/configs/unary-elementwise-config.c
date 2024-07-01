@@ -12,14 +12,14 @@
   #include <pthread.h>
 #endif
 
-#include <xnnpack/common.h>
-#include <xnnpack/config.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/packq.h>
-#include <xnnpack/vcvt.h>
-#include <xnnpack/vlrelu.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/config.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/packq.h"
+#include "xnnpack/vcvt.h"
+#include "xnnpack/vlrelu.h"
+#include "xnnpack/vunary.h"
 
 static struct xnn_unary_elementwise_config f16_abs_config = {0};
 static struct xnn_unary_elementwise_config f16_clamp_config = {0};
@@ -1025,6 +1025,10 @@ static void init_f32_relu_config(void) {
   #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_relu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__wasmsimd_u16;
     f32_relu_config.element_tile = 16;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    f32_relu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__rvv_u4v;
+    f32_relu_config.element_tile = hardware_config->vlenb;
   #elif XNN_ARCH_WASM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);

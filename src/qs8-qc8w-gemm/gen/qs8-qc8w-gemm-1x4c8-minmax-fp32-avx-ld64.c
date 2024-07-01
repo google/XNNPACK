@@ -15,9 +15,9 @@
   #include <x86intrin.h>
 #endif
 
-#include <xnnpack/gemm.h>
-#include <xnnpack/math.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/gemm.h"
+#include "xnnpack/math.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c8__avx_ld64(

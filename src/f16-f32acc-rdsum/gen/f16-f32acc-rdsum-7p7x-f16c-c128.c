@@ -11,10 +11,10 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/unaligned.h>
-#include <xnnpack/common.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/math.h>
+#include "xnnpack/unaligned.h"
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/math.h"
 
 
 void xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c128(

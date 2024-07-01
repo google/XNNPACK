@@ -15,8 +15,8 @@
 #include <string>
 #include <vector>
 
-#include <xnnpack.h>
-#include <xnnpack/common.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
 
 #include <benchmark/benchmark.h>
 #include <fp16/fp16.h>

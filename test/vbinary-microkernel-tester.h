@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include <xnnpack.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/requantization.h>
+#include "xnnpack.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/requantization.h"
 
 #include <cassert>
 #include <cmath>

@@ -12,9 +12,9 @@
   #include <pthread.h>
 #endif
 
-#include <xnnpack/common.h>
-#include <xnnpack/config.h>
-#include <xnnpack/lut.h>
+#include "xnnpack/common.h"
+#include "xnnpack/config.h"
+#include "xnnpack/lut.h"
 
 
 static struct xnn_lut32norm_config u8_lut32norm_config = {0};

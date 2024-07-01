@@ -11,8 +11,8 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/vunary.h>
-#include <xnnpack/common.h>
+#include "xnnpack/vunary.h"
+#include "xnnpack/common.h"
 
 
 void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_u16(

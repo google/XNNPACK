@@ -9,9 +9,9 @@
 
 #include <assert.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f32_vclamp_ukernel__wasm_u1(

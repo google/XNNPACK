@@ -12,10 +12,10 @@
 
 #include <arm_fp16.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/vbinary.h"
 
 
 void xnn_f16_vaddc_minmax_ukernel__fp16arith_u2(

@@ -11,8 +11,8 @@
 
 #include <xmmintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vunary.h"
 
 // In the following, we do a single Newton-Raphson step on the equation
 // $x^{-2} - a$, which expands to:

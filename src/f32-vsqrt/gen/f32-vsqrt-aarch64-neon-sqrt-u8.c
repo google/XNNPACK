@@ -12,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f32_vsqrt_ukernel__aarch64_neon_sqrt_u8(

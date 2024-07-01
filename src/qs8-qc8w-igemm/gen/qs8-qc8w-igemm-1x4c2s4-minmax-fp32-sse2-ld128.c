@@ -11,9 +11,9 @@
 
 #include <emmintrin.h>
 
-#include <xnnpack/igemm.h>
-#include <xnnpack/math.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/igemm.h"
+#include "xnnpack/math.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4c2s4__sse2_ld128(

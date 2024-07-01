@@ -11,9 +11,9 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/ibilinear.h>
-#include <xnnpack/intrinsics-polyfill.h>
+#include "xnnpack/common.h"
+#include "xnnpack/ibilinear.h"
+#include "xnnpack/intrinsics-polyfill.h"
 
 
 void xnn_f16_ibilinear_ukernel__fma3_c16(

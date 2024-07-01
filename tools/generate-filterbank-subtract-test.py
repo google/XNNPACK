@@ -134,10 +134,10 @@ def main(args):
 
 #include <gtest/gtest.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/isa-checks.h>
+#include "xnnpack/common.h"
+#include "xnnpack/isa-checks.h"
 
-#include <xnnpack/filterbank.h>
+#include "xnnpack/filterbank.h"
 #include "filterbank-subtract-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 

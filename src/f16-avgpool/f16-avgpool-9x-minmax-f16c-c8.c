@@ -7,8 +7,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/avgpool.h>
-#include <xnnpack/intrinsics-polyfill.h>
+#include "xnnpack/avgpool.h"
+#include "xnnpack/intrinsics-polyfill.h"
 
 
 void xnn_f16_avgpool_minmax_ukernel_9x__f16c_c8(

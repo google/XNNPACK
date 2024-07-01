@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/prelu.h>
+#include "xnnpack/math.h"
+#include "xnnpack/prelu.h"
 
 
 static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};

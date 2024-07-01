@@ -11,9 +11,9 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vcvt.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/vcvt.h"
 
 
 void xnn_qs8_f32_vcvt_ukernel__neon_u32(

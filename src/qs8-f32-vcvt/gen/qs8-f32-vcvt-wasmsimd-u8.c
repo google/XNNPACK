@@ -11,9 +11,9 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vcvt.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/vcvt.h"
 
 
 void xnn_qs8_f32_vcvt_ukernel__wasmsimd_u8(

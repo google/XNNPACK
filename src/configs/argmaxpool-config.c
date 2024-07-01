@@ -12,10 +12,10 @@
   #include <pthread.h>
 #endif
 
-#include <xnnpack/argmaxpool.h>
-#include <xnnpack/common.h>
-#include <xnnpack/config.h>
-#include <xnnpack/microfnptr.h>
+#include "xnnpack/argmaxpool.h"
+#include "xnnpack/common.h"
+#include "xnnpack/config.h"
+#include "xnnpack/microfnptr.h"
 
 static struct xnn_argmaxpool_config f32_argmaxpool_config[XNN_MAX_F32_ARGMAXPOOL_UKERNELS ] = {0};
 

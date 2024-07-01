@@ -68,6 +68,7 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/f32-velu/gen/f32-velu-sse2-rr2-p6-u16.c
   src/f32-velu/gen/f32-velu-sse2-rr2-p6-u20.c
   src/f32-velu/gen/f32-velu-sse2-rr2-p6-u24.c
+  src/f32-vlog/gen/f32-vlog-sse2-rational-3-3-div.c
   src/f32-vlrelu/gen/f32-vlrelu-sse2-u4.c
   src/f32-vlrelu/gen/f32-vlrelu-sse2-u8.c
   src/f32-vrnd/gen/f32-vrndd-sse2-u4.c

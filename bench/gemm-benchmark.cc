@@ -3,18 +3,18 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/config-types.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/packq.h>
-#include <xnnpack/packw.h>
+#include "xnnpack.h"
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/config-types.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/pack.h"
+#include "xnnpack/packq.h"
+#include "xnnpack/packw.h"
 
 #include <algorithm>
 #include <cmath>

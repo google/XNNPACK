@@ -457,23 +457,23 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
       # replace year
       prologue.append(line)
       continue
-    elif '#include <xnnpack/assembly.h>' in line:
+    elif '#include "xnnpack/assembly.h"' in line:
       prologue.append(f'#include <cassert>')
       prologue.append(f'#include <cstddef>')
       if minmax:
         prologue.append(f'#include <limits>')
       prologue.append('')
-      prologue.append('#include <xnnpack.h>')
-      prologue.append(f'#include <xnnpack/{arch}-assembler.h>')
+      prologue.append('#include "xnnpack.h"')
+      prologue.append(f'#include "xnnpack/{arch}-assembler.h"')
       if kernel_type == GEMM:
-        prologue.append('#include <xnnpack/gemm.h>')
+        prologue.append('#include "xnnpack/gemm.h"')
       else:
-        prologue.append('#include <xnnpack/igemm.h>')
+        prologue.append('#include "xnnpack/igemm.h"')
       if post_op:
-        prologue.append('#include <xnnpack/log.h>')
-      prologue.append('#include <xnnpack/memory.h>')
-      prologue.append('#include <xnnpack/microparams.h>')
-      prologue.append('#include <xnnpack/post-operation.h>')
+        prologue.append('#include "xnnpack/log.h"')
+      prologue.append('#include "xnnpack/memory.h"')
+      prologue.append('#include "xnnpack/microparams.h"')
+      prologue.append('#include "xnnpack/post-operation.h"')
       prologue.append('')
       prologue.append('namespace xnnpack {')
       prologue.append(f'namespace {arch} {{')

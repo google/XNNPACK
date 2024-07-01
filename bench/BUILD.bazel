@@ -234,9 +234,9 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "qs8_rsum_minmax_fp32_bench",
+    name = "qs8_rsum_bench",
     srcs = [
-        "qs8-rsum-minmax-fp32.cc",
+        "qs8-rsum.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":rsum_benchmark",
@@ -548,6 +548,7 @@ xnnpack_benchmark(
     "f32_vabs",
     "f32_velu",
     "f32_vhswish",
+    "f32_vlog",
     "f32_vlrelu",
     "f32_vneg",
     "f32_vrelu",

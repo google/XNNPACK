@@ -8,10 +8,10 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/unaligned.h"
 
-#include <xnnpack/math.h>
-#include <xnnpack/spmm.h>
+#include "xnnpack/math.h"
+#include "xnnpack/spmm.h"
 
 
 void xnn_f32_qc8w_spmm_minmax_ukernel_1x1__scalar(

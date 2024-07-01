@@ -8,11 +8,11 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/unaligned.h"
 
 #include <fp16/fp16.h>
 
@@ -985,7 +985,7 @@ size_t xnn_init_qs8_rsum_ssse3_params(
   for (uint32_t i = 16; i < 32; i++) {
     params->ssse3.onemask_table[i] = 0;
   }
-  return sizeof(params->sse4);
+  return sizeof(params->ssse3);
 }
 
 size_t xnn_init_qs8_rsum_sse4_params(
@@ -1003,11 +1003,11 @@ size_t xnn_init_qs8_rsum_sse4_params(
 size_t xnn_init_qs8_rsum_avx2_params(
   union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
 {
-  for (uint32_t i = 0; i < 15; i++) {
-    params->avx2.mask_table[i] = 1;
+  for (uint32_t i = 0; i < 32; i++) {
+    params->avx2.onemask_table[i] = 1;
   }
-  for (uint32_t i = 15; i < 30; i++) {
-    params->avx2.mask_table[i] = 0;
+  for (uint32_t i = 32; i < 64; i++) {
+    params->avx2.onemask_table[i] = 0;
   }
   return sizeof(params->avx2);
 }
@@ -6392,6 +6392,67 @@ size_t xnn_init_qs8_add_minmax_wasmsimd_params(
   return sizeof(params->wasmsimd);
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ARCH_HEXAGON
+size_t xnn_init_qs8_add_minmax_hvx_params(
+  union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t a_zero_point,
+  int8_t b_zero_point,
+  int8_t output_zero_point,
+  float a_output_scale,
+  float b_output_scale,
+  int8_t output_min,
+  int8_t output_max)
+{
+  const float abs_a_output_scale = fabsf(a_output_scale);
+  const float abs_b_output_scale = fabsf(b_output_scale);
+  assert(abs_a_output_scale >= 0x1.0p-10f);
+  assert(abs_b_output_scale >= 0x1.0p-10f);
+  assert(abs_a_output_scale < 0x1.0p+8f);
+  assert(abs_b_output_scale < 0x1.0p+8f);
+
+  // Compute requantization parameters.
+  const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
+  assert(max_abs_output_scale >= 0x1.0p-10f);
+  assert(max_abs_output_scale < 0x1.0p+8f);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
+  const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
+
+  // Shift is in [12, 30] range.
+  const uint32_t shift = (uint32_t) (20 /* multiplier bits */ - max_scale_exponent);
+  assert(shift <= 30);
+  assert(shift >= 12);
+
+  const int32_t first_shift = min(shift, 15);
+  const int32_t rest_shift = shift - first_shift;
+  assert(first_shift < 16);
+  assert(rest_shift < 16);
+   
+  // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
+  assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
+  assert(abs_a_multiplier <= INT32_C(0x00200000));
+  assert(abs_b_multiplier <= INT32_C(0x00200000));
+
+  const int32_t a_multiplier = signbit(a_output_scale) ? -abs_a_multiplier : abs_a_multiplier;
+  const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
+
+  const int32_t rounding = INT32_C(1) << (shift - 1);
+  const int32_t bias = rounding - a_multiplier * (int32_t) a_zero_point - b_multiplier * (int32_t) b_zero_point;
+
+  params->hvx.bias = bias;
+  params->hvx.a_multiplier = a_multiplier;
+  params->hvx.b_multiplier = b_multiplier;
+  params->hvx.first_shift = first_shift;
+  params->hvx.rest_shift = rest_shift;
+  params->hvx.output_zero_point = (int16_t) output_zero_point;
+  params->hvx.output_min = (int8_t) output_min;
+  params->hvx.output_max = (int8_t) output_max;
+
+  return sizeof(params->hvx);
+}
+#endif // XNN_ARCH_HEXAGON
 
 size_t xnn_init_qs8_add_minmax_scalar_params(
   union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],

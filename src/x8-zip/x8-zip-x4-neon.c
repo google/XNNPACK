@@ -8,7 +8,7 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/zip.h>
+#include "xnnpack/zip.h"
 
 
 void xnn_x8_zip_x4_ukernel__neon(

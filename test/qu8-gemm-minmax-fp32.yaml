@@ -346,8 +346,8 @@
   pack: xnn_pack_qu8_gemm_goi_w
   k-block: 8
 
-# x86 AVX512VL
-- name: xnn_qu8_gemm_minmax_fp32_ukernel_1x8c8__avx512skx
+# x86 AVX256SKX
+- name: xnn_qu8_gemm_minmax_fp32_ukernel_1x8c8__avx256skx
   init: xnn_init_qu8_conv_minmax_fp32_avx2_params
   pack: xnn_pack_qu8_gemm_goi_w
   k-block: 8

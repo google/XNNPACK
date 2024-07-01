@@ -12,9 +12,9 @@
 
 #include <riscv_vector.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f32_vsqrt_ukernel__rvv_sqrt_u8v(

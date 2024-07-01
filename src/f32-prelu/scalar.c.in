@@ -8,8 +8,8 @@ $assert ROW_TILE >= 1
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/prelu.h>
+#include "xnnpack/math.h"
+#include "xnnpack/prelu.h"
 
 
 void xnn_f32_prelu_ukernel__scalar_${ROW_TILE}x${CHANNEL_TILE}(

@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/vscaleextexp.h>
+#include "xnnpack/common.h"
+#include "xnnpack/vscaleextexp.h"
 
 
 static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};

@@ -10,11 +10,11 @@
 #include <iterator>
 #include <limits>
 
-#include <xnnpack/log.h>
-#include <xnnpack/assembler.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/post-operation.h>
-#include <xnnpack/wasm-assembler.h>
+#include "xnnpack/log.h"
+#include "xnnpack/assembler.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/post-operation.h"
+#include "xnnpack/wasm-assembler.h"
 
 
 namespace xnnpack {

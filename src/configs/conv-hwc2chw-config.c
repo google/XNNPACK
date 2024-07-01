@@ -12,11 +12,11 @@
   #include <pthread.h>
 #endif
 
-#include <xnnpack/common.h>
-#include <xnnpack/config.h>
-#include <xnnpack/conv.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
+#include "xnnpack/common.h"
+#include "xnnpack/config.h"
+#include "xnnpack/conv.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
 
 static struct xnn_conv_hwc2chw_config f16_conv_hwc2chw_3x3c3s2_config = {0};
 static struct xnn_conv_hwc2chw_config f32_conv_hwc2chw_3x3c3s2_config = {0};

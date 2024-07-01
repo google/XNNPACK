@@ -11,9 +11,9 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f16_vsqrt_ukernel__avx512fp16_sqrt_u64(

@@ -425,11 +425,11 @@ def main(args):
 #include <string>
 #include <vector>
 
-#include <xnnpack/common.h>
-#include <xnnpack/dwconv.h>
-#include <xnnpack/isa-checks.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/requantization.h>
+#include "xnnpack/common.h"
+#include "xnnpack/dwconv.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/requantization.h"
 
 #include "dwconv-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])

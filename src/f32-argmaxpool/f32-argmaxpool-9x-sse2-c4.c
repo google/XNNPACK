@@ -7,7 +7,7 @@
 
 #include <emmintrin.h>
 
-#include <xnnpack/argmaxpool.h>
+#include "xnnpack/argmaxpool.h"
 
 
 void xnn_f32_argmaxpool_ukernel_9x__sse2_c4(

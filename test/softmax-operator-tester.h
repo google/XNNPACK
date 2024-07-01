@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <xnnpack.h>
+#include "xnnpack.h"
 
 #include <algorithm>
 #include <cassert>

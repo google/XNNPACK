@@ -2,27 +2,30 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Generator: tools/update-microkernels.py -a
 
 #include <assert.h>
 #include <math.h>
-#include <simd/f32-fma3.h>
 #include <stddef.h>
 #include <stdint.h>
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/dwconv.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/ibilinear.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/microparams.h>
-#include <xnnpack/prefetch.h>
-#include <xnnpack/unaligned.h>
-#include <xnnpack/vmulcaddc.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/dwconv.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/ibilinear.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/prefetch.h"
+#include "xnnpack/simd/f32-fma3.h"
+#include "xnnpack/unaligned.h"
+#include "xnnpack/vmulcaddc.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f16_dwconv_minmax_ukernel_25p8c__fma3_acc2(

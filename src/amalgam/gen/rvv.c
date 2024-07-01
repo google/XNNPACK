@@ -2,23 +2,26 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Generator: tools/update-microkernels.py -a
 
 #include <assert.h>
 #include <math.h>
 
 #include <riscv_vector.h>
 
-#include <xnnpack/avgpool.h>
-#include <xnnpack/common.h>
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/maxpool.h>
-#include <xnnpack/pavgpool.h>
-#include <xnnpack/raddstoreexpminusmax.h>
-#include <xnnpack/transpose.h>
-#include <xnnpack/vbinary.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/avgpool.h"
+#include "xnnpack/common.h"
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/maxpool.h"
+#include "xnnpack/pavgpool.h"
+#include "xnnpack/raddstoreexpminusmax.h"
+#include "xnnpack/transpose.h"
+#include "xnnpack/vbinary.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f32_avgpool_minmax_ukernel_9p8x__rvv_c2v(
@@ -1511,6 +1514,28 @@ void xnn_f32_vcmul_ukernel__rvv_u2v(
     vfloat32m2_t ar_bi_plus_ai_br_f32v = __riscv_vfmacc_vv_f32m2(ai_br_f32v, ar_f32v, bi_f32v, n);
     __riscv_vse32_v_f32m2(or, ar_br_sub_ai_bi_f32v, n); or += n;
     __riscv_vse32_v_f32m2(oi, ar_bi_plus_ai_br_f32v, n); oi += n;
+  }
+}
+
+void xnn_f32_vrelu_ukernel__rvv_u4v(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_relu_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  float zero = 0.0f;
+  size_t batch_ = batch >> XNN_LOG2_SIZEOF_FLOAT;
+
+  for (; batch_ > 0; ) {
+    size_t n = __riscv_vsetvl_e32m4(batch_); batch_ -= n;
+    vfloat32m4_t in_f32v = __riscv_vle32_v_f32m4(input, n); input += n;
+    vfloat32m4_t out_f32v = __riscv_vfmax_vf_f32m4(in_f32v, zero, n);
+    __riscv_vse32_v_f32m4(output, out_f32v, n); output += n;
   }
 }
 

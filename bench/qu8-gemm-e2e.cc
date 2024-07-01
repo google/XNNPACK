@@ -15,14 +15,14 @@
 #include "bench/end2end.h"
 #include "bench/utils.h"
 
-#include <xnnpack.h>
-#include <xnnpack/config.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/igemm.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/models.h>
-#include <xnnpack/pack.h>
+#include "xnnpack.h"
+#include "xnnpack/config.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/igemm.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/models.h"
+#include "xnnpack/pack.h"
 
 
 static void GEMMEnd2EndBenchmark(

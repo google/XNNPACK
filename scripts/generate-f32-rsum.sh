@@ -32,6 +32,13 @@ tools/xngen src/f32-rsum/avx512f.c.in -D BATCH_TILE=48 -D ACCUMULATORS=3 -o src/
 tools/xngen src/f32-rsum/avx512f.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -o src/f32-rsum/gen/f32-rsum-avx512f-u64-acc2.c &
 tools/xngen src/f32-rsum/avx512f.c.in -D BATCH_TILE=64 -D ACCUMULATORS=4 -o src/f32-rsum/gen/f32-rsum-avx512f-u64-acc4.c &
 
+################################## Hexagon HVX ################################
+tools/xngen src/f32-rsum/hvx.c.in -D BATCH_TILE=32 -D ACCUMULATORS=1 -o src/f32-rsum/gen/f32-rsum-hvx-u32.c &
+tools/xngen src/f32-rsum/hvx.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -o src/f32-rsum/gen/f32-rsum-hvx-u64-acc2.c &
+tools/xngen src/f32-rsum/hvx.c.in -D BATCH_TILE=96 -D ACCUMULATORS=3 -o src/f32-rsum/gen/f32-rsum-hvx-u96-acc3.c &
+tools/xngen src/f32-rsum/hvx.c.in -D BATCH_TILE=128 -D ACCUMULATORS=2 -o src/f32-rsum/gen/f32-rsum-hvx-u128-acc2.c &
+tools/xngen src/f32-rsum/hvx.c.in -D BATCH_TILE=128 -D ACCUMULATORS=4 -o src/f32-rsum/gen/f32-rsum-hvx-u128-acc4.c &
+
 ################################## Wasm SIMD ##################################
 tools/xngen src/f32-rsum/wasmsimd.c.in -D BATCH_TILE=4  -D ACCUMULATORS=1 -o src/f32-rsum/gen/f32-rsum-wasmsimd-u4.c &
 tools/xngen src/f32-rsum/wasmsimd.c.in -D BATCH_TILE=8  -D ACCUMULATORS=2 -o src/f32-rsum/gen/f32-rsum-wasmsimd-u8-acc2.c &

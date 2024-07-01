@@ -8,8 +8,8 @@ $assert NR % 16 == 0
 
 #include <immintrin.h>
 
-#include <xnnpack/igemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
+#include "xnnpack/igemm.h"
+#include "xnnpack/intrinsics-polyfill.h"
 
 
 void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__avx512f_broadcast(

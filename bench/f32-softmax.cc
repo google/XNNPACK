@@ -12,17 +12,17 @@
 #endif  // BENCHMARK_INTEL_DNNL
 #include "bench/utils.h"
 
-#include <xnnpack.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/raddexpminusmax.h>
-#include <xnnpack/raddextexp.h>
-#include <xnnpack/raddstoreexpminusmax.h>
-#include <xnnpack/vbinary.h>
-#include <xnnpack/reduce.h>
-#include <xnnpack/vscaleexpminusmax.h>
-#include <xnnpack/vscaleextexp.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/raddexpminusmax.h"
+#include "xnnpack/raddextexp.h"
+#include "xnnpack/raddstoreexpminusmax.h"
+#include "xnnpack/vbinary.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/vscaleexpminusmax.h"
+#include "xnnpack/vscaleextexp.h"
 
 
 #ifdef BENCHMARK_INTEL_DNNL

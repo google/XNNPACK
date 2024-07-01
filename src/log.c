@@ -32,7 +32,7 @@
   #endif
 #endif
 
-#include <xnnpack/log.h>
+#include "xnnpack/log.h"
 
 
 /* Messages up to this size are formatted entirely on-stack, and don't allocate heap memory */

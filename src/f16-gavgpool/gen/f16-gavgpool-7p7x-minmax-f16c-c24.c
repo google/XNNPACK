@@ -11,9 +11,9 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
 
 
 void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c24(

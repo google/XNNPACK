@@ -9,7 +9,7 @@
 
 #include "math-evaluation-tester.h"
 
-#include <xnnpack/isa-checks.h>
+#include "xnnpack/isa-checks.h"
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

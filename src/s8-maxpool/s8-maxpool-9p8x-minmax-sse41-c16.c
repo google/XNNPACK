@@ -7,8 +7,8 @@
 
 #include <smmintrin.h>
 
-#include <xnnpack/maxpool.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/maxpool.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16(

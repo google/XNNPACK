@@ -6,9 +6,9 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/packb.h>
-#include <xnnpack/unaligned.h>
+#include "xnnpack/math.h"
+#include "xnnpack/packb.h"
+#include "xnnpack/unaligned.h"
 
 $assert CHANNEL_TILE >= 1
 $assert CHANNEL_SUBTILE >= 1

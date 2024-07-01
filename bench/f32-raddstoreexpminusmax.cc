@@ -12,13 +12,13 @@
 #include <benchmark/benchmark.h>
 #include "bench/utils.h"
 
-#include <xnnpack.h>
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/microfnptr.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/raddstoreexpminusmax.h>
-#include <xnnpack/reduce.h>
+#include "xnnpack.h"
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/raddstoreexpminusmax.h"
+#include "xnnpack/reduce.h"
 
 
 static void f32_raddstoreexpminusmax(

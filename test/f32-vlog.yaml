@@ -7,3 +7,44 @@
 - name: xnn_f32_vlog_ukernel__scalar_log_u1
 - name: xnn_f32_vlog_ukernel__scalar_log_u2
 - name: xnn_f32_vlog_ukernel__scalar_log_u4
+
+- name: xnn_f32_vlog_ukernel__scalar_rational_3_3_div_u1
+- name: xnn_f32_vlog_ukernel__scalar_rational_3_3_div_u2
+- name: xnn_f32_vlog_ukernel__scalar_rational_3_3_div_u4
+- name: xnn_f32_vlog_ukernel__scalar_rational_3_3_div_u8
+
+# SSE2
+- name: xnn_f32_vlog_ukernel__sse2_rational_3_3_div_u4
+- name: xnn_f32_vlog_ukernel__sse2_rational_3_3_div_u8
+- name: xnn_f32_vlog_ukernel__sse2_rational_3_3_div_u12
+- name: xnn_f32_vlog_ukernel__sse2_rational_3_3_div_u16
+
+# AVX2
+- name: xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u8
+- name: xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u16
+- name: xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u24
+- name: xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u32
+
+# FMA3
+- name: xnn_f32_vlog_ukernel__fma3_rational_3_3_div_u8
+- name: xnn_f32_vlog_ukernel__fma3_rational_3_3_div_u16
+- name: xnn_f32_vlog_ukernel__fma3_rational_3_3_div_u24
+- name: xnn_f32_vlog_ukernel__fma3_rational_3_3_div_u32
+
+# AVX512F
+- name: xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u16
+- name: xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u32
+- name: xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u48
+- name: xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u64
+
+# NEON
+- name: xnn_f32_vlog_ukernel__neon_rational_3_3_div_u4
+- name: xnn_f32_vlog_ukernel__neon_rational_3_3_div_u8
+- name: xnn_f32_vlog_ukernel__neon_rational_3_3_div_u12
+- name: xnn_f32_vlog_ukernel__neon_rational_3_3_div_u16
+
+# WASMSIMD
+- name: xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u4
+- name: xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u8
+- name: xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u12
+- name: xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u16

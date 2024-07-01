@@ -13,8 +13,8 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/dwconv.h>
-#include <xnnpack/math.h>
+#include "xnnpack/dwconv.h"
+#include "xnnpack/math.h"
 
 
 void xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmrelaxedsimd_fma_acc2(

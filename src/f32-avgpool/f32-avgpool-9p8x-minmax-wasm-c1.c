@@ -5,8 +5,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/avgpool.h>
-#include <xnnpack/math.h>
+#include "xnnpack/avgpool.h"
+#include "xnnpack/math.h"
 
 
 void xnn_f32_avgpool_minmax_ukernel_9p8x__wasm_c1(
