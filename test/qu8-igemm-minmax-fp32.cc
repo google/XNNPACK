@@ -1156,26 +1156,6 @@ std::vector<GemmTestParams> CreateTests1(
       });
 
   INSTANTIATE_TEST_SUITE_P(
-      QU8_IGEMM_MINMAX_FP32_1X8C8__AVX512SKX, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/8,
-          /*adj_k_block=*/8,
-          /*mr=*/1, /*nr=*/8, /*kr=*/8, /*sr=*/1,
-          /*is_igemm=*/true,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x8c8__avx512skx,
-                        xnn_init_qu8_conv_minmax_fp32_avx2_params,
-                        xnn_pack_qu8_conv_goki_w,
-                        xnn_qu8_requantize_fp32);
-          },
-          []() {
-            TEST_REQUIRES_X86_AVX512SKX;
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  INSTANTIATE_TEST_SUITE_P(
       QU8_IGEMM_MINMAX_FP32_1X16C8__AVX512SKX, GemmTest,
       testing::ValuesIn(CreateTests1(
           /*k_block=*/8,

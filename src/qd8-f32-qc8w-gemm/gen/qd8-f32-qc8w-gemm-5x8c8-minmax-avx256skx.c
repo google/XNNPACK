@@ -17,17 +17,17 @@
 #include "xnnpack/unaligned.h"
 
 
-void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_5x8c8__avx512skx(
+void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x8c8__avx256skx(
     size_t mr,
     size_t nc,
     size_t kc,
     const int8_t* restrict a,
     size_t a_stride,
     const void* restrict w,
-    void* restrict c,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
@@ -41,27 +41,27 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_5x8c8__avx512skx(
 
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const int8_t* a0 = a;
-  uint16_t* c0 = (uint16_t*) c;
+  float* c0 = c;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
-  uint16_t* c1 = (uint16_t*) ((uintptr_t) c0 + cm_stride);
+  float* c1 = (float*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {
     a1 = a0;
     c1 = c0;
   }
   const int8_t* a2 = (const int8_t*) ((uintptr_t) a1 + a_stride);
-  uint16_t* c2 = (uint16_t*) ((uintptr_t) c1 + cm_stride);
+  float* c2 = (float*) ((uintptr_t) c1 + cm_stride);
   if XNN_UNPREDICTABLE(mr <= 2) {
     a2 = a1;
     c2 = c1;
   }
   const int8_t* a3 = (const int8_t*) ((uintptr_t) a2 + a_stride);
-  uint16_t* c3 = (uint16_t*) ((uintptr_t) c2 + cm_stride);
+  float* c3 = (float*) ((uintptr_t) c2 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 4) {
     a3 = a2;
     c3 = c2;
   }
   const int8_t* a4 = (const int8_t*) ((uintptr_t) a3 + a_stride);
-  uint16_t* c4 = (uint16_t*) ((uintptr_t) c3 + cm_stride);
+  float* c4 = (float*) ((uintptr_t) c3 + cm_stride);
   if XNN_UNPREDICTABLE(mr <= 4) {
     a4 = a3;
     c4 = c3;
@@ -222,22 +222,18 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_5x8c8__avx512skx(
     vout2x01234567 = _mm256_min_ps(vout2x01234567, vmax);
     vout3x01234567 = _mm256_min_ps(vout3x01234567, vmax);
     vout4x01234567 = _mm256_min_ps(vout4x01234567, vmax);
-    __m128i vfp16out0x01234567 = _mm256_cvtps_ph(vout0x01234567, _MM_FROUND_TO_NEAREST_INT);
-    __m128i vfp16out1x01234567 = _mm256_cvtps_ph(vout1x01234567, _MM_FROUND_TO_NEAREST_INT);
-    __m128i vfp16out2x01234567 = _mm256_cvtps_ph(vout2x01234567, _MM_FROUND_TO_NEAREST_INT);
-    __m128i vfp16out3x01234567 = _mm256_cvtps_ph(vout3x01234567, _MM_FROUND_TO_NEAREST_INT);
-    __m128i vfp16out4x01234567 = _mm256_cvtps_ph(vout4x01234567, _MM_FROUND_TO_NEAREST_INT);
+
     if XNN_LIKELY(nc >= 8) {
-      _mm_storeu_si128((__m128i*) c0, vfp16out0x01234567);
-      c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
-      _mm_storeu_si128((__m128i*) c1, vfp16out1x01234567);
-      c1 = (uint16_t*) ((uintptr_t) c1 + cn_stride);
-      _mm_storeu_si128((__m128i*) c2, vfp16out2x01234567);
-      c2 = (uint16_t*) ((uintptr_t) c2 + cn_stride);
-      _mm_storeu_si128((__m128i*) c3, vfp16out3x01234567);
-      c3 = (uint16_t*) ((uintptr_t) c3 + cn_stride);
-      _mm_storeu_si128((__m128i*) c4, vfp16out4x01234567);
-      c4 = (uint16_t*) ((uintptr_t) c4 + cn_stride);
+      _mm256_storeu_ps(c0, vout0x01234567);
+      c0 = (float*) ((uintptr_t) c0 + cn_stride);
+      _mm256_storeu_ps(c1, vout1x01234567);
+      c1 = (float*) ((uintptr_t) c1 + cn_stride);
+      _mm256_storeu_ps(c2, vout2x01234567);
+      c2 = (float*) ((uintptr_t) c2 + cn_stride);
+      _mm256_storeu_ps(c3, vout3x01234567);
+      c3 = (float*) ((uintptr_t) c3 + cn_stride);
+      _mm256_storeu_ps(c4, vout4x01234567);
+      c4 = (float*) ((uintptr_t) c4 + cn_stride);
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
       a1 = (const int8_t*) ((uintptr_t) a1 - kc);
@@ -247,13 +243,13 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_5x8c8__avx512skx(
 
       nc -= 8;
     } else {
-      // Prepare mask for valid 16-bit elements (depends on nc).
+      // Prepare mask for valid 32-bit elements (depends on nc).
       const __mmask8 vmask = _cvtu32_mask8((UINT32_C(1) << nc) - 1);
-      _mm_mask_storeu_epi16(c0, vmask, vfp16out0x01234567);
-      _mm_mask_storeu_epi16(c1, vmask, vfp16out1x01234567);
-      _mm_mask_storeu_epi16(c2, vmask, vfp16out2x01234567);
-      _mm_mask_storeu_epi16(c3, vmask, vfp16out3x01234567);
-      _mm_mask_storeu_epi16(c4, vmask, vfp16out4x01234567);
+      _mm256_mask_storeu_ps(c0, vmask, vout0x01234567);
+      _mm256_mask_storeu_ps(c1, vmask, vout1x01234567);
+      _mm256_mask_storeu_ps(c2, vmask, vout2x01234567);
+      _mm256_mask_storeu_ps(c3, vmask, vout3x01234567);
+      _mm256_mask_storeu_ps(c4, vmask, vout4x01234567);
       nc = 0;
     }
   } while (nc != 0);

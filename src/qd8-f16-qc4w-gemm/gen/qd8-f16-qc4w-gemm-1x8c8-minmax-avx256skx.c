@@ -17,17 +17,17 @@
 #include "xnnpack/unaligned.h"
 
 
-void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx512skx(
+void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_1x8c8__avx256skx(
     size_t mr,
     size_t nc,
     size_t kc,
     const int8_t* restrict a,
     size_t a_stride,
     const void* restrict w,
-    float* restrict c,
+    void* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
+    const union xnn_f16_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
@@ -41,7 +41,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx512skx(
 
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const int8_t* a0 = a;
-  float* c0 = c;
+  uint16_t* c0 = (uint16_t*) c;
 
   const __m128i vmask = _mm_load_si128((const __m128i*) params->avx.mask);  // 0xF0
   do {
@@ -178,18 +178,18 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx512skx(
 
     const __m256 vmax = _mm256_load_ps(params->avx.max);
     vout0x01234567 = _mm256_min_ps(vout0x01234567, vmax);
-
+    __m128i vfp16out0x01234567 = _mm256_cvtps_ph(vout0x01234567, _MM_FROUND_TO_NEAREST_INT);
     if XNN_LIKELY(nc >= 8) {
-      _mm256_storeu_ps(c0, vout0x01234567);
-      c0 = (float*) ((uintptr_t) c0 + cn_stride);
+      _mm_storeu_si128((__m128i*) c0, vfp16out0x01234567);
+      c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
 
       nc -= 8;
     } else {
-      // Prepare mask for valid 32-bit elements (depends on nc).
+      // Prepare mask for valid 16-bit elements (depends on nc).
       const __mmask8 vmask = _cvtu32_mask8((UINT32_C(1) << nc) - 1);
-      _mm256_mask_storeu_ps(c0, vmask, vout0x01234567);
+      _mm_mask_storeu_epi16(c0, vmask, vfp16out0x01234567);
       nc = 0;
     }
   } while (nc != 0);

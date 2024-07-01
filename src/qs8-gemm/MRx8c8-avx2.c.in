@@ -26,7 +26,7 @@ $PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx2"
 $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params", "QD8_F16": "xnn_f16_minmax_params", "QD8_F32": "xnn_f32_minmax_params", "QC4_F16": "xnn_f16_qc4w_minmax_params", "QC4_F32": "xnn_f32_qc4w_minmax_params"}[DATATYPE]
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $OUT_T = {"QC8": "int8_t", "QD8_F16": "void", "QD8_F32": "float", "QC4_F16": "void", "QC4_F32": "float", "QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
-$ISA = "avx2" if AVX == 2 else "avx512skx"
+$ISA = "avx2" if AVX == 2 else "avx256skx"
 void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__${ISA}${"_prfm" if PREFETCH else ""}(
     size_t mr,
     size_t nc,

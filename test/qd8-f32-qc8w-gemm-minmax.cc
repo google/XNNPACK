@@ -735,26 +735,51 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+
+#if XNN_ENABLE_AVX256SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   INSTANTIATE_TEST_SUITE_P(
-      QD8_F32_QC8W_GEMM_MINMAX_5X8C8__AVX512SKX, GemmTest,
+      QD8_F32_QC8W_GEMM_MINMAX_1X8C8__AVX256SKX, GemmTest,
       testing::ValuesIn(CreateTests1(
           /*k_block=*/8,
           /*adj_k_block=*/8,
-          /*mr=*/5, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+          /*mr=*/1, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x8c8__avx512skx,
+            tester.Test(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c8__avx256skx,
                         xnn_init_f32_minmax_avx_params,
                         xnn_pack_qs8_gemm_goi_w);
           },
           []() {
-            TEST_REQUIRES_X86_AVX512SKX;
+            TEST_REQUIRES_X86_AVX256SKX;
           })),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
 
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F32_QC8W_GEMM_MINMAX_7X8C8__AVX256SKX, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
+          /*mr=*/7, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+          /*is_igemm=*/false,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x8c8__avx256skx,
+                        xnn_init_f32_minmax_avx_params,
+                        xnn_pack_qs8_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_X86_AVX256SKX;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+#endif  // XNN_ENABLE_AVX256SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   INSTANTIATE_TEST_SUITE_P(
       QD8_F32_QC8W_GEMM_MINMAX_7X16C4__AVX512VNNI, GemmTest,
       testing::ValuesIn(CreateTests1(

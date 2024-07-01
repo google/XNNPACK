@@ -646,23 +646,4 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-
-  INSTANTIATE_TEST_SUITE_P(
-      QD8_F16_QC8W_GEMM_MINMAX_8X8C8__AVX512SKX, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/8,
-          /*adj_k_block=*/8,
-          /*mr=*/8, /*nr=*/8, /*kr=*/8, /*sr=*/1,
-          /*is_igemm=*/false,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qd8_f16_qc8w_gemm_minmax_ukernel_8x8c8__avx512skx,
-                        xnn_init_f16_minmax_avx_params,
-                        xnn_pack_qs8_gemm_goi_w);
-          },
-          []() {
-            TEST_REQUIRES_X86_AVX512SKX;
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
