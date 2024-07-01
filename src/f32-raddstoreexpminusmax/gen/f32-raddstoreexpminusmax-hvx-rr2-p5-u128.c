@@ -35,7 +35,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128(
 
   const HVX_Vector vi_max = Q6_V_vsplat_R(*((int32_t*) max));
   const HVX_Vector vlog2e = Q6_V_vsplat_R(*((int32_t *) &params->hvx_rr2_p5.log2e));
-  const HVX_Vector vmagic_bias = Q6_V_vsplat_R(*((int32_t *) &params->hvx_rr2_p5.magic_bias));  
+  const HVX_Vector vmagic_bias = Q6_V_vsplat_R(*((int32_t *) &params->hvx_rr2_p5.magic_bias));
   const HVX_Vector vindex_mask = Q6_V_vsplat_R(INT32_C(0x3F));
   const HVX_Vector vminus_ln2_hi = Q6_V_vsplat_R(*((int32_t *) &params->hvx_rr2_p5.minus_ln2_hi));
   const HVX_Vector vminus_ln2_lo = Q6_V_vsplat_R(*((int32_t *) &params->hvx_rr2_p5.minus_ln2_lo));

@@ -249,7 +249,7 @@
 - name: xnn_f32_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_u20_acc5
   init: xnn_init_f32_expminus_wasmsimd_rr2_p5_params
 
-# Hexagon HVM
+# Hexagon HVX
 - name: xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u32
   init: xnn_init_f32_expminus_hvx_rr2_p5_params
 - name: xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u64

@@ -345,10 +345,11 @@ HVX_Vector Q6_Vsf_vdiv_VsfVsf(HVX_Vector vin1, HVX_Vector vin2){
     return *((HVX_UVector *) svin1);
 }
 
-// Horizontal addition by pairwise addition.
-// To calculate less number of elements than 32 in vin, use
+// Horizontal vector sum by pairwise addition.
+// To calculate fewer elements than the full 128 bytes in 'vin', 
+// use the following code first before calling the intrinsic:
 //   vin = Q6_V_vand_QV(Q6_Q_vsetq_R(batch), vin);
-// before calling this intrinsic.
+// where 'batch' is equal to 'elements * sizeof(float)'
 static XNN_INTRINSIC
 float Q6_f32_vrsum_Vsf(HVX_Vector vin){
     HVX_VectorPair vsum_pair = Q6_W_vshuff_VVR(vin, vin, 64);
