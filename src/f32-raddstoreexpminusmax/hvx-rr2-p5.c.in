@@ -3,9 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert BATCH_TILE % 4 == 0
-$assert BATCH_TILE >= 4
-$SIMD_TILE = BATCH_TILE // 4
+$assert BATCH_TILE % 32 == 0
+$assert BATCH_TILE >= 32
+$SIMD_TILE = BATCH_TILE // 32
 
 #include <assert.h>
 

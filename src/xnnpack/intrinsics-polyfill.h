@@ -333,7 +333,7 @@ HVX_Vector Q6_Vw_vmpyie_VwVh(HVX_Vector multiplier_lo, HVX_Vector multiplier_hi,
 
 // Vector Muliply-Add
 // vin1 - vin3: 32-bit float
-// vout = vin1 + (vin2 * vin3)
+// vout = (vin1 * vin2) + vin3)
 // vout: 32-bit float
 static XNN_INTRINSIC
 HVX_Vector Q6_Vsf_vmpyadd_VsfVsf(HVX_Vector vin1, HVX_Vector vin2, HVX_Vector vin3)
@@ -343,10 +343,11 @@ HVX_Vector Q6_Vsf_vmpyadd_VsfVsf(HVX_Vector vin1, HVX_Vector vin2, HVX_Vector vi
     return vout;
 }
 
-// Horizontal addition by pairwise addition.
-// To calculate less number of elements than 32 in vin, use
+// Horizontal vector sum by pairwise addition.
+// To calculate fewer elements than the full 128 bytes in 'vin', 
+// use the following code first before calling the intrinsic:
 //   vin = Q6_V_vand_QV(Q6_Q_vsetq_R(batch), vin);
-// before calling this intrinsic.
+// where 'batch' is equal to 'elements * sizeof(float)'
 static XNN_INTRINSIC
 float Q6_f32_vrsum_Vsf(HVX_Vector vin){
     HVX_VectorPair vsum_pair = Q6_W_vshuff_VVR(vin, vin, 64);
