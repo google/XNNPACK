@@ -252,7 +252,9 @@ static enum xnn_status reshape_mean_nd(
       .output_element_size = UINT32_C(1) << log2_data_element_size,
     };
     memcpy(&mean_op->context.reduce.params, scale_params, scale_params_size);
-    memcpy(&mean_op->context.reduce.cvt_params, cvt_params, cvt_params_size);
+    if (cvt_params != NULL) {
+      memcpy(&mean_op->context.reduce.cvt_params, cvt_params, cvt_params_size);
+    }
 
     mean_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_contiguous_reduce;
     mean_op->compute[0].range[0] = normalized_input_shape[0];
@@ -299,7 +301,9 @@ static enum xnn_status reshape_mean_nd(
       .output_element_size = UINT32_C(1) << log2_data_element_size,
     };
     memcpy(&mean_op->context.reduce.params, scale_params, scale_params_size);
-    memcpy(&mean_op->context.reduce.cvt_params, cvt_params, cvt_params_size);
+    if (cvt_params != NULL) {
+      memcpy(&mean_op->context.reduce.cvt_params, cvt_params, cvt_params_size);
+    }
     mean_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_discontiguous_reduce;
     mean_op->compute[0].range[0] = normalized_input_shape[1];
     mean_op->compute[0].range[1] = normalized_input_shape[3];
