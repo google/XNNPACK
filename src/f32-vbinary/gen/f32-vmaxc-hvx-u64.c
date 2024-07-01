@@ -9,10 +9,10 @@
 #include <hexagon_protos.h>
 #include <hexagon_types.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/vbinary.h"
 
 void xnn_f32_vmaxc_ukernel__hvx_u64(
     size_t batch,

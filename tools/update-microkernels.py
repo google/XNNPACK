@@ -29,6 +29,7 @@ ISA_LIST = frozenset({
     'avx512amx',
     'avx512fp16',
     'avxvnni',
+    'avx256skx',
     'f16c',
     'fma',
     'fma3',
@@ -85,6 +86,7 @@ ISA_TO_HEADER_MAP = {
     'avx512amx': 'immintrin.h',
     'avx512fp16': 'immintrin.h',
     'avxvnni': 'immintrin.h',
+    'avx256skx': 'immintrin.h',
     'f16c': 'immintrin.h',
     'fma3': 'immintrin.h',
     'fp16arith': 'arm_fp16.h',
@@ -124,6 +126,9 @@ AMALGAMATION_HEADER = """\
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Generator: tools/update-microkernels.py -a
 
 """
 

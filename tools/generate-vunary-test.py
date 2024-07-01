@@ -88,6 +88,15 @@ SPECIAL_VALUES_F32 = {
         # `cmake-linux-riscv64-rvv` (but not on `cmake-linux-riscv64`).
         3,
     ),
+    # TODO(b/338031720) - These kernels currently do not handle inputs `<= 0.0f`
+    # correctly. Add tests for `0.0f`, `-0.0f`, and `+/-INFINITY` once they do.
+    "Log": (
+        1,  # Number of elements.
+        "{1.0f}",  # Inputs.
+        "{0.0f}",  # Expected outputs.
+        "xnn_f32_default_params",
+        1,  # Error margin in ULP.
+    ),
 }
 
 TEST_TEMPLATE = """\
