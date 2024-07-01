@@ -23,10 +23,12 @@ typedef v128_t xnn_simd_f32_t;
 #define xnn_simd_bytes_f32 (xnn_simd_size_f32 * sizeof(float))
 
 #define XNN_SIMD_CONST_F32(var, val) \
-  static const __f32x4 var = {(val), (val), (val), (val)};
+  static const xnn_simd_f32_t var =  \
+      (xnn_simd_f32_t)((__f32x4){(val), (val), (val), (val)});
 
 #define XNN_SIMD_CONST_U32(var, val) \
-  static const __u32x4 var = {(val), (val), (val), (val)};
+  static const xnn_simd_f32_t var =  \
+      (xnn_simd_f32_t)((__u32x4){(val), (val), (val), (val)});
 
 // Whether or not this architecture has native fused multiply-add support.
 #define XNN_SIMD_HAS_NATIVE_FMA 0
