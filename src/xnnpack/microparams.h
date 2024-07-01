@@ -1055,7 +1055,7 @@ union xnn_qs8_rsum_params {
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
-    int8_t onemask_table[32];  // 16 ones, 16 zeros
+    XNN_ALIGN(16) int8_t onemask_table[32];  // 16 ones, 16 zeros
   } ssse3;
   struct {
     XNN_ALIGN(16) int8_t mask_table[30];

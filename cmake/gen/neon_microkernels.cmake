@@ -687,7 +687,6 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-requantization/qs8-requantization-rndna-neon.c
   src/qs8-requantization/qs8-requantization-rndnu-neon-mull.c
   src/qs8-requantization/qs8-requantization-rndnu-neon-qdmulh.c
-  src/qs8-rsum/gen/qs8-rsum-minmax-fp32-neon-u16-acc2.c
   src/qs8-rsum/gen/qs8-rsum-neon-u16.c
   src/qs8-rsum/gen/qs8-rsum-neon-u32-acc2.c
   src/qs8-rsum/gen/qs8-rsum-neon-u32.c

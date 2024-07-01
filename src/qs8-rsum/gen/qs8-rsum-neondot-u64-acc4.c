@@ -12,7 +12,6 @@
 #include <arm_neon.h>
 
 #include "xnnpack/common.h"
-#include "xnnpack/math.h"
 #include "xnnpack/reduce.h"
 
 void xnn_qs8_rsum_ukernel__neondot_u64_acc4(
