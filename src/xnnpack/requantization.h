@@ -8,10 +8,10 @@
 
 #pragma once
 
-#include <stdint.h>
-#include <stddef.h>
 #include <assert.h>
 #include <math.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"

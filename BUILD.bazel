@@ -389,6 +389,7 @@ xnnpack_cc_library(
         "src/xnnpack/config.h",
         "src/xnnpack/config-types.h",
     ],
+    deps = [":params"],
 )
 
 xnnpack_cc_library(
@@ -484,6 +485,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
+        ":config_hdrs",
     ],
 )
 

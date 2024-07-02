@@ -3,8 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <math.h>
-#include <stdbool.h>
 #include <stddef.h>
 
 #include "xnnpack/common.h"
@@ -21,6 +19,7 @@
 #if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)
 #include <sys/syscall.h>
 #include <unistd.h>
+
 #define XFEATURE_XTILEDATA 18
 #define ARCH_REQ_XCOMP_PERM 0x1023
 #endif
@@ -38,8 +37,12 @@
   #include <sys/auxv.h>
 #endif
 
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+#include <math.h>
+#endif
+
 #if XNN_ARCH_WASMRELAXEDSIMD
-  #include <wasm_simd128.h>
+#include <wasm_simd128.h>
 #endif
 
 #include "xnnpack/hardware-config.h"

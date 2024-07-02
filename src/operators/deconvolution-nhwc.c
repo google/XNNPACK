@@ -9,11 +9,11 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <math.h>
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 
+#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/allocator.h"
 #include "xnnpack/cache.h"
@@ -32,9 +32,7 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/pack.h"
 #include "xnnpack/params.h"
-
 #include "pthreadpool.h"
-#include <fp16/fp16.h>
 
 #ifndef XNN_ENABLE_GEMM_M_SPECIALIZATION
 #error "XNN_ENABLE_GEMM_M_SPECIALIZATION is not defined"

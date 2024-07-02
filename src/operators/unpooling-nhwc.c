@@ -5,7 +5,6 @@
 
 #include <assert.h>
 #include <inttypes.h>
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -15,6 +14,7 @@
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/compute.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/indirection.h"
 #include "xnnpack/log.h"
@@ -23,7 +23,6 @@
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
-
 #include "pthreadpool.h"
 
 enum xnn_status xnn_create_unpooling2d_nhwc_x32(

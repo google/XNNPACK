@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/config-types.h"

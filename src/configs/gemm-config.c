@@ -26,8 +26,6 @@
 #include "xnnpack/pack.h"
 #include "xnnpack/packw.h"
 
-#include "experiments-config.h"
-
 #if XNN_ARCH_WASMSIMD
   #include <emscripten.h>
 #endif

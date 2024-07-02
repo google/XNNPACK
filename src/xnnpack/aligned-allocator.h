@@ -6,13 +6,13 @@
 
 #pragma once
 
+#include <stdlib.h>
+
 #include <cstddef>
 #include <limits>
 #include <memory>
 #include <type_traits>
 #include <utility>
-
-#include <stdlib.h>
 
 #if defined(__ANDROID__) || defined(_WIN32) || defined(__CYGWIN__)
   #include <malloc.h>

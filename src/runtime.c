@@ -29,7 +29,6 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
 #include "xnnpack/subgraph.h"
-
 #include "pthreadpool.h"
 
 #if defined(__EMSCRIPTEN__)

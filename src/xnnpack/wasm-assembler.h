@@ -17,11 +17,12 @@
 #include <numeric>
 #include <type_traits>
 #include <utility>
+
 #include "xnnpack/array-helpers.h"
 #include "xnnpack/assembler.h"
 #include "xnnpack/common.h"
 #include "xnnpack/leb128.h"
-
+#include "xnnpack/memory.h"
 
 namespace xnnpack {
 

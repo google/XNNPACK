@@ -5,8 +5,9 @@
 
 #include <assert.h>
 #include <stddef.h>
+#include <stdint.h>
 
-#include "xnnpack/math.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/math-stubs.h"
 
 

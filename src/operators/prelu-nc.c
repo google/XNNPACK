@@ -13,6 +13,7 @@
 #include "xnnpack/cache.h"
 #include "xnnpack/common.h"
 #include "xnnpack/compute.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
@@ -21,7 +22,6 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/pack.h"
 #include "xnnpack/params.h"
-
 #include "pthreadpool.h"
 
 static enum xnn_status create_prelu_nc(

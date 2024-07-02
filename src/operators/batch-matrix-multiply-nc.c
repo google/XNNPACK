@@ -26,7 +26,6 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/pack.h"
 #include "xnnpack/params.h"
-
 #include "pthreadpool.h"
 
 enum xnn_status create_batch_matrix_multiply_nc(
