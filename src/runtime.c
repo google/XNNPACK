@@ -161,7 +161,9 @@ enum xnn_status xnn_create_weights_cache_with_size(size_t size, xnn_weights_cach
   return xnn_status_success;
 
 error:
-  xnn_internal_release_weights_cache(cache_provider->context);
+  if (cache_provider != NULL) {
+    xnn_internal_release_weights_cache(cache_provider->context);
+  }
   return status;
 }
 
