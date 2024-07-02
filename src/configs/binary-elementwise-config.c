@@ -510,8 +510,6 @@ static void init_f32_vcopysign_config(void) {
       f32_vcopysign_config.linear.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
     f32_vcopysign_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcopysign_ukernel__wasmsimd_u16;
     f32_vcopysign_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcopysignc_ukernel__wasmsimd_u16;
     f32_vcopysign_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrcopysignc_ukernel__wasmsimd_u16;
