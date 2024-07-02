@@ -96,6 +96,10 @@ SET(ALL_RVV_MICROKERNEL_SRCS
   src/f32-vhswish/gen/f32-vhswish-rvv-u2v.c
   src/f32-vhswish/gen/f32-vhswish-rvv-u4v.c
   src/f32-vhswish/gen/f32-vhswish-rvv-u8v.c
+  src/f32-vlrelu/gen/f32-vlrelu-rvv-u1v.c
+  src/f32-vlrelu/gen/f32-vlrelu-rvv-u2v.c
+  src/f32-vlrelu/gen/f32-vlrelu-rvv-u4v.c
+  src/f32-vlrelu/gen/f32-vlrelu-rvv-u8v.c
   src/f32-vrelu/gen/f32-vrelu-rvv-u1v.c
   src/f32-vrelu/gen/f32-vrelu-rvv-u2v.c
   src/f32-vrelu/gen/f32-vrelu-rvv-u4v.c
