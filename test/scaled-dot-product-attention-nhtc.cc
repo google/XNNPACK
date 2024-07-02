@@ -5,7 +5,6 @@
 
 
 #include <gtest/gtest.h>
-
 #include "scaled-dot-product-attention-operator-tester.h"
 
 

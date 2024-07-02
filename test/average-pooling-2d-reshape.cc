@@ -10,7 +10,6 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-
 #include "xnnpack.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/subgraph.h"

@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include "xnnpack.h"
-#include "xnnpack/normalization.h"
-
 #include <cassert>
 #include <cstddef>
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "xnnpack.h"
+#include "xnnpack/normalization.h"
 
 class ReduceNormalizationTester {
  public:

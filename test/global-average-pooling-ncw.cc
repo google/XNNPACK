@@ -3,12 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack.h"
-
 #include <cstddef>
 
-#include "global-average-pooling-operator-tester.h"
 #include <gtest/gtest.h>
+#include "xnnpack.h"
+#include "global-average-pooling-operator-tester.h"
 
 TEST(GLOBAL_AVERAGE_POOLING_NCW_F16, single_channel) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));

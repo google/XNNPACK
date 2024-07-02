@@ -13,6 +13,7 @@
 #include <functional>
 #include <string>
 
+#include <gtest/gtest.h>
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
@@ -25,10 +26,9 @@
 #include "xnnpack/ppmm.h"
 #include "xnnpack/requantization.h"
 
-#include <gtest/gtest.h>
-
 #if XNN_PLATFORM_JIT
 #include <vector>
+
 #include "xnnpack/post-operation.h"
 #endif  // XNN_PLATFORM_JIT
 

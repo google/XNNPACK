@@ -5,10 +5,6 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "xnnpack.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/subgraph.h"
 
 #include <algorithm>
 #include <array>
@@ -17,9 +13,13 @@
 #include <random>
 #include <vector>
 
-#include "subgraph-binary-tester.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "xnnpack.h"
+#include "xnnpack/node-type.h"
+#include "xnnpack/operator.h"
+#include "xnnpack/subgraph.h"
+#include "subgraph-binary-tester.h"
 
 using SquaredDifferenceTestF16 = BinaryTest<uint16_t>;
 using SquaredDifferenceTestF32 = BinaryTest<float>;

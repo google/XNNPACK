@@ -156,10 +156,8 @@ def main(args):
 
 
 #include <gtest/gtest.h>
-
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
-
 #include "xnnpack/vlog.h"
 #include "vlog-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])

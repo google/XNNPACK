@@ -11,12 +11,10 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-
 #include "xnnpack.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
-
 #include "subgraph-binary-tester.h"
 
 using Maximum2TestF16 = BinaryTest<uint16_t>;

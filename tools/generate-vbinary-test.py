@@ -482,8 +482,6 @@ def main(args):
     if not isinstance(spec_yaml, list):
       raise ValueError("expected a list of micro-kernels in the spec")
 
-    spec_name = os.path.splitext(os.path.split(options.spec)[1])[0]
-    microkernel_header = '#include "xnnpack/vbinary.h"'
     tester_header = {
       "VCMulMicrokernelTester": "vcmul-microkernel-tester.h",
       "VBinaryMicrokernelTester": "vbinary-microkernel-tester.h",
@@ -501,15 +499,16 @@ def main(args):
 
 
 #include <gtest/gtest.h>
-
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
-
 #include "xnnpack/microparams-init.h"
-{microkernel_header}
+#include "xnnpack/vbinary.h"
 #include "{tester_header}"
-""".format(specification=options.spec, generator=sys.argv[0],
-           microkernel_header=microkernel_header, tester_header=tester_header)
+""".format(
+        specification=options.spec,
+        generator=sys.argv[0],
+        tester_header=tester_header,
+    )
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]

@@ -3,12 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack.h"
-
 #include <cstddef>
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "xnnpack.h"
 #include "unpooling-operator-tester.h"
 
 TEST(UNPOOLING_NHWC_X32, unit_height_horizontal_pool) {

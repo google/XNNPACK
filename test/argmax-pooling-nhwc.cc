@@ -3,15 +3,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack.h"
-#include "xnnpack/config.h"
-
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
 
-#include "argmax-pooling-operator-tester.h"
 #include <gtest/gtest.h>
+#include "xnnpack.h"
+#include "xnnpack/config.h"
+#include "argmax-pooling-operator-tester.h"
 
 static uint32_t FindMaxSinglePassPoolingSize(const xnn_argmaxpool_config* ukernel) {
   uint32_t first_pass_tile_size = 0;

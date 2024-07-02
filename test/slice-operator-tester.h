@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include "xnnpack.h"
-
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -20,6 +18,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "xnnpack.h"
 
 class SliceOperatorTester {
  public:

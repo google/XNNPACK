@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 
+#include <gtest/gtest.h>
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
@@ -24,9 +25,7 @@
 #include "xnnpack/pack.h"
 #include "xnnpack/ppmm.h"
 #include "xnnpack/requantization.h"
-
 #include "gemm-microkernel-tester.h"
-#include <gtest/gtest.h>
 
 namespace {
 

@@ -5,12 +5,6 @@
 
 #pragma once
 
-#include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/pack.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -21,9 +15,14 @@
 #include <random>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "xnnpack.h"
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/pack.h"
+#include "replicable_random_device.h"
 
 class ConvHWC2CHWMicrokernelTester {
  public:

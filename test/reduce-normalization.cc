@@ -1,6 +1,4 @@
 #include <gtest/gtest.h>
-
-
 #include "reduce-normalization-tester.h"
 
 

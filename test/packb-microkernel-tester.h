@@ -5,10 +5,6 @@
 
 #pragma once
 
-#include "xnnpack/aligned-allocator.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -18,6 +14,9 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
 
 // Reference bias packing function for f32.
 static void f32_packb_reference(

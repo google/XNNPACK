@@ -9,10 +9,8 @@
 
 
 #include <gtest/gtest.h>
-
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
-
 #include "xnnpack/lut.h"
 #include "lut-microkernel-tester.h"
 

@@ -1033,6 +1033,12 @@ def main(args):
 //   Specification: {specification}
 //   Generator: {generator}
 
+#include <cstddef>
+#include <functional>
+#include <string>
+#include <vector>
+
+#include <gtest/gtest.h>
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
@@ -1043,14 +1049,7 @@ def main(args):
 #include "xnnpack/packw.h"
 #include "xnnpack/ppmm.h"
 #include "xnnpack/requantization.h"
-
-#include <cstddef>
-#include <functional>
-#include <string>
-#include <vector>
-
 #include "gemm-microkernel-tester.h"
-#include <gtest/gtest.h>
 """.format(specification=options.spec, generator=sys.argv[0])
 
     benches = """\
@@ -1063,16 +1062,15 @@ def main(args):
 //   Specification: {specification}
 //   Generator: {generator}
 
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/pack.h"
-
 #include <benchmark/benchmark.h>
 #include "bench/gemm-benchmark.h"
 #include "bench/utils.h"
+#include "xnnpack/common.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/pack.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     test_outputs = collections.defaultdict(str)

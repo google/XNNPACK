@@ -8,12 +8,6 @@
 
 #pragma once
 
-#include "xnnpack.h"
-#include "xnnpack/cache.h"
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microparams.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -25,9 +19,14 @@
 #include <random>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "xnnpack.h"
+#include "xnnpack/cache.h"
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
+#include "replicable_random_device.h"
 
 static int8_t sign_extend_int4(int8_t value) {
   int8_t mask = 0x08;

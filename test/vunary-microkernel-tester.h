@@ -5,12 +5,6 @@
 
 #pragma once
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -23,9 +17,14 @@
 #include <random>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/microparams.h"
+#include "replicable_random_device.h"
 
 #if XNN_PLATFORM_JIT
   #include "xnnpack/memory.h"

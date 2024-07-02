@@ -8,10 +8,6 @@
 // LICENSE file in the root directory of this source tree.
 
 
-#include "xnnpack/common.h"
-
-
-#include "xnnpack/isa-checks.h"
 
 #include <algorithm>
 #include <cmath>
@@ -20,11 +16,11 @@
 #include <random>
 #include <vector>
 
-#include "xnnpack/simd/f32-scalar.h"
-
-#include "replicable_random_device.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/simd/f32-scalar.h"
+#include "replicable_random_device.h"
 
 namespace xnnpack {
 

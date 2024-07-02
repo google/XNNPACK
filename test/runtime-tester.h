@@ -5,9 +5,6 @@
 
 #pragma once
 
-#include "xnnpack.h"
-#include "xnnpack/subgraph.h"
-
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -16,8 +13,10 @@
 #include <memory>
 #include <vector>
 
-#include "subgraph-tester.h"
 #include <gtest/gtest.h>
+#include "xnnpack.h"
+#include "xnnpack/subgraph.h"
+#include "subgraph-tester.h"
 
 namespace xnnpack {
 

@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include "xnnpack.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -21,9 +19,10 @@
 #include <random>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "xnnpack.h"
+#include "replicable_random_device.h"
 
 class SoftMaxOperatorTester {
  public:

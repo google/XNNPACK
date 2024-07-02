@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include "xnnpack/quantization.h"
-
 #include <cstddef>
 #include <cstdint>
 #include <vector>
+
+#include "xnnpack/quantization.h"
 
 namespace xnnpack {
 void compute_convolution_qd8_f32_qc8w_reference_results(

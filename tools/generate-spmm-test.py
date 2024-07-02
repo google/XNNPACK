@@ -467,14 +467,12 @@ def main(args):
 //   Specification: {specification}
 //   Generator: {generator}
 
-
+#include <gtest/gtest.h>
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/spmm.h"
-
 #include "spmm-microkernel-tester.h"
-#include <gtest/gtest.h>
 """.format(specification=options.spec, generator=sys.argv[0])
 
     benches = """\
@@ -490,7 +488,6 @@ def main(args):
 #include <benchmark/benchmark.h>
 #include "bench/spmm-benchmark.h"
 #include "bench/utils.h"
-
 #include "xnnpack/gemm.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"

@@ -6,7 +6,6 @@
 #include "binary-elementwise-operator-tester.h"
 
 #include <stdint.h>
-#include "xnnpack.h"
 
 #include <algorithm>
 #include <array>
@@ -21,9 +20,10 @@
 #include <random>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "xnnpack.h"
+#include "replicable_random_device.h"
 
 void BinaryElementwiseOperatorTester::TestQS8() const {
   ASSERT_NE(operation_type(), OperationType::Unknown);
