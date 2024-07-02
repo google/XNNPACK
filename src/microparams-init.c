@@ -1017,11 +1017,11 @@ size_t xnn_init_qs8_rsum_avx2_params(
 size_t xnn_init_qs8_rsum_neon_params(
   union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
 {
-  for (uint32_t i = 0; i < 15; i++) {
-    params->neon.mask_table[i] = 1;
+  for (uint32_t i = 0; i < 16; i++) {
+    params->neon.onemask_table[i] = 1;
   }
-  for (uint32_t i = 15; i < 30; i++) {
-    params->neon.mask_table[i] = 0;
+  for (uint32_t i = 16; i < 32; i++) {
+    params->neon.onemask_table[i] = 0;
   }
   return sizeof(params->neon);
 }

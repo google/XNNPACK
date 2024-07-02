@@ -1050,7 +1050,7 @@ union xnn_qs8_rsum_params {
   } scalar;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
-    int8_t mask_table[30];
+    int8_t onemask_table[32];  // 16 ones, 16 zeros
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

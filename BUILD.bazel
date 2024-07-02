@@ -249,10 +249,10 @@ MICROKERNEL_DEPS = [
     ":logging",
 ]
 
-SIMD_HEADERS = ["src/xnnpack/simd/f32-" + arch + ".h" for arch in xnnpack_simd_archs()] + [
+SIMD_HEADERS = [
     "src/xnnpack/simd/f32-avx-base.h",
     "src/xnnpack/simd/f32-generic-functions.h",
-]
+] + ["src/xnnpack/simd/f32-" + arch + ".h" for arch in xnnpack_simd_archs()]
 
 exports_files(SIMD_HEADERS)
 
