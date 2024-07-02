@@ -1340,11 +1340,6 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(copy-nc-eager-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME copy-nc-eager-test COMMAND copy-nc-eager-test)
 
-    ADD_EXECUTABLE(copysign-nd-test test/copysign-nd.cc)
-    TARGET_INCLUDE_DIRECTORIES(copysign-nd-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(copysign-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME copysign-nd-test COMMAND copysign-nd-test)
-
     ADD_EXECUTABLE(deconvolution-nhwc-test test/deconvolution-nhwc.cc test/deconvolution-nhwc-qd8-f32-qc8w.cc)
     TARGET_INCLUDE_DIRECTORIES(deconvolution-nhwc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(deconvolution-nhwc-test PRIVATE XNNPACK fp16 GTest::gmock GTest::gtest GTest::gtest_main)
