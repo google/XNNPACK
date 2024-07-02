@@ -2010,7 +2010,6 @@ xnnpack_unit_test(
     ],
 ) for operator in [
     "add2",
-    "copysign",
     "divide2",
     "maximum2",
     "minimum2",
