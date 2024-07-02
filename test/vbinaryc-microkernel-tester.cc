@@ -55,6 +55,14 @@ void VBinaryCMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinaryc,
           y_ref[i] =
               fp16_ieee_to_fp32_value(a_data[i]) + fp16_ieee_to_fp32_value(b);
           break;
+        case OpType::CopySignC:
+          y_ref[i] =
+              std::copysign(fp16_ieee_to_fp32_value(a_data[i]), fp16_ieee_to_fp32_value(b));
+          break;
+        case OpType::RCopySignC:
+          y_ref[i] =
+              std::copysign(fp16_ieee_to_fp32_value(b), fp16_ieee_to_fp32_value(a_data[i]));
+          break;
         case OpType::DivC:
           y_ref[i] =
               fp16_ieee_to_fp32_value(a_data[i]) / fp16_ieee_to_fp32_value(b);
@@ -131,6 +139,14 @@ void VBinaryCMicrokernelTester::Test(
         case OpType::AddC:
           y_ref[i] =
               fp16_ieee_to_fp32_value(a_data[i]) + fp16_ieee_to_fp32_value(b);
+          break;
+        case OpType::CopySignC:
+          y_ref[i] =
+              std::copysign(fp16_ieee_to_fp32_value(a_data[i]), fp16_ieee_to_fp32_value(b));
+          break;
+        case OpType::RCopySignC:
+          y_ref[i] =
+              std::copysign(fp16_ieee_to_fp32_value(b), fp16_ieee_to_fp32_value(a_data[i]));
           break;
         case OpType::DivC:
           y_ref[i] =
@@ -231,6 +247,12 @@ void VBinaryCMicrokernelTester::Test(
         case OpType::AddC:
           y_ref[i] = a_data[i] + b;
           break;
+        case OpType::CopySignC:
+          y_ref[i] = std::copysign(a_data[i], b);
+          break;
+        case OpType::RCopySignC:
+          y_ref[i] = std::copysign(b, a_data[i]);
+          break;
         case OpType::DivC:
           y_ref[i] = a_data[i] / b;
           break;
@@ -303,6 +325,12 @@ void VBinaryCMicrokernelTester::Test(
         case OpType::AddC:
           y_ref[i] = a_data[i] + b;
           break;
+        case OpType::CopySignC:
+          y_ref[i] = std::copysign(a_data[i], b);
+          break;
+        case OpType::RCopySignC:
+          y_ref[i] = std::copysign(b, a_data[i]);
+          break;
         case OpType::DivC:
           y_ref[i] = a_data[i] / b;
           break;
@@ -372,6 +400,12 @@ void VBinaryCMicrokernelTester::Test(
       switch (op_type) {
         case OpType::AddC:
           y_ref[i] = a_data[i] + b;
+          break;
+        case OpType::CopySignC:
+          y_ref[i] = std::copysign(a_data[i], b);
+          break;
+        case OpType::RCopySignC:
+          y_ref[i] = std::copysign(b, a_data[i]);
           break;
         case OpType::DivC:
           y_ref[i] = a_data[i] / b;

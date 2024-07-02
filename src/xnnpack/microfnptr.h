@@ -1774,6 +1774,15 @@ typedef void (*xnn_u8_vclamp_ukernel_fn)(
     uint8_t* output,
     const union xnn_u8_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+// VCOPYSIGN: Vector Copysign elementwise
+
+typedef void (*xnn_f32_vcopysign_ukernel_fn)(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 // VCVT: Vector ConVerT elementwise
 
 typedef void (*xnn_f16_f32_vcvt_ukernel_fn)(

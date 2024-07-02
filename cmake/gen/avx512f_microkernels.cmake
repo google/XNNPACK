@@ -153,6 +153,9 @@ SET(ALL_AVX512F_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsubc-minmax-avx512f-u32.c
   src/f32-vclamp/gen/f32-vclamp-avx512f-u16.c
   src/f32-vclamp/gen/f32-vclamp-avx512f-u32.c
+  src/f32-vcopysign/gen/f32-vcopysign-avx512f.c
+  src/f32-vcopysign/gen/f32-vcopysignc-avx512f.c
+  src/f32-vcopysign/gen/f32-vrcopysignc-avx512f.c
   src/f32-velu/gen/f32-velu-avx512f-rr1-lut16-p3-perm-u16.c
   src/f32-velu/gen/f32-velu-avx512f-rr1-lut16-p3-perm-u32.c
   src/f32-velu/gen/f32-velu-avx512f-rr1-lut16-p3-perm-u48.c
