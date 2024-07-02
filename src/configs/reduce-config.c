@@ -214,6 +214,13 @@ static void init_f32_rsum_config(void) {
       .init.f32_scale = xnn_init_f32_scale_scalar_params,
       .element_tile = 16,
     };
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    f32_rsum_config = (struct xnn_reduce_config) {
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__rvv_u2v,
+      .init.f32_scale = xnn_init_f32_scale_scalar_params,
+      .element_tile = hardware_config->vlenb,
+    };
   #else
     f32_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__scalar_u4_acc4,

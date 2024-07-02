@@ -1,3 +1,7 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-rsum/rvv.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2024 Imagination Technologies, Inc.
 //
 // This source code is licensed under the BSD-style license found in the
@@ -5,9 +9,9 @@
 
 #include <assert.h>
 
+#include <riscv_vector.h>
 #include "xnnpack/common.h"
 #include "xnnpack/reduce.h"
-#include <riscv_vector.h>
 
 void xnn_f32_rsum_ukernel__rvv_u1v(
     size_t batch,
