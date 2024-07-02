@@ -57,6 +57,7 @@ ISA_LIST = frozenset({
     'wasmrelaxedsimd',
     'wasmpshufb',
     'wasmsdot',
+    'wasmusdot',
     'wasmsimd',
 })
 
@@ -64,6 +65,7 @@ ISA_MAP = {
     'wasmblendvps': 'wasmrelaxedsimd',
     'wasmpshufb': 'wasmrelaxedsimd',
     'wasmsdot': 'wasmrelaxedsimd',
+    'wasmusdot': 'wasmrelaxedsimd',
 }
 
 ARCH_LIST = frozenset({
