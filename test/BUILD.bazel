@@ -1498,6 +1498,7 @@ xnnpack_binary(
 ) for operator in [
     "add_nd",
     "add_nd_eager",
+    "copysign_nd",
     "divide_nd",
     "divide_nd_eager",
     "maximum_nd",

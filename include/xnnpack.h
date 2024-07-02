@@ -3966,6 +3966,24 @@ enum xnn_status xnn_setup_divide_nd_f16(
   const void* input2,
   void* output);
 
+enum xnn_status xnn_create_copysign_nd_f32(
+  uint32_t flags,
+  xnn_operator_t* copysign_op_out);
+
+enum xnn_status xnn_reshape_copysign_nd_f32(
+  xnn_operator_t copysign_op,
+  size_t num_mag_dims,
+  const size_t* mag_shape,
+  size_t num_sign_dims,
+  const size_t* sign_shape,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_copysign_nd_f32(
+  xnn_operator_t copysign_op,
+  const float* mag,
+  const float* sign,
+  float* output);
+
 enum xnn_status xnn_create_divide_nd_f32(
   float output_min,
   float output_max,

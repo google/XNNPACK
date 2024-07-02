@@ -837,6 +837,10 @@ void BinaryElementwiseOperatorTester::TestF32() const {
                   xnn_create_add_nd_f32(output_min, output_max, 0,
                                         &binary_elementwise_op));
         break;
+      case OperationType::CopySign:
+        ASSERT_EQ(xnn_status_success,
+                  xnn_create_copysign_nd_f32(/*flags=*/0, &binary_elementwise_op));
+        break;
       case OperationType::Divide:
         ASSERT_EQ(xnn_status_success,
                   xnn_create_divide_nd_f32(output_min, output_max, 0,
@@ -884,6 +888,17 @@ void BinaryElementwiseOperatorTester::TestF32() const {
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_add_nd_f32(binary_elementwise_op, input1.data(),
                                        input2.data(), output.data()));
+        break;
+      case OperationType::CopySign:
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_reshape_copysign_nd_f32(binary_elementwise_op, num_input1_dims(),
+                                      input1_shape().data(), num_input2_dims(),
+                                      input2_shape().data(),
+                                      /*threadpool=*/nullptr));
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_copysign_nd_f32(binary_elementwise_op, input1.data(),
+                                          input2.data(), output.data()));
         break;
       case OperationType::Divide:
         ASSERT_EQ(
