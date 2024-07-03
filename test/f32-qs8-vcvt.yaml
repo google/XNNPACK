@@ -89,6 +89,17 @@
   init: xnn_init_f32_qs8_cvt_scalar_fmagic_params
 - name: xnn_f32_qs8_vcvt_ukernel__wasm_fmagic_u4
   init: xnn_init_f32_qs8_cvt_scalar_fmagic_params
+# Hexagon HVX
+- name: xnn_f32_qs8_vcvt_ukernel__hvx_u32
+  init: xnn_init_f32_qs8_cvt_hvx_params
+- name: xnn_f32_qs8_vcvt_ukernel__hvx_u64
+  init: xnn_init_f32_qs8_cvt_hvx_params
+- name: xnn_f32_qs8_vcvt_ukernel__hvx_u96
+  init: xnn_init_f32_qs8_cvt_hvx_params
+- name: xnn_f32_qs8_vcvt_ukernel__hvx_u128
+  init: xnn_init_f32_qs8_cvt_hvx_params
+- name: xnn_f32_qs8_vcvt_ukernel__hvx_u256
+  init: xnn_init_f32_qs8_cvt_hvx_params
 # Scalar
 - name: xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_u1
   init: xnn_init_f32_qs8_cvt_scalar_fmagic_params

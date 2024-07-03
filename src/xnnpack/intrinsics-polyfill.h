@@ -272,6 +272,10 @@ uint8x16x4_t vld1q_u8_x4(const uint8_t* address) {
 #include <hexagon_types.h>
 #include <hvx_hexagon_protos.h>
 
+// Conditional Store:
+// - addr: destination
+// - n: number of elements * sizeof(datatype) where n <= 128
+// - vin: input
 static XNN_INTRINSIC
 void Q6_V_vstu_variable(void *addr, uint32_t n, HVX_Vector vin)
 {
@@ -295,8 +299,11 @@ void Q6_V_vstu_variable(void *addr, uint32_t n, HVX_Vector vin)
     Q6_vmem_QnRIV(ql_not, (HVX_Vector*) addr, vin);
 }
 
-// 32x16 signed integer multiply:
-// vout is in HVX_VectorPair format, keeping the same order as vin.
+// 32x16 Integer Multiplication:
+// - multiplier: 32-bit integer
+// - vin: 16-bit signed integer
+// - Return 'HVX_VectorPair' keeping the same order as vin
+//   but with elements widened to 32-bit.
 static XNN_INTRINSIC
 HVX_VectorPair Q6_Vw_vmpyi_VwVh(HVX_Vector multiplier, HVX_Vector vin)
 {
@@ -307,7 +314,13 @@ HVX_VectorPair Q6_Vw_vmpyi_VwVh(HVX_Vector multiplier, HVX_Vector vin)
     return Q6_W_vshuff_VVR(mul_o, mul_e, -4);
 }
 
-// 32x16 integer multiply of even elements in vin.
+// 32x16 Integer Multiplication of even elements in the 'vin':
+// multiplier_hi: upper part of 32-bit integer multiplier
+// multiplier_lo: lower part of 32-bit integer multiplier
+// vin: 16-bit signed integer
+// - Return 'vout' in the HVX_Vector format,
+//   containing only the multiplication results of the even elements from 'vin' and
+//   widened to 32-bit.
 static XNN_INTRINSIC
 HVX_Vector Q6_Vw_vmpyie_VwVh(HVX_Vector multiplier_lo, HVX_Vector multiplier_hi, HVX_Vector vin)
 {
@@ -315,6 +328,18 @@ HVX_Vector Q6_Vw_vmpyie_VwVh(HVX_Vector multiplier_lo, HVX_Vector multiplier_hi,
     HVX_Vector vout = Q6_Vw_vmpyieo_VhVh(vin, multiplier_hi);
     vout = Q6_Vw_vmpyieacc_VwVwVh(vout, multiplier_lo, vin);
 
+    return vout;
+}
+
+// Vector Muliply-Add
+// vin1 - vin3: 32-bit float
+// vout = (vin1 * vin2) + vin3)
+// vout: 32-bit float
+static XNN_INTRINSIC
+HVX_Vector Q6_Vsf_vmpyadd_VsfVsf(HVX_Vector vin1, HVX_Vector vin2, HVX_Vector vin3)
+{
+    HVX_Vector vout = Q6_Vsf_vmpy_VsfVsf(vin1, vin2);
+    vout = Q6_Vsf_vadd_VsfVsf(vout, vin3);
     return vout;
 }
 #endif  // Hexagon

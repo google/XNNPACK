@@ -1505,6 +1505,15 @@ union xnn_f32_qs8_cvt_params {
     XNN_ALIGN(8) int8_t output_max[8];
   } wasmsimd_magic;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_HEXAGON
+  struct {
+    float scale;
+    float magic_bias;
+    int32_t magic_bias_less_zero_point;
+    int8_t output_min;
+    int8_t output_max;
+  } hvx;
+#endif  // XNN_ARCH_HEXAGON
 };
 
 union xnn_f32_qu8_cvt_params {
