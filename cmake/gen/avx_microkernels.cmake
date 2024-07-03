@@ -251,6 +251,14 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/math/gen/f32-tanh-avx-expm1minus-rr2-lut8-p4h3ps-nr2.c
   src/math/gen/f32-tanh-avx-expm1minus-rr2-lut8-p4h3ts-nr1.c
   src/math/gen/f32-tanh-avx-expm1minus-rr2-lut8-p4h3ts-nr2.c
+  src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x4c8-minmax-avx-ld64.c
+  src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x4c8-minmax-avx-ld128.c
+  src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-2x4c8-minmax-avx-ld64.c
+  src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-2x4c8-minmax-avx-ld128.c
+  src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-3x4c8-minmax-avx-ld64.c
+  src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-3x4c8-minmax-avx-ld128.c
+  src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-4x4c8-minmax-avx-ld64.c
+  src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-4x4c8-minmax-avx-ld128.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x4c8-minmax-avx-ld64.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x4c8-minmax-avx-ld128.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x4c8-minmax-avx-ld64.c
