@@ -1720,8 +1720,12 @@ py_binary(
     name = "generate_build_identifier_py",
     srcs = ["scripts/generate-build-identifier.py"],
     main = "scripts/generate-build-identifier.py",
-    # This should only be built as part of the related genrule.
-    tags = ["notap"],
+    tags = ["notap"],  # This should only be built as part of the related genrule.
+    target_compatible_with = select({
+        "@bazel_platforms//cpu:wasm32": ["@bazel_platforms//:incompatible"],
+        "@bazel_platforms//cpu:wasm64": ["@bazel_platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
 )
 
 xnnpack_transitive_source_list(
