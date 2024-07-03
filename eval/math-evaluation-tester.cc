@@ -3,25 +3,21 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <gtest/gtest.h>
+#include "math-evaluation-tester.h"
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <iomanip>
 #include <ios>
-#include <limits>
 #include <utility>
 #include <vector>
 
+#include <gtest/gtest.h>
 #include <fp16/fp16.h>
-
-#include "math-evaluation-tester.h"
-
 #include "xnnpack/aligned-allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
 #include "xnnpack/math-stubs.h"
-
+#include "xnnpack/math.h"
 
 void MathEvaluationTester::TestOutputMatchReference(xnn_f16_unary_math_fn math_fn, float output_value) const {
   ASSERT_FALSE(std::isnan(output_value));

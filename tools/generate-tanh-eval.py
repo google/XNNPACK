@@ -103,10 +103,10 @@ def main(args):
 #include <limits>
 
 #include <gtest/gtest.h>
-
 #include "math-evaluation-tester.h"
-
+#include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
+#include "xnnpack/math-stubs.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for eval_spec in spec_yaml:
