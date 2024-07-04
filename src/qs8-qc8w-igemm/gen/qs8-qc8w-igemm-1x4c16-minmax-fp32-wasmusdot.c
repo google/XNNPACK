@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-igemm/MRx4c16-wasmusdot.c.in
+//   Template: src/qs8-igemm/MRx4c16-wasmdot.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC

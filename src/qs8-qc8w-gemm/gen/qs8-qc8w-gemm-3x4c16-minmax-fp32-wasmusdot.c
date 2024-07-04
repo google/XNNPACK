@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-gemm/MRx4c16-wasmusdot.c.in
+//   Template: src/qs8-gemm/MRx4c16-wasmdot.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
@@ -13,7 +13,6 @@
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
-
 
 void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x4c16__wasmusdot(
     size_t mr,

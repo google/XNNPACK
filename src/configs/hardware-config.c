@@ -245,7 +245,7 @@ static void init_hardware_config(void) {
         wasm_v128_xor(overflow_output, wasm_i32x4_const(65536, 33024, 33024, 512))));
     }
     {
-      // Check out-of-bounds behaviour of VNNI (vpdpbusd) version Relaxed Integer Dot Product with Accumulation.
+      // Check out-of-bounds behaviour of Relaxed Integer Dot Product with Accumulation with signed and unsigned input (e.g. vpdpbusd).
       const v128_t int8_input = wasm_i8x16_const(0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0);
       const volatile v128_t xint8_input = wasm_i8x16_const(0, 0, 0, -128, 0, 0, -128, 0, 0, -128, 0, 0, -128, 0, 0, 0);  // volatile to confuse Clang which otherwise ICE's
       const v128_t xint8_output = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(int8_input, xint8_input, wasm_i8x16_const_splat(0));
