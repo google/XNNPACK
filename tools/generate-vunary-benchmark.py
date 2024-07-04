@@ -49,7 +49,7 @@ def split_ukernel_name(name: str) -> tuple[str, str, str]:
       `isa`: `str` target ISA.
   """
   match = re.fullmatch(
-      r"(?:xnn_|xnn_generate_)(f16|f32)(_(f16|f32))*_v(abs|clamp|elu|hswish|log|lrelu|neg|relu|rndd|rndne|rndu|rndz|rsqrt|sigmoid|sqr|sqrt|sqrtshift|tanh)_(fact_)?ukernel__(.+)_u(\d+)(v)?",
+      r"(?:xnn_|xnn_generate_)(f16|f32)(_(f16|f32))*_v(abs|clamp|elu|gelu|hswish|log|lrelu|neg|relu|rndd|rndne|rndu|rndz|rsqrt|sigmoid|sqr|sqrt|sqrtshift|tanh)_(fact_)?ukernel__(.+)_u(\d+)(v)?",
       name,
   )
   if match is None:
@@ -105,7 +105,7 @@ $elif OP_NAME == "clamp":
         /*range_min=*/${RANGE_MIN},
         /*range_max=*/${RANGE_MAX});
   }
-$elif OP_NAME == "sqr" or (DATATYPE == "f32" and OP_NAME in ("abs", "log", "neg")):
+$elif OP_NAME == "sqr" or (DATATYPE == "f32" and OP_NAME in ("abs", "gelu", "log", "neg")):
   void ${DATATYPE}_v${OP_NAME}(benchmark::State& state, xnn_${DATATYPE}_v${OP_NAME}_ukernel_fn ukernel,
                 xnn_init_${DATATYPE}_default_params_fn init_params = nullptr,
                 benchmark::utils::IsaCheckFunction isa_check = nullptr) {
@@ -228,17 +228,14 @@ def main(args):
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
+#include <benchmark/benchmark.h>
+#include "bench/{datatype}-vunary-benchmark.h"
+#include "bench/utils.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/vunary.h"
-
-#include "bench/{datatype}-vunary-benchmark.h"
-#include "bench/utils.h"
-#include <benchmark/benchmark.h>
 
 """.format(specification=options.spec, generator=sys.argv[0], datatype=datatype)
 

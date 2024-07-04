@@ -70,6 +70,7 @@ SET(ALL_HVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsubc-minmax-hvx-u32.c
   src/f32-vbinary/gen/f32-vsubc-minmax-hvx-u64.c
   src/f32-vbinary/gen/f32-vsubc-minmax-hvx-u128.c
+  src/f32-vgelu/gen/f32-vgelu-hvx-rational-10-8-div.c
   src/f32-vunary/gen/f32-vabs-hvx.c
   src/f32-vunary/gen/f32-vneg-hvx.c
   src/f32-vunary/gen/f32-vsqr-hvx.c

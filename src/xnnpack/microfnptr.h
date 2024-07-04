@@ -1865,6 +1865,14 @@ typedef void (*xnn_f32_velu_ukernel_fn)(
     float* output,
     const union xnn_f32_elu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+// VGELU: Vector Gaussian Error Linear Unit elementwise
+
+typedef void (*xnn_f32_vgelu_ukernel_fn)(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 // VHSWISH: Vector Hard SWISH elementwise
 
 typedef void (*xnn_f16_vhswish_ukernel_fn)(

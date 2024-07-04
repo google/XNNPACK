@@ -10,17 +10,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
+#include <benchmark/benchmark.h>
+#include "bench/f16-vunary-benchmark.h"
+#include "bench/utils.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/vunary.h"
-
-#include "bench/f16-vunary-benchmark.h"
-#include "bench/utils.h"
-#include <benchmark/benchmark.h>
 
 void f16_vrsqrt(benchmark::State& state, xnn_f16_vrsqrt_ukernel_fn ukernel,
               xnn_init_f16_rsqrt_params_fn init_params = nullptr,

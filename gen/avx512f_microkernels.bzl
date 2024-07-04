@@ -168,6 +168,7 @@ ALL_AVX512F_MICROKERNEL_SRCS = [
     "src/f32-velu/gen/f32-velu-avx512f-rr1-p6-u96.c",
     "src/f32-velu/gen/f32-velu-avx512f-rr1-p6-u112.c",
     "src/f32-velu/gen/f32-velu-avx512f-rr1-p6-u128.c",
+    "src/f32-vgelu/gen/f32-vgelu-avx512f-rational-10-8-div.c",
     "src/f32-vhswish/gen/f32-vhswish-avx512f-u16.c",
     "src/f32-vhswish/gen/f32-vhswish-avx512f-u32.c",
     "src/f32-vlog/gen/f32-vlog-avx512f-rational-3-3-div.c",

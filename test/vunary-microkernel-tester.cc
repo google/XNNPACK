@@ -28,6 +28,10 @@
   #include "xnnpack/memory.h"
 #endif
 
+#ifndef M_SQRT1_2
+#define M_SQRT1_2 0.7071067811865475244
+#endif
+
 void VUnaryMicrokernelTester::Test(xnn_f32_vrelu_ukernel_fn vrelu) const {
   TestFP32(
       vrelu, [](xnn_f32_relu_params*) { return nullptr; },
@@ -98,6 +102,15 @@ void VUnaryMicrokernelTester::Test(
                    : static_cast<double>(x) * beta();
       },
       TolMixed(5.0e-6f, 1.0e-5f), -20.0f, 20.0f);
+}
+
+void VUnaryMicrokernelTester::TestGelu(
+    xnn_f32_vgelu_ukernel_fn vgelu,
+    xnn_init_f32_default_params_fn init_params) const {
+  TestFP32(
+      vgelu, InitParamsWrapper(init_params),
+      [](float x) { return x * 0.5f * (1.0f + std::erf(x * M_SQRT1_2)); },
+      TolMixed(1.0e-5f, 1.0e-5f), -20.0f, 20.0f);
 }
 
 void VUnaryMicrokernelTester::Test(

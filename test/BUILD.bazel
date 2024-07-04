@@ -191,6 +191,7 @@ xnnpack_cc_library(
     "f32_vabs",
     "f32_vclamp",
     "f32_velu",
+    "f32_vgelu",
     "f32_vhswish",
     "f32_vlog",
     "f32_vlrelu",
