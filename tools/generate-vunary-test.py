@@ -97,7 +97,6 @@ SPECIAL_VALUES_F32 = {
         "{0.0f}",  # Expected outputs.
         "xnn_f32_default_params",
         1,  # Error margin in ULP.
-        "",  # Extra checks.
     ),
     "GELU": (
         3,  # Number of elements.

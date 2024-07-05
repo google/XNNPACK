@@ -83,11 +83,12 @@ void xnn_f32_vgelu_ukernel__avx512f_rational_10_8_div_u16(
     vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator and add one
-    const xnn_simd_f32_t verf_plus_one =  xnn_add_f32(xnn_div_f32(vp, vq), vone);
+    const xnn_simd_f32_t verf =  xnn_div_f32(vp, vq);
 
-    // Add one to the rational interpolant, and multiply by 0.5x.
+    // Add one to the rational interpolant, and multiply by 0.5 times the
+    // original input.
     const xnn_simd_f32_t vy = xnn_mul_f32(xnn_mul_f32(vx_orig, vhalf),
-                                          verf_plus_one);
+                                          xnn_add_f32(verf, vone));
 
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
@@ -108,9 +109,9 @@ void xnn_f32_vgelu_ukernel__avx512f_rational_10_8_div_u16(
   vq = xnn_fmadd_f32(vx2, vq, vbeta_4);
   vq = xnn_fmadd_f32(vx2, vq, vbeta_2);
   vq = xnn_fmadd_f32(vx2, vq, vone);
-  const xnn_simd_f32_t verf_plus_one =  xnn_add_f32(xnn_div_f32(vp, vq), vone);
+  const xnn_simd_f32_t verf =  xnn_div_f32(vp, vq);
   const xnn_simd_f32_t vy = xnn_mul_f32(xnn_mul_f32(vx_orig, vhalf),
-                                        verf_plus_one);
+                                        xnn_add_f32(verf, vone));
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
@@ -194,14 +195,15 @@ void xnn_f32_vgelu_ukernel__avx512f_rational_10_8_div_u32(
     vq_1 = xnn_fmadd_f32(vx2_1, vq_1, vone);
 
     // Divide the numerator by the denominator.
-    const xnn_simd_f32_t verf_plus_one_0 = xnn_add_f32(xnn_div_f32(vp_0, vq_0), vone);
-    const xnn_simd_f32_t verf_plus_one_1 = xnn_add_f32(xnn_div_f32(vp_1, vq_1), vone);
+    const xnn_simd_f32_t verf_0 = xnn_div_f32(vp_0, vq_0);
+    const xnn_simd_f32_t verf_1 = xnn_div_f32(vp_1, vq_1);
 
-    // Add one to the rational interpolant, and multiply by 0.5x.
+    // Add one to the rational interpolant, and multiply by 0.5 times the
+    // original input.
     const xnn_simd_f32_t vy_0 = xnn_mul_f32(xnn_mul_f32(vx_orig_0, vhalf),
-                                        verf_plus_one_0);
+                                        xnn_add_f32(verf_0, vone));
     const xnn_simd_f32_t vy_1 = xnn_mul_f32(xnn_mul_f32(vx_orig_1, vhalf),
-                                        verf_plus_one_1);
+                                        xnn_add_f32(verf_1, vone));
 
     xnn_storeu_f32(output, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
@@ -232,11 +234,12 @@ void xnn_f32_vgelu_ukernel__avx512f_rational_10_8_div_u32(
     vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator and add one
-    const xnn_simd_f32_t verf_plus_one =  xnn_add_f32(xnn_div_f32(vp, vq), vone);
+    const xnn_simd_f32_t verf =  xnn_div_f32(vp, vq);
 
-    // Add one to the rational interpolant, and multiply by 0.5x.
+    // Add one to the rational interpolant, and multiply by 0.5 times the
+    // original input.
     const xnn_simd_f32_t vy = xnn_mul_f32(xnn_mul_f32(vx_orig, vhalf),
-                                          verf_plus_one);
+                                          xnn_add_f32(verf, vone));
 
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
@@ -257,9 +260,9 @@ void xnn_f32_vgelu_ukernel__avx512f_rational_10_8_div_u32(
   vq = xnn_fmadd_f32(vx2, vq, vbeta_4);
   vq = xnn_fmadd_f32(vx2, vq, vbeta_2);
   vq = xnn_fmadd_f32(vx2, vq, vone);
-  const xnn_simd_f32_t verf_plus_one =  xnn_add_f32(xnn_div_f32(vp, vq), vone);
+  const xnn_simd_f32_t verf =  xnn_div_f32(vp, vq);
   const xnn_simd_f32_t vy = xnn_mul_f32(xnn_mul_f32(vx_orig, vhalf),
-                                        verf_plus_one);
+                                        xnn_add_f32(verf, vone));
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
@@ -356,17 +359,18 @@ void xnn_f32_vgelu_ukernel__avx512f_rational_10_8_div_u48(
     vq_2 = xnn_fmadd_f32(vx2_2, vq_2, vone);
 
     // Divide the numerator by the denominator.
-    const xnn_simd_f32_t verf_plus_one_0 = xnn_add_f32(xnn_div_f32(vp_0, vq_0), vone);
-    const xnn_simd_f32_t verf_plus_one_1 = xnn_add_f32(xnn_div_f32(vp_1, vq_1), vone);
-    const xnn_simd_f32_t verf_plus_one_2 = xnn_add_f32(xnn_div_f32(vp_2, vq_2), vone);
+    const xnn_simd_f32_t verf_0 = xnn_div_f32(vp_0, vq_0);
+    const xnn_simd_f32_t verf_1 = xnn_div_f32(vp_1, vq_1);
+    const xnn_simd_f32_t verf_2 = xnn_div_f32(vp_2, vq_2);
 
-    // Add one to the rational interpolant, and multiply by 0.5x.
+    // Add one to the rational interpolant, and multiply by 0.5 times the
+    // original input.
     const xnn_simd_f32_t vy_0 = xnn_mul_f32(xnn_mul_f32(vx_orig_0, vhalf),
-                                        verf_plus_one_0);
+                                        xnn_add_f32(verf_0, vone));
     const xnn_simd_f32_t vy_1 = xnn_mul_f32(xnn_mul_f32(vx_orig_1, vhalf),
-                                        verf_plus_one_1);
+                                        xnn_add_f32(verf_1, vone));
     const xnn_simd_f32_t vy_2 = xnn_mul_f32(xnn_mul_f32(vx_orig_2, vhalf),
-                                        verf_plus_one_2);
+                                        xnn_add_f32(verf_2, vone));
 
     xnn_storeu_f32(output, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
@@ -398,11 +402,12 @@ void xnn_f32_vgelu_ukernel__avx512f_rational_10_8_div_u48(
     vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator and add one
-    const xnn_simd_f32_t verf_plus_one =  xnn_add_f32(xnn_div_f32(vp, vq), vone);
+    const xnn_simd_f32_t verf =  xnn_div_f32(vp, vq);
 
-    // Add one to the rational interpolant, and multiply by 0.5x.
+    // Add one to the rational interpolant, and multiply by 0.5 times the
+    // original input.
     const xnn_simd_f32_t vy = xnn_mul_f32(xnn_mul_f32(vx_orig, vhalf),
-                                          verf_plus_one);
+                                          xnn_add_f32(verf, vone));
 
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
@@ -423,9 +428,9 @@ void xnn_f32_vgelu_ukernel__avx512f_rational_10_8_div_u48(
   vq = xnn_fmadd_f32(vx2, vq, vbeta_4);
   vq = xnn_fmadd_f32(vx2, vq, vbeta_2);
   vq = xnn_fmadd_f32(vx2, vq, vone);
-  const xnn_simd_f32_t verf_plus_one =  xnn_add_f32(xnn_div_f32(vp, vq), vone);
+  const xnn_simd_f32_t verf =  xnn_div_f32(vp, vq);
   const xnn_simd_f32_t vy = xnn_mul_f32(xnn_mul_f32(vx_orig, vhalf),
-                                        verf_plus_one);
+                                        xnn_add_f32(verf, vone));
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
@@ -535,20 +540,21 @@ void xnn_f32_vgelu_ukernel__avx512f_rational_10_8_div_u64(
     vq_3 = xnn_fmadd_f32(vx2_3, vq_3, vone);
 
     // Divide the numerator by the denominator.
-    const xnn_simd_f32_t verf_plus_one_0 = xnn_add_f32(xnn_div_f32(vp_0, vq_0), vone);
-    const xnn_simd_f32_t verf_plus_one_1 = xnn_add_f32(xnn_div_f32(vp_1, vq_1), vone);
-    const xnn_simd_f32_t verf_plus_one_2 = xnn_add_f32(xnn_div_f32(vp_2, vq_2), vone);
-    const xnn_simd_f32_t verf_plus_one_3 = xnn_add_f32(xnn_div_f32(vp_3, vq_3), vone);
+    const xnn_simd_f32_t verf_0 = xnn_div_f32(vp_0, vq_0);
+    const xnn_simd_f32_t verf_1 = xnn_div_f32(vp_1, vq_1);
+    const xnn_simd_f32_t verf_2 = xnn_div_f32(vp_2, vq_2);
+    const xnn_simd_f32_t verf_3 = xnn_div_f32(vp_3, vq_3);
 
-    // Add one to the rational interpolant, and multiply by 0.5x.
+    // Add one to the rational interpolant, and multiply by 0.5 times the
+    // original input.
     const xnn_simd_f32_t vy_0 = xnn_mul_f32(xnn_mul_f32(vx_orig_0, vhalf),
-                                        verf_plus_one_0);
+                                        xnn_add_f32(verf_0, vone));
     const xnn_simd_f32_t vy_1 = xnn_mul_f32(xnn_mul_f32(vx_orig_1, vhalf),
-                                        verf_plus_one_1);
+                                        xnn_add_f32(verf_1, vone));
     const xnn_simd_f32_t vy_2 = xnn_mul_f32(xnn_mul_f32(vx_orig_2, vhalf),
-                                        verf_plus_one_2);
+                                        xnn_add_f32(verf_2, vone));
     const xnn_simd_f32_t vy_3 = xnn_mul_f32(xnn_mul_f32(vx_orig_3, vhalf),
-                                        verf_plus_one_3);
+                                        xnn_add_f32(verf_3, vone));
 
     xnn_storeu_f32(output, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
@@ -581,11 +587,12 @@ void xnn_f32_vgelu_ukernel__avx512f_rational_10_8_div_u64(
     vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator and add one
-    const xnn_simd_f32_t verf_plus_one =  xnn_add_f32(xnn_div_f32(vp, vq), vone);
+    const xnn_simd_f32_t verf =  xnn_div_f32(vp, vq);
 
-    // Add one to the rational interpolant, and multiply by 0.5x.
+    // Add one to the rational interpolant, and multiply by 0.5 times the
+    // original input.
     const xnn_simd_f32_t vy = xnn_mul_f32(xnn_mul_f32(vx_orig, vhalf),
-                                          verf_plus_one);
+                                          xnn_add_f32(verf, vone));
 
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
@@ -606,9 +613,9 @@ void xnn_f32_vgelu_ukernel__avx512f_rational_10_8_div_u64(
   vq = xnn_fmadd_f32(vx2, vq, vbeta_4);
   vq = xnn_fmadd_f32(vx2, vq, vbeta_2);
   vq = xnn_fmadd_f32(vx2, vq, vone);
-  const xnn_simd_f32_t verf_plus_one =  xnn_add_f32(xnn_div_f32(vp, vq), vone);
+  const xnn_simd_f32_t verf =  xnn_div_f32(vp, vq);
   const xnn_simd_f32_t vy = xnn_mul_f32(xnn_mul_f32(vx_orig, vhalf),
-                                        verf_plus_one);
+                                        xnn_add_f32(verf, vone));
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
