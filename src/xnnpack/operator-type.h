@@ -101,6 +101,7 @@ enum xnn_operator_type {
   xnn_operator_type_fully_connected_nc_qs8,
   xnn_operator_type_fully_connected_nc_qs8_qc8w,
   xnn_operator_type_fully_connected_nc_qu8,
+  xnn_operator_type_gelu_nc_f32,
   xnn_operator_type_global_average_pooling_ncw_f16,
   xnn_operator_type_global_average_pooling_ncw_f32,
   xnn_operator_type_global_average_pooling_nwc_f16,

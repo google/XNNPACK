@@ -10,14 +10,14 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/simd/f32-avx2.h"
+#include "xnnpack/simd/f32-avx.h"
 
 #include "xnnpack/common.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/vunary.h"
 
 
-void xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u8(
+void xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -114,7 +114,7 @@ void xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u8(
   }
 }
 
-void xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u16(
+void xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -263,7 +263,7 @@ void xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u16(
   }
 }
 
-void xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u24(
+void xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u24(
     size_t batch,
     const float* input,
     float* output,
@@ -429,7 +429,7 @@ void xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u24(
   }
 }
 
-void xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u32(
+void xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u32(
     size_t batch,
     const float* input,
     float* output,

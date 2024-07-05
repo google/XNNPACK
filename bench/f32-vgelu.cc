@@ -86,28 +86,28 @@ BENCHMARK_CAPTURE(f32_vgelu, scalar_rational_10_8_div_u8,
                     /*init_params=*/nullptr)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vgelu, avx2_rational_10_8_div_u8,
-                    xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u8,
+  BENCHMARK_CAPTURE(f32_vgelu, avx_rational_10_8_div_u8,
+                    xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u8,
                     /*init_params=*/nullptr,
-                    benchmark::utils::CheckAVX2)
+                    benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vgelu, avx2_rational_10_8_div_u16,
-                    xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u16,
+  BENCHMARK_CAPTURE(f32_vgelu, avx_rational_10_8_div_u16,
+                    xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u16,
                     /*init_params=*/nullptr,
-                    benchmark::utils::CheckAVX2)
+                    benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vgelu, avx2_rational_10_8_div_u24,
-                    xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u24,
+  BENCHMARK_CAPTURE(f32_vgelu, avx_rational_10_8_div_u24,
+                    xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u24,
                     /*init_params=*/nullptr,
-                    benchmark::utils::CheckAVX2)
+                    benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vgelu, avx2_rational_10_8_div_u32,
-                    xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u32,
+  BENCHMARK_CAPTURE(f32_vgelu, avx_rational_10_8_div_u32,
+                    xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u32,
                     /*init_params=*/nullptr,
-                    benchmark::utils::CheckAVX2)
+                    benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vgelu, fma3_rational_10_8_div_u8,

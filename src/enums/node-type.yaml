@@ -61,6 +61,8 @@
   string: "Fully Connected"
 - name: xnn_node_type_fully_connected_sparse
   string: "Fully Connected Sparse"
+- name: xnn_node_type_gelu
+  string: "GELU"
 - name: xnn_node_type_global_average_pooling_1d
   string: "Global Average Pooling 1D"
 - name: xnn_node_type_global_average_pooling_2d

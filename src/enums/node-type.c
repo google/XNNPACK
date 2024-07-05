@@ -13,10 +13,10 @@
 #include "xnnpack/node-type.h"
 
 #if XNN_LOG_LEVEL > 0
-static const uint16_t offset[60] = {
+static const uint16_t offset[61] = {
   0, 8, 12, 17, 35, 54, 71, 93, 101, 107, 120, 133, 146, 159, 167, 182, 187, 197, 214, 232, 257, 264, 268, 280, 292,
-  304, 310, 326, 349, 375, 401, 423, 445, 455, 459, 470, 485, 494, 503, 513, 520, 526, 549, 560, 565, 594, 602, 610,
-  628, 635, 647, 666, 686, 698, 713, 739, 752, 769, 778, 783
+  304, 310, 326, 349, 354, 380, 406, 428, 450, 460, 464, 475, 490, 499, 508, 518, 525, 531, 554, 565, 570, 599, 607,
+  615, 633, 640, 652, 671, 691, 703, 718, 744, 757, 774, 783, 788
 };
 
 static const char data[] =
@@ -48,6 +48,7 @@ static const char data[] =
   "Floor\0"
   "Fully Connected\0"
   "Fully Connected Sparse\0"
+  "GELU\0"
   "Global Average Pooling 1D\0"
   "Global Average Pooling 2D\0"
   "Global Sum Pooling 1D\0"

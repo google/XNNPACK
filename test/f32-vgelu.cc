@@ -754,52 +754,52 @@ TEST(F32_VGELU__SCALAR_RATIONAL_10_8_DIV_U8, special_values) {
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U8, batch_eq_8) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U8, batch_eq_8) {
+    TEST_REQUIRES_X86_AVX;
     VUnaryMicrokernelTester()
       .batch_size(8)
-      .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u8);
+      .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u8);
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U8, batch_div_8) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U8, batch_div_8) {
+    TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u8);
+        .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u8);
     }
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U8, batch_lt_8) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U8, batch_lt_8) {
+    TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 1; batch_size < 8; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u8);
+        .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u8);
     }
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U8, batch_gt_8) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U8, batch_gt_8) {
+    TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u8);
+        .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u8);
     }
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U8, inplace) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U8, inplace) {
+    TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u8);
+        .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u8);
     }
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U8, special_values) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U8, special_values) {
+    TEST_REQUIRES_X86_AVX;
     constexpr size_t num_elements = 3;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
@@ -808,7 +808,7 @@ TEST(F32_VGELU__SCALAR_RATIONAL_10_8_DIV_U8, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, 6.0f, 0.0f};
     std::array<float, buffered_size> outputs;
-    xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u8(
+    xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u8(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
@@ -829,52 +829,52 @@ TEST(F32_VGELU__SCALAR_RATIONAL_10_8_DIV_U8, special_values) {
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U16, batch_eq_16) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U16, batch_eq_16) {
+    TEST_REQUIRES_X86_AVX;
     VUnaryMicrokernelTester()
       .batch_size(16)
-      .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u16);
+      .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u16);
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U16, batch_div_16) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U16, batch_div_16) {
+    TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u16);
+        .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u16);
     }
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U16, batch_lt_16) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U16, batch_lt_16) {
+    TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u16);
+        .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u16);
     }
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U16, batch_gt_16) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U16, batch_gt_16) {
+    TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u16);
+        .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u16);
     }
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U16, inplace) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U16, inplace) {
+    TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u16);
+        .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u16);
     }
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U16, special_values) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U16, special_values) {
+    TEST_REQUIRES_X86_AVX;
     constexpr size_t num_elements = 3;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
@@ -883,7 +883,7 @@ TEST(F32_VGELU__SCALAR_RATIONAL_10_8_DIV_U8, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, 6.0f, 0.0f};
     std::array<float, buffered_size> outputs;
-    xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u16(
+    xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u16(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
@@ -904,52 +904,52 @@ TEST(F32_VGELU__SCALAR_RATIONAL_10_8_DIV_U8, special_values) {
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U24, batch_eq_24) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U24, batch_eq_24) {
+    TEST_REQUIRES_X86_AVX;
     VUnaryMicrokernelTester()
       .batch_size(24)
-      .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u24);
+      .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u24);
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U24, batch_div_24) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U24, batch_div_24) {
+    TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 48; batch_size < 240; batch_size += 24) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u24);
+        .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u24);
     }
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U24, batch_lt_24) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U24, batch_lt_24) {
+    TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 1; batch_size < 24; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u24);
+        .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u24);
     }
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U24, batch_gt_24) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U24, batch_gt_24) {
+    TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 24 + 1; batch_size < 48; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u24);
+        .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u24);
     }
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U24, inplace) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U24, inplace) {
+    TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 1; batch_size <= 120; batch_size += 23) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u24);
+        .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u24);
     }
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U24, special_values) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U24, special_values) {
+    TEST_REQUIRES_X86_AVX;
     constexpr size_t num_elements = 3;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
@@ -958,7 +958,7 @@ TEST(F32_VGELU__SCALAR_RATIONAL_10_8_DIV_U8, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, 6.0f, 0.0f};
     std::array<float, buffered_size> outputs;
-    xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u24(
+    xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u24(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {
@@ -979,52 +979,52 @@ TEST(F32_VGELU__SCALAR_RATIONAL_10_8_DIV_U8, special_values) {
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U32, batch_eq_32) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U32, batch_eq_32) {
+    TEST_REQUIRES_X86_AVX;
     VUnaryMicrokernelTester()
       .batch_size(32)
-      .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u32);
+      .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u32);
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U32, batch_div_32) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U32, batch_div_32) {
+    TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u32);
+        .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u32);
     }
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U32, batch_lt_32) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U32, batch_lt_32) {
+    TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u32);
+        .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u32);
     }
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U32, batch_gt_32) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U32, batch_gt_32) {
+    TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 32 + 1; batch_size < 64; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u32);
+        .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u32);
     }
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U32, inplace) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U32, inplace) {
+    TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .TestGelu(xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u32);
+        .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u32);
     }
   }
 
-  TEST(F32_VGELU__AVX2_RATIONAL_10_8_DIV_U32, special_values) {
-    TEST_REQUIRES_X86_AVX2;
+  TEST(F32_VGELU__AVX_RATIONAL_10_8_DIV_U32, special_values) {
+    TEST_REQUIRES_X86_AVX;
     constexpr size_t num_elements = 3;
     constexpr size_t buffered_size =
         num_elements + XNN_EXTRA_BYTES / sizeof(float);
@@ -1033,7 +1033,7 @@ TEST(F32_VGELU__SCALAR_RATIONAL_10_8_DIV_U8, special_values) {
     std::array<float, num_elements> expected =
         {0.0f, 6.0f, 0.0f};
     std::array<float, buffered_size> outputs;
-    xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u32(
+    xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u32(
         num_elements * sizeof(float), inputs.data(), outputs.data(), nullptr);
     for (int i = 0; i < num_elements; i++) {
       if (std::isfinite(expected[i])) {

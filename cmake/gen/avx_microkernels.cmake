@@ -184,6 +184,7 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/f32-velu/gen/f32-velu-avx-rr2-p6-u32.c
   src/f32-velu/gen/f32-velu-avx-rr2-p6-u40.c
   src/f32-velu/gen/f32-velu-avx-rr2-p6-u48.c
+  src/f32-vgelu/gen/f32-vgelu-avx-rational-10-8-div.c
   src/f32-vhswish/gen/f32-vhswish-avx-u8.c
   src/f32-vhswish/gen/f32-vhswish-avx-u16.c
   src/f32-vlrelu/gen/f32-vlrelu-avx-u8.c

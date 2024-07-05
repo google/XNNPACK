@@ -1682,6 +1682,19 @@ enum xnn_status xnn_define_floor(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define an GELU (Gaussian Error Linear Unit) Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
+///                    shape must match the shape of the input tensor.
+/// @param flags - binary features of the GELU Node. No supported flags are currently defined.
+enum xnn_status xnn_define_gelu(
+  xnn_subgraph_t subgraph,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a HardSwish Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
@@ -2093,7 +2106,7 @@ enum xnn_status xnn_get_external_value_shape(
 
 /// Reshape the XNNPACK runtime.
 ///
-/// Propgates the shapes of input tensors through the graph to determine the shapes of intermediate and output tensors.
+/// Propagates the shapes of input tensors through the graph to determine the shapes of intermediate and output tensors.
 /// Memory is allocated if required. Output tensor shapes are returned by xnn_get_external_value_shape.
 ///
 /// @param runtime - a Runtime object created with @ref xnn_create_runtime or @ref xnn_create_runtime_v2.
@@ -4490,6 +4503,33 @@ enum xnn_status xnn_setup_fully_connected_nc_qu8(
   xnn_operator_t fully_connected_op,
   const uint8_t* input,
   uint8_t* output);
+
+enum xnn_status xnn_create_gelu_nc_f32(
+  uint32_t flags,
+  xnn_operator_t* gelu_op_out);
+
+enum xnn_status xnn_reshape_gelu_nc_f32(
+  xnn_operator_t gelu_op,
+  size_t batch_size,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_gelu_nc_f32(
+  xnn_operator_t gelu_op,
+  const float* input,
+  float* output);
+
+enum xnn_status xnn_run_gelu_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  uint32_t flags,
+  pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_global_average_pooling_ncw_f16(
   float output_min,

@@ -19,11 +19,11 @@
 - name: xnn_f32_vgelu_ukernel__sse2_rational_10_8_div_u12
 - name: xnn_f32_vgelu_ukernel__sse2_rational_10_8_div_u16
 
-# AVX2
-- name: xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u8
-- name: xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u16
-- name: xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u24
-- name: xnn_f32_vgelu_ukernel__avx2_rational_10_8_div_u32
+# AVX
+- name: xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u8
+- name: xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u16
+- name: xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u24
+- name: xnn_f32_vgelu_ukernel__avx_rational_10_8_div_u32
 
 # FMA3
 - name: xnn_f32_vgelu_ukernel__fma3_rational_10_8_div_u8
