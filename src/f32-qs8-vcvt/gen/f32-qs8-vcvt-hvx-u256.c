@@ -9,14 +9,8 @@
 
 #include <assert.h>
 
-#include <hvx_hexagon_protos.h>
-#include <hexagon_protos.h>
-#include <hexagon_types.h>
-
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/simd/f32-hvx.h"
 #include "xnnpack/vcvt.h"
-
 
 void xnn_f32_qs8_vcvt_ukernel__hvx_u256(
     size_t batch,
@@ -29,30 +23,30 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u256(
   assert(input != NULL);
   assert(output != NULL);
 
-  const HVX_Vector vscale = Q6_V_vsplat_R(*((uint32_t *) &params->hvx.scale));
-  const HVX_Vector vmagic_bias = Q6_V_vsplat_R(*((uint32_t *) &params->hvx.magic_bias));
+  const HVX_Vector vscale = xnn_set1_f32(params->hvx.scale);
+  const HVX_Vector vmagic_bias = xnn_set1_f32(params->hvx.magic_bias);
   const HVX_Vector vmagic_bias_less_zero_point = Q6_V_vsplat_R(*((int32_t *) &params->hvx.magic_bias_less_zero_point));
   const HVX_Vector voutput_min = Q6_Vb_vsplat_R(*((int8_t *) &params->hvx.output_min));
   const HVX_Vector voutput_max = Q6_Vb_vsplat_R(*((int8_t *) &params->hvx.output_max));
   for (; batch >= 256 * sizeof(float); batch -= 256 * sizeof(float)) {
-    HVX_Vector vx0 = *((HVX_UVector *) input);
-    HVX_Vector vx1 = *((HVX_UVector *)(input + 32));
-    HVX_Vector vx2 = *((HVX_UVector *)(input + 64));
-    HVX_Vector vx3 = *((HVX_UVector *)(input + 96));
-    HVX_Vector vx4 = *((HVX_UVector *)(input + 128));
-    HVX_Vector vx5 = *((HVX_UVector *)(input + 160));
-    HVX_Vector vx6 = *((HVX_UVector *)(input + 192));
-    HVX_Vector vx7 = *((HVX_UVector *)(input + 224));
+    HVX_Vector vx0 = xnn_loadu_f32(input);
+    HVX_Vector vx1 = xnn_loadu_f32(input + 32);
+    HVX_Vector vx2 = xnn_loadu_f32(input + 64);
+    HVX_Vector vx3 = xnn_loadu_f32(input + 96);
+    HVX_Vector vx4 = xnn_loadu_f32(input + 128);
+    HVX_Vector vx5 = xnn_loadu_f32(input + 160);
+    HVX_Vector vx6 = xnn_loadu_f32(input + 192);
+    HVX_Vector vx7 = xnn_loadu_f32(input + 224);
     input += 256;
 
-    vx0 = Q6_Vsf_vmpyadd_VsfVsf(vx0, vscale, vmagic_bias);
-    vx1 = Q6_Vsf_vmpyadd_VsfVsf(vx1, vscale, vmagic_bias);
-    vx2 = Q6_Vsf_vmpyadd_VsfVsf(vx2, vscale, vmagic_bias);
-    vx3 = Q6_Vsf_vmpyadd_VsfVsf(vx3, vscale, vmagic_bias);
-    vx4 = Q6_Vsf_vmpyadd_VsfVsf(vx4, vscale, vmagic_bias);
-    vx5 = Q6_Vsf_vmpyadd_VsfVsf(vx5, vscale, vmagic_bias);
-    vx6 = Q6_Vsf_vmpyadd_VsfVsf(vx6, vscale, vmagic_bias);
-    vx7 = Q6_Vsf_vmpyadd_VsfVsf(vx7, vscale, vmagic_bias);
+    vx0 = xnn_fmadd_f32(vx0, vscale, vmagic_bias);
+    vx1 = xnn_fmadd_f32(vx1, vscale, vmagic_bias);
+    vx2 = xnn_fmadd_f32(vx2, vscale, vmagic_bias);
+    vx3 = xnn_fmadd_f32(vx3, vscale, vmagic_bias);
+    vx4 = xnn_fmadd_f32(vx4, vscale, vmagic_bias);
+    vx5 = xnn_fmadd_f32(vx5, vscale, vmagic_bias);
+    vx6 = xnn_fmadd_f32(vx6, vscale, vmagic_bias);
+    vx7 = xnn_fmadd_f32(vx7, vscale, vmagic_bias);
 
     const HVX_Vector vacc0 = Q6_Vw_vsub_VwVw_sat(vx0, vmagic_bias_less_zero_point);
     const HVX_Vector vacc1 = Q6_Vw_vsub_VwVw_sat(vx1, vmagic_bias_less_zero_point);
@@ -84,10 +78,10 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u256(
     output += 128;
   }
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
-    HVX_Vector vx = *((HVX_UVector *) input);
+    HVX_Vector vx = xnn_loadu_f32(input);
     input += 32;
 
-    vx = Q6_Vsf_vmpyadd_VsfVsf(vx, vscale, vmagic_bias);
+    vx = xnn_fmadd_f32(vx, vscale, vmagic_bias);
 
     const HVX_Vector vacc = Q6_Vw_vsub_VwVw_sat(vx, vmagic_bias_less_zero_point);
 
@@ -104,9 +98,9 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u256(
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch < 32 * sizeof(float));
-    HVX_Vector vx = *((HVX_UVector *) input);
+    HVX_Vector vx = xnn_loadu_f32(input);
 
-    vx = Q6_Vsf_vmpyadd_VsfVsf(vx, vscale, vmagic_bias);
+    vx = xnn_fmadd_f32(vx, vscale, vmagic_bias);
 
     const HVX_Vector vacc = Q6_Vw_vsub_VwVw_sat(vx, vmagic_bias_less_zero_point);
 
@@ -118,10 +112,8 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u256(
     vy = Q6_Vb_vmin_VbVb(voutput_max, vy);
 
     // Since the output data type is int8_t,
-    // we simply determine the number of elements
+    // we simply determine the number of elements using batch >> 2
     // without multiplying by sizeof(int8_t).
-    int element = batch / sizeof(float);
-
-    Q6_V_vstu_variable(output, element, vy);
+    Q6_V_vstu_variable(output, batch >> 2, vy);
   }
 }

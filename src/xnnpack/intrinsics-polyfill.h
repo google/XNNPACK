@@ -331,15 +331,14 @@ HVX_Vector Q6_Vw_vmpyie_VwVh(HVX_Vector multiplier_lo, HVX_Vector multiplier_hi,
     return vout;
 }
 
-// Vector Muliply-Add
-// vin1 - vin3: 32-bit float
-// vout = (vin1 * vin2) + vin3)
-// vout: 32-bit float
 static XNN_INTRINSIC
-HVX_Vector Q6_Vsf_vmpyadd_VsfVsf(HVX_Vector vin1, HVX_Vector vin2, HVX_Vector vin3)
-{
-    HVX_Vector vout = Q6_Vsf_vmpy_VsfVsf(vin1, vin2);
-    vout = Q6_Vsf_vadd_VsfVsf(vout, vin3);
-    return vout;
+HVX_Vector Q6_Vsf_vdiv_VsfVsf(HVX_Vector vin1, HVX_Vector vin2){
+    float* svin1 = (float *) &vin1;
+    float* svin2 = (float *) &vin2;
+
+    for(int i = 0; i < 32; i++)
+      svin1[i] = svin1[i] / svin2[i];
+
+    return *((HVX_UVector *) svin1);
 }
 #endif  // Hexagon
