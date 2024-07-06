@@ -10,12 +10,7 @@
 
 #include <assert.h>
 
-#include <hvx_hexagon_protos.h>
-#include <hexagon_protos.h>
-#include <hexagon_types.h>
-
-#include "xnnpack/common.h"
-#include <xnnpack/intrinsics-polyfill.h>
+#include "xnnpack/simd/f32-hvx.h"
 #include "xnnpack/raddstoreexpminusmax.h"
 
 void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u64_acc2(
@@ -33,121 +28,121 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u64_acc2(
   assert(output != NULL);
   assert(sum != NULL);
 
-  const HVX_Vector vi_max = Q6_V_vsplat_R(*((int32_t*) max));
-  const HVX_Vector vlog2e = Q6_V_vsplat_R(*((int32_t *) &params->hvx_rr2_p5.log2e));
-  const HVX_Vector vmagic_bias = Q6_V_vsplat_R(*((int32_t *) &params->hvx_rr2_p5.magic_bias));
-  const HVX_Vector vindex_mask = Q6_V_vsplat_R(INT32_C(0x3F));
-  const HVX_Vector vminus_ln2_hi = Q6_V_vsplat_R(*((int32_t *) &params->hvx_rr2_p5.minus_ln2_hi));
-  const HVX_Vector vminus_ln2_lo = Q6_V_vsplat_R(*((int32_t *) &params->hvx_rr2_p5.minus_ln2_lo));
-  const HVX_Vector vc5 = Q6_V_vsplat_R(*((int32_t *) &params->hvx_rr2_p5.c5));
-  const HVX_Vector vc4 = Q6_V_vsplat_R(*((int32_t *) &params->hvx_rr2_p5.c4));
-  const HVX_Vector vc3 = Q6_V_vsplat_R(*((int32_t *) &params->hvx_rr2_p5.c3));
-  const HVX_Vector vc2 = Q6_V_vsplat_R(*((int32_t *) &params->hvx_rr2_p5.c2));
-  const HVX_Vector vc1 = Q6_V_vsplat_R(*((int32_t *) &params->hvx_rr2_p5.c1));
-  const HVX_Vector vdenorm_cutoff = Q6_V_vsplat_R(*((int32_t *) &params->hvx_rr2_p5.denorm_cutoff));
+  XNN_SIMD_CONST_F32(vindex_mask, INT32_C(0x3F));
+  const HVX_Vector vi_max = xnn_set1_f32(*max);
+  const HVX_Vector vlog2e = xnn_set1_f32(params->hvx_rr2_p5.log2e);
+  const HVX_Vector vmagic_bias = xnn_set1_f32(params->hvx_rr2_p5.magic_bias);
+  const HVX_Vector vminus_ln2_hi = xnn_set1_f32(params->hvx_rr2_p5.minus_ln2_hi);
+  const HVX_Vector vminus_ln2_lo = xnn_set1_f32(params->hvx_rr2_p5.minus_ln2_lo);
+  const HVX_Vector vc5 = xnn_set1_f32(params->hvx_rr2_p5.c5);
+  const HVX_Vector vc4 = xnn_set1_f32(params->hvx_rr2_p5.c4);
+  const HVX_Vector vc3 = xnn_set1_f32(params->hvx_rr2_p5.c3);
+  const HVX_Vector vc2 = xnn_set1_f32(params->hvx_rr2_p5.c2);
+  const HVX_Vector vc1 = xnn_set1_f32(params->hvx_rr2_p5.c1);
+  const HVX_Vector vdenorm_cutoff = xnn_set1_f32(params->hvx_rr2_p5.denorm_cutoff);
 
   HVX_Vector vacc0 = Q6_V_vzero();
   HVX_Vector vacc1 = vacc0;
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
-    const HVX_Vector vi0 = *((HVX_UVector *) input);
-    const HVX_Vector vi1 = *((HVX_UVector *)(input + 32));
+    const HVX_Vector vi0 =  xnn_loadu_f32(input);
+    const HVX_Vector vi1 = xnn_loadu_f32(input + 32);
     input += 64;
 
     // Subtract maximum input x := i - i_max
-    const HVX_Vector vx0 = Q6_Vsf_vsub_VsfVsf(vi0, vi_max);
-    const HVX_Vector vx1 = Q6_Vsf_vsub_VsfVsf(vi1, vi_max);
+    const HVX_Vector vx0 = xnn_sub_f32(vi0, vi_max);
+    const HVX_Vector vx1 = xnn_sub_f32(vi1, vi_max);
 
     // n := round(x / log(2))
-    HVX_Vector vn0 = Q6_Vsf_vmpyadd_VsfVsf(vx0, vlog2e, vmagic_bias);
-    HVX_Vector vn1 = Q6_Vsf_vmpyadd_VsfVsf(vx1, vlog2e, vmagic_bias);
+    HVX_Vector vn0 = xnn_fmadd_f32(vx0, vlog2e, vmagic_bias);
+    HVX_Vector vn1 = xnn_fmadd_f32(vx1, vlog2e, vmagic_bias);
 
     // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow.
     const HVX_Vector vs0 = Q6_Vw_vasl_VwR(vn0, 23);
     const HVX_Vector vs1 = Q6_Vw_vasl_VwR(vn1, 23);
 
     // Subtract the large number back to get final batch := round(x / log(2)).
-    vn0 = Q6_Vsf_vsub_VsfVsf(vn0, vmagic_bias);
-    vn1 = Q6_Vsf_vsub_VsfVsf(vn1, vmagic_bias);
+    vn0 = xnn_sub_f32(vn0, vmagic_bias);
+    vn1 = xnn_sub_f32(vn1, vmagic_bias);
 
     // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    HVX_Vector vt0 = Q6_Vsf_vmpyadd_VsfVsf(vn0, vminus_ln2_hi, vx0);
-    HVX_Vector vt1 = Q6_Vsf_vmpyadd_VsfVsf(vn1, vminus_ln2_hi, vx1);
+    HVX_Vector vt0 = xnn_fmadd_f32(vn0, vminus_ln2_hi, vx0);
+    HVX_Vector vt1 = xnn_fmadd_f32(vn1, vminus_ln2_hi, vx1);
 
-    vt0 = Q6_Vsf_vmpyadd_VsfVsf(vn0, vminus_ln2_lo, vt0);
-    vt1 = Q6_Vsf_vmpyadd_VsfVsf(vn1, vminus_ln2_lo, vt1);
+    vt0 = xnn_fmadd_f32(vn0, vminus_ln2_lo, vt0);
+    vt1 = xnn_fmadd_f32(vn1, vminus_ln2_lo, vt1);
 
     // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     //  p := c5 * t + c4;
     //  p = p * t + c3;
     //  p = p * t + c2;
     //  p = p * t + c1;
-    HVX_Vector vp0 = Q6_Vsf_vmpyadd_VsfVsf(vc5, vt0, vc4);
-    HVX_Vector vp1 = Q6_Vsf_vmpyadd_VsfVsf(vc5, vt1, vc4);
+    HVX_Vector vp0 = xnn_fmadd_f32(vc5, vt0, vc4);
+    HVX_Vector vp1 = xnn_fmadd_f32(vc5, vt1, vc4);
 
-    vp0 = Q6_Vsf_vmpyadd_VsfVsf(vp0, vt0, vc3);
-    vp1 = Q6_Vsf_vmpyadd_VsfVsf(vp1, vt1, vc3);
+    vp0 = xnn_fmadd_f32(vp0, vt0, vc3);
+    vp1 = xnn_fmadd_f32(vp1, vt1, vc3);
 
-    vp0 = Q6_Vsf_vmpyadd_VsfVsf(vp0, vt0, vc2);
-    vp1 = Q6_Vsf_vmpyadd_VsfVsf(vp1, vt1, vc2);
+    vp0 = xnn_fmadd_f32(vp0, vt0, vc2);
+    vp1 = xnn_fmadd_f32(vp1, vt1, vc2);
 
-    vp0 = Q6_Vsf_vmpyadd_VsfVsf(vp0, vt0, vc1);
-    vp1 = Q6_Vsf_vmpyadd_VsfVsf(vp1, vt1, vc1);
+    vp0 = xnn_fmadd_f32(vp0, vt0, vc1);
+    vp1 = xnn_fmadd_f32(vp1, vt1, vc1);
 
     // Reconstruct the final f value:
     //   f = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
     //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
     //     = s + (t * s) * p
-    vt0 = Q6_Vsf_vmpy_VsfVsf(vt0, vs0);
-    vt1 = Q6_Vsf_vmpy_VsfVsf(vt1, vs1);
+    vt0 = xnn_mul_f32(vt0, vs0);
+    vt1 = xnn_mul_f32(vt1, vs1);
 
-    HVX_Vector vf0 = Q6_Vsf_vmpyadd_VsfVsf(vt0, vp0, vs0);
-    HVX_Vector vf1 = Q6_Vsf_vmpyadd_VsfVsf(vt1, vp1, vs1);
+    HVX_Vector vf0 = xnn_fmadd_f32(vt0, vp0, vs0);
+    HVX_Vector vf1 = xnn_fmadd_f32(vt1, vp1, vs1);
 
     // For inputs below zero cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
     vf0 = Q6_V_vand_QnV(Q6_Q_vcmp_gt_VsfVsf(vdenorm_cutoff, vx0), vf0);
     vf1 = Q6_V_vand_QnV(Q6_Q_vcmp_gt_VsfVsf(vdenorm_cutoff, vx1), vf1);
 
-    *((HVX_UVector *) output) = vf0;
-    *((HVX_UVector *)(output + 32)) = vf1;
+    xnn_storeu_f32(output, vf0);
+    xnn_storeu_f32(output + 32, vf1);
     output += 64;
 
-    vacc0 = Q6_Vsf_vadd_VsfVsf(vacc0, vf0);
-    vacc0 = Q6_Vsf_vadd_VsfVsf(vacc0, vf1);
+    vacc0 = xnn_add_f32(vacc0, vf0);
+    vacc0 = xnn_add_f32(vacc0, vf1);
   }
-  vacc0 = Q6_Vsf_vadd_VsfVsf(vacc0, vacc1);
+  vacc0 = xnn_add_f32(vacc0, vacc1);
 
   HVX_Vector vacc = vacc0;
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
-    const HVX_Vector vi = *((HVX_UVector *) input);
+    const HVX_Vector vi = xnn_loadu_f32(input);
     input += 32;
 
-    const HVX_Vector vx = Q6_Vsf_vsub_VsfVsf(vi, vi_max);
+    const HVX_Vector vx = xnn_sub_f32(vi, vi_max);
 
-    HVX_Vector vn = Q6_Vsf_vmpyadd_VsfVsf(vx, vlog2e, vmagic_bias);
+    HVX_Vector vn = xnn_fmadd_f32(vx, vlog2e, vmagic_bias);
 
     const HVX_Vector vs = Q6_Vw_vasl_VwR(vn, 23);
 
-    vn = Q6_Vsf_vsub_VsfVsf(vn, vmagic_bias);
+    vn = xnn_sub_f32(vn, vmagic_bias);
 
-    HVX_Vector vt = Q6_Vsf_vmpyadd_VsfVsf(vn, vminus_ln2_hi, vx);
-    vt = Q6_Vsf_vmpyadd_VsfVsf(vn, vminus_ln2_lo, vt);
+    HVX_Vector vt = xnn_fmadd_f32(vn, vminus_ln2_hi, vx);
+    vt = xnn_fmadd_f32(vn, vminus_ln2_lo, vt);
 
-    HVX_Vector vp = Q6_Vsf_vmpyadd_VsfVsf(vc5, vt, vc4);
-    vp = Q6_Vsf_vmpyadd_VsfVsf(vp, vt, vc3);
-    vp = Q6_Vsf_vmpyadd_VsfVsf(vp, vt, vc2);
-    vp = Q6_Vsf_vmpyadd_VsfVsf(vp, vt, vc1);
+    HVX_Vector vp = xnn_fmadd_f32(vc5, vt, vc4);
+    vp = xnn_fmadd_f32(vp, vt, vc3);
+    vp = xnn_fmadd_f32(vp, vt, vc2);
+    vp = xnn_fmadd_f32(vp, vt, vc1);
 
-    vt = Q6_Vsf_vmpy_VsfVsf(vt, vs);
-    HVX_Vector vf = Q6_Vsf_vmpyadd_VsfVsf(vt, vp, vs);
+    vt = xnn_mul_f32(vt, vs);
+    HVX_Vector vf = xnn_fmadd_f32(vt, vp, vs);
 
     vf = Q6_V_vand_QnV(Q6_Q_vcmp_gt_VsfVsf(vdenorm_cutoff, vx), vf);
 
-    *((HVX_UVector *) output) = vf;
+    xnn_storeu_f32(output, vf);
     output += 32;
 
-    vacc = Q6_Vsf_vadd_VsfVsf(vacc, vf);
+    vacc = xnn_add_f32(vacc, vf);
   }
 
   float vacc_lo = Q6_f32_vrsum_Vsf(vacc);
@@ -155,26 +150,26 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u64_acc2(
     assert(batch >= 1 * sizeof(float));
     assert(batch < 32 * sizeof(float));
 
-    const HVX_Vector vi = *((HVX_UVector *) input);
+    const HVX_Vector vi = xnn_loadu_f32(input);
 
-    const HVX_Vector vx = Q6_Vsf_vsub_VsfVsf(vi, vi_max);
+    const HVX_Vector vx = xnn_sub_f32(vi, vi_max);
 
-    HVX_Vector vn = Q6_Vsf_vmpyadd_VsfVsf(vx, vlog2e, vmagic_bias);
+    HVX_Vector vn = xnn_fmadd_f32(vx, vlog2e, vmagic_bias);
 
     const HVX_Vector vs = Q6_Vw_vasl_VwR(vn, 23);
 
-    vn = Q6_Vsf_vsub_VsfVsf(vn, vmagic_bias);
+    vn = xnn_sub_f32(vn, vmagic_bias);
 
-    HVX_Vector vt = Q6_Vsf_vmpyadd_VsfVsf(vn, vminus_ln2_hi, vx);
-    vt = Q6_Vsf_vmpyadd_VsfVsf(vn, vminus_ln2_lo, vt);
+    HVX_Vector vt = xnn_fmadd_f32(vn, vminus_ln2_hi, vx);
+    vt = xnn_fmadd_f32(vn, vminus_ln2_lo, vt);
 
-    HVX_Vector vp = Q6_Vsf_vmpyadd_VsfVsf(vc5, vt, vc4);
-    vp = Q6_Vsf_vmpyadd_VsfVsf(vp, vt, vc3);
-    vp = Q6_Vsf_vmpyadd_VsfVsf(vp, vt, vc2);
-    vp = Q6_Vsf_vmpyadd_VsfVsf(vp, vt, vc1);
+    HVX_Vector vp = xnn_fmadd_f32(vc5, vt, vc4);
+    vp = xnn_fmadd_f32(vp, vt, vc3);
+    vp = xnn_fmadd_f32(vp, vt, vc2);
+    vp = xnn_fmadd_f32(vp, vt, vc1);
 
-    vt = Q6_Vsf_vmpy_VsfVsf(vt, vs);
-    HVX_Vector vf = Q6_Vsf_vmpyadd_VsfVsf(vt, vp, vs);
+    vt = xnn_mul_f32(vt, vs);
+    HVX_Vector vf = xnn_fmadd_f32(vt, vp, vs);
 
     vf = Q6_V_vand_QnV(Q6_Q_vcmp_gt_VsfVsf(vdenorm_cutoff, vx), vf);
 

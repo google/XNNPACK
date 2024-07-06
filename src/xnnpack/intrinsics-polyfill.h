@@ -369,18 +369,4 @@ float Q6_f32_vrsum_Vsf(HVX_Vector vin){
 
     return *((float *) &vin);
 }
-<<<<<<< HEAD
-=======
-
-static XNN_INTRINSIC
-HVX_Vector Q6_Vsf_vdiv_VsfVsf(HVX_Vector vin1, HVX_Vector vin2){
-    float* svin1 = (float *) &vin1;
-    float* svin2 = (float *) &vin2;
-
-    for(int i = 0; i < 32; i++)
-      svin1[i] = svin1[i] / svin2[i];
-
-    return *((HVX_UVector *) svin1);
-}
->>>>>>> Temporary fix for the issue with xnn_div_f32 for HVX
 #endif  // XNN_ARCH_HEXAGON
