@@ -110,7 +110,9 @@ void VUnaryMicrokernelTester::TestGelu(
   TestFP32(
       vgelu, InitParamsWrapper(init_params),
       [](float x) { return x * 0.5f * (1.0f + std::erf(x * M_SQRT1_2)); },
-      TolMixed(1.0e-5f, 1.0e-5f), -20.0f, 20.0f);
+      TolMixed(10 * std::numeric_limits<float>::epsilon(),
+               5 * std::numeric_limits<float>::epsilon()),
+      -10.0f, 10.0f);
 }
 
 void VUnaryMicrokernelTester::Test(
