@@ -20,6 +20,7 @@
 #include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/config.h"
+#include "xnnpack/internal.h"
 #include "xnnpack/math.h"
 #include "xnnpack/packq.h"
 #include "replicable_random_device.h"

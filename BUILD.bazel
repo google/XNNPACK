@@ -557,6 +557,13 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "internal",
+    hdrs = ["src/xnnpack/internal.h"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+)
+
+xnnpack_cc_library(
     name = "allocator",
     srcs = [
         "src/allocator.c",

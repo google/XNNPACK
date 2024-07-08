@@ -2902,17 +2902,6 @@ enum xnn_status xnn_setup_convert_nc_f32_qd8(
   int8_t* output,
   struct xnn_dynamic_quantization_params* quantization_params);
 
-enum xnn_status xnn_create_convert_nc_f32_qp8(uint32_t flags,
-                                              xnn_operator_t* convert_op_out);
-
-enum xnn_status xnn_reshape_convert_nc_f32_qp8(
-    xnn_operator_t convert_op, size_t batch_size, size_t channels,
-    size_t input_stride, pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_convert_nc_f32_qp8(xnn_operator_t convert_op,
-                                             const float* input,
-                                             int8_t* output);
-
 enum xnn_status xnn_create_convert_nc_f32_f16(
   uint32_t flags,
   xnn_operator_t* convert_op_out);
