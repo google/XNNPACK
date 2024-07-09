@@ -344,6 +344,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-velu/gen/f32-velu-neon-rr2-p6-u16.c
   src/f32-velu/gen/f32-velu-neon-rr2-p6-u20.c
   src/f32-velu/gen/f32-velu-neon-rr2-p6-u24.c
+  src/f32-vgelu/gen/f32-vgelu-neon-rational-10-8-div.c
   src/f32-vgelu/gen/f32-vgelu-neon-rational-12-10-div.c
   src/f32-vhswish/gen/f32-vhswish-neon-u4.c
   src/f32-vhswish/gen/f32-vhswish-neon-u8.c

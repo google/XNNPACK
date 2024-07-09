@@ -359,8 +359,8 @@ SET(SUBGRAPH_SRCS
   src/subgraph/depthwise-convolution-2d.c
   src/subgraph/divide.c
   src/subgraph/elu.c
-  src/subgraph/exp.c
   src/subgraph/even-split.c
+  src/subgraph/exp.c
   src/subgraph/floor.c
   src/subgraph/fully-connected-sparse.c
   src/subgraph/fully-connected.c
