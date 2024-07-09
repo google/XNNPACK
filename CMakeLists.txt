@@ -337,6 +337,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/depthwise-convolution-2d.c
   src/subgraph/divide.c
   src/subgraph/elu.c
+  src/subgraph/exp.c
   src/subgraph/even-split.c
   src/subgraph/floor.c
   src/subgraph/fully-connected-sparse.c
@@ -1740,6 +1741,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(elu-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(elu-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME elu-test COMMAND elu-test)
+
+    ADD_EXECUTABLE(exp-test test/exp.cc)
+    TARGET_INCLUDE_DIRECTORIES(exp-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(exp-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main fp16)
+    ADD_TEST(NAME exp-test COMMAND exp-test)
 
     ADD_EXECUTABLE(even-split2-test test/even-split2.cc)
     TARGET_INCLUDE_DIRECTORIES(even-split2-test PRIVATE src test)

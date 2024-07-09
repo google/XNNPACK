@@ -1966,6 +1966,7 @@ xnnpack_cc_library(
     "convert",
     "copy",
     "elu",
+    "exp",
     "floor",
     "gelu",
     "hardswish",
