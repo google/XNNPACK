@@ -109,6 +109,8 @@
   string: "Copy (NC, X16)"
 - name: xnn_operator_type_copy_nc_x32
   string: "Copy (NC, X32)"
+- name: xnn_operator_type_copysign_nd_f32
+  string: "Copy Sign (NC, F32)"
 - name: xnn_operator_type_deconvolution_nhwc_f16
   string: "Deconvolution (NHWC, F16)"
 - name: xnn_operator_type_deconvolution_nhwc_f32
@@ -165,12 +167,16 @@
   string: "Fully Connected (NC, QD8, F32, QC4W)"
 - name: xnn_operator_type_fully_connected_nc_qd8_f32_qc8w
   string: "Fully Connected (NC, QD8, F32, QC8W)"
+- name: xnn_operator_type_fully_connected_nc_qp8_f32_qc4w
+  string: "Fully Connected (NC, QP8, F32, QC4W)"
 - name: xnn_operator_type_fully_connected_nc_qs8
   string: "Fully Connected (NC, QS8)"
 - name: xnn_operator_type_fully_connected_nc_qs8_qc8w
   string: "Fully Connected (NC, QS8, QC8W)"
 - name: xnn_operator_type_fully_connected_nc_qu8
   string: "Fully Connected (NC, QU8)"
+- name: xnn_operator_type_gelu_nc_f32
+  string: "GELU (NC, F32)"
 - name: xnn_operator_type_global_average_pooling_ncw_f16
   string: "Global Average Pooling (NCW, F16)"
 - name: xnn_operator_type_global_average_pooling_ncw_f32

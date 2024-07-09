@@ -5,12 +5,6 @@
 
 #pragma once
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -23,9 +17,14 @@
 #include <random>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/microparams.h"
+#include "replicable_random_device.h"
 
 #if XNN_PLATFORM_JIT
   #include "xnnpack/memory.h"
@@ -167,6 +166,9 @@ class VUnaryMicrokernelTester {
 
   void Test(xnn_f32_velu_ukernel_fn velu,
             xnn_init_f32_elu_params_fn init_params) const;
+
+  void TestGelu(xnn_f32_vgelu_ukernel_fn vgelu,
+            xnn_init_f32_default_params_fn init_params = nullptr) const;
 
   void Test(xnn_f16_vhswish_ukernel_fn vhswish,
             xnn_init_f16_hswish_params_fn init_params) const;

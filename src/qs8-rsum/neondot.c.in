@@ -12,7 +12,6 @@ $assert ACCUMULATORS <= SIMD_TILE
 #include <arm_neon.h>
 
 #include "xnnpack/common.h"
-#include "xnnpack/math.h"
 #include "xnnpack/reduce.h"
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
@@ -34,7 +33,6 @@ void xnn_qs8_rsum_ukernel__neondot_u${CHANNEL_TILE}${ACC_SUFFIX}(
     for (; batch >= ${CHANNEL_TILE}; batch -= ${CHANNEL_TILE}) {
       $for N in range(SIMD_TILE):
         const int8x16_t vt${N} = vld1q_s8(input); input += 16;
-
       $for N in range(SIMD_TILE):
         vacc${N % ACCUMULATORS} = vdotq_s32(vacc${N % ACCUMULATORS}, vt${N}, vone);
     }
@@ -45,8 +43,8 @@ void xnn_qs8_rsum_ukernel__neondot_u${CHANNEL_TILE}${ACC_SUFFIX}(
     }
     if (XNN_UNLIKELY(batch != 0)) {
       int8x16_t vt = vld1q_s8(input);
-      const int8x16_t vmask = vld1q_s8(&params->neon.mask_table[15 - batch]);
-      vacc0 = vdotq_s32(vacc0, vt, vmask);
+      const int8x16_t vonemask = vld1q_s8(&params->neon.onemask_table[16 - batch]);
+      vacc0 = vdotq_s32(vacc0, vt, vonemask);
     }
   }
   $if ACCUMULATORS > 1:

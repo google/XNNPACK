@@ -327,29 +327,6 @@ def generate_test_cases(ukernel, tile_height, tile_width, element_size, isa, ini
           "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       })
 
-def generate_memcpy_test_cases(ukernel, tile_height, isa):
-  """Generates all tests cases for a Vector Convert Operation micro-kernel.
-
-  Args:
-    ukernel: C name of the micro-kernel function.
-    tile_height: Number of vertical elements processed by the ukernel.
-    isa: instruction set required to run the micro-kernel. Generated unit test
-      will skip execution if the host processor doesn't support this ISA.
-
-  Returns:
-    Code for the test case.
-  """
-  _, test_name = ukernel.split("_", 1)
-  test_args = [ukernel]
-  return xngen.preprocess(
-      TRANSPOSE_MEMCPY_TEST_TEMPLATE, {
-          "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
-          "KERNEL": ukernel,
-          "TILE_HEIGHT": tile_height,
-          "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
-      })
-
-
 def main(args):
   options = parser.parse_args(args)
 
@@ -369,12 +346,11 @@ def main(args):
 //   Generator: {generator}
 
 
+#include <gtest/gtest.h>
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/transpose.h"
-
-#include <gtest/gtest.h>
 #include "transpose-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 

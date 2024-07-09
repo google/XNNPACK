@@ -5,11 +5,6 @@
 
 #pragma once
 
-#include "xnnpack.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -20,8 +15,12 @@
 #include <random>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gtest/gtest.h>
+#include "xnnpack.h"
+#include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams.h"
+#include "replicable_random_device.h"
 
 class VLReLUMicrokernelTester {
  public:

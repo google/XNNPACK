@@ -201,14 +201,13 @@ def main(args):
 //   Generator: {generator}
 
 
+#include <vector>
+
+#include <gtest/gtest.h>
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/vhswish.h"
-
-#include <vector>
-
-#include <gtest/gtest.h>
 #include "vhswish-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 

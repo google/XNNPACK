@@ -5,11 +5,11 @@
 
 #pragma once
 
+#include <wasm_simd128.h>
+
 #include <cstdint>
 
 #include "xnnpack/wasmsimd-gemm-igemm-commons.h"
-
-#include <wasm_simd128.h>
 
 namespace xnnpack {
 namespace internal {

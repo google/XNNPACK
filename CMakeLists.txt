@@ -331,6 +331,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/convert.c
   src/subgraph/convolution-2d.c
   src/subgraph/copy.c
+  src/subgraph/copysign.c
   src/subgraph/deconvolution-2d.c
   src/subgraph/depth-to-space-2d.c
   src/subgraph/depthwise-convolution-2d.c
@@ -1339,6 +1340,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(copy-nc-eager-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME copy-nc-eager-test COMMAND copy-nc-eager-test)
 
+    ADD_EXECUTABLE(copysign-nd-test test/copysign-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(copysign-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(copysign-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME copysign-nd-test COMMAND copysign-nd-test)
+
     ADD_EXECUTABLE(deconvolution-nhwc-test test/deconvolution-nhwc.cc test/deconvolution-nhwc-qd8-f32-qc8w.cc)
     TARGET_INCLUDE_DIRECTORIES(deconvolution-nhwc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(deconvolution-nhwc-test PRIVATE XNNPACK fp16 GTest::gmock GTest::gtest GTest::gtest_main)
@@ -1697,6 +1703,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(copy-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(copy-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME copy-test COMMAND copy-test)
+
+    ADD_EXECUTABLE(copysign-test test/copysign.cc)
+    TARGET_INCLUDE_DIRECTORIES(copysign-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(copysign-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME copysign-test COMMAND copysign-test)
 
     ADD_EXECUTABLE(deconvolution-2d-test test/deconvolution-2d.cc)
     SET_TARGET_PROPERTIES(deconvolution-2d-test PROPERTIES CXX_EXTENSIONS YES)
@@ -2616,6 +2627,24 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vclamp-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME f32-vclamp-test COMMAND f32-vclamp-test)
 
+  ADD_EXECUTABLE(f32-vcopysign-test test/f32-vcopysign.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-vcopysign-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f32-vcopysign-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(f32-vcopysign-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME f32-vcopysign-test COMMAND f32-vcopysign-test)
+
+  ADD_EXECUTABLE(f32-vcopysignc-test test/f32-vcopysignc.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-vcopysignc-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f32-vcopysignc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(f32-vcopysignc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME f32-vcopysignc-test COMMAND f32-vcopysignc-test)
+
+  ADD_EXECUTABLE(f32-vrcopysignc-test test/f32-vrcopysignc.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-vrcopysignc-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f32-vrcopysignc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(f32-vrcopysignc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME f32-vrcopysignc-test COMMAND f32-vrcopysignc-test)
+
   ADD_EXECUTABLE(f16-vcmul-test test/f16-vcmul.cc)
   SET_TARGET_PROPERTIES(f16-vcmul-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f16-vcmul-test PRIVATE include src test)
@@ -2705,6 +2734,12 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-velu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
   TARGET_LINK_LIBRARIES(f32-velu-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME f32-velu-test COMMAND f32-velu-test)
+
+  ADD_EXECUTABLE(f32-vgelu-test test/f32-vgelu.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-vgelu-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f32-vgelu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(f32-vgelu-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME f32-vgelu-test COMMAND f32-vgelu-test)
 
   ADD_EXECUTABLE(f32-vlrelu-test test/f32-vlrelu.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-vlrelu-test PRIVATE include src test)
@@ -4316,6 +4351,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-velu-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-velu-bench PRIVATE benchmark::benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(f32-velu-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
+  ADD_EXECUTABLE(f32-vgelu-bench bench/f32-vgelu.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-vgelu-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f32-vgelu-bench PRIVATE benchmark::benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-vgelu-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
   ADD_EXECUTABLE(f32-vhswish-bench bench/f32-vhswish.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-vhswish-bench PRIVATE . include src)

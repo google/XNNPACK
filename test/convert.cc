@@ -11,14 +11,12 @@
 #include <random>
 #include <vector>
 
-#include <fp16/fp16.h>
 #include <gtest/gtest.h>
-
+#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
-
 #include "subgraph-unary-tester.h"
 
 using ConvertTestF32ToF16 = UnaryTest<float, uint16_t>;

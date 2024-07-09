@@ -6,11 +6,10 @@
 #pragma once
 
 #include <assert.h>
-#include <stdint.h>
 #include <math.h>
+#include <stdint.h>
 
 #include <fp16/fp16.h>
-
 #include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
 

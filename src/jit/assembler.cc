@@ -3,10 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <assert.h>
+#include "xnnpack/assembler.h"
+
+#include <cassert>
 #include <cstdint>
 
-#include "xnnpack/assembler.h"
 #include "xnnpack/memory.h"
 
 namespace xnnpack {

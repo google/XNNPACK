@@ -8,11 +8,6 @@
 
 #pragma once
 
-#include "xnnpack.h"
-#include "xnnpack/cache.h"
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -26,10 +21,14 @@
 #include <utility>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "xnnpack.h"
+#include "xnnpack/cache.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
+#include "replicable_random_device.h"
 
 class DeconvolutionOperatorTester {
  public:

@@ -8,14 +8,13 @@
 //   Generator: tools/generate-packq-test.py
 
 
+#include <cstddef>
+
+#include <gtest/gtest.h>
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/packq.h"
-
-#include <cstddef>
-
 #include "packq-microkernel-tester.h"
-#include <gtest/gtest.h>
 
 
 namespace xnnpack {

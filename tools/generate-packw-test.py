@@ -333,10 +333,8 @@ def main(args):
 
 
 #include <gtest/gtest.h>
-
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
-
 #include "xnnpack/packw.h"
 #include "packw-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
@@ -356,7 +354,6 @@ def main(args):
 #include "bench/bgemm.h"
 #include "bench/packw-benchmark.h"
 #include "bench/utils.h"
-
 #include "xnnpack/common.h"
 #include "xnnpack/hardware-config.h"
 #include "xnnpack/packw.h"

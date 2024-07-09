@@ -5,9 +5,6 @@
 
 #pragma once
 
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -17,8 +14,10 @@
 #include <random>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gtest/gtest.h>
+#include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
+#include "replicable_random_device.h"
 
 static const int16_t xnn_reference_table_fftr_twiddle[256] = {
   -402,-32765,   -804,-32757,  -1206,-32745,  -1608,-32728,

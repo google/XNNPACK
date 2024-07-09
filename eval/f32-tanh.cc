@@ -11,10 +11,10 @@
 #include <limits>
 
 #include <gtest/gtest.h>
-
 #include "math-evaluation-tester.h"
-
+#include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
+#include "xnnpack/math-stubs.h"
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

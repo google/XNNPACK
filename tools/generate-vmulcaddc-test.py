@@ -256,12 +256,11 @@ def main(args):
 //   Generator: {generator}
 
 
+#include <gtest/gtest.h>
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/vmulcaddc.h"
-
-#include <gtest/gtest.h>
 #include "vmulcaddc-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 

@@ -13,7 +13,6 @@
 #include <stdlib.h>
 
 #include "xnnpack.h"
-#include "xnnpack/node-type.h"
 #include "xnnpack/common.h"
 
 #ifndef XNN_LOG_LEVEL

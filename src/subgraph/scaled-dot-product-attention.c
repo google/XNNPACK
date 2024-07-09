@@ -17,7 +17,6 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph-validation.h"
 #include "xnnpack/subgraph.h"
-
 #include "pthreadpool.h"
 
 static enum xnn_status create_scaled_dot_product_attention_operator(

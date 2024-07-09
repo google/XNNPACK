@@ -2,8 +2,8 @@
 #include <cstdint>
 #include <vector>
 
-#include "runtime-tester.h"
 #include <gtest/gtest.h>
+#include "runtime-tester.h"
 
 TEST(RUNTIME, reshape_runtime) {
   xnnpack::RuntimeTester tester(4);

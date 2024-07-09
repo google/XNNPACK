@@ -8,12 +8,11 @@
 //   Generator: tools/generate-raddstoreexpminusmax-test.py
 
 
+#include <gtest/gtest.h>
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/raddstoreexpminusmax.h"
-
-#include <gtest/gtest.h>
 #include "raddstoreexpminusmax-microkernel-tester.h"
 
 

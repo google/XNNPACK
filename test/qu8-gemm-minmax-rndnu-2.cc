@@ -10,6 +10,12 @@
 //   Specification: test/qu8-gemm-minmax-rndnu.yaml
 //   Generator: tools/generate-gemm-test.py
 
+#include <cstddef>
+#include <functional>
+#include <string>
+#include <vector>
+
+#include <gtest/gtest.h>
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
@@ -20,14 +26,7 @@
 #include "xnnpack/packw.h"
 #include "xnnpack/ppmm.h"
 #include "xnnpack/requantization.h"
-
-#include <cstddef>
-#include <functional>
-#include <string>
-#include <vector>
-
 #include "gemm-microkernel-tester.h"
-#include <gtest/gtest.h>
 
 namespace {
 

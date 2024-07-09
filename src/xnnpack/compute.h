@@ -5,16 +5,16 @@
 
 #pragma once
 
-
 #include <stddef.h>
 #include <stdint.h>
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
-#include "xnnpack/math.h"
 
+#include "pthreadpool.h"
 
 enum xnn_parallelization_type {
   xnn_parallelization_type_invalid = 0,
@@ -322,10 +322,15 @@ struct gemm_context {
   size_t batch_strides_c[XNN_MAX_TENSOR_DIMS];
   // The `mr` size of the current GEMM microkernel.
   size_t mr;
+  // The `kr` size of the current GEMM microkernel.
+  size_t kr;
+  // The `sr` size of the current GEMM microkernel.
+  size_t sr;
   // GEMM microkernels.
   union {
     struct xnn_hmp_gemm_ukernel ukernel;
     struct xnn_hmp_dqgemm_ukernel dq_ukernel;
+    struct xnn_hmp_qp8gemm_ukernel qp8_ukernel;
   };
   // Parameters for dynamically quantized inputs.
   const struct xnn_qd8_quantization_params* quantization_params;
@@ -365,7 +370,12 @@ struct gemm_context {
       size_t mr_block_size,
       size_t nr_block_size);
 
-  #if XNN_MAX_UARCH_TYPES > 1
+  XNN_PRIVATE void xnn_compute_qp8gemm(
+      const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t mr_block_start, size_t nr_block_start, size_t mr_block_size,
+      size_t nr_block_size);
+
+#if XNN_MAX_UARCH_TYPES > 1
     XNN_PRIVATE void xnn_compute_hmp_grouped_gemm(
         const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
         uint32_t uarch_index,
@@ -390,39 +400,49 @@ struct gemm_context {
         size_t nr_block_start,
         size_t mr_block_size,
         size_t nr_block_size);
-  #endif  // XNN_MAX_UARCH_TYPES > 1
+
+    XNN_PRIVATE void xnn_compute_hmp_qp8gemm(
+        const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+        uint32_t uarch_index, size_t mr_block_start, size_t nr_block_start,
+        size_t mr_block_size, size_t nr_block_size);
+#endif  // XNN_MAX_UARCH_TYPES > 1
 #endif
 
-// Context for Sparse Matrix-Dense Matrix Multiplication.
-// C [MxN] := A [MxK] * B [KxN] + bias [N]
-// A and C are dense matrices with row-major storage, B is a sparse matrix.
-struct spmm_context {
-  // N dimension of the B and C matrices.
-  // Corresponds to number of output channels in 1x1 convolution.
-  size_t n;
-  // M dimension of the A and C matrices, pre-scaled by sizeof(element size).
-  // Corresponds to the stride, in bytes, between adjacent rows of C matrix.
-  size_t scaled_m;
-  // Input matrix A.
-  const void* input;
-  // Packed bias elements and non-zero filter elements.
-  const void* nonzero_weights;
-  // Input pointer increments, in bytes, after each processed non-zero weight.
-  const int32_t* input_increments;
-  // Number of non-zero filter elements per each N (output channel) dimension.
-  const uint32_t* output_channel_nonzeros;
-  // Output matrix C.
-  void* output;
-  // Stride, in bytes, between matrices A corresponding to different images in batched 1x1 Convolution
-  size_t batched_input_stride;
-  // Stride, in bytes, between matrices C corresponding to different images in batched 1x1 Convolution
-  size_t batched_output_stride;
-  // Micro-kernel function pointer.
-  xnn_spmm_ukernel_fn ukernel;
-  // Output activation parameters.
-  union {
-    union xnn_f32_minmax_params f32;
-  } params;
+    // Context for Sparse Matrix-Dense Matrix Multiplication.
+    // C [MxN] := A [MxK] * B [KxN] + bias [N]
+    // A and C are dense matrices with row-major storage, B is a sparse matrix.
+    struct spmm_context {
+      // N dimension of the B and C matrices.
+      // Corresponds to number of output channels in 1x1 convolution.
+      size_t n;
+      // M dimension of the A and C matrices, pre-scaled by sizeof(element
+      // size). Corresponds to the stride, in bytes, between adjacent rows of C
+      // matrix.
+      size_t scaled_m;
+      // Input matrix A.
+      const void* input;
+      // Packed bias elements and non-zero filter elements.
+      const void* nonzero_weights;
+      // Input pointer increments, in bytes, after each processed non-zero
+      // weight.
+      const int32_t* input_increments;
+      // Number of non-zero filter elements per each N (output channel)
+      // dimension.
+      const uint32_t* output_channel_nonzeros;
+      // Output matrix C.
+      void* output;
+      // Stride, in bytes, between matrices A corresponding to different images
+      // in batched 1x1 Convolution
+      size_t batched_input_stride;
+      // Stride, in bytes, between matrices C corresponding to different images
+      // in batched 1x1 Convolution
+      size_t batched_output_stride;
+      // Micro-kernel function pointer.
+      xnn_spmm_ukernel_fn ukernel;
+      // Output activation parameters.
+      union {
+        union xnn_f32_minmax_params f32;
+      } params;
 };
 
 #ifndef __cplusplus
@@ -1428,7 +1448,7 @@ struct reduce_context {
 };
 
 #ifndef __cplusplus
-// Compute contigous reduction over the 1st, 3rd and 5th dimensions of the input
+// Compute contiguous reduction over the 1st, 3rd and 5th dimensions of the input
 // tensor.
   XNN_PRIVATE void xnn_compute_contiguous_reduce(
       const struct reduce_context context[restrict XNN_MIN_ELEMENTS(1)],
@@ -1440,7 +1460,7 @@ struct reduce_context {
 #endif
 
 #ifndef __cplusplus
-// Compute discontigous reduction over the 0st, 2rd and 4th dimensions of the input
+// Compute discontiguous reduction over the 0st, 2rd and 4th dimensions of the input
 // tensor.
   XNN_PRIVATE void xnn_compute_discontiguous_reduce(
       const struct reduce_context context[restrict XNN_MIN_ELEMENTS(1)],

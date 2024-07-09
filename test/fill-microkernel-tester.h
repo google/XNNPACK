@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include "xnnpack/microfnptr.h"
-
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -21,8 +19,9 @@
 #include <random>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gtest/gtest.h>
+#include "xnnpack/microfnptr.h"
+#include "replicable_random_device.h"
 
 class FillMicrokernelTester {
  public:

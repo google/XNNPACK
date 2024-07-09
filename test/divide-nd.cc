@@ -7,8 +7,8 @@
 #include <cstdint>
 #include <limits>
 
-#include "binary-elementwise-operator-tester.h"
 #include <gtest/gtest.h>
+#include "binary-elementwise-operator-tester.h"
 
 constexpr size_t kDim1 = 2;
 constexpr size_t kDim2 = 3;

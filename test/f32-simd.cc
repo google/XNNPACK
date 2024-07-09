@@ -27,9 +27,9 @@
 #include <random>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "replicable_random_device.h"
 
 namespace xnnpack {
 

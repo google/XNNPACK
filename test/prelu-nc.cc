@@ -3,14 +3,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/config.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
 
-#include "prelu-operator-tester.h"
 #include <gtest/gtest.h>
+#include "xnnpack/config.h"
+#include "prelu-operator-tester.h"
 
 #ifndef XNN_EXCLUDE_F16_TESTS
 TEST(PRELU_NC_F16, unit_batch) {

@@ -3,10 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack.h"
-#include "xnnpack/reshape-helpers.h"
-#include "xnnpack/subgraph.h"
-
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -19,8 +15,11 @@
 #include <random>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gtest/gtest.h>
+#include "xnnpack.h"
+#include "xnnpack/reshape-helpers.h"
+#include "xnnpack/subgraph.h"
+#include "replicable_random_device.h"
 
 xnn_runtime_t SetupUnary(const std::vector<size_t> &dims) {
   if (xnn_initialize(/*allocator=*/nullptr) != xnn_status_success) {

@@ -3,11 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/subgraph.h"
-
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -17,9 +12,13 @@
 #include <random>
 #include <vector>
 
-#include "subgraph-unary-tester.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "xnnpack.h"
+#include "xnnpack/node-type.h"
+#include "xnnpack/operator.h"
+#include "xnnpack/subgraph.h"
+#include "subgraph-unary-tester.h"
 
 using SpaceToDepth2DTestQS8 = UnaryTest<int8_t, int8_t, /*min_dim=*/4, /*max_dim=*/4>;
 using SpaceToDepth2DTestQU8 = UnaryTest<uint8_t, uint8_t, /*min_dim=*/4, /*max_dim=*/4>;

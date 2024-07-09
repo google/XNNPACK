@@ -36,6 +36,14 @@ http_archive(
     ],
 )
 
+# Bazel Platforms
+http_archive(
+    name = "bazel_platforms",
+    strip_prefix = "platforms-0.0.10",
+    sha256 = "3df33228654e56b09f17613613767b052581b822d57cb9cfd5e7b19a8e617b42",
+    urls = ["https://github.com/bazelbuild/platforms/archive/refs/tags/0.0.10.tar.gz"],
+)
+
 # LINT.IfChange
 # Google Test framework, used by most unit-tests.
 http_archive(

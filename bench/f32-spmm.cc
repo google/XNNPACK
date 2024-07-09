@@ -10,7 +10,6 @@
 #include <benchmark/benchmark.h>
 #include "bench/spmm-benchmark.h"
 #include "bench/utils.h"
-
 #include "xnnpack/gemm.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"

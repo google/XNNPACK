@@ -5,9 +5,6 @@
 
 #pragma once
 
-#include "xnnpack.h"
-#include "xnnpack/cache.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -18,9 +15,11 @@
 #include <random>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "xnnpack.h"
+#include "xnnpack/cache.h"
+#include "replicable_random_device.h"
 
 class PReLUOperatorTester {
  public:

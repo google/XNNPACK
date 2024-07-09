@@ -32,12 +32,13 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(qu8|qs8|f16|f32)_v(add|cmul|div|max|min|mul|sqrdiff|sub|addc|divc|rdivc|maxc|minc|mulc|sqrdiffc|subc|rsubc)(_(minmax|relu)(_(fp32|rndnu))?)?_ukernel__(.+)_u(\d+)(v)?", name)
+  match = re.fullmatch(r"xnn_(qu8|qs8|f16|f32)_v(add|cmul|copysign|div|max|min|mul|sqrdiff|sub|addc|copysignc|rcopysignc|divc|rdivc|maxc|minc|mulc|sqrdiffc|subc|rsubc)(_(minmax|relu)(_(fp32|rndnu))?)?_ukernel__(.+)_u(\d+)(v)?", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
     "add": "Add",
     "cmul": "CMul",
+    "copysign": "CopySign",
     "div": "Div",
     "max": "Max",
     "min": "Min",
@@ -45,6 +46,8 @@ def split_ukernel_name(name):
     "sqrdiff": "SqrDiff",
     "sub": "Sub",
     "addc": "AddC",
+    "copysignc": "CopySignC",
+    "rcopysignc": "RCopySignC",
     "divc": "DivC",
     "rdivc": "RDivC",
     "maxc": "MaxC",
@@ -482,8 +485,6 @@ def main(args):
     if not isinstance(spec_yaml, list):
       raise ValueError("expected a list of micro-kernels in the spec")
 
-    spec_name = os.path.splitext(os.path.split(options.spec)[1])[0]
-    microkernel_header = '#include "xnnpack/vbinary.h"'
     tester_header = {
       "VCMulMicrokernelTester": "vcmul-microkernel-tester.h",
       "VBinaryMicrokernelTester": "vbinary-microkernel-tester.h",
@@ -501,15 +502,16 @@ def main(args):
 
 
 #include <gtest/gtest.h>
-
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
-
 #include "xnnpack/microparams-init.h"
-{microkernel_header}
+#include "xnnpack/vbinary.h"
 #include "{tester_header}"
-""".format(specification=options.spec, generator=sys.argv[0],
-           microkernel_header=microkernel_header, tester_header=tester_header)
+""".format(
+        specification=options.spec,
+        generator=sys.argv[0],
+        tester_header=tester_header,
+    )
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]

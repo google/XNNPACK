@@ -18,7 +18,6 @@
 #include "xnnpack/requantization.h"
 #include "xnnpack/subgraph-validation.h"
 #include "xnnpack/subgraph.h"
-
 #include "pthreadpool.h"
 
 static enum xnn_status create_global_average_pooling_operator(

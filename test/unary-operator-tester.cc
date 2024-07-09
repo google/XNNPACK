@@ -6,7 +6,6 @@
 #include "unary-operator-tester.h"
 
 #include <stdint.h>
-#include "xnnpack.h"
 
 #include <algorithm>
 #include <cassert>
@@ -19,9 +18,10 @@
 #include <utility>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "xnnpack.h"
+#include "replicable_random_device.h"
 
 namespace xnnpack {
 

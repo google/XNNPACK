@@ -8,8 +8,8 @@
 
 #include <cstddef>
 
-#include "channel-shuffle-operator-tester.h"
 #include <gtest/gtest.h>
+#include "channel-shuffle-operator-tester.h"
 
 TEST(CHANNEL_SHUFFLE_NC_X8, two_groups_unit_batch) {
   for (size_t group_channels = 1; group_channels < 100; group_channels += 15) {

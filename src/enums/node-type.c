@@ -13,10 +13,10 @@
 #include "xnnpack/node-type.h"
 
 #if XNN_LOG_LEVEL > 0
-static const uint16_t offset[59] = {
-  0, 8, 12, 17, 35, 54, 71, 93, 101, 107, 120, 133, 146, 159, 167, 182, 187, 204, 222, 247, 254, 258, 270, 282, 294,
-  300, 316, 339, 365, 391, 413, 435, 445, 449, 460, 475, 484, 493, 503, 510, 516, 539, 550, 555, 584, 592, 600, 618,
-  625, 637, 656, 676, 688, 703, 729, 742, 759, 768, 773
+static const uint16_t offset[61] = {
+  0, 8, 12, 17, 35, 54, 71, 93, 101, 107, 120, 133, 146, 159, 167, 182, 187, 197, 214, 232, 257, 264, 268, 280, 292,
+  304, 310, 326, 349, 354, 380, 406, 428, 450, 460, 464, 475, 490, 499, 508, 518, 525, 531, 554, 565, 570, 599, 607,
+  615, 633, 640, 652, 671, 691, 703, 718, 744, 757, 774, 783, 788
 };
 
 static const char data[] =
@@ -36,6 +36,7 @@ static const char data[] =
   "Convert\0"
   "Convolution 2D\0"
   "Copy\0"
+  "Copy Sign\0"
   "Deconvolution 2D\0"
   "Depth To Space 2D\0"
   "Depthwise Convolution 2D\0"
@@ -47,6 +48,7 @@ static const char data[] =
   "Floor\0"
   "Fully Connected\0"
   "Fully Connected Sparse\0"
+  "GELU\0"
   "Global Average Pooling 1D\0"
   "Global Average Pooling 2D\0"
   "Global Sum Pooling 1D\0"

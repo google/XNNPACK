@@ -22,6 +22,7 @@ tools/generate-vunary-benchmark.py --spec test/f16-vtanh.yaml --output bench/f16
 tools/generate-vunary-benchmark.py --spec test/f32-vabs.yaml --output bench/f32-vabs.cc &
 tools/generate-vunary-benchmark.py --spec test/f32-vclamp.yaml --output bench/f32-vclamp.cc &
 tools/generate-vunary-benchmark.py --spec test/f32-velu.yaml --output bench/f32-velu.cc &
+tools/generate-vunary-benchmark.py --spec test/f32-vgelu.yaml --output bench/f32-vgelu.cc &
 tools/generate-vunary-benchmark.py --spec test/f32-vneg.yaml --output bench/f32-vneg.cc &
 tools/generate-vunary-benchmark.py --spec test/f32-vrelu.yaml --output bench/f32-vrelu.cc &
 tools/generate-vunary-benchmark.py --spec test/f32-vrndd.yaml  --output bench/f32-vrndd.cc &

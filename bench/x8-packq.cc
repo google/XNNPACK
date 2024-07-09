@@ -8,12 +8,11 @@
 //   Generator: tools/generate-packq-test.py
 
 
-#include "xnnpack/common.h"
-#include "xnnpack/packq.h"
-
 #include <benchmark/benchmark.h>
 #include "bench/bgemm.h"
 #include "bench/packq-benchmark.h"
+#include "xnnpack/common.h"
+#include "xnnpack/packq.h"
 
 
 #if XNN_ARCH_ARM64

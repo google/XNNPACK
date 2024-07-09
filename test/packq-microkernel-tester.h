@@ -6,14 +6,14 @@
 #ifndef __XNNPACK_TEST_PACKQ_MICROKERNEL_TESTER_H
 #define __XNNPACK_TEST_PACKQ_MICROKERNEL_TESTER_H
 
+#include <cassert>
+#include <cstddef>
+#include <cstdlib>
+
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/pack.h"
-
-#include <cassert>
-#include <cstddef>
-#include <cstdlib>
 
 namespace xnnpack {
 

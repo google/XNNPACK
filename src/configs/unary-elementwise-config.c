@@ -5,6 +5,8 @@
 
 #include <assert.h>
 #include <stddef.h>
+#include "xnnpack/config-types.h"
+#include "xnnpack/hardware-config.h"
 
 #ifdef _WIN32
   #include <windows.h>
@@ -41,6 +43,7 @@ static struct xnn_unary_elementwise_config f16_to_qs8_cvt_config = {0};
 static struct xnn_unary_elementwise_config f32_abs_config = {0};
 static struct xnn_unary_elementwise_config f32_clamp_config = {0};
 static struct xnn_unary_elementwise_config f32_elu_config = {0};
+static struct xnn_unary_elementwise_config f32_gelu_config = {0};
 static struct xnn_unary_elementwise_config f32_hswish_config = {0};
 static struct xnn_unary_elementwise_config f32_log_config = {0};
 static struct xnn_unary_elementwise_config f32_lrelu_config = {0};
@@ -93,6 +96,7 @@ static struct xnn_unary_elementwise_config xx_copy_config = {0};
   static INIT_ONCE init_guard_f32_abs = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_clamp = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_elu = INIT_ONCE_STATIC_INIT;
+  static INIT_ONCE init_guard_f32_gelu = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_hswish = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_log = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_lrelu = INIT_ONCE_STATIC_INIT;
@@ -143,6 +147,7 @@ static struct xnn_unary_elementwise_config xx_copy_config = {0};
   static pthread_once_t init_guard_f32_abs = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_clamp = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_elu = PTHREAD_ONCE_INIT;
+  static pthread_once_t init_guard_f32_gelu = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_hswish = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_log = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_lrelu = PTHREAD_ONCE_INIT;
@@ -831,6 +836,56 @@ static void init_f32_elu_config(void) {
     f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u4;
     f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_rr2_lut16_p3_params;
     f32_elu_config.element_tile = 4;
+  #endif
+}
+
+static void init_f32_gelu_config(void) {
+  #if XNN_ARCH_ARM
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_arm_neon) {
+      if (hardware_config->use_arm_neon_fma) {
+        f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__neon_rational_12_10_div_u8;
+        f32_gelu_config.element_tile = 8;
+      } else {
+        f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__neon_rational_12_10_div_u8;
+        f32_gelu_config.element_tile = 8;
+      }
+    } else if (!XNN_PLATFORM_MOBILE) {
+      f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__neon_rational_12_10_div_u8;
+      f32_gelu_config.element_tile = 8;
+    }
+  #elif XNN_ARCH_ARM64
+    f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__neon_rational_12_10_div_u8;
+    f32_gelu_config.element_tile = 8;
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u32;
+      f32_gelu_config.element_tile = 32;
+    } else if (hardware_config->use_x86_fma3) {
+      f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u16;
+      f32_gelu_config.element_tile = 16;
+    } else if (hardware_config->use_x86_avx) {
+      f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u16;
+      f32_gelu_config.element_tile = 16;
+    } else {
+      f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u12;
+      f32_gelu_config.element_tile = 12;
+    }
+  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+    f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__wasmsimd_rational_12_10_div_u12;
+    f32_gelu_config.element_tile = 12;
+  #elif XNN_ARCH_WASM
+    f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u1;
+    f32_gelu_config.element_tile = 1;
+  #elif XNN_ARCH_RISCV
+    f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u1;
+    f32_gelu_config.element_tile = 1;
+  #else
+    f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u1;
+    f32_gelu_config.element_tile = 1;
   #endif
 }
 
@@ -2460,6 +2515,11 @@ static void init_xx_copy_config(void) {
     return TRUE;
   }
 
+  static BOOL CALLBACK init_f32_gelu_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
+    init_f32_gelu_config();
+    return TRUE;
+  }
+
   static BOOL CALLBACK init_f32_hswish_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
     init_f32_hswish_config();
     return TRUE;
@@ -2877,6 +2937,19 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_elu_config() {
     pthread_once(&init_guard_f32_elu, &init_f32_elu_config);
   #endif
   return &f32_elu_config;
+}
+
+const struct xnn_unary_elementwise_config* xnn_init_f32_gelu_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+  #if XNN_PLATFORM_WINDOWS
+    InitOnceExecuteOnce(&init_guard_f32_gelu, &init_f32_gelu_config_windows, NULL, NULL);
+  #else
+    pthread_once(&init_guard_f32_gelu, &init_f32_gelu_config);
+  #endif
+  return &f32_gelu_config;
 }
 
 const struct xnn_unary_elementwise_config* xnn_init_f32_hswish_config() {

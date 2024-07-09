@@ -91,8 +91,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_abs_f32(xnn_simd_f32_t a) {
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
-  XNN_SIMD_CONST_F32(vsign_mask, -0.0f);
-  return _mm_xor_ps(a, vsign_mask);
+  return xnn_sub_f32(xnn_zero_f32(), a);
 }
 
 // Logical operations.

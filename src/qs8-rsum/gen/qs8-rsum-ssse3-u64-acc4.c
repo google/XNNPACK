@@ -12,7 +12,6 @@
 #include <immintrin.h>
 
 #include "xnnpack/common.h"
-#include "xnnpack/math.h"
 #include "xnnpack/reduce.h"
 
 void xnn_qs8_rsum_ukernel__ssse3_u64_acc4(
@@ -26,7 +25,7 @@ void xnn_qs8_rsum_ukernel__ssse3_u64_acc4(
   assert(output != NULL);
   assert(params != NULL);
 
-  const __m128i vone = _mm_loadu_si128((const __m128i*) &params->ssse3.onemask_table[0]);
+  const __m128i vone = _mm_load_si128((const __m128i*) &params->ssse3.onemask_table[0]);
   const __m128i vone_16 = _mm_srli_epi16(vone, 8);
   __m128i vacc0 = _mm_setzero_si128();
   __m128i vacc1 = _mm_setzero_si128();

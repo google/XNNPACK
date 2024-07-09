@@ -8,24 +8,24 @@
 // LICENSE file in the root directory of this source tree.
 
 
+// This header needs to go first for the arch test macros.
 #include "xnnpack/common.h"
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#include "xnnpack/isa-checks.h"
 
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <random>
 #include <vector>
 
-#include "xnnpack/simd/f32-neon.h"
-
-#include "replicable_random_device.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/simd/f32-neon.h"
+#include "replicable_random_device.h"
 
 namespace xnnpack {
 

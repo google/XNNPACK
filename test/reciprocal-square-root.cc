@@ -3,20 +3,19 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/subgraph.h"
-
 #include <algorithm>
 #include <array>
 #include <cstdint>
 #include <memory>
 #include <random>
 
-#include "subgraph-unary-tester.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "xnnpack.h"
+#include "xnnpack/node-type.h"
+#include "xnnpack/operator.h"
+#include "xnnpack/subgraph.h"
+#include "subgraph-unary-tester.h"
 
 using ReciprocalSquareRootTestF16 = UnaryTest<uint16_t>;
 using ReciprocalSquareRootTestF32 = UnaryTest<float>;

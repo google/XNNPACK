@@ -8,7 +8,6 @@
 #include <string>
 
 #include <gtest/gtest.h>
-
 #include "xnnpack.h"
 #include "xnnpack/cache.h"
 
