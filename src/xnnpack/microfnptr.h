@@ -2980,6 +2980,13 @@ struct xnn_hmp_igemm_ukernel {
 #endif  // XNN_PLATFORM_JIT
 };
 
+struct xnn_hmp_qp8gemm_ukernel {
+  xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn function[XNN_MAX_UARCH_TYPES];
+#if XNN_PLATFORM_JIT
+  struct xnn_generated_code_chunk generated_code_chunk[XNN_MAX_UARCH_TYPES];
+#endif  // XNN_PLATFORM_JIT
+};
+
 // Largest GEMM/IGEMM MR used in init.c is 16 (x86 AVX512AMX).
 // Largest GEMM/IGEMM MR is 8 in e2e benchmarks.
 #define XNN_MAX_MR 16
@@ -2988,6 +2995,7 @@ struct gemm_fused_ukernels {
   union {
     struct xnn_hmp_gemm_ukernel gemm[XNN_MAX_MR];
     struct xnn_hmp_dqgemm_ukernel dqgemm[XNN_MAX_MR];
+    struct xnn_hmp_qp8gemm_ukernel qp8gemm[XNN_MAX_MR];
   };
   union {
     struct xnn_hmp_igemm_ukernel igemm[XNN_MAX_MR];

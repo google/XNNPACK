@@ -11,6 +11,8 @@
 #include <stdint.h>
 
 #include "xnnpack/common.h"
+#include "xnnpack/config-types.h"
+#include "xnnpack/config.h"
 #include "xnnpack/math.h"
 
 #ifdef __cplusplus
@@ -56,6 +58,19 @@ XNN_INLINE static size_t xnn_x8_packq_f32qp8_packed_size(size_t m, size_t k,
   const size_t num_rows = round_up(m, mr) / mr;
 
   return num_rows * lhs_packed_stride(k, mr, kr, sr);
+}
+
+XNN_INLINE static size_t xnn_x8_packq_f32qp8_gemm_packed_size(size_t m,
+                                                              size_t k) {
+  const struct xnn_gemm_config* gemm_config =
+      xnn_init_qp8_f32_qc4w_gemm_config();
+  assert(gemm_config != NULL);
+
+  const uint32_t mr = m == 1 ? 1 : gemm_config->mr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+
+  return xnn_x8_packq_f32qp8_packed_size(m, k, mr, kr, sr);
 }
 
 XNN_INLINE static int8_t xnn_x8_packq_f32qp8_get_quantized(

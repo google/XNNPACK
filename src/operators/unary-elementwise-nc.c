@@ -1846,15 +1846,19 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,
 
   convert_op->batch_size = batch_size;
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_nr2_config();
+  const struct xnn_gemm_config* gemm_config =
+      xnn_init_qp8_f32_qc4w_gemm_config();
+  const uint32_t mr = batch_size == 1 ? 1 : gemm_config->mr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
 
   convert_op->context.f32_qp8_convert = (struct f32_qp8_convert_context){
       .m = batch_size,
       .k = channels,
-      .mr = gemm_config->mr,
-      .kr = 1 << gemm_config->log2_kr,
-      .sr = 1 << gemm_config->log2_sr,
-      .lhs_stride = input_stride,
+      .mr = mr,
+      .kr = kr,
+      .sr = sr,
+      .lhs_stride = input_stride * sizeof(float),
       .packq_ukernel = (xnn_x8_packq_f32qp8_ukernel_fn)
                            convert_op->unary_elementwise_config->ukernel,
   };
