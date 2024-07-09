@@ -152,6 +152,18 @@ static void init_hardware_config(void) {
 #else
     hardware_config.use_x86_avx256skx = 0;
 #endif
+#if XNN_ENABLE_AVX256VNNI
+    // Using cpuinfo_has_x86_amx_int8 as placeholder for cpuinfo_has_x86_avx10
+    hardware_config.use_x86_avx256vnni = (hardware_config.use_x86_avx512skx && cpuinfo_has_x86_avxvnni()) || cpuinfo_has_x86_amx_int8();
+#else
+    hardware_config.use_x86_avx256vnni = 0;
+#endif
+#if XNN_ENABLE_AVX256VNNIGFNI
+    // Using cpuinfo_has_x86_amx_int8 as placeholder for cpuinfo_has_x86_avx10
+    hardware_config.use_x86_avx256vnnigfni = hardware_config.use_x86_avx256vnni && cpuinfo_has_x86_gfni();
+#else
+    hardware_config.use_x86_avx256vnnigfni = 0;
+#endif
 #endif  // !XNN_ARCH_X86 && !XNN_ARCH_X86_64
 
 #if XNN_ARCH_HEXAGON
