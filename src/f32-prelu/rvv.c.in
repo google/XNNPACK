@@ -7,9 +7,10 @@ $assert ROW_TILE >= 1
 $assert LMUL in [1, 2, 4, 8]
 #include <assert.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/prelu.h>
 #include <riscv_vector.h>
+
+#include "xnnpack/math.h"
+#include "xnnpack/prelu.h"
 
 void xnn_f32_prelu_ukernel__rvv_${ROW_TILE}x${LMUL}v(
     size_t rows,
@@ -30,7 +31,6 @@ void xnn_f32_prelu_ukernel__rvv_${ROW_TILE}x${LMUL}v(
 
   const float* i0 = input;
   float* o0 = output;
-  float zero = 0.0f;
 
   $for M in range(1, ROW_TILE):
     const float* i${M} = i${M-1} + input_stride;
@@ -58,13 +58,14 @@ void xnn_f32_prelu_ukernel__rvv_${ROW_TILE}x${LMUL}v(
     for (; c > 0;) {
       size_t n = __riscv_vsetvl_e32m${LMUL}(c); c -= n;
       vfloat32m${LMUL}_t w_f32v = __riscv_vle32_v_f32m${LMUL}(w, n); w += n;
-
       $for M in range(ROW_TILE):
         vfloat32m${LMUL}_t in${M}_f32v = __riscv_vle32_v_f32m${LMUL}(i${M}, n); i${M} += n;
+
       $for M in range(ROW_TILE):
-        vbool${32//LMUL}_t mask${M}_f32v = __riscv_vmflt_vf_f32m${LMUL}_b${32//LMUL}(in${M}_f32v, zero, n);
+        vbool${32//LMUL}_t mask${M}_f32v = __riscv_vmflt_vf_f32m${LMUL}_b${32//LMUL}(in${M}_f32v, 0.0f, n);
       $for M in range(ROW_TILE):
         vfloat32m${LMUL}_t out${M}_f32v = __riscv_vfmul_vv_f32m${LMUL}_mu(mask${M}_f32v, in${M}_f32v, w_f32v, in${M}_f32v, n);
+
       $for M in range(ROW_TILE):
         __riscv_vse32_v_f32m${LMUL}(o${M}, out${M}_f32v, n); o${M} += n;
     }

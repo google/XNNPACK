@@ -11,18 +11,18 @@
 
 #include <riscv_vector.h>
 
-#include <xnnpack/avgpool.h>
-#include <xnnpack/common.h>
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/maxpool.h>
-#include <xnnpack/pavgpool.h>
-#include <xnnpack/prelu.h>
-#include <xnnpack/raddstoreexpminusmax.h>
-#include <xnnpack/transpose.h>
-#include <xnnpack/vbinary.h>
-#include <xnnpack/vunary.h>
+#include "xnnpack/avgpool.h"
+#include "xnnpack/common.h"
+#include "xnnpack/gavgpool.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/maxpool.h"
+#include "xnnpack/pavgpool.h"
+#include "xnnpack/prelu.h"
+#include "xnnpack/raddstoreexpminusmax.h"
+#include "xnnpack/transpose.h"
+#include "xnnpack/vbinary.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_f32_avgpool_minmax_ukernel_9p8x__rvv_c2v(
@@ -834,7 +834,6 @@ void xnn_f32_prelu_ukernel__rvv_2x4v(
 
   const float* i0 = input;
   float* o0 = output;
-  float zero = 0.0f;
 
   const float* i1 = i0 + input_stride;
   float* o1 = o0 + output_stride;
@@ -854,13 +853,14 @@ void xnn_f32_prelu_ukernel__rvv_2x4v(
     for (; c > 0;) {
       size_t n = __riscv_vsetvl_e32m4(c); c -= n;
       vfloat32m4_t w_f32v = __riscv_vle32_v_f32m4(w, n); w += n;
-
       vfloat32m4_t in0_f32v = __riscv_vle32_v_f32m4(i0, n); i0 += n;
       vfloat32m4_t in1_f32v = __riscv_vle32_v_f32m4(i1, n); i1 += n;
-      vbool8_t mask0_f32v = __riscv_vmflt_vf_f32m4_b8(in0_f32v, zero, n);
-      vbool8_t mask1_f32v = __riscv_vmflt_vf_f32m4_b8(in1_f32v, zero, n);
+
+      vbool8_t mask0_f32v = __riscv_vmflt_vf_f32m4_b8(in0_f32v, 0.0f, n);
+      vbool8_t mask1_f32v = __riscv_vmflt_vf_f32m4_b8(in1_f32v, 0.0f, n);
       vfloat32m4_t out0_f32v = __riscv_vfmul_vv_f32m4_mu(mask0_f32v, in0_f32v, w_f32v, in0_f32v, n);
       vfloat32m4_t out1_f32v = __riscv_vfmul_vv_f32m4_mu(mask1_f32v, in1_f32v, w_f32v, in1_f32v, n);
+
       __riscv_vse32_v_f32m4(o0, out0_f32v, n); o0 += n;
       __riscv_vse32_v_f32m4(o1, out1_f32v, n); o1 += n;
     }

@@ -9,9 +9,10 @@
 
 #include <assert.h>
 
-#include <xnnpack/math.h>
-#include <xnnpack/prelu.h>
 #include <riscv_vector.h>
+
+#include "xnnpack/math.h"
+#include "xnnpack/prelu.h"
 
 void xnn_f32_prelu_ukernel__rvv_4x2v(
     size_t rows,
@@ -32,7 +33,6 @@ void xnn_f32_prelu_ukernel__rvv_4x2v(
 
   const float* i0 = input;
   float* o0 = output;
-  float zero = 0.0f;
 
   const float* i1 = i0 + input_stride;
   float* o1 = o0 + output_stride;
@@ -64,19 +64,20 @@ void xnn_f32_prelu_ukernel__rvv_4x2v(
     for (; c > 0;) {
       size_t n = __riscv_vsetvl_e32m2(c); c -= n;
       vfloat32m2_t w_f32v = __riscv_vle32_v_f32m2(w, n); w += n;
-
       vfloat32m2_t in0_f32v = __riscv_vle32_v_f32m2(i0, n); i0 += n;
       vfloat32m2_t in1_f32v = __riscv_vle32_v_f32m2(i1, n); i1 += n;
       vfloat32m2_t in2_f32v = __riscv_vle32_v_f32m2(i2, n); i2 += n;
       vfloat32m2_t in3_f32v = __riscv_vle32_v_f32m2(i3, n); i3 += n;
-      vbool16_t mask0_f32v = __riscv_vmflt_vf_f32m2_b16(in0_f32v, zero, n);
-      vbool16_t mask1_f32v = __riscv_vmflt_vf_f32m2_b16(in1_f32v, zero, n);
-      vbool16_t mask2_f32v = __riscv_vmflt_vf_f32m2_b16(in2_f32v, zero, n);
-      vbool16_t mask3_f32v = __riscv_vmflt_vf_f32m2_b16(in3_f32v, zero, n);
+
+      vbool16_t mask0_f32v = __riscv_vmflt_vf_f32m2_b16(in0_f32v, 0.0f, n);
+      vbool16_t mask1_f32v = __riscv_vmflt_vf_f32m2_b16(in1_f32v, 0.0f, n);
+      vbool16_t mask2_f32v = __riscv_vmflt_vf_f32m2_b16(in2_f32v, 0.0f, n);
+      vbool16_t mask3_f32v = __riscv_vmflt_vf_f32m2_b16(in3_f32v, 0.0f, n);
       vfloat32m2_t out0_f32v = __riscv_vfmul_vv_f32m2_mu(mask0_f32v, in0_f32v, w_f32v, in0_f32v, n);
       vfloat32m2_t out1_f32v = __riscv_vfmul_vv_f32m2_mu(mask1_f32v, in1_f32v, w_f32v, in1_f32v, n);
       vfloat32m2_t out2_f32v = __riscv_vfmul_vv_f32m2_mu(mask2_f32v, in2_f32v, w_f32v, in2_f32v, n);
       vfloat32m2_t out3_f32v = __riscv_vfmul_vv_f32m2_mu(mask3_f32v, in3_f32v, w_f32v, in3_f32v, n);
+
       __riscv_vse32_v_f32m2(o0, out0_f32v, n); o0 += n;
       __riscv_vse32_v_f32m2(o1, out1_f32v, n); o1 += n;
       __riscv_vse32_v_f32m2(o2, out2_f32v, n); o2 += n;
