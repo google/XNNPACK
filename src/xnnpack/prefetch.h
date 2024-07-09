@@ -6,7 +6,11 @@
 #pragma once
 
 #ifdef _MSC_VER
-  #include <intrin.h>
+  #include <intrin.h>  
+#endif
+
+#ifdef __hexagon__
+  #include <hexagon_protos.h>
 #endif
 
 #include "xnnpack/common.h"
