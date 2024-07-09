@@ -22,7 +22,6 @@
 #include "xnnpack.h"
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
-#include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/internal.h"
 #include "xnnpack/math.h"
@@ -360,8 +359,7 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api) {
   std::vector<float> convert_input(batch_size * input_channels +
                                    XNN_EXTRA_BYTES / sizeof(float));
   std::vector<int8_t> operator_dq_data(
-      xnn_x8_packq_f32qp8_gemm_packed_size(batch_size, input_channels) +
-      XNN_EXTRA_BYTES);
+      xnn_x8_packq_f32qp8_gemm_packed_size(batch_size, input_channels));
   std::vector<float> subgraph_output(batch_size * output_channels);
   std::vector<float> operator_output(batch_size * output_channels);
   std::fill(operator_output.begin(), operator_output.end(), nanf(""));
@@ -439,7 +437,7 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api) {
   uint32_t dq_quantized_id = XNN_INVALID_NODE_ID;
   ASSERT_EQ(xnn_status_success,
             xnn_define_dynamically_quantized_tensor_value(
-                subgraph, xnn_datatype_qpint8, input_dims.size(),
+                subgraph, xnn_datatype_qdint8, input_dims.size(),
                 /*num_nonbatch_dims=*/1, input_dims.data(),
                 XNN_INVALID_VALUE_ID, /*flags=*/0, &dq_quantized_id));
   ASSERT_NE(dq_quantized_id, XNN_INVALID_NODE_ID);
@@ -466,14 +464,21 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api) {
                 &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_define_convert(subgraph, input_id, dq_quantized_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_convert(subgraph, input_id, dq_quantized_id,
+                               /*flags=*/XNN_FLAG_MAYBE_PACK_FOR_GEMM));
   ASSERT_EQ(xnn_status_success,
             xnn_define_fully_connected(subgraph, output_min, output_max,
                                        dq_quantized_id, kernel_id, bias_id,
                                        output_id, /*flags=*/0));
+
+  // Make sure the quantized inputs were coerced to `qpint8`.
+  ASSERT_EQ(subgraph->num_nodes, 2);
+  const struct xnn_node* fc_node = &subgraph->nodes[1];
+  ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(fc_node->compute_type, xnn_compute_type_qp8_to_fp32);
+
+  xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(
       xnn_status_success,
       xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -604,7 +609,7 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_with_reshape) {
   uint32_t dq_quantized_id = XNN_INVALID_NODE_ID;
   ASSERT_EQ(xnn_status_success,
             xnn_define_dynamically_quantized_tensor_value(
-                subgraph, xnn_datatype_qpint8, subgraph_input_dims.size(),
+                subgraph, xnn_datatype_qdint8, subgraph_input_dims.size(),
                 /*num_nonbatch_dims=*/1, subgraph_input_dims.data(),
                 XNN_INVALID_VALUE_ID, /*flags=*/0, &dq_quantized_id));
   ASSERT_NE(dq_quantized_id, XNN_INVALID_NODE_ID);
@@ -626,13 +631,20 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_with_reshape) {
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_define_convert(subgraph, input_id, dq_quantized_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_convert(subgraph, input_id, dq_quantized_id,
+                               /*flags=*/XNN_FLAG_MAYBE_PACK_FOR_GEMM));
   ASSERT_EQ(xnn_status_success,
             xnn_define_fully_connected(
                 subgraph, output_min, output_max, dq_quantized_id, kernel_id,
                 XNN_INVALID_NODE_ID, output_id, /*flags=*/0));
+
+  // Make sure the quantized inputs were coerced to `qpint8`.
+  ASSERT_EQ(subgraph->num_nodes, 2);
+  const struct xnn_node* fc_node = &subgraph->nodes[1];
+  ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(fc_node->compute_type, xnn_compute_type_qp8_to_fp32);
+
   ASSERT_EQ(
       xnn_status_success,
       xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -782,7 +794,7 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_transposed_weights) {
   uint32_t dq_quantized_id = XNN_INVALID_NODE_ID;
   ASSERT_EQ(xnn_status_success,
             xnn_define_dynamically_quantized_tensor_value(
-                subgraph, xnn_datatype_qpint8, input_dims.size(),
+                subgraph, xnn_datatype_qdint8, input_dims.size(),
                 /*num_nonbatch_dims=*/1, input_dims.data(),
                 XNN_INVALID_VALUE_ID, /*flags=*/0, &dq_quantized_id));
   ASSERT_NE(dq_quantized_id, XNN_INVALID_NODE_ID);
@@ -810,13 +822,20 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_transposed_weights) {
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_define_convert(subgraph, input_id, dq_quantized_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_convert(subgraph, input_id, dq_quantized_id,
+                               /*flags=*/XNN_FLAG_MAYBE_PACK_FOR_GEMM));
   ASSERT_EQ(xnn_status_success,
             xnn_define_fully_connected(subgraph, output_min, output_max,
                                        dq_quantized_id, kernel_id, bias_id,
                                        output_id, XNN_FLAG_TRANSPOSE_WEIGHTS));
+
+  // Make sure the quantized inputs were coerced to `qpint8`.
+  ASSERT_EQ(subgraph->num_nodes, 2);
+  const struct xnn_node* fc_node = &subgraph->nodes[1];
+  ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(fc_node->compute_type, xnn_compute_type_qp8_to_fp32);
+
   ASSERT_EQ(
       xnn_status_success,
       xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));

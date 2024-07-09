@@ -1757,7 +1757,9 @@ static void init_qp8_f32_qc4w_gemm_config(void) {
   const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
   assert(hardware_config != NULL);
-  if (XNN_ENABLE_ARM_I8MM && hardware_config->use_arm_neon_i8mm) {
+  // TODO(b/340399245) - The `4x8c16s2__aarch64_neoni8mm_mstep2` is temporarily
+  // disabled.
+  if (0 && XNN_ENABLE_ARM_I8MM && hardware_config->use_arm_neon_i8mm) {
 #if XNN_ENABLE_ARM_I8MM
     qp8_f32_qc4w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(1)] =
         xnn_init_hmp_qp8gemm_ukernel(

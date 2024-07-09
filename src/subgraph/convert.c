@@ -10,6 +10,7 @@
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/config.h"
 #include "xnnpack/internal.h"
 #include "xnnpack/log.h"
 #include "xnnpack/node-type.h"
@@ -485,7 +486,8 @@ enum xnn_status xnn_define_convert(
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
     case xnn_datatype_qdint8:
-    case xnn_datatype_qpint8:
+    // TODO(b/340399245) - Uncomment once we have full support for `qpint8`.
+    // case xnn_datatype_qpint8:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
       break;
@@ -495,6 +497,21 @@ enum xnn_status xnn_define_convert(
         xnn_node_type_to_string(xnn_node_type_convert), output_id,
         xnn_datatype_to_string(output_value->datatype), output_value->datatype);
       return xnn_status_invalid_parameter;
+  }
+
+  // Coerce the input from `xnn_datatype_qdint8` to `xnn_datatype_qpint8` if we
+  // know that we're converting for a GEMM and `qp8_f32_*` kernels are
+  // available.
+  // TODO(b/340399245) - Remove once we have full support for `qpint8`.
+  if ((flags & XNN_FLAG_MAYBE_PACK_FOR_GEMM) &&
+      input_value->datatype == xnn_datatype_fp32 &&
+      output_value->datatype == xnn_datatype_qdint8) {
+    xnn_log_debug("Coercing type of output ID #%" PRIu32
+                  " of %s operator from `%s` to `%s`.",
+                  output_id, xnn_node_type_to_string(xnn_node_type_convert),
+                  xnn_datatype_to_string(output_value->datatype),
+                  xnn_datatype_to_string(xnn_datatype_qpint8));
+    subgraph->values[output_id].datatype = xnn_datatype_qpint8;
   }
 
   enum xnn_compute_type compute_type = validate_datatypes(input_value->datatype, output_value->datatype);
