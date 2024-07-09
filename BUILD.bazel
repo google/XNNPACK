@@ -242,13 +242,14 @@ MICROKERNEL_HDRS = [
 
 MICROKERNEL_DEPS = [
     ":common",
+    ":hardware_config",
+    ":logging",
     ":math",
     ":microkernels_h",
     ":microparams",
     ":prefetch",
     ":tables",
     ":unaligned",
-    ":logging",
 ]
 
 SIMD_HEADERS = [
@@ -1960,6 +1961,7 @@ xnnpack_cc_library(
         ":common",
         ":enable_jit",
         ":enable_sparse",
+        ":internal",
         ":logging",
         ":math",
         ":node_type",
