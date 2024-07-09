@@ -5,8 +5,8 @@
 
 #include <cstddef>
 
-#include "constant-pad-operator-tester.h"
 #include <gtest/gtest.h>
+#include "constant-pad-operator-tester.h"
 
 constexpr size_t kDim1 = 2;
 constexpr size_t kDim2 = 3;

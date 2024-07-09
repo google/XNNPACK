@@ -15,6 +15,7 @@
 #include <functional>
 #include <string>
 
+#include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
@@ -23,8 +24,6 @@
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"
 #include "xnnpack/requantization.h"
-
-#include <gtest/gtest.h>
 
 class DWConvMicrokernelTester {
  public:

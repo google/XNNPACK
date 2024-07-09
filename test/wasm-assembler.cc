@@ -6,15 +6,14 @@
 
 #if XNN_PLATFORM_WEB
 
-#include "xnnpack/memory.h"
-#include "xnnpack/wasm-assembler.h"
-
 #include <array>
 #include <cstdint>
 #include <numeric>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "xnnpack/memory.h"
+#include "xnnpack/wasm-assembler.h"
 
 using ::testing::ElementsAreArray;
 using ::testing::FloatNear;

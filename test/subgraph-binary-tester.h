@@ -5,12 +5,6 @@
 
 #pragma once
 
-#include "xnnpack.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/requantization.h"
-#include "xnnpack/subgraph.h"
-
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -21,8 +15,13 @@
 #include <random>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gtest/gtest.h>
+#include "xnnpack.h"
+#include "xnnpack/node-type.h"
+#include "xnnpack/operator.h"
+#include "xnnpack/requantization.h"
+#include "xnnpack/subgraph.h"
+#include "replicable_random_device.h"
 
 template <typename T> class BinaryTest : public ::testing::Test {
  protected:

@@ -6,8 +6,8 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "space-to-depth-operator-tester.h"
 #include <gtest/gtest.h>
+#include "space-to-depth-operator-tester.h"
 
 TEST(SPACE_TO_DEPTH_NHWC_X8, one_output_pixel) {
   size_t block_size = 3;

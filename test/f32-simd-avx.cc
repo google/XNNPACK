@@ -8,24 +8,24 @@
 // LICENSE file in the root directory of this source tree.
 
 
+// This header needs to go first for the arch test macros.
 #include "xnnpack/common.h"
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#include "xnnpack/isa-checks.h"
 
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <random>
 #include <vector>
 
-#include "xnnpack/simd/f32-avx.h"
-
-#include "replicable_random_device.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/simd/f32-avx.h"
+#include "replicable_random_device.h"
 
 namespace xnnpack {
 
@@ -231,6 +231,461 @@ TEST_F(F32SimdAVXTest, Xor) {
     ASSERT_EQ(*(uint32_t *)&output_[k],
               *(uint32_t *)&inputs_[k] ^
                   *(uint32_t *)&inputs_[k + xnn_simd_size_f32]);
+  }
+}
+
+TEST_F(F32SimdAVXTest, ShiftLeft) {
+  const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
+  // Not using a loop since the `bits` parameter needs to be a compile-time
+  // constant, e.g. for `neon`.
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 1);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 1);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 2);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 2);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 3);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 3);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 4);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 4);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 5);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 5);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 6);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 6);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 7);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 7);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 8);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 8);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 9);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 9);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 10);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 10);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 11);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 11);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 12);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 12);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 13);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 13);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 14);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 14);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 15);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 15);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 16);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 16);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 17);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 17);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 18);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 18);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 19);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 19);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 20);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 20);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 21);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 21);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 22);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 22);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 23);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 23);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 24);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 24);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 25);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 25);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 26);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 26);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 27);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 27);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 28);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 28);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 29);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 29);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 30);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 30);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftl_f32(a, 31);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 31);
+    }
+  }
+}
+
+TEST_F(F32SimdAVXTest, ShiftRight) {
+  const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
+  // Not using a loop since the `bits` parameter needs to be a compile-time
+  // constant, e.g. for `neon`.
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 1);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 1);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 2);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 2);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 3);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 3);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 4);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 4);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 5);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 5);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 6);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 6);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 7);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 7);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 8);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 8);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 9);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 9);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 10);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 10);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 11);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 11);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 12);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 12);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 13);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 13);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 14);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 14);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 15);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 15);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 16);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 16);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 17);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 17);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 18);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 18);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 19);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 19);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 20);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 20);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 21);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 21);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 22);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 22);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 23);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 23);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 24);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 24);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 25);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 25);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 26);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 26);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 27);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 27);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 28);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 28);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 29);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 29);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 30);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 30);
+    }
+  }
+  {
+    const xnn_simd_f32_t res = xnn_shiftr_f32(a, 31);
+    xnn_storeu_f32(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 31);
+    }
+  }
+}
+
+TEST_F(F32SimdAVXTest, GetExp) {
+  const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
+  const xnn_simd_f32_t res = xnn_getexp_f32(a);
+  xnn_storeu_f32(output_.data(), res);
+  for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+    ASSERT_EQ(output_[k], std::logb(inputs_[k]));
   }
 }
 

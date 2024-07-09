@@ -10,9 +10,9 @@
 #include <assert.h>
 #include <emmintrin.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "xnnpack/common.h"
-
 
 // SIMD vector type for f32 using SSE2.
 typedef __m128 xnn_simd_f32_t;
@@ -28,6 +28,10 @@ typedef __m128 xnn_simd_f32_t;
 
 // Whether or not this architecture has native fused multiply-add support.
 #define XNN_SIMD_HAS_NATIVE_FMA 0
+
+// Include the header for generic functions _after_ declaring the arch-specific
+// types and sizes.
+#include "xnnpack/simd/f32-generic-functions.h"
 
 // Arithmetic operations.
 
@@ -87,8 +91,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_abs_f32(xnn_simd_f32_t a) {
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
-  XNN_SIMD_CONST_F32(vsign_mask, -0.0f);
-  return _mm_xor_ps(a, vsign_mask);
+  return xnn_sub_f32(xnn_zero_f32(), a);
 }
 
 // Logical operations.
@@ -108,6 +111,16 @@ static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a,
   return _mm_xor_ps(a, b);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_shiftl_f32(xnn_simd_f32_t a,
+                                                uint8_t bits) {
+  return _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(a), bits));
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_shiftr_f32(xnn_simd_f32_t a,
+                                                uint8_t bits) {
+  return _mm_castsi128_ps(_mm_srli_epi32(_mm_castps_si128(a), bits));
+}
+
 // Special functions.
 
 #define XNN_SIMD_HAVE_RCP_F32 1
@@ -120,6 +133,10 @@ static XNN_INLINE xnn_simd_f32_t xnn_rcp_f32(xnn_simd_f32_t a) {
 #define XNN_SIMD_NUM_RSQRT_ITER_F32 1
 static XNN_INLINE xnn_simd_f32_t xnn_rsqrt_f32(xnn_simd_f32_t a) {
   return _mm_rsqrt_ps(a);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_getexp_f32(xnn_simd_f32_t a) {
+  return xnn_generic_getexp_f32(a);
 }
 
 // Load/store operations.

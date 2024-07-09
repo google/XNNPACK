@@ -2,6 +2,9 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Generator: tools/update-microkernels.py -a
 
 #include <assert.h>
 
@@ -879,12 +882,12 @@ void xnn_x24_transposec_ukernel__4x4_ssse3(
   uint8_t* o2 = (uint8_t*) ((uintptr_t) o1 + output_stride);
   uint8_t* o3 = (uint8_t*) ((uintptr_t) o2 + output_stride);
 
-  const __m128i vperm0 = _mm_loadu_si128((const __m128i*) params->ssse3.pos0);
-  const __m128i vperm1 = _mm_loadu_si128((const __m128i*) params->ssse3.pos1);
-  const __m128i vperm2 = _mm_loadu_si128((const __m128i*) params->ssse3.pos2);
-  const __m128i vperm3 = _mm_loadu_si128((const __m128i*) params->ssse3.pos3);
-  const __m128i vperm4 = _mm_loadu_si128((const __m128i*) params->ssse3.pos4);
-  const __m128i vperm5 = _mm_loadu_si128((const __m128i*) params->ssse3.pos5);
+  const __m128i vperm0 = _mm_load_si128((const __m128i*) params->ssse3.pos0);
+  const __m128i vperm1 = _mm_load_si128((const __m128i*) params->ssse3.pos1);
+  const __m128i vperm2 = _mm_load_si128((const __m128i*) params->ssse3.pos2);
+  const __m128i vperm3 = _mm_load_si128((const __m128i*) params->ssse3.pos3);
+  const __m128i vperm4 = _mm_load_si128((const __m128i*) params->ssse3.pos4);
+  const __m128i vperm5 = _mm_load_si128((const __m128i*) params->ssse3.pos5);
   do {
     if XNN_UNPREDICTABLE(block_width < 2) {
       o1 = o0;

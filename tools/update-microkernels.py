@@ -29,6 +29,7 @@ ISA_LIST = frozenset({
     'avx512amx',
     'avx512fp16',
     'avxvnni',
+    'avx256skx',
     'f16c',
     'fma',
     'fma3',
@@ -85,6 +86,7 @@ ISA_TO_HEADER_MAP = {
     'avx512amx': 'immintrin.h',
     'avx512fp16': 'immintrin.h',
     'avxvnni': 'immintrin.h',
+    'avx256skx': 'immintrin.h',
     'f16c': 'immintrin.h',
     'fma3': 'immintrin.h',
     'fp16arith': 'arm_fp16.h',
@@ -116,6 +118,7 @@ VERIFICATION_IGNORE_SUBDIRS = {
     os.path.join('src', 'math', 'gen'),
     os.path.join('src', 'qs8-requantization'),
     os.path.join('src', 'qu8-requantization'),
+    os.path.join('src', 'xnnpack', 'simd'),
 }
 
 AMALGAMATION_HEADER = """\
@@ -123,21 +126,24 @@ AMALGAMATION_HEADER = """\
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Generator: tools/update-microkernels.py -a
 
 """
 
 UNWANTED_INCLUDES = (
-    'arm_acle.h',
-    'arm_fp16.h',
-    'arm_neon.h',
-    'emmintrin.h',
-    'immintrin.h',
-    'nmmintrin.h',
-    'smmintrin.h',
-    'tmmintrin.h',
-    'xmmintrin.h',
-    'riscv_vector.h',
-    'wasm_simd128.h',
+    '<arm_acle.h>',
+    '<arm_fp16.h>',
+    '<arm_neon.h>',
+    '<emmintrin.h>',
+    '<immintrin.h>',
+    '<nmmintrin.h>',
+    '<smmintrin.h>',
+    '<tmmintrin.h>',
+    '<xmmintrin.h>',
+    '<riscv_vector.h>',
+    '<wasm_simd128.h>',
 )
 
 parser = argparse.ArgumentParser(
@@ -160,7 +166,7 @@ def human_sort_key(text):
 
 
 def _discard(l, val):
-  if val in l:
+  while val in l:
     l.remove(val)
 
 
@@ -205,7 +211,7 @@ def amalgamate_microkernel_sources(source_paths, include_header):
 
   # Single-line sequences for intrinsics with a standardized header
   for filename in UNWANTED_INCLUDES:
-    _discard(amalgam_includes, f'#include <{filename}>')
+    _discard(amalgam_includes, f'#include {filename}')
 
   amalgam_text = AMALGAMATION_HEADER
 
@@ -215,7 +221,7 @@ def amalgamate_microkernel_sources(source_paths, include_header):
           [
               inc
               for inc in amalgam_includes
-              if not inc.startswith('#include <xnnpack/')
+              if 'xnnpack' not in inc
           ],
           lambda x: True if x.startswith('#include ') else x,
       )
@@ -236,7 +242,7 @@ def amalgamate_microkernel_sources(source_paths, include_header):
       sorted(
           inc
           for inc in amalgam_includes
-          if inc.startswith('#include <xnnpack/')
+          if 'xnnpack' in inc
       )
   )
   amalgam_text += '\n\n\n'

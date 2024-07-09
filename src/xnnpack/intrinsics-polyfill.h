@@ -269,8 +269,8 @@ uint8x16x4_t vld1q_u8_x4(const uint8_t* address) {
 
 // Hexagon
 #if XNN_ARCH_HEXAGON
-#include <hvx_hexagon_protos.h>
 #include <hexagon_types.h>
+#include <hvx_hexagon_protos.h>
 
 static XNN_INTRINSIC
 void Q6_V_vstu_variable(void *addr, uint32_t n, HVX_Vector vin)

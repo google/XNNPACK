@@ -6,7 +6,6 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-
 #include <wasm_simd128.h>
 
 #include "xnnpack/math-stubs.h"

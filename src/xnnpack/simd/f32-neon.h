@@ -25,7 +25,7 @@ typedef float32x4_t xnn_simd_f32_t;
   const float32x4_t var = vdupq_n_f32(val);
 
 #define XNN_SIMD_CONST_U32(var, val) \
-  const uint32x4_t var = vdupq_n_u32(val);
+  const float32x4_t var = vreinterpretq_f32_u32(vdupq_n_u32(val));
 
 // Whether or not this architecture has native fused multiply-add support.
 #if __ARM_FEATURE_FMA
@@ -33,6 +33,21 @@ typedef float32x4_t xnn_simd_f32_t;
 #else
 #define XNN_SIMD_HAS_NATIVE_FMA 0
 #endif  // __ARM_FEATURE_FMA
+
+// The following wrapper is defined as a macro since `bits` needs to be a
+// compile-time constant.
+#define XNN_SIMD_SHIFTS_ARE_MACROS 1
+#define xnn_shiftl_f32(a, bits) \
+  vreinterpretq_f32_u32(vshlq_n_u32(vreinterpretq_u32_f32(a), bits))
+
+// The following wrapper is defined as a macro since `bits` needs to be a
+// compile-time constant.
+#define xnn_shiftr_f32(a, bits) \
+  vreinterpretq_f32_u32(vshrq_n_u32(vreinterpretq_u32_f32(a), bits))
+
+// Include the header for generic functions _after_ declaring the arch-specific
+// types and sizes.
+#include "xnnpack/simd/f32-generic-functions.h"
 
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return vdupq_n_f32(0.f); }
@@ -58,7 +73,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_fmadd_f32(xnn_simd_f32_t a,
 #if __ARM_FEATURE_FMA
   return vfmaq_f32(c, a, b);
 #else
-  return vmlaq_f32(c, a, b);
+  return vaddq_f32(vmulq_f32(a, b), c);
 #endif  // __ARM_FEATURE_FMA
 }
 
@@ -68,7 +83,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_f32(xnn_simd_f32_t a,
 #if __ARM_FEATURE_FMA
   return vfmsq_f32(c, a, b);
 #else
-  return vmlsq_f32(c, a, b);
+  return vsubq_f32(c, vmulq_f32(a, b));
 #endif  // __ARM_FEATURE_FMA
 }
 
@@ -78,7 +93,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
 #if __ARM_FEATURE_FMA
   return vfmaq_f32(vnegq_f32(c), a, b);
 #else
-  return vmlaq_f32(vnegq_f32(c), a, b);
+  return vsubq_f32(vmulq_f32(a, b), c);
 #endif  // __ARM_FEATURE_FMA
 }
 
@@ -142,6 +157,10 @@ static XNN_INLINE xnn_simd_f32_t xnn_rcp_f32(xnn_simd_f32_t a) {
 #define XNN_SIMD_NUM_RSQRT_ITER_F32 2
 static XNN_INLINE xnn_simd_f32_t xnn_rsqrt_f32(xnn_simd_f32_t a) {
   return vrsqrteq_f32(a);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_getexp_f32(xnn_simd_f32_t a) {
+  return xnn_generic_getexp_f32(a);
 }
 
 // Load/store operations.

@@ -9,6 +9,7 @@
 
 #include <assert.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include <wasm_simd128.h>
 
@@ -22,13 +23,19 @@ typedef v128_t xnn_simd_f32_t;
 #define xnn_simd_bytes_f32 (xnn_simd_size_f32 * sizeof(float))
 
 #define XNN_SIMD_CONST_F32(var, val) \
-  static const __f32x4 var = {(val), (val), (val), (val)};
+  static const xnn_simd_f32_t var =  \
+      (xnn_simd_f32_t)((__f32x4){(val), (val), (val), (val)});
 
 #define XNN_SIMD_CONST_U32(var, val) \
-  static const __u32x4 var = {(val), (val), (val), (val)};
+  static const xnn_simd_f32_t var =  \
+      (xnn_simd_f32_t)((__u32x4){(val), (val), (val), (val)});
 
 // Whether or not this architecture has native fused multiply-add support.
 #define XNN_SIMD_HAS_NATIVE_FMA 0
+
+// Include the header for generic functions _after_ declaring the arch-specific
+// types and sizes.
+#include "xnnpack/simd/f32-generic-functions.h"
 
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() {
@@ -107,9 +114,23 @@ static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a,
   return wasm_v128_xor(a, b);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_shiftl_f32(xnn_simd_f32_t a,
+                                                uint8_t bits) {
+  return wasm_i32x4_shl(a, bits);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_shiftr_f32(xnn_simd_f32_t a,
+                                                uint8_t bits) {
+  return wasm_u32x4_shr(a, bits);
+}
+
 // Special functions.
 #define XNN_SIMD_HAVE_RCP_F32 0
 #define XNN_SIMD_HAVE_RSQRT_F32 0
+
+static XNN_INLINE xnn_simd_f32_t xnn_getexp_f32(xnn_simd_f32_t a) {
+  return xnn_generic_getexp_f32(a);
+}
 
 // Load/store operations.
 static XNN_INLINE xnn_simd_f32_t xnn_loadu_f32(const float* ptr) {
@@ -151,7 +172,7 @@ static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,
 
   if (num_elements & 2) {
     wasm_v128_store64_lane(output, v, 0);
-    v = wasm_v64x2_shuffle(v, v, 1, 1);
+    v = wasm_i64x2_shuffle(v, v, 1, 1);
     output += 2;
   }
   if (num_elements & 1) {

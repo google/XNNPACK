@@ -12,7 +12,6 @@ $assert ACCUMULATORS <= SIMD_TILE
 #include <immintrin.h>
 
 #include "xnnpack/common.h"
-#include "xnnpack/math.h"
 #include "xnnpack/reduce.h"
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS

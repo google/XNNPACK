@@ -7,6 +7,7 @@ load(
     "//:build_defs.bzl",
     "xnnpack_binary",
     "xnnpack_cc_library",
+    "xnnpack_kleidiai_defines",
     "xnnpack_simd_archs",
     "xnnpack_simd_copts_for_arch",
     "xnnpack_test_deps_for_library",
@@ -42,6 +43,7 @@ OPERATOR_TEST_DEPS = [
     "//:allocator",
     "//:cache",
     "//:common",
+    "//:internal",
     "//:jit",
     "//:math",
     "//:microkernel_configs",
@@ -191,6 +193,7 @@ xnnpack_cc_library(
     "f32_vabs",
     "f32_vclamp",
     "f32_velu",
+    "f32_vgelu",
     "f32_vhswish",
     "f32_vlog",
     "f32_vlrelu",
@@ -227,6 +230,7 @@ xnnpack_cc_library(
     "f32_vadd",
     "f32_vadd_minmax",
     "f32_vadd_relu",
+    "f32_vcopysign",
     "f32_vdiv",
     "f32_vdiv_minmax",
     "f32_vdiv_relu",
@@ -266,9 +270,11 @@ xnnpack_cc_library(
     "f32_vaddc",
     "f32_vaddc_minmax",
     "f32_vaddc_relu",
+    "f32_vcopysignc",
     "f32_vdivc",
     "f32_vdivc_minmax",
     "f32_vdivc_relu",
+    "f32_vrcopysignc",
     "f32_vrdivc",
     "f32_vrdivc_minmax",
     "f32_vrdivc_relu",
@@ -977,11 +983,36 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qd8_f16_qb4w_gemm_minmax_test",
+    timeout = "moderate",
+    srcs = [
+        "qd8-f16-qb4w-gemm-minmax.cc",
+    ],
+    shard_count = 10,
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "qd8_f32_qb4w_gemm_minmax_test",
+    timeout = "moderate",
+    srcs = [
+        "qd8-f32-qb4w-gemm-minmax.cc",
+    ],
+    shard_count = 10,
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "qp8_f32_qc4w_gemm_minmax_test",
     timeout = "moderate",
     srcs = [
         "qp8-f32-qc4w-gemm-minmax.cc",
     ],
+    defines = xnnpack_kleidiai_defines(),
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -1472,6 +1503,7 @@ xnnpack_binary(
     "clamp_nc",
     "elu_nc",
     "floor_nc",
+    "gelu_nc",
     "hardswish_nc",
     "leaky_relu_nc",
     "log_nc",
@@ -1495,6 +1527,7 @@ xnnpack_binary(
 ) for operator in [
     "add_nd",
     "add_nd_eager",
+    "copysign_nd",
     "divide_nd",
     "divide_nd_eager",
     "maximum_nd",
@@ -1678,7 +1711,9 @@ xnnpack_unit_test(
         "fully-connected-nc.cc",
         "fully-connected-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + [
+        "//:microkernels_h",
+    ],
 )
 
 xnnpack_unit_test(
@@ -1930,6 +1965,7 @@ xnnpack_cc_library(
     "copy",
     "elu",
     "floor",
+    "gelu",
     "hardswish",
     "leaky_relu",
     "log",
@@ -2006,6 +2042,7 @@ xnnpack_unit_test(
     ],
 ) for operator in [
     "add2",
+    "copysign",
     "divide2",
     "maximum2",
     "minimum2",

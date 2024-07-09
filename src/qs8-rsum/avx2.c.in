@@ -2,22 +2,22 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
-
-$assert CHANNEL_TILE % 16 == 0
-$assert CHANNEL_TILE >= 16
+$assert CHANNEL_TILE % 32 == 0
+$assert CHANNEL_TILE >= 32
 $SIMD_TILE = CHANNEL_TILE // 32
 $assert ACCUMULATORS <= SIMD_TILE
-$import math
+$assert AVX in [2, 10]
+
 #include <assert.h>
 
 #include <immintrin.h>
 
 #include "xnnpack/common.h"
-#include "xnnpack/math.h"
 #include "xnnpack/reduce.h"
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
-void xnn_qs8_rsum_ukernel__avx2_u${CHANNEL_TILE}${ACC_SUFFIX}(
+$ISA = "avx2" if AVX == 2 else "avx256skx"
+void xnn_qs8_rsum_ukernel__${ISA}_u${CHANNEL_TILE}${ACC_SUFFIX}(
     size_t batch,
     const int8_t* input,
     int32_t* output,
@@ -28,44 +28,80 @@ void xnn_qs8_rsum_ukernel__avx2_u${CHANNEL_TILE}${ACC_SUFFIX}(
   assert(output != NULL);
   assert(params != NULL);
 
-  __m256i vacc = _mm256_setzero_si256();
+  const __m256i vone = _mm256_load_si256((const __m256i*) &params->avx2.onemask_table[0]);
+  const __m256i vone_16 = _mm256_srli_epi16(vone, 8);
+  $for ACC in range(ACCUMULATORS):
+    __m256i vacc${ACC} = _mm256_setzero_si256();
+
   // 256 int8s may be summed into an int16 before overflowing.
-  // There are ${ACCUMULATORS} registers and each register has 16 lanes so batch size is ${ACCUMULATORS * 256 * 16}
-  const __m256i vone = _mm256_set1_epi8(INT8_C(1));
-  while (batch >= ${CHANNEL_TILE}) {
+  // Each register has 16 lanes and there are ${ACCUMULATORS} accumulators so batch size is ${ACCUMULATORS*256*16}
+  for (; batch >= ${ACCUMULATORS*256*16}; batch -= ${ACCUMULATORS*256*16}) {
     $for ACC in range(ACCUMULATORS):
       __m256i vacc16_${ACC} = _mm256_setzero_si256();
-    for (int current_batch = min(batch, ${ACCUMULATORS * 256 * 16}); current_batch >= ${CHANNEL_TILE}; current_batch -= ${CHANNEL_TILE}) {
+    for (size_t current_batch = ${ACCUMULATORS*256*16}; current_batch > 0; current_batch -= ${CHANNEL_TILE}) {
       $for N in range(SIMD_TILE):
         const __m256i vt${N} = _mm256_maddubs_epi16(vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
-
       $for N in range(SIMD_TILE):
         vacc16_${N % ACCUMULATORS} = _mm256_add_epi16(vacc16_${N % ACCUMULATORS}, vt${N});
     }
     $for ACC in range(ACCUMULATORS):
-      __m256i left${ACC} = _mm256_cvtepi16_epi32(_mm256_castsi256_si128(vacc16_${ACC}));
-      __m256i right${ACC} = _mm256_cvtepi16_epi32(_mm256_extractf128_si256(vacc16_${ACC}, 1));
-      vacc = _mm256_add_epi32(vacc, _mm256_add_epi32(left${ACC}, right${ACC}));
-    batch = (batch >= ${ACCUMULATORS * 256 * 16} ? (batch - ${ACCUMULATORS * 256 * 16}) : batch & ${CHANNEL_TILE - 1});
+      vacc${ACC} = _mm256_add_epi32(vacc${ACC}, _mm256_madd_epi16(vone_16, vacc16_${ACC}));
   }
+
+  $if CHANNEL_TILE > 32:
+    if (XNN_LIKELY(batch >= ${CHANNEL_TILE})) {
+      assert(batch >= 1 && batch < ${ACCUMULATORS*256*16});
+      $for ACC in range(ACCUMULATORS):
+        __m256i vacc16_${ACC} = _mm256_setzero_si256();
+      for (; batch >= ${CHANNEL_TILE}; batch -= ${CHANNEL_TILE}) {
+        $for N in range(SIMD_TILE):
+          const __m256i vt${N} = _mm256_maddubs_epi16(vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
+        $for N in range(SIMD_TILE):
+          vacc16_${N % ACCUMULATORS} = _mm256_add_epi16(vacc16_${N % ACCUMULATORS}, vt${N});
+      }
+      $for ACC in range(ACCUMULATORS):
+        vacc${ACC} = _mm256_add_epi32(vacc${ACC}, _mm256_madd_epi16(vone_16, vacc16_${ACC}));
+    }
   if (XNN_UNLIKELY(batch != 0)) {
-    assert(batch < ${CHANNEL_TILE});
-
-    __m128i vacc16 = _mm_setzero_si128();
-    const __m128i vone_16 = _mm_set1_epi8(1);
-    for (; batch >= 16; batch -= 16) {
-      const __m128i vt = _mm_maddubs_epi16(vone_16, _mm_loadu_si128((const __m128i*) input)); input += 16;
-      vacc16 = _mm_add_epi16(vacc16, vt);
+    assert(batch >= 1 && batch < ${256*16});
+    __m256i vacc16 = _mm256_setzero_si256();
+    for (; batch >= 32; batch -= 32) {
+      const __m256i vt = _mm256_maddubs_epi16(vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
+      vacc16 = _mm256_add_epi16(vacc16, vt);
     }
-    if (XNN_UNLIKELY(batch != 0)) {
-      const __m128i vmask = _mm_loadu_si128((const __m128i*) &params->avx2.mask_table[15 - batch]);
-      const __m128i vt = _mm_maddubs_epi16(vmask, _mm_loadu_si128((const __m128i*) input));
-      vacc16 = _mm_add_epi16(vacc16, vt);
-    }
-    vacc = _mm256_add_epi32(vacc, _mm256_cvtepi16_epi32(vacc16));
+    $if AVX == 2:
+      // Remainder is between 17 and 31 bytes, so process 32 bytes (overread of up to 15)
+      if (XNN_UNLIKELY(batch >= 17)) {
+        assert(batch >= 17 && batch <= 31);
+        const __m256i vonemask = _mm256_loadu_si256((const __m256i*) &params->avx2.onemask_table[32 - batch]);
+        const __m256i vt = _mm256_maddubs_epi16(vonemask, _mm256_loadu_si256((const __m256i*) input));
+        vacc16 = _mm256_add_epi16(vacc16, vt);
+      // Remainder is between 1 and 16 bytes, so process 16 bytes (overread of up to 15)
+      } else if (XNN_UNLIKELY(batch != 0)) {
+        assert(batch >= 1 && batch <= 16);
+        const __m256i vonemask = _mm256_loadu_si256((const __m256i*) &params->avx2.onemask_table[32 - batch]);
+        const __m256i vt = _mm256_maddubs_epi16(vonemask, _mm256_castsi128_si256(_mm_loadu_si128((const __m128i*) input)));
+        vacc16 = _mm256_add_epi16(vacc16, vt);
+      }
+    $else:
+      if (XNN_UNLIKELY(batch != 0)) {
+        assert(batch >= 1 && batch <= 31);
+        // Prepare mask for valid 8-bit elements (depends on batch).
+        const __mmask32 vmask = _cvtu32_mask32((UINT32_C(1) << batch) - 1);
+        const __m256i vt = _mm256_maddubs_epi16(vone, _mm256_maskz_loadu_epi8(vmask, input));
+        vacc16 = _mm256_add_epi16(vacc16, vt);
+      }
+    vacc0 = _mm256_add_epi32(vacc0, _mm256_madd_epi16(vone_16, vacc16));
   }
+  $if ACCUMULATORS > 1:
+    $ACC_SLICE = 1
+    $while ACC_SLICE < ACCUMULATORS:
+      $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+        $if A + ACC_SLICE < ACCUMULATORS:
+          vacc${A} = _mm256_add_epi32(vacc${A}, vacc${A + ACC_SLICE});
+      $ACC_SLICE *= 2
 
-  __m128i vacc_lo = _mm_add_epi32(_mm256_castsi256_si128(vacc), _mm256_extractf128_si256(vacc, 1));
+  __m128i vacc_lo = _mm_add_epi32(_mm256_castsi256_si128(vacc0), _mm256_extractf128_si256(vacc0, 1));
   vacc_lo = _mm_hadd_epi32(vacc_lo, vacc_lo);
   vacc_lo = _mm_hadd_epi32(vacc_lo, vacc_lo);
 

@@ -6,11 +6,6 @@
 #include "vbinary-microkernel-tester.h"
 
 #include <stdint.h>
-#include "xnnpack.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/requantization.h"
 
 #include <algorithm>
 #include <cassert>
@@ -23,9 +18,14 @@
 #include <random>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "xnnpack.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/requantization.h"
+#include "replicable_random_device.h"
 
 void VBinaryMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinary,
                                     OpType op_type) const {
@@ -58,6 +58,9 @@ void VBinaryMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinary,
         case OpType::Add:
           y_ref[i] = fp16_ieee_to_fp32_value(a_data[i]) +
                      fp16_ieee_to_fp32_value(b_data[i]);
+          break;
+        case OpType::CopySign:
+          y_ref[i] = std::copysign(fp16_ieee_to_fp32_value(a_data[i]), fp16_ieee_to_fp32_value(b_data[i]));
           break;
         case OpType::Div:
           y_ref[i] = fp16_ieee_to_fp32_value(a_data[i]) /
@@ -133,6 +136,9 @@ void VBinaryMicrokernelTester::Test(
           y_ref[i] = fp16_ieee_to_fp32_value(a_data[i]) +
                      fp16_ieee_to_fp32_value(b_data[i]);
           break;
+        case OpType::CopySign:
+          y_ref[i] = std::copysign(fp16_ieee_to_fp32_value(a_data[i]), fp16_ieee_to_fp32_value(b_data[i]));
+          break;
         case OpType::Div:
           y_ref[i] = fp16_ieee_to_fp32_value(a_data[i]) /
                      fp16_ieee_to_fp32_value(b_data[i]);
@@ -203,7 +209,7 @@ void VBinaryMicrokernelTester::Test(
     xnn_f32_vbinary_ukernel_fn vbinary, OpType op_type,
     xnn_init_f32_default_params_fn init_params) const {
   xnnpack::ReplicableRandomDevice rng;
-  std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
+  std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
   std::vector<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> b(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
@@ -227,6 +233,9 @@ void VBinaryMicrokernelTester::Test(
       switch (op_type) {
         case OpType::Add:
           y_ref[i] = a_data[i] + b_data[i];
+          break;
+        case OpType::CopySign:
+          y_ref[i] = std::copysign(a_data[i], b_data[i]);
           break;
         case OpType::Div:
           y_ref[i] = a_data[i] / b_data[i];
@@ -299,6 +308,9 @@ void VBinaryMicrokernelTester::Test(
         case OpType::Add:
           y_ref[i] = a_data[i] + b_data[i];
           break;
+        case OpType::CopySign:
+          y_ref[i] = std::copysign(a_data[i], b_data[i]);
+          break;
         case OpType::Div:
           y_ref[i] = a_data[i] / b_data[i];
           break;
@@ -366,6 +378,9 @@ void VBinaryMicrokernelTester::Test(
       switch (op_type) {
         case OpType::Add:
           y_ref[i] = a_data[i] + b_data[i];
+          break;
+        case OpType::CopySign:
+          y_ref[i] = std::copysign(a_data[i], b_data[i]);
           break;
         case OpType::Div:
           y_ref[i] = a_data[i] / b_data[i];

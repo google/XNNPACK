@@ -11,9 +11,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/reduce.h>
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
 
 void xnn_qs8_rsum_ukernel__neondot_u16(
     size_t batch,
@@ -30,7 +29,6 @@ void xnn_qs8_rsum_ukernel__neondot_u16(
   int32x4_t vacc0 = vmovq_n_s32(0);
   for (; batch >= 16; batch -= 16) {
     const int8x16_t vt0 = vld1q_s8(input); input += 16;
-
     vacc0 = vdotq_s32(vacc0, vt0, vone);
   }
   if (XNN_UNLIKELY(batch != 0)) {
@@ -40,8 +38,8 @@ void xnn_qs8_rsum_ukernel__neondot_u16(
     }
     if (XNN_UNLIKELY(batch != 0)) {
       int8x16_t vt = vld1q_s8(input);
-      const int8x16_t vmask = vld1q_s8(&params->neon.mask_table[15 - batch]);
-      vacc0 = vdotq_s32(vacc0, vt, vmask);
+      const int8x16_t vonemask = vld1q_s8(&params->neon.onemask_table[16 - batch]);
+      vacc0 = vdotq_s32(vacc0, vt, vonemask);
     }
   }
 

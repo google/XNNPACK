@@ -3,11 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack.h"
-#include "xnnpack/allocation-type.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/subgraph.h"
-
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -18,13 +13,17 @@
 #include <random>
 #include <vector>
 
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <fp16/fp16.h>
+#include "xnnpack.h"
+#include "xnnpack/allocation-type.h"
+#include "xnnpack/node-type.h"
+#include "xnnpack/subgraph.h"
 #include "mock-allocator.h"
 #include "replicable_random_device.h"
 #include "runtime-tester.h"
 #include "subgraph-tester.h"
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <fp16/fp16.h>
 
 namespace xnnpack {
 

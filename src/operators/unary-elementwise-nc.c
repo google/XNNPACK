@@ -11,10 +11,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/compute.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/log.h"
 #include "xnnpack/microfnptr.h"
@@ -22,9 +24,7 @@
 #include "xnnpack/operator-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
-
 #include "pthreadpool.h"
-#include <fp16/fp16.h>
 
 static xnn_status_t check_op_type(xnn_operator_t op,
                                   enum xnn_operator_type expected_type) {
@@ -984,6 +984,23 @@ enum xnn_status xnn_create_floor_nc_f32(
     flags, f32_rndd_config, /*rminmax_config=*/NULL,
     &params, sizeof(params),
     xnn_operator_type_floor_nc_f32, floor_op_out);
+}
+
+enum xnn_status xnn_create_gelu_nc_f32(uint32_t flags,
+                                       xnn_operator_t* gelu_op_out) {
+  const struct xnn_unary_elementwise_config* f32_gelu_config =
+      xnn_init_f32_gelu_config();
+
+  union xnn_f32_default_params params;
+  if XNN_LIKELY (f32_gelu_config != NULL) {
+    if (f32_gelu_config->init.f32_default != NULL) {
+      f32_gelu_config->init.f32_default(&params);
+    }
+  }
+
+  return create_unary_elementwise_nc(
+      flags, f32_gelu_config, /*rminmax_config=*/NULL, &params, sizeof(params),
+      xnn_operator_type_gelu_nc_f32, gelu_op_out);
 }
 
 enum xnn_status xnn_create_hardswish_nc_f16(
@@ -2124,6 +2141,19 @@ enum xnn_status xnn_reshape_floor_nc_f32(
     threadpool);
 }
 
+enum xnn_status xnn_reshape_gelu_nc_f32(xnn_operator_t gelu_op,
+                                        size_t batch_size, size_t channels,
+                                        size_t input_stride,
+                                        size_t output_stride,
+                                        pthreadpool_t threadpool) {
+  return reshape_unary_elementwise_nc(
+      gelu_op, xnn_operator_type_gelu_nc_f32, batch_size, channels,
+      input_stride, output_stride,
+      /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT, &gelu_op->params.f32_default,
+      sizeof(gelu_op->params.f32_default), threadpool);
+}
+
 enum xnn_status xnn_reshape_hardswish_nc_f16(
     xnn_operator_t hardswish_op,
     size_t batch_size,
@@ -2856,6 +2886,12 @@ enum xnn_status xnn_setup_floor_nc_f32(
   return setup_unary_elementwise_nc(
     floor_op, xnn_operator_type_floor_nc_f32,
     input, output);
+}
+
+enum xnn_status xnn_setup_gelu_nc_f32(xnn_operator_t gelu_op,
+                                      const float* input, float* output) {
+  return setup_unary_elementwise_nc(gelu_op, xnn_operator_type_gelu_nc_f32,
+                                    input, output);
 }
 
 enum xnn_status xnn_setup_hardswish_nc_f16(
@@ -3619,6 +3655,27 @@ enum xnn_status xnn_run_floor_nc_f32(
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     flags,
     threadpool);
+}
+
+enum xnn_status xnn_run_gelu_nc_f32(size_t channels, size_t input_stride,
+                                    size_t output_stride, size_t batch_size,
+                                    const float* input, float* output,
+                                    uint32_t flags, pthreadpool_t threadpool) {
+  const struct xnn_unary_elementwise_config* f32_gelu_config =
+      xnn_init_f32_gelu_config();
+
+  union xnn_f32_default_params params;
+  if XNN_LIKELY (f32_gelu_config != NULL) {
+    if (f32_gelu_config->init.f32_default != NULL) {
+      f32_gelu_config->init.f32_default(&params);
+    }
+  }
+
+  return run_unary_elementwise_nc(
+      xnn_operator_type_gelu_nc_f32, channels, input_stride, output_stride,
+      batch_size, input, output, f32_gelu_config, &params, sizeof(params),
+      /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT, flags, threadpool);
 }
 
 enum xnn_status xnn_run_hardswish_nc_f32(

@@ -67,6 +67,20 @@
 - name: xnn_qs8_rsum_ukernel__avx2_u128_acc4
   init: xnn_init_qs8_rsum_avx2_params
 
+# x86 AVX256SKX
+- name: xnn_qs8_rsum_ukernel__avx256skx_u32
+  init: xnn_init_qs8_rsum_avx2_params
+- name: xnn_qs8_rsum_ukernel__avx256skx_u64
+  init: xnn_init_qs8_rsum_avx2_params
+- name: xnn_qs8_rsum_ukernel__avx256skx_u64_acc2
+  init: xnn_init_qs8_rsum_avx2_params
+- name: xnn_qs8_rsum_ukernel__avx256skx_u128
+  init: xnn_init_qs8_rsum_avx2_params
+- name: xnn_qs8_rsum_ukernel__avx256skx_u128_acc2
+  init: xnn_init_qs8_rsum_avx2_params
+- name: xnn_qs8_rsum_ukernel__avx256skx_u128_acc4
+  init: xnn_init_qs8_rsum_avx2_params
+
 # x86 AVX512SKX
 - name: xnn_qs8_rsum_ukernel__avx512skx_u64
   init: xnn_init_qs8_rsum_scalar_params

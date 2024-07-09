@@ -1,4 +1,5 @@
 name: Test Pull Request
+run-name: ${{ github.event.pull_request.title }}
 on:
   pull_request_review:
     types: [submitted]

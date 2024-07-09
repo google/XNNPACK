@@ -6,13 +6,12 @@
 #ifndef __XNNPACK_TEST_REPLICABLE_RANDOM_NUMBER_GENERATOR_H_
 #define __XNNPACK_TEST_REPLICABLE_RANDOM_NUMBER_GENERATOR_H_
 
-#include "xnnpack.h"
-
 #include <cstddef>
 #include <random>
 #include <string>
 
 #include <gtest/gtest.h>
+#include "xnnpack.h"
 
 namespace xnnpack {
 

@@ -8,20 +8,18 @@
 //   Generator: tools/generate-dwconv-multipass-test.py
 
 
-#include <gtest/gtest.h>
-
 #include <algorithm>
 #include <cstddef>
 #include <functional>
 #include <string>
 #include <vector>
 
+#include <gtest/gtest.h>
 #include "xnnpack/common.h"
 #include "xnnpack/dwconv.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/requantization.h"
-
 #include "dwconv-microkernel-tester.h"
 
 namespace {

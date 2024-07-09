@@ -25,10 +25,15 @@ typedef __m512 xnn_simd_f32_t;
 #define XNN_SIMD_CONST_F32(var, val) \
   const xnn_simd_f32_t var = _mm512_set1_ps(val);
 
-#define XNN_SIMD_CONST_U32(var, val) const __m512i var = _mm512_set1_epi32(val);
+#define XNN_SIMD_CONST_U32(var, val) \
+  const __m512 var = _mm512_castsi512_ps(_mm512_set1_epi32(val));
 
 // Whether or not this architecture has native fused multiply-add support.
 #define XNN_SIMD_HAS_NATIVE_FMA 1
+
+// Include the header for generic functions _after_ declaring the arch-specific
+// types and sizes.
+#include "xnnpack/simd/f32-generic-functions.h"
 
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return _mm512_setzero_ps(); }
@@ -83,14 +88,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_min_f32(xnn_simd_f32_t a,
 
 static XNN_INLINE xnn_simd_f32_t xnn_abs_f32(xnn_simd_f32_t a) {
   XNN_SIMD_CONST_U32(vnonsign_mask, 0x7FFFFFFFUL);
-  return _mm512_castsi512_ps(
-      _mm512_and_epi32(_mm512_castps_si512(a), vnonsign_mask));
+  return _mm512_castsi512_ps(_mm512_and_epi32(
+      _mm512_castps_si512(a), _mm512_castps_si512(vnonsign_mask)));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
-  XNN_SIMD_CONST_F32(vsign_mask, -0.0f);
-  return _mm512_castsi512_ps(_mm512_xor_epi32(_mm512_castps_si512(a),
-                                              _mm512_castps_si512(vsign_mask)));
+  return xnn_sub_f32(xnn_zero_f32(), a);
 }
 
 // Logical operations.
@@ -110,6 +113,20 @@ static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
   return _mm512_castsi512_ps(
       _mm512_xor_epi32(_mm512_castps_si512(a), _mm512_castps_si512(b)));
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_shiftl_f32(xnn_simd_f32_t a,
+                                                uint8_t bits) {
+  return _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(a), bits));
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_shiftr_f32(xnn_simd_f32_t a,
+                                                uint8_t bits) {
+  return _mm512_castsi512_ps(_mm512_srli_epi32(_mm512_castps_si512(a), bits));
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_getexp_f32(xnn_simd_f32_t a) {
+  return _mm512_getexp_ps(a);
 }
 
 // Special functions.

@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -14,18 +13,16 @@
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/compute.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/log.h"
-#include "xnnpack/math.h"
 #include "xnnpack/microkernel-type.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/normalization.h"
 #include "xnnpack/operator-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
-
 #include "pthreadpool.h"
-#include <fp16/fp16.h>
 
 static enum xnn_status create_mean_nd(
     uint32_t flags,
@@ -252,7 +249,9 @@ static enum xnn_status reshape_mean_nd(
       .output_element_size = UINT32_C(1) << log2_data_element_size,
     };
     memcpy(&mean_op->context.reduce.params, scale_params, scale_params_size);
-    memcpy(&mean_op->context.reduce.cvt_params, cvt_params, cvt_params_size);
+    if (cvt_params != NULL) {
+      memcpy(&mean_op->context.reduce.cvt_params, cvt_params, cvt_params_size);
+    }
 
     mean_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_contiguous_reduce;
     mean_op->compute[0].range[0] = normalized_input_shape[0];
@@ -299,7 +298,9 @@ static enum xnn_status reshape_mean_nd(
       .output_element_size = UINT32_C(1) << log2_data_element_size,
     };
     memcpy(&mean_op->context.reduce.params, scale_params, scale_params_size);
-    memcpy(&mean_op->context.reduce.cvt_params, cvt_params, cvt_params_size);
+    if (cvt_params != NULL) {
+      memcpy(&mean_op->context.reduce.cvt_params, cvt_params, cvt_params_size);
+    }
     mean_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_discontiguous_reduce;
     mean_op->compute[0].range[0] = normalized_input_shape[1];
     mean_op->compute[0].range[1] = normalized_input_shape[3];

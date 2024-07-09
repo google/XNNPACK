@@ -8,9 +8,9 @@
 #include <cstddef>
 #include <vector>
 
+#include <gtest/gtest.h>
 #include "runtime-tester.h"
 #include "subgraph-tester.h"
-#include <gtest/gtest.h>
 
 namespace xnnpack {
 

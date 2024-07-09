@@ -12,7 +12,6 @@ $assert ACCUMULATORS <= SIMD_TILE
 #include <immintrin.h>
 
 #include "xnnpack/common.h"
-#include "xnnpack/math.h"
 #include "xnnpack/reduce.h"
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
@@ -27,7 +26,7 @@ void xnn_qs8_rsum_ukernel__ssse3_u${CHANNEL_TILE}${ACC_SUFFIX}(
   assert(output != NULL);
   assert(params != NULL);
 
-  const __m128i vone = _mm_loadu_si128((const __m128i*) &params->ssse3.onemask_table[0]);
+  const __m128i vone = _mm_load_si128((const __m128i*) &params->ssse3.onemask_table[0]);
   const __m128i vone_16 = _mm_srli_epi16(vone, 8);
   $for ACC in range(ACCUMULATORS):
     __m128i vacc${ACC} = _mm_setzero_si128();

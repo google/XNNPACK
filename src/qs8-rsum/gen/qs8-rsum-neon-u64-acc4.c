@@ -7,13 +7,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+
 #include <assert.h>
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/reduce.h>
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
 
 void xnn_qs8_rsum_ukernel__neon_u64_acc4(
     size_t batch,
@@ -31,17 +31,19 @@ void xnn_qs8_rsum_ukernel__neon_u64_acc4(
   int32x4_t vacc2 = vmovq_n_s32(0);
   int32x4_t vacc3 = vmovq_n_s32(0);
 
-  for (; batch >= 512; batch -= 512) {
+  // 256 int8s may be summed into an int16 before overflowing.
+  // Each register has 8 lanes and there are 4 accumulators so batch size is 8192
+
+  for (; batch >= 8192; batch -= 8192) {
     int16x8_t vacc16_0 = vmovq_n_s16(0);
     int16x8_t vacc16_1 = vmovq_n_s16(0);
     int16x8_t vacc16_2 = vmovq_n_s16(0);
     int16x8_t vacc16_3 = vmovq_n_s16(0);
-    for (size_t current_batch = 512; current_batch > 0; current_batch -= 64) {
+    for (size_t current_batch = 8192; current_batch > 0; current_batch -= 64) {
       const int8x16_t vt0 = vld1q_s8(input); input += 16;
       const int8x16_t vt1 = vld1q_s8(input); input += 16;
       const int8x16_t vt2 = vld1q_s8(input); input += 16;
       const int8x16_t vt3 = vld1q_s8(input); input += 16;
-
       vacc16_0 = vpadalq_s8(vacc16_0, vt0);
       vacc16_1 = vpadalq_s8(vacc16_1, vt1);
       vacc16_2 = vpadalq_s8(vacc16_2, vt2);
@@ -53,7 +55,8 @@ void xnn_qs8_rsum_ukernel__neon_u64_acc4(
     vacc3 = vpadalq_s16(vacc3, vacc16_3);
   }
 
-  if (XNN_UNLIKELY(batch != 0)) {
+  if (XNN_LIKELY(batch >= 64)) {
+    assert(batch >= 1 && batch < 8192);
     int16x8_t vacc16_0 = vmovq_n_s16(0);
     int16x8_t vacc16_1 = vmovq_n_s16(0);
     int16x8_t vacc16_2 = vmovq_n_s16(0);
@@ -63,26 +66,30 @@ void xnn_qs8_rsum_ukernel__neon_u64_acc4(
       const int8x16_t vt1 = vld1q_s8(input); input += 16;
       const int8x16_t vt2 = vld1q_s8(input); input += 16;
       const int8x16_t vt3 = vld1q_s8(input); input += 16;
-
       vacc16_0 = vpadalq_s8(vacc16_0, vt0);
       vacc16_1 = vpadalq_s8(vacc16_1, vt1);
       vacc16_2 = vpadalq_s8(vacc16_2, vt2);
       vacc16_3 = vpadalq_s8(vacc16_3, vt3);
     }
-    vacc16_0 = vaddq_s16(vacc16_0, vacc16_1);
-    vacc16_2 = vaddq_s16(vacc16_2, vacc16_3);
-    vacc16_0 = vaddq_s16(vacc16_0, vacc16_2);
+    vacc0 = vpadalq_s16(vacc0, vacc16_0);
+    vacc1 = vpadalq_s16(vacc1, vacc16_1);
+    vacc2 = vpadalq_s16(vacc2, vacc16_2);
+    vacc3 = vpadalq_s16(vacc3, vacc16_3);
+  }
+  if (XNN_UNLIKELY(batch != 0)) {
+    assert(batch >= 1 && batch < 2048);
+    int16x8_t vacc16 = vmovq_n_s16(0);
     for (; batch >= 16; batch -= 16) {
       const int8x16_t vt = vld1q_s8(input); input += 16;
-      vacc16_0 = vpadalq_s8(vacc16_0, vt);
+      vacc16 = vpadalq_s8(vacc16, vt);
     }
     if (XNN_UNLIKELY(batch != 0)) {
       const int8x16_t vt = vld1q_s8(input);
-      const int8x16_t vmask = vld1q_s8(&params->neon.mask_table[15 - batch]);
-      const int8x16_t vtm = vmulq_s8(vt, vmask);
-      vacc16_0 = vpadalq_s8(vacc16_0, vtm);
+      const int8x16_t vonemask = vld1q_s8(&params->neon.onemask_table[16 - batch]);
+      const int8x16_t vtm = vmulq_s8(vt, vonemask);
+      vacc16 = vpadalq_s8(vacc16, vtm);
     }
-    vacc0 = vpadalq_s16(vacc0, vacc16_0);
+    vacc0 = vpadalq_s16(vacc0, vacc16);
   }
   vacc0 = vaddq_s32(vacc0, vacc1);
   vacc2 = vaddq_s32(vacc2, vacc3);

@@ -1,6 +1,4 @@
 #include <gtest/gtest.h>
-
-
 #include "transpose-normalization-tester.h"
 
 TEST(TRANSPOSE_NORMALIZATION_TEST, input_stride_fold_0_1) {

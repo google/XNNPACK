@@ -8,9 +8,6 @@
 
 #pragma once
 
-#include "xnnpack/requantization-stubs.h"
-#include "xnnpack/requantization.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -22,8 +19,10 @@
 #include <random>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gtest/gtest.h>
+#include "xnnpack/requantization-stubs.h"
+#include "xnnpack/requantization.h"
+#include "replicable_random_device.h"
 
 class RequantizationTester {
  public:

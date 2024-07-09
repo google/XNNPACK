@@ -9,16 +9,17 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <math.h>
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/compute.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/indirection.h"
 #include "xnnpack/log.h"
@@ -28,8 +29,6 @@
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
-
-#include <fp16/fp16.h>
 #include "pthreadpool.h"
 
 static inline size_t compute_output_dimension_with_tf_same_padding(

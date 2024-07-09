@@ -3,18 +3,19 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include "xnnpack/microparams-init.h"
+
 #include <assert.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+
+#include <fp16/fp16.h>
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
-#include "xnnpack/microparams-init.h"
 #include "xnnpack/unaligned.h"
-
-#include <fp16/fp16.h>
 
 size_t xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_fmagic_params(
   union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -1003,11 +1004,11 @@ size_t xnn_init_qs8_rsum_sse4_params(
 size_t xnn_init_qs8_rsum_avx2_params(
   union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
 {
-  for (uint32_t i = 0; i < 15; i++) {
-    params->avx2.mask_table[i] = 1;
+  for (uint32_t i = 0; i < 32; i++) {
+    params->avx2.onemask_table[i] = 1;
   }
-  for (uint32_t i = 15; i < 30; i++) {
-    params->avx2.mask_table[i] = 0;
+  for (uint32_t i = 32; i < 64; i++) {
+    params->avx2.onemask_table[i] = 0;
   }
   return sizeof(params->avx2);
 }
@@ -1017,11 +1018,11 @@ size_t xnn_init_qs8_rsum_avx2_params(
 size_t xnn_init_qs8_rsum_neon_params(
   union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
 {
-  for (uint32_t i = 0; i < 15; i++) {
-    params->neon.mask_table[i] = 1;
+  for (uint32_t i = 0; i < 16; i++) {
+    params->neon.onemask_table[i] = 1;
   }
-  for (uint32_t i = 15; i < 30; i++) {
-    params->neon.mask_table[i] = 0;
+  for (uint32_t i = 16; i < 32; i++) {
+    params->neon.onemask_table[i] = 0;
   }
   return sizeof(params->neon);
 }

@@ -7,12 +7,12 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+
 #include <assert.h>
 
 #include <arm_neon.h>
 
 #include "xnnpack/common.h"
-#include "xnnpack/math.h"
 #include "xnnpack/reduce.h"
 
 void xnn_qs8_rsum_ukernel__neon_u16(
@@ -28,34 +28,32 @@ void xnn_qs8_rsum_ukernel__neon_u16(
 
   int32x4_t vacc0 = vmovq_n_s32(0);
 
-  for (; batch >= 128; batch -= 128) {
-    int16x8_t vacc16_0 = vmovq_n_s16(0);
-    for (size_t current_batch = 128; current_batch > 0; current_batch -= 16) {
-      const int8x16_t vt0 = vld1q_s8(input); input += 16;
+  // 256 int8s may be summed into an int16 before overflowing.
+  // Each register has 8 lanes and there are 1 accumulators so batch size is 2048
 
+  for (; batch >= 2048; batch -= 2048) {
+    int16x8_t vacc16_0 = vmovq_n_s16(0);
+    for (size_t current_batch = 2048; current_batch > 0; current_batch -= 16) {
+      const int8x16_t vt0 = vld1q_s8(input); input += 16;
       vacc16_0 = vpadalq_s8(vacc16_0, vt0);
     }
     vacc0 = vpadalq_s16(vacc0, vacc16_0);
   }
 
   if (XNN_UNLIKELY(batch != 0)) {
-    int16x8_t vacc16_0 = vmovq_n_s16(0);
-    for (; batch >= 16; batch -= 16) {
-      const int8x16_t vt0 = vld1q_s8(input); input += 16;
-
-      vacc16_0 = vpadalq_s8(vacc16_0, vt0);
-    }
+    assert(batch >= 1 && batch < 2048);
+    int16x8_t vacc16 = vmovq_n_s16(0);
     for (; batch >= 16; batch -= 16) {
       const int8x16_t vt = vld1q_s8(input); input += 16;
-      vacc16_0 = vpadalq_s8(vacc16_0, vt);
+      vacc16 = vpadalq_s8(vacc16, vt);
     }
     if (XNN_UNLIKELY(batch != 0)) {
       const int8x16_t vt = vld1q_s8(input);
-      const int8x16_t vmask = vld1q_s8(&params->neon.mask_table[15 - batch]);
-      const int8x16_t vtm = vmulq_s8(vt, vmask);
-      vacc16_0 = vpadalq_s8(vacc16_0, vtm);
+      const int8x16_t vonemask = vld1q_s8(&params->neon.onemask_table[16 - batch]);
+      const int8x16_t vtm = vmulq_s8(vt, vonemask);
+      vacc16 = vpadalq_s8(vacc16, vtm);
     }
-    vacc0 = vpadalq_s16(vacc0, vacc16_0);
+    vacc0 = vpadalq_s16(vacc0, vacc16);
   }
   #if XNN_ARCH_ARM64
     const int32_t vacc = vaddvq_s32(vacc0);

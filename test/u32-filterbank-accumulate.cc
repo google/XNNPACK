@@ -9,11 +9,9 @@
 
 
 #include <gtest/gtest.h>
-
 #include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-
 #include "xnnpack/filterbank.h"
+#include "xnnpack/isa-checks.h"
 #include "filterbank-accumulate-microkernel-tester.h"
 
 

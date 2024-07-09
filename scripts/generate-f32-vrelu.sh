@@ -26,6 +26,12 @@ tools/xngen src/f32-vrelu/wasmsimd.c.in -D BATCH_TILE=16 -o src/f32-vrelu/gen/f3
 tools/xngen src/f32-vrelu/neon.c.in -D BATCH_TILE=4 -o src/f32-vrelu/gen/f32-vrelu-neon-u4.c &
 tools/xngen src/f32-vrelu/neon.c.in -D BATCH_TILE=8 -o src/f32-vrelu/gen/f32-vrelu-neon-u8.c &
 
+################################ RISC-V Vector ################################
+tools/xngen src/f32-vrelu/rvv.c.in -D LMUL=1 -o src/f32-vrelu/gen/f32-vrelu-rvv-u1v.c &
+tools/xngen src/f32-vrelu/rvv.c.in -D LMUL=2 -o src/f32-vrelu/gen/f32-vrelu-rvv-u2v.c &
+tools/xngen src/f32-vrelu/rvv.c.in -D LMUL=4 -o src/f32-vrelu/gen/f32-vrelu-rvv-u4v.c &
+tools/xngen src/f32-vrelu/rvv.c.in -D LMUL=8 -o src/f32-vrelu/gen/f32-vrelu-rvv-u8v.c &
+
 ################################# x86 128-bit #################################
 tools/xngen src/f32-vrelu/sse.c.in -D BATCH_TILE=4 -o src/f32-vrelu/gen/f32-vrelu-sse-u4.c &
 tools/xngen src/f32-vrelu/sse.c.in -D BATCH_TILE=8 -o src/f32-vrelu/gen/f32-vrelu-sse-u8.c &

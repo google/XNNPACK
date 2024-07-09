@@ -10,10 +10,10 @@ $assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <hexagon_protos.h>
 #include <hexagon_types.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
-#include <xnnpack/vbinary.h>
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/vbinary.h"
 
 $_HEXAGON_OP_HVX = {
 $  "ADD": lambda x: "Q6_Vsf_vadd_VsfVsf(%s, vb)" % x,

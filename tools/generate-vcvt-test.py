@@ -384,10 +384,8 @@ def main(args):
 #include <limits>
 
 #include <gtest/gtest.h>
-
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
-
 #include "xnnpack/vcvt.h"
 #include "vcvt-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
@@ -406,7 +404,6 @@ def main(args):
 #include <benchmark/benchmark.h>
 #include "bench/utils.h"
 #include "bench/vcvt-benchmark.h"
-
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"

@@ -3,12 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/config.h"
-#include "xnnpack/operator-utils.h"
-
 #include <cstddef>
 
 #include <gtest/gtest.h>
+#include "xnnpack/config.h"
+#include "xnnpack/operator-utils.h"
 
 TEST(COMPUTE_CONVOLUTION_OUTPUT_DIMENSION, compute) {
   ASSERT_EQ(xnn_compute_convolution_output_dimension(5, 3, 1, 1), 3);

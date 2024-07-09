@@ -39,7 +39,7 @@ parser.set_defaults(defines=list())
 
 def split_ukernel_name(name):
   match = re.fullmatch(
-      r"(?:xnn_|xnn_generate_)(s8|u8|bf16|f16|f32|u32|u64)(_(s8|u8|bf16|f16|f32|u32|u64))*_v(abs|clamp|elu|hswish|log|lrelu|neg|relu|rndd|rndne|rndu|rndz|rsqrt|sigmoid|sqr|sqrt|sqrtshift|tanh)_(fact_)?ukernel__(.+)_u(\d+)(v)?",
+      r"(?:xnn_|xnn_generate_)(s8|u8|bf16|f16|f32|u32|u64)(_(s8|u8|bf16|f16|f32|u32|u64))*_v(abs|clamp|elu|gelu|hswish|log|lrelu|neg|relu|rndd|rndne|rndu|rndz|rsqrt|sigmoid|sqr|sqrt|sqrtshift|tanh)_(fact_)?ukernel__(.+)_u(\d+)(v)?",
       name,
   )
   if match is None:
@@ -48,6 +48,7 @@ def split_ukernel_name(name):
       "abs": "Abs",
       "clamp": "Clamp",
       "elu": "ELU",
+      "gelu": "GELU",
       "hswish": "HardSwish",
       "log": "Log",
       "lrelu": "LeakyReLU",
@@ -87,6 +88,22 @@ SPECIAL_VALUES_F32 = {
         # TODO: b/338934971 - This should be `1` ulp, but this fails on
         # `cmake-linux-riscv64-rvv` (but not on `cmake-linux-riscv64`).
         3,
+    ),
+    # TODO(b/338031720) - These kernels currently do not handle inputs `<= 0.0f`
+    # correctly. Add tests for `0.0f`, `-0.0f`, and `+/-INFINITY` once they do.
+    "Log": (
+        1,  # Number of elements.
+        "{1.0f}",  # Inputs.
+        "{0.0f}",  # Expected outputs.
+        "xnn_f32_default_params",
+        1,  # Error margin in ULP.
+    ),
+    "GELU": (
+        3,  # Number of elements.
+        "{-6.0f, 6.0f, 0.0f}",  # Inputs.
+        "{0.0f, 6.0f, 0.0f}",  # Expected outputs.
+        "xnn_f32_default_params",
+        1,  # Error margin in ULP.
     ),
 }
 
@@ -322,10 +339,11 @@ def generate_test_cases(
           "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
           "SPECIAL_VALUES_F32": SPECIAL_VALUES_F32,
           "TEST_FN": {
-              "Square": "TestSqr",
               "Abs": "TestAbs",
+              "GELU": "TestGelu",
               "Log": "TestLog",
               "Negate": "TestNeg",
+              "Square": "TestSqr",
           }.get(op_type, "Test"),
       },
   )
@@ -355,14 +373,13 @@ def main(args):
 #include <cstddef>
 #include <limits>
 
+#include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/vunary.h"
-
-#include <gtest/gtest.h>
 #include "vunary-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 

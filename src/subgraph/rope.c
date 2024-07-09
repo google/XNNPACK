@@ -16,7 +16,6 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph-validation.h"
 #include "xnnpack/subgraph.h"
-
 #include "pthreadpool.h"
 
 static enum xnn_status create_rope_operator(

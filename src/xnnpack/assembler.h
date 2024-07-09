@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include "xnnpack/memory.h"
-
 #include <array>
 #include <cstdint>
 #include <cstring>
+
+#include "xnnpack/memory.h"
 
 typedef uint8_t byte;
 

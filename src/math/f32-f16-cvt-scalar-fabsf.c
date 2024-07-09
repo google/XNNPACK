@@ -4,12 +4,13 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <math.h>
 
-#include "xnnpack/math.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/math-stubs.h"
+#include "xnnpack/math.h"
 
 
 void xnn_math_f32_f16_cvt__scalar_fabsf(

@@ -34,12 +34,20 @@ tools/xngen src/qs8-rsum/ssse3.c.in -D CHANNEL_TILE=64 -D ACCUMULATORS=2 -o src/
 tools/xngen src/qs8-rsum/ssse3.c.in -D CHANNEL_TILE=64 -D ACCUMULATORS=4 -o src/qs8-rsum/gen/qs8-rsum-ssse3-u64-acc4.c &
 
 ################################### x86 AVX2 ##################################
-tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=32  -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u32.c &
-tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=64  -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u64.c &
-tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=128  -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u128.c &
-tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=2 -D CHANNEL_TILE=64  -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u64-acc2.c &
-tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=2 -D CHANNEL_TILE=128  -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u128-acc2.c &
-tools/xngen src/qs8-rsum/avx2.c.in -D ACCUMULATORS=4 -D CHANNEL_TILE=128  -o src/qs8-rsum/gen/qs8-rsum-minmax-fp32-avx2-u128-acc4.c &
+tools/xngen src/qs8-rsum/avx2.c.in -D CHANNEL_TILE=32  -D ACCUMULATORS=1 -D AVX=2 -o src/qs8-rsum/gen/qs8-rsum-avx2-u32.c &
+tools/xngen src/qs8-rsum/avx2.c.in -D CHANNEL_TILE=64  -D ACCUMULATORS=1 -D AVX=2 -o src/qs8-rsum/gen/qs8-rsum-avx2-u64.c &
+tools/xngen src/qs8-rsum/avx2.c.in -D CHANNEL_TILE=64  -D ACCUMULATORS=2 -D AVX=2 -o src/qs8-rsum/gen/qs8-rsum-avx2-u64-acc2.c &
+tools/xngen src/qs8-rsum/avx2.c.in -D CHANNEL_TILE=128 -D ACCUMULATORS=1 -D AVX=2 -o src/qs8-rsum/gen/qs8-rsum-avx2-u128.c &
+tools/xngen src/qs8-rsum/avx2.c.in -D CHANNEL_TILE=128 -D ACCUMULATORS=2 -D AVX=2 -o src/qs8-rsum/gen/qs8-rsum-avx2-u128-acc2.c &
+tools/xngen src/qs8-rsum/avx2.c.in -D CHANNEL_TILE=128 -D ACCUMULATORS=4 -D AVX=2 -o src/qs8-rsum/gen/qs8-rsum-avx2-u128-acc4.c &
+
+################################### x86 AVX256SKX ##################################
+tools/xngen src/qs8-rsum/avx2.c.in -D CHANNEL_TILE=32  -D ACCUMULATORS=1 -D AVX=10 -o src/qs8-rsum/gen/qs8-rsum-avx256skx-u32.c &
+tools/xngen src/qs8-rsum/avx2.c.in -D CHANNEL_TILE=64  -D ACCUMULATORS=1 -D AVX=10 -o src/qs8-rsum/gen/qs8-rsum-avx256skx-u64.c &
+tools/xngen src/qs8-rsum/avx2.c.in -D CHANNEL_TILE=64  -D ACCUMULATORS=2 -D AVX=10 -o src/qs8-rsum/gen/qs8-rsum-avx256skx-u64-acc2.c &
+tools/xngen src/qs8-rsum/avx2.c.in -D CHANNEL_TILE=128 -D ACCUMULATORS=1 -D AVX=10 -o src/qs8-rsum/gen/qs8-rsum-avx256skx-u128.c &
+tools/xngen src/qs8-rsum/avx2.c.in -D CHANNEL_TILE=128 -D ACCUMULATORS=2 -D AVX=10 -o src/qs8-rsum/gen/qs8-rsum-avx256skx-u128-acc2.c &
+tools/xngen src/qs8-rsum/avx2.c.in -D CHANNEL_TILE=128 -D ACCUMULATORS=4 -D AVX=10 -o src/qs8-rsum/gen/qs8-rsum-avx256skx-u128-acc4.c &
 
 ################################### x86 AVX512SKX ##############################
 tools/xngen src/qs8-rsum/avx512skx.c.in -D CHANNEL_TILE=64  -D ACCUMULATORS=1 -o src/qs8-rsum/gen/qs8-rsum-avx512skx-u64.c &

@@ -8,8 +8,8 @@
 #include <limits>
 #include <vector>
 
-#include "convert-operator-tester.h"
 #include <gtest/gtest.h>
+#include "convert-operator-tester.h"
 
 TEST(CONVERT_NC_F16_F32, unit_batch) {
   for (size_t channels = 1; channels < 100; channels++) {

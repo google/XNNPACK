@@ -7,7 +7,6 @@
 #define __XNNPACK_TEST_UNARY_OPERATOR_TESTER_H_
 
 #include <sys/types.h>
-#include "xnnpack.h"
 
 #include <algorithm>
 #include <cassert>
@@ -23,6 +22,7 @@
 
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "xnnpack.h"
 #include "pthreadpool.h"
 
 namespace xnnpack {

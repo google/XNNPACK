@@ -213,10 +213,8 @@ def main(args):
 
 
 #include <gtest/gtest.h>
-
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
-
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/reduce.h"
 #include "{tester_header}"

@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-
 #include <immintrin.h>
+#include <stddef.h>
 
 #include "xnnpack/math-stubs.h"
 

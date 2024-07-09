@@ -7,9 +7,10 @@
 #ifndef __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX2_H_
 #define __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX2_H_
 
-#include "xnnpack/simd/f32-avx-base.h"
-#include "xnnpack/common.h"
+#include <stdint.h>
 
+#include "xnnpack/common.h"
+#include "xnnpack/simd/f32-avx-base.h"
 
 // Whether or not this architecture has native fused multiply-add support.
 #ifdef __FMA3__
@@ -46,6 +47,16 @@ static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
 #else
   return _mm256_sub_ps(_mm256_mul_ps(a, b), c);
 #endif  // __FMA3__
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_shiftl_f32(xnn_simd_f32_t a,
+                                                uint8_t bits) {
+  return _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(a), bits));
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_shiftr_f32(xnn_simd_f32_t a,
+                                                uint8_t bits) {
+  return _mm256_castsi256_ps(_mm256_srli_epi32(_mm256_castps_si256(a), bits));
 }
 
 #endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX2_H_

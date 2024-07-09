@@ -14,7 +14,10 @@
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
+
+#include <inttypes.h>
 #include <windows.h>
+
 #else
 // This define needs to come first because errno include features.h and would have defined macros that lead to
 // sys/mman.h not having mremap.

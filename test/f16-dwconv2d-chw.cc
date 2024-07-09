@@ -8,13 +8,12 @@
 //   Generator: tools/generate-dwconv2d-chw-test.py
 
 
+#include <gtest/gtest.h>
 #include "xnnpack/common.h"
 #include "xnnpack/dwconv.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microparams-init.h"
-
 #include "dwconv2d-microkernel-tester.h"
-#include <gtest/gtest.h>
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)

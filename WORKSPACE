@@ -36,6 +36,14 @@ http_archive(
     ],
 )
 
+# Bazel Platforms
+http_archive(
+    name = "bazel_platforms",
+    strip_prefix = "platforms-0.0.10",
+    sha256 = "3df33228654e56b09f17613613767b052581b822d57cb9cfd5e7b19a8e617b42",
+    urls = ["https://github.com/bazelbuild/platforms/archive/refs/tags/0.0.10.tar.gz"],
+)
+
 # LINT.IfChange
 # Google Test framework, used by most unit-tests.
 http_archive(
@@ -93,24 +101,25 @@ http_archive(
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
-    sha256 = "a615cac78fad03952cc3e1fd231ce789a8df6e81a5957b64350cb8200364b385",
-    strip_prefix = "cpuinfo-d6860c477c99f1fce9e28eb206891af3c0e1a1d7",
+    sha256 = "5d7f00693e97bd7525753de94be63f99b0490ae6855df168f5a6b2cfc452e49e",
+    strip_prefix = "cpuinfo-3c8b1533ac03dd6531ab6e7b9245d488f13a82a5",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/d6860c477c99f1fce9e28eb206891af3c0e1a1d7.zip",
+        "https://github.com/pytorch/cpuinfo/archive/3c8b1533ac03dd6531ab6e7b9245d488f13a82a5.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadCpuinfo.cmake)
 
+# TODO: b/349993583 - Uncomment when KleidiAI has an official BUILD file.
 # LINT.IfChange
 # KleidiAI library, used for ARM microkernels.
-http_archive(
-    name = "KleidiAI",
-    sha256 = "39b26d8840ec719afaa480b0622a77952d0f22dbb8e8ba58ec9f93e39895a205",
-    strip_prefix = "kleidiai-1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53",
-    urls = [
-        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53/kleidiai-1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53.zip",
-    ],
-)
+# http_archive(
+#     name = "KleidiAI",
+#     sha256 = "39b26d8840ec719afaa480b0622a77952d0f22dbb8e8ba58ec9f93e39895a205",
+#     strip_prefix = "kleidiai-1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53",
+#     urls = [
+#         "https://gitlab.arm.com/kleidi/kleidiai/-/archive/1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53/kleidiai-1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53.zip",
+#     ],
+# )
 # LINT.ThenChange(cmake/DownloadKleidiAI.cmake)
 
 # Ruy library, used to benchmark against

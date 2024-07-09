@@ -6,14 +6,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/config.h"
-
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
 
-#include "global-average-pooling-operator-tester.h"
 #include <gtest/gtest.h>
+#include "xnnpack/config.h"
+#include "global-average-pooling-operator-tester.h"
 
 TEST(GLOBAL_AVERAGE_POOLING_NWC_QU8, unit_batch_small_width) {
   const struct xnn_gavgpool_config* gavgpool_config = xnn_init_qu8_gavgpool_config();

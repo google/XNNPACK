@@ -6,17 +6,18 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <math.h>
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/allocator.h"
 #include "xnnpack/cache.h"
 #include "xnnpack/common.h"
 #include "xnnpack/compute.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
@@ -27,9 +28,7 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/pack.h"
 #include "xnnpack/params.h"
-
 #include "pthreadpool.h"
-#include <fp16/fp16.h>
 
 static enum xnn_status create_spmm_path(
     const uint32_t kernel_height,

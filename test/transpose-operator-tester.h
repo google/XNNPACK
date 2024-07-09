@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include "xnnpack.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -18,6 +16,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "xnnpack.h"
 
 inline size_t reference_index(
     const size_t* input_stride,

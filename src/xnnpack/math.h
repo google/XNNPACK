@@ -8,10 +8,10 @@
 
 #pragma once
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <assert.h>
 
 #ifdef _MSC_VER
   #include <intrin.h>

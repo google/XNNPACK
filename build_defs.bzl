@@ -73,7 +73,8 @@ def xnnpack_slinky_defines():
 
 def xnnpack_if_kleidiai_enabled(enabled = [], not_enabled = []):
     return select({
-        ":kleidiai_enabled": enabled,
+        # TODO: b/349993583 - Uncomment when KleidiAI has an official BUILD file.
+        # "//:kleidiai_enabled": enabled,
         "//conditions:default": not_enabled,
     })
 
@@ -450,7 +451,7 @@ def xnnpack_aggregate_library(
         visibility = ["//:__subpackages__"],
     )
 
-def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = [], linkopts = [], automatic = True, timeout = "short", shard_count = 1):
+def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = [], linkopts = [], defines = [], automatic = True, timeout = "short", shard_count = 1):
     """Unit test binary based on Google Test.
 
     Args:
@@ -465,6 +466,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
             (with main() function) is always added as a dependency and does not
             need to be explicitly specified.
       linkopts: The list of linking options
+      defines: List of predefines macros to be added to the compile line.
       tags: List of arbitrary text tags.
       automatic: Whether to create the test or testable binary.
       timeout: How long the test is expected to run before returning.
@@ -494,6 +496,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
                 "//conditions:default": [],
             }) + linkopts,
             linkstatic = True,
+            defines = defines,
             deps = [
                 "@com_google_googletest//:gtest_main",
             ] + deps + select({
@@ -527,6 +530,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
                 "//conditions:default": [],
             }),
             linkstatic = True,
+            defines = defines,
             deps = [
                 "@com_google_googletest//:gtest_main",
             ] + deps + select({

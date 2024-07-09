@@ -10,7 +10,6 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"

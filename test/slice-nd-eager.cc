@@ -7,8 +7,8 @@
 #include <cstddef>
 #include <utility>
 
-#include "slice-operator-tester.h"
 #include <gtest/gtest.h>
+#include "slice-operator-tester.h"
 
 constexpr size_t kDim1 = 4;
 constexpr size_t kDim2 = 5;

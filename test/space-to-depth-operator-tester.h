@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include "xnnpack.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -17,6 +15,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "xnnpack.h"
 
 class SpaceToDepthOperatorTester {
  public:

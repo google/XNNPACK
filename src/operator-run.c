@@ -14,17 +14,17 @@
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/compute.h"
-#include "xnnpack/config.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/indirection.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
 #include "xnnpack/microkernel-type.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/operator-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/packq.h"
 #include "xnnpack/quantization.h"
-
 #include "pthreadpool.h"
 
 void xnn_compute_transposec_2d(
@@ -503,6 +503,33 @@ void xnn_compute_dqgemm(
       context->cn_stride,
       context->fused_params,
       (const void*) ((uintptr_t) &context->quantization_params[mr_block_start]));
+}
+
+void xnn_compute_hmp_qp8gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    uint32_t uarch_index, size_t mr_block_start, size_t nr_block_start,
+    size_t mr_block_size, size_t nr_block_size) {
+  const size_t a_offset = xnn_x8_packq_f32qp8_packed_offset(
+      mr_block_start, context->k_scaled, context->mr, context->kr, context->sr);
+  const size_t cm_stride = context->cm_stride;
+
+  context->qp8_ukernel.function[uarch_index](
+      mr_block_size, nr_block_size, context->k_scaled,
+      (const void*)((uintptr_t)context->a + a_offset),
+      (const void*)((uintptr_t)context->packed_w +
+                    nr_block_start * context->w_stride),
+      (void*)((uintptr_t)context->c + mr_block_start * cm_stride +
+              (nr_block_start << context->log2_csize)),
+      cm_stride,
+      /*dst_stride_col=*/sizeof(float), context->fused_params);
+}
+
+void xnn_compute_qp8gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t mr_block_start, size_t nr_block_start, size_t mr_block_size,
+    size_t nr_block_size) {
+  xnn_compute_hmp_qp8gemm(context, XNN_UARCH_DEFAULT, mr_block_start,
+                          nr_block_start, mr_block_size, nr_block_size);
 }
 
 void xnn_compute_spmm(

@@ -3,15 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/requantization.h"
-#include "xnnpack/subgraph.h"
-
 #include <algorithm>  // For std::generate, std::min.
 #include <array>      // For std::array.
 #include <cassert>    // For std::cassert.
@@ -25,10 +16,18 @@
 #include <random>   // For std::uniform_real_distribution.
 #include <vector>   // For std::vector.
 
-#include "replicable_random_device.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "xnnpack.h"
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/node-type.h"
+#include "xnnpack/operator.h"
+#include "xnnpack/requantization.h"
+#include "xnnpack/subgraph.h"
+#include "replicable_random_device.h"
 
 using testing::ElementsAreArray;
 
@@ -2625,16 +2624,16 @@ TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_p
   std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
   std::vector<xnn_dynamic_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
 
+  // Adjust number of kernel elements for QC4W. input_channels should be padded to byte boundary, hence even.
+  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
+  kernel = std::vector<uint8_t>(output_channels * rounded_input_channels);
+
   std::vector<float> kernel_scale(output_channels);
   std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
   std::generate(convert_input.begin(), convert_input.end(), [&]() { return f32dist(rng); });
   std::generate(quantization_params.begin(), quantization_params.end(), [&]() { return xnn_dynamic_quantization_params{w8dist(rng), f32dist(rng)}; });
-
-  // Adjust number of kernel elements for QC4W. input_channels should be padded to byte boundary, hence even.
-  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
-  kernel = std::vector<uint8_t>(output_channels * rounded_input_channels);
 
   const float output_min = -std::numeric_limits<float>::infinity();
   const float output_max = std::numeric_limits<float>::infinity();
@@ -2739,15 +2738,15 @@ TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_p
   std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
   std::vector<xnn_dynamic_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
 
+  // Adjust number of kernel elements for QC4W. input_channels should be padded to byte boundary, hence even.
+  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
+  kernel = std::vector<uint8_t>(output_channels * rounded_input_channels);
+
   std::vector<float> kernel_scale(output_channels);
   std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
   std::generate(convert_input.begin(), convert_input.end(), [&]() { return f32dist(rng); });
   std::generate(quantization_params.begin(), quantization_params.end(), [&]() { return xnn_dynamic_quantization_params{w8dist(rng), f32dist(rng)}; });
-
-  // Adjust number of kernel elements for QC4W. input_channels should be padded to byte boundary, hence even.
-  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
-  kernel = std::vector<uint8_t>(output_channels * rounded_input_channels);
 
   const float output_min = -std::numeric_limits<float>::infinity();
   const float output_max = std::numeric_limits<float>::infinity();
@@ -2894,16 +2893,16 @@ TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_p
   std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
   std::vector<xnn_dynamic_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
 
+  // Adjust number of kernel elements for QC4W. input_channels should be padded to byte boundary, hence even.
+  const size_t rounded_output_channels = round_up_po2(output_channels, 2);
+  kernel = std::vector<uint8_t>(input_channels * rounded_output_channels);
+
   std::vector<float> kernel_scale(output_channels);
   std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
   std::generate(convert_input.begin(), convert_input.end(), [&]() { return f32dist(rng); });
   std::generate(quantization_params.begin(), quantization_params.end(), [&]() { return xnn_dynamic_quantization_params{w8dist(rng), f32dist(rng)}; });
-
-  // Adjust number of kernel elements for QC4W. input_channels should be padded to byte boundary, hence even.
-  const size_t rounded_output_channels = round_up_po2(output_channels, 2);
-  kernel = std::vector<uint8_t>(input_channels * rounded_output_channels);
 
   const float output_min = -std::numeric_limits<float>::infinity();
   const float output_max = std::numeric_limits<float>::infinity();

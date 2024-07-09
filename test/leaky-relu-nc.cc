@@ -6,8 +6,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -16,8 +14,10 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "xnnpack.h"
 #include "unary-operator-tester.h"
 #include "pthreadpool.h"
+
 namespace xnnpack {
 
 class LeakyReLUOperatorTester : public UnaryOperatorTester {

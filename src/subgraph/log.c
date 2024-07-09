@@ -5,7 +5,6 @@
 
 #include <assert.h>
 #include <inttypes.h>
-#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -18,7 +17,6 @@
 #include "xnnpack/reshape-helpers.h"
 #include "xnnpack/subgraph-validation.h"
 #include "xnnpack/subgraph.h"
-
 #include "pthreadpool.h"
 
 static enum xnn_status create_log_operator(

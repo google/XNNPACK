@@ -5,25 +5,26 @@
 
 #pragma once
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <functional>
+#include <ios>
 #include <random>
 #include <vector>
 
-#include "replicable_random_device.h"
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+#include "xnnpack.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/microparams.h"
+#include "replicable_random_device.h"
 
 #if XNN_PLATFORM_JIT
   #include "xnnpack/memory.h"
@@ -129,11 +130,6 @@ class VUnaryMicrokernelTester {
   // Tolerance functions for the `TestFP32` and `TestFP16` template functions.
   static float TolExact(float) { return 0.0f; }
   static float TolExact16(float y_ref) { return std::abs(y_ref) * 5.0e-4f; }
-  static std::function<float(float)> TolMixed(float abs_tol, float rel_tol) {
-    return [=](float y_ref) -> float {
-      return std::max(abs_tol, std::abs(y_ref * (1.0f + rel_tol) - y_ref));
-    };
-  }
   static std::function<float(float)> TolRelative(float rel_tol) {
     return [=](float y_ref) -> float {
       // Note that `y_ref * rel_tol`, i.e. the expected absolute difference,
@@ -142,6 +138,12 @@ class VUnaryMicrokernelTester {
       // the latter form since it is the true difference between two `float`s
       // within the given relative tolerance.
       return std::abs(y_ref * (1.0f + rel_tol)) - std::abs(y_ref);
+    };
+  }
+  static std::function<float(float)> TolMixed(float abs_tol, float rel_tol) {
+    return [=](float y_ref) -> float {
+      return std::max(abs_tol,
+                      std::abs(y_ref) * (1.0f + rel_tol) - std::abs(y_ref));
     };
   }
 
@@ -164,6 +166,9 @@ class VUnaryMicrokernelTester {
 
   void Test(xnn_f32_velu_ukernel_fn velu,
             xnn_init_f32_elu_params_fn init_params) const;
+
+  void TestGelu(xnn_f32_vgelu_ukernel_fn vgelu,
+            xnn_init_f32_default_params_fn init_params = nullptr) const;
 
   void Test(xnn_f16_vhswish_ukernel_fn vhswish,
             xnn_init_f16_hswish_params_fn init_params) const;
@@ -264,10 +269,10 @@ class VUnaryMicrokernelTester {
                          (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
     std::vector<float> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
       if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
+        memcpy(y.data(), x.data(), y.size() * sizeof(float));
       } else {
-        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
         std::fill(y.begin(), y.end(), nanf(""));
       }
       const float* x_data = inplace() ? y.data() : x.data();
@@ -288,7 +293,7 @@ class VUnaryMicrokernelTester {
       for (size_t i = 0; i < batch_size(); i++) {
         ASSERT_NEAR(y[i], y_ref[i], tol(y_ref[i]))
             << "at " << i << " / " << batch_size() << ", x[" << i
-            << "] = " << x[i];
+            << "] = " << std::scientific << x[i];
       }
     }
   }

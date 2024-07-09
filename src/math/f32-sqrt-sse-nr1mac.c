@@ -5,10 +5,8 @@
 
 #include <assert.h>
 #include <stddef.h>
-
 #include <xmmintrin.h>
 
-#include "xnnpack/math.h"
 #include "xnnpack/math-stubs.h"
 
 

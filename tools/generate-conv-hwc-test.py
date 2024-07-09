@@ -494,13 +494,12 @@ def main(args):
 //   Generator: {generator}
 
 
+#include <gtest/gtest.h>
 #include "xnnpack/common.h"
 #include "xnnpack/conv.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microparams-init.h"
-
 #include "conv-hwc-microkernel-tester.h"
-#include <gtest/gtest.h>
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:

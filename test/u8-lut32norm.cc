@@ -7,12 +7,11 @@
 //   Specification: test/u8-lut32norm.yaml
 //   Generator: tools/generate-lut-norm-test.py
 
-#include "xnnpack/lut.h"
-
 #include <cstddef>
 
-#include "lut-norm-microkernel-tester.h"
 #include <gtest/gtest.h>
+#include "xnnpack/lut.h"
+#include "lut-norm-microkernel-tester.h"
 
 TEST(U8_LUT32NORM__SCALAR, n_eq_1) {
   LUTNormMicrokernelTester()

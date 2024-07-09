@@ -10,17 +10,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
+#include <benchmark/benchmark.h>
+#include "bench/f32-vunary-benchmark.h"
+#include "bench/utils.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/vunary.h"
-
-#include "bench/f32-vunary-benchmark.h"
-#include "bench/utils.h"
-#include <benchmark/benchmark.h>
 
 void f32_vrelu(benchmark::State& state, xnn_f32_vrelu_ukernel_fn ukernel,
               xnn_init_f32_relu_params_fn init_params = nullptr,
@@ -47,6 +44,33 @@ void f32_vrelu(benchmark::State& state, xnn_f32_vrelu_ukernel_fn ukernel,
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(f32_vrelu, rvv_u1v,
+                    xnn_f32_vrelu_ukernel__rvv_u1v,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vrelu, rvv_u2v,
+                    xnn_f32_vrelu_ukernel__rvv_u2v,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vrelu, rvv_u4v,
+                    xnn_f32_vrelu_ukernel__rvv_u4v,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vrelu, rvv_u8v,
+                    xnn_f32_vrelu_ukernel__rvv_u8v,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_vrelu, sse_u4,

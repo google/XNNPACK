@@ -192,14 +192,13 @@ def main(args):
 //   Generator: {generator}
 
 
+#include <cstddef>
+
+#include <gtest/gtest.h>
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/packq.h"
-
-#include <cstddef>
-
 #include "packq-microkernel-tester.h"
-#include <gtest/gtest.h>
 
 
 namespace xnnpack {{""".format(
@@ -217,12 +216,11 @@ namespace xnnpack {{""".format(
 //   Generator: {generator}
 
 
-#include "xnnpack/common.h"
-#include "xnnpack/packq.h"
-
 #include <benchmark/benchmark.h>
 #include "bench/bgemm.h"
 #include "bench/packq-benchmark.h"
+#include "xnnpack/common.h"
+#include "xnnpack/packq.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     isa_hierarchy = xnncommon._ISA_HIERARCHY_MAP

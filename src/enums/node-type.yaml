@@ -37,6 +37,8 @@
   string: "Convolution 2D"
 - name: xnn_node_type_copy
   string: "Copy"
+- name: xnn_node_type_copysign
+  string: "Copy Sign"
 - name: xnn_node_type_deconvolution_2d
   string: "Deconvolution 2D"
 - name: xnn_node_type_depth_to_space_2d
@@ -59,6 +61,8 @@
   string: "Fully Connected"
 - name: xnn_node_type_fully_connected_sparse
   string: "Fully Connected Sparse"
+- name: xnn_node_type_gelu
+  string: "GELU"
 - name: xnn_node_type_global_average_pooling_1d
   string: "Global Average Pooling 1D"
 - name: xnn_node_type_global_average_pooling_2d

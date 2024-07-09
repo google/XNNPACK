@@ -6,19 +6,19 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include "xnnpack/indirection.h"
+
 #include <assert.h>
 #include <fxdiv.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 
+#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/common.h"
-#include "xnnpack/indirection.h"
 #include "xnnpack/math.h"
 #include "xnnpack/operator.h"
-
-#include <fp16/fp16.h>
 
 void xnn_indirection_init_conv2d(
   size_t output_tile_size,

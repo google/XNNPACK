@@ -11,9 +11,8 @@
 
 #include <immintrin.h>
 
-#include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/reduce.h>
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
 
 void xnn_qs8_rsum_ukernel__avx512vnni_u256_acc2(
     size_t batch,
