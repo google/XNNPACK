@@ -212,6 +212,7 @@ tools/generate-vunary-test.py --spec test/f32-vabs.yaml --output test/f32-vabs.c
 tools/generate-vunary-test.py --spec test/f32-vclamp.yaml --output test/f32-vclamp.cc &
 tools/generate-vunary-test.py --spec test/f32-velu.yaml --output test/f32-velu.cc &
 tools/generate-vunary-test.py --spec test/f32-vgelu.yaml --output test/f32-vgelu.cc &
+tools/generate-vunary-test.py --spec test/f32-vexp.yaml --output test/f32-vexp.cc &
 tools/generate-vunary-test.py --spec test/f32-vlog.yaml --output test/f32-vlog.cc &
 tools/generate-vunary-test.py --spec test/f32-vneg.yaml --output test/f32-vneg.cc &
 tools/generate-vunary-test.py --spec test/f32-vrelu.yaml --output test/f32-vrelu.cc &
