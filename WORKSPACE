@@ -38,10 +38,9 @@ http_archive(
 
 # Bazel Platforms
 http_archive(
-    name = "bazel_platforms",
-    strip_prefix = "platforms-0.0.10",
-    sha256 = "3df33228654e56b09f17613613767b052581b822d57cb9cfd5e7b19a8e617b42",
-    urls = ["https://github.com/bazelbuild/platforms/archive/refs/tags/0.0.10.tar.gz"],
+    name = "platforms",
+    sha256 = "5308fc1d8865406a49427ba24a9ab53087f17f5266a7aabbfc28823f3916e1ca",
+    urls = ["https://github.com/bazelbuild/platforms/releases/download/0.0.6/platforms-0.0.6.tar.gz"],
 )
 
 # LINT.IfChange
