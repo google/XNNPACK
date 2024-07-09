@@ -5,12 +5,8 @@
 
 #include <assert.h>
 
-#include <hvx_hexagon_protos.h>
-#include <hexagon_protos.h>
-#include <hexagon_types.h>
+#include "xnnpack/simd/f32-hvx.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
 #include "xnnpack/vbinary.h"
 
@@ -27,21 +23,21 @@ void xnn_f32_vmaxc_ukernel__hvx_u32(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  HVX_Vector vb = Q6_V_vsplat_R(*((int32_t*) input_b));
+  HVX_Vector vb = xnn_set1_f32(*input_b);
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
-    HVX_Vector va = *((HVX_UVector*) input_a);
+    HVX_Vector va = xnn_loadu_f32(input_a);
     input_a += 32;
 
-    HVX_Vector vacc = Q6_Vsf_vmax_VsfVsf(va, vb);
+    HVX_Vector vacc = xnn_max_f32(va, vb);
 
-    *((HVX_UVector *) output) = vacc;
+    xnn_storeu_f32(output, vacc);
     output+= 32;
   }
   if XNN_UNLIKELY(batch != 0) {
-    HVX_Vector va = *((HVX_UVector*) input_a);
+    HVX_Vector va = xnn_loadu_f32(input_a);
 
-    HVX_Vector vacc = Q6_Vsf_vmax_VsfVsf(va, vb);
+    HVX_Vector vacc = xnn_max_f32(va, vb);
 
     Q6_V_vstu_variable(output, batch, vacc);
   }
