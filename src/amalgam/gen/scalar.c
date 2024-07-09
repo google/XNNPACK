@@ -30367,6 +30367,45 @@ void xnn_f32_vcopysignc_ukernel__scalar_u2(
   }
 }
 
+void xnn_f32_vexp_ukernel__scalar_exp_u4(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const float vx0 = input[0];
+    const float vx1 = input[1];
+    const float vx2 = input[2];
+    const float vx3 = input[3];
+    input += 4;
+
+    const float vy0 = expf(vx0);
+    const float vy1 = expf(vx1);
+    const float vy2 = expf(vx2);
+    const float vy3 = expf(vx3);
+
+    output[0] = vy0;
+    output[1] = vy1;
+    output[2] = vy2;
+    output[3] = vy3;
+    output += 4;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    do {
+      const float vx = *input++;
+      const float vy = expf(vx);
+      *output++ = vy;
+      batch -= sizeof(float);
+    } while (batch != 0);
+  }
+}
+
 void xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u1(
     size_t batch,
     const float* input,

@@ -147,6 +147,8 @@
   string: "ELU (NC, F32)"
 - name: xnn_operator_type_elu_nc_qs8
   string: "ELU (NC, QS8)"
+- name: xnn_operator_type_exp_nc_f32
+  string: "Exp (NC, F32)"
 - name: xnn_operator_type_floor_nc_f16
   string: "Floor (NC, F16)"
 - name: xnn_operator_type_floor_nc_f32

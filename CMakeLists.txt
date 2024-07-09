@@ -1380,6 +1380,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(elu-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME elu-nc-test COMMAND elu-nc-test)
 
+    ADD_EXECUTABLE(exp-nc-test test/exp-nc.cc)
+    TARGET_INCLUDE_DIRECTORIES(exp-nc-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(exp-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME exp-nc-test COMMAND exp-nc-test)
+
     ADD_EXECUTABLE(fully-connected-nc-test test/fully-connected-nc.cc)
     SET_TARGET_PROPERTIES(fully-connected-nc-test PROPERTIES CXX_EXTENSIONS YES)
     TARGET_INCLUDE_DIRECTORIES(fully-connected-nc-test PRIVATE src test)

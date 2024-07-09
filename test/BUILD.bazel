@@ -1503,6 +1503,7 @@ xnnpack_binary(
     "ceiling_nc",
     "clamp_nc",
     "elu_nc",
+    "exp_nc",
     "floor_nc",
     "gelu_nc",
     "hardswish_nc",

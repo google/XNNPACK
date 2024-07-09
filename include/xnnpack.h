@@ -4156,6 +4156,23 @@ enum xnn_status xnn_setup_elu_nc_qs8(
   const int8_t* input,
   int8_t* output);
 
+enum xnn_status xnn_create_exp_nc_f32(
+  uint32_t flags,
+  xnn_operator_t* exp_op_out);
+
+enum xnn_status xnn_reshape_exp_nc_f32(
+  xnn_operator_t exp_op,
+  size_t batch_size,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_exp_nc_f32(
+  xnn_operator_t exp_op,
+  const float* input,
+  float* output);
+
 enum xnn_status xnn_create_floor_nc_f16(
   uint32_t flags,
   xnn_operator_t* floor_op_out);

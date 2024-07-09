@@ -2646,6 +2646,9 @@ typedef size_t (*xnn_init_f16_elu_params_fn)(
   uint16_t alpha,
   uint16_t beta);
 
+typedef size_t (*xnn_init_f32_exp_params_fn)(
+  union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
+
 typedef size_t (*xnn_init_f32_elu_params_fn)(
   union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
   float prescale,
