@@ -331,20 +331,6 @@ HVX_Vector Q6_Vw_vmpyie_VwVh(HVX_Vector multiplier_lo, HVX_Vector multiplier_hi,
     return vout;
 }
 
-// Temporary div implementation for HVX.
-// TODO: improve the implementation 
-//       e.g., use reprocical with newton-raphson approximation
-static XNN_INTRINSIC
-HVX_Vector Q6_Vsf_vdiv_VsfVsf(HVX_Vector vin1, HVX_Vector vin2){
-    float* svin1 = (float *) &vin1;
-    float* svin2 = (float *) &vin2;
-
-    for(int i = 0; i < 32; i++)
-      svin1[i] = svin1[i] / svin2[i];
-
-    return *((HVX_UVector *) svin1);
-}
-
 // Horizontal vector sum by pairwise addition.
 // To calculate fewer elements than the full 128 bytes in 'vin', 
 // use the following code first before calling the intrinsic:
@@ -368,5 +354,19 @@ float Q6_f32_vrsum_Vsf(HVX_Vector vin){
     vin = Q6_Vsf_vadd_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
 
     return *((float *) &vin);
+}
+
+// Temporary div implementation for HVX.
+// TODO: improve the implementation 
+//       e.g., use reprocical with newton-raphson approximation
+static XNN_INTRINSIC
+HVX_Vector Q6_Vsf_vdiv_VsfVsf(HVX_Vector vin1, HVX_Vector vin2){
+    float* svin1 = (float *) &vin1;
+    float* svin2 = (float *) &vin2;
+
+    for(int i = 0; i < 32; i++)
+      svin1[i] = svin1[i] / svin2[i];
+
+    return *((HVX_UVector *) svin1);
 }
 #endif  // XNN_ARCH_HEXAGON
