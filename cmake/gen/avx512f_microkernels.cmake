@@ -172,8 +172,6 @@ SET(ALL_AVX512F_MICROKERNEL_SRCS
   src/f32-velu/gen/f32-velu-avx512f-rr1-p6-u96.c
   src/f32-velu/gen/f32-velu-avx512f-rr1-p6-u112.c
   src/f32-velu/gen/f32-velu-avx512f-rr1-p6-u128.c
-  src/f32-vgelu/gen/f32-vgelu-avx512f-rational-10-8-div.c
-  src/f32-vgelu/gen/f32-vgelu-avx512f-rational-10-8-nr.c
   src/f32-vgelu/gen/f32-vgelu-avx512f-rational-12-10-div.c
   src/f32-vgelu/gen/f32-vgelu-avx512f-rational-12-10-nr.c
   src/f32-vhswish/gen/f32-vhswish-avx512f-u16.c
