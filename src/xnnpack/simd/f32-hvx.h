@@ -45,6 +45,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_mul_f32(xnn_simd_f32_t a,
   return Q6_Vsf_vmpy_VsfVsf(a, b);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_div_f32(xnn_simd_f32_t a,
+                                             xnn_simd_f32_t b){
+  return Q6_Vsf_vdiv_VsfVsf(a, b);
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_fmadd_f32(xnn_simd_f32_t a,
                                                xnn_simd_f32_t b,
                                                xnn_simd_f32_t c) {

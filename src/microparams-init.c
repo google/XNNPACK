@@ -7409,6 +7409,23 @@ size_t xnn_init_f32_qs8_cvt_wasmsimd_magic_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_HEXAGON
+size_t xnn_init_f32_qs8_cvt_hvx_params(
+  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  params->hvx.scale = scale;
+  params->hvx.magic_bias = 12582912.0f;
+  params->hvx.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->hvx.output_min = output_min;
+  params->hvx.output_max = output_max;
+  return sizeof(params->hvx);
+}
+#endif  // XNN_ARCH_HEXAGON
+
 size_t xnn_init_f32_qu8_cvt_scalar_fmagic_params(
   union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,

@@ -26,6 +26,11 @@ SET(ALL_HVX_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-7x64-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-8x32-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-16x32-minmax-hvx-broadcast.c
+  src/f32-qs8-vcvt/gen/f32-qs8-vcvt-hvx-u32.c
+  src/f32-qs8-vcvt/gen/f32-qs8-vcvt-hvx-u64.c
+  src/f32-qs8-vcvt/gen/f32-qs8-vcvt-hvx-u96.c
+  src/f32-qs8-vcvt/gen/f32-qs8-vcvt-hvx-u128.c
+  src/f32-qs8-vcvt/gen/f32-qs8-vcvt-hvx-u256.c
   src/f32-rsum/gen/f32-rsum-hvx-u32.c
   src/f32-rsum/gen/f32-rsum-hvx-u64-acc2.c
   src/f32-rsum/gen/f32-rsum-hvx-u96-acc3.c
