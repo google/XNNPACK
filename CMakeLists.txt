@@ -364,6 +364,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/floor.c
   src/subgraph/fully-connected-sparse.c
   src/subgraph/fully-connected.c
+  src/subgraph/gelu.c
   src/subgraph/global-average-pooling.c
   src/subgraph/global-sum-pooling.c
   src/subgraph/hardswish.c
@@ -1793,6 +1794,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(elu-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(elu-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME elu-test COMMAND elu-test)
+
+    ADD_EXECUTABLE(gelu-test test/gelu.cc)
+    TARGET_INCLUDE_DIRECTORIES(gelu-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(gelu-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME gelu-test COMMAND gelu-test)
 
     ADD_EXECUTABLE(exp-test test/exp.cc)
     TARGET_INCLUDE_DIRECTORIES(exp-test PRIVATE src test)
