@@ -39,6 +39,7 @@ enum xnn_node_type {
   xnn_node_type_depthwise_convolution_2d,
   xnn_node_type_divide,
   xnn_node_type_elu,
+  xnn_node_type_exp,
   xnn_node_type_even_split2,
   xnn_node_type_even_split3,
   xnn_node_type_even_split4,

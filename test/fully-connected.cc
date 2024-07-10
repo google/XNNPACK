@@ -22,9 +22,12 @@
 #include "xnnpack.h"
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
+#include "xnnpack/config.h"
+#include "xnnpack/internal.h"
 #include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
+#include "xnnpack/packq.h"
 #include "xnnpack/requantization.h"
 #include "xnnpack/subgraph.h"
 #include "replicable_random_device.h"
@@ -116,6 +119,738 @@ class FullyConnectedTestBase : public ::testing::Test {
   std::vector<OutputType> subgraph_output;
   std::vector<int32_t> accumulators;
 };
+
+class FullyConnectedTestQP8F32QC4W
+    : public FullyConnectedTestBase<int8_t, uint8_t, float, float, true> {};
+
+TEST_F(FullyConnectedTestQP8F32QC4W, define) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  if (xnn_init_qp8_f32_qc4w_gemm_config() == nullptr) {
+    GTEST_SKIP();
+  }
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_dynamically_quantized_tensor_value(
+                subgraph, xnn_datatype_qpint8, input_dims.size(),
+                /*num_nonbatch_dims=*/1, input_dims.data(),
+                /*external_id=*/0, /*flags=*/0, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_VALUE_ID);
+
+  // Adjust number of kernel elements for QC4W. input_channels should be padded
+  // to byte boundary, hence even.
+  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
+  kernel = std::vector<uint8_t>(output_channels * rounded_input_channels);
+
+  const uint8_t kernel_zero_point = 8;
+  std::vector<float> kernel_scale(output_channels);
+  std::generate(kernel_scale.begin(), kernel_scale.end(),
+                [&]() { return scale_dist(rng); });
+  uint32_t kernel_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_channelwise_quantized_tensor_value_v2(
+                subgraph, xnn_datatype_qcint4, kernel_zero_point,
+                kernel_scale.data(), kernel_dims.size(),
+                /*channel_dim=*/0, kernel_dims.data(), kernel.data(),
+                /*external_id=*/1, /*flags=*/0, &kernel_id));
+
+  uint32_t bias_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, bias_dims.size(),
+                              bias_dims.data(), bias.data(),
+                              /*external_id=*/2, /*flags=*/0, &bias_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, output_dims.size(),
+                              output_dims.data(), nullptr,
+                              /*external_id=*/3, /*flags=*/0, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
+
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_fully_connected(subgraph, output_min, output_max, input_id,
+                                 kernel_id, bias_id, output_id, /*flags=*/0));
+
+  ASSERT_EQ(subgraph->num_nodes, 1);
+  const struct xnn_node* node = &subgraph->nodes[0];
+  ASSERT_EQ(node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(node->compute_type, xnn_compute_type_qp8_to_fp32);
+  ASSERT_EQ(node->activation.output_min, output_min);
+  ASSERT_EQ(node->activation.output_max, output_max);
+  ASSERT_EQ(node->num_inputs, 3);
+  ASSERT_EQ(node->inputs[0], input_id);
+  ASSERT_EQ(node->inputs[1], kernel_id);
+  ASSERT_EQ(node->inputs[2], bias_id);
+  ASSERT_EQ(node->num_outputs, 1);
+  ASSERT_EQ(node->outputs[0], output_id);
+  ASSERT_EQ(node->flags, 0);
+}
+
+TEST_F(FullyConnectedTestQP8F32QC4W, matches_qd8_f32_qc4w) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  if (xnn_init_qp8_f32_qc4w_gemm_config() == nullptr) {
+    GTEST_SKIP();
+  }
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/4,
+                                                    /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+  std::vector<float> convert_input(batch_size * input_channels +
+                                   XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<int8_t> operator_qp8_data(
+      xnn_x8_packq_f32qp8_gemm_packed_size(batch_size, input_channels) +
+      XNN_EXTRA_BYTES);
+  std::vector<int8_t> operator_qd8_data(batch_size * input_channels +
+                                        XNN_EXTRA_BYTES);
+  std::vector<float> qp8_operator_output(batch_size * output_channels);
+  std::vector<float> qd8_operator_output(batch_size * output_channels);
+  std::fill(qp8_operator_output.begin(), qp8_operator_output.end(), nanf(""));
+  std::fill(qd8_operator_output.begin(), qd8_operator_output.end(), nanf(""));
+
+  // Adjust number of kernel elements for QC4W. input_channels should be padded
+  // to byte boundary, hence even.
+  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
+  kernel = std::vector<uint8_t>(output_channels * rounded_input_channels);
+
+  std::vector<float> kernel_scale(output_channels);
+  std::vector<xnn_dynamic_quantization_params> quantization_params(
+      batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
+  std::generate(kernel_scale.begin(), kernel_scale.end(),
+                [&]() { return scale_dist(rng); });
+  std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
+  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+  std::generate(convert_input.begin(), convert_input.end(),
+                [&]() { return f32dist(rng); });
+
+  const float output_min = -std::numeric_limits<float>::infinity();
+  const float output_max = std::numeric_limits<float>::infinity();
+
+  const uint8_t kernel_zero_point = 8;
+
+  // Call operator API for `qp8`.
+  xnn_operator_t qp8_convert_op = nullptr;
+  xnn_operator_t qp8_fc_op = nullptr;
+  xnn_status status = xnn_create_convert_nc_f32_qp8(
+      /*flags=*/0, &qp8_convert_op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+      auto_qp8_convert_op(qp8_convert_op, xnn_delete_operator);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, qp8_convert_op);
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qp8(
+                                    qp8_convert_op, batch_size, input_channels,
+                                    input_channels, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_convert_nc_f32_qp8(qp8_convert_op, convert_input.data(),
+                                         operator_qp8_data.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_operator(qp8_convert_op, /*threadpool=*/nullptr));
+
+  status = xnn_create_fully_connected_nc_qp8_f32_qc4w(
+      input_channels, output_channels, input_channels, output_channels,
+      kernel_zero_point, kernel_scale.data(), kernel.data(), bias.data(),
+      output_min, output_max,
+      /*flags=*/0, nullptr, nullptr, &qp8_fc_op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_qp8_fc_op(
+      qp8_fc_op, xnn_delete_operator);
+
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, qp8_fc_op);
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_fully_connected_nc_qp8_f32_qc4w(
+                qp8_fc_op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_fully_connected_nc_qp8_f32_qc4w(
+                                    qp8_fc_op, operator_qp8_data.data(),
+                                    qp8_operator_output.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_operator(qp8_fc_op, /*threadpool=*/nullptr));
+
+  // Call operator API for `qd8`.
+  xnn_operator_t qd8_convert_op = nullptr;
+  xnn_operator_t qd8_fc_op = nullptr;
+  status = xnn_create_convert_nc_f32_qd8(
+      /*flags=*/0, &qd8_convert_op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+      auto_qd8_convert_op(qd8_convert_op, xnn_delete_operator);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, qd8_convert_op);
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_convert_nc_f32_qd8(
+                qd8_convert_op, batch_size, input_channels, input_channels,
+                input_channels, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_convert_nc_f32_qd8(qd8_convert_op, convert_input.data(),
+                                         operator_qd8_data.data(),
+                                         quantization_params.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_operator(qd8_convert_op, /*threadpool=*/nullptr));
+
+  status = xnn_create_fully_connected_nc_qd8_f32_qc4w(
+      input_channels, output_channels, input_channels, output_channels,
+      kernel_zero_point, kernel_scale.data(), kernel.data(), bias.data(),
+      output_min, output_max,
+      /*flags=*/0, nullptr, nullptr, &qd8_fc_op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_qd8_fc_op(
+      qd8_fc_op, xnn_delete_operator);
+
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, qd8_fc_op);
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_fully_connected_nc_qd8_f32_qc4w(
+                qd8_fc_op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_fully_connected_nc_qd8_f32_qc4w(
+                qd8_fc_op, operator_qd8_data.data(), qd8_operator_output.data(),
+                quantization_params.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_operator(qd8_fc_op, /*threadpool=*/nullptr));
+
+  // Compare the outputs. Note that the values will not be exactly the same
+  // since the `qd8` quantization rounds to zero, whereas the `qp8` quantization
+  // does not.
+  float max_abs_val = 0.0f;
+  for (size_t i = 0; i < batch_size * output_channels; i++) {
+    max_abs_val = std::max(max_abs_val, std::abs(qd8_operator_output[i]));
+  }
+  for (size_t i = 0; i < batch_size * output_channels; i++) {
+    ASSERT_NEAR(qp8_operator_output[i], qd8_operator_output[i],
+                max_abs_val * 1e-2);
+  }
+}
+
+TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  if (xnn_init_qp8_f32_qc4w_gemm_config() == nullptr) {
+    GTEST_SKIP();
+  }
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/4,
+                                                    /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+  uint32_t input_id = XNN_INVALID_NODE_ID;
+  std::vector<float> convert_input(batch_size * input_channels +
+                                   XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<int8_t> operator_dq_data(
+      xnn_x8_packq_f32qp8_gemm_packed_size(batch_size, input_channels));
+  std::vector<float> subgraph_output(batch_size * output_channels);
+  std::vector<float> operator_output(batch_size * output_channels);
+  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
+  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
+
+  // Adjust number of kernel elements for QC4W. input_channels should be padded
+  // to byte boundary, hence even.
+  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
+  kernel = std::vector<uint8_t>(output_channels * rounded_input_channels);
+
+  std::vector<float> kernel_scale(output_channels);
+  std::generate(kernel_scale.begin(), kernel_scale.end(),
+                [&]() { return scale_dist(rng); });
+  std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
+  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+  std::generate(convert_input.begin(), convert_input.end(),
+                [&]() { return f32dist(rng); });
+
+  const float output_min = -std::numeric_limits<float>::infinity();
+  const float output_max = std::numeric_limits<float>::infinity();
+
+  const uint8_t kernel_zero_point = 8;
+
+  // Call operator API.
+  xnn_operator_t convert_op = nullptr;
+  xnn_operator_t fc_op = nullptr;
+  xnn_status status = xnn_create_convert_nc_f32_qp8(
+      /*flags=*/0, &convert_op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(
+      convert_op, xnn_delete_operator);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, convert_op);
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qp8(
+                                    convert_op, batch_size, input_channels,
+                                    input_channels, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_convert_nc_f32_qp8(convert_op, convert_input.data(),
+                                         operator_dq_data.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_operator(convert_op, /*threadpool=*/nullptr));
+
+  status = xnn_create_fully_connected_nc_qp8_f32_qc4w(
+      input_channels, output_channels, input_channels, output_channels,
+      kernel_zero_point, kernel_scale.data(), kernel.data(), bias.data(),
+      output_min, output_max,
+      /*flags=*/0, nullptr, nullptr, &fc_op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fc_op(
+      fc_op, xnn_delete_operator);
+
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, fc_op);
+  ASSERT_EQ(xnn_status_success, xnn_reshape_fully_connected_nc_qp8_f32_qc4w(
+                                    fc_op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_fully_connected_nc_qp8_f32_qc4w(
+                fc_op, operator_dq_data.data(), operator_output.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_operator(fc_op, /*threadpool=*/nullptr));
+
+  // Call subgraph API.
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, input_dims.size(),
+                input_dims.data(), nullptr, /*external_id=*/0,
+                /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+
+  uint32_t dq_quantized_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_dynamically_quantized_tensor_value(
+                subgraph, xnn_datatype_qdint8, input_dims.size(),
+                /*num_nonbatch_dims=*/1, input_dims.data(),
+                XNN_INVALID_VALUE_ID, /*flags=*/0, &dq_quantized_id));
+  ASSERT_NE(dq_quantized_id, XNN_INVALID_NODE_ID);
+  uint32_t kernel_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_channelwise_quantized_tensor_value_v2(
+                subgraph, xnn_datatype_qcint4, kernel_zero_point,
+                kernel_scale.data(), kernel_dims.size(),
+                /*channel_dim=*/0, kernel_dims.data(), kernel.data(),
+                /*external_id=*/1, /*flags=*/0, &kernel_id));
+
+  uint32_t bias_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, bias_dims.size(),
+                              bias_dims.data(), bias.data(),
+                              /*external_id=*/2, /*flags=*/0, &bias_id));
+  uint32_t output_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, output_dims.size(),
+                output_dims.data(), nullptr,
+                /*external_id=*/3, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
+                &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_convert(subgraph, input_id, dq_quantized_id,
+                               /*flags=*/XNN_FLAG_MAYBE_PACK_FOR_GEMM));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_fully_connected(subgraph, output_min, output_max,
+                                       dq_quantized_id, kernel_id, bias_id,
+                                       output_id, /*flags=*/0));
+
+  // Make sure the quantized inputs were coerced to `qpint8`.
+  ASSERT_EQ(subgraph->num_nodes, 2);
+  const struct xnn_node* fc_node = &subgraph->nodes[1];
+  ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(fc_node->compute_type, xnn_compute_type_qp8_to_fp32);
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+  std::array<xnn_external_value, 2> external = {
+      xnn_external_value{input_id, convert_input.data()},
+      xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  EXPECT_THAT(subgraph_output, operator_output);
+}
+
+TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_with_reshape) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  if (xnn_init_qp8_f32_qc4w_gemm_config() == nullptr) {
+    GTEST_SKIP();
+  }
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/4,
+                                                    /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+  uint32_t input_id = XNN_INVALID_NODE_ID;
+  std::vector<float> convert_input;
+  convert_input.reserve(5 * batch_size * input_channels +
+                        XNN_EXTRA_BYTES / sizeof(float));
+  convert_input.resize(batch_size * input_channels +
+                       XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<float> subgraph_output;
+  subgraph_output.reserve(5 * batch_size * output_channels);
+  subgraph_output.resize(batch_size * output_channels);
+  std::vector<int8_t> operator_dq_data(
+      xnn_x8_packq_f32qp8_gemm_packed_size(batch_size, input_channels) +
+      XNN_EXTRA_BYTES);
+  std::vector<float> operator_output(batch_size * output_channels);
+  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
+  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
+
+  // Adjust number of kernel elements for QC4W. input_channels should be padded
+  // to byte boundary, hence even.
+  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
+  kernel = std::vector<uint8_t>(output_channels * rounded_input_channels);
+
+  std::vector<float> kernel_scale(output_channels);
+  std::generate(kernel_scale.begin(), kernel_scale.end(),
+                [&]() { return scale_dist(rng); });
+  std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
+  std::generate(convert_input.begin(), convert_input.end(),
+                [&]() { return f32dist(rng); });
+
+  const float output_min = -std::numeric_limits<float>::infinity();
+  const float output_max = std::numeric_limits<float>::infinity();
+
+  const uint8_t kernel_zero_point = 8;
+
+  // Call operator API.
+  xnn_operator_t convert_op = nullptr;
+  xnn_operator_t fc_op = nullptr;
+  xnn_status status = xnn_create_convert_nc_f32_qp8(
+      /*flags=*/0, &convert_op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(
+      convert_op, xnn_delete_operator);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, convert_op);
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qp8(
+                                    convert_op, batch_size, input_channels,
+                                    input_channels, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_convert_nc_f32_qp8(convert_op, convert_input.data(),
+                                         operator_dq_data.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_operator(convert_op, /*threadpool=*/nullptr));
+
+  status = xnn_create_fully_connected_nc_qp8_f32_qc4w(
+      input_channels, output_channels, input_channels, output_channels,
+      kernel_zero_point, kernel_scale.data(), kernel.data(), nullptr,
+      output_min, output_max,
+      /*flags=*/0, nullptr, nullptr, &fc_op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fc_op(
+      fc_op, xnn_delete_operator);
+
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, fc_op);
+  ASSERT_EQ(xnn_status_success, xnn_reshape_fully_connected_nc_qp8_f32_qc4w(
+                                    fc_op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_fully_connected_nc_qp8_f32_qc4w(
+                fc_op, operator_dq_data.data(), operator_output.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_operator(fc_op, /*threadpool=*/nullptr));
+
+  // Call subgraph API.
+  //
+  // dim[0] size increments:
+  //
+  //  0..........2......3.......4
+  //  ^          ^      ^       ^
+  //  `..Input1  |      |       |
+  //     Input2..'      |       |
+  //     Subgraph.......'       |
+  //     Input3.................'
+
+  std::vector<size_t> subgraph_input_dims(input_dims);
+  std::vector<size_t> subgraph_output_dims(output_dims);
+  subgraph_input_dims[0] += 3;
+  subgraph_output_dims[0] += 3;
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, subgraph_input_dims.size(),
+                subgraph_input_dims.data(), nullptr, /*external_id=*/0,
+                /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+
+  uint32_t dq_quantized_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_dynamically_quantized_tensor_value(
+                subgraph, xnn_datatype_qdint8, subgraph_input_dims.size(),
+                /*num_nonbatch_dims=*/1, subgraph_input_dims.data(),
+                XNN_INVALID_VALUE_ID, /*flags=*/0, &dq_quantized_id));
+  ASSERT_NE(dq_quantized_id, XNN_INVALID_NODE_ID);
+  uint32_t kernel_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_channelwise_quantized_tensor_value_v2(
+                subgraph, xnn_datatype_qcint4, kernel_zero_point,
+                kernel_scale.data(), kernel_dims.size(),
+                /*channel_dim=*/0, kernel_dims.data(), kernel.data(),
+                /*external_id=*/1, /*flags=*/0, &kernel_id));
+
+  uint32_t output_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, subgraph_output_dims.size(),
+                subgraph_output_dims.data(), nullptr,
+                /*external_id=*/3, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
+                &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_convert(subgraph, input_id, dq_quantized_id,
+                               /*flags=*/XNN_FLAG_MAYBE_PACK_FOR_GEMM));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_fully_connected(
+                subgraph, output_min, output_max, dq_quantized_id, kernel_id,
+                XNN_INVALID_NODE_ID, output_id, /*flags=*/0));
+
+  // Make sure the quantized inputs were coerced to `qpint8`.
+  ASSERT_EQ(subgraph->num_nodes, 2);
+  const struct xnn_node* fc_node = &subgraph->nodes[1];
+  ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(fc_node->compute_type, xnn_compute_type_qp8_to_fp32);
+
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+
+  struct xnn_node* node = &subgraph->nodes[0];
+  ASSERT_EQ(node->type, xnn_node_type_convert);
+
+  // 1st inference: lets start smaller than we planned memory for
+  std::array<xnn_external_value, 2> external = {
+      xnn_external_value{input_id, convert_input.data()},
+      xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, input_id, input_dims.size(),
+                                       input_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime_v2(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+  EXPECT_THAT(subgraph_output, operator_output);
+
+  // 2nd inference: The dq-params should be properly allocated to handle a
+  // resize without memory retrigger
+  input_dims[0] += 2;
+  size_t batch_size2 = std::accumulate(input_dims.begin(), input_dims.end() - 1,
+                                       1, std::multiplies<size_t>());
+  convert_input.resize(batch_size2 * input_channels +
+                       XNN_EXTRA_BYTES / sizeof(float));
+  subgraph_output.resize(batch_size2 * output_channels);
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, input_id, input_dims.size(),
+                                       input_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime_v2(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  // 3rd inference: The dq-params should be properly allocated even with memory
+  // retrigger
+  input_dims[0] += 2;  // +4 total
+  size_t batch_size3 = std::accumulate(input_dims.begin(), input_dims.end() - 1,
+                                       1, std::multiplies<size_t>());
+  convert_input.resize(batch_size3 * input_channels +
+                       XNN_EXTRA_BYTES / sizeof(float));
+  subgraph_output.resize(batch_size3 * output_channels);
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, input_id, input_dims.size(),
+                                       input_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime_v2(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+}
+
+TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_transposed_weights) {
+  if (xnn_init_qp8_f32_qc4w_gemm_config() == nullptr) {
+    GTEST_SKIP();
+  }
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/4,
+                                                    /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+  uint32_t input_id = XNN_INVALID_NODE_ID;
+  std::vector<float> convert_input(batch_size * input_channels +
+                                   XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<int8_t> operator_dq_data(
+      xnn_x8_packq_f32qp8_gemm_packed_size(batch_size, input_channels) +
+      XNN_EXTRA_BYTES);
+  std::vector<float> subgraph_output(batch_size * output_channels);
+  std::vector<float> operator_output(batch_size * output_channels);
+  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
+  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
+
+  // Adjust number of kernel elements for QC4W. input_channels should be padded
+  // to byte boundary, hence even.
+  const size_t rounded_output_channels = round_up_po2(output_channels, 2);
+  kernel = std::vector<uint8_t>(input_channels * rounded_output_channels);
+
+  std::vector<float> kernel_scale(output_channels);
+  std::generate(kernel_scale.begin(), kernel_scale.end(),
+                [&]() { return scale_dist(rng); });
+  std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
+  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+  std::generate(convert_input.begin(), convert_input.end(),
+                [&]() { return f32dist(rng); });
+
+  const float output_min = -std::numeric_limits<float>::infinity();
+  const float output_max = std::numeric_limits<float>::infinity();
+
+  const uint8_t kernel_zero_point = 8;
+
+  // Call operator API.
+  xnn_operator_t convert_op = nullptr;
+  xnn_operator_t fc_op = nullptr;
+  xnn_status status = xnn_create_convert_nc_f32_qp8(
+      /*flags=*/0, &convert_op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(
+      convert_op, xnn_delete_operator);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, convert_op);
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qp8(
+                                    convert_op, batch_size, input_channels,
+                                    input_channels, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_convert_nc_f32_qp8(convert_op, convert_input.data(),
+                                         operator_dq_data.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_operator(convert_op, /*threadpool=*/nullptr));
+
+  status = xnn_create_fully_connected_nc_qp8_f32_qc4w(
+      input_channels, output_channels, input_channels, output_channels,
+      kernel_zero_point, kernel_scale.data(), kernel.data(), bias.data(),
+      output_min, output_max, XNN_FLAG_TRANSPOSE_WEIGHTS, nullptr, nullptr,
+      &fc_op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fc_op(
+      fc_op, xnn_delete_operator);
+
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, fc_op);
+  ASSERT_EQ(xnn_status_success, xnn_reshape_fully_connected_nc_qp8_f32_qc4w(
+                                    fc_op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_fully_connected_nc_qp8_f32_qc4w(
+                fc_op, operator_dq_data.data(), operator_output.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_operator(fc_op, /*threadpool=*/nullptr));
+
+  // Call subgraph API.
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, input_dims.size(),
+                input_dims.data(), nullptr, /*external_id=*/0,
+                /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+
+  uint32_t dq_quantized_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_dynamically_quantized_tensor_value(
+                subgraph, xnn_datatype_qdint8, input_dims.size(),
+                /*num_nonbatch_dims=*/1, input_dims.data(),
+                XNN_INVALID_VALUE_ID, /*flags=*/0, &dq_quantized_id));
+  ASSERT_NE(dq_quantized_id, XNN_INVALID_NODE_ID);
+  uint32_t kernel_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_channelwise_quantized_tensor_value_v2(
+                subgraph, xnn_datatype_qcint4, kernel_zero_point,
+                kernel_scale.data(), kernel_dims_tranposed.size(),
+                /*channel_dim=*/1, kernel_dims_tranposed.data(), kernel.data(),
+                /*external_id=*/1, /*flags=*/0, &kernel_id));
+
+  uint32_t bias_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, bias_dims.size(),
+                              bias_dims.data(), bias.data(),
+                              /*external_id=*/2, /*flags=*/0, &bias_id));
+  uint32_t output_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, output_dims.size(),
+                output_dims.data(), nullptr,
+                /*external_id=*/3, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
+                &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_convert(subgraph, input_id, dq_quantized_id,
+                               /*flags=*/XNN_FLAG_MAYBE_PACK_FOR_GEMM));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_fully_connected(subgraph, output_min, output_max,
+                                       dq_quantized_id, kernel_id, bias_id,
+                                       output_id, XNN_FLAG_TRANSPOSE_WEIGHTS));
+
+  // Make sure the quantized inputs were coerced to `qpint8`.
+  ASSERT_EQ(subgraph->num_nodes, 2);
+  const struct xnn_node* fc_node = &subgraph->nodes[1];
+  ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(fc_node->compute_type, xnn_compute_type_qp8_to_fp32);
+
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+  std::array<xnn_external_value, 2> external = {
+      xnn_external_value{input_id, convert_input.data()},
+      xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  EXPECT_THAT(subgraph_output, operator_output);
+}
 
 template <class T> class QuantizedFullyConnectedTestBase : public FullyConnectedTestBase<T, T, int32_t> {
 protected:

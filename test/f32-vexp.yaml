@@ -1,0 +1,9 @@
+# Copyright 2020 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Scalar
+- name: xnn_f32_vexp_ukernel__scalar_exp_u1
+- name: xnn_f32_vexp_ukernel__scalar_exp_u2
+- name: xnn_f32_vexp_ukernel__scalar_exp_u4

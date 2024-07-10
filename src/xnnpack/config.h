@@ -66,6 +66,7 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_to_qs8_cvt_
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_abs_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_clamp_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_elu_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_exp_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_gelu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_hswish_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_log_config();
@@ -188,8 +189,16 @@ static inline struct xnn_hmp_dqigemm_ukernel xnn_init_hmp_dqigemm_ukernel(
 static inline struct xnn_hmp_qp8gemm_ukernel xnn_init_hmp_qp8gemm_ukernel(
     xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn function) {
   struct xnn_hmp_qp8gemm_ukernel ukernel = {{function}};
+#if XNN_PLATFORM_JIT
+  ukernel.generated_code_chunk[0].offset = SIZE_MAX;
+  ukernel.generated_code_chunk[0].offset_end = SIZE_MAX;
+#endif  // XNN_PLATFORM_JIT
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
+#if XNN_PLATFORM_JIT
+    ukernel.generated_code_chunk[i].offset = SIZE_MAX;
+    ukernel.generated_code_chunk[i].offset_end = SIZE_MAX;
+#endif  // XNN_PLATFORM_JIT
   }
   return ukernel;
 }

@@ -277,6 +277,126 @@ BENCHMARK_CAPTURE(qs8_rsum, scalar_u4,
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
+#if XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  BENCHMARK_CAPTURE(qs8_rsum, avxvnni_u32,
+                    xnn_qs8_rsum_ukernel__avxvnni_u32,
+                    xnn_init_qs8_rsum_avx2_params,
+                    benchmark::utils::CheckAVXVNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  BENCHMARK_CAPTURE(qs8_rsum, avxvnni_u64,
+                    xnn_qs8_rsum_ukernel__avxvnni_u64,
+                    xnn_init_qs8_rsum_avx2_params,
+                    benchmark::utils::CheckAVXVNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  BENCHMARK_CAPTURE(qs8_rsum, avxvnni_u64_acc2,
+                    xnn_qs8_rsum_ukernel__avxvnni_u64_acc2,
+                    xnn_init_qs8_rsum_avx2_params,
+                    benchmark::utils::CheckAVXVNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  BENCHMARK_CAPTURE(qs8_rsum, avxvnni_u128,
+                    xnn_qs8_rsum_ukernel__avxvnni_u128,
+                    xnn_init_qs8_rsum_avx2_params,
+                    benchmark::utils::CheckAVXVNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  BENCHMARK_CAPTURE(qs8_rsum, avxvnni_u128_acc2,
+                    xnn_qs8_rsum_ukernel__avxvnni_u128_acc2,
+                    xnn_init_qs8_rsum_avx2_params,
+                    benchmark::utils::CheckAVXVNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  BENCHMARK_CAPTURE(qs8_rsum, avxvnni_u128_acc4,
+                    xnn_qs8_rsum_ukernel__avxvnni_u128_acc4,
+                    xnn_init_qs8_rsum_avx2_params,
+                    benchmark::utils::CheckAVXVNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  BENCHMARK_CAPTURE(qs8_rsum, avx256vnni_u32,
+                    xnn_qs8_rsum_ukernel__avx256vnni_u32,
+                    xnn_init_qs8_rsum_avx2_params,
+                    benchmark::utils::CheckAVX256VNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  BENCHMARK_CAPTURE(qs8_rsum, avx256vnni_u64,
+                    xnn_qs8_rsum_ukernel__avx256vnni_u64,
+                    xnn_init_qs8_rsum_avx2_params,
+                    benchmark::utils::CheckAVX256VNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  BENCHMARK_CAPTURE(qs8_rsum, avx256vnni_u64_acc2,
+                    xnn_qs8_rsum_ukernel__avx256vnni_u64_acc2,
+                    xnn_init_qs8_rsum_avx2_params,
+                    benchmark::utils::CheckAVX256VNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  BENCHMARK_CAPTURE(qs8_rsum, avx256vnni_u128,
+                    xnn_qs8_rsum_ukernel__avx256vnni_u128,
+                    xnn_init_qs8_rsum_avx2_params,
+                    benchmark::utils::CheckAVX256VNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  BENCHMARK_CAPTURE(qs8_rsum, avx256vnni_u128_acc2,
+                    xnn_qs8_rsum_ukernel__avx256vnni_u128_acc2,
+                    xnn_init_qs8_rsum_avx2_params,
+                    benchmark::utils::CheckAVX256VNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  BENCHMARK_CAPTURE(qs8_rsum, avx256vnni_u128_acc4,
+                    xnn_qs8_rsum_ukernel__avx256vnni_u128_acc4,
+                    xnn_init_qs8_rsum_avx2_params,
+                    benchmark::utils::CheckAVX256VNNI)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
 #if XNN_ENABLE_AVX256SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   BENCHMARK_CAPTURE(qs8_rsum, avx256skx_u32,
                     xnn_qs8_rsum_ukernel__avx256skx_u32,

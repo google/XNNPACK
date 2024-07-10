@@ -1846,15 +1846,19 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,
 
   convert_op->batch_size = batch_size;
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_nr2_config();
+  const struct xnn_gemm_config* gemm_config =
+      xnn_init_qp8_f32_qc4w_gemm_config();
+  const uint32_t mr = batch_size == 1 ? 1 : gemm_config->mr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
 
   convert_op->context.f32_qp8_convert = (struct f32_qp8_convert_context){
       .m = batch_size,
       .k = channels,
-      .mr = gemm_config->mr,
-      .kr = 1 << gemm_config->log2_kr,
-      .sr = 1 << gemm_config->log2_sr,
-      .lhs_stride = input_stride,
+      .mr = mr,
+      .kr = kr,
+      .sr = sr,
+      .lhs_stride = input_stride * sizeof(float),
       .packq_ukernel = (xnn_x8_packq_f32qp8_ukernel_fn)
                            convert_op->unary_elementwise_config->ukernel,
   };
@@ -2103,6 +2107,53 @@ enum xnn_status xnn_reshape_elu_nc_f32(
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &elu_op->params.f32_elu, sizeof(elu_op->params.f32_elu),
     threadpool);
+}
+
+enum xnn_status xnn_create_exp_nc_f32(
+  uint32_t flags,
+  xnn_operator_t* exp_op_out)
+{
+  const struct xnn_unary_elementwise_config* f32_exp_config = xnn_init_f32_exp_config();
+
+  union xnn_f32_default_params params;
+  if XNN_LIKELY(f32_exp_config != NULL) {
+    if (f32_exp_config->init.f32_default != NULL) {
+      f32_exp_config->init.f32_default(&params);
+    }
+  }
+
+  return create_unary_elementwise_nc(
+    flags, f32_exp_config, /*rminmax_config=*/NULL,
+    &params, sizeof(params),
+    xnn_operator_type_exp_nc_f32, exp_op_out);
+}
+
+enum xnn_status xnn_reshape_exp_nc_f32(
+  xnn_operator_t exp_op,
+  size_t batch_size,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  pthreadpool_t threadpool)
+{
+  return reshape_unary_elementwise_nc(
+    exp_op, xnn_operator_type_exp_nc_f32,
+    batch_size,
+    channels, input_stride, output_stride,
+    /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    &exp_op->params.f32_default, sizeof(exp_op->params.f32_default),
+    threadpool);
+}
+
+enum xnn_status xnn_setup_exp_nc_f32(
+  xnn_operator_t exp_op,
+  const float* input,
+  float* output)
+{
+  return setup_unary_elementwise_nc(
+    exp_op, xnn_operator_type_exp_nc_f32,
+    input, output);
 }
 
 enum xnn_status xnn_reshape_floor_nc_f16(

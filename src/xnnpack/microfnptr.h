@@ -2041,6 +2041,14 @@ typedef void (*xnn_f32_vtanh_ukernel_fn)(
     float* output,
     const union xnn_f32_tanh_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+// VEXP: Vector Exp elementwise
+
+typedef void (*xnn_f32_vexp_ukernel_fn)(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 // VLOG: Vector Log elementwise
 
 typedef void (*xnn_f32_vlog_ukernel_fn)(
@@ -2637,6 +2645,9 @@ typedef size_t (*xnn_init_f16_elu_params_fn)(
   uint16_t prescale,
   uint16_t alpha,
   uint16_t beta);
+
+typedef size_t (*xnn_init_f32_exp_params_fn)(
+  union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f32_elu_params_fn)(
   union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
