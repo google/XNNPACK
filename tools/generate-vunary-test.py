@@ -39,7 +39,7 @@ parser.set_defaults(defines=list())
 
 def split_ukernel_name(name):
   match = re.fullmatch(
-      r"(?:xnn_|xnn_generate_)(s8|u8|bf16|f16|f32|u32|u64)(_(s8|u8|bf16|f16|f32|u32|u64))*_v(abs|clamp|elu|gelu|hswish|log|lrelu|neg|relu|rndd|rndne|rndu|rndz|rsqrt|sigmoid|sqr|sqrt|sqrtshift|tanh)_(fact_)?ukernel__(.+)_u(\d+)(v)?",
+      r"(?:xnn_|xnn_generate_)(s8|u8|bf16|f16|f32|u32|u64)(_(s8|u8|bf16|f16|f32|u32|u64))*_v(abs|clamp|elu|exp|gelu|hswish|log|lrelu|neg|relu|rndd|rndne|rndu|rndz|rsqrt|sigmoid|sqr|sqrt|sqrtshift|tanh)_(fact_)?ukernel__(.+)_u(\d+)(v)?",
       name,
   )
   if match is None:
@@ -48,6 +48,7 @@ def split_ukernel_name(name):
       "abs": "Abs",
       "clamp": "Clamp",
       "elu": "ELU",
+      "exp": "Exp",
       "gelu": "GELU",
       "hswish": "HardSwish",
       "log": "Log",
@@ -102,6 +103,13 @@ SPECIAL_VALUES_F32 = {
         3,  # Number of elements.
         "{-6.0f, 6.0f, 0.0f}",  # Inputs.
         "{0.0f, 6.0f, 0.0f}",  # Expected outputs.
+        "xnn_f32_default_params",
+        1,  # Error margin in ULP.
+    ),
+    "Exp": (
+        3,  # Number of elements.
+        "{0.0f, -1e3f, 1e3f}",  # Inputs.
+        "{1.0f, 0.0f, INFINITY}",  # Expected outputs.
         "xnn_f32_default_params",
         1,  # Error margin in ULP.
     ),
@@ -341,6 +349,7 @@ def generate_test_cases(
           "TEST_FN": {
               "Abs": "TestAbs",
               "GELU": "TestGelu",
+              "Exp": "TestExp",
               "Log": "TestLog",
               "Negate": "TestNeg",
               "Square": "TestSqr",

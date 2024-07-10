@@ -18,6 +18,9 @@
 extern "C" {
 #endif
 
+/// If set, try to pack the quantized values for use by a GEMM.
+#define XNN_FLAG_MAYBE_PACK_FOR_GEMM 0x00000080
+
 enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc4w(
     size_t input_channels,              //
     size_t output_channels,             //

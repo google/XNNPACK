@@ -88,6 +88,7 @@ enum xnn_operator_type {
   xnn_operator_type_elu_nc_f16,
   xnn_operator_type_elu_nc_f32,
   xnn_operator_type_elu_nc_qs8,
+  xnn_operator_type_exp_nc_f32,
   xnn_operator_type_floor_nc_f16,
   xnn_operator_type_floor_nc_f32,
   xnn_operator_type_fully_connected_nc_f16,

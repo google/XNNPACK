@@ -15,8 +15,11 @@
 #include "xnnpack.h"
 #include "xnnpack/allocation-type.h"
 #include "xnnpack/common.h"
+#include "xnnpack/config-types.h"
+#include "xnnpack/config.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
+#include "xnnpack/packq.h"
 #include "xnnpack/params.h"
 #include "xnnpack/subgraph.h"
 
@@ -242,6 +245,7 @@ enum xnn_status xnn_define_dynamically_quantized_tensor_value(
 
   switch (datatype) {
     case xnn_datatype_qdint8:
+    case xnn_datatype_qpint8:
       break;
     default:
       xnn_log_error("failed to create Dynamically Quantized Dense Tensor value: unsupported datatype %s (%d)",
@@ -500,6 +504,13 @@ size_t xnn_tensor_get_size(const struct xnn_value* value)
   assert(value->type == xnn_value_type_dense_tensor);
   assert(value->datatype != xnn_datatype_invalid);
 
+  // Special handling for packed quantized types.
+  if (value->datatype == xnn_datatype_qpint8) {
+    const size_t m = xnn_shape_multiply_batch_dims(&value->shape, 1);
+    const size_t k = value->shape.dim[value->shape.num_dims - 1];
+    return xnn_x8_packq_f32qp8_gemm_packed_size(m, k);
+  }
+
   size_t size = 0;
   switch (value->datatype) {
     case xnn_datatype_fp16:
@@ -526,14 +537,10 @@ size_t xnn_tensor_get_size(const struct xnn_value* value)
 
   size *= xnn_shape_multiply_all_dims(&value->shape);
 
-  // Adjustments for nibbles, assume that we can't have sizes are byte-aligned (rounded up).
+  // Adjustments for nibbles, assume that we can't have sizes are byte-aligned
+  // (rounded up).
   if (value->datatype == xnn_datatype_qcint4) {
     size = round_up_po2(size, 2) >> 1;
-  } else if (value->datatype == xnn_datatype_qpint8) {
-    // TODO(b/340399245): Compute the correct size depending on the shape and
-    // packing constraints/alignment.
-    xnn_log_fatal("Support for %s is not yet implemented.",
-                  xnn_datatype_to_string(value->datatype));
   }
 
   return size;
@@ -542,10 +549,17 @@ size_t xnn_tensor_get_size(const struct xnn_value* value)
 // Return size of the dynamic quantization params in this value
 size_t xnn_tensor_get_dynamic_quant_param_size(const struct xnn_value* value)
 {
-  assert (value->datatype == xnn_datatype_qdint8);
-
-  const size_t batch_dims_size = xnn_shape_multiply_batch_dims(&value->shape, value->quantization.num_nonbatch_dims);
-  return batch_dims_size * sizeof(struct xnn_dynamic_quantization_params);
+  switch (value->datatype) {
+    case xnn_datatype_qdint8: {
+      const size_t batch_dims_size = xnn_shape_multiply_batch_dims(
+          &value->shape, value->quantization.num_nonbatch_dims);
+      return batch_dims_size * sizeof(struct xnn_dynamic_quantization_params);
+    }
+    case xnn_datatype_qpint8:
+      return 0;
+    default:
+      XNN_UNREACHABLE;
+  }
 }
 
 size_t xnn_tensor_get_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id)

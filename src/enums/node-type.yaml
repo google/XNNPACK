@@ -49,6 +49,8 @@
   string: "Divide"
 - name: xnn_node_type_elu
   string: "ELU"
+- name: xnn_node_type_exp
+  string: "Exp"
 - name: xnn_node_type_even_split2
   string: "Even Split2"
 - name: xnn_node_type_even_split3

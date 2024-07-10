@@ -270,6 +270,15 @@ void VUnaryMicrokernelTester::Test(
       10.0f);
 }
 
+void VUnaryMicrokernelTester::TestExp(
+    xnn_f32_vexp_ukernel_fn vexp,
+    xnn_init_f32_default_params_fn init_params) const {
+  TestFP32(
+      vexp, InitParamsWrapper(init_params), [](float x) { return std::exp(x); },
+      TolMixed(2 * std::numeric_limits<float>::epsilon(),
+               6 * std::numeric_limits<float>::epsilon()),
+      0.0f, 10.0f);
+}
 void VUnaryMicrokernelTester::TestLog(
     xnn_f32_vlog_ukernel_fn vlog,
     xnn_init_f32_default_params_fn init_params) const {

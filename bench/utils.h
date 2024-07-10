@@ -210,6 +210,13 @@ bool CheckAVXVNNI(benchmark::State& state);
 // If AVX256SKX extension is unsupported, report error in benchmark state, and return false.
 bool CheckAVX256SKX(benchmark::State& state);
 
+// Check if x86 AVXVNNI + AVX10 or AVX512 is supported
+// If VNNI or SKX-level AVX256 extensions are unsupported, report error in benchmark state, and return false.
+bool CheckAVX256VNNI(benchmark::State& state);
+
+// Check if x86 VNNI + GFNI + AVX10 or AVX512 is supported
+bool CheckAVX256VNNIGFNI(benchmark::State& state);
+
 // Check if Hexagon HVX extension is supported.
 // If HVX is unsupported, report error in benchmark state, and return false.
 bool CheckHVX(benchmark::State& state);

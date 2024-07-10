@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 #include "xnnpack.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/internal.h"
 #include "xnnpack/math.h"

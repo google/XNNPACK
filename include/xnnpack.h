@@ -92,6 +92,8 @@ extern "C" {
 /// Retain reduced dimensions with length 1.
 #define XNN_FLAG_KEEP_DIMS 0x00000040
 
+// Next unused flag value: 0x00000100.
+
 /// The number of entries in an array of xnn_dynamic_quantization_params that XNNPACK may read beyond array bounds.
 /// The caller must allocate at least this many extra xnn_dynamic_quantization_params before passing the array to XNNPACK.
 ///
@@ -1665,6 +1667,19 @@ enum xnn_status xnn_define_clamp(
 enum xnn_status xnn_define_elu(
   xnn_subgraph_t subgraph,
   float alpha,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
+/// Define a Exp Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
+///                    shape must match the shape of the input tensor.
+/// @param flags - binary features of the Exp Node. No supported flags are currently defined.
+enum xnn_status xnn_define_exp(
+  xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
   uint32_t flags);
@@ -4155,6 +4170,23 @@ enum xnn_status xnn_setup_elu_nc_qs8(
   xnn_operator_t elu_op,
   const int8_t* input,
   int8_t* output);
+
+enum xnn_status xnn_create_exp_nc_f32(
+  uint32_t flags,
+  xnn_operator_t* exp_op_out);
+
+enum xnn_status xnn_reshape_exp_nc_f32(
+  xnn_operator_t exp_op,
+  size_t batch_size,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_exp_nc_f32(
+  xnn_operator_t exp_op,
+  const float* input,
+  float* output);
 
 enum xnn_status xnn_create_floor_nc_f16(
   uint32_t flags,
