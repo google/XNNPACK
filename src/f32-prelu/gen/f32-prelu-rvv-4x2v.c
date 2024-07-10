@@ -27,19 +27,14 @@ void xnn_f32_prelu_ukernel__rvv_4x2v(
   assert(channels != 0);
   assert(channels % sizeof(float) == 0);
 
-  channels >>= XNN_LOG2_SIZEOF_FLOAT;
-  input_stride >>= XNN_LOG2_SIZEOF_FLOAT;
-  output_stride >>= XNN_LOG2_SIZEOF_FLOAT;
-
   const float* i0 = input;
   float* o0 = output;
-
-  const float* i1 = i0 + input_stride;
-  float* o1 = o0 + output_stride;
-  const float* i2 = i1 + input_stride;
-  float* o2 = o1 + output_stride;
-  const float* i3 = i2 + input_stride;
-  float* o3 = o2 + output_stride;
+  const float* i1 = (const float*) ((uintptr_t) i0 + input_stride);
+  float* o1 = (float*) ((uintptr_t) o0 + output_stride);
+  const float* i2 = (const float*) ((uintptr_t) i1 + input_stride);
+  float* o2 = (float*) ((uintptr_t) o1 + output_stride);
+  const float* i3 = (const float*) ((uintptr_t) i2 + input_stride);
+  float* o3 = (float*) ((uintptr_t) o2 + output_stride);
 
   const size_t input_increment = input_stride * 4 - channels;
   const size_t output_increment = output_stride * 4 - channels;
@@ -59,7 +54,7 @@ void xnn_f32_prelu_ukernel__rvv_4x2v(
     }
 
     const float* w = weights;
-    size_t c = channels;
+    size_t c = channels >> XNN_LOG2_SIZEOF_FLOAT;
 
     for (; c > 0;) {
       size_t n = __riscv_vsetvl_e32m2(c); c -= n;
@@ -84,14 +79,14 @@ void xnn_f32_prelu_ukernel__rvv_4x2v(
       __riscv_vse32_v_f32m2(o3, out3_f32v, n); o3 += n;
     }
 
-    i0 = i0 + input_increment;
-    o0 = o0 + output_increment;
-    i1 = i1 + input_increment;
-    o1 = o1 + output_increment;
-    i2 = i2 + input_increment;
-    o2 = o2 + output_increment;
-    i3 = i3 + input_increment;
-    o3 = o3 + output_increment;
+    i0 = (const float*) ((uintptr_t) i0 + input_increment);
+    o0 = (float*) ((uintptr_t) o0 + output_increment);
+    i1 = (const float*) ((uintptr_t) i1 + input_increment);
+    o1 = (float*) ((uintptr_t) o1 + output_increment);
+    i2 = (const float*) ((uintptr_t) i2 + input_increment);
+    o2 = (float*) ((uintptr_t) o2 + output_increment);
+    i3 = (const float*) ((uintptr_t) i3 + input_increment);
+    o3 = (float*) ((uintptr_t) o3 + output_increment);
     rows = doz(rows, 4);
   } while (rows != 0);
 }

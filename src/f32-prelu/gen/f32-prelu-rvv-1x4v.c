@@ -27,13 +27,8 @@ void xnn_f32_prelu_ukernel__rvv_1x4v(
   assert(channels != 0);
   assert(channels % sizeof(float) == 0);
 
-  channels >>= XNN_LOG2_SIZEOF_FLOAT;
-  input_stride >>= XNN_LOG2_SIZEOF_FLOAT;
-  output_stride >>= XNN_LOG2_SIZEOF_FLOAT;
-
   const float* i0 = input;
   float* o0 = output;
-
 
   const size_t input_increment = input_stride * 1 - channels;
   const size_t output_increment = output_stride * 1 - channels;
@@ -41,7 +36,7 @@ void xnn_f32_prelu_ukernel__rvv_1x4v(
   do {
 
     const float* w = weights;
-    size_t c = channels;
+    size_t c = channels >> XNN_LOG2_SIZEOF_FLOAT;
 
     for (; c > 0;) {
       size_t n = __riscv_vsetvl_e32m4(c); c -= n;
@@ -54,8 +49,8 @@ void xnn_f32_prelu_ukernel__rvv_1x4v(
       __riscv_vse32_v_f32m4(o0, out0_f32v, n); o0 += n;
     }
 
-    i0 = i0 + input_increment;
-    o0 = o0 + output_increment;
+    i0 = (const float*) ((uintptr_t) i0 + input_increment);
+    o0 = (float*) ((uintptr_t) o0 + output_increment);
     rows = doz(rows, 1);
   } while (rows != 0);
 }
