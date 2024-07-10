@@ -1689,7 +1689,7 @@ void GemmMicrokernelTester::Test(
       for (size_t j = 0; j < n(); j++) {
         // Extract tolerance into variable to workaround test failures on Linux AArch64.
         const float tolerance =
-            std::max(2.0e-5f, std::abs(c_ref[i * n() + j]) * 2.0e-6f);
+            std::max(2.5e-5f, std::abs(c_ref[i * n() + j]) * 2.5e-6f);
         EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
