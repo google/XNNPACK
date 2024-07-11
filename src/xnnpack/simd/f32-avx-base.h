@@ -13,8 +13,8 @@
 //   - xnn_fmadd_f32
 //   - xnn_fnmadd_f32
 //   - xnn_fmsub_f32
-//   - xnn_shiftl_f32
-//   - xnn_shiftr_f32
+//   - xnn_sll_f32
+//   - xnn_srl_f32
 
 #ifndef __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_BASE_H_
 #define __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_BASE_H_

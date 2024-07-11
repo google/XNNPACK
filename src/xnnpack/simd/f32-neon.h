@@ -37,13 +37,18 @@ typedef float32x4_t xnn_simd_f32_t;
 // The following wrapper is defined as a macro since `bits` needs to be a
 // compile-time constant.
 #define XNN_SIMD_SHIFTS_ARE_MACROS 1
-#define xnn_shiftl_f32(a, bits) \
+#define xnn_sll_f32(a, bits) \
   vreinterpretq_f32_u32(vshlq_n_u32(vreinterpretq_u32_f32(a), bits))
 
 // The following wrapper is defined as a macro since `bits` needs to be a
 // compile-time constant.
-#define xnn_shiftr_f32(a, bits) \
+#define xnn_srl_f32(a, bits) \
   vreinterpretq_f32_u32(vshrq_n_u32(vreinterpretq_u32_f32(a), bits))
+
+// The following wrapper is defined as a macro since `bits` needs to be a
+// compile-time constant.
+#define xnn_sra_f32(a, bits) \
+  vreinterpretq_f32_s32(vshrq_n_s32(vreinterpretq_s32_f32(a), bits))
 
 // Include the header for generic functions _after_ declaring the arch-specific
 // types and sizes.
