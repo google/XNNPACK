@@ -1035,7 +1035,7 @@ static void init_f32_lrelu_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__rvv_u4v;
     f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
-    f32_lrelu_config.element_tile = hardware_config->vlenb/sizeof(float)*4; // (VLENB/sizeof)*LMUL
+    f32_lrelu_config.element_tile = hardware_config->vlenb / sizeof(float) * 4; // (VLENB/sizeof)*LMUL
   #else
     f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__scalar_u4;
     f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
