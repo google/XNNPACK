@@ -123,6 +123,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_sra_f32(xnn_simd_f32_t a, uint8_t bits) {
   return _mm_castsi128_ps(_mm_srai_epi32(_mm_castps_si128(a), bits));
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
+                                               xnn_simd_f32_t b) {
+  return _mm_castsi128_ps(
+      _mm_cmpeq_epi32(_mm_castps_si128(a), _mm_castps_si128(b)));
+}
+
 // Special functions.
 
 #define XNN_SIMD_HAVE_RCP_F32 1

@@ -119,6 +119,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_sra_f32(xnn_simd_f32_t a, uint8_t bits) {
   return Q6_Vh_vasr_VhR(a, bits);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
+                                               xnn_simd_f32_t b) {
+  return Q6_V_vand_QR(Q6_Q_vcmp_eq_VbVb(a, b), 0xFFFFFFFF);
+}
+
 // Special functions.
 #define XNN_SIMD_HAVE_RCP_F32 0
 #define XNN_SIMD_HAVE_RSQRT_F32 0

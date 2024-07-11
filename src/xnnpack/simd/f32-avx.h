@@ -64,4 +64,9 @@ static XNN_INLINE xnn_simd_f32_t xnn_sra_f32(xnn_simd_f32_t a, uint8_t bits) {
       _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1));
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
+                                               xnn_simd_f32_t b) {
+  return _mm256_cmp_ps(a, b, _CMP_EQ_OQ);
+}
+
 #endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_H_

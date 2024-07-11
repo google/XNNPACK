@@ -10,9 +10,10 @@
 // Portable SIMD wrapper headers including this file need to implement the
 // following wrappers themselves:
 //
+//   - xnn_cmpeq_f32
 //   - xnn_fmadd_f32
-//   - xnn_fnmadd_f32
 //   - xnn_fmsub_f32
+//   - xnn_fnmadd_f32
 //   - xnn_sll_f32
 //   - xnn_srl_f32
 
