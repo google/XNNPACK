@@ -2287,8 +2287,21 @@ union xnn_f32_expminus_params {
     XNN_ALIGN(8) float denorm_cutoff[2];
   } wasmsimd_rr2_p5;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_HEXAGON
+  struct {
+    float log2e;
+    float magic_bias;
+    float minus_ln2_hi;
+    float minus_ln2_lo;
+    float c5;
+    float c4;
+    float c3;
+    float c2;
+    float c1;
+    float denorm_cutoff;
+  } hvx_rr2_p5;
+#endif  // XNN_ARCH_HEXAGON
 };
-
 
 // HSwish: used by VHSWISH microkernels.
 
