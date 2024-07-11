@@ -33,38 +33,33 @@ static enum xnn_status create_resize_bilinear2d_nhwc(
     xnn_operator_t* resize_op_out)
 {
   xnn_operator_t resize_op = NULL;
-  enum xnn_status status = xnn_status_uninitialized;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(operator_type));
-    goto error;
+    return xnn_status_uninitialized;
   }
-
-  status = xnn_status_invalid_parameter;
 
   if (output_width == 0 || output_height == 0) {
     xnn_log_error(
       "failed to reshape %s operator with %zux%zu output: output dimensions must be non-zero",
-      xnn_operator_type_to_string(resize_op->type), output_width, output_height);
+      xnn_operator_type_to_string(operator_type), output_width, output_height);
     return xnn_status_invalid_parameter;
   }
 
   if (max(output_width, output_height) >= 16777216) {
     xnn_log_error(
       "failed to reshape %s operator with %zux%zu output: output dimensions must be below 2**24",
-      xnn_operator_type_to_string(resize_op->type), output_width, output_height);
+      xnn_operator_type_to_string(operator_type), output_width, output_height);
     return xnn_status_unsupported_parameter;
   }
-
-  status = xnn_status_out_of_memory;
 
   resize_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (resize_op == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator descriptor",
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
-    goto error;
+    return xnn_status_out_of_memory;
   }
 
   resize_op->output_height = output_height;
@@ -78,10 +73,6 @@ static enum xnn_status create_resize_bilinear2d_nhwc(
 
   *resize_op_out = resize_op;
   return xnn_status_success;
-
-error:
-  xnn_delete_operator(resize_op);
-  return status;
 }
 
 enum xnn_status xnn_create_resize_bilinear2d_nhwc_f16(
