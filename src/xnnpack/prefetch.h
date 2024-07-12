@@ -11,6 +11,17 @@
 
 #ifdef __hexagon__
   #include <hexagon_protos.h>
+
+  // Use fetchl2 at least several hundred cycles prior to using the data.
+  XNN_INLINE static void xnn_prefetch_to_l2(const void *address,
+                                        uint32_t stride,
+                                        uint32_t width,
+                                        uint32_t height,
+                                        uint32_t iter)
+  {
+    uint64_t info = HEXAGON_V64_CREATE_H(iter, stride, width, height);
+    Q6_l2fetch_AP(address, info);
+  }
 #endif
 
 #include "xnnpack/common.h"
@@ -31,6 +42,8 @@ XNN_INLINE static void xnn_prefetch_to_l1(const void* address) {
       #else
         _m_prefetch((void*) address);
       #endif
+    #elif defined(__hexagon__)
+      Q6_dcfetch_A(address);
     #else
       #error "Architecture-specific implementation of xnn_prefetch_to_l1 required"
     #endif

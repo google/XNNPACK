@@ -59,13 +59,16 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__hvx${"_x" + str(UNROLL) if UNROLL 
               const HVX_Vector vi${int(M/32)}x${K} = xnn_loadu_f32(input + ${M});
             input = (const float*) ((uintptr_t) input + (uintptr_t) diff${K});
 
-            // Use VMEM stores to get the data into L2,
-            // then use DCFETCH to get the data in L1,
-            // followed by scalar load instructions.
+            // Use `xnn_prefetch_to_l2` first to prefetch data into the L2 cache,
+            // then, use `xnn_prefetch_to_l1` to bring data into the L1 cache.
+            // format: xnn_prefetch_to_l1(addr)
+            //         xnn_prefetch_to_l2(addr, stride, width, height, iter)
             $for M in range(0, MR, 128):
+              xnn_prefetch_to_l2(input + ${M+32}, 128, 128, 1, 1);
               xnn_prefetch_to_l1(input + ${M+32});
 
             const HVX_Vector vw${K} = xnn_set1_f32(*w); w += 1;
+            xnn_prefetch_to_l2(w + 32, 32, 32, 1, 1);
             xnn_prefetch_to_l1(w + 32);
 
             $for M in range(0, MR, 32):
@@ -88,9 +91,11 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__hvx${"_x" + str(UNROLL) if UNROLL 
             const HVX_Vector vi${int(M/32)} = xnn_loadu_f32(input + ${M});
           input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
           $for M in range(0, MR, 128):
-            xnn_prefetch_to_l1(input + ${M+128});
-
+            xnn_prefetch_to_l2(input + ${M+32}, 128, 128, 1, 1);
+            xnn_prefetch_to_l1(input + ${M+32});
+            
           const HVX_Vector vw = xnn_set1_f32(*w); w += 1;
+          xnn_prefetch_to_l2(w + 32, 32, 32, 1, 1);
           xnn_prefetch_to_l1(w + 32);
 
           $for M in range(0, MR, 32):
