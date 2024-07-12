@@ -997,6 +997,199 @@ INSTANTIATE_TEST_SUITE_P(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F32_QB4W_GEMM_MINMAX_1X16__NEON_MLAL_LANE, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
+          /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x16__neon_mlal_lane,
+                        xnn_init_f32_qb4w_minmax_scalar_params,
+                        xnn_pack_qs8_qb4w_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_ARM_NEON;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F32_QB4W_GEMM_MINMAX_2X16__NEON_MLAL_LANE, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
+          /*mr=*/2, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_2x16__neon_mlal_lane,
+                        xnn_init_f32_qb4w_minmax_scalar_params,
+                        xnn_pack_qs8_qb4w_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_ARM_NEON;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F32_QB4W_GEMM_MINMAX_3X16__NEON_MLAL_LANE, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
+          /*mr=*/3, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x16__neon_mlal_lane,
+                        xnn_init_f32_qb4w_minmax_scalar_params,
+                        xnn_pack_qs8_qb4w_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_ARM_NEON;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F32_QB4W_GEMM_MINMAX_4X16__NEON_MLAL_LANE, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
+          /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x16__neon_mlal_lane,
+                        xnn_init_f32_qb4w_minmax_scalar_params,
+                        xnn_pack_qs8_qb4w_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_ARM_NEON;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F32_QB4W_GEMM_MINMAX_6X16__NEON_MLAL_LANE, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
+          /*mr=*/6, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_6x16__neon_mlal_lane,
+                        xnn_init_f32_qb4w_minmax_scalar_params,
+                        xnn_pack_qs8_qb4w_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_ARM_NEON;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F32_QB4W_GEMM_MINMAX_1X16__NEON_MLAL_LANE_PRFM, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
+          /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x16__neon_mlal_lane_prfm,
+                        xnn_init_f32_qb4w_minmax_scalar_params,
+                        xnn_pack_qs8_qb4w_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_ARM_NEON;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F32_QB4W_GEMM_MINMAX_2X16__NEON_MLAL_LANE_PRFM, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
+          /*mr=*/2, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_2x16__neon_mlal_lane_prfm,
+                        xnn_init_f32_qb4w_minmax_scalar_params,
+                        xnn_pack_qs8_qb4w_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_ARM_NEON;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F32_QB4W_GEMM_MINMAX_3X16__NEON_MLAL_LANE_PRFM, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
+          /*mr=*/3, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x16__neon_mlal_lane_prfm,
+                        xnn_init_f32_qb4w_minmax_scalar_params,
+                        xnn_pack_qs8_qb4w_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_ARM_NEON;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F32_QB4W_GEMM_MINMAX_4X16__NEON_MLAL_LANE_PRFM, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
+          /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x16__neon_mlal_lane_prfm,
+                        xnn_init_f32_qb4w_minmax_scalar_params,
+                        xnn_pack_qs8_qb4w_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_ARM_NEON;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F32_QB4W_GEMM_MINMAX_6X16__NEON_MLAL_LANE_PRFM, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
+          /*mr=*/6, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_6x16__neon_mlal_lane_prfm,
+                        xnn_init_f32_qb4w_minmax_scalar_params,
+                        xnn_pack_qs8_qb4w_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_ARM_NEON;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
 #if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F32_QB4W_GEMM_MINMAX_1X8C8__NEONI8MM, GemmTest,
