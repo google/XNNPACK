@@ -14,6 +14,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#ifndef M_LN2
+#define M_LN2 0.69314718055994531
+#endif  // M_LN2
 
 #include "xnnpack/argmaxpool.h"
 #include "xnnpack/avgpool.h"
@@ -30486,42 +30489,129 @@ void xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u1(
   }
 }
 
-void xnn_f32_vlog_ukernel__scalar_log_u4(
+static XNN_INLINE xnn_simd_f32_t xnn_signed_getexp_f32(xnn_simd_f32_t a) {
+  // The bits of IEE754 single-precision floating-point format are:
+  //
+  //   s | e e e e e e e e | m m m m m m m m m m m m m m m m m m m m m m m
+  //
+  // We start by masking out the sign and exponent and shifting it 8 bits to the
+  // right arithmetically, i.e. extending by the leftmost sign bit:
+  //
+  //   s | s s s s s s s s | e e e e e e e e 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  //
+  // These bits are then `or`-ed with `256.0f`, which has a biased exponent of
+  // `135` and all mantissa bit set to zero. This is equivalent to adding the
+  // biased integer exponent to `256.0`:
+  //
+  //   0 | 1 0 0 0 0 1 1 1 | e e e e e e e e 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  //
+  // We can re-extract the exponent as a `float` value by subtracting `256.0`
+  // plus the exponent bias `127.0`, i.e. `383.0`.
+  //
+  // Note that if the sign bit is `1`, we end up with the floating point bits:
+  //
+  //   1 | 1 1 1 1 1 1 1 1 | e e e e e e e e 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  //
+  // Which is `-NaN` if the exponent is non-zero, and `-Inf` if the exponent is
+  // zero (e.g. the input was `0.0f` or denormal).
+
+  // Some useful constants.
+  XNN_SIMD_CONST_F32(sign_mask, -0.0f);
+  XNN_SIMD_CONST_U32(sign_and_exp_mask, 0xff800000);
+  XNN_SIMD_CONST_F32(bias_256, 256.0f);
+  XNN_SIMD_CONST_F32(bias_383, 383.0f);
+
+  // If `a` is `0.0f`, flip its sign bit so that we return `-Inf`.
+  a = xnn_or_f32(xnn_and_f32(xnn_cmpeq_f32(a, xnn_zero_f32()), sign_mask), a);
+
+  // Extract the exponent and shift the exponent to the most significant bits of
+  // the mantissa.
+  const xnn_simd_f32_t exp =
+      xnn_sra_f32(xnn_and_f32(a, sign_and_exp_mask), 8);
+
+  // Add the shifted exponent to `256.0f` by copying its bits to the mantissa,
+  // then subtract out `383.0f`, i.e. the original `256.0f` plus the `127`
+  // exponent bias, resulting in the unbiased exponent.
+  return xnn_sub_f32(xnn_or_f32(bias_256, exp), bias_383);
+}
+
+void xnn_f32_vlog_ukernel__scalar_rational_3_3_div_u1(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
+  assert(xnn_simd_size_f32 == 1);
 
-  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const float vx0 = input[0];
-    const float vx1 = input[1];
-    const float vx2 = input[2];
-    const float vx3 = input[3];
-    input += 4;
+  // Some useful constants.
+  XNN_SIMD_CONST_F32(vone, 1.0f);
+  XNN_SIMD_CONST_F32(vln2, M_LN2);
+  XNN_SIMD_CONST_U32(vmantissa_bits_mask, 0x007FFFFFUL);
 
-    const float vy0 = logf(vx0);
-    const float vy1 = logf(vx1);
-    const float vy2 = logf(vx2);
-    const float vy3 = logf(vx3);
+  // Note that these two values are not _exactly_ `(float)M_SQRT2` and
+  // `(float)M_SQRT1_2`, but are instead chosen such that their product is
+  // exactly `1.0f` when evaluated in `float` precision.
+  XNN_SIMD_CONST_F32(vsqrt2, 1.4142134190e+00);
+  XNN_SIMD_CONST_F32(vsqrt1_2, 7.0710688829e-01);
 
-    output[0] = vy0;
-    output[1] = vy1;
-    output[2] = vy2;
-    output[3] = vy3;
-    output += 4;
-  }
-  if XNN_UNLIKELY(batch != 0) {
-    do {
-      const float vx = *input++;
-      const float vy = logf(vx);
-      *output++ = vy;
-      batch -= sizeof(float);
-    } while (batch != 0);
+  // The monomial coefficients of the numerator polynomial.
+  // XNN_SIMD_CONST_F32(valpha_0, 0.0f);
+  // XNN_SIMD_CONST_F32(valpha_1, 1.0f);
+  // XNN_SIMD_CONST_F32(valpha_2, 1.0f);
+  XNN_SIMD_CONST_F32(valpha_3, 1.824996918440e-01);
+
+  // The monomial coefficients of the denominator polynomial.
+  // XNN_SIMD_CONST_F32(vbeta_0, 1.0f);
+  XNN_SIMD_CONST_F32(vbeta_1, 1.5f);
+  XNN_SIMD_CONST_F32(vbeta_2, 0.599170029163);
+  XNN_SIMD_CONST_F32(vbeta_3, 0.049584995955);
+
+
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    xnn_simd_f32_t vx = xnn_loadu_f32(input);
+    input += xnn_simd_size_f32;
+
+    // Scale `x` with `sqrt(2)` so that the exponent is rounded up.
+    vx = xnn_mul_f32(vx, vsqrt2);
+
+    // Extract the exponent.
+    const xnn_simd_f32_t vexp = xnn_signed_getexp_f32(vx);
+
+    // Normalize `x` to an exponent of zero.
+    vx = xnn_or_f32(xnn_and_f32(vx, vmantissa_bits_mask), vone);
+
+    // Scale `x` back with `1/sqrt(2)` to move its range from `[1.0, 2.0)` to
+    // `[sqrt(1/2), sqrt(2))`, and further subtract `1.0` so that it is around
+    // zero, i.e. `[sqrt(1/2) - 1, sqrt(2) - 1)`, or `[−0.29289, 0.4142136)`.
+    vx = xnn_sub_f32(xnn_mul_f32(vx, vsqrt1_2), vone);
+
+    // In the following, we use a 3/2-degree rational polynomial to
+    // approximate the (shifted) `log(x + 1)` on the (shifted) interval
+    // `[sqrt(1/2) - 1, sqrt(2) - 1)`. The shifted interval is chosen so that
+    // `f(0) = 0`.
+
+    // Evaluate the numerator polynomial p.
+    xnn_simd_f32_t vp = xnn_fmadd_f32(vx, valpha_3, vone);
+    vp = xnn_fmadd_f32(vx, vp, vone);
+    vp = xnn_mul_f32(vx, vp);
+
+    // Evaluate the denominator polynomial q.
+    xnn_simd_f32_t vq = xnn_fmadd_f32(vx, vbeta_3, vbeta_2);
+    vq = xnn_fmadd_f32(vx, vq, vbeta_1);
+    vq = xnn_fmadd_f32(vx, vq, vone);
+
+    // Divide the numerator by the denominator.
+    xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
+
+    // Put it all together, i.e. `log(x) = `log(2)*exp + y`.
+    vy = xnn_fmadd_f32(vexp, vln2, vy);
+
+    xnn_storeu_f32(output, vy);
+    output += xnn_simd_size_f32;
   }
 }
 

@@ -20,7 +20,7 @@
 // Define some mathematical constants in case they are not provided by `math.h`.
 #ifndef M_LN2
 #define M_LN2 0.69314718055994531
-#endif
+#endif  // M_LN2
 
 // Extracts the exponent of the input `a` as a `float` value.
 static XNN_INLINE xnn_simd_f32_t xnn_signed_getexp_f32(xnn_simd_f32_t a) {
