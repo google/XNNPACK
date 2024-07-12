@@ -28,7 +28,7 @@ $OUT_T = {"QC8": "int8_t", "QD8_F16": "void", "QD8_F32": "float", "QC4_F16": "vo
 $_MM_MAX_EPX8 = "_mm_max_epu8" if DATATYPE == "QU8" else "_mm_max_epi8"
 $_MM256_CVTXEPI32_EPI8 = "_mm256_cvtusepi32_epi8" if DATATYPE == "QU8" else "_mm256_cvtsepi32_epi8"
 $_MM256_DPBUSD_EPI32 = "_mm256_dpbusd_avx_epi32" if AVX == 2 else "_mm256_dpbusd_epi32"
-$ISA = "avxvnni" if AVX == 2 else "avx512vnnigfni" if GFNI else "avx512vnni"
+$ISA = "avxvnni" if AVX == 2 else "avx256vnnigfni" if GFNI else "avx256vnni"
 void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__${ISA}${"_gfni" if GFNI else ""}${"_prfm" if PREFETCH else ""}(
     size_t mr,
     size_t nc,

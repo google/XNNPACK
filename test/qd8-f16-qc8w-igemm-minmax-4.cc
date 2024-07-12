@@ -424,45 +424,45 @@ std::vector<GemmTestParams> CreateTests1(
 #endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   INSTANTIATE_TEST_SUITE_P(
-      QD8_F16_QC8W_IGEMM_MINMAX_8X8C8__AVX512VNNI, GemmTest,
+      QD8_F16_QC8W_IGEMM_MINMAX_8X8C8__AVX256VNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
           /*k_block=*/16,
           /*adj_k_block=*/16,
           /*mr=*/8, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/true,
           [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qd8_f16_qc8w_igemm_minmax_ukernel_8x8c8__avx512vnni,
+            tester.Test(xnn_qd8_f16_qc8w_igemm_minmax_ukernel_8x8c8__avx256vnni,
                         xnn_init_f16_minmax_avxvnni_params,
                         xnn_pack_qs8_conv_goki_w);
           },
           []() {
-            TEST_REQUIRES_X86_AVX512VNNI;
+            TEST_REQUIRES_X86_AVX256VNNI;
           })),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
 
   INSTANTIATE_TEST_SUITE_P(
-      QD8_F16_QC8W_IGEMM_MINMAX_10X8C8__AVX512VNNI, GemmTest,
+      QD8_F16_QC8W_IGEMM_MINMAX_10X8C8__AVX256VNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
           /*k_block=*/16,
           /*adj_k_block=*/16,
           /*mr=*/10, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/true,
           [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qd8_f16_qc8w_igemm_minmax_ukernel_10x8c8__avx512vnni,
+            tester.Test(xnn_qd8_f16_qc8w_igemm_minmax_ukernel_10x8c8__avx256vnni,
                         xnn_init_f16_minmax_avxvnni_params,
                         xnn_pack_qs8_conv_goki_w);
           },
           []() {
-            TEST_REQUIRES_X86_AVX512VNNI;
+            TEST_REQUIRES_X86_AVX256VNNI;
           })),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
