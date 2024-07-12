@@ -19,7 +19,8 @@ load(
     "xnnpack_microkernel_cc_library",
     "xnnpack_min_size_copts",
     "xnnpack_msvc_std_copts",
-    "xnnpack_simd_archs",
+    "xnnpack_simd_f32_archs",
+    "xnnpack_simd_s32_archs",
     "xnnpack_slinky_defines",
     "xnnpack_slinky_deps",
     "xnnpack_slinky_srcs",
@@ -258,7 +259,13 @@ MICROKERNEL_DEPS = [
 SIMD_HEADERS = [
     "src/xnnpack/simd/f32-avx-base.h",
     "src/xnnpack/simd/f32-generic-functions.h",
-] + ["src/xnnpack/simd/f32-" + arch + ".h" for arch in xnnpack_simd_archs()]
+] + [
+    "src/xnnpack/simd/f32-" + arch + ".h"
+    for arch in xnnpack_simd_f32_archs()
+] + [
+    "src/xnnpack/simd/s32-" + arch + ".h"
+    for arch in xnnpack_simd_s32_archs()
+]
 
 exports_files(SIMD_HEADERS)
 
@@ -267,6 +274,7 @@ INTERNAL_MICROKERNEL_HDRS = MICROKERNEL_HDRS + SIMD_HEADERS + [
     "src/xnnpack/intrinsics-polyfill.h",
     "src/xnnpack/math-stubs.h",
     "src/xnnpack/requantization-stubs.h",
+    "src/xnnpack/unaligned.h",
 ]
 
 WASM_JIT_LINKOPTS = [
