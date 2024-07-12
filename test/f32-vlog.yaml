@@ -31,11 +31,21 @@
 - name: xnn_f32_vlog_ukernel__fma3_rational_3_3_div_u24
 - name: xnn_f32_vlog_ukernel__fma3_rational_3_3_div_u32
 
+- name: xnn_f32_vlog_ukernel__fma3_rational_3_3_nr_u8
+- name: xnn_f32_vlog_ukernel__fma3_rational_3_3_nr_u16
+- name: xnn_f32_vlog_ukernel__fma3_rational_3_3_nr_u24
+- name: xnn_f32_vlog_ukernel__fma3_rational_3_3_nr_u32
+
 # AVX512F
 - name: xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u16
 - name: xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u32
 - name: xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u48
 - name: xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u64
+
+- name: xnn_f32_vlog_ukernel__avx512f_rational_3_3_nr_u16
+- name: xnn_f32_vlog_ukernel__avx512f_rational_3_3_nr_u32
+- name: xnn_f32_vlog_ukernel__avx512f_rational_3_3_nr_u48
+- name: xnn_f32_vlog_ukernel__avx512f_rational_3_3_nr_u64
 
 # NEON
 - name: xnn_f32_vlog_ukernel__neon_rational_3_3_div_u4

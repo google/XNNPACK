@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/simd/f32-wasmsimd.h"
+#include "xnnpack/simd/f32-fma3.h"
 
 #include "xnnpack/common.h"
 #include "xnnpack/microparams.h"
@@ -69,7 +69,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_signed_getexp_f32(xnn_simd_f32_t a) {
 }
 
 
-void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u4(
+void xnn_f32_vlog_ukernel__fma3_rational_3_3_nr_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -79,7 +79,7 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u4(
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
-  assert(xnn_simd_size_f32 == 4);
+  assert(xnn_simd_size_f32 == 8);
 
   // Some useful constants.
   XNN_SIMD_CONST_F32(vone, 1.0f);
@@ -104,6 +104,8 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u4(
   XNN_SIMD_CONST_F32(vbeta_2, 0.599170029163);
   XNN_SIMD_CONST_F32(vbeta_3, 0.049584995955);
 
+  // Constant needed for the Newton-Raphson iteration of the reciprocal.
+  XNN_SIMD_CONST_F32(vtwo, 2.0f);
 
   for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
     xnn_simd_f32_t vx = xnn_loadu_f32(input);
@@ -139,7 +141,11 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u4(
     vq = xnn_fmadd_f32(vx, vq, vone);
 
     // Divide the numerator by the denominator.
-    xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
+    xnn_simd_f32_t vrq = xnn_rcp_f32(vq);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq = xnn_mul_f32(vrq, xnn_fnmadd_f32(vrq, vq, vtwo));
+    }
+    xnn_simd_f32_t vy = xnn_mul_f32(vp, vrq);
 
     // Put it all together, i.e. `log(x) = `log(2)*exp + y`.
     vy = xnn_fmadd_f32(vexp, vln2, vy);
@@ -161,14 +167,18 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u4(
     xnn_simd_f32_t vq = xnn_fmadd_f32(vx, vbeta_3, vbeta_2);
     vq = xnn_fmadd_f32(vx, vq, vbeta_1);
     vq = xnn_fmadd_f32(vx, vq, vone);
-    xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
+    xnn_simd_f32_t vrq = xnn_rcp_f32(vq);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq = xnn_mul_f32(vrq, xnn_fnmadd_f32(vrq, vq, vtwo));
+    }
+    xnn_simd_f32_t vy = xnn_mul_f32(vp, vrq);
     vy = xnn_fmadd_f32(vexp, vln2, vy);
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
 }
 
-void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u8(
+void xnn_f32_vlog_ukernel__fma3_rational_3_3_nr_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -178,7 +188,7 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u8(
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
-  assert(xnn_simd_size_f32 == 4);
+  assert(xnn_simd_size_f32 == 8);
 
   // Some useful constants.
   XNN_SIMD_CONST_F32(vone, 1.0f);
@@ -203,11 +213,13 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u8(
   XNN_SIMD_CONST_F32(vbeta_2, 0.599170029163);
   XNN_SIMD_CONST_F32(vbeta_3, 0.049584995955);
 
+  // Constant needed for the Newton-Raphson iteration of the reciprocal.
+  XNN_SIMD_CONST_F32(vtwo, 2.0f);
 
-  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     xnn_simd_f32_t vx_0 = xnn_loadu_f32(input);
     xnn_simd_f32_t vx_1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
-    input += 8;
+    input += 16;
 
     // Scale `x` with `sqrt(2)` so that the exponent is rounded up.
     vx_0 = xnn_mul_f32(vx_0, vsqrt2);
@@ -249,8 +261,14 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u8(
     vq_1 = xnn_fmadd_f32(vx_1, vq_1, vone);
 
     // Divide the numerator by the denominator.
-    xnn_simd_f32_t vy_0 = xnn_div_f32(vp_0, vq_0);
-    xnn_simd_f32_t vy_1 = xnn_div_f32(vp_1, vq_1);
+    xnn_simd_f32_t vrq_0 = xnn_rcp_f32(vq_0);
+    xnn_simd_f32_t vrq_1 = xnn_rcp_f32(vq_1);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq_0 = xnn_mul_f32(vrq_0, xnn_fnmadd_f32(vrq_0, vq_0, vtwo));
+      vrq_1 = xnn_mul_f32(vrq_1, xnn_fnmadd_f32(vrq_1, vq_1, vtwo));
+    }
+    xnn_simd_f32_t vy_0 = xnn_mul_f32(vp_0, vrq_0);
+    xnn_simd_f32_t vy_1 = xnn_mul_f32(vp_1, vrq_1);
 
     // Put it all together, i.e. `log(x) = `log(2)*exp + y`.
     vy_0 = xnn_fmadd_f32(vexp_0, vln2, vy_0);
@@ -258,7 +276,7 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u8(
 
     xnn_storeu_f32(output, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
-    output += 8;
+    output += 16;
   }
   for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
     xnn_simd_f32_t vx = xnn_loadu_f32(input);
@@ -294,7 +312,11 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u8(
     vq = xnn_fmadd_f32(vx, vq, vone);
 
     // Divide the numerator by the denominator.
-    xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
+    xnn_simd_f32_t vrq = xnn_rcp_f32(vq);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq = xnn_mul_f32(vrq, xnn_fnmadd_f32(vrq, vq, vtwo));
+    }
+    xnn_simd_f32_t vy = xnn_mul_f32(vp, vrq);
 
     // Put it all together, i.e. `log(x) = `log(2)*exp + y`.
     vy = xnn_fmadd_f32(vexp, vln2, vy);
@@ -316,14 +338,18 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u8(
     xnn_simd_f32_t vq = xnn_fmadd_f32(vx, vbeta_3, vbeta_2);
     vq = xnn_fmadd_f32(vx, vq, vbeta_1);
     vq = xnn_fmadd_f32(vx, vq, vone);
-    xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
+    xnn_simd_f32_t vrq = xnn_rcp_f32(vq);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq = xnn_mul_f32(vrq, xnn_fnmadd_f32(vrq, vq, vtwo));
+    }
+    xnn_simd_f32_t vy = xnn_mul_f32(vp, vrq);
     vy = xnn_fmadd_f32(vexp, vln2, vy);
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
 }
 
-void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u12(
+void xnn_f32_vlog_ukernel__fma3_rational_3_3_nr_u24(
     size_t batch,
     const float* input,
     float* output,
@@ -333,7 +359,7 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u12(
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
-  assert(xnn_simd_size_f32 == 4);
+  assert(xnn_simd_size_f32 == 8);
 
   // Some useful constants.
   XNN_SIMD_CONST_F32(vone, 1.0f);
@@ -358,12 +384,14 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u12(
   XNN_SIMD_CONST_F32(vbeta_2, 0.599170029163);
   XNN_SIMD_CONST_F32(vbeta_3, 0.049584995955);
 
+  // Constant needed for the Newton-Raphson iteration of the reciprocal.
+  XNN_SIMD_CONST_F32(vtwo, 2.0f);
 
-  for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {
+  for (; batch >= 24 * sizeof(float); batch -= 24 * sizeof(float)) {
     xnn_simd_f32_t vx_0 = xnn_loadu_f32(input);
     xnn_simd_f32_t vx_1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
     xnn_simd_f32_t vx_2 = xnn_loadu_f32(input + 2 * xnn_simd_size_f32);
-    input += 12;
+    input += 24;
 
     // Scale `x` with `sqrt(2)` so that the exponent is rounded up.
     vx_0 = xnn_mul_f32(vx_0, vsqrt2);
@@ -415,9 +443,17 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u12(
     vq_2 = xnn_fmadd_f32(vx_2, vq_2, vone);
 
     // Divide the numerator by the denominator.
-    xnn_simd_f32_t vy_0 = xnn_div_f32(vp_0, vq_0);
-    xnn_simd_f32_t vy_1 = xnn_div_f32(vp_1, vq_1);
-    xnn_simd_f32_t vy_2 = xnn_div_f32(vp_2, vq_2);
+    xnn_simd_f32_t vrq_0 = xnn_rcp_f32(vq_0);
+    xnn_simd_f32_t vrq_1 = xnn_rcp_f32(vq_1);
+    xnn_simd_f32_t vrq_2 = xnn_rcp_f32(vq_2);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq_0 = xnn_mul_f32(vrq_0, xnn_fnmadd_f32(vrq_0, vq_0, vtwo));
+      vrq_1 = xnn_mul_f32(vrq_1, xnn_fnmadd_f32(vrq_1, vq_1, vtwo));
+      vrq_2 = xnn_mul_f32(vrq_2, xnn_fnmadd_f32(vrq_2, vq_2, vtwo));
+    }
+    xnn_simd_f32_t vy_0 = xnn_mul_f32(vp_0, vrq_0);
+    xnn_simd_f32_t vy_1 = xnn_mul_f32(vp_1, vrq_1);
+    xnn_simd_f32_t vy_2 = xnn_mul_f32(vp_2, vrq_2);
 
     // Put it all together, i.e. `log(x) = `log(2)*exp + y`.
     vy_0 = xnn_fmadd_f32(vexp_0, vln2, vy_0);
@@ -427,7 +463,7 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u12(
     xnn_storeu_f32(output, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
-    output += 12;
+    output += 24;
   }
   for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
     xnn_simd_f32_t vx = xnn_loadu_f32(input);
@@ -463,7 +499,11 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u12(
     vq = xnn_fmadd_f32(vx, vq, vone);
 
     // Divide the numerator by the denominator.
-    xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
+    xnn_simd_f32_t vrq = xnn_rcp_f32(vq);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq = xnn_mul_f32(vrq, xnn_fnmadd_f32(vrq, vq, vtwo));
+    }
+    xnn_simd_f32_t vy = xnn_mul_f32(vp, vrq);
 
     // Put it all together, i.e. `log(x) = `log(2)*exp + y`.
     vy = xnn_fmadd_f32(vexp, vln2, vy);
@@ -485,14 +525,18 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u12(
     xnn_simd_f32_t vq = xnn_fmadd_f32(vx, vbeta_3, vbeta_2);
     vq = xnn_fmadd_f32(vx, vq, vbeta_1);
     vq = xnn_fmadd_f32(vx, vq, vone);
-    xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
+    xnn_simd_f32_t vrq = xnn_rcp_f32(vq);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq = xnn_mul_f32(vrq, xnn_fnmadd_f32(vrq, vq, vtwo));
+    }
+    xnn_simd_f32_t vy = xnn_mul_f32(vp, vrq);
     vy = xnn_fmadd_f32(vexp, vln2, vy);
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
 }
 
-void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u16(
+void xnn_f32_vlog_ukernel__fma3_rational_3_3_nr_u32(
     size_t batch,
     const float* input,
     float* output,
@@ -502,7 +546,7 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u16(
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
-  assert(xnn_simd_size_f32 == 4);
+  assert(xnn_simd_size_f32 == 8);
 
   // Some useful constants.
   XNN_SIMD_CONST_F32(vone, 1.0f);
@@ -527,13 +571,15 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u16(
   XNN_SIMD_CONST_F32(vbeta_2, 0.599170029163);
   XNN_SIMD_CONST_F32(vbeta_3, 0.049584995955);
 
+  // Constant needed for the Newton-Raphson iteration of the reciprocal.
+  XNN_SIMD_CONST_F32(vtwo, 2.0f);
 
-  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     xnn_simd_f32_t vx_0 = xnn_loadu_f32(input);
     xnn_simd_f32_t vx_1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
     xnn_simd_f32_t vx_2 = xnn_loadu_f32(input + 2 * xnn_simd_size_f32);
     xnn_simd_f32_t vx_3 = xnn_loadu_f32(input + 3 * xnn_simd_size_f32);
-    input += 16;
+    input += 32;
 
     // Scale `x` with `sqrt(2)` so that the exponent is rounded up.
     vx_0 = xnn_mul_f32(vx_0, vsqrt2);
@@ -595,10 +641,20 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u16(
     vq_3 = xnn_fmadd_f32(vx_3, vq_3, vone);
 
     // Divide the numerator by the denominator.
-    xnn_simd_f32_t vy_0 = xnn_div_f32(vp_0, vq_0);
-    xnn_simd_f32_t vy_1 = xnn_div_f32(vp_1, vq_1);
-    xnn_simd_f32_t vy_2 = xnn_div_f32(vp_2, vq_2);
-    xnn_simd_f32_t vy_3 = xnn_div_f32(vp_3, vq_3);
+    xnn_simd_f32_t vrq_0 = xnn_rcp_f32(vq_0);
+    xnn_simd_f32_t vrq_1 = xnn_rcp_f32(vq_1);
+    xnn_simd_f32_t vrq_2 = xnn_rcp_f32(vq_2);
+    xnn_simd_f32_t vrq_3 = xnn_rcp_f32(vq_3);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq_0 = xnn_mul_f32(vrq_0, xnn_fnmadd_f32(vrq_0, vq_0, vtwo));
+      vrq_1 = xnn_mul_f32(vrq_1, xnn_fnmadd_f32(vrq_1, vq_1, vtwo));
+      vrq_2 = xnn_mul_f32(vrq_2, xnn_fnmadd_f32(vrq_2, vq_2, vtwo));
+      vrq_3 = xnn_mul_f32(vrq_3, xnn_fnmadd_f32(vrq_3, vq_3, vtwo));
+    }
+    xnn_simd_f32_t vy_0 = xnn_mul_f32(vp_0, vrq_0);
+    xnn_simd_f32_t vy_1 = xnn_mul_f32(vp_1, vrq_1);
+    xnn_simd_f32_t vy_2 = xnn_mul_f32(vp_2, vrq_2);
+    xnn_simd_f32_t vy_3 = xnn_mul_f32(vp_3, vrq_3);
 
     // Put it all together, i.e. `log(x) = `log(2)*exp + y`.
     vy_0 = xnn_fmadd_f32(vexp_0, vln2, vy_0);
@@ -610,7 +666,7 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u16(
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
     xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy_3);
-    output += 16;
+    output += 32;
   }
   for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
     xnn_simd_f32_t vx = xnn_loadu_f32(input);
@@ -646,7 +702,11 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u16(
     vq = xnn_fmadd_f32(vx, vq, vone);
 
     // Divide the numerator by the denominator.
-    xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
+    xnn_simd_f32_t vrq = xnn_rcp_f32(vq);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq = xnn_mul_f32(vrq, xnn_fnmadd_f32(vrq, vq, vtwo));
+    }
+    xnn_simd_f32_t vy = xnn_mul_f32(vp, vrq);
 
     // Put it all together, i.e. `log(x) = `log(2)*exp + y`.
     vy = xnn_fmadd_f32(vexp, vln2, vy);
@@ -668,7 +728,11 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u16(
     xnn_simd_f32_t vq = xnn_fmadd_f32(vx, vbeta_3, vbeta_2);
     vq = xnn_fmadd_f32(vx, vq, vbeta_1);
     vq = xnn_fmadd_f32(vx, vq, vone);
-    xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
+    xnn_simd_f32_t vrq = xnn_rcp_f32(vq);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq = xnn_mul_f32(vrq, xnn_fnmadd_f32(vrq, vq, vtwo));
+    }
+    xnn_simd_f32_t vy = xnn_mul_f32(vp, vrq);
     vy = xnn_fmadd_f32(vexp, vln2, vy);
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
