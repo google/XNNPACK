@@ -359,8 +359,8 @@ SET(SUBGRAPH_SRCS
   src/subgraph/depthwise-convolution-2d.c
   src/subgraph/divide.c
   src/subgraph/elu.c
-  src/subgraph/exp.c
   src/subgraph/even-split.c
+  src/subgraph/exp.c
   src/subgraph/floor.c
   src/subgraph/fully-connected-sparse.c
   src/subgraph/fully-connected.c
@@ -904,10 +904,10 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^x86(_64)?$")
       SET_PROPERTY(SOURCE ${PROD_AVXVNNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx2 -clang:-mavxvnni ")
       SET_PROPERTY(SOURCE ${ALL_AVX256SKX_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx512f -clang:-mavx512cd -clang:-mavx512bw -clang:-mavx512dq -clang:-mavx512vl ")
       SET_PROPERTY(SOURCE ${PROD_AVX256SKX_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx512f -clang:-mavx512cd -clang:-mavx512bw -clang:-mavx512dq -clang:-mavx512vl ")
-      SET_PROPERTY(SOURCE ${ALL_AVX256VNNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx512f -clang:-mavx512cd -clang:-mavx512bw -clang:-mavx512dq -clang:-mavx512vl -clang:-mavxvnni ")
-      SET_PROPERTY(SOURCE ${PROD_AVX256VNNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx512f -clang:-mavx512cd -clang:-mavx512bw -clang:-mavx512dq -clang:-mavx512vl -clang:-mavxvnni ")
-      SET_PROPERTY(SOURCE ${ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx512f -clang:-mavx512cd -clang:-mavx512bw -clang:-mavx512dq -clang:-mavx512vl -clang:-mavxvnni -clang:-mgfni ")
-      SET_PROPERTY(SOURCE ${PROD_AVX256VNNIGFNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx512f -clang:-mavx512cd -clang:-mavx512bw -clang:-mavx512dq -clang:-mavx512vl -clang:-mavxvnni -clang:-mgfni ")
+      SET_PROPERTY(SOURCE ${ALL_AVX256VNNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx512f -clang:-mavx512cd -clang:-mavx512bw -clang:-mavx512dq -clang:-mavx512vl -clang:-mavx512vnni ")
+      SET_PROPERTY(SOURCE ${PROD_AVX256VNNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx512f -clang:-mavx512cd -clang:-mavx512bw -clang:-mavx512dq -clang:-mavx512vl -clang:-mavx512vnni ")
+      SET_PROPERTY(SOURCE ${ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx512f -clang:-mavx512cd -clang:-mavx512bw -clang:-mavx512dq -clang:-mavx512vl -clang:-mavx512vnni -clang:-mgfni ")
+      SET_PROPERTY(SOURCE ${PROD_AVX256VNNIGFNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx512f -clang:-mavx512cd -clang:-mavx512bw -clang:-mavx512dq -clang:-mavx512vl -clang:-mavx512vnni -clang:-mgfni ")
       SET_PROPERTY(SOURCE ${ALL_AVX512F_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mavx512f ")
       SET_PROPERTY(SOURCE ${PROD_AVX512F_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mavx512f ")
       SET_PROPERTY(SOURCE ${ALL_AVX512SKX_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx512f -clang:-mavx512cd -clang:-mavx512bw -clang:-mavx512dq -clang:-mavx512vl ")
@@ -944,10 +944,10 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^x86(_64)?$")
     SET_PROPERTY(SOURCE ${PROD_AVXVNNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -mf16c -mfma -mavx2 -mavxvnni ")
     SET_PROPERTY(SOURCE ${ALL_AVX256SKX_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -mf16c -mfma -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl ")
     SET_PROPERTY(SOURCE ${PROD_AVX256SKX_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -mf16c -mfma -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl ")
-    SET_PROPERTY(SOURCE ${ALL_AVX256VNNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -mf16c -mfma -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl -mavxvnni ")
-    SET_PROPERTY(SOURCE ${PROD_AVX256VNNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -mf16c -mfma -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl -mavxvnni ")
-    SET_PROPERTY(SOURCE ${ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -mf16c -mfma -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl -mavxvnni -mgfni ")
-    SET_PROPERTY(SOURCE ${PROD_AVX256VNNIGFNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -mf16c -mfma -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl -mavxvnni -mgfni ")
+    SET_PROPERTY(SOURCE ${ALL_AVX256VNNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -mf16c -mfma -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl -mavx512vnni ")
+    SET_PROPERTY(SOURCE ${PROD_AVX256VNNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -mf16c -mfma -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl -mavx512vnni  ")
+    SET_PROPERTY(SOURCE ${ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -mf16c -mfma -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl -mavx512vnni -mgfni ")
+    SET_PROPERTY(SOURCE ${PROD_AVX256VNNIGFNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -mf16c -mfma -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl -mavx512vnni -mgfni ")
     SET_PROPERTY(SOURCE ${ALL_AVX512F_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mavx512f ")
     SET_PROPERTY(SOURCE ${PROD_AVX512F_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mavx512f ")
     SET_PROPERTY(SOURCE ${ALL_AVX512SKX_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -mf16c -mfma -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl ")
