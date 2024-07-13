@@ -70,6 +70,7 @@ enum xnn_operator_type {
   xnn_operator_type_copy_nc_x16,
   xnn_operator_type_copy_nc_x32,
   xnn_operator_type_copysign_nd_f32,
+  xnn_operator_type_vmultiply_nd_s32,
   xnn_operator_type_deconvolution_nhwc_f16,
   xnn_operator_type_deconvolution_nhwc_f32,
   xnn_operator_type_deconvolution_nhwc_qd8_f32_qc8w,

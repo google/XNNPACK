@@ -2283,6 +2283,40 @@ enum xnn_status xnn_run_add_nd_f32(
   uint32_t flags,
   pthreadpool_t threadpool);
 
+
+enum xnn_status xnn_create_vmultiply_nd_s32(
+  // int32_t output_min,
+  // int32_t output_max,
+  uint32_t flags,
+  xnn_operator_t* vmultiply_op_out);
+
+enum xnn_status xnn_reshape_vmultiply_nd_s32(
+  xnn_operator_t vmultiply_op_out,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_vmultiply_nd_s32(
+  xnn_operator_t vmultiply_op_out,
+  const int32_t* input1,
+  const int32_t* input2,
+  int32_t* output);
+
+
+enum xnn_status xnn_run_vmultiply_nd_s32(
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const int32_t* input1,
+  const int32_t* input2,
+  int32_t* output,
+  uint32_t flags,
+  pthreadpool_t threadpool);
+
+
 enum xnn_status xnn_create_add_nd_qs8(
   int8_t input1_zero_point,
   float input1_scale,

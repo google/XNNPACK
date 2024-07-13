@@ -1399,6 +1399,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(copysign-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME copysign-nd-test COMMAND copysign-nd-test)
 
+    ADD_EXECUTABLE(s32-vmultiply-nd-test test/vmultiply-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(s32-vmultiply-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(s32-vmultiply-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME s32-vmultiply-nd-test COMMAND s32-vmultiply-nd-test)
+
     ADD_EXECUTABLE(deconvolution-nhwc-test test/deconvolution-nhwc.cc test/deconvolution-nhwc-qd8-f32-qc8w.cc)
     TARGET_INCLUDE_DIRECTORIES(deconvolution-nhwc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(deconvolution-nhwc-test PRIVATE XNNPACK fp16 GTest::gmock GTest::gtest GTest::gtest_main)
