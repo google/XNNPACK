@@ -282,7 +282,7 @@ void VBinaryMicrokernelTester::Test(
     xnn_s32_vbinary_ukernel_fn vbinary, OpType op_type,
     xnn_init_s32_default_params_fn init_params) const {
   xnnpack::ReplicableRandomDevice rng;
-  std::uniform_real_distribution<int32_t> s32dist(std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max());
+  std::uniform_int_distribution<int32_t> s32dist(std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max());
 
   std::vector<int32_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
   std::vector<int32_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));

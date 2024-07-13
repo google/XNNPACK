@@ -763,13 +763,33 @@ enum xnn_status xnn_create_vmultiply_nd_s32(
     uint32_t flags,
     xnn_operator_t* vmultiply_op_out)
 {
-  return create_binary_elementwise_nd(
+  /*return create_binary_elementwise_nd(
     flags,
     NULL,
     NULL,
     0,
     xnn_operator_type_vmultiply_nd_s32,
     xnn_init_s32_vmultiply_config(),
+    vmultiply_op_out);*/
+
+  const struct xnn_binary_elementwise_config* s32_vmultiply_config = xnn_init_s32_vmultiply_config();
+  if (s32_vmultiply_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+      xnn_operator_type_to_string(xnn_operator_type_vmultiply_nd_s32));
+    return xnn_status_unsupported_hardware;
+  }
+
+  union xnn_s32_default_params params;
+  if (s32_vmultiply_config->init.s32_default != NULL) {
+    s32_vmultiply_config->init.s32_default(&params);
+  }
+  return create_binary_elementwise_nd(
+    flags,
+    &params,
+    &params,
+    sizeof(params),
+    xnn_operator_type_vmultiply_nd_s32,
+    &s32_vmultiply_config->linear,
     vmultiply_op_out);
 }
 
@@ -1503,8 +1523,8 @@ enum xnn_status xnn_reshape_vmultiply_nd_s32(
     num_input1_dims, input1_shape,
     num_input2_dims, input2_shape,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_INT32_T,
-    &vmultiply_op->params.f32_minmax, sizeof(vmultiply_op->params.f32_minmax),
-    &vmultiply_op->params.f32_minmax, sizeof(vmultiply_op->params.f32_minmax),
+    &vmultiply_op->params.s32_default, sizeof(vmultiply_op->params.s32_default),
+    &vmultiply_op->params.s32_default, sizeof(vmultiply_op->params.s32_default),
     threadpool);
 }
 

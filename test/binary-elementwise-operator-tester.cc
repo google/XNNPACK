@@ -728,7 +728,7 @@ void BinaryElementwiseOperatorTester::TestS32() const {
   ASSERT_LT(qmin(), qmax());
 
   xnnpack::ReplicableRandomDevice rng;
-  std::uniform_real_distribution<int32_t> s32dist(std::numeric_limits<int32_t>::min(),
+  std::uniform_int_distribution<int32_t> s32dist(std::numeric_limits<int32_t>::min(),
                                   std::numeric_limits<int32_t>::max());
 
   // Compute generalized shapes.

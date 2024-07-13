@@ -266,6 +266,9 @@ enum xnn_datatype {
   /// Dynamically quantized 8-bit signed integers packed with their per-row
   /// quantization parameters.
   xnn_datatype_qpint8 = 10,
+
+  /// 32  signed bit integer
+  xnn_datatype_int32 = 11,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.
@@ -1378,6 +1381,24 @@ enum xnn_status xnn_define_copysign(
   uint32_t input2_id,
   uint32_t output_id,
   uint32_t flags);
+
+
+/// Define a S32 Multiply node and add it to a Subgraph.
+///
+/// The Multiply node copies the first input and second input.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input1_id - Value ID for the first input tensor. The input tensor must be defined in the @a subgraph.
+/// @param input2_id - Value ID for the second input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor.
+/// @param flags - binary features of the Multiply node. No supported flags are currently defined.
+enum xnn_status xnn_define_vmultiply(
+  xnn_subgraph_t subgraph,
+  uint32_t input1_id,
+  uint32_t input2_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 
 /// Define a Copy Node and add it to a Subgraph.
 ///

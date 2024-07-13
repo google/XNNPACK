@@ -354,6 +354,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/convolution-2d.c
   src/subgraph/copy.c
   src/subgraph/copysign.c
+  src/subgraph/vmultiply.c
   src/subgraph/deconvolution-2d.c
   src/subgraph/depth-to-space-2d.c
   src/subgraph/depthwise-convolution-2d.c
@@ -1772,6 +1773,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(copysign-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(copysign-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME copysign-test COMMAND copysign-test)
+  
+    ADD_EXECUTABLE(s32-vmultiply-sub-test test/vmultiply.cc)
+    TARGET_INCLUDE_DIRECTORIES(s32-vmultiply-sub-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(s32-vmultiply-sub-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME s32-vmultiply-sub-test COMMAND copysign-test)
 
     ADD_EXECUTABLE(deconvolution-2d-test test/deconvolution-2d.cc)
     SET_TARGET_PROPERTIES(deconvolution-2d-test PROPERTIES CXX_EXTENSIONS YES)
