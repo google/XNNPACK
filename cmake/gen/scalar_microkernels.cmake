@@ -1050,6 +1050,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/s16-window/gen/s16-window-scalar-u2.c
   src/s16-window/gen/s16-window-scalar-u3.c
   src/s16-window/gen/s16-window-scalar-u4.c
+  src/s32-vmultiply/gen/s32-vmultiply-scalar.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c1.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c2.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c4.c
