@@ -1939,6 +1939,26 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
+
+  INSTANTIATE_TEST_SUITE_P(
+      QS8_QC8W_IGEMM_MINMAX_FP32_2X8C8__AVX256SKX, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
+          /*mr=*/2, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+          /*is_igemm=*/false,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x8c8__avx256skx,
+                        xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params,
+                        xnn_pack_qs8_conv_goki_w,
+                        xnn_qs8_requantize_fp32);
+          },
+          []() {
+            TEST_REQUIRES_X86_AVX256SKX;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
 #endif  // XNN_ENABLE_AVX256SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 

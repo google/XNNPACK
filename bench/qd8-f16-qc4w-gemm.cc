@@ -655,6 +655,39 @@
 
   BENCHMARK_GEMM(qd8_f16_qc4w_gemm_minmax_ukernel_1x8c8__avx256skx)
 
+  static void qd8_f16_qc4w_gemm_minmax_ukernel_2x8c8__avx256skx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc4w_gemm_minmax_ukernel_2x8c8__avx256skx,
+      xnn_init_f16_qc4w_minmax_avx_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/2, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX256SKX);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc4w_gemm_minmax_ukernel_2x8c8__avx256skx)
+
+  static void qd8_f16_qc4w_gemm_minmax_ukernel_3x8c8__avx256skx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc4w_gemm_minmax_ukernel_3x8c8__avx256skx,
+      xnn_init_f16_qc4w_minmax_avx_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/3, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX256SKX);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc4w_gemm_minmax_ukernel_3x8c8__avx256skx)
+
+  static void qd8_f16_qc4w_gemm_minmax_ukernel_4x8c8__avx256skx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc4w_gemm_minmax_ukernel_4x8c8__avx256skx,
+      xnn_init_f16_qc4w_minmax_avx_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/4, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX256SKX);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc4w_gemm_minmax_ukernel_4x8c8__avx256skx)
+
   static void qd8_f16_qc4w_gemm_minmax_ukernel_5x8c8__avx256skx(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc4w_gemm_minmax_ukernel_5x8c8__avx256skx,
@@ -665,6 +698,17 @@
   }
 
   BENCHMARK_GEMM(qd8_f16_qc4w_gemm_minmax_ukernel_5x8c8__avx256skx)
+
+  static void qd8_f16_qc4w_gemm_minmax_ukernel_6x8c8__avx256skx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc4w_gemm_minmax_ukernel_6x8c8__avx256skx,
+      xnn_init_f16_qc4w_minmax_avx_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/6, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX256SKX);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc4w_gemm_minmax_ukernel_6x8c8__avx256skx)
 
   static void qd8_f16_qc4w_gemm_minmax_ukernel_7x8c8__avx256skx(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
@@ -913,6 +957,50 @@
   }
 
   BENCHMARK_GEMM(qd8_f16_qc4w_gemm_minmax_ukernel_4x8c8__avx2)
+
+  static void qd8_f16_qc4w_gemm_minmax_ukernel_5x8c8__avx2(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc4w_gemm_minmax_ukernel_5x8c8__avx2,
+      xnn_init_f16_qc4w_minmax_avx_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/5, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX2);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc4w_gemm_minmax_ukernel_5x8c8__avx2)
+
+  static void qd8_f16_qc4w_gemm_minmax_ukernel_6x8c8__avx2(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc4w_gemm_minmax_ukernel_6x8c8__avx2,
+      xnn_init_f16_qc4w_minmax_avx_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/6, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX2);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc4w_gemm_minmax_ukernel_6x8c8__avx2)
+
+  static void qd8_f16_qc4w_gemm_minmax_ukernel_7x8c8__avx2(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc4w_gemm_minmax_ukernel_7x8c8__avx2,
+      xnn_init_f16_qc4w_minmax_avx_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/7, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX2);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc4w_gemm_minmax_ukernel_7x8c8__avx2)
+
+  static void qd8_f16_qc4w_gemm_minmax_ukernel_8x8c8__avx2(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc4w_gemm_minmax_ukernel_8x8c8__avx2,
+      xnn_init_f16_qc4w_minmax_avx_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/8, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX2);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc4w_gemm_minmax_ukernel_8x8c8__avx2)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
