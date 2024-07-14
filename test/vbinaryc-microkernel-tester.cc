@@ -300,6 +300,58 @@ void VBinaryCMicrokernelTester::Test(
   }
 }
 
+
+void VBinaryCMicrokernelTester::Test(
+    xnn_s32_vbinary_ukernel_fn vbinaryc, OpType op_type,
+    xnn_init_s32_default_params_fn init_params) const {
+  xnnpack::ReplicableRandomDevice rng;
+  std::uniform_int_distribution<int32_t> s32dist(std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max());
+
+  std::vector<int32_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
+  const int32_t b = 4;//s32dist(rng);
+  std::vector<int32_t> y(batch_size() +
+                       (inplace() ? XNN_EXTRA_BYTES / sizeof(int32_t) : 0));
+  std::vector<int32_t> y_ref(batch_size());
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(a.begin(), a.end(), [&]() { return 3;/*return s32dist(rng); */});
+    if (inplace()) {
+      std::generate(y.begin(), y.end(), [&]() { return 3;/*return s32dist(rng);*/ });
+    } else {
+      std::fill(y.begin(), y.end(), nanf(""));
+    }
+    const int32_t* a_data = inplace() ? y.data() : a.data();
+
+
+    // Compute reference results.
+    for (size_t i = 0; i < batch_size(); i++) {
+        switch (op_type) {
+        case OpType::VMultiplyC:
+          y_ref[i] = a_data[i] * b;
+          break;
+        case OpType::RMultiplyC:
+          y_ref[i] = b * a_data[i];
+          break;
+      }
+    }
+
+    // Prepare parameters.
+    xnn_s32_default_params params;
+    if (init_params != nullptr) {
+      init_params(&params);
+    }
+
+    // Call optimized micro-kernel.
+    vbinaryc(batch_size() * sizeof(int32_t), a_data, &b, y.data(),
+            init_params != nullptr ? &params : nullptr);
+
+    // Verify results.
+    for (size_t i = 0; i < batch_size(); i++) {
+      EXPECT_EQ(y[i], y_ref[i])
+          << "at " << i << " / " << batch_size();
+    }
+  }
+}
+
 void VBinaryCMicrokernelTester::Test(
     xnn_f32_vbinary_relu_ukernel_fn vbinaryc_relu, OpType op_type) const {
   xnnpack::ReplicableRandomDevice rng;

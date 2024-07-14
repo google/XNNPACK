@@ -30,6 +30,8 @@ class VBinaryCMicrokernelTester {
     SqrDiffC,
     SubC,
     RSubC,
+    VMultiplyC,
+    RMultiplyC,
   };
 
   VBinaryCMicrokernelTester& batch_size(size_t batch_size) {
@@ -144,6 +146,8 @@ class VBinaryCMicrokernelTester {
             xnn_init_qs8_mul_minmax_params_fn init_params,
             xnn_qs8_requantize_fn requantize) const;
 
+  void Test(xnn_s32_vbinary_ukernel_fn vbinaryc, OpType op_type,
+            xnn_init_s32_default_params_fn init_params = nullptr) const;
  private:
   size_t batch_size_{1};
   bool inplace_{false};

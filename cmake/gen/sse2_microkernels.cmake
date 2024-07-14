@@ -367,6 +367,7 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/s8-maxpool/s8-maxpool-9p8x-minmax-sse2-c16.c
   src/s8-vclamp/s8-vclamp-sse2-u64.c
   src/s32-vmultiply/gen/s32-vmultiply-sse2.c
+  src/s32-vmultiply/gen/s32-vmultiplyc-sse2.c
   src/u8-ibilinear/gen/u8-ibilinear-sse2-c8.c
   src/u8-ibilinear/gen/u8-ibilinear-sse2-c16.c
   src/u8-maxpool/u8-maxpool-9p8x-minmax-sse2-c16.c

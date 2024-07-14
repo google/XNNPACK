@@ -13,7 +13,7 @@ mkdir -p build/local
 CMAKE_ARGS=()
 
 # CMake-level configuration
-CMAKE_ARGS+=("-DCMAKE_BUILD_TYPE=Debug")
+CMAKE_ARGS+=("-DCMAKE_BUILD_TYPE=Release")
 CMAKE_ARGS+=("-DCMAKE_POSITION_INDEPENDENT_CODE=ON")
 
 # If Ninja is installed, prefer it to Make

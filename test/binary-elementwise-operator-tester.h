@@ -182,6 +182,30 @@ class BinaryElementwiseOperatorTester {
     }
   }
 
+  int32_t Compute_S32(int32_t a, int32_t b) const{
+    switch (operation_type()) {
+      case OperationType::Add:
+        return a + b;
+      case OperationType::CopySign:
+        return std::copysign(a, b);
+      case OperationType::Divide:
+        return a / b;
+      case OperationType::Maximum:
+        return std::max<int32_t>(a, b);
+      case OperationType::Minimum:
+        return std::min<int32_t>(a, b);
+      case OperationType::Multiply:
+        return a * b;
+      case OperationType::VMultiply:
+        return a * b;
+      case OperationType::Subtract:
+        return a - b;
+      case OperationType::SquaredDifference:
+        return (a - b) * (a - b);
+      default:
+        return std::nan("");
+    }
+  }
   void TestQS8() const;
 
   void TestQU8() const;

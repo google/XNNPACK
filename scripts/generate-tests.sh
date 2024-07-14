@@ -149,6 +149,7 @@ tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f3
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f32-vsub.yaml        --output test/f32-vsub.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/s32-vmultiply.yaml   --output test/s32-vmultiply.cc &
 
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/s32-vmultiplyc.yaml    --output test/s32-vmultiplyc.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f32-vaddc-minmax.yaml  --output test/f32-vaddc-minmax.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f32-vaddc-relu.yaml    --output test/f32-vaddc-relu.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f32-vaddc.yaml         --output test/f32-vaddc.cc &

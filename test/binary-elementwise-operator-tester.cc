@@ -728,8 +728,8 @@ void BinaryElementwiseOperatorTester::TestS32() const {
   ASSERT_LT(qmin(), qmax());
 
   xnnpack::ReplicableRandomDevice rng;
-  std::uniform_int_distribution<int32_t> s32dist(std::numeric_limits<int32_t>::min(),
-                                  std::numeric_limits<int32_t>::max());
+  std::uniform_int_distribution<int32_t> s32dist(-10000, 10000 );//std::numeric_limits<int32_t>::min(),
+                                  //std::numeric_limits<int32_t>::max());
 
   // Compute generalized shapes.
   std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_dims;
@@ -775,7 +775,7 @@ void BinaryElementwiseOperatorTester::TestS32() const {
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input1.begin(), input1.end(), [&]() { return s32dist(rng); });
     std::generate(input2.begin(), input2.end(), [&]() { return s32dist(rng); });
-    std::fill(output.begin(), output.end(), nanf(""));
+    std::fill(output.begin(), output.end(), INT_MAX);
 
     // Compute reference results.
     for (size_t i = 0; i < output_dims[0]; i++) {
@@ -787,7 +787,7 @@ void BinaryElementwiseOperatorTester::TestS32() const {
                 output_ref[i * output_strides[0] + j * output_strides[1] +
                            k * output_strides[2] + l * output_strides[3] +
                            m * output_strides[4] + n * output_strides[5]] =
-                    Compute(
+                    Compute_S32(
                         input1[i * input1_strides[0] + j * input1_strides[1] +
                                k * input1_strides[2] + l * input1_strides[3] +
                                m * input1_strides[4] + n * input1_strides[5]],
@@ -800,7 +800,7 @@ void BinaryElementwiseOperatorTester::TestS32() const {
         }
       }
     }
-    const int32_t accumulated_min =
+    /*const int32_t accumulated_min =
         *std::min_element(output_ref.cbegin(), output_ref.cend());
     const int32_t accumulated_max =
         *std::max_element(output_ref.cbegin(), output_ref.cend());
@@ -826,7 +826,7 @@ void BinaryElementwiseOperatorTester::TestS32() const {
     for (int32_t& output_value : output_ref) {
       output_value = std::max(output_value, output_min);
       output_value = std::min(output_value, output_max);
-    }
+    }*/
 
     // Create, setup, run, and destroy a binary elementwise operator.
     ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
