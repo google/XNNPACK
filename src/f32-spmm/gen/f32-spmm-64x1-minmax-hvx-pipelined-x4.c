@@ -61,18 +61,12 @@ void xnn_f32_spmm_minmax_ukernel_64x1__hvx_pipelined_x4(
         vacc1 = xnn_fmadd_f32(vi1, vw, vacc1);
         input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
 
-        // Use `xnn_prefetch_to_l2` first to prefetch data into the L2 cache,
-        // then, use `xnn_prefetch_to_l1` to bring data into the L1 cache.
-        // format: xnn_prefetch_to_l1(addr)
-        //         xnn_prefetch_to_l2(addr, stride, width, height, iter)
-        xnn_prefetch_to_l2(input + 32, 128, 128, 1, 1);
-        xnn_prefetch_to_l1(input + 32);
+        xnn_prefetch_to_l2_linear(input, 2);
 
         diff = *dmap++;
 
         vw = xnn_set1_f32(*w); w += 1;
-        xnn_prefetch_to_l2(w + 32, 32, 32, 1, 1);
-        xnn_prefetch_to_l1(w + 32);
+        xnn_prefetch_to_l2_linear(w, 1);
 
         vi0 = xnn_loadu_f32(input + 0);
         vi1 = xnn_loadu_f32(input + 32);
@@ -80,18 +74,12 @@ void xnn_f32_spmm_minmax_ukernel_64x1__hvx_pipelined_x4(
         vacc1 = xnn_fmadd_f32(vi1, vw, vacc1);
         input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
 
-        // Use `xnn_prefetch_to_l2` first to prefetch data into the L2 cache,
-        // then, use `xnn_prefetch_to_l1` to bring data into the L1 cache.
-        // format: xnn_prefetch_to_l1(addr)
-        //         xnn_prefetch_to_l2(addr, stride, width, height, iter)
-        xnn_prefetch_to_l2(input + 32, 128, 128, 1, 1);
-        xnn_prefetch_to_l1(input + 32);
+        xnn_prefetch_to_l2_linear(input, 2);
 
         diff = *dmap++;
 
         vw = xnn_set1_f32(*w); w += 1;
-        xnn_prefetch_to_l2(w + 32, 32, 32, 1, 1);
-        xnn_prefetch_to_l1(w + 32);
+        xnn_prefetch_to_l2_linear(w, 1);
 
         vi0 = xnn_loadu_f32(input + 0);
         vi1 = xnn_loadu_f32(input + 32);
@@ -99,18 +87,12 @@ void xnn_f32_spmm_minmax_ukernel_64x1__hvx_pipelined_x4(
         vacc1 = xnn_fmadd_f32(vi1, vw, vacc1);
         input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
 
-        // Use `xnn_prefetch_to_l2` first to prefetch data into the L2 cache,
-        // then, use `xnn_prefetch_to_l1` to bring data into the L1 cache.
-        // format: xnn_prefetch_to_l1(addr)
-        //         xnn_prefetch_to_l2(addr, stride, width, height, iter)
-        xnn_prefetch_to_l2(input + 32, 128, 128, 1, 1);
-        xnn_prefetch_to_l1(input + 32);
+        xnn_prefetch_to_l2_linear(input, 2);
 
         diff = *dmap++;
 
         vw = xnn_set1_f32(*w); w += 1;
-        xnn_prefetch_to_l2(w + 32, 32, 32, 1, 1);
-        xnn_prefetch_to_l1(w + 32);
+        xnn_prefetch_to_l2_linear(w, 1);
 
         vi0 = xnn_loadu_f32(input + 0);
         vi1 = xnn_loadu_f32(input + 32);
@@ -118,18 +100,12 @@ void xnn_f32_spmm_minmax_ukernel_64x1__hvx_pipelined_x4(
         vacc1 = xnn_fmadd_f32(vi1, vw, vacc1);
         input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
 
-        // Use `xnn_prefetch_to_l2` first to prefetch data into the L2 cache,
-        // then, use `xnn_prefetch_to_l1` to bring data into the L1 cache.
-        // format: xnn_prefetch_to_l1(addr)
-        //         xnn_prefetch_to_l2(addr, stride, width, height, iter)
-        xnn_prefetch_to_l2(input + 32, 128, 128, 1, 1);
-        xnn_prefetch_to_l1(input + 32);
+        xnn_prefetch_to_l2_linear(input, 2);
 
         diff = *dmap++;
 
         vw = xnn_set1_f32(*w); w += 1;
-        xnn_prefetch_to_l2(w + 32, 32, 32, 1, 1);
-        xnn_prefetch_to_l1(w + 32);
+        xnn_prefetch_to_l2_linear(w, 1);
 
         vi0 = xnn_loadu_f32(input + 0);
         vi1 = xnn_loadu_f32(input + 32);
@@ -139,14 +115,12 @@ void xnn_f32_spmm_minmax_ukernel_64x1__hvx_pipelined_x4(
           vacc0 = xnn_fmadd_f32(vi0, vw, vacc0);
           vacc1 = xnn_fmadd_f32(vi1, vw, vacc1);
           input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
-          xnn_prefetch_to_l2(input + 32, 128, 128, 1, 1);
-          xnn_prefetch_to_l1(input + 32);
+          xnn_prefetch_to_l2_linear(input, 2);
 
           diff = *dmap++;
 
           vw = xnn_set1_f32(*w); w += 1;
-          xnn_prefetch_to_l2(w + 32, 32, 32, 1, 1);
-          xnn_prefetch_to_l1(w + 32);
+          xnn_prefetch_to_l2_linear(w, 1);
 
           vi0 = xnn_loadu_f32(input);
           vi1 = xnn_loadu_f32(input + 32);
@@ -182,12 +156,10 @@ void xnn_f32_spmm_minmax_ukernel_64x1__hvx_pipelined_x4(
 
             const HVX_Vector vi0 = xnn_loadu_f32(input);
             input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
-            xnn_prefetch_to_l2(input + 32, 128, 128, 1, 1);
-            xnn_prefetch_to_l1(input + 32);
+            xnn_prefetch_to_l2_linear(input, 2);
 
             const HVX_Vector vw = xnn_set1_f32(*w); w += 1;
-            xnn_prefetch_to_l2(w + 32, 32, 32, 1, 1);
-            xnn_prefetch_to_l1(w + 32);
+            xnn_prefetch_to_l2_linear(w, 1);
 
             vacc0 = xnn_fmadd_f32(vi0, vw, vacc0);
           } while (--nnz != 0);
@@ -216,12 +188,10 @@ void xnn_f32_spmm_minmax_ukernel_64x1__hvx_pipelined_x4(
 
             const HVX_Vector vi0 = xnn_loadu_f32(input);
             input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
-            xnn_prefetch_to_l2(input + 32, 128, 128, 1, 1);
-            xnn_prefetch_to_l1(input + 32);
+            xnn_prefetch_to_l2_linear(input, 2);
 
             const HVX_Vector vw = xnn_set1_f32(*w); w += 1;
-            xnn_prefetch_to_l2(w + 32, 32, 32, 1, 1);
-            xnn_prefetch_to_l1(w + 32);
+            xnn_prefetch_to_l2_linear(w, 1);
 
             vacc0 = xnn_fmadd_f32(vi0, vw, vacc0);
           } while (--nnz != 0);
@@ -250,12 +220,10 @@ void xnn_f32_spmm_minmax_ukernel_64x1__hvx_pipelined_x4(
 
             const HVX_Vector vi0 = xnn_loadu_f32(input);
             input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
-            xnn_prefetch_to_l2(input + 32, 128, 128, 1, 1);
-            xnn_prefetch_to_l1(input + 32);
+            xnn_prefetch_to_l2_linear(input, 2);
 
             const HVX_Vector vw = xnn_set1_f32(*w); w += 1;
-            xnn_prefetch_to_l2(w + 32, 32, 32, 1, 1);
-            xnn_prefetch_to_l1(w + 32);
+            xnn_prefetch_to_l2_linear(w, 1);
 
             vacc0 = xnn_fmadd_f32(vi0, vw, vacc0);
           } while (--nnz != 0);
@@ -284,12 +252,10 @@ void xnn_f32_spmm_minmax_ukernel_64x1__hvx_pipelined_x4(
 
             const HVX_Vector vi0 = xnn_loadu_f32(input);
             input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
-            xnn_prefetch_to_l2(input + 32, 128, 128, 1, 1);
-            xnn_prefetch_to_l1(input + 32);
+            xnn_prefetch_to_l2_linear(input, 2);
 
             const HVX_Vector vw = xnn_set1_f32(*w); w += 1;
-            xnn_prefetch_to_l2(w + 32, 32, 32, 1, 1);
-            xnn_prefetch_to_l1(w + 32);
+            xnn_prefetch_to_l2_linear(w, 1);
 
             vacc0 = xnn_fmadd_f32(vi0, vw, vacc0);
           } while (--nnz != 0);
@@ -318,12 +284,10 @@ void xnn_f32_spmm_minmax_ukernel_64x1__hvx_pipelined_x4(
 
             const HVX_Vector vi0 = xnn_loadu_f32(input);
             input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
-            xnn_prefetch_to_l2(input + 32, 128, 128, 1, 1);
-            xnn_prefetch_to_l1(input + 32);
+            xnn_prefetch_to_l2_linear(input, 2);
 
             const HVX_Vector vw = xnn_set1_f32(*w); w += 1;
-            xnn_prefetch_to_l2(w + 32, 32, 32, 1, 1);
-            xnn_prefetch_to_l1(w + 32);
+            xnn_prefetch_to_l2_linear(w, 1);
 
             vacc0 = xnn_fmadd_f32(vi0, vw, vacc0);
           } while (--nnz != 0);
@@ -351,12 +315,10 @@ void xnn_f32_spmm_minmax_ukernel_64x1__hvx_pipelined_x4(
 
             const HVX_Vector vi0 = xnn_loadu_f32(input);
             input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
-            xnn_prefetch_to_l2(input + 32, 128, 128, 1, 1);
-            xnn_prefetch_to_l1(input + 32);
+            xnn_prefetch_to_l2_linear(input, 2);
 
             const HVX_Vector vw = xnn_set1_f32(*w); w += 1;
-            xnn_prefetch_to_l2(w + 32, 32, 32, 1, 1);
-            xnn_prefetch_to_l1(w + 32);
+            xnn_prefetch_to_l2_linear(w, 1);
 
             vacc0 = xnn_fmadd_f32(vi0, vw, vacc0);
           } while (--nnz != 0);

@@ -13,13 +13,29 @@
   #include <hexagon_protos.h>
 
   // Use fetchl2 at least several hundred cycles prior to using the data.
-  XNN_INLINE static void xnn_prefetch_to_l2(const void *address,
-                                        uint32_t stride,
-                                        uint32_t width,
-                                        uint32_t height,
-                                        uint32_t iter)
+  
+  // height: the number of 128 bytes to fetch.
+  // width: we set 128 bytes here.
+  // stride: we set 128 bytes here.
+  XNN_INLINE static void xnn_prefetch_to_l2_linear(const void *address, uint8_t height)
   {
-    uint64_t info = HEXAGON_V64_CREATE_H(iter, stride, width, height);
+    uint16_t h0 = (((HEXAGON_Vect32)(128) << 8) | ((HEXAGON_Vect32)((height) & 0xff));
+    uint32_t info = HEXAGON_V32_CREATE_H(128, h0);
+    Q6_l2fetch_AR(address, info);
+  }
+
+  // height: the number of width-sized blocks to fetch.
+  // width: width of a fetch block in bytes.
+  // stride: an unsigned byte offset which is used to increment the pointer
+  //         after each width-sized block is fetched.
+  // direction: If clear, row major. If set, cloumn major.
+  XNN_INLINE static void xnn_prefetch_to_l2_box(const void *address,
+                                        uint16_t stride,
+                                        uint16_t width,
+                                        uint16_t height,
+                                        uint16_t direction)
+  {
+    uint64_t info = HEXAGON_V64_CREATE_H(direction, stride, width, height);
     Q6_l2fetch_AP(address, info);
   }
 #endif

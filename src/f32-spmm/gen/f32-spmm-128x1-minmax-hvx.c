@@ -56,12 +56,10 @@ void xnn_f32_spmm_minmax_ukernel_128x1__hvx(
           const HVX_Vector vi2 = xnn_loadu_f32(input + 64);
           const HVX_Vector vi3 = xnn_loadu_f32(input + 96);
           input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
-          xnn_prefetch_to_l2(input + 32, 128, 128, 1, 1);
-          xnn_prefetch_to_l1(input + 32);
-          
+          xnn_prefetch_to_l2_linear(input, 4);
+            
           const HVX_Vector vw = xnn_set1_f32(*w); w += 1;
-          xnn_prefetch_to_l2(w + 32, 32, 32, 1, 1);
-          xnn_prefetch_to_l1(w + 32);
+          xnn_prefetch_to_l2_linear(w, 1);
 
           vacc0 = xnn_fmadd_f32(vi0, vw, vacc0);
           vacc1 = xnn_fmadd_f32(vi1, vw, vacc1);
