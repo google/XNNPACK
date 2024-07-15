@@ -259,7 +259,7 @@ static void init_f16_gemm_config(void) {
         f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(7)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f16_igemm_minmax_ukernel_7x64__avx512fp16_broadcast);
         f16_gemm_config.init.f16 = xnn_init_f16_minmax_fp16arith_params;
         f16_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f16_gemm_gio_w;
-        f16_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_f16_gemm_goi_w;  //xnn_x16_packw_gemm_goi_ukernel_x64__avx512skx_u16_prfm;
+        f16_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4;
         f16_gemm_config.mr = 7;
         f16_gemm_config.nr = 64;
       } else

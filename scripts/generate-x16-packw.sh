@@ -8,6 +8,9 @@
 ### Generic C micro-kernels
 tools/xngen src/x32-packw/scalar.c.in -D NR=8  -D KBLOCK=4 -D TYPE=uint16_t -o src/x16-packw/gen/x16-packw-x8-gemm-goi-scalar-int-u4.c &
 tools/xngen src/x32-packw/scalar.c.in -D NR=16 -D KBLOCK=4 -D TYPE=uint16_t -o src/x16-packw/gen/x16-packw-x16-gemm-goi-scalar-int-u4.c &
+# AVX needs NR 32 and NR 64 packw microkernels
+tools/xngen src/x32-packw/scalar.c.in -D NR=32 -D KBLOCK=4 -D TYPE=uint16_t -o src/x16-packw/gen/x16-packw-x32-gemm-goi-scalar-int-u4.c &
+tools/xngen src/x32-packw/scalar.c.in -D NR=64 -D KBLOCK=4 -D TYPE=uint16_t -o src/x16-packw/gen/x16-packw-x64-gemm-goi-scalar-int-u4.c &
 
 ################################### ARM NEON ##################################
 ### NR multiple of 4

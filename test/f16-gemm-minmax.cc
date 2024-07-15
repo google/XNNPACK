@@ -720,7 +720,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_f16_gemm_minmax_ukernel_1x32__avx512fp16_broadcast,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4);
           },
           []() {
             TEST_REQUIRES_X86_AVX512FP16;
@@ -739,7 +739,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_f16_gemm_minmax_ukernel_4x32__avx512fp16_broadcast,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4);
           },
           []() {
             TEST_REQUIRES_X86_AVX512FP16;
@@ -758,7 +758,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_f16_gemm_minmax_ukernel_5x32__avx512fp16_broadcast,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4);
           },
           []() {
             TEST_REQUIRES_X86_AVX512FP16;
@@ -777,7 +777,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_f16_gemm_minmax_ukernel_6x32__avx512fp16_broadcast,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4);
           },
           []() {
             TEST_REQUIRES_X86_AVX512FP16;
@@ -796,7 +796,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_f16_gemm_minmax_ukernel_7x32__avx512fp16_broadcast,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4);
           },
           []() {
             TEST_REQUIRES_X86_AVX512FP16;
@@ -815,7 +815,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_f16_gemm_minmax_ukernel_8x32__avx512fp16_broadcast,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4);
           },
           []() {
             TEST_REQUIRES_X86_AVX512FP16;
@@ -834,7 +834,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_f16_gemm_minmax_ukernel_1x64__avx512fp16_broadcast,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4);
           },
           []() {
             TEST_REQUIRES_X86_AVX512FP16;
@@ -853,7 +853,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_f16_gemm_minmax_ukernel_4x64__avx512fp16_broadcast,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4);
           },
           []() {
             TEST_REQUIRES_X86_AVX512FP16;
@@ -872,7 +872,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_f16_gemm_minmax_ukernel_5x64__avx512fp16_broadcast,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4);
           },
           []() {
             TEST_REQUIRES_X86_AVX512FP16;
@@ -891,7 +891,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_f16_gemm_minmax_ukernel_6x64__avx512fp16_broadcast,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4);
           },
           []() {
             TEST_REQUIRES_X86_AVX512FP16;
@@ -910,7 +910,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_f16_gemm_minmax_ukernel_7x64__avx512fp16_broadcast,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4);
           },
           []() {
             TEST_REQUIRES_X86_AVX512FP16;
@@ -929,7 +929,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_f16_gemm_minmax_ukernel_8x64__avx512fp16_broadcast,
                         xnn_init_f16_minmax_fp16arith_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4);
           },
           []() {
             TEST_REQUIRES_X86_AVX512FP16;
