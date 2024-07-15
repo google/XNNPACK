@@ -558,9 +558,9 @@ static void init_s32_vmultiply_config(void) {
       s32_vmultiply_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmultiplyc_ukernel__avx512f_u32;
       s32_vmultiply_config.linear.element_tile = 32;
     } else if (hardware_config->use_x86_avx) {
-      s32_vmultiply_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmultiply_ukernel__avx_u16;
-      s32_vmultiply_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmultiplyc_ukernel__avx_u16;
-      s32_vmultiply_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmultiplyc_ukernel__avx_u16;
+      s32_vmultiply_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmultiply_ukernel__avx2_u16;
+      s32_vmultiply_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmultiplyc_ukernel__avx2_u16;
+      s32_vmultiply_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmultiplyc_ukernel__avx2_u16;
       s32_vmultiply_config.linear.element_tile = 16;
     } else {
       s32_vmultiply_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmultiply_ukernel__sse41_u8;

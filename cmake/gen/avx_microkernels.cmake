@@ -484,8 +484,6 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-avx-mul16-ld64-u16.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-avx-mul16-ld64-u8.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-avx-mul16-ld64-u16.c
-  src/s32-vmultiply/gen/s32-vmultiply-avx.c
-  src/s32-vmultiply/gen/s32-vmultiplyc-avx.c
   src/x8-lut/gen/x8-lut-avx-u16.c
   src/x8-lut/gen/x8-lut-avx-u32.c
   src/x8-lut/gen/x8-lut-avx-u48.c

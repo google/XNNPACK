@@ -11,14 +11,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/simd/s32-avx.h"
+#include "xnnpack/simd/s32-avx2.h"
 
 #include "xnnpack/common.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/vunary.h"
 
 
-void xnn_s32_vmultiply_ukernel__avx_u8(
+void xnn_s32_vmultiply_ukernel__avx2_u8(
     size_t batch,
     const int32_t* input_a,
     const int32_t* input_b,
@@ -56,7 +56,7 @@ void xnn_s32_vmultiply_ukernel__avx_u8(
   }
 }
 
-void xnn_s32_vmultiply_ukernel__avx_u16(
+void xnn_s32_vmultiply_ukernel__avx2_u16(
     size_t batch,
     const int32_t* input_a,
     const int32_t* input_b,
@@ -110,7 +110,7 @@ void xnn_s32_vmultiply_ukernel__avx_u16(
   }
 }
 
-void xnn_s32_vmultiply_ukernel__avx_u24(
+void xnn_s32_vmultiply_ukernel__avx2_u24(
     size_t batch,
     const int32_t* input_a,
     const int32_t* input_b,
@@ -168,7 +168,7 @@ void xnn_s32_vmultiply_ukernel__avx_u24(
   }
 }
 
-void xnn_s32_vmultiply_ukernel__avx_u32(
+void xnn_s32_vmultiply_ukernel__avx2_u32(
     size_t batch,
     const int32_t* input_a,
     const int32_t* input_b,

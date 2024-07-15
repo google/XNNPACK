@@ -24,6 +24,7 @@
 #include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "replicable_random_device.h"
+#include <climits>
 
 void BinaryElementwiseOperatorTester::TestQS8() const {
   ASSERT_NE(operation_type(), OperationType::Unknown);
