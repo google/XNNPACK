@@ -11,14 +11,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/simd/s32-sse2.h"
+#include "xnnpack/simd/s32-sse41.h"
 
 #include "xnnpack/common.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/vunary.h"
 
 
-void xnn_s32_vmultiplyc_ukernel__sse2_u4(
+void xnn_s32_vmultiplyc_ukernel__sse41_u4(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,
@@ -52,7 +52,7 @@ void xnn_s32_vmultiplyc_ukernel__sse2_u4(
   }
 }
 
-void xnn_s32_vmultiplyc_ukernel__sse2_u8(
+void xnn_s32_vmultiplyc_ukernel__sse41_u8(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,
@@ -99,7 +99,7 @@ void xnn_s32_vmultiplyc_ukernel__sse2_u8(
   }
 }
 
-void xnn_s32_vmultiplyc_ukernel__sse2_u12(
+void xnn_s32_vmultiplyc_ukernel__sse41_u12(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,
@@ -149,7 +149,7 @@ void xnn_s32_vmultiplyc_ukernel__sse2_u12(
   }
 }
 
-void xnn_s32_vmultiplyc_ukernel__sse2_u16(
+void xnn_s32_vmultiplyc_ukernel__sse41_u16(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,

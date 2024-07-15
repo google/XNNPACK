@@ -237,272 +237,272 @@ TEST(S32_VMULTIPLY__SCALAR_U8, inplace_a_and_b) {
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(S32_VMULTIPLY__SSE2_U4, batch_eq_4) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U4, batch_eq_4) {
+    TEST_REQUIRES_X86_SSE41;
     VBinaryMicrokernelTester()
       .batch_size(4)
-      .Test(xnn_s32_vmultiply_ukernel__sse2_u4, VBinaryMicrokernelTester::OpType::Mul);
+      .Test(xnn_s32_vmultiply_ukernel__sse41_u4, VBinaryMicrokernelTester::OpType::Mul);
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U4, batch_div_4) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U4, batch_div_4) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u4, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u4, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U4, batch_lt_4) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U4, batch_lt_4) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size < 4; batch_size++) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u4, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u4, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U4, batch_gt_4) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U4, batch_gt_4) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 5; batch_size < 8; batch_size++) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u4, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u4, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U4, inplace_a) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U4, inplace_a) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace_a(true)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u4, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u4, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U4, inplace_b) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U4, inplace_b) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace_b(true)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u4, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u4, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U4, inplace_a_and_b) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U4, inplace_a_and_b) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace_a(true)
         .inplace_b(true)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u4, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u4, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(S32_VMULTIPLY__SSE2_U8, batch_eq_8) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U8, batch_eq_8) {
+    TEST_REQUIRES_X86_SSE41;
     VBinaryMicrokernelTester()
       .batch_size(8)
-      .Test(xnn_s32_vmultiply_ukernel__sse2_u8, VBinaryMicrokernelTester::OpType::Mul);
+      .Test(xnn_s32_vmultiply_ukernel__sse41_u8, VBinaryMicrokernelTester::OpType::Mul);
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U8, batch_div_8) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U8, batch_div_8) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u8, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u8, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U8, batch_lt_8) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U8, batch_lt_8) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size < 8; batch_size++) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u8, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u8, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U8, batch_gt_8) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U8, batch_gt_8) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 9; batch_size < 16; batch_size++) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u8, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u8, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U8, inplace_a) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U8, inplace_a) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace_a(true)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u8, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u8, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U8, inplace_b) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U8, inplace_b) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace_b(true)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u8, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u8, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U8, inplace_a_and_b) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U8, inplace_a_and_b) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace_a(true)
         .inplace_b(true)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u8, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u8, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(S32_VMULTIPLY__SSE2_U12, batch_eq_12) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U12, batch_eq_12) {
+    TEST_REQUIRES_X86_SSE41;
     VBinaryMicrokernelTester()
       .batch_size(12)
-      .Test(xnn_s32_vmultiply_ukernel__sse2_u12, VBinaryMicrokernelTester::OpType::Mul);
+      .Test(xnn_s32_vmultiply_ukernel__sse41_u12, VBinaryMicrokernelTester::OpType::Mul);
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U12, batch_div_12) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U12, batch_div_12) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 24; batch_size < 120; batch_size += 12) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u12, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u12, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U12, batch_lt_12) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U12, batch_lt_12) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size < 12; batch_size++) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u12, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u12, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U12, batch_gt_12) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U12, batch_gt_12) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 13; batch_size < 24; batch_size++) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u12, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u12, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U12, inplace_a) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U12, inplace_a) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 60; batch_size += 11) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace_a(true)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u12, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u12, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U12, inplace_b) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U12, inplace_b) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 60; batch_size += 11) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace_b(true)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u12, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u12, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U12, inplace_a_and_b) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U12, inplace_a_and_b) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 60; batch_size += 11) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace_a(true)
         .inplace_b(true)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u12, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u12, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(S32_VMULTIPLY__SSE2_U16, batch_eq_16) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U16, batch_eq_16) {
+    TEST_REQUIRES_X86_SSE41;
     VBinaryMicrokernelTester()
       .batch_size(16)
-      .Test(xnn_s32_vmultiply_ukernel__sse2_u16, VBinaryMicrokernelTester::OpType::Mul);
+      .Test(xnn_s32_vmultiply_ukernel__sse41_u16, VBinaryMicrokernelTester::OpType::Mul);
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U16, batch_div_16) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U16, batch_div_16) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u16, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u16, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U16, batch_lt_16) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U16, batch_lt_16) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size < 16; batch_size++) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u16, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u16, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U16, batch_gt_16) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U16, batch_gt_16) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 17; batch_size < 32; batch_size++) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u16, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u16, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U16, inplace_a) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U16, inplace_a) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace_a(true)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u16, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u16, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U16, inplace_b) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U16, inplace_b) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace_b(true)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u16, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u16, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 
-  TEST(S32_VMULTIPLY__SSE2_U16, inplace_a_and_b) {
-    TEST_REQUIRES_X86_SSE2;
+  TEST(S32_VMULTIPLY__SSE41_U16, inplace_a_and_b) {
+    TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
       VBinaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace_a(true)
         .inplace_b(true)
-        .Test(xnn_s32_vmultiply_ukernel__sse2_u16, VBinaryMicrokernelTester::OpType::Mul);
+        .Test(xnn_s32_vmultiply_ukernel__sse41_u16, VBinaryMicrokernelTester::OpType::Mul);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

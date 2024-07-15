@@ -10,10 +10,10 @@
 - name: xnn_s32_vmultiplyc_ukernel__scalar_u8
 
 # x86 SSE2
-- name: xnn_s32_vmultiplyc_ukernel__sse2_u4
-- name: xnn_s32_vmultiplyc_ukernel__sse2_u8
-- name: xnn_s32_vmultiplyc_ukernel__sse2_u12
-- name: xnn_s32_vmultiplyc_ukernel__sse2_u16
+- name: xnn_s32_vmultiplyc_ukernel__sse41_u4
+- name: xnn_s32_vmultiplyc_ukernel__sse41_u8
+- name: xnn_s32_vmultiplyc_ukernel__sse41_u12
+- name: xnn_s32_vmultiplyc_ukernel__sse41_u16
 
 # x86 AVX
 - name: xnn_s32_vmultiplyc_ukernel__avx_u8
