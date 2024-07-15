@@ -73,8 +73,7 @@ def xnnpack_slinky_defines():
 
 def xnnpack_if_kleidiai_enabled(enabled = [], not_enabled = []):
     return select({
-        # TODO: b/349993583 - Uncomment when KleidiAI has an official BUILD file.
-        # "//:kleidiai_enabled": enabled,
+        "//:kleidiai_enabled": enabled,
         "//conditions:default": not_enabled,
     })
 
