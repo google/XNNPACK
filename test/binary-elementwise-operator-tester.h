@@ -31,7 +31,6 @@ class BinaryElementwiseOperatorTester {
     Multiply,
     Subtract,
     SquaredDifference,
-    VMultiply,
   };
 
   BinaryElementwiseOperatorTester& input1_shape(
@@ -171,8 +170,6 @@ class BinaryElementwiseOperatorTester {
         return std::min<float>(a, b);
       case OperationType::Multiply:
         return a * b;
-      case OperationType::VMultiply:
-        return a * b;
       case OperationType::Subtract:
         return a - b;
       case OperationType::SquaredDifference:
@@ -195,8 +192,6 @@ class BinaryElementwiseOperatorTester {
       case OperationType::Minimum:
         return std::min<int32_t>(a, b);
       case OperationType::Multiply:
-        return a * b;
-      case OperationType::VMultiply:
         return a * b;
       case OperationType::Subtract:
         return a - b;

@@ -20,7 +20,7 @@ constexpr size_t kDim6 = 7;
 
 TEST(VMULTIPLY_ND_S32, vmultiply_0d_x_0d) {
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
     .TestS32();
 }
 
@@ -29,7 +29,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_1d_x_0d) {
     const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
     const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
     BinaryElementwiseOperatorTester()
-      .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+      .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim1})
       .TestS32();
   }
@@ -40,7 +40,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_0d_x_1d) {
     const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
     const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
     BinaryElementwiseOperatorTester()
-      .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+      .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim1})
       .TestS32();
   }
@@ -54,7 +54,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_1d_x_1d) {
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim1})
         .TestS32();
@@ -69,7 +69,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_0d_x_2d) {
     const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
     const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
     BinaryElementwiseOperatorTester()
-      .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+      .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim2, input2_dim1})
       .TestS32();
   }
@@ -85,7 +85,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_1d_x_2d) {
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
         .TestS32();
@@ -100,7 +100,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_2d_x_0d) {
     const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
     const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
     BinaryElementwiseOperatorTester()
-      .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+      .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim2, input1_dim1})
       .TestS32();
   }
@@ -116,7 +116,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_2d_x_1d) {
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
         .TestS32();
@@ -136,7 +136,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_2d_x_2d) {
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
         .TestS32();
@@ -153,7 +153,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_0d_x_3d) {
     const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
     const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
     BinaryElementwiseOperatorTester()
-      .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+      .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim3, input2_dim2, input2_dim1})
       .TestS32();
   }
@@ -171,7 +171,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_1d_x_3d) {
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -193,7 +193,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_2d_x_3d) {
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -210,7 +210,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_3d_x_0d) {
     const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
     const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
     BinaryElementwiseOperatorTester()
-      .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+      .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim3, input1_dim2, input1_dim1})
       .TestS32();
   }
@@ -228,7 +228,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_3d_x_1d) {
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
         .TestS32();
@@ -250,7 +250,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_3d_x_2d) {
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
         .TestS32();
@@ -274,7 +274,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_3d_x_3d) {
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -293,7 +293,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_0d_x_4d) {
     const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
     const size_t input2_dim4 = input2_broadcast_dim4 ? 1 : kDim4;
     BinaryElementwiseOperatorTester()
-      .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+      .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
       .TestS32();
   }
@@ -313,7 +313,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_1d_x_4d) {
       const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
       const size_t input2_dim4 = input2_broadcast_dim4 ? 1 : kDim4;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -337,7 +337,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_2d_x_4d) {
       const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
       const size_t input2_dim4 = input2_broadcast_dim4 ? 1 : kDim4;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -363,7 +363,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_3d_x_4d) {
       const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
       const size_t input2_dim4 = input2_broadcast_dim4 ? 1 : kDim4;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -382,7 +382,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_4d_x_0d) {
     const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
     const size_t input1_dim4 = input1_broadcast_dim4 ? 1 : kDim4;
     BinaryElementwiseOperatorTester()
-      .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+      .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
       .TestS32();
   }
@@ -402,7 +402,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_4d_x_1d) {
       const size_t input1_dim4 = input1_broadcast_dim4 ? 1 : kDim4;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
         .TestS32();
@@ -426,7 +426,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_4d_x_2d) {
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
         .TestS32();
@@ -452,7 +452,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_4d_x_3d) {
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -480,7 +480,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_4d_x_4d) {
       const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
       const size_t input2_dim4 = input2_broadcast_dim4 ? 1 : kDim4;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -501,7 +501,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_0d_x_5d) {
     const size_t input2_dim4 = input2_broadcast_dim4 ? 1 : kDim4;
     const size_t input2_dim5 = input2_broadcast_dim5 ? 1 : kDim5;
     BinaryElementwiseOperatorTester()
-      .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+      .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
       .TestS32();
   }
@@ -523,7 +523,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_1d_x_5d) {
       const size_t input2_dim4 = input2_broadcast_dim4 ? 1 : kDim4;
       const size_t input2_dim5 = input2_broadcast_dim5 ? 1 : kDim5;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -549,7 +549,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_2d_x_5d) {
       const size_t input2_dim4 = input2_broadcast_dim4 ? 1 : kDim4;
       const size_t input2_dim5 = input2_broadcast_dim5 ? 1 : kDim5;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -577,7 +577,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_3d_x_5d) {
       const size_t input2_dim4 = input2_broadcast_dim4 ? 1 : kDim4;
       const size_t input2_dim5 = input2_broadcast_dim5 ? 1 : kDim5;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -607,7 +607,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_4d_x_5d) {
       const size_t input2_dim4 = input2_broadcast_dim4 ? 1 : kDim4;
       const size_t input2_dim5 = input2_broadcast_dim5 ? 1 : kDim5;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -628,7 +628,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_5d_x_0d) {
     const size_t input1_dim4 = input1_broadcast_dim4 ? 1 : kDim4;
     const size_t input1_dim5 = input1_broadcast_dim5 ? 1 : kDim5;
     BinaryElementwiseOperatorTester()
-      .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+      .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
       .TestS32();
   }
@@ -650,7 +650,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_5d_x_1d) {
       const size_t input1_dim5 = input1_broadcast_dim5 ? 1 : kDim5;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
         .TestS32();
@@ -676,7 +676,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_5d_x_2d) {
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
         .TestS32();
@@ -704,7 +704,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_5d_x_3d) {
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -734,7 +734,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_5d_x_4d) {
       const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
       const size_t input2_dim4 = input2_broadcast_dim4 ? 1 : kDim4;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -766,7 +766,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_5d_x_5d) {
       const size_t input2_dim4 = input2_broadcast_dim4 ? 1 : kDim4;
       const size_t input2_dim5 = input2_broadcast_dim5 ? 1 : kDim5;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .iterations(1)
@@ -790,7 +790,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_0d_x_6d) {
     const size_t input2_dim5 = input2_broadcast_dim5 ? 1 : kDim5;
     const size_t input2_dim6 = input2_broadcast_dim6 ? 1 : kDim6;
     BinaryElementwiseOperatorTester()
-      .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+      .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
       .TestS32();
   }
@@ -814,7 +814,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_1d_x_6d) {
       const size_t input2_dim5 = input2_broadcast_dim5 ? 1 : kDim5;
       const size_t input2_dim6 = input2_broadcast_dim6 ? 1 : kDim6;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -842,7 +842,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_2d_x_6d) {
       const size_t input2_dim5 = input2_broadcast_dim5 ? 1 : kDim5;
       const size_t input2_dim6 = input2_broadcast_dim6 ? 1 : kDim6;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -872,7 +872,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_3d_x_6d) {
       const size_t input2_dim5 = input2_broadcast_dim5 ? 1 : kDim5;
       const size_t input2_dim6 = input2_broadcast_dim6 ? 1 : kDim6;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -904,7 +904,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_4d_x_6d) {
       const size_t input2_dim5 = input2_broadcast_dim5 ? 1 : kDim5;
       const size_t input2_dim6 = input2_broadcast_dim6 ? 1 : kDim6;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -938,7 +938,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_5d_x_6d) {
       const size_t input2_dim5 = input2_broadcast_dim5 ? 1 : kDim5;
       const size_t input2_dim6 = input2_broadcast_dim6 ? 1 : kDim6;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .iterations(1)
@@ -962,7 +962,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_6d_x_0d) {
     const size_t input1_dim5 = input1_broadcast_dim5 ? 1 : kDim5;
     const size_t input1_dim6 = input1_broadcast_dim6 ? 1 : kDim6;
     BinaryElementwiseOperatorTester()
-      .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+      .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
       .TestS32();
   }
@@ -986,7 +986,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_6d_x_1d) {
       const size_t input1_dim6 = input1_broadcast_dim6 ? 1 : kDim6;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
         .TestS32();
@@ -1014,7 +1014,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_6d_x_2d) {
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
         .TestS32();
@@ -1044,7 +1044,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_6d_x_3d) {
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -1076,7 +1076,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_6d_x_4d) {
       const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
       const size_t input2_dim4 = input2_broadcast_dim4 ? 1 : kDim4;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .TestS32();
@@ -1110,7 +1110,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_6d_x_5d) {
       const size_t input2_dim4 = input2_broadcast_dim4 ? 1 : kDim4;
       const size_t input2_dim5 = input2_broadcast_dim5 ? 1 : kDim5;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .iterations(1)
@@ -1147,7 +1147,7 @@ TEST(VMULTIPLY_ND_S32, vmultiply_6d_x_6d) {
       const size_t input2_dim5 = input2_broadcast_dim5 ? 1 : kDim5;
       const size_t input2_dim6 = input2_broadcast_dim6 ? 1 : kDim6;
       BinaryElementwiseOperatorTester()
-        .operation_type(BinaryElementwiseOperatorTester::OperationType::VMultiply)
+        .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .iterations(1)

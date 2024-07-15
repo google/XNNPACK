@@ -2739,14 +2739,6 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(s32-vmultiplyc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME s32-vmultiplyc-test COMMAND s32-vmultiplyc-test)
 
-
-  # ADD_EXECUTABLE(s32-vrmultiplyc-test test/s32-vrmultiplyc.cc)
-  # TARGET_INCLUDE_DIRECTORIES(s32-vrmultiplyc-test PRIVATE include src test)
-  # TARGET_LINK_LIBRARIES(s32-vrmultiplyc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  # TARGET_LINK_LIBRARIES(s32-vrmultiplyc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  # ADD_TEST(NAME s32-vrmultiplyc-test COMMAND s32-vrmultiplyc-test)
-
-
   ADD_EXECUTABLE(f16-vcmul-test test/f16-vcmul.cc)
   SET_TARGET_PROPERTIES(f16-vcmul-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f16-vcmul-test PRIVATE include src test)

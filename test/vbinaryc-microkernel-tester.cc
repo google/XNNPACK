@@ -325,11 +325,8 @@ void VBinaryCMicrokernelTester::Test(
     // Compute reference results.
     for (size_t i = 0; i < batch_size(); i++) {
         switch (op_type) {
-        case OpType::VMultiplyC:
+        case OpType::MulC:
           y_ref[i] = a_data[i] * b;
-          break;
-        case OpType::RMultiplyC:
-          y_ref[i] = b * a_data[i];
           break;
       }
     }

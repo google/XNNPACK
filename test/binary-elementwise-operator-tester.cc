@@ -833,7 +833,7 @@ void BinaryElementwiseOperatorTester::TestS32() const {
     xnn_operator_t binary_elementwise_op = nullptr;
 
     switch (operation_type()) {
-      case OperationType::VMultiply:
+      case OperationType::Multiply:
         ASSERT_EQ(xnn_status_success,
                   xnn_create_vmultiply_nd_s32(0,
                                              &binary_elementwise_op));
@@ -848,7 +848,7 @@ void BinaryElementwiseOperatorTester::TestS32() const {
         auto_binary_elementwise_op(binary_elementwise_op, xnn_delete_operator);
 
     switch (operation_type()) {
-      case OperationType::VMultiply:
+      case OperationType::Multiply:
         ASSERT_EQ(
             xnn_status_success,
             xnn_reshape_vmultiply_nd_s32(

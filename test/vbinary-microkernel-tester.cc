@@ -330,9 +330,6 @@ void VBinaryMicrokernelTester::Test(
         case OpType::Sub:
           y_ref[i] = a_data[i] - b_data[i];
           break;
-        case OpType::VMultiply:
-          y_ref[i] = a_data[i] * b_data[i];
-          break;
       }
     }
 
