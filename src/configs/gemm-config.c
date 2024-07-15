@@ -1757,27 +1757,29 @@ static void init_qp8_f32_qc4w_gemm_config(void) {
   if (XNN_ENABLE_ARM_I8MM && hardware_config->use_arm_neon_i8mm) {
 #if XNN_ENABLE_ARM_I8MM
     qp8_f32_qc4w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_qp8gemm_ukernel(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x8c16s2__aarch64_neondot);
-    qp8_f32_qc4w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_qp8gemm_ukernel(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_4x8c16s2__aarch64_neoni8mm_mstep2);
+    qp8_f32_qc4w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(8)] = xnn_init_hmp_qp8gemm_ukernel(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_8x8c16s2__aarch64_neoni8mm_mstep2);
     qp8_f32_qc4w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-    qp8_f32_qc4w_gemm_config.pack_weights_and_biases = xnn_pack_kai_qs8_weights_and_biases;
-    qp8_f32_qc4w_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_qs8_weights_and_biases;
-    qp8_f32_qc4w_gemm_config.mr = 4;
+    qp8_f32_qc4w_gemm_config.pack_weights_and_biases = xnn_pack_kai_qs4_weights_and_biases;
+    qp8_f32_qc4w_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_qs4_weights_and_biases;
+    qp8_f32_qc4w_gemm_config.mr = 8;
     qp8_f32_qc4w_gemm_config.nr = 8;
     qp8_f32_qc4w_gemm_config.log2_kr = 4;
     qp8_f32_qc4w_gemm_config.log2_sr = 1;
     qp8_f32_qc4w_gemm_config.planes = 2;
+    qp8_f32_qc4w_gemm_config.mr_packed = 4;
 #endif  // XNN_ENABLE_ARM_I8MM
   } else if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
 #if XNN_ENABLE_ARM_DOTPROD
     qp8_f32_qc4w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_qp8gemm_ukernel(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x8c16s2__aarch64_neondot);
     qp8_f32_qc4w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-    qp8_f32_qc4w_gemm_config.pack_weights_and_biases = xnn_pack_kai_qs8_weights_and_biases;
-    qp8_f32_qc4w_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_qs8_weights_and_biases;
+    qp8_f32_qc4w_gemm_config.pack_weights_and_biases = xnn_pack_kai_qs4_weights_and_biases;
+    qp8_f32_qc4w_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_qs4_weights_and_biases;
     qp8_f32_qc4w_gemm_config.mr = 1;
     qp8_f32_qc4w_gemm_config.nr = 8;
     qp8_f32_qc4w_gemm_config.log2_kr = 4;
     qp8_f32_qc4w_gemm_config.log2_sr = 1;
     qp8_f32_qc4w_gemm_config.planes = 2;
+    qp8_f32_qc4w_gemm_config.mr_packed = 1;
 #endif  // XNN_ENABLE_ARM_DOTPROD
   }
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI

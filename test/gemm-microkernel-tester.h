@@ -12,19 +12,15 @@
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
+#include <iostream>
+#include <ostream>
 #include <string>
 
 #include <gtest/gtest.h>
-#include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/igemm.h"
-#include "xnnpack/isa-checks.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"
-#include "xnnpack/ppmm.h"
 #include "xnnpack/requantization.h"
 
 #if XNN_PLATFORM_JIT
@@ -55,6 +51,10 @@ inline size_t NextPrime(size_t n) {
 
 class GemmMicrokernelTester {
  public:
+  GemmMicrokernelTester clone() const {
+    return *this;
+  }
+
   GemmMicrokernelTester& mr(size_t mr) {
     this->mr_ = mr;
     return *this;
@@ -260,6 +260,18 @@ class GemmMicrokernelTester {
 
   bool relu() const {
     return relu_;
+  }
+
+  GemmMicrokernelTester& mr_packed(size_t mr_packed) {
+    this->mr_packed_ = mr_packed;
+    return *this;
+  }
+
+  size_t mr_packed() const {
+    if (this->mr_packed_ == 0) {
+      return this->mr_;
+    }
+    return this->mr_packed_;
   }
 
   size_t nc_mod_nr() const {
@@ -514,6 +526,7 @@ class GemmMicrokernelTester {
   size_t iterations_{15};
   bool known_nc_mod_nr_{true};
   bool relu_{false};
+  size_t mr_packed_{0};
 };
 
 enum class LoopStepType {

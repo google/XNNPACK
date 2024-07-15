@@ -16,6 +16,7 @@
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"
+#include "xnnpack/packw.h"
 
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON

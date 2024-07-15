@@ -78,7 +78,6 @@ TEST_P(GemmTest, Test) {
             }
             for (size_t bl = params.loop_bl_.from; bl <= tester.k() / 2;
                bl = params.loop_bl_.next(bl)) {
-              
                if (params.loop_bl_.is_set) {
                 // Require block size to divide (padded) column size.
                 if (round_up_po2(k, params.loop_bl_.step) % bl != 0) {
@@ -1729,6 +1728,7 @@ void GemmMicrokernelTester::Test(
   // Create a fake `gemm_config` for the packing functions.
   struct xnn_gemm_config gemm_config;
   gemm_config.mr = static_cast<uint8_t>(mr());
+  gemm_config.mr_packed = static_cast<uint8_t>(mr_packed());
   gemm_config.nr = static_cast<uint8_t>(nr());
   gemm_config.log2_kr = static_cast<uint8_t>(31 - math_clz_nonzero_u32(kr()));
   gemm_config.log2_sr = static_cast<uint8_t>(31 - math_clz_nonzero_u32(sr()));
@@ -1743,9 +1743,9 @@ void GemmMicrokernelTester::Test(
 
     // Quantize the left-hand operand.
     const size_t input_packed_size =
-        xnn_x8_packq_f32qp8_packed_size(m(), k2, mr(), kr(), sr());
+        xnn_x8_packq_f32qp8_packed_size(m(), k2, mr_packed(), kr(), sr());
     std::vector<int8_t> input_qp8(input_packed_size);
-    xnn_x8_packq_f32qp8_ukernel__scalar_u1(m(), k2, mr(), kr(), sr(),
+    xnn_x8_packq_f32qp8_ukernel__scalar_u1(m(), k2, mr_packed(), kr(), sr(),
                                            /*m_idx_start=*/0, input_f32.data(),
                                            /*lhs_stride=*/k2 * sizeof(float),
                                            input_qp8.data());
@@ -1785,8 +1785,9 @@ void GemmMicrokernelTester::Test(
                                        : (b[nb_index] >> 4)) -
               b_zero_point();
           c_ref[m_index * n() + n_index] +=
-              xnn_x8_packq_f32qp8_get_dequantized(
-                  m_index, k_index, input_qp8.data(), k2, mr(), kr(), sr()) *
+              xnn_x8_packq_f32qp8_get_dequantized(m_index, k_index,
+                                                  input_qp8.data(), k2,
+                                                  mr_packed(), kr(), sr()) *
               static_cast<int32_t>(bv);
         }
         c_ref[m_index * n() + n_index] *= kernel_scale[n_index];

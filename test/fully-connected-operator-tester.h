@@ -624,7 +624,7 @@ class FullyConnectedOperatorTester {
 
     // Note that the microkernel will force `mr` to 1 if `mc` is 1, so we have
     // to anticipate that when packing the left-hand operand.
-    const uint32_t mr = batch_size() > 1 ? gemm_config->mr : 1;
+    const uint32_t mr_packed = batch_size() > 1 ? gemm_config->mr_packed : 1;
     const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
     const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
 
@@ -662,12 +662,12 @@ class FullyConnectedOperatorTester {
 
       // Quantize the left-hand operand.
       const size_t input_packed_size =
-          xnn_x8_packq_f32qp8_packed_size(batch_size(), k2, mr, kr, sr);
+          xnn_x8_packq_f32qp8_packed_size(batch_size(), k2, mr_packed, kr, sr);
       std::vector<int8_t> input_qp8(input_packed_size);
-      xnn_x8_packq_f32qp8_ukernel__scalar_u1(batch_size(), k2, mr, kr, sr,
-                                             /*m_idx_start=*/0, input.data(),
-                                             /*lhs_stride=*/k2 * sizeof(float),
-                                             input_qp8.data());
+      xnn_x8_packq_f32qp8_ukernel__scalar_u1(
+          batch_size(), k2, mr_packed, kr, sr,
+          /*m_idx_start=*/0, input.data(),
+          /*lhs_stride=*/k2 * sizeof(float), input_qp8.data());
 
       // Compute reference results, without renormalization.
       std::fill(output_ref.begin(), output_ref.end(), 0);
@@ -687,7 +687,7 @@ class FullyConnectedOperatorTester {
               }
               output_ref[mi * output_channels() + ni] +=
                   xnn_x8_packq_f32qp8_get_dequantized(mi, ki, input_qp8.data(),
-                                                      k2, mr, kr, sr) *
+                                                      k2, mr_packed, kr, sr) *
                   static_cast<float>(static_cast<int32_t>(kernel_value));
             }
             output_ref[mi * output_channels() + ni] *= kernel_scale[ni];
@@ -711,7 +711,7 @@ class FullyConnectedOperatorTester {
               }
               output_ref[mi * output_channels() + ni] +=
                   xnn_x8_packq_f32qp8_get_dequantized(mi, ki, input_qp8.data(),
-                                                      k2, mr, kr, sr) *
+                                                      k2, mr_packed, kr, sr) *
                   static_cast<float>(static_cast<int32_t>(kernel_value));
             }
             output_ref[mi * output_channels() + ni] *= kernel_scale[ni];

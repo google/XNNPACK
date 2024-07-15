@@ -458,7 +458,7 @@ XNN_INTERNAL size_t xnn_packed_stride_qu8_weights_and_biases(
     size_t extra_bytes);
 
 #if XNN_ENABLE_KLEIDIAI
-XNN_INTERNAL void xnn_pack_kai_qs8_weights_and_biases(
+XNN_INTERNAL void xnn_pack_kai_qs4_weights_and_biases(
     uint32_t flags,                                //
     const struct xnn_gemm_config* gemm_config,     //
     size_t input_channels,                         //
@@ -476,7 +476,7 @@ XNN_INTERNAL void xnn_pack_kai_qs8_weights_and_biases(
     void* packed_weights_ptr,                      //
     const void* params);
 
-XNN_INTERNAL size_t xnn_packed_stride_kai_qs8_weights_and_biases(
+XNN_INTERNAL size_t xnn_packed_stride_kai_qs4_weights_and_biases(
     const struct xnn_gemm_config* gemm_config,  //
     size_t k,                                   //
     size_t k_stride,                            //
