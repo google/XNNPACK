@@ -17,6 +17,24 @@ $assert DATATYPE in ["QD8", "QS8", "QC4", "QB4", "QC8"]
 $if PREFETCH:
   #include "xnnpack/prefetch.h"
 
+$#
+$INDENT = 0
+$_ = ""
+$#
+$def SET_INDENT(NEW_INDENT):
+  $global INDENT
+  $global _
+  $INDENT=NEW_INDENT
+  $_ = "  " * INDENT
+$#
+$def BEGIN():
+  $SET_INDENT(INDENT + 1)
+  $return '{'
+$#
+$def END():
+  $SET_INDENT(INDENT - 1)
+  $return _ + '}'
+$#
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w", "QS8": "qs8", "QU8": "qu8", "QC4": "qd8_f32_qc4w", "QB4": "qd8_f32_qb4w"}[DATATYPE]
 $REQUANTIZATION_SPEC = "" if DATATYPE in ["QD8", "QC4", "QB4"] else "_" + REQUANTIZATION.lower()
@@ -126,6 +144,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
     w = (const int32_t*) w + 16;
 
     $if DATATYPE == "QB4":
+      $SET_INDENT(1)
       for (size_t nb=0; nb < n_blocks; ++nb) {
         $for M in range(MR):
           __m512i vacc${M}x01234567 = _mm512_setzero_epi32();
@@ -134,88 +153,88 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
           $for M in range(MR):
             __m512i vacc1x${M}x01234567 = _mm512_setzero_epi32();
             __m512i vacc1x${M}x89ABCDEF = _mm512_setzero_epi32();
-      size_t k = bl;
+      ${_}size_t k = bl;
     $else:
       size_t k = kc;
-    while (k >= 16 * sizeof(int8_t)) {
+    ${_}while (k >= 16 * sizeof(int8_t)) {
       $for M in range(MR):
-        const __m512i va${M}x01234567 = _mm512_xor_epi64(_mm512_set1_epi64((int64_t) unaligned_load_u64(a${M})), vsign_mask);
-        const __m512i va${M}x89ABCDEF = _mm512_xor_epi64(_mm512_set1_epi64((int64_t) unaligned_load_u64(a${M} + 8)), vsign_mask);
-        a${M} += 16;
+        ${_}const __m512i va${M}x01234567 = _mm512_xor_epi64(_mm512_set1_epi64((int64_t) unaligned_load_u64(a${M})), vsign_mask);
+        ${_}const __m512i va${M}x89ABCDEF = _mm512_xor_epi64(_mm512_set1_epi64((int64_t) unaligned_load_u64(a${M} + 8)), vsign_mask);
+        ${_}a${M} += 16;
 
       $if DATATYPE in ["QC4", "QB4"]:
-        const __m512i vbb01234567x01234567 = _mm512_load_si512(w);
-        const __m512i vbb89ABCDEFx01234567 = _mm512_load_si512((const ${XINT8_T}*) w + 64);
+        ${_}const __m512i vbb01234567x01234567 = _mm512_load_si512(w);
+        ${_}const __m512i vbb89ABCDEFx01234567 = _mm512_load_si512((const ${XINT8_T}*) w + 64);
         $if GFNI:
-          const __m512i vb01234567x01234567 = _mm512_gf2p8affine_epi64_epi8(vbb01234567x01234567, vshl4, 0);
-          const __m512i vb89ABCDEFx01234567 = _mm512_gf2p8affine_epi64_epi8(vbb89ABCDEFx01234567, vshl4, 0);
-          const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbb01234567x01234567, vvalue_mask);
-          const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbb89ABCDEFx01234567, vvalue_mask);
+          ${_}const __m512i vb01234567x01234567 = _mm512_gf2p8affine_epi64_epi8(vbb01234567x01234567, vshl4, 0);
+          ${_}const __m512i vb89ABCDEFx01234567 = _mm512_gf2p8affine_epi64_epi8(vbb89ABCDEFx01234567, vshl4, 0);
+          ${_}const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbb01234567x01234567, vvalue_mask);
+          ${_}const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbb89ABCDEFx01234567, vvalue_mask);
         $else:
-          const __m512i vbs01234567x01234567 = _mm512_slli_epi32(vbb01234567x01234567, 4);
-          const __m512i vbs89ABCDEFx01234567 = _mm512_slli_epi32(vbb89ABCDEFx01234567, 4);
-          const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbb01234567x01234567, vvalue_mask);
-          const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbb89ABCDEFx01234567, vvalue_mask);
-          const __m512i vb01234567x01234567 = _mm512_and_si512(vbs01234567x01234567, vvalue_mask);
-          const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbs89ABCDEFx01234567, vvalue_mask);
+          ${_}const __m512i vbs01234567x01234567 = _mm512_slli_epi32(vbb01234567x01234567, 4);
+          ${_}const __m512i vbs89ABCDEFx01234567 = _mm512_slli_epi32(vbb89ABCDEFx01234567, 4);
+          ${_}const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbb01234567x01234567, vvalue_mask);
+          ${_}const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbb89ABCDEFx01234567, vvalue_mask);
+          ${_}const __m512i vb01234567x01234567 = _mm512_and_si512(vbs01234567x01234567, vvalue_mask);
+          ${_}const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbs89ABCDEFx01234567, vvalue_mask);
       $else:
-        const __m512i vb01234567x01234567 = _mm512_load_si512(w);
-        const __m512i vb89ABCDEFx01234567 = _mm512_load_si512((const ${XINT8_T}*) w + 64);
-        const __m512i vb01234567x89ABCDEF = _mm512_load_si512((const ${XINT8_T}*) w + 128);
-        const __m512i vb89ABCDEFx89ABCDEF = _mm512_load_si512((const ${XINT8_T}*) w + 192);
+        ${_}const __m512i vb01234567x01234567 = _mm512_load_si512(w);
+        ${_}const __m512i vb89ABCDEFx01234567 = _mm512_load_si512((const ${XINT8_T}*) w + 64);
+        ${_}const __m512i vb01234567x89ABCDEF = _mm512_load_si512((const ${XINT8_T}*) w + 128);
+        ${_}const __m512i vb89ABCDEFx89ABCDEF = _mm512_load_si512((const ${XINT8_T}*) w + 192);
         $if PREFETCH:
-          xnn_prefetch_to_l1((const ${XINT8_T}*) w + 768);
-          xnn_prefetch_to_l1((const ${XINT8_T}*) w + 832);
+          ${_}xnn_prefetch_to_l1((const ${XINT8_T}*) w + 768);
+          ${_}xnn_prefetch_to_l1((const ${XINT8_T}*) w + 832);
 
       $for M in range(MR):
-        vacc${M}x01234567 = _mm512_dpbusd_epi32(vacc${M}x01234567, va${M}x01234567, vb01234567x01234567);
-        vacc${M}x89ABCDEF = _mm512_dpbusd_epi32(vacc${M}x89ABCDEF, va${M}x01234567, vb89ABCDEFx01234567);
+        ${_}vacc${M}x01234567 = _mm512_dpbusd_epi32(vacc${M}x01234567, va${M}x01234567, vb01234567x01234567);
+        ${_}vacc${M}x89ABCDEF = _mm512_dpbusd_epi32(vacc${M}x89ABCDEF, va${M}x01234567, vb89ABCDEFx01234567);
       $if PREFETCH:
-        xnn_prefetch_to_l1((const ${XINT8_T}*) w + 896);
-        xnn_prefetch_to_l1((const ${XINT8_T}*) w + 960);
+        ${_}xnn_prefetch_to_l1((const ${XINT8_T}*) w + 896);
+        ${_}xnn_prefetch_to_l1((const ${XINT8_T}*) w + 960);
       $for M in range(MR):
         $if MR < 4:
-          vacc1x${M}x01234567 = _mm512_dpbusd_epi32(vacc1x${M}x01234567, va${M}x89ABCDEF, vb01234567x89ABCDEF);
-          vacc1x${M}x89ABCDEF = _mm512_dpbusd_epi32(vacc1x${M}x89ABCDEF, va${M}x89ABCDEF, vb89ABCDEFx89ABCDEF);
+          ${_}vacc1x${M}x01234567 = _mm512_dpbusd_epi32(vacc1x${M}x01234567, va${M}x89ABCDEF, vb01234567x89ABCDEF);
+          ${_}vacc1x${M}x89ABCDEF = _mm512_dpbusd_epi32(vacc1x${M}x89ABCDEF, va${M}x89ABCDEF, vb89ABCDEFx89ABCDEF);
         $else:
-          vacc${M}x01234567 = _mm512_dpbusd_epi32(vacc${M}x01234567, va${M}x89ABCDEF, vb01234567x89ABCDEF);
-          vacc${M}x89ABCDEF = _mm512_dpbusd_epi32(vacc${M}x89ABCDEF, va${M}x89ABCDEF, vb89ABCDEFx89ABCDEF);
+          ${_}vacc${M}x01234567 = _mm512_dpbusd_epi32(vacc${M}x01234567, va${M}x89ABCDEF, vb01234567x89ABCDEF);
+          ${_}vacc${M}x89ABCDEF = _mm512_dpbusd_epi32(vacc${M}x89ABCDEF, va${M}x89ABCDEF, vb89ABCDEFx89ABCDEF);
 
       $if DATATYPE in ["QC4", "QB4"]:
-        w = (const ${XINT8_T}*) w + 128;
+        ${_}w = (const ${XINT8_T}*) w + 128;
       $else:
-        w = (const ${XINT8_T}*) w + 256;
-      k -= 16 * sizeof(${XINT8_T});
-    }
+        ${_}w = (const ${XINT8_T}*) w + 256;
+      ${_}k -= 16 * sizeof(${XINT8_T});
+    ${_}}
 
-    if (k != 0) {
+    ${_}if (k != 0) {
       $for M in range(MR):
-        const __m512i va${M}x01234567 = _mm512_xor_epi64(_mm512_set1_epi64((int64_t) unaligned_load_u64(a${M})), vsign_mask);
-        a${M} += 8;
+        ${_}const __m512i va${M}x01234567 = _mm512_xor_epi64(_mm512_set1_epi64((int64_t) unaligned_load_u64(a${M})), vsign_mask);
+        ${_}a${M} += 8;
 
       $if DATATYPE in ["QC4", "QB4"]:
-        const __m512i vbb01234567x01234567 = _mm512_load_si512(w);
-        const __m512i vbb89ABCDEFx01234567 = _mm512_load_si512((const ${XINT8_T}*) w + 64);
+        ${_}const __m512i vbb01234567x01234567 = _mm512_load_si512(w);
+        ${_}const __m512i vbb89ABCDEFx01234567 = _mm512_load_si512((const ${XINT8_T}*) w + 64);
         $if GFNI:
-          const __m512i vb01234567x01234567 = _mm512_gf2p8affine_epi64_epi8(vbb01234567x01234567, vshl4, 0);
-          const __m512i vb89ABCDEFx01234567 = _mm512_gf2p8affine_epi64_epi8(vbb89ABCDEFx01234567, vshl4, 0);
+          ${_}const __m512i vb01234567x01234567 = _mm512_gf2p8affine_epi64_epi8(vbb01234567x01234567, vshl4, 0);
+          ${_}const __m512i vb89ABCDEFx01234567 = _mm512_gf2p8affine_epi64_epi8(vbb89ABCDEFx01234567, vshl4, 0);
         $else:
-          const __m512i vb01234567x01234567 = _mm512_slli_epi32(vbb01234567x01234567, 4);
-          const __m512i vb89ABCDEFx01234567 = _mm512_slli_epi32(vbb89ABCDEFx01234567, 4);
+          ${_}const __m512i vb01234567x01234567 = _mm512_slli_epi32(vbb01234567x01234567, 4);
+          ${_}const __m512i vb89ABCDEFx01234567 = _mm512_slli_epi32(vbb89ABCDEFx01234567, 4);
       $else:
-        const __m512i vb01234567x01234567 = _mm512_load_si512(w);
-        const __m512i vb89ABCDEFx01234567 = _mm512_load_si512((const ${XINT8_T}*) w + 64);
+        ${_}const __m512i vb01234567x01234567 = _mm512_load_si512(w);
+        ${_}const __m512i vb89ABCDEFx01234567 = _mm512_load_si512((const ${XINT8_T}*) w + 64);
 
       $for M in range(MR):
-        vacc${M}x01234567 = _mm512_dpbusd_epi32(vacc${M}x01234567, va${M}x01234567, vb01234567x01234567);
-        vacc${M}x89ABCDEF = _mm512_dpbusd_epi32(vacc${M}x89ABCDEF, va${M}x01234567, vb89ABCDEFx01234567);
+        ${_}vacc${M}x01234567 = _mm512_dpbusd_epi32(vacc${M}x01234567, va${M}x01234567, vb01234567x01234567);
+        ${_}vacc${M}x89ABCDEF = _mm512_dpbusd_epi32(vacc${M}x89ABCDEF, va${M}x01234567, vb89ABCDEFx01234567);
       $if PREFETCH:
-        xnn_prefetch_to_l1((const ${XINT8_T}*) w + 896);
-        xnn_prefetch_to_l1((const ${XINT8_T}*) w + 960);
+        ${_}xnn_prefetch_to_l1((const ${XINT8_T}*) w + 896);
+        ${_}xnn_prefetch_to_l1((const ${XINT8_T}*) w + 960);
 
-      w = (const ${XINT8_T}*) w + 128;
-      k -= 8 * sizeof(${XINT8_T});
-    }
+      ${_}w = (const ${XINT8_T}*) w + 128;
+      ${_}k -= 8 * sizeof(${XINT8_T});
+    ${_}}
     $if DATATYPE == "QB4":
       const __m512 vfilter_output_scale0123456789ABCDEF = _mm512_load_ps((const float*) w);
       w = (const float*) w + 16;
