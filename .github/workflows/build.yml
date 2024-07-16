@@ -197,21 +197,52 @@ jobs:
       - name: Build with Xcode
         run: cmake --build build/ios/x86_64 --parallel $(sysctl -n hw.ncpu) -- -sdk iphonesimulator -quiet
         working-directory: ${{ github.workspace }}
-  bazel-linux:
+  bazel-linux-x86_64:
     runs-on: ubuntu-22.04-8core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Android NDK
-        id: setup-ndk
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r25b
-          add-to-path: false
-      - name: Build and run tests
-        run: |
-          # TODO(b/340788119): re-enable once an ndk supports this flag.
-          bazel test --define=xnn_enable_avx512fp16=false --test_output=errors test:all
+      - name: Update apt
+        run: sudo apt update
+      - name: Install clang-18
         working-directory: ${{ github.workspace }}
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 18
+      - name: Build and run tests
         env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          CC: clang-18
+          CXX: clang++-18
+        run: |
+            bazel test --test_output=errors test:all
+        working-directory: ${{ github.workspace }}
+  bazel-linux-aarch64:
+    runs-on: arm-ubuntu-arm-22.04-8core
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update apt
+        run: sudo apt update
+      - name: Install clang-18
+        working-directory: ${{ github.workspace }}
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 18
+      - name: Build and run tests
+        env:
+          CC: clang-18
+          CXX: clang++-18
+        run: |
+          # For whatever reason, `xnn_enable_kleidiai` has to be set to `true` explicitly, i.e.
+          # the config setting `//build_config:aarch64` for the default does not seem to trigger.
+          # We also only test the KleidiAI integration for now.
+          bazel test \
+            --define=xnn_enable_kleidiai=true \
+            --define=xnn_enable_jit=false \
+            --test_output=errors \
+            test:qp8_f32_qc4w_gemm_minmax_test \
+            test:fully_connected_nc_test \
+            test:fully_connected_test
+        working-directory: ${{ github.workspace }}

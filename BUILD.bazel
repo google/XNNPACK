@@ -789,7 +789,7 @@ xnnpack_microkernel_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
-        "@KleidiAI///kai/ukernels/matmul",
+        "@KleidiAI//kai/ukernels/matmul",
     ]),
 )
 
@@ -811,7 +811,7 @@ xnnpack_microkernel_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
-        "@KleidiAI///kai/ukernels/matmul",
+        "@KleidiAI//kai/ukernels/matmul",
     ]),
 )
 
@@ -933,7 +933,7 @@ xnnpack_microkernel_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
-        "@KleidiAI///kai/ukernels/matmul",
+        "@KleidiAI//kai/ukernels/matmul",
     ]),
 )
 
@@ -956,7 +956,7 @@ xnnpack_microkernel_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
-        "@KleidiAI///kai/ukernels/matmul",
+        "@KleidiAI//kai/ukernels/matmul",
     ]),
 )
 
@@ -1743,7 +1743,7 @@ xnnpack_cc_library(
         ":unaligned",
         "@FP16",
     ] + xnnpack_if_kleidiai_enabled([
-        "@KleidiAI///kai/ukernels/matmul",
+        "@KleidiAI//kai/ukernels/matmul",
     ]),
 )
 
