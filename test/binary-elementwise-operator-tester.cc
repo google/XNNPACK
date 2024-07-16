@@ -729,8 +729,7 @@ void BinaryElementwiseOperatorTester::TestS32() const {
   ASSERT_LT(qmin(), qmax());
 
   xnnpack::ReplicableRandomDevice rng;
-  std::uniform_int_distribution<int32_t> s32dist(-10000, 10000 );//std::numeric_limits<int32_t>::min(),
-                                  //std::numeric_limits<int32_t>::max());
+  std::uniform_int_distribution<int32_t> s32dist(-10000, 10000);
 
   // Compute generalized shapes.
   std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_dims;
@@ -788,7 +787,7 @@ void BinaryElementwiseOperatorTester::TestS32() const {
                 output_ref[i * output_strides[0] + j * output_strides[1] +
                            k * output_strides[2] + l * output_strides[3] +
                            m * output_strides[4] + n * output_strides[5]] =
-                    Compute_S32(
+                    Compute(
                         input1[i * input1_strides[0] + j * input1_strides[1] +
                                k * input1_strides[2] + l * input1_strides[3] +
                                m * input1_strides[4] + n * input1_strides[5]],
@@ -801,33 +800,6 @@ void BinaryElementwiseOperatorTester::TestS32() const {
         }
       }
     }
-    /*const int32_t accumulated_min =
-        *std::min_element(output_ref.cbegin(), output_ref.cend());
-    const int32_t accumulated_max =
-        *std::max_element(output_ref.cbegin(), output_ref.cend());
-    const int32_t accumulated_range = accumulated_max - accumulated_min;
-    int32_t output_min =
-        accumulated_min +
-        accumulated_range *
-            (static_cast<int32_t>(qmin() - std::numeric_limits<int16_t>::min()) /
-             static_cast<int32_t>(std::numeric_limits<int16_t>::max() -
-                                std::numeric_limits<int16_t>::min()));
-    if (qmin() == std::numeric_limits<int16_t>::min()) {
-      output_min = -std::numeric_limits<int32_t>::infinity();
-    }
-    int32_t output_max =
-        accumulated_max -
-        accumulated_range *
-            (static_cast<int32_t>(std::numeric_limits<int16_t>::max() - qmax()) /
-             static_cast<int32_t>(std::numeric_limits<int16_t>::max() -
-                                std::numeric_limits<int16_t>::min()));
-    if (qmax() == std::numeric_limits<int16_t>::max()) {
-      output_max = +std::numeric_limits<int32_t>::infinity();
-    }
-    for (int32_t& output_value : output_ref) {
-      output_value = std::max(output_value, output_min);
-      output_value = std::min(output_value, output_max);
-    }*/
 
     // Create, setup, run, and destroy a binary elementwise operator.
     ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -878,10 +850,7 @@ void BinaryElementwiseOperatorTester::TestS32() const {
                     i * output_strides[0] + j * output_strides[1] +
                     k * output_strides[2] + l * output_strides[3] +
                     m * output_strides[4] + n * output_strides[5];
-                ASSERT_EQ(output[index], output_ref[index]);/*,
-                            1.0e-6f * std::abs(output_ref[index]))
-                    << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k
-                    << ", " << l << ", " << m << ", " << n << ")";*/
+                ASSERT_EQ(output[index], output_ref[index]);
               }
             }
           }

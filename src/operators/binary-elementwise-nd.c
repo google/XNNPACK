@@ -763,15 +763,6 @@ enum xnn_status xnn_create_vmultiply_nd_s32(
     uint32_t flags,
     xnn_operator_t* vmultiply_op_out)
 {
-  /*return create_binary_elementwise_nd(
-    flags,
-    NULL,
-    NULL,
-    0,
-    xnn_operator_type_vmultiply_nd_s32,
-    xnn_init_s32_vmultiply_config(),
-    vmultiply_op_out);*/
-
   const struct xnn_binary_elementwise_config* s32_vmultiply_config = xnn_init_s32_vmultiply_config();
   if (s32_vmultiply_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
@@ -2214,48 +2205,6 @@ enum xnn_status xnn_run_squared_difference_nd_f32(
     num_input2_dims, input2_shape,
     input1, input2, output,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
-    offsetof(struct xnn_operator, params2.f32_minmax), sizeof(params),
-    binary_elementwise_subconfig,
-    &params,
-    &params,
-    sizeof(params),
-    flags,
-    threadpool);
-}
-
-
-enum xnn_status xnn_run_vmultiply_nd_s32(
-  size_t num_input1_dims,
-  const size_t* input1_shape,
-  size_t num_input2_dims,
-  const size_t* input2_shape,
-  const int32_t* input1,
-  const int32_t* input2,
-  int32_t* output,
-  uint32_t flags,
-  pthreadpool_t threadpool)
-{
-  const struct xnn_binary_elementwise_config* s32_vmultiply_config = xnn_init_s32_vmultiply_config();
-  if (s32_vmultiply_config == NULL) {
-    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
-      xnn_operator_type_to_string(xnn_operator_type_vmultiply_nd_s32));
-    return xnn_status_unsupported_hardware;
-  }
-
-  union xnn_s32_default_params params;
-  if (s32_vmultiply_config->init.s32_default != NULL) {
-    s32_vmultiply_config->init.s32_default(&params);
-  }
-
-  const struct xnn_binary_elementwise_subconfig* binary_elementwise_subconfig = &s32_vmultiply_config->linear;
-
-  return run_binary_elementwise_nd(
-    xnn_operator_type_vmultiply_nd_s32,
-    num_input1_dims, input1_shape,
-    num_input2_dims, input2_shape,
-    input1, input2, output,
-    /*log2_element_size=*/XNN_LOG2_SIZEOF_INT32_T,
     offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
     offsetof(struct xnn_operator, params2.f32_minmax), sizeof(params),
     binary_elementwise_subconfig,

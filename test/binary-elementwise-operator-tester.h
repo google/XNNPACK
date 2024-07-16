@@ -179,7 +179,7 @@ class BinaryElementwiseOperatorTester {
     }
   }
 
-  int32_t Compute_S32(int32_t a, int32_t b) const{
+  int32_t Compute(int32_t a, int32_t b) const{
     switch (operation_type()) {
       case OperationType::Add:
         return a + b;
