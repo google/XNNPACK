@@ -25,8 +25,6 @@
 #include "xnnpack/vcvt.h"
 #include "xnnpack/vmulcaddc.h"
 #include "xnnpack/vunary.h"
-#include <xnnpack/gemm.h>
-#include <xnnpack/math.h>
 
 
 void xnn_f16_f32_vcvt_ukernel__wasmrelaxedsimd_int16_u16(
