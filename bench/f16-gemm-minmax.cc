@@ -16,6 +16,7 @@
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"
+#include "xnnpack/packw.h"
 
 
 #if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
@@ -23,7 +24,7 @@
     GEMMBenchmark(state,
       xnn_f16_gemm_minmax_ukernel_1x32__avx512fp16_broadcast,
       xnn_init_f16_minmax_fp16arith_params,
-      xnn_pack_f16_gemm_goi_w,
+      xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4,
       /*mr=*/1, /*nr=*/32, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckAVX512FP16);
   }
@@ -34,7 +35,7 @@
     GEMMBenchmark(state,
       xnn_f16_gemm_minmax_ukernel_4x32__avx512fp16_broadcast,
       xnn_init_f16_minmax_fp16arith_params,
-      xnn_pack_f16_gemm_goi_w,
+      xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4,
       /*mr=*/4, /*nr=*/32, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckAVX512FP16);
   }
@@ -45,7 +46,7 @@
     GEMMBenchmark(state,
       xnn_f16_gemm_minmax_ukernel_5x32__avx512fp16_broadcast,
       xnn_init_f16_minmax_fp16arith_params,
-      xnn_pack_f16_gemm_goi_w,
+      xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4,
       /*mr=*/5, /*nr=*/32, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckAVX512FP16);
   }
@@ -56,7 +57,7 @@
     GEMMBenchmark(state,
       xnn_f16_gemm_minmax_ukernel_6x32__avx512fp16_broadcast,
       xnn_init_f16_minmax_fp16arith_params,
-      xnn_pack_f16_gemm_goi_w,
+      xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4,
       /*mr=*/6, /*nr=*/32, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckAVX512FP16);
   }
@@ -67,7 +68,7 @@
     GEMMBenchmark(state,
       xnn_f16_gemm_minmax_ukernel_7x32__avx512fp16_broadcast,
       xnn_init_f16_minmax_fp16arith_params,
-      xnn_pack_f16_gemm_goi_w,
+      xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4,
       /*mr=*/7, /*nr=*/32, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckAVX512FP16);
   }
@@ -78,7 +79,7 @@
     GEMMBenchmark(state,
       xnn_f16_gemm_minmax_ukernel_8x32__avx512fp16_broadcast,
       xnn_init_f16_minmax_fp16arith_params,
-      xnn_pack_f16_gemm_goi_w,
+      xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4,
       /*mr=*/8, /*nr=*/32, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckAVX512FP16);
   }
@@ -89,7 +90,7 @@
     GEMMBenchmark(state,
       xnn_f16_gemm_minmax_ukernel_1x64__avx512fp16_broadcast,
       xnn_init_f16_minmax_fp16arith_params,
-      xnn_pack_f16_gemm_goi_w,
+      xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4,
       /*mr=*/1, /*nr=*/64, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckAVX512FP16);
   }
@@ -100,7 +101,7 @@
     GEMMBenchmark(state,
       xnn_f16_gemm_minmax_ukernel_4x64__avx512fp16_broadcast,
       xnn_init_f16_minmax_fp16arith_params,
-      xnn_pack_f16_gemm_goi_w,
+      xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4,
       /*mr=*/4, /*nr=*/64, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckAVX512FP16);
   }
@@ -111,7 +112,7 @@
     GEMMBenchmark(state,
       xnn_f16_gemm_minmax_ukernel_5x64__avx512fp16_broadcast,
       xnn_init_f16_minmax_fp16arith_params,
-      xnn_pack_f16_gemm_goi_w,
+      xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4,
       /*mr=*/5, /*nr=*/64, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckAVX512FP16);
   }
@@ -122,7 +123,7 @@
     GEMMBenchmark(state,
       xnn_f16_gemm_minmax_ukernel_6x64__avx512fp16_broadcast,
       xnn_init_f16_minmax_fp16arith_params,
-      xnn_pack_f16_gemm_goi_w,
+      xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4,
       /*mr=*/6, /*nr=*/64, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckAVX512FP16);
   }
@@ -133,7 +134,7 @@
     GEMMBenchmark(state,
       xnn_f16_gemm_minmax_ukernel_7x64__avx512fp16_broadcast,
       xnn_init_f16_minmax_fp16arith_params,
-      xnn_pack_f16_gemm_goi_w,
+      xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4,
       /*mr=*/7, /*nr=*/64, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckAVX512FP16);
   }
@@ -144,7 +145,7 @@
     GEMMBenchmark(state,
       xnn_f16_gemm_minmax_ukernel_8x64__avx512fp16_broadcast,
       xnn_init_f16_minmax_fp16arith_params,
-      xnn_pack_f16_gemm_goi_w,
+      xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4,
       /*mr=*/8, /*nr=*/64, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckAVX512FP16);
   }

@@ -5,12 +5,8 @@
 
 #include <assert.h>
 
-#include <hvx_hexagon_protos.h>
-#include <hexagon_protos.h>
-#include <hexagon_types.h>
+#include "xnnpack/simd/f32-hvx.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
 #include "xnnpack/vbinary.h"
 
@@ -28,26 +24,25 @@ void xnn_f32_vsqrdiff_ukernel__hvx_u32(
   assert(output != NULL);
 
 
-  const HVX_UVector *vptr_a = (const HVX_UVector *) input_a;
-  const HVX_UVector *vptr_b = (const HVX_UVector *) input_b;
-  HVX_UVector *vptr_o = (HVX_UVector*) output;
-
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
-    HVX_Vector va = *vptr_a++;
-    HVX_Vector vb = *vptr_b++;
+    HVX_Vector va = xnn_loadu_f32(input_a);
+    HVX_Vector vb = xnn_loadu_f32(input_b);
+    input_a += 32;
+    input_b += 32;
 
-    HVX_Vector vacc = Q6_Vsf_vsub_VsfVsf(va, vb);
-    vacc = Q6_Vsf_vmpy_VsfVsf(vacc, vacc);
+    HVX_Vector vacc = xnn_sub_f32(va, vb);
+    vacc = xnn_mul_f32(vacc, vacc);
 
-    *vptr_o++ = vacc;
+    xnn_storeu_f32(output, vacc);
+    output += 32;
   }
   if XNN_UNLIKELY(batch != 0) {
-     HVX_Vector va = *vptr_a;
-     HVX_Vector vb = *vptr_b;
+     HVX_Vector va = xnn_loadu_f32(input_a);
+     HVX_Vector vb = xnn_loadu_f32(input_b);
 
-     HVX_Vector vacc = Q6_Vsf_vsub_VsfVsf(va, vb);
-     vacc = Q6_Vsf_vmpy_VsfVsf(vacc, vacc);
+     HVX_Vector vacc = xnn_sub_f32(va, vb);
+     vacc = xnn_mul_f32(vacc, vacc);
      
-     Q6_V_vstu_variable(vptr_o, batch, vacc);
+     Q6_V_vstu_variable(output, batch, vacc);
   }
 }

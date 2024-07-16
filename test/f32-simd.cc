@@ -195,7 +195,7 @@ TEST_F(F32SimdTest, Xor) {
 
 TEST_F(F32SimdTest, ShiftLeft) {
   const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
-  const xnn_simd_f32_t res = xnn_shiftl_f32(a, 5);
+  const xnn_simd_f32_t res = xnn_sll_f32(a, 5);
   xnn_storeu_f32(output_.data(), res);
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
     ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << 5);
@@ -204,7 +204,7 @@ TEST_F(F32SimdTest, ShiftLeft) {
 
 TEST_F(F32SimdTest, ShiftRight) {
   const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
-  const xnn_simd_f32_t res = xnn_shiftr_f32(a, 5);
+  const xnn_simd_f32_t res = xnn_srl_f32(a, 5);
   xnn_storeu_f32(output_.data(), res);
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
     ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> 5);

@@ -1482,7 +1482,7 @@ void xnn_pack_qu8_weights_and_biases(
 }
 
 #if XNN_ENABLE_KLEIDIAI
-size_t xnn_packed_stride_kai_qs8_weights_and_biases(
+size_t xnn_packed_stride_kai_qs4_weights_and_biases(
     const struct xnn_gemm_config* gemm_config, size_t k, size_t unused_k_stride,
     size_t extra_bytes) {
   const uint32_t nr = gemm_config->nr;
@@ -1493,7 +1493,7 @@ size_t xnn_packed_stride_kai_qs8_weights_and_biases(
          nr;
 }
 
-void xnn_pack_kai_qs8_weights_and_biases(
+void xnn_pack_kai_qs4_weights_and_biases(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     size_t input_channels, size_t output_channels, size_t groups,
     size_t k_stride, const void* accumulator_init, const void* weights,

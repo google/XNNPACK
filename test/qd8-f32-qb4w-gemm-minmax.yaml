@@ -230,6 +230,48 @@
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
   k-block: 16
 
+# ARM NEON
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x16__neon_mlal_lane
+  init: xnn_init_f32_qb4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 8
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x16__neon_mlal_lane_prfm
+  init: xnn_init_f32_qb4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 8
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_2x16__neon_mlal_lane
+  init: xnn_init_f32_qb4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 8
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_2x16__neon_mlal_lane_prfm
+  init: xnn_init_f32_qb4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 8
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x16__neon_mlal_lane
+  init: xnn_init_f32_qb4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 8
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x16__neon_mlal_lane_prfm
+  init: xnn_init_f32_qb4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 8
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x16__neon_mlal_lane
+  init: xnn_init_f32_qb4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 8
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x16__neon_mlal_lane_prfm
+  init: xnn_init_f32_qb4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 8
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_6x16__neon_mlal_lane
+  init: xnn_init_f32_qb4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 8
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_6x16__neon_mlal_lane_prfm
+  init: xnn_init_f32_qb4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 8
+
 # ARM NEONI8MM
 - name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x8c8__neoni8mm
   init: xnn_init_f32_qb4w_minmax_scalar_params

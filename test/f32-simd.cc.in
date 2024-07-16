@@ -239,7 +239,7 @@ TEST_F(${TESTNAME}, ShiftLeft) {
   // constant, e.g. for `neon`.
   $for BITS in range(1, 32):
     {
-      const xnn_simd_f32_t res = xnn_shiftl_f32(a, ${BITS});
+      const xnn_simd_f32_t res = xnn_sll_f32(a, ${BITS});
       xnn_storeu_f32(output_.data(), res);
       for (size_t k = 0; k < xnn_simd_size_f32; k++) {
         ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] << ${BITS});
@@ -253,12 +253,42 @@ TEST_F(${TESTNAME}, ShiftRight) {
   // constant, e.g. for `neon`.
   $for BITS in range(1, 32):
     {
-      const xnn_simd_f32_t res = xnn_shiftr_f32(a, ${BITS});
+      const xnn_simd_f32_t res = xnn_srl_f32(a, ${BITS});
       xnn_storeu_f32(output_.data(), res);
       for (size_t k = 0; k < xnn_simd_size_f32; k++) {
         ASSERT_EQ(*(uint32_t *)&output_[k], *(uint32_t *)&inputs_[k] >> ${BITS});
       }
     }
+}
+
+TEST_F(${TESTNAME}, ShiftRightSigned) {
+  const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
+  // Not using a loop since the `bits` parameter needs to be a compile-time
+  // constant, e.g. for `neon`.
+  $for BITS in range(1, 32):
+    {
+      const xnn_simd_f32_t res = xnn_sra_f32(a, ${BITS});
+      xnn_storeu_f32(output_.data(), res);
+      for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+        ASSERT_EQ(*(int32_t *)&output_[k], *(int32_t *)&inputs_[k] >> ${BITS});
+      }
+    }
+}
+
+TEST_F(${TESTNAME}, CmpEq) {
+  for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+    if (rng_() & 1) {
+      inputs_[k + xnn_simd_size_f32] = inputs_[k];
+    }
+  }
+  const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
+  const xnn_simd_f32_t b = xnn_loadu_f32(inputs_.data() + xnn_simd_size_f32);
+  const xnn_simd_f32_t res = xnn_cmpeq_f32(a, b);
+  xnn_storeu_f32(output_.data(), res);
+  for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+    ASSERT_EQ(*(uint32_t *)&output_[k],
+              inputs_[k] == inputs_[k + xnn_simd_size_f32] ? 0xFFFFFFFF : 0);
+  }
 }
 
 TEST_F(${TESTNAME}, GetExp) {

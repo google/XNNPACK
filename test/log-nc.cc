@@ -3,8 +3,10 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <limits>
 
 #include "unary-operator-tester.h"
 
@@ -18,6 +20,12 @@ class LogOperatorTester : public UnaryOperatorTester {
   }
 
  protected:
+  float AbsTolF32(float y_ref) const override {
+    return std::max(
+        2 * std::numeric_limits<float>::epsilon(),
+        std::abs(y_ref) * 6 * std::numeric_limits<float>::epsilon());
+  };
+
   // Computes the expected result for some input `x`. Subclasses should override
   // this function with their own reference function.
   float RefFunc(float x) const override { return std::log(x); }

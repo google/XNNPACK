@@ -8,7 +8,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include <math.h>
 #include <stddef.h>
 
 #include "xnnpack/simd/f32-avx2.h"
@@ -20,13 +19,54 @@
 // Define some mathematical constants in case they are not provided by `math.h`.
 #ifndef M_LN2
 #define M_LN2 0.69314718055994531
-#endif
-#ifndef M_SQRT2
-#define M_SQRT2 1.41421356237309505
-#endif
-#ifndef M_SQRT1_2
-#define M_SQRT1_2 0.70710678118654752440
-#endif
+#endif  // M_LN2
+
+// Extracts the exponent of the input `a` as a `float` value.
+static XNN_INLINE xnn_simd_f32_t xnn_signed_getexp_f32(xnn_simd_f32_t a) {
+  // The bits of IEE754 single-precision floating-point format are:
+  //
+  //   s | e e e e e e e e | m m m m m m m m m m m m m m m m m m m m m m m
+  //
+  // We start by masking out the sign and exponent and shifting it 8 bits to the
+  // right arithmetically, i.e. extending by the leftmost sign bit:
+  //
+  //   s | s s s s s s s s | e e e e e e e e 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  //
+  // These bits are then `or`-ed with `256.0f`, which has a biased exponent of
+  // `135` and all mantissa bit set to zero. This is equivalent to adding the
+  // biased integer exponent to `256.0`:
+  //
+  //   0 | 1 0 0 0 0 1 1 1 | e e e e e e e e 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  //
+  // We can re-extract the exponent as a `float` value by subtracting `256.0`
+  // plus the exponent bias `127.0`, i.e. `383.0`.
+  //
+  // Note that if the sign bit is `1`, we end up with the floating point bits:
+  //
+  //   1 | 1 1 1 1 1 1 1 1 | e e e e e e e e 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  //
+  // Which is `-NaN` if the exponent is non-zero, and `-Inf` if the exponent is
+  // zero (e.g. the input was `0.0f` or denormal).
+
+  // Some useful constants.
+  XNN_SIMD_CONST_F32(sign_mask, -0.0f);
+  XNN_SIMD_CONST_U32(sign_and_exp_mask, 0xff800000);
+  XNN_SIMD_CONST_F32(bias_256, 256.0f);
+  XNN_SIMD_CONST_F32(bias_383, 383.0f);
+
+  // If `a` is `0.0f`, flip its sign bit so that we return `-Inf`.
+  a = xnn_or_f32(xnn_and_f32(xnn_cmpeq_f32(a, xnn_zero_f32()), sign_mask), a);
+
+  // Extract the exponent and shift the exponent to the most significant bits of
+  // the mantissa.
+  const xnn_simd_f32_t exp =
+      xnn_sra_f32(xnn_and_f32(a, sign_and_exp_mask), 8);
+
+  // Add the shifted exponent to `256.0f` by copying its bits to the mantissa,
+  // then subtract out `383.0f`, i.e. the original `256.0f` plus the `127`
+  // exponent bias, resulting in the unbiased exponent.
+  return xnn_sub_f32(xnn_or_f32(bias_256, exp), bias_383);
+}
 
 
 void xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u8(
@@ -73,7 +113,7 @@ void xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u8(
     vx = xnn_mul_f32(vx, vsqrt2);
 
     // Extract the exponent.
-    const xnn_simd_f32_t vexp = xnn_getexp_f32(vx);
+    const xnn_simd_f32_t vexp = xnn_signed_getexp_f32(vx);
 
     // Normalize `x` to an exponent of zero.
     vx = xnn_or_f32(xnn_and_f32(vx, vmantissa_bits_mask), vone);
@@ -112,7 +152,7 @@ void xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u8(
 
     // See the loop above for comments.
     vx = xnn_mul_f32(vx, vsqrt2);
-    const xnn_simd_f32_t vexp = xnn_getexp_f32(vx);
+    const xnn_simd_f32_t vexp = xnn_signed_getexp_f32(vx);
     vx = xnn_or_f32(xnn_and_f32(vx, vmantissa_bits_mask), vone);
     vx = xnn_sub_f32(xnn_mul_f32(vx, vsqrt1_2), vone);
     xnn_simd_f32_t vp = xnn_fmadd_f32(vx, valpha_3, vone);
@@ -174,8 +214,8 @@ void xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u16(
     vx_1 = xnn_mul_f32(vx_1, vsqrt2);
 
     // Extract the exponent.
-    const xnn_simd_f32_t vexp_0 = xnn_getexp_f32(vx_0);
-    const xnn_simd_f32_t vexp_1 = xnn_getexp_f32(vx_1);
+    const xnn_simd_f32_t vexp_0 = xnn_signed_getexp_f32(vx_0);
+    const xnn_simd_f32_t vexp_1 = xnn_signed_getexp_f32(vx_1);
 
     // Normalize `x` to an exponent of zero.
     vx_0 = xnn_or_f32(xnn_and_f32(vx_0, vmantissa_bits_mask), vone);
@@ -228,7 +268,7 @@ void xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u16(
     vx = xnn_mul_f32(vx, vsqrt2);
 
     // Extract the exponent.
-    const xnn_simd_f32_t vexp = xnn_getexp_f32(vx);
+    const xnn_simd_f32_t vexp = xnn_signed_getexp_f32(vx);
 
     // Normalize `x` to an exponent of zero.
     vx = xnn_or_f32(xnn_and_f32(vx, vmantissa_bits_mask), vone);
@@ -267,7 +307,7 @@ void xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u16(
 
     // See the loop above for comments.
     vx = xnn_mul_f32(vx, vsqrt2);
-    const xnn_simd_f32_t vexp = xnn_getexp_f32(vx);
+    const xnn_simd_f32_t vexp = xnn_signed_getexp_f32(vx);
     vx = xnn_or_f32(xnn_and_f32(vx, vmantissa_bits_mask), vone);
     vx = xnn_sub_f32(xnn_mul_f32(vx, vsqrt1_2), vone);
     xnn_simd_f32_t vp = xnn_fmadd_f32(vx, valpha_3, vone);
@@ -331,9 +371,9 @@ void xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u24(
     vx_2 = xnn_mul_f32(vx_2, vsqrt2);
 
     // Extract the exponent.
-    const xnn_simd_f32_t vexp_0 = xnn_getexp_f32(vx_0);
-    const xnn_simd_f32_t vexp_1 = xnn_getexp_f32(vx_1);
-    const xnn_simd_f32_t vexp_2 = xnn_getexp_f32(vx_2);
+    const xnn_simd_f32_t vexp_0 = xnn_signed_getexp_f32(vx_0);
+    const xnn_simd_f32_t vexp_1 = xnn_signed_getexp_f32(vx_1);
+    const xnn_simd_f32_t vexp_2 = xnn_signed_getexp_f32(vx_2);
 
     // Normalize `x` to an exponent of zero.
     vx_0 = xnn_or_f32(xnn_and_f32(vx_0, vmantissa_bits_mask), vone);
@@ -397,7 +437,7 @@ void xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u24(
     vx = xnn_mul_f32(vx, vsqrt2);
 
     // Extract the exponent.
-    const xnn_simd_f32_t vexp = xnn_getexp_f32(vx);
+    const xnn_simd_f32_t vexp = xnn_signed_getexp_f32(vx);
 
     // Normalize `x` to an exponent of zero.
     vx = xnn_or_f32(xnn_and_f32(vx, vmantissa_bits_mask), vone);
@@ -436,7 +476,7 @@ void xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u24(
 
     // See the loop above for comments.
     vx = xnn_mul_f32(vx, vsqrt2);
-    const xnn_simd_f32_t vexp = xnn_getexp_f32(vx);
+    const xnn_simd_f32_t vexp = xnn_signed_getexp_f32(vx);
     vx = xnn_or_f32(xnn_and_f32(vx, vmantissa_bits_mask), vone);
     vx = xnn_sub_f32(xnn_mul_f32(vx, vsqrt1_2), vone);
     xnn_simd_f32_t vp = xnn_fmadd_f32(vx, valpha_3, vone);
@@ -502,10 +542,10 @@ void xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u32(
     vx_3 = xnn_mul_f32(vx_3, vsqrt2);
 
     // Extract the exponent.
-    const xnn_simd_f32_t vexp_0 = xnn_getexp_f32(vx_0);
-    const xnn_simd_f32_t vexp_1 = xnn_getexp_f32(vx_1);
-    const xnn_simd_f32_t vexp_2 = xnn_getexp_f32(vx_2);
-    const xnn_simd_f32_t vexp_3 = xnn_getexp_f32(vx_3);
+    const xnn_simd_f32_t vexp_0 = xnn_signed_getexp_f32(vx_0);
+    const xnn_simd_f32_t vexp_1 = xnn_signed_getexp_f32(vx_1);
+    const xnn_simd_f32_t vexp_2 = xnn_signed_getexp_f32(vx_2);
+    const xnn_simd_f32_t vexp_3 = xnn_signed_getexp_f32(vx_3);
 
     // Normalize `x` to an exponent of zero.
     vx_0 = xnn_or_f32(xnn_and_f32(vx_0, vmantissa_bits_mask), vone);
@@ -580,7 +620,7 @@ void xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u32(
     vx = xnn_mul_f32(vx, vsqrt2);
 
     // Extract the exponent.
-    const xnn_simd_f32_t vexp = xnn_getexp_f32(vx);
+    const xnn_simd_f32_t vexp = xnn_signed_getexp_f32(vx);
 
     // Normalize `x` to an exponent of zero.
     vx = xnn_or_f32(xnn_and_f32(vx, vmantissa_bits_mask), vone);
@@ -619,7 +659,7 @@ void xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u32(
 
     // See the loop above for comments.
     vx = xnn_mul_f32(vx, vsqrt2);
-    const xnn_simd_f32_t vexp = xnn_getexp_f32(vx);
+    const xnn_simd_f32_t vexp = xnn_signed_getexp_f32(vx);
     vx = xnn_or_f32(xnn_and_f32(vx, vmantissa_bits_mask), vone);
     vx = xnn_sub_f32(xnn_mul_f32(vx, vsqrt1_2), vone);
     xnn_simd_f32_t vp = xnn_fmadd_f32(vx, valpha_3, vone);

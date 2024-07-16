@@ -791,7 +791,7 @@ void GEMMBenchmark(benchmark::State& state,
                    xnn_init_f32_minmax_params_fn init_minmax_params,
                    xnn_pack_weights_and_biases_fn pack_weights,
                    xnn_packed_stride_weights_and_biases_fn packed_stride,
-                   size_t mr, size_t nr, size_t kr, size_t sr,
+                   size_t mr, size_t nr, size_t kr, size_t sr, size_t mr_packed,
                    benchmark::utils::IsaCheckFunction isa_check) {
   if (isa_check != nullptr && !isa_check(state)) {
     return;
@@ -817,6 +817,7 @@ void GEMMBenchmark(benchmark::State& state,
   // Create a fake `gemm_config` for the packing functions.
   struct xnn_gemm_config gemm_config;
   gemm_config.mr = static_cast<uint8_t>(mr);
+  gemm_config.mr_packed = static_cast<uint8_t>(mr_packed);
   gemm_config.nr = static_cast<uint8_t>(nr);
   gemm_config.log2_kr = static_cast<uint8_t>(31 - math_clz_nonzero_u32(kr));
   gemm_config.log2_sr = static_cast<uint8_t>(31 - math_clz_nonzero_u32(sr));
@@ -836,9 +837,9 @@ void GEMMBenchmark(benchmark::State& state,
 
   // Quantize the left-hand operand.
   const size_t input_packed_size =
-      xnn_x8_packq_f32qp8_packed_size(mc, kc, mr, kr, sr);
+      xnn_x8_packq_f32qp8_packed_size(mc, kc, mr_packed, kr, sr);
   std::vector<int8_t> input_qp8(input_packed_size);
-  xnn_x8_packq_f32qp8_ukernel__scalar_u1(mc, kc, mr, kr, sr,
+  xnn_x8_packq_f32qp8_ukernel__scalar_u1(mc, kc, mr_packed, kr, sr,
                                          /*m_idx_start=*/0, a.data(),
                                          /*lhs_stride=*/kc * sizeof(float),
                                          input_qp8.data());

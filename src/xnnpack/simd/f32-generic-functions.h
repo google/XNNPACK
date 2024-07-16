@@ -25,7 +25,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,
 static XNN_INLINE xnn_simd_f32_t xnn_or_f32(xnn_simd_f32_t a, xnn_simd_f32_t b);
 
 #ifndef XNN_SIMD_SHIFTS_ARE_MACROS
-static XNN_INLINE xnn_simd_f32_t xnn_shiftr_f32(xnn_simd_f32_t a, uint8_t b);
+static XNN_INLINE xnn_simd_f32_t xnn_srl_f32(xnn_simd_f32_t a, uint8_t b);
 #endif  // XNN_SIMD_SHIFTS_ARE_MACROS
 
 // Extracts the exponent of the input `a` as a `float` value.
@@ -54,7 +54,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_generic_getexp_f32(xnn_simd_f32_t a) {
 
   // Extract the exponent and shift the exponent to the most significant bits of
   // the mantissa.
-  const xnn_simd_f32_t exp = xnn_shiftr_f32(xnn_and_f32(a, exp_mask), 8);
+  const xnn_simd_f32_t exp = xnn_srl_f32(xnn_and_f32(a, exp_mask), 8);
 
   // Add the shifted exponent to `256.0f` by copying its bits to the mantissa,
   // then subtract out `383.0f`, i.e. the original `256.0f` plus the `127`

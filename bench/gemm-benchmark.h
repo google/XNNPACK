@@ -6,19 +6,11 @@
 #ifndef __XNNPACK_BENCH_GEMM_BENCHMARK_H__
 #define __XNNPACK_BENCH_GEMM_BENCHMARK_H__
 
-#include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/packq.h"
-#include "xnnpack/packw.h"
-
 #include <cstddef>
+
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/pack.h"
 
 #if XNN_ENABLE_KLEIDIAI
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qsu4cxs1s0.h"
@@ -107,7 +99,7 @@ void GEMMBenchmark(benchmark::State& state,
                    xnn_pack_weights_and_biases_fn pack_weights,
                    xnn_packed_stride_weights_and_biases_fn packed_stride,
                    size_t mr,
-                   size_t nr, size_t kr, size_t sr,
+                   size_t nr, size_t kr, size_t sr, size_t mr_packed,
                    benchmark::utils::IsaCheckFunction isa_check);
 
 void GEMMBenchmark(benchmark::State& state, xnn_qu8_gemm_minmax_ukernel_fn gemm,

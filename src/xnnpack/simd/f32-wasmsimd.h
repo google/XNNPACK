@@ -114,14 +114,21 @@ static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a,
   return wasm_v128_xor(a, b);
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_shiftl_f32(xnn_simd_f32_t a,
-                                                uint8_t bits) {
+static XNN_INLINE xnn_simd_f32_t xnn_sll_f32(xnn_simd_f32_t a, uint8_t bits) {
   return wasm_i32x4_shl(a, bits);
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_shiftr_f32(xnn_simd_f32_t a,
-                                                uint8_t bits) {
+static XNN_INLINE xnn_simd_f32_t xnn_srl_f32(xnn_simd_f32_t a, uint8_t bits) {
   return wasm_u32x4_shr(a, bits);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_sra_f32(xnn_simd_f32_t a, uint8_t bits) {
+  return wasm_i32x4_shr(a, bits);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
+                                               xnn_simd_f32_t b) {
+  return wasm_f32x4_eq(a, b);
 }
 
 // Special functions.

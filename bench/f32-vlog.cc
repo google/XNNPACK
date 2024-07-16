@@ -134,6 +134,30 @@ BENCHMARK_CAPTURE(f32_vlog, scalar_rational_3_3_div_u8,
                     benchmark::utils::CheckFMA3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vlog, fma3_rational_3_3_nr_u8,
+                    xnn_f32_vlog_ukernel__fma3_rational_3_3_nr_u8,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vlog, fma3_rational_3_3_nr_u16,
+                    xnn_f32_vlog_ukernel__fma3_rational_3_3_nr_u16,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vlog, fma3_rational_3_3_nr_u24,
+                    xnn_f32_vlog_ukernel__fma3_rational_3_3_nr_u24,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vlog, fma3_rational_3_3_nr_u32,
+                    xnn_f32_vlog_ukernel__fma3_rational_3_3_nr_u32,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vlog, avx512f_rational_3_3_div_u16,
                     xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u16,
                     /*init_params=*/nullptr,
@@ -154,6 +178,30 @@ BENCHMARK_CAPTURE(f32_vlog, scalar_rational_3_3_div_u8,
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vlog, avx512f_rational_3_3_div_u64,
                     xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u64,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vlog, avx512f_rational_3_3_nr_u16,
+                    xnn_f32_vlog_ukernel__avx512f_rational_3_3_nr_u16,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vlog, avx512f_rational_3_3_nr_u32,
+                    xnn_f32_vlog_ukernel__avx512f_rational_3_3_nr_u32,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vlog, avx512f_rational_3_3_nr_u48,
+                    xnn_f32_vlog_ukernel__avx512f_rational_3_3_nr_u48,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vlog, avx512f_rational_3_3_nr_u64,
+                    xnn_f32_vlog_ukernel__avx512f_rational_3_3_nr_u64,
                     /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)

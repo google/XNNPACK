@@ -49,14 +49,22 @@ static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
 #endif  // __FMA3__
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_shiftl_f32(xnn_simd_f32_t a,
-                                                uint8_t bits) {
+static XNN_INLINE xnn_simd_f32_t xnn_sll_f32(xnn_simd_f32_t a, uint8_t bits) {
   return _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(a), bits));
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_shiftr_f32(xnn_simd_f32_t a,
-                                                uint8_t bits) {
+static XNN_INLINE xnn_simd_f32_t xnn_srl_f32(xnn_simd_f32_t a, uint8_t bits) {
   return _mm256_castsi256_ps(_mm256_srli_epi32(_mm256_castps_si256(a), bits));
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_sra_f32(xnn_simd_f32_t a, uint8_t bits) {
+  return _mm256_castsi256_ps(_mm256_srai_epi32(_mm256_castps_si256(a), bits));
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
+                                               xnn_simd_f32_t b) {
+  return _mm256_castsi256_ps(
+      _mm256_cmpeq_epi32(_mm256_castps_si256(a), _mm256_castps_si256(b)));
 }
 
 #endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX2_H_

@@ -19,7 +19,8 @@ load(
     "xnnpack_microkernel_cc_library",
     "xnnpack_min_size_copts",
     "xnnpack_msvc_std_copts",
-    "xnnpack_simd_archs",
+    "xnnpack_simd_f32_archs",
+    "xnnpack_simd_s32_archs",
     "xnnpack_slinky_defines",
     "xnnpack_slinky_deps",
     "xnnpack_slinky_srcs",
@@ -143,8 +144,8 @@ SUBGRAPH_SRCS = [
     "src/subgraph/depthwise-convolution-2d.c",
     "src/subgraph/divide.c",
     "src/subgraph/elu.c",
-    "src/subgraph/exp.c",
     "src/subgraph/even-split.c",
+    "src/subgraph/exp.c",
     "src/subgraph/floor.c",
     "src/subgraph/fully-connected-sparse.c",
     "src/subgraph/fully-connected.c",
@@ -161,8 +162,8 @@ SUBGRAPH_SRCS = [
     "src/subgraph/negate.c",
     "src/subgraph/prelu.c",
     "src/subgraph/reciprocal-square-root.c",
-    "src/subgraph/reshape-2d.c",
     "src/subgraph/reshape-helpers.c",
+    "src/subgraph/reshape-2d.c",
     "src/subgraph/rope.c",
     "src/subgraph/scaled-dot-product-attention.c",
     "src/subgraph/sigmoid.c",
@@ -258,7 +259,13 @@ MICROKERNEL_DEPS = [
 SIMD_HEADERS = [
     "src/xnnpack/simd/f32-avx-base.h",
     "src/xnnpack/simd/f32-generic-functions.h",
-] + ["src/xnnpack/simd/f32-" + arch + ".h" for arch in xnnpack_simd_archs()]
+] + [
+    "src/xnnpack/simd/f32-" + arch + ".h"
+    for arch in xnnpack_simd_f32_archs()
+] + [
+    "src/xnnpack/simd/s32-" + arch + ".h"
+    for arch in xnnpack_simd_s32_archs()
+]
 
 exports_files(SIMD_HEADERS)
 
@@ -267,6 +274,7 @@ INTERNAL_MICROKERNEL_HDRS = MICROKERNEL_HDRS + SIMD_HEADERS + [
     "src/xnnpack/intrinsics-polyfill.h",
     "src/xnnpack/math-stubs.h",
     "src/xnnpack/requantization-stubs.h",
+    "src/xnnpack/unaligned.h",
 ]
 
 WASM_JIT_LINKOPTS = [
@@ -780,7 +788,9 @@ xnnpack_microkernel_cc_library(
     defines = xnnpack_kleidiai_defines(),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled(["@KleidiAI//:kleidiai_neon"]),
+    deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI///kai/ukernels/matmul",
+    ]),
 )
 
 xnnpack_microkernel_cc_library(
@@ -801,7 +811,7 @@ xnnpack_microkernel_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
-        "@KleidiAI//:kleidiai_neon",
+        "@KleidiAI///kai/ukernels/matmul",
     ]),
 )
 
@@ -922,7 +932,9 @@ xnnpack_microkernel_cc_library(
     defines = xnnpack_kleidiai_defines(),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled(["@KleidiAI//:kleidiai_dotprod"]),
+    deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI///kai/ukernels/matmul",
+    ]),
 )
 
 xnnpack_microkernel_cc_library(
@@ -943,7 +955,9 @@ xnnpack_microkernel_cc_library(
     defines = xnnpack_kleidiai_defines(),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled(["@KleidiAI//:kleidiai_i8mm"]),
+    deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI///kai/ukernels/matmul",
+    ]),
 )
 
 xnnpack_microkernel_cc_library(
@@ -1194,7 +1208,7 @@ xnnpack_microkernel_cc_library(
         "-mavx512bw",
         "-mavx512dq",
         "-mavx512vl",
-        "-mavxvnni",
+        "-mavx512vnni",
     ],
     mingw_copts = ["-fno-asynchronous-unwind-tables"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -1241,7 +1255,7 @@ xnnpack_microkernel_cc_library(
         "-mavx512bw",
         "-mavx512dq",
         "-mavx512vl",
-        "-mavxvnni",
+        "-mavx512vnni",
         "-mgfni",
     ],
     mingw_copts = ["-fno-asynchronous-unwind-tables"],
@@ -1728,7 +1742,9 @@ xnnpack_cc_library(
         ":operator_h",
         ":unaligned",
         "@FP16",
-    ] + xnnpack_if_kleidiai_enabled(["@KleidiAI//:kleidiai_common"]),
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI///kai/ukernels/matmul",
+    ]),
 )
 
 cc_library(

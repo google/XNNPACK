@@ -29,7 +29,7 @@ inline static size_t k_roundedup(size_t k, size_t kr, size_t sr) {
   return round_up(k, kr_sr_roundedup4);
 }
 
-inline static size_t lhs_packed_stride(size_t k, size_t mr, size_t kr,
+inline static size_t lhs_packed_stride(size_t k, size_t mr_packed, size_t kr,
                                        size_t sr) {
   const size_t k_internal = k_roundedup(k, kr, sr);
 
@@ -40,24 +40,22 @@ inline static size_t lhs_packed_stride(size_t k, size_t mr, size_t kr,
   static const size_t kai_num_bytes_per_multiplier = sizeof(float);
   static const size_t kai_num_bytes_per_offset = sizeof(int32_t);
 
-  return mr * (k_internal * sizeof(int8_t) + kai_num_bytes_per_multiplier +
-               kai_num_bytes_per_offset);
+  return mr_packed * (k_internal * sizeof(int8_t) +
+                      kai_num_bytes_per_multiplier + kai_num_bytes_per_offset);
 }
 
-XNN_INLINE static size_t xnn_x8_packq_f32qp8_packed_offset(size_t m_idx,
-                                                           size_t k, size_t mr,
-                                                           size_t kr,
-                                                           size_t sr) {
+XNN_INLINE static size_t xnn_x8_packq_f32qp8_packed_offset(
+    size_t m_idx, size_t k, size_t mr_packed, size_t kr, size_t sr) {
   // It always points to the beginning of the row
-  return (m_idx / mr) * lhs_packed_stride(k, mr, kr, sr);
+  return (m_idx / mr_packed) * lhs_packed_stride(k, mr_packed, kr, sr);
 }
 
 XNN_INLINE static size_t xnn_x8_packq_f32qp8_packed_size(size_t m, size_t k,
-                                                         size_t mr, size_t kr,
-                                                         size_t sr) {
-  const size_t num_rows = round_up(m, mr) / mr;
+                                                         size_t mr_packed,
+                                                         size_t kr, size_t sr) {
+  const size_t num_rows = round_up(m, mr_packed) / mr_packed;
 
-  return num_rows * lhs_packed_stride(k, mr, kr, sr);
+  return num_rows * lhs_packed_stride(k, mr_packed, kr, sr);
 }
 
 XNN_INLINE static size_t xnn_x8_packq_f32qp8_gemm_packed_size(size_t m,
@@ -66,55 +64,55 @@ XNN_INLINE static size_t xnn_x8_packq_f32qp8_gemm_packed_size(size_t m,
       xnn_init_qp8_f32_qc4w_gemm_config();
   assert(gemm_config != NULL);
 
-  const uint32_t mr = m == 1 ? 1 : gemm_config->mr;
+  const uint32_t mr_packed = m == 1 ? 1 : gemm_config->mr_packed;
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
 
-  return xnn_x8_packq_f32qp8_packed_size(m, k, mr, kr, sr);
+  return xnn_x8_packq_f32qp8_packed_size(m, k, mr_packed, kr, sr);
 }
 
 XNN_INLINE static int8_t xnn_x8_packq_f32qp8_get_quantized(
-    size_t m_idx, size_t k_idx, const int8_t* lhs_packed, size_t k, size_t mr,
-    size_t kr, size_t sr) {
+    size_t m_idx, size_t k_idx, const int8_t* lhs_packed, size_t k,
+    size_t mr_packed, size_t kr, size_t sr) {
   const int32_t k_block_len = (int32_t)(kr / sr);
-  const size_t dst_x = (m_idx % mr);
+  const size_t dst_x = (m_idx % mr_packed);
   const size_t packed_offset =
-      xnn_x8_packq_f32qp8_packed_offset(m_idx, k, mr, kr, sr);
+      xnn_x8_packq_f32qp8_packed_offset(m_idx, k, mr_packed, kr, sr);
   const int8_t* dst_ptr = lhs_packed + packed_offset + dst_x * k_block_len;
 
-  dst_ptr += (k_idx / k_block_len) * (mr - 1) * k_block_len;
+  dst_ptr += (k_idx / k_block_len) * (mr_packed - 1) * k_block_len;
   dst_ptr += k_idx;
 
   return *dst_ptr;
 }
 
 XNN_INLINE static float xnn_x8_packq_f32qp8_get_dequantized(
-    size_t m_idx, size_t k_idx, const int8_t* lhs_packed, size_t k, size_t mr,
-    size_t kr, size_t sr) {
+    size_t m_idx, size_t k_idx, const int8_t* lhs_packed, size_t k,
+    size_t mr_packed, size_t kr, size_t sr) {
   const size_t k_internal = k_roundedup(k, kr, sr);
   const int32_t k_block_len = (int32_t)(kr / sr);
-  const size_t dst_x = (m_idx % mr);
+  const size_t dst_x = (m_idx % mr_packed);
   const size_t packed_offset =
-      xnn_x8_packq_f32qp8_packed_offset(m_idx, k, mr, kr, sr);
+      xnn_x8_packq_f32qp8_packed_offset(m_idx, k, mr_packed, kr, sr);
   const int8_t* dst_ptr = lhs_packed + packed_offset + dst_x * k_block_len;
 
   // Get the quantized value.
-  dst_ptr += (k_idx / k_block_len) * (mr - 1) * k_block_len;
+  dst_ptr += (k_idx / k_block_len) * (mr_packed - 1) * k_block_len;
   dst_ptr += k_idx;
   const int32_t val = *dst_ptr;
 
   // Get the quantization parameters.
-  dst_ptr = lhs_packed + packed_offset + mr * k_internal;
+  dst_ptr = lhs_packed + packed_offset + mr_packed * k_internal;
   dst_ptr += dst_x * sizeof(int32_t);
   const int32_t neg_nudged_zero_point = *(const int32_t*)dst_ptr;
-  dst_ptr += mr * sizeof(float);
+  dst_ptr += mr_packed * sizeof(float);
   const float recip_scale = *(const float*)dst_ptr;
 
   return (val + neg_nudged_zero_point) * recip_scale;
 }
 
 #define DECLARE_X8_PACKQ_UKERNEL_FUNCTION(fn_name)                            \
-  XNN_INTERNAL void fn_name(size_t m, size_t k, size_t mr, size_t kr,         \
+  XNN_INTERNAL void fn_name(size_t m, size_t k, size_t mr_packed, size_t kr,  \
                             size_t sr, size_t m_idx_start,                    \
                             const float* XNN_RESTRICT lhs, size_t lhs_stride, \
                             void* XNN_RESTRICT lhs_packed);

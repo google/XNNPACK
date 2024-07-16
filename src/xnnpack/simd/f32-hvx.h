@@ -31,6 +31,10 @@ typedef HVX_Vector xnn_simd_f32_t;
 // Whether or not this architecture has native fused multiply-add support.
 #define XNN_SIMD_HAS_NATIVE_FMA 1
 
+// Include the header for generic functions _after_ declaring the arch-specific
+// types and sizes.
+#include "xnnpack/simd/f32-generic-functions.h"
+
 // Arithmetic operations.
 
 static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return Q6_V_vsplat_R(0); }
@@ -43,6 +47,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_add_f32(xnn_simd_f32_t a,
 static XNN_INLINE xnn_simd_f32_t xnn_mul_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
   return Q6_Vsf_vmpy_VsfVsf(a, b);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_div_f32(xnn_simd_f32_t a,
+                                             xnn_simd_f32_t b){
+  return Q6_Vsf_vdiv_VsfVsf(a, b);
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_fmadd_f32(xnn_simd_f32_t a,
@@ -96,6 +105,31 @@ static XNN_INLINE xnn_simd_f32_t xnn_or_f32(xnn_simd_f32_t a,
 static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
   return Q6_V_vxor_VV(a, b);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_sll_f32(xnn_simd_f32_t a, uint8_t bits) {
+  return Q6_Vh_vasl_VhR(a bits);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_srl_f32(xnn_simd_f32_t a, uint8_t bits) {
+  return Q6_Vuh_vlsr_VuhR(a, bits);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_sra_f32(xnn_simd_f32_t a, uint8_t bits) {
+  return Q6_Vh_vasr_VhR(a, bits);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
+                                               xnn_simd_f32_t b) {
+  return Q6_V_vand_QR(Q6_Q_vcmp_eq_VbVb(a, b), 0xFFFFFFFF);
+}
+
+// Special functions.
+#define XNN_SIMD_HAVE_RCP_F32 0
+#define XNN_SIMD_HAVE_RSQRT_F32 0
+
+static XNN_INLINE xnn_simd_f32_t xnn_getexp_f32(xnn_simd_f32_t a) {
+  return xnn_generic_getexp_f32(a);
 }
 
 // Load/store operations.

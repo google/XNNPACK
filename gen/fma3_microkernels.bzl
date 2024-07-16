@@ -180,6 +180,7 @@ ALL_FMA3_MICROKERNEL_SRCS = [
     "src/f32-vhswish/gen/f32-vhswish-fma3-u8.c",
     "src/f32-vhswish/gen/f32-vhswish-fma3-u16.c",
     "src/f32-vlog/gen/f32-vlog-fma3-rational-3-3-div.c",
+    "src/f32-vlog/gen/f32-vlog-fma3-rational-3-3-nr.c",
     "src/f32-vrsqrt/gen/f32-vrsqrt-fma3-rsqrt-u8.c",
     "src/f32-vrsqrt/gen/f32-vrsqrt-fma3-rsqrt-u16.c",
     "src/f32-vrsqrt/gen/f32-vrsqrt-fma3-rsqrt-u32.c",

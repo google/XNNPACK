@@ -5,12 +5,8 @@
 
 #include <assert.h>
 
-#include <hvx_hexagon_protos.h>
-#include <hexagon_protos.h>
-#include <hexagon_types.h>
+#include "xnnpack/simd/f32-hvx.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
 #include "xnnpack/vbinary.h"
 
@@ -28,37 +24,40 @@ void xnn_f32_vmin_ukernel__hvx_u64(
   assert(output != NULL);
 
 
-  const HVX_UVector *vptr_a = (const HVX_UVector *) input_a;
-  const HVX_UVector *vptr_b = (const HVX_UVector *) input_b;
-  HVX_UVector *vptr_o = (HVX_UVector*) output;
-
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
-    HVX_Vector va0 = *vptr_a++;
-    HVX_Vector va1 = *vptr_a++;
-    HVX_Vector vb0 = *vptr_b++;
-    HVX_Vector vb1 = *vptr_b++;
+    HVX_Vector va0 = xnn_loadu_f32(input_a);
+    HVX_Vector va1 = xnn_loadu_f32(input_a + 32);
+    HVX_Vector vb0 = xnn_loadu_f32(input_b);
+    HVX_Vector vb1 = xnn_loadu_f32(input_b + 32);
+    input_a += 64;
+    input_b += 64;
 
-    HVX_Vector vacc0 = Q6_Vsf_vmin_VsfVsf(va0, vb0);
-    HVX_Vector vacc1 = Q6_Vsf_vmin_VsfVsf(va1, vb1);
+    HVX_Vector vacc0 = xnn_min_f32(va0, vb0);
+    HVX_Vector vacc1 = xnn_min_f32(va1, vb1);
 
 
-    *vptr_o++ = vacc0;
-    *vptr_o++ = vacc1;
+
+    xnn_storeu_f32(output, vacc0);
+    xnn_storeu_f32(output + 32, vacc1);
+    output += 64;
   }
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
-    HVX_Vector va = *vptr_a++;
-    HVX_Vector vb = *vptr_b++;
+    HVX_Vector va = xnn_loadu_f32(input_a);
+    HVX_Vector vb = xnn_loadu_f32(input_b);
+    input_a += 32;
+    input_b += 32;
 
-    HVX_Vector vacc = Q6_Vsf_vmin_VsfVsf(va, vb);
+    HVX_Vector vacc = xnn_min_f32(va, vb);
 
-    *vptr_o++ = vacc;
+    xnn_storeu_f32(output, vacc);
+    output += 32;
   }
   if XNN_UNLIKELY(batch != 0) {
-     HVX_Vector va = *vptr_a;
-     HVX_Vector vb = *vptr_b;
+     HVX_Vector va = xnn_loadu_f32(input_a);
+     HVX_Vector vb = xnn_loadu_f32(input_b);
 
-     HVX_Vector vacc = Q6_Vsf_vmin_VsfVsf(va, vb);
+     HVX_Vector vacc = xnn_min_f32(va, vb);
      
-     Q6_V_vstu_variable(vptr_o, batch, vacc);
+     Q6_V_vstu_variable(output, batch, vacc);
   }
 }

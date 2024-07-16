@@ -118,11 +118,21 @@ _XNNPACK_ARCH_COPT_MAPPING = {
         "//build_config:x86": ["-msse2"],
         "//conditions:default": [],
     }),
+    "sse41": select({
+        "//build_config:x86": ["-msse4.1"],
+        "//conditions:default": [],
+    }),
     "wasmsimd": [],
 }
 
 def xnnpack_simd_archs():
     return _XNNPACK_ARCH_COPT_MAPPING.keys()
+
+def xnnpack_simd_f32_archs():
+    return ["avx", "avx2", "avx512f", "fma3", "hvx", "neon", "scalar", "sse2", "wasmsimd"]
+
+def xnnpack_simd_s32_archs():
+    return ["avx2", "avx512f", "neon", "scalar", "sse41", "wasmsimd"]
 
 def xnnpack_simd_copts_for_arch(arch):
     return _XNNPACK_ARCH_COPT_MAPPING[arch]

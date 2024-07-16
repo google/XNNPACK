@@ -249,6 +249,28 @@
 - name: xnn_f32_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_u20_acc5
   init: xnn_init_f32_expminus_wasmsimd_rr2_p5_params
 
+# Hexagon HVX
+- name: xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u32
+  init: xnn_init_f32_expminus_hvx_rr2_p5_params
+- name: xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u64
+  init: xnn_init_f32_expminus_hvx_rr2_p5_params
+- name: xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u64_acc2
+  init: xnn_init_f32_expminus_hvx_rr2_p5_params
+- name: xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u96
+  init: xnn_init_f32_expminus_hvx_rr2_p5_params
+- name: xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u96_acc2
+  init: xnn_init_f32_expminus_hvx_rr2_p5_params
+- name: xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u96_acc3
+  init: xnn_init_f32_expminus_hvx_rr2_p5_params
+- name: xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128
+  init: xnn_init_f32_expminus_hvx_rr2_p5_params
+- name: xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128_acc2
+  init: xnn_init_f32_expminus_hvx_rr2_p5_params
+- name: xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128_acc3
+  init: xnn_init_f32_expminus_hvx_rr2_p5_params
+- name: xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128_acc4
+  init: xnn_init_f32_expminus_hvx_rr2_p5_params
+
 # Scalar
 - name: xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_u1
   init: xnn_init_f32_expminus_scalar_rr2_lut64_p2_params

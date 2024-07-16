@@ -6,7 +6,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   cmake-linux-local:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-8core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -18,7 +18,7 @@ jobs:
         run: scripts/build-local.sh
         working-directory: ${{ github.workspace }}
   cmake-linux-aarch64:
-    runs-on: ubuntu-22.04
+    runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
@@ -26,10 +26,6 @@ jobs:
         run: sudo apt update
       - name: Install ninja
         run: sudo apt install ninja-build
-      - name: Install aarch64 cross-toolchain
-        run: sudo apt install crossbuild-essential-arm64
-      - name: Install qemu-aarch64
-        run: sudo apt install qemu-user
       - name: Configure and build
         run: scripts/build-linux-aarch64.sh -DCMAKE_BUILD_TYPE=Release
         working-directory: ${{ github.workspace }}
@@ -37,7 +33,7 @@ jobs:
         run: ctest --output-on-failure --parallel $(nproc)
         working-directory: ${{ github.workspace }}/build/linux/aarch64
   cmake-linux-armhf:
-    runs-on: ubuntu-22.04
+    runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -47,16 +43,18 @@ jobs:
         run: sudo apt install ninja-build
       - name: Install armhf cross-toolchain
         run: sudo apt install crossbuild-essential-armhf
-      - name: Install qemu-arm
-        run: sudo apt install qemu-user
       - name: Configure and build
         run: scripts/build-linux-armhf.sh -DCMAKE_BUILD_TYPE=Release
         working-directory: ${{ github.workspace }}
+      - name: Link the armhf loader to run the test binaries
+        run: sudo ln -s /usr/arm-linux-gnueabihf/lib/ld-linux-armhf.so.3 /usr/lib/ld-linux-armhf.so.3
       - name: Run tests
+        env:
+          LD_LIBRARY_PATH: /usr/arm-linux-gnueabihf/lib/:${{ env.LD_LIBRARY_PATH }}
         run: ctest --output-on-failure --parallel $(nproc)
         working-directory: ${{ github.workspace }}/build/linux/armhf
   cmake-linux-riscv64:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04-8core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -75,7 +73,7 @@ jobs:
         run: ctest --output-on-failure --parallel $(nproc)
         working-directory: ${{ github.workspace }}/build/linux/riscv64
   cmake-linux-riscv64-rvv:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04-8core
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
@@ -96,7 +94,7 @@ jobs:
         run: ctest --output-on-failure -LE operator --parallel $(nproc)
         working-directory: ${{ github.workspace }}/build/linux/riscv64
   cmake-windows-arm64:
-    runs-on: windows-latest
+    runs-on: windows-2022-32core
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
@@ -105,7 +103,7 @@ jobs:
         shell: cmd
         working-directory: ${{ github.workspace }}
   cmake-windows-x64:
-    runs-on: windows-latest
+    runs-on: windows-2022-32core
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
@@ -120,7 +118,7 @@ jobs:
         run: ctest -C Release --output-on-failure --parallel $NUMBER_OF_PROCESSORS
         working-directory: ${{ github.workspace }}/build/windows/x64
   cmake-windows-x86:
-    runs-on: windows-latest
+    runs-on: windows-2022-32core
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
@@ -146,13 +144,13 @@ jobs:
         run: cmake -G Xcode -DCMAKE_CONFIGURATION_TYPES=Release -DCMAKE_OSX_ARCHITECTURES=arm64 -DHAVE_STD_REGEX=TRUE ../../..
         working-directory: ${{ github.workspace }}/build/macos/arm64
       - name: Build with Xcode
-        run: cmake --build build/macos/arm64 --parallel $(sysctl -n hw.ncpu) -- -quiet
+        run: cmake --build build/macos/arm64 --parallel $((2*$(sysctl -n hw.ncpu)))
         working-directory: ${{ github.workspace }}
   cmake-android:
     strategy:
       matrix:
         script: [build-android-arm64.sh, build-android-armv7.sh, build-android-x86.sh]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-8core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -200,7 +198,7 @@ jobs:
         run: cmake --build build/ios/x86_64 --parallel $(sysctl -n hw.ncpu) -- -sdk iphonesimulator -quiet
         working-directory: ${{ github.workspace }}
   bazel-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-8core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4

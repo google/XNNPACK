@@ -98,16 +98,25 @@ static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a, xnn_simd_f32_t b)
   return *(const xnn_simd_f32_t *)&res;
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_shiftl_f32(xnn_simd_f32_t a,
-                                                uint8_t bits) {
+static XNN_INLINE xnn_simd_f32_t xnn_sll_f32(xnn_simd_f32_t a, uint8_t bits) {
   const uint32_t res = *(uint32_t *)&a << bits;
   return *(const xnn_simd_f32_t *)&res;
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_shiftr_f32(xnn_simd_f32_t a,
-                                                uint8_t bits) {
+static XNN_INLINE xnn_simd_f32_t xnn_srl_f32(xnn_simd_f32_t a, uint8_t bits) {
   const uint32_t res = *(uint32_t *)&a >> bits;
   return *(const xnn_simd_f32_t *)&res;
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_sra_f32(xnn_simd_f32_t a, uint8_t bits) {
+  const int32_t res = *(int32_t *)&a >> bits;
+  return *(const xnn_simd_f32_t *)&res;
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
+                                               xnn_simd_f32_t b) {
+  XNN_SIMD_CONST_U32(ones, 0xFFFFFFFF)
+  return a == b ? ones : 0.0f;
 }
 
 // Special functions.

@@ -7,6 +7,8 @@
 # Scalar
 - name: xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4
 - name: xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4
+- name: xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4
+- name: xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4
 
 # ARM NEON
 - name: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4
