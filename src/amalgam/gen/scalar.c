@@ -30831,12 +30831,12 @@ void xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u1(
   }
 }
 
-void xnn_s32_vmultiply_ukernel__scalar_u2(
+void xnn_s32_vmul_minmax_ukernel__scalar_u2(
     size_t batch,
     const int32_t* input_a,
     const int32_t* input_b,
     int32_t* output,
-    const union xnn_s32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_s32_minmax_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int32_t) == 0);
@@ -30844,7 +30844,6 @@ void xnn_s32_vmultiply_ukernel__scalar_u2(
   assert(input_a != NULL);
   assert(output != NULL);
   assert(xnn_simd_size_s32 == 1);
-
 
   for (; batch >= 2 * sizeof(int32_t); batch -= 2 * sizeof(int32_t)) {
     xnn_simd_s32_t vin1_0 = xnn_loadu_s32(input_a);
@@ -30876,12 +30875,12 @@ void xnn_s32_vmultiply_ukernel__scalar_u2(
   }
 }
 
-void xnn_s32_vmultiplyc_ukernel__scalar_u2(
+void xnn_s32_vmulc_minmax_ukernel__scalar_u2(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,
     int32_t* output,
-    const union xnn_s32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_s32_minmax_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int32_t) == 0);

@@ -2726,18 +2726,18 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_TEST(NAME f32-vrcopysignc-test COMMAND f32-vrcopysignc-test)
 
 
-  ADD_EXECUTABLE(s32-vmultiply-test test/s32-vmultiply.cc)
-  TARGET_INCLUDE_DIRECTORIES(s32-vmultiply-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(s32-vmultiply-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(s32-vmultiply-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME s32-vmultiply-test COMMAND s32-vmultiply-test)
+  ADD_EXECUTABLE(s32-vmul-test test/s32-vmul.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vmul-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vmul-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vmul-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vmul-test COMMAND s32-vmul-test)
 
 
-  ADD_EXECUTABLE(s32-vmultiplyc-test test/s32-vmultiplyc.cc)
-  TARGET_INCLUDE_DIRECTORIES(s32-vmultiplyc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(s32-vmultiplyc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(s32-vmultiplyc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME s32-vmultiplyc-test COMMAND s32-vmultiplyc-test)
+  ADD_EXECUTABLE(s32-vmulc-test test/s32-vmulc.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vmulc-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vmulc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vmulc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vmulc-test COMMAND s32-vmulc-test)
 
   ADD_EXECUTABLE(f16-vcmul-test test/f16-vcmul.cc)
   SET_TARGET_PROPERTIES(f16-vcmul-test PROPERTIES CXX_EXTENSIONS YES)

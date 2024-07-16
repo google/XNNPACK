@@ -145,7 +145,7 @@ class VBinaryCMicrokernelTester {
             xnn_qs8_requantize_fn requantize) const;
 
   void Test(xnn_s32_vbinary_ukernel_fn vbinaryc, OpType op_type,
-            xnn_init_s32_default_params_fn init_params = nullptr) const;
+            xnn_init_s32_minmax_params_fn init_params = nullptr) const;
  private:
   size_t batch_size_{1};
   bool inplace_{false};

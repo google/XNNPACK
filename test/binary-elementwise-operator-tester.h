@@ -16,6 +16,7 @@
 #include <limits>
 #include <numeric>
 #include <vector>
+#include <common.h>
 
 #include "xnnpack.h"
 
@@ -198,7 +199,8 @@ class BinaryElementwiseOperatorTester {
       case OperationType::SquaredDifference:
         return (a - b) * (a - b);
       default:
-        return std::nan("");
+        return INT_MAX;
+
     }
   }
   void TestQS8() const;

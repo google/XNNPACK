@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/s32-vmultiply/s32-vmultiplyc.c.in
+//   Template: src/s32-vmul/s32-vmulc.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 Google LLC
@@ -18,12 +18,12 @@
 #include "xnnpack/vunary.h"
 
 
-void xnn_s32_vmultiplyc_ukernel__wasmsimd_u4(
+void xnn_s32_vmulc_minmax_ukernel__wasmsimd_u4(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,
     int32_t* output,
-    const union xnn_s32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_s32_minmax_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int32_t) == 0);
@@ -52,12 +52,12 @@ void xnn_s32_vmultiplyc_ukernel__wasmsimd_u4(
   }
 }
 
-void xnn_s32_vmultiplyc_ukernel__wasmsimd_u8(
+void xnn_s32_vmulc_minmax_ukernel__wasmsimd_u8(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,
     int32_t* output,
-    const union xnn_s32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_s32_minmax_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int32_t) == 0);
@@ -99,12 +99,12 @@ void xnn_s32_vmultiplyc_ukernel__wasmsimd_u8(
   }
 }
 
-void xnn_s32_vmultiplyc_ukernel__wasmsimd_u12(
+void xnn_s32_vmulc_minmax_ukernel__wasmsimd_u12(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,
     int32_t* output,
-    const union xnn_s32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_s32_minmax_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int32_t) == 0);
@@ -149,12 +149,12 @@ void xnn_s32_vmultiplyc_ukernel__wasmsimd_u12(
   }
 }
 
-void xnn_s32_vmultiplyc_ukernel__wasmsimd_u16(
+void xnn_s32_vmulc_minmax_ukernel__wasmsimd_u16(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,
     int32_t* output,
-    const union xnn_s32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_s32_minmax_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int32_t) == 0);

@@ -280,7 +280,7 @@ void VBinaryMicrokernelTester::Test(
 
 void VBinaryMicrokernelTester::Test(
     xnn_s32_vbinary_ukernel_fn vbinary, OpType op_type,
-    xnn_init_s32_default_params_fn init_params) const {
+    xnn_init_s32_minmax_params_fn init_params) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<int32_t> s32dist(std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max());
 
@@ -296,7 +296,7 @@ void VBinaryMicrokernelTester::Test(
     if (inplace_a() || inplace_b()) {
       std::generate(y.begin(), y.end(), [&]() { return s32dist(rng); });
     } else {
-      std::fill(y.begin(), y.end(), nanf(""));
+      std::fill(y.begin(), y.end(), INT_MAX);
     }
     const int32_t* a_data = inplace_a() ? y.data() : a.data();
     const int32_t* b_data = inplace_b() ? y.data() : b.data();
@@ -333,10 +333,21 @@ void VBinaryMicrokernelTester::Test(
       }
     }
 
+    // ToDo: Update clamping logic
+    const int32_t accumulated_min =
+        *std::min_element(y_ref.cbegin(), y_ref.cend());
+    const int64_t accumulated_max =
+        *std::max_element(y_ref.cbegin(), y_ref.cend());
+    const int32_t accumulated_range = accumulated_max - accumulated_min;
+    const int32_t y_max = std::numeric_limits<int32_t>::max();
+    const float y_min = std::numeric_limits<int32_t>::min();
+    for (size_t i = 0; i < batch_size(); i++) {
+      y_ref[i] = std::max<int32_t>(std::min<int32_t>(y_ref[i], y_max), y_min);
+    }
     // Prepare parameters.
-    xnn_s32_default_params params;
+    xnn_s32_minmax_params params;
     if (init_params != nullptr) {
-      init_params(&params);
+      init_params(&params, y_min, y_max);
     }
 
     // Call optimized micro-kernel.

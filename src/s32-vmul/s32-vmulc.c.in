@@ -21,35 +21,32 @@ $for BATCH_TILE in BATCH_TILES:
   $assert BATCH_TILE >= SIMD_SIZE
   $SIMD_TILE = BATCH_TILE // SIMD_SIZE
 
-  void xnn_s32_vmultiply_ukernel__${ARCH}_u${BATCH_TILE}(
+  void xnn_s32_vmulc_minmax_ukernel__${ARCH}_u${BATCH_TILE}(
       size_t batch,
-      const int32_t* input_a,
-      const int32_t* input_b,
+      const int32_t* input1,
+      const int32_t* input2,
       int32_t* output,
-      const union xnn_s32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+      const union xnn_s32_minmax_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
   {
     assert(batch != 0);
     assert(batch % sizeof(int32_t) == 0);
-    assert(input_b != NULL);
-    assert(input_a != NULL);
+    assert(input1 != NULL);
+    assert(input2 != NULL);
     assert(output != NULL);
     assert(xnn_simd_size_s32 == ${SIMD_SIZE});
 
+    xnn_simd_s32_t vin2 = xnn_set1_s32(*input2);
 
     $if SIMD_TILE > 1:
       for (; batch >= ${BATCH_TILE} * sizeof(int32_t); batch -= ${BATCH_TILE} * sizeof(int32_t)) {
-        xnn_simd_s32_t vin1_${ABC[0]} = xnn_loadu_s32(input_a);
-        $for N in range(1, SIMD_TILE):
-          xnn_simd_s32_t vin1_${ABC[N]} = xnn_loadu_s32(input_a + ${N} * xnn_simd_size_s32);
-        input_a += ${BATCH_TILE};
 
-        xnn_simd_s32_t vin2_${ABC[0]} = xnn_loadu_s32(input_b);
+        xnn_simd_s32_t vin1_${ABC[0]} = (xnn_loadu_s32(input1));
         $for N in range(1, SIMD_TILE):
-          xnn_simd_s32_t vin2_${ABC[N]} = (xnn_loadu_s32(input_b + ${N} * xnn_simd_size_s32));
-        input_b += ${BATCH_TILE};
+          xnn_simd_s32_t vin1_${ABC[N]} = (xnn_loadu_s32(input1 + ${N} * xnn_simd_size_s32));
+        input1 += ${BATCH_TILE};
 
         $for N in range(0, SIMD_TILE):
-          xnn_simd_s32_t vy_${ABC[N]} = xnn_mul_s32(vin1_${ABC[N]}, vin2_${ABC[N]});
+          xnn_simd_s32_t vy_${ABC[N]} = xnn_mul_s32(vin1_${ABC[N]}, vin2);
 
         xnn_storeu_s32(output, vy_${ABC[0]});
         $for N in range(1, SIMD_TILE):
@@ -57,11 +54,8 @@ $for BATCH_TILE in BATCH_TILES:
         output += ${BATCH_TILE};
       }
     for (; batch >= xnn_simd_bytes_s32; batch -= xnn_simd_bytes_s32) {
-      xnn_simd_s32_t vin1 = xnn_loadu_s32(input_a);
-      input_a += xnn_simd_size_s32;
-
-      xnn_simd_s32_t vin2 = xnn_loadu_s32(input_b);
-      input_b += xnn_simd_size_s32;
+      xnn_simd_s32_t vin1 = xnn_loadu_s32(input1);
+      input1 += xnn_simd_size_s32;
 
       xnn_simd_s32_t vy = xnn_mul_s32(vin1, vin2);
 
@@ -70,9 +64,7 @@ $for BATCH_TILE in BATCH_TILES:
     }
     $if SIMD_SIZE > 1:
       if XNN_UNLIKELY(batch != 0) {
-        xnn_simd_s32_t vin1 = xnn_load_tail_s32(input_a, batch >> XNN_LOG2_SIZEOF_INT32_T);
-
-        xnn_simd_s32_t vin2 = xnn_load_tail_s32(input_b, batch >> XNN_LOG2_SIZEOF_INT32_T);
+        xnn_simd_s32_t vin1 = (xnn_load_tail_s32(input1, batch >> XNN_LOG2_SIZEOF_INT32_T));
 
         xnn_simd_s32_t vy = xnn_mul_s32(vin1, vin2);
 

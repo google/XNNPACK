@@ -770,9 +770,9 @@ enum xnn_status xnn_create_vmultiply_nd_s32(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_s32_default_params params;
-  if (s32_vmultiply_config->init.s32_default != NULL) {
-    s32_vmultiply_config->init.s32_default(&params);
+  union xnn_s32_minmax_params params;
+  if (s32_vmultiply_config->init.s32_minmax != NULL) {
+    s32_vmultiply_config->init.s32_minmax(&params, 0, 0);
   }
   return create_binary_elementwise_nd(
     flags,
@@ -1514,8 +1514,8 @@ enum xnn_status xnn_reshape_vmultiply_nd_s32(
     num_input1_dims, input1_shape,
     num_input2_dims, input2_shape,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_INT32_T,
-    &vmultiply_op->params.s32_default, sizeof(vmultiply_op->params.s32_default),
-    &vmultiply_op->params.s32_default, sizeof(vmultiply_op->params.s32_default),
+    &vmultiply_op->params.s32_minmax, sizeof(vmultiply_op->params.s32_minmax),
+    &vmultiply_op->params.s32_minmax, sizeof(vmultiply_op->params.s32_minmax),
     threadpool);
 }
 

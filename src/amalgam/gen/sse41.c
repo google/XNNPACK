@@ -10931,12 +10931,12 @@ void xnn_u8_ibilinear_ukernel__sse41_c16(
   } while (--output_pixels != 0);
 }
 
-void xnn_s32_vmultiply_ukernel__sse41_u8(
+void xnn_s32_vmul_minmax_ukernel__sse41_u8(
     size_t batch,
     const int32_t* input_a,
     const int32_t* input_b,
     int32_t* output,
-    const union xnn_s32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_s32_minmax_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int32_t) == 0);
@@ -10944,7 +10944,6 @@ void xnn_s32_vmultiply_ukernel__sse41_u8(
   assert(input_a != NULL);
   assert(output != NULL);
   assert(xnn_simd_size_s32 == 4);
-
 
   for (; batch >= 8 * sizeof(int32_t); batch -= 8 * sizeof(int32_t)) {
     xnn_simd_s32_t vin1_0 = xnn_loadu_s32(input_a);
@@ -10985,12 +10984,12 @@ void xnn_s32_vmultiply_ukernel__sse41_u8(
   }
 }
 
-void xnn_s32_vmultiplyc_ukernel__sse41_u8(
+void xnn_s32_vmulc_minmax_ukernel__sse41_u8(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,
     int32_t* output,
-    const union xnn_s32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_s32_minmax_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int32_t) == 0);

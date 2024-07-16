@@ -32,7 +32,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(qu8|qs8|f16|f32|s32)_v(add|cmul|copysign|div|max|min|mul|multiplyc|multiply|sqrdiff|sub|addc|copysignc|rcopysignc|divc|rdivc|maxc|minc|mulc|sqrdiffc|subc|rsubc)(_(minmax|relu)(_(fp32|rndnu))?)?_ukernel__(.+)_u(\d+)(v)?", name)
+  match = re.fullmatch(r"xnn_(qu8|qs8|f16|f32|s32)_v(add|cmul|copysign|div|max|min|mul|sqrdiff|sub|addc|copysignc|rcopysignc|divc|rdivc|maxc|minc|mulc|sqrdiffc|subc|rsubc)(_(minmax|relu)(_(fp32|rndnu))?)?_ukernel__(.+)_u(\d+)(v)?", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
@@ -56,8 +56,6 @@ def split_ukernel_name(name):
     "sqrdiffc": "SqrDiffC",
     "subc": "SubC",
     "rsubc": "RSubC",
-    "multiply": "Mul",
-    "multiplyc": "MulC",
   }[match.group(2)]
   batch_tile = int(match.group(8))
   vector_tile = bool(match.group(9))

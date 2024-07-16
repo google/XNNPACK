@@ -130,7 +130,7 @@ class VBinaryMicrokernelTester {
             xnn_init_f32_default_params_fn init_params = nullptr) const;
   
   void Test(xnn_s32_vbinary_ukernel_fn vbinary, OpType op_type,
-            xnn_init_s32_default_params_fn init_params = nullptr) const;
+            xnn_init_s32_minmax_params_fn init_params = nullptr) const;
 
   void Test(xnn_f32_vbinary_relu_ukernel_fn vbinary_relu, OpType op_type) const;
 
