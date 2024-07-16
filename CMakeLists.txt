@@ -1231,6 +1231,19 @@ ENDIF()
 
 # ---[ XNNPACK unit tests
 IF(XNNPACK_BUILD_TESTS)
+  # ---[ Macro to shard a test.
+  MACRO(ADD_SHARDED_TEST TEST_NAME NUM_SHARDS)
+    math(EXPR NUM_SHARDS_MINUS_ONE "${NUM_SHARDS} - 1")
+    FOREACH(SHARD RANGE 0 ${NUM_SHARDS_MINUS_ONE})
+      ADD_TEST(NAME ${TEST_NAME}-${SHARD} COMMAND ${TEST_NAME})
+      SET_PROPERTY(
+          TEST ${TEST_NAME}-${SHARD}
+            APPEND
+            PROPERTY ENVIRONMENT "GTEST_TOTAL_SHARDS=${NUM_SHARDS};"
+                    "GTEST_SHARD_INDEX=${SHARD}")
+    ENDFOREACH()
+  ENDMACRO()
+
   # ---[ Build google test
   IF(NOT TARGET gtest)
     IF(XNNPACK_USE_SYSTEM_LIBS)
@@ -1913,7 +1926,7 @@ IF(XNNPACK_BUILD_TESTS)
     SET_TARGET_PROPERTIES(scaled-dot-product-attention-test PROPERTIES CXX_EXTENSIONS YES)
     TARGET_INCLUDE_DIRECTORIES(scaled-dot-product-attention-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(scaled-dot-product-attention-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME scaled-dot-product-attention-test COMMAND scaled-dot-product-attention-test)
+    ADD_SHARDED_TEST(scaled-dot-product-attention-test 10)
 
     ADD_EXECUTABLE(sigmoid-test test/sigmoid.cc)
     SET_TARGET_PROPERTIES(sigmoid-test PROPERTIES CXX_EXTENSIONS YES)
@@ -2393,7 +2406,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-avgpool-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f32-avgpool-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
   TARGET_LINK_LIBRARIES(f32-avgpool-minmax-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-avgpool-minmax-test COMMAND f32-avgpool-minmax-test)
+  ADD_SHARDED_TEST(f32-avgpool-minmax-test 20)
 
   ADD_EXECUTABLE(f32-conv-hwc-test test/f32-conv-hwc.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-test PRIVATE include src test)
@@ -2578,13 +2591,13 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-maxpool-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f32-maxpool-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
   TARGET_LINK_LIBRARIES(f32-maxpool-minmax-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-maxpool-minmax-test COMMAND f32-maxpool-minmax-test)
+  ADD_SHARDED_TEST(f32-maxpool-minmax-test 10)
 
   ADD_EXECUTABLE(f32-pavgpool-minmax-test test/f32-pavgpool-minmax.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-pavgpool-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f32-pavgpool-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
   TARGET_LINK_LIBRARIES(f32-pavgpool-minmax-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-pavgpool-minmax-test COMMAND f32-pavgpool-minmax-test)
+  ADD_SHARDED_TEST(f32-pavgpool-minmax-test 5)
 
   ADD_EXECUTABLE(f32-ppmm-minmax-test test/f32-ppmm-minmax.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-ppmm-minmax-test PRIVATE include src test)
@@ -2698,7 +2711,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-vclamp-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f32-vclamp-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
   TARGET_LINK_LIBRARIES(f32-vclamp-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vclamp-test COMMAND f32-vclamp-test)
+  ADD_SHARDED_TEST(f32-vclamp-test 10)
 
   ADD_EXECUTABLE(f32-vcopysign-test test/f32-vcopysign.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-vcopysign-test PRIVATE include src test)

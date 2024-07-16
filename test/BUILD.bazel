@@ -2259,6 +2259,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "fully_connected_test",
+    timeout = "moderate",
     srcs = [
         "fully-connected.cc",
     ],

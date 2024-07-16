@@ -30,7 +30,8 @@ TEST(U64_U32_VSQRTSHIFT__SCALAR_CVTU32_SQRT_CVTU32F64_U1, batch_eq_1) {
 }
 
 TEST(U64_U32_VSQRTSHIFT__SCALAR_CVTU32_SQRT_CVTU32F64_U1, batch_gt_1) {
-  for (size_t batch_size = 1 + 1; batch_size < 10; batch_size++) {
+  const size_t batch_step = 1;
+  for (size_t batch_size = batch_step + 1; batch_size < 10; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .Test(xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_u1);
@@ -38,8 +39,9 @@ TEST(U64_U32_VSQRTSHIFT__SCALAR_CVTU32_SQRT_CVTU32F64_U1, batch_gt_1) {
 }
 
 TEST(U64_U32_VSQRTSHIFT__SCALAR_CVTU32_SQRT_CVTU32F64_U1, shift) {
+  const size_t batch_step = 1;
   for (uint32_t shift = 0; shift < 32; shift++) {
-    for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+    for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 1) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .shift(shift)

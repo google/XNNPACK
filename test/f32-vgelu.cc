@@ -30,7 +30,8 @@ TEST(F32_VGELU__SCALAR_U1, batch_eq_1) {
 }
 
 TEST(F32_VGELU__SCALAR_U1, batch_gt_1) {
-  for (size_t batch_size = 1 + 1; batch_size < 10; batch_size++) {
+  const size_t batch_step = 1;
+  for (size_t batch_size = batch_step + 1; batch_size < 10; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestGelu(xnn_f32_vgelu_ukernel__scalar_u1);
@@ -38,7 +39,8 @@ TEST(F32_VGELU__SCALAR_U1, batch_gt_1) {
 }
 
 TEST(F32_VGELU__SCALAR_U1, inplace) {
-  for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+  const size_t batch_step = 1;
+  for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 1) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .inplace(true)
@@ -80,7 +82,8 @@ TEST(F32_VGELU__SCALAR_U2, batch_eq_2) {
 }
 
 TEST(F32_VGELU__SCALAR_U2, batch_div_2) {
-  for (size_t batch_size = 4; batch_size < 20; batch_size += 2) {
+  const size_t batch_step = 2;
+  for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestGelu(xnn_f32_vgelu_ukernel__scalar_u2);
@@ -88,7 +91,8 @@ TEST(F32_VGELU__SCALAR_U2, batch_div_2) {
 }
 
 TEST(F32_VGELU__SCALAR_U2, batch_lt_2) {
-  for (size_t batch_size = 1; batch_size < 2; batch_size++) {
+  const size_t batch_step = 2;
+  for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestGelu(xnn_f32_vgelu_ukernel__scalar_u2);
@@ -96,7 +100,8 @@ TEST(F32_VGELU__SCALAR_U2, batch_lt_2) {
 }
 
 TEST(F32_VGELU__SCALAR_U2, batch_gt_2) {
-  for (size_t batch_size = 2 + 1; batch_size < 4; batch_size++) {
+  const size_t batch_step = 2;
+  for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestGelu(xnn_f32_vgelu_ukernel__scalar_u2);
@@ -104,7 +109,8 @@ TEST(F32_VGELU__SCALAR_U2, batch_gt_2) {
 }
 
 TEST(F32_VGELU__SCALAR_U2, inplace) {
-  for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+  const size_t batch_step = 2;
+  for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 1) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .inplace(true)
@@ -146,7 +152,8 @@ TEST(F32_VGELU__SCALAR_U4, batch_eq_4) {
 }
 
 TEST(F32_VGELU__SCALAR_U4, batch_div_4) {
-  for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
+  const size_t batch_step = 4;
+  for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestGelu(xnn_f32_vgelu_ukernel__scalar_u4);
@@ -154,7 +161,8 @@ TEST(F32_VGELU__SCALAR_U4, batch_div_4) {
 }
 
 TEST(F32_VGELU__SCALAR_U4, batch_lt_4) {
-  for (size_t batch_size = 1; batch_size < 4; batch_size++) {
+  const size_t batch_step = 4;
+  for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestGelu(xnn_f32_vgelu_ukernel__scalar_u4);
@@ -162,7 +170,8 @@ TEST(F32_VGELU__SCALAR_U4, batch_lt_4) {
 }
 
 TEST(F32_VGELU__SCALAR_U4, batch_gt_4) {
-  for (size_t batch_size = 4 + 1; batch_size < 8; batch_size++) {
+  const size_t batch_step = 4;
+  for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestGelu(xnn_f32_vgelu_ukernel__scalar_u4);
@@ -170,7 +179,8 @@ TEST(F32_VGELU__SCALAR_U4, batch_gt_4) {
 }
 
 TEST(F32_VGELU__SCALAR_U4, inplace) {
-  for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+  const size_t batch_step = 4;
+  for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 3) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .inplace(true)
@@ -212,7 +222,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U1, batch_eq_1) {
 }
 
 TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U1, batch_gt_1) {
-  for (size_t batch_size = 1 + 1; batch_size < 10; batch_size++) {
+  const size_t batch_step = 1;
+  for (size_t batch_size = batch_step + 1; batch_size < 10; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestGelu(xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u1);
@@ -220,7 +231,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U1, batch_gt_1) {
 }
 
 TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U1, inplace) {
-  for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+  const size_t batch_step = 1;
+  for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 1) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .inplace(true)
@@ -262,7 +274,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U2, batch_eq_2) {
 }
 
 TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U2, batch_div_2) {
-  for (size_t batch_size = 4; batch_size < 20; batch_size += 2) {
+  const size_t batch_step = 2;
+  for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestGelu(xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u2);
@@ -270,7 +283,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U2, batch_div_2) {
 }
 
 TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U2, batch_lt_2) {
-  for (size_t batch_size = 1; batch_size < 2; batch_size++) {
+  const size_t batch_step = 2;
+  for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestGelu(xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u2);
@@ -278,7 +292,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U2, batch_lt_2) {
 }
 
 TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U2, batch_gt_2) {
-  for (size_t batch_size = 2 + 1; batch_size < 4; batch_size++) {
+  const size_t batch_step = 2;
+  for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestGelu(xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u2);
@@ -286,7 +301,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U2, batch_gt_2) {
 }
 
 TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U2, inplace) {
-  for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+  const size_t batch_step = 2;
+  for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 1) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .inplace(true)
@@ -328,7 +344,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U4, batch_eq_4) {
 }
 
 TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U4, batch_div_4) {
-  for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
+  const size_t batch_step = 4;
+  for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestGelu(xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u4);
@@ -336,7 +353,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U4, batch_div_4) {
 }
 
 TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U4, batch_lt_4) {
-  for (size_t batch_size = 1; batch_size < 4; batch_size++) {
+  const size_t batch_step = 4;
+  for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestGelu(xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u4);
@@ -344,7 +362,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U4, batch_lt_4) {
 }
 
 TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U4, batch_gt_4) {
-  for (size_t batch_size = 4 + 1; batch_size < 8; batch_size++) {
+  const size_t batch_step = 4;
+  for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestGelu(xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u4);
@@ -352,7 +371,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U4, batch_gt_4) {
 }
 
 TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U4, inplace) {
-  for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+  const size_t batch_step = 4;
+  for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 3) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .inplace(true)
@@ -394,7 +414,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, batch_eq_8) {
 }
 
 TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, batch_div_8) {
-  for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
+  const size_t batch_step = 8;
+  for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestGelu(xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u8);
@@ -402,7 +423,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, batch_div_8) {
 }
 
 TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, batch_lt_8) {
-  for (size_t batch_size = 1; batch_size < 8; batch_size++) {
+  const size_t batch_step = 8;
+  for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestGelu(xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u8);
@@ -410,7 +432,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, batch_lt_8) {
 }
 
 TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, batch_gt_8) {
-  for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
+  const size_t batch_step = 8;
+  for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestGelu(xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u8);
@@ -418,7 +441,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, batch_gt_8) {
 }
 
 TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, inplace) {
-  for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+  const size_t batch_step = 8;
+  for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 7) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .inplace(true)
@@ -463,7 +487,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__SSE2_RATIONAL_12_10_DIV_U4, batch_div_4) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
+    const size_t batch_step = 4;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u4);
@@ -472,7 +497,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__SSE2_RATIONAL_12_10_DIV_U4, batch_lt_4) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t batch_size = 1; batch_size < 4; batch_size++) {
+    const size_t batch_step = 4;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u4);
@@ -481,7 +507,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__SSE2_RATIONAL_12_10_DIV_U4, batch_gt_4) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t batch_size = 4 + 1; batch_size < 8; batch_size++) {
+    const size_t batch_step = 4;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u4);
@@ -490,7 +517,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__SSE2_RATIONAL_12_10_DIV_U4, inplace) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+    const size_t batch_step = 4;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 3) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -538,7 +566,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__SSE2_RATIONAL_12_10_DIV_U8, batch_div_8) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u8);
@@ -547,7 +576,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__SSE2_RATIONAL_12_10_DIV_U8, batch_lt_8) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t batch_size = 1; batch_size < 8; batch_size++) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u8);
@@ -556,7 +586,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__SSE2_RATIONAL_12_10_DIV_U8, batch_gt_8) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u8);
@@ -565,7 +596,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__SSE2_RATIONAL_12_10_DIV_U8, inplace) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 7) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -613,7 +645,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__SSE2_RATIONAL_12_10_DIV_U12, batch_div_12) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t batch_size = 24; batch_size < 120; batch_size += 12) {
+    const size_t batch_step = 12;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u12);
@@ -622,7 +655,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__SSE2_RATIONAL_12_10_DIV_U12, batch_lt_12) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t batch_size = 1; batch_size < 12; batch_size++) {
+    const size_t batch_step = 12;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u12);
@@ -631,7 +665,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__SSE2_RATIONAL_12_10_DIV_U12, batch_gt_12) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t batch_size = 12 + 1; batch_size < 24; batch_size++) {
+    const size_t batch_step = 12;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u12);
@@ -640,7 +675,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__SSE2_RATIONAL_12_10_DIV_U12, inplace) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t batch_size = 1; batch_size <= 60; batch_size += 11) {
+    const size_t batch_step = 12;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 11) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -688,7 +724,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__SSE2_RATIONAL_12_10_DIV_U16, batch_div_16) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u16);
@@ -697,7 +734,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__SSE2_RATIONAL_12_10_DIV_U16, batch_lt_16) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u16);
@@ -706,7 +744,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__SSE2_RATIONAL_12_10_DIV_U16, batch_gt_16) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u16);
@@ -715,7 +754,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__SSE2_RATIONAL_12_10_DIV_U16, inplace) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 15) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -763,7 +803,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX_RATIONAL_12_10_DIV_U8, batch_div_8) {
     TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u8);
@@ -772,7 +813,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX_RATIONAL_12_10_DIV_U8, batch_lt_8) {
     TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 1; batch_size < 8; batch_size++) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u8);
@@ -781,7 +823,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX_RATIONAL_12_10_DIV_U8, batch_gt_8) {
     TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u8);
@@ -790,7 +833,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX_RATIONAL_12_10_DIV_U8, inplace) {
     TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 7) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -838,7 +882,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX_RATIONAL_12_10_DIV_U16, batch_div_16) {
     TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u16);
@@ -847,7 +892,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX_RATIONAL_12_10_DIV_U16, batch_lt_16) {
     TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u16);
@@ -856,7 +902,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX_RATIONAL_12_10_DIV_U16, batch_gt_16) {
     TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u16);
@@ -865,7 +912,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX_RATIONAL_12_10_DIV_U16, inplace) {
     TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 15) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -913,7 +961,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX_RATIONAL_12_10_DIV_U24, batch_div_24) {
     TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 48; batch_size < 240; batch_size += 24) {
+    const size_t batch_step = 24;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u24);
@@ -922,7 +971,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX_RATIONAL_12_10_DIV_U24, batch_lt_24) {
     TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 1; batch_size < 24; batch_size++) {
+    const size_t batch_step = 24;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u24);
@@ -931,7 +981,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX_RATIONAL_12_10_DIV_U24, batch_gt_24) {
     TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 24 + 1; batch_size < 48; batch_size++) {
+    const size_t batch_step = 24;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u24);
@@ -940,7 +991,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX_RATIONAL_12_10_DIV_U24, inplace) {
     TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 1; batch_size <= 120; batch_size += 23) {
+    const size_t batch_step = 24;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 23) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -988,7 +1040,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX_RATIONAL_12_10_DIV_U32, batch_div_32) {
     TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u32);
@@ -997,7 +1050,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX_RATIONAL_12_10_DIV_U32, batch_lt_32) {
     TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 1; batch_size < 32; batch_size++) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u32);
@@ -1006,7 +1060,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX_RATIONAL_12_10_DIV_U32, batch_gt_32) {
     TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 32 + 1; batch_size < 64; batch_size++) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u32);
@@ -1015,7 +1070,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX_RATIONAL_12_10_DIV_U32, inplace) {
     TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 31) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -1063,7 +1119,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__FMA3_RATIONAL_12_10_DIV_U8, batch_div_8) {
     TEST_REQUIRES_X86_FMA3;
-    for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u8);
@@ -1072,7 +1129,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__FMA3_RATIONAL_12_10_DIV_U8, batch_lt_8) {
     TEST_REQUIRES_X86_FMA3;
-    for (size_t batch_size = 1; batch_size < 8; batch_size++) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u8);
@@ -1081,7 +1139,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__FMA3_RATIONAL_12_10_DIV_U8, batch_gt_8) {
     TEST_REQUIRES_X86_FMA3;
-    for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u8);
@@ -1090,7 +1149,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__FMA3_RATIONAL_12_10_DIV_U8, inplace) {
     TEST_REQUIRES_X86_FMA3;
-    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 7) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -1138,7 +1198,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__FMA3_RATIONAL_12_10_DIV_U16, batch_div_16) {
     TEST_REQUIRES_X86_FMA3;
-    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u16);
@@ -1147,7 +1208,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__FMA3_RATIONAL_12_10_DIV_U16, batch_lt_16) {
     TEST_REQUIRES_X86_FMA3;
-    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u16);
@@ -1156,7 +1218,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__FMA3_RATIONAL_12_10_DIV_U16, batch_gt_16) {
     TEST_REQUIRES_X86_FMA3;
-    for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u16);
@@ -1165,7 +1228,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__FMA3_RATIONAL_12_10_DIV_U16, inplace) {
     TEST_REQUIRES_X86_FMA3;
-    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 15) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -1213,7 +1277,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__FMA3_RATIONAL_12_10_DIV_U24, batch_div_24) {
     TEST_REQUIRES_X86_FMA3;
-    for (size_t batch_size = 48; batch_size < 240; batch_size += 24) {
+    const size_t batch_step = 24;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u24);
@@ -1222,7 +1287,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__FMA3_RATIONAL_12_10_DIV_U24, batch_lt_24) {
     TEST_REQUIRES_X86_FMA3;
-    for (size_t batch_size = 1; batch_size < 24; batch_size++) {
+    const size_t batch_step = 24;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u24);
@@ -1231,7 +1297,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__FMA3_RATIONAL_12_10_DIV_U24, batch_gt_24) {
     TEST_REQUIRES_X86_FMA3;
-    for (size_t batch_size = 24 + 1; batch_size < 48; batch_size++) {
+    const size_t batch_step = 24;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u24);
@@ -1240,7 +1307,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__FMA3_RATIONAL_12_10_DIV_U24, inplace) {
     TEST_REQUIRES_X86_FMA3;
-    for (size_t batch_size = 1; batch_size <= 120; batch_size += 23) {
+    const size_t batch_step = 24;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 23) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -1288,7 +1356,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__FMA3_RATIONAL_12_10_DIV_U32, batch_div_32) {
     TEST_REQUIRES_X86_FMA3;
-    for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u32);
@@ -1297,7 +1366,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__FMA3_RATIONAL_12_10_DIV_U32, batch_lt_32) {
     TEST_REQUIRES_X86_FMA3;
-    for (size_t batch_size = 1; batch_size < 32; batch_size++) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u32);
@@ -1306,7 +1376,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__FMA3_RATIONAL_12_10_DIV_U32, batch_gt_32) {
     TEST_REQUIRES_X86_FMA3;
-    for (size_t batch_size = 32 + 1; batch_size < 64; batch_size++) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u32);
@@ -1315,7 +1386,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__FMA3_RATIONAL_12_10_DIV_U32, inplace) {
     TEST_REQUIRES_X86_FMA3;
-    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 31) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -1363,7 +1435,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_DIV_U16, batch_div_16) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_div_u16);
@@ -1372,7 +1445,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_DIV_U16, batch_lt_16) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_div_u16);
@@ -1381,7 +1455,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_DIV_U16, batch_gt_16) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_div_u16);
@@ -1390,7 +1465,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_DIV_U16, inplace) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 15) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -1438,7 +1514,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_DIV_U32, batch_div_32) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_div_u32);
@@ -1447,7 +1524,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_DIV_U32, batch_lt_32) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size < 32; batch_size++) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_div_u32);
@@ -1456,7 +1534,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_DIV_U32, batch_gt_32) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 32 + 1; batch_size < 64; batch_size++) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_div_u32);
@@ -1465,7 +1544,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_DIV_U32, inplace) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 31) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -1513,7 +1593,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_DIV_U48, batch_div_48) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 96; batch_size < 480; batch_size += 48) {
+    const size_t batch_step = 48;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_div_u48);
@@ -1522,7 +1603,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_DIV_U48, batch_lt_48) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size < 48; batch_size++) {
+    const size_t batch_step = 48;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_div_u48);
@@ -1531,7 +1613,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_DIV_U48, batch_gt_48) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 48 + 1; batch_size < 96; batch_size++) {
+    const size_t batch_step = 48;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_div_u48);
@@ -1540,7 +1623,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_DIV_U48, inplace) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size <= 240; batch_size += 47) {
+    const size_t batch_step = 48;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 47) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -1588,7 +1672,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_DIV_U64, batch_div_64) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
+    const size_t batch_step = 64;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_div_u64);
@@ -1597,7 +1682,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_DIV_U64, batch_lt_64) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size < 64; batch_size++) {
+    const size_t batch_step = 64;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_div_u64);
@@ -1606,7 +1692,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_DIV_U64, batch_gt_64) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 64 + 1; batch_size < 128; batch_size++) {
+    const size_t batch_step = 64;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_div_u64);
@@ -1615,7 +1702,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_DIV_U64, inplace) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size <= 320; batch_size += 63) {
+    const size_t batch_step = 64;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 63) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -1663,7 +1751,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_NR_U16, batch_div_16) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u16);
@@ -1672,7 +1761,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_NR_U16, batch_lt_16) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u16);
@@ -1681,7 +1771,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_NR_U16, batch_gt_16) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u16);
@@ -1690,7 +1781,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_NR_U16, inplace) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 15) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -1738,7 +1830,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_NR_U32, batch_div_32) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u32);
@@ -1747,7 +1840,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_NR_U32, batch_lt_32) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size < 32; batch_size++) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u32);
@@ -1756,7 +1850,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_NR_U32, batch_gt_32) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 32 + 1; batch_size < 64; batch_size++) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u32);
@@ -1765,7 +1860,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_NR_U32, inplace) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 31) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -1813,7 +1909,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_NR_U48, batch_div_48) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 96; batch_size < 480; batch_size += 48) {
+    const size_t batch_step = 48;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u48);
@@ -1822,7 +1919,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_NR_U48, batch_lt_48) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size < 48; batch_size++) {
+    const size_t batch_step = 48;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u48);
@@ -1831,7 +1929,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_NR_U48, batch_gt_48) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 48 + 1; batch_size < 96; batch_size++) {
+    const size_t batch_step = 48;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u48);
@@ -1840,7 +1939,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_NR_U48, inplace) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size <= 240; batch_size += 47) {
+    const size_t batch_step = 48;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 47) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -1888,7 +1988,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_NR_U64, batch_div_64) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
+    const size_t batch_step = 64;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u64);
@@ -1897,7 +1998,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_NR_U64, batch_lt_64) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size < 64; batch_size++) {
+    const size_t batch_step = 64;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u64);
@@ -1906,7 +2008,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_NR_U64, batch_gt_64) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 64 + 1; batch_size < 128; batch_size++) {
+    const size_t batch_step = 64;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u64);
@@ -1915,7 +2018,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__AVX512F_RATIONAL_12_10_NR_U64, inplace) {
     TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size <= 320; batch_size += 63) {
+    const size_t batch_step = 64;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 63) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -1963,7 +2067,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__NEON_RATIONAL_12_10_DIV_U4, batch_div_4) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
+    const size_t batch_step = 4;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__neon_rational_12_10_div_u4);
@@ -1972,7 +2077,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__NEON_RATIONAL_12_10_DIV_U4, batch_lt_4) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 1; batch_size < 4; batch_size++) {
+    const size_t batch_step = 4;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__neon_rational_12_10_div_u4);
@@ -1981,7 +2087,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__NEON_RATIONAL_12_10_DIV_U4, batch_gt_4) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 4 + 1; batch_size < 8; batch_size++) {
+    const size_t batch_step = 4;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__neon_rational_12_10_div_u4);
@@ -1990,7 +2097,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__NEON_RATIONAL_12_10_DIV_U4, inplace) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+    const size_t batch_step = 4;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 3) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -2038,7 +2146,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__NEON_RATIONAL_12_10_DIV_U8, batch_div_8) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__neon_rational_12_10_div_u8);
@@ -2047,7 +2156,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__NEON_RATIONAL_12_10_DIV_U8, batch_lt_8) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 1; batch_size < 8; batch_size++) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__neon_rational_12_10_div_u8);
@@ -2056,7 +2166,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__NEON_RATIONAL_12_10_DIV_U8, batch_gt_8) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__neon_rational_12_10_div_u8);
@@ -2065,7 +2176,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__NEON_RATIONAL_12_10_DIV_U8, inplace) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 7) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -2113,7 +2225,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__NEON_RATIONAL_12_10_DIV_U12, batch_div_12) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 24; batch_size < 120; batch_size += 12) {
+    const size_t batch_step = 12;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__neon_rational_12_10_div_u12);
@@ -2122,7 +2235,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__NEON_RATIONAL_12_10_DIV_U12, batch_lt_12) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 1; batch_size < 12; batch_size++) {
+    const size_t batch_step = 12;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__neon_rational_12_10_div_u12);
@@ -2131,7 +2245,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__NEON_RATIONAL_12_10_DIV_U12, batch_gt_12) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 12 + 1; batch_size < 24; batch_size++) {
+    const size_t batch_step = 12;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__neon_rational_12_10_div_u12);
@@ -2140,7 +2255,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__NEON_RATIONAL_12_10_DIV_U12, inplace) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 1; batch_size <= 60; batch_size += 11) {
+    const size_t batch_step = 12;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 11) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -2188,7 +2304,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__NEON_RATIONAL_12_10_DIV_U16, batch_div_16) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__neon_rational_12_10_div_u16);
@@ -2197,7 +2314,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__NEON_RATIONAL_12_10_DIV_U16, batch_lt_16) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__neon_rational_12_10_div_u16);
@@ -2206,7 +2324,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__NEON_RATIONAL_12_10_DIV_U16, batch_gt_16) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__neon_rational_12_10_div_u16);
@@ -2215,7 +2334,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__NEON_RATIONAL_12_10_DIV_U16, inplace) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 15) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -2263,7 +2383,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__HVX_RATIONAL_12_10_DIV_U32, batch_div_32) {
     TEST_REQUIRES_HVX;
-    for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__hvx_rational_12_10_div_u32);
@@ -2272,7 +2393,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__HVX_RATIONAL_12_10_DIV_U32, batch_lt_32) {
     TEST_REQUIRES_HVX;
-    for (size_t batch_size = 1; batch_size < 32; batch_size++) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__hvx_rational_12_10_div_u32);
@@ -2281,7 +2403,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__HVX_RATIONAL_12_10_DIV_U32, batch_gt_32) {
     TEST_REQUIRES_HVX;
-    for (size_t batch_size = 32 + 1; batch_size < 64; batch_size++) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__hvx_rational_12_10_div_u32);
@@ -2290,7 +2413,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__HVX_RATIONAL_12_10_DIV_U32, inplace) {
     TEST_REQUIRES_HVX;
-    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+    const size_t batch_step = 32;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 31) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -2338,7 +2462,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__HVX_RATIONAL_12_10_DIV_U64, batch_div_64) {
     TEST_REQUIRES_HVX;
-    for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
+    const size_t batch_step = 64;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__hvx_rational_12_10_div_u64);
@@ -2347,7 +2472,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__HVX_RATIONAL_12_10_DIV_U64, batch_lt_64) {
     TEST_REQUIRES_HVX;
-    for (size_t batch_size = 1; batch_size < 64; batch_size++) {
+    const size_t batch_step = 64;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__hvx_rational_12_10_div_u64);
@@ -2356,7 +2482,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__HVX_RATIONAL_12_10_DIV_U64, batch_gt_64) {
     TEST_REQUIRES_HVX;
-    for (size_t batch_size = 64 + 1; batch_size < 128; batch_size++) {
+    const size_t batch_step = 64;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__hvx_rational_12_10_div_u64);
@@ -2365,7 +2492,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__HVX_RATIONAL_12_10_DIV_U64, inplace) {
     TEST_REQUIRES_HVX;
-    for (size_t batch_size = 1; batch_size <= 320; batch_size += 63) {
+    const size_t batch_step = 64;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 63) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -2413,7 +2541,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__HVX_RATIONAL_12_10_DIV_U128, batch_div_128) {
     TEST_REQUIRES_HVX;
-    for (size_t batch_size = 256; batch_size < 1280; batch_size += 128) {
+    const size_t batch_step = 128;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__hvx_rational_12_10_div_u128);
@@ -2422,7 +2551,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__HVX_RATIONAL_12_10_DIV_U128, batch_lt_128) {
     TEST_REQUIRES_HVX;
-    for (size_t batch_size = 1; batch_size < 128; batch_size++) {
+    const size_t batch_step = 128;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__hvx_rational_12_10_div_u128);
@@ -2431,7 +2561,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__HVX_RATIONAL_12_10_DIV_U128, batch_gt_128) {
     TEST_REQUIRES_HVX;
-    for (size_t batch_size = 128 + 1; batch_size < 256; batch_size++) {
+    const size_t batch_step = 128;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__hvx_rational_12_10_div_u128);
@@ -2440,7 +2571,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
 
   TEST(F32_VGELU__HVX_RATIONAL_12_10_DIV_U128, inplace) {
     TEST_REQUIRES_HVX;
-    for (size_t batch_size = 1; batch_size <= 640; batch_size += 127) {
+    const size_t batch_step = 128;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 127) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -2486,7 +2618,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
   }
 
   TEST(F32_VGELU__WASMSIMD_RATIONAL_12_10_DIV_U4, batch_div_4) {
-    for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
+    const size_t batch_step = 4;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__wasmsimd_rational_12_10_div_u4);
@@ -2494,7 +2627,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
   }
 
   TEST(F32_VGELU__WASMSIMD_RATIONAL_12_10_DIV_U4, batch_lt_4) {
-    for (size_t batch_size = 1; batch_size < 4; batch_size++) {
+    const size_t batch_step = 4;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__wasmsimd_rational_12_10_div_u4);
@@ -2502,7 +2636,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
   }
 
   TEST(F32_VGELU__WASMSIMD_RATIONAL_12_10_DIV_U4, batch_gt_4) {
-    for (size_t batch_size = 4 + 1; batch_size < 8; batch_size++) {
+    const size_t batch_step = 4;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__wasmsimd_rational_12_10_div_u4);
@@ -2510,7 +2645,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
   }
 
   TEST(F32_VGELU__WASMSIMD_RATIONAL_12_10_DIV_U4, inplace) {
-    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+    const size_t batch_step = 4;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 3) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -2555,7 +2691,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
   }
 
   TEST(F32_VGELU__WASMSIMD_RATIONAL_12_10_DIV_U8, batch_div_8) {
-    for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__wasmsimd_rational_12_10_div_u8);
@@ -2563,7 +2700,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
   }
 
   TEST(F32_VGELU__WASMSIMD_RATIONAL_12_10_DIV_U8, batch_lt_8) {
-    for (size_t batch_size = 1; batch_size < 8; batch_size++) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__wasmsimd_rational_12_10_div_u8);
@@ -2571,7 +2709,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
   }
 
   TEST(F32_VGELU__WASMSIMD_RATIONAL_12_10_DIV_U8, batch_gt_8) {
-    for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__wasmsimd_rational_12_10_div_u8);
@@ -2579,7 +2718,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
   }
 
   TEST(F32_VGELU__WASMSIMD_RATIONAL_12_10_DIV_U8, inplace) {
-    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 7) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -2624,7 +2764,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
   }
 
   TEST(F32_VGELU__WASMSIMD_RATIONAL_12_10_DIV_U12, batch_div_12) {
-    for (size_t batch_size = 24; batch_size < 120; batch_size += 12) {
+    const size_t batch_step = 12;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__wasmsimd_rational_12_10_div_u12);
@@ -2632,7 +2773,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
   }
 
   TEST(F32_VGELU__WASMSIMD_RATIONAL_12_10_DIV_U12, batch_lt_12) {
-    for (size_t batch_size = 1; batch_size < 12; batch_size++) {
+    const size_t batch_step = 12;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__wasmsimd_rational_12_10_div_u12);
@@ -2640,7 +2782,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
   }
 
   TEST(F32_VGELU__WASMSIMD_RATIONAL_12_10_DIV_U12, batch_gt_12) {
-    for (size_t batch_size = 12 + 1; batch_size < 24; batch_size++) {
+    const size_t batch_step = 12;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__wasmsimd_rational_12_10_div_u12);
@@ -2648,7 +2791,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
   }
 
   TEST(F32_VGELU__WASMSIMD_RATIONAL_12_10_DIV_U12, inplace) {
-    for (size_t batch_size = 1; batch_size <= 60; batch_size += 11) {
+    const size_t batch_step = 12;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 11) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -2693,7 +2837,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
   }
 
   TEST(F32_VGELU__WASMSIMD_RATIONAL_12_10_DIV_U16, batch_div_16) {
-    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__wasmsimd_rational_12_10_div_u16);
@@ -2701,7 +2846,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
   }
 
   TEST(F32_VGELU__WASMSIMD_RATIONAL_12_10_DIV_U16, batch_lt_16) {
-    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__wasmsimd_rational_12_10_div_u16);
@@ -2709,7 +2855,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
   }
 
   TEST(F32_VGELU__WASMSIMD_RATIONAL_12_10_DIV_U16, batch_gt_16) {
-    for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestGelu(xnn_f32_vgelu_ukernel__wasmsimd_rational_12_10_div_u16);
@@ -2717,7 +2864,8 @@ TEST(F32_VGELU__SCALAR_RATIONAL_12_10_DIV_U8, special_values) {
   }
 
   TEST(F32_VGELU__WASMSIMD_RATIONAL_12_10_DIV_U16, inplace) {
-    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 15) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)

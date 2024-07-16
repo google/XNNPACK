@@ -30,7 +30,8 @@ TEST(F32_VEXP__SCALAR_EXP_U1, batch_eq_1) {
 }
 
 TEST(F32_VEXP__SCALAR_EXP_U1, batch_gt_1) {
-  for (size_t batch_size = 1 + 1; batch_size < 10; batch_size++) {
+  const size_t batch_step = 1;
+  for (size_t batch_size = batch_step + 1; batch_size < 10; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestExp(xnn_f32_vexp_ukernel__scalar_exp_u1);
@@ -38,7 +39,8 @@ TEST(F32_VEXP__SCALAR_EXP_U1, batch_gt_1) {
 }
 
 TEST(F32_VEXP__SCALAR_EXP_U1, inplace) {
-  for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+  const size_t batch_step = 1;
+  for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 1) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .inplace(true)
@@ -80,7 +82,8 @@ TEST(F32_VEXP__SCALAR_EXP_U2, batch_eq_2) {
 }
 
 TEST(F32_VEXP__SCALAR_EXP_U2, batch_div_2) {
-  for (size_t batch_size = 4; batch_size < 20; batch_size += 2) {
+  const size_t batch_step = 2;
+  for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestExp(xnn_f32_vexp_ukernel__scalar_exp_u2);
@@ -88,7 +91,8 @@ TEST(F32_VEXP__SCALAR_EXP_U2, batch_div_2) {
 }
 
 TEST(F32_VEXP__SCALAR_EXP_U2, batch_lt_2) {
-  for (size_t batch_size = 1; batch_size < 2; batch_size++) {
+  const size_t batch_step = 2;
+  for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestExp(xnn_f32_vexp_ukernel__scalar_exp_u2);
@@ -96,7 +100,8 @@ TEST(F32_VEXP__SCALAR_EXP_U2, batch_lt_2) {
 }
 
 TEST(F32_VEXP__SCALAR_EXP_U2, batch_gt_2) {
-  for (size_t batch_size = 2 + 1; batch_size < 4; batch_size++) {
+  const size_t batch_step = 2;
+  for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestExp(xnn_f32_vexp_ukernel__scalar_exp_u2);
@@ -104,7 +109,8 @@ TEST(F32_VEXP__SCALAR_EXP_U2, batch_gt_2) {
 }
 
 TEST(F32_VEXP__SCALAR_EXP_U2, inplace) {
-  for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+  const size_t batch_step = 2;
+  for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 1) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .inplace(true)
@@ -146,7 +152,8 @@ TEST(F32_VEXP__SCALAR_EXP_U4, batch_eq_4) {
 }
 
 TEST(F32_VEXP__SCALAR_EXP_U4, batch_div_4) {
-  for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
+  const size_t batch_step = 4;
+  for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestExp(xnn_f32_vexp_ukernel__scalar_exp_u4);
@@ -154,7 +161,8 @@ TEST(F32_VEXP__SCALAR_EXP_U4, batch_div_4) {
 }
 
 TEST(F32_VEXP__SCALAR_EXP_U4, batch_lt_4) {
-  for (size_t batch_size = 1; batch_size < 4; batch_size++) {
+  const size_t batch_step = 4;
+  for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestExp(xnn_f32_vexp_ukernel__scalar_exp_u4);
@@ -162,7 +170,8 @@ TEST(F32_VEXP__SCALAR_EXP_U4, batch_lt_4) {
 }
 
 TEST(F32_VEXP__SCALAR_EXP_U4, batch_gt_4) {
-  for (size_t batch_size = 4 + 1; batch_size < 8; batch_size++) {
+  const size_t batch_step = 4;
+  for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .TestExp(xnn_f32_vexp_ukernel__scalar_exp_u4);
@@ -170,7 +179,8 @@ TEST(F32_VEXP__SCALAR_EXP_U4, batch_gt_4) {
 }
 
 TEST(F32_VEXP__SCALAR_EXP_U4, inplace) {
-  for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+  const size_t batch_step = 4;
+  for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 3) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .inplace(true)

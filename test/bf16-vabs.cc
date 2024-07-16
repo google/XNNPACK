@@ -33,7 +33,8 @@
 
   TEST(BF16_VABS__NEONBF16_U8, batch_div_8) {
     TEST_REQUIRES_ARM_NEON_BF16;
-    for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8, xnn_init_bf16_abs_neon_params);
@@ -42,7 +43,8 @@
 
   TEST(BF16_VABS__NEONBF16_U8, batch_lt_8) {
     TEST_REQUIRES_ARM_NEON_BF16;
-    for (size_t batch_size = 1; batch_size < 8; batch_size++) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8, xnn_init_bf16_abs_neon_params);
@@ -51,7 +53,8 @@
 
   TEST(BF16_VABS__NEONBF16_U8, batch_gt_8) {
     TEST_REQUIRES_ARM_NEON_BF16;
-    for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8, xnn_init_bf16_abs_neon_params);
@@ -60,7 +63,8 @@
 
   TEST(BF16_VABS__NEONBF16_U8, inplace) {
     TEST_REQUIRES_ARM_NEON_BF16;
-    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+    const size_t batch_step = 8;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 7) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -80,7 +84,8 @@
 
   TEST(BF16_VABS__NEONBF16_U16, batch_div_16) {
     TEST_REQUIRES_ARM_NEON_BF16;
-    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16, xnn_init_bf16_abs_neon_params);
@@ -89,7 +94,8 @@
 
   TEST(BF16_VABS__NEONBF16_U16, batch_lt_16) {
     TEST_REQUIRES_ARM_NEON_BF16;
-    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16, xnn_init_bf16_abs_neon_params);
@@ -98,7 +104,8 @@
 
   TEST(BF16_VABS__NEONBF16_U16, batch_gt_16) {
     TEST_REQUIRES_ARM_NEON_BF16;
-    for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16, xnn_init_bf16_abs_neon_params);
@@ -107,7 +114,8 @@
 
   TEST(BF16_VABS__NEONBF16_U16, inplace) {
     TEST_REQUIRES_ARM_NEON_BF16;
-    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+    const size_t batch_step = 16;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 15) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
@@ -127,7 +135,8 @@
 
   TEST(BF16_VABS__NEONBF16_U24, batch_div_24) {
     TEST_REQUIRES_ARM_NEON_BF16;
-    for (size_t batch_size = 48; batch_size < 240; batch_size += 24) {
+    const size_t batch_step = 24;
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24, xnn_init_bf16_abs_neon_params);
@@ -136,7 +145,8 @@
 
   TEST(BF16_VABS__NEONBF16_U24, batch_lt_24) {
     TEST_REQUIRES_ARM_NEON_BF16;
-    for (size_t batch_size = 1; batch_size < 24; batch_size++) {
+    const size_t batch_step = 24;
+    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24, xnn_init_bf16_abs_neon_params);
@@ -145,7 +155,8 @@
 
   TEST(BF16_VABS__NEONBF16_U24, batch_gt_24) {
     TEST_REQUIRES_ARM_NEON_BF16;
-    for (size_t batch_size = 24 + 1; batch_size < 48; batch_size++) {
+    const size_t batch_step = 24;
+    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24, xnn_init_bf16_abs_neon_params);
@@ -154,7 +165,8 @@
 
   TEST(BF16_VABS__NEONBF16_U24, inplace) {
     TEST_REQUIRES_ARM_NEON_BF16;
-    for (size_t batch_size = 1; batch_size <= 120; batch_size += 23) {
+    const size_t batch_step = 24;
+    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 23) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
