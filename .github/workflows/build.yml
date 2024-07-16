@@ -247,13 +247,10 @@ jobs:
           CC: clang-18
           CXX: clang++-18
         run: |
-          # For whatever reason, `xnn_enable_kleidiai` has to be set to `true` explicitly, i.e.
-          # the config setting `//build_config:aarch64` for the default does not seem to trigger.
-          # We also only test the KleidiAI integration for now.
+          # We only test the KleidiAI integration for now.
           bazel test \
-            --define=xnn_enable_kleidiai=true \
             --define=xnn_enable_jit=false \
-            --test_output=errors \
+            --test_output=all \
             test:qp8_f32_qc4w_gemm_minmax_test \
             test:fully_connected_nc_test \
             test:fully_connected_test

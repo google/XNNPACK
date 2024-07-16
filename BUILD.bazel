@@ -2895,7 +2895,7 @@ alias(
 
 selects.config_setting_group(
     name = "kleidiai_enabled_by_default",
-    match_any = [":xnn_enable_kleidiai_explicit_true"],
+    match_any = ["//build_config:aarch64"],
 )
 
 alias(
