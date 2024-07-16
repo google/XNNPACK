@@ -17,10 +17,9 @@
   // height: the number of 128 bytes to fetch.
   // width: we set 128 bytes here.
   // stride: we set 128 bytes here.
-  XNN_INLINE static void xnn_prefetch_to_l2_linear(const void *address, uint8_t height)
+  XNN_INLINE static void xnn_prefetch_to_l2_linear(const void *address, uint32_t height)
   {
-    uint16_t h0 = (((HEXAGON_Vect32)(128) << 8) | ((HEXAGON_Vect32)((height) & 0xff));
-    uint32_t info = HEXAGON_V32_CREATE_H(128, h0);
+    uint32_t info = ((128 << 16) | ((128 << 8) & 0xffff) | (height & 0xffff));
     Q6_l2fetch_AR(address, info);
   }
 
@@ -30,12 +29,12 @@
   //         after each width-sized block is fetched.
   // direction: If clear, row major. If set, cloumn major.
   XNN_INLINE static void xnn_prefetch_to_l2_box(const void *address,
-                                        uint16_t stride,
-                                        uint16_t width,
-                                        uint16_t height,
-                                        uint16_t direction)
+                                        uint64_t stride,
+                                        uint64_t width,
+                                        uint64_t height,
+                                        uint64_t direction)
   {
-    uint64_t info = HEXAGON_V64_CREATE_H(direction, stride, width, height);
+    uint64_t info = ((h3 << 48) | ((h2 & 0xffff) << 32) | ((h1 & 0xffff) << 16) | (h0 & 0xffff));
     Q6_l2fetch_AP(address, info);
   }
 #endif
