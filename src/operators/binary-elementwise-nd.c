@@ -759,29 +759,33 @@ enum xnn_status xnn_create_squared_difference_nd_f32(
 }
 
 
-enum xnn_status xnn_create_vmultiply_nd_s32(
+enum xnn_status xnn_create_multiply_nd_s32(
+    int32_t output_min,
+    int32_t output_max,
     uint32_t flags,
-    xnn_operator_t* vmultiply_op_out)
+    xnn_operator_t* multiply_op_out)
 {
-  const struct xnn_binary_elementwise_config* s32_vmultiply_config = xnn_init_s32_vmultiply_config();
-  if (s32_vmultiply_config == NULL) {
+  
+  const struct xnn_binary_elementwise_config* s32_multiply_config = xnn_init_s32_vmul_config();
+  if (s32_multiply_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
-      xnn_operator_type_to_string(xnn_operator_type_vmultiply_nd_s32));
+      xnn_operator_type_to_string(xnn_operator_type_multiply_nd_s32));
     return xnn_status_unsupported_hardware;
   }
 
   union xnn_s32_minmax_params params;
-  if (s32_vmultiply_config->init.s32_minmax != NULL) {
-    s32_vmultiply_config->init.s32_minmax(&params, 0, 0);
+  if (s32_multiply_config->init.s32_minmax != NULL) {
+    s32_multiply_config->init.s32_minmax(&params, output_min, output_max);
   }
+
   return create_binary_elementwise_nd(
     flags,
     &params,
     &params,
     sizeof(params),
-    xnn_operator_type_vmultiply_nd_s32,
-    &s32_vmultiply_config->linear,
-    vmultiply_op_out);
+    xnn_operator_type_multiply_nd_s32,
+    &s32_multiply_config->minmax,
+    multiply_op_out);
 }
 
 
@@ -1500,8 +1504,8 @@ enum xnn_status xnn_reshape_squared_difference_nd_f32(
 }
 
 
-enum xnn_status xnn_reshape_vmultiply_nd_s32(
-    xnn_operator_t vmultiply_op,
+enum xnn_status xnn_reshape_multiply_nd_s32(
+    xnn_operator_t mul_op,
     size_t num_input1_dims,
     const size_t* input1_shape,
     size_t num_input2_dims,
@@ -1510,12 +1514,12 @@ enum xnn_status xnn_reshape_vmultiply_nd_s32(
 {
 
   return reshape_binary_elementwise_nd(
-    vmultiply_op, xnn_operator_type_vmultiply_nd_s32,
+    mul_op, xnn_operator_type_multiply_nd_s32,
     num_input1_dims, input1_shape,
     num_input2_dims, input2_shape,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_INT32_T,
-    &vmultiply_op->params.s32_minmax, sizeof(vmultiply_op->params.s32_minmax),
-    &vmultiply_op->params.s32_minmax, sizeof(vmultiply_op->params.s32_minmax),
+    &mul_op->params.s32_minmax, sizeof(mul_op->params.s32_minmax),
+    &mul_op->params.s32_minmax, sizeof(mul_op->params.s32_minmax),
     threadpool);
 }
 
@@ -1827,14 +1831,14 @@ enum xnn_status xnn_setup_subtract_nd_f16(
 }
 
 
-enum xnn_status xnn_setup_vmultiply_nd_s32(
-    xnn_operator_t vmultiply_op,
+enum xnn_status xnn_setup_multiply_nd_s32(
+    xnn_operator_t mul_op,
     const int32_t* input1,
     const int32_t* input2,
     int32_t* output)
 {
   return setup_binary_elementwise_nd(
-    vmultiply_op, xnn_operator_type_vmultiply_nd_s32,
+    mul_op, xnn_operator_type_multiply_nd_s32,
     input1, input2, output);
 }
 

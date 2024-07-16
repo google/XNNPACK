@@ -1383,16 +1383,16 @@ enum xnn_status xnn_define_copysign(
   uint32_t flags);
 
 
-/// Define a S32 Multiply node and add it to a Subgraph.
+/// Define a Multiply node and add it to a Subgraph.
 ///
-/// The Multiply node copies the first input and second input.
+/// The Multiply Node performs multiplication of first input and second input.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
 /// @param input1_id - Value ID for the first input tensor. The input tensor must be defined in the @a subgraph.
 /// @param input2_id - Value ID for the second input tensor. The input tensor must be defined in the @a subgraph.
 /// @param output_id - Value ID for the output tensor.
 /// @param flags - binary features of the Multiply node. No supported flags are currently defined.
-enum xnn_status xnn_define_vmultiply(
+enum xnn_status xnn_define_multiply_v2(
   xnn_subgraph_t subgraph,
   uint32_t input1_id,
   uint32_t input2_id,
@@ -2305,22 +2305,22 @@ enum xnn_status xnn_run_add_nd_f32(
   pthreadpool_t threadpool);
 
 
-enum xnn_status xnn_create_vmultiply_nd_s32(
-  // int32_t output_min,
-  // int32_t output_max,
+enum xnn_status xnn_create_multiply_nd_s32(
+  int32_t output_min,
+  int32_t output_max,
   uint32_t flags,
-  xnn_operator_t* vmultiply_op_out);
+  xnn_operator_t* mul_op_out);
 
-enum xnn_status xnn_reshape_vmultiply_nd_s32(
-  xnn_operator_t vmultiply_op_out,
+enum xnn_status xnn_reshape_multiply_nd_s32(
+  xnn_operator_t mul_op,
   size_t num_input1_dims,
   const size_t* input1_shape,
   size_t num_input2_dims,
   const size_t* input2_shape,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_setup_vmultiply_nd_s32(
-  xnn_operator_t vmultiply_op_out,
+enum xnn_status xnn_setup_multiply_nd_s32(
+  xnn_operator_t mul_op,
   const int32_t* input1,
   const int32_t* input2,
   int32_t* output);

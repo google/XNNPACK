@@ -82,11 +82,11 @@ static const char data[] =
   "Subtract\0"
   "Tanh\0"
   "Unpooling 2D\0"
-  "VMultiply";
+  "Multiply";
 
 const char* xnn_node_type_to_string(enum xnn_node_type node_type) {
   assert(node_type >= xnn_node_type_invalid);
-  assert(node_type <= xnn_node_type_vmultiply);
+  assert(node_type <= xnn_node_type_multiply);
   return &data[offset[node_type]];
 }
 #endif  // XNN_LOG_LEVEL > 0

@@ -70,7 +70,6 @@ enum xnn_operator_type {
   xnn_operator_type_copy_nc_x16,
   xnn_operator_type_copy_nc_x32,
   xnn_operator_type_copysign_nd_f32,
-  xnn_operator_type_vmultiply_nd_s32,
   xnn_operator_type_deconvolution_nhwc_f16,
   xnn_operator_type_deconvolution_nhwc_f32,
   xnn_operator_type_deconvolution_nhwc_qd8_f32_qc8w,
@@ -184,6 +183,7 @@ enum xnn_operator_type {
   xnn_operator_type_truncation_nc_f16,
   xnn_operator_type_truncation_nc_f32,
   xnn_operator_type_unpooling_nhwc_x32,
+  xnn_operator_type_multiply_nd_s32,
 };
 
 XNN_INTERNAL const char* xnn_operator_type_to_string(enum xnn_operator_type operator_type);

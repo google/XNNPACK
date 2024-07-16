@@ -729,8 +729,8 @@ void BinaryElementwiseOperatorTester::TestS32() const {
   ASSERT_LT(qmin(), qmax());
 
   xnnpack::ReplicableRandomDevice rng;
-  std::uniform_int_distribution<int32_t> s32dist(-10000, 10000);
-
+  std::uniform_int_distribution<int32_t> s32dist(std::numeric_limits<int32_t>::min(),
+                          std::numeric_limits<int32_t>::max());
   // Compute generalized shapes.
   std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_dims;
   std::array<size_t, XNN_MAX_TENSOR_DIMS> input2_dims;
@@ -801,6 +801,14 @@ void BinaryElementwiseOperatorTester::TestS32() const {
       }
     }
 
+    int32_t output_min = std::numeric_limits<int32_t>::min();
+    int32_t output_max = std::numeric_limits<int32_t>::max();
+
+    for (int32_t& output_value : output_ref) {
+      output_value = std::max(output_value, output_min);
+      output_value = std::min(output_value, output_max);
+    }
+
     // Create, setup, run, and destroy a binary elementwise operator.
     ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     xnn_operator_t binary_elementwise_op = nullptr;
@@ -808,7 +816,7 @@ void BinaryElementwiseOperatorTester::TestS32() const {
     switch (operation_type()) {
       case OperationType::Multiply:
         ASSERT_EQ(xnn_status_success,
-                  xnn_create_vmultiply_nd_s32(0,
+                  xnn_create_multiply_nd_s32(output_min, output_max, 0,
                                              &binary_elementwise_op));
         break;
       default:
@@ -824,11 +832,11 @@ void BinaryElementwiseOperatorTester::TestS32() const {
       case OperationType::Multiply:
         ASSERT_EQ(
             xnn_status_success,
-            xnn_reshape_vmultiply_nd_s32(
+            xnn_reshape_multiply_nd_s32(
                 binary_elementwise_op, num_input1_dims(), input1_shape().data(),
                 num_input2_dims(), input2_shape().data(),
                 /*threadpool=*/nullptr));
-        ASSERT_EQ(xnn_status_success, xnn_setup_vmultiply_nd_s32(
+        ASSERT_EQ(xnn_status_success, xnn_setup_multiply_nd_s32(
                                           binary_elementwise_op, input1.data(),
                                           input2.data(), output.data()));
         break;

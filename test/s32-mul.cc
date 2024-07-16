@@ -20,9 +20,9 @@
 #include "xnnpack/subgraph.h"
 #include "subgraph-binary-tester.h"
 
-using VMultiplyTestS32 = BinaryTest<int32_t>;
+using MultiplyTestS32 = BinaryTest<int32_t>;
 
-TEST_F(VMultiplyTestS32, define) {
+TEST_F(MultiplyTestS32, define) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_subgraph_t subgraph = nullptr;
@@ -54,12 +54,12 @@ TEST_F(VMultiplyTestS32, define) {
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_vmultiply(subgraph, input1_id, input2_id, output_id, /*flags=*/0));
+    xnn_define_multiply_v2(subgraph, input1_id, input2_id, output_id, /*flags=*/0));
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_vmultiply);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
+  ASSERT_EQ(node->type, xnn_node_type_multiply);
+  ASSERT_EQ(node->compute_type, xnn_compute_type_s32);
   ASSERT_EQ(node->num_inputs, 2);
   ASSERT_EQ(node->inputs[0], input1_id);
   ASSERT_EQ(node->inputs[1], input2_id);
@@ -68,7 +68,7 @@ TEST_F(VMultiplyTestS32, define) {
   ASSERT_EQ(node->flags, 0);
 }
 
-TEST_F(VMultiplyTestS32, matches_operator_api)
+TEST_F(MultiplyTestS32, matches_operator_api)
 {
   std::generate(input1.begin(), input1.end(), [&]() { return s32dist(rng); });
   std::generate(input2.begin(), input2.end(), [&]() { return s32dist(rng); });
@@ -80,16 +80,17 @@ TEST_F(VMultiplyTestS32, matches_operator_api)
   xnn_operator_t op = nullptr;
 
   // Call operator API.
-  ASSERT_EQ(xnn_status_success, xnn_create_vmultiply_nd_s32(/*flags=*/0, &op));
+  ASSERT_EQ(xnn_status_success, xnn_create_multiply_nd_s32(std::numeric_limits<int32_t>::min(),
+                                            std::numeric_limits<int32_t>::max(),/*flags=*/0, &op));
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_vmultiply_nd_s32(
+    xnn_status_success, xnn_reshape_multiply_nd_s32(
                           op, input1_dims.size(), input1_dims.data(), input2_dims.size(), input2_dims.data(),
                           /*threadpool=*/nullptr));
 
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_vmultiply_nd_s32(op, input1.data(), input2.data(), operator_output.data()));
+    xnn_status_success, xnn_setup_multiply_nd_s32(op, input1.data(), input2.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -122,7 +123,7 @@ TEST_F(VMultiplyTestS32, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_vmultiply(subgraph, input1_id, input2_id, output_id, /*flags=*/0));
+    xnn_define_multiply_v2(subgraph, input1_id, input2_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));

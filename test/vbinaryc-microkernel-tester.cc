@@ -331,11 +331,6 @@ void VBinaryCMicrokernelTester::Test(
       }
     }
 
-    // ToDo: Update clamping logic
-    const int32_t accumulated_min =
-        *std::min_element(y_ref.cbegin(), y_ref.cend());
-    const int32_t accumulated_max =
-        *std::max_element(y_ref.cbegin(), y_ref.cend());
     const int32_t y_max = std::numeric_limits<int32_t>::max();
     const int32_t y_min = std::numeric_limits<int32_t>::min();
     for (size_t i = 0; i < batch_size(); i++) {

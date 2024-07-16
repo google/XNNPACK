@@ -20,7 +20,7 @@
 #include "xnnpack/subgraph.h"
 #include "pthreadpool.h"
 
-static enum xnn_status create_vmultiply_operator(
+static enum xnn_status create_multiply_operator(
   const struct xnn_node* node,
   const struct xnn_value* values,
   size_t num_values,
@@ -33,8 +33,10 @@ static enum xnn_status create_vmultiply_operator(
 
   enum xnn_status status;
   switch (node->compute_type) {
-    case xnn_compute_type_fp32:
-      status = xnn_create_vmultiply_nd_s32(
+    case xnn_compute_type_s32:
+      status = xnn_create_multiply_nd_s32(
+        node->activation.output_min,
+        node->activation.output_max,
         node->flags,
         &opdata->operator_objects[0]);
       break;
@@ -44,7 +46,7 @@ static enum xnn_status create_vmultiply_operator(
   return status;
 }
 
-static enum xnn_status reshape_vmultiply_operator(
+static enum xnn_status reshape_multiply_operator(
   struct xnn_operator_data* opdata,
   struct xnn_value* values,
   size_t num_values,
@@ -93,8 +95,8 @@ static enum xnn_status reshape_vmultiply_operator(
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;
   switch (opdata->operator_objects[0]->type) {
-    case xnn_operator_type_vmultiply_nd_s32:
-      status = xnn_reshape_vmultiply_nd_s32(
+    case xnn_operator_type_multiply_nd_s32:
+      status = xnn_reshape_multiply_nd_s32(
         opdata->operator_objects[0],
         opdata->shape1.num_dims,
         opdata->shape1.dim,
@@ -111,7 +113,7 @@ static enum xnn_status reshape_vmultiply_operator(
   return resize_binary_elementwise_output_tensor(opdata, values, num_values, old_workspace_size, threadpool);
 }
 
-static enum xnn_status setup_vmultiply_operator(
+static enum xnn_status setup_multiply_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
   size_t num_values,
@@ -142,8 +144,8 @@ static enum xnn_status setup_vmultiply_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
-    case xnn_operator_type_vmultiply_nd_s32:
-      return xnn_setup_vmultiply_nd_s32(
+    case xnn_operator_type_multiply_nd_s32:
+      return xnn_setup_multiply_nd_s32(
         opdata->operator_objects[0],
         input1_data, input2_data, output_data);
     default:
@@ -151,7 +153,7 @@ static enum xnn_status setup_vmultiply_operator(
   }
 }
 
-enum xnn_status xnn_define_vmultiply(
+enum xnn_status xnn_define_multiply_v2(
   xnn_subgraph_t subgraph,
   uint32_t input1_id,
   uint32_t input2_id,
@@ -159,17 +161,17 @@ enum xnn_status xnn_define_vmultiply(
   uint32_t flags)
 {
   enum xnn_status status;
-  if ((status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_vmultiply)) != xnn_status_success) {
+  if ((status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_multiply)) != xnn_status_success) {
     return status;
   }
 
-  if ((status = xnn_subgraph_check_nth_input_node_id(xnn_node_type_vmultiply, input1_id, subgraph->num_values, 1)) !=
+  if ((status = xnn_subgraph_check_nth_input_node_id(xnn_node_type_multiply, input1_id, subgraph->num_values, 1)) !=
       xnn_status_success) {
     return status;
   }
 
   const struct xnn_value* input1_value = &subgraph->values[input1_id];
-  status = xnn_subgraph_check_nth_input_type_dense(xnn_node_type_vmultiply, input1_id, input1_value, 1);
+  status = xnn_subgraph_check_nth_input_type_dense(xnn_node_type_multiply, input1_id, input1_value, 1);
   if (status != xnn_status_success) {
     return status;
   }
@@ -180,18 +182,18 @@ enum xnn_status xnn_define_vmultiply(
     default:
       xnn_log_error(
         "failed to define %s operator with the first input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_vmultiply), input1_id,
+        xnn_node_type_to_string(xnn_node_type_multiply), input1_id,
         xnn_datatype_to_string(input1_value->datatype), input1_value->datatype);
       return xnn_status_invalid_parameter;
   }
 
   if ((status = xnn_subgraph_check_nth_input_node_id(
-        xnn_node_type_vmultiply, input2_id, subgraph->num_values, 2)) != xnn_status_success) {
+        xnn_node_type_multiply, input2_id, subgraph->num_values, 2)) != xnn_status_success) {
     return status;
   }
 
   const struct xnn_value* input2_value = &subgraph->values[input2_id];
-  status = xnn_subgraph_check_nth_input_type_dense(xnn_node_type_vmultiply, input2_id, input2_value, 2);
+  status = xnn_subgraph_check_nth_input_type_dense(xnn_node_type_multiply, input2_id, input2_value, 2);
   if (status != xnn_status_success) {
     return status;
   }
@@ -202,18 +204,18 @@ enum xnn_status xnn_define_vmultiply(
     default:
       xnn_log_error(
         "failed to define %s operator with the second input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_vmultiply), input2_id,
+        xnn_node_type_to_string(xnn_node_type_multiply), input2_id,
         xnn_datatype_to_string(input2_value->datatype), input2_value->datatype);
       return xnn_status_invalid_parameter;
   }
 
-  status = xnn_subgraph_check_output_node_id(xnn_node_type_vmultiply, output_id, subgraph->num_values);
+  status = xnn_subgraph_check_output_node_id(xnn_node_type_multiply, output_id, subgraph->num_values);
   if (status != xnn_status_success) {
     return status;
   }
 
   const struct xnn_value* output_value = &subgraph->values[output_id];
-  status = xnn_subgraph_check_output_type_dense(xnn_node_type_vmultiply, output_id, output_value);
+  status = xnn_subgraph_check_output_type_dense(xnn_node_type_multiply, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
   }
@@ -221,12 +223,12 @@ enum xnn_status xnn_define_vmultiply(
   enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
     case xnn_datatype_int32:
-      compute_type = xnn_compute_type_fp32;
+      compute_type = xnn_compute_type_s32;
       break;
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_vmultiply), output_id,
+        xnn_node_type_to_string(xnn_node_type_multiply), output_id,
         xnn_datatype_to_string(output_value->datatype), output_value->datatype);
       return xnn_status_invalid_parameter;
   }
@@ -236,7 +238,7 @@ enum xnn_status xnn_define_vmultiply(
     return xnn_status_out_of_memory;
   }
 
-  node->type = xnn_node_type_vmultiply;
+  node->type = xnn_node_type_multiply;
   node->compute_type = compute_type;
   node->num_inputs = 2;
   node->inputs[0] = input1_id;
@@ -245,9 +247,9 @@ enum xnn_status xnn_define_vmultiply(
   node->outputs[0] = output_id;
   node->flags = flags;
 
-  node->create = create_vmultiply_operator;
-  node->reshape = reshape_vmultiply_operator;
-  node->setup = setup_vmultiply_operator;
+  node->create = create_multiply_operator;
+  node->reshape = reshape_multiply_operator;
+  node->setup = setup_multiply_operator;
 
   return xnn_status_success;
 }

@@ -16,7 +16,6 @@
 #include <limits>
 #include <numeric>
 #include <vector>
-#include <common.h>
 
 #include "xnnpack.h"
 

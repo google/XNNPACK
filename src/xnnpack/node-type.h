@@ -79,7 +79,7 @@ enum xnn_node_type {
   xnn_node_type_subtract,
   xnn_node_type_tanh,
   xnn_node_type_unpooling_2d,
-  xnn_node_type_vmultiply,
+  xnn_node_type_multiply,
 };
 
 #if XNN_LOG_LEVEL <= 0
