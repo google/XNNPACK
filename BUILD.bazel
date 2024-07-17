@@ -2895,7 +2895,10 @@ alias(
 
 selects.config_setting_group(
     name = "kleidiai_enabled_by_default",
-    match_any = ["//build_config:aarch64"],
+    match_all = [
+        "//build_config:aarch64",
+        ":arm_i8mm_enabled",
+    ],
 )
 
 alias(
