@@ -11,6 +11,8 @@
 //   Generator: tools/generate-avgpool-test.py
 
 
+#include <cstddef>
+
 #include <gtest/gtest.h>
 #include "xnnpack/avgpool.h"
 #include "xnnpack/common.h"
@@ -23,30 +25,33 @@
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_twopass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     AvgPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(8)
+      .channels(channel_tile)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     AvgPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(8)
+      .channels(channel_tile)
       .input_offset(11)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_twopass_fulltile_with_zero) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .input_offset(11)
         .zero_index_mod2(zero_index_mod2)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
@@ -55,11 +60,12 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_twopass_fulltile_with_input_scale) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .input_scale(scale)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
     }
@@ -67,11 +73,12 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_twopass_fulltile_with_input_zero_point) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .input_zero_point(zero_point)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
     }
@@ -79,11 +86,12 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_twopass_fulltile_with_output_scale) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .output_scale(scale)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
     }
@@ -91,11 +99,12 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_twopass_fulltile_with_output_zero_point) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .output_zero_point(zero_point)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
     }
@@ -103,42 +112,46 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_twopass_fulltile_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     AvgPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(8)
+      .channels(channel_tile)
       .qmin(128)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_twopass_fulltile_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     AvgPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(8)
+      .channels(channel_tile)
       .qmax(128)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_twopass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
     }
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .input_offset(11)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
     }
@@ -146,12 +159,13 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_twopass_subtile_with_zero) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
-          .channels(8)
+          .channels(channel_tile)
           .input_offset(11)
           .zero_index_mod2(zero_index_mod2)
           .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
@@ -323,7 +337,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_twopass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -334,7 +349,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -346,7 +362,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_twopass_fulltile_with_zero) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(17)
@@ -361,7 +378,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_twopass_fulltile_with_input_scale) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
           .pooling_elements(17)
@@ -375,7 +393,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_twopass_fulltile_with_input_zero_point) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
           .pooling_elements(17)
@@ -389,7 +408,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_twopass_fulltile_with_output_scale) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
           .pooling_elements(17)
@@ -403,7 +423,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_twopass_fulltile_with_output_zero_point) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
           .pooling_elements(17)
@@ -417,7 +438,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_twopass_fulltile_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -429,7 +451,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_twopass_fulltile_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -441,8 +464,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_twopass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -454,8 +478,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -468,8 +493,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_twopass_subtile_with_zero) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -647,22 +673,24 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
     }
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .input_offset(11)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
     }
@@ -670,12 +698,13 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass_with_zero) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
-          .channels(8)
+          .channels(channel_tile)
           .input_offset(11)
           .zero_index_mod2(zero_index_mod2)
           .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
@@ -685,12 +714,13 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass_with_input_scale) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
-          .channels(8)
+          .channels(channel_tile)
           .input_scale(scale)
           .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
       }
@@ -699,12 +729,13 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass_with_input_zero_point) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
-          .channels(8)
+          .channels(channel_tile)
           .input_zero_point(zero_point)
           .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
       }
@@ -713,12 +744,13 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass_with_output_scale) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
-          .channels(8)
+          .channels(channel_tile)
           .output_scale(scale)
           .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
       }
@@ -727,12 +759,13 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass_with_output_zero_point) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
-          .channels(8)
+          .channels(channel_tile)
           .output_zero_point(zero_point)
           .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
       }
@@ -741,11 +774,12 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .qmin(128)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
     }
@@ -753,11 +787,12 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .qmax(128)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
     }
@@ -901,8 +936,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -914,13 +950,14 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .input_offset(8)
+          .input_offset(channel_tile)
           .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
       }
     }
@@ -928,14 +965,15 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass_with_zero) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(9, 8)
             .channels(channels)
-            .input_offset(8)
+            .input_offset(channel_tile)
             .zero_index_mod2(zero_index_mod2)
             .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
         }
@@ -945,8 +983,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass_with_input_scale) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -961,8 +1000,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass_with_input_zero_point) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -977,8 +1017,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass_with_output_scale) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -993,8 +1034,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass_with_output_zero_point) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -1009,8 +1051,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -1023,8 +1066,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -1376,30 +1420,33 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_twopass_fulltile) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     AvgPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(8)
+      .channels(channel_tile)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     AvgPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(8)
+      .channels(channel_tile)
       .input_offset(11)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_twopass_fulltile_with_zero) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .input_offset(11)
         .zero_index_mod2(zero_index_mod2)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -1408,11 +1455,12 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_twopass_fulltile_with_input_scale) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .input_scale(scale)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
     }
@@ -1420,11 +1468,12 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_twopass_fulltile_with_input_zero_point) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .input_zero_point(zero_point)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
     }
@@ -1432,11 +1481,12 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_twopass_fulltile_with_output_scale) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .output_scale(scale)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
     }
@@ -1444,11 +1494,12 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_twopass_fulltile_with_output_zero_point) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .output_zero_point(zero_point)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
     }
@@ -1456,42 +1507,46 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_twopass_fulltile_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     AvgPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(8)
+      .channels(channel_tile)
       .qmin(128)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_twopass_fulltile_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     AvgPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(8)
+      .channels(channel_tile)
       .qmax(128)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_twopass_subtile) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
     }
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .input_offset(11)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
     }
@@ -1499,12 +1554,13 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_twopass_subtile_with_zero) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
-          .channels(8)
+          .channels(channel_tile)
           .input_offset(11)
           .zero_index_mod2(zero_index_mod2)
           .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -1676,7 +1732,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_twopass_fulltile) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -1687,7 +1744,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -1699,7 +1757,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_twopass_fulltile_with_zero) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(17)
@@ -1714,7 +1773,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_twopass_fulltile_with_input_scale) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
           .pooling_elements(17)
@@ -1728,7 +1788,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_twopass_fulltile_with_input_zero_point) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
           .pooling_elements(17)
@@ -1742,7 +1803,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_twopass_fulltile_with_output_scale) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
           .pooling_elements(17)
@@ -1756,7 +1818,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_twopass_fulltile_with_output_zero_point) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
           .pooling_elements(17)
@@ -1770,7 +1833,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_twopass_fulltile_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -1782,7 +1846,8 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_twopass_fulltile_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -1794,8 +1859,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_twopass_subtile) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -1807,8 +1873,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -1821,8 +1888,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_twopass_subtile_with_zero) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -2000,22 +2068,24 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
     }
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .input_offset(11)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
     }
@@ -2023,12 +2093,13 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass_with_zero) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
-          .channels(8)
+          .channels(channel_tile)
           .input_offset(11)
           .zero_index_mod2(zero_index_mod2)
           .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -2038,12 +2109,13 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass_with_input_scale) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
-          .channels(8)
+          .channels(channel_tile)
           .input_scale(scale)
           .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -2052,12 +2124,13 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass_with_input_zero_point) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
-          .channels(8)
+          .channels(channel_tile)
           .input_zero_point(zero_point)
           .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -2066,12 +2139,13 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass_with_output_scale) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
-          .channels(8)
+          .channels(channel_tile)
           .output_scale(scale)
           .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -2080,12 +2154,13 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass_with_output_zero_point) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
-          .channels(8)
+          .channels(channel_tile)
           .output_zero_point(zero_point)
           .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -2094,11 +2169,12 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .qmin(128)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
     }
@@ -2106,11 +2182,12 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(8)
+        .channels(channel_tile)
         .qmax(128)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
     }
@@ -2254,8 +2331,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -2267,13 +2345,14 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .input_offset(8)
+          .input_offset(channel_tile)
           .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
     }
@@ -2281,14 +2360,15 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass_with_zero) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(9, 8)
             .channels(channels)
-            .input_offset(8)
+            .input_offset(channel_tile)
             .zero_index_mod2(zero_index_mod2)
             .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
         }
@@ -2298,8 +2378,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass_with_input_scale) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -2314,8 +2395,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass_with_input_zero_point) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -2330,8 +2412,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass_with_output_scale) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -2346,8 +2429,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass_with_output_zero_point) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -2362,8 +2446,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -2376,8 +2461,9 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -2727,28 +2813,31 @@
 
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_twopass_fulltile) {
+  const size_t channel_tile = 1;
   AvgPoolMicrokernelTester()
     .pooling_elements(17)
     .pooling_tile(9, 8)
-    .channels(1)
+    .channels(channel_tile)
     .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_twopass_fulltile_with_input_offset) {
+  const size_t channel_tile = 1;
   AvgPoolMicrokernelTester()
     .pooling_elements(17)
     .pooling_tile(9, 8)
-    .channels(1)
+    .channels(channel_tile)
     .input_offset(3)
     .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_twopass_fulltile_with_zero) {
+  const size_t channel_tile = 1;
   for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
     AvgPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .input_offset(3)
       .zero_index_mod2(zero_index_mod2)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
@@ -2756,95 +2845,104 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_twopass_fullt
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_twopass_fulltile_with_input_scale) {
+  const size_t channel_tile = 1;
   for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
     AvgPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .input_scale(scale)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
   }
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_twopass_fulltile_with_input_zero_point) {
+  const size_t channel_tile = 1;
   for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
     AvgPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .input_zero_point(zero_point)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
   }
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_twopass_fulltile_with_output_scale) {
+  const size_t channel_tile = 1;
   for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
     AvgPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .output_scale(scale)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
   }
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_twopass_fulltile_with_output_zero_point) {
+  const size_t channel_tile = 1;
   for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
     AvgPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .output_zero_point(zero_point)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
   }
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_twopass_fulltile_with_qmin) {
+  const size_t channel_tile = 1;
   AvgPoolMicrokernelTester()
     .pooling_elements(17)
     .pooling_tile(9, 8)
-    .channels(1)
+    .channels(channel_tile)
     .qmin(128)
     .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_twopass_fulltile_with_qmax) {
+  const size_t channel_tile = 1;
   AvgPoolMicrokernelTester()
     .pooling_elements(17)
     .pooling_tile(9, 8)
-    .channels(1)
+    .channels(channel_tile)
     .qmax(128)
     .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_twopass_subtile) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
     AvgPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
   }
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_twopass_subtile_with_input_offset) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
     AvgPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .input_offset(3)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
   }
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_twopass_subtile_with_zero) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
     for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(1)
+        .channels(channel_tile)
         .input_offset(3)
         .zero_index_mod2(zero_index_mod2)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
@@ -3003,33 +3101,36 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_twopass_subti
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
     AvgPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
   }
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_with_input_offset) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
     AvgPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .input_offset(3)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
   }
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_with_zero) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
     for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(1)
+        .channels(channel_tile)
         .input_offset(3)
         .zero_index_mod2(zero_index_mod2)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
@@ -3038,12 +3139,13 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_wit
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_with_input_scale) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
     for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(1)
+        .channels(channel_tile)
         .input_scale(scale)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
     }
@@ -3051,12 +3153,13 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_wit
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_with_input_zero_point) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
     for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(1)
+        .channels(channel_tile)
         .input_zero_point(zero_point)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
     }
@@ -3064,12 +3167,13 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_wit
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_with_output_scale) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
     for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(1)
+        .channels(channel_tile)
         .output_scale(scale)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
     }
@@ -3077,12 +3181,13 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_wit
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_with_output_zero_point) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
     for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(1)
+        .channels(channel_tile)
         .output_zero_point(zero_point)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
     }
@@ -3090,22 +3195,24 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_wit
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_with_qmin) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
     AvgPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .qmin(128)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
   }
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_with_qmax) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
     AvgPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .qmax(128)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
   }
@@ -3430,30 +3537,33 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_eq_8_unipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     AvgPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9)
-      .channels(8)
+      .channels(channel_tile)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_eq_8_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     AvgPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9)
-      .channels(8)
+      .channels(channel_tile)
       .input_offset(11)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_eq_8_unipass_fulltile_with_zero) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
-        .channels(8)
+        .channels(channel_tile)
         .input_offset(11)
         .zero_index_mod2(zero_index_mod2)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
@@ -3462,11 +3572,12 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_eq_8_unipass_fulltile_with_input_scale) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
-        .channels(8)
+        .channels(channel_tile)
         .input_scale(scale)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
     }
@@ -3474,11 +3585,12 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_eq_8_unipass_fulltile_with_input_zero_point) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
-        .channels(8)
+        .channels(channel_tile)
         .input_zero_point(zero_point)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
     }
@@ -3486,11 +3598,12 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_eq_8_unipass_fulltile_with_output_scale) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
-        .channels(8)
+        .channels(channel_tile)
         .output_scale(scale)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
     }
@@ -3498,11 +3611,12 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_eq_8_unipass_fulltile_with_output_zero_point) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
-        .channels(8)
+        .channels(channel_tile)
         .output_zero_point(zero_point)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
     }
@@ -3510,42 +3624,46 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_eq_8_unipass_fulltile_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     AvgPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9)
-      .channels(8)
+      .channels(channel_tile)
       .qmin(128)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_eq_8_unipass_fulltile_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     AvgPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9)
-      .channels(8)
+      .channels(channel_tile)
       .qmax(128)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_eq_8_unipass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9)
-        .channels(8)
+        .channels(channel_tile)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
     }
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_eq_8_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9)
-        .channels(8)
+        .channels(channel_tile)
         .input_offset(11)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
     }
@@ -3553,12 +3671,13 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_eq_8_unipass_subtile_with_zero) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9)
-          .channels(8)
+          .channels(channel_tile)
           .input_offset(11)
           .zero_index_mod2(zero_index_mod2)
           .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
@@ -3730,7 +3849,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_lt_8_unipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
@@ -3741,7 +3861,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_lt_8_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
@@ -3753,7 +3874,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_lt_8_unipass_fulltile_with_zero) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(9)
@@ -3768,7 +3890,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_lt_8_unipass_fulltile_with_input_scale) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
           .pooling_elements(9)
@@ -3782,7 +3905,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_lt_8_unipass_fulltile_with_input_zero_point) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
           .pooling_elements(9)
@@ -3796,7 +3920,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_lt_8_unipass_fulltile_with_output_scale) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
           .pooling_elements(9)
@@ -3810,7 +3935,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_lt_8_unipass_fulltile_with_output_zero_point) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
           .pooling_elements(9)
@@ -3824,7 +3950,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_lt_8_unipass_fulltile_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
@@ -3836,7 +3963,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_lt_8_unipass_fulltile_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
@@ -3848,8 +3976,9 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_lt_8_unipass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9)
@@ -3861,8 +3990,9 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_lt_8_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9)
@@ -3875,8 +4005,9 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__NEON_C8, channels_lt_8_unipass_subtile_with_zero) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -4257,30 +4388,33 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_eq_8_unipass_fulltile) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     AvgPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9)
-      .channels(8)
+      .channels(channel_tile)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_eq_8_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     AvgPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9)
-      .channels(8)
+      .channels(channel_tile)
       .input_offset(11)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_eq_8_unipass_fulltile_with_zero) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
-        .channels(8)
+        .channels(channel_tile)
         .input_offset(11)
         .zero_index_mod2(zero_index_mod2)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -4289,11 +4423,12 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_eq_8_unipass_fulltile_with_input_scale) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
-        .channels(8)
+        .channels(channel_tile)
         .input_scale(scale)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
     }
@@ -4301,11 +4436,12 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_eq_8_unipass_fulltile_with_input_zero_point) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
-        .channels(8)
+        .channels(channel_tile)
         .input_zero_point(zero_point)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
     }
@@ -4313,11 +4449,12 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_eq_8_unipass_fulltile_with_output_scale) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
-        .channels(8)
+        .channels(channel_tile)
         .output_scale(scale)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
     }
@@ -4325,11 +4462,12 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_eq_8_unipass_fulltile_with_output_zero_point) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
-        .channels(8)
+        .channels(channel_tile)
         .output_zero_point(zero_point)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
     }
@@ -4337,42 +4475,46 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_eq_8_unipass_fulltile_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     AvgPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9)
-      .channels(8)
+      .channels(channel_tile)
       .qmin(128)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_eq_8_unipass_fulltile_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     AvgPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9)
-      .channels(8)
+      .channels(channel_tile)
       .qmax(128)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_eq_8_unipass_subtile) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9)
-        .channels(8)
+        .channels(channel_tile)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
     }
   }
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_eq_8_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9)
-        .channels(8)
+        .channels(channel_tile)
         .input_offset(11)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
     }
@@ -4380,12 +4522,13 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_eq_8_unipass_subtile_with_zero) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9)
-          .channels(8)
+          .channels(channel_tile)
           .input_offset(11)
           .zero_index_mod2(zero_index_mod2)
           .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -4557,7 +4700,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_lt_8_unipass_fulltile) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
@@ -4568,7 +4712,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_lt_8_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
@@ -4580,7 +4725,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_lt_8_unipass_fulltile_with_zero) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(9)
@@ -4595,7 +4741,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_lt_8_unipass_fulltile_with_input_scale) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
           .pooling_elements(9)
@@ -4609,7 +4756,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_lt_8_unipass_fulltile_with_input_zero_point) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
           .pooling_elements(9)
@@ -4623,7 +4771,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_lt_8_unipass_fulltile_with_output_scale) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
           .pooling_elements(9)
@@ -4637,7 +4786,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_lt_8_unipass_fulltile_with_output_zero_point) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
           .pooling_elements(9)
@@ -4651,7 +4801,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_lt_8_unipass_fulltile_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
@@ -4663,7 +4814,8 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_lt_8_unipass_fulltile_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 8; channels++) {
+    const size_t channel_tile = 8;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9)
@@ -4675,8 +4827,9 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_lt_8_unipass_subtile) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9)
@@ -4688,8 +4841,9 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_lt_8_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9)
@@ -4702,8 +4856,9 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SSE2_C8, channels_lt_8_unipass_subtile_with_zero) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 8;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < 8; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -5082,28 +5237,31 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, few_output_pixels_with_step
 
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SCALAR_IMAGIC_C1, channels_eq_1_unipass_fulltile) {
+  const size_t channel_tile = 1;
   AvgPoolMicrokernelTester()
     .pooling_elements(9)
     .pooling_tile(9)
-    .channels(1)
+    .channels(channel_tile)
     .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SCALAR_IMAGIC_C1, channels_eq_1_unipass_fulltile_with_input_offset) {
+  const size_t channel_tile = 1;
   AvgPoolMicrokernelTester()
     .pooling_elements(9)
     .pooling_tile(9)
-    .channels(1)
+    .channels(channel_tile)
     .input_offset(3)
     .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SCALAR_IMAGIC_C1, channels_eq_1_unipass_fulltile_with_zero) {
+  const size_t channel_tile = 1;
   for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
     AvgPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9)
-      .channels(1)
+      .channels(channel_tile)
       .input_offset(3)
       .zero_index_mod2(zero_index_mod2)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
@@ -5111,95 +5269,104 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SCALAR_IMAGIC_C1, channels_eq_1_unipass_fulltil
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SCALAR_IMAGIC_C1, channels_eq_1_unipass_fulltile_with_input_scale) {
+  const size_t channel_tile = 1;
   for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
     AvgPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9)
-      .channels(1)
+      .channels(channel_tile)
       .input_scale(scale)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
   }
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SCALAR_IMAGIC_C1, channels_eq_1_unipass_fulltile_with_input_zero_point) {
+  const size_t channel_tile = 1;
   for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
     AvgPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9)
-      .channels(1)
+      .channels(channel_tile)
       .input_zero_point(zero_point)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
   }
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SCALAR_IMAGIC_C1, channels_eq_1_unipass_fulltile_with_output_scale) {
+  const size_t channel_tile = 1;
   for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
     AvgPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9)
-      .channels(1)
+      .channels(channel_tile)
       .output_scale(scale)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
   }
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SCALAR_IMAGIC_C1, channels_eq_1_unipass_fulltile_with_output_zero_point) {
+  const size_t channel_tile = 1;
   for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
     AvgPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9)
-      .channels(1)
+      .channels(channel_tile)
       .output_zero_point(zero_point)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
   }
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SCALAR_IMAGIC_C1, channels_eq_1_unipass_fulltile_with_qmin) {
+  const size_t channel_tile = 1;
   AvgPoolMicrokernelTester()
     .pooling_elements(9)
     .pooling_tile(9)
-    .channels(1)
+    .channels(channel_tile)
     .qmin(128)
     .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SCALAR_IMAGIC_C1, channels_eq_1_unipass_fulltile_with_qmax) {
+  const size_t channel_tile = 1;
   AvgPoolMicrokernelTester()
     .pooling_elements(9)
     .pooling_tile(9)
-    .channels(1)
+    .channels(channel_tile)
     .qmax(128)
     .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SCALAR_IMAGIC_C1, channels_eq_1_unipass_subtile) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
     AvgPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9)
-      .channels(1)
+      .channels(channel_tile)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
   }
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SCALAR_IMAGIC_C1, channels_eq_1_unipass_subtile_with_input_offset) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
     AvgPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9)
-      .channels(1)
+      .channels(channel_tile)
       .input_offset(3)
       .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
   }
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9X__SCALAR_IMAGIC_C1, channels_eq_1_unipass_subtile_with_zero) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
     for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9)
-        .channels(1)
+        .channels(channel_tile)
         .input_offset(3)
         .zero_index_mod2(zero_index_mod2)
         .Test(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__scalar_imagic_c1, xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);

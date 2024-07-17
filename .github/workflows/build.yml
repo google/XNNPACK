@@ -230,7 +230,7 @@ jobs:
             bazel test --test_output=errors test:all
         working-directory: ${{ github.workspace }}
   bazel-linux-aarch64:
-    runs-on: arm-ubuntu-arm-22.04-8core
+    runs-on: arm-ubuntu-arm-22.04-4core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
