@@ -440,6 +440,25 @@ DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(xnn_init_f32_minmax_scalar_params)
   DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(xnn_init_f32_minmax_hvx_params)
 #endif
 
+#define DECLARE_INIT_S32_MINMAX_PARAMS_FUNCTION(fn_name)     \
+  XNN_INTERNAL size_t fn_name(                               \
+    union xnn_s32_minmax_params params[XNN_MIN_ELEMENTS(1)], \
+    int32_t output_min,                                        \
+    int32_t output_max);
+
+DECLARE_INIT_S32_MINMAX_PARAMS_FUNCTION(xnn_init_s32_minmax_scalar_params)
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_S32_MINMAX_PARAMS_FUNCTION(xnn_init_s32_minmax_sse41_params)
+  DECLARE_INIT_S32_MINMAX_PARAMS_FUNCTION(xnn_init_s32_minmax_avx2_params)
+  DECLARE_INIT_S32_MINMAX_PARAMS_FUNCTION(xnn_init_s32_minmax_avx512f_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  DECLARE_INIT_S32_MINMAX_PARAMS_FUNCTION(xnn_init_s32_minmax_wasmsimd_params)
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_HEXAGON
+  DECLARE_INIT_S32_MINMAX_PARAMS_FUNCTION(xnn_init_s32_minmax_hvx_params)
+#endif
+
 #define DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                    \
     union xnn_f16_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)], \

@@ -773,6 +773,13 @@ enum xnn_status xnn_create_multiply_nd_s32(
     return xnn_status_unsupported_hardware;
   }
 
+  if (output_min > output_max) {
+    xnn_log_error(
+      "failed to create %s operator with output range: lower bound must be less than or equal to upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_multiply_nd_s32));
+    return xnn_status_invalid_parameter;
+  }
+
   union xnn_s32_minmax_params params;
   if (s32_multiply_config->init.s32_minmax != NULL) {
     s32_multiply_config->init.s32_minmax(&params, output_min, output_max);

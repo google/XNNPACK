@@ -17,6 +17,7 @@
 #include <limits>
 #include <random>
 #include <vector>
+#include <climits>
 
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
@@ -334,7 +335,7 @@ void VBinaryCMicrokernelTester::Test(
     const int32_t y_max = std::numeric_limits<int32_t>::max();
     const int32_t y_min = std::numeric_limits<int32_t>::min();
     for (size_t i = 0; i < batch_size(); i++) {
-      y_ref[i] = std::max<int32_t>(std::min<int32_t>(y_ref[i], y_max), y_min);
+      y_ref[i] = std::max(std::min(y_ref[i], y_max), y_min);
     }
 
     // Prepare parameters.

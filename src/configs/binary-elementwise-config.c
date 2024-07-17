@@ -581,7 +581,6 @@ static void init_s32_vmul_config(void) {
   #endif
 }
 
-
 static void init_f32_vdiv_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();

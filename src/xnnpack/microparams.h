@@ -32,17 +32,19 @@ union xnn_s32_minmax_params {
     int32_t min;
     int32_t max;
   } scalar;
-
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) int32_t min[4];
     XNN_ALIGN(16) int32_t max[4];
-  } sse;
+  } sse41;
   struct {
     XNN_ALIGN(32) int32_t min[8];
     XNN_ALIGN(32) int32_t max[8];
-    int32_t mask_table[14];
-  } avx;
+  } avx2;
+  struct {
+    int32_t min;
+    int32_t max;
+  } avx512f;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   struct {
@@ -50,7 +52,21 @@ union xnn_s32_minmax_params {
     XNN_ALIGN(8) int32_t max[2];
   } wasmsimd;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_HEXAGON
+  struct {
+    XNN_ALIGN(128) int32_t min[32];
+    XNN_ALIGN(128) int32_t max[32];
+  } hvx;
+#endif //XNN_ARCH_HEXAGON
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct 
+  {
+    XNN_ALIGN(32) int32_t min[8];
+    XNN_ALIGN(32) int32_t max[8];
+  } neon;
+#endif // XNN_ARCH_ARM || XNN_ARCH_ARM64
 };
+
 
 // ReLU: serves to differentiate pointer types for micro-kernels with fused ReLU activation.
 

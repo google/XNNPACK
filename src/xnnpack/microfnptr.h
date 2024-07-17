@@ -2739,6 +2739,11 @@ typedef size_t (*xnn_init_f32_minmax_params_fn)(
   float min,
   float max);
 
+typedef size_t (*xnn_init_s32_minmax_params_fn)(
+  union xnn_s32_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int32_t min,
+  int32_t max);
+
 typedef size_t (*xnn_init_f16_qc4w_minmax_params_fn)(
   union xnn_f16_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t min,
