@@ -80,36 +80,6 @@ BENCHMARK_CAPTURE(f32_vtanh, scalar_rational_9_6_div_u8,
                   /*init_params=*/nullptr)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vtanh, fma_expm1minus_rr1_lut8_p4h3ts_div_u1,
-                  xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3ts_div_u1,
-                  xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vtanh, fma_expm1minus_rr1_lut8_p4h3ts_div_u2,
-                  xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3ts_div_u2,
-                  xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vtanh, fma_expm1minus_rr1_lut8_p4h3ts_div_u4,
-                  xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3ts_div_u4,
-                  xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vtanh, fma_expm1minus_rr1_p6h5ts_div_u1,
-                  xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_p6h5ts_div_u1,
-                  xnn_init_f32_tanh_scalar_expm1minus_rr1_p6h5_params)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vtanh, fma_expm1minus_rr1_p6h5ts_div_u2,
-                  xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_p6h5ts_div_u2,
-                  xnn_init_f32_tanh_scalar_expm1minus_rr1_p6h5_params)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vtanh, fma_expm1minus_rr1_p6h5ts_div_u4,
-                  xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_p6h5ts_div_u4,
-                  xnn_init_f32_tanh_scalar_expm1minus_rr1_p6h5_params)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-  ->UseRealTime();
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(f32_vtanh, wasm_expm1minus_rr1_lut8_p4h3ts_div_u1,
                     xnn_f32_vtanh_ukernel__wasm_expm1minus_rr1_lut8_p4h3ts_div_u1,
