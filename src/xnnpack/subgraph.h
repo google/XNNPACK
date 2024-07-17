@@ -335,6 +335,10 @@ struct xnn_node {
     float output_min;
     float output_max;
   } activation;
+  struct {
+    int32_t output_min;
+    int32_t output_max;
+  } activation_int;
   /// Value IDs for node inputs.
   uint32_t inputs[XNN_MAX_INPUTS];
   uint32_t num_inputs;

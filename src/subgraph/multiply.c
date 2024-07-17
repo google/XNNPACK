@@ -31,8 +31,10 @@ static enum xnn_status create_multiply_operator(
   switch (node->compute_type) {
     case xnn_compute_type_s32:
       status = xnn_create_multiply_nd_s32(
-          node->activation.output_min, node->activation.output_max, node->flags,
-          &opdata->operator_objects[0]);
+        node->activation_int.output_min,
+        node->activation_int.output_max,
+        node->flags,
+        &opdata->operator_objects[0]);
       break;
     default:
       XNN_UNREACHABLE;
@@ -162,7 +164,7 @@ enum xnn_status xnn_define_multiply_v2(xnn_subgraph_t subgraph,
     return status;
   }
 
-  if ((status = xnn_subgraph_check_output_min_max(xnn_node_type_divide,
+  if ((status = xnn_subgraph_check_output_min_max(xnn_node_type_multiply,
                                                   output_min, output_max)) !=
       xnn_status_success) {
     return status;
@@ -247,8 +249,8 @@ enum xnn_status xnn_define_multiply_v2(xnn_subgraph_t subgraph,
   }
 
   node->type = xnn_node_type_multiply;
-  node->activation.output_min = output_min;
-  node->activation.output_max = output_max;
+  node->activation_int.output_min = output_min;
+  node->activation_int.output_max = output_max;
   node->compute_type = compute_type;
   node->num_inputs = 2;
   node->inputs[0] = input1_id;
