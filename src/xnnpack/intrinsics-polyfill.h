@@ -150,6 +150,19 @@ static XNN_INTRINSIC __m512 _mm512_zextps128_ps512(__m128 v) {
 }
 #endif  // GCC pre-10
 
+// VNNI replacement
+static XNN_INTRINSIC __m512i _mm512_dpbusd_epi32_bw(__m512i i32, const __m512i u8, const __m512i i8) {
+    const __m512i ones = _mm512_set1_epi16(1);
+    const __m512i highest_bit = _mm512_set1_epi8(0x80);
+
+    __m512i s1 = _mm512_maddubs_epi16(_mm512_and_si512(u8, highest_bit), i8);
+    __m512i s2 = _mm512_maddubs_epi16(_mm512_andnot_si512(highest_bit, u8), i8);
+
+    s1 = _mm512_madd_epi16(s1, ones);
+    s2 = _mm512_madd_epi16(s2, ones);
+
+    return _mm512_add_epi32(_mm512_add_epi32(s1, s2), i32);
+}
 #endif  // __AVX512F__
 
 #if XNN_ARCH_ARM
@@ -177,6 +190,7 @@ int32x4_t vcvtnq_s32_f32(float32x4_t v) {
 #endif  // AArch32 GCC targeting ARMv8 NEON
 
 #endif  // ARM NEON
+
 
 // AArch32 Clang targeting ARMv8.2-A with FP16 arithmetics
 #if XNN_ARCH_ARM && (defined(__ARM_FEATURE_FP16_SCALAR_ARITHMETIC) && defined(__clang__))
