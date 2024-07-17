@@ -17,15 +17,17 @@
 #include "xnnpack/maxpool.h"
 #include "xnnpack/microparams-init.h"
 #include "maxpool-microkernel-tester.h"
+#include "next_prime.h"
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_eq_16_unipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(2)
       .pooling_tile(2, 2)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_2p2x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -33,10 +35,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_eq_16_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(2)
       .pooling_tile(2, 2)
-      .channels(16)
+      .channels(channel_tile)
       .input_offset(19)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
@@ -45,10 +48,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_eq_16_unipass_fulltile_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(2)
       .pooling_tile(2, 2)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(-64)
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_2p2x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -56,10 +60,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_eq_16_unipass_fulltile_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(2)
       .pooling_tile(2, 2)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(64)
       .Test(xnn_s8_maxpool_minmax_ukernel_2p2x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -67,11 +72,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_eq_16_unipass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 2; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(2, 2)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_2p2x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -80,11 +86,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_eq_16_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 2; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(2, 2)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -178,7 +185,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_lt_16_unipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(2)
         .pooling_tile(2, 2)
@@ -191,7 +199,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_lt_16_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(2)
         .pooling_tile(2, 2)
@@ -205,7 +214,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_lt_16_unipass_fulltile_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(2)
         .pooling_tile(2, 2)
@@ -218,7 +228,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_lt_16_unipass_fulltile_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(2)
         .pooling_tile(2, 2)
@@ -231,8 +242,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_lt_16_unipass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 2; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(2, 2)
@@ -246,8 +258,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_lt_16_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 2; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(2, 2)
@@ -346,10 +359,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_eq_16_twopass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(4)
       .pooling_tile(2, 2)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_2p2x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -357,10 +371,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_eq_16_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(4)
       .pooling_tile(2, 2)
-      .channels(16)
+      .channels(channel_tile)
       .input_offset(19)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
@@ -369,10 +384,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_eq_16_twopass_fulltile_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(4)
       .pooling_tile(2, 2)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(-64)
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_2p2x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -380,10 +396,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_eq_16_twopass_fulltile_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(4)
       .pooling_tile(2, 2)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(64)
       .Test(xnn_s8_maxpool_minmax_ukernel_2p2x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -391,11 +408,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_eq_16_twopass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 3; pooling_elements < 4; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(2, 2)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_2p2x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -404,11 +422,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_eq_16_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 3; pooling_elements < 4; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(2, 2)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -502,7 +521,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_lt_16_twopass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(4)
         .pooling_tile(2, 2)
@@ -515,7 +535,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_lt_16_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(4)
         .pooling_tile(2, 2)
@@ -529,7 +550,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_lt_16_twopass_fulltile_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(4)
         .pooling_tile(2, 2)
@@ -542,7 +564,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_lt_16_twopass_fulltile_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(4)
         .pooling_tile(2, 2)
@@ -555,8 +578,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_lt_16_twopass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 3; pooling_elements < 4; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(2, 2)
@@ -570,8 +594,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_lt_16_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 3; pooling_elements < 4; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(2, 2)
@@ -670,11 +695,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_eq_16_multipass) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(2, 2)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_2p2x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -683,11 +709,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_eq_16_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(2, 2)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -697,11 +724,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_eq_16_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(2, 2)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(-64)
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_2p2x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -710,11 +738,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_eq_16_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(2, 2)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(64)
         .Test(xnn_s8_maxpool_minmax_ukernel_2p2x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -723,7 +752,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_div_16_multipass) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements += 3) {
+    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -738,7 +767,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_div_16_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements += 3) {
+    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -754,7 +783,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_div_16_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements += 3) {
+    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -769,7 +798,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_div_16_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements += 3) {
+    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -784,8 +813,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_lt_16_multipass) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(2, 2)
@@ -799,13 +829,14 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_lt_16_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(2, 2)
           .channels(channels)
-          .input_offset(16)
+          .input_offset(channel_tile)
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
           .Test(xnn_s8_maxpool_minmax_ukernel_2p2x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -815,8 +846,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_lt_16_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(2, 2)
@@ -830,8 +862,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_lt_16_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(2, 2)
@@ -845,7 +878,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_gt_16_multipass) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements += 3) {
+    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -860,7 +893,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_gt_16_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements += 3) {
+    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -876,7 +909,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_gt_16_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements += 3) {
+    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -891,7 +924,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_2P2X__NEON_C16, channels_gt_16_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements += 3) {
+    for (size_t pooling_elements = 5; pooling_elements <= 8; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -1023,10 +1056,11 @@
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_eq_16_unipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(4)
       .pooling_tile(4, 3)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_4p3x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -1034,10 +1068,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_eq_16_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(4)
       .pooling_tile(4, 3)
-      .channels(16)
+      .channels(channel_tile)
       .input_offset(19)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
@@ -1046,10 +1081,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_eq_16_unipass_fulltile_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(4)
       .pooling_tile(4, 3)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(-64)
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_4p3x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -1057,10 +1093,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_eq_16_unipass_fulltile_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(4)
       .pooling_tile(4, 3)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(64)
       .Test(xnn_s8_maxpool_minmax_ukernel_4p3x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -1068,11 +1105,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_eq_16_unipass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 4; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(4, 3)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_4p3x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -1081,11 +1119,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_eq_16_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 4; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(4, 3)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -1179,7 +1218,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_lt_16_unipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(4)
         .pooling_tile(4, 3)
@@ -1192,7 +1232,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_lt_16_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(4)
         .pooling_tile(4, 3)
@@ -1206,7 +1247,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_lt_16_unipass_fulltile_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(4)
         .pooling_tile(4, 3)
@@ -1219,7 +1261,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_lt_16_unipass_fulltile_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(4)
         .pooling_tile(4, 3)
@@ -1232,8 +1275,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_lt_16_unipass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 4; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(4, 3)
@@ -1247,8 +1291,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_lt_16_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 4; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(4, 3)
@@ -1347,10 +1392,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_eq_16_twopass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(7)
       .pooling_tile(4, 3)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_4p3x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -1358,10 +1404,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_eq_16_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(7)
       .pooling_tile(4, 3)
-      .channels(16)
+      .channels(channel_tile)
       .input_offset(19)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
@@ -1370,10 +1417,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_eq_16_twopass_fulltile_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(7)
       .pooling_tile(4, 3)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(-64)
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_4p3x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -1381,10 +1429,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_eq_16_twopass_fulltile_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(7)
       .pooling_tile(4, 3)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(64)
       .Test(xnn_s8_maxpool_minmax_ukernel_4p3x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -1392,11 +1441,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_eq_16_twopass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 5; pooling_elements < 7; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(4, 3)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_4p3x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -1405,11 +1455,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_eq_16_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 5; pooling_elements < 7; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(4, 3)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -1503,7 +1554,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_lt_16_twopass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(7)
         .pooling_tile(4, 3)
@@ -1516,7 +1568,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_lt_16_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(7)
         .pooling_tile(4, 3)
@@ -1530,7 +1583,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_lt_16_twopass_fulltile_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(7)
         .pooling_tile(4, 3)
@@ -1543,7 +1597,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_lt_16_twopass_fulltile_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(7)
         .pooling_tile(4, 3)
@@ -1556,8 +1611,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_lt_16_twopass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 5; pooling_elements < 7; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(4, 3)
@@ -1571,8 +1627,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_lt_16_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 5; pooling_elements < 7; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(4, 3)
@@ -1671,11 +1728,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_eq_16_multipass) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(4, 3)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_4p3x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -1684,11 +1742,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_eq_16_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(4, 3)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -1698,11 +1757,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_eq_16_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(4, 3)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(-64)
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_4p3x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -1711,11 +1771,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_eq_16_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(4, 3)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(64)
         .Test(xnn_s8_maxpool_minmax_ukernel_4p3x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -1724,7 +1785,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_div_16_multipass) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements += 3) {
+    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -1739,7 +1800,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_div_16_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements += 3) {
+    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -1755,7 +1816,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_div_16_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements += 3) {
+    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -1770,7 +1831,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_div_16_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements += 3) {
+    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -1785,8 +1846,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_lt_16_multipass) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(4, 3)
@@ -1800,13 +1862,14 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_lt_16_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(4, 3)
           .channels(channels)
-          .input_offset(16)
+          .input_offset(channel_tile)
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
           .Test(xnn_s8_maxpool_minmax_ukernel_4p3x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -1816,8 +1879,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_lt_16_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(4, 3)
@@ -1831,8 +1895,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_lt_16_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(4, 3)
@@ -1846,7 +1911,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_gt_16_multipass) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements += 3) {
+    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -1861,7 +1926,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_gt_16_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements += 3) {
+    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -1877,7 +1942,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_gt_16_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements += 3) {
+    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -1892,7 +1957,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_4P3X__NEON_C16, channels_gt_16_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements += 3) {
+    for (size_t pooling_elements = 8; pooling_elements <= 13; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2024,10 +2089,11 @@
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_unipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -2035,10 +2101,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .input_offset(19)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
@@ -2047,10 +2114,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_unipass_fulltile_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(-64)
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -2058,10 +2126,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_unipass_fulltile_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(64)
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -2069,11 +2138,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_unipass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -2082,11 +2152,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -2180,7 +2251,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_lt_16_unipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9, 8)
@@ -2193,7 +2265,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_lt_16_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9, 8)
@@ -2207,7 +2280,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_lt_16_unipass_fulltile_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9, 8)
@@ -2220,7 +2294,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_lt_16_unipass_fulltile_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9, 8)
@@ -2233,8 +2308,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_lt_16_unipass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -2248,8 +2324,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_lt_16_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -2348,10 +2425,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_twopass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -2359,10 +2437,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .input_offset(19)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
@@ -2371,10 +2450,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_twopass_fulltile_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(-64)
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -2382,10 +2462,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_twopass_fulltile_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(64)
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -2393,11 +2474,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_twopass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -2406,11 +2488,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -2504,7 +2587,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_lt_16_twopass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -2517,7 +2601,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_lt_16_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -2531,7 +2616,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_lt_16_twopass_fulltile_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -2544,7 +2630,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_lt_16_twopass_fulltile_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -2557,8 +2644,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_lt_16_twopass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -2572,8 +2660,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_lt_16_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -2672,11 +2761,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_multipass) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -2685,11 +2775,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -2699,11 +2790,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(-64)
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -2712,11 +2804,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(64)
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -2725,7 +2818,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_div_16_multipass) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2740,7 +2833,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_div_16_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2756,7 +2849,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_div_16_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2771,7 +2864,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_div_16_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2786,8 +2879,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_lt_16_multipass) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -2801,13 +2895,14 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_lt_16_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .input_offset(16)
+          .input_offset(channel_tile)
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
           .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_s8_minmax_neon_params);
@@ -2817,8 +2912,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_lt_16_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -2832,8 +2928,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_lt_16_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -2847,7 +2944,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_gt_16_multipass) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2862,7 +2959,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_gt_16_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2878,7 +2975,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_gt_16_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2893,7 +2990,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_gt_16_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -3025,10 +3122,11 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_eq_16_unipass_fulltile) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16, xnn_init_s8_minmax_sse2_params);
@@ -3036,10 +3134,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_eq_16_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .input_offset(19)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
@@ -3048,10 +3147,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_eq_16_unipass_fulltile_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(-64)
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16, xnn_init_s8_minmax_sse2_params);
@@ -3059,10 +3159,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_eq_16_unipass_fulltile_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(64)
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16, xnn_init_s8_minmax_sse2_params);
@@ -3070,11 +3171,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_eq_16_unipass_subtile) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16, xnn_init_s8_minmax_sse2_params);
@@ -3083,11 +3185,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_eq_16_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -3181,7 +3284,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_lt_16_unipass_fulltile) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9, 8)
@@ -3194,7 +3298,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_lt_16_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9, 8)
@@ -3208,7 +3313,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_lt_16_unipass_fulltile_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9, 8)
@@ -3221,7 +3327,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_lt_16_unipass_fulltile_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9, 8)
@@ -3234,8 +3341,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_lt_16_unipass_subtile) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -3249,8 +3357,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_lt_16_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -3349,10 +3458,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_eq_16_twopass_fulltile) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16, xnn_init_s8_minmax_sse2_params);
@@ -3360,10 +3470,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_eq_16_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .input_offset(19)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
@@ -3372,10 +3483,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_eq_16_twopass_fulltile_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(-64)
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16, xnn_init_s8_minmax_sse2_params);
@@ -3383,10 +3495,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_eq_16_twopass_fulltile_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(64)
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16, xnn_init_s8_minmax_sse2_params);
@@ -3394,11 +3507,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_eq_16_twopass_subtile) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16, xnn_init_s8_minmax_sse2_params);
@@ -3407,11 +3521,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_eq_16_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -3505,7 +3620,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_lt_16_twopass_fulltile) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -3518,7 +3634,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_lt_16_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -3532,7 +3649,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_lt_16_twopass_fulltile_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -3545,7 +3663,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_lt_16_twopass_fulltile_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -3558,8 +3677,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_lt_16_twopass_subtile) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -3573,8 +3693,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_lt_16_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -3673,11 +3794,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_eq_16_multipass) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16, xnn_init_s8_minmax_sse2_params);
@@ -3686,11 +3808,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_eq_16_multipass_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -3700,11 +3823,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_eq_16_multipass_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(-64)
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16, xnn_init_s8_minmax_sse2_params);
@@ -3713,11 +3837,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_eq_16_multipass_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(64)
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16, xnn_init_s8_minmax_sse2_params);
@@ -3726,7 +3851,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_div_16_multipass) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -3741,7 +3866,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_div_16_multipass_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -3757,7 +3882,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_div_16_multipass_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -3772,7 +3897,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_div_16_multipass_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -3787,8 +3912,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_lt_16_multipass) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -3802,13 +3928,14 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_lt_16_multipass_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .input_offset(16)
+          .input_offset(channel_tile)
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
           .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16, xnn_init_s8_minmax_sse2_params);
@@ -3818,8 +3945,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_lt_16_multipass_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -3833,8 +3961,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_lt_16_multipass_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -3848,7 +3977,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_gt_16_multipass) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -3863,7 +3992,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_gt_16_multipass_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -3879,7 +4008,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_gt_16_multipass_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -3894,7 +4023,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE2_C16, channels_gt_16_multipass_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -4026,10 +4155,11 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_eq_16_unipass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16, xnn_init_s8_minmax_sse4_params);
@@ -4037,10 +4167,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_eq_16_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .input_offset(19)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
@@ -4049,10 +4180,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_eq_16_unipass_fulltile_with_qmin) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(-64)
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16, xnn_init_s8_minmax_sse4_params);
@@ -4060,10 +4192,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_eq_16_unipass_fulltile_with_qmax) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(64)
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16, xnn_init_s8_minmax_sse4_params);
@@ -4071,11 +4204,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_eq_16_unipass_subtile) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16, xnn_init_s8_minmax_sse4_params);
@@ -4084,11 +4218,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_eq_16_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -4182,7 +4317,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_lt_16_unipass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9, 8)
@@ -4195,7 +4331,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_lt_16_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9, 8)
@@ -4209,7 +4346,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_lt_16_unipass_fulltile_with_qmin) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9, 8)
@@ -4222,7 +4360,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_lt_16_unipass_fulltile_with_qmax) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9, 8)
@@ -4235,8 +4374,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_lt_16_unipass_subtile) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -4250,8 +4390,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_lt_16_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -4350,10 +4491,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_eq_16_twopass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16, xnn_init_s8_minmax_sse4_params);
@@ -4361,10 +4503,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_eq_16_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .input_offset(19)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
@@ -4373,10 +4516,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_eq_16_twopass_fulltile_with_qmin) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(-64)
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16, xnn_init_s8_minmax_sse4_params);
@@ -4384,10 +4528,11 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_eq_16_twopass_fulltile_with_qmax) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(64)
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16, xnn_init_s8_minmax_sse4_params);
@@ -4395,11 +4540,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_eq_16_twopass_subtile) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16, xnn_init_s8_minmax_sse4_params);
@@ -4408,11 +4554,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_eq_16_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -4506,7 +4653,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_lt_16_twopass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -4519,7 +4667,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_lt_16_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -4533,7 +4682,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_lt_16_twopass_fulltile_with_qmin) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -4546,7 +4696,8 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_lt_16_twopass_fulltile_with_qmax) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -4559,8 +4710,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_lt_16_twopass_subtile) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -4574,8 +4726,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_lt_16_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -4674,11 +4827,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_eq_16_multipass) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16, xnn_init_s8_minmax_sse4_params);
@@ -4687,11 +4841,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_eq_16_multipass_with_input_offset) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -4701,11 +4856,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_eq_16_multipass_with_qmin) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(-64)
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16, xnn_init_s8_minmax_sse4_params);
@@ -4714,11 +4870,12 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_eq_16_multipass_with_qmax) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(64)
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16, xnn_init_s8_minmax_sse4_params);
@@ -4727,7 +4884,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_div_16_multipass) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -4742,7 +4899,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_div_16_multipass_with_input_offset) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -4758,7 +4915,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_div_16_multipass_with_qmin) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -4773,7 +4930,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_div_16_multipass_with_qmax) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -4788,8 +4945,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_lt_16_multipass) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -4803,13 +4961,14 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_lt_16_multipass_with_input_offset) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .input_offset(16)
+          .input_offset(channel_tile)
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
           .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16, xnn_init_s8_minmax_sse4_params);
@@ -4819,8 +4978,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_lt_16_multipass_with_qmin) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -4834,8 +4994,9 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_lt_16_multipass_with_qmax) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -4849,7 +5010,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_gt_16_multipass) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -4864,7 +5025,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_gt_16_multipass_with_input_offset) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -4880,7 +5041,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_gt_16_multipass_with_qmin) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -4895,7 +5056,7 @@
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__SSE41_C16, channels_gt_16_multipass_with_qmax) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -5026,20 +5187,22 @@
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_eq_16_unipass_fulltile) {
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16, xnn_init_s8_minmax_wasmsimd_params);
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_eq_16_unipass_fulltile_with_input_offset) {
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .input_offset(19)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
@@ -5047,31 +5210,34 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_eq_16_unipass_fulltile_with_qmin) {
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(-64)
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16, xnn_init_s8_minmax_wasmsimd_params);
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_eq_16_unipass_fulltile_with_qmax) {
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(64)
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16, xnn_init_s8_minmax_wasmsimd_params);
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_eq_16_unipass_subtile) {
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16, xnn_init_s8_minmax_wasmsimd_params);
@@ -5079,11 +5245,12 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_eq_16_unipass_subtile_with_input_offset) {
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -5170,7 +5337,8 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_lt_16_unipass_fulltile) {
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9, 8)
@@ -5182,7 +5350,8 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_lt_16_unipass_fulltile_with_input_offset) {
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9, 8)
@@ -5195,7 +5364,8 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_lt_16_unipass_fulltile_with_qmin) {
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9, 8)
@@ -5207,7 +5377,8 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_lt_16_unipass_fulltile_with_qmax) {
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(9)
         .pooling_tile(9, 8)
@@ -5219,8 +5390,9 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_lt_16_unipass_subtile) {
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -5233,8 +5405,9 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_lt_16_unipass_subtile_with_input_offset) {
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -5326,20 +5499,22 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_eq_16_twopass_fulltile) {
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16, xnn_init_s8_minmax_wasmsimd_params);
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_eq_16_twopass_fulltile_with_input_offset) {
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .input_offset(19)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
@@ -5347,31 +5522,34 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_eq_16_twopass_fulltile_with_qmin) {
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(-64)
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16, xnn_init_s8_minmax_wasmsimd_params);
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_eq_16_twopass_fulltile_with_qmax) {
+    const size_t channel_tile = 16;
     MaxPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
-      .channels(16)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(64)
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16, xnn_init_s8_minmax_wasmsimd_params);
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_eq_16_twopass_subtile) {
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16, xnn_init_s8_minmax_wasmsimd_params);
@@ -5379,11 +5557,12 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_eq_16_twopass_subtile_with_input_offset) {
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -5470,7 +5649,8 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_lt_16_twopass_fulltile) {
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -5482,7 +5662,8 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_lt_16_twopass_fulltile_with_input_offset) {
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -5495,7 +5676,8 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_lt_16_twopass_fulltile_with_qmin) {
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -5507,7 +5689,8 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_lt_16_twopass_fulltile_with_qmax) {
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(17)
         .pooling_tile(9, 8)
@@ -5519,8 +5702,9 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_lt_16_twopass_subtile) {
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -5533,8 +5717,9 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_lt_16_twopass_subtile_with_input_offset) {
+    const size_t channel_tile = 16;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < 16; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -5626,11 +5811,12 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_eq_16_multipass) {
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16, xnn_init_s8_minmax_wasmsimd_params);
@@ -5638,11 +5824,12 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_eq_16_multipass_with_input_offset) {
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .input_offset(19)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -5651,11 +5838,12 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_eq_16_multipass_with_qmin) {
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(-64)
         .qmax(std::numeric_limits<int8_t>::max())
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16, xnn_init_s8_minmax_wasmsimd_params);
@@ -5663,11 +5851,12 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_eq_16_multipass_with_qmax) {
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
-        .channels(16)
+        .channels(channel_tile)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(64)
         .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16, xnn_init_s8_minmax_wasmsimd_params);
@@ -5675,7 +5864,7 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_div_16_multipass) {
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -5689,7 +5878,7 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_div_16_multipass_with_input_offset) {
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -5704,7 +5893,7 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_div_16_multipass_with_qmin) {
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -5718,7 +5907,7 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_div_16_multipass_with_qmax) {
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -5732,8 +5921,9 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_lt_16_multipass) {
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -5746,13 +5936,14 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_lt_16_multipass_with_input_offset) {
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .input_offset(16)
+          .input_offset(channel_tile)
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
           .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16, xnn_init_s8_minmax_wasmsimd_params);
@@ -5761,8 +5952,9 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_lt_16_multipass_with_qmin) {
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -5775,8 +5967,9 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_lt_16_multipass_with_qmax) {
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
-      for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
@@ -5789,7 +5982,7 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_gt_16_multipass) {
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -5803,7 +5996,7 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_gt_16_multipass_with_input_offset) {
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -5818,7 +6011,7 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_gt_16_multipass_with_qmin) {
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -5832,7 +6025,7 @@
   }
 
   TEST(S8_MAXPOOL_MINMAX_9P8X__WASMSIMD_C16, channels_gt_16_multipass_with_qmax) {
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -5956,20 +6149,22 @@
 
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_unipass_fulltile) {
+  const size_t channel_tile = 1;
   MaxPoolMicrokernelTester()
     .pooling_elements(9)
     .pooling_tile(9, 8)
-    .channels(1)
+    .channels(channel_tile)
     .qmin(std::numeric_limits<int8_t>::min())
     .qmax(std::numeric_limits<int8_t>::max())
     .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_s8_minmax_scalar_params);
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_input_offset) {
+  const size_t channel_tile = 1;
   MaxPoolMicrokernelTester()
     .pooling_elements(9)
     .pooling_tile(9, 8)
-    .channels(1)
+    .channels(channel_tile)
     .input_offset(3)
     .qmin(std::numeric_limits<int8_t>::min())
     .qmax(std::numeric_limits<int8_t>::max())
@@ -5977,31 +6172,34 @@ TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_inpu
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_qmin) {
+  const size_t channel_tile = 1;
   MaxPoolMicrokernelTester()
     .pooling_elements(9)
     .pooling_tile(9, 8)
-    .channels(1)
+    .channels(channel_tile)
     .qmin(-64)
     .qmax(std::numeric_limits<int8_t>::max())
     .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_s8_minmax_scalar_params);
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_qmax) {
+  const size_t channel_tile = 1;
   MaxPoolMicrokernelTester()
     .pooling_elements(9)
     .pooling_tile(9, 8)
-    .channels(1)
+    .channels(channel_tile)
     .qmin(std::numeric_limits<int8_t>::min())
     .qmax(64)
     .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_s8_minmax_scalar_params);
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_unipass_subtile) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
     MaxPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_s8_minmax_scalar_params);
@@ -6009,11 +6207,12 @@ TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_unipass_subtile) {
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_unipass_subtile_with_input_offset) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
     MaxPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .input_offset(3)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
@@ -6100,20 +6299,22 @@ TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_unipass_subtile_with_input
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile) {
+  const size_t channel_tile = 1;
   MaxPoolMicrokernelTester()
     .pooling_elements(17)
     .pooling_tile(9, 8)
-    .channels(1)
+    .channels(channel_tile)
     .qmin(std::numeric_limits<int8_t>::min())
     .qmax(std::numeric_limits<int8_t>::max())
     .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_s8_minmax_scalar_params);
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile_with_input_offset) {
+  const size_t channel_tile = 1;
   MaxPoolMicrokernelTester()
     .pooling_elements(17)
     .pooling_tile(9, 8)
-    .channels(1)
+    .channels(channel_tile)
     .input_offset(3)
     .qmin(std::numeric_limits<int8_t>::min())
     .qmax(std::numeric_limits<int8_t>::max())
@@ -6121,31 +6322,34 @@ TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile_with_inpu
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile_with_qmin) {
+  const size_t channel_tile = 1;
   MaxPoolMicrokernelTester()
     .pooling_elements(17)
     .pooling_tile(9, 8)
-    .channels(1)
+    .channels(channel_tile)
     .qmin(-64)
     .qmax(std::numeric_limits<int8_t>::max())
     .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_s8_minmax_scalar_params);
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile_with_qmax) {
+  const size_t channel_tile = 1;
   MaxPoolMicrokernelTester()
     .pooling_elements(17)
     .pooling_tile(9, 8)
-    .channels(1)
+    .channels(channel_tile)
     .qmin(std::numeric_limits<int8_t>::min())
     .qmax(64)
     .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_s8_minmax_scalar_params);
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_subtile) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
     MaxPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_s8_minmax_scalar_params);
@@ -6153,11 +6357,12 @@ TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_subtile) {
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_subtile_with_input_offset) {
+  const size_t channel_tile = 1;
   for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
     MaxPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .input_offset(3)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
@@ -6244,11 +6449,12 @@ TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_twopass_subtile_with_input
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_multipass) {
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  const size_t channel_tile = 1;
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     MaxPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_s8_minmax_scalar_params);
@@ -6256,11 +6462,12 @@ TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_multipass) {
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_multipass_with_input_offset) {
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  const size_t channel_tile = 1;
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     MaxPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .input_offset(3)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
@@ -6269,11 +6476,12 @@ TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_multipass_with_input_offse
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_multipass_with_qmin) {
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  const size_t channel_tile = 1;
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     MaxPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .qmin(-64)
       .qmax(std::numeric_limits<int8_t>::max())
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_s8_minmax_scalar_params);
@@ -6281,11 +6489,12 @@ TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_multipass_with_qmin) {
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_multipass_with_qmax) {
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  const size_t channel_tile = 1;
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     MaxPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
-      .channels(1)
+      .channels(channel_tile)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(64)
       .Test(xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_s8_minmax_scalar_params);
@@ -6293,7 +6502,7 @@ TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_multipass_with_qmax) {
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_multipass) {
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (size_t channels = 2; channels < 10; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
@@ -6307,7 +6516,7 @@ TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_multipass) {
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_multipass_with_input_offset) {
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (size_t channels = 2; channels < 10; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
@@ -6322,7 +6531,7 @@ TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_multipass_with_input_offse
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_multipass_with_qmin) {
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (size_t channels = 2; channels < 10; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
@@ -6336,7 +6545,7 @@ TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_multipass_with_qmin) {
 }
 
 TEST(S8_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_multipass_with_qmax) {
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (size_t channels = 2; channels < 10; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(pooling_elements)

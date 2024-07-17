@@ -192,8 +192,8 @@ $if OP_TYPE == "Clamp":
       const size_t batch_step = ${BATCH_TILE} * ${BATCH_SCALE};
     $else:
       const size_t batch_step = ${BATCH_TILE};
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += ${max(1, BATCH_TILE-1 if BATCH_SCALE == "" else (BATCH_TILE * 10 - 1))}) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
+      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += ${max(1, BATCH_TILE-1) if BATCH_SCALE == "" else "batch_step - 1"}) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmin(qmin)
@@ -209,8 +209,8 @@ $if OP_TYPE == "Clamp":
       const size_t batch_step = ${BATCH_TILE} * ${BATCH_SCALE};
     $else:
       const size_t batch_step = ${BATCH_TILE};
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += ${max(1, BATCH_TILE-1 if BATCH_SCALE == "" else (BATCH_TILE * 10 - 1))}) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
+      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += ${max(1, BATCH_TILE-1) if BATCH_SCALE == "" else "batch_step - 1"}) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmax(qmax)
@@ -424,6 +424,7 @@ def main(args):
 
 #include <array>
 #include <cmath>
+#include <cstdint>
 #include <cstddef>
 #include <limits>
 
@@ -434,6 +435,7 @@ def main(args):
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/vunary.h"
+#include "next_prime.h"
 #include "vunary-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 

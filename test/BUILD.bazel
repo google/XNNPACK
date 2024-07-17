@@ -16,6 +16,7 @@ load(
 )
 
 MICROKERNEL_TEST_DEPS = [
+    ":next_prime",
     ":replicable_random_device",
     "@FP16",
     "//:aligned_allocator",
@@ -64,6 +65,14 @@ xnnpack_cc_library(
     deps = xnnpack_test_deps_for_library() + [
         "//:xnnpack_h",
     ],
+)
+
+xnnpack_cc_library(
+    name = "next_prime",
+    testonly = True,
+    srcs = ["next_prime.cc"],
+    hdrs = ["next_prime.h"],
+    deps = xnnpack_test_deps_for_library(),
 )
 
 xnnpack_cc_library(

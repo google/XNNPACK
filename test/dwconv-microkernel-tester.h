@@ -291,24 +291,3 @@ struct DWConvTestParams {
 };
 
 using DWConvTest = testing::TestWithParam<DWConvTestParams>;
-
-inline bool IsPrime(size_t n) {
-    if (n == 1 || n == 2) {
-      return true;
-    }
-    for (size_t k = 3; k * k <= n; k += 2) {
-      if (n % k == 0) {
-        return false;
-      }
-    }
-    return true;
-}
-
-inline size_t NextPrime(size_t n) {
-    n = (n + 1) | static_cast<size_t>(1);
-    while (!IsPrime(n)) {
-      n++;
-    }
-    return n;
-}
-
