@@ -56,10 +56,7 @@ void xnn_f32_spmm_minmax_ukernel_64x1__hvx_x2(
         const HVX_Vector vi1x0 = xnn_loadu_f32(input + 32);
         input = (const float*) ((uintptr_t) input + (uintptr_t) diff0);
 
-        xnn_prefetch_to_l2_linear(input, 2);
-
         const HVX_Vector vw0 = xnn_set1_f32(*w); w += 1;
-        xnn_prefetch_to_l2_linear(w, 1);
 
         vacc0x0 = xnn_fmadd_f32(vi0x0, vw0, vacc0x0);
         vacc1x0 = xnn_fmadd_f32(vi1x0, vw0, vacc1x0);
@@ -67,10 +64,7 @@ void xnn_f32_spmm_minmax_ukernel_64x1__hvx_x2(
         const HVX_Vector vi1x1 = xnn_loadu_f32(input + 32);
         input = (const float*) ((uintptr_t) input + (uintptr_t) diff1);
 
-        xnn_prefetch_to_l2_linear(input, 2);
-
         const HVX_Vector vw1 = xnn_set1_f32(*w); w += 1;
-        xnn_prefetch_to_l2_linear(w, 1);
 
         vacc0x1 = xnn_fmadd_f32(vi0x1, vw1, vacc0x1);
         vacc1x1 = xnn_fmadd_f32(vi1x1, vw1, vacc1x1);
@@ -85,10 +79,8 @@ void xnn_f32_spmm_minmax_ukernel_64x1__hvx_x2(
           const HVX_Vector vi0 = xnn_loadu_f32(input);
           const HVX_Vector vi1 = xnn_loadu_f32(input + 32);
           input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
-          xnn_prefetch_to_l2_linear(input, 2);
-            
+
           const HVX_Vector vw = xnn_set1_f32(*w); w += 1;
-          xnn_prefetch_to_l2_linear(w, 1);
 
           vacc0 = xnn_fmadd_f32(vi0, vw, vacc0);
           vacc1 = xnn_fmadd_f32(vi1, vw, vacc1);
