@@ -32,8 +32,8 @@ void xnn_s32_vmul_minmax_ukernel__avx2_u8(
   assert(output != NULL);
   assert(xnn_simd_size_s32 == 8);
 
-  xnn_simd_s32_t voutput_min = xnn_set1_s32(&params->avx2.min);
-  xnn_simd_s32_t voutput_max = xnn_set1_s32(&params->avx2.max);
+  xnn_simd_s32_t voutput_min = xnn_set1_s32(params->scalar.min);
+  xnn_simd_s32_t voutput_max = xnn_set1_s32(params->scalar.max);
 
   for (; batch >= xnn_simd_bytes_s32; batch -= xnn_simd_bytes_s32) {
     xnn_simd_s32_t vin1 = xnn_loadu_s32(input_a);
@@ -78,8 +78,8 @@ void xnn_s32_vmul_minmax_ukernel__avx2_u16(
   assert(output != NULL);
   assert(xnn_simd_size_s32 == 8);
 
-  xnn_simd_s32_t voutput_min = xnn_set1_s32(&params->avx2.min);
-  xnn_simd_s32_t voutput_max = xnn_set1_s32(&params->avx2.max);
+  xnn_simd_s32_t voutput_min = xnn_set1_s32(params->scalar.min);
+  xnn_simd_s32_t voutput_max = xnn_set1_s32(params->scalar.max);
 
   for (; batch >= 16 * sizeof(int32_t); batch -= 16 * sizeof(int32_t)) {
     xnn_simd_s32_t vin1_0 = xnn_loadu_s32(input_a);
@@ -144,8 +144,8 @@ void xnn_s32_vmul_minmax_ukernel__avx2_u24(
   assert(output != NULL);
   assert(xnn_simd_size_s32 == 8);
 
-  xnn_simd_s32_t voutput_min = xnn_set1_s32(&params->avx2.min);
-  xnn_simd_s32_t voutput_max = xnn_set1_s32(&params->avx2.max);
+  xnn_simd_s32_t voutput_min = xnn_set1_s32(params->scalar.min);
+  xnn_simd_s32_t voutput_max = xnn_set1_s32(params->scalar.max);
 
   for (; batch >= 24 * sizeof(int32_t); batch -= 24 * sizeof(int32_t)) {
     xnn_simd_s32_t vin1_0 = xnn_loadu_s32(input_a);
@@ -216,8 +216,8 @@ void xnn_s32_vmul_minmax_ukernel__avx2_u32(
   assert(output != NULL);
   assert(xnn_simd_size_s32 == 8);
 
-  xnn_simd_s32_t voutput_min = xnn_set1_s32(&params->avx2.min);
-  xnn_simd_s32_t voutput_max = xnn_set1_s32(&params->avx2.max);
+  xnn_simd_s32_t voutput_min = xnn_set1_s32(params->scalar.min);
+  xnn_simd_s32_t voutput_max = xnn_set1_s32(params->scalar.max);
 
   for (; batch >= 32 * sizeof(int32_t); batch -= 32 * sizeof(int32_t)) {
     xnn_simd_s32_t vin1_0 = xnn_loadu_s32(input_a);

@@ -72,8 +72,8 @@ TEST_F(MultiplyTestS32, matches_operator_api)
 {
   std::generate(input1.begin(), input1.end(), [&]() { return s32dist(rng); });
   std::generate(input2.begin(), input2.end(), [&]() { return s32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nan(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nan(""));
+  std::fill(operator_output.begin(), operator_output.end(), INT_MAX);
+  std::fill(subgraph_output.begin(), subgraph_output.end(), INT_MAX);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

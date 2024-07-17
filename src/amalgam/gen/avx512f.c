@@ -5456,8 +5456,8 @@ void xnn_s32_vmul_minmax_ukernel__avx512f_u32(
   assert(output != NULL);
   assert(xnn_simd_size_s32 == 16);
 
-  xnn_simd_s32_t voutput_min = xnn_set1_s32(&params->avx512f.min);
-  xnn_simd_s32_t voutput_max = xnn_set1_s32(&params->avx512f.max);
+  xnn_simd_s32_t voutput_min = xnn_set1_s32(params->scalar.min);
+  xnn_simd_s32_t voutput_max = xnn_set1_s32(params->scalar.max);
 
   for (; batch >= 32 * sizeof(int32_t); batch -= 32 * sizeof(int32_t)) {
     xnn_simd_s32_t vin1_0 = xnn_loadu_s32(input_a);
@@ -5523,8 +5523,8 @@ void xnn_s32_vmulc_minmax_ukernel__avx512f_u32(
   assert(xnn_simd_size_s32 == 16);
 
   xnn_simd_s32_t vin2 = xnn_set1_s32(*input2);
-  xnn_simd_s32_t voutput_min = xnn_set1_s32(&params->avx512f.min);
-  xnn_simd_s32_t voutput_max = xnn_set1_s32(&params->avx512f.max);
+  xnn_simd_s32_t voutput_min = xnn_set1_s32(params->scalar.min);
+  xnn_simd_s32_t voutput_max = xnn_set1_s32(params->scalar.max);
 
   for (; batch >= 32 * sizeof(int32_t); batch -= 32 * sizeof(int32_t)) {
 

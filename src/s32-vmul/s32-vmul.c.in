@@ -35,8 +35,8 @@ $for BATCH_TILE in BATCH_TILES:
     assert(output != NULL);
     assert(xnn_simd_size_s32 == ${SIMD_SIZE});
 
-    xnn_simd_s32_t voutput_min = xnn_set1_s32(&params->${ARCH}.min);
-    xnn_simd_s32_t voutput_max = xnn_set1_s32(&params->${ARCH}.max);
+    xnn_simd_s32_t voutput_min = xnn_set1_s32(params->scalar.min);
+    xnn_simd_s32_t voutput_max = xnn_set1_s32(params->scalar.max);
 
     $if SIMD_TILE > 1:
       for (; batch >= ${BATCH_TILE} * sizeof(int32_t); batch -= ${BATCH_TILE} * sizeof(int32_t)) {

@@ -33,8 +33,8 @@ void xnn_s32_vmulc_minmax_ukernel__scalar_u1(
   assert(xnn_simd_size_s32 == 1);
 
   xnn_simd_s32_t vin2 = xnn_set1_s32(*input2);
-  xnn_simd_s32_t voutput_min = xnn_set1_s32(&params->scalar.min);
-  xnn_simd_s32_t voutput_max = xnn_set1_s32(&params->scalar.max);
+  xnn_simd_s32_t voutput_min = xnn_set1_s32(params->scalar.min);
+  xnn_simd_s32_t voutput_max = xnn_set1_s32(params->scalar.max);
 
   for (; batch >= xnn_simd_bytes_s32; batch -= xnn_simd_bytes_s32) {
     xnn_simd_s32_t vin1 = xnn_loadu_s32(input1);
@@ -65,8 +65,8 @@ void xnn_s32_vmulc_minmax_ukernel__scalar_u2(
   assert(xnn_simd_size_s32 == 1);
 
   xnn_simd_s32_t vin2 = xnn_set1_s32(*input2);
-  xnn_simd_s32_t voutput_min = xnn_set1_s32(&params->scalar.min);
-  xnn_simd_s32_t voutput_max = xnn_set1_s32(&params->scalar.max);
+  xnn_simd_s32_t voutput_min = xnn_set1_s32(params->scalar.min);
+  xnn_simd_s32_t voutput_max = xnn_set1_s32(params->scalar.max);
 
   for (; batch >= 2 * sizeof(int32_t); batch -= 2 * sizeof(int32_t)) {
 
@@ -114,8 +114,8 @@ void xnn_s32_vmulc_minmax_ukernel__scalar_u4(
   assert(xnn_simd_size_s32 == 1);
 
   xnn_simd_s32_t vin2 = xnn_set1_s32(*input2);
-  xnn_simd_s32_t voutput_min = xnn_set1_s32(&params->scalar.min);
-  xnn_simd_s32_t voutput_max = xnn_set1_s32(&params->scalar.max);
+  xnn_simd_s32_t voutput_min = xnn_set1_s32(params->scalar.min);
+  xnn_simd_s32_t voutput_max = xnn_set1_s32(params->scalar.max);
 
   for (; batch >= 4 * sizeof(int32_t); batch -= 4 * sizeof(int32_t)) {
 
@@ -173,8 +173,8 @@ void xnn_s32_vmulc_minmax_ukernel__scalar_u8(
   assert(xnn_simd_size_s32 == 1);
 
   xnn_simd_s32_t vin2 = xnn_set1_s32(*input2);
-  xnn_simd_s32_t voutput_min = xnn_set1_s32(&params->scalar.min);
-  xnn_simd_s32_t voutput_max = xnn_set1_s32(&params->scalar.max);
+  xnn_simd_s32_t voutput_min = xnn_set1_s32(params->scalar.min);
+  xnn_simd_s32_t voutput_max = xnn_set1_s32(params->scalar.max);
 
   for (; batch >= 8 * sizeof(int32_t); batch -= 8 * sizeof(int32_t)) {
 

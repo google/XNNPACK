@@ -378,20 +378,9 @@ XNN_INTERNAL void xnn_update_f32_gavgpool_params(
   float multiplier,
   uint32_t width);
 
-
 #define DECLARE_INIT_F32_DEFAULT_PARAMS_FUNCTION(fn_name)      \
   XNN_INTERNAL size_t fn_name(                                 \
     union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F32_DEFAULT_PARAMS_FUNCTION(xnn_init_f32_default_avx_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#define DECLARE_INIT_S32_MINMAX_PARAMS_FUNCTION(fn_name)      \
-  XNN_INTERNAL size_t fn_name(                                \
-    union xnn_s32_minmax_params params[XNN_MIN_ELEMENTS(1)],  \
-    int32_t output_min,                                       \
-    int32_t output_max);
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_F32_DEFAULT_PARAMS_FUNCTION(xnn_init_f32_default_avx_params)
@@ -440,10 +429,10 @@ DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(xnn_init_f32_minmax_scalar_params)
   DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(xnn_init_f32_minmax_hvx_params)
 #endif
 
-#define DECLARE_INIT_S32_MINMAX_PARAMS_FUNCTION(fn_name)     \
-  XNN_INTERNAL size_t fn_name(                               \
-    union xnn_s32_minmax_params params[XNN_MIN_ELEMENTS(1)], \
-    int32_t output_min,                                        \
+#define DECLARE_INIT_S32_MINMAX_PARAMS_FUNCTION(fn_name)      \
+  XNN_INTERNAL size_t fn_name(                                \
+    union xnn_s32_minmax_params params[XNN_MIN_ELEMENTS(1)],  \
+    int32_t output_min,                                       \
     int32_t output_max);
 
 DECLARE_INIT_S32_MINMAX_PARAMS_FUNCTION(xnn_init_s32_minmax_scalar_params)

@@ -292,10 +292,8 @@ void VBinaryMicrokernelTester::Test(
                                            : 0));
   std::vector<int32_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
-    // std::generate(a.begin(), a.end(), [&]() { return s32dist(rng); });
-    std::generate(a.begin(), a.end(), [&]() { return 1; });
-    // std::generate(b.begin(), b.end(), [&]() { return s32dist(rng); });
-    std::generate(b.begin(), b.end(), [&]() { return 2; });
+    std::generate(a.begin(), a.end(), [&]() { return s32dist(rng); });
+    std::generate(b.begin(), b.end(), [&]() { return s32dist(rng); });
     if (inplace_a() || inplace_b()) {
       std::generate(y.begin(), y.end(), [&]() { return s32dist(rng); });
     } else {
@@ -346,7 +344,7 @@ void VBinaryMicrokernelTester::Test(
     // Prepare parameters.
     xnn_s32_minmax_params params;
     if (init_params != nullptr) {
-      init_params(&params, y_max, y_min);
+      init_params(&params, y_min, y_max);
     }
 
     // Call optimized micro-kernel.
