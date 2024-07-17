@@ -129,8 +129,8 @@ template <typename T> class BinaryTest : public ::testing::Test {
   std::uniform_int_distribution<int32_t> s32dist;
 
 
-  float output_min = -std::numeric_limits<float>::infinity();
-  float output_max = std::numeric_limits<float>::infinity();
+  T output_min = std::numeric_limits<T>::min();
+  T output_max = std::numeric_limits<T>::max();
 
   std::vector<size_t> input1_dims;
   std::vector<size_t> input2_dims;

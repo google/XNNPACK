@@ -326,8 +326,40 @@ void VBinaryCMicrokernelTester::Test(
     // Compute reference results.
     for (size_t i = 0; i < batch_size(); i++) {
         switch (op_type) {
+        case OpType::AddC:
+          y_ref[i] = a_data[i] + b;
+          break;
+        case OpType::CopySignC:
+          y_ref[i] = std::copysign(a_data[i], b);
+          break;
+        case OpType::RCopySignC:
+          y_ref[i] = std::copysign(b, a_data[i]);
+          break;
+        case OpType::DivC:
+          y_ref[i] = a_data[i] / b;
+          break;
+        case OpType::RDivC:
+          y_ref[i] = b / a_data[i];
+          break;
+        case OpType::MaxC:
+          y_ref[i] = std::max<int32_t>(a_data[i], b);
+          break;
+        case OpType::MinC:
+          y_ref[i] = std::min<int32_t>(a_data[i], b);
+          break;
         case OpType::MulC:
           y_ref[i] = a_data[i] * b;
+          break;
+        case OpType::SqrDiffC: {
+          const int32_t diff = a_data[i] - b;
+          y_ref[i] = diff * diff;
+          break;
+        }
+        case OpType::SubC:
+          y_ref[i] = a_data[i] - b;
+          break;
+        case OpType::RSubC:
+          y_ref[i] = b - a_data[i];
           break;
       }
     }
