@@ -313,6 +313,7 @@ xnnpack_cc_library(
     "qu8_vaddc_minmax",
     "qu8_vmulc_minmax_fp32",
     "qu8_vmulc_minmax_rndnu",
+    "s32_vmulc",
 ]]
 
 [xnnpack_unit_test(
@@ -1558,7 +1559,7 @@ xnnpack_binary(
     "squared_difference_nd_eager",
     "subtract_nd",
     "subtract_nd_eager",
-    "multiply_nd",
+    "multiply-v2-nd",
 ]]
 
 xnnpack_unit_test(
@@ -2069,6 +2070,7 @@ xnnpack_unit_test(
     "multiply2",
     "squared_difference",
     "subtract2",
+    "multiply-v2"
 ]]
 
 xnnpack_unit_test(
