@@ -296,8 +296,8 @@ struct xnn_operator {
     union xnn_qs8_lrelu_params qs8_lrelu;
     union xnn_qu8_lrelu_params qu8_lrelu;
     union xnn_s8_minmax_params s8_minmax;
-    union xnn_u8_minmax_params u8_minmax;
     union xnn_s32_minmax_params s32_minmax;
+    union xnn_u8_minmax_params u8_minmax;
   } params;
   // Second set of params. Operators like Dynamic Fully Connected only decides on the specific config to use during
   // reshape, so it needs to keep two sets of params around. Configs can have different initialization functions.

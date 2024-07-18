@@ -2409,58 +2409,6 @@ size_t xnn_init_f32_minmax_avxvnni_params(
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_s32_minmax_sse41_params(
-  union xnn_s32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t output_min,
-  int32_t output_max)
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse41.min[i] = output_min;
-    params->sse41.max[i] = output_max;
-  }
-  return sizeof(params->sse41);
-}
-
-size_t xnn_init_s32_minmax_avx2_params(
-  union xnn_s32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t output_min,
-  int32_t output_max)
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx2.min[i] = output_min;
-    params->avx2.max[i] = output_max;
-  }
-  // for (uint32_t i = 0; i < 7; i++) {
-  //   params->avx2.mask_table[i] = -1;
-  // }
-  // for (uint32_t i = 7; i < 14; i++) {
-  //   params->avx2.mask_table[i] = 0;
-  // }
-  return sizeof(params->avx2);
-}
-
-size_t xnn_init_s32_minmax_avx512f_params(
-  union xnn_s32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t output_min,
-  int32_t output_max) {
-  params->avx512f.min = output_min;
-  params->avx512f.max = output_max;
-  // params->avx512f.sign_mask = 0x80;
-  return sizeof(params->avx512f);
-}
-
-// size_t xnn_init_f32_minmax_avxvnni_params(
-//   union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-//   float output_min,
-//   float output_max) {
-//   params->avxvnni.min = output_min;
-//   params->avxvnni.max = output_max;
-//   params->avxvnni.sign_mask = 0x80;
-//   return sizeof(params->avxvnni);
-// }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 size_t xnn_init_f32_minmax_wasmsimd_params(
   union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2475,39 +2423,11 @@ size_t xnn_init_f32_minmax_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_s32_minmax_wasmsimd_params(
-  union xnn_s32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t output_min,
-  int32_t output_max)
-{
-  params->wasmsimd.min[0] = output_min;
-  params->wasmsimd.min[1] = output_min;
-  params->wasmsimd.max[0] = output_max;
-  params->wasmsimd.max[1] = output_max;
-  return sizeof(params->wasmsimd);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
 #if XNN_ARCH_HEXAGON
 size_t xnn_init_f32_minmax_hvx_params(
   union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,
   float output_max)
-{
-  for (uint32_t i = 0; i < 32; i++) {
-    params->hvx.min[i] = output_min;
-    params->hvx.max[i] = output_max;
-  }
-  return sizeof(params->hvx);
-}
-#endif // XNN_ARCH_HEXAGON
-
-#if XNN_ARCH_HEXAGON
-size_t xnn_init_s32_minmax_hvx_params(
-  union xnn_s32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t output_min,
-  int32_t output_max)
 {
   for (uint32_t i = 0; i < 32; i++) {
     params->hvx.min[i] = output_min;

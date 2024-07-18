@@ -354,7 +354,6 @@ SET(SUBGRAPH_SRCS
   src/subgraph/convolution-2d.c
   src/subgraph/copy.c
   src/subgraph/copysign.c
-  src/subgraph/multiply.c
   src/subgraph/deconvolution-2d.c
   src/subgraph/depth-to-space-2d.c
   src/subgraph/depthwise-convolution-2d.c
@@ -1400,11 +1399,6 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(copysign-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME copysign-nd-test COMMAND copysign-nd-test)
 
-    ADD_EXECUTABLE(multiply-v2-nd-test test/multiply-v2-nd.cc)
-    TARGET_INCLUDE_DIRECTORIES(multiply-v2-nd-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(multiply-v2-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME multiply-v2-nd-test COMMAND multiply-v2-nd-test)
-
     ADD_EXECUTABLE(deconvolution-nhwc-test test/deconvolution-nhwc.cc test/deconvolution-nhwc-qd8-f32-qc8w.cc)
     TARGET_INCLUDE_DIRECTORIES(deconvolution-nhwc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(deconvolution-nhwc-test PRIVATE XNNPACK fp16 GTest::gmock GTest::gtest GTest::gtest_main)
@@ -1774,11 +1768,6 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(copysign-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME copysign-test COMMAND copysign-test)
   
-    ADD_EXECUTABLE(multiply-v2-test test/multiply-v2.cc)
-    TARGET_INCLUDE_DIRECTORIES(multiply-v2-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(multiply-v2-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME multiply-v2-test COMMAND multiply-v2-test)
-
     ADD_EXECUTABLE(deconvolution-2d-test test/deconvolution-2d.cc)
     SET_TARGET_PROPERTIES(deconvolution-2d-test PROPERTIES CXX_EXTENSIONS YES)
     TARGET_INCLUDE_DIRECTORIES(deconvolution-2d-test PRIVATE src test)

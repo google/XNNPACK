@@ -133,6 +133,7 @@ enum xnn_operator_type {
   xnn_operator_type_multiply_nd_f32,
   xnn_operator_type_multiply_nd_qs8,
   xnn_operator_type_multiply_nd_qu8,
+  xnn_operator_type_multiply_nd_s32,
   xnn_operator_type_negate_nc_f16,
   xnn_operator_type_negate_nc_f32,
   xnn_operator_type_prelu_nc_f16,
@@ -183,7 +184,6 @@ enum xnn_operator_type {
   xnn_operator_type_truncation_nc_f16,
   xnn_operator_type_truncation_nc_f32,
   xnn_operator_type_unpooling_nhwc_x32,
-  xnn_operator_type_multiply_nd_s32,
 };
 
 XNN_INTERNAL const char* xnn_operator_type_to_string(enum xnn_operator_type operator_type);

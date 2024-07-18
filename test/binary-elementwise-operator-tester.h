@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <climits>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -16,7 +17,6 @@
 #include <limits>
 #include <numeric>
 #include <vector>
-#include <climits>
 
 #include "xnnpack.h"
 

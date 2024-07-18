@@ -530,28 +530,23 @@ static void init_f32_vcopysign_config(void) {
 
 
 static void init_s32_vmul_config(void) {
-  #if XNN_ARCH_ARM
+  #if XNN_ARCH_ARM || XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon){
+    if (hardware_config->use_arm_neon) {
       s32_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmul_minmax_ukernel__neon_u8;
       s32_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_minmax_ukernel__neon_u8;
       s32_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_minmax_ukernel__neon_u8;
       s32_vmul_config.init.s32_minmax = xnn_init_s32_minmax_scalar_params;
-      s32_vmul_config.minmax.element_tile = 2;
-    } else if (!XNN_PLATFORM_MOBILE) {
+      s32_vmul_config.minmax.element_tile = 8;
+    }
+    else if (!XNN_PLATFORM_MOBILE) {
       s32_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmul_minmax_ukernel__scalar_u2;
       s32_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_minmax_ukernel__scalar_u2;
       s32_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_minmax_ukernel__scalar_u2;
       s32_vmul_config.init.s32_minmax = xnn_init_s32_minmax_scalar_params;
       s32_vmul_config.minmax.element_tile = 2;
     }
-  #elif XNN_ARCH_ARM64
-    s32_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmul_minmax_ukernel__neon_u8;
-    s32_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_minmax_ukernel__neon_u8;
-    s32_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_minmax_ukernel__neon_u8;
-    s32_vmul_config.init.s32_minmax = xnn_init_s32_minmax_scalar_params;
-    s32_vmul_config.minmax.element_tile = 8;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -561,13 +556,15 @@ static void init_s32_vmul_config(void) {
       s32_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_minmax_ukernel__avx512f_u32;
       s32_vmul_config.init.s32_minmax = xnn_init_s32_minmax_scalar_params;
       s32_vmul_config.minmax.element_tile = 32;
-    } else if (hardware_config->use_x86_avx) {
+    }
+    else if (hardware_config->use_x86_avx2) {
       s32_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmul_minmax_ukernel__avx2_u16;
       s32_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_minmax_ukernel__avx2_u16;
       s32_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_minmax_ukernel__avx2_u16;
       s32_vmul_config.init.s32_minmax = xnn_init_s32_minmax_scalar_params;
       s32_vmul_config.minmax.element_tile = 16;
-    } else {
+    }
+    else {
       s32_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmul_minmax_ukernel__sse41_u8;
       s32_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_minmax_ukernel__sse41_u8;
       s32_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_minmax_ukernel__sse41_u8;

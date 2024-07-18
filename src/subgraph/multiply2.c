@@ -58,6 +58,9 @@ static enum xnn_status create_multiply_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
+    case xnn_compute_type_s32:
+      status = xnn_create_multiply_nd_s32(INT_MIN, INT_MAX, node->flags, &opdata->operator_objects[0]);
+      break;
     case xnn_compute_type_qs8:
     {
       const float output_scale = values[output_id].quantization.scale;
@@ -163,6 +166,11 @@ static enum xnn_status reshape_multiply_operator(
         opdata->shape2.dim,
         threadpool);
       break;
+    case xnn_operator_type_multiply_nd_s32:
+      status = xnn_reshape_multiply_nd_s32(
+        opdata->operator_objects[0], opdata->shape1.num_dims, opdata->shape1.dim, opdata->shape2.num_dims,
+        opdata->shape2.dim, threadpool);
+      break;
     case xnn_operator_type_multiply_nd_qs8:
       status = xnn_reshape_multiply_nd_qs8(
         opdata->operator_objects[0],
@@ -231,6 +239,9 @@ static enum xnn_status setup_multiply_operator(
         opdata->operator_objects[0],
         input1_data, input2_data, output_data);
       break;
+    case xnn_operator_type_multiply_nd_s32:
+      return xnn_setup_multiply_nd_s32(opdata->operator_objects[0], input1_data, input2_data, output_data);
+      break;
     case xnn_operator_type_multiply_nd_qs8:
       return xnn_setup_multiply_nd_qs8(
         opdata->operator_objects[0],
@@ -279,6 +290,7 @@ enum xnn_status xnn_define_multiply2(
   switch (input1_value->datatype) {
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
+    case xnn_datatype_int32:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
       break;
@@ -304,6 +316,7 @@ enum xnn_status xnn_define_multiply2(
   switch (input2_value->datatype) {
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
+    case xnn_datatype_int32:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
       break;
@@ -333,6 +346,9 @@ enum xnn_status xnn_define_multiply2(
       break;
     case xnn_datatype_fp32:
       compute_type = xnn_compute_type_fp32;
+      break;
+    case xnn_datatype_int32:
+      compute_type = xnn_compute_type_s32;
       break;
     case xnn_datatype_qint8:
       compute_type = xnn_compute_type_qs8;
