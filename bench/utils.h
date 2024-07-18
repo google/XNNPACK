@@ -229,6 +229,10 @@ bool CheckWAsmPSHUFB(benchmark::State& state);
 // If WAsm SDOT is unsupported, report error in benchmark state, and return false.
 bool CheckWAsmSDOT(benchmark::State& state);
 
+// Check if USDOT instruction is available in WAsm Relaxed SIMD as Relaxed Integer Dot Product with Accumulation.
+// If WAsm USDOT is unsupported, report error in benchmark state, and return false.
+bool CheckWAsmUSDOT(benchmark::State& state);
+
 // Check if BLENDVPS instruction is available in WAsm Relaxed SIMD as Relaxed Lane Select.
 // If WAsm BLENDVPS is unsupported, report error in benchmark state, and return false.
 bool CheckWAsmBLENDVPS(benchmark::State& state);

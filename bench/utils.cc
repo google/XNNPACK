@@ -560,6 +560,15 @@ void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark) {
     return true;
   }
 
+  bool CheckWAsmUSDOT(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_wasm_usdot) {
+      state.SkipWithError("no WAsm USDOT support");
+      return false;
+    }
+    return true;
+  }
+
   bool CheckWAsmBLENDVPS(benchmark::State& state) {
     const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     if (hardware_config == nullptr || !hardware_config->use_wasm_blendvps) {

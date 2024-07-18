@@ -433,6 +433,18 @@
 #endif
 
 #if XNN_ARCH_WASMRELAXEDSIMD
+  #define TEST_REQUIRES_WASM_USDOT \
+    do { \
+      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config(); \
+      if (hardware_config == nullptr || !hardware_config->use_wasm_usdot) { \
+        GTEST_SKIP(); \
+      } \
+    } while (0)
+#else
+  #define TEST_REQUIRES_WASM_USDOT
+#endif
+
+#if XNN_ARCH_WASMRELAXEDSIMD
   #define TEST_REQUIRES_WASM_BLENDVPS \
     do { \
       const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config(); \
