@@ -92,6 +92,10 @@ _XNNPACK_ARCH_COPT_MAPPING = {
         "//build_config:x86": ["-mavx2"],
         "//conditions:default": [],
     }),
+    "avx512bw": select({
+        "//build_config:x86": ["-mavx512bw"],
+        "//conditions:default": [],
+    }),
     "avx512f": select({
         "//build_config:x86": ["-mavx512f"],
         "//conditions:default": [],
@@ -129,6 +133,9 @@ def xnnpack_simd_archs():
 
 def xnnpack_simd_f32_archs():
     return ["avx", "avx2", "avx512f", "fma3", "hvx", "neon", "scalar", "sse2", "wasmsimd"]
+
+def xnnpack_simd_s16_archs():
+    return ["avx2", "avx512bw", "neon", "scalar", "sse41", "wasmsimd"]
 
 def xnnpack_simd_s32_archs():
     return ["avx2", "avx512f", "neon", "scalar", "sse41", "wasmsimd"]

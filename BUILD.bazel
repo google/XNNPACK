@@ -20,6 +20,7 @@ load(
     "xnnpack_min_size_copts",
     "xnnpack_msvc_std_copts",
     "xnnpack_simd_f32_archs",
+    "xnnpack_simd_s16_archs",
     "xnnpack_simd_s32_archs",
     "xnnpack_slinky_defines",
     "xnnpack_slinky_deps",
@@ -261,6 +262,9 @@ SIMD_HEADERS = [
 ] + [
     "src/xnnpack/simd/f32-" + arch + ".h"
     for arch in xnnpack_simd_f32_archs()
+] + [
+    "src/xnnpack/simd/s16-" + arch + ".h"
+    for arch in xnnpack_simd_s16_archs()
 ] + [
     "src/xnnpack/simd/s32-" + arch + ".h"
     for arch in xnnpack_simd_s32_archs()
