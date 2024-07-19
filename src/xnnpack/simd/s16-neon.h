@@ -19,46 +19,46 @@
 typedef int16x8_t xnn_simd_s16_t;
 #define xnn_simd_size_s16 8
 #define xnn_simd_log2_size_s16 3
-#define xnn_simd_bytes_s16 (xnn_simd_size_s16 * sizeof(int16))
+#define xnn_simd_bytes_s16 (xnn_simd_size_s16 * sizeof(int16_t))
 
 #define XNN_SIMD_CONST_S16(var, val) const int16x8_t var = vdupq_n_s16(val);
 
 // Arithmetic operations.
 
 // Load/store operations.
-static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16* ptr) {
+static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t* ptr) {
   return vld1q_s16(ptr);
 }
 
-static XNN_INLINE xnn_simd_s16_t xnn_load_s16(const int16* ptr) {
+static XNN_INLINE xnn_simd_s16_t xnn_load_s16(const int16_t* ptr) {
   return vld1q_s16(ptr);
 }
 
-static XNN_INLINE void xnn_storeu_s16(int16* ptr, xnn_simd_s16_t v) {
+static XNN_INLINE void xnn_storeu_s16(int16_t* ptr, xnn_simd_s16_t v) {
   vst1q_s16(ptr, v);
 }
 
-static XNN_INLINE void xnn_store_s16(int16* ptr, xnn_simd_s16_t v) {
+static XNN_INLINE void xnn_store_s16(int16_t* ptr, xnn_simd_s16_t v) {
   vst1q_s16(ptr, v);
 }
 
-static XNN_INLINE xnn_simd_s16_t xnn_set1_s16(int16 v) {
+static XNN_INLINE xnn_simd_s16_t xnn_set1_s16(int16_t v) {
   return vld1q_dup_s16(&v);
 }
 
-static XNN_INLINE xnn_simd_s16_t xnn_set1_or_load_s16(const int16* v) {
+static XNN_INLINE xnn_simd_s16_t xnn_set1_or_load_s16(const int16_t* v) {
   return vld1q_dup_s16(v);
 }
 
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_s16_t
-xnn_load_tail_s16(const int16* input, size_t num_elements) XNN_OOB_READS {
+xnn_load_tail_s16(const int16_t* input, size_t num_elements) XNN_OOB_READS {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_s16);
   return vld1q_s16(input);
 }
 
-static XNN_INLINE void xnn_store_tail_s16(int16* output, xnn_simd_s16_t v,
+static XNN_INLINE void xnn_store_tail_s16(int16_t* output, xnn_simd_s16_t v,
                                           size_t num_elements) {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_s16);
