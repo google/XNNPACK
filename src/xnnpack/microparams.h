@@ -1746,6 +1746,15 @@ union xnn_qs8_f32_cvt_params {
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
+union xnn_s16_cvt_params {
+  struct {
+    int32_t a_zero_point;
+    int32_t b_zero_point;
+    float scale;
+    int32_t output_zero_point;
+  } fp32_scalar;
+};
+
 union xnn_qu8_cvt_params {
   struct {
     int32_t bias;

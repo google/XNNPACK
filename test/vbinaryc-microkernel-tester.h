@@ -63,6 +63,14 @@ class VBinaryCMicrokernelTester {
 
   uint8_t a_zero_point() const { return this->a_zero_point_; }
 
+  VBinaryCMicrokernelTester& a_zero_point_s16(int16_t a_zero_point_s16) {
+    this->a_zero_point_s16_ = a_zero_point_s16;
+    return *this;
+  }
+
+  int16_t a_zero_point_s16() const { return this->a_zero_point_s16_; }
+
+
   VBinaryCMicrokernelTester& b_scale(float b_scale) {
     assert(b_scale > 0.0f);
     assert(std::isnormal(b_scale));
@@ -79,6 +87,13 @@ class VBinaryCMicrokernelTester {
 
   uint8_t b_zero_point() const { return this->b_zero_point_; }
 
+  VBinaryCMicrokernelTester& b_zero_point_s16(int16_t b_zero_point_s16) {
+    this->b_zero_point_s16_ = b_zero_point_s16;
+    return *this;
+  }
+
+  int16_t b_zero_point_s16() const { return this->b_zero_point_s16_; }
+
   VBinaryCMicrokernelTester& y_scale(float y_scale) {
     assert(y_scale > 0.0f);
     assert(std::isnormal(y_scale));
@@ -94,6 +109,13 @@ class VBinaryCMicrokernelTester {
   }
 
   uint8_t y_zero_point() const { return this->y_zero_point_; }
+
+  VBinaryCMicrokernelTester& y_zero_point_s16(int16_t y_zero_point_s16) {
+    this->y_zero_point_s16_ = y_zero_point_s16;
+    return *this;
+  }
+
+  int16_t y_zero_point_s16() const { return this->y_zero_point_s16_; }
 
   VBinaryCMicrokernelTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
@@ -144,6 +166,9 @@ class VBinaryCMicrokernelTester {
             xnn_init_qs8_mul_minmax_params_fn init_params,
             xnn_qs8_requantize_fn requantize) const;
 
+  void Test(xnn_s16_vbinary_ukernel_fn vbinary, OpType op_type,
+            xnn_init_s16_cvt_params_fn init_params = nullptr) const;
+
   void Test(xnn_s32_vbinary_ukernel_fn vbinaryc, OpType op_type,
             xnn_init_s32_default_params_fn init_params = nullptr) const;
  private:
@@ -155,6 +180,9 @@ class VBinaryCMicrokernelTester {
   uint8_t a_zero_point_{121};
   uint8_t b_zero_point_{127};
   uint8_t y_zero_point_{133};
+  int16_t a_zero_point_s16_{121};
+  int16_t b_zero_point_s16_{127};
+  int16_t y_zero_point_s16_{133};
   uint8_t qmin_{0};
   uint8_t qmax_{255};
   size_t iterations_{15};

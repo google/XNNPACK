@@ -552,6 +552,8 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/qu8-vlrelu/gen/qu8-vlrelu-avx2-u16.c
   src/qu8-vlrelu/gen/qu8-vlrelu-avx2-u32.c
   src/qu8-vlrelu/gen/qu8-vlrelu-avx2-u64.c
+  src/s16-vmul/gen/s16-vmul-avx2.c
+  src/s16-vmul/gen/s16-vmulc-avx2.c
   src/s32-vmul/gen/s32-vmul-avx2.c
   src/s32-vmul/gen/s32-vmulc-avx2.c
   src/x8-lut/gen/x8-lut-avx2-u32.c
