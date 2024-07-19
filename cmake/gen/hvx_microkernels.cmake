@@ -46,6 +46,24 @@ SET(ALL_HVX_MICROKERNEL_SRCS
   src/f32-rsum/gen/f32-rsum-hvx-u96-acc3.c
   src/f32-rsum/gen/f32-rsum-hvx-u128-acc2.c
   src/f32-rsum/gen/f32-rsum-hvx-u128-acc4.c
+  src/f32-spmm/gen/f32-spmm-32x1-minmax-hvx-pipelined-x2.c
+  src/f32-spmm/gen/f32-spmm-32x1-minmax-hvx-pipelined-x4.c
+  src/f32-spmm/gen/f32-spmm-32x1-minmax-hvx-pipelined.c
+  src/f32-spmm/gen/f32-spmm-32x1-minmax-hvx-x2.c
+  src/f32-spmm/gen/f32-spmm-32x1-minmax-hvx-x4.c
+  src/f32-spmm/gen/f32-spmm-32x1-minmax-hvx.c
+  src/f32-spmm/gen/f32-spmm-64x1-minmax-hvx-pipelined-x2.c
+  src/f32-spmm/gen/f32-spmm-64x1-minmax-hvx-pipelined-x4.c
+  src/f32-spmm/gen/f32-spmm-64x1-minmax-hvx-pipelined.c
+  src/f32-spmm/gen/f32-spmm-64x1-minmax-hvx-x2.c
+  src/f32-spmm/gen/f32-spmm-64x1-minmax-hvx-x4.c
+  src/f32-spmm/gen/f32-spmm-64x1-minmax-hvx.c
+  src/f32-spmm/gen/f32-spmm-128x1-minmax-hvx-pipelined-x2.c
+  src/f32-spmm/gen/f32-spmm-128x1-minmax-hvx-pipelined-x4.c
+  src/f32-spmm/gen/f32-spmm-128x1-minmax-hvx-pipelined.c
+  src/f32-spmm/gen/f32-spmm-128x1-minmax-hvx-x2.c
+  src/f32-spmm/gen/f32-spmm-128x1-minmax-hvx-x4.c
+  src/f32-spmm/gen/f32-spmm-128x1-minmax-hvx.c
   src/f32-vbinary/gen/f32-vadd-minmax-hvx-u32.c
   src/f32-vbinary/gen/f32-vadd-minmax-hvx-u64.c
   src/f32-vbinary/gen/f32-vadd-minmax-hvx-u128.c

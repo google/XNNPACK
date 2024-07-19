@@ -1,0 +1,152 @@
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert MR % 32 == 0
+#include <assert.h>
+
+#include <hvx_hexagon_protos.h>
+#include <hexagon_protos.h>
+#include <hexagon_types.h>
+
+#include "xnnpack/simd/f32-hvx.h"
+
+#include "xnnpack/prefetch.h"
+#include "xnnpack/spmm.h"
+
+void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__hvx${"_x" + str(UNROLL) if UNROLL > 1 else ""}(
+    size_t mc,
+    size_t nc,
+    const float* input,
+    const float* weights,
+    const int32_t* widx_dmap,
+    const uint32_t* nidx_nnzmap,
+    float* output,
+    size_t output_stride,
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(mc != 0);
+  assert(mc % sizeof(float) == 0);
+  assert(nc != 0);
+
+  const HVX_Vector vmin = xnn_set1_f32(params->scalar.min);
+  const HVX_Vector vmax = xnn_set1_f32(params->scalar.max);
+
+  size_t output_decrement = output_stride * nc - ${MR} * sizeof(float);
+  while XNN_LIKELY(mc >= ${MR} * sizeof(float)) {
+    const float* w = weights;
+    const int32_t* dmap = widx_dmap;
+    const uint32_t* nnzmap = nidx_nnzmap;
+    size_t n = nc;
+    do {
+      uint32_t nnz = *nnzmap++;
+      $if UNROLL > 1:
+        HVX_Vector vacc0x0 = xnn_set1_f32(*w); w += 1;
+        $for K in range(1, UNROLL):
+          HVX_Vector vacc0x${K} = xnn_zero_f32();
+        $for M in range(32, MR, 32):
+          HVX_Vector vacc${int(M/32)}x0 = vacc0x0;
+          $for K in range(1, UNROLL):
+            HVX_Vector vacc${int(M/32)}x${K} = xnn_zero_f32();
+        for (; nnz >= ${UNROLL}; nnz -= ${UNROLL}) {
+          $for K in range(UNROLL):
+            const intptr_t diff${K} = dmap[${K}];
+          dmap += ${UNROLL};
+          $for K in range(UNROLL):
+            const HVX_Vector vi0x${K} = xnn_loadu_f32(input);
+            $for M in range(32, MR, 32):
+              const HVX_Vector vi${int(M/32)}x${K} = xnn_loadu_f32(input + ${M});
+            input = (const float*) ((uintptr_t) input + (uintptr_t) diff${K});
+
+            const HVX_Vector vw${K} = xnn_set1_f32(*w); w += 1;
+
+            $for M in range(0, MR, 32):
+              vacc${int(M/32)}x${K} = xnn_fmadd_f32(vi${int(M/32)}x${K}, vw${K}, vacc${int(M/32)}x${K});
+        }
+        $for M in range(0, MR, 32):
+          HVX_Vector vacc${int(M/32)} = vacc${int(M/32)}x0;
+        $for K in range(1, UNROLL):
+          $for M in range(0, MR, 32):
+            vacc${int(M/32)} = xnn_add_f32(vacc${int(M/32)}, vacc${int(M/32)}x${K});
+      $else:
+        HVX_Vector vacc0 = xnn_set1_f32(*w); w += 1;
+        $for M in range(32, MR, 32):
+          HVX_Vector vacc${int(M/32)} = vacc0;
+      if XNN_LIKELY(nnz != 0) {
+        do {
+          const intptr_t diff = *dmap++;
+          const HVX_Vector vi0 = xnn_loadu_f32(input);
+          $for M in range(32, MR, 32):
+            const HVX_Vector vi${int(M/32)} = xnn_loadu_f32(input + ${M});
+          input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
+
+          const HVX_Vector vw = xnn_set1_f32(*w); w += 1;
+
+          $for M in range(0, MR, 32):
+            vacc${int(M/32)} = xnn_fmadd_f32(vi${int(M/32)}, vw, vacc${int(M/32)});
+        } while (--nnz != 0);
+      }
+      $for M in range(0, MR, 32):
+        HVX_Vector vout${int(M/32)} = xnn_min_f32(vacc${int(M/32)}, vmax);
+      $for M in range(0, MR, 32):
+        vout${int(M/32)} = xnn_max_f32(vout${int(M/32)}, vmin);
+
+      xnn_storeu_f32(output, vout0);
+      $for M in range(32, MR, 32):
+        xnn_storeu_f32(output + ${M}, vout${int(M/32)});
+      output = (float*) ((uintptr_t) output + output_stride);
+    } while (--n != 0);
+    output = (float*) ((uintptr_t) output - output_decrement);
+    input += ${MR};
+    mc -= ${MR} * sizeof(float);
+  }
+  if XNN_UNLIKELY(mc != 0) {
+    $for LOG2M in reversed(range((MR - 1).bit_length())):
+      $SUBMR = 1 << LOG2M
+      $if SUBMR != 1:
+        $if SUBMR * 2 >= MR:
+          output_decrement += ${MR - SUBMR} * sizeof(float);
+        $else:
+          output_decrement += ${SUBMR} * sizeof(float);
+      if (mc & (${SUBMR} * sizeof(float))) {
+        const float* w = weights;
+        const int32_t* dmap = widx_dmap;
+        const uint32_t* nnzmap = nidx_nnzmap;
+        size_t n = nc;
+        do {
+          uint32_t nnz = *nnzmap++;
+          HVX_Vector vacc0 = xnn_set1_f32(*w); w += 1;
+          $for M in range(32, SUBMR, 32):
+            HVX_Vector vacc${int(M/32)} = vacc0;
+          if XNN_LIKELY(nnz != 0) {
+            do {
+              const intptr_t diff = *dmap++;
+              const HVX_Vector vi0 = xnn_loadu_f32(input);
+              $for M in range(32, SUBMR, 32):
+                const HVX_Vector vi${int(M/32)} = xnn_loadu_f32(input + ${M});
+              input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
+              const HVX_Vector vw = xnn_set1_f32(*w); w += 1;
+              $for M in range(0, SUBMR, 32):
+                vacc${int(M/32)} = xnn_fmadd_f32(vi${int(M/32)}, vw, vacc${int(M/32)});
+            } while (--nnz != 0);
+          }
+          $for M in range(0, SUBMR, 32):
+            HVX_Vector vout${int(M/32)} = xnn_min_f32(vacc${int(M/32)}, vmax);
+          $for M in range(0, SUBMR, 32):
+            vout${int(M/32)} = xnn_max_f32(vout${int(M/32)}, vmin);
+
+          $if SUBMR >= 32:
+            xnn_storeu_f32(output, vout0);
+            $for M in range(32, SUBMR, 32):
+              xnn_storeu_f32(output + ${M}, vout${int(M/32)});
+          $else:
+            xnn_store_tail_f32(output, vout0, ${SUBMR});
+          output = (float*) ((uintptr_t) output + output_stride);
+        } while (--n != 0);
+        $if SUBMR != 1:
+          output = (float*) ((uintptr_t) output - output_decrement);
+          input += ${SUBMR};
+      }
+  }
+}
