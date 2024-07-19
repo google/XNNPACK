@@ -14,18 +14,30 @@ jobs:
         run: sudo apt update
       - name: Install ninja
         run: sudo apt install ninja-build
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{ github.job }}"
+          max-size: "1G"
+          save: ${{ github.event.review.state == 'APPROVED' }}
       - name: Configure and build
         run: scripts/build-local.sh
         working-directory: ${{ github.workspace }}
   cmake-linux-aarch64:
     runs-on: arm-ubuntu-arm-22.04-8core
-    timeout-minutes: 150
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - name: Update apt
         run: sudo apt update
       - name: Install ninja
         run: sudo apt install ninja-build
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{ github.job }}"
+          max-size: "1G"
+          save: ${{ github.event.review.state == 'APPROVED' }}
       - name: Configure and build
         run: scripts/build-linux-aarch64.sh -DCMAKE_BUILD_TYPE=Release
         working-directory: ${{ github.workspace }}
@@ -34,7 +46,7 @@ jobs:
         working-directory: ${{ github.workspace }}/build/linux/aarch64
   cmake-linux-armhf:
     runs-on: arm-ubuntu-arm-22.04-8core
-    timeout-minutes: 90
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - name: Update apt
@@ -43,6 +55,12 @@ jobs:
         run: sudo apt install ninja-build
       - name: Install armhf cross-toolchain
         run: sudo apt install crossbuild-essential-armhf
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{ github.job }}"
+          max-size: "1G"
+          save: ${{ github.event.review.state == 'APPROVED' }}
       - name: Configure and build
         run: scripts/build-linux-armhf.sh -DCMAKE_BUILD_TYPE=Release
         working-directory: ${{ github.workspace }}
@@ -66,6 +84,12 @@ jobs:
         run: sudo apt install crossbuild-essential-riscv64
       - name: Install qemu-riscv64
         run: sudo apt install qemu-user
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{ github.job }}"
+          max-size: "1G"
+          save: ${{ github.event.review.state == 'APPROVED' }}
       - name: Configure and build
         run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release -DXNNPACK_ENABLE_RISCV_VECTOR=OFF
         working-directory: ${{ github.workspace }}
@@ -74,7 +98,7 @@ jobs:
         working-directory: ${{ github.workspace }}/build/linux/riscv64
   cmake-linux-riscv64-rvv:
     runs-on: ubuntu-22.04-8core
-    timeout-minutes: 120
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - name: Update apt
@@ -86,6 +110,12 @@ jobs:
           wget -nv https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2024.04.12/riscv64-glibc-ubuntu-22.04-llvm-nightly-2024.04.12-nightly.tar.gz
           tar zxf riscv64-glibc-ubuntu-22.04-llvm-nightly-2024.04.12-nightly.tar.gz
         working-directory: ${{ github.workspace }}
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{ github.job }}"
+          max-size: "1G"
+          save: ${{ github.event.review.state == 'APPROVED' }}
       - name: Configure and build
         run: |
           scripts/build-linux-riscv64.sh \
@@ -100,18 +130,45 @@ jobs:
         working-directory: ${{ github.workspace }}/build/linux/riscv64
   cmake-windows-arm64:
     runs-on: windows-2022-32core
-    timeout-minutes: 120
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{ github.job }}"
+          max-size: "1G"
+          save: ${{ github.event.review.state == 'APPROVED' }}
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+      - name: Setup build environment
+        shell: bash
+        run: |
+          echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
       - name: Configure and build
         run: scripts/build-windows-arm64.cmd
         shell: cmd
         working-directory: ${{ github.workspace }}
+        env:
+          CFLAGS: "/UNDEBUG"
+          CXXFLAGS: "/UNDEBUG"
   cmake-windows-x64:
     runs-on: windows-2022-32core
-    timeout-minutes: 120
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{ github.job }}"
+          max-size: "1G"
+          save: ${{ github.event.review.state == 'APPROVED' }}
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+      - name: Setup build environment
+        shell: bash
+        run: |
+          echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
       - name: Configure and build
         run: scripts/build-windows-x64.cmd
         shell: cmd
@@ -124,9 +181,21 @@ jobs:
         working-directory: ${{ github.workspace }}/build/windows/x64
   cmake-windows-x86:
     runs-on: windows-2022-32core
-    timeout-minutes: 120
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{ github.job }}"
+          max-size: "1G"
+          save: ${{ github.event.review.state == 'APPROVED' }}
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+      - name: Setup build environment
+        shell: bash
+        run: |
+          echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
       - name: Configure and build
         run: scripts/build-windows-x86.cmd
         shell: cmd
@@ -139,7 +208,7 @@ jobs:
         working-directory: ${{ github.workspace }}/build/windows/x86
   cmake-macos-arm64:
     runs-on: macos-latest
-    timeout-minutes: 120
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - name: Install ninja
@@ -147,6 +216,12 @@ jobs:
       - name: Create output directory
         run: mkdir -p build/macos/arm64
         working-directory: ${{ github.workspace }}
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{ github.job }}"
+          max-size: "1G"
+          save: ${{ github.event.review.state == 'APPROVED' }}
       - name: Generate CMake project
         run: |
           cmake \
@@ -181,6 +256,12 @@ jobs:
         with:
           ndk-version: r23b
           add-to-path: false
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{ github.job }}"
+          max-size: "1G"
+          save: ${{ github.event.review.state == 'APPROVED' }}
       - name: Configure and build
         run: scripts/${{ matrix.script }}
         working-directory: ${{ github.workspace }}
@@ -227,6 +308,11 @@ jobs:
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
           sudo ./llvm.sh 18
+      - name: Restore bazel cache
+        uses: actions/cache/restore@v4
+        with:
+          path: "/home/runner/.cache/bazel"
+          key: "${{ github.job }}"
       - name: Build and run tests
         env:
           CC: clang-18
@@ -234,6 +320,12 @@ jobs:
         run: |
             bazel test --test_output=errors test:all
         working-directory: ${{ github.workspace }}
+      - name: Save bazel cache
+        if: github.event.review.state == 'APPROVED'
+        uses: actions/cache/save@v4
+        with:
+          path: "/home/runner/.cache/bazel"
+          key: "${{ github.job }}"
   bazel-linux-aarch64:
     runs-on: arm-ubuntu-arm-22.04-4core
     timeout-minutes: 60
@@ -247,6 +339,11 @@ jobs:
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
           sudo ./llvm.sh 18
+      - name: Restore bazel cache
+        uses: actions/cache/restore@v4
+        with:
+          path: "/home/runner/.cache/bazel"
+          key: "${{ github.job }}"
       - name: Build and run tests
         env:
           CC: clang-18
@@ -256,7 +353,14 @@ jobs:
           bazel test \
             --define=xnn_enable_jit=false \
             --test_output=all \
+            --test_filter=*QP8* \
             test:qp8_f32_qc4w_gemm_minmax_test \
             test:fully_connected_nc_test \
             test:fully_connected_test
         working-directory: ${{ github.workspace }}
+      - name: Save bazel cache
+        if: github.event.review.state == 'APPROVED'
+        uses: actions/cache/save@v4
+        with:
+          path: "/home/runner/.cache/bazel"
+          key: "${{ github.job }}"

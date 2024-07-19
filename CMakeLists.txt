@@ -17,6 +17,24 @@ CMAKE_POLICY(SET CMP0091 NEW)
 # ---[ Project and semantic versioning.
 PROJECT(XNNPACK C CXX ASM)
 
+# --[ Use ccache if available
+FIND_PROGRAM(CCACHE_BINARY "ccache")
+IF(CCACHE_BINARY)
+  MESSAGE(STATUS "Using ccache: ${CCACHE_BINARY}")
+  SET(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_BINARY}" CACHE STRING "CXX compiler launcher" FORCE)
+  SET(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_BINARY}" CACHE STRING "C compiler launcher" FORCE)
+  IF(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    STRING(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+    STRING(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+    STRING(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+    STRING(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+    STRING(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_DEBUG_INIT "${CMAKE_C_FLAGS_DEBU_INITG}")
+    STRING(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_DEBUG_INIT "${CMAKE_CXX_FLAGS_DEBUG_INIT}")
+    STRING(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "${CMAKE_C_FLAGS_RELWITHDEBINFO_INIT}")
+    STRING(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}")
+  ENDIF()
+ENDIF()
+
 SET(CMAKE_C_STANDARD 99)
 SET(CMAKE_C_EXTENSIONS NO)
 SET(CMAKE_CXX_STANDARD 14)
@@ -83,6 +101,7 @@ ELSEIF(NOT XNNPACK_TARGET_PROCESSOR MATCHES "^(x86(_64)?|arm64|riscv(32|64|128)|
 ELSE()
   MESSAGE(FATAL_ERROR "Unrecognized CMAKE_SYSTEM_PROCESSOR value \"${CMAKE_SYSTEM_PROCESSOR}\"")
 ENDIF()
+MESSAGE(STATUS "Building for XNNPACK_TARGET_PROCESSOR: ${XNNPACK_TARGET_PROCESSOR}")
 
 # --- [ Processor-specific options
 OPTION(XNNPACK_ENABLE_ARM_FP16_SCALAR "Build XNNPACK with ARM FP16 (FP16 data processing) scalar micro-kernels" ON)
@@ -178,7 +197,6 @@ INCLUDE(GNUInstallDirs)
 IF(XNNPACK_BUILD_TESTS)
   ENABLE_TESTING()
 ENDIF()
-
 
 ADD_COMPILE_DEFINITIONS("XNN_ENABLE_ARM_FP16_VECTOR=$<BOOL:${XNNPACK_ENABLE_ARM_FP16_VECTOR}>")
 ADD_COMPILE_DEFINITIONS("XNN_ENABLE_ARM_FP16_SCALAR=$<BOOL:${XNNPACK_ENABLE_ARM_FP16_SCALAR}>")
@@ -1346,10 +1364,20 @@ IF(XNNPACK_BUILD_TESTS)
 
   IF(XNNPACK_BUILD_LIBRARY)
     # ---[ Launch heavy tests first.
+    ADD_EXECUTABLE(batch-matrix-multiply-nc-test test/batch-matrix-multiply-nc.cc)
+    TARGET_INCLUDE_DIRECTORIES(batch-matrix-multiply-nc-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(batch-matrix-multiply-nc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
+    ADD_SHARDED_TEST(batch-matrix-multiply-nc-test 10)
+
     ADD_EXECUTABLE(batch-matrix-multiply-test test/batch-matrix-multiply.cc)
     TARGET_INCLUDE_DIRECTORIES(batch-matrix-multiply-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(batch-matrix-multiply-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_SHARDED_TEST(batch-matrix-multiply-test 10)
+
+    ADD_EXECUTABLE(deconvolution-nhwc-test test/deconvolution-nhwc.cc test/deconvolution-nhwc-qd8-f32-qc8w.cc)
+    TARGET_INCLUDE_DIRECTORIES(deconvolution-nhwc-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(deconvolution-nhwc-test PRIVATE XNNPACK fp16 GTest::gmock GTest::gtest GTest::gtest_main)
+    ADD_SHARDED_TEST(deconvolution-nhwc-test 10)
 
     ADD_EXECUTABLE(fully-connected-test test/fully-connected.cc)
     TARGET_INCLUDE_DIRECTORIES(fully-connected-test PRIVATE src test)
@@ -1399,11 +1427,6 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(bankers-rounding-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(bankers-rounding-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME bankers-rounding-nc-test COMMAND bankers-rounding-nc-test)
-
-    ADD_EXECUTABLE(batch-matrix-multiply-nc-test test/batch-matrix-multiply-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(batch-matrix-multiply-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(batch-matrix-multiply-nc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME batch-matrix-multiply-nc-test COMMAND batch-matrix-multiply-nc-test)
 
     ADD_EXECUTABLE(ceiling-nc-test test/ceiling-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(ceiling-nc-test PRIVATE src test)
@@ -1467,11 +1490,6 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(copysign-nd-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(copysign-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME copysign-nd-test COMMAND copysign-nd-test)
-
-    ADD_EXECUTABLE(deconvolution-nhwc-test test/deconvolution-nhwc.cc test/deconvolution-nhwc-qd8-f32-qc8w.cc)
-    TARGET_INCLUDE_DIRECTORIES(deconvolution-nhwc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(deconvolution-nhwc-test PRIVATE XNNPACK fp16 GTest::gmock GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME deconvolution-nhwc-test COMMAND deconvolution-nhwc-test)
 
     ADD_EXECUTABLE(depth-to-space-nchw2nhwc-test test/depth-to-space-nchw2nhwc.cc)
     TARGET_INCLUDE_DIRECTORIES(depth-to-space-nchw2nhwc-test PRIVATE src test)
@@ -3694,26 +3712,26 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(indirection-test PRIVATE XNNPACK indirection)
 
   # ---[ Mark the operator tests as such.
-  MACRO(get_all_targets_recursive targets dir)
+  MACRO(get_all_test_targets_recursive test_targets dir)
     GET_PROPERTY(subdirectories DIRECTORY ${dir} PROPERTY SUBDIRECTORIES)
     FOREACH(subdir ${subdirectories})
-      get_all_targets_recursive(${targets} ${subdir})
+      get_all_test_targets_recursive(${test_targets} ${subdir})
     ENDFOREACH()
 
-    GET_PROPERTY(current_targets DIRECTORY ${dir} PROPERTY BUILDSYSTEM_TARGETS)
-    LIST(APPEND ${targets} ${current_targets})
+    GET_PROPERTY(current_test_targets DIRECTORY ${dir} PROPERTY TESTS)
+    LIST(APPEND ${test_targets} ${current_test_targets})
   ENDMACRO()
 
-  FUNCTION(get_all_targets var)
-    SET(targets)
-    get_all_targets_recursive(targets ${CMAKE_CURRENT_SOURCE_DIR})
-    SET(${var} ${targets} PARENT_SCOPE)
+  FUNCTION(get_all_test_targets var)
+    SET(test_targets)
+    get_all_test_targets_recursive(test_targets ${CMAKE_CURRENT_SOURCE_DIR})
+    SET(${var} ${test_targets} PARENT_SCOPE)
   ENDFUNCTION()
 
-  get_all_targets(targets)
-  LIST(FILTER targets INCLUDE REGEX "-(nc|nd|nd-eager|ncw|nhwc|nhtc|nchw|nwc)-test$")
-  MESSAGE(STATUS "Inferred operator test targets: ${targets}")
-  SET_TESTS_PROPERTIES(${targets} PROPERTIES LABELS "operator")
+  get_all_test_targets(test_targets)
+  LIST(FILTER test_targets INCLUDE REGEX "-(nc|nd|nd-eager|ncw|nhwc|nhtc|nchw|nwc)-test(-[0-9]+)?$")
+  MESSAGE(STATUS "Inferred operator tests: ${test_targets}")
+  SET_TESTS_PROPERTIES(${test_targets} PROPERTIES LABELS "operator")
 
 ENDIF()
 
