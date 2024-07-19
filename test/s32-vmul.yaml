@@ -1,0 +1,40 @@
+# Copyright 2024 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Scalar
+- name: xnn_s32_vmul_ukernel__scalar_u1
+- name: xnn_s32_vmul_ukernel__scalar_u2
+- name: xnn_s32_vmul_ukernel__scalar_u4
+- name: xnn_s32_vmul_ukernel__scalar_u8
+
+# x86 SSE41
+- name: xnn_s32_vmul_ukernel__sse41_u4
+- name: xnn_s32_vmul_ukernel__sse41_u8
+- name: xnn_s32_vmul_ukernel__sse41_u12
+- name: xnn_s32_vmul_ukernel__sse41_u16
+
+# x86 AVX2
+- name: xnn_s32_vmul_ukernel__avx2_u8
+- name: xnn_s32_vmul_ukernel__avx2_u16
+- name: xnn_s32_vmul_ukernel__avx2_u24
+- name: xnn_s32_vmul_ukernel__avx2_u32
+
+# x86 AVX512F
+- name: xnn_s32_vmul_ukernel__avx512f_u16
+- name: xnn_s32_vmul_ukernel__avx512f_u32
+- name: xnn_s32_vmul_ukernel__avx512f_u48
+- name: xnn_s32_vmul_ukernel__avx512f_u64
+
+# Wasm SIMD
+- name: xnn_s32_vmul_ukernel__wasmsimd_u4
+- name: xnn_s32_vmul_ukernel__wasmsimd_u8
+- name: xnn_s32_vmul_ukernel__wasmsimd_u12
+- name: xnn_s32_vmul_ukernel__wasmsimd_u16
+
+# ARM NEON
+- name: xnn_s32_vmul_ukernel__neon_u4
+- name: xnn_s32_vmul_ukernel__neon_u8
+- name: xnn_s32_vmul_ukernel__neon_u12
+- name: xnn_s32_vmul_ukernel__neon_u16

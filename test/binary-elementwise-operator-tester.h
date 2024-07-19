@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <climits>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -179,6 +180,29 @@ class BinaryElementwiseOperatorTester {
     }
   }
 
+  int32_t Compute(int32_t a, int32_t b) const{
+    switch (operation_type()) {
+      case OperationType::Add:
+        return a + b;
+      case OperationType::CopySign:
+        return std::copysign(a, b);
+      case OperationType::Divide:
+        return a / b;
+      case OperationType::Maximum:
+        return std::max<int32_t>(a, b);
+      case OperationType::Minimum:
+        return std::min<int32_t>(a, b);
+      case OperationType::Multiply:
+        return a * b;
+      case OperationType::Subtract:
+        return a - b;
+      case OperationType::SquaredDifference:
+        return (a - b) * (a - b);
+      default:
+        return INT_MAX;
+
+    }
+  }
   void TestQS8() const;
 
   void TestQU8() const;
@@ -186,6 +210,8 @@ class BinaryElementwiseOperatorTester {
   void TestF16() const;
 
   void TestF32() const;
+
+  void TestS32() const;
 
   void TestRunF32() const;
 

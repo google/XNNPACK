@@ -1831,7 +1831,7 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(copysign-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(copysign-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME copysign-test COMMAND copysign-test)
-
+  
     ADD_EXECUTABLE(deconvolution-2d-test test/deconvolution-2d.cc)
     SET_TARGET_PROPERTIES(deconvolution-2d-test PROPERTIES CXX_EXTENSIONS YES)
     TARGET_INCLUDE_DIRECTORIES(deconvolution-2d-test PRIVATE src test)
@@ -2741,6 +2741,20 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vrcopysignc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
   TARGET_LINK_LIBRARIES(f32-vrcopysignc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME f32-vrcopysignc-test COMMAND f32-vrcopysignc-test)
+
+
+  ADD_EXECUTABLE(s32-vmul-test test/s32-vmul.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vmul-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vmul-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vmul-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vmul-test COMMAND s32-vmul-test)
+
+
+  ADD_EXECUTABLE(s32-vmulc-test test/s32-vmulc.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vmulc-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vmulc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vmulc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vmulc-test COMMAND s32-vmulc-test)
 
   ADD_EXECUTABLE(f16-vcmul-test test/f16-vcmul.cc)
   SET_TARGET_PROPERTIES(f16-vcmul-test PROPERTIES CXX_EXTENSIONS YES)

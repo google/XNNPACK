@@ -26,6 +26,10 @@ union xnn_f32_default_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
+union xnn_s32_default_params {
+  char _;  // Dummy member variable to comply with the C standard
+};
+
 
 // ReLU: serves to differentiate pointer types for micro-kernels with fused ReLU activation.
 
