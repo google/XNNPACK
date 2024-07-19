@@ -140,8 +140,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
       w = (const int32_t*) w + ${NR};
 
     $if BLOCKWISE:
-      size_t n_blocks = kc / bl;
-      for (size_t nb = 0; nb < n_blocks; ++nb) {
+      for (size_t kb=0; kb < kc; kb += bl) {
         $for M in range(MR):
           $for N in range(NR):
             int32_t vacc${M}x${N} = 0;

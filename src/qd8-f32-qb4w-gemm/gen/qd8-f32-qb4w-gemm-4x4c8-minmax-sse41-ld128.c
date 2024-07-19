@@ -42,7 +42,6 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x4c8__sse41_ld128(
   assert(bl <= round_up_po2(kc, 2));
   assert(bl != 0);
   assert(bl % 32 == 0);
-  size_t n_blocks = kc / bl;
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const int8_t* a0 = a;
   float* c0 = c;
@@ -85,7 +84,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x4c8__sse41_ld128(
     __m128 vout3x0123 = _mm_mul_ps(vksum, vinput_zero_point3_float);
     w = (const int32_t*) w + 4;
 
-    for (size_t nb=0; nb<n_blocks; ++nb){
+    for (size_t kb=0; kb < kc; kb += bl) {
       __m128i vacc0x0 = _mm_setzero_si128();
       __m128i vacc0x1 = _mm_setzero_si128();
       __m128i vacc0x2 = _mm_setzero_si128();

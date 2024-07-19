@@ -51,7 +51,6 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_2x16c4__neondotfp16arith(
   assert(bl <= kc);
   assert(bl != 0);
   assert(bl % 32 == 0);
-  size_t n_blocks = kc / bl;
   const int8x16_t vmask = vmovq_n_s8(INT8_C(0xF0));
   // Loop over groups of 16 columns.
   do {
@@ -71,7 +70,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_2x16c4__neondotfp16arith(
     float32x4_t vout0xCDEF = vmulq_lane_f32(vksumCDEF, vget_low_f32(vinput_zero_point01), 0);
     float32x4_t vout1xCDEF = vmulq_lane_f32(vksumCDEF, vget_high_f32(vinput_zero_point01), 0);
 
-    for (size_t nb=0; nb < n_blocks; ++nb) {
+    for (size_t kb=0; kb < kc; kb += bl) {
       int32x4_t vacc0x0123 = vdupq_n_s32(0);
       int32x4_t vacc1x0123 = vdupq_n_s32(0);
       int32x4_t vacc0x4567 = vdupq_n_s32(0);

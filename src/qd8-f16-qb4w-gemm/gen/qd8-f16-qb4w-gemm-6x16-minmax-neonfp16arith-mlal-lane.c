@@ -110,8 +110,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_6x16__neonfp16arith_mlal_lane(
     float32x4_t vout4xCDEF = vmulq_lane_f32(vksumCDEF, vget_low_f32(vzp45), 0);
     float32x4_t vout5xCDEF = vmulq_lane_f32(vksumCDEF, vget_high_f32(vzp45), 0);
 
-    size_t n_blocks = kc / bl;
-    for (size_t nb = 0; nb < n_blocks; ++nb) {
+    for (size_t kb=0; kb < kc; kb += bl) {
       int32x4_t vacc0x0123 = vdupq_n_s32(0);
       int32x4_t vacc0x4567 = vdupq_n_s32(0);
       int32x4_t vacc0x89AB = vdupq_n_s32(0);

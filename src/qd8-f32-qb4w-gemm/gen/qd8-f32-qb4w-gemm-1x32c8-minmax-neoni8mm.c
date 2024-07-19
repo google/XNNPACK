@@ -42,7 +42,6 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x32c8__neoni8mm(
   assert(bl <= kc);
   assert(bl != 0);
   assert(bl % 32 == 0);
-  size_t n_blocks = kc / bl;
   const int8_t* a0 = a;
   float* c0 = c;
   const int8x16_t vmask = vmovq_n_s8(INT8_C(0xF0));
@@ -70,7 +69,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x32c8__neoni8mm(
     float32x4_t vout0xSTUV = vmulq_f32(vksumSTUV, vinput_zero_point01);
 
 
-    for (size_t nb=0; nb < n_blocks; ++nb) {
+    for (size_t kb=0; kb < kc; kb += bl) {
       int32x4_t vacc01x01 = vdupq_n_s32(0);
       int32x4_t vacc01x23 = vdupq_n_s32(0);
       int32x4_t vacc01x45 = vdupq_n_s32(0);
