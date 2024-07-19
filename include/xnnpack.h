@@ -156,7 +156,7 @@ struct xnn_allocator {
   /// @returns Pointer to the allocated memory block of at least @ref size bytes.
   ///          If allocation fails, the function must return NULL.
   void* (*aligned_allocate)(void* context, size_t alignment, size_t size);
-  /// Pointer to a function to be called for aligned memory de-allocation.
+  /// Pointer to a function to be called for aligned memory deallocation.
   ///
   /// @param context - The user-specified pointer from xnn_allocator structure.
   /// @param pointer - Pointer to a memory block allocated by @ref aligned_allocate function. Can be NULL.
