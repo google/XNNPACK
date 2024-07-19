@@ -1783,6 +1783,17 @@ typedef void (*xnn_f32_vcopysign_ukernel_fn)(
     float* output,
     const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+
+// MULTIPLY: Vector Multiply (S32 bit)elementwise
+
+typedef void (*xnn_s32_vmul_ukernel_fn)(
+    size_t batch,
+    const int32_t* input_a,
+    const int32_t* input_b,
+    int32_t* output,
+    const union xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+
 // VCVT: Vector ConVerT elementwise
 
 typedef void (*xnn_f16_f32_vcvt_ukernel_fn)(
@@ -2095,6 +2106,13 @@ typedef void (*xnn_f32_vbinary_ukernel_fn)(
     const float* input_y,
     float* output,
     const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+typedef void (*xnn_s32_vbinary_ukernel_fn)(
+    size_t batch,
+    const int32_t* input_x,
+    const int32_t* input_y,
+    int32_t* output,
+    const union xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // VBINARY: Vector BINARY elementwise with ReLU activation
 
@@ -2633,12 +2651,14 @@ typedef size_t (*xnn_init_f16_default_params_fn)(
 
 typedef size_t (*xnn_init_f32_default_params_fn)(
   union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
-
 typedef size_t (*xnn_init_f16_expminus_params_fn)(
   union xnn_f16_expminus_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f32_expminus_params_fn)(
   union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef size_t (*xnn_init_s32_default_params_fn)(
+  union xnn_s32_default_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f16_elu_params_fn)(
   union xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)],

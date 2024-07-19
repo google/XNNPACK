@@ -213,6 +213,7 @@ enum xnn_compute_type {
   xnn_compute_type_qs8_to_fp16,
   xnn_compute_type_qs8_to_fp32,
   xnn_compute_type_qu8_to_fp32,
+  xnn_compute_type_s32,
 };
 
 struct xnn_node {
@@ -334,6 +335,10 @@ struct xnn_node {
     float output_min;
     float output_max;
   } activation;
+  struct {
+    int32_t output_min;
+    int32_t output_max;
+  } activation_int;
   /// Value IDs for node inputs.
   uint32_t inputs[XNN_MAX_INPUTS];
   uint32_t num_inputs;
