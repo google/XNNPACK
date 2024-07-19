@@ -226,14 +226,14 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
 
     $if BLOCKWISE:
       $for N in range(0, 8, 2):
-        ${_}const __m128 vfilter_output_scale${N} = _mm_broadcast_ss(&((const float*) w)[${N}]);
-        ${_}const __m128 vfilter_output_scale${N+1} = _mm_broadcast_ss(&((const float*) w)[${N+1}]);
+        ${_}const __m128 vfilter_output_scale${N} = _mm_castsi128_ps(_mm_set1_epi32((uint32_t) ((const uint16_t*) w)[${N}] << 16));
+        ${_}const __m128 vfilter_output_scale${N+1} = _mm_castsi128_ps(_mm_set1_epi32((uint32_t) ((const uint16_t*) w)[${N+1}] << 16));
         ${_}const __m256 vfilter_output_scale${N}${N+1} = _mm256_insertf128_ps(
             ${_}_mm256_castps128_ps256(vfilter_output_scale${N}), vfilter_output_scale${N+1}, 1);
         $for M in range(MR):
           ${_}vout${M}x${N}${N+1} = _mm256_fmadd_ps(_mm256_cvtepi32_ps(vacc${M}x${N}${N+1}), vfilter_output_scale${N}${N+1}, vout${M}x${N}${N+1});
 
-      ${_}w = (const float*) w + 8;
+      ${_}w = (const uint16_t*) w + 8;
       }
 
       $for M in range(MR):
@@ -280,7 +280,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
         $for M in range(MR):
           vout${M}x01234567 = _mm256_fmadd_ps(vout${M}x01234567, vfilter_output_scale01234567, vbias01234567);
       $else:
-        const __m256 vbias01234567 = _mm256_load_ps((const float*) w);
+        const __m256 vbias01234567 = _mm256_loadu_ps((const float*) w);
         w = (const float*) w + 8;
         $for M in range(MR):
           vout${M}x01234567 = _mm256_fmadd_ps(vout${M}x01234567, vinput_scale${M}, vbias01234567);

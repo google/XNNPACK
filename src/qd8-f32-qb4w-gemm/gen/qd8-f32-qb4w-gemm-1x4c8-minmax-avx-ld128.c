@@ -71,7 +71,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4c8__avx_ld128(
         const __m128i vxa0c0 = _mm_cvtepi8_epi16(va0c0);
         a0 += 8;
 
-        const __m128i vb01c01 = _mm_load_si128((const __m128i*) w);
+        const __m128i vb01c01 = _mm_loadu_si128((const __m128i*) w);
         const __m128i vbs01c0 = _mm_slli_epi32(vb01c01, 4);
         const __m128i vb01c0 = _mm_and_si128(vbs01c0, vmask);
         const __m128i vsb01c0 = _mm_cmpgt_epi8(_mm_setzero_si128(), vb01c0);
@@ -80,7 +80,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4c8__avx_ld128(
 
         vacc0x0 = _mm_add_epi32(vacc0x0, _mm_madd_epi16(vxa0c0, vxb0c0));
         vacc0x1 = _mm_add_epi32(vacc0x1, _mm_madd_epi16(vxa0c0, vxb1c0));
-        const __m128i vb23c01 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
+        const __m128i vb23c01 = _mm_loadu_si128((const __m128i*) ((const int8_t*) w + 16));
         const __m128i vbs23c0 = _mm_slli_epi32(vb23c01, 4);
         const __m128i vb23c0 = _mm_and_si128(vbs23c0, vmask);
         const __m128i vsb23c0 = _mm_cmpgt_epi8(_mm_setzero_si128(), vb23c0);
@@ -119,7 +119,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4c8__avx_ld128(
         const __m128i vxa0 = _mm_cvtepi8_epi16(va0);
         a0 += 8;
 
-        __m128i vb01 = _mm_load_si128((const __m128i*) w);
+        __m128i vb01 = _mm_loadu_si128((const __m128i*) w);
         vb01 = _mm_slli_epi32(vb01, 4);
         vb01 = _mm_and_si128(vb01, vmask);
 
@@ -129,7 +129,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4c8__avx_ld128(
 
         vacc0x0 = _mm_add_epi32(vacc0x0, _mm_madd_epi16(vxa0, vxb0));
         vacc0x1 = _mm_add_epi32(vacc0x1, _mm_madd_epi16(vxa0, vxb1));
-        __m128i vb23 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
+        __m128i vb23 = _mm_loadu_si128((const __m128i*) ((const int8_t*) w + 16));
         vb23 = _mm_slli_epi32(vb23, 4);
         vb23 = _mm_and_si128(vb23, vmask);
 
@@ -144,8 +144,8 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4c8__avx_ld128(
         k -= 8 * sizeof(int8_t);
       }
       // accumulate float
-      const __m128 vfilter_output_scale0123 = _mm_load_ps((const float*) w);
-      w = (const float*) w + 4;
+      const __m128 vfilter_output_scale0123 = _mm_castsi128_ps(_mm_slli_epi32(_mm_cvtepu16_epi32(_mm_loadl_epi64((const __m128i*) w)), 16));
+      w = (const uint16_t*) w + 4;
 
       const __m128i vacc0x01 = _mm_hadd_epi32(vacc0x0, vacc0x1);
       const __m128i vacc0x23 = _mm_hadd_epi32(vacc0x2, vacc0x3);
@@ -162,7 +162,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4c8__avx_ld128(
     vout0x0123 = _mm_mul_ps(vout0x0123, vinput_scale0);
 
 
-    const __m128 vbias0123 = _mm_load_ps((const float*) w);
+    const __m128 vbias0123 = _mm_loadu_ps((const float*) w);
     w = (const float*) w + 4;
     vout0x0123 = _mm_add_ps(vout0x0123, vbias0123);
 
