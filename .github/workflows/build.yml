@@ -1,8 +1,19 @@
 name: Build and Run Tests
 on:
   workflow_call:
+    inputs:
+      run-tests:
+        description: 'Whether to also run unit tests where possible.'
+        default: true
+        required: false
+        type: boolean
+      update-caches:
+        description: 'Whether to update the `ccache` or `bazel` caches, where possible.'
+        default: false
+        required: false
+        type: boolean
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}-${{ inputs.update-caches }}
   cancel-in-progress: true
 jobs:
   cmake-linux-local:
@@ -19,7 +30,8 @@ jobs:
         with:
           key: "${{ github.job }}"
           max-size: "1G"
-          save: ${{ github.event.review.state == 'APPROVED' }}
+          append-timestamp: false
+          save: ${{ inputs.update-caches }}
       - name: Configure and build
         run: scripts/build-local.sh
         working-directory: ${{ github.workspace }}
@@ -37,11 +49,13 @@ jobs:
         with:
           key: "${{ github.job }}"
           max-size: "1G"
-          save: ${{ github.event.review.state == 'APPROVED' }}
+          append-timestamp: false
+          save: ${{ inputs.update-caches }}
       - name: Configure and build
         run: scripts/build-linux-aarch64.sh -DCMAKE_BUILD_TYPE=Release
         working-directory: ${{ github.workspace }}
       - name: Run tests
+        if: ${{ inputs.run-tests }}
         run: ctest --output-on-failure --parallel $(nproc)
         working-directory: ${{ github.workspace }}/build/linux/aarch64
   cmake-linux-armhf:
@@ -60,13 +74,15 @@ jobs:
         with:
           key: "${{ github.job }}"
           max-size: "1G"
-          save: ${{ github.event.review.state == 'APPROVED' }}
+          append-timestamp: false
+          save: ${{ inputs.update-caches }}
       - name: Configure and build
         run: scripts/build-linux-armhf.sh -DCMAKE_BUILD_TYPE=Release
         working-directory: ${{ github.workspace }}
       - name: Link the armhf loader to run the test binaries
         run: sudo ln -s /usr/arm-linux-gnueabihf/lib/ld-linux-armhf.so.3 /usr/lib/ld-linux-armhf.so.3
       - name: Run tests
+        if: ${{ inputs.run-tests }}
         env:
           LD_LIBRARY_PATH: /usr/arm-linux-gnueabihf/lib/:${{ env.LD_LIBRARY_PATH }}
         run: ctest --output-on-failure --parallel $(nproc)
@@ -89,11 +105,13 @@ jobs:
         with:
           key: "${{ github.job }}"
           max-size: "1G"
-          save: ${{ github.event.review.state == 'APPROVED' }}
+          append-timestamp: false
+          save: ${{ inputs.update-caches }}
       - name: Configure and build
         run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release -DXNNPACK_ENABLE_RISCV_VECTOR=OFF
         working-directory: ${{ github.workspace }}
       - name: Run tests
+        if: ${{ inputs.run-tests }}
         run: ctest --output-on-failure --parallel $(nproc)
         working-directory: ${{ github.workspace }}/build/linux/riscv64
   cmake-linux-riscv64-rvv:
@@ -115,7 +133,8 @@ jobs:
         with:
           key: "${{ github.job }}"
           max-size: "1G"
-          save: ${{ github.event.review.state == 'APPROVED' }}
+          append-timestamp: false
+          save: ${{ inputs.update-caches }}
       - name: Configure and build
         run: |
           scripts/build-linux-riscv64.sh \
@@ -126,6 +145,7 @@ jobs:
             -DRISCV_QEMU_ROOT=${{ github.workspace }}/riscv/
         working-directory: ${{ github.workspace }}
       - name: Run tests (no operator tests)
+        if: ${{ inputs.run-tests }}
         run: ctest --output-on-failure -LE operator --parallel $(nproc)
         working-directory: ${{ github.workspace }}/build/linux/riscv64
   cmake-windows-arm64:
@@ -138,7 +158,8 @@ jobs:
         with:
           key: "${{ github.job }}"
           max-size: "1G"
-          save: ${{ github.event.review.state == 'APPROVED' }}
+          append-timestamp: false
+          save: ${{ inputs.update-caches }}
       - name: Install Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
       - name: Setup build environment
@@ -162,7 +183,8 @@ jobs:
         with:
           key: "${{ github.job }}"
           max-size: "1G"
-          save: ${{ github.event.review.state == 'APPROVED' }}
+          append-timestamp: false
+          save: ${{ inputs.update-caches }}
       - name: Install Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
       - name: Setup build environment
@@ -177,6 +199,7 @@ jobs:
           CFLAGS: "/UNDEBUG"
           CXXFLAGS: "/UNDEBUG"
       - name: Run tests
+        if: ${{ inputs.run-tests }}
         run: ctest -C Release --output-on-failure --parallel $NUMBER_OF_PROCESSORS
         working-directory: ${{ github.workspace }}/build/windows/x64
   cmake-windows-x86:
@@ -189,7 +212,8 @@ jobs:
         with:
           key: "${{ github.job }}"
           max-size: "1G"
-          save: ${{ github.event.review.state == 'APPROVED' }}
+          append-timestamp: false
+          save: ${{ inputs.update-caches }}
       - name: Install Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
       - name: Setup build environment
@@ -204,6 +228,7 @@ jobs:
           CFLAGS: "/UNDEBUG"
           CXXFLAGS: "/UNDEBUG"
       - name: Run tests
+        if: ${{ inputs.run-tests }}
         run: ctest -C Release --output-on-failure --parallel $NUMBER_OF_PROCESSORS
         working-directory: ${{ github.workspace }}/build/windows/x86
   cmake-macos-arm64:
@@ -221,7 +246,8 @@ jobs:
         with:
           key: "${{ github.job }}"
           max-size: "1G"
-          save: ${{ github.event.review.state == 'APPROVED' }}
+          append-timestamp: false
+          save: ${{ inputs.update-caches }}
       - name: Generate CMake project
         run: |
           cmake \
@@ -261,7 +287,8 @@ jobs:
         with:
           key: "${{ github.job }}"
           max-size: "1G"
-          save: ${{ github.event.review.state == 'APPROVED' }}
+          append-timestamp: false
+          save: ${{ inputs.update-caches }}
       - name: Configure and build
         run: scripts/${{ matrix.script }}
         working-directory: ${{ github.workspace }}
@@ -313,7 +340,15 @@ jobs:
         with:
           path: "/home/runner/.cache/bazel"
           key: "${{ github.job }}"
-      - name: Build and run tests
+      - name: Build tests
+        env:
+          CC: clang-18
+          CXX: clang++-18
+        run: |
+            bazel build test:all
+        working-directory: ${{ github.workspace }}
+      - name: Run tests
+        if: ${{ inputs.run-tests }}
         env:
           CC: clang-18
           CXX: clang++-18
@@ -321,7 +356,7 @@ jobs:
             bazel test --test_output=errors test:all
         working-directory: ${{ github.workspace }}
       - name: Save bazel cache
-        if: github.event.review.state == 'APPROVED'
+        if: ${{ inputs.update-caches }}
         uses: actions/cache/save@v4
         with:
           path: "/home/runner/.cache/bazel"
@@ -344,7 +379,15 @@ jobs:
         with:
           path: "/home/runner/.cache/bazel"
           key: "${{ github.job }}"
-      - name: Build and run tests
+      - name: Build tests
+        env:
+          CC: clang-18
+          CXX: clang++-18
+        run: |
+            bazel build --define=xnn_enable_jit=false test:all
+        working-directory: ${{ github.workspace }}
+      - name: Run tests
+        if: ${{ inputs.run-tests }}
         env:
           CC: clang-18
           CXX: clang++-18
@@ -359,7 +402,7 @@ jobs:
             test:fully_connected_test
         working-directory: ${{ github.workspace }}
       - name: Save bazel cache
-        if: github.event.review.state == 'APPROVED'
+        if: ${{ inputs.update-caches }}
         uses: actions/cache/save@v4
         with:
           path: "/home/runner/.cache/bazel"
