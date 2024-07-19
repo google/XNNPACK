@@ -1280,6 +1280,63 @@ DECLARE_QS8_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs8_vmulc_minmax_fp32_ukernel__scal
 DECLARE_QS8_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_u2)
 DECLARE_QS8_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_u4)
 
+#define DECLARE_S16_VBINOP_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                         \
+      size_t n,                                      \
+      const int16_t* a,                                \
+      const int16_t* b,                                \
+      int16_t* y,                                      \
+      const union xnn_s16_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__avx2_u8)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__avx2_u16)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__avx2_u24)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__avx2_u32)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__avx512f_u16)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__avx512f_u32)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__avx512f_u48)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__avx512f_u64)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__neon_u4)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__neon_u8)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__neon_u12)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__neon_u16)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__scalar_u1)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__scalar_u2)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__scalar_u4)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__scalar_u8)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__sse41_u4)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__sse41_u8)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__sse41_u12)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__sse41_u16)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__wasmsimd_u4)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__wasmsimd_u8)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__wasmsimd_u12)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmul_ukernel__wasmsimd_u16)
+
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__avx2_u8)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__avx2_u16)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__avx2_u24)
+DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__avx2_u32)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__avx512f_u16)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__avx512f_u32)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__avx512f_u48)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__avx512f_u64)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__neon_u4)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__neon_u8)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__neon_u12)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__neon_u16)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__scalar_u1)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__scalar_u2)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__scalar_u4)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__scalar_u8)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__sse41_u4)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__sse41_u8)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__sse41_u12)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__sse41_u16)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__wasmsimd_u4)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__wasmsimd_u8)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__wasmsimd_u12)
+// DECLARE_S16_VBINOP_UKERNEL_FUNCTION(xnn_s16_vmulc_ukernel__wasmsimd_u16)
 
 #define DECLARE_S32_VBINOP_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                         \

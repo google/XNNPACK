@@ -2137,6 +2137,13 @@ typedef void (*xnn_f32_vbinary_ukernel_fn)(
     float* output,
     const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+typedef void (*xnn_s16_vbinary_ukernel_fn)(
+  size_t batch,
+  const int16_t* input_x,
+  const int16_t* input_y,
+  int16_t* output,
+  const union xnn_s16_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 typedef void (*xnn_s32_vbinary_ukernel_fn)(
     size_t batch,
     const int32_t* input_x,
@@ -2184,6 +2191,15 @@ typedef void (*xnn_qu8_vadd_minmax_ukernel_fn)(
     const uint8_t* input_y,
     uint8_t* output,
     const union xnn_qu8_add_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+// VMUL: Vector MUL elementwise with quantization
+
+typedef void (*xnn_s16_vmul_ukernel_fn)(
+  size_t batch,
+  const int16_t* input_x,
+  const int16_t* input_y,
+  int16_t* output,
+  const union xnn_s16_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // VMUL: Vector MUL elementwise with Min+Max activation
 
@@ -2544,6 +2560,13 @@ typedef size_t (*xnn_init_f32_qu8_cvt_params_fn)(
   uint8_t output_zero_point,
   uint8_t output_min,
   uint8_t output_max);
+
+typedef size_t (*xnn_init_s16_cvt_params_fn)(
+  union xnn_s16_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  int32_t a_zero_point,
+  int32_t b_zero_point,
+  float scale,
+  int32_t output_zero_point);
 
 typedef size_t (*xnn_init_qs8_cvt_params_fn)(
   union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],

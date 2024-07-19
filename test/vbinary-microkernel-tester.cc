@@ -280,6 +280,59 @@ void VBinaryMicrokernelTester::Test(
 }
 
 void VBinaryMicrokernelTester::Test(
+    xnn_s16_vbinary_ukernel_fn vbinary, OpType op_type,
+    xnn_init_s16_cvt_params_fn init_params) const {
+  xnnpack::ReplicableRandomDevice rng;
+  std::uniform_int_distribution<int16_t> s16dist(0, 65535);
+
+  std::vector<int16_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int16_t));
+  std::vector<int16_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(int16_t));
+  std::vector<int16_t> y(batch_size() + (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(int16_t) : 0));
+  float y_fp;
+  std::vector<int16_t> y_ref(batch_size());
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(a.begin(), a.end(), [&]() { return s16dist(rng); });
+    std::generate(b.begin(), b.end(), [&]() { return s16dist(rng); });
+    if (inplace_a() || inplace_b()) {
+      std::generate(y.begin(), y.end(), [&]() { return s16dist(rng); });
+    }
+    else {
+      std::fill(y.begin(), y.end(), INT_MAX);
+    }
+    const int16_t* a_data = inplace_a() ? y.data() : a.data();
+    const int16_t* b_data = inplace_b() ? y.data() : b.data();
+
+    // Prepare parameters.
+    xnn_s16_cvt_params params;
+    if (init_params != nullptr) {
+      init_params(
+        &params, a_zero_point_s16(), b_zero_point_s16(), (a_scale() * b_scale() / y_scale()), y_zero_point_s16());
+    }
+
+    // Compute reference results.
+    for (size_t i = 0; i < batch_size(); i++) {
+      switch (op_type) {
+        case OpType::Mul:
+          y_fp = static_cast<float>(static_cast<int32_t>(a_data[i]) - static_cast<int32_t>(a_zero_point_s16())) *
+                 (a_scale() / y_scale()) *
+                 static_cast<float>(static_cast<int32_t>(b_data[i]) - static_cast<int32_t>(b_zero_point_s16())) *
+                 (b_scale() / y_scale());
+          y_ref[i] = static_cast<int16_t>(static_cast<int32_t>(y_fp) + static_cast<int32_t>(y_zero_point_s16()));
+          break;
+      }
+    }
+
+    // Call optimized micro-kernel.
+    vbinary(batch_size() * sizeof(int16_t), a_data, b_data, y.data(), &params);
+
+    // Verify results.
+    for (size_t i = 0; i < batch_size(); i++) {
+      EXPECT_EQ(y[i], y_ref[i]) << "at " << i << " / " << batch_size();
+    }
+  }
+}
+
+void VBinaryMicrokernelTester::Test(
     xnn_s32_vbinary_ukernel_fn vbinary, OpType op_type,
     xnn_init_s32_default_params_fn init_params) const {
   xnnpack::ReplicableRandomDevice rng;
