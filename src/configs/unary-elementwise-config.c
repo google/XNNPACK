@@ -1537,6 +1537,10 @@ static void init_f32_rsqrt_config(void) {
       f32_rsqrt_config.init.f32_rsqrt = xnn_init_f32_rsqrt_sse_params;
       f32_rsqrt_config.element_tile = 8;
     }
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    f32_rsqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__rvv_rsqrt_u4v;
+    f32_rsqrt_config.element_tile = hardware_config->vlenb / sizeof(float) * 4; // (VLENB/sizeof)*LMUL
   #else
     f32_rsqrt_config.ukernel =
         (xnn_vunary_ukernel_fn)xnn_f32_vrsqrt_ukernel__scalar_rsqrt_u4;
