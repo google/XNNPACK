@@ -368,7 +368,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
 
     $if BLOCKWISE:
       $for N in range(0, NR, 4):
-        const float32x4_t vfilter_output_scale${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
+        const float32x4_t vfilter_output_scale${ABC[N:N+4]} = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
 
       $for M in range(MR):
         $for N in range(0, NR, 4):
