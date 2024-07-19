@@ -73,15 +73,15 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x2__scalar(
     }
     // accumulate in float
       float vf0x0 = vacc0x0;
-      const float vfilter_output_scale0 = unaligned_indexed_load_f32(w, 0);
+      const float vfilter_output_scale0 = math_cvt_fp32_bf16(unaligned_indexed_load_u16(w, 0));
       float vf0x1 = vacc0x1;
-      const float vfilter_output_scale1 = unaligned_indexed_load_f32(w, 1);
+      const float vfilter_output_scale1 = math_cvt_fp32_bf16(unaligned_indexed_load_u16(w, 1));
 
       vf0x0 *= vfilter_output_scale0;
       vout0x0 += vf0x0;
       vf0x1 *= vfilter_output_scale1;
       vout0x1 += vf0x1;
-      w = (const float*) w + 2;
+      w = (const uint16_t*) w + 2;
     }
 
     vout0x0 /= 16;

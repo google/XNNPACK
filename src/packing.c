@@ -497,7 +497,7 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
   size_t bl,             // blocksize
   const uint8_t* k,      // kernel
   const float* bias,
-  const float* scale,
+  const uint16_t* scale,
   void* packed_weights,
   size_t extra_bytes_bl, // extra bytes per block
   size_t extra_bytes_n,  // extra bytes per n
@@ -558,7 +558,9 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
 
           size_t block_index = kr_block_start / bl;
           size_t scale_index = (nr_block_start + nr_block_offset) * num_blocks + block_index;
-          unaligned_indexed_store_f32(packed_b, nr_block_offset, unaligned_indexed_load_f32(packed_b, nr_block_offset) - (float) ksum * izp * scale[scale_index] * 16);
+          unaligned_indexed_store_f32(packed_b, nr_block_offset, 
+            unaligned_indexed_load_f32(packed_b, nr_block_offset) - 
+              (float) ksum * izp * math_cvt_fp32_bf16(scale[scale_index]) * 16);
           packed_weights = (uint8_t*) packed_weights + kr;  // kr * 2 nibbles
         }
         if (((2 * kr) + kr_block_start) % bl == 0) {
@@ -585,7 +587,7 @@ void xnn_pack_qs8_qb4w_gemm_gio_w(
   size_t bl,              // block size
   const uint8_t* k,       // kernel
   const float* bias,
-  const float* scale,
+  const uint16_t* scale,  // block scales (bf16 format)
   void* packed_weights,
   size_t extra_bytes_bl,  // extra bytes per block
   size_t extra_bytes_n,   // extra bytes per n
@@ -646,7 +648,9 @@ void xnn_pack_qs8_qb4w_gemm_gio_w(
 
           size_t block_index = kr_block_start / bl;
           size_t scale_index = (nr_block_start + nr_block_offset) * num_blocks + block_index;
-          unaligned_indexed_store_f32(packed_b, nr_block_offset, unaligned_indexed_load_f32(packed_b, nr_block_offset) - (float) ksum * izp * scale[scale_index] * 16);
+          unaligned_indexed_store_f32(packed_b, nr_block_offset, 
+            unaligned_indexed_load_f32(packed_b, nr_block_offset) - 
+              (float) ksum * izp * math_cvt_fp32_bf16(scale[scale_index] << 16) * 16);
           packed_weights = (uint8_t*) packed_weights + kr;  // kr * 2 nibbles
         }
         if (((2 * kr) + kr_block_start) % bl == 0) {

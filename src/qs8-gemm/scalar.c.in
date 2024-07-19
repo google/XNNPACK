@@ -197,15 +197,15 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
             float vf${M}x${N} = vacc${M}x${N};
             $if M == 0:
               $if NR % 4 != 0:
-                const float vfilter_output_scale${N} = unaligned_indexed_load_f32(w, ${N});
+                const float vfilter_output_scale${N} = math_cvt_fp32_bf16(unaligned_indexed_load_u16(w, ${N}));
               $else:
-                const float vfilter_output_scale${N} = ((const float*) w)[${N}];
+                const float vfilter_output_scale${N} = math_cvt_fp32_bf16(((const uint16_t*) w)[${N}]);
 
         $for M in range(MR):
           $for N in range(NR):
             vf${M}x${N} *= vfilter_output_scale${N};
             vout${M}x${N} += vf${M}x${N};
-        w = (const float*) w + ${NR};
+        w = (const uint16_t*) w + ${NR};
       }
 
     $if DATATYPE in ["QD8", "QC4", "QB4_F16", "QB4_F32"]:
