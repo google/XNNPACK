@@ -283,7 +283,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     ${_}#endif
     $if BLOCKWISE:
       $for N in range(0, NR, 4):
-        ${_}const float32x4_t vfilter_output_scale${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
+        ${_}const float32x4_t vfilter_output_scale${ABC[N:N+4]} = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
       $for M in range(0, MR):
         $for N in range(0, NR, 4):
           ${_}float32x4_t vf${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});

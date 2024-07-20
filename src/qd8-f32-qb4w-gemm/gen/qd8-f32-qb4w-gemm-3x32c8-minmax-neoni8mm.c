@@ -407,14 +407,14 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x32c8__neoni8mm(
         int32x4_t vacc2xOPQR = vcombine_s32(vget_low_s32(vacc23xOP), vget_low_s32(vacc23xQR));
         int32x4_t vacc2xSTUV = vcombine_s32(vget_low_s32(vacc23xST), vget_low_s32(vacc23xUV));
       #endif
-      const float32x4_t vfilter_output_scale0123 = vld1q_f32(w); w = (const float*) w + 4;
-      const float32x4_t vfilter_output_scale4567 = vld1q_f32(w); w = (const float*) w + 4;
-      const float32x4_t vfilter_output_scale89AB = vld1q_f32(w); w = (const float*) w + 4;
-      const float32x4_t vfilter_output_scaleCDEF = vld1q_f32(w); w = (const float*) w + 4;
-      const float32x4_t vfilter_output_scaleGHIJ = vld1q_f32(w); w = (const float*) w + 4;
-      const float32x4_t vfilter_output_scaleKLMN = vld1q_f32(w); w = (const float*) w + 4;
-      const float32x4_t vfilter_output_scaleOPQR = vld1q_f32(w); w = (const float*) w + 4;
-      const float32x4_t vfilter_output_scaleSTUV = vld1q_f32(w); w = (const float*) w + 4;
+      const float32x4_t vfilter_output_scale0123 = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+      const float32x4_t vfilter_output_scale4567 = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+      const float32x4_t vfilter_output_scale89AB = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+      const float32x4_t vfilter_output_scaleCDEF = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+      const float32x4_t vfilter_output_scaleGHIJ = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+      const float32x4_t vfilter_output_scaleKLMN = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+      const float32x4_t vfilter_output_scaleOPQR = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+      const float32x4_t vfilter_output_scaleSTUV = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
       float32x4_t vf0x0123 = vcvtq_f32_s32(vacc0x0123);
       vout0x0123 = vfmaq_f32(vout0x0123, vf0x0123, vfilter_output_scale0123);
       float32x4_t vf0x4567 = vcvtq_f32_s32(vacc0x4567);
