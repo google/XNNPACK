@@ -1,0 +1,121 @@
+// Copyright 2023 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$SIMD_TILE = BATCH_TILE // 4
+$assert ACCUMULATORS <= SIMD_TILE
+$assert OP in ["MAX", "MIN", "MINMAX", "MINMAXSUM"]
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/reduce.h>
+
+
+$ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
+$EMIT_MIN = "MIN" in OP
+$EMIT_MAX = "MAX" in OP
+$EMIT_SUM = "SUM" in OP
+void xnn_f32_r${OP.lower()}_ukernel__neon_u${BATCH_TILE}${ACC_SUFFIX}(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  $if EMIT_MIN:
+    float32x4_t vmin0 = vld1q_dup_f32(input);
+    $if EMIT_MAX:
+      float32x4_t vmax0 = vmin0;
+  $elif EMIT_MAX:
+    float32x4_t vmax0 = vld1q_dup_f32(input);
+  $if EMIT_SUM:
+    float32x4_t vsum0 = vmovq_n_f32(0.0f);
+  $for A in range(1, ACCUMULATORS):
+    $if EMIT_MIN:
+      float32x4_t vmin${A} = vmin0;
+    $if EMIT_MAX:
+      float32x4_t vmax${A} = vmax0;
+    $if EMIT_SUM:
+      float32x4_t vsum${A} = vsum0;
+  $if BATCH_TILE > 4:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      $for N in range(SIMD_TILE):
+        const float32x4_t vt${N} = vld1q_f32(input); input += 4;
+
+      $for N in range(SIMD_TILE):
+        $if $EMIT_MIN:
+          vmin${N % ACCUMULATORS} = vminq_f32(vmin${N % ACCUMULATORS}, vt${N});
+        $if $EMIT_MAX:
+          vmax${N % ACCUMULATORS} = vmaxq_f32(vmax${N % ACCUMULATORS}, vt${N});
+        $if $EMIT_SUM:
+          vsum${N % ACCUMULATORS} = vaddq_f32(vsum${N % ACCUMULATORS}, vt${N});
+    }
+    $if ACCUMULATORS > 1:
+      $ACC_SLICE = 1
+      $while ACC_SLICE < ACCUMULATORS:
+        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+          $if A + ACC_SLICE < ACCUMULATORS:
+            $if $EMIT_MIN:
+              vmin${A} = vminq_f32(vmin${A}, vmin${A + ACC_SLICE});
+            $if $EMIT_MAX:
+              vmax${A} = vmaxq_f32(vmax${A}, vmax${A + ACC_SLICE});
+            $if $EMIT_SUM:
+              vsum${A} = vaddq_f32(vsum${A}, vsum${A + ACC_SLICE});
+        $ACC_SLICE *= 2
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const float32x4_t vt = vld1q_f32(input); input += 4;
+    $if $EMIT_MIN:
+      vmin0 = vminq_f32(vmin0, vt);
+    $if $EMIT_MAX:
+      vmax0 = vmaxq_f32(vmax0, vt);
+    $if $EMIT_SUM:
+      vsum0 = vaddq_f32(vsum0, vt);
+  }
+  $if $EMIT_MIN:
+    float32x2_t vmin = vmin_f32(vget_low_f32(vmin0), vget_high_f32(vmin0));
+  $if $EMIT_MAX:
+    float32x2_t vmax = vmax_f32(vget_low_f32(vmax0), vget_high_f32(vmax0));
+  $if $EMIT_SUM:
+    float32x2_t vsum = vadd_f32(vget_low_f32(vsum0), vget_high_f32(vsum0));
+  if XNN_UNLIKELY(batch & (2 * sizeof(float))) {
+    const float32x2_t vt = vld1_f32(input); input += 2;
+    $if $EMIT_MIN:
+      vmin = vmin_f32(vmin, vt);
+    $if $EMIT_MAX:
+      vmax = vmax_f32(vmax, vt);
+    $if $EMIT_SUM:
+      vsum = vadd_f32(vsum, vt);
+  }
+  $if $EMIT_MIN:
+    vmin = vpmin_f32(vmin, vmin);
+  $if $EMIT_MAX:
+    vmax = vpmax_f32(vmax, vmax);
+  $if $EMIT_SUM:
+    vsum = vpadd_f32(vsum, vsum);
+  if XNN_UNLIKELY(batch & (1 * sizeof(float))) {
+    const float32x2_t vt = vld1_dup_f32(input);
+    $if $EMIT_MIN:
+      vmin = vmin_f32(vmin, vt);
+    $if $EMIT_MAX:
+      vmax = vmax_f32(vmax, vt);
+    $if $EMIT_SUM:
+      vsum = vadd_f32(vsum, vt);
+  }
+  $if $EMIT_MIN:
+    vst1_lane_f32(output, vmin, 0);
+    $if $EMIT_MAX:
+      vst1_lane_f32(output + 1, vmax, 0);
+      $if $EMIT_SUM:
+        vst1_lane_f32(output + 2, vsum, 0);
+  $elif $EMIT_MAX:
+    vst1_lane_f32(output, vmax, 0);
+}

@@ -1,0 +1,123 @@
+// Copyright 2023 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$SIMD_TILE = BATCH_TILE // 4
+$assert ACCUMULATORS <= SIMD_TILE
+$assert OP in ["MAX", "MIN", "MINMAX", "MINMAXSUM"]
+#include <assert.h>
+
+#include <xmmintrin.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/reduce.h>
+
+
+$ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
+$EMIT_MIN = "MIN" in OP
+$EMIT_MAX = "MAX" in OP
+$EMIT_SUM = "SUM" in OP
+void xnn_f32_r${OP.lower()}_ukernel__sse_u${BATCH_TILE}${ACC_SUFFIX}(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  $if EMIT_MIN:
+    __m128 vmin0 = _mm_load_ss(input);
+    vmin0 = _mm_shuffle_ps(vmin0, vmin0, _MM_SHUFFLE(0, 0, 0, 0));
+    $if EMIT_MAX:
+      __m128 vmax0 = vmin0;
+  $elif EMIT_MAX:
+    __m128 vmax0 = _mm_load_ss(input);
+    vmax0 = _mm_shuffle_ps(vmax0, vmax0, _MM_SHUFFLE(0, 0, 0, 0));
+  $if EMIT_SUM:
+    __m128 vsum0 = _mm_setzero_ps();
+  $for A in range(1, ACCUMULATORS):
+    $if EMIT_MIN:
+      __m128 vmin${A} = vmin0;
+    $if EMIT_MAX:
+      __m128 vmax${A} = vmax0;
+    $if EMIT_SUM:
+      __m128 vsum${A} = vsum0;
+  $if BATCH_TILE > 4:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      const __m128 vt0 = _mm_loadu_ps(input);
+      $for N in range(1, SIMD_TILE):
+        const __m128 vt${N} = _mm_loadu_ps(input + ${N * 4});
+      input += ${BATCH_TILE};
+
+      $for N in range(SIMD_TILE):
+        $if EMIT_MIN:
+          vmin${N % ACCUMULATORS} = _mm_min_ps(vmin${N % ACCUMULATORS}, vt${N});
+        $if EMIT_MAX:
+          vmax${N % ACCUMULATORS} = _mm_max_ps(vmax${N % ACCUMULATORS}, vt${N});
+        $if EMIT_SUM:
+          vsum${N % ACCUMULATORS} = _mm_add_ps(vsum${N % ACCUMULATORS}, vt${N});
+    }
+    $if ACCUMULATORS > 1:
+      $ACC_SLICE = 1
+      $while ACC_SLICE < ACCUMULATORS:
+        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+          $if A + ACC_SLICE < ACCUMULATORS:
+            $if EMIT_MIN:
+              vmin${A} = _mm_min_ps(vmin${A}, vmin${A + ACC_SLICE});
+            $if EMIT_MAX:
+              vmax${A} = _mm_max_ps(vmax${A}, vmax${A + ACC_SLICE});
+            $if EMIT_SUM:
+              vsum${A} = _mm_add_ps(vsum${A}, vsum${A + ACC_SLICE});
+        $ACC_SLICE *= 2
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const __m128 vt = _mm_loadu_ps(input);
+    input += 4;
+
+    $if EMIT_MIN:
+      vmin0 = _mm_min_ps(vmin0, vt);
+    $if EMIT_MAX:
+      vmax0 = _mm_max_ps(vmax0, vt);
+    $if EMIT_SUM:
+      vsum0 = _mm_add_ps(vsum0, vt);
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    do {
+      const __m128 vt = _mm_load_ss(input);
+      input += 1;
+      $if EMIT_MIN:
+        vmin0 = _mm_min_ss(vmin0, vt);
+      $if EMIT_MAX:
+        vmax0 = _mm_max_ss(vmax0, vt);
+      $if EMIT_SUM:
+        vsum0 = _mm_add_ss(vsum0, vt);
+      batch -= sizeof(float);
+    } while (batch != 0);
+  }
+  $if EMIT_MIN:
+    vmin0 = _mm_min_ps(vmin0, _mm_movehl_ps(vmin0, vmin0));
+  $if EMIT_MAX:
+    vmax0 = _mm_max_ps(vmax0, _mm_movehl_ps(vmax0, vmax0));
+  $if EMIT_SUM:
+    vsum0 = _mm_add_ps(vsum0, _mm_movehl_ps(vsum0, vsum0));
+  $if EMIT_MIN:
+    vmin0 = _mm_min_ss(vmin0, _mm_shuffle_ps(vmin0, vmin0, _MM_SHUFFLE(1, 1, 1, 1)));
+  $if EMIT_MAX:
+    vmax0 = _mm_max_ss(vmax0, _mm_shuffle_ps(vmax0, vmax0, _MM_SHUFFLE(1, 1, 1, 1)));
+  $if EMIT_SUM:
+    vsum0 = _mm_add_ss(vsum0, _mm_shuffle_ps(vsum0, vsum0, _MM_SHUFFLE(1, 1, 1, 1)));
+
+  $if EMIT_MIN:
+    _mm_store_ss(output, vmin0);
+    $if EMIT_MAX:
+      _mm_store_ss(output + 1, vmax0);
+      $if EMIT_SUM:
+        _mm_store_ss(output + 2, vsum0);
+  $elif EMIT_MAX:
+    _mm_store_ss(output, vmax0);
+}

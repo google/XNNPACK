@@ -124,6 +124,11 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rminmax-avx-u24-acc3.c
   src/f32-rminmax/gen/f32-rminmax-avx-u32-acc2.c
   src/f32-rminmax/gen/f32-rminmax-avx-u32-acc4.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-avx-u8.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-avx-u16-acc2.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-avx-u24-acc3.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-avx-u32-acc2.c
+  src/f32-rminmaxsum/gen/f32-rminmaxsum-avx-u32-acc4.c
   src/f32-rsum/gen/f32-rsum-avx-u8.c
   src/f32-rsum/gen/f32-rsum-avx-u16-acc2.c
   src/f32-rsum/gen/f32-rsum-avx-u24-acc3.c
