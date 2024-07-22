@@ -8,6 +8,11 @@
 - name: xnn_f32_vrsqrt_ukernel__scalar_rsqrt_u2
 - name: xnn_f32_vrsqrt_ukernel__scalar_rsqrt_u4
 
+# RISC-V Vector
+- name: xnn_f32_vrsqrt_ukernel__rvv_rsqrt_u1v
+- name: xnn_f32_vrsqrt_ukernel__rvv_rsqrt_u2v
+- name: xnn_f32_vrsqrt_ukernel__rvv_rsqrt_u4v
+
 # ARM NEON
 - name: xnn_f32_vrsqrt_ukernel__neon_rsqrt_u4
 - name: xnn_f32_vrsqrt_ukernel__neon_rsqrt_u8

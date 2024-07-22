@@ -14,6 +14,11 @@ tools/xngen src/f32-vrsqrt/neon-rsqrt.c.in -D BATCH_TILE=4  -o src/f32-vrsqrt/ge
 tools/xngen src/f32-vrsqrt/neon-rsqrt.c.in -D BATCH_TILE=8  -o src/f32-vrsqrt/gen/f32-vrsqrt-neon-rsqrt-u8.c &
 tools/xngen src/f32-vrsqrt/neon-rsqrt.c.in -D BATCH_TILE=16 -o src/f32-vrsqrt/gen/f32-vrsqrt-neon-rsqrt-u16.c &
 
+################################ RISC-V Vector ################################
+tools/xngen src/f32-vrsqrt/rvv.c.in -D LMUL=1 -o src/f32-vrsqrt/gen/f32-vrsqrt-rvv-rsqrt-u1v.c &
+tools/xngen src/f32-vrsqrt/rvv.c.in -D LMUL=2 -o src/f32-vrsqrt/gen/f32-vrsqrt-rvv-rsqrt-u2v.c &
+tools/xngen src/f32-vrsqrt/rvv.c.in -D LMUL=4 -o src/f32-vrsqrt/gen/f32-vrsqrt-rvv-rsqrt-u4v.c &
+
 ################################# x86 SSE ######################################
 tools/xngen src/f32-vrsqrt/sse-rsqrt.c.in -D BATCH_TILE=4  -o src/f32-vrsqrt/gen/f32-vrsqrt-sse-rsqrt-u4.c &
 tools/xngen src/f32-vrsqrt/sse-rsqrt.c.in -D BATCH_TILE=8  -o src/f32-vrsqrt/gen/f32-vrsqrt-sse-rsqrt-u8.c &
