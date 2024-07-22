@@ -143,6 +143,7 @@ static const char data[] =
   "Multiply (ND, F32)\0"
   "Multiply (ND, QS8)\0"
   "Multiply (ND, QU8)\0"
+  "Multiply (ND, S16)\0"
   "Multiply (ND, S32)\0"
   "Negate (NC, F16)\0"
   "Negate (NC, F32)\0"
