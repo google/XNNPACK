@@ -325,7 +325,7 @@ void VBinaryMicrokernelTester::Test(
     }
 
     // Call optimized micro-kernel.
-    // vbinary(batch_size() * sizeof(int16_t), a_data, b_data, y.data(), &params);
+    vbinary(batch_size() * sizeof(int16_t), a_data, b_data, y.data(), &params);
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
