@@ -544,3 +544,44 @@
   init: xnn_init_f32_qb4w_minmax_scalar_params
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
   k-block: 16
+
+# X86 AVX256SKX
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x8c8__avx256skx
+  init: xnn_init_f32_qb4w_minmax_avx_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 16
+
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_2x8c8__avx256skx
+  init: xnn_init_f32_qb4w_minmax_avx_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 16
+
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x8c8__avx256skx
+  init: xnn_init_f32_qb4w_minmax_avx_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 16
+
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x8c8__avx256skx
+  init: xnn_init_f32_qb4w_minmax_avx_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 16
+
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_5x8c8__avx256skx
+  init: xnn_init_f32_qb4w_minmax_avx_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 16
+
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_6x8c8__avx256skx
+  init: xnn_init_f32_qb4w_minmax_avx_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 16
+
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_7x8c8__avx256skx
+  init: xnn_init_f32_qb4w_minmax_avx_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 16
+
+- name: xnn_qd8_f32_qb4w_gemm_minmax_ukernel_8x8c8__avx256skx
+  init: xnn_init_f32_qb4w_minmax_avx_params
+  pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  k-block: 16
