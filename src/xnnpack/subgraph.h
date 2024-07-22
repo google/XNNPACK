@@ -221,6 +221,7 @@ enum xnn_compute_type {
   xnn_compute_type_qs8_to_fp16,
   xnn_compute_type_qs8_to_fp32,
   xnn_compute_type_qu8_to_fp32,
+  xnn_compute_type_s16,
   xnn_compute_type_s32,
 };
 
