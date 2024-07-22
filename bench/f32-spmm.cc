@@ -15,6 +15,222 @@
 #include "xnnpack/microparams-init.h"
 
 
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_32x1__hvx(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_32x1__hvx, 32, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_32x1__hvx)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_32x1__hvx_pipelined(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_32x1__hvx_pipelined, 32, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_32x1__hvx_pipelined)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_32x1__hvx_pipelined_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_32x1__hvx_pipelined_x2, 32, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_32x1__hvx_pipelined_x2)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_32x1__hvx_pipelined_x4(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_32x1__hvx_pipelined_x4, 32, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_32x1__hvx_pipelined_x4)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_32x1__hvx_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_32x1__hvx_x2, 32, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_32x1__hvx_x2)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_32x1__hvx_x4(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_32x1__hvx_x4, 32, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_32x1__hvx_x4)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_64x1__hvx(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_64x1__hvx, 64, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_64x1__hvx)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_64x1__hvx_pipelined(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_64x1__hvx_pipelined, 64, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_64x1__hvx_pipelined)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_64x1__hvx_pipelined_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_64x1__hvx_pipelined_x2, 64, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_64x1__hvx_pipelined_x2)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_64x1__hvx_pipelined_x4(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_64x1__hvx_pipelined_x4, 64, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_64x1__hvx_pipelined_x4)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_64x1__hvx_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_64x1__hvx_x2, 64, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_64x1__hvx_x2)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_64x1__hvx_x4(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_64x1__hvx_x4, 64, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_64x1__hvx_x4)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_128x1__hvx(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_128x1__hvx, 128, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_128x1__hvx)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_128x1__hvx_pipelined(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_128x1__hvx_pipelined, 128, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_128x1__hvx_pipelined)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_128x1__hvx_pipelined_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_128x1__hvx_pipelined_x2, 128, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_128x1__hvx_pipelined_x2)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_128x1__hvx_pipelined_x4(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_128x1__hvx_pipelined_x4, 128, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_128x1__hvx_pipelined_x4)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_128x1__hvx_x2(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_128x1__hvx_x2, 128, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_128x1__hvx_x2)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void f32_spmm_minmax_ukernel_128x1__hvx_x4(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_128x1__hvx_x4, 128, 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckHVX
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_128x1__hvx_x4)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
 #if XNN_ARCH_WASMRELAXEDSIMD
   static void f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm(benchmark::State& state, const char* net) {
     f32_spmm(state, xnn_f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm, 4, 1,

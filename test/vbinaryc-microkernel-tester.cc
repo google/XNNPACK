@@ -17,6 +17,7 @@
 #include <limits>
 #include <random>
 #include <vector>
+#include <climits>
 
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
@@ -295,6 +296,93 @@ void VBinaryCMicrokernelTester::Test(
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
       EXPECT_NEAR(y[i], y_ref[i], std::abs(y_ref[i]) * 1.0e-6f)
+          << "at " << i << " / " << batch_size();
+    }
+  }
+}
+
+
+void VBinaryCMicrokernelTester::Test(
+    xnn_s32_vbinary_ukernel_fn vbinaryc, OpType op_type,
+    xnn_init_s32_default_params_fn init_params) const {
+  xnnpack::ReplicableRandomDevice rng;
+  std::uniform_int_distribution<int32_t> s32dist(std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max());
+
+  std::vector<int32_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
+  const int32_t b = s32dist(rng);
+  std::vector<int32_t> y(batch_size() +
+                       (inplace() ? XNN_EXTRA_BYTES / sizeof(int32_t) : 0));
+  std::vector<int32_t> y_ref(batch_size());
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(a.begin(), a.end(), [&]() { return s32dist(rng);});
+    if (inplace()) {
+      std::generate(y.begin(), y.end(), [&]() { return s32dist(rng); });
+    } else {
+      std::fill(y.begin(), y.end(), INT_MAX);
+    }
+    const int32_t* a_data = inplace() ? y.data() : a.data();
+
+
+    // Compute reference results.
+    for (size_t i = 0; i < batch_size(); i++) {
+        switch (op_type) {
+        case OpType::AddC:
+          y_ref[i] = a_data[i] + b;
+          break;
+        case OpType::CopySignC:
+          y_ref[i] = std::copysign(a_data[i], b);
+          break;
+        case OpType::RCopySignC:
+          y_ref[i] = std::copysign(b, a_data[i]);
+          break;
+        case OpType::DivC:
+          y_ref[i] = a_data[i] / b;
+          break;
+        case OpType::RDivC:
+          y_ref[i] = b / a_data[i];
+          break;
+        case OpType::MaxC:
+          y_ref[i] = std::max<int32_t>(a_data[i], b);
+          break;
+        case OpType::MinC:
+          y_ref[i] = std::min<int32_t>(a_data[i], b);
+          break;
+        case OpType::MulC:
+          y_ref[i] = a_data[i] * b;
+          break;
+        case OpType::SqrDiffC: {
+          const int32_t diff = a_data[i] - b;
+          y_ref[i] = diff * diff;
+          break;
+        }
+        case OpType::SubC:
+          y_ref[i] = a_data[i] - b;
+          break;
+        case OpType::RSubC:
+          y_ref[i] = b - a_data[i];
+          break;
+      }
+    }
+
+    const int32_t y_max = std::numeric_limits<int32_t>::max();
+    const int32_t y_min = std::numeric_limits<int32_t>::min();
+    for (size_t i = 0; i < batch_size(); i++) {
+      y_ref[i] = std::max(std::min(y_ref[i], y_max), y_min);
+    }
+
+    // Prepare parameters.
+    xnn_s32_default_params params;
+    if (init_params != nullptr) {
+      init_params(&params);
+    }
+
+    // Call optimized micro-kernel.
+    vbinaryc(batch_size() * sizeof(int32_t), a_data, &b, y.data(),
+            init_params != nullptr ? &params : nullptr);
+
+    // Verify results.
+    for (size_t i = 0; i < batch_size(); i++) {
+      EXPECT_EQ(y[i], y_ref[i])
           << "at " << i << " / " << batch_size();
     }
   }

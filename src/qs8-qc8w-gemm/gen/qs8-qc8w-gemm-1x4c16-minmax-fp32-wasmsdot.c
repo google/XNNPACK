@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-gemm/MRx4c16-wasmsdot.c.in
+//   Template: src/qs8-gemm/MRx4c16-wasmdot.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
@@ -13,7 +13,6 @@
 
 #include "xnnpack/gemm.h"
 #include "xnnpack/math.h"
-
 
 void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c16__wasmsdot(
     size_t mr,
@@ -54,16 +53,16 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c16__wasmsdot(
 
       const v128_t vb0 = wasm_v128_load(w);
 
-      vacc0x0 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va0, vb0, vacc0x0);
+      vacc0x0 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb0, va0, vacc0x0);
       const v128_t vb1 = wasm_v128_load((const int8_t*) w + 16);
 
-      vacc0x1 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va0, vb1, vacc0x1);
+      vacc0x1 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb1, va0, vacc0x1);
       const v128_t vb2 = wasm_v128_load((const int8_t*) w + 32);
 
-      vacc0x2 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va0, vb2, vacc0x2);
+      vacc0x2 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb2, va0, vacc0x2);
       const v128_t vb3 = wasm_v128_load((const int8_t*) w + 48);
 
-      vacc0x3 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va0, vb3, vacc0x3);
+      vacc0x3 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb3, va0, vacc0x3);
 
       w = (const int8_t*) w + 64;
       k -= 16 * sizeof(int8_t);

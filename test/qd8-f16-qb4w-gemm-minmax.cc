@@ -27,6 +27,7 @@
 #include "xnnpack/ppmm.h"
 #include "xnnpack/requantization.h"
 #include "gemm-microkernel-tester.h"
+#include "next_prime.h"
 
 namespace {
 
@@ -58,7 +59,7 @@ std::vector<GemmTestParams> CreateTests1(
       "strided_cn",
       tester.clone()
           .m(mr).n(nr).k(k_block)
-          .cn_stride(NextPrime(nr + 1))
+          .cn_stride(xnnpack::NextPrime(nr + 1))
           .b_zero_point(8)
           .bl(kr * sr * 2)
     , test_func, isa_check));
@@ -67,7 +68,7 @@ std::vector<GemmTestParams> CreateTests1(
         "k_eq_" + kbs + "_strided_a",
         tester.clone()
             .m(mr).n(nr).k(k_block)
-            .a_stride(NextPrime(k_block + 1))
+            .a_stride(xnnpack::NextPrime(k_block + 1))
             .b_zero_point(8)
             .bl(kr * sr * 2)
         , test_func, isa_check));

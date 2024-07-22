@@ -1245,6 +1245,7 @@ struct elementwise_binary_context {
     union xnn_qu8_mul_minmax_params qu8_mul;
     union xnn_f16_minmax_params f16;
     union xnn_f32_minmax_params f32;
+    union xnn_s32_default_params s32;
   } params;
   xnn_vbinary_ukernel_fn ukernel;
   bool flip_a_b;

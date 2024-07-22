@@ -6,6 +6,7 @@
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
 $assert DATATYPE in ["QD8", "QS8", "QC4", "QB4", "QC8"]
+$assert VARIANT in ["", "MADD"]
 #include <assert.h>
 
 #include <immintrin.h>
@@ -38,6 +39,22 @@ $#
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w", "QS8": "qs8", "QU8": "qu8", "QC4": "qd8_f32_qc4w", "QB4": "qd8_f32_qb4w"}[DATATYPE]
 $REQUANTIZATION_SPEC = "" if DATATYPE in ["QD8", "QC4", "QB4"] else "_" + REQUANTIZATION.lower()
+
+$if VARIANT in ["MADD"]:
+  // VNNI replacement that uses vpmaddubsw
+  static XNN_INTRINSIC __m512i _mm512_dpbusd_epi32_bw(__m512i i32, const __m512i u8, const __m512i i8) {
+    const __m512i ones = _mm512_set1_epi16(1);
+    const __m512i highest_bit = _mm512_set1_epi8(0x80);
+
+    __m512i s1 = _mm512_maddubs_epi16(_mm512_and_si512(u8, highest_bit), i8);
+    __m512i s2 = _mm512_maddubs_epi16(_mm512_andnot_si512(highest_bit, u8), i8);
+
+    s1 = _mm512_madd_epi16(s1, ones);
+    s2 = _mm512_madd_epi16(s2, ones);
+
+    return _mm512_add_epi32(_mm512_add_epi32(s1, s2), i32);
+  }
+
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx512vnni" if REQUANTIZATION else "avx512vnni"
 $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params", "QC4": "xnn_f32_qc4w_minmax_params", "QB4": "xnn_f32_qb4w_minmax_params"}[DATATYPE]
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
@@ -45,7 +62,9 @@ $OUT_T = "float" if DATATYPE in ["QD8", "QC4", "QB4"] else XINT8_T
 $_MM_PACKXS_EPI16 = "_mm_packus_epi16" if DATATYPE == "QU8" else "_mm_packs_epi16"
 $_MM_MAX_EPX8 = "_mm_max_epu8" if DATATYPE == "QU8" else "_mm_max_epi8"
 $_MM512_CVTXEPI32_EPI8 = "_mm512_cvtusepi32_epi8" if DATATYPE == "QU8" else "_mm512_cvtsepi32_epi8"
-void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__avx512vnni${"gfni" if GFNI else ""}${"_prfm" if PREFETCH else ""}(
+$_MM512_DPBUSD_EPI32 = "_mm512_dpbusd_epi32_bw" if VARIANT == "MADD" else "_mm512_dpbusd_epi32"
+$ISA = "skx" if VARIANT in ["MADD"] else "vnni"
+void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__avx512${ISA}${"gfni" if GFNI else ""}${"_madd" if VARIANT == "MADD" else ""}${"_prfm" if PREFETCH else ""}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -187,18 +206,19 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
           ${_}xnn_prefetch_to_l1((const ${XINT8_T}*) w + 832);
 
       $for M in range(MR):
-        ${_}vacc${M}x01234567 = _mm512_dpbusd_epi32(vacc${M}x01234567, va${M}x01234567, vb01234567x01234567);
-        ${_}vacc${M}x89ABCDEF = _mm512_dpbusd_epi32(vacc${M}x89ABCDEF, va${M}x01234567, vb89ABCDEFx01234567);
+        ${_}vacc${M}x01234567 = ${_MM512_DPBUSD_EPI32}(vacc${M}x01234567, va${M}x01234567, vb01234567x01234567);
+        ${_}vacc${M}x89ABCDEF = ${_MM512_DPBUSD_EPI32}(vacc${M}x89ABCDEF, va${M}x01234567, vb89ABCDEFx01234567);
+
       $if PREFETCH:
         ${_}xnn_prefetch_to_l1((const ${XINT8_T}*) w + 896);
         ${_}xnn_prefetch_to_l1((const ${XINT8_T}*) w + 960);
       $for M in range(MR):
         $if MR < 4:
-          ${_}vacc1x${M}x01234567 = _mm512_dpbusd_epi32(vacc1x${M}x01234567, va${M}x89ABCDEF, vb01234567x89ABCDEF);
-          ${_}vacc1x${M}x89ABCDEF = _mm512_dpbusd_epi32(vacc1x${M}x89ABCDEF, va${M}x89ABCDEF, vb89ABCDEFx89ABCDEF);
+          ${_}vacc1x${M}x01234567 = ${_MM512_DPBUSD_EPI32}(vacc1x${M}x01234567, va${M}x89ABCDEF, vb01234567x89ABCDEF);
+          ${_}vacc1x${M}x89ABCDEF = ${_MM512_DPBUSD_EPI32}(vacc1x${M}x89ABCDEF, va${M}x89ABCDEF, vb89ABCDEFx89ABCDEF);
         $else:
-          ${_}vacc${M}x01234567 = _mm512_dpbusd_epi32(vacc${M}x01234567, va${M}x89ABCDEF, vb01234567x89ABCDEF);
-          ${_}vacc${M}x89ABCDEF = _mm512_dpbusd_epi32(vacc${M}x89ABCDEF, va${M}x89ABCDEF, vb89ABCDEFx89ABCDEF);
+          ${_}vacc${M}x01234567 = ${_MM512_DPBUSD_EPI32}(vacc${M}x01234567, va${M}x89ABCDEF, vb01234567x89ABCDEF);
+          ${_}vacc${M}x89ABCDEF = ${_MM512_DPBUSD_EPI32}(vacc${M}x89ABCDEF, va${M}x89ABCDEF, vb89ABCDEFx89ABCDEF);
 
       $if DATATYPE in ["QC4", "QB4"]:
         ${_}w = (const ${XINT8_T}*) w + 128;
@@ -226,8 +246,9 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
         ${_}const __m512i vb89ABCDEFx01234567 = _mm512_load_si512((const ${XINT8_T}*) w + 64);
 
       $for M in range(MR):
-        ${_}vacc${M}x01234567 = _mm512_dpbusd_epi32(vacc${M}x01234567, va${M}x01234567, vb01234567x01234567);
-        ${_}vacc${M}x89ABCDEF = _mm512_dpbusd_epi32(vacc${M}x89ABCDEF, va${M}x01234567, vb89ABCDEFx01234567);
+        ${_}vacc${M}x01234567 = ${_MM512_DPBUSD_EPI32}(vacc${M}x01234567, va${M}x01234567, vb01234567x01234567);
+        ${_}vacc${M}x89ABCDEF = ${_MM512_DPBUSD_EPI32}(vacc${M}x89ABCDEF, va${M}x01234567, vb89ABCDEFx01234567);
+
       $if PREFETCH:
         ${_}xnn_prefetch_to_l1((const ${XINT8_T}*) w + 896);
         ${_}xnn_prefetch_to_l1((const ${XINT8_T}*) w + 960);

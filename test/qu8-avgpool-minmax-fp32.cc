@@ -12,6 +12,7 @@
 
 
 #include <cstddef>
+#include <vector>
 
 #include <gtest/gtest.h>
 #include "xnnpack/avgpool.h"
@@ -20,6 +21,7 @@
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pavgpool.h"
 #include "avgpool-microkernel-tester.h"
+#include "next_prime.h"
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -674,7 +676,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
@@ -686,7 +688,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
@@ -699,7 +701,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass_with_zero) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -715,7 +717,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass_with_input_scale) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -730,7 +732,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass_with_input_zero_point) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -745,7 +747,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass_with_output_scale) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -760,7 +762,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass_with_output_zero_point) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -775,7 +777,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
@@ -788,7 +790,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_eq_8_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
@@ -800,7 +802,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_div_8_multipass) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -813,7 +815,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_div_8_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -827,7 +829,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_div_8_multipass_with_zero) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
           AvgPoolMicrokernelTester()
@@ -844,7 +846,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_div_8_multipass_with_input_scale) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
@@ -860,7 +862,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_div_8_multipass_with_input_zero_point) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
@@ -876,7 +878,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_div_8_multipass_with_output_scale) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
@@ -892,7 +894,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_div_8_multipass_with_output_zero_point) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
@@ -908,7 +910,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_div_8_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -922,7 +924,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_div_8_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -937,7 +939,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -951,7 +953,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -966,7 +968,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass_with_zero) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
           AvgPoolMicrokernelTester()
@@ -984,7 +986,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass_with_input_scale) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
@@ -1001,7 +1003,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass_with_input_zero_point) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
@@ -1018,7 +1020,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass_with_output_scale) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
@@ -1035,7 +1037,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass_with_output_zero_point) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
@@ -1052,7 +1054,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -1067,7 +1069,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_lt_8_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -1081,7 +1083,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_gt_8_multipass) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -1094,7 +1096,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_gt_8_multipass_with_input_offset) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -1108,7 +1110,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_gt_8_multipass_with_zero) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
           AvgPoolMicrokernelTester()
@@ -1125,7 +1127,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_gt_8_multipass_with_input_scale) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
@@ -1141,7 +1143,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_gt_8_multipass_with_input_zero_point) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
@@ -1157,7 +1159,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_gt_8_multipass_with_output_scale) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
@@ -1173,7 +1175,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_gt_8_multipass_with_output_zero_point) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
@@ -1189,7 +1191,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_gt_8_multipass_with_qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -1203,7 +1205,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__NEON_C8, channels_gt_8_multipass_with_qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2069,7 +2071,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
@@ -2081,7 +2083,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
@@ -2094,7 +2096,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass_with_zero) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2110,7 +2112,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass_with_input_scale) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2125,7 +2127,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass_with_input_zero_point) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2140,7 +2142,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass_with_output_scale) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2155,7 +2157,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass_with_output_zero_point) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2170,7 +2172,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
@@ -2183,7 +2185,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_eq_8_multipass_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
@@ -2195,7 +2197,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_div_8_multipass) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2208,7 +2210,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_div_8_multipass_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2222,7 +2224,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_div_8_multipass_with_zero) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
           AvgPoolMicrokernelTester()
@@ -2239,7 +2241,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_div_8_multipass_with_input_scale) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
@@ -2255,7 +2257,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_div_8_multipass_with_input_zero_point) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
@@ -2271,7 +2273,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_div_8_multipass_with_output_scale) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
@@ -2287,7 +2289,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_div_8_multipass_with_output_zero_point) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
@@ -2303,7 +2305,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_div_8_multipass_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2317,7 +2319,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_div_8_multipass_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 16; channels < 64; channels += 8) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2332,7 +2334,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2346,7 +2348,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2361,7 +2363,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass_with_zero) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
           AvgPoolMicrokernelTester()
@@ -2379,7 +2381,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass_with_input_scale) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
@@ -2396,7 +2398,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass_with_input_zero_point) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
@@ -2413,7 +2415,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass_with_output_scale) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
@@ -2430,7 +2432,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass_with_output_zero_point) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
@@ -2447,7 +2449,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2462,7 +2464,7 @@
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_lt_8_multipass_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
     const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2476,7 +2478,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_gt_8_multipass) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2489,7 +2491,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_gt_8_multipass_with_input_offset) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2503,7 +2505,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_gt_8_multipass_with_zero) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
           AvgPoolMicrokernelTester()
@@ -2520,7 +2522,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_gt_8_multipass_with_input_scale) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
@@ -2536,7 +2538,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_gt_8_multipass_with_input_zero_point) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
@@ -2552,7 +2554,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_gt_8_multipass_with_output_scale) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
@@ -2568,7 +2570,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_gt_8_multipass_with_output_zero_point) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
@@ -2584,7 +2586,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_gt_8_multipass_with_qmin) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2598,7 +2600,7 @@
 
   TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SSE2_C8, channels_gt_8_multipass_with_qmax) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t channels = 9; channels < 16; channels++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -3102,7 +3104,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_twopass_subti
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass) {
   const size_t channel_tile = 1;
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     AvgPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
@@ -3113,7 +3115,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass) {
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_with_input_offset) {
   const size_t channel_tile = 1;
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     AvgPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
@@ -3125,7 +3127,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_wit
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_with_zero) {
   const size_t channel_tile = 1;
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
@@ -3140,7 +3142,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_wit
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_with_input_scale) {
   const size_t channel_tile = 1;
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
@@ -3154,7 +3156,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_wit
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_with_input_zero_point) {
   const size_t channel_tile = 1;
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
@@ -3168,7 +3170,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_wit
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_with_output_scale) {
   const size_t channel_tile = 1;
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
@@ -3182,7 +3184,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_wit
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_with_output_zero_point) {
   const size_t channel_tile = 1;
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
@@ -3196,7 +3198,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_wit
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_with_qmin) {
   const size_t channel_tile = 1;
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     AvgPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
@@ -3208,7 +3210,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_wit
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_with_qmax) {
   const size_t channel_tile = 1;
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     AvgPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
@@ -3219,7 +3221,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_eq_1_multipass_wit
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_multipass) {
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (size_t channels = 2; channels < 10; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
@@ -3231,7 +3233,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_multipass) {
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_multipass_with_input_offset) {
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (size_t channels = 2; channels < 10; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
@@ -3244,7 +3246,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_multipass_wit
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_multipass_with_zero) {
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (size_t channels = 2; channels < 10; channels++) {
       for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
         AvgPoolMicrokernelTester()
@@ -3260,7 +3262,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_multipass_wit
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_multipass_with_input_scale) {
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (size_t channels = 2; channels < 10; channels++) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
@@ -3275,7 +3277,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_multipass_wit
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_multipass_with_input_zero_point) {
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (size_t channels = 2; channels < 10; channels++) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
@@ -3290,7 +3292,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_multipass_wit
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_multipass_with_output_scale) {
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (size_t channels = 2; channels < 10; channels++) {
       for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
         AvgPoolMicrokernelTester()
@@ -3305,7 +3307,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_multipass_wit
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_multipass_with_output_zero_point) {
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (size_t channels = 2; channels < 10; channels++) {
       for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
         AvgPoolMicrokernelTester()
@@ -3320,7 +3322,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_multipass_wit
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_multipass_with_qmin) {
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (size_t channels = 2; channels < 10; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
@@ -3333,7 +3335,7 @@ TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_multipass_wit
 }
 
 TEST(QU8_AVGPOOL_MINMAX_FP32_9P8X__SCALAR_IMAGIC_C1, channels_gt_1_multipass_with_qmax) {
-  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+  for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     for (size_t channels = 2; channels < 10; channels++) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)

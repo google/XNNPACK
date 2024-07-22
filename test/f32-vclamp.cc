@@ -10,6 +10,7 @@
 
 #include <array>
 #include <cmath>
+#include <cstdint>
 #include <cstddef>
 #include <limits>
 
@@ -20,6 +21,7 @@
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/vunary.h"
+#include "next_prime.h"
 #include "vunary-microkernel-tester.h"
 
 
@@ -75,7 +77,7 @@
   TEST(F32_VCLAMP__NEON_U4, qmin) {
     TEST_REQUIRES_ARM_NEON;
     const size_t batch_step = 4;
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 3) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -88,7 +90,7 @@
   TEST(F32_VCLAMP__NEON_U4, qmax) {
     TEST_REQUIRES_ARM_NEON;
     const size_t batch_step = 4;
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 3) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -152,7 +154,7 @@
   TEST(F32_VCLAMP__NEON_U8, qmin) {
     TEST_REQUIRES_ARM_NEON;
     const size_t batch_step = 8;
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -165,7 +167,7 @@
   TEST(F32_VCLAMP__NEON_U8, qmax) {
     TEST_REQUIRES_ARM_NEON;
     const size_t batch_step = 8;
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -229,7 +231,7 @@
   TEST(F32_VCLAMP__NEON_U16, qmin) {
     TEST_REQUIRES_ARM_NEON;
     const size_t batch_step = 16;
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 15) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -242,7 +244,7 @@
   TEST(F32_VCLAMP__NEON_U16, qmax) {
     TEST_REQUIRES_ARM_NEON;
     const size_t batch_step = 16;
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 15) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -306,8 +308,8 @@
   TEST(F32_VCLAMP__RVV_U1V, qmin) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t batch_step = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 9) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
+      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += batch_step - 1) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmin(qmin)
@@ -319,8 +321,8 @@
   TEST(F32_VCLAMP__RVV_U1V, qmax) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t batch_step = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 9) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
+      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += batch_step - 1) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmax(qmax)
@@ -383,8 +385,8 @@
   TEST(F32_VCLAMP__RVV_U2V, qmin) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t batch_step = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 19) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
+      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += batch_step - 1) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmin(qmin)
@@ -396,8 +398,8 @@
   TEST(F32_VCLAMP__RVV_U2V, qmax) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t batch_step = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 19) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
+      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += batch_step - 1) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmax(qmax)
@@ -460,8 +462,8 @@
   TEST(F32_VCLAMP__RVV_U4V, qmin) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t batch_step = 4 * xnn_init_hardware_config()->vlenb / sizeof(float);
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 39) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
+      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += batch_step - 1) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmin(qmin)
@@ -473,8 +475,8 @@
   TEST(F32_VCLAMP__RVV_U4V, qmax) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t batch_step = 4 * xnn_init_hardware_config()->vlenb / sizeof(float);
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 39) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
+      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += batch_step - 1) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmax(qmax)
@@ -537,8 +539,8 @@
   TEST(F32_VCLAMP__RVV_U8V, qmin) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t batch_step = 8 * xnn_init_hardware_config()->vlenb / sizeof(float);
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 79) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
+      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += batch_step - 1) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmin(qmin)
@@ -550,8 +552,8 @@
   TEST(F32_VCLAMP__RVV_U8V, qmax) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t batch_step = 8 * xnn_init_hardware_config()->vlenb / sizeof(float);
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 79) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
+      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += batch_step - 1) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmax(qmax)
@@ -614,7 +616,7 @@
   TEST(F32_VCLAMP__SSE_U4, qmin) {
     TEST_REQUIRES_X86_SSE;
     const size_t batch_step = 4;
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 3) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -627,7 +629,7 @@
   TEST(F32_VCLAMP__SSE_U4, qmax) {
     TEST_REQUIRES_X86_SSE;
     const size_t batch_step = 4;
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 3) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -691,7 +693,7 @@
   TEST(F32_VCLAMP__SSE_U8, qmin) {
     TEST_REQUIRES_X86_SSE;
     const size_t batch_step = 8;
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -704,7 +706,7 @@
   TEST(F32_VCLAMP__SSE_U8, qmax) {
     TEST_REQUIRES_X86_SSE;
     const size_t batch_step = 8;
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -768,7 +770,7 @@
   TEST(F32_VCLAMP__AVX_U8, qmin) {
     TEST_REQUIRES_X86_AVX;
     const size_t batch_step = 8;
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -781,7 +783,7 @@
   TEST(F32_VCLAMP__AVX_U8, qmax) {
     TEST_REQUIRES_X86_AVX;
     const size_t batch_step = 8;
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -845,7 +847,7 @@
   TEST(F32_VCLAMP__AVX_U16, qmin) {
     TEST_REQUIRES_X86_AVX;
     const size_t batch_step = 16;
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 15) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -858,7 +860,7 @@
   TEST(F32_VCLAMP__AVX_U16, qmax) {
     TEST_REQUIRES_X86_AVX;
     const size_t batch_step = 16;
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 15) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -922,7 +924,7 @@
   TEST(F32_VCLAMP__AVX512F_U16, qmin) {
     TEST_REQUIRES_X86_AVX512F;
     const size_t batch_step = 16;
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 15) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -935,7 +937,7 @@
   TEST(F32_VCLAMP__AVX512F_U16, qmax) {
     TEST_REQUIRES_X86_AVX512F;
     const size_t batch_step = 16;
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 15) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -999,7 +1001,7 @@
   TEST(F32_VCLAMP__AVX512F_U32, qmin) {
     TEST_REQUIRES_X86_AVX512F;
     const size_t batch_step = 32;
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 31) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -1012,7 +1014,7 @@
   TEST(F32_VCLAMP__AVX512F_U32, qmax) {
     TEST_REQUIRES_X86_AVX512F;
     const size_t batch_step = 32;
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 31) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -1070,7 +1072,7 @@
 
   TEST(F32_VCLAMP__WASMSIMD_ARM_U4, qmin) {
     const size_t batch_step = 4;
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 3) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -1082,7 +1084,7 @@
 
   TEST(F32_VCLAMP__WASMSIMD_ARM_U4, qmax) {
     const size_t batch_step = 4;
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 3) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -1140,7 +1142,7 @@
 
   TEST(F32_VCLAMP__WASMSIMD_ARM_U8, qmin) {
     const size_t batch_step = 8;
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -1152,7 +1154,7 @@
 
   TEST(F32_VCLAMP__WASMSIMD_ARM_U8, qmax) {
     const size_t batch_step = 8;
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -1210,7 +1212,7 @@
 
   TEST(F32_VCLAMP__WASMSIMD_X86_U4, qmin) {
     const size_t batch_step = 4;
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 3) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -1222,7 +1224,7 @@
 
   TEST(F32_VCLAMP__WASMSIMD_X86_U4, qmax) {
     const size_t batch_step = 4;
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 3) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -1280,7 +1282,7 @@
 
   TEST(F32_VCLAMP__WASMSIMD_X86_U8, qmin) {
     const size_t batch_step = 8;
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -1292,7 +1294,7 @@
 
   TEST(F32_VCLAMP__WASMSIMD_X86_U8, qmax) {
     const size_t batch_step = 8;
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 7) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -1332,7 +1334,7 @@
 
   TEST(F32_VCLAMP__WASM_U1, qmin) {
     const size_t batch_step = 1;
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 1) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -1344,7 +1346,7 @@
 
   TEST(F32_VCLAMP__WASM_U1, qmax) {
     const size_t batch_step = 1;
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 1) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -1402,7 +1404,7 @@
 
   TEST(F32_VCLAMP__WASM_U2, qmin) {
     const size_t batch_step = 2;
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 1) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -1414,7 +1416,7 @@
 
   TEST(F32_VCLAMP__WASM_U2, qmax) {
     const size_t batch_step = 2;
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 1) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -1472,7 +1474,7 @@
 
   TEST(F32_VCLAMP__WASM_U4, qmin) {
     const size_t batch_step = 4;
-    for (uint8_t qmin = 1; qmin < 255; qmin++) {
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 3) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -1484,7 +1486,7 @@
 
   TEST(F32_VCLAMP__WASM_U4, qmax) {
     const size_t batch_step = 4;
-    for (uint8_t qmax = 1; qmax < 255; qmax++) {
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 3) {
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -1523,7 +1525,7 @@ TEST(F32_VCLAMP__SCALAR_U1, inplace) {
 
 TEST(F32_VCLAMP__SCALAR_U1, qmin) {
   const size_t batch_step = 1;
-  for (uint8_t qmin = 1; qmin < 255; qmin++) {
+  for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
     for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 1) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1535,7 +1537,7 @@ TEST(F32_VCLAMP__SCALAR_U1, qmin) {
 
 TEST(F32_VCLAMP__SCALAR_U1, qmax) {
   const size_t batch_step = 1;
-  for (uint8_t qmax = 1; qmax < 255; qmax++) {
+  for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
     for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 1) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1591,7 +1593,7 @@ TEST(F32_VCLAMP__SCALAR_U2, inplace) {
 
 TEST(F32_VCLAMP__SCALAR_U2, qmin) {
   const size_t batch_step = 2;
-  for (uint8_t qmin = 1; qmin < 255; qmin++) {
+  for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
     for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 1) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1603,7 +1605,7 @@ TEST(F32_VCLAMP__SCALAR_U2, qmin) {
 
 TEST(F32_VCLAMP__SCALAR_U2, qmax) {
   const size_t batch_step = 2;
-  for (uint8_t qmax = 1; qmax < 255; qmax++) {
+  for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
     for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 1) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1659,7 +1661,7 @@ TEST(F32_VCLAMP__SCALAR_U4, inplace) {
 
 TEST(F32_VCLAMP__SCALAR_U4, qmin) {
   const size_t batch_step = 4;
-  for (uint8_t qmin = 1; qmin < 255; qmin++) {
+  for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {
     for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 3) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
@@ -1671,7 +1673,7 @@ TEST(F32_VCLAMP__SCALAR_U4, qmin) {
 
 TEST(F32_VCLAMP__SCALAR_U4, qmax) {
   const size_t batch_step = 4;
-  for (uint8_t qmax = 1; qmax < 255; qmax++) {
+  for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {
     for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 3) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)

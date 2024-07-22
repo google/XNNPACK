@@ -124,6 +124,7 @@ enum xnn_status xnn_define_tensor_value(
   switch (datatype) {
     case xnn_datatype_fp32:
     case xnn_datatype_fp16:
+    case xnn_datatype_int32:
       break;
     default:
       xnn_log_error("failed to create Dense Tensor value: unsupported datatype %s (%d)",
@@ -529,6 +530,7 @@ size_t xnn_tensor_get_size(const struct xnn_value* value)
       break;
     case xnn_datatype_qint32:
     case xnn_datatype_qcint32:
+    case xnn_datatype_int32:
       size = 4;
       break;
     case xnn_datatype_invalid:

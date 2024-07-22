@@ -1,0 +1,80 @@
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$BATCH_TILES = tuple(int(bt) for bt in BATCH_TILES.split(","))
+$SIMD_SIZE = BATCH_TILES[0]
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "xnnpack/simd/s32-${ARCH}.h"
+
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
+#include "xnnpack/vunary.h"
+
+$for BATCH_TILE in BATCH_TILES:
+  $assert BATCH_TILE % SIMD_SIZE == 0
+  $assert BATCH_TILE >= SIMD_SIZE
+  $SIMD_TILE = BATCH_TILE // SIMD_SIZE
+
+  void xnn_s32_vmul_ukernel__${ARCH}_u${BATCH_TILE}(
+      size_t batch,
+      const int32_t* input_a,
+      const int32_t* input_b,
+      int32_t* output,
+      const union xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+  {
+    assert(batch != 0);
+    assert(batch % sizeof(int32_t) == 0);
+    assert(input_b != NULL);
+    assert(input_a != NULL);
+    assert(output != NULL);
+    assert(xnn_simd_size_s32 == ${SIMD_SIZE});
+
+    $if SIMD_TILE > 1:
+      for (; batch >= ${BATCH_TILE} * sizeof(int32_t); batch -= ${BATCH_TILE} * sizeof(int32_t)) {
+        xnn_simd_s32_t vin1_${ABC[0]} = xnn_loadu_s32(input_a);
+        $for N in range(1, SIMD_TILE):
+          xnn_simd_s32_t vin1_${ABC[N]} = xnn_loadu_s32(input_a + ${N} * xnn_simd_size_s32);
+        input_a += ${BATCH_TILE};
+
+        xnn_simd_s32_t vin2_${ABC[0]} = xnn_loadu_s32(input_b);
+        $for N in range(1, SIMD_TILE):
+          xnn_simd_s32_t vin2_${ABC[N]} = (xnn_loadu_s32(input_b + ${N} * xnn_simd_size_s32));
+        input_b += ${BATCH_TILE};
+
+        $for N in range(0, SIMD_TILE):
+          xnn_simd_s32_t vy_${ABC[N]} = xnn_mul_s32(vin1_${ABC[N]}, vin2_${ABC[N]});
+
+        xnn_storeu_s32(output, vy_${ABC[0]});
+        $for N in range(1, SIMD_TILE):
+          xnn_storeu_s32(output + ${N} * xnn_simd_size_s32, vy_${ABC[N]});
+        output += ${BATCH_TILE};
+      }
+    for (; batch >= xnn_simd_bytes_s32; batch -= xnn_simd_bytes_s32) {
+      xnn_simd_s32_t vin1 = xnn_loadu_s32(input_a);
+      input_a += xnn_simd_size_s32;
+
+      xnn_simd_s32_t vin2 = xnn_loadu_s32(input_b);
+      input_b += xnn_simd_size_s32;
+
+      xnn_simd_s32_t vy = xnn_mul_s32(vin1, vin2);
+
+      xnn_storeu_s32(output, vy);
+      output += xnn_simd_size_s32;
+    }
+    $if SIMD_SIZE > 1:
+      if XNN_UNLIKELY(batch != 0) {
+        xnn_simd_s32_t vin1 = xnn_load_tail_s32(input_a, batch >> XNN_LOG2_SIZEOF_INT32_T);
+
+        xnn_simd_s32_t vin2 = xnn_load_tail_s32(input_b, batch >> XNN_LOG2_SIZEOF_INT32_T);
+
+        xnn_simd_s32_t vy = xnn_mul_s32(vin1, vin2);
+
+        xnn_store_tail_s32(output, vy, batch >> XNN_LOG2_SIZEOF_INT32_T);
+      }
+  }

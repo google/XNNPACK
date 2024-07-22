@@ -33,7 +33,7 @@ extern "C" {
 
 /// Allow sparse inference in a Runtime.
 ///
-/// Note: this flag hints XNNPACK to consider sparse inference, but does not guarantee it.
+/// Note: this flag is a hint to XNNPACK that it should consider sparse inference, but does not guarantee it.
 #define XNN_FLAG_HINT_SPARSE_INFERENCE 0x00000001
 
 /// Allow IEEE FP16 inference in a Runtime.
@@ -156,7 +156,7 @@ struct xnn_allocator {
   /// @returns Pointer to the allocated memory block of at least @ref size bytes.
   ///          If allocation fails, the function must return NULL.
   void* (*aligned_allocate)(void* context, size_t alignment, size_t size);
-  /// Pointer to a function to be called for aligned memory de-allocation.
+  /// Pointer to a function to be called for aligned memory deallocation.
   ///
   /// @param context - The user-specified pointer from xnn_allocator structure.
   /// @param pointer - Pointer to a memory block allocated by @ref aligned_allocate function. Can be NULL.
@@ -266,6 +266,9 @@ enum xnn_datatype {
   /// Dynamically quantized 8-bit signed integers packed with their per-row
   /// quantization parameters.
   xnn_datatype_qpint8 = 10,
+
+  /// 32-bit signed integers.
+  xnn_datatype_int32 = 11,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.
@@ -981,13 +984,19 @@ enum xnn_status xnn_define_add2(
   uint32_t output_id,
   uint32_t flags);
 
+enum xnn_status xnn_define_multiply2(
+  xnn_subgraph_t subgraph,
+  float output_min,
+  float output_max,
+  uint32_t input1_id,
+  uint32_t input2_id,
+  uint32_t output_id,
+  uint32_t flags);
 /// Define a 2-Input Multiply Node and add it to a Subgraph.
 ///
 /// The 2-Input Multiply Node computes elementwise multiplication of two tensor inputs with numpy broadcasting rules.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param output_min - lower bound for clipping output values.
-/// @param output_max - upper bound for clipping output values.
 /// @param input1_id - Value ID for the first input tensor. The input tensor must be an N-dimensional tensor defined in
 ///                    the @a subgraph with each dimension either equal to the corresponding dimension of the second
 ///                    input, or equal to 1. In the latter case, the elements of the input tensor are broadcasted along
@@ -1000,10 +1009,8 @@ enum xnn_status xnn_define_add2(
 ///                    in the @a subgraph with each dimension equal to the maximum between the corresponding dimension
 ///                    of the two inputs.
 /// @param flags - binary features of the Multiply Node. No supported flags are currently defined.
-enum xnn_status xnn_define_multiply2(
+enum xnn_status xnn_define_multiply2_v2(
   xnn_subgraph_t subgraph,
-  float output_min,
-  float output_max,
   uint32_t input1_id,
   uint32_t input2_id,
   uint32_t output_id,
@@ -2282,6 +2289,26 @@ enum xnn_status xnn_run_add_nd_f32(
   float output_max,
   uint32_t flags,
   pthreadpool_t threadpool);
+
+
+enum xnn_status xnn_create_multiply_nd_s32(
+  uint32_t flags,
+  xnn_operator_t* multiply_op_out);
+
+enum xnn_status xnn_reshape_multiply_nd_s32(
+  xnn_operator_t mul_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_multiply_nd_s32(
+  xnn_operator_t mul_op,
+  const int32_t* input1,
+  const int32_t* input2,
+  int32_t* output);
+
 
 enum xnn_status xnn_create_add_nd_qs8(
   int8_t input1_zero_point,

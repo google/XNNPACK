@@ -754,7 +754,7 @@ $if INCREMENTAL_TILE == 0:
       }
     $else:
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
         AvgPoolMicrokernelTester()
           .pooling_elements(${PRIMARY_TILE})
           .pooling_tile(${PRIMARY_TILE})
@@ -777,7 +777,7 @@ $if INCREMENTAL_TILE == 0:
       }
     $else:
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
         AvgPoolMicrokernelTester()
           .pooling_elements(${PRIMARY_TILE})
           .pooling_tile(${PRIMARY_TILE})
@@ -804,7 +804,7 @@ $if INCREMENTAL_TILE == 0:
       }
     $else:
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
         for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
           AvgPoolMicrokernelTester()
             .pooling_elements(${PRIMARY_TILE})
@@ -834,7 +834,7 @@ $if INCREMENTAL_TILE == 0:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
             AvgPoolMicrokernelTester()
               .pooling_elements(${PRIMARY_TILE})
@@ -862,7 +862,7 @@ $if INCREMENTAL_TILE == 0:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
             AvgPoolMicrokernelTester()
               .pooling_elements(${PRIMARY_TILE})
@@ -890,7 +890,7 @@ $if INCREMENTAL_TILE == 0:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
             AvgPoolMicrokernelTester()
               .pooling_elements(${PRIMARY_TILE})
@@ -918,7 +918,7 @@ $if INCREMENTAL_TILE == 0:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
             AvgPoolMicrokernelTester()
               .pooling_elements(${PRIMARY_TILE})
@@ -944,7 +944,7 @@ $if INCREMENTAL_TILE == 0:
       }
     $else:
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
         AvgPoolMicrokernelTester()
           .pooling_elements(${PRIMARY_TILE})
           .pooling_tile(${PRIMARY_TILE})
@@ -968,7 +968,7 @@ $if INCREMENTAL_TILE == 0:
       }
     $else:
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
         AvgPoolMicrokernelTester()
           .pooling_elements(${PRIMARY_TILE})
           .pooling_tile(${PRIMARY_TILE})
@@ -992,7 +992,7 @@ $if INCREMENTAL_TILE == 0:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE})
@@ -1017,7 +1017,7 @@ $if INCREMENTAL_TILE == 0:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE})
@@ -1046,7 +1046,7 @@ $if INCREMENTAL_TILE == 0:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
             AvgPoolMicrokernelTester()
               .pooling_elements(pooling_elements)
@@ -1401,8 +1401,8 @@ $if INCREMENTAL_TILE == 0:
           }
         $else:
           const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-          for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
-            for (size_t step = 2; step <= pooling_elements; step++) {
+          for (size_t channels = 1; channels <= 3 * channel_tile; channels += channel_tile-1) {
+            for (size_t step = 2; step <= pooling_elements; step = xnnpack::NextPrime(step)) {
               AvgPoolMicrokernelTester()
                 .output_pixels(output_pixels)
                 .pooling_elements(pooling_elements)
@@ -2124,7 +2124,7 @@ $else:
       }
     $else:
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
         AvgPoolMicrokernelTester()
           .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -2147,7 +2147,7 @@ $else:
       }
     $else:
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
         AvgPoolMicrokernelTester()
           .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -2174,7 +2174,7 @@ $else:
       }
     $else:
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
         for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
           AvgPoolMicrokernelTester()
             .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
@@ -2204,7 +2204,7 @@ $else:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
             AvgPoolMicrokernelTester()
               .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
@@ -2232,7 +2232,7 @@ $else:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
             AvgPoolMicrokernelTester()
               .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
@@ -2260,7 +2260,7 @@ $else:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
             AvgPoolMicrokernelTester()
               .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
@@ -2288,7 +2288,7 @@ $else:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
             AvgPoolMicrokernelTester()
               .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
@@ -2314,7 +2314,7 @@ $else:
       }
     $else:
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
         AvgPoolMicrokernelTester()
           .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -2338,7 +2338,7 @@ $else:
       }
     $else:
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
         AvgPoolMicrokernelTester()
           .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -2362,7 +2362,7 @@ $else:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -2387,7 +2387,7 @@ $else:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -2416,7 +2416,7 @@ $else:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
             AvgPoolMicrokernelTester()
               .pooling_elements(pooling_elements)
@@ -2434,7 +2434,7 @@ $else:
     $if ISA_CHECK:
       ${ISA_CHECK};
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -2447,7 +2447,7 @@ $else:
     $if ISA_CHECK:
       ${ISA_CHECK};
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -2464,7 +2464,7 @@ $else:
     $if ISA_CHECK:
       ${ISA_CHECK};
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
         AvgPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
@@ -2485,7 +2485,7 @@ $else:
       $if ISA_CHECK:
         ${ISA_CHECK};
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -2501,7 +2501,7 @@ $else:
       $if ISA_CHECK:
         ${ISA_CHECK};
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -2517,7 +2517,7 @@ $else:
       $if ISA_CHECK:
         ${ISA_CHECK};
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -2533,7 +2533,7 @@ $else:
       $if ISA_CHECK:
         ${ISA_CHECK};
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -2549,7 +2549,7 @@ $else:
     $if ISA_CHECK:
       ${ISA_CHECK};
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -2563,7 +2563,7 @@ $else:
     $if ISA_CHECK:
       ${ISA_CHECK};
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       AvgPoolMicrokernelTester()
         .pooling_elements(pooling_elements)
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -2577,7 +2577,7 @@ $else:
     TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
           for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
             AvgPoolMicrokernelTester()
@@ -2601,7 +2601,7 @@ $else:
     TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_input_offset) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
           for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
             AvgPoolMicrokernelTester()
@@ -2627,7 +2627,7 @@ $else:
     TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_zero) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
           for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
             for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
@@ -2660,7 +2660,7 @@ $else:
       TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_input_scale) {
         $if ISA_CHECK:
           ${ISA_CHECK};
-        for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+        for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
           $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
             for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
               for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
@@ -2690,7 +2690,7 @@ $else:
       TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_input_zero_point) {
         $if ISA_CHECK:
           ${ISA_CHECK};
-        for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+        for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
           $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
             for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
               for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
@@ -2720,7 +2720,7 @@ $else:
       TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_output_scale) {
         $if ISA_CHECK:
           ${ISA_CHECK};
-        for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+        for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
           $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
             for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
               for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
@@ -2750,7 +2750,7 @@ $else:
       TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_output_zero_point) {
         $if ISA_CHECK:
           ${ISA_CHECK};
-        for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+        for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
           $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
             for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
               for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
@@ -2780,7 +2780,7 @@ $else:
     TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_qmin) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
           for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
             AvgPoolMicrokernelTester()
@@ -2806,7 +2806,7 @@ $else:
     TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_qmax) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
           for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
             AvgPoolMicrokernelTester()
@@ -2833,7 +2833,7 @@ $else:
       $if ISA_CHECK:
         ${ISA_CHECK};
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         for (size_t channels = 1; channels < channel_tile; channels++) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -2848,7 +2848,7 @@ $else:
       $if ISA_CHECK:
         ${ISA_CHECK};
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         for (size_t channels = 1; channels < channel_tile; channels++) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -2864,7 +2864,7 @@ $else:
       $if ISA_CHECK:
         ${ISA_CHECK};
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         for (size_t channels = 1; channels < channel_tile; channels++) {
           for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
             AvgPoolMicrokernelTester()
@@ -2884,7 +2884,7 @@ $else:
         $if ISA_CHECK:
           ${ISA_CHECK};
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+        for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
           for (size_t channels = 1; channels < channel_tile; channels++) {
             for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
               AvgPoolMicrokernelTester()
@@ -2902,7 +2902,7 @@ $else:
         $if ISA_CHECK:
           ${ISA_CHECK};
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+        for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
           for (size_t channels = 1; channels < channel_tile; channels++) {
             for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
               AvgPoolMicrokernelTester()
@@ -2920,7 +2920,7 @@ $else:
         $if ISA_CHECK:
           ${ISA_CHECK};
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+        for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
           for (size_t channels = 1; channels < channel_tile; channels++) {
             for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
               AvgPoolMicrokernelTester()
@@ -2938,7 +2938,7 @@ $else:
         $if ISA_CHECK:
           ${ISA_CHECK};
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+        for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
           for (size_t channels = 1; channels < channel_tile; channels++) {
             for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
               AvgPoolMicrokernelTester()
@@ -2956,7 +2956,7 @@ $else:
       $if ISA_CHECK:
         ${ISA_CHECK};
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         for (size_t channels = 1; channels < channel_tile; channels++) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -2972,7 +2972,7 @@ $else:
       $if ISA_CHECK:
         ${ISA_CHECK};
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         for (size_t channels = 1; channels < channel_tile; channels++) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
@@ -2987,7 +2987,7 @@ $else:
   TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
         for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
           AvgPoolMicrokernelTester()
@@ -2998,7 +2998,7 @@ $else:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -3011,7 +3011,7 @@ $else:
   TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_input_offset) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
         for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
           AvgPoolMicrokernelTester()
@@ -3023,7 +3023,7 @@ $else:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -3037,7 +3037,7 @@ $else:
   TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_zero) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
         for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
           for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
@@ -3052,7 +3052,7 @@ $else:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
             AvgPoolMicrokernelTester()
               .pooling_elements(pooling_elements)
@@ -3070,7 +3070,7 @@ $else:
     TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_input_scale) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
           for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
             for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
@@ -3084,7 +3084,7 @@ $else:
           }
         $else:
           const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-          for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+          for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
             for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
               AvgPoolMicrokernelTester()
                 .pooling_elements(pooling_elements)
@@ -3100,7 +3100,7 @@ $else:
     TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_input_zero_point) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
           for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
             for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
@@ -3114,7 +3114,7 @@ $else:
           }
         $else:
           const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-          for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+          for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
             for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
               AvgPoolMicrokernelTester()
                 .pooling_elements(pooling_elements)
@@ -3130,7 +3130,7 @@ $else:
     TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_output_scale) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
           for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
             for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
@@ -3144,7 +3144,7 @@ $else:
           }
         $else:
           const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-          for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+          for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
             for (float scale = 0.01f; scale < 100.0f; scale *= 3.14159265f) {
               AvgPoolMicrokernelTester()
                 .pooling_elements(pooling_elements)
@@ -3160,7 +3160,7 @@ $else:
     TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_output_zero_point) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
           for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
             for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
@@ -3174,7 +3174,7 @@ $else:
           }
         $else:
           const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-          for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+          for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
             for (int32_t zero_point = 0; zero_point <= 255; zero_point += 51) {
               AvgPoolMicrokernelTester()
                 .pooling_elements(pooling_elements)
@@ -3190,7 +3190,7 @@ $else:
   TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_qmin) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
         for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
           AvgPoolMicrokernelTester()
@@ -3202,7 +3202,7 @@ $else:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -3216,7 +3216,7 @@ $else:
   TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_qmax) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
         for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
           AvgPoolMicrokernelTester()
@@ -3228,7 +3228,7 @@ $else:
         }
       $else:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
           AvgPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -3580,8 +3580,8 @@ $else:
           }
         $else:
           const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-          for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
-            for (size_t step = 2; step <= pooling_elements; step++) {
+          for (size_t channels = 1; channels <= 3 * channel_tile; channels += channel_tile-1) {
+            for (size_t step = 2; step <= pooling_elements; step = xnnpack::NextPrime(step)) {
               AvgPoolMicrokernelTester()
                 .output_pixels(output_pixels)
                 .pooling_elements(pooling_elements)
@@ -3667,6 +3667,7 @@ def main(args):
 
 
 #include <cstddef>
+#include <vector>
 
 #include <gtest/gtest.h>
 #include "xnnpack/avgpool.h"
@@ -3675,6 +3676,7 @@ def main(args):
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pavgpool.h"
 #include "avgpool-microkernel-tester.h"
+#include "next_prime.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:
