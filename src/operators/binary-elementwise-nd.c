@@ -758,6 +758,72 @@ enum xnn_status xnn_create_squared_difference_nd_f32(
     squared_difference_op_out);
 }
 
+enum xnn_status xnn_create_multiply_nd_s16(
+    int16_t input1_zero_point,
+    float input1_scale,
+    int16_t input2_zero_point,
+    float input2_scale,
+    int16_t output_zero_point,
+    float output_scale,
+    uint32_t flags,
+    xnn_operator_t* multiply_op_out)
+{
+   if (input1_scale <= 0.0f || !isnormal(input1_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input 1 scale: scale must be finite and positive",
+      xnn_operator_type_to_string(xnn_operator_type_multiply_nd_s16), input1_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (input2_scale <= 0.0f || !isnormal(input2_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input 2 scale: scale must be finite and positive",
+      xnn_operator_type_to_string(xnn_operator_type_multiply_nd_s16), input2_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_scale <= 0.0f || !isnormal(output_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g output scale: scale must be finite and positive",
+      xnn_operator_type_to_string(xnn_operator_type_multiply_nd_s16), output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  const float product_scale = input1_scale * input2_scale;
+  const float product_output_scale = product_scale / output_scale;
+  if (product_output_scale < 0x1.0p-16f || product_output_scale >= 0x1.0p+8f) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g product-to-output scale ratio: scale ratio must be in [2**-16, 2**8) range",
+      xnn_operator_type_to_string(xnn_operator_type_multiply_nd_s16), product_output_scale);
+    return xnn_status_unsupported_parameter;
+  }
+
+  const struct xnn_binary_elementwise_config* s16_vmul_config = xnn_init_s16_vmul_config();
+  if (s16_vmul_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+      xnn_operator_type_to_string(xnn_operator_type_multiply_nd_s16));
+    return xnn_status_unsupported_hardware;
+  }
+
+  union xnn_s16_cvt_params params;
+  union xnn_s16_cvt_params params2;
+  assert(s16_vmul_config->init.s16_cvt != NULL);
+  s16_vmul_config->init.s16_cvt(
+    &params, input1_zero_point, input2_zero_point, output_zero_point,
+    product_output_scale);
+  s16_vmul_config->init.s16_cvt(
+    &params2, input2_zero_point, input1_zero_point, output_zero_point,
+    product_output_scale);
+
+  return create_binary_elementwise_nd(
+    flags,
+    &params,
+    &params2,
+    sizeof(params),
+    xnn_operator_type_multiply_nd_s16,
+    &s16_vmul_config->linear,
+    multiply_op_out);
+}
 
 enum xnn_status xnn_create_multiply_nd_s32(
     uint32_t flags,
@@ -1497,6 +1563,24 @@ enum xnn_status xnn_reshape_squared_difference_nd_f32(
     threadpool);
 }
 
+enum xnn_status xnn_reshape_multiply_nd_s16(
+    xnn_operator_t mul_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    pthreadpool_t threadpool)
+{
+
+  return reshape_binary_elementwise_nd(
+    mul_op, xnn_operator_type_multiply_nd_s16,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_INT16_T,
+    &mul_op->params.s16_cvt, sizeof(mul_op->params.s16_cvt),
+    &mul_op->params.s16_cvt, sizeof(mul_op->params.s16_cvt),
+    threadpool);
+}
 
 enum xnn_status xnn_reshape_multiply_nd_s32(
     xnn_operator_t mul_op,
@@ -1824,6 +1908,16 @@ enum xnn_status xnn_setup_subtract_nd_f16(
     input1, input2, output);
 }
 
+enum xnn_status xnn_setup_multiply_nd_s16(
+    xnn_operator_t mul_op,
+    const int16_t* input1,
+    const int16_t* input2,
+    int16_t* output)
+{
+  return setup_binary_elementwise_nd(
+    mul_op, xnn_operator_type_multiply_nd_s16,
+    input1, input2, output);
+}
 
 enum xnn_status xnn_setup_multiply_nd_s32(
     xnn_operator_t mul_op,
