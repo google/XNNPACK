@@ -15,9 +15,10 @@
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
 #include "xnnpack/unaligned.h"
+#include "xnnpack/prefetch.h"
 
 
-void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x16c8__avx512skx_madd(
+void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x16c8__avx512skx_madd_prfm(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -108,6 +109,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x16c8__avx512skx_madd(
       vacc1x89ABCDEF = _mm512_dpbusd_epi32_bw(vacc1x89ABCDEF, va1x01234567, vb89ABCDEFx01234567);
       vacc2x01234567 = _mm512_dpbusd_epi32_bw(vacc2x01234567, va2x01234567, vb01234567x01234567);
       vacc2x89ABCDEF = _mm512_dpbusd_epi32_bw(vacc2x89ABCDEF, va2x01234567, vb89ABCDEFx01234567);
+      xnn_prefetch_to_l1((const int8_t*) w + 896);
+      xnn_prefetch_to_l1((const int8_t*) w + 960);
       vacc1x0x01234567 = _mm512_dpbusd_epi32_bw(vacc1x0x01234567, va0x89ABCDEF, vb01234567x89ABCDEF);
       vacc1x0x89ABCDEF = _mm512_dpbusd_epi32_bw(vacc1x0x89ABCDEF, va0x89ABCDEF, vb89ABCDEFx89ABCDEF);
       vacc1x1x01234567 = _mm512_dpbusd_epi32_bw(vacc1x1x01234567, va1x89ABCDEF, vb01234567x89ABCDEF);
@@ -138,6 +141,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x16c8__avx512skx_madd(
       vacc1x89ABCDEF = _mm512_dpbusd_epi32_bw(vacc1x89ABCDEF, va1x01234567, vb89ABCDEFx01234567);
       vacc2x01234567 = _mm512_dpbusd_epi32_bw(vacc2x01234567, va2x01234567, vb01234567x01234567);
       vacc2x89ABCDEF = _mm512_dpbusd_epi32_bw(vacc2x89ABCDEF, va2x01234567, vb89ABCDEFx01234567);
+      xnn_prefetch_to_l1((const int8_t*) w + 896);
+      xnn_prefetch_to_l1((const int8_t*) w + 960);
 
       w = (const int8_t*) w + 128;
       k -= 8 * sizeof(int8_t);

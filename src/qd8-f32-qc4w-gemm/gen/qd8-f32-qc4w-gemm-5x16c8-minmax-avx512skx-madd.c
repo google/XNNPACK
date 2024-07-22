@@ -16,19 +16,6 @@
 #include "xnnpack/math.h"
 #include "xnnpack/unaligned.h"
 
-// VNNI replacement that uses vpmaddubsw
-static XNN_INTRINSIC __m512i _mm512_dpbusd_epi32_bw(__m512i i32, const __m512i u8, const __m512i i8) {
-  const __m512i ones = _mm512_set1_epi16(1);
-  const __m512i highest_bit = _mm512_set1_epi8(0x80);
-
-  __m512i s1 = _mm512_maddubs_epi16(_mm512_and_si512(u8, highest_bit), i8);
-  __m512i s2 = _mm512_maddubs_epi16(_mm512_andnot_si512(highest_bit, u8), i8);
-
-  s1 = _mm512_madd_epi16(s1, ones);
-  s2 = _mm512_madd_epi16(s2, ones);
-
-  return _mm512_add_epi32(_mm512_add_epi32(s1, s2), i32);
-}
 
 void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x16c8__avx512skx_madd(
     size_t mr,
