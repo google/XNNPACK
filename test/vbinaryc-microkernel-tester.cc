@@ -305,11 +305,12 @@ void VBinaryCMicrokernelTester::Test(
     xnn_s16_vbinary_ukernel_fn vbinary, OpType op_type,
     xnn_init_s16_cvt_params_fn init_params) const {
   xnnpack::ReplicableRandomDevice rng;
-  std::uniform_int_distribution<int16_t> s16dist(0, 65535);
+  std::uniform_int_distribution<int32_t> s16dist(
+        0, std::numeric_limits<int16_t>::max());
 
   std::vector<int16_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int16_t));
   int16_t b = s16dist(rng);
-  std::vector<int16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(int32_t) : 0));
+  std::vector<int16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(int16_t) : 0));
   float y_fp;
   std::vector<int16_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -318,7 +319,7 @@ void VBinaryCMicrokernelTester::Test(
       std::generate(y.begin(), y.end(), [&]() { return s16dist(rng); });
     }
     else {
-      std::fill(y.begin(), y.end(), INT_MAX);
+      std::fill(y.begin(), y.end(), 0xA5);
     }
     const int16_t* a_data = inplace() ? y.data() : a.data();
 
@@ -333,11 +334,12 @@ void VBinaryCMicrokernelTester::Test(
     for (size_t i = 0; i < batch_size(); i++) {
       switch (op_type) {
         case OpType::MulC:
-          y_fp = static_cast<float>(static_cast<int32_t>(a_data[i]) - static_cast<int32_t>(a_zero_point_s16())) *
-                 (a_scale() / y_scale()) *
-                 static_cast<float>(static_cast<int32_t>(b) - static_cast<int32_t>(b_zero_point_s16())) *
-                 (b_scale() / y_scale());
+          y_fp = static_cast<float>((static_cast<int32_t>(a_data[i]) - static_cast<int32_t>(a_zero_point_s16()))  *
+                 (static_cast<int32_t>(b) - static_cast<int32_t>(b_zero_point_s16()))) *
+                 (b_scale()*a_scale() / y_scale());
           y_ref[i] = static_cast<int16_t>(static_cast<int32_t>(y_fp) + static_cast<int32_t>(y_zero_point_s16()));
+          break;
+        default:
           break;
       }
     }
