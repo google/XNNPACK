@@ -13,11 +13,9 @@ $SIMD_SIZE = BATCH_TILES[0]
 #include "xnnpack/simd/s16-${ARCH}.h"
 $if ${ARCH} == "avx512bw":
     #include "xnnpack/simd/s32-avx512f.h"
-$else:
-    #include "xnnpack/simd/s32-${ARCH}.h"
-$if ${ARCH} == "avx512bw":
     #include "xnnpack/simd/f32-avx512f.h"
 $else:
+    #include "xnnpack/simd/s32-${ARCH}.h"
     #include "xnnpack/simd/f32-${ARCH}.h"
 
 #include "xnnpack/common.h"
