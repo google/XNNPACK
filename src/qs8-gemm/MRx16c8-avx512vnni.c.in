@@ -99,6 +99,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
     assert(bl != 0);
     assert(bl <= kc);
     assert(kc % bl == 0);
+    assert(bl % 32 == 0);
 
   $if DATATYPE in ["QD8", "QC4", "QB4"]:
     $for M in range(MR):

@@ -43,6 +43,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x8c8__avx2(
   size_t bl = params->avx.blocksize;
   assert(bl <= round_up_po2(kc, 16));
   assert(bl != 0);
+  assert(bl % 32 == 0);
   const int8_t* a0 = a;
   float* c0 = c;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);

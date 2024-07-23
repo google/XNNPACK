@@ -41,6 +41,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4c8__sse2_ld64(
   size_t bl = params->sse.blocksize;
   assert(bl <= round_up_po2(kc, 2));
   assert(bl != 0);
+  assert(bl % 32 == 0);
   size_t n_blocks = kc / bl;
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const int8_t* a0 = a;
