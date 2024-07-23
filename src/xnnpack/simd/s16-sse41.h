@@ -26,6 +26,14 @@ typedef __m128i xnn_simd_s16_t;
 
 // Arithmetic operations.
 
+static XNN_INLINE xnn_simd_s16_t xnn_low_cvt_s16_s32(xnn_simd_s16_t a) {
+  return _mm_cvtepi16_epi32(a);
+}
+
+static XNN_INLINE xnn_simd_s16_t xnn_high_cvt_s16_s32(xnn_simd_s16_t a) {
+  return _mm_cvtepi16_epi32(_mm_unpackhi_epi64(a,a));
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t* ptr) {

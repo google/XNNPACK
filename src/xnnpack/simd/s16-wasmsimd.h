@@ -26,6 +26,14 @@ typedef v128_t xnn_simd_s16_t;
 
 // Arithmetic operations.
 
+static XNN_INLINE xnn_simd_s16_t xnn_low_cvt_s16_s32(xnn_simd_s16_t a) {
+  return wasm_i32x4_convert_i16x8_low(a);
+}
+
+static XNN_INLINE xnn_simd_s16_t xnn_high_cvt_s16_s32(xnn_simd_s16_t a) {
+  return wasm_i32x4_shuffle(a, a, 0x55);
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t* ptr) {

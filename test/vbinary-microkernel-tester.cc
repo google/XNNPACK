@@ -289,8 +289,7 @@ void VBinaryMicrokernelTester::Test(
   std::vector<int16_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int16_t));
   std::vector<int16_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(int16_t));
   std::vector<int16_t> y(batch_size() + (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(int16_t) : 0));
-  float y_fp;
-  std::vector<int16_t> y_ref(batch_size());
+  std::vector<int16_t> y_fp(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(a.begin(), a.end(), [&]() { return s16dist(rng); });
     std::generate(b.begin(), b.end(), [&]() { return s16dist(rng); });
@@ -304,20 +303,23 @@ void VBinaryMicrokernelTester::Test(
     const int16_t* b_data = inplace_b() ? y.data() : b.data();
 
     // Prepare parameters.
+    const float product_scale = a_scale() * b_scale();
+    const float product_output_scale = product_scale / y_scale();
     xnn_s16_cvt_params params;
     if (init_params != nullptr) {
-      init_params(
-        &params, a_zero_point_s16(), b_zero_point_s16(), (a_scale() * b_scale() / y_scale()), y_zero_point_s16());
+      init_params(&params, a_zero_point_s16(), b_zero_point_s16(), product_output_scale, y_zero_point_s16());
     }
 
     // Compute reference results.
+    int32_t acc;
     for (size_t i = 0; i < batch_size(); i++) {
       switch (op_type) {
         case OpType::Mul:
-          y_fp = static_cast<float>((static_cast<int32_t>(a_data[i]) - static_cast<int32_t>(a_zero_point_s16()))  *
-                 (static_cast<int32_t>(b_data[i]) - static_cast<int32_t>(b_zero_point_s16()))) *
-                 (b_scale()*a_scale() / y_scale());
-          y_ref[i] = static_cast<int16_t>(static_cast<int32_t>(y_fp) + static_cast<int32_t>(y_zero_point_s16()));
+          acc = (static_cast<int32_t>(a_data[i]) - static_cast<int32_t>(a_zero_point_s16())) *
+                (static_cast<int32_t>(b_data[i]) - static_cast<int32_t>(b_zero_point_s16()));
+          y_fp[i] = static_cast<int16_t>(
+            static_cast<int32_t>(y_zero_point_s16()) +
+            static_cast<int32_t>(product_output_scale * static_cast<float>(acc)));
           break;
         default:
           break;
@@ -329,7 +331,8 @@ void VBinaryMicrokernelTester::Test(
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
-      EXPECT_EQ(y[i], y_ref[i]) << "at " << i << " / " << batch_size();
+      EXPECT_EQ(static_cast<int32_t>(y[i]), static_cast<int32_t>(y_fp[i]))
+        << "at element " << i << " / " << batch_size();
     }
   }
 }
