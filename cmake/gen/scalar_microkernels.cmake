@@ -1046,6 +1046,8 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/s16-rmaxabs/gen/s16-rmaxabs-scalar-x2.c
   src/s16-rmaxabs/gen/s16-rmaxabs-scalar-x3.c
   src/s16-rmaxabs/gen/s16-rmaxabs-scalar-x4.c
+  src/s16-vmul/gen/s16-vmul-scalar.c
+  src/s16-vmul/gen/s16-vmulc-scalar.c
   src/s16-window/gen/s16-window-scalar-u1.c
   src/s16-window/gen/s16-window-scalar-u2.c
   src/s16-window/gen/s16-window-scalar-u3.c

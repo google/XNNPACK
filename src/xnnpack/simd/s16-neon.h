@@ -25,6 +25,14 @@ typedef int16x8_t xnn_simd_s16_t;
 
 // Arithmetic operations.
 
+static XNN_INLINE xnn_simd_s16_t xnn_low_cvt_s16_s32(xnn_simd_s16_t a) {
+  return vmovl_s16(vget_low_s16(a));
+}
+
+static XNN_INLINE xnn_simd_s16_t xnn_high_cvt_s16_s32(xnn_simd_s16_t a) {
+  return vmovl_s16(vget_high_s16(a));
+}
+
 // Load/store operations.
 static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t* ptr) {
   return vld1q_s16(ptr);

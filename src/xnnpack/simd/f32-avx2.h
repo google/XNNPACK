@@ -67,7 +67,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
       _mm256_cmpeq_epi32(_mm256_castps_si256(a), _mm256_castps_si256(b)));
 }
 
-static inline __m256i xnn_cvt_f32_s32(xnn_simd_f32_t a){
+static XNN_INLINE __m256i xnn_cvt_f32_s32(xnn_simd_f32_t a){
   return _mm256_cvtps_epi32(a);
 }
 

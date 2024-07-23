@@ -47,13 +47,13 @@ void xnn_s16_vmul_ukernel__avx2_u16(
     xnn_simd_s16_t vin2 = xnn_loadu_s16(input_b);
     input_b += xnn_simd_size_s16;
 
-    xnn_simd_s32_t vin1_low = xnn_cvt_s16_s32(xnn_low_s16(vin1));
-    xnn_simd_s32_t vin1_high = xnn_cvt_s16_s32(xnn_high_s16(vin1));
+    xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+    xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
     vin1_low = xnn_sub_s32(vin1_low,vzero_point_a);
     vin1_high = xnn_sub_s32(vin1_high,vzero_point_a);
 
-    xnn_simd_s32_t vin2_low = xnn_cvt_s16_s32(xnn_low_s16(vin2));
-    xnn_simd_s32_t vin2_high = xnn_cvt_s16_s32(xnn_high_s16(vin2));
+    xnn_simd_s32_t vin2_low = xnn_low_cvt_s16_s32(vin2);
+    xnn_simd_s32_t vin2_high = xnn_high_cvt_s16_s32(vin2);
     vin2_low = xnn_sub_s32(vin2_low,vzero_point_b);
     vin2_high = xnn_sub_s32(vin2_high,vzero_point_b);
 
@@ -76,13 +76,13 @@ void xnn_s16_vmul_ukernel__avx2_u16(
 
     xnn_simd_s16_t vin2 = xnn_load_tail_s16(input_b, batch >> XNN_LOG2_SIZEOF_INT16_T);
 
-    xnn_simd_s32_t vin1_low = xnn_cvt_s16_s32(xnn_low_s16(vin1));
-    xnn_simd_s32_t vin1_high = xnn_cvt_s16_s32(xnn_high_s16(vin1));
+    xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+    xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
     vin1_low = xnn_sub_s32(vin1_low,vzero_point_a);
     vin1_high = xnn_sub_s32(vin1_high,vzero_point_a);
 
-    xnn_simd_s32_t vin2_low = xnn_cvt_s16_s32(xnn_low_s16(vin2));
-    xnn_simd_s32_t vin2_high = xnn_cvt_s16_s32(xnn_high_s16(vin2));
+    xnn_simd_s32_t vin2_low = xnn_low_cvt_s16_s32(vin2);
+    xnn_simd_s32_t vin2_high = xnn_high_cvt_s16_s32(vin2);
     vin2_low = xnn_sub_s32(vin2_low,vzero_point_b);
     vin2_high = xnn_sub_s32(vin2_high,vzero_point_b);
 
@@ -130,13 +130,13 @@ void xnn_s16_vmul_ukernel__avx2_u32(
     xnn_simd_s16_t vin2_1 = (xnn_loadu_s16(input_b + 1 * xnn_simd_size_s16));
     input_b += 32;
 
-    xnn_simd_s32_t vin1_low_0 = xnn_cvt_s16_s32(xnn_low_s16(vin1_0));
-    xnn_simd_s32_t vin1_high_0 = xnn_cvt_s16_s32(xnn_high_s16(vin1_0));
+    xnn_simd_s32_t vin1_low_0 = xnn_low_cvt_s16_s32(vin1_0);
+    xnn_simd_s32_t vin1_high_0 = xnn_high_cvt_s16_s32(vin1_0);
     vin1_low_0 = xnn_sub_s32(vin1_low_0,vzero_point_a);
     vin1_high_0 = xnn_sub_s32(vin1_high_0,vzero_point_a);
 
-    xnn_simd_s32_t vin2_low_0 = xnn_cvt_s16_s32(xnn_low_s16(vin2_0));
-    xnn_simd_s32_t vin2_high_0 = xnn_cvt_s16_s32(xnn_high_s16(vin2_0));
+    xnn_simd_s32_t vin2_low_0 = xnn_low_cvt_s16_s32(vin2_0);
+    xnn_simd_s32_t vin2_high_0 = xnn_high_cvt_s16_s32(vin2_0);
     vin2_low_0 = xnn_sub_s32(vin2_low_0,vzero_point_b);
     vin2_high_0 = xnn_sub_s32(vin2_high_0,vzero_point_b);
 
@@ -150,13 +150,13 @@ void xnn_s16_vmul_ukernel__avx2_u32(
     vy_s32_high_0 = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled_0),vzero_point_output);
 
     xnn_simd_s16_t vy_0 = xnn_cvt_s32_s16(vy_s32_low_0, vy_s32_high_0);
-    xnn_simd_s32_t vin1_low_1 = xnn_cvt_s16_s32(xnn_low_s16(vin1_1));
-    xnn_simd_s32_t vin1_high_1 = xnn_cvt_s16_s32(xnn_high_s16(vin1_1));
+    xnn_simd_s32_t vin1_low_1 = xnn_low_cvt_s16_s32(vin1_1);
+    xnn_simd_s32_t vin1_high_1 = xnn_high_cvt_s16_s32(vin1_1);
     vin1_low_1 = xnn_sub_s32(vin1_low_1,vzero_point_a);
     vin1_high_1 = xnn_sub_s32(vin1_high_1,vzero_point_a);
 
-    xnn_simd_s32_t vin2_low_1 = xnn_cvt_s16_s32(xnn_low_s16(vin2_1));
-    xnn_simd_s32_t vin2_high_1 = xnn_cvt_s16_s32(xnn_high_s16(vin2_1));
+    xnn_simd_s32_t vin2_low_1 = xnn_low_cvt_s16_s32(vin2_1);
+    xnn_simd_s32_t vin2_high_1 = xnn_high_cvt_s16_s32(vin2_1);
     vin2_low_1 = xnn_sub_s32(vin2_low_1,vzero_point_b);
     vin2_high_1 = xnn_sub_s32(vin2_high_1,vzero_point_b);
 
@@ -182,13 +182,13 @@ void xnn_s16_vmul_ukernel__avx2_u32(
     xnn_simd_s16_t vin2 = xnn_loadu_s16(input_b);
     input_b += xnn_simd_size_s16;
 
-    xnn_simd_s32_t vin1_low = xnn_cvt_s16_s32(xnn_low_s16(vin1));
-    xnn_simd_s32_t vin1_high = xnn_cvt_s16_s32(xnn_high_s16(vin1));
+    xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+    xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
     vin1_low = xnn_sub_s32(vin1_low,vzero_point_a);
     vin1_high = xnn_sub_s32(vin1_high,vzero_point_a);
 
-    xnn_simd_s32_t vin2_low = xnn_cvt_s16_s32(xnn_low_s16(vin2));
-    xnn_simd_s32_t vin2_high = xnn_cvt_s16_s32(xnn_high_s16(vin2));
+    xnn_simd_s32_t vin2_low = xnn_low_cvt_s16_s32(vin2);
+    xnn_simd_s32_t vin2_high = xnn_high_cvt_s16_s32(vin2);
     vin2_low = xnn_sub_s32(vin2_low,vzero_point_b);
     vin2_high = xnn_sub_s32(vin2_high,vzero_point_b);
 
@@ -211,13 +211,13 @@ void xnn_s16_vmul_ukernel__avx2_u32(
 
     xnn_simd_s16_t vin2 = xnn_load_tail_s16(input_b, batch >> XNN_LOG2_SIZEOF_INT16_T);
 
-    xnn_simd_s32_t vin1_low = xnn_cvt_s16_s32(xnn_low_s16(vin1));
-    xnn_simd_s32_t vin1_high = xnn_cvt_s16_s32(xnn_high_s16(vin1));
+    xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+    xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
     vin1_low = xnn_sub_s32(vin1_low,vzero_point_a);
     vin1_high = xnn_sub_s32(vin1_high,vzero_point_a);
 
-    xnn_simd_s32_t vin2_low = xnn_cvt_s16_s32(xnn_low_s16(vin2));
-    xnn_simd_s32_t vin2_high = xnn_cvt_s16_s32(xnn_high_s16(vin2));
+    xnn_simd_s32_t vin2_low = xnn_low_cvt_s16_s32(vin2);
+    xnn_simd_s32_t vin2_high = xnn_high_cvt_s16_s32(vin2);
     vin2_low = xnn_sub_s32(vin2_low,vzero_point_b);
     vin2_high = xnn_sub_s32(vin2_high,vzero_point_b);
 

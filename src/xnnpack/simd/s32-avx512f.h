@@ -42,6 +42,22 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return _mm512_min_epi32(a, b);
 }
 
+static XNN_INLINE xnn_simd_s32_t xnn_cvt_s32_s16(xnn_simd_s32_t a, xnn_simd_s32_t b) {
+    return _mm512_packs_epi32(a, b);
+}
+
+static XNN_INLINE __m512 xnn_cvt_s32_f32(xnn_simd_s32_t a) {
+   return _mm512_cvtepi32_ps(a);
+}
+
+static XNN_INLINE xnn_simd_s32_t xnn_add_s32(xnn_simd_s32_t a,xnn_simd_s32_t b) {
+   return _mm512_add_epi32(a, b);
+}
+
+static XNN_INLINE xnn_simd_s32_t xnn_sub_s32(xnn_simd_s32_t a,xnn_simd_s32_t b) {
+   return _mm512_sub_epi32(a, b);
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {

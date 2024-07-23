@@ -38,6 +38,22 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return vminq_s32(a, b);
 }
 
+static XNN_INLINE xnn_simd_s32_t xnn_cvt_s32_s16(xnn_simd_s32_t a, xnn_simd_s32_t b) {
+    return vcombine_s16(vqmovn_s32(a), vqmovn_s32(b));
+}
+
+static XNN_INLINE float32x4_t xnn_cvt_s32_f32(xnn_simd_s32_t a) {
+   return vcvtq_f32_s32(a);
+}
+
+static XNN_INLINE xnn_simd_s32_t xnn_add_s32(xnn_simd_s32_t a,xnn_simd_s32_t b) {
+   return vadd_s32(a, b);
+}
+
+static XNN_INLINE xnn_simd_s32_t xnn_sub_s32(xnn_simd_s32_t a,xnn_simd_s32_t b) {
+   return vsub_s32(a, b);
+}
+
 // Load/store operations.
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {
   return vld1q_s32(ptr);

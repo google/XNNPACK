@@ -11,12 +11,16 @@ $SIMD_SIZE = BATCH_TILES[0]
 #include <stdint.h>
 
 #include "xnnpack/simd/s16-${ARCH}.h"
-$if ${ARCH} == "avx512bw":
+$if ARCH == 'avx512bw':
     #include "xnnpack/simd/s32-avx512f.h"
     #include "xnnpack/simd/f32-avx512f.h"
 $else:
-    #include "xnnpack/simd/s32-${ARCH}.h"
-    #include "xnnpack/simd/f32-${ARCH}.h"
+  $if ARCH == 'sse41':
+      #include "xnnpack/simd/s32-sse41.h"
+      #include "xnnpack/simd/f32-sse2.h"
+  $else:
+      #include "xnnpack/simd/s32-${ARCH}.h"
+      #include "xnnpack/simd/f32-${ARCH}.h"
 
 #include "xnnpack/common.h"
 #include "xnnpack/microparams.h"
@@ -60,13 +64,13 @@ $for BATCH_TILE in BATCH_TILES:
         input_b += ${BATCH_TILE};
 
         $for N in range(0, SIMD_TILE):
-          xnn_simd_s32_t vin1_low_${ABC[N]} = xnn_cvt_s16_s32(xnn_low_s16(vin1_${ABC[N]}));
-          xnn_simd_s32_t vin1_high_${ABC[N]} = xnn_cvt_s16_s32(xnn_high_s16(vin1_${ABC[N]}));
+          xnn_simd_s32_t vin1_low_${ABC[N]} = xnn_low_cvt_s16_s32(vin1_${ABC[N]});
+          xnn_simd_s32_t vin1_high_${ABC[N]} = xnn_high_cvt_s16_s32(vin1_${ABC[N]});
           vin1_low_${ABC[N]} = xnn_sub_s32(vin1_low_${ABC[N]},vzero_point_a);
           vin1_high_${ABC[N]} = xnn_sub_s32(vin1_high_${ABC[N]},vzero_point_a);
 
-          xnn_simd_s32_t vin2_low_${ABC[N]} = xnn_cvt_s16_s32(xnn_low_s16(vin2_${ABC[N]}));
-          xnn_simd_s32_t vin2_high_${ABC[N]} = xnn_cvt_s16_s32(xnn_high_s16(vin2_${ABC[N]}));
+          xnn_simd_s32_t vin2_low_${ABC[N]} = xnn_low_cvt_s16_s32(vin2_${ABC[N]});
+          xnn_simd_s32_t vin2_high_${ABC[N]} = xnn_high_cvt_s16_s32(vin2_${ABC[N]});
           vin2_low_${ABC[N]} = xnn_sub_s32(vin2_low_${ABC[N]},vzero_point_b);
           vin2_high_${ABC[N]} = xnn_sub_s32(vin2_high_${ABC[N]},vzero_point_b);
 
@@ -93,13 +97,13 @@ $for BATCH_TILE in BATCH_TILES:
       xnn_simd_s16_t vin2 = xnn_loadu_s16(input_b);
       input_b += xnn_simd_size_s16;
 
-      xnn_simd_s32_t vin1_low = xnn_cvt_s16_s32(xnn_low_s16(vin1));
-      xnn_simd_s32_t vin1_high = xnn_cvt_s16_s32(xnn_high_s16(vin1));
+      xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+      xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
       vin1_low = xnn_sub_s32(vin1_low,vzero_point_a);
       vin1_high = xnn_sub_s32(vin1_high,vzero_point_a);
 
-      xnn_simd_s32_t vin2_low = xnn_cvt_s16_s32(xnn_low_s16(vin2));
-      xnn_simd_s32_t vin2_high = xnn_cvt_s16_s32(xnn_high_s16(vin2));
+      xnn_simd_s32_t vin2_low = xnn_low_cvt_s16_s32(vin2);
+      xnn_simd_s32_t vin2_high = xnn_high_cvt_s16_s32(vin2);
       vin2_low = xnn_sub_s32(vin2_low,vzero_point_b);
       vin2_high = xnn_sub_s32(vin2_high,vzero_point_b);
 
@@ -123,13 +127,13 @@ $for BATCH_TILE in BATCH_TILES:
 
         xnn_simd_s16_t vin2 = xnn_load_tail_s16(input_b, batch >> XNN_LOG2_SIZEOF_INT16_T);
 
-        xnn_simd_s32_t vin1_low = xnn_cvt_s16_s32(xnn_low_s16(vin1));
-        xnn_simd_s32_t vin1_high = xnn_cvt_s16_s32(xnn_high_s16(vin1));
+        xnn_simd_s32_t vin1_low = xnn_low_cvt_s16_s32(vin1);
+        xnn_simd_s32_t vin1_high = xnn_high_cvt_s16_s32(vin1);
         vin1_low = xnn_sub_s32(vin1_low,vzero_point_a);
         vin1_high = xnn_sub_s32(vin1_high,vzero_point_a);
 
-        xnn_simd_s32_t vin2_low = xnn_cvt_s16_s32(xnn_low_s16(vin2));
-        xnn_simd_s32_t vin2_high = xnn_cvt_s16_s32(xnn_high_s16(vin2));
+        xnn_simd_s32_t vin2_low = xnn_low_cvt_s16_s32(vin2);
+        xnn_simd_s32_t vin2_high = xnn_high_cvt_s16_s32(vin2);
         vin2_low = xnn_sub_s32(vin2_low,vzero_point_b);
         vin2_high = xnn_sub_s32(vin2_high,vzero_point_b);
 

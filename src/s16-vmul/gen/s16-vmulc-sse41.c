@@ -11,16 +11,16 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/simd/s16-avx2.h"
-#include "xnnpack/simd/s32-avx2.h"
-#include "xnnpack/simd/f32-avx2.h"
+#include "xnnpack/simd/s16-sse41.h"
+#include "xnnpack/simd/s32-sse41.h"
+#include "xnnpack/simd/f32-sse2.h"
 
 #include "xnnpack/common.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/vunary.h"
 
 
-void xnn_s16_vmulc_ukernel__avx2_u16(
+void xnn_s16_vmulc_ukernel__sse41_u8(
     size_t batch,
     const int16_t* input_a,
     const int16_t* input_b,
@@ -32,7 +32,7 @@ void xnn_s16_vmulc_ukernel__avx2_u16(
   assert(input_b != NULL);
   assert(input_a != NULL);
   assert(output != NULL);
-  assert(xnn_simd_size_s16 == 16);
+  assert(xnn_simd_size_s16 == 8);
 
   xnn_simd_s32_t vzero_point_a = xnn_set1_s32(params->fp32_scalar.a_zero_point);
   xnn_simd_s32_t vzero_point_b = xnn_set1_s32(params->fp32_scalar.b_zero_point);
@@ -92,7 +92,7 @@ void xnn_s16_vmulc_ukernel__avx2_u16(
   }
 }
 
-void xnn_s16_vmulc_ukernel__avx2_u32(
+void xnn_s16_vmulc_ukernel__sse41_u16(
     size_t batch,
     const int16_t* input_a,
     const int16_t* input_b,
@@ -104,7 +104,7 @@ void xnn_s16_vmulc_ukernel__avx2_u32(
   assert(input_b != NULL);
   assert(input_a != NULL);
   assert(output != NULL);
-  assert(xnn_simd_size_s16 == 16);
+  assert(xnn_simd_size_s16 == 8);
 
   xnn_simd_s32_t vzero_point_a = xnn_set1_s32(params->fp32_scalar.a_zero_point);
   xnn_simd_s32_t vzero_point_b = xnn_set1_s32(params->fp32_scalar.b_zero_point);
@@ -118,10 +118,10 @@ void xnn_s16_vmulc_ukernel__avx2_u32(
   vin2_low = xnn_sub_s32(vin2_low,vzero_point_b);
   vin2_high = xnn_sub_s32(vin2_high,vzero_point_b);
 
-  for (; batch >= 32 * sizeof(int16_t); batch -= 32 * sizeof(int16_t)) {
+  for (; batch >= 16 * sizeof(int16_t); batch -= 16 * sizeof(int16_t)) {
     xnn_simd_s16_t vin1_0 = xnn_loadu_s16(input_a);
     xnn_simd_s16_t vin1_1 = xnn_loadu_s16(input_a + 1 * xnn_simd_size_s16);
-    input_a += 32;
+    input_a += 16;
 
     xnn_simd_s32_t vin1_low_0 = xnn_low_cvt_s16_s32(vin1_0);
     xnn_simd_s32_t vin1_high_0 = xnn_high_cvt_s16_s32(vin1_0);
@@ -156,7 +156,7 @@ void xnn_s16_vmulc_ukernel__avx2_u32(
 
     xnn_storeu_s16(output, vy_0);
     xnn_storeu_s16(output + 1 * xnn_simd_size_s16, vy_1);
-    output += 32;
+    output += 16;
   }
   for (; batch >= xnn_simd_bytes_s16; batch -= xnn_simd_bytes_s16) {
     xnn_simd_s16_t vin1 = xnn_loadu_s16(input_a);

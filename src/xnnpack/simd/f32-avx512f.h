@@ -175,6 +175,10 @@ static XNN_INLINE xnn_simd_f32_t xnn_set1_or_load_f32(const float* v) {
   return _mm512_set1_ps(*v);
 }
 
+static XNN_INLINE __m512i xnn_cvt_f32_s32(xnn_simd_f32_t a){
+  return _mm512_cvtps_epi32(a);
+}
+
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_f32_t xnn_load_tail_f32(const float* input,
                                                    size_t num_elements) {
