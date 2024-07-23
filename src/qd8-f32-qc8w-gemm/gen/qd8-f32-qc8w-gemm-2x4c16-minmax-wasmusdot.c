@@ -14,7 +14,7 @@
 #include "xnnpack/gemm.h"
 #include "xnnpack/math.h"
 
-void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4c16__wasmsdot(
+void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4c16__wasmusdot(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -46,13 +46,14 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4c16__wasmsdot(
     c1 = c0;
   }
 
+  const v128_t vsign_mask = wasm_u8x16_const_splat(UINT8_C(0x80));
   do {
     v128_t vksum0 = wasm_v128_load32_zero(w);
     v128_t vksum1 = wasm_v128_load32_zero((const int32_t*) w + 1);
     v128_t vksum2 = wasm_v128_load32_zero((const int32_t*) w + 2);
     v128_t vksum3 = wasm_v128_load32_zero((const int32_t*) w + 3);
-    const v128_t vinput_zero_point0 = wasm_v128_load32_splat(&quantization_params[0].zero_point);
-    const v128_t vinput_zero_point1 = wasm_v128_load32_splat(&quantization_params[1].zero_point);
+    const v128_t vinput_zero_point0 = wasm_i32x4_splat((int32_t) quantization_params[0].zero_point + 128);
+    const v128_t vinput_zero_point1 = wasm_i32x4_splat((int32_t) quantization_params[1].zero_point + 128);
     v128_t vacc0x0 = wasm_i32x4_mul(vksum0, vinput_zero_point0);
     v128_t vacc0x1 = wasm_i32x4_mul(vksum1, vinput_zero_point0);
     v128_t vacc0x2 = wasm_i32x4_mul(vksum2, vinput_zero_point0);
@@ -65,9 +66,9 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4c16__wasmsdot(
 
     size_t k = kc;
     do {
-      const v128_t va0 = wasm_v128_load(a0);
+      const v128_t va0 = wasm_v128_xor(wasm_v128_load(a0), vsign_mask);
       a0 += 16;
-      const v128_t va1 = wasm_v128_load(a1);
+      const v128_t va1 = wasm_v128_xor(wasm_v128_load(a1), vsign_mask);
       a1 += 16;
 
       const v128_t vb0 = wasm_v128_load(w);
