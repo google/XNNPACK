@@ -384,11 +384,6 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
       }
     $if DATATYPE in ["QD8", "QC4_F16", "QC4_F32", "QB4_F16", "QB4_F32"]:
       $if BLOCKWISE:
-        float32x4_t one_sixteenth = vdupq_n_f32(1/16.0);
-        $for M in range(0, MR):
-          $for N in range(0, NR, 4):
-            vout${M}x${ABC[N:N+4]} = vmulq_f32(vout${M}x${ABC[N:N+4]}, one_sixteenth);
-
         $for M in range(0, MR, 2):
           $if M + 1 == MR:
             const float32x4_t vinput_scale${M} = vld1q_dup_f32(&quantization_params[${M}].inv_scale);

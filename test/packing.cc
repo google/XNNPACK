@@ -199,13 +199,13 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_eq_kc) {
 
   const std::vector<uint8_t> expected = {
     // kscaledsum
-    0x00, 0x00, 0xd5, 0xc7, // -1 * 853.6010 (bf16) * (sum(-8..+7) = -109260.9297 = 0xc7d50000
+    0x00, 0x00, 0xd5, 0xc5, // -1 * 853.6010 (bf16) * (sum(-8..+7) = 0xc5d50000
 
     // weights.
     0x40, 0x51, 0x62, 0x73, // kr0 | kr1
     0xC8, 0xD9, 0xEA, 0xFB, // kr2 | kr3
     // extra bytes bl
-    0x55, 0x44,
+    0x55, 0x42,
 
     // extra bytes n - no bias for this test
     0, 0, 0, 0
@@ -272,12 +272,12 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, nc_gt_1) {
 
   const std::vector<uint8_t> expected = {
     // kscaledsum
-    0x00, 0x00, 0xd5, 0xc7, // -1 * 853.6010 (bf16) * (sum(-8, -6, ..., 2, 6) = -109260.9297 = 0xc7d50000
+    0x00, 0x00, 0xd5, 0xc5, // -1 * 853.6010 (bf16) * (sum(-8..+7) = 0xc5d50000
 
     // weights
     0x80, 0xA2, 0xC4, 0xE6, // kr0 | kr1
     // extra bytes bl
-    0x55, 0x44,
+    0x55, 0x42,
 
     // extra bytes n
     0, 0, 0, 0,
@@ -288,7 +288,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, nc_gt_1) {
     // weights
     0x91, 0xB3, 0xD5, 0xF7, // kr2 | kr3
     // extra bytes bl
-    0x55, 0x44,
+    0x55, 0x42,
 
     // extra bytes n
     0, 0, 0, 0
@@ -350,17 +350,17 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_lt_kc) {
 
   const std::vector<uint8_t> expected = {
     // kscaledsum
-    0x00, 0x00, 0xd5, 0xc7, // -1 * 853.6010 (bf16) * (sum(-8..+7) = -109260.9297 = 0xc7d50000
+    0x00, 0x00, 0xd5, 0xc5, // -1 * 853.6010 (bf16) * (sum(-8..+7) = 0xc5d50000
 
     // weights
     0x40, 0x51, 0x62, 0x73, // kr0 | kr1
     // extra bytes bl
-    0x55, 0x44,
+    0x55, 0x42,
 
     // weights
     0xC8, 0xD9, 0xEA, 0xFB, // kr2 | kr3
     // extra bytes bl
-    0x55, 0x44,
+    0x55, 0x42,
 
     // extra bytes n - no bias for this test
     0, 0, 0, 0
@@ -435,12 +435,12 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GIO_W, bl_eq_kc) {
 
   const std::vector<uint8_t> expected = {
     // kscaledsum
-    0x00, 0x00, 0xd5, 0xc7, // -1 * 853.6010 (bf16) * (sum(-8, -6, ..., 2, 6) = -109260.9297 = 0xc7d50000
+    0x00, 0x00, 0xd5, 0xc5, // -1 * 853.6010 (bf16) * (sum(-8..+7) = 0xc5d50000
 
     // weights
     0x80, 0xA2, 0xC4, 0xE6, // kr0 | kr1
     // extra bytes bl
-    0x55, 0x44,
+    0x55, 0x42,
 
     // extra bytes n
     0, 0, 0, 0,
@@ -451,7 +451,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GIO_W, bl_eq_kc) {
     // weights
     0x91, 0xB3, 0xD5, 0xF7, // kr2 | kr3
     // extra bytes bl
-    0x55, 0x44,
+    0x55, 0x42,
 
     // extra bytes n
     0, 0, 0, 0

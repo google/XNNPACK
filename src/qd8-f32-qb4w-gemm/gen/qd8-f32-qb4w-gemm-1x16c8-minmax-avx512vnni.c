@@ -118,7 +118,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x16c8__avx512vnni(
       vscaled0x0123456789ABCDEF = _mm512_fmadd_ps(vf0x0123456789ABCDEF, vfilter_output_scale0123456789ABCDEF, vscaled0x0123456789ABCDEF);
     }
 
-    vscaled0x0123456789ABCDEF = _mm512_mul_ps(vscaled0x0123456789ABCDEF, _mm512_set1_ps(quantization_params[0].inv_scale * 0.0625));
+    vscaled0x0123456789ABCDEF = _mm512_mul_ps(vscaled0x0123456789ABCDEF, _mm512_set1_ps(quantization_params[0].inv_scale));
 
     const __m512 vbias0123456789ABCDEF = _mm512_loadu_ps((const float*) w);
     w = (const float*) w + 16;

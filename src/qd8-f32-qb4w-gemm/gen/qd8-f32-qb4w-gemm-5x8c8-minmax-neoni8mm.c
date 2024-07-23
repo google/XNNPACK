@@ -268,17 +268,6 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_5x8c8__neoni8mm(
       float32x4_t vf4x4567 = vcvtq_f32_s32(vacc4x4567);
       vout4x4567 = vfmaq_f32(vout4x4567, vf4x4567, vfilter_output_scale4567);
     }
-    const float32x4_t one_sixteenth = vdupq_n_f32(1/16.0);
-    vout0x0123 = vmulq_f32(vout0x0123, one_sixteenth);
-    vout0x4567 = vmulq_f32(vout0x4567, one_sixteenth);
-    vout1x0123 = vmulq_f32(vout1x0123, one_sixteenth);
-    vout1x4567 = vmulq_f32(vout1x4567, one_sixteenth);
-    vout2x0123 = vmulq_f32(vout2x0123, one_sixteenth);
-    vout2x4567 = vmulq_f32(vout2x4567, one_sixteenth);
-    vout3x0123 = vmulq_f32(vout3x0123, one_sixteenth);
-    vout3x4567 = vmulq_f32(vout3x4567, one_sixteenth);
-    vout4x0123 = vmulq_f32(vout4x0123, one_sixteenth);
-    vout4x4567 = vmulq_f32(vout4x4567, one_sixteenth);
 
     const float32x4_t vinput_scale01 = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[0].zero_point));
     vout0x0123 = vmulq_lane_f32(vout0x0123, vget_low_f32(vinput_scale01), 1);

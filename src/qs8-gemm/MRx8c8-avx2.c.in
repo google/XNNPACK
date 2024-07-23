@@ -262,9 +262,6 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
       $if DATATYPE in ["QC4_F16", "QC4_F32"]:
         $for M in range(MR):
           vacc${M}x01234567 = _mm256_srai_epi32(vacc${M}x01234567, 4);
-      $elif BLOCKWISE:
-        $for M in range(MR):
-          vout${M}x01234567 = _mm256_mul_ps(vout${M}x01234567, _mm256_set1_ps(1.0f/16));
       $for M in range(MR):
         $if not BLOCKWISE:
           __m256 vout${M}x01234567 = _mm256_cvtepi32_ps(vacc${M}x01234567);

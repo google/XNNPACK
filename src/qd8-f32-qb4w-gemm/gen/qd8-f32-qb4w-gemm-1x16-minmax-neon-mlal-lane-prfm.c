@@ -256,12 +256,6 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x16__neon_mlal_lane_prfm(
       vout0xCDEF = vmlaq_f32(vout0xCDEF, vf0xCDEF, vfilter_output_scaleCDEF);
     #endif
     }
-    float32x4_t one_sixteenth = vdupq_n_f32(1/16.0);
-    vout0x0123 = vmulq_f32(vout0x0123, one_sixteenth);
-    vout0x4567 = vmulq_f32(vout0x4567, one_sixteenth);
-    vout0x89AB = vmulq_f32(vout0x89AB, one_sixteenth);
-    vout0xCDEF = vmulq_f32(vout0xCDEF, one_sixteenth);
-
     const float32x4_t vinput_scale0 = vld1q_dup_f32(&quantization_params[0].inv_scale);
 
     const float32x4_t vbias0123 = vld1q_f32(w); w = (const float*) w + 4;

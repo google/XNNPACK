@@ -268,11 +268,6 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x4c8__avx_ld128(
       vout2x0123 = _mm_add_ps(vout2x0123, _mm_mul_ps(_mm_cvtepi32_ps(vacc2x0123), vfilter_output_scale0123));
       vout3x0123 = _mm_add_ps(vout3x0123, _mm_mul_ps(_mm_cvtepi32_ps(vacc3x0123), vfilter_output_scale0123));
     }
-    __m128 one_sixteenth = _mm_set_ps1(1.0f/16);
-    vout0x0123 = _mm_mul_ps(vout0x0123, one_sixteenth);
-    vout1x0123 = _mm_mul_ps(vout1x0123, one_sixteenth);
-    vout2x0123 = _mm_mul_ps(vout2x0123, one_sixteenth);
-    vout3x0123 = _mm_mul_ps(vout3x0123, one_sixteenth);
 
     const __m128 vinput_scale0 = _mm_broadcast_ss(&quantization_params[0].inv_scale);
     const __m128 vinput_scale1 = _mm_broadcast_ss(&quantization_params[1].inv_scale);

@@ -284,9 +284,6 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x8c8__avx2(
     __m256 vout1x01234567 = _mm256_permutevar8x32_ps(vout1x02461357, vpermute_mask);
     __m256 vout2x01234567 = _mm256_permutevar8x32_ps(vout2x02461357, vpermute_mask);
 
-    vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(1.0f/16));
-    vout1x01234567 = _mm256_mul_ps(vout1x01234567, _mm256_set1_ps(1.0f/16));
-    vout2x01234567 = _mm256_mul_ps(vout2x01234567, _mm256_set1_ps(1.0f/16));
     const __m256 vinput_scale0 = _mm256_broadcast_ss(&quantization_params[0].inv_scale);
     const __m256 vinput_scale1 = _mm256_broadcast_ss(&quantization_params[1].inv_scale);
     const __m256 vinput_scale2 = _mm256_broadcast_ss(&quantization_params[2].inv_scale);

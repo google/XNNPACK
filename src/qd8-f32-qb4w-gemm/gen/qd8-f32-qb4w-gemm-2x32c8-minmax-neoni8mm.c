@@ -344,23 +344,6 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_2x32c8__neoni8mm(
       float32x4_t vf1xSTUV = vcvtq_f32_s32(vacc1xSTUV);
       vout1xSTUV = vfmaq_f32(vout1xSTUV, vf1xSTUV, vfilter_output_scaleSTUV);
     }
-    const float32x4_t one_sixteenth = vdupq_n_f32(1/16.0);
-    vout0x0123 = vmulq_f32(vout0x0123, one_sixteenth);
-    vout0x4567 = vmulq_f32(vout0x4567, one_sixteenth);
-    vout0x89AB = vmulq_f32(vout0x89AB, one_sixteenth);
-    vout0xCDEF = vmulq_f32(vout0xCDEF, one_sixteenth);
-    vout0xGHIJ = vmulq_f32(vout0xGHIJ, one_sixteenth);
-    vout0xKLMN = vmulq_f32(vout0xKLMN, one_sixteenth);
-    vout0xOPQR = vmulq_f32(vout0xOPQR, one_sixteenth);
-    vout0xSTUV = vmulq_f32(vout0xSTUV, one_sixteenth);
-    vout1x0123 = vmulq_f32(vout1x0123, one_sixteenth);
-    vout1x4567 = vmulq_f32(vout1x4567, one_sixteenth);
-    vout1x89AB = vmulq_f32(vout1x89AB, one_sixteenth);
-    vout1xCDEF = vmulq_f32(vout1xCDEF, one_sixteenth);
-    vout1xGHIJ = vmulq_f32(vout1xGHIJ, one_sixteenth);
-    vout1xKLMN = vmulq_f32(vout1xKLMN, one_sixteenth);
-    vout1xOPQR = vmulq_f32(vout1xOPQR, one_sixteenth);
-    vout1xSTUV = vmulq_f32(vout1xSTUV, one_sixteenth);
 
     const float32x4_t vinput_scale01 = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[0].zero_point));
     vout0x0123 = vmulq_lane_f32(vout0x0123, vget_low_f32(vinput_scale01), 1);

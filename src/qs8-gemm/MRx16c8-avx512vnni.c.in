@@ -280,7 +280,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
         w = (const float*) w + 32;
       $else:
         $for M in range(MR):
-          vscaled${M}x0123456789ABCDEF = _mm512_mul_ps(vscaled${M}x0123456789ABCDEF, _mm512_set1_ps(quantization_params[${M}].inv_scale * 0.0625));
+          vscaled${M}x0123456789ABCDEF = _mm512_mul_ps(vscaled${M}x0123456789ABCDEF, _mm512_set1_ps(quantization_params[${M}].inv_scale));
 
         const __m512 vbias0123456789ABCDEF = _mm512_loadu_ps((const float*) w);
         w = (const float*) w + 16;

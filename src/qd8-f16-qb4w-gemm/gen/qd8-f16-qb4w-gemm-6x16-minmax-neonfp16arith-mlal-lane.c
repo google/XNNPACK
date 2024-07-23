@@ -705,32 +705,6 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_6x16__neonfp16arith_mlal_lane(
       vout5xCDEF = vmlaq_f32(vout5xCDEF, vf5xCDEF, vfilter_output_scaleCDEF);
     #endif
     }
-    float32x4_t one_sixteenth = vdupq_n_f32(1/16.0);
-    vout0x0123 = vmulq_f32(vout0x0123, one_sixteenth);
-    vout0x4567 = vmulq_f32(vout0x4567, one_sixteenth);
-    vout0x89AB = vmulq_f32(vout0x89AB, one_sixteenth);
-    vout0xCDEF = vmulq_f32(vout0xCDEF, one_sixteenth);
-    vout1x0123 = vmulq_f32(vout1x0123, one_sixteenth);
-    vout1x4567 = vmulq_f32(vout1x4567, one_sixteenth);
-    vout1x89AB = vmulq_f32(vout1x89AB, one_sixteenth);
-    vout1xCDEF = vmulq_f32(vout1xCDEF, one_sixteenth);
-    vout2x0123 = vmulq_f32(vout2x0123, one_sixteenth);
-    vout2x4567 = vmulq_f32(vout2x4567, one_sixteenth);
-    vout2x89AB = vmulq_f32(vout2x89AB, one_sixteenth);
-    vout2xCDEF = vmulq_f32(vout2xCDEF, one_sixteenth);
-    vout3x0123 = vmulq_f32(vout3x0123, one_sixteenth);
-    vout3x4567 = vmulq_f32(vout3x4567, one_sixteenth);
-    vout3x89AB = vmulq_f32(vout3x89AB, one_sixteenth);
-    vout3xCDEF = vmulq_f32(vout3xCDEF, one_sixteenth);
-    vout4x0123 = vmulq_f32(vout4x0123, one_sixteenth);
-    vout4x4567 = vmulq_f32(vout4x4567, one_sixteenth);
-    vout4x89AB = vmulq_f32(vout4x89AB, one_sixteenth);
-    vout4xCDEF = vmulq_f32(vout4xCDEF, one_sixteenth);
-    vout5x0123 = vmulq_f32(vout5x0123, one_sixteenth);
-    vout5x4567 = vmulq_f32(vout5x4567, one_sixteenth);
-    vout5x89AB = vmulq_f32(vout5x89AB, one_sixteenth);
-    vout5xCDEF = vmulq_f32(vout5xCDEF, one_sixteenth);
-
     const float32x4_t vinput_scale01 = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[0].zero_point));
     const float32x4_t vinput_scale23 = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[2].zero_point));
     const float32x4_t vinput_scale45 = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[4].zero_point));

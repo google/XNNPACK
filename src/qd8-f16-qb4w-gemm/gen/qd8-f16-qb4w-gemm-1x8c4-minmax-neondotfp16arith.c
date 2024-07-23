@@ -104,9 +104,6 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x8c4__neondotfp16arith(
       vout0x4567 = vfmaq_f32(vout0x4567, vf0x4567, vfilter_output_scale4567);
     }
 
-    const float32x4_t one_sixteenth = vdupq_n_f32(1/16.0);
-    vout0x0123 = vmulq_f32(vout0x0123, one_sixteenth);
-    vout0x4567 = vmulq_f32(vout0x4567, one_sixteenth);
     const float32x4_t vinput_scale0 = vld1q_dup_f32(&quantization_params[0].inv_scale);
     vout0x0123 = vmulq_f32(vout0x0123, vinput_scale0);
     vout0x4567 = vmulq_f32(vout0x4567, vinput_scale0);

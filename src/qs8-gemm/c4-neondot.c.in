@@ -235,15 +235,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
       }
 
     $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"] or BLOCKWISE:
-      $if BLOCKWISE:
-        const float32x4_t one_sixteenth = vdupq_n_f32(1/16.0);
       $for M in range(0, MR):
         $for N in range(0, NR, 4):
           $if DATATYPE in ["QC4_F16", "QC4_F32"]:
             float32x4_t vout${M}x${ABC[N:N+4]} = vcvtq_n_f32_s32(vacc${M}x${ABC[N:N+4]}, 4);
-          $elif BLOCKWISE:
-            vout${M}x${ABC[N:N+4]} = vmulq_f32(vout${M}x${ABC[N:N+4]}, one_sixteenth);
-          $else:
+          $elif not BLOCKWISE:
             float32x4_t vout${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});
       $for M in range(0, MR, 2):
         $if M + 1 == MR:

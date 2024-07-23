@@ -294,15 +294,6 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x32c8__neoni8mm(
       float32x4_t vf0xSTUV = vcvtq_f32_s32(vacc0xSTUV);
       vout0xSTUV = vfmaq_f32(vout0xSTUV, vf0xSTUV, vfilter_output_scaleSTUV);
     }
-    const float32x4_t one_sixteenth = vdupq_n_f32(1/16.0);
-    vout0x0123 = vmulq_f32(vout0x0123, one_sixteenth);
-    vout0x4567 = vmulq_f32(vout0x4567, one_sixteenth);
-    vout0x89AB = vmulq_f32(vout0x89AB, one_sixteenth);
-    vout0xCDEF = vmulq_f32(vout0xCDEF, one_sixteenth);
-    vout0xGHIJ = vmulq_f32(vout0xGHIJ, one_sixteenth);
-    vout0xKLMN = vmulq_f32(vout0xKLMN, one_sixteenth);
-    vout0xOPQR = vmulq_f32(vout0xOPQR, one_sixteenth);
-    vout0xSTUV = vmulq_f32(vout0xSTUV, one_sixteenth);
 
     const float32x4_t vinput_scale0 = vld1q_dup_f32(&quantization_params[0].inv_scale);
     vout0x0123 = vmulq_f32(vout0x0123, vinput_scale0);
