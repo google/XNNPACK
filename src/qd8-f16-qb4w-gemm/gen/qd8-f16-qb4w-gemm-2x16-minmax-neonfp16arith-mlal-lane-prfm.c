@@ -42,6 +42,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_2x16__neonfp16arith_mlal_lane_prfm(
   size_t bl = params->fp16arith.blocksize;
   assert(bl <= round_up_po2(kc, 2));
   assert(bl != 0);
+  assert(bl % 32 == 0);
   const int8_t* a0 = a;
   uint16_t* c0 = (uint16_t*) c;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);

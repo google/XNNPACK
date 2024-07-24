@@ -74,6 +74,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
       size_t bl = params->scalar.blocksize;
     assert(bl <= round_up_po2(kc, 2));
     assert(bl != 0);
+    assert(bl % 32 == 0);
 
   const ${XINT8_T}* a0 = a;
   ${OUT_T}* c0 = c;
