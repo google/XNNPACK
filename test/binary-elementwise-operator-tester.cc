@@ -726,12 +726,12 @@ void BinaryElementwiseOperatorTester::TestF16() const {
 
 void BinaryElementwiseOperatorTester::TestS16() const {
   ASSERT_NE(operation_type(), OperationType::Unknown);
-  ASSERT_GE(input1_zero_point(), std::numeric_limits<int8_t>::min());
-  ASSERT_LE(input1_zero_point(), std::numeric_limits<int8_t>::max());
-  ASSERT_GE(input2_zero_point(), std::numeric_limits<int8_t>::min());
-  ASSERT_LE(input2_zero_point(), std::numeric_limits<int8_t>::max());
-  ASSERT_GE(output_zero_point(), std::numeric_limits<int8_t>::min());
-  ASSERT_LE(output_zero_point(), std::numeric_limits<int8_t>::max());
+  ASSERT_GE(input1_zero_point(), std::numeric_limits<int16_t>::min());
+  ASSERT_LE(input1_zero_point(), std::numeric_limits<int16_t>::max());
+  ASSERT_GE(input2_zero_point(), std::numeric_limits<int16_t>::min());
+  ASSERT_LE(input2_zero_point(), std::numeric_limits<int16_t>::max());
+  ASSERT_GE(output_zero_point(), std::numeric_limits<int16_t>::min());
+  ASSERT_LE(output_zero_point(), std::numeric_limits<int16_t>::max());
 
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<int32_t> s16dist(
@@ -780,10 +780,10 @@ void BinaryElementwiseOperatorTester::TestS16() const {
   float output_float;
   int32_t res;
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
-    std::generate(input1.begin(), input1.end(), [&]() {return 25472; /*return s16dist(rng);*/ });
-    std::generate(input2.begin(), input2.end(), [&]() { return 10409;/*return s16dist(rng);*/ });
+    std::generate(input1.begin(), input1.end(), [&]() {return s16dist(rng);});
+    std::generate(input2.begin(), input2.end(), [&]() {return s16dist(rng);});
     std::fill(output.begin(), output.end(), 0xA5);
-    float scale = input1_scale()*input2_scale()/output_scale();
+    float scale = (input1_scale() * input2_scale())/ output_scale();
     // Compute reference results.
     for (size_t i = 0; i < output_dims[0]; i++) {
       for (size_t j = 0; j < output_dims[1]; j++) {
@@ -817,9 +817,10 @@ void BinaryElementwiseOperatorTester::TestS16() const {
 
     switch (operation_type()) {
       case OperationType::Multiply:
-        ASSERT_EQ(xnn_status_success,
-                  xnn_create_multiply_nd_s16(input1_zero_point(), input1_scale(), input2_zero_point(),
-            input2_scale(), output_zero_point(), output_scale(),0, &binary_elementwise_op));
+        ASSERT_EQ(
+          xnn_status_success, xnn_create_multiply_nd_s16(
+                                input1_zero_point(), input1_scale(), input2_zero_point(), input2_scale(),
+                                output_zero_point(), output_scale(), 0, &binary_elementwise_op));
         break;
       default:
         FAIL() << "Unsupported operation type";

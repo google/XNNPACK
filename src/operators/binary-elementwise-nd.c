@@ -809,16 +809,15 @@ enum xnn_status xnn_create_multiply_nd_s16(
   union xnn_s16_cvt_params params2;
   assert(s16_vmul_config->init.s16_cvt != NULL);
   s16_vmul_config->init.s16_cvt(
-    &params, input1_zero_point, input2_zero_point, output_zero_point,
-    product_output_scale);
-  // s16_vmul_config->init.s16_cvt(
-  //   &params2, input2_zero_point, input1_zero_point, output_zero_point,
-  //   product_output_scale);
+    &params, input1_zero_point, input2_zero_point, product_output_scale, output_zero_point);
+  s16_vmul_config->init.s16_cvt(
+    &params2, input2_zero_point, input1_zero_point, product_output_scale,
+    output_zero_point);
 
   return create_binary_elementwise_nd(
     flags,
     &params,
-    &params,
+    &params2,
     sizeof(params),
     xnn_operator_type_multiply_nd_s16,
     &s16_vmul_config->linear,
