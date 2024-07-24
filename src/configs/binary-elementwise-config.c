@@ -538,18 +538,21 @@ static void init_s16_vmul_config(void) {
       s16_vmul_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmul_ukernel__neon_u8;
       s16_vmul_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__neon_u8;
       s16_vmul_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__neon_u8;
+      s16_vmul_config.init.s16_cvt = xnn_init_s16_cvt_scalar_params;
       s16_vmul_config.linear.element_tile = 8;
     }
     else if (!XNN_PLATFORM_MOBILE) {
       s16_vmul_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmul_ukernel__scalar_u2;
       s16_vmul_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__scalar_u2;
       s16_vmul_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__scalar_u2;
+      s16_vmul_config.init.s16_cvt = xnn_init_s16_cvt_scalar_params;
       s16_vmul_config.linear.element_tile = 2;
     }
   #elif XNN_ARCH_ARM64
     s16_vmul_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmul_ukernel__neon_u8;
     s16_vmul_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__neon_u8;
     s16_vmul_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__neon_u8;
+    s16_vmul_config.init.s16_cvt = xnn_init_s16_cvt_scalar_params;
     s16_vmul_config.linear.element_tile = 8;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -571,17 +574,20 @@ static void init_s16_vmul_config(void) {
       s16_vmul_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmul_ukernel__sse41_u8;
       s16_vmul_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__sse41_u8;
       s16_vmul_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__sse41_u8;
+      s16_vmul_config.init.s16_cvt = xnn_init_s16_cvt_scalar_params;
       s16_vmul_config.linear.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     s16_vmul_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmul_ukernel__wasmsimd_u16;
     s16_vmul_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__wasmsimd_u16;
     s16_vmul_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__wasmsimd_u16;
+    s16_vmul_config.init.s16_cvt = xnn_init_s16_cvt_scalar_params;
     s16_vmul_config.linear.element_tile = 16;
   #else
     s16_vmul_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmul_ukernel__scalar_u2;
     s16_vmul_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__scalar_u2;
     s16_vmul_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__scalar_u2;
+    s16_vmul_config.init.s16_cvt = xnn_init_s16_cvt_scalar_params;
     s16_vmul_config.linear.element_tile = 2;
   #endif
 }

@@ -40,7 +40,9 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
 }
 
 static XNN_INLINE xnn_simd_s32_t xnn_cvt_s32_s16(xnn_simd_s32_t a, xnn_simd_s32_t b) {
-    return a;
+   a = (a < INT16_MAX ? a : INT16_MAX );
+   a = (a > INT16_MIN ? a : INT16_MIN );
+   return a;
 }
 
 static XNN_INLINE float xnn_cvt_s32_f32(xnn_simd_s32_t a) {

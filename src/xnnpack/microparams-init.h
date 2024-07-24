@@ -1271,10 +1271,10 @@ DECLARE_INIT_QS8_F32_CVT_PARAMS_FUNCTION(xnn_init_qs8_f32_cvt_scalar_params)
 #define DECLARE_INIT_S16_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                            \
     union xnn_s16_cvt_params params[XNN_MIN_ELEMENTS(1)], \
-    int32_t a_zero_point,                                 \
-    int32_t b_zero_point,                                 \
+    int16_t a_zero_point,                                 \
+    int16_t b_zero_point,                                 \
     float scale,                                          \
-    int32_t output_zero_point);
+    int16_t output_zero_point);
 
 DECLARE_INIT_S16_CVT_PARAMS_FUNCTION(xnn_init_s16_cvt_scalar_params)
 
