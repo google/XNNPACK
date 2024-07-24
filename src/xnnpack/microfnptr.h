@@ -2563,10 +2563,10 @@ typedef size_t (*xnn_init_f32_qu8_cvt_params_fn)(
 
 typedef size_t (*xnn_init_s16_cvt_params_fn)(
   union xnn_s16_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t a_zero_point,
-  int32_t b_zero_point,
+  int16_t a_zero_point,
+  int16_t b_zero_point,
   float scale,
-  int32_t output_zero_point);
+  int16_t output_zero_point);
 
 typedef size_t (*xnn_init_qs8_cvt_params_fn)(
   union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],

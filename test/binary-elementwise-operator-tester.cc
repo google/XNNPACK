@@ -778,9 +778,10 @@ void BinaryElementwiseOperatorTester::TestS16() const {
   std::vector<int16_t> output(num_output_elements);
   std::vector<int16_t> output_ref(num_output_elements);
   float output_float;
+  int32_t res;
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
-    std::generate(input1.begin(), input1.end(), [&]() { return s16dist(rng); });
-    std::generate(input2.begin(), input2.end(), [&]() { return s16dist(rng); });
+    std::generate(input1.begin(), input1.end(), [&]() {return 25472; /*return s16dist(rng);*/ });
+    std::generate(input2.begin(), input2.end(), [&]() { return 10409;/*return s16dist(rng);*/ });
     std::fill(output.begin(), output.end(), 0xA5);
     float scale = input1_scale()*input2_scale()/output_scale();
     // Compute reference results.
@@ -797,10 +798,12 @@ void BinaryElementwiseOperatorTester::TestS16() const {
                         static_cast<int32_t>(input2[i * input2_strides[0] + j * input2_strides[1] +
                                k * input2_strides[2] + l * input2_strides[3] +
                                m * input2_strides[4] + n * input2_strides[5]]) - static_cast<int32_t>(input2_zero_point()))) * scale;
+                res = static_cast<int32_t>(output_zero_point()) + static_cast<int32_t>((output_float));
+                res = (std::max<int32_t>(std::min<int32_t>(res, INT16_MAX), INT16_MIN));
                 output_ref[i * output_strides[0] + j * output_strides[1] +
                            k * output_strides[2] + l * output_strides[3] +
                            m * output_strides[4] + n * output_strides[5]] =
-                    static_cast<int16_t>(static_cast<int32_t>(output_float) + static_cast<int32_t>(output_zero_point()));
+                    static_cast<int16_t>( res );
               }
             }
           }

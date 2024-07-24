@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <stdio.h>
 #include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/allocator.h"
@@ -811,14 +811,14 @@ enum xnn_status xnn_create_multiply_nd_s16(
   s16_vmul_config->init.s16_cvt(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
     product_output_scale);
-  s16_vmul_config->init.s16_cvt(
-    &params2, input2_zero_point, input1_zero_point, output_zero_point,
-    product_output_scale);
+  // s16_vmul_config->init.s16_cvt(
+  //   &params2, input2_zero_point, input1_zero_point, output_zero_point,
+  //   product_output_scale);
 
   return create_binary_elementwise_nd(
     flags,
     &params,
-    &params2,
+    &params,
     sizeof(params),
     xnn_operator_type_multiply_nd_s16,
     &s16_vmul_config->linear,
