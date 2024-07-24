@@ -105,6 +105,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
       size_t bl = params->scalar.blocksize;
     assert(bl <= kc);
     assert(bl != 0);
+    assert(bl % 32 == 0);
     size_t n_blocks = kc / bl;
   $if DATATYPE in ["QC4_F16", "QC4_F32", "QB4_F16", "QB4_F32"]:
     const int8x16_t vmask = vmovq_n_s8(INT8_C(0xF0));

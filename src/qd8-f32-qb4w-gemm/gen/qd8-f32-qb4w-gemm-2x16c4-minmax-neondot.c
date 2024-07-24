@@ -50,6 +50,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_2x16c4__neondot(
   size_t bl = params->scalar.blocksize;
   assert(bl <= kc);
   assert(bl != 0);
+  assert(bl % 32 == 0);
   size_t n_blocks = kc / bl;
   const int8x16_t vmask = vmovq_n_s8(INT8_C(0xF0));
   // Loop over groups of 16 columns.

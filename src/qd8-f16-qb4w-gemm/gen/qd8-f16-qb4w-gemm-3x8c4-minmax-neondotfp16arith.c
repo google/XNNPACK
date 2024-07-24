@@ -56,6 +56,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_3x8c4__neondotfp16arith(
   size_t bl = params->fp16arith.blocksize;
   assert(bl <= kc);
   assert(bl != 0);
+  assert(bl % 32 == 0);
   size_t n_blocks = kc / bl;
   const int8x16_t vmask = vmovq_n_s8(INT8_C(0xF0));
   // Loop over groups of 8 columns.

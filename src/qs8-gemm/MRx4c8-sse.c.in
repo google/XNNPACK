@@ -90,6 +90,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
     size_t bl = params->sse.blocksize;
     assert(bl <= round_up_po2(kc, 2));
     assert(bl != 0);
+    assert(bl % 32 == 0);
     size_t n_blocks = kc / bl;
   kc = round_up_po2(kc, 8 * sizeof(${XINT8_T}));
   const ${XINT8_T}* a0 = a;

@@ -41,6 +41,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_6x16c8__neoni8mm(
   size_t bl = params->fp16arith.blocksize;
   assert(bl <= kc);
   assert(bl != 0);
+  assert(bl % 32 == 0);
   size_t n_blocks = kc / bl;
   const int8_t* a0 = a;
   uint16_t* c0 = (uint16_t*) c;
