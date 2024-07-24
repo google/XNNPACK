@@ -44,7 +44,11 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {
+#if (defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && __GNUC__ < 10)
+  return _mm512_set1_epi32((int) unaligned_load_s32(ptr));
+#else
   return _mm512_loadu_epi32(ptr);
+#endif
 }
 
 static XNN_INLINE xnn_simd_s32_t xnn_load_s32(const int32_t* ptr) {
@@ -52,7 +56,11 @@ static XNN_INLINE xnn_simd_s32_t xnn_load_s32(const int32_t* ptr) {
 }
 
 static XNN_INLINE void xnn_storeu_s32(int32_t* ptr, xnn_simd_s32_t v) {
+#if (defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && __GNUC__ < 10)
+  _mm512_storeu_si512(ptr, v);
+#else
   _mm512_storeu_epi32(ptr, v);
+#endif
 }
 
 static XNN_INLINE void xnn_store_s32(float* ptr, xnn_simd_s32_t v) {
