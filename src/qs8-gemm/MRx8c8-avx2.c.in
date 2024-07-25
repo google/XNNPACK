@@ -138,8 +138,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
     w = (const int32_t*) w + 8;
 
     $if BLOCKWISE:
-      size_t n_blocks = kc / bl;
-      for (size_t nb = 0; nb < n_blocks; ++nb) {
+      for (size_t kb=0; kb < kc; kb += bl) {
         $for M in range(MR):
           $for N in range(0, 8, 2):
             __m256i vacc${M}x${N}${N+1} = _mm256_setzero_si256();

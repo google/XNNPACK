@@ -79,8 +79,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_2x8c8__avx2(
     __m256 vout1x67 = _mm256_mul_ps(vinit67, vinput_zero_point1);
     w = (const int32_t*) w + 8;
 
-    size_t n_blocks = kc / bl;
-    for (size_t nb = 0; nb < n_blocks; ++nb) {
+    for (size_t kb=0; kb < kc; kb += bl) {
       __m256i vacc0x01 = _mm256_setzero_si256();
       __m256i vacc0x23 = _mm256_setzero_si256();
       __m256i vacc0x45 = _mm256_setzero_si256();

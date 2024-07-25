@@ -75,8 +75,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_2x8__scalar(
     float vout1x7 = vksum7 * vinput_zero_point1;
     w = (const float*) w + 8;
 
-    size_t n_blocks = kc / bl;
-    for (size_t nb = 0; nb < n_blocks; ++nb) {
+    for (size_t kb=0; kb < kc; kb += bl) {
       int32_t vacc0x0 = 0;
       int32_t vacc0x1 = 0;
       int32_t vacc0x2 = 0;

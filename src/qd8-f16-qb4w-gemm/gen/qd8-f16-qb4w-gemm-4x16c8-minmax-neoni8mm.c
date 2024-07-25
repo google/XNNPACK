@@ -42,7 +42,6 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_4x16c8__neoni8mm(
   assert(bl <= kc);
   assert(bl != 0);
   assert(bl % 32 == 0);
-  size_t n_blocks = kc / bl;
   const int8_t* a0 = a;
   uint16_t* c0 = (uint16_t*) c;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
@@ -93,7 +92,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_4x16c8__neoni8mm(
     float32x4_t vout3xCDEF = vmulq_lane_f32(vksumCDEF, vget_high_f32(vinput_zero_point23), 0);
 
 
-    for (size_t nb=0; nb < n_blocks; ++nb) {
+    for (size_t kb=0; kb < kc; kb += bl) {
       int32x4_t vacc01x01 = vdupq_n_s32(0);
       int32x4_t vacc01x23 = vdupq_n_s32(0);
       int32x4_t vacc01x45 = vdupq_n_s32(0);

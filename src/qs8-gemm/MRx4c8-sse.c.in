@@ -91,7 +91,6 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
     assert(bl <= round_up_po2(kc, 2));
     assert(bl != 0);
     assert(bl % 32 == 0);
-    size_t n_blocks = kc / bl;
   kc = round_up_po2(kc, 8 * sizeof(${XINT8_T}));
   const ${XINT8_T}* a0 = a;
   ${OUT_T}* c0 = c;
@@ -202,7 +201,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
       $if SSE < 4 or VARIANT == "LD128":
         const __m128i vzero = _mm_setzero_si128();
     $if DATATYPE == "QB4":
-      for (size_t nb=0; nb<n_blocks; ++nb){
+      for (size_t kb=0; kb < kc; kb += bl) {
         $for M in range(MR):
           __m128i vacc${M}x0 = _mm_setzero_si128();
           __m128i vacc${M}x1 = _mm_setzero_si128();

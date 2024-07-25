@@ -174,8 +174,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
           int32x4_t vacc${M}x${ABC[N:N+4]} = vacc0x${ABC[N:N+4]};
 
     $if BLOCKWISE:
-      size_t n_blocks = kc / bl;
-      for (size_t nb = 0; nb < n_blocks; ++nb) {
+      for (size_t kb=0; kb < kc; kb += bl) {
         $for M in range(MR):
           $for N in range(0, NR, 4):
             int32x4_t vacc${M}x${ABC[N:N+4]} = vdupq_n_s32(0);

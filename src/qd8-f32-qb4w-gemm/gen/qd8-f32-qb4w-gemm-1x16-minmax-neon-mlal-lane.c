@@ -58,8 +58,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x16__neon_mlal_lane(
     float32x4_t vout0x89AB = vmulq_f32(vksum89AB, vzp0);
     float32x4_t vout0xCDEF = vmulq_f32(vksumCDEF, vzp0);
 
-    size_t n_blocks = kc / bl;
-    for (size_t nb = 0; nb < n_blocks; ++nb) {
+    for (size_t kb=0; kb < kc; kb += bl) {
       int32x4_t vacc0x0123 = vdupq_n_s32(0);
       int32x4_t vacc0x4567 = vdupq_n_s32(0);
       int32x4_t vacc0x89AB = vdupq_n_s32(0);
