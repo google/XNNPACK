@@ -5,7 +5,8 @@
 
 set -e
 
-mkdir -p build/qurt/v68
+HEXAGON_ARCH=v68
+mkdir -p build/qurt/${HEXAGON_ARCH}
 
 CMAKE_ARGS=()
 
@@ -30,7 +31,7 @@ CMAKE_ARGS+=("-DHAVE_STEADY_CLOCK=0")
 # Use-specified CMake arguments go last to allow overridding defaults
 CMAKE_ARGS+=($@)
 
-cd build/qurt/v68 && cmake ../../.. \
+cd build/qurt/${HEXAGON_ARCH} && cmake ../../.. \
     "${CMAKE_ARGS[@]}"
 
 cmake --build . -- "-j$((2*$(nproc)))"
