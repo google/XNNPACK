@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-gemm/MRx4c16-wasmsdot.c.in
+//   Template: src/qs8-gemm/MRx4c16-wasmdot.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
@@ -13,7 +13,6 @@
 
 #include "xnnpack/gemm.h"
 #include "xnnpack/math.h"
-
 
 void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4c16__wasmsdot(
     size_t mr,
@@ -90,28 +89,28 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4c16__wasmsdot(
 
       const v128_t vb0 = wasm_v128_load(w);
 
-      vacc0x0 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va0, vb0, vacc0x0);
-      vacc1x0 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va1, vb0, vacc1x0);
-      vacc2x0 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va2, vb0, vacc2x0);
-      vacc3x0 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va3, vb0, vacc3x0);
+      vacc0x0 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb0, va0, vacc0x0);
+      vacc1x0 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb0, va1, vacc1x0);
+      vacc2x0 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb0, va2, vacc2x0);
+      vacc3x0 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb0, va3, vacc3x0);
       const v128_t vb1 = wasm_v128_load((const int8_t*) w + 16);
 
-      vacc0x1 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va0, vb1, vacc0x1);
-      vacc1x1 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va1, vb1, vacc1x1);
-      vacc2x1 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va2, vb1, vacc2x1);
-      vacc3x1 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va3, vb1, vacc3x1);
+      vacc0x1 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb1, va0, vacc0x1);
+      vacc1x1 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb1, va1, vacc1x1);
+      vacc2x1 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb1, va2, vacc2x1);
+      vacc3x1 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb1, va3, vacc3x1);
       const v128_t vb2 = wasm_v128_load((const int8_t*) w + 32);
 
-      vacc0x2 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va0, vb2, vacc0x2);
-      vacc1x2 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va1, vb2, vacc1x2);
-      vacc2x2 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va2, vb2, vacc2x2);
-      vacc3x2 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va3, vb2, vacc3x2);
+      vacc0x2 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb2, va0, vacc0x2);
+      vacc1x2 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb2, va1, vacc1x2);
+      vacc2x2 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb2, va2, vacc2x2);
+      vacc3x2 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb2, va3, vacc3x2);
       const v128_t vb3 = wasm_v128_load((const int8_t*) w + 48);
 
-      vacc0x3 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va0, vb3, vacc0x3);
-      vacc1x3 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va1, vb3, vacc1x3);
-      vacc2x3 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va2, vb3, vacc2x3);
-      vacc3x3 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(va3, vb3, vacc3x3);
+      vacc0x3 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb3, va0, vacc0x3);
+      vacc1x3 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb3, va1, vacc1x3);
+      vacc2x3 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb3, va2, vacc2x3);
+      vacc3x3 = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(vb3, va3, vacc3x3);
 
       w = (const int8_t*) w + 64;
       k -= 16 * sizeof(int8_t);

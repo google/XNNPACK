@@ -41,6 +41,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x16__neon_mlal_lane(
   size_t bl = params->scalar.blocksize;
   assert(bl <= round_up_po2(kc, 2));
   assert(bl != 0);
+  assert(bl % 32 == 0);
   const int8_t* a0 = a;
   float* c0 = c;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);

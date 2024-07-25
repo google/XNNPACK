@@ -108,17 +108,16 @@ http_archive(
 )
 # LINT.ThenChange(cmake/DownloadCpuinfo.cmake)
 
-# TODO: b/349993583 - Uncomment when KleidiAI has an official BUILD file.
 # LINT.IfChange
 # KleidiAI library, used for ARM microkernels.
-# http_archive(
-#     name = "KleidiAI",
-#     sha256 = "39b26d8840ec719afaa480b0622a77952d0f22dbb8e8ba58ec9f93e39895a205",
-#     strip_prefix = "kleidiai-1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53",
-#     urls = [
-#         "https://gitlab.arm.com/kleidi/kleidiai/-/archive/1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53/kleidiai-1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53.zip",
-#     ],
-# )
+http_archive(
+    name = "KleidiAI",
+    sha256 = "e1a3a6a27dcae459e61c33f5eb235a7c809c3208b3b8a649f361a641269ebdc8",
+    strip_prefix = "kleidiai-8fda0bd9224cad4360c011a09bbb582c5ab7496a",
+    urls = [
+        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/8fda0bd9224cad4360c011a09bbb582c5ab7496a/kleidiai-1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53.zip",
+    ],
+)
 # LINT.ThenChange(cmake/DownloadKleidiAI.cmake)
 
 # Ruy library, used to benchmark against
@@ -130,19 +129,3 @@ http_archive(
         "https://github.com/google/ruy/archive/9f53ba413e6fc879236dcaa3e008915973d67a4f.zip",
     ],
 )
-
-http_archive(
-    name = "rules_android_ndk",
-    sha256 = "f238b4b0323f1e0028a4a3f1093574d70f087867f4b29626469a11eaaf9fd63f",
-    strip_prefix = "rules_android_ndk-1ed5be3498d20c8120417fe73b6a5f2b4a3438cc",
-    url = "https://github.com/bazelbuild/rules_android_ndk/archive/1ed5be3498d20c8120417fe73b6a5f2b4a3438cc.zip",
-)
-
-load("@rules_android_ndk//:rules.bzl", "android_ndk_repository")
-
-android_ndk_repository(name = "androidndk")
-
-register_toolchains("@androidndk//:all")
-
-# Android SDK location and API is auto-detected from $ANDROID_HOME environment variable
-android_sdk_repository(name = "androidsdk")

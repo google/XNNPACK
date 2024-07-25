@@ -33,7 +33,6 @@ ISA_LIST = frozenset({
     'avx256vnni',
     'avx256vnnigfni',
     'f16c',
-    'fma',
     'fma3',
     'fp16arith',
     'hexagon',
@@ -59,6 +58,7 @@ ISA_LIST = frozenset({
     'wasmrelaxedsimd',
     'wasmpshufb',
     'wasmsdot',
+    'wasmusdot',
     'wasmsimd',
 })
 
@@ -66,6 +66,7 @@ ISA_MAP = {
     'wasmblendvps': 'wasmrelaxedsimd',
     'wasmpshufb': 'wasmrelaxedsimd',
     'wasmsdot': 'wasmrelaxedsimd',
+    'wasmusdot': 'wasmrelaxedsimd',
 }
 
 ARCH_LIST = frozenset({

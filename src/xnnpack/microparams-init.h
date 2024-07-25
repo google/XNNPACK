@@ -378,7 +378,6 @@ XNN_INTERNAL void xnn_update_f32_gavgpool_params(
   float multiplier,
   uint32_t width);
 
-
 #define DECLARE_INIT_F32_DEFAULT_PARAMS_FUNCTION(fn_name)      \
   XNN_INTERNAL size_t fn_name(                                 \
     union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
@@ -386,7 +385,6 @@ XNN_INTERNAL void xnn_update_f32_gavgpool_params(
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_F32_DEFAULT_PARAMS_FUNCTION(xnn_init_f32_default_avx_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
 
 #define DECLARE_INIT_BF16_MINMAX_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \

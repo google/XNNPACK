@@ -1372,17 +1372,65 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c16__wasmusdot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params
+  pack: xnn_pack_qs8_to_qu8_gemm_goi_w
+  k-block: 16
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c16__wasmsdot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 16
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c16__wasmusdot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params
+  pack: xnn_pack_qs8_to_qu8_gemm_goi_w
+  k-block: 16
 - name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x4c16__wasmsdot
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params
   pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 16
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x4c16__wasmusdot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params
+  pack: xnn_pack_qs8_to_qu8_gemm_goi_w
+  k-block: 16
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x8c16__wasmsdot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 16
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x8c16__wasmusdot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params
+  pack: xnn_pack_qs8_to_qu8_gemm_goi_w
   k-block: 16
 - name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x4c16__wasmsdot
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x4c16__wasmusdot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params
+  pack: xnn_pack_qs8_to_qu8_gemm_goi_w
+  k-block: 16
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x8c16__wasmsdot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 16
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x8c16__wasmusdot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params
+  pack: xnn_pack_qs8_to_qu8_gemm_goi_w
+  k-block: 16
 - name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4c16__wasmsdot
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params
   pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 16
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4c16__wasmusdot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params
+  pack: xnn_pack_qs8_to_qu8_gemm_goi_w
+  k-block: 16
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8c16__wasmsdot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 16
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8c16__wasmusdot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params
+  pack: xnn_pack_qs8_to_qu8_gemm_goi_w
   k-block: 16
 # WAsm
 - name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x2__wasm_fmagic

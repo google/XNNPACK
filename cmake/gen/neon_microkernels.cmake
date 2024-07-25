@@ -892,6 +892,8 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/s16-window/gen/s16-window-shift15-neon-u16.c
   src/s16-window/gen/s16-window-shift15-neon-u24.c
   src/s16-window/gen/s16-window-shift15-neon-u32.c
+  src/s32-vmul/gen/s32-vmul-neon.c
+  src/s32-vmul/gen/s32-vmulc-neon.c
   src/u8-ibilinear/gen/u8-ibilinear-neon-c8.c
   src/u8-ibilinear/gen/u8-ibilinear-neon-c16.c
   src/u8-maxpool/u8-maxpool-9p8x-minmax-neon-c16.c

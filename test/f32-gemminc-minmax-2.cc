@@ -27,6 +27,7 @@
 #include "xnnpack/ppmm.h"
 #include "xnnpack/requantization.h"
 #include "gemm-microkernel-tester.h"
+#include "next_prime.h"
 
 namespace {
 
@@ -56,14 +57,14 @@ std::vector<GemmTestParams> CreateTests1(
       "strided_cn",
       tester.clone()
           .m(mr).n(nr).k(k_block)
-          .cn_stride(NextPrime(nr + 1))
+          .cn_stride(xnnpack::NextPrime(nr + 1))
     , test_func, isa_check));
   if (!is_igemm) {
     gemm_tests.push_back(GemmTestParams(
         "k_eq_" + kbs + "_strided_a",
         tester.clone()
             .m(mr).n(nr).k(k_block)
-            .a_stride(NextPrime(k_block + 1))
+            .a_stride(xnnpack::NextPrime(k_block + 1))
         , test_func, isa_check));
   }
   gemm_tests.push_back(GemmTestParams(
@@ -95,7 +96,7 @@ std::vector<GemmTestParams> CreateTests1(
         "k_eq_" + kb2s + "_strided_a",
         tester.clone()
             .m(mr).n(nr).k(k_block * 2)
-            .a_stride(NextPrime(k_block * 2 + 1))
+            .a_stride(xnnpack::NextPrime(k_block * 2 + 1))
         , test_func, isa_check));
   }
   gemm_tests.push_back(GemmTestParams(
@@ -117,7 +118,7 @@ std::vector<GemmTestParams> CreateTests1(
           "k_lt_" + akbs + "_strided_a",
           tester.clone()
               .m(mr).n(nr)
-              .a_stride(NextPrime(adj_k_block + 1))
+              .a_stride(xnnpack::NextPrime(adj_k_block + 1))
           , test_func, isa_check)
           .loop_k(1, adj_k_block - 1));
     }
@@ -141,7 +142,7 @@ std::vector<GemmTestParams> CreateTests1(
         "k_gt_" + akbs + "_strided_a",
         tester.clone()
             .m(mr).n(nr)
-            .a_stride(NextPrime(adj_k_block * 2 + 1))
+            .a_stride(xnnpack::NextPrime(adj_k_block * 2 + 1))
       , test_func, isa_check)
       .loop_k(adj_k_block + 1, adj_k_block * 2 - 1, k_block));
   }
@@ -165,7 +166,7 @@ std::vector<GemmTestParams> CreateTests1(
           "k_div_" + kbs + "_strided_a",
           tester.clone()
               .m(mr).n(nr)
-              .a_stride(NextPrime(k_block * 3 + 1))
+              .a_stride(xnnpack::NextPrime(k_block * 3 + 1))
           , test_func, isa_check)
           .loop_k(adj_k_block + k_block, k_block * 3, k_block));
     }
@@ -189,7 +190,7 @@ std::vector<GemmTestParams> CreateTests1(
       "n_gt_" + nrs + "_strided_cn",
       tester.clone()
           .m(mr)
-          .cn_stride(NextPrime(nr + 1))
+          .cn_stride(xnnpack::NextPrime(nr + 1))
       , test_func, isa_check)
       .loop_n(nr + 1, nr * 2 - 1)
       .loop_k(1, k_block * 3, k_block + 1));
@@ -198,7 +199,7 @@ std::vector<GemmTestParams> CreateTests1(
         "n_gt_" + nrs + "_strided_a",
         tester.clone()
             .m(mr)
-            .a_stride(NextPrime(k_block * 3 + 1))
+            .a_stride(xnnpack::NextPrime(k_block * 3 + 1))
         , test_func, isa_check)
         .loop_n(nr + 1, nr * 2 - 1)
         .loop_k(1, k_block * 3, k_block));
@@ -222,7 +223,7 @@ std::vector<GemmTestParams> CreateTests1(
       "n_div_" + nrs + "_strided_cn",
       tester.clone()
           .m(mr)
-          .cn_stride(NextPrime(nr + 1))
+          .cn_stride(xnnpack::NextPrime(nr + 1))
       , test_func, isa_check)
       .loop_n(nr * 2, nr * 3, nr)
       .loop_k(1, k_block * 3, k_block + 1));
@@ -231,7 +232,7 @@ std::vector<GemmTestParams> CreateTests1(
         "n_div_" + nrs + "_strided_a",
         tester.clone()
             .m(mr)
-            .a_stride(NextPrime(k_block * 3 + 1))
+            .a_stride(xnnpack::NextPrime(k_block * 3 + 1))
         , test_func, isa_check)
         .loop_n(nr * 2, nr * 3, nr)
         .loop_k(1, k_block * 3, k_block));
@@ -278,7 +279,7 @@ std::vector<GemmTestParams> CreateTests1(
       "strided_cm_subtile",
       tester.clone()
           .mr(mr).nr(nr).kr(kr).sr(sr)
-          .cm_stride(NextPrime(nr + 1))
+          .cm_stride(xnnpack::NextPrime(nr + 1))
           .iterations(1)
       , test_func, isa_check)
       .loop_k(1, k_block * 3, k_block + 1)
@@ -289,14 +290,14 @@ std::vector<GemmTestParams> CreateTests1(
         "a_offset",
         tester.clone()
             .m(mr).n(nr).ks(3)
-            .a_offset(NextPrime(mr * k_block * 3 + 1))
+            .a_offset(xnnpack::NextPrime(mr * k_block * 3 + 1))
         , test_func, isa_check)
         .loop_k(1, k_block * 3, k_block + 1));
     gemm_tests.push_back(GemmTestParams(
         "zero",
         tester.clone()
             .m(mr).n(nr).ks(3)
-            .a_offset(NextPrime(mr * k_block * 3 + 1))
+            .a_offset(xnnpack::NextPrime(mr * k_block * 3 + 1))
         , test_func, isa_check)
         .loop_k(1, k_block * 3, k_block + 1)
         .loop_zi(0, mr - 1));
@@ -315,7 +316,7 @@ std::vector<GemmTestParams> CreateTests1(
       "strided_cm",
       tester.clone()
           .m(mr).n(nr).k(k_block)
-          .cm_stride(NextPrime(nr + 1))
+          .cm_stride(xnnpack::NextPrime(nr + 1))
       , test_func, isa_check));
 
   return gemm_tests;
@@ -347,14 +348,14 @@ std::vector<GemmTestParams> CreateTests2(
       "strided_cn",
       tester.clone()
           .m(mr).n(nr).k(k_block)
-          .cn_stride(NextPrime(nr + 1))
+          .cn_stride(xnnpack::NextPrime(nr + 1))
     , test_func, isa_check));
   if (!is_igemm) {
     gemm_tests.push_back(GemmTestParams(
         "k_eq_" + kbs + "_strided_a",
         tester.clone()
             .m(mr).n(nr).k(k_block)
-            .a_stride(NextPrime(k_block + 1))
+            .a_stride(xnnpack::NextPrime(k_block + 1))
         , test_func, isa_check));
   }
   gemm_tests.push_back(GemmTestParams(
@@ -388,7 +389,7 @@ std::vector<GemmTestParams> CreateTests2(
           "k_lt_" + akbs + "_strided_a",
           tester.clone()
               .m(mr).n(nr)
-              .a_stride(NextPrime(adj_k_block + 1))
+              .a_stride(xnnpack::NextPrime(adj_k_block + 1))
           , test_func, isa_check)
           .loop_k(1, adj_k_block - 1));
     }
@@ -412,7 +413,7 @@ std::vector<GemmTestParams> CreateTests2(
         "k_gt_" + akbs + "_strided_a",
         tester.clone()
             .m(mr).n(nr)
-            .a_stride(NextPrime(adj_k_block * 2 + 1))
+            .a_stride(xnnpack::NextPrime(adj_k_block * 2 + 1))
       , test_func, isa_check)
       .loop_k(adj_k_block + 1, adj_k_block * 2 - 1, k_block));
   }
@@ -436,7 +437,7 @@ std::vector<GemmTestParams> CreateTests2(
           "k_div_" + kbs + "_strided_a",
           tester.clone()
               .m(mr).n(nr)
-              .a_stride(NextPrime(k_block * 3 + 1))
+              .a_stride(xnnpack::NextPrime(k_block * 3 + 1))
           , test_func, isa_check)
           .loop_k(adj_k_block + k_block, k_block * 3, k_block));
     }
@@ -460,7 +461,7 @@ std::vector<GemmTestParams> CreateTests2(
       "n_gt_" + nrs + "_strided_cn",
       tester.clone()
           .m(mr)
-          .cn_stride(NextPrime(nr + 1))
+          .cn_stride(xnnpack::NextPrime(nr + 1))
       , test_func, isa_check)
       .loop_n(nr + 1, nr * 2 - 1)
       .loop_k(1, k_block * 3, k_block + 1));
@@ -469,7 +470,7 @@ std::vector<GemmTestParams> CreateTests2(
         "n_gt_" + nrs + "_strided_a",
         tester.clone()
             .m(mr)
-            .a_stride(NextPrime(k_block * 3 + 1))
+            .a_stride(xnnpack::NextPrime(k_block * 3 + 1))
         , test_func, isa_check)
         .loop_n(nr + 1, nr * 2 - 1)
         .loop_k(1, k_block * 3, k_block));
@@ -493,7 +494,7 @@ std::vector<GemmTestParams> CreateTests2(
       "n_div_" + nrs + "_strided_cn",
       tester.clone()
           .m(mr)
-          .cn_stride(NextPrime(nr + 1))
+          .cn_stride(xnnpack::NextPrime(nr + 1))
       , test_func, isa_check)
       .loop_n(nr * 2, nr * 3, nr)
       .loop_k(1, k_block * 3, k_block + 1));
@@ -502,7 +503,7 @@ std::vector<GemmTestParams> CreateTests2(
         "n_div_" + nrs + "_strided_a",
         tester.clone()
             .m(mr)
-            .a_stride(NextPrime(k_block * 3 + 1))
+            .a_stride(xnnpack::NextPrime(k_block * 3 + 1))
         , test_func, isa_check)
         .loop_n(nr * 2, nr * 3, nr)
         .loop_k(1, k_block * 3, k_block));
@@ -549,7 +550,7 @@ std::vector<GemmTestParams> CreateTests2(
       "strided_cm_subtile",
       tester.clone()
           .mr(mr).nr(nr).kr(kr).sr(sr)
-          .cm_stride(NextPrime(nr + 1))
+          .cm_stride(xnnpack::NextPrime(nr + 1))
           .iterations(1)
       , test_func, isa_check)
       .loop_k(1, k_block * 3, k_block + 1)
@@ -560,14 +561,14 @@ std::vector<GemmTestParams> CreateTests2(
         "a_offset",
         tester.clone()
             .m(mr).n(nr).ks(3)
-            .a_offset(NextPrime(mr * k_block * 3 + 1))
+            .a_offset(xnnpack::NextPrime(mr * k_block * 3 + 1))
         , test_func, isa_check)
         .loop_k(1, k_block * 3, k_block + 1));
     gemm_tests.push_back(GemmTestParams(
         "zero",
         tester.clone()
             .m(mr).n(nr).ks(3)
-            .a_offset(NextPrime(mr * k_block * 3 + 1))
+            .a_offset(xnnpack::NextPrime(mr * k_block * 3 + 1))
         , test_func, isa_check)
         .loop_k(1, k_block * 3, k_block + 1)
         .loop_zi(0, mr - 1));
@@ -586,7 +587,7 @@ std::vector<GemmTestParams> CreateTests2(
       "strided_cm",
       tester.clone()
           .m(mr).n(nr).k(k_block)
-          .cm_stride(NextPrime(nr + 1))
+          .cm_stride(xnnpack::NextPrime(nr + 1))
       , test_func, isa_check));
 
   return gemm_tests;

@@ -702,6 +702,8 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_with_reshape) {
 }
 
 TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_transposed_weights) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
   if (xnn_init_qp8_f32_qc4w_gemm_config() == nullptr) {
     GTEST_SKIP();
   }
@@ -2962,9 +2964,9 @@ class FullyConnectedTestQD8F16QC8W : public FullyConnectedTestBase<int8_t, int8_
 
 TEST_F(FullyConnectedTestQD8F16QC8W, define)
 {
-  std::vector<float> requantization_scales(output_channels, 1.0f);
-
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  std::vector<float> requantization_scales(output_channels, 1.0f);
 
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
@@ -3124,9 +3126,9 @@ class FullyConnectedTestQD8F32QC8W : public FullyConnectedTestBase<int8_t, int8_
 
 TEST_F(FullyConnectedTestQD8F32QC8W, define)
 {
-  std::vector<float> requantization_scales(output_channels, 1.0f);
-
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  std::vector<float> requantization_scales(output_channels, 1.0f);
 
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
@@ -3179,6 +3181,8 @@ TEST_F(FullyConnectedTestQD8F32QC8W, define)
 
 TEST_F(FullyConnectedTestQD8F32QC8W, internally_allocated_dynamic_quantization_parameters)
 {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/4, /*flags=*/0, &subgraph));
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
@@ -3285,9 +3289,9 @@ class FullyConnectedTestQD8F32QC4W : public FullyConnectedTestBase<int8_t, uint8
 
 TEST_F(FullyConnectedTestQD8F32QC4W, define)
 {
-  std::vector<float> requantization_scales(output_channels, 1.0f);
-
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  std::vector<float> requantization_scales(output_channels, 1.0f);
 
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
@@ -3616,6 +3620,8 @@ TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_p
 
 TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_parameters_transposed_weights)
 {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/4, /*flags=*/0, &subgraph));
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
@@ -3725,12 +3731,12 @@ TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_p
 
 TEST_F(FullyConnectedTestF32, reshape)
 {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
   std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));

@@ -18,17 +18,29 @@
 // SIMD vector type for s32 using AVX2.
 typedef __m256i xnn_simd_s32_t;
 #define xnn_simd_size_s32 8
-#define xnn_simd_log2_size_s32 4
+#define xnn_simd_log2_size_s32 3
 #define xnn_simd_bytes_s32 (xnn_simd_size_s32 * sizeof(int32_t))
 
 #define XNN_SIMD_CONST_S32(var, val) \
   const xnn_simd_s32_t var = _mm256_set1_epi32(val);
 
+// Mask table used for masked load/store operations.
+static const int32_t mask_table_avx_s32[14] = {-1, -1, -1, -1, -1, -1, -1,
+                                               0,  0,  0,  0,  0,  0,  0};
 // Arithmetic operations.
-
 static XNN_INLINE xnn_simd_s32_t xnn_mul_s32(xnn_simd_s32_t a,
                                              xnn_simd_s32_t b) {
   return _mm256_mullo_epi32(a, b);
+}
+
+static XNN_INLINE xnn_simd_s32_t xnn_max_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  return _mm256_max_epi32(a, b);
+}
+
+static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  return _mm256_min_epi32(a, b);
 }
 
 // Load/store operations.
@@ -45,7 +57,7 @@ static XNN_INLINE void xnn_storeu_s32(int32_t* ptr, xnn_simd_s32_t v) {
   _mm256_storeu_si256((__m256i*)ptr, v);
 }
 
-static XNN_INLINE void xnn_store_s32(float* ptr, xnn_simd_s32_t v) {
+static XNN_INLINE void xnn_store_s32(int32_t* ptr, xnn_simd_s32_t v) {
   _mm256_store_si256((__m256i*)ptr, v);
 }
 
@@ -64,10 +76,13 @@ static XNN_INLINE xnn_simd_s32_t xnn_set1_or_load_s32(const int32_t* v) {
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t
-xnn_load_tail_s32(const int32_t* input, size_t num_elements) XNN_OOB_READS {
+xnn_load_tail_s32(const int32_t* input, size_t num_elements) {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_s32);
-  return _mm256_loadu_si256((const __m256i*)input);
+
+  const __m256i vmask = _mm256_loadu_si256(
+      (const __m256i*)(&mask_table_avx_s32[7] - num_elements));
+  return _mm256_maskload_epi32(input, vmask);
 }
 
 static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,

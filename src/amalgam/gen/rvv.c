@@ -1616,6 +1616,41 @@ void xnn_f32_vrelu_ukernel__rvv_u4v(
   }
 }
 
+void xnn_f32_vrsqrt_ukernel__rvv_rsqrt_u4v(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_rsqrt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  batch >>= XNN_LOG2_SIZEOF_FLOAT;
+
+  vfloat32m4_t onephalf_f32v = __riscv_vfmv_v_f_f32m4(1.5f, __riscv_vsetvl_e32m4(batch));
+  for (; batch > 0; ) {
+    int32_t n = __riscv_vsetvl_e32m4(batch); batch -= n;
+    vfloat32m4_t in_f32v = __riscv_vle32_v_f32m4(input, n); input += n;
+
+    vfloat32m4_t t0_f32v = __riscv_vfrsqrt7_v_f32m4(in_f32v, n);
+    vfloat32m4_t in_half_f32v = __riscv_vfmul_vf_f32m4(in_f32v, 0.5f, n);
+
+    // First Newton-Raphson iteration
+    vfloat32m4_t t1_f32v = __riscv_vfmul_vv_f32m4(t0_f32v, t0_f32v, n);
+    vfloat32m4_t t2_f32v = __riscv_vfnmsub_vv_f32m4(in_half_f32v, t1_f32v, onephalf_f32v, n);
+    t0_f32v = __riscv_vfmul_vv_f32m4(t0_f32v, t2_f32v, n);
+
+    // Second Newton-Raphson iteration
+    t1_f32v = __riscv_vfmul_vv_f32m4(t0_f32v, t0_f32v, n);
+    t2_f32v = __riscv_vfnmsub_vv_f32m4(in_half_f32v, t1_f32v, onephalf_f32v, n);
+    vfloat32m4_t y_f32v = __riscv_vfmul_vv_f32m4(t0_f32v, t2_f32v, n);
+
+    __riscv_vse32_v_f32m4(output, y_f32v, n); output += n;
+  }
+}
+
 void xnn_qs8_vmul_minmax_fp32_ukernel__rvv_u2v(
     size_t batch,
     const int8_t* input_a,

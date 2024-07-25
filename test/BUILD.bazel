@@ -10,12 +10,14 @@ load(
     "xnnpack_kleidiai_defines",
     "xnnpack_simd_copts_for_arch",
     "xnnpack_simd_f32_archs",
+    "xnnpack_simd_s16_archs",
     "xnnpack_simd_s32_archs",
     "xnnpack_test_deps_for_library",
     "xnnpack_unit_test",
 )
 
 MICROKERNEL_TEST_DEPS = [
+    ":next_prime",
     ":replicable_random_device",
     "@FP16",
     "//:aligned_allocator",
@@ -64,6 +66,14 @@ xnnpack_cc_library(
     deps = xnnpack_test_deps_for_library() + [
         "//:xnnpack_h",
     ],
+)
+
+xnnpack_cc_library(
+    name = "next_prime",
+    testonly = True,
+    srcs = ["next_prime.cc"],
+    hdrs = ["next_prime.h"],
+    deps = xnnpack_test_deps_for_library(),
 )
 
 xnnpack_cc_library(
@@ -167,6 +177,20 @@ xnnpack_cc_library(
 ) for arch in xnnpack_simd_f32_archs()]
 
 [xnnpack_unit_test(
+    name = "s16_simd_" + arch + "_test",
+    srcs = [
+        "s16-simd-" + arch + ".cc",
+    ],
+    copts = xnnpack_simd_copts_for_arch(arch),
+    deps = [
+        ":replicable_random_device",
+        "//:common",
+        "//:isa_checks",
+        "//:microkernels_h",
+    ],
+) for arch in xnnpack_simd_s16_archs()]
+
+[xnnpack_unit_test(
     name = "s32_simd_" + arch + "_test",
     srcs = [
         "s32-simd-" + arch + ".cc",
@@ -265,6 +289,7 @@ xnnpack_cc_library(
     "qu8_vadd_minmax",
     "qu8_vmul_minmax_fp32",
     "qu8_vmul_minmax_rndnu",
+    "s32_vmul",
 ]]
 
 [xnnpack_unit_test(
@@ -312,6 +337,7 @@ xnnpack_cc_library(
     "qu8_vaddc_minmax",
     "qu8_vmulc_minmax_fp32",
     "qu8_vmulc_minmax_rndnu",
+    "s32_vmulc",
 ]]
 
 [xnnpack_unit_test(
@@ -2259,6 +2285,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "fully_connected_test",
+    timeout = "moderate",
     srcs = [
         "fully-connected.cc",
     ],

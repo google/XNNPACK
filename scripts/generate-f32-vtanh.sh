@@ -21,14 +21,6 @@ tools/xngen src/f32-vtanh/scalar-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D P
 tools/xngen src/f32-vtanh/scalar-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D BATCH_TILE=2 -D FMA=0 -D WASM=1 -o src/f32-vtanh/gen/f32-vtanh-wasm-expm1minus-rr1-lut8-p4h3ts-div-u2.c &
 tools/xngen src/f32-vtanh/scalar-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D BATCH_TILE=4 -D FMA=0 -D WASM=1 -o src/f32-vtanh/gen/f32-vtanh-wasm-expm1minus-rr1-lut8-p4h3ts-div-u4.c &
 
-tools/xngen src/f32-vtanh/scalar-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D BATCH_TILE=1 -D FMA=1 -D WASM=0 -o src/f32-vtanh/gen/f32-vtanh-fma-expm1minus-rr1-p6h5ts-div-u1.c &
-tools/xngen src/f32-vtanh/scalar-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D BATCH_TILE=2 -D FMA=1 -D WASM=0 -o src/f32-vtanh/gen/f32-vtanh-fma-expm1minus-rr1-p6h5ts-div-u2.c &
-tools/xngen src/f32-vtanh/scalar-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D BATCH_TILE=4 -D FMA=1 -D WASM=0 -o src/f32-vtanh/gen/f32-vtanh-fma-expm1minus-rr1-p6h5ts-div-u4.c &
-
-tools/xngen src/f32-vtanh/scalar-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D BATCH_TILE=1 -D FMA=1 -D WASM=0 -o src/f32-vtanh/gen/f32-vtanh-fma-expm1minus-rr1-lut8-p4h3ts-div-u1.c &
-tools/xngen src/f32-vtanh/scalar-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D BATCH_TILE=2 -D FMA=1 -D WASM=0 -o src/f32-vtanh/gen/f32-vtanh-fma-expm1minus-rr1-lut8-p4h3ts-div-u2.c &
-tools/xngen src/f32-vtanh/scalar-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D BATCH_TILE=4 -D FMA=1 -D WASM=0 -o src/f32-vtanh/gen/f32-vtanh-fma-expm1minus-rr1-lut8-p4h3ts-div-u4.c &
-
 ################################### Wasm SIMD ####################################
 tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D MINMAX=WASM   -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-vtanh-wasmsimd-expm1minus-rr1-p6h5ts-div-abs-min-u4.c &
 tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D MINMAX=WASM   -D BATCH_TILE=8  -o src/f32-vtanh/gen/f32-vtanh-wasmsimd-expm1minus-rr1-p6h5ts-div-abs-min-u8.c &

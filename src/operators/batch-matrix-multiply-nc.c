@@ -365,12 +365,12 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
 
   // Fail if the batch sizes for `A` and `B` are not compatible.
   for (int k = 0; k < num_batch_dims; k++) {
-    if (batch_dims_c[k] % batch_dims_a[k] != 0 ||
-        batch_dims_c[k] % batch_dims_b[k] != 0) {
+    if ((batch_dims_a[k] != 1 && batch_dims_c[k] != batch_dims_a[k]) ||
+        (batch_dims_b[k] != 1 && batch_dims_c[k] != batch_dims_b[k])) {
       xnn_log_error(
           "failed to reshape %s operator with incompatible %i-th batch "
-          "dimensions %zu and %zu: batch dimensions must be equal or integer "
-          "multiples of one another",
+          "dimensions %zu and %zu: batch dimensions must be equal or "
+          "broadcastable",
           xnn_operator_type_to_string(batch_matrix_multiply_op->type), k,
           batch_dims_a[k], batch_dims_b[k]);
       return xnn_status_invalid_parameter;

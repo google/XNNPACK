@@ -153,7 +153,9 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":gemm_benchmark",
         "//:isa_checks",
-    ] + xnnpack_if_kleidiai_enabled(["@KleidiAI//"]),
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//kai/ukernels/matmul",
+    ]),
 )
 
 xnnpack_benchmark(

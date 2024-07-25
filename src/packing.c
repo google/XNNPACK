@@ -532,7 +532,7 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
     size_t nr_block_start = 0;
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      int32_t* packed_b = (int32_t*) packed_weights;
+      float* packed_b = (float*) packed_weights;
       packed_weights = (float*) packed_weights + nr_block_size;
       packed_weights = (float*) packed_weights + (nr - nr_block_size);
 
@@ -1488,9 +1488,8 @@ size_t xnn_packed_stride_kai_qs4_weights_and_biases(
   const uint32_t nr = gemm_config->nr;
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
-  return kai_get_rhs_packed_offset_rhs_pack_kxn_qsi4cxp_qsu4cxs1s0(nr, k, nr,
-                                                                   kr, sr) /
-         nr;
+  return kai_get_rhs_packed_stride_rhs_pack_kxn_qsi4cxp_qsu4cxs1s0(k, nr, kr,
+                                                                   sr);
 }
 
 void xnn_pack_kai_qs4_weights_and_biases(

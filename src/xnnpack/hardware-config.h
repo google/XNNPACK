@@ -70,6 +70,7 @@ struct xnn_hardware_config {
   bool use_wasm_blendvps;
   bool use_wasm_pshufb;
   bool use_wasm_sdot;
+  bool use_wasm_usdot;
   bool use_wasm_fma;
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 #if XNN_ARCH_HEXAGON

@@ -22,20 +22,6 @@
 - name: xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u4
 - name: xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u8
 
-# Scalar+FMA
-- name: xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3ts_div_u1
-  init: xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params
-- name: xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3ts_div_u2
-  init: xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params
-- name: xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3ts_div_u4
-  init: xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params
-- name: xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_p6h5ts_div_u1
-  init: xnn_init_f32_tanh_scalar_expm1minus_rr1_p6h5_params
-- name: xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_p6h5ts_div_u2
-  init: xnn_init_f32_tanh_scalar_expm1minus_rr1_p6h5_params
-- name: xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_p6h5ts_div_u4
-  init: xnn_init_f32_tanh_scalar_expm1minus_rr1_p6h5_params
-
 # Wasm
 - name: xnn_f32_vtanh_ukernel__wasm_expm1minus_rr1_lut8_p4h3ts_div_u1
   init: xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params

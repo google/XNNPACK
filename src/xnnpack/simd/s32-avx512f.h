@@ -31,6 +31,16 @@ static XNN_INLINE xnn_simd_s32_t xnn_mul_s32(xnn_simd_s32_t a,
   return _mm512_mullo_epi32(a, b);
 }
 
+static XNN_INLINE xnn_simd_s32_t xnn_max_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  return _mm512_max_epi32(a, b);
+}
+
+static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  return _mm512_min_epi32(a, b);
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {
@@ -67,7 +77,8 @@ static XNN_INLINE xnn_simd_s32_t
 xnn_load_tail_s32(const int32_t* input, size_t num_elements) XNN_OOB_READS {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_s32);
-  return _mm512_loadu_epi32(input);
+  const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << num_elements) - UINT32_C(1)));
+  return _mm512_maskz_loadu_epi32(vmask, input);
 }
 
 static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,

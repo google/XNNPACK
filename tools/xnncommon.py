@@ -100,6 +100,7 @@ _ISA_TO_ARCH_MAP = {
   "wasmrelaxedsimd": ["wasmrelaxedsimd"],
   "wasmpshufb": ["wasmrelaxedsimd"],
   "wasmsdot": ["wasmrelaxedsimd"],
+  "wasmusdot": ["wasmrelaxedsimd"],
   "wasmblendvps": ["wasmrelaxedsimd"],
 }
 
@@ -137,6 +138,7 @@ _ISA_TO_UTILCHECK_MAP = {
   "rvvfp16arith": "CheckRVVFP16ARITH",
   "wasmpshufb": "CheckWAsmPSHUFB",
   "wasmsdot": "CheckWAsmSDOT",
+  "wasmusdot": "CheckWAsmUSDOT",
   "wasmblendvps": "CheckWAsmBLENDVPS",
 }
 
@@ -176,6 +178,7 @@ _ISA_TO_CHECK_MAP = {
   "rvvfp16arith": "TEST_REQUIRES_RISCV_VECTOR_FP16_ARITH",
   "wasmpshufb": "TEST_REQUIRES_WASM_PSHUFB",
   "wasmsdot": "TEST_REQUIRES_WASM_SDOT",
+  "wasmusdot": "TEST_REQUIRES_WASM_USDOT",
   "wasmblendvps": "TEST_REQUIRES_WASM_BLENDVPS",
 }
 

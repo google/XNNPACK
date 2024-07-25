@@ -9,6 +9,8 @@
 #pragma once
 
 #include <benchmark/benchmark.h>
+#include "xnnpack/math.h"
+
 #include <cstdint>
 #include <initializer_list>
 #include <functional>
@@ -55,7 +57,7 @@ class BenchmarkWrapper {
       if (blockwise_ && args.size() < 4) {
         // Use K as default blocksize for parity with non-blockwise kernels.
         // This is equivalent to per-channel quantization.
-        vals.push_back(k);
+        vals.push_back(round_up_po2(k, 32));
       }
       else if (!blockwise_ && vals.size() == 4) {
         // Drop blocksize argument for non-blockwise kernels. This declutters the

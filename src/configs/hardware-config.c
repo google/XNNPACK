@@ -146,19 +146,19 @@ static void init_hardware_config(void) {
 #else
     hardware_config.use_x86_avxvnni = 0;
 #endif
-#if XNN_ENABLE_AVX256SKX
+#if XNN_ENABLE_AVX256SKX && XNN_ENABLE_AVX512AMX
     // Using cpuinfo_has_x86_amx_int8 as placeholder for cpuinfo_has_x86_avx10
     hardware_config.use_x86_avx256skx = hardware_config.use_x86_avx512skx || cpuinfo_has_x86_amx_int8();
 #else
     hardware_config.use_x86_avx256skx = 0;
 #endif
-#if XNN_ENABLE_AVX256VNNI
+#if XNN_ENABLE_AVX256VNNI && XNN_ENABLE_AVX512AMX
     // Using cpuinfo_has_x86_amx_int8 as placeholder for cpuinfo_has_x86_avx10
     hardware_config.use_x86_avx256vnni = (hardware_config.use_x86_avx512skx && cpuinfo_has_x86_avxvnni()) || cpuinfo_has_x86_amx_int8();
 #else
     hardware_config.use_x86_avx256vnni = 0;
 #endif
-#if XNN_ENABLE_AVX256VNNIGFNI
+#if XNN_ENABLE_AVX256VNNIGFNI && XNN_ENABLE_AVX512AMX
     // Using cpuinfo_has_x86_amx_int8 as placeholder for cpuinfo_has_x86_avx10
     hardware_config.use_x86_avx256vnnigfni = hardware_config.use_x86_avx256vnni && cpuinfo_has_x86_gfni();
 #else
@@ -243,6 +243,18 @@ static void init_hardware_config(void) {
       hardware_config.use_wasm_sdot = !wasm_v128_any_true(wasm_v128_or(
         wasm_v128_xor(xint8_output, wasm_i32x4_const_splat(-128)),
         wasm_v128_xor(overflow_output, wasm_i32x4_const(65536, 33024, 33024, 512))));
+    }
+    {
+      // Check out-of-bounds behaviour of Relaxed Integer Dot Product with Accumulation with signed and unsigned input (e.g. vpdpbusd).
+      const v128_t int8_input = wasm_i8x16_const(0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0);
+      const volatile v128_t xint8_input = wasm_i8x16_const(0, 0, 0, -128, 0, 0, -128, 0, 0, -128, 0, 0, -128, 0, 0, 0);  // volatile to confuse Clang which otherwise ICE's
+      const v128_t xint8_output = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(int8_input, xint8_input, wasm_i8x16_const_splat(0));
+
+      const volatile v128_t overflow_input = wasm_i8x16_const(-128, -128, -128, -128, -128, -128, -1, -1, -1, -1, -128, -128, -1, -1, -1, -1);  // volatile to confuse Clang which otherwise ICE's
+      const v128_t overflow_output = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(wasm_i8x16_const_splat(-128), overflow_input, wasm_i8x16_const_splat(0));
+      hardware_config.use_wasm_usdot = !wasm_v128_any_true(wasm_v128_or(
+        wasm_v128_xor(xint8_output, wasm_i32x4_const_splat(128)),
+        wasm_v128_xor(overflow_output, wasm_i32x4_const(-65536, -98048, -98048, -130560))));
     }
     {
       const v128_t input1 = wasm_i32x4_const(0xF0F0F0F0, 0xAAAAAAAA, 0xCCCCCCCC, 0x99999999);

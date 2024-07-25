@@ -44,10 +44,11 @@ MAXPOOL_TEST_TEMPLATE = """\
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   MaxPoolMicrokernelTester()
     .pooling_elements(${PRIMARY_TILE})
     .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
-    .channels(${CHANNEL_SCALED_TILE})
+    .channels(channel_tile)
     $if DATATYPE in ["s8", "u8"]:
       .qmin(std::numeric_limits<${CTYPE}>::min())
       .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -57,14 +58,15 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile_with_input_offset) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   MaxPoolMicrokernelTester()
     .pooling_elements(${PRIMARY_TILE})
     .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
-    .channels(${CHANNEL_SCALED_TILE})
+    .channels(channel_tile)
     $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
       .input_offset(${next_prime(CHANNEL_TILE+1)})
     $else:
-      .input_offset(${CHANNEL_SCALED_TILE}+1)
+      .input_offset(channel_tile+1)
     $if DATATYPE in ["s8", "u8"]:
       .qmin(std::numeric_limits<${CTYPE}>::min())
       .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -74,10 +76,11 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile_with_qmin) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   MaxPoolMicrokernelTester()
     .pooling_elements(${PRIMARY_TILE})
     .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
-    .channels(${CHANNEL_SCALED_TILE})
+    .channels(channel_tile)
     .qmin(${QMIN})
     $if DATATYPE in ["s8", "u8"]:
       .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -87,10 +90,11 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile_with_qmax) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   MaxPoolMicrokernelTester()
     .pooling_elements(${PRIMARY_TILE})
     .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
-    .channels(${CHANNEL_SCALED_TILE})
+    .channels(channel_tile)
     $if DATATYPE in ["s8", "u8"]:
       .qmin(std::numeric_limits<${CTYPE}>::min())
     .qmax(${QMAX})
@@ -100,11 +104,12 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_subtile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
     MaxPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
-      .channels(${CHANNEL_SCALED_TILE})
+      .channels(channel_tile)
       $if DATATYPE in ["s8", "u8"]:
         .qmin(std::numeric_limits<${CTYPE}>::min())
         .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -115,15 +120,16 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_subtile)
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_subtile_with_input_offset) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
     MaxPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
-      .channels(${CHANNEL_SCALED_TILE})
+      .channels(channel_tile)
       $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
         .input_offset(${next_prime(CHANNEL_TILE+1)})
       $else:
-        .input_offset(${CHANNEL_SCALED_TILE}+1)
+        .input_offset(channel_tile+1)
       $if DATATYPE in ["s8", "u8"]:
         .qmin(std::numeric_limits<${CTYPE}>::min())
         .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -146,7 +152,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
             .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
     $else:
-      for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
         MaxPoolMicrokernelTester()
           .pooling_elements(${PRIMARY_TILE})
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -173,12 +180,13 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
             .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
     $else:
-      for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
         MaxPoolMicrokernelTester()
           .pooling_elements(${PRIMARY_TILE})
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
-          .input_offset(${CHANNEL_SCALED_TILE}*8)
+          .input_offset(channel_tile*8)
           $if DATATYPE in ["s8", "u8"]:
             .qmin(std::numeric_limits<${CTYPE}>::min())
             .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -200,7 +208,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
             .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
     $else:
-      for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
         MaxPoolMicrokernelTester()
           .pooling_elements(${PRIMARY_TILE})
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -226,7 +235,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
           .qmax(${QMAX})
           .Test(${", ".join(TEST_ARGS)});
     $else:
-      for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
         MaxPoolMicrokernelTester()
           .pooling_elements(${PRIMARY_TILE})
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -254,7 +264,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
             .Test(${", ".join(TEST_ARGS)});
         }
       $else:
-        for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+        for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
           MaxPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -284,12 +295,13 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
             .Test(${", ".join(TEST_ARGS)});
         }
       $else:
-        for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+        for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
           MaxPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
             .channels(channels)
-            .input_offset(${CHANNEL_SCALED_TILE}*8)
+            .input_offset(channel_tile*8)
             $if DATATYPE in ["s8", "u8"]:
               .qmin(std::numeric_limits<${CTYPE}>::min())
               .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -301,7 +313,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(${PRIMARY_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -316,7 +329,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile_with_input_offset) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(${PRIMARY_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -324,7 +338,7 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
         $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
           .input_offset(${next_prime(CHANNEL_TILE)})
         $else:
-          .input_offset(${CHANNEL_SCALED_TILE})
+          .input_offset(channel_tile)
         $if DATATYPE in ["s8", "u8"]:
           .qmin(std::numeric_limits<${CTYPE}>::min())
           .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -335,7 +349,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile_with_qmin) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(${PRIMARY_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -350,7 +365,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile_with_qmax) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(${PRIMARY_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -365,8 +381,9 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_subtile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
     for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
-      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -382,8 +399,9 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_subtile_with_input_offset) {
     $if ISA_CHECK:
       ${ISA_CHECK};
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
     for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
-      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -391,7 +409,7 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
           $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
             .input_offset(${next_prime(CHANNEL_TILE)})
           $else:
-            .input_offset(${CHANNEL_SCALED_TILE})
+            .input_offset(channel_tile)
           $if DATATYPE in ["s8", "u8"]:
             .qmin(std::numeric_limits<${CTYPE}>::min())
             .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -414,7 +432,8 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile
           .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
   $else:
-    for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(${PRIMARY_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -441,12 +460,13 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile
           .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
   $else:
-    for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(${PRIMARY_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
-        .input_offset(${CHANNEL_SCALED_TILE}*2)
+        .input_offset(channel_tile*2)
         $if DATATYPE in ["s8", "u8"]:
           .qmin(std::numeric_limits<${CTYPE}>::min())
           .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -468,7 +488,8 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile
           .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
   $else:
-    for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(${PRIMARY_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -494,7 +515,8 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile
         .qmax(${QMAX})
         .Test(${", ".join(TEST_ARGS)});
   $else:
-    for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(${PRIMARY_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -522,7 +544,8 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_subtile)
           .Test(${", ".join(TEST_ARGS)});
       }
     $else:
-      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -552,12 +575,13 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_subtile_
           .Test(${", ".join(TEST_ARGS)});
       }
     $else:
-      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
-          .input_offset(${CHANNEL_SCALED_TILE}*2)
+          .input_offset(channel_tile*2)
           $if DATATYPE in ["s8", "u8"]:
             .qmin(std::numeric_limits<${CTYPE}>::min())
             .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -569,10 +593,11 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_subtile_
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   MaxPoolMicrokernelTester()
     .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
     .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
-    .channels(${CHANNEL_SCALED_TILE})
+    .channels(channel_tile)
     $if DATATYPE in ["s8", "u8"]:
       .qmin(std::numeric_limits<${CTYPE}>::min())
       .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -582,14 +607,15 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile_with_input_offset) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   MaxPoolMicrokernelTester()
     .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
     .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
-    .channels(${CHANNEL_SCALED_TILE})
+    .channels(channel_tile)
     $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
       .input_offset(${next_prime(CHANNEL_TILE+1)})
     $else:
-      .input_offset(${CHANNEL_SCALED_TILE}+1)
+      .input_offset(channel_tile+1)
     $if DATATYPE in ["s8", "u8"]:
       .qmin(std::numeric_limits<${CTYPE}>::min())
       .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -599,10 +625,11 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile_with_qmin) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   MaxPoolMicrokernelTester()
     .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
     .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
-    .channels(${CHANNEL_SCALED_TILE})
+    .channels(channel_tile)
     .qmin(${QMIN})
     $if DATATYPE in ["s8", "u8"]:
       .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -612,10 +639,11 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile_with_qmax) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   MaxPoolMicrokernelTester()
     .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
     .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
-    .channels(${CHANNEL_SCALED_TILE})
+    .channels(channel_tile)
     $if DATATYPE in ["s8", "u8"]:
       .qmin(std::numeric_limits<${CTYPE}>::min())
     .qmax(${QMAX})
@@ -625,11 +653,12 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_subtile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
     MaxPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
-      .channels(${CHANNEL_SCALED_TILE})
+      .channels(channel_tile)
       $if DATATYPE in ["s8", "u8"]:
         .qmin(std::numeric_limits<${CTYPE}>::min())
         .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -640,15 +669,16 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_subtile)
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_subtile_with_input_offset) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
     MaxPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
-      .channels(${CHANNEL_SCALED_TILE})
+      .channels(channel_tile)
       $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
         .input_offset(${next_prime(CHANNEL_TILE+1)})
       $else:
-        .input_offset(${CHANNEL_SCALED_TILE}+1)
+        .input_offset(channel_tile+1)
       $if DATATYPE in ["s8", "u8"]:
         .qmin(std::numeric_limits<${CTYPE}>::min())
         .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -672,7 +702,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
           .Test(${", ".join(TEST_ARGS)});
       }
     $else:
-      for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
         MaxPoolMicrokernelTester()
           .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -700,12 +731,13 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
           .Test(${", ".join(TEST_ARGS)});
       }
     $else:
-      for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
         MaxPoolMicrokernelTester()
           .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
-          .input_offset(${CHANNEL_SCALED_TILE}*5)
+          .input_offset(channel_tile*5)
           $if DATATYPE in ["s8", "u8"]:
             .qmin(std::numeric_limits<${CTYPE}>::min())
             .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -728,7 +760,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
           .Test(${", ".join(TEST_ARGS)});
       }
     $else:
-      for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
         MaxPoolMicrokernelTester()
           .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -755,7 +788,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
           .Test(${", ".join(TEST_ARGS)});
       }
     $else:
-      for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
         MaxPoolMicrokernelTester()
           .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -783,7 +817,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
             .Test(${", ".join(TEST_ARGS)});
         }
       $else:
-        for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+        for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
           MaxPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -813,12 +848,13 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
             .Test(${", ".join(TEST_ARGS)});
         }
       $else:
-        for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+        for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
           MaxPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
             .channels(channels)
-            .input_offset(${CHANNEL_SCALED_TILE}*8)
+            .input_offset(channel_tile*8)
             $if DATATYPE in ["s8", "u8"]:
               .qmin(std::numeric_limits<${CTYPE}>::min())
               .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -830,7 +866,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -845,7 +882,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile_with_input_offset) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -853,7 +891,7 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
         $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
           .input_offset(${next_prime(CHANNEL_TILE)})
         $else:
-          .input_offset(${CHANNEL_SCALED_TILE})
+          .input_offset(channel_tile)
         $if DATATYPE in ["s8", "u8"]:
           .qmin(std::numeric_limits<${CTYPE}>::min())
           .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -864,7 +902,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile_with_qmin) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -879,7 +918,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile_with_qmax) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -894,8 +934,9 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_subtile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
     for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
-      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -911,8 +952,9 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_subtile_with_input_offset) {
     $if ISA_CHECK:
       ${ISA_CHECK};
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
     for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
-      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -920,7 +962,7 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
           $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
             .input_offset(${next_prime(CHANNEL_TILE)})
           $else:
-            .input_offset(${CHANNEL_SCALED_TILE})
+            .input_offset(channel_tile)
           $if DATATYPE in ["s8", "u8"]:
             .qmin(std::numeric_limits<${CTYPE}>::min())
             .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -944,7 +986,8 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile
         .Test(${", ".join(TEST_ARGS)});
     }
   $else:
-    for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -972,12 +1015,13 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile
         .Test(${", ".join(TEST_ARGS)});
     }
   $else:
-    for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
-        .input_offset(${CHANNEL_SCALED_TILE}*2)
+        .input_offset(channel_tile*2)
         $if DATATYPE in ["s8", "u8"]:
           .qmin(std::numeric_limits<${CTYPE}>::min())
           .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -1000,7 +1044,8 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile
         .Test(${", ".join(TEST_ARGS)});
     }
   $else:
-    for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -1027,7 +1072,8 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile
         .Test(${", ".join(TEST_ARGS)});
     }
   $else:
-    for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
       MaxPoolMicrokernelTester()
         .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -1055,7 +1101,8 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_subtile)
           .Test(${", ".join(TEST_ARGS)});
       }
     $else:
-      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -1085,12 +1132,13 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_subtile_
           .Test(${", ".join(TEST_ARGS)});
       }
     $else:
-      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
-          .input_offset(${CHANNEL_SCALED_TILE}*2)
+          .input_offset(channel_tile*2)
           $if DATATYPE in ["s8", "u8"]:
             .qmin(std::numeric_limits<${CTYPE}>::min())
             .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -1102,11 +1150,12 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_subtile_
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+  for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     MaxPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
-      .channels(${CHANNEL_SCALED_TILE})
+      .channels(channel_tile)
       $if DATATYPE in ["s8", "u8"]:
         .qmin(std::numeric_limits<${CTYPE}>::min())
         .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -1117,15 +1166,16 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass) {
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_input_offset) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+  for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     MaxPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
-      .channels(${CHANNEL_SCALED_TILE})
+      .channels(channel_tile)
       $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
         .input_offset(${next_prime(CHANNEL_TILE+1)})
       $else:
-        .input_offset(${CHANNEL_SCALED_TILE}+1)
+        .input_offset(channel_tile+1)
       $if DATATYPE in ["s8", "u8"]:
         .qmin(std::numeric_limits<${CTYPE}>::min())
         .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -1136,11 +1186,12 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_i
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_qmin) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+  for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     MaxPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
-      .channels(${CHANNEL_SCALED_TILE})
+      .channels(channel_tile)
       .qmin(${QMIN})
       $if DATATYPE in ["s8", "u8"]:
         .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -1151,11 +1202,12 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_q
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_qmax) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+  for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     MaxPoolMicrokernelTester()
       .pooling_elements(pooling_elements)
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
-      .channels(${CHANNEL_SCALED_TILE})
+      .channels(channel_tile)
       $if DATATYPE in ["s8", "u8"]:
         .qmin(std::numeric_limits<${CTYPE}>::min())
       .qmax(${QMAX})
@@ -1167,7 +1219,7 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
         for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
           MaxPoolMicrokernelTester()
@@ -1180,7 +1232,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
             .Test(${", ".join(TEST_ARGS)});
         }
       $else:
-        for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+        for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
           MaxPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -1196,7 +1249,7 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_input_offset) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
         for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
           MaxPoolMicrokernelTester()
@@ -1210,12 +1263,13 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
             .Test(${", ".join(TEST_ARGS)});
         }
       $else:
-        for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+        for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
           MaxPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
             .channels(channels)
-            .input_offset(${CHANNEL_SCALED_TILE}*8)
+            .input_offset(channel_tile*8)
             $if DATATYPE in ["s8", "u8"]:
               .qmin(std::numeric_limits<${CTYPE}>::min())
               .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -1227,7 +1281,7 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_qmin) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
         for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
           MaxPoolMicrokernelTester()
@@ -1240,7 +1294,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
             .Test(${", ".join(TEST_ARGS)});
         }
       $else:
-        for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+        for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
           MaxPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -1256,7 +1311,7 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_qmax) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
       $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
         for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
           MaxPoolMicrokernelTester()
@@ -1269,7 +1324,8 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
             .Test(${", ".join(TEST_ARGS)});
         }
       $else:
-        for (size_t channels = ${CHANNEL_SCALED_TILE}*2; channels < ${CHANNEL_SCALED_TILE}*8; channels += ${CHANNEL_SCALED_TILE}) {
+        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+        for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
           MaxPoolMicrokernelTester()
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -1285,8 +1341,9 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
-      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -1302,13 +1359,14 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_input_offset) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
-      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
-          .input_offset(${CHANNEL_SCALED_TILE})
+          .input_offset(channel_tile)
           $if DATATYPE in ["s8", "u8"]:
             .qmin(std::numeric_limits<${CTYPE}>::min())
             .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -1320,8 +1378,9 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_qmin) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
-      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -1337,8 +1396,9 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_qmax) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
-      for (size_t channels = 1; channels < ${CHANNEL_SCALED_TILE}; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -1354,7 +1414,7 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
 TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+  for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
       for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
         MaxPoolMicrokernelTester()
@@ -1367,7 +1427,8 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass) {
           .Test(${", ".join(TEST_ARGS)});
       }
     $else:
-      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -1383,7 +1444,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass) {
 TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_input_offset) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+  for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
       for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
         MaxPoolMicrokernelTester()
@@ -1397,12 +1458,13 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_i
           .Test(${", ".join(TEST_ARGS)});
       }
     $else:
-      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
-          .input_offset(${CHANNEL_SCALED_TILE}*2)
+          .input_offset(channel_tile*2)
           $if DATATYPE in ["s8", "u8"]:
             .qmin(std::numeric_limits<${CTYPE}>::min())
             .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -1414,7 +1476,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_i
 TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_qmin) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+  for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
       for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
         MaxPoolMicrokernelTester()
@@ -1427,7 +1489,8 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_q
           .Test(${", ".join(TEST_ARGS)});
       }
     $else:
-      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -1443,7 +1506,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_q
 TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_qmax) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
+  for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
     $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
       for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
         MaxPoolMicrokernelTester()
@@ -1456,7 +1519,8 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_q
           .Test(${", ".join(TEST_ARGS)});
       }
     $else:
-      for (size_t channels = ${CHANNEL_SCALED_TILE}+1; channels < ${CHANNEL_SCALED_TILE}*2; channels++) {
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
         MaxPoolMicrokernelTester()
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
@@ -1487,7 +1551,8 @@ TEST(${TEST_NAME}, few_output_pixels) {
             .Test(${", ".join(TEST_ARGS)});
         }
       $else:
-        for (size_t channels = 1; channels <= ${CHANNEL_SCALED_TILE}*5; channels += ${CHANNEL_SCALED_TILE}-1) {
+        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+        for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
           MaxPoolMicrokernelTester()
             .output_pixels(output_pixels)
             .pooling_elements(pooling_elements)
@@ -1521,13 +1586,14 @@ TEST(${TEST_NAME}, few_output_pixels_with_input_offset) {
             .Test(${", ".join(TEST_ARGS)});
         }
       $else:
-        for (size_t channels = 1; channels <= ${CHANNEL_SCALED_TILE}*5; channels += ${CHANNEL_SCALED_TILE}-1) {
+        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+        for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
           MaxPoolMicrokernelTester()
             .output_pixels(output_pixels)
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
             .channels(channels)
-            .input_offset(${CHANNEL_SCALED_TILE}*5+1)
+            .input_offset(channel_tile*5+1)
             $if DATATYPE in ["s8", "u8"]:
               .qmin(std::numeric_limits<${CTYPE}>::min())
               .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -1555,7 +1621,8 @@ TEST(${TEST_NAME}, few_output_pixels_with_qmin) {
             .Test(${", ".join(TEST_ARGS)});
         }
       $else:
-        for (size_t channels = 1; channels <= ${CHANNEL_SCALED_TILE}*5; channels += ${CHANNEL_SCALED_TILE}-1) {
+        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+        for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
           MaxPoolMicrokernelTester()
             .output_pixels(output_pixels)
             .pooling_elements(pooling_elements)
@@ -1588,7 +1655,8 @@ TEST(${TEST_NAME}, few_output_pixels_with_qmax) {
             .Test(${", ".join(TEST_ARGS)});
         }
       $else:
-        for (size_t channels = 1; channels <= ${CHANNEL_SCALED_TILE}*5; channels += ${CHANNEL_SCALED_TILE}-1) {
+        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+        for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
           MaxPoolMicrokernelTester()
             .output_pixels(output_pixels)
             .pooling_elements(pooling_elements)
@@ -1622,13 +1690,14 @@ TEST(${TEST_NAME}, few_output_pixels_with_output_stride) {
             .Test(${", ".join(TEST_ARGS)});
         }
       $else:
-        for (size_t channels = 1; channels <= ${CHANNEL_SCALED_TILE}*5; channels += ${CHANNEL_SCALED_TILE}-1) {
+        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+        for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
           MaxPoolMicrokernelTester()
             .output_pixels(output_pixels)
             .pooling_elements(pooling_elements)
             .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
             .channels(channels)
-            .output_stride(${CHANNEL_SCALED_TILE}*5+1)
+            .output_stride(channel_tile*5+1)
             $if DATATYPE in ["s8", "u8"]:
               .qmin(std::numeric_limits<${CTYPE}>::min())
               .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -1660,15 +1729,16 @@ TEST(${TEST_NAME}, few_output_pixels_with_step) {
           }
         }
       $else:
-        for (size_t channels = 1; channels <= ${CHANNEL_SCALED_TILE}*5; channels += ${CHANNEL_SCALED_TILE}-1) {
-          for (size_t step = 2; step <= pooling_elements; step++) {
+        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+        for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
+          for (size_t step = 2; step <= pooling_elements; step = xnnpack::NextPrime(step)) {
             MaxPoolMicrokernelTester()
               .output_pixels(output_pixels)
               .pooling_elements(pooling_elements)
               .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
               .step(step)
               .channels(channels)
-              .output_stride(${CHANNEL_SCALED_TILE}*5+1)
+              .output_stride(channel_tile*5+1)
               $if DATATYPE in ["s8", "u8"]:
                 .qmin(std::numeric_limits<${CTYPE}>::min())
                 .qmax(std::numeric_limits<${CTYPE}>::max())
@@ -1754,6 +1824,7 @@ def main(args):
 #include "xnnpack/maxpool.h"
 #include "xnnpack/microparams-init.h"
 #include "maxpool-microkernel-tester.h"
+#include "next_prime.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:

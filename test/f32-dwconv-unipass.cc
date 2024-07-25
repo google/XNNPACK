@@ -24,6 +24,7 @@
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/requantization.h"
 #include "dwconv-microkernel-tester.h"
+#include "next_prime.h"
 
 namespace {
 
@@ -99,7 +100,7 @@ std::vector<DWConvTestParams> CreateTests1(
           .channel_tile(cr)
           .kernel_tile(kr)
           .width(5)
-          .output_stride(NextPrime(cr * 5 + 1))
+          .output_stride(xnnpack::NextPrime(cr * 5 + 1))
       , test_func, isa_check)
       .loop_channels(1, c_block * 5, std::max(size_t(1), c_block - 1)));
 
@@ -110,7 +111,7 @@ std::vector<DWConvTestParams> CreateTests1(
       DWConvMicrokernelTester()
           .channel_tile(cr)
           .kernel_tile(kr)
-          .input_offset(NextPrime(cr + 1) * 16)
+          .input_offset(xnnpack::NextPrime(cr + 1) * 16)
       , test_func, isa_check)
       .loop_channels(adj_c_block + c_block, cr * 16 - 1, cr * 3));
 
@@ -119,7 +120,7 @@ std::vector<DWConvTestParams> CreateTests1(
       DWConvMicrokernelTester()
           .channel_tile(cr)
           .kernel_tile(kr)
-          .input_offset(NextPrime(cr + 1) * 16)
+          .input_offset(xnnpack::NextPrime(cr + 1) * 16)
       , test_func, isa_check)
       .loop_zi(0, kr - 1)
       .loop_channels(adj_c_block + c_block, cr * 16 - 1, cr * 3));

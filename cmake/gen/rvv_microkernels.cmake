@@ -114,6 +114,9 @@ SET(ALL_RVV_MICROKERNEL_SRCS
   src/f32-vrelu/gen/f32-vrelu-rvv-u2v.c
   src/f32-vrelu/gen/f32-vrelu-rvv-u4v.c
   src/f32-vrelu/gen/f32-vrelu-rvv-u8v.c
+  src/f32-vrsqrt/gen/f32-vrsqrt-rvv-rsqrt-u1v.c
+  src/f32-vrsqrt/gen/f32-vrsqrt-rvv-rsqrt-u2v.c
+  src/f32-vrsqrt/gen/f32-vrsqrt-rvv-rsqrt-u4v.c
   src/f32-vsqrt/gen/f32-vsqrt-rvv-sqrt-u1v.c
   src/f32-vsqrt/gen/f32-vsqrt-rvv-sqrt-u2v.c
   src/f32-vsqrt/gen/f32-vsqrt-rvv-sqrt-u4v.c

@@ -1537,6 +1537,10 @@ static void init_f32_rsqrt_config(void) {
       f32_rsqrt_config.init.f32_rsqrt = xnn_init_f32_rsqrt_sse_params;
       f32_rsqrt_config.element_tile = 8;
     }
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    f32_rsqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__rvv_rsqrt_u4v;
+    f32_rsqrt_config.element_tile = hardware_config->vlenb / sizeof(float) * 4; // (VLENB/sizeof)*LMUL
   #else
     f32_rsqrt_config.ukernel =
         (xnn_vunary_ukernel_fn)xnn_f32_vrsqrt_ukernel__scalar_rsqrt_u4;
@@ -1605,15 +1609,10 @@ static void init_f32_tanh_config(void) {
       f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_scalar_expm1minus_rr1_p6h5_params;
       f32_tanh_config.element_tile = 4;
     }
-  #elif XNN_ARCH_RISCV
-    f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3ts_div_u4;
-    f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params;
-    f32_tanh_config.element_tile = 4;
   #else
-  f32_tanh_config.ukernel =
-      (xnn_vunary_ukernel_fn)xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u1;
-  f32_tanh_config.init.f32_tanh = NULL;
-  f32_tanh_config.element_tile = 1;
+    f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn)xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u1;
+    f32_tanh_config.init.f32_tanh = NULL;
+    f32_tanh_config.element_tile = 1;
   #endif
 }
 
