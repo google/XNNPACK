@@ -115,7 +115,7 @@ http_archive(
     sha256 = "e1a3a6a27dcae459e61c33f5eb235a7c809c3208b3b8a649f361a641269ebdc8",
     strip_prefix = "kleidiai-8fda0bd9224cad4360c011a09bbb582c5ab7496a",
     urls = [
-        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/8fda0bd9224cad4360c011a09bbb582c5ab7496a/kleidiai-1976f8661e8d5aa7d4cdca0f3d2a915e5ecb4c53.zip",
+        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/8fda0bd9224cad4360c011a09bbb582c5ab7496a/kleidiai-8fda0bd9224cad4360c011a09bbb582c5ab7496a.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadKleidiAI.cmake)
