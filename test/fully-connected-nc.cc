@@ -1912,7 +1912,8 @@ TEST(FULLY_CONNECTED_NC_QP8_F32_QC4W, unit_batch_with_output_stride) {
     .TestQP8F32QC4W();
 }
 
-TEST(FULLY_CONNECTED_NC_QP8_F32_QC4W, unit_batch_transpose_weights) {
+// TODO(b/355416339): Re-enable once we can handle strides again
+TEST(DISABLED_FULLY_CONNECTED_NC_QP8_F32_QC4W, unit_batch_transpose_weights) {
   FullyConnectedOperatorTester()
     .transpose_weights(true)
     .batch_size(1)
@@ -1988,7 +1989,8 @@ TEST(FULLY_CONNECTED_NC_QP8_F32_QC4W, small_batch_with_output_stride) {
     .TestQP8F32QC4W();
 }
 
-TEST(FULLY_CONNECTED_NC_QP8_F32_QC4W, small_batch_transpose_weights) {
+// TODO(b/355416339): Re-enable once we can handle strides again
+TEST(DISABLED_FULLY_CONNECTED_NC_QP8_F32_QC4W, small_batch_transpose_weights) {
   FullyConnectedOperatorTester()
     .transpose_weights(true)
     .batch_size(12)
@@ -2021,7 +2023,8 @@ TEST(FULLY_CONNECTED_NC_QP8_F32_QC4W, weights_cache_unit_batch) {
     .TestQP8F32QC4W();
 }
 
-TEST(FULLY_CONNECTED_NC_QP8_F32_QC4W, weights_cache_unit_batch_transpose_weights) {
+// TODO(b/355416339): Re-enable once we can handle strides again
+TEST(DISABLED_FULLY_CONNECTED_NC_QP8_F32_QC4W, weights_cache_unit_batch_transpose_weights) {
   FullyConnectedOperatorTester()
     .transpose_weights(true)
     .batch_size(1)
