@@ -45,7 +45,7 @@ static enum xnn_status create_fully_connected_nc(
     bool blockwise,
     size_t block_size,
     size_t extra_bl_bytes,
-    const float* blockwise_kernel_scale_params,
+    const uint16_t* blockwise_kernel_scale_params,
     uint32_t log2_input_element_size,
     uint32_t log2_filter_element_size,
     bool filter_is_nibble,
@@ -278,13 +278,13 @@ static enum xnn_status create_fully_connected_nc(
         void* weights_start = (void*) ((uintptr_t) weights_ptr +
           gemm_config->nr * (sizeof(float) + (block_size * sizeof(int8_t) / 2)));
 
-        const size_t block_stride = /* weights */ block_size / 2 + sizeof(float);
+        const size_t block_stride = /* weights */ block_size / 2 + sizeof(uint16_t);
         const size_t weights_stride = /* weights */ k_stride * sizeof(int8_t) +
-            /* scales= */ num_blocks * sizeof(float) +
+            /* scales= */ num_blocks * sizeof(uint16_t) +
             /* ksum= */ sizeof(float) +
             /* bias= */ sizeof(float);
 
-        xnn_init_blockwise_scale_fp32_params(
+        xnn_init_blockwise_scale_bf16_params(
             output_channels, gemm_config->nr, gemm_config->nr,
             gemm_config->nr * weights_stride,
             gemm_config->nr * weights_stride,
@@ -544,7 +544,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
     size_t output_stride,
     size_t block_size,
     uint8_t kernel_zero_point,
-    const float* kernel_scale,
+    const uint16_t* kernel_scale,
     const void* kernel,
     const float* bias,
     float output_min,
@@ -598,11 +598,12 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
   for (size_t output_channel = 0; output_channel < output_channels; output_channel++) {
     for(size_t block_index=0; block_index < num_blocks; block_index++) {
       size_t scale_index = output_channel * num_blocks + block_index;
-      if (kernel_scale[scale_index] <= 0.0f || !isnormal(kernel_scale[scale_index])) {
+      float fp32_scale = math_cvt_fp32_bf16(kernel_scale[scale_index]);
+      if (fp32_scale <= 0.0f || !isnormal(fp32_scale)) {
         xnn_log_error(
           "failed to create %s operator with %.7g kernel scale in output channel #%zu, block #%zu: scale must be finite and positive",
           xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qd8_f16_qb4w),
-          kernel_scale[scale_index], output_channel, block_index);
+          fp32_scale, output_channel, block_index);
         return xnn_status_invalid_parameter;
       }
     }
@@ -643,7 +644,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
     kernel, bias, flags,
     /*blockwise=*/true,
     /*block_size=*/block_size,
-    /*extra_bl_bytes=*/sizeof(float),
+    /*extra_bl_bytes=*/sizeof(uint16_t),
     /*blockwise_kernel_scale_params=*/kernel_scale,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
@@ -870,7 +871,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
     size_t output_stride,
     size_t block_size,
     uint8_t kernel_zero_point,
-    const float* kernel_scale,
+    const uint16_t* kernel_scale,
     const void* kernel,
     const float* bias,
     float output_min,
@@ -920,11 +921,12 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
   for (size_t output_channel = 0; output_channel < output_channels; output_channel++) {
     for(size_t block_index=0; block_index < num_blocks; block_index++) {
       size_t scale_index = output_channel * num_blocks + block_index;
-      if (kernel_scale[scale_index] <= 0.0f || !isnormal(kernel_scale[scale_index])) {
+      float fp32_scale = math_cvt_fp32_bf16(kernel_scale[scale_index]);
+      if (fp32_scale <= 0.0f || !isnormal(fp32_scale)) {
         xnn_log_error(
           "failed to create %s operator with %.7g kernel scale in output channel #%zu, block #%zu: scale must be finite and positive",
           xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qd8_f32_qb4w),
-          kernel_scale[scale_index], output_channel, block_index);
+          fp32_scale, output_channel, block_index);
         return xnn_status_invalid_parameter;
       }
     }
@@ -957,7 +959,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
     kernel, bias, flags,
     /*blockwise=*/true,
     /*block_size=*/block_size,
-    /*extra_bl_bytes=*/sizeof(float),
+    /*extra_bl_bytes=*/sizeof(uint16_t),
     /*blockwise_kernel_scale_params=*/kernel_scale,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,

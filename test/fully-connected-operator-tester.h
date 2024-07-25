@@ -450,14 +450,14 @@ class FullyConnectedOperatorTester {
     std::vector<float> output_ref(batch_size() * output_channels());
     std::vector<xnn_qd8_quantization_params> quantization_params(batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
     size_t num_blocks = k2 / block_size();
-    std::vector<float> kernel_scale2d(output_channels() * num_blocks);
+    std::vector<uint16_t> kernel_scale2d(output_channels() * num_blocks);
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
 
-      std::generate(kernel_scale2d.begin(), kernel_scale2d.end(), [&]() { return f32idist(rng); });
+      std::generate(kernel_scale2d.begin(), kernel_scale2d.end(), [&]() { return math_cvt_bf16_fp32(f32idist(rng)); });
       std::generate(quantization_params.begin(), quantization_params.end(), [&]() { return xnn_qd8_quantization_params{w8dist(rng), f32idist(rng)}; });
       for (size_t i = batch_size(); i < batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS; ++i) {
         quantization_params[i].zero_point = quantization_params[batch_size() - 1].zero_point;
@@ -485,7 +485,7 @@ class FullyConnectedOperatorTester {
               c_ref_acc += int32_t(input[mi * input_stride() + k_index]) * static_cast<float>(kernel_value);
             }
             size_t scale_index = ni * num_blocks + bi;
-            float scale = kernel_scale2d[scale_index];
+            float scale = math_cvt_fp32_bf16(kernel_scale2d[scale_index]);
             output_ref[mi * output_channels() + ni] += c_ref_acc * scale;
             kfsum += scale * ksum;
           }
@@ -494,6 +494,10 @@ class FullyConnectedOperatorTester {
           if (has_bias()) {
             output_ref[mi * output_channels() + ni] += bias[ni];
           }
+
+          output_ref[mi * output_channels() + ni] = fp16_ieee_to_fp32_value(
+            fp16_ieee_from_fp32_value(output_ref[mi * output_channels() + ni])
+          );
         }
       }
 
@@ -832,14 +836,14 @@ class FullyConnectedOperatorTester {
     std::vector<float> output_ref(batch_size() * output_channels());
     std::vector<xnn_qd8_quantization_params> quantization_params(batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
     size_t num_blocks = k2 / block_size();
-    std::vector<float> kernel_scale2d(output_channels() * num_blocks);
+    std::vector<uint16_t> kernel_scale2d(output_channels() * num_blocks);
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
 
-      std::generate(kernel_scale2d.begin(), kernel_scale2d.end(), [&]() { return f32idist(rng); });
+      std::generate(kernel_scale2d.begin(), kernel_scale2d.end(), [&]() { return math_cvt_bf16_fp32(f32idist(rng)); });
       std::generate(quantization_params.begin(), quantization_params.end(), [&]() { return xnn_qd8_quantization_params{w8dist(rng), f32idist(rng)}; });
       for (size_t i = batch_size(); i < batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS; ++i) {
         quantization_params[i].zero_point = quantization_params[batch_size() - 1].zero_point;
@@ -867,7 +871,7 @@ class FullyConnectedOperatorTester {
               c_ref_acc += int32_t(input[mi * input_stride() + k_index]) * static_cast<float>(kernel_value);
             }
             size_t scale_index = ni * num_blocks + bi;
-            float scale = kernel_scale2d[scale_index];
+            float scale = math_cvt_fp32_bf16(kernel_scale2d[scale_index]);
             output_ref[mi * output_channels() + ni] += c_ref_acc * scale;
             kfsum += scale * ksum;
           }
