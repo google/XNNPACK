@@ -241,14 +241,6 @@ enum xnn_status xnn_define_static_mean(
       return xnn_status_invalid_parameter;
   }
 
-  if (num_reduction_axes > input_value->shape.num_dims) {
-    xnn_log_error(
-      "failed to define %s operator with %zu reduction axes: "
-      "the number of reduction axes must not exceed the number of input dimensions %zu",
-      xnn_node_type_to_string(xnn_node_type_static_mean), num_reduction_axes, input_value->shape.num_dims);
-    return xnn_status_invalid_parameter;
-  }
-
   if (num_reduction_axes == 0) {
     xnn_log_error(
       "failed to define %s operator with %zu reduction axes: the number of reduction axes must be non-zero",
