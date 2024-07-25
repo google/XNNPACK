@@ -118,7 +118,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_10x16c8__avx512vnnigfni(
   const __m512i vvalue_mask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0xF0
   const __m512i vshl4 = _mm512_set1_epi64(params->avx512vnni.gfni_shl4);  // 0x01020408
   do {
-    const __m512 vksum0123456789ABCDEF = _mm512_load_ps(w);
+    const __m512 vksum0123456789ABCDEF = _mm512_loadu_ps(w);
     __m512 vscaled0x0123456789ABCDEF = _mm512_mul_ps(vksum0123456789ABCDEF, vinput_zero_point0);
     __m512 vscaled1x0123456789ABCDEF = _mm512_mul_ps(vksum0123456789ABCDEF, vinput_zero_point1);
     __m512 vscaled2x0123456789ABCDEF = _mm512_mul_ps(vksum0123456789ABCDEF, vinput_zero_point2);
@@ -185,8 +185,8 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_10x16c8__avx512vnnigfni(
         const __m512i va9x89ABCDEF = _mm512_xor_epi64(_mm512_set1_epi64((int64_t) unaligned_load_u64(a9 + 8)), vsign_mask);
         a9 += 16;
 
-        const __m512i vbb01234567x01234567 = _mm512_load_si512(w);
-        const __m512i vbb89ABCDEFx01234567 = _mm512_load_si512((const int8_t*) w + 64);
+        const __m512i vbb01234567x01234567 = _mm512_loadu_si512(w);
+        const __m512i vbb89ABCDEFx01234567 = _mm512_loadu_si512((const int8_t*) w + 64);
         const __m512i vb01234567x01234567 = _mm512_gf2p8affine_epi64_epi8(vbb01234567x01234567, vshl4, 0);
         const __m512i vb89ABCDEFx01234567 = _mm512_gf2p8affine_epi64_epi8(vbb89ABCDEFx01234567, vshl4, 0);
         const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbb01234567x01234567, vvalue_mask);
@@ -288,8 +288,9 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_10x16c8__avx512vnnigfni(
         w = (const int8_t*) w + 128;
         k -= 8 * sizeof(int8_t);
       }
-      const __m512 vfilter_output_scale0123456789ABCDEF = _mm512_load_ps((const float*) w);
-      w = (const float*) w + 16;
+      const __m512 vfilter_output_scale0123456789ABCDEF = _mm512_castsi512_ps(_mm512_slli_epi32(
+            _mm512_cvtepu16_epi32(_mm256_load_si256((const __m256i*) w)), 16));
+      w = (const uint16_t*) w + 16;
 
       // Add adjacent pairs
       const __m512i vidx = _mm512_set_epi32(30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0);
@@ -357,7 +358,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_10x16c8__avx512vnnigfni(
     vscaled8x0123456789ABCDEF = _mm512_mul_ps(vscaled8x0123456789ABCDEF, _mm512_set1_ps(quantization_params[8].inv_scale * 0.0625));
     vscaled9x0123456789ABCDEF = _mm512_mul_ps(vscaled9x0123456789ABCDEF, _mm512_set1_ps(quantization_params[9].inv_scale * 0.0625));
 
-    const __m512 vbias0123456789ABCDEF = _mm512_load_ps((const float*) w);
+    const __m512 vbias0123456789ABCDEF = _mm512_loadu_ps((const float*) w);
     w = (const float*) w + 16;
 
     vscaled0x0123456789ABCDEF = _mm512_add_ps(vscaled0x0123456789ABCDEF, vbias0123456789ABCDEF);
