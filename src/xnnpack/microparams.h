@@ -278,9 +278,11 @@ union xnn_f32_qc4w_minmax_params {
   struct {
     float min;
     float max;
-    int8_t sign_mask;   // 0x80
-    int8_t mask;        // 0xF0
-    int64_t gfni_shl4;  // 0x01020408
+    int8_t sign_mask;         // 0x80
+    int8_t mask;              // 0xF0 or 0x0F
+    int8_t kernel_sign_mask1; // 0x08
+    int8_t kernel_sign_mask2; // 0x88
+    int64_t gfni_shl4;        // 0x01020408
   } avx512vnni;
   struct {
     float min;

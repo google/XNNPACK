@@ -2521,6 +2521,22 @@ size_t xnn_init_f32_qc4w_minmax_avx512vnni_params(
   return sizeof(params->avx512vnni);
 }
 
+size_t xnn_init_f32_qc4w_minmax_avx512vnni_madd_params(
+  union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float output_min,
+  float output_max,
+  uint8_t kernel_zero_point)
+{
+  assert(kernel_zero_point <= 15);
+  params->avx512vnni.min = output_min;
+  params->avx512vnni.max = output_max;
+  params->avx512vnni.sign_mask = 0x80;
+  params->avx512vnni.mask = 0x0F;
+  params->avx512vnni.kernel_sign_mask1 = 0x08;
+  params->avx512vnni.kernel_sign_mask2 = 0x88;
+  params->avx512vnni.gfni_shl4 = INT64_C(0);
+  return sizeof(params->avx512vnni);
+}
 
 size_t xnn_init_f32_qc4w_minmax_avxvnni_params(
   union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
