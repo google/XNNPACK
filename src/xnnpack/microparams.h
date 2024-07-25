@@ -1752,7 +1752,7 @@ union xnn_s16_cvt_params {
     int16_t b_zero_point;
     float scale;
     int16_t output_zero_point;
-  } fp32_scalar;
+  } s16_scalar;
 };
 
 union xnn_qu8_cvt_params {

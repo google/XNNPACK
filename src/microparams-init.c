@@ -6591,11 +6591,11 @@ size_t xnn_init_s16_cvt_scalar_params(
   float scale,
   int16_t output_zero_point)
 {
-  params->fp32_scalar.a_zero_point = a_zero_point;
-  params->fp32_scalar.b_zero_point = b_zero_point;
-  params->fp32_scalar.scale = scale;
-  params->fp32_scalar.output_zero_point = output_zero_point;
-  return sizeof(params->fp32_scalar);
+  params->s16_scalar.a_zero_point = a_zero_point;
+  params->s16_scalar.b_zero_point = b_zero_point;
+  params->s16_scalar.scale = scale;
+  params->s16_scalar.output_zero_point = output_zero_point;
+  return sizeof(params->s16_scalar);
 }
 
 size_t xnn_init_qu8_mul_minmax_fp32_scalar_params(
