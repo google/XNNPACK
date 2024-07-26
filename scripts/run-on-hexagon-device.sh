@@ -9,7 +9,7 @@
 #
 # Syntax: run-on-hexagon-device.sh path-to-binary
 
-set -ex
+set -e
 
 if [ -z "$HEXAGON_SDK_ROOT" ]; then
   echo "HEXAGON_SDK_ROOT must be set!"
