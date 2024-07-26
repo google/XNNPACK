@@ -181,20 +181,6 @@ __m512i _mm512_dpbusd_epi32_madd(__m512i i32, const __m512i u8, const __m512i u4
   const __m512i v = _mm512_madd_epi16(i12, vsixteen);  // convert 16 bits to 32 bits
   return _mm512_add_epi32(i32, v);
 }
-
-// VNNI replacement that uses vpmaddubsw.
-// i4h is int4 in upper 4 bits.  Low bits are zero.
-static XNN_INTRINSIC
-__m512i _mm512_dpbusd_epi32_bw(__m512i i32, const __m512i u8, const __m512i i4h) {
-  const __m512i vzero_point = _mm512_set1_epi8(0x08);
-  const __m512i v16 = _mm512_set1_epi16(16);  // accumulators are times 16
-  const __m512i i4l = _mm512_srli_epi32(i4h, 4);   // move high nibble to low 4 bits
-  const __m512i u4 = _mm512_xor_si512(i4l, vzero_point);  // convert int4 to uint4
-  const __m512i i4 = _mm512_sub_epi8(u4, vzero_point);  // convert uint4 to int4
-  const __m512i i12 = _mm512_maddubs_epi16(u8, i4);  // u8 * i4 = i12
-  const __m512i v = _mm512_madd_epi16(i12, v16);  // convert 16 bits to 32 bits
-  return _mm512_add_epi32(i32, v);
-}
 #endif  // __AVX512F__
 
 #ifdef __AVX__
