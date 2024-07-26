@@ -457,10 +457,10 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x16__neon_mlal_lane_prfm(
         }
       }
 
-    const float32x4_t vfilter_output_scale0123 = vld1q_f32(w); w = (const float*) w + 4;
-    const float32x4_t vfilter_output_scale4567 = vld1q_f32(w); w = (const float*) w + 4;
-    const float32x4_t vfilter_output_scale89AB = vld1q_f32(w); w = (const float*) w + 4;
-    const float32x4_t vfilter_output_scaleCDEF = vld1q_f32(w); w = (const float*) w + 4;
+    const float32x4_t vfilter_output_scale0123 = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+    const float32x4_t vfilter_output_scale4567 = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+    const float32x4_t vfilter_output_scale89AB = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+    const float32x4_t vfilter_output_scaleCDEF = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
 
     const float32x4_t vf0x0123 = vcvtq_f32_s32(vacc0x0123);
     const float32x4_t vf0x4567 = vcvtq_f32_s32(vacc0x4567);
@@ -527,24 +527,6 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x16__neon_mlal_lane_prfm(
       vout3xCDEF = vmlaq_f32(vout3xCDEF, vf3xCDEF, vfilter_output_scaleCDEF);
     #endif
     }
-    float32x4_t one_sixteenth = vdupq_n_f32(1/16.0);
-    vout0x0123 = vmulq_f32(vout0x0123, one_sixteenth);
-    vout0x4567 = vmulq_f32(vout0x4567, one_sixteenth);
-    vout0x89AB = vmulq_f32(vout0x89AB, one_sixteenth);
-    vout0xCDEF = vmulq_f32(vout0xCDEF, one_sixteenth);
-    vout1x0123 = vmulq_f32(vout1x0123, one_sixteenth);
-    vout1x4567 = vmulq_f32(vout1x4567, one_sixteenth);
-    vout1x89AB = vmulq_f32(vout1x89AB, one_sixteenth);
-    vout1xCDEF = vmulq_f32(vout1xCDEF, one_sixteenth);
-    vout2x0123 = vmulq_f32(vout2x0123, one_sixteenth);
-    vout2x4567 = vmulq_f32(vout2x4567, one_sixteenth);
-    vout2x89AB = vmulq_f32(vout2x89AB, one_sixteenth);
-    vout2xCDEF = vmulq_f32(vout2xCDEF, one_sixteenth);
-    vout3x0123 = vmulq_f32(vout3x0123, one_sixteenth);
-    vout3x4567 = vmulq_f32(vout3x4567, one_sixteenth);
-    vout3x89AB = vmulq_f32(vout3x89AB, one_sixteenth);
-    vout3xCDEF = vmulq_f32(vout3xCDEF, one_sixteenth);
-
     const float32x4_t vinput_scale01 = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[0].zero_point));
     const float32x4_t vinput_scale23 = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[2].zero_point));
 

@@ -162,21 +162,21 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_2x8__scalar(
     }
     // accumulate in float
       float vf0x0 = vacc0x0;
-      const float vfilter_output_scale0 = ((const float*) w)[0];
+      const float vfilter_output_scale0 = math_cvt_fp32_bf16(((const uint16_t*) w)[0]);
       float vf0x1 = vacc0x1;
-      const float vfilter_output_scale1 = ((const float*) w)[1];
+      const float vfilter_output_scale1 = math_cvt_fp32_bf16(((const uint16_t*) w)[1]);
       float vf0x2 = vacc0x2;
-      const float vfilter_output_scale2 = ((const float*) w)[2];
+      const float vfilter_output_scale2 = math_cvt_fp32_bf16(((const uint16_t*) w)[2]);
       float vf0x3 = vacc0x3;
-      const float vfilter_output_scale3 = ((const float*) w)[3];
+      const float vfilter_output_scale3 = math_cvt_fp32_bf16(((const uint16_t*) w)[3]);
       float vf0x4 = vacc0x4;
-      const float vfilter_output_scale4 = ((const float*) w)[4];
+      const float vfilter_output_scale4 = math_cvt_fp32_bf16(((const uint16_t*) w)[4]);
       float vf0x5 = vacc0x5;
-      const float vfilter_output_scale5 = ((const float*) w)[5];
+      const float vfilter_output_scale5 = math_cvt_fp32_bf16(((const uint16_t*) w)[5]);
       float vf0x6 = vacc0x6;
-      const float vfilter_output_scale6 = ((const float*) w)[6];
+      const float vfilter_output_scale6 = math_cvt_fp32_bf16(((const uint16_t*) w)[6]);
       float vf0x7 = vacc0x7;
-      const float vfilter_output_scale7 = ((const float*) w)[7];
+      const float vfilter_output_scale7 = math_cvt_fp32_bf16(((const uint16_t*) w)[7]);
       float vf1x0 = vacc1x0;
       float vf1x1 = vacc1x1;
       float vf1x2 = vacc1x2;
@@ -218,25 +218,9 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_2x8__scalar(
       vout1x6 += vf1x6;
       vf1x7 *= vfilter_output_scale7;
       vout1x7 += vf1x7;
-      w = (const float*) w + 8;
+      w = (const uint16_t*) w + 8;
     }
 
-    vout0x0 /= 16;
-    vout0x1 /= 16;
-    vout0x2 /= 16;
-    vout0x3 /= 16;
-    vout0x4 /= 16;
-    vout0x5 /= 16;
-    vout0x6 /= 16;
-    vout0x7 /= 16;
-    vout1x0 /= 16;
-    vout1x1 /= 16;
-    vout1x2 /= 16;
-    vout1x3 /= 16;
-    vout1x4 /= 16;
-    vout1x5 /= 16;
-    vout1x6 /= 16;
-    vout1x7 /= 16;
 
     const float vinput_scale0 = quantization_params[0].inv_scale;
     vout0x0 *= vinput_scale0;

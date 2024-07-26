@@ -413,7 +413,7 @@ void GEMMBenchmark(benchmark::State& state,
   const size_t mc = state.range(0);
   const size_t nc = state.range(1);
   const size_t bl = state.range(3);
-  const size_t kc = round_up_po2(state.range(2), bl);
+  const size_t kc = round_up(state.range(2), bl);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
@@ -440,10 +440,10 @@ void GEMMBenchmark(benchmark::State& state,
   std::generate(a.begin(), a.end(), std::ref(i8rng));
   std::vector<uint8_t> k(nc * kc / 2);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
-  std::vector<float> kernel_scale2d(nc * k2 / bl);
+  std::vector<uint16_t> kernel_scale2d(nc * k2 / bl);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
   std::generate(kernel_scale2d.begin(), kernel_scale2d.end(),
-                std::ref(scalerng));
+                [&]() { return math_cvt_bf16_fp32(scalerng()); });
 
   std::vector<xnn_qd8_quantization_params> quantization_params(
       mc + XNN_EXTRA_QUANTIZATION_PARAMS);
@@ -607,7 +607,7 @@ void GEMMBenchmark(benchmark::State& state,
   const size_t mc = state.range(0);
   const size_t nc = state.range(1);
   const size_t bl = state.range(3);
-  const size_t kc = round_up_po2(state.range(2), bl);
+  const size_t kc = round_up(state.range(2), bl);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
@@ -634,10 +634,10 @@ void GEMMBenchmark(benchmark::State& state,
   std::generate(a.begin(), a.end(), std::ref(i8rng));
   std::vector<uint8_t> k(nc * kc / 2);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
-  std::vector<float> kernel_scale2d(nc * k2 / bl);
+  std::vector<uint16_t> kernel_scale2d(nc * k2 / bl);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
   std::generate(kernel_scale2d.begin(), kernel_scale2d.end(),
-                std::ref(scalerng));
+                [&]() { return math_cvt_bf16_fp32(scalerng()); });
 
   std::vector<xnn_qd8_quantization_params> quantization_params(
       mc + XNN_EXTRA_QUANTIZATION_PARAMS);

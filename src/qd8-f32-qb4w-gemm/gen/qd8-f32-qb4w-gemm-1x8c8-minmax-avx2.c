@@ -164,28 +164,28 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x8c8__avx2(
         k -= 8 * sizeof(int8_t);
       }
 
-      const __m128 vfilter_output_scale0 = _mm_broadcast_ss(&((const float*) w)[0]);
-      const __m128 vfilter_output_scale1 = _mm_broadcast_ss(&((const float*) w)[1]);
+      const __m128 vfilter_output_scale0 = _mm_castsi128_ps(_mm_set1_epi32((uint32_t) ((const uint16_t*) w)[0] << 16));
+      const __m128 vfilter_output_scale1 = _mm_castsi128_ps(_mm_set1_epi32((uint32_t) ((const uint16_t*) w)[1] << 16));
       const __m256 vfilter_output_scale01 = _mm256_insertf128_ps(
           _mm256_castps128_ps256(vfilter_output_scale0), vfilter_output_scale1, 1);
       vout0x01 = _mm256_fmadd_ps(_mm256_cvtepi32_ps(vacc0x01), vfilter_output_scale01, vout0x01);
-      const __m128 vfilter_output_scale2 = _mm_broadcast_ss(&((const float*) w)[2]);
-      const __m128 vfilter_output_scale3 = _mm_broadcast_ss(&((const float*) w)[3]);
+      const __m128 vfilter_output_scale2 = _mm_castsi128_ps(_mm_set1_epi32((uint32_t) ((const uint16_t*) w)[2] << 16));
+      const __m128 vfilter_output_scale3 = _mm_castsi128_ps(_mm_set1_epi32((uint32_t) ((const uint16_t*) w)[3] << 16));
       const __m256 vfilter_output_scale23 = _mm256_insertf128_ps(
           _mm256_castps128_ps256(vfilter_output_scale2), vfilter_output_scale3, 1);
       vout0x23 = _mm256_fmadd_ps(_mm256_cvtepi32_ps(vacc0x23), vfilter_output_scale23, vout0x23);
-      const __m128 vfilter_output_scale4 = _mm_broadcast_ss(&((const float*) w)[4]);
-      const __m128 vfilter_output_scale5 = _mm_broadcast_ss(&((const float*) w)[5]);
+      const __m128 vfilter_output_scale4 = _mm_castsi128_ps(_mm_set1_epi32((uint32_t) ((const uint16_t*) w)[4] << 16));
+      const __m128 vfilter_output_scale5 = _mm_castsi128_ps(_mm_set1_epi32((uint32_t) ((const uint16_t*) w)[5] << 16));
       const __m256 vfilter_output_scale45 = _mm256_insertf128_ps(
           _mm256_castps128_ps256(vfilter_output_scale4), vfilter_output_scale5, 1);
       vout0x45 = _mm256_fmadd_ps(_mm256_cvtepi32_ps(vacc0x45), vfilter_output_scale45, vout0x45);
-      const __m128 vfilter_output_scale6 = _mm_broadcast_ss(&((const float*) w)[6]);
-      const __m128 vfilter_output_scale7 = _mm_broadcast_ss(&((const float*) w)[7]);
+      const __m128 vfilter_output_scale6 = _mm_castsi128_ps(_mm_set1_epi32((uint32_t) ((const uint16_t*) w)[6] << 16));
+      const __m128 vfilter_output_scale7 = _mm_castsi128_ps(_mm_set1_epi32((uint32_t) ((const uint16_t*) w)[7] << 16));
       const __m256 vfilter_output_scale67 = _mm256_insertf128_ps(
           _mm256_castps128_ps256(vfilter_output_scale6), vfilter_output_scale7, 1);
       vout0x67 = _mm256_fmadd_ps(_mm256_cvtepi32_ps(vacc0x67), vfilter_output_scale67, vout0x67);
 
-      w = (const float*) w + 8;
+      w = (const uint16_t*) w + 8;
     }
 
     const __m256 vout0x0213 = _mm256_hadd_ps(vout0x01, vout0x23);
@@ -196,10 +196,9 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x8c8__avx2(
     const __m256i vpermute_mask = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
     __m256 vout0x01234567 = _mm256_permutevar8x32_ps(vout0x02461357, vpermute_mask);
 
-    vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(1.0f/16));
     const __m256 vinput_scale0 = _mm256_broadcast_ss(&quantization_params[0].inv_scale);
 
-    const __m256 vbias01234567 = _mm256_load_ps((const float*) w);
+    const __m256 vbias01234567 = _mm256_loadu_ps((const float*) w);
     w = (const float*) w + 8;
     vout0x01234567 = _mm256_fmadd_ps(vout0x01234567, vinput_scale0, vbias01234567);
 

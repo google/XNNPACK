@@ -299,8 +299,8 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_7x8c8__neoni8mm(
         int32x4_t vacc6x0123 = vcombine_s32(vget_low_s32(vacc67x01), vget_low_s32(vacc67x23));
         int32x4_t vacc6x4567 = vcombine_s32(vget_low_s32(vacc67x45), vget_low_s32(vacc67x67));
       #endif
-      const float32x4_t vfilter_output_scale0123 = vld1q_f32(w); w = (const float*) w + 4;
-      const float32x4_t vfilter_output_scale4567 = vld1q_f32(w); w = (const float*) w + 4;
+      const float32x4_t vfilter_output_scale0123 = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+      const float32x4_t vfilter_output_scale4567 = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
       float32x4_t vf0x0123 = vcvtq_f32_s32(vacc0x0123);
       vout0x0123 = vfmaq_f32(vout0x0123, vf0x0123, vfilter_output_scale0123);
       float32x4_t vf0x4567 = vcvtq_f32_s32(vacc0x4567);
@@ -330,21 +330,6 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_7x8c8__neoni8mm(
       float32x4_t vf6x4567 = vcvtq_f32_s32(vacc6x4567);
       vout6x4567 = vfmaq_f32(vout6x4567, vf6x4567, vfilter_output_scale4567);
     }
-    const float32x4_t one_sixteenth = vdupq_n_f32(1/16.0);
-    vout0x0123 = vmulq_f32(vout0x0123, one_sixteenth);
-    vout0x4567 = vmulq_f32(vout0x4567, one_sixteenth);
-    vout1x0123 = vmulq_f32(vout1x0123, one_sixteenth);
-    vout1x4567 = vmulq_f32(vout1x4567, one_sixteenth);
-    vout2x0123 = vmulq_f32(vout2x0123, one_sixteenth);
-    vout2x4567 = vmulq_f32(vout2x4567, one_sixteenth);
-    vout3x0123 = vmulq_f32(vout3x0123, one_sixteenth);
-    vout3x4567 = vmulq_f32(vout3x4567, one_sixteenth);
-    vout4x0123 = vmulq_f32(vout4x0123, one_sixteenth);
-    vout4x4567 = vmulq_f32(vout4x4567, one_sixteenth);
-    vout5x0123 = vmulq_f32(vout5x0123, one_sixteenth);
-    vout5x4567 = vmulq_f32(vout5x4567, one_sixteenth);
-    vout6x0123 = vmulq_f32(vout6x0123, one_sixteenth);
-    vout6x4567 = vmulq_f32(vout6x4567, one_sixteenth);
 
     const float32x4_t vinput_scale01 = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[0].zero_point));
     vout0x0123 = vmulq_lane_f32(vout0x0123, vget_low_f32(vinput_scale01), 1);

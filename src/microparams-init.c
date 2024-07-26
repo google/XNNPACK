@@ -952,7 +952,8 @@ void xnn_init_blockwise_scale_fp32_params(
       const size_t tile_size = channels_tile;
       for (size_t tile_offset = 0; tile_offset < tile_size; tile_offset++) {
         size_t scale_index = (tile_start + tile_offset) * num_blocks + block_start;
-        unaligned_indexed_store_f32(packed_w, tile_offset, scale[scale_index]);
+        // 1/16 because the weight are << 4 in the innermost loop to save a shift
+        unaligned_indexed_store_f32(packed_w, tile_offset, scale[scale_index] / 16.0f);
       }
       packed_w = (void*) ((uintptr_t) packed_w + stride);
     }
@@ -963,7 +964,51 @@ void xnn_init_blockwise_scale_fp32_params(
       const size_t tile_size = min(channels - tile_start, channels_subtile);
       for (size_t tile_offset = 0; tile_offset < tile_size; tile_offset++) {
         size_t scale_index = (tile_start + tile_offset) * num_blocks + block_start;
-        unaligned_indexed_store_f32(packed_w, tile_offset, scale[scale_index]);
+        // 1/16 because the weight are << 4 in the innermost loop to save a shift
+        unaligned_indexed_store_f32(packed_w, tile_offset, scale[scale_index] / 16.0f);
+      }
+      packed_w = (void*) ((uintptr_t) packed_w + substride);
+    }
+  }
+}
+
+void xnn_init_blockwise_scale_bf16_params(
+  size_t channels,
+  size_t channels_tile,
+  size_t channels_subtile,
+  size_t stride,
+  size_t substride,
+  size_t num_blocks,
+  size_t block_stride,
+  size_t stride_offset,
+  const uint16_t scale[XNN_MIN_ELEMENTS(1)],
+  void* packed_w)
+{
+  void* packed_w_saved = packed_w;
+  for (size_t block_start = 0; block_start < num_blocks; block_start++) {
+    packed_w = (void*)((uintptr_t) packed_w_saved + block_start * block_stride);
+    const size_t tiled_channels = round_down_po2(channels, channels_tile);
+    size_t tile_start = 0;
+    for (; tile_start < tiled_channels; tile_start += channels_tile) {
+      const size_t tile_size = channels_tile;
+      for (size_t tile_offset = 0; tile_offset < tile_size; tile_offset++) {
+        size_t scale_index = (tile_start + tile_offset) * num_blocks + block_start;
+        // 1/16 because the weight are << 4 in the innermost loop to save a shift
+        float scale_16 = math_cvt_bf16_fp32(math_cvt_fp32_bf16(scale[scale_index]) / 16.0f);
+        unaligned_indexed_store_u16(packed_w, tile_offset, scale_16);
+      }
+      packed_w = (void*) ((uintptr_t) packed_w + stride);
+    }
+
+    packed_w = (void*) ((uintptr_t) packed_w - stride_offset);
+
+    for (; tile_start < channels; tile_start += channels_subtile) {
+      const size_t tile_size = min(channels - tile_start, channels_subtile);
+      for (size_t tile_offset = 0; tile_offset < tile_size; tile_offset++) {
+        size_t scale_index = (tile_start + tile_offset) * num_blocks + block_start;
+        // 1/16 because the weight are << 4 in the innermost loop to save a shift
+        float scale_16 = math_cvt_bf16_fp32(math_cvt_fp32_bf16(scale[scale_index]) / 16.0f);
+        unaligned_indexed_store_u16(packed_w, tile_offset, scale_16);
       }
       packed_w = (void*) ((uintptr_t) packed_w + substride);
     }

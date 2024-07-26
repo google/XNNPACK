@@ -366,3 +366,23 @@ XNN_INLINE static uint32_t math_cvt_sat_u32_f64(double x) {
   #endif
 }
 #endif
+
+XNN_INLINE static float math_cvt_fp32_bf16(uint16_t x) {
+   union {
+    float as_float;
+    uint32_t as_uint32;
+  } bits;
+  bits.as_uint32 = ((uint32_t) x) << 16;
+  return bits.as_float;
+}
+
+XNN_INLINE static float math_cvt_bf16_fp32(float x) {
+   union {
+    float as_float;
+    uint32_t as_uint32;
+  } bits;
+  bits.as_float = x;
+
+  // TODO Handle fraction rounding
+  return bits.as_uint32 >> 16;
+}
