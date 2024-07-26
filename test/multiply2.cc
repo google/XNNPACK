@@ -25,6 +25,17 @@ using Multiply2TestF16 = BinaryTest<uint16_t>;
 using Multiply2TestF32 = BinaryTest<float>;
 using MultiplyTestS32 = BinaryTest<int32_t>;
 
+// forward declare until we know the exact interface.
+extern "C" {
+enum xnn_status xnn_define_multiply2_v2(
+  xnn_subgraph_t subgraph,
+  uint32_t input1_id,
+  uint32_t input2_id,
+  uint32_t output_id,
+  uint32_t flags);
+}
+
+// Cap operations applied to logits (Q * K) of attention operator.
 TEST_F(Multiply2TestQS8, define)
 {
   const int32_t input1_zero_point = i8dist(rng);

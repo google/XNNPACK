@@ -984,14 +984,6 @@ enum xnn_status xnn_define_add2(
   uint32_t output_id,
   uint32_t flags);
 
-enum xnn_status xnn_define_multiply2(
-  xnn_subgraph_t subgraph,
-  float output_min,
-  float output_max,
-  uint32_t input1_id,
-  uint32_t input2_id,
-  uint32_t output_id,
-  uint32_t flags);
 /// Define a 2-Input Multiply Node and add it to a Subgraph.
 ///
 /// The 2-Input Multiply Node computes elementwise multiplication of two tensor inputs with numpy broadcasting rules.
@@ -1009,8 +1001,10 @@ enum xnn_status xnn_define_multiply2(
 ///                    in the @a subgraph with each dimension equal to the maximum between the corresponding dimension
 ///                    of the two inputs.
 /// @param flags - binary features of the Multiply Node. No supported flags are currently defined.
-enum xnn_status xnn_define_multiply2_v2(
+enum xnn_status xnn_define_multiply2(
   xnn_subgraph_t subgraph,
+  float output_min,
+  float output_max,
   uint32_t input1_id,
   uint32_t input2_id,
   uint32_t output_id,
