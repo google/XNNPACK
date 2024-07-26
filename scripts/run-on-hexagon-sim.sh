@@ -9,7 +9,7 @@
 #
 # Syntax: run-on-hexagon-sim.sh path-to-binary
 
-set -ex
+set -e
 
 if [ -z "$HEXAGON_SDK_ROOT" ]; then
   echo "HEXAGON_SDK_ROOT must be set!"
@@ -21,7 +21,7 @@ if [ -z "$HEXAGON_TOOLS_ROOT" ]; then
   exit 1
 fi
 
-# These rarely vary so just assume the current defaults.
+# These should match the versions specified in hexagon.toolchain
 : "${HEXAGON_ARCH:=v68}"
 : "${HEXAGON_TOOL_VER:=v86}"
 
@@ -30,9 +30,9 @@ BINARY_PATH=$1
 shift
 
 EXE_NAME="$(basename ${BINARY_PATH})"
-HEXAGON_LIBS_DIR=${HEXAGON_TOOLS_ROOT}/Tools/lib
-HEXAGON_LIBC_DIR="${HEXAGON_TOOLS_ROOT}/Tools/target/hexagon/lib/${HEXAGON_ARCH}/G0/pic"
-HEXAGON_SIM="${HEXAGON_TOOLS_ROOT}/Tools/bin/hexagon-sim"
+HEXAGON_LIBS_DIR=${HEXAGON_TOOLS_ROOT}/lib
+HEXAGON_LIBC_DIR="${HEXAGON_TOOLS_ROOT}/target/hexagon/lib/${HEXAGON_ARCH}/G0/pic"
+HEXAGON_SIM="${HEXAGON_TOOLS_ROOT}/bin/hexagon-sim"
 SIM_STACK_SIZE=0x400000 # 4 MB
 
 # Copy everything into a temp dir to avoid scrambling our build (etc) dirs.

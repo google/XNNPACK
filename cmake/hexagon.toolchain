@@ -10,7 +10,7 @@ SET(CMAKE_CROSSCOMPILING TRUE)
 # For compatibility with with CMake toolchain from Hexagon SDK
 SET(HEXAGON TRUE)
 SET(HEXAGON_ARCH v68)
-SET(HEXAGON_TOOL_VER v87)
+SET(HEXAGON_TOOL_VER v86)
 
 # This is configured for Hexagon SDK 5.3.0.0
 IF(NOT DEFINED ENV{HEXAGON_SDK_ROOT})

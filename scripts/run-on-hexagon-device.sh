@@ -21,7 +21,7 @@ if [ -z "$HEXAGON_TOOLS_ROOT" ]; then
   exit 1
 fi
 
-# These rarely vary so just assume the current defaults.
+# These should match the versions specified in hexagon.toolchain
 : "${HEXAGON_ARCH:=v68}"
 : "${HEXAGON_SDK_VER:=5.3.0}"
 : "${HEXAGON_TOOL_VER:=v86}"
