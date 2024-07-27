@@ -1268,24 +1268,21 @@ DECLARE_INIT_QS8_F32_CVT_PARAMS_FUNCTION(xnn_init_qs8_f32_cvt_scalar_params)
   DECLARE_INIT_QS8_F32_CVT_PARAMS_FUNCTION(xnn_init_qs8_f32_cvt_wasmsimd_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#define DECLARE_INIT_S16_CVT_PARAMS_FUNCTION(fn_name)     \
-  XNN_INTERNAL size_t fn_name(                            \
-    union xnn_s16_cvt_params params[XNN_MIN_ELEMENTS(1)], \
-    int16_t a_zero_point,                                 \
-    int16_t b_zero_point,                                 \
-    float scale,                                          \
-    int16_t output_zero_point);
+#define DECLARE_INIT_QS16_MUL_MINMAX_PARAMS_FUNCTION(fn_name)       \
+    XNN_INTERNAL size_t fn_name(                                      \
+        union xnn_qs16_mul_minmax_params params[XNN_MIN_ELEMENTS(1)], \
+        int16_t a_zero_point, int16_t b_zero_point, float scale,      \
+        int16_t output_zero_point);
 
-DECLARE_INIT_S16_CVT_PARAMS_FUNCTION(xnn_init_s16_cvt_scalar_params)
+  DECLARE_INIT_QS16_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs16_mul_minmax_params)
 
-#define DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(fn_name)     \
-  XNN_INTERNAL size_t fn_name(                            \
-    union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
-    float input_output_scale,                             \
-    uint8_t input_zero_point,                             \
-    uint8_t output_zero_point);
+#define DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(fn_name)       \
+    XNN_INTERNAL size_t fn_name(                              \
+        union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+        float input_output_scale, uint8_t input_zero_point,   \
+        uint8_t output_zero_point);
 
-DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_scalar_params)
+  DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_scalar_params)
 #if XNN_ARCH_ARM
   DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_armsimd32_params)
 #endif  // XNN_ARCH_ARM

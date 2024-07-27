@@ -31,12 +31,12 @@ $for BATCH_TILE in BATCH_TILES:
   $assert BATCH_TILE >= SIMD_SIZE
   $SIMD_TILE = BATCH_TILE // SIMD_SIZE
 
-  void xnn_s16_vmul_ukernel__${ARCH}_u${BATCH_TILE}(
+  void xnn_qs16_vmul_minmax_ukernel__${ARCH}_u${BATCH_TILE}(
       size_t batch,
       const int16_t* input_a,
       const int16_t* input_b,
       int16_t* output,
-      const union xnn_s16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+      const union xnn_qs16_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
   {
     assert(batch != 0);
     assert(batch % sizeof(int16_t) == 0);
@@ -45,11 +45,11 @@ $for BATCH_TILE in BATCH_TILES:
     assert(output != NULL);
     assert(xnn_simd_size_s16 == ${SIMD_SIZE});
 
-    xnn_simd_s32_t vzero_point_a = xnn_set1_s32(params->s16_scalar.a_zero_point);
-    xnn_simd_s32_t vzero_point_b = xnn_set1_s32(params->s16_scalar.b_zero_point);
-    xnn_simd_s32_t vzero_point_output = xnn_set1_s32(params->s16_scalar.output_zero_point);
+    xnn_simd_s32_t vzero_point_a = xnn_set1_s32(params->qs16_scalar.a_zero_point);
+    xnn_simd_s32_t vzero_point_b = xnn_set1_s32(params->qs16_scalar.b_zero_point);
+    xnn_simd_s32_t vzero_point_output = xnn_set1_s32(params->qs16_scalar.output_zero_point);
 
-    xnn_simd_f32_t vscale = xnn_set1_f32(params->s16_scalar.scale);
+    xnn_simd_f32_t vscale = xnn_set1_f32(params->qs16_scalar.scale);
 
     $if SIMD_TILE > 1:
       for (; batch >= ${BATCH_TILE} * sizeof(int16_t); batch -= ${BATCH_TILE} * sizeof(int16_t)) {

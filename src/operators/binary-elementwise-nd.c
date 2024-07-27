@@ -797,30 +797,27 @@ enum xnn_status xnn_create_multiply_nd_s16(
     return xnn_status_unsupported_parameter;
   }
 
-  const struct xnn_binary_elementwise_config* s16_vmul_config = xnn_init_s16_vmul_config();
-  if (s16_vmul_config == NULL) {
+  const struct xnn_binary_elementwise_config* qs16_vmul_config =
+      xnn_init_qs16_vmul_config();
+  if (qs16_vmul_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
       xnn_operator_type_to_string(xnn_operator_type_multiply_nd_s16));
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_s16_cvt_params params;
-  union xnn_s16_cvt_params params2;
-  assert(s16_vmul_config->init.s16_cvt != NULL);
-  s16_vmul_config->init.s16_cvt(
-    &params, input1_zero_point, input2_zero_point, product_output_scale, output_zero_point);
-  s16_vmul_config->init.s16_cvt(
-    &params2, input2_zero_point, input1_zero_point, product_output_scale,
-    output_zero_point);
+  union xnn_qs16_mul_minmax_params params;
+  union xnn_qs16_mul_minmax_params params2;
+  assert(qs16_vmul_config->init.qs16_mul != NULL);
+  qs16_vmul_config->init.qs16_mul(&params, input1_zero_point, input2_zero_point,
+                                  product_output_scale, output_zero_point);
+  qs16_vmul_config->init.qs16_mul(&params2, input2_zero_point,
+                                  input1_zero_point, product_output_scale,
+                                  output_zero_point);
 
-  return create_binary_elementwise_nd(
-    flags,
-    &params,
-    &params2,
-    sizeof(params),
-    xnn_operator_type_multiply_nd_s16,
-    &s16_vmul_config->linear,
-    multiply_op_out);
+  return create_binary_elementwise_nd(flags, &params, &params2, sizeof(params),
+                                      xnn_operator_type_multiply_nd_s16,
+                                      &qs16_vmul_config->minmax,
+                                      multiply_op_out);
 }
 
 enum xnn_status xnn_create_multiply_nd_s32(
@@ -1569,15 +1566,12 @@ enum xnn_status xnn_reshape_multiply_nd_s16(
     const size_t* input2_shape,
     pthreadpool_t threadpool)
 {
-
   return reshape_binary_elementwise_nd(
-    mul_op, xnn_operator_type_multiply_nd_s16,
-    num_input1_dims, input1_shape,
-    num_input2_dims, input2_shape,
-    /*log2_element_size=*/XNN_LOG2_SIZEOF_INT16_T,
-    &mul_op->params.s16_cvt, sizeof(mul_op->params.s16_cvt),
-    &mul_op->params.s16_cvt, sizeof(mul_op->params.s16_cvt),
-    threadpool);
+      mul_op, xnn_operator_type_multiply_nd_s16, num_input1_dims, input1_shape,
+      num_input2_dims, input2_shape,
+      /*log2_element_size=*/XNN_LOG2_SIZEOF_INT16_T, &mul_op->params.qs16_mul,
+      sizeof(mul_op->params.qs16_mul), &mul_op->params.qs16_mul,
+      sizeof(mul_op->params.qs16_mul), threadpool);
 }
 
 enum xnn_status xnn_reshape_multiply_nd_s32(

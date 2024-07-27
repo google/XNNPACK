@@ -25,15 +25,16 @@ typedef __m256i xnn_simd_s16_t;
   const xnn_simd_s16_t var = _mm256_set1_epi16(val);
 
 // Mask table used for masked load/store operations.
-static const int32_t mask_table_avx_s16[32] = {-1, -1, -1, -1, -1, -1, -1, -1,-1, -1, -1, -1, -1, -1, -1, -1,
-                                               0,  0,  0,  0,  0,  0,  0, 0,0,  0,  0,  0,  0,  0,  0, 0};
+static const int32_t mask_table_avx_s16[32] = {
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0};
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_s16_t xnn_low_cvt_s16_s32(xnn_simd_s16_t a) {
-  return _mm256_cvtepi16_epi32(_mm256_extracti128_si256(a,0));
+  return _mm256_cvtepi16_epi32(_mm256_extracti128_si256(a, 0));
 }
 
 static XNN_INLINE xnn_simd_s16_t xnn_high_cvt_s16_s32(xnn_simd_s16_t a) {
-  return _mm256_cvtepi16_epi32(_mm256_extracti128_si256(a,1));
+  return _mm256_cvtepi16_epi32(_mm256_extracti128_si256(a, 1));
 }
 
 // Load/store operations.

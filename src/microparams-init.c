@@ -6584,18 +6584,18 @@ size_t xnn_init_qs8_add_minmax_scalar_params(
   return sizeof(params->scalar);
 }
 
-size_t xnn_init_s16_cvt_scalar_params(
-  union xnn_s16_cvt_params params[XNN_MIN_ELEMENTS(1)],
+size_t xnn_init_qs16_mul_minmax_params(
+  union xnn_qs16_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int16_t a_zero_point,
   int16_t b_zero_point,
   float scale,
   int16_t output_zero_point)
 {
-  params->s16_scalar.a_zero_point = a_zero_point;
-  params->s16_scalar.b_zero_point = b_zero_point;
-  params->s16_scalar.scale = scale;
-  params->s16_scalar.output_zero_point = output_zero_point;
-  return sizeof(params->s16_scalar);
+  params->qs16_scalar.a_zero_point = a_zero_point;
+  params->qs16_scalar.b_zero_point = b_zero_point;
+  params->qs16_scalar.scale = scale;
+  params->qs16_scalar.output_zero_point = output_zero_point;
+  return sizeof(params->qs16_scalar);
 }
 
 size_t xnn_init_qu8_mul_minmax_fp32_scalar_params(

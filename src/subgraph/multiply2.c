@@ -305,8 +305,8 @@ enum xnn_status define_multiply2(
   switch (input1_value->datatype) {
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
-    case xnn_datatype_int16:
     case xnn_datatype_int32:
+    case xnn_datatype_qcint16:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
       break;
@@ -332,7 +332,7 @@ enum xnn_status define_multiply2(
   switch (input2_value->datatype) {
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
-    case xnn_datatype_int16:
+    case xnn_datatype_qcint16:
     case xnn_datatype_int32:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
@@ -364,7 +364,7 @@ enum xnn_status define_multiply2(
     case xnn_datatype_fp32:
       compute_type = xnn_compute_type_fp32;
       break;
-    case xnn_datatype_int16:
+    case xnn_datatype_qcint16:
       compute_type = xnn_compute_type_s16;
       break;
     case xnn_datatype_int32:
@@ -431,6 +431,7 @@ enum xnn_status xnn_define_multiply2(
     case xnn_datatype_fp32:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
+    case xnn_datatype_qcint16:
       break;
     default:
       xnn_log_error(
@@ -445,6 +446,8 @@ enum xnn_status xnn_define_multiply2(
     case xnn_datatype_fp32:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
+    case xnn_datatype_qcint16:
+
       break;
     default:
       xnn_log_error(
@@ -467,6 +470,7 @@ enum xnn_status xnn_define_multiply2_v2(
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
     case xnn_datatype_int32:
+    case xnn_datatype_qcint16:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
       break;
@@ -482,6 +486,7 @@ enum xnn_status xnn_define_multiply2_v2(
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
     case xnn_datatype_int32:
+    case xnn_datatype_qcint16:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
       break;
