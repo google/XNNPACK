@@ -241,8 +241,8 @@
   string: "Multiply (ND, QS8)"
 - name: xnn_operator_type_multiply_nd_qu8
   string: "Multiply (ND, QU8)"
-- name: xnn_operator_type_multiply_nd_s16
-  string: "Multiply (ND, S16)"
+- name: xnn_operator_type_multiply_nd_qs16
+  string: "Multiply (ND, QS16)"
 - name: xnn_operator_type_multiply_nd_s32
   string: "Multiply (ND, S32)"
 - name: xnn_operator_type_negate_nc_f16
