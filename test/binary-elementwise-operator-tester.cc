@@ -724,7 +724,7 @@ void BinaryElementwiseOperatorTester::TestF16() const {
   }
 }
 
-void BinaryElementwiseOperatorTester::TestS16() const {
+void BinaryElementwiseOperatorTester::TestQS16() const {
   ASSERT_NE(operation_type(), OperationType::Unknown);
   ASSERT_GE(input1_zero_point(), std::numeric_limits<int16_t>::min());
   ASSERT_LE(input1_zero_point(), std::numeric_limits<int16_t>::max());
@@ -818,7 +818,7 @@ void BinaryElementwiseOperatorTester::TestS16() const {
     switch (operation_type()) {
       case OperationType::Multiply:
         ASSERT_EQ(
-          xnn_status_success, xnn_create_multiply_nd_s16(
+          xnn_status_success, xnn_create_multiply_nd_qs16(
                                 input1_zero_point(), input1_scale(), input2_zero_point(), input2_scale(),
                                 output_zero_point(), output_scale(), 0, &binary_elementwise_op));
         break;
@@ -835,11 +835,11 @@ void BinaryElementwiseOperatorTester::TestS16() const {
       case OperationType::Multiply:
         ASSERT_EQ(
             xnn_status_success,
-            xnn_reshape_multiply_nd_s16(
+            xnn_reshape_multiply_nd_qs16(
                 binary_elementwise_op, num_input1_dims(), input1_shape().data(),
                 num_input2_dims(), input2_shape().data(),
                 /*threadpool=*/nullptr));
-        ASSERT_EQ(xnn_status_success, xnn_setup_multiply_nd_s16(
+        ASSERT_EQ(xnn_status_success, xnn_setup_multiply_nd_qs16(
                                           binary_elementwise_op, input1.data(),
                                           input2.data(), output.data()));
         break;

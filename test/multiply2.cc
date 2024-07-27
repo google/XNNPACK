@@ -23,7 +23,7 @@ using Multiply2TestQS8 = BinaryTest<int8_t>;
 using Multiply2TestQU8 = BinaryTest<uint8_t>;
 using Multiply2TestF16 = BinaryTest<uint16_t>;
 using Multiply2TestF32 = BinaryTest<float>;
-using MultiplyTestS16 = BinaryTest<int16_t>;
+using MultiplyTestQS16 = BinaryTest<int16_t>;
 using MultiplyTestS32 = BinaryTest<int32_t>;
 
 // forward declare until we know the exact interface.
@@ -239,7 +239,7 @@ TEST_F(Multiply2TestF32, define)
   ASSERT_EQ(node->flags, 0);
 }
 
-TEST_F(MultiplyTestS16, define)
+TEST_F(MultiplyTestQS16, define)
 {
   const int32_t input1_zero_point = s16dist(rng);
   const float input1_scale = scale_dist(rng);
@@ -285,7 +285,7 @@ TEST_F(MultiplyTestS16, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_multiply2);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_s16);
+  ASSERT_EQ(node->compute_type, xnn_compute_type_qs16);
   ASSERT_EQ(node->num_inputs, 2);
   ASSERT_EQ(node->inputs[0], input1_id);
   ASSERT_EQ(node->inputs[1], input2_id);
@@ -649,7 +649,7 @@ TEST_F(Multiply2TestF32, matches_operator_api)
   ASSERT_EQ(subgraph_output, operator_output);
 }
 
-TEST_F(MultiplyTestS16, matches_operator_api)
+TEST_F(MultiplyTestQS16, matches_operator_api)
 {
   const int32_t input1_zero_point = s16dist(rng);
   const float input1_scale = scale_dist(rng);
@@ -669,18 +669,18 @@ TEST_F(MultiplyTestS16, matches_operator_api)
 
   // Call operator API.
   ASSERT_EQ(
-    xnn_status_success, xnn_create_multiply_nd_s16(
+    xnn_status_success, xnn_create_multiply_nd_qs16(
                           input1_zero_point, input1_scale, input2_zero_point, input2_scale, output_zero_point,
                           output_scale, /*flags=*/0, &op));
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_multiply_nd_s16(
+    xnn_status_success, xnn_reshape_multiply_nd_qs16(
                           op, input1_dims.size(), input1_dims.data(), input2_dims.size(), input2_dims.data(),
                           /*threadpool=*/nullptr));
 
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_multiply_nd_s16(op, input1.data(), input2.data(), operator_output.data()));
+    xnn_status_success, xnn_setup_multiply_nd_qs16(op, input1.data(), input2.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

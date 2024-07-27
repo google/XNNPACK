@@ -1286,58 +1286,35 @@ DECLARE_QS8_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs8_vmulc_minmax_fp32_ukernel__scal
                             const union xnn_qs16_mul_minmax_params        \
                                 params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmul_minmax_ukernel__avx2_u16)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmul_minmax_ukernel__avx2_u32)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmul_minmax_ukernel__avx2_u16)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmul_minmax_ukernel__avx2_u32)
 // DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmul_minmax_ukernel__avx512bw_u32)
 // DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmul_minmax_ukernel__avx512bw_u64)
 DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmul_minmax_ukernel__neon_u8)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmul_minmax_ukernel__neon_u16)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmul_minmax_ukernel__scalar_u1)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmul_minmax_ukernel__scalar_u2)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmul_minmax_ukernel__scalar_u4)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmul_minmax_ukernel__scalar_u8)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmul_minmax_ukernel__sse41_u8)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmul_minmax_ukernel__sse41_u16)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmul_minmax_ukernel__wasmsimd_u8)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmul_minmax_ukernel__wasmsimd_u16)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmul_minmax_ukernel__neon_u16)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmul_minmax_ukernel__scalar_u1)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmul_minmax_ukernel__scalar_u2)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmul_minmax_ukernel__scalar_u4)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmul_minmax_ukernel__scalar_u8)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmul_minmax_ukernel__sse41_u8)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmul_minmax_ukernel__sse41_u16)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmul_minmax_ukernel__wasmsimd_u8)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmul_minmax_ukernel__wasmsimd_u16)
 
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmulc_minmax_ukernel__avx2_u16)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmulc_minmax_ukernel__avx2_u32)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmulc_minmax_ukernel__avx2_u16)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmulc_minmax_ukernel__avx2_u32)
 // DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmulc_minmax_ukernel__avx512bw_u32)
 // DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmulc_minmax_ukernel__avx512bw_u64)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmulc_minmax_ukernel__neon_u8)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmulc_minmax_ukernel__neon_u16)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmulc_minmax_ukernel__scalar_u1)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmulc_minmax_ukernel__scalar_u2)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmulc_minmax_ukernel__scalar_u4)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmulc_minmax_ukernel__scalar_u8)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmulc_minmax_ukernel__sse41_u8)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmulc_minmax_ukernel__sse41_u16)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmulc_minmax_ukernel__wasmsimd_u8)
-DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs16_vmulc_minmax_ukernel__wasmsimd_u16)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmulc_minmax_ukernel__neon_u8)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmulc_minmax_ukernel__neon_u16)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmulc_minmax_ukernel__scalar_u1)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmulc_minmax_ukernel__scalar_u2)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmulc_minmax_ukernel__scalar_u4)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmulc_minmax_ukernel__scalar_u8)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmulc_minmax_ukernel__sse41_u8)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmulc_minmax_ukernel__sse41_u16)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmulc_minmax_ukernel__wasmsimd_u8)
+DECLARE_QS16_VMUL_MINMAX_UKERNEL_FUNCTION(xnn_qs16_vmulc_minmax_ukernel__wasmsimd_u16)
 
 #define DECLARE_S32_VBINOP_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                         \

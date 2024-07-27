@@ -58,9 +58,9 @@ static enum xnn_status create_multiply_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_s16:
+    case xnn_compute_type_qs16:
     {
-      status = xnn_create_multiply_nd_s16(
+      status = xnn_create_multiply_nd_qs16(
         (int16_t) values[input1_id].quantization.zero_point,
         values[input1_id].quantization.scale,
         (int16_t) values[input2_id].quantization.zero_point,
@@ -178,8 +178,8 @@ static enum xnn_status reshape_multiply_operator(
         opdata->shape2.dim,
         threadpool);
       break;
-    case xnn_operator_type_multiply_nd_s16:
-      status = xnn_reshape_multiply_nd_s16(
+    case xnn_operator_type_multiply_nd_qs16:
+      status = xnn_reshape_multiply_nd_qs16(
         opdata->operator_objects[0], opdata->shape1.num_dims, opdata->shape1.dim, opdata->shape2.num_dims,
         opdata->shape2.dim, threadpool);
       break;
@@ -256,8 +256,8 @@ static enum xnn_status setup_multiply_operator(
         opdata->operator_objects[0],
         input1_data, input2_data, output_data);
       break;
-    case xnn_operator_type_multiply_nd_s16:
-      return xnn_setup_multiply_nd_s16(opdata->operator_objects[0], input1_data, input2_data, output_data);
+    case xnn_operator_type_multiply_nd_qs16:
+      return xnn_setup_multiply_nd_qs16(opdata->operator_objects[0], input1_data, input2_data, output_data);
       break;
     case xnn_operator_type_multiply_nd_s32:
       return xnn_setup_multiply_nd_s32(opdata->operator_objects[0], input1_data, input2_data, output_data);
@@ -365,7 +365,7 @@ enum xnn_status define_multiply2(
       compute_type = xnn_compute_type_fp32;
       break;
     case xnn_datatype_qcint16:
-      compute_type = xnn_compute_type_s16;
+      compute_type = xnn_compute_type_qs16;
       break;
     case xnn_datatype_int32:
       compute_type = xnn_compute_type_s32;

@@ -5437,12 +5437,12 @@ TEST(MULTIPLY_ND_QU8, qmax) {
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_0d_x_0d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_0d_x_0d)
 {
-  BinaryElementwiseOperatorTester().operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply).TestS16();
+  BinaryElementwiseOperatorTester().operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply).TestQS16();
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_1d_x_0d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_1d_x_0d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -5450,11 +5450,11 @@ TEST(VMULTIPLY_ND_S16, vmultiply_1d_x_0d)
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim1})
-      .TestS16();
+      .TestQS16();
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_0d_x_1d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_0d_x_1d)
 {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
     const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
@@ -5462,11 +5462,11 @@ TEST(VMULTIPLY_ND_S16, vmultiply_0d_x_1d)
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim1})
-      .TestS16();
+      .TestQS16();
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_1d_x_1d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_1d_x_1d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
@@ -5478,12 +5478,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_1d_x_1d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_0d_x_2d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_0d_x_2d)
 {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
     const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
@@ -5493,11 +5493,11 @@ TEST(VMULTIPLY_ND_S16, vmultiply_0d_x_2d)
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim2, input2_dim1})
-      .TestS16();
+      .TestQS16();
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_1d_x_2d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_1d_x_2d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
@@ -5511,12 +5511,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_1d_x_2d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_2d_x_0d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_2d_x_0d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -5526,11 +5526,11 @@ TEST(VMULTIPLY_ND_S16, vmultiply_2d_x_0d)
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim2, input1_dim1})
-      .TestS16();
+      .TestQS16();
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_2d_x_1d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_2d_x_1d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
@@ -5544,12 +5544,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_2d_x_1d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_2d_x_2d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_2d_x_2d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
@@ -5565,12 +5565,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_2d_x_2d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_0d_x_3d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_0d_x_3d)
 {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
     const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
@@ -5582,11 +5582,11 @@ TEST(VMULTIPLY_ND_S16, vmultiply_0d_x_3d)
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim3, input2_dim2, input2_dim1})
-      .TestS16();
+      .TestQS16();
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_1d_x_3d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_1d_x_3d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
@@ -5602,12 +5602,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_1d_x_3d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_2d_x_3d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_2d_x_3d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
@@ -5625,12 +5625,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_2d_x_3d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_3d_x_0d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_3d_x_0d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -5642,11 +5642,11 @@ TEST(VMULTIPLY_ND_S16, vmultiply_3d_x_0d)
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim3, input1_dim2, input1_dim1})
-      .TestS16();
+      .TestQS16();
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_3d_x_1d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_3d_x_1d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
@@ -5662,12 +5662,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_3d_x_1d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_3d_x_2d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_3d_x_2d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
@@ -5685,12 +5685,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_3d_x_2d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_3d_x_3d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_3d_x_3d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
@@ -5710,12 +5710,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_3d_x_3d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_0d_x_4d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_0d_x_4d)
 {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
     const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
@@ -5729,11 +5729,11 @@ TEST(VMULTIPLY_ND_S16, vmultiply_0d_x_4d)
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
-      .TestS16();
+      .TestQS16();
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_1d_x_4d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_1d_x_4d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
@@ -5751,12 +5751,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_1d_x_4d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_2d_x_4d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_2d_x_4d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
@@ -5776,12 +5776,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_2d_x_4d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_3d_x_4d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_3d_x_4d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
@@ -5803,12 +5803,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_3d_x_4d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_4d_x_0d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_4d_x_0d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -5822,11 +5822,11 @@ TEST(VMULTIPLY_ND_S16, vmultiply_4d_x_0d)
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
-      .TestS16();
+      .TestQS16();
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_4d_x_1d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_4d_x_1d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
@@ -5844,12 +5844,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_4d_x_1d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_4d_x_2d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_4d_x_2d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
@@ -5869,12 +5869,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_4d_x_2d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_4d_x_3d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_4d_x_3d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
@@ -5896,12 +5896,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_4d_x_3d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_4d_x_4d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_4d_x_4d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
@@ -5925,12 +5925,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_4d_x_4d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_0d_x_5d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_0d_x_5d)
 {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
     const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
@@ -5946,11 +5946,11 @@ TEST(VMULTIPLY_ND_S16, vmultiply_0d_x_5d)
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
-      .TestS16();
+      .TestQS16();
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_1d_x_5d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_1d_x_5d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
@@ -5970,12 +5970,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_1d_x_5d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_2d_x_5d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_2d_x_5d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
@@ -5997,12 +5997,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_2d_x_5d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_3d_x_5d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_3d_x_5d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
@@ -6026,12 +6026,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_3d_x_5d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_4d_x_5d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_4d_x_5d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
@@ -6057,12 +6057,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_4d_x_5d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_5d_x_0d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_5d_x_0d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -6078,11 +6078,11 @@ TEST(VMULTIPLY_ND_S16, vmultiply_5d_x_0d)
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
-      .TestS16();
+      .TestQS16();
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_5d_x_1d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_5d_x_1d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
@@ -6102,12 +6102,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_5d_x_1d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_5d_x_2d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_5d_x_2d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
@@ -6129,12 +6129,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_5d_x_2d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_5d_x_3d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_5d_x_3d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
@@ -6158,12 +6158,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_5d_x_3d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_5d_x_4d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_5d_x_4d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
@@ -6189,12 +6189,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_5d_x_4d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_5d_x_5d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_5d_x_5d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
@@ -6223,12 +6223,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_5d_x_5d)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .iterations(1)
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_0d_x_6d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_0d_x_6d)
 {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
     const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
@@ -6246,11 +6246,11 @@ TEST(VMULTIPLY_ND_S16, vmultiply_0d_x_6d)
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
-      .TestS16();
+      .TestQS16();
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_1d_x_6d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_1d_x_6d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
@@ -6272,12 +6272,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_1d_x_6d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_2d_x_6d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_2d_x_6d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
@@ -6301,12 +6301,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_2d_x_6d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_3d_x_6d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_3d_x_6d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
@@ -6332,12 +6332,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_3d_x_6d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_4d_x_6d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_4d_x_6d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
@@ -6365,12 +6365,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_4d_x_6d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_5d_x_6d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_5d_x_6d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
@@ -6401,12 +6401,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_5d_x_6d)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .iterations(1)
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_6d_x_0d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_6d_x_0d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -6424,11 +6424,11 @@ TEST(VMULTIPLY_ND_S16, vmultiply_6d_x_0d)
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
-      .TestS16();
+      .TestQS16();
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_6d_x_1d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_6d_x_1d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
@@ -6450,12 +6450,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_6d_x_1d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_6d_x_2d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_6d_x_2d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
@@ -6479,12 +6479,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_6d_x_2d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_6d_x_3d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_6d_x_3d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
@@ -6510,12 +6510,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_6d_x_3d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_6d_x_4d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_6d_x_4d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
@@ -6543,12 +6543,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_6d_x_4d)
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_6d_x_5d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_6d_x_5d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
@@ -6579,12 +6579,12 @@ TEST(VMULTIPLY_ND_S16, vmultiply_6d_x_5d)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .iterations(1)
-        .TestS16();
+        .TestQS16();
     }
   }
 }
 
-TEST(VMULTIPLY_ND_S16, vmultiply_6d_x_6d)
+TEST(VMULTIPLY_ND_QS16, vmultiply_6d_x_6d)
 {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
@@ -6617,7 +6617,7 @@ TEST(VMULTIPLY_ND_S16, vmultiply_6d_x_6d)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .iterations(1)
-        .TestS16();
+        .TestQS16();
     }
   }
 }

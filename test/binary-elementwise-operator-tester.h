@@ -211,7 +211,7 @@ class BinaryElementwiseOperatorTester {
 
   void TestF32() const;
 
-  void TestS16() const;
+  void TestQS16() const;
 
   void TestS32() const;
 
