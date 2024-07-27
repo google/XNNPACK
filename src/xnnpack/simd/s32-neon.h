@@ -15,7 +15,7 @@
 #include "xnnpack/common.h"
 
 // SIMD vector type for s32 using NEON.
-typedef int32x4_t  xnn_simd_s32_t;
+typedef int32x4_t xnn_simd_s32_t;
 #define xnn_simd_size_s32 4
 #define xnn_simd_log2_size_s32 2
 #define xnn_simd_bytes_s32 (xnn_simd_size_s32 * sizeof(int32_t))
@@ -39,19 +39,21 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
 }
 
 static XNN_INLINE xnn_simd_s32_t xnn_cvt_s32_s16(xnn_simd_s32_t a, xnn_simd_s32_t b) {
-    return vcombine_s16(vqmovn_s32(a), vqmovn_s32(b));
+  return vcombine_s16(vqmovn_s32(a), vqmovn_s32(b));
 }
 
 static XNN_INLINE float32x4_t xnn_cvt_s32_f32(xnn_simd_s32_t a) {
-   return vcvtq_f32_s32(a);
+  return vcvtq_f32_s32(a);
 }
 
-static XNN_INLINE xnn_simd_s32_t xnn_add_s32(xnn_simd_s32_t a,xnn_simd_s32_t b) {
-   return vaddq_s32(a, b);
+static XNN_INLINE xnn_simd_s32_t xnn_add_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  return vaddq_s32(a, b);
 }
 
-static XNN_INLINE xnn_simd_s32_t xnn_sub_s32(xnn_simd_s32_t a,xnn_simd_s32_t b) {
-   return vsubq_s32(a, b);
+static XNN_INLINE xnn_simd_s32_t xnn_sub_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  return vsubq_s32(a, b);
 }
 
 // Load/store operations.

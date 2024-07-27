@@ -255,24 +255,27 @@ TEST_F(MultiplyTestS16, define)
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
 
   uint32_t input1_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_int16, input1_zero_point, input1_scale, input1_dims.size(), input1_dims.data(), nullptr,
-                          /*external_id=*/0, /*flags=*/0, &input1_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_quantized_tensor_value(
+                subgraph, xnn_datatype_qcint16, input1_zero_point, input1_scale,
+                input1_dims.size(), input1_dims.data(), nullptr,
+                /*external_id=*/0, /*flags=*/0, &input1_id));
   ASSERT_NE(input1_id, XNN_INVALID_NODE_ID);
 
   uint32_t input2_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_int16, input2_zero_point, input2_scale, input2_dims.size(), input2_dims.data(), nullptr,
-                          /*external_id=*/0, /*flags=*/0, &input2_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_quantized_tensor_value(
+                subgraph, xnn_datatype_qcint16, input2_zero_point, input2_scale,
+                input2_dims.size(), input2_dims.data(), nullptr,
+                /*external_id=*/0, /*flags=*/0, &input2_id));
   ASSERT_NE(input2_id, XNN_INVALID_NODE_ID);
 
   uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_int16, output_zero_point, output_scale, output_dims.size(), output_dims.data(), nullptr,
-                          XNN_INVALID_VALUE_ID, /*flags=*/0, &output_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_quantized_tensor_value(
+                subgraph, xnn_datatype_qcint16, output_zero_point, output_scale,
+                output_dims.size(), output_dims.data(), nullptr,
+                XNN_INVALID_VALUE_ID, /*flags=*/0, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
   ASSERT_EQ(
@@ -687,27 +690,30 @@ TEST_F(MultiplyTestS16, matches_operator_api)
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
 
   uint32_t input1_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_quantized_tensor_value(
-      subgraph, xnn_datatype_int16, input1_zero_point, input1_scale, input1_dims.size(), input1_dims.data(), nullptr,
-      /*external_id=*/0, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input1_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_quantized_tensor_value(
+                subgraph, xnn_datatype_qcint16, input1_zero_point, input1_scale,
+                input1_dims.size(), input1_dims.data(), nullptr,
+                /*external_id=*/0, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
+                &input1_id));
   ASSERT_NE(input1_id, XNN_INVALID_NODE_ID);
 
   uint32_t input2_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_quantized_tensor_value(
-      subgraph, xnn_datatype_int16, input2_zero_point, input2_scale, input2_dims.size(), input2_dims.data(), nullptr,
-      /*external_id=*/1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input2_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_quantized_tensor_value(
+                subgraph, xnn_datatype_qcint16, input2_zero_point, input2_scale,
+                input2_dims.size(), input2_dims.data(), nullptr,
+                /*external_id=*/1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
+                &input2_id));
   ASSERT_NE(input2_id, XNN_INVALID_NODE_ID);
 
   uint32_t output_id = XNN_INVALID_NODE_ID;
   ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_int16, output_zero_point, output_scale, output_dims.size(),
-                          output_dims.data(), nullptr, /*external_id=*/2,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+      xnn_status_success,
+      xnn_define_quantized_tensor_value(
+          subgraph, xnn_datatype_qcint16, output_zero_point, output_scale,
+          output_dims.size(), output_dims.data(), nullptr, /*external_id=*/2,
+          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
   ASSERT_EQ(

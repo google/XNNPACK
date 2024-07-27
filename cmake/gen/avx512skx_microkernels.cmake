@@ -204,6 +204,8 @@ SET(ALL_AVX512SKX_MICROKERNEL_SRCS
   src/qs8-vadd/gen/qs8-vadd-minmax-avx512skx-mul32-ld128-u32.c
   src/qs8-vaddc/gen/qs8-vaddc-minmax-avx512skx-mul32-ld128-u16.c
   src/qs8-vaddc/gen/qs8-vaddc-minmax-avx512skx-mul32-ld128-u32.c
+  src/qs16-vmul/gen/qs16-vmul-minmax-avx512skx.c
+  src/qs16-vmul/gen/qs16-vmulc-minmax-avx512skx.c
   src/qu8-dwconv/gen/qu8-dwconv-5f5m5l16c16s1r-minmax-fp32-avx512skx-mul32.c
   src/qu8-dwconv/gen/qu8-dwconv-5f5m5l32c16s1r-minmax-fp32-avx512skx-mul32.c
   src/qu8-dwconv/gen/qu8-dwconv-6f6m7l16c16s1r-minmax-fp32-avx512skx-mul32.c

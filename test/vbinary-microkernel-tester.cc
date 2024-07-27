@@ -280,8 +280,8 @@ void VBinaryMicrokernelTester::Test(
 }
 
 void VBinaryMicrokernelTester::Test(
-    xnn_s16_vbinary_ukernel_fn vbinary, OpType op_type,
-    xnn_init_s16_cvt_params_fn init_params) const {
+    xnn_qs16_vbinary_ukernel_fn vbinary, OpType op_type,
+    xnn_init_qs16_mul_minmax_params_fn init_params) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<int32_t> s16dist(
         0, std::numeric_limits<int16_t>::max());
@@ -305,7 +305,7 @@ void VBinaryMicrokernelTester::Test(
     // Prepare parameters.
     const float product_scale = a_scale() * b_scale();
     const float product_output_scale = product_scale / y_scale();
-    xnn_s16_cvt_params params;
+    xnn_qs16_mul_minmax_params params;
     if (init_params != nullptr) {
       init_params(&params, a_zero_point_s16(), b_zero_point_s16(), product_output_scale, y_zero_point_s16());
     }

@@ -30,15 +30,16 @@ static struct xnn_binary_elementwise_config f32_vmul_config = {0};
 static struct xnn_binary_elementwise_config f32_vsub_config = {0};
 static struct xnn_binary_elementwise_config f32_vsqrdiff_config = {0};
 
-static struct xnn_binary_elementwise_config s16_vmul_config = {0};
 static struct xnn_binary_elementwise_config s32_vmul_config = {0};
 
 static struct xnn_binary_elementwise_config qs8_vadd_config = {0};
 static struct xnn_binary_elementwise_config qs8_vmul_config = {0};
+static struct xnn_binary_elementwise_config qs16_vmul_config = {0};
 
 static struct xnn_binary_elementwise_config qu8_vadd_config = {0};
 static struct xnn_binary_elementwise_config qu8_vmul_config = {0};
 
+<<<<<<< HEAD
 XNN_INIT_ONCE_GUARD(f16_vadd);
 XNN_INIT_ONCE_GUARD(f16_vdiv);
 XNN_INIT_ONCE_GUARD(f16_vmax);
@@ -54,13 +55,12 @@ XNN_INIT_ONCE_GUARD(f32_vmin);
 XNN_INIT_ONCE_GUARD(f32_vmul);
 XNN_INIT_ONCE_GUARD(f32_vsub);
 XNN_INIT_ONCE_GUARD(f32_vsqrdiff);
-XNN_INIT_ONCE_GUARD(s16_vmul);
 XNN_INIT_ONCE_GUARD(s32_vmul);
 XNN_INIT_ONCE_GUARD(qs8_vadd);
 XNN_INIT_ONCE_GUARD(qs8_vmul);
+XNN_INIT_ONCE_GUARD(qs16_vmul);
 XNN_INIT_ONCE_GUARD(qu8_vadd);
 XNN_INIT_ONCE_GUARD(qu8_vmul);
-
 
 static void init_f16_vadd_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
@@ -501,66 +501,90 @@ static void init_f32_vcopysign_config(void) {
   #endif
 }
 
-static void init_s16_vmul_config(void) {
-  #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon) {
-      s16_vmul_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmul_ukernel__neon_u8;
-      s16_vmul_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__neon_u8;
-      s16_vmul_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__neon_u8;
-      s16_vmul_config.init.s16_cvt = xnn_init_s16_cvt_scalar_params;
-      s16_vmul_config.linear.element_tile = 8;
-    }
-    else if (!XNN_PLATFORM_MOBILE) {
-      s16_vmul_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmul_ukernel__scalar_u2;
-      s16_vmul_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__scalar_u2;
-      s16_vmul_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__scalar_u2;
-      s16_vmul_config.init.s16_cvt = xnn_init_s16_cvt_scalar_params;
-      s16_vmul_config.linear.element_tile = 2;
-    }
-  #elif XNN_ARCH_ARM64
-    s16_vmul_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmul_ukernel__neon_u8;
-    s16_vmul_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__neon_u8;
-    s16_vmul_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__neon_u8;
-    s16_vmul_config.init.s16_cvt = xnn_init_s16_cvt_scalar_params;
-    s16_vmul_config.linear.element_tile = 8;
-  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    // if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      // s16_vmul_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmul_ukernel__avx512bw_u32;
-      // s16_vmul_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__avx512bw_u32;
-      // s16_vmul_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__avx512bw_u32;
-      // s16_vmul_config.linear.element_tile = 32;
-    // }
-    if (hardware_config->use_x86_avx2) {
-      s16_vmul_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmul_ukernel__avx2_u16;
-      s16_vmul_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__avx2_u16;
-      s16_vmul_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__avx2_u16;
-      s16_vmul_config.init.s16_cvt = xnn_init_s16_cvt_scalar_params;
-      s16_vmul_config.linear.element_tile = 16;
-    }
-    else {
-      s16_vmul_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmul_ukernel__sse41_u8;
-      s16_vmul_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__sse41_u8;
-      s16_vmul_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__sse41_u8;
-      s16_vmul_config.init.s16_cvt = xnn_init_s16_cvt_scalar_params;
-      s16_vmul_config.linear.element_tile = 8;
-    }
-  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    s16_vmul_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmul_ukernel__wasmsimd_u16;
-    s16_vmul_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__wasmsimd_u16;
-    s16_vmul_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__wasmsimd_u16;
-    s16_vmul_config.init.s16_cvt = xnn_init_s16_cvt_scalar_params;
-    s16_vmul_config.linear.element_tile = 16;
-  #else
-    s16_vmul_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmul_ukernel__scalar_u2;
-    s16_vmul_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__scalar_u2;
-    s16_vmul_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s16_vmulc_ukernel__scalar_u2;
-    s16_vmul_config.init.s16_cvt = xnn_init_s16_cvt_scalar_params;
-    s16_vmul_config.linear.element_tile = 2;
-  #endif
+static void init_qs16_vmul_config(void) {
+#if XNN_ARCH_ARM
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->use_arm_neon) {
+    qs16_vmul_config.minmax.op_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__neon_u8;
+    qs16_vmul_config.minmax.opc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__neon_u8;
+    qs16_vmul_config.minmax.ropc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__neon_u8;
+    qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+    qs16_vmul_config.minmax.element_tile = 8;
+  } else if (!XNN_PLATFORM_MOBILE) {
+    qs16_vmul_config.minmax.op_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__scalar_u2;
+    qs16_vmul_config.minmax.opc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__scalar_u2;
+    qs16_vmul_config.minmax.ropc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__scalar_u2;
+    qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+    qs16_vmul_config.minmax.element_tile = 2;
+  }
+#elif XNN_ARCH_ARM64
+  qs16_vmul_config.minmax.op_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__neon_u8;
+  qs16_vmul_config.minmax.opc_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__neon_u8;
+  qs16_vmul_config.minmax.ropc_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__neon_u8;
+  qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+  qs16_vmul_config.minmax.element_tile = 8;
+#elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+    qs16_vmul_config.minmax.op_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__avx512bw_u32;
+    qs16_vmul_config.minmax.opc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__avx512bw_u32;
+    qs16_vmul_config.minmax.ropc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__avx512bw_u32;
+    qs16_vmul_config.minmax.element_tile = 32;
+  }
+  if (hardware_config->use_x86_avx2) {
+    qs16_vmul_config.minmax.op_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__avx2_u16;
+    qs16_vmul_config.minmax.opc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__avx2_u16;
+    qs16_vmul_config.minmax.ropc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__avx2_u16;
+    qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+    qs16_vmul_config.minmax.element_tile = 16;
+  } else {
+    qs16_vmul_config.minmax.op_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__sse41_u8;
+    qs16_vmul_config.minmax.opc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__sse41_u8;
+    qs16_vmul_config.minmax.ropc_ukernel =
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__sse41_u8;
+    qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+    qs16_vmul_config.minmax.element_tile = 8;
+  }
+#elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  qs16_vmul_config.minmax.op_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__wasmsimd_u16;
+  qs16_vmul_config.minmax.opc_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__wasmsimd_u16;
+  qs16_vmul_config.minmax.ropc_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__wasmsimd_u16;
+  qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+  qs16_vmul_config.minmax.element_tile = 16;
+#else
+  qs16_vmul_config.minmax.op_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__scalar_u2;
+  qs16_vmul_config.minmax.opc_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__scalar_u2;
+  qs16_vmul_config.minmax.ropc_ukernel =
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__scalar_u2;
+  qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
+  qs16_vmul_config.minmax.element_tile = 2;
+#endif
 }
 
 static void init_s32_vmul_config(void) {
@@ -1420,8 +1444,10 @@ static void init_qu8_vmul_config(void) {
     return TRUE;
   }
 
-  static BOOL CALLBACK init_s16_vmul_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_s16_vmul_config();
+  static BOOL CALLBACK init_qs16_vmul_config_windows(PINIT_ONCE init_once,
+                                                     PVOID parameter,
+                                                     PVOID* context) {
+    init_qs16_vmul_config();
     return TRUE;
   }
 
@@ -1563,17 +1589,18 @@ const struct xnn_binary_elementwise_config* xnn_init_f32_vcopysign_config() {
   return &f32_vcopysign_config;
 }
 
-const struct xnn_binary_elementwise_config* xnn_init_s16_vmul_config() {
+const struct xnn_binary_elementwise_config* xnn_init_qs16_vmul_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
   #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_s16_vmul, &init_s16_vmul_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_s16_vmul, &init_s16_vmul_config);
-  #endif
-  return &s16_vmul_config;
+  InitOnceExecuteOnce(&init_guard_qs16_vmul, &init_qs16_vmul_config_windows,
+                      NULL, NULL);
+#else
+  pthread_once(&init_guard_qs16_vmul, &init_qs16_vmul_config);
+#endif
+  return &qs16_vmul_config;
 }
 
 const struct xnn_binary_elementwise_config* xnn_init_s32_vmul_config() {

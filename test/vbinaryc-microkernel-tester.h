@@ -70,7 +70,6 @@ class VBinaryCMicrokernelTester {
 
   int16_t a_zero_point_s16() const { return this->a_zero_point_s16_; }
 
-
   VBinaryCMicrokernelTester& b_scale(float b_scale) {
     assert(b_scale > 0.0f);
     assert(std::isnormal(b_scale));
@@ -166,8 +165,8 @@ class VBinaryCMicrokernelTester {
             xnn_init_qs8_mul_minmax_params_fn init_params,
             xnn_qs8_requantize_fn requantize) const;
 
-  void Test(xnn_s16_vbinary_ukernel_fn vbinary, OpType op_type,
-            xnn_init_s16_cvt_params_fn init_params = nullptr) const;
+  void Test(xnn_qs16_vbinary_ukernel_fn vbinary, OpType op_type,
+            xnn_init_qs16_mul_minmax_params_fn init_params = nullptr) const;
 
   void Test(xnn_s32_vbinary_ukernel_fn vbinaryc, OpType op_type,
             xnn_init_s32_default_params_fn init_params = nullptr) const;
