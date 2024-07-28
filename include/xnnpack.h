@@ -418,16 +418,10 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
   uint32_t* id_out);
 
 /// Define a blockwise quantized tensor-type Value and add it to a Subgraph.
-<<<<<<< HEAD
 /// @param block_size - size of a block in the tensor with blockwise quantization parameters. Block is defined as
 ///                     number of input channel element per output channel.
 ///                     For Fully connected operators with 2d filters of size [output_channels, input_channels],
 ///                     expecting number of scale values to be = output_channels * (input_channels / block_size).
-=======
-/// @param block_size - size of a block in the tensor with blockwise quantization parameters. Block is defined as number of input channel element per output channel.
-///                     For Fully connected operators with 2d filters of size [output_channels, input_channels], expecting number of scale values to be,
-///                     = output_channels * (input_channels / block_size).
->>>>>>> b976ff159 (Add subgraph support for qb4w)
 enum xnn_status xnn_define_blockwise_quantized_tensor_value(
   xnn_subgraph_t subgraph,
   enum xnn_datatype datatype,
