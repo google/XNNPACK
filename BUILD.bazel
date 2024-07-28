@@ -1059,6 +1059,23 @@ xnnpack_microkernel_cc_library(
 )
 
 xnnpack_microkernel_cc_library(
+    name = "avxvnniint8",
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = [
+        "-mavx2",
+        "-mavxvnniint8",
+        "-mf16c",
+        "-mfma",
+    ],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX"],
+    msvc_x86_64_copts = ["/arch:AVX"],
+    x86_srcs_prod = ["src/amalgam/gen/avxvnniint8.c"],
+    x86_srcs_test = ALL_AVXVNNIINT8_MICROKERNEL_SRCS,
+    deps = MICROKERNEL_DEPS,
+)
+
+xnnpack_microkernel_cc_library(
     name = "f16c",
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
