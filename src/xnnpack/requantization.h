@@ -70,15 +70,14 @@ static inline int16_t xnn_qs16_requantize_fp32(
   assert(scale >= 1.0f / 4294967296.0f /* 0x1.0p-32f */);
   assert(scale < 256.0f);
 
-  const float min_less_zero_point = (float) ((int32_t) min - (int32_t) zero_point);
-  const float max_less_zero_point = (float) ((int32_t) max - (int32_t) zero_point);
+  int32_t scaled_input = (int32_t)(input * scale) + (int32_t)zero_point;
+  scaled_input = (scaled_input > INT16_MAX)
+                     ? INT16_MAX
+                     : ((scaled_input < INT16_MIN) ? INT16_MIN : scaled_input);
+  scaled_input = math_max_s32(scaled_input, min);
+  scaled_input = math_min_s32(scaled_input, max);
 
-  float scaled_input = (float) input * scale;
-  scaled_input = math_max_f32(scaled_input, min_less_zero_point);
-  scaled_input = math_min_f32(scaled_input, max_less_zero_point);
-
-  const int32_t output = (int32_t) lrintf(scaled_input) + (int32_t) zero_point;
-  return (int16_t) output;
+  return (int16_t)scaled_input;
 }
 
 static inline uint8_t xnn_qu8_requantize_fp32(
