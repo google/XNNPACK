@@ -1553,7 +1553,7 @@ xnnpack_aggregate_library(
         ":riscv_fp16_vector_enabled": [":rvvfp16arith_prod_microkernels"],
         "//conditions:default": [],
     }) + select({
-        ":avxvnni_enabled": [":avxvnni_prod_microkernels"],
+        ":avxvnni_enabled": [":avxvnni_prod_microkernels", ":avxvnniint8_prod_microkernels"],
         "//conditions:default": [],
     }) + select({
         ":avx256skx_enabled": [":avx256skx_prod_microkernels"],
