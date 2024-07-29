@@ -537,30 +537,30 @@ static void init_qs16_vmul_config(void) {
   assert(hardware_config != NULL);
   if (hardware_config->use_arm_neon) {
     qs16_vmul_config.minmax.op_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__neon_u8;
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_fp32_ukernel__neon_u8;
     qs16_vmul_config.minmax.opc_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__neon_u8;
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__neon_u8;
     qs16_vmul_config.minmax.ropc_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__neon_u8;
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__neon_u8;
     qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
     qs16_vmul_config.minmax.element_tile = 8;
   } else if (!XNN_PLATFORM_MOBILE) {
     qs16_vmul_config.minmax.op_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__scalar_u2;
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_fp32_ukernel__scalar_u2;
     qs16_vmul_config.minmax.opc_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__scalar_u2;
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__scalar_u2;
     qs16_vmul_config.minmax.ropc_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__scalar_u2;
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__scalar_u2;
     qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
     qs16_vmul_config.minmax.element_tile = 2;
   }
 #elif XNN_ARCH_ARM64
   qs16_vmul_config.minmax.op_ukernel =
-      (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__neon_u8;
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_fp32_ukernel__neon_u8;
   qs16_vmul_config.minmax.opc_ukernel =
-      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__neon_u8;
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__neon_u8;
   qs16_vmul_config.minmax.ropc_ukernel =
-      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__neon_u8;
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__neon_u8;
   qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
   qs16_vmul_config.minmax.element_tile = 8;
 #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -569,48 +569,49 @@ static void init_qs16_vmul_config(void) {
   assert(hardware_config != NULL);
   if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
     qs16_vmul_config.minmax.op_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__avx512bw_u32;
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_fp32_ukernel__avx512bw_u32;
     qs16_vmul_config.minmax.opc_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__avx512bw_u32;
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__avx512bw_u32;
     qs16_vmul_config.minmax.ropc_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__avx512bw_u32;
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__avx512bw_u32;
+    qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
     qs16_vmul_config.minmax.element_tile = 32;
   }
   if (hardware_config->use_x86_avx2) {
     qs16_vmul_config.minmax.op_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__avx2_u16;
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_fp32_ukernel__avx2_u16;
     qs16_vmul_config.minmax.opc_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__avx2_u16;
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__avx2_u16;
     qs16_vmul_config.minmax.ropc_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__avx2_u16;
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__avx2_u16;
     qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
     qs16_vmul_config.minmax.element_tile = 16;
   } else {
     qs16_vmul_config.minmax.op_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__sse41_u8;
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_fp32_ukernel__sse41_u8;
     qs16_vmul_config.minmax.opc_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__sse41_u8;
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__sse41_u8;
     qs16_vmul_config.minmax.ropc_ukernel =
-        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__sse41_u8;
+        (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__sse41_u8;
     qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
     qs16_vmul_config.minmax.element_tile = 8;
   }
 #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   qs16_vmul_config.minmax.op_ukernel =
-      (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__wasmsimd_u16;
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_fp32_ukernel__wasmsimd_u16;
   qs16_vmul_config.minmax.opc_ukernel =
-      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__wasmsimd_u16;
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__wasmsimd_u16;
   qs16_vmul_config.minmax.ropc_ukernel =
-      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__wasmsimd_u16;
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__wasmsimd_u16;
   qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
   qs16_vmul_config.minmax.element_tile = 16;
 #else
   qs16_vmul_config.minmax.op_ukernel =
-      (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_ukernel__scalar_u2;
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmul_minmax_fp32_ukernel__scalar_u2;
   qs16_vmul_config.minmax.opc_ukernel =
-      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__scalar_u2;
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__scalar_u2;
   qs16_vmul_config.minmax.ropc_ukernel =
-      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_ukernel__scalar_u2;
+      (xnn_vbinary_ukernel_fn)xnn_qs16_vmulc_minmax_fp32_ukernel__scalar_u2;
   qs16_vmul_config.init.qs16_mul = xnn_init_qs16_mul_minmax_params;
   qs16_vmul_config.minmax.element_tile = 2;
 #endif

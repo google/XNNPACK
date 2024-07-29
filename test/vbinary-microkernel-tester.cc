@@ -281,7 +281,7 @@ void VBinaryMicrokernelTester::Test(
 
 void VBinaryMicrokernelTester::Test(
     xnn_qs16_vbinary_ukernel_fn vbinary, OpType op_type,
-    xnn_init_qs16_mul_minmax_params_fn init_params) const {
+    xnn_init_qs16_mul_minmax_params_fn init_params,xnn_qs16_requantize_fn requantize) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<int32_t> s16dist(
         0, std::numeric_limits<int16_t>::max());
@@ -289,7 +289,8 @@ void VBinaryMicrokernelTester::Test(
   std::vector<int16_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int16_t));
   std::vector<int16_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(int16_t));
   std::vector<int16_t> y(batch_size() + (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(int16_t) : 0));
-  std::vector<int16_t> y_fp(batch_size());
+  std::vector<float> y_fp(batch_size());
+  std::vector<int16_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(a.begin(), a.end(), [&]() { return s16dist(rng); });
     std::generate(b.begin(), b.end(), [&]() { return s16dist(rng); });
@@ -307,24 +308,30 @@ void VBinaryMicrokernelTester::Test(
     const float product_output_scale = product_scale / y_scale();
     xnn_qs16_mul_minmax_params params;
     if (init_params != nullptr) {
-      init_params(&params, a_zero_point_s16(), b_zero_point_s16(), product_output_scale, y_zero_point_s16());
+      init_params(&params, a_zero_point_s16(), b_zero_point_s16(), product_output_scale, y_zero_point_s16(),qmin_s16(),qmax_s16());
     }
 
     // Compute reference results.
-    int32_t acc, res;
+    // int32_t acc;
     for (size_t i = 0; i < batch_size(); i++) {
-      switch (op_type) {
-        case OpType::Mul:
-          acc = (static_cast<int32_t>(a_data[i]) - static_cast<int32_t>(a_zero_point_s16())) *
-                (static_cast<int32_t>(b_data[i]) - static_cast<int32_t>(b_zero_point_s16()));
-          res = 
-            static_cast<int32_t>(y_zero_point_s16()) +
-            static_cast<int32_t>(product_output_scale * static_cast<float>(acc));
-          y_fp[i] = static_cast<int16_t>(std::max<int32_t>(std::min<int32_t>(res, INT16_MAX), INT16_MIN));
-          break;
-        default:
-          break;
-      }
+      // switch (op_type) {
+      //   case OpType::Mul:
+          const int32_t acc = (static_cast<int32_t>(a_data[i]) -
+                              static_cast<int32_t>(a_zero_point())) *
+                              (static_cast<int32_t>(b_data[i]) -
+                              static_cast<int32_t>(b_zero_point()));
+          y_fp[i] = static_cast<float>(y_zero_point()) +
+                    product_output_scale * static_cast<float>(acc);
+          y_fp[i] = std::max<float>(
+              y_fp[i], static_cast<float>(static_cast<int32_t>(qmin_s16())));
+          y_fp[i] = std::min<float>(
+              y_fp[i], static_cast<float>(static_cast<int32_t>(qmax_s16())));
+          y_ref[i] =
+          requantize(acc, product_output_scale, y_zero_point(), qmin_s16(), qmax_s16());
+        //   break;
+        // default:
+        //   break;
+      // }
     }
 
     // Call optimized micro-kernel.

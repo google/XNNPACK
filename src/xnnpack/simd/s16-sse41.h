@@ -26,6 +26,16 @@ typedef __m128i xnn_simd_s16_t;
 
 // Arithmetic operations.
 
+static XNN_INLINE xnn_simd_s16_t xnn_max_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return _mm_max_epi16(a, b);
+}
+
+static XNN_INLINE xnn_simd_s16_t xnn_min_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return _mm_min_epi16(a, b);
+}
+
 static XNN_INLINE xnn_simd_s16_t xnn_low_cvt_s16_s32(xnn_simd_s16_t a) {
   return _mm_cvtepi16_epi32(a);
 }

@@ -6589,12 +6589,16 @@ size_t xnn_init_qs16_mul_minmax_params(
   int16_t a_zero_point,
   int16_t b_zero_point,
   float scale,
-  int16_t output_zero_point)
+  int16_t output_zero_point,
+  int16_t output_min,
+  int16_t output_max)
 {
   params->qs16_scalar.a_zero_point = a_zero_point;
   params->qs16_scalar.b_zero_point = b_zero_point;
   params->qs16_scalar.scale = scale;
   params->qs16_scalar.output_zero_point = output_zero_point;
+  params->qs16_scalar.output_min = output_min;
+  params->qs16_scalar.output_max = output_max;
   return sizeof(params->qs16_scalar);
 }
 

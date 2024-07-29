@@ -1752,6 +1752,8 @@ union xnn_qs16_mul_minmax_params {
     int16_t b_zero_point;
     float scale;
     int16_t output_zero_point;
+    int16_t output_min;
+    int16_t output_max;
   } qs16_scalar;
 };
 

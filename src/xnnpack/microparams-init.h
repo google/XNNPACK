@@ -1272,7 +1272,7 @@ DECLARE_INIT_QS8_F32_CVT_PARAMS_FUNCTION(xnn_init_qs8_f32_cvt_scalar_params)
     XNN_INTERNAL size_t fn_name(                                      \
         union xnn_qs16_mul_minmax_params params[XNN_MIN_ELEMENTS(1)], \
         int16_t a_zero_point, int16_t b_zero_point, float scale,      \
-        int16_t output_zero_point);
+        int16_t output_zero_point,int16_t output_min,int16_t output_max);
 
   DECLARE_INIT_QS16_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs16_mul_minmax_params)
 
