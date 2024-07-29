@@ -311,8 +311,8 @@ void VBinaryCMicrokernelTester::Test(
   std::vector<int16_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int16_t));
   int16_t b = s16dist(rng);
   std::vector<int16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(int16_t) : 0));
-  std::vector<float> y_fp(batch_size());
   std::vector<int16_t> y_ref(batch_size());
+  std::vector<float> y_fp(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(a.begin(), a.end(), [&]() { return s16dist(rng); });
     if (inplace()) {
@@ -335,25 +335,27 @@ void VBinaryCMicrokernelTester::Test(
     for (size_t i = 0; i < batch_size(); i++) {
           const int32_t acc =
               (static_cast<int32_t>(a_data[i]) -
-              static_cast<int32_t>(a_zero_point())) *
-              (static_cast<int32_t>(b) - static_cast<int32_t>(b_zero_point()));
-          y_fp[i] = static_cast<float>(y_zero_point()) +
-                    product_output_scale * static_cast<float>(acc);
-          y_fp[i] = std::min<float>(
-              y_fp[i], static_cast<float>(static_cast<int32_t>(qmax_s16())));
+              static_cast<int32_t>(a_zero_point_s16())) *
+              (static_cast<int32_t>(b) - static_cast<int32_t>(b_zero_point_s16()));
+          int32_t res = static_cast<int32_t>(y_zero_point_s16()) +
+            static_cast<int32_t>(product_output_scale * static_cast<float>(acc));
+          y_fp[i] = static_cast<float>(res);
           y_fp[i] = std::max<float>(
-              y_fp[i], static_cast<float>(static_cast<int32_t>(qmin_s16())));
-          y_ref[i] =
-              requantize(acc, product_output_scale, y_zero_point(), qmin_s16(), qmax_s16());
+              y_fp[i], static_cast<int16_t>(static_cast<int32_t>(qmin_s16())));
+          y_fp[i] = std::min<float>(
+              y_fp[i], static_cast<int16_t>(static_cast<int32_t>(qmax_s16())));
+          y_ref[i] = requantize(acc, product_output_scale, y_zero_point_s16(),
+                                qmin_s16(), qmax_s16());
     }
-
     // Call optimized micro-kernel.
     vbinary(batch_size() * sizeof(int16_t), a_data, &b, y.data(), &params);
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
-      EXPECT_EQ(static_cast<int32_t>(y[i]), static_cast<int32_t>(y_fp[i]))
+      EXPECT_EQ(static_cast<int32_t>(y[i]), static_cast<int32_t>(y_ref[i]))
         << "at element " << i << " / " << batch_size();
+      EXPECT_NEAR(static_cast<int32_t>(y[i]), y_fp[i], 1.0f)
+          << "at element " << i << " / " << batch_size();
     }
   }
 }

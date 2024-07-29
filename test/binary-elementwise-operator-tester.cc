@@ -811,6 +811,12 @@ void BinaryElementwiseOperatorTester::TestQS16() const {
       }
     }
 
+    for (int16_t& output_value : output_ref) {
+      output_value =
+          std::max<int16_t>(output_value, static_cast<int16_t>(qmin()));
+      output_value =
+          std::min<int16_t>(output_value, static_cast<int16_t>(qmax()));
+    }
     // Create, setup, run, and destroy a binary elementwise operator.
     ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     xnn_operator_t binary_elementwise_op = nullptr;
