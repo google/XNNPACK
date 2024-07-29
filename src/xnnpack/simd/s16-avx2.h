@@ -30,6 +30,17 @@ static const int32_t mask_table_avx_s16[32] = {
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0};
 
 // Arithmetic operations.
+
+static XNN_INLINE xnn_simd_s16_t xnn_max_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return _mm256_max_epi16(a, b);
+}
+
+static XNN_INLINE xnn_simd_s16_t xnn_min_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return _mm256_min_epi16(a, b);
+}
+
 static XNN_INLINE xnn_simd_s16_t xnn_low_cvt_s16_s32(xnn_simd_s16_t a) {
   return _mm256_cvtepi16_epi32(_mm256_castsi256_si128(a));
 }

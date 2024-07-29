@@ -31,7 +31,7 @@ $for BATCH_TILE in BATCH_TILES:
   $assert BATCH_TILE >= SIMD_SIZE
   $SIMD_TILE = BATCH_TILE // SIMD_SIZE
 
-  void xnn_qs16_vmul_minmax_ukernel__${ARCH}_u${BATCH_TILE}(
+  void xnn_qs16_vmul_minmax_fp32_ukernel__${ARCH}_u${BATCH_TILE}(
       size_t batch,
       const int16_t* input_a,
       const int16_t* input_b,
@@ -50,6 +50,8 @@ $for BATCH_TILE in BATCH_TILES:
     xnn_simd_s32_t vzero_point_output = xnn_set1_s32(params->qs16_scalar.output_zero_point);
 
     xnn_simd_f32_t vscale = xnn_set1_f32(params->qs16_scalar.scale);
+    xnn_simd_s16_t voutput_min = xnn_set1_s16(params->qs16_scalar.output_min);
+    xnn_simd_s16_t voutput_max = xnn_set1_s16(params->qs16_scalar.output_max);
 
     $if SIMD_TILE > 1:
       for (; batch >= ${BATCH_TILE} * sizeof(int16_t); batch -= ${BATCH_TILE} * sizeof(int16_t)) {
@@ -84,6 +86,8 @@ $for BATCH_TILE in BATCH_TILES:
           vy_s32_high_${ABC[N]} = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled_${ABC[N]}), vzero_point_output);
 
           xnn_simd_s16_t vy_${ABC[N]} = xnn_cvt_s32_s16(vy_s32_low_${ABC[N]}, vy_s32_high_${ABC[N]});
+          vy_${ABC[N]} = xnn_max_s16(vy_${ABC[N]},voutput_min);
+          vy_${ABC[N]} = xnn_min_s16(vy_${ABC[N]},voutput_max);
 
         xnn_storeu_s16(output, vy_${ABC[0]});
         $for N in range(1, SIMD_TILE):
@@ -117,6 +121,8 @@ $for BATCH_TILE in BATCH_TILES:
       vy_s32_high = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled), vzero_point_output);
 
       xnn_simd_s16_t vy = xnn_cvt_s32_s16(vy_s32_low, vy_s32_high);
+      vy = xnn_max_s16(vy,voutput_min);
+      vy = xnn_min_s16(vy,voutput_max);
 
       xnn_storeu_s16(output, vy);
       output += xnn_simd_size_s16;
@@ -147,6 +153,8 @@ $for BATCH_TILE in BATCH_TILES:
         vy_s32_high = xnn_add_s32(xnn_cvt_f32_s32(vy_f32_high_scaled), vzero_point_output);
         
         xnn_simd_s16_t vy = xnn_cvt_s32_s16(vy_s32_low, vy_s32_high);
+        vy = xnn_max_s16(vy,voutput_min);
+        vy = xnn_min_s16(vy,voutput_max);
 
         xnn_store_tail_s16(output, vy, batch >> XNN_LOG2_SIZEOF_INT16_T);
       }

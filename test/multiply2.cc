@@ -657,6 +657,8 @@ TEST_F(MultiplyTestQS16, matches_operator_api)
   const float input2_scale = scale_dist(rng);
   const int32_t output_zero_point = s16dist(rng);
   const float output_scale = scale_dist(rng);
+  const int16_t quantized_output_min = xnn_qs16_quantize(output_min, output_scale, output_zero_point);
+  const int16_t quantized_output_max = xnn_qs16_quantize(output_max, output_scale, output_zero_point);
 
   std::generate(input1.begin(), input1.end(), [&]() { return s16dist(rng); });
   std::generate(input2.begin(), input2.end(), [&]() { return s16dist(rng); });
@@ -671,7 +673,7 @@ TEST_F(MultiplyTestQS16, matches_operator_api)
   ASSERT_EQ(
     xnn_status_success, xnn_create_multiply_nd_qs16(
                           input1_zero_point, input1_scale, input2_zero_point, input2_scale, output_zero_point,
-                          output_scale, /*flags=*/0, &op));
+                          output_scale, quantized_output_min, quantized_output_max, /*flags=*/0, &op));
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   ASSERT_EQ(
@@ -718,7 +720,7 @@ TEST_F(MultiplyTestQS16, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_multiply2_v2(subgraph, input1_id, input2_id, output_id, /*flags=*/0));
+    xnn_define_multiply2(subgraph, output_min, output_max, input1_id, input2_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));

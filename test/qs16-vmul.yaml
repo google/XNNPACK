@@ -4,41 +4,41 @@
 # LICENSE file in the root directory of this source tree.
 
 # Scalar
-- name: xnn_qs16_vmul_minmax_ukernel__scalar_u1
+- name: xnn_qs16_vmul_minmax_fp32_ukernel__scalar_u1
   init: xnn_init_qs16_mul_minmax_params
-- name: xnn_qs16_vmul_minmax_ukernel__scalar_u2
+- name: xnn_qs16_vmul_minmax_fp32_ukernel__scalar_u2
   init: xnn_init_qs16_mul_minmax_params
-- name: xnn_qs16_vmul_minmax_ukernel__scalar_u4
+- name: xnn_qs16_vmul_minmax_fp32_ukernel__scalar_u4
   init: xnn_init_qs16_mul_minmax_params
-- name: xnn_qs16_vmul_minmax_ukernel__scalar_u8
+- name: xnn_qs16_vmul_minmax_fp32_ukernel__scalar_u8
   init: xnn_init_qs16_mul_minmax_params
 
 # x86 SSE41
-- name: xnn_qs16_vmul_minmax_ukernel__sse41_u8
+- name: xnn_qs16_vmul_minmax_fp32_ukernel__sse41_u8
   init: xnn_init_qs16_mul_minmax_params
-- name: xnn_qs16_vmul_minmax_ukernel__sse41_u16
+- name: xnn_qs16_vmul_minmax_fp32_ukernel__sse41_u16
   init: xnn_init_qs16_mul_minmax_params
 
 # x86 AVX2
-- name: xnn_qs16_vmul_minmax_ukernel__avx2_u16
+- name: xnn_qs16_vmul_minmax_fp32_ukernel__avx2_u16
   init: xnn_init_qs16_mul_minmax_params
-- name: xnn_qs16_vmul_minmax_ukernel__avx2_u32
+- name: xnn_qs16_vmul_minmax_fp32_ukernel__avx2_u32
   init: xnn_init_qs16_mul_minmax_params
 
 # x86 AVX512BW
-# - name: xnn_qs16_vmul_minmax_ukernel__avx512bw_u32
+# - name: xnn_qs16_vmul_minmax_fp32_ukernel__avx512bw_u32
 #   init: xnn_init_qs16_mul_minmax_params
-# - name: xnn_qs16_vmul_minmax_ukernel__avx512bw_u64
+# - name: xnn_qs16_vmul_minmax_fp32_ukernel__avx512bw_u64
 #   init: xnn_init_qs16_mul_minmax_params
 
 # # Wasm SIMD
-- name: xnn_qs16_vmul_minmax_ukernel__wasmsimd_u8
+- name: xnn_qs16_vmul_minmax_fp32_ukernel__wasmsimd_u8
   init: xnn_init_qs16_mul_minmax_params
-- name: xnn_qs16_vmul_minmax_ukernel__wasmsimd_u16
+- name: xnn_qs16_vmul_minmax_fp32_ukernel__wasmsimd_u16
   init: xnn_init_qs16_mul_minmax_params
 
 # # ARM NEON
-- name: xnn_qs16_vmul_minmax_ukernel__neon_u8
+- name: xnn_qs16_vmul_minmax_fp32_ukernel__neon_u8
   init: xnn_init_qs16_mul_minmax_params
-- name: xnn_qs16_vmul_minmax_ukernel__neon_u16
+- name: xnn_qs16_vmul_minmax_fp32_ukernel__neon_u16
   init: xnn_init_qs16_mul_minmax_params

@@ -116,6 +116,20 @@ class VBinaryCMicrokernelTester {
 
   int16_t y_zero_point_s16() const { return this->y_zero_point_s16_; }
 
+  VBinaryCMicrokernelTester& qmin_s16(int16_t qmin) {
+    this->qmin_s16_ = qmin;
+    return *this;
+  }
+
+  int16_t qmin_s16() const { return this->qmin_s16_; }
+
+  VBinaryCMicrokernelTester& qmax_s16(int16_t qmax) {
+    this->qmax_s16_ = qmax;
+    return *this;
+  }
+
+  int16_t qmax_s16() const { return this->qmax_s16_; }
+
   VBinaryCMicrokernelTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
@@ -166,7 +180,7 @@ class VBinaryCMicrokernelTester {
             xnn_qs8_requantize_fn requantize) const;
 
   void Test(xnn_qs16_vbinary_ukernel_fn vbinary, OpType op_type,
-            xnn_init_qs16_mul_minmax_params_fn init_params = nullptr) const;
+            xnn_init_qs16_mul_minmax_params_fn init_params, xnn_qs16_requantize_fn requantize) const;
 
   void Test(xnn_s32_vbinary_ukernel_fn vbinaryc, OpType op_type,
             xnn_init_s32_default_params_fn init_params = nullptr) const;
@@ -184,5 +198,7 @@ class VBinaryCMicrokernelTester {
   int16_t y_zero_point_s16_{133};
   uint8_t qmin_{0};
   uint8_t qmax_{255};
+  int16_t qmin_s16_{-32768};
+  int16_t qmax_s16_{32767};
   size_t iterations_{15};
 };

@@ -820,7 +820,7 @@ void BinaryElementwiseOperatorTester::TestQS16() const {
         ASSERT_EQ(
           xnn_status_success, xnn_create_multiply_nd_qs16(
                                 input1_zero_point(), input1_scale(), input2_zero_point(), input2_scale(),
-                                output_zero_point(), output_scale(), 0, &binary_elementwise_op));
+                                output_zero_point(), output_scale(), qmin(), qmax(), 0, &binary_elementwise_op));
         break;
       default:
         FAIL() << "Unsupported operation type";

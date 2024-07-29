@@ -765,6 +765,8 @@ enum xnn_status xnn_create_multiply_nd_qs16(
     float input2_scale,
     int16_t output_zero_point,
     float output_scale,
+    int16_t output_min,
+    int16_t output_max,
     uint32_t flags,
     xnn_operator_t* multiply_op_out)
 {
@@ -798,6 +800,13 @@ enum xnn_status xnn_create_multiply_nd_qs16(
     return xnn_status_unsupported_parameter;
   }
 
+  if (output_min > output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%" PRId16 ", %" PRId16 "] output range: lower bound must be less than or equal to upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_multiply_nd_qs16), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
   const struct xnn_binary_elementwise_config* qs16_vmul_config =
       xnn_init_qs16_vmul_config();
   if (qs16_vmul_config == NULL) {
@@ -810,10 +819,10 @@ enum xnn_status xnn_create_multiply_nd_qs16(
   union xnn_qs16_mul_minmax_params params2;
   assert(qs16_vmul_config->init.qs16_mul != NULL);
   qs16_vmul_config->init.qs16_mul(&params, input1_zero_point, input2_zero_point,
-                                  product_output_scale, output_zero_point);
+                                  product_output_scale, output_zero_point,output_min,output_max);
   qs16_vmul_config->init.qs16_mul(&params2, input2_zero_point,
                                   input1_zero_point, product_output_scale,
-                                  output_zero_point);
+                                  output_zero_point,output_min,output_max);
 
   return create_binary_elementwise_nd(flags, &params, &params2, sizeof(params),
                                       xnn_operator_type_multiply_nd_qs16,

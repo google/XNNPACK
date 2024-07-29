@@ -2317,6 +2317,8 @@ enum xnn_status xnn_create_multiply_nd_qs16(
   float input2_scale,
   int16_t output_zero_point,
   float output_scale,
+  int16_t output_min,
+  int16_t output_max,
   uint32_t flags,
   xnn_operator_t* multiply_op_out);
 

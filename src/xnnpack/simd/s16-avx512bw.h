@@ -26,6 +26,17 @@ typedef __m512i xnn_simd_s16_t;
   const xnn_simd_s16 var = _mm_set1_epi16(val);
 
 // Arithmetic operations.
+
+static XNN_INLINE xnn_simd_s16_t xnn_max_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return _mm512_max_epi16(a, b);
+}
+
+static XNN_INLINE xnn_simd_s16_t xnn_min_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return _mm512_min_epi16(a, b);
+}
+
 static XNN_INLINE __m512i xnn_low_cvt_s16_s32(xnn_simd_s16_t a) {
   return _mm512_cvtepi16_epi32(_mm512_extracti64x4_epi64(a, 0));
 }

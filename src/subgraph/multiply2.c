@@ -60,6 +60,10 @@ static enum xnn_status create_multiply_operator(
       break;
     case xnn_compute_type_qs16:
     {
+      const float output_scale = values[output_id].quantization.scale;
+      const int32_t output_zero_point = values[output_id].quantization.zero_point;
+      const int16_t output_min = xnn_qs16_quantize(node->activation.output_min, output_scale, output_zero_point);
+      const int16_t output_max = xnn_qs16_quantize(node->activation.output_max, output_scale, output_zero_point);
       status = xnn_create_multiply_nd_qs16(
         (int16_t) values[input1_id].quantization.zero_point,
         values[input1_id].quantization.scale,
@@ -67,6 +71,7 @@ static enum xnn_status create_multiply_operator(
         values[input2_id].quantization.scale,
         (int16_t) values[output_id].quantization.zero_point,
         values[output_id].quantization.scale,
+        output_min,output_max,
         node->flags,&opdata->operator_objects[0]);
       break;
     }
