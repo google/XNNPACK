@@ -68,7 +68,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
 }
 
 static XNN_INLINE __m256i xnn_cvt_f32_s32(xnn_simd_f32_t a){
-  return _mm256_cvtps_epi32(a);
+  return _mm256_cvttps_epi32(a);
 }
 
 #endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX2_H_

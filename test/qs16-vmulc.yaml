@@ -26,10 +26,10 @@
   init: xnn_init_qs16_mul_minmax_params
 
 # x86 AVX512BW
-# - name: xnn_qs16_vmulc_minmax_fp32_ukernel__avx512bw_u32
-#   init: xnn_init_qs16_mul_minmax_params
-# - name: xnn_qs16_vmulc_minmax_fp32_ukernel__avx512bw_u64
-#   init: xnn_init_qs16_mul_minmax_params
+- name: xnn_qs16_vmulc_minmax_fp32_ukernel__avx512bw_u32
+  init: xnn_init_qs16_mul_minmax_params
+- name: xnn_qs16_vmulc_minmax_fp32_ukernel__avx512bw_u64
+  init: xnn_init_qs16_mul_minmax_params
 
 # # Wasm SIMD
 - name: xnn_qs16_vmulc_minmax_fp32_ukernel__wasmsimd_u8

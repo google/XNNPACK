@@ -148,7 +148,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_getexp_f32(xnn_simd_f32_t a) {
 }
 
 static XNN_INLINE __m128i xnn_cvt_f32_s32(xnn_simd_f32_t a){
-  return _mm_cvtps_epi32(a);
+  return _mm_cvttps_epi32(a);
 }
 
 // Load/store operations.
