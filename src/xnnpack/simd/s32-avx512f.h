@@ -42,8 +42,9 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return _mm512_min_epi32(a, b);
 }
 
-static XNN_INLINE xnn_simd_s32_t xnn_cvt_s32_s16(xnn_simd_s32_t a, xnn_simd_s32_t b) {
-    return _mm512_packs_epi32(a, b);
+static XNN_INLINE __m512i xnn_cvt_s32_s16(xnn_simd_s32_t a, xnn_simd_s32_t b) {
+  __m512i packed = _mm512_packs_epi32(a, b);
+    return _mm512_permutexvar_epi64(_mm512_set_epi64(7, 5, 3, 1, 6, 4, 2, 0), packed); 
 }
 
 static XNN_INLINE __m512 xnn_cvt_s32_f32(xnn_simd_s32_t a) {
