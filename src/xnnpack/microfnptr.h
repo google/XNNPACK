@@ -1823,7 +1823,7 @@ typedef void (*xnn_s32_vmul_ukernel_fn)(
     int32_t* output,
     const union xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-// MULTIPLY: Vector Minimum (S32 bit)elementwise
+// MINIMUM: Vector Minimum (S32 bit)elementwise
 
 typedef void (*xnn_s32_vmin_ukernel_fn)(
     size_t batch,
