@@ -622,7 +622,6 @@ void GemmMicrokernelTester::Test(
   std::vector<int8_t> b(n() * k());
   std::vector<int32_t> bias(n());
   std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float)) / sizeof(int8_t));
-  std::vector<int16_t, AlignedAllocator<int16_t, XNN_ALLOCATION_ALIGNMENT>> packed_xw(packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float)) / sizeof(int16_t));
   std::vector<int8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
   std::vector<float> scale(n());
@@ -636,7 +635,7 @@ void GemmMicrokernelTester::Test(
 
     std::fill(packed_w.begin(), packed_w.end(), 0);
     const xnn_qs8_packing_params packing_params = { int8_t(a_zero_point() - 0x80) };
-    void* const packed_data = extended_weights() ? static_cast<void*>(packed_xw.data()) : packed_w.data();
+    void* const packed_data = packed_w.data();
     pack(/*g=*/1, n(), k(), nr(), kr(), sr(),
         b.data(), bias.data(), /*scale=*/nullptr, packed_data, nr() * sizeof(float), &packing_params);
 
@@ -666,7 +665,7 @@ void GemmMicrokernelTester::Test(
       scale[n_index] = 1.0f / c_scale;
     }
 
-    const size_t type_size = extended_weights() ? sizeof(int16_t): sizeof(int8_t);
+    const size_t type_size = sizeof(int8_t);
     xnn_init_qs8_qc8w_scale_fp32_params(
       n(), nr(), nr(),
       nr() * (packed_k() * type_size + (sizeof(int32_t) + sizeof(float))),
@@ -1865,7 +1864,6 @@ void GemmMicrokernelTester::Test(
   std::vector<int8_t> b(n() * k());
   std::vector<int32_t> bias(n());
   std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int8_t));
-  std::vector<int16_t, AlignedAllocator<int16_t, XNN_ALLOCATION_ALIGNMENT>> packed_xw(packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int16_t));
   std::vector<int8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
   std::vector<int8_t> c_ref(m() * n());
@@ -1878,7 +1876,7 @@ void GemmMicrokernelTester::Test(
 
     std::fill(packed_w.begin(), packed_w.end(), 0);
     const xnn_qs8_packing_params packing_params = { int8_t(a_zero_point() - 0x80) };
-    void* const packed_data = extended_weights() ? static_cast<void*>(packed_xw.data()) : packed_w.data();
+    void* const packed_data = packed_w.data();
     pack(/*g=*/1, n(), k(), nr(), kr(), sr(),
       b.data(), bias.data(), /*scale=*/nullptr, packed_data, /*extra_bytes=*/0, &packing_params);
 
@@ -4411,7 +4409,6 @@ void GemmMicrokernelTester::Test(
   std::vector<int8_t> b(n() * k());
   std::vector<int32_t> bias(n());
   std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float)) / sizeof(int8_t));
-  std::vector<int16_t, AlignedAllocator<int16_t, XNN_ALLOCATION_ALIGNMENT>> packed_xw(packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float)) / sizeof(int16_t));
   std::vector<int8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
   std::vector<float> scale(n());
@@ -4425,7 +4422,7 @@ void GemmMicrokernelTester::Test(
 
     std::fill(packed_w.begin(), packed_w.end(), 0);
     const xnn_qs8_packing_params packing_params = { int8_t(a_zero_point() - 0x80) };
-    void* const packed_data = extended_weights() ? static_cast<void*>(packed_xw.data()) : packed_w.data();
+    void* const packed_data = packed_w.data();
     pack(/*g=*/1, n(), k(), nr(), kr(), sr(),
         b.data(), bias.data(), /*scale=*/nullptr, packed_data, nr() * sizeof(float), &packing_params);
 
@@ -4455,23 +4452,13 @@ void GemmMicrokernelTester::Test(
       scale[n_index] = 1.0f / c_scale;
     }
 
-    if (extended_weights()) {
-      xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(),
-        nr() * (packed_k() * sizeof(int16_t) + (sizeof(int32_t) + sizeof(float))),
-        nr() * (packed_k() * sizeof(int16_t) + (sizeof(int32_t) + sizeof(float))),
-        0,
-        scale.data(),
-        (void*) ((uintptr_t) packed_xw.data() + nr() * (packed_k() * sizeof(int16_t) + sizeof(int32_t))));
-    } else {
-      xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(),
-        nr() * (packed_k() * sizeof(int8_t) + (sizeof(int32_t) + sizeof(float))),
-        nr() * (packed_k() * sizeof(int8_t) + (sizeof(int32_t) + sizeof(float))),
-        0,
-        scale.data(),
-        (void*) ((uintptr_t) packed_w.data() + nr() * (packed_k() * sizeof(int8_t) + sizeof(int32_t))));
-    }
+    xnn_init_qs8_qc8w_scale_fp32_params(
+      n(), nr(), nr(),
+      nr() * (packed_k() * sizeof(int8_t) + (sizeof(int32_t) + sizeof(float))),
+      nr() * (packed_k() * sizeof(int8_t) + (sizeof(int32_t) + sizeof(float))),
+      0,
+      scale.data(),
+      (void*) ((uintptr_t) packed_w.data() + nr() * (packed_k() * sizeof(int8_t) + sizeof(int32_t))));
 
     union xnn_qs8_qc8w_conv_minmax_params minmax_params;
     init_params(&minmax_params,
@@ -4487,7 +4474,7 @@ void GemmMicrokernelTester::Test(
     gemm(
       m(), n(), k(),
       a.data(), a_stride() * sizeof(int8_t),
-      extended_weights() ? static_cast<const void*>(packed_xw.data()) : static_cast<const void*>(packed_w.data()),
+      static_cast<const void*>(packed_w.data()),
       c.data(), cm_stride() * sizeof(int8_t), cn_stride() * sizeof(int8_t),
       &minmax_params);
 
@@ -4680,7 +4667,6 @@ void GemmMicrokernelTester::Test(
   std::vector<int8_t> b(n() * k());
   std::vector<int32_t> bias(n());
   std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int8_t));
-  std::vector<int16_t, AlignedAllocator<int16_t, XNN_ALLOCATION_ALIGNMENT>> packed_xw(packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int16_t));
   std::vector<int8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
   std::vector<int8_t> c_ref(m() * n());
@@ -4693,7 +4679,7 @@ void GemmMicrokernelTester::Test(
 
     std::fill(packed_w.begin(), packed_w.end(), 0);
     const xnn_qs8_packing_params packing_params = { int8_t(a_zero_point() - 0x80) };
-    void* const packed_data = extended_weights() ? static_cast<void*>(packed_xw.data()) : packed_w.data();
+    void* const packed_data = packed_w.data();
     pack(/*g=*/1, n(), k(), nr(), kr(), sr(),
         b.data(), bias.data(), /*scale=*/nullptr, packed_data, /*extra_bytes=*/0, &packing_params);
 
@@ -4732,7 +4718,7 @@ void GemmMicrokernelTester::Test(
     gemm(
       m(), n(), k(),
       a.data(), a_stride() * sizeof(int8_t),
-      extended_weights() ? static_cast<const void*>(packed_xw.data()) : static_cast<const void*>(packed_w.data()),
+      static_cast<const void*>(packed_w.data()),
       c.data(), cm_stride() * sizeof(int8_t), cn_stride() * sizeof(int8_t),
       &quantization_params);
 
