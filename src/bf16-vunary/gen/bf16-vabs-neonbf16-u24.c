@@ -19,7 +19,7 @@ void xnn_bf16_vabs_ukernel__neonbf16_u24(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_bf16_abs_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_bf16_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(bfloat16_t) == 0);
@@ -28,7 +28,7 @@ void xnn_bf16_vabs_ukernel__neonbf16_u24(
 
   const bfloat16_t* i = (const bfloat16_t*) input;
   bfloat16_t* o = (bfloat16_t*) output;
-  uint16x8_t vmask = vld1q_u16(params->neon.nonsign_mask);
+  uint16x8_t vmask = vdupq_n_u16(0x7FFF);
   for (; batch >= 24 * sizeof(bfloat16_t); batch -= 24 * sizeof(bfloat16_t)) {
     const bfloat16x8_t vx01234567 = vld1q_bf16(i); i+= 8;
     const bfloat16x8_t vx89ABCDEF = vld1q_bf16(i); i+= 8;

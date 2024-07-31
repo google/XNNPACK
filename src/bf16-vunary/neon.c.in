@@ -15,15 +15,11 @@ $assert OP in ["ABS", "NEG", "SQR"]
 #include "xnnpack/vunary.h"
 
 
-$PARAMS = {
-$  "ABS": "xnn_bf16_abs_params",
-$  "NEG": "xnn_bf16_neg_params",
-$}[OP]
 void xnn_bf16_v${OP.lower()}_ukernel__neonbf16_u${BATCH_TILE}(
     size_t batch,
     const void* input,
     void* output,
-    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_bf16_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(bfloat16_t) == 0);
@@ -32,7 +28,7 @@ void xnn_bf16_v${OP.lower()}_ukernel__neonbf16_u${BATCH_TILE}(
 
   const bfloat16_t* i = (const bfloat16_t*) input;
   bfloat16_t* o = (bfloat16_t*) output;
-  uint16x8_t vmask = vld1q_u16(params->neon.nonsign_mask);
+  uint16x8_t vmask = vdupq_n_u16(0x7FFF);
   for (; batch >= ${BATCH_TILE} * sizeof(bfloat16_t); batch -= ${BATCH_TILE} * sizeof(bfloat16_t)) {
     $for N in range(0, BATCH_TILE, 8):
       const bfloat16x8_t vx${ABC[N:N+8]} = vld1q_bf16(i); i+= 8;

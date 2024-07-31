@@ -51,15 +51,19 @@ def split_ukernel_name(name):
 
 CVT_BENCHMARK_TEMPLATE = """\
 BENCHMARK_CAPTURE(${BENCHMARK_FN}, ${BENCHMARK_NAME},
-                  ${UKERNEL_NAME},
                   $if INIT_FN and ISA_CHECK:
+                    ${UKERNEL_NAME},
                     ${INIT_FN},
                     benchmark::utils::${ISA_CHECK})
                   $elif INIT_FN:
+                    ${UKERNEL_NAME},
                     ${INIT_FN})
                   $elif ISA_CHECK:
+                    ${UKERNEL_NAME},
                     nullptr /* init params */,
                     benchmark::utils::${ISA_CHECK})
+                  $else:
+                    ${UKERNEL_NAME})
   ->Apply(benchmark::utils::UnaryElementwiseParameters<${INPUT_CTYPE}, ${OUTPUT_CTYPE}>)
   ->UseRealTime();
 """
