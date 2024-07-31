@@ -2789,6 +2789,19 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(s32-vmulc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME s32-vmulc-test COMMAND s32-vmulc-test)
 
+  ADD_EXECUTABLE(s32-vmin-test test/s32-vmin.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vmin-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vmin-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vmin-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vmin-test COMMAND s32-vmin-test)
+
+
+  ADD_EXECUTABLE(s32-vminc-test test/s32-vminc.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vminc-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vminc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vminc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vminc-test COMMAND s32-vminc-test)
+
   ADD_EXECUTABLE(f16-vcmul-test test/f16-vcmul.cc)
   SET_TARGET_PROPERTIES(f16-vcmul-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f16-vcmul-test PRIVATE include src test)
