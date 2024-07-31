@@ -113,12 +113,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
     const __m512i vsign_mask = _mm512_set1_epi8(params->avx512vnni.sign_mask);  // 0x80
     $if DATATYPE in ["QC4", "QB4"]:
       $if VARIANT == "MADD":
-        const __m512i vkernel_sign_mask1 = _mm512_set1_epi8(params->avx512vnni.kernel_sign_mask1);  // 0x08
-        const __m512i vkernel_sign_mask2 = _mm512_set1_epi8(params->avx512vnni.kernel_sign_mask2);  // 0x88
-        const __m512i vvalue_mask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0x0F
+        const __m512i vmask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0x0F
         assert(params->avx512vnni.mask == (int8_t) 0x0F);
       $else:
-        const __m512i vvalue_mask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0xF0
+        const __m512i vmask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0xF0
         assert(params->avx512vnni.mask == (int8_t) 0xF0);
       $if GFNI:
         const __m512i vshl4 = _mm512_set1_epi64(params->avx512vnni.gfni_shl4);  // 0x01020408
@@ -180,24 +178,22 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
         $if GFNI:
           ${_}const __m512i vb01234567x01234567 = _mm512_gf2p8affine_epi64_epi8(vbb01234567x01234567, vshl4, 0);
           ${_}const __m512i vb89ABCDEFx01234567 = _mm512_gf2p8affine_epi64_epi8(vbb89ABCDEFx01234567, vshl4, 0);
-          ${_}const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbb01234567x01234567, vvalue_mask);
-          ${_}const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbb89ABCDEFx01234567, vvalue_mask);
+          ${_}const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbb01234567x01234567, vmask);
+          ${_}const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbb89ABCDEFx01234567, vmask);
         $elif VARIANT == "MADD":
-          ${_}const __m512i vbu01234567x01234567 = _mm512_xor_si512(vbb01234567x01234567, vkernel_sign_mask2);  // convert int4 to uint4
-          ${_}const __m512i vbu89ABCDEFx01234567 = _mm512_xor_si512(vbb89ABCDEFx01234567, vkernel_sign_mask2);
-          ${_}const __m512i vbs01234567x89ABCDEF = _mm512_srli_epi32(vbu01234567x01234567, 4);
-          ${_}const __m512i vbs89ABCDEFx89ABCDEF = _mm512_srli_epi32(vbu89ABCDEFx01234567, 4);
-          ${_}const __m512i vb01234567x01234567 = _mm512_and_si512(vbu01234567x01234567, vvalue_mask);
-          ${_}const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbu89ABCDEFx01234567, vvalue_mask);
-          ${_}const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbs01234567x89ABCDEF, vvalue_mask);
-          ${_}const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbs89ABCDEFx89ABCDEF, vvalue_mask);
+          ${_}const __m512i vbs01234567x89ABCDEF = _mm512_srli_epi32(vbb01234567x01234567, 4);
+          ${_}const __m512i vbs89ABCDEFx89ABCDEF = _mm512_srli_epi32(vbb89ABCDEFx01234567, 4);
+          ${_}const __m512i vb01234567x01234567 = _mm512_and_si512(vbb01234567x01234567, vmask);
+          ${_}const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbb89ABCDEFx01234567, vmask);
+          ${_}const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbs01234567x89ABCDEF, vmask);
+          ${_}const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbs89ABCDEFx89ABCDEF, vmask);
         $else:
           ${_}const __m512i vbs01234567x01234567 = _mm512_slli_epi32(vbb01234567x01234567, 4);
           ${_}const __m512i vbs89ABCDEFx01234567 = _mm512_slli_epi32(vbb89ABCDEFx01234567, 4);
-          ${_}const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbb01234567x01234567, vvalue_mask);
-          ${_}const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbb89ABCDEFx01234567, vvalue_mask);
-          ${_}const __m512i vb01234567x01234567 = _mm512_and_si512(vbs01234567x01234567, vvalue_mask);
-          ${_}const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbs89ABCDEFx01234567, vvalue_mask);
+          ${_}const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbb01234567x01234567, vmask);
+          ${_}const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbb89ABCDEFx01234567, vmask);
+          ${_}const __m512i vb01234567x01234567 = _mm512_and_si512(vbs01234567x01234567, vmask);
+          ${_}const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbs89ABCDEFx01234567, vmask);
       $else:
         ${_}const __m512i vb01234567x01234567 = _mm512_load_si512(w);
         ${_}const __m512i vb89ABCDEFx01234567 = _mm512_load_si512((const ${XINT8_T}*) w + 64);
@@ -240,8 +236,8 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
           ${_}const __m512i vb01234567x01234567 = _mm512_gf2p8affine_epi64_epi8(vbb01234567x01234567, vshl4, 0);
           ${_}const __m512i vb89ABCDEFx01234567 = _mm512_gf2p8affine_epi64_epi8(vbb89ABCDEFx01234567, vshl4, 0);
         $elif VARIANT == "MADD":
-          ${_}const __m512i vb01234567x01234567 = _mm512_xor_si512(vbb01234567x01234567, vkernel_sign_mask1);  // convert int4 to uint4
-          ${_}const __m512i vb89ABCDEFx01234567 = _mm512_xor_si512(vbb89ABCDEFx01234567, vkernel_sign_mask1);
+          ${_}const __m512i vb01234567x01234567 = _mm512_and_si512(vbb01234567x01234567, vmask);
+          ${_}const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbb89ABCDEFx01234567, vmask);
         $else:
           ${_}const __m512i vb01234567x01234567 = _mm512_slli_epi32(vbb01234567x01234567, 4);
           ${_}const __m512i vb89ABCDEFx01234567 = _mm512_slli_epi32(vbb89ABCDEFx01234567, 4);
