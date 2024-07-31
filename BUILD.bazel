@@ -490,6 +490,7 @@ xnnpack_cc_library(
         ":enable_avx256vnnigfni",
         ":enable_avx512amx",
         ":enable_avx512fp16",
+        ":enable_avx512vnnigfni",
         ":enable_avxvnni",
         ":enable_dwconv_multipass",
         ":enable_gemm_m_specialization",
@@ -1817,6 +1818,15 @@ cc_library(
     defines = select({
         ":avx512fp16_enabled": ["XNN_ENABLE_AVX512FP16=1"],
         "//conditions:default": ["XNN_ENABLE_AVX512FP16=0"],
+    }),
+    visibility = xnnpack_visibility(),
+)
+
+cc_library(
+    name = "enable_avx512vnnigfni",
+    defines = select({
+        ":avx512vnnigfni_enabled": ["XNN_ENABLE_AVX512VNNIGFNI=1"],
+        "//conditions:default": ["XNN_ENABLE_AVX512VNNIGFNI=0"],
     }),
     visibility = xnnpack_visibility(),
 )
