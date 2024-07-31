@@ -199,9 +199,9 @@ class VBinaryMicrokernelTester {
   uint8_t a_zero_point_{121};
   uint8_t b_zero_point_{127};
   uint8_t y_zero_point_{133};
-  int16_t a_zero_point_s16_{121};
-  int16_t b_zero_point_s16_{127};
-  int16_t y_zero_point_s16_{133};
+  int16_t a_zero_point_s16_{-32000};
+  int16_t b_zero_point_s16_{2000};
+  int16_t y_zero_point_s16_{32767};
   uint8_t qmin_{0};
   uint8_t qmax_{255};
   int16_t qmin_s16_{-32768};

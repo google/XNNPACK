@@ -735,7 +735,7 @@ void BinaryElementwiseOperatorTester::TestQS16() const {
 
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<int32_t> s16dist(
-        0, std::numeric_limits<int16_t>::max());
+      std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max());
   // Compute generalized shapes.
   std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_dims;
   std::array<size_t, XNN_MAX_TENSOR_DIMS> input2_dims;
@@ -783,7 +783,6 @@ void BinaryElementwiseOperatorTester::TestQS16() const {
     std::generate(input1.begin(), input1.end(), [&]() {return s16dist(rng);});
     std::generate(input2.begin(), input2.end(), [&]() {return s16dist(rng);});
     std::fill(output.begin(), output.end(), 0xA5);
-    float scale = (input1_scale() * input2_scale())/ output_scale();
     // Compute reference results.
     for (size_t i = 0; i < output_dims[0]; i++) {
       for (size_t j = 0; j < output_dims[1]; j++) {
@@ -791,13 +790,25 @@ void BinaryElementwiseOperatorTester::TestQS16() const {
           for (size_t l = 0; l < output_dims[3]; l++) {
             for (size_t m = 0; m < output_dims[4]; m++) {
               for (size_t n = 0; n < output_dims[5]; n++) {
-                output_float = static_cast<float>(Compute(
-                        static_cast<int32_t>(input1[i * input1_strides[0] + j * input1_strides[1] +
-                               k * input1_strides[2] + l * input1_strides[3] +
-                               m * input1_strides[4] + n * input1_strides[5]]) - static_cast<int32_t>(input1_zero_point()),
-                        static_cast<int32_t>(input2[i * input2_strides[0] + j * input2_strides[1] +
-                               k * input2_strides[2] + l * input2_strides[3] +
-                               m * input2_strides[4] + n * input2_strides[5]]) - static_cast<int32_t>(input2_zero_point()))) * scale;
+                output_float =
+                    Compute(
+                        input1_scale() * static_cast<int32_t>(
+                                             input1[i * input1_strides[0] +
+                                                    j * input1_strides[1] +
+                                                    k * input1_strides[2] +
+                                                    l * input1_strides[3] +
+                                                    m * input1_strides[4] +
+                                                    n * input1_strides[5]]) -
+                            static_cast<int32_t>(input1_zero_point()),
+                        input2_scale() * static_cast<int32_t>(
+                                             input2[i * input2_strides[0] +
+                                                    j * input2_strides[1] +
+                                                    k * input2_strides[2] +
+                                                    l * input2_strides[3] +
+                                                    m * input2_strides[4] +
+                                                    n * input2_strides[5]]) -
+                            static_cast<int32_t>(input2_zero_point())) /
+                    output_scale();
                 res = static_cast<int32_t>(output_zero_point()) + static_cast<int32_t>((output_float));
                 res = (std::max<int32_t>(std::min<int32_t>(res, INT16_MAX), INT16_MIN));
                 output_ref[i * output_strides[0] + j * output_strides[1] +

@@ -68,7 +68,7 @@ static inline int16_t xnn_qs16_requantize_fp32(
   int16_t max)
 {
   assert(scale >= 1.0f / 4294967296.0f /* 0x1.0p-32f */);
-  assert(scale < 256.0f);
+  assert(scale < 32768.0f);
 
   int32_t scaled_input = (int32_t)(input * scale) + (int32_t)zero_point;
   scaled_input = (scaled_input > INT16_MAX)

@@ -306,7 +306,7 @@ void VBinaryCMicrokernelTester::Test(
     xnn_init_qs16_mul_minmax_params_fn init_params,xnn_qs16_requantize_fn requantize) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<int32_t> s16dist(
-        0, std::numeric_limits<int16_t>::max());
+      std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max());
 
   std::vector<int16_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int16_t));
   int16_t b = s16dist(rng);
