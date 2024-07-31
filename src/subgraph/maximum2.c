@@ -43,6 +43,11 @@ static enum xnn_status create_maximum_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
+    case xnn_compute_type_s32:
+      status = xnn_create_maximum_nd_s32(
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
     default:
       XNN_UNREACHABLE;
   }
@@ -116,6 +121,15 @@ static enum xnn_status reshape_maximum_operator(
         opdata->shape2.dim,
         threadpool);
       break;
+    case xnn_operator_type_maximum_nd_s32:
+      status = xnn_reshape_maximum_nd_s32(
+        opdata->operator_objects[0],
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->shape2.num_dims,
+        opdata->shape2.dim,
+        threadpool);
+      break;
     default:
       XNN_UNREACHABLE;
   }
@@ -164,6 +178,10 @@ static enum xnn_status setup_maximum_operator(
       return xnn_setup_maximum_nd_f32(
         opdata->operator_objects[0],
         input1_data, input2_data, output_data);
+    case xnn_operator_type_maximum_nd_s32:
+      return xnn_setup_maximum_nd_s32(
+        opdata->operator_objects[0],
+        input1_data, input2_data, output_data);
     default:
       XNN_UNREACHABLE;
   }
@@ -197,6 +215,8 @@ enum xnn_status xnn_define_maximum2(
       break;
     case xnn_datatype_fp32:
       break;
+    case xnn_datatype_int32:
+      break;
     default:
       xnn_log_error(
         "failed to define %s operator with the first input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
@@ -220,6 +240,8 @@ enum xnn_status xnn_define_maximum2(
     case xnn_datatype_fp16:
       break;
     case xnn_datatype_fp32:
+      break;
+    case xnn_datatype_int32:
       break;
     default:
       xnn_log_error(
@@ -247,6 +269,9 @@ enum xnn_status xnn_define_maximum2(
       break;
     case xnn_datatype_fp32:
       compute_type = xnn_compute_type_fp32;
+      break;
+    case xnn_datatype_int32:
+      compute_type = xnn_compute_type_s32;
       break;
     default:
       xnn_log_error(

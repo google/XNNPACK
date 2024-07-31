@@ -36,6 +36,7 @@ static struct xnn_binary_elementwise_config f32_vsub_config = {0};
 static struct xnn_binary_elementwise_config f32_vsqrdiff_config = {0};
 
 static struct xnn_binary_elementwise_config s32_vmul_config = {0};
+static struct xnn_binary_elementwise_config s32_vmax_config = {0};
 
 static struct xnn_binary_elementwise_config qs8_vadd_config = {0};
 static struct xnn_binary_elementwise_config qs8_vmul_config = {0};
@@ -61,6 +62,7 @@ static struct xnn_binary_elementwise_config qu8_vmul_config = {0};
   static INIT_ONCE init_guard_f32_vsub = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_vsqrdiff = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_s32_vmul = INIT_ONCE_STATIC_INIT;
+  static INIT_ONCE init_guard_s32_vmax = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_qs8_vadd = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_qs8_vmul = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_qs16_vmul = INIT_ONCE_STATIC_INIT;
@@ -83,6 +85,7 @@ static struct xnn_binary_elementwise_config qu8_vmul_config = {0};
   static pthread_once_t init_guard_f32_vsub = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_vsqrdiff = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_s32_vmul = PTHREAD_ONCE_INIT;
+  static pthread_once_t init_guard_s32_vmax = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_qs8_vadd = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_qs8_vmul = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_qs16_vmul = PTHREAD_ONCE_INIT;
@@ -669,6 +672,61 @@ static void init_s32_vmul_config(void) {
     s32_vmul_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__scalar_u2;
     s32_vmul_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__scalar_u2;
     s32_vmul_config.linear.element_tile = 2;
+  #endif
+}
+
+static void init_s32_vmax_config(void) {
+  #if XNN_ARCH_ARM
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_arm_neon) {
+      s32_vmax_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmax_ukernel__neon_u8;
+      s32_vmax_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmaxc_ukernel__neon_u8;
+      s32_vmax_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmaxc_ukernel__neon_u8;
+      s32_vmax_config.linear.element_tile = 8;
+    }
+    else if (!XNN_PLATFORM_MOBILE) {
+      s32_vmax_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmax_ukernel__scalar_u2;
+      s32_vmax_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmaxc_ukernel__scalar_u2;
+      s32_vmax_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmaxc_ukernel__scalar_u2;
+      s32_vmax_config.linear.element_tile = 2;
+    }
+  #elif XNN_ARCH_ARM64
+    s32_vmax_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmax_ukernel__neon_u8;
+    s32_vmax_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmaxc_ukernel__neon_u8;
+    s32_vmax_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmaxc_ukernel__neon_u8;
+    s32_vmax_config.linear.element_tile = 8;
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      s32_vmax_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmax_ukernel__avx512f_u32;
+      s32_vmax_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmaxc_ukernel__avx512f_u32;
+      s32_vmax_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmaxc_ukernel__avx512f_u32;
+      s32_vmax_config.linear.element_tile = 32;
+    }
+    else if (hardware_config->use_x86_avx2) {
+      s32_vmax_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmax_ukernel__avx2_u16;
+      s32_vmax_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmaxc_ukernel__avx2_u16;
+      s32_vmax_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmaxc_ukernel__avx2_u16;
+      s32_vmax_config.linear.element_tile = 16;
+    }
+    else {
+      s32_vmax_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmax_ukernel__sse41_u8;
+      s32_vmax_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmaxc_ukernel__sse41_u8;
+      s32_vmax_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmaxc_ukernel__sse41_u8;
+      s32_vmax_config.linear.element_tile = 8;
+    }
+  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+    s32_vmax_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmax_ukernel__wasmsimd_u16;
+    s32_vmax_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmaxc_ukernel__wasmsimd_u16;
+    s32_vmax_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmaxc_ukernel__wasmsimd_u16;
+    s32_vmax_config.linear.element_tile = 16;
+  #else
+    s32_vmax_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmax_ukernel__scalar_u2;
+    s32_vmax_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmaxc_ukernel__scalar_u2;
+    s32_vmax_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmaxc_ukernel__scalar_u2;
+    s32_vmax_config.linear.element_tile = 2;
   #endif
 }
 
@@ -1484,6 +1542,11 @@ static void init_qu8_vmul_config(void) {
     return TRUE;
   }
 
+  static BOOL CALLBACK init_s32_vmax_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
+    init_s32_vmax_config();
+    return TRUE;
+  }
+
   static BOOL CALLBACK init_f32_vdiv_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
     init_f32_vdiv_config();
     return TRUE;
@@ -1677,6 +1740,19 @@ const struct xnn_binary_elementwise_config* xnn_init_s32_vmul_config() {
     pthread_once(&init_guard_s32_vmul, &init_s32_vmul_config);
   #endif
   return &s32_vmul_config;
+}
+
+const struct xnn_binary_elementwise_config* xnn_init_s32_vmax_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+  #if XNN_PLATFORM_WINDOWS
+    InitOnceExecuteOnce(&init_guard_s32_vmax, &init_s32_vmax_config_windows, NULL, NULL);
+  #else
+    pthread_once(&init_guard_s32_vmax, &init_s32_vmax_config);
+  #endif
+  return &s32_vmax_config;
 }
 
 const struct xnn_binary_elementwise_config* xnn_init_f32_vdiv_config() {

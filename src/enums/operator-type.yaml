@@ -225,6 +225,8 @@
   string: "Maximum (ND, F16)"
 - name: xnn_operator_type_maximum_nd_f32
   string: "Maximum (ND, F32)"
+- name: xnn_operator_type_maximum_nd_s32
+  string: "Maximum (ND, S32)"
 - name: xnn_operator_type_mean_nd_f16
   string: "Mean (ND, F16)"
 - name: xnn_operator_type_mean_nd_f32
