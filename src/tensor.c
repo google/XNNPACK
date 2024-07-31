@@ -516,9 +516,10 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value(
       return xnn_status_unsupported_parameter;
   }
 
-  const size_t channels = dims[channel_dim];
-  const size_t block_count = channels / block_size;
-  for (size_t channel = 0; channel < channels; channel++) {
+  const size_t input_channels = dims[channel_dim];
+  const size_t output_channels = dims[1 - channel_dim];
+  const size_t block_count = input_channels / block_size;
+  for (size_t channel = 0; channel < output_channels; channel++) {
     for (size_t block = 0; block < block_count; block++) {
       float float_scale = math_cvt_fp32_bf16(scale[channel * block_count + block]);
       if (float_scale <= 0.0f || !isnormal(float_scale)) {
