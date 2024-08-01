@@ -107,6 +107,7 @@ void xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v(
   assert(pooling_elements > 9);
   assert(channels != 0);
 
+  vuint32m1_t fidx_f32v = __riscv_vmv_v_x_u32m1(0, __riscv_vsetvl_e32m1(channels));
   do {
     {
       float* ab = accumulation_buffer;
@@ -143,8 +144,6 @@ void xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v(
         vfloat32m1_t i6_f32v = __riscv_vle32_v_f32m1(i6, n); i6 += n;
         vfloat32m1_t i7_f32v = __riscv_vle32_v_f32m1(i7, n); i7 += n;
         vfloat32m1_t i8_f32v = __riscv_vle32_v_f32m1(i8, n); i8 += n;
-
-        vuint32m1_t fidx_f32v = __riscv_vmv_v_x_u32m1(0, __riscv_vsetvl_e32m1(channels));
 
         vbool32_t mask_b32v = __riscv_vmfgt_vv_f32m1_b32(i1_f32v, max_f32v, n);
         max_f32v = __riscv_vmerge_vvm_f32m1(max_f32v, i1_f32v, mask_b32v, n);
