@@ -224,7 +224,7 @@ void xnn_f16_vabs_ukernel__sse2_u16(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_abs_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
@@ -233,7 +233,7 @@ void xnn_f16_vabs_ukernel__sse2_u16(
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
-  const __m128i vnonsign_mask = _mm_load_si128((const __m128i*) params->sse.nonsign_mask);
+  const __m128i vnonsign_mask = _mm_set1_epi16(0x7FFF);
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
     __m128i vacc0 = _mm_loadu_si128((const __m128i*) i);
     __m128i vacc1 = _mm_loadu_si128((const __m128i*) (i + 8));
@@ -276,7 +276,7 @@ void xnn_f16_vneg_ukernel__sse2_u16(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_neg_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
@@ -285,7 +285,7 @@ void xnn_f16_vneg_ukernel__sse2_u16(
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
-  const __m128i vsign_mask = _mm_load_si128((const __m128i*) params->sse.sign_mask);
+  const __m128i vsign_mask = _mm_set1_epi16(0x8000);
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
     __m128i vacc0 = _mm_loadu_si128((const __m128i*) i);
     __m128i vacc1 = _mm_loadu_si128((const __m128i*) (i + 8));

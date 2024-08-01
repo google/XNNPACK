@@ -20,9 +20,9 @@
 #include "xnnpack/vunary.h"
 
 void f16_vneg(benchmark::State& state, xnn_f16_vneg_ukernel_fn ukernel,
-              xnn_init_f16_neg_params_fn init_params = nullptr,
+              xnn_init_f16_default_params_fn init_params = nullptr,
               benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  f16_vunary_benchmark<xnn_f16_neg_params>(
+  f16_vunary_benchmark<xnn_f16_default_params>(
       state, ukernel,
       init_params,
       isa_check,
@@ -48,12 +48,12 @@ void f16_vneg(benchmark::State& state, xnn_f16_vneg_ukernel_fn ukernel,
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f16_vneg, sse2_u8,
                     xnn_f16_vneg_ukernel__sse2_u8,
-                    xnn_init_f16_neg_sse_params)
+                    /*init_params=*/nullptr)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f16_vneg, sse2_u16,
                     xnn_f16_vneg_ukernel__sse2_u16,
-                    xnn_init_f16_neg_sse_params)
+                    /*init_params=*/nullptr)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
