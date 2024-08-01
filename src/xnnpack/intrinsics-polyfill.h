@@ -85,9 +85,9 @@ static XNN_INTRINSIC
 float _mm512_reduce_add_ps(__m512 v) {
 #if __AVX512DQ__
   const __m256 sum2 = _mm256_add_ps(_mm512_castps512_ps256(v), _mm512_extractf32x8_ps(v, 1));
-#else
+#else  // __AVX512DQ__
   const __m256 sum2 = _mm256_add_ps(_mm512_castps512_ps256(v), _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(v), 1)));
-#endif
+#endif  // __AVX512DQ__
   const __m128 sum4 = _mm_add_ps(_mm256_castps256_ps128(sum2), _mm256_extractf128_ps(sum2, 1));
   const __m128 sum8 = _mm_add_ps(sum4, _mm_movehl_ps(sum4, sum4));
   const __m128 sum16 = _mm_add_ss(sum8, _mm_movehdup_ps(sum8));
@@ -98,9 +98,9 @@ static XNN_INTRINSIC
 float _mm512_reduce_max_ps(__m512 v) {
 #if __AVX512DQ__
   const __m256 sum2 = _mm256_max_ps(_mm512_castps512_ps256(v), _mm512_extractf32x8_ps(v, 1));
-#else
+#else  // __AVX512DQ__
   const __m256 sum2 = _mm256_max_ps(_mm512_castps512_ps256(v), _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(v), 1)));
-#endif
+#endif  // __AVX512DQ__
   const __m128 sum4 = _mm_max_ps(_mm256_castps256_ps128(sum2), _mm256_extractf128_ps(sum2, 1));
   const __m128 sum8 = _mm_max_ps(sum4, _mm_movehl_ps(sum4, sum4));
   const __m128 sum16 = _mm_max_ss(sum8, _mm_movehdup_ps(sum8));
@@ -148,40 +148,59 @@ __m512i _mm512_set_epi8(
 static XNN_INTRINSIC __m512 _mm512_zextps128_ps512(__m128 v) {
   return _mm512_insertf32x4(_mm512_setzero_ps(), v, 0);
 }
+
+static XNN_INTRINSIC
+__m512i _mm512_loadu_epi16 (void const* mem_addr) {
+  return _mm512_set1_epi16((int) unaligned_load_s16(mem_addr));
+}
+
+static XNN_INTRINSIC
+__m512i _mm512_loadu_epi32 (void const* mem_addr) {
+  return _mm512_set1_epi32((int) unaligned_load_s32(mem_addr));
+}
+
+static XNN_INTRINSIC
+void _mm512_storeu_epi16 (void* mem_addr, __m512i a) {
+  _mm512_storeu_si512(mem_addr, a);
+}
+
+static XNN_INTRINSIC
+void _mm512_storeu_epi32 (void* mem_addr, __m512i a) {
+  _mm512_storeu_si512(mem_addr, a);
+}
 #endif  // GCC pre-10
 
+#ifdef __AVX512BW__
 // VNNI replacement that uses vpmaddubsw.
-// i4h is int4 in upper 4 bits.  Low bits are zero.
+// u4 is uint4 in lower 4 bits.
+// subtracting zero_point (8) converts 4 bit value to sign extended 8 bit value.
 static XNN_INTRINSIC
-__m512i _mm512_dpbusd_epi32_bw(__m512i i32, const __m512i u8, const __m512i i4h) {
-  const __m512i vzero_point = _mm512_set1_epi8(0x08);
-  const __m512i v16 = _mm512_set1_epi16(16);  // accumulators are times 16
-  const __m512i i4l = _mm512_srli_epi32(i4h, 4);   // move high nibble to low 4 bits
-  const __m512i u4 = _mm512_xor_si512(i4l, vzero_point);  // convert int4 to uint4
+__m512i _mm512_dpbusd_epi32_madd(__m512i i32, const __m512i u8, const __m512i u4) {
+  const __m512i vzero_point = _mm512_set1_epi8(8);
+  const __m512i vsixteen = _mm512_set1_epi16(16);
   const __m512i i4 = _mm512_sub_epi8(u4, vzero_point);  // convert uint4 to int4
   const __m512i i12 = _mm512_maddubs_epi16(u8, i4);  // u8 * i4 = i12
-  const __m512i v = _mm512_madd_epi16(i12, v16);  // convert 16 bits to 32 bits
+  const __m512i v = _mm512_madd_epi16(i12, vsixteen);  // convert 16 bits to 32 bits
   return _mm512_add_epi32(i32, v);
 }
+#endif  // __AVX512BW__
 #endif  // __AVX512F__
 
-#ifdef __AVX__
+#ifdef __AVX2__
 
 // AVXVNNI replacement that uses vpmaddubsw.
-// i4h is int4 in upper 4 bits.  Low bits are zero.
+// u4 is uint4 in lower 4 bits.
 static XNN_INTRINSIC
-__m256i _mm256_dpbusd_epi32_bw(__m256i i32, const __m256i u8, const __m256i i4h) {
-  const __m256i vzero_point = _mm256_set1_epi8(0x08);
-  const __m256i v16 = _mm256_set1_epi16(16);  // accumulators are times 16
-  const __m256i i4l = _mm256_srli_epi32(i4h, 4);   // move high nibble to low 4 bits
-  const __m256i u4 = _mm256_xor_si256(i4l, vzero_point);  // convert int4 to uint4
+__m256i _mm256_dpbusd_epi32_madd(__m256i i32, const __m256i u8, const __m256i u4) {
+  const __m256i vzero_point = _mm256_set1_epi8(8);
+  const __m256i vsixteen = _mm256_set1_epi16(16);  // accumulators are times 16
   const __m256i i4 = _mm256_sub_epi8(u4, vzero_point);  // convert uint4 to int4
   const __m256i i12 = _mm256_maddubs_epi16(u8, i4);  // u8 * i4 = i12
-  const __m256i v = _mm256_madd_epi16(i12, v16);  // convert 16 bits to 32 bits
+  const __m256i v = _mm256_madd_epi16(i12, vsixteen);  // convert 16 bits to 32 bits
   return _mm256_add_epi32(i32, v);
 }
 
-#endif  // __AVX__
+#endif  // __AVX2__
 
 
 #if XNN_ARCH_ARM

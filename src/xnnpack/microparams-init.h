@@ -134,6 +134,19 @@ XNN_INTERNAL void xnn_init_blockwise_scale_fp32_params(
   const float scale[XNN_MIN_ELEMENTS(1)],
   void* packed_w);
 
+XNN_INTERNAL void xnn_init_blockwise_scale_bf16_params(
+  size_t channels,
+  size_t channels_tile,
+  size_t channels_subtile,
+  size_t stride,
+  size_t substride,
+  size_t num_blocks,
+  size_t block_stride,
+  // How much offset to subtract from packed_w pointer when moving from channels_tile to channels_subtile.
+  size_t stride_offset,
+  const uint16_t scale[XNN_MIN_ELEMENTS(1)],
+  void* packed_w);
+
 XNN_INTERNAL void xnn_init_qs8_to_qs8_qc8w_scale_fp32_params(
   size_t channels,
   size_t channels_tile,
@@ -441,6 +454,7 @@ DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_scalar_par
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_avx_params)
   DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_avxvnni_params)
+  DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_avxvnni_madd_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
@@ -473,7 +487,9 @@ DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_scalar_par
   DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_avx_params)
   DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_avx512_params)
   DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_avx512vnni_params)
+  DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_avx512vnni_madd_params)
   DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_avxvnni_params)
+  DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_avxvnni_madd_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_wasmsimd_params)

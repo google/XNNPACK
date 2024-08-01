@@ -174,8 +174,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
           int32x4_t vacc${M}x${ABC[N:N+4]} = vacc0x${ABC[N:N+4]};
 
     $if BLOCKWISE:
-      size_t n_blocks = kc / bl;
-      for (size_t nb = 0; nb < n_blocks; ++nb) {
+      for (size_t kb=0; kb < kc; kb += bl) {
         $for M in range(MR):
           $for N in range(0, NR, 4):
             int32x4_t vacc${M}x${ABC[N:N+4]} = vdupq_n_s32(0);
@@ -369,7 +368,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
 
     $if BLOCKWISE:
       $for N in range(0, NR, 4):
-        const float32x4_t vfilter_output_scale${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
+        const float32x4_t vfilter_output_scale${ABC[N:N+4]} = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
 
       $for M in range(MR):
         $for N in range(0, NR, 4):
@@ -385,11 +384,6 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
       }
     $if DATATYPE in ["QD8", "QC4_F16", "QC4_F32", "QB4_F16", "QB4_F32"]:
       $if BLOCKWISE:
-        float32x4_t one_sixteenth = vdupq_n_f32(1/16.0);
-        $for M in range(0, MR):
-          $for N in range(0, NR, 4):
-            vout${M}x${ABC[N:N+4]} = vmulq_f32(vout${M}x${ABC[N:N+4]}, one_sixteenth);
-
         $for M in range(0, MR, 2):
           $if M + 1 == MR:
             const float32x4_t vinput_scale${M} = vld1q_dup_f32(&quantization_params[${M}].inv_scale);

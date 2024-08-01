@@ -85,6 +85,14 @@ struct xnn_value {
         /// Index of the channel dimension with per-channel quantization parameters.
         size_t channel_dimension;
       };
+        struct {
+        /// Per-channel-block multiplication factor to convert quantized elements to real representation, bf16 format.
+        const uint16_t* blockwise_scale;
+        /// Index of the channel dimension with blockwise quantization parameters.
+        size_t channel_dimension_blockwise;
+        /// Block size.
+        size_t block_size;
+      };
       struct {
         /// Number of non-batch dimensions. 1 for FC, 3 for Conv2D.
         size_t num_nonbatch_dims;

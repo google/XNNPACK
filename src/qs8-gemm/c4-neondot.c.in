@@ -44,7 +44,7 @@ $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if REQUANTIZATION == "
 $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QD8_F16": "xnn_f16_minmax_params", "QD8_F32": "xnn_f32_minmax_params", "QC4_F16": "xnn_f16_qc4w_minmax_params", "QC4_F32": "xnn_f32_qc4w_minmax_params", "QB4_F16": "xnn_f16_qb4w_minmax_params", "QB4_F32": "xnn_f32_qb4w_minmax_params"}[DATATYPE]
 $OUT_T = {"QC8": "int8_t", "QD8_F16": "void", "QD8_F32": "float", "QC4_F16": "void", "QC4_F32": "float", "QB4_F16": "uint16_t", "QB4_F32": "float", "QS8": "int8_t"}[DATATYPE]
 $ISA = "fp16arith" if DATATYPE in ["QC4_F16", "QD8_F16", "QB4_F16"] else ""
-$BLOCKWISE = True if DATATYPE in ["QB4_F16", "QB4_F32"] else False
+$BLOCKWISE = DATATYPE in ["QB4_F16", "QB4_F32"]
 void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c4__neondot${ISA}(
     size_t mr,
     size_t nc,
@@ -106,7 +106,6 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     assert(bl <= kc);
     assert(bl != 0);
     assert(bl % 32 == 0);
-    size_t n_blocks = kc / bl;
   $if DATATYPE in ["QC4_F16", "QC4_F32", "QB4_F16", "QB4_F32"]:
     const int8x16_t vmask = vmovq_n_s8(INT8_C(0xF0));
   // Loop over groups of ${NR} columns.
@@ -154,7 +153,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
 
     $if BLOCKWISE:
       $SET_INDENT(1)
-      for (size_t nb=0; nb < n_blocks; ++nb) {
+      for (size_t kb=0; kb < kc; kb += bl) {
         $for M in range(0, MR, 2):
           $if M + 1 == MR:
             $for N in range(0, NR, 4):
@@ -220,7 +219,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     ${_}}
     $if BLOCKWISE:
       $for N in range(0, NR, 4):
-        ${_}const float32x4_t vfilter_output_scale${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
+        ${_}const float32x4_t vfilter_output_scale${ABC[N:N+4]} = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
 
       $for M in range(0, MR, 2):
           $if M + 1 == MR:
@@ -236,15 +235,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
       }
 
     $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"] or BLOCKWISE:
-      $if BLOCKWISE:
-        const float32x4_t one_sixteenth = vdupq_n_f32(1/16.0);
       $for M in range(0, MR):
         $for N in range(0, NR, 4):
           $if DATATYPE in ["QC4_F16", "QC4_F32"]:
             float32x4_t vout${M}x${ABC[N:N+4]} = vcvtq_n_f32_s32(vacc${M}x${ABC[N:N+4]}, 4);
-          $elif BLOCKWISE:
-            vout${M}x${ABC[N:N+4]} = vmulq_f32(vout${M}x${ABC[N:N+4]}, one_sixteenth);
-          $else:
+          $elif not BLOCKWISE:
             float32x4_t vout${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});
       $for M in range(0, MR, 2):
         $if M + 1 == MR:

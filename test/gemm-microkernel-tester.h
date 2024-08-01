@@ -207,15 +207,6 @@ class GemmMicrokernelTester {
     return this->zero_index_;
   }
 
-  GemmMicrokernelTester& extended_weights(bool extended_weights) {
-    this->extended_weights_ = extended_weights;
-    return *this;
-  }
-
-  bool extended_weights() const {
-    return this->extended_weights_;
-  }
-
   GemmMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -503,7 +494,6 @@ class GemmMicrokernelTester {
   uint8_t qmax_{255};
   size_t a_offset_{0};
   size_t zero_index_{SIZE_MAX};
-  bool extended_weights_{false};
   size_t iterations_{15};
   bool known_nc_mod_nr_{true};
   bool relu_{false};

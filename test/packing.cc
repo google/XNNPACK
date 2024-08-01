@@ -113,6 +113,34 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, kr_eq_4_nr_eq_2) {
   EXPECT_EQ(expected, packed_weights);
 }
 
+TEST(PACK_QD8_F32_QC4UW_GEMM_GOI_W, kr_eq_4_nr_eq_2) {
+  size_t g = 1;
+  size_t nc = 2;
+  size_t kc = 8;
+  size_t nr = 2;
+  size_t kr = 4;
+  size_t sr = 1;
+
+  std::vector<int32_t> b(g * nc);
+  std::iota(b.begin(), b.end(), 0);
+  std::vector<uint8_t> k(g * nc * kc / 2);
+  k[0] = 0x98; k[1] = 0xBA; k[2] = 0xDC; k[3] = 0xFE;
+  k[4] = 0x10; k[5] = 0x32; k[6] = 0x54; k[7] = 0x76;
+  std::vector<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2));
+  auto a = xnn_qs8_qc4w_packing_params{ 0, 0x8 };
+  xnn_pack_qs8_qc4uw_gemm_goi_w(g, nc, kc, nr, kr, sr,
+    k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
+
+  const std::vector<uint8_t> expected = {
+    // 2 bias.
+    0x00, 0x00, 0x00, 0x00,
+    0x01, 0x00, 0x00, 0x00,
+    0xC8, 0xD9, 0xEA, 0xFB,
+    0x40, 0x51, 0x62, 0x73,
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
 TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, kr_eq_4_nr_eq_2) {
   size_t g = 1;
   size_t nc = 2;
@@ -159,12 +187,12 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_eq_kc) {
 
   std::vector<uint8_t> k(g * nc * kc / 2);
   k[0] = 0x98; k[1] = 0xBA; k[2] = 0xDC; k[3] = 0xFE; k[4] = 0x10; k[5] = 0x32; k[6] = 0x54; k[7] = 0x76;
-  size_t extra_bytes_bl = sizeof(float);
+  size_t extra_bytes_bl = sizeof(uint16_t);
   size_t extra_bytes_n = sizeof(float);
   std::vector<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2)
     + k_num_blocks * round_up(nc, nr) * extra_bytes_bl + round_up(nc, nr) * extra_bytes_n);
-  std::vector<float> scale(nc * k_num_blocks, 0);
-  std::fill(scale.begin(), scale.end(), 853.6010);
+  std::vector<uint16_t> scale(nc * k_num_blocks, 0);
+  std::fill(scale.begin(), scale.end(), math_cvt_bf16_fp32(853.6010));
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
 
   xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl,
@@ -178,14 +206,14 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_eq_kc) {
   size_t k_bytes = sizeof(int8_t) * k_stride * nr;
   size_t bias_bytes = sizeof(float) * nr;
   size_t ksum_bytes = sizeof(float) * nr;
-  size_t block_bytes = sizeof(float) * k_num_blocks * nr;
+  size_t block_bytes = sizeof(uint16_t) * k_num_blocks * nr;
 
   size_t start_offset = ksum_bytes + k_bytes / k_num_blocks;
   size_t stride = ksum_bytes + k_bytes + block_bytes + bias_bytes;
-  size_t block_stride = (bl * nr) / 2 +  (sizeof(float) * nr);
+  size_t block_stride = (bl * nr) / 2 + (sizeof(uint16_t) * nr);
 
   // Fill in scales.
-  xnn_init_blockwise_scale_fp32_params(
+  xnn_init_blockwise_scale_bf16_params(
     /*channels=*/ nc,
     /*channels_tile=*/ nr,
     /*channel_stride=*/ nr,
@@ -199,13 +227,14 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_eq_kc) {
 
   const std::vector<uint8_t> expected = {
     // kscaledsum
-    0x78, 0x66, 0xd5, 0xc7, // -1 * 853.6010 * (sum(-8..+7) = -109260.9297 = 0xc7d56678
+    // scaled row sum converted to bf16.
+    0x00, 0x00, 0xd5, 0xc5, // -1 * 853.6010 (bf16) * sum(-8..+7) = 0xc5d50000
 
     // weights.
     0x40, 0x51, 0x62, 0x73, // kr0 | kr1
     0xC8, 0xD9, 0xEA, 0xFB, // kr2 | kr3
     // extra bytes bl
-    0x77, 0x66, 0x55, 0x44,
+    0x55, 0x42,
 
     // extra bytes n - no bias for this test
     0, 0, 0, 0
@@ -235,11 +264,11 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, nc_gt_1) {
   // ------------------
 
   size_t extra_bytes_n = sizeof(float);
-  size_t extra_bytes_bl = sizeof(float);
+  size_t extra_bytes_bl = sizeof(uint16_t);
   std::vector<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2)
     + k_num_blocks * round_up(nc, nr) * extra_bytes_bl + round_up(nc, nr) * extra_bytes_n);
-  std::vector<float> scale(nc * k_num_blocks, 0);
-  std::fill(scale.begin(), scale.end(), 853.6010);
+  std::vector<uint16_t> scale(nc * k_num_blocks, 0);
+  std::fill(scale.begin(), scale.end(), math_cvt_bf16_fp32(853.6010));
 
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
   xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl,
@@ -252,13 +281,13 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, nc_gt_1) {
   size_t k_bytes = sizeof(int8_t) * k_stride * nr;
   size_t bias_bytes = sizeof(float) * nr;
   size_t ksum_bytes = sizeof(float) * nr;
-  size_t block_bytes = sizeof(float) * k_num_blocks * nr;
+  size_t block_bytes = sizeof(uint16_t) * k_num_blocks * nr;
 
   size_t start_offset = ksum_bytes + k_bytes / k_num_blocks;
   size_t stride = ksum_bytes + k_bytes + block_bytes + bias_bytes;
-  size_t block_stride = (bl * nr) / 2 +  (sizeof(float) * nr);
+  size_t block_stride = (bl * nr) / 2 + (sizeof(uint16_t) * nr);
 
-  xnn_init_blockwise_scale_fp32_params(
+  xnn_init_blockwise_scale_bf16_params(
     /*channels=*/nc,
     /*channels_tile=*/nr,
     /*channels_subtile=*/nr,
@@ -272,12 +301,13 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, nc_gt_1) {
 
   const std::vector<uint8_t> expected = {
     // kscaledsum
-    0x77, 0x66, 0xd5, 0xc7, // -1 * 853.6010 * (sum(-8, -6, ..., 2, 6) = -109260.9297 = 0xc7d56678
+    // scaled row sum converted to bf16.
+    0x00, 0x00, 0xd5, 0xc5, // -1 * 853.6010 (bf16) * (sum(-8..+7) = 0xc5d50000
 
     // weights
     0x80, 0xA2, 0xC4, 0xE6, // kr0 | kr1
     // extra bytes bl
-    0x77, 0x66, 0x55, 0x44,
+    0x55, 0x42,
 
     // extra bytes n
     0, 0, 0, 0,
@@ -288,7 +318,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, nc_gt_1) {
     // weights
     0x91, 0xB3, 0xD5, 0xF7, // kr2 | kr3
     // extra bytes bl
-    0x77, 0x66, 0x55, 0x44,
+    0x55, 0x42,
 
     // extra bytes n
     0, 0, 0, 0
@@ -310,11 +340,11 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_lt_kc) {
   std::vector<uint8_t> k(g * nc * kc / 2);
   k[0] = 0x98; k[1] = 0xBA; k[2] = 0xDC; k[3] = 0xFE; k[4] = 0x10; k[5] = 0x32; k[6] = 0x54; k[7] = 0x76;
   size_t extra_bytes_n = sizeof(float);
-  size_t extra_bytes_bl = sizeof(float);
+  size_t extra_bytes_bl = sizeof(uint16_t);
   std::vector<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2)
     + k_num_blocks * round_up(nc, nr) * extra_bytes_bl + round_up(nc, nr) * extra_bytes_n);
-  std::vector<float> scale(nc * k_num_blocks, 0);
-  std::fill(scale.begin(), scale.end(), 853.6010);
+  std::vector<uint16_t> scale(nc * k_num_blocks, 0);
+  std::fill(scale.begin(), scale.end(), math_cvt_bf16_fp32(853.6010));
 
 
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
@@ -328,14 +358,14 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_lt_kc) {
   size_t k_bytes = sizeof(int8_t) * k_stride * nr;
   size_t bias_bytes = sizeof(float) * nr;
   size_t ksum_bytes = sizeof(float) * nr;
-  size_t block_bytes = sizeof(float) * k_num_blocks * nr;
+  size_t block_bytes = sizeof(uint16_t) * k_num_blocks * nr;
 
   size_t start_offset = ksum_bytes + k_bytes / k_num_blocks;
   size_t stride = ksum_bytes + k_bytes + block_bytes + bias_bytes;
-  size_t block_stride = (bl * nr) / 2 +  (sizeof(float) * nr);
+  size_t block_stride = (bl * nr) / 2 + (sizeof(uint16_t) * nr);
 
   // Fill in scales.
-  xnn_init_blockwise_scale_fp32_params(
+  xnn_init_blockwise_scale_bf16_params(
     /*channels=*/ nc,
     /*channels_tile=*/ nr,
     /*channel_stride=*/ nr,
@@ -350,17 +380,18 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_lt_kc) {
 
   const std::vector<uint8_t> expected = {
     // kscaledsum
-    0x78, 0x66, 0xd5, 0xc7, // -1 * 853.6010 * (sum(-8..+7) = -109260.9297 = 0xc7d56678
+    // scaled row sum converted to bf16.
+    0x00, 0x00, 0xd5, 0xc5, // -1 * 853.6010 (bf16) * (sum(-8..+7) = 0xc5d50000
 
     // weights
     0x40, 0x51, 0x62, 0x73, // kr0 | kr1
     // extra bytes bl
-    0x77, 0x66, 0x55, 0x44,
+    0x55, 0x42,
 
     // weights
     0xC8, 0xD9, 0xEA, 0xFB, // kr2 | kr3
     // extra bytes bl
-    0x77, 0x66, 0x55, 0x44,
+    0x55, 0x42,
 
     // extra bytes n - no bias for this test
     0, 0, 0, 0
@@ -396,11 +427,11 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GIO_W, bl_eq_kc) {
   // |-----------|
 
   size_t extra_bytes_n = sizeof(float);
-  size_t extra_bytes_bl = sizeof(float);
+  size_t extra_bytes_bl = sizeof(uint16_t);
   std::vector<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2)
     + k_num_blocks * round_up(nc, nr) * extra_bytes_bl + round_up(nc, nr) * extra_bytes_n);
-  std::vector<float> scale(nc * k_num_blocks, 0);
-  std::fill(scale.begin(), scale.end(), 853.6010);
+  std::vector<uint16_t> scale(nc * k_num_blocks, 0);
+  std::fill(scale.begin(), scale.end(), math_cvt_bf16_fp32(853.6010));
 
 
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
@@ -415,13 +446,13 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GIO_W, bl_eq_kc) {
   size_t k_bytes = sizeof(int8_t) * k_stride * nr;
   size_t bias_bytes = sizeof(float) * nr;
   size_t ksum_bytes = sizeof(float) * nr;
-  size_t block_bytes = sizeof(float) * k_num_blocks * nr;
+  size_t block_bytes = sizeof(uint16_t) * k_num_blocks * nr;
 
   size_t start_offset = ksum_bytes + k_bytes / k_num_blocks;
   size_t stride = ksum_bytes + k_bytes + block_bytes + bias_bytes;
-  size_t block_stride = (bl * nr) / 2 +  (sizeof(float) * nr);
+  size_t block_stride = (bl * nr) / 2 + (sizeof(uint16_t) * nr);
 
-  xnn_init_blockwise_scale_fp32_params(
+  xnn_init_blockwise_scale_bf16_params(
     /*channels=*/nc,
     /*channels_tile=*/nr,
     /*channel_subtile=*/nr,
@@ -435,23 +466,24 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GIO_W, bl_eq_kc) {
 
   const std::vector<uint8_t> expected = {
     // kscaledsum
-    0x77, 0x66, 0xd5, 0xc7, // -1 * 853.6010 * (sum(-8, -6, ..., 2, 6) = -109260.9297 = 0xc7d56678
+    0x00, 0x00, 0xd5, 0xc5, // -1 * 853.6010 (bf16) * (sum(-8..+7) = 0xc5d50000
 
     // weights
     0x80, 0xA2, 0xC4, 0xE6, // kr0 | kr1
     // extra bytes bl
-    0x77, 0x66, 0x55, 0x44,
+    0x55, 0x42,
 
     // extra bytes n
     0, 0, 0, 0,
 
     // kscaledsum
+    // scaled row sum converted to bf16.
     0x00, 0x00, 0x00, 0x00, // -1 * 853.6010 * (sum(-7, -5, -3, ..., 7)) = 0
 
     // weights
     0x91, 0xB3, 0xD5, 0xF7, // kr2 | kr3
     // extra bytes bl
-    0x77, 0x66, 0x55, 0x44,
+    0x55, 0x42,
 
     // extra bytes n
     0, 0, 0, 0

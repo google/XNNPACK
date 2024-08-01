@@ -9,10 +9,11 @@ $import math
 
 #include <immintrin.h>
 
-#include "xnnpack/unaligned.h"
 #include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_qs8_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__avx512skx_c${CHANNELS}(

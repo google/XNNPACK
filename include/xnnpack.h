@@ -100,6 +100,9 @@ extern "C" {
 /// Note: XNNPACK reads, but never writes beyond array bounds.
 #define XNN_EXTRA_QUANTIZATION_PARAMS 10
 
+/// The minimum blocksize for blockwise quantized operators.
+#define XNN_MIN_BLOCKSIZE 32
+
 struct xnn_dynamic_quantization_params {
   int32_t zero_point;
   float scale;
@@ -266,9 +269,11 @@ enum xnn_datatype {
   /// Dynamically quantized 8-bit signed integers packed with their per-row
   /// quantization parameters.
   xnn_datatype_qpint8 = 10,
-
   /// 32-bit signed integers.
   xnn_datatype_int32 = 11,
+  /// Quantized 4-bit signed integer with shared per-channel-block quantization
+  /// parameters.
+  xnn_datatype_qbint4 = 12,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.
@@ -406,6 +411,25 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
   const float* scale,
   size_t num_dims,
   size_t channel_dim,
+  const size_t* dims,
+  const void* data,
+  uint32_t external_id,
+  uint32_t flags,
+  uint32_t* id_out);
+
+/// Define a blockwise quantized tensor-type Value and add it to a Subgraph.
+/// @param block_size - size of a block in the tensor with blockwise quantization parameters. Block is defined as
+///                     number of input channel element per output channel.
+///                     For Fully connected operators with 2d filters of size [output_channels, input_channels],
+///                     expecting number of scale values to be = output_channels * (input_channels / block_size).
+enum xnn_status xnn_define_blockwise_quantized_tensor_value(
+  xnn_subgraph_t subgraph,
+  enum xnn_datatype datatype,
+  int32_t zero_point,
+  const uint16_t* scale,
+  size_t num_dims,
+  size_t channel_dim,
+  size_t block_size,
   const size_t* dims,
   const void* data,
   uint32_t external_id,
@@ -984,14 +1008,6 @@ enum xnn_status xnn_define_add2(
   uint32_t output_id,
   uint32_t flags);
 
-enum xnn_status xnn_define_multiply2(
-  xnn_subgraph_t subgraph,
-  float output_min,
-  float output_max,
-  uint32_t input1_id,
-  uint32_t input2_id,
-  uint32_t output_id,
-  uint32_t flags);
 /// Define a 2-Input Multiply Node and add it to a Subgraph.
 ///
 /// The 2-Input Multiply Node computes elementwise multiplication of two tensor inputs with numpy broadcasting rules.
@@ -1009,8 +1025,10 @@ enum xnn_status xnn_define_multiply2(
 ///                    in the @a subgraph with each dimension equal to the maximum between the corresponding dimension
 ///                    of the two inputs.
 /// @param flags - binary features of the Multiply Node. No supported flags are currently defined.
-enum xnn_status xnn_define_multiply2_v2(
+enum xnn_status xnn_define_multiply2(
   xnn_subgraph_t subgraph,
+  float output_min,
+  float output_max,
   uint32_t input1_id,
   uint32_t input2_id,
   uint32_t output_id,
@@ -4385,6 +4403,34 @@ enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qc4w(
   size_t batch_size,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
+    size_t input_channels,
+    size_t output_channels,
+    size_t input_stride,
+    size_t output_stride,
+    size_t block_size,
+    uint8_t kernel_zero_point,
+    const uint16_t* kernel_scale,
+    const void* kernel,
+    const float* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out);
+
+enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qb4w(
+    xnn_operator_t fully_connected_op,
+    size_t batch_size,
+    pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qb4w(
+    xnn_operator_t fully_connected_op,
+    const int8_t* input,
+    void* output,
+    const struct xnn_dynamic_quantization_params* quantization_params);
+
 enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc4w(
   size_t input_channels,
   size_t output_channels,
@@ -4411,6 +4457,34 @@ enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qc4w(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
+  size_t input_channels,
+  size_t output_channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t block_size,
+  uint8_t kernel_zero_point,
+  const uint16_t* kernel_scale,
+  const void* kernel,
+  const float* bias,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* fully_connected_op_out);
+
+enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qb4w(
+  xnn_operator_t fully_connected_op,
+  size_t batch_size,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qb4w(
+  xnn_operator_t fully_connected_op,
+  const int8_t* input,
+  float* output,
+  const struct xnn_dynamic_quantization_params* quantization_params);
 
 enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qc8w(
   size_t input_channels,

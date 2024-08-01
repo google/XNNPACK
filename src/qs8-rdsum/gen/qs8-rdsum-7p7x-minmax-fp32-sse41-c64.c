@@ -12,10 +12,11 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/unaligned.h"
 #include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/unaligned.h"
 
 
 void xnn_qs8_rdsum_ukernel_7p7x__sse41_c64(

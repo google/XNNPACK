@@ -77,7 +77,6 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     assert(bl <= kc);
     assert(bl != 0);
     assert(bl % 32 == 0);
-    size_t n_blocks = kc / bl;
   const int8_t* a0 = a;
   $if DATATYPE in ["QD8_F16", "QC4_F16", "QB4_F16"]:
     uint16_t* c0 = (uint16_t*) c;
@@ -181,7 +180,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
 
     $if BLOCKWISE:
       $SET_INDENT(1)
-      for (size_t nb=0; nb < n_blocks; ++nb) {
+      for (size_t kb=0; kb < kc; kb += bl) {
         $for M in range(0, MR, 2):
           $for N in range(0, NR, 4):
             int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vdupq_n_s32(0);
@@ -284,21 +283,17 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     ${_}#endif
     $if BLOCKWISE:
       $for N in range(0, NR, 4):
-        ${_}const float32x4_t vfilter_output_scale${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
+        ${_}const float32x4_t vfilter_output_scale${ABC[N:N+4]} = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
       $for M in range(0, MR):
         $for N in range(0, NR, 4):
           ${_}float32x4_t vf${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});
           ${_}vout${M}x${ABC[N:N+4]} = vfmaq_f32(vout${M}x${ABC[N:N+4]}, vf${M}x${ABC[N:N+4]}, vfilter_output_scale${ABC[N:N+4]});
       }
     $if DATATYPE in ["QC4_F16", "QC4_F32", "QB4_F16", "QB4_F32"]:
-      $if BLOCKWISE:
-        const float32x4_t one_sixteenth = vdupq_n_f32(1/16.0);
       $for M in range(0, MR):
         $for N in range(0, NR, 4):
           $if not BLOCKWISE:
             float32x4_t vout${M}x${ABC[N:N+4]} = vcvtq_n_f32_s32(vacc${M}x${ABC[N:N+4]}, 4);
-          $else:
-            vout${M}x${ABC[N:N+4]} = vmulq_f32(vout${M}x${ABC[N:N+4]}, one_sixteenth);
     $elif DATATYPE in ["QD8_F16", "QD8_F32"]:
       $for M in range(0, MR):
         $for N in range(0, NR, 4):

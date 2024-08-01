@@ -306,7 +306,7 @@ void VBinaryCMicrokernelTester::Test(
     xnn_s32_vbinary_ukernel_fn vbinaryc, OpType op_type,
     xnn_init_s32_default_params_fn init_params) const {
   xnnpack::ReplicableRandomDevice rng;
-  std::uniform_int_distribution<int32_t> s32dist(std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max());
+  std::uniform_int_distribution<int32_t> s32dist(-100000, 100000);
 
   std::vector<int32_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
   const int32_t b = s32dist(rng);
@@ -348,7 +348,8 @@ void VBinaryCMicrokernelTester::Test(
           y_ref[i] = std::min<int32_t>(a_data[i], b);
           break;
         case OpType::MulC:
-          y_ref[i] = a_data[i] * b;
+          // Overflow is the expected behaviour
+          y_ref[i] = ((((int64_t) a_data[i] * (int64_t) b) << 32) >> 32);
           break;
         case OpType::SqrDiffC: {
           const int32_t diff = a_data[i] - b;

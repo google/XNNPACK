@@ -47,7 +47,8 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_1x8c8__avxvnni_prfm(
   const __m256 voutput_min = _mm256_set1_ps(params->avxvnni.min);
   const __m256 voutput_max = _mm256_set1_ps(params->avxvnni.max);
   const __m256i vsign_mask = _mm256_set1_epi8(params->avxvnni.sign_mask);  // 0x80
-  const __m256i vvalue_mask = _mm256_set1_epi8(params->avxvnni.mask);  // 0xF0
+  const __m256i vmask = _mm256_set1_epi8(params->avxvnni.mask);  // 0xF0
+  assert(params->avxvnni.mask == (int8_t) 0xF0);
   do {
     const __m256i vksum01234567 = _mm256_load_si256(w);
     __m256i vsum0x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point0);
@@ -67,10 +68,10 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_1x8c8__avxvnni_prfm(
       const __m256i vbb89ABCDEFx01234567 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
       const __m256i vbs01234567x0123 = _mm256_slli_epi32(vbb01234567x01234567, 4);
       const __m256i vbs89ABCDEFx0123 = _mm256_slli_epi32(vbb89ABCDEFx01234567, 4);
-      const __m256i vb01234567x4567 = _mm256_and_si256(vbb01234567x01234567, vvalue_mask);
-      const __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbb89ABCDEFx01234567, vvalue_mask);
-      const __m256i vb01234567x0123 = _mm256_and_si256(vbs01234567x0123, vvalue_mask);
-      const __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbs89ABCDEFx0123, vvalue_mask);
+      const __m256i vb01234567x4567 = _mm256_and_si256(vbb01234567x01234567, vmask);
+      const __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
+      const __m256i vb01234567x0123 = _mm256_and_si256(vbs01234567x0123, vmask);
+      const __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbs89ABCDEFx0123, vmask);
 
       vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x01234567, vb01234567x0123);
       vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x01234567, vb89ABCDEFx0123);
@@ -203,7 +204,8 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_5x8c8__avxvnni_prfm(
   const __m256 voutput_min = _mm256_set1_ps(params->avxvnni.min);
   const __m256 voutput_max = _mm256_set1_ps(params->avxvnni.max);
   const __m256i vsign_mask = _mm256_set1_epi8(params->avxvnni.sign_mask);  // 0x80
-  const __m256i vvalue_mask = _mm256_set1_epi8(params->avxvnni.mask);  // 0xF0
+  const __m256i vmask = _mm256_set1_epi8(params->avxvnni.mask);  // 0xF0
+  assert(params->avxvnni.mask == (int8_t) 0xF0);
   do {
     const __m256i vksum01234567 = _mm256_load_si256(w);
     __m256i vsum0x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point0);
@@ -245,10 +247,10 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_5x8c8__avxvnni_prfm(
       const __m256i vbb89ABCDEFx01234567 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
       const __m256i vbs01234567x0123 = _mm256_slli_epi32(vbb01234567x01234567, 4);
       const __m256i vbs89ABCDEFx0123 = _mm256_slli_epi32(vbb89ABCDEFx01234567, 4);
-      const __m256i vb01234567x4567 = _mm256_and_si256(vbb01234567x01234567, vvalue_mask);
-      const __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbb89ABCDEFx01234567, vvalue_mask);
-      const __m256i vb01234567x0123 = _mm256_and_si256(vbs01234567x0123, vvalue_mask);
-      const __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbs89ABCDEFx0123, vvalue_mask);
+      const __m256i vb01234567x4567 = _mm256_and_si256(vbb01234567x01234567, vmask);
+      const __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
+      const __m256i vb01234567x0123 = _mm256_and_si256(vbs01234567x0123, vmask);
+      const __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbs89ABCDEFx0123, vmask);
 
       vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x01234567, vb01234567x0123);
       vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x01234567, vb89ABCDEFx0123);
@@ -1285,7 +1287,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avxvnni_prfm(
   const __m256 voutput_min = _mm256_set1_ps(params->avxvnni.min);
   const __m256 voutput_max = _mm256_set1_ps(params->avxvnni.max);
   const __m256i vsign_mask = _mm256_set1_epi8(params->avxvnni.sign_mask);  // 0x80
-  const __m256i vvalue_mask = _mm256_set1_epi8(params->avxvnni.mask);  // 0xF0
+  const __m256i vmask = _mm256_set1_epi8(params->avxvnni.mask);  // 0xF0
+  assert(params->avxvnni.mask == (int8_t) 0xF0);
   do {
     const __m256i vksum01234567 = _mm256_load_si256(w);
     __m256i vsum0x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point0);
@@ -1305,10 +1308,10 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avxvnni_prfm(
       const __m256i vbb89ABCDEFx01234567 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
       const __m256i vbs01234567x0123 = _mm256_slli_epi32(vbb01234567x01234567, 4);
       const __m256i vbs89ABCDEFx0123 = _mm256_slli_epi32(vbb89ABCDEFx01234567, 4);
-      const __m256i vb01234567x4567 = _mm256_and_si256(vbb01234567x01234567, vvalue_mask);
-      const __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbb89ABCDEFx01234567, vvalue_mask);
-      const __m256i vb01234567x0123 = _mm256_and_si256(vbs01234567x0123, vvalue_mask);
-      const __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbs89ABCDEFx0123, vvalue_mask);
+      const __m256i vb01234567x4567 = _mm256_and_si256(vbb01234567x01234567, vmask);
+      const __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
+      const __m256i vb01234567x0123 = _mm256_and_si256(vbs01234567x0123, vmask);
+      const __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbs89ABCDEFx0123, vmask);
 
       vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x01234567, vb01234567x0123);
       vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x01234567, vb89ABCDEFx0123);
@@ -1441,7 +1444,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x8c8__avxvnni_prfm(
   const __m256 voutput_min = _mm256_set1_ps(params->avxvnni.min);
   const __m256 voutput_max = _mm256_set1_ps(params->avxvnni.max);
   const __m256i vsign_mask = _mm256_set1_epi8(params->avxvnni.sign_mask);  // 0x80
-  const __m256i vvalue_mask = _mm256_set1_epi8(params->avxvnni.mask);  // 0xF0
+  const __m256i vmask = _mm256_set1_epi8(params->avxvnni.mask);  // 0xF0
+  assert(params->avxvnni.mask == (int8_t) 0xF0);
   do {
     const __m256i vksum01234567 = _mm256_load_si256(w);
     __m256i vsum0x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point0);
@@ -1483,10 +1487,10 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x8c8__avxvnni_prfm(
       const __m256i vbb89ABCDEFx01234567 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
       const __m256i vbs01234567x0123 = _mm256_slli_epi32(vbb01234567x01234567, 4);
       const __m256i vbs89ABCDEFx0123 = _mm256_slli_epi32(vbb89ABCDEFx01234567, 4);
-      const __m256i vb01234567x4567 = _mm256_and_si256(vbb01234567x01234567, vvalue_mask);
-      const __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbb89ABCDEFx01234567, vvalue_mask);
-      const __m256i vb01234567x0123 = _mm256_and_si256(vbs01234567x0123, vvalue_mask);
-      const __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbs89ABCDEFx0123, vvalue_mask);
+      const __m256i vb01234567x4567 = _mm256_and_si256(vbb01234567x01234567, vmask);
+      const __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
+      const __m256i vb01234567x0123 = _mm256_and_si256(vbs01234567x0123, vmask);
+      const __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbs89ABCDEFx0123, vmask);
 
       vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x01234567, vb01234567x0123);
       vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x01234567, vb89ABCDEFx0123);
