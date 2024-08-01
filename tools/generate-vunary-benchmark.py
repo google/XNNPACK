@@ -105,7 +105,7 @@ $elif OP_NAME == "clamp":
         /*range_min=*/${RANGE_MIN},
         /*range_max=*/${RANGE_MAX});
   }
-$elif OP_NAME == "sqr" or (DATATYPE == "f32" and OP_NAME in ("abs", "gelu", "log", "neg")):
+$elif OP_NAME in ("abs", "gelu", "log", "neg", "sqr"):
   void ${DATATYPE}_v${OP_NAME}(benchmark::State& state, xnn_${DATATYPE}_v${OP_NAME}_ukernel_fn ukernel,
                 xnn_init_${DATATYPE}_default_params_fn init_params = nullptr,
                 benchmark::utils::IsaCheckFunction isa_check = nullptr) {
