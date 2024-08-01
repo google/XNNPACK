@@ -173,6 +173,7 @@ void _mm512_storeu_epi32 (void* mem_addr, __m512i a) {
 #ifdef __AVX512BW__
 // VNNI replacement that uses vpmaddubsw.
 // u4 is uint4 in lower 4 bits.
+// subtracting zero_point (8) converts 4 bit value to sign extended 8 bit value.
 static XNN_INTRINSIC
 __m512i _mm512_dpbusd_epi32_madd(__m512i i32, const __m512i u8, const __m512i u4) {
   const __m512i vzero_point = _mm512_set1_epi8(8);
