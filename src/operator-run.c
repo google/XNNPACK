@@ -2229,7 +2229,7 @@ void xnn_compute_contiguous_reduce(
     const void* workspace_ptr = (void*) ((uintptr_t) context->workspace + workspace_offset);
     output_ptr = (void*) ((uintptr_t) context->output + output_offset);
     context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
-                         output_ptr, &context->cvt_params);
+                         output_ptr, /*params=*/NULL);
   }
 }
 
@@ -2290,7 +2290,7 @@ void xnn_compute_discontiguous_reduce(
     const void* workspace_ptr = (void*) ((uintptr_t) context->workspace + workspace_offset);
     output_ptr = (void*) ((uintptr_t) context->output + output_offset);
     context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
-                         output_ptr, &context->cvt_params);
+                         output_ptr, /*params=*/NULL);
   }
 }
 

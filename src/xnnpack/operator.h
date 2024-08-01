@@ -145,7 +145,6 @@ struct subconvolution_params {
 
 struct f16_f32acc_mean_params {
   union xnn_f16_f32acc_scale_params f16_f32acc_scale;
-  union xnn_f32_f16_cvt_params cvt_params;
 };
 
 struct xnn_operator {
@@ -225,13 +224,10 @@ struct xnn_operator {
   uint32_t flags;
 
   union {
-    union xnn_f16_abs_params f16_abs;
     union xnn_f16_default_params f16_default;
-    union xnn_f16_f32_cvt_params f16_f32_cvt;
     union xnn_f16_hswish_params f16_hswish;
     union xnn_f16_elu_params f16_elu;
     union xnn_f16_lrelu_params f16_lrelu;
-    union xnn_f16_neg_params f16_neg;
     union xnn_f16_sigmoid_params f16_sigmoid;
     union xnn_f16_tanh_params f16_tanh;
     union xnn_f32_default_params f32_default;
@@ -264,7 +260,6 @@ struct xnn_operator {
     };
     union xnn_f16_chw_params f16_chw;
     union xnn_f32_chw_params f32_chw;
-    union xnn_f32_f16_cvt_params f32_f16_cvt;
     union xnn_f32_qb4w_minmax_params f32_qb4w_minmax;
     union xnn_f32_qc4w_minmax_params f32_qc4w_minmax;
     union xnn_f32_qs8_cvt_params f32_qs8_cvt;

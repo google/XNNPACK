@@ -57,19 +57,19 @@ void xnn_f16_f32_vcvt_ukernel__scalar_u1(
     size_t batch,
     const void* input,
     float* output,
-    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const void* params)
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const uint32_t vsign_mask = params->scalar.sign_mask;
-  const uint32_t vexp_offset = params->scalar.exp_offset;
-  const float vexp_scale = params->scalar.exp_scale;
-  const uint32_t vmagic_mask = params->scalar.magic_mask;
-  const float vmagic_bias = params->scalar.magic_bias;
-  const uint32_t vdenorm_cutoff = params->scalar.denorm_cutoff;
+  const uint32_t vsign_mask = 0x80000000;
+  const uint32_t vexp_offset = 0x70000000;
+  const float vexp_scale = 0x1.0p-112f;
+  const uint32_t vmagic_mask = 0x3F000000;
+  const float vmagic_bias = 0.5f;
+  const uint32_t vdenorm_cutoff = 0x08000000;
 
   const uint16_t* i = (const uint16_t*) input;
   uint32_t* o = (uint32_t*) output;
@@ -93,19 +93,19 @@ void xnn_f16_f32_vcvt_ukernel__scalar_u4(
     size_t batch,
     const void* input,
     float* output,
-    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const void* params)
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const uint32_t vsign_mask = params->scalar.sign_mask;
-  const uint32_t vexp_offset = params->scalar.exp_offset;
-  const float vexp_scale = params->scalar.exp_scale;
-  const uint32_t vmagic_mask = params->scalar.magic_mask;
-  const float vmagic_bias = params->scalar.magic_bias;
-  const uint32_t vdenorm_cutoff = params->scalar.denorm_cutoff;
+  const uint32_t vsign_mask = 0x80000000;
+  const uint32_t vexp_offset = 0x70000000;
+  const float vexp_scale = 0x1.0p-112f;
+  const uint32_t vmagic_mask = 0x3F000000;
+  const float vmagic_bias = 0.5f;
+  const uint32_t vdenorm_cutoff = 0x08000000;
 
   const uint16_t* i = (const uint16_t*) input;
   uint32_t* o = (uint32_t*) output;
@@ -5049,22 +5049,22 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_u4(
     size_t batch,
     const float* input,
     void* output,
-    const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const void* params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const uint32_t vnonsign_mask = params->scalar_bitcast.nonsign_mask;
-  const uint32_t vexp_bias = params->scalar_bitcast.exp_bias;
-  const float vscale_to_inf = params->scalar_bitcast.scale_to_inf;
-  const uint32_t vexpw_max = params->scalar_bitcast.expw_max;
-  const float vscale_to_zero = params->scalar_bitcast.scale_to_zero;
-  const uint32_t vbias_min = params->scalar_bitcast.bias_min;
-  const uint16_t vexph_mask = params->scalar_bitcast.exph_mask;
-  const uint16_t vmanth_mask = params->scalar_bitcast.manth_mask;
-  const uint16_t vnanh = params->scalar_bitcast.nanh;
+  const uint32_t vnonsign_mask = UINT32_C(0x7FFFFFFF);
+  const uint32_t vexp_bias = UINT32_C(0x07800000);
+  const float vscale_to_inf = 0x1.0p+112f;
+  const uint32_t vexpw_max = UINT32_C(0x7F800000);
+  const float vscale_to_zero = 0x1.0p-110f;
+  const uint32_t vbias_min = UINT32_C(0x40000000);
+  const uint16_t vexph_mask = UINT16_C(0x7C00);
+  const uint16_t vmanth_mask = UINT16_C(0x0FFF);
+  const uint16_t vnanh = UINT16_C(0x7E00);
 
   const uint32_t* i = (const uint32_t*) input;
   uint16_t* o = (uint16_t*) output;
@@ -5202,21 +5202,21 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_u2(
     size_t batch,
     const float* input,
     void* output,
-    const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const void* params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const float vscale_to_inf = params->scalar_fabsf.scale_to_inf;
-  const uint32_t vexp_bias = params->scalar_fabsf.exp_bias;
-  const float vscale_to_zero = params->scalar_fabsf.scale_to_zero;
-  const uint32_t vexpw_max = params->scalar_fabsf.expw_max;
-  const uint32_t vbias_min = params->scalar_fabsf.bias_min;
-  const uint16_t vexph_mask = params->scalar_fabsf.exph_mask;
-  const uint16_t vmanth_mask = params->scalar_fabsf.manth_mask;
-  const uint16_t vnanh = params->scalar_fabsf.nanh;
+  const float vscale_to_inf = 0x1.0p+112f;
+  const uint32_t vexp_bias = UINT32_C(0x07800000);
+  const float vscale_to_zero = 0x1.0p-110f;
+  const uint32_t vexpw_max = UINT32_C(0x7F800000);
+  const uint32_t vbias_min = UINT32_C(0x40000000);
+  const uint16_t vexph_mask = UINT16_C(0x7C00);
+  const uint16_t vmanth_mask = UINT16_C(0x0FFF);
+  const uint16_t vnanh = UINT16_C(0x7E00);
 
   uint16_t* o = (uint16_t*) output;
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
