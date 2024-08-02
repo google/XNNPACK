@@ -10,6 +10,9 @@
 
 
 SET(ALL_RVV_MICROKERNEL_SRCS
+  src/f32-argmaxpool/f32-argmaxpool-4x-rvv-c1v.c
+  src/f32-argmaxpool/f32-argmaxpool-9p8x-rvv-c1v.c
+  src/f32-argmaxpool/f32-argmaxpool-9x-rvv-c1v.c
   src/f32-avgpool/gen/f32-avgpool-9p8x-minmax-rvv-c1v.c
   src/f32-avgpool/gen/f32-avgpool-9p8x-minmax-rvv-c2v.c
   src/f32-avgpool/gen/f32-avgpool-9x-minmax-rvv-c1v.c
