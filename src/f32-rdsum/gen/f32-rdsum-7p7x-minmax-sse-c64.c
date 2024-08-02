@@ -30,7 +30,7 @@ void xnn_f32_rdsum_ukernel_7p7x__sse_c64(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vscale = _mm_load_ps(params->sse.scale);
+  const __m128 vscale = _mm_set1_ps(params->scale);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 64; channels -= 64) {

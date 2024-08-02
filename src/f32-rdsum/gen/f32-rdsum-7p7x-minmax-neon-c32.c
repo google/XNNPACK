@@ -30,7 +30,7 @@ void xnn_f32_rdsum_ukernel_7p7x__neon_c32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
+  const float32x4_t vscale = vdupq_n_f32(params->scale);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 32; channels -= 32) {

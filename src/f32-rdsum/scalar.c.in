@@ -25,7 +25,7 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__scalar_c4(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float vscale = params->scalar.scale;
+  const float vscale = params->scale;
 
   size_t input_increment = ${ACCUMULATORS} * input_stride;
   for (; channels >= ${CHANNELS}; channels -= ${CHANNELS}) {

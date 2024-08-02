@@ -26,7 +26,7 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__wasmsimd_c${CHANNEL
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
+  const v128_t vscale = wasm_v128_load32_splat(&params->scale);
 
   size_t input_increment = ${ACCUMULATORS} * input_stride;
   for (; channels >= ${CHANNELS}; channels -= ${CHANNELS}) {

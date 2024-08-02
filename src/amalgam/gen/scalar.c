@@ -10506,7 +10506,7 @@ void xnn_f32_rdsum_ukernel_7p7x__scalar_c4(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float vscale = params->scalar.scale;
+  const float vscale = params->scale;
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 4; channels -= 4) {
@@ -10802,7 +10802,7 @@ void xnn_f32_rsum_ukernel__scalar_u4_acc4(
       batch -= sizeof(float);
     } while (batch != 0);
   }
-  const float vscale = params->scalar.scale;
+  const float vscale = params->scale;
   vacc0 *= vscale;
   *output += vacc0;
 }

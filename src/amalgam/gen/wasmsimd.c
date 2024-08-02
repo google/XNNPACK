@@ -22409,7 +22409,7 @@ void xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
+  const v128_t vscale = wasm_v128_load32_splat(&params->scale);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 16; channels -= 16) {
@@ -22779,7 +22779,7 @@ void xnn_f32_rsum_ukernel__wasmsimd_u16_acc4(
     const v128_t vt = wasm_v128_load32_zero(input);
     vacc0 = wasm_f32x4_add(vacc0, vt);
   }
-  const v128_t vscale = wasm_v128_load32_zero(&params->scalar.scale);
+  const v128_t vscale = wasm_v128_load32_zero(&params->scale);
   vacc0 = wasm_f32x4_mul(vacc0, vscale);
   *output += wasm_f32x4_extract_lane(vacc0, 0);
 }

@@ -50,7 +50,7 @@ void xnn_f16_rsum_ukernel__neonfp16arith_u32_acc4(
     const float16x8_t vt = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
     vacc0 = vaddq_f16(vacc0, vt);
   }
-  const float16x4_t vscale = vreinterpret_f16_u16(vld1_dup_u16(&params->fp16arith.scale));
+  const float16x4_t vscale = vreinterpret_f16_u16(vld1_dup_u16(&params->scale));
   float16x4_t vacc = vadd_f16(vget_low_f16(vacc0), vget_high_f16(vacc0));
   if XNN_UNLIKELY(batch & (4 * sizeof(uint16_t))) {
     const float16x4_t vt = vreinterpret_f16_u16(vld1_u16(i)); i += 4;

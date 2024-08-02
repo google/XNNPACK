@@ -28,7 +28,7 @@ void xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
+  const v128_t vscale = wasm_v128_load32_splat(&params->scale);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 16; channels -= 16) {
