@@ -30,6 +30,7 @@ class VBinaryCMicrokernelTester {
     SqrDiffC,
     SubC,
     RSubC,
+    AndC,
   };
 
   VBinaryCMicrokernelTester& batch_size(size_t batch_size) {

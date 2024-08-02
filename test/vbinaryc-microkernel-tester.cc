@@ -362,6 +362,9 @@ void VBinaryCMicrokernelTester::Test(
         case OpType::RSubC:
           y_ref[i] = b - a_data[i];
           break;
+        case OpType::AndC:
+          y_ref[i] = a_data[i] & b;
+          break;
       }
     }
 

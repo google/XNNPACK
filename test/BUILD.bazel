@@ -291,6 +291,7 @@ xnnpack_cc_library(
     "qu8_vmul_minmax_fp32",
     "qu8_vmul_minmax_rndnu",
     "s32_vmul",
+    "s32_vand",
 ]]
 
 [xnnpack_unit_test(
@@ -339,6 +340,7 @@ xnnpack_cc_library(
     "qu8_vmulc_minmax_fp32",
     "qu8_vmulc_minmax_rndnu",
     "s32_vmulc",
+    "s32_vandc",
 ]]
 
 [xnnpack_unit_test(

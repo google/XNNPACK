@@ -28,6 +28,7 @@ class VBinaryMicrokernelTester {
     Mul,
     Sub,
     SqrDiff,
+    And,
   };
 
   VBinaryMicrokernelTester& batch_size(size_t batch_size) {
