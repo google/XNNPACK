@@ -28,7 +28,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(f16|f32)_argmaxpool_ukernel_((\d+)p)?(\d+)x__(.+)_c(\d+)(v)?", name)
+  match = re.fullmatch(r"xnn_(f16|f32)_argmaxpool_ukernel_((\d+)p)?(\d+)x__(.+)_(c)?(u)?(\d+)(v)?", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
 
@@ -39,8 +39,8 @@ def split_ukernel_name(name):
     primary_tile = int(match.group(4))
     incremental_tile = 0
 
-  channel_tile = int(match.group(6))
-  vector_tile = bool(match.group(7))
+  channel_tile = int(match.group(8))
+  vector_tile = bool(match.group(9))
 
   arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(5))
   return primary_tile, incremental_tile, channel_tile, vector_tile, arch, isa

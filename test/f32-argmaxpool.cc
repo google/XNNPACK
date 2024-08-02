@@ -289,17 +289,17 @@
 
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, channels_eq_1v_unipass_fulltile) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, channels_eq_1v_unipass_fulltile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     ArgMaxPoolMicrokernelTester()
       .pooling_elements(4)
       .pooling_tile(4)
       .channels(channel_tile)
-      .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+      .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, channels_eq_1v_unipass_fulltile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, channels_eq_1v_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     ArgMaxPoolMicrokernelTester()
@@ -307,10 +307,10 @@
       .pooling_tile(4)
       .channels(channel_tile)
       .input_offset(channel_tile+1)
-      .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+      .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, channels_eq_1v_unipass_subtile) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, channels_eq_1v_unipass_subtile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t pooling_elements = 2; pooling_elements < 4; pooling_elements++) {
@@ -318,11 +318,11 @@
         .pooling_elements(pooling_elements)
         .pooling_tile(4)
         .channels(channel_tile)
-        .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, channels_eq_1v_unipass_subtile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, channels_eq_1v_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t pooling_elements = 2; pooling_elements < 4; pooling_elements++) {
@@ -331,11 +331,11 @@
         .pooling_tile(4)
         .channels(channel_tile)
         .input_offset(channel_tile+1)
-        .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, channels_div_1v_unipass_fulltile) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, channels_div_1v_unipass_fulltile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
@@ -343,11 +343,11 @@
         .pooling_elements(4)
         .pooling_tile(4)
         .channels(channels)
-        .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, channels_div_1v_unipass_fulltile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, channels_div_1v_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
@@ -356,11 +356,11 @@
         .pooling_tile(4)
         .channels(channels)
         .input_offset(channel_tile*8)
-        .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, channels_div_1v_unipass_subtile) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, channels_div_1v_unipass_subtile) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t pooling_elements = 2; pooling_elements < 4; pooling_elements++) {
       const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
@@ -369,12 +369,12 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(4)
           .channels(channels)
-          .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, channels_div_1v_unipass_subtile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, channels_div_1v_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t pooling_elements = 2; pooling_elements < 4; pooling_elements++) {
       const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
@@ -384,12 +384,12 @@
           .pooling_tile(4)
           .channels(channels)
           .input_offset(channel_tile*8)
-          .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, channels_lt_1v_unipass_fulltile) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, channels_lt_1v_unipass_fulltile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = 1; channels < channel_tile; channels++) {
@@ -397,11 +397,11 @@
         .pooling_elements(4)
         .pooling_tile(4)
         .channels(channels)
-        .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, channels_lt_1v_unipass_fulltile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, channels_lt_1v_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = 1; channels < channel_tile; channels++) {
@@ -410,11 +410,11 @@
         .pooling_tile(4)
         .channels(channels)
         .input_offset(channel_tile)
-        .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, channels_lt_1v_unipass_subtile) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, channels_lt_1v_unipass_subtile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t pooling_elements = 2; pooling_elements < 4; pooling_elements++) {
@@ -423,12 +423,12 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(4)
           .channels(channels)
-          .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, channels_lt_1v_unipass_subtile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, channels_lt_1v_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t pooling_elements = 2; pooling_elements < 4; pooling_elements++) {
@@ -438,12 +438,12 @@
           .pooling_tile(4)
           .channels(channels)
           .input_offset(channel_tile)
-          .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, channels_gt_1v_unipass_fulltile) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, channels_gt_1v_unipass_fulltile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
@@ -451,11 +451,11 @@
         .pooling_elements(4)
         .pooling_tile(4)
         .channels(channels)
-        .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, channels_gt_1v_unipass_fulltile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, channels_gt_1v_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
@@ -464,11 +464,11 @@
         .pooling_tile(4)
         .channels(channels)
         .input_offset(channel_tile*2)
-        .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, channels_gt_1v_unipass_subtile) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, channels_gt_1v_unipass_subtile) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t pooling_elements = 2; pooling_elements < 4; pooling_elements++) {
       const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
@@ -477,12 +477,12 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(4)
           .channels(channels)
-          .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, channels_gt_1v_unipass_subtile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, channels_gt_1v_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t pooling_elements = 2; pooling_elements < 4; pooling_elements++) {
       const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
@@ -492,12 +492,12 @@
           .pooling_tile(4)
           .channels(channels)
           .input_offset(channel_tile*2)
-          .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, few_output_pixels) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, few_output_pixels) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
       for (size_t pooling_elements = 2; pooling_elements <= 4; pooling_elements++) {
@@ -508,13 +508,13 @@
             .pooling_elements(pooling_elements)
             .pooling_tile(4)
             .channels(channels)
-            .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+            .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
         }
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, few_output_pixels_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, few_output_pixels_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
       for (size_t pooling_elements = 2; pooling_elements <= 4; pooling_elements++) {
@@ -526,13 +526,13 @@
             .pooling_tile(4)
             .channels(channels)
             .input_offset(channel_tile*5+1)
-            .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+            .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
         }
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, few_output_pixels_with_output_stride) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, few_output_pixels_with_output_stride) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
       for (size_t pooling_elements = 2; pooling_elements <= 4; pooling_elements++) {
@@ -544,13 +544,13 @@
             .pooling_tile(4)
             .channels(channels)
             .output_stride(channel_tile*5+1)
-            .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+            .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
         }
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_4X__RVV_C1V, few_output_pixels_with_step) {
+  TEST(F32_ARGMAXPOOL_4X__RVV_U1V, few_output_pixels_with_step) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
       for (size_t pooling_elements = 2; pooling_elements <= 4; pooling_elements++) {
@@ -564,7 +564,7 @@
               .step(step)
               .channels(channels)
               .output_stride(channel_tile*5+1)
-              .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_c1v);
+              .Test(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v);
           }
         }
       }
@@ -1527,17 +1527,17 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
 
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, channels_eq_1v_unipass_fulltile) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, channels_eq_1v_unipass_fulltile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     ArgMaxPoolMicrokernelTester()
       .pooling_elements(9)
       .pooling_tile(9)
       .channels(channel_tile)
-      .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+      .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, channels_eq_1v_unipass_fulltile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, channels_eq_1v_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     ArgMaxPoolMicrokernelTester()
@@ -1545,10 +1545,10 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
       .pooling_tile(9)
       .channels(channel_tile)
       .input_offset(channel_tile+1)
-      .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+      .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, channels_eq_1v_unipass_subtile) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, channels_eq_1v_unipass_subtile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
@@ -1556,11 +1556,11 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_elements(pooling_elements)
         .pooling_tile(9)
         .channels(channel_tile)
-        .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, channels_eq_1v_unipass_subtile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, channels_eq_1v_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
@@ -1569,11 +1569,11 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channel_tile)
         .input_offset(channel_tile+1)
-        .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, channels_div_1v_unipass_fulltile) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, channels_div_1v_unipass_fulltile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
@@ -1581,11 +1581,11 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_elements(9)
         .pooling_tile(9)
         .channels(channels)
-        .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, channels_div_1v_unipass_fulltile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, channels_div_1v_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
@@ -1594,11 +1594,11 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .input_offset(channel_tile*8)
-        .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, channels_div_1v_unipass_subtile) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, channels_div_1v_unipass_subtile) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
@@ -1607,12 +1607,12 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_elements(pooling_elements)
           .pooling_tile(9)
           .channels(channels)
-          .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, channels_div_1v_unipass_subtile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, channels_div_1v_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
@@ -1622,12 +1622,12 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_offset(channel_tile*8)
-          .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, channels_lt_1v_unipass_fulltile) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, channels_lt_1v_unipass_fulltile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = 1; channels < channel_tile; channels++) {
@@ -1635,11 +1635,11 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_elements(9)
         .pooling_tile(9)
         .channels(channels)
-        .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, channels_lt_1v_unipass_fulltile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, channels_lt_1v_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = 1; channels < channel_tile; channels++) {
@@ -1648,11 +1648,11 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .input_offset(channel_tile)
-        .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, channels_lt_1v_unipass_subtile) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, channels_lt_1v_unipass_subtile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
@@ -1661,12 +1661,12 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_elements(pooling_elements)
           .pooling_tile(9)
           .channels(channels)
-          .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, channels_lt_1v_unipass_subtile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, channels_lt_1v_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
@@ -1676,12 +1676,12 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_offset(channel_tile)
-          .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, channels_gt_1v_unipass_fulltile) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, channels_gt_1v_unipass_fulltile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
@@ -1689,11 +1689,11 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_elements(9)
         .pooling_tile(9)
         .channels(channels)
-        .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, channels_gt_1v_unipass_fulltile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, channels_gt_1v_unipass_fulltile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
@@ -1702,11 +1702,11 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .input_offset(channel_tile*2)
-        .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, channels_gt_1v_unipass_subtile) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, channels_gt_1v_unipass_subtile) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
@@ -1715,12 +1715,12 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_elements(pooling_elements)
           .pooling_tile(9)
           .channels(channels)
-          .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, channels_gt_1v_unipass_subtile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, channels_gt_1v_unipass_subtile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
@@ -1730,12 +1730,12 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_offset(channel_tile*2)
-          .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, few_output_pixels) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, few_output_pixels) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
       for (size_t pooling_elements = 2; pooling_elements <= 9; pooling_elements++) {
@@ -1746,13 +1746,13 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
             .pooling_elements(pooling_elements)
             .pooling_tile(9)
             .channels(channels)
-            .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+            .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
         }
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, few_output_pixels_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, few_output_pixels_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
       for (size_t pooling_elements = 2; pooling_elements <= 9; pooling_elements++) {
@@ -1764,13 +1764,13 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
             .pooling_tile(9)
             .channels(channels)
             .input_offset(channel_tile*5+1)
-            .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+            .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
         }
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, few_output_pixels_with_output_stride) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, few_output_pixels_with_output_stride) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
       for (size_t pooling_elements = 2; pooling_elements <= 9; pooling_elements++) {
@@ -1782,13 +1782,13 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
             .pooling_tile(9)
             .channels(channels)
             .output_stride(channel_tile*5+1)
-            .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+            .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
         }
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9X__RVV_C1V, few_output_pixels_with_step) {
+  TEST(F32_ARGMAXPOOL_9X__RVV_U1V, few_output_pixels_with_step) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
       for (size_t pooling_elements = 2; pooling_elements <= 9; pooling_elements++) {
@@ -1802,7 +1802,7 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
               .step(step)
               .channels(channels)
               .output_stride(channel_tile*5+1)
-              .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_c1v);
+              .Test(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v);
           }
         }
       }
@@ -2875,17 +2875,17 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_eq_1v_twopass_fulltile) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_eq_1v_twopass_fulltile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     ArgMaxPoolMicrokernelTester()
       .pooling_elements(17)
       .pooling_tile(9, 8)
       .channels(channel_tile)
-      .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+      .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_eq_1v_twopass_fulltile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_eq_1v_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     ArgMaxPoolMicrokernelTester()
@@ -2893,10 +2893,10 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
       .pooling_tile(9, 8)
       .channels(channel_tile)
       .input_offset(channel_tile+1)
-      .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+      .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_eq_1v_twopass_subtile) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_eq_1v_twopass_subtile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
@@ -2904,11 +2904,11 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(channel_tile)
-        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_eq_1v_twopass_subtile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_eq_1v_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
@@ -2917,11 +2917,11 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9, 8)
         .channels(channel_tile)
         .input_offset(channel_tile+1)
-        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_div_1v_twopass_fulltile) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_div_1v_twopass_fulltile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
@@ -2929,11 +2929,11 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_elements(17)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_div_1v_twopass_fulltile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_div_1v_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
@@ -2942,11 +2942,11 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(channel_tile*5)
-        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_div_1v_twopass_subtile) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_div_1v_twopass_subtile) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
@@ -2955,12 +2955,12 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_elements(17)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_div_1v_twopass_subtile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_div_1v_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
@@ -2970,12 +2970,12 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(channel_tile*8)
-          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_lt_1v_twopass_fulltile) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_lt_1v_twopass_fulltile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = 1; channels < channel_tile; channels++) {
@@ -2983,11 +2983,11 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_elements(17)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_lt_1v_twopass_fulltile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_lt_1v_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = 1; channels < channel_tile; channels++) {
@@ -2996,11 +2996,11 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(channel_tile)
-        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_lt_1v_twopass_subtile) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_lt_1v_twopass_subtile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
@@ -3009,12 +3009,12 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_elements(17)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_lt_1v_twopass_subtile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_lt_1v_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
@@ -3024,12 +3024,12 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(channel_tile)
-          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_gt_1v_twopass_fulltile) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_gt_1v_twopass_fulltile) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
@@ -3037,11 +3037,11 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_elements(17)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_gt_1v_twopass_fulltile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_gt_1v_twopass_fulltile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
@@ -3050,11 +3050,11 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(channel_tile*2)
-        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_gt_1v_twopass_subtile) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_gt_1v_twopass_subtile) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
@@ -3063,12 +3063,12 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_elements(17)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_gt_1v_twopass_subtile_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_gt_1v_twopass_subtile_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
@@ -3078,12 +3078,12 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(channel_tile*2)
-          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_eq_1v_multipass) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_eq_1v_multipass) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
@@ -3091,11 +3091,11 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_elements(17)
         .pooling_tile(9, 8)
         .channels(channel_tile)
-        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_eq_1v_multipass_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_eq_1v_multipass_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
@@ -3104,11 +3104,11 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9, 8)
         .channels(channel_tile)
         .input_offset(channel_tile+1)
-        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+        .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_div_1v_multipass) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_div_1v_multipass) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
@@ -3117,12 +3117,12 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_elements(17)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_div_1v_multipass_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_div_1v_multipass_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
@@ -3132,12 +3132,12 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(channel_tile*8)
-          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_lt_1v_multipass) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_lt_1v_multipass) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
@@ -3146,12 +3146,12 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_elements(17)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_lt_1v_multipass_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_lt_1v_multipass_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
@@ -3161,12 +3161,12 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(channel_tile)
-          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_gt_1v_multipass) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_gt_1v_multipass) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
@@ -3175,12 +3175,12 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_elements(17)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, channels_gt_1v_multipass_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, channels_gt_1v_multipass_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(float));
@@ -3190,12 +3190,12 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(channel_tile*2)
-          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+          .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, few_output_pixels) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, few_output_pixels) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
       for (size_t pooling_elements = 10; pooling_elements <= 17; pooling_elements++) {
@@ -3206,13 +3206,13 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
             .pooling_elements(pooling_elements)
             .pooling_tile(9, 8)
             .channels(channels)
-            .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+            .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
         }
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, few_output_pixels_with_input_offset) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, few_output_pixels_with_input_offset) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
       for (size_t pooling_elements = 10; pooling_elements <= 17; pooling_elements++) {
@@ -3224,13 +3224,13 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
             .pooling_tile(9, 8)
             .channels(channels)
             .input_offset(channel_tile*5+1)
-            .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+            .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
         }
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, few_output_pixels_with_output_stride) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, few_output_pixels_with_output_stride) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
       for (size_t pooling_elements = 10; pooling_elements <= 17; pooling_elements++) {
@@ -3242,13 +3242,13 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
             .pooling_tile(9, 8)
             .channels(channels)
             .output_stride(channel_tile*5+1)
-            .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+            .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
         }
       }
     }
   }
 
-  TEST(F32_ARGMAXPOOL_9P8X__RVV_C1V, few_output_pixels_with_step) {
+  TEST(F32_ARGMAXPOOL_9P8X__RVV_U1V, few_output_pixels_with_step) {
     TEST_REQUIRES_RISCV_VECTOR;
     for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
       for (size_t pooling_elements = 10; pooling_elements <= 17; pooling_elements++) {
@@ -3262,7 +3262,7 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
               .step(step)
               .channels(channels)
               .output_stride(channel_tile*5+1)
-              .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v);
+              .Test(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v);
           }
         }
       }

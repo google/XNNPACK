@@ -102,15 +102,15 @@ static void init_f32_argmaxpool_config(void) {
     };
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     f32_argmaxpool_config[0] = (struct xnn_argmaxpool_config) {
-      .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__rvv_c1v,
+      .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__rvv_u1v,
       .first_pass_tile_size = 4,
     };
     f32_argmaxpool_config[1] = (struct xnn_argmaxpool_config) {
-      .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9x__rvv_c1v,
+      .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9x__rvv_u1v,
       .first_pass_tile_size = 9,
     };
     f32_argmaxpool_config[2] = (struct xnn_argmaxpool_config) {
-      .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__rvv_c1v,
+      .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v,
       .first_pass_tile_size = 9,
       .remainder_pass_tile_size = 8,
     };

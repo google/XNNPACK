@@ -8,7 +8,7 @@
 
 #include "xnnpack/argmaxpool.h"
 
-void xnn_f32_argmaxpool_ukernel_4x__rvv_c1v(
+void xnn_f32_argmaxpool_ukernel_4x__rvv_u1v(
     size_t output_pixels,
     size_t pooling_elements,
     size_t channels,
