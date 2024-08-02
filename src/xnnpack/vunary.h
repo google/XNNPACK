@@ -38,13 +38,13 @@ extern "C" {
       const union params_union params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 
-#define DECLARE_BF16_VABS_UKERNEL_FUNCTION(fn_name) DECLARE_BF16_UKERNEL_FUNCTION(fn_name, xnn_bf16_abs_params);
+#define DECLARE_BF16_VABS_UKERNEL_FUNCTION(fn_name) DECLARE_BF16_UKERNEL_FUNCTION(fn_name, xnn_bf16_default_params);
 
 DECLARE_BF16_VABS_UKERNEL_FUNCTION(xnn_bf16_vabs_ukernel__neonbf16_u8)
 DECLARE_BF16_VABS_UKERNEL_FUNCTION(xnn_bf16_vabs_ukernel__neonbf16_u16)
 DECLARE_BF16_VABS_UKERNEL_FUNCTION(xnn_bf16_vabs_ukernel__neonbf16_u24)
 
-#define DECLARE_F16_VABS_UKERNEL_FUNCTION(fn_name) DECLARE_F16_UKERNEL_FUNCTION(fn_name, xnn_f16_abs_params);
+#define DECLARE_F16_VABS_UKERNEL_FUNCTION(fn_name) DECLARE_F16_UKERNEL_FUNCTION(fn_name, xnn_f16_default_params);
 
 DECLARE_F16_VABS_UKERNEL_FUNCTION(xnn_f16_vabs_ukernel__neonfp16arith_u8)
 DECLARE_F16_VABS_UKERNEL_FUNCTION(xnn_f16_vabs_ukernel__neonfp16arith_u16)
@@ -403,7 +403,7 @@ DECLARE_F16_VHSWISH_UKERNEL_FUNCTION(xnn_f16_vhswish_ukernel__f16c_u8)
 DECLARE_F16_VHSWISH_UKERNEL_FUNCTION(xnn_f16_vhswish_ukernel__f16c_u16)
 
 
-#define DECLARE_F16_VNEG_UKERNEL_FUNCTION(fn_name) DECLARE_F16_UKERNEL_FUNCTION(fn_name, xnn_f16_neg_params);
+#define DECLARE_F16_VNEG_UKERNEL_FUNCTION(fn_name) DECLARE_F16_UKERNEL_FUNCTION(fn_name, xnn_f16_default_params);
 
 DECLARE_F16_VNEG_UKERNEL_FUNCTION(xnn_f16_vneg_ukernel__neonfp16arith_u8)
 DECLARE_F16_VNEG_UKERNEL_FUNCTION(xnn_f16_vneg_ukernel__neonfp16arith_u16)

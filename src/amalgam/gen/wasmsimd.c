@@ -55,19 +55,19 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_u16(
     size_t batch,
     const void* input,
     float* output,
-    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const void* params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vsign_mask = wasm_v128_load64_splat(params->wasmsimd_int16.sign_mask);
-  const v128_t vexp_offset = wasm_v128_load64_splat(params->wasmsimd_int16.exp_offset);
-  const v128_t vexp_scale = wasm_v128_load64_splat(params->wasmsimd_int16.exp_scale);
-  const v128_t vmagic_mask = wasm_v128_load64_splat(params->wasmsimd_int16.magic_mask);
-  const v128_t vmagic_bias = wasm_v128_load64_splat(params->wasmsimd_int16.magic_bias);
-  const v128_t vdenorm_cutoff = wasm_v128_load64_splat(params->wasmsimd_int16.denorm_cutoff);
+  const v128_t vsign_mask = wasm_u16x8_const_splat(0x8000);
+  const v128_t vexp_offset = wasm_u16x8_const_splat(0x7000);
+  const v128_t vexp_scale = wasm_f32x4_const_splat(0x1.0p-112f);
+  const v128_t vmagic_mask = wasm_u16x8_const_splat(0x3F00);
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(0.5f);
+  const v128_t vdenorm_cutoff = wasm_u16x8_const_splat(0x0400);
 
   const uint16_t* i = (const uint16_t*) input;
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
@@ -9825,21 +9825,21 @@ void xnn_f32_f16_vcvt_ukernel__wasmsimd_u24(
     size_t batch,
     const float* input,
     void* output,
-    const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const void* params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vexp_bias = wasm_v128_load64_splat(params->wasmsimd.exp_bias);
-  const v128_t vscale_to_inf = wasm_v128_load64_splat(params->wasmsimd.scale_to_inf);
-  const v128_t vexpw_max = wasm_v128_load64_splat(params->wasmsimd.expw_max);
-  const v128_t vscale_to_zero = wasm_v128_load64_splat(params->wasmsimd.scale_to_zero);
-  const v128_t vbias_min = wasm_v128_load64_splat(params->wasmsimd.bias_min);
-  const v128_t vmanth_mask = wasm_v128_load64_splat(params->wasmsimd.manth_mask);
-  const v128_t vexph_mask = wasm_v128_load64_splat(params->wasmsimd.exph_mask);
-  const v128_t vnanh = wasm_v128_load64_splat(params->wasmsimd.nanh);
+  const v128_t vexp_bias = wasm_u32x4_const_splat(UINT32_C(0x07800000));
+  const v128_t vscale_to_inf = wasm_f32x4_const_splat(0x1.0p+112f);
+  const v128_t vexpw_max = wasm_u32x4_const_splat(UINT32_C(0x7F800000));
+  const v128_t vscale_to_zero = wasm_f32x4_const_splat(0x1.0p-110f);
+  const v128_t vbias_min = wasm_u32x4_const_splat(UINT32_C(0x80004000));
+  const v128_t vmanth_mask = wasm_u32x4_const_splat(UINT32_C(0x00000FFF));
+  const v128_t vexph_mask = wasm_u32x4_const_splat(UINT32_C(0x00007C00));
+  const v128_t vnanh = wasm_u16x8_const_splat(UINT16_C(0x7E00));
 
   uint16_t* o = (uint16_t*) output;
   for (; batch >= 24 * sizeof(float); batch -= 24 * sizeof(float)) {
