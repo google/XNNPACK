@@ -151,7 +151,7 @@ static enum xnn_status create_fully_connected_nc(
   const bool block_wise = (block_size != 0);
   if (block_wise) {
     num_blocks = input_channels / block_size;
-    block_scale_bytes += num_blocks * sizeof(float);
+    block_scale_bytes += num_blocks * sizeof(uint16_t);
   }
 
   const size_t weights_stride =
@@ -265,10 +265,6 @@ static enum xnn_status create_fully_connected_nc(
           gemm_config->nr * (sizeof(float) + (block_size * sizeof(int8_t) / 2)));
 
         const size_t block_stride = /*weights*/block_size / 2 + sizeof(uint16_t);
-        const size_t weights_stride = /*weights*/k_stride * sizeof(int8_t) +
-            /*scales*/num_blocks * sizeof(uint16_t) +
-            /*ksum*/sizeof(float) +
-            /*bias*/sizeof(float);
 
         xnn_init_blockwise_scale_bf16_params(
             output_channels, gemm_config->nr, gemm_config->nr,
@@ -629,10 +625,10 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
     /*block_size=*/block_size,
     /*extra_bl_bytes=*/sizeof(uint16_t),
     /*blockwise_kernel_scale_params=*/kernel_scale,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*filter_is_nibble=*/true,
-    /*bias_element_size=*/sizeof(uint16_t),
+    /*bias_element_size=*/sizeof(float),
     /*pack_gemm_gio_w,=*/ NULL,
     /*pack_gemm_goi_w=*/ NULL,
     /*pack_gemm_goi_bl_w=*/gemm_config->pack_gemm_goi_bl,
