@@ -32,8 +32,7 @@
 void GEMMBenchmark(benchmark::State& state, xnn_qs8_gemm_minmax_ukernel_fn gemm,
                    xnn_init_qs8_conv_minmax_params_fn init_params,
                    xnn_pack_qs8_gemm_fn pack, size_t mr, size_t nr, size_t kr,
-                   size_t sr, benchmark::utils::IsaCheckFunction isa_check,
-                   bool extended_weights) {
+                   size_t sr, benchmark::utils::IsaCheckFunction isa_check) {
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
@@ -61,10 +60,8 @@ void GEMMBenchmark(benchmark::State& state, xnn_qs8_gemm_minmax_ukernel_fn gemm,
   std::vector<int32_t> b(nc);
   std::generate(b.begin(), b.end(), std::ref(i32rng));
 
-  const size_t w_element_size =
-      extended_weights ? sizeof(int16_t) : sizeof(int8_t);
-  const size_t w_size =
-      nc_stride * sizeof(int32_t) + kc_stride * nc_stride * w_element_size;
+  const size_t w_element_size = sizeof(int8_t);
+  const size_t w_size = nc_stride * sizeof(int32_t) + kc_stride * nc_stride * w_element_size;
   const size_t c_elements = mc * nc;
   const size_t num_buffers = 1 + benchmark::utils::DivideRoundUp<size_t>(
                                      benchmark::utils::GetMaxCacheSize(),
@@ -127,8 +124,7 @@ void GEMMBenchmark(benchmark::State& state,
                    xnn_qs8_qc8w_gemm_minmax_ukernel_fn gemm,
                    xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
                    xnn_pack_qs8_gemm_fn pack, size_t mr, size_t nr, size_t kr,
-                   size_t sr, benchmark::utils::IsaCheckFunction isa_check,
-                   bool extended_weights) {
+                   size_t sr, benchmark::utils::IsaCheckFunction isa_check) {
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
@@ -156,10 +152,8 @@ void GEMMBenchmark(benchmark::State& state,
   std::vector<int32_t> b(nc);
   std::generate(b.begin(), b.end(), std::ref(i32rng));
 
-  const size_t w_element_size =
-      extended_weights ? sizeof(int16_t) : sizeof(int8_t);
-  const size_t w_size =
-      nc_stride * sizeof(int32_t) + kc_stride * nc_stride * w_element_size;
+  const size_t w_element_size = sizeof(int8_t);
+  const size_t w_size = nc_stride * sizeof(int32_t) + kc_stride * nc_stride * w_element_size;
   const size_t c_elements = mc * nc;
   const size_t num_buffers = 1 + benchmark::utils::DivideRoundUp<size_t>(
                                      benchmark::utils::GetMaxCacheSize(),
@@ -214,23 +208,6 @@ void GEMMBenchmark(benchmark::State& state,
   state.counters["OPS"] =
       benchmark::Counter(uint64_t(state.iterations()) * 2 * mc * nc * kc,
                          benchmark::Counter::kIsRate);
-}
-
-void GEMMBenchmark(benchmark::State& state,
-                   xnn_qs8_qc8w_gemm_minmax_ukernel_fn gemm,
-                   xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
-                   xnn_pack_qs8_gemm_fn pack, size_t mr, size_t nr, size_t kr,
-                   size_t sr, benchmark::utils::IsaCheckFunction isa_check) {
-  return GEMMBenchmark(state, gemm, init_params, pack, mr, nr, kr, sr,
-                       isa_check, /*extended_weights=*/false);
-}
-
-void GEMMBenchmark(benchmark::State& state, xnn_qs8_gemm_minmax_ukernel_fn gemm,
-                   xnn_init_qs8_conv_minmax_params_fn init_params,
-                   xnn_pack_qs8_gemm_fn pack, size_t mr, size_t nr, size_t kr,
-                   size_t sr, benchmark::utils::IsaCheckFunction isa_check) {
-  return GEMMBenchmark(state, gemm, init_params, pack, mr, nr, kr, sr,
-                       isa_check, /*extended_weights=*/false);
 }
 
 void GEMMBenchmark(benchmark::State& state,
@@ -413,7 +390,7 @@ void GEMMBenchmark(benchmark::State& state,
   const size_t mc = state.range(0);
   const size_t nc = state.range(1);
   const size_t bl = state.range(3);
-  const size_t kc = round_up_po2(state.range(2), bl);
+  const size_t kc = round_up(state.range(2), bl);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
@@ -440,10 +417,10 @@ void GEMMBenchmark(benchmark::State& state,
   std::generate(a.begin(), a.end(), std::ref(i8rng));
   std::vector<uint8_t> k(nc * kc / 2);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
-  std::vector<float> kernel_scale2d(nc * k2 / bl);
+  std::vector<uint16_t> kernel_scale2d(nc * k2 / bl);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
   std::generate(kernel_scale2d.begin(), kernel_scale2d.end(),
-                std::ref(scalerng));
+                [&]() { return math_cvt_bf16_fp32(scalerng()); });
 
   std::vector<xnn_qd8_quantization_params> quantization_params(
       mc + XNN_EXTRA_QUANTIZATION_PARAMS);
@@ -607,7 +584,7 @@ void GEMMBenchmark(benchmark::State& state,
   const size_t mc = state.range(0);
   const size_t nc = state.range(1);
   const size_t bl = state.range(3);
-  const size_t kc = round_up_po2(state.range(2), bl);
+  const size_t kc = round_up(state.range(2), bl);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
@@ -634,10 +611,10 @@ void GEMMBenchmark(benchmark::State& state,
   std::generate(a.begin(), a.end(), std::ref(i8rng));
   std::vector<uint8_t> k(nc * kc / 2);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
-  std::vector<float> kernel_scale2d(nc * k2 / bl);
+  std::vector<uint16_t> kernel_scale2d(nc * k2 / bl);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
   std::generate(kernel_scale2d.begin(), kernel_scale2d.end(),
-                std::ref(scalerng));
+                [&]() { return math_cvt_bf16_fp32(scalerng()); });
 
   std::vector<xnn_qd8_quantization_params> quantization_params(
       mc + XNN_EXTRA_QUANTIZATION_PARAMS);

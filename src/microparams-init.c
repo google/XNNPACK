@@ -952,7 +952,8 @@ void xnn_init_blockwise_scale_fp32_params(
       const size_t tile_size = channels_tile;
       for (size_t tile_offset = 0; tile_offset < tile_size; tile_offset++) {
         size_t scale_index = (tile_start + tile_offset) * num_blocks + block_start;
-        unaligned_indexed_store_f32(packed_w, tile_offset, scale[scale_index]);
+        // 1/16 because the weight are << 4 in the innermost loop to save a shift
+        unaligned_indexed_store_f32(packed_w, tile_offset, scale[scale_index] / 16.0f);
       }
       packed_w = (void*) ((uintptr_t) packed_w + stride);
     }
@@ -963,7 +964,51 @@ void xnn_init_blockwise_scale_fp32_params(
       const size_t tile_size = min(channels - tile_start, channels_subtile);
       for (size_t tile_offset = 0; tile_offset < tile_size; tile_offset++) {
         size_t scale_index = (tile_start + tile_offset) * num_blocks + block_start;
-        unaligned_indexed_store_f32(packed_w, tile_offset, scale[scale_index]);
+        // 1/16 because the weight are << 4 in the innermost loop to save a shift
+        unaligned_indexed_store_f32(packed_w, tile_offset, scale[scale_index] / 16.0f);
+      }
+      packed_w = (void*) ((uintptr_t) packed_w + substride);
+    }
+  }
+}
+
+void xnn_init_blockwise_scale_bf16_params(
+  size_t channels,
+  size_t channels_tile,
+  size_t channels_subtile,
+  size_t stride,
+  size_t substride,
+  size_t num_blocks,
+  size_t block_stride,
+  size_t stride_offset,
+  const uint16_t scale[XNN_MIN_ELEMENTS(1)],
+  void* packed_w)
+{
+  void* packed_w_saved = packed_w;
+  for (size_t block_start = 0; block_start < num_blocks; block_start++) {
+    packed_w = (void*)((uintptr_t) packed_w_saved + block_start * block_stride);
+    const size_t tiled_channels = round_down_po2(channels, channels_tile);
+    size_t tile_start = 0;
+    for (; tile_start < tiled_channels; tile_start += channels_tile) {
+      const size_t tile_size = channels_tile;
+      for (size_t tile_offset = 0; tile_offset < tile_size; tile_offset++) {
+        size_t scale_index = (tile_start + tile_offset) * num_blocks + block_start;
+        // 1/16 because the weight are << 4 in the innermost loop to save a shift
+        float scale_16 = math_cvt_bf16_fp32(math_cvt_fp32_bf16(scale[scale_index]) / 16.0f);
+        unaligned_indexed_store_u16(packed_w, tile_offset, scale_16);
+      }
+      packed_w = (void*) ((uintptr_t) packed_w + stride);
+    }
+
+    packed_w = (void*) ((uintptr_t) packed_w - stride_offset);
+
+    for (; tile_start < channels; tile_start += channels_subtile) {
+      const size_t tile_size = min(channels - tile_start, channels_subtile);
+      for (size_t tile_offset = 0; tile_offset < tile_size; tile_offset++) {
+        size_t scale_index = (tile_start + tile_offset) * num_blocks + block_start;
+        // 1/16 because the weight are << 4 in the innermost loop to save a shift
+        float scale_16 = math_cvt_bf16_fp32(math_cvt_fp32_bf16(scale[scale_index]) / 16.0f);
+        unaligned_indexed_store_u16(packed_w, tile_offset, scale_16);
       }
       packed_w = (void*) ((uintptr_t) packed_w + substride);
     }
@@ -2286,6 +2331,23 @@ size_t xnn_init_f16_qc4w_minmax_avxvnni_params(
   params->avxvnni.gfni_shl4 = INT64_C(0x01020408);
   return sizeof(params->avxvnni);
 }
+
+size_t xnn_init_f16_qc4w_minmax_avxvnni_madd_params(
+  union xnn_f16_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t output_min,
+  uint16_t output_max,
+  uint8_t kernel_zero_point)
+{
+  assert(kernel_zero_point <= 15);
+  const float min_f32 = fp16_ieee_to_fp32_value(output_min);
+  const float max_f32 = fp16_ieee_to_fp32_value(output_max);
+  params->avxvnni.min = min_f32;
+  params->avxvnni.max = max_f32;
+  params->avxvnni.sign_mask = 0x80;
+  params->avxvnni.mask = 0x0F;
+  params->avxvnni.gfni_shl4 = INT64_C(0);
+  return sizeof(params->avxvnni);
+}
 #endif
 
 size_t xnn_init_f16_qb4w_minmax_scalar_params(
@@ -2521,6 +2583,20 @@ size_t xnn_init_f32_qc4w_minmax_avx512vnni_params(
   return sizeof(params->avx512vnni);
 }
 
+size_t xnn_init_f32_qc4w_minmax_avx512vnni_madd_params(
+  union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float output_min,
+  float output_max,
+  uint8_t kernel_zero_point)
+{
+  assert(kernel_zero_point <= 15);
+  params->avx512vnni.min = output_min;
+  params->avx512vnni.max = output_max;
+  params->avx512vnni.sign_mask = 0x80;
+  params->avx512vnni.mask = 0x0F;
+  params->avx512vnni.gfni_shl4 = INT64_C(0);  // Unused
+  return sizeof(params->avx512vnni);
+}
 
 size_t xnn_init_f32_qc4w_minmax_avxvnni_params(
   union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2534,6 +2610,21 @@ size_t xnn_init_f32_qc4w_minmax_avxvnni_params(
   params->avxvnni.sign_mask = 0x80;
   params->avxvnni.mask = 0xF0;
   params->avxvnni.gfni_shl4 = INT64_C(0x01020408);
+  return sizeof(params->avxvnni);
+}
+
+size_t xnn_init_f32_qc4w_minmax_avxvnni_madd_params(
+  union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float output_min,
+  float output_max,
+  uint8_t kernel_zero_point)
+{
+  assert(kernel_zero_point <= 15);
+  params->avxvnni.min = output_min;
+  params->avxvnni.max = output_max;
+  params->avxvnni.sign_mask = 0x80;
+  params->avxvnni.mask = 0x0F;
+  params->avxvnni.gfni_shl4 = INT64_C(0);  // Unused
   return sizeof(params->avxvnni);
 }
 

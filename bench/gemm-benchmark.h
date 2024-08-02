@@ -23,35 +23,13 @@
 void GEMMBenchmark(benchmark::State& state, xnn_qs8_gemm_minmax_ukernel_fn gemm,
                    xnn_init_qs8_conv_minmax_params_fn init_params,
                    xnn_pack_qs8_gemm_fn pack, size_t mr, size_t nr, size_t kr,
-                   size_t sr, benchmark::utils::IsaCheckFunction isa_check,
-                   bool extended_weights);
+                   size_t sr, benchmark::utils::IsaCheckFunction isa_check);
 
 void GEMMBenchmark(benchmark::State& state,
                    xnn_qs8_qc8w_gemm_minmax_ukernel_fn gemm,
                    xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
                    xnn_pack_qs8_gemm_fn pack, size_t mr, size_t nr, size_t kr,
-                   size_t sr, benchmark::utils::IsaCheckFunction isa_check,
-                   bool extended_weights);
-
-static void GEMMBenchmark(benchmark::State& state,
-                          xnn_qs8_qc8w_gemm_minmax_ukernel_fn gemm,
-                          xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
-                          xnn_pack_qs8_gemm_fn pack, size_t mr, size_t nr,
-                          size_t kr, size_t sr,
-                          benchmark::utils::IsaCheckFunction isa_check) {
-  return GEMMBenchmark(state, gemm, init_params, pack, mr, nr, kr, sr,
-                       isa_check, /*extended_weights=*/false);
-}
-
-static void GEMMBenchmark(benchmark::State& state,
-                          xnn_qs8_gemm_minmax_ukernel_fn gemm,
-                          xnn_init_qs8_conv_minmax_params_fn init_params,
-                          xnn_pack_qs8_gemm_fn pack, size_t mr, size_t nr,
-                          size_t kr, size_t sr,
-                          benchmark::utils::IsaCheckFunction isa_check) {
-  return GEMMBenchmark(state, gemm, init_params, pack, mr, nr, kr, sr,
-                       isa_check, /*extended_weights=*/false);
-}
+                   size_t sr, benchmark::utils::IsaCheckFunction isa_check);
 
 void GEMMBenchmark(benchmark::State& state,
                    xnn_qd8_f16_qc8w_gemm_ukernel_fn gemm,

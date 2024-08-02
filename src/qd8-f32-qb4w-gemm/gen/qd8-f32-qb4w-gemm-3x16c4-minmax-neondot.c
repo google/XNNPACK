@@ -57,7 +57,6 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x16c4__neondot(
   assert(bl <= kc);
   assert(bl != 0);
   assert(bl % 32 == 0);
-  size_t n_blocks = kc / bl;
   const int8x16_t vmask = vmovq_n_s8(INT8_C(0xF0));
   // Loop over groups of 16 columns.
   do {
@@ -82,7 +81,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x16c4__neondot(
     float32x4_t vout2x89AB = vmulq_f32(vksum89AB, vinput_zero_point2);
     float32x4_t vout2xCDEF = vmulq_f32(vksumCDEF, vinput_zero_point2);
 
-    for (size_t nb=0; nb < n_blocks; ++nb) {
+    for (size_t kb=0; kb < kc; kb += bl) {
       int32x4_t vacc0x0123 = vdupq_n_s32(0);
       int32x4_t vacc1x0123 = vdupq_n_s32(0);
       int32x4_t vacc0x4567 = vdupq_n_s32(0);
@@ -173,10 +172,10 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x16c4__neondot(
         vacc2x89AB = vdotq_lane_s32(vacc2x89AB, vb0123x89AB, va2x01234567, 0);
         vacc2xCDEF = vdotq_lane_s32(vacc2xCDEF, vb0123xCDEF, va2x01234567, 0);
       }
-      const float32x4_t vfilter_output_scale0123 = vld1q_f32(w); w = (const float*) w + 4;
-      const float32x4_t vfilter_output_scale4567 = vld1q_f32(w); w = (const float*) w + 4;
-      const float32x4_t vfilter_output_scale89AB = vld1q_f32(w); w = (const float*) w + 4;
-      const float32x4_t vfilter_output_scaleCDEF = vld1q_f32(w); w = (const float*) w + 4;
+      const float32x4_t vfilter_output_scale0123 = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+      const float32x4_t vfilter_output_scale4567 = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+      const float32x4_t vfilter_output_scale89AB = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+      const float32x4_t vfilter_output_scaleCDEF = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
 
       float32x4_t vf0x0123 = vcvtq_f32_s32(vacc0x0123);
       float32x4_t vf1x0123 = vcvtq_f32_s32(vacc1x0123);
@@ -204,19 +203,6 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x16c4__neondot(
       vout2xCDEF = vfmaq_f32(vout2xCDEF, vf2xCDEF, vfilter_output_scaleCDEF);
     }
 
-    const float32x4_t one_sixteenth = vdupq_n_f32(1/16.0);
-    vout0x0123 = vmulq_f32(vout0x0123, one_sixteenth);
-    vout0x4567 = vmulq_f32(vout0x4567, one_sixteenth);
-    vout0x89AB = vmulq_f32(vout0x89AB, one_sixteenth);
-    vout0xCDEF = vmulq_f32(vout0xCDEF, one_sixteenth);
-    vout1x0123 = vmulq_f32(vout1x0123, one_sixteenth);
-    vout1x4567 = vmulq_f32(vout1x4567, one_sixteenth);
-    vout1x89AB = vmulq_f32(vout1x89AB, one_sixteenth);
-    vout1xCDEF = vmulq_f32(vout1xCDEF, one_sixteenth);
-    vout2x0123 = vmulq_f32(vout2x0123, one_sixteenth);
-    vout2x4567 = vmulq_f32(vout2x4567, one_sixteenth);
-    vout2x89AB = vmulq_f32(vout2x89AB, one_sixteenth);
-    vout2xCDEF = vmulq_f32(vout2xCDEF, one_sixteenth);
     const float32x4_t vinput_scale01 = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[0].zero_point));
     vout0x0123 = vmulq_lane_f32(vout0x0123, vget_low_f32(vinput_scale01), 1);
     vout1x0123 = vmulq_lane_f32(vout1x0123, vget_high_f32(vinput_scale01), 1);

@@ -361,6 +361,41 @@ jobs:
         with:
           path: "/home/runner/.cache/bazel"
           key: "${{ github.job }}"
+  bazel-linux-x86_64-gcc-9:
+    runs-on: ubuntu-22.04-8core
+    timeout-minutes: 60
+    env:
+      CC: gcc-9
+      CXX: g++-9
+      BAZEL_DEFINES: --define=xnn_enable_avxvnni=false --define=xnn_enable_avx512amx=false --define=xnn_enable_avx512fp16=false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update apt
+        run: sudo apt update
+      - name: Install gcc-9
+        working-directory: ${{ github.workspace }}
+        run: |
+          sudo apt install gcc-9 g++-9
+      - name: Restore bazel cache
+        uses: actions/cache/restore@v4
+        with:
+          path: "/home/runner/.cache/bazel"
+          key: "${{ github.job }}"
+      - name: Build tests
+        run: |
+            bazel build ${BAZEL_DEFINES} test:all
+        working-directory: ${{ github.workspace }}
+      - name: Run tests
+        if: ${{ inputs.run-tests }}
+        run: |
+            bazel test ${BAZEL_DEFINES} --test_output=errors test:all
+        working-directory: ${{ github.workspace }}
+      - name: Save bazel cache
+        if: ${{ inputs.update-caches }}
+        uses: actions/cache/save@v4
+        with:
+          path: "/home/runner/.cache/bazel"
+          key: "${{ github.job }}"
   bazel-linux-aarch64:
     runs-on: arm-ubuntu-arm-22.04-4core
     timeout-minutes: 60

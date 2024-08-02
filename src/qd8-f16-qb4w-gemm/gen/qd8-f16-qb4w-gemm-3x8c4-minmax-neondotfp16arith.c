@@ -57,7 +57,6 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_3x8c4__neondotfp16arith(
   assert(bl <= kc);
   assert(bl != 0);
   assert(bl % 32 == 0);
-  size_t n_blocks = kc / bl;
   const int8x16_t vmask = vmovq_n_s8(INT8_C(0xF0));
   // Loop over groups of 8 columns.
   do {
@@ -74,7 +73,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_3x8c4__neondotfp16arith(
     float32x4_t vout2x0123 = vmulq_f32(vksum0123, vinput_zero_point2);
     float32x4_t vout2x4567 = vmulq_f32(vksum4567, vinput_zero_point2);
 
-    for (size_t nb=0; nb < n_blocks; ++nb) {
+    for (size_t kb=0; kb < kc; kb += bl) {
       int32x4_t vacc0x0123 = vdupq_n_s32(0);
       int32x4_t vacc1x0123 = vdupq_n_s32(0);
       int32x4_t vacc0x4567 = vdupq_n_s32(0);
@@ -133,8 +132,8 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_3x8c4__neondotfp16arith(
         vacc2x0123 = vdotq_lane_s32(vacc2x0123, vb0123x0123, va2x01234567, 0);
         vacc2x4567 = vdotq_lane_s32(vacc2x4567, vb0123x4567, va2x01234567, 0);
       }
-      const float32x4_t vfilter_output_scale0123 = vld1q_f32(w); w = (const float*) w + 4;
-      const float32x4_t vfilter_output_scale4567 = vld1q_f32(w); w = (const float*) w + 4;
+      const float32x4_t vfilter_output_scale0123 = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+      const float32x4_t vfilter_output_scale4567 = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
 
       float32x4_t vf0x0123 = vcvtq_f32_s32(vacc0x0123);
       float32x4_t vf1x0123 = vcvtq_f32_s32(vacc1x0123);
@@ -150,13 +149,6 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_3x8c4__neondotfp16arith(
       vout2x4567 = vfmaq_f32(vout2x4567, vf2x4567, vfilter_output_scale4567);
     }
 
-    const float32x4_t one_sixteenth = vdupq_n_f32(1/16.0);
-    vout0x0123 = vmulq_f32(vout0x0123, one_sixteenth);
-    vout0x4567 = vmulq_f32(vout0x4567, one_sixteenth);
-    vout1x0123 = vmulq_f32(vout1x0123, one_sixteenth);
-    vout1x4567 = vmulq_f32(vout1x4567, one_sixteenth);
-    vout2x0123 = vmulq_f32(vout2x0123, one_sixteenth);
-    vout2x4567 = vmulq_f32(vout2x4567, one_sixteenth);
     const float32x4_t vinput_scale01 = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[0].zero_point));
     vout0x0123 = vmulq_lane_f32(vout0x0123, vget_low_f32(vinput_scale01), 1);
     vout1x0123 = vmulq_lane_f32(vout1x0123, vget_high_f32(vinput_scale01), 1);

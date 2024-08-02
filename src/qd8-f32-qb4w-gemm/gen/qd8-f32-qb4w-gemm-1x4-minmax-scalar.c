@@ -51,8 +51,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4__scalar(
     float vout0x3 = vksum3 * vinput_zero_point0;
     w = (const float*) w + 4;
 
-    size_t n_blocks = kc / bl;
-    for (size_t nb = 0; nb < n_blocks; ++nb) {
+    for (size_t kb=0; kb < kc; kb += bl) {
       int32_t vacc0x0 = 0;
       int32_t vacc0x1 = 0;
       int32_t vacc0x2 = 0;
@@ -88,13 +87,13 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4__scalar(
     }
     // accumulate in float
       float vf0x0 = vacc0x0;
-      const float vfilter_output_scale0 = ((const float*) w)[0];
+      const float vfilter_output_scale0 = math_cvt_fp32_bf16(((const uint16_t*) w)[0]);
       float vf0x1 = vacc0x1;
-      const float vfilter_output_scale1 = ((const float*) w)[1];
+      const float vfilter_output_scale1 = math_cvt_fp32_bf16(((const uint16_t*) w)[1]);
       float vf0x2 = vacc0x2;
-      const float vfilter_output_scale2 = ((const float*) w)[2];
+      const float vfilter_output_scale2 = math_cvt_fp32_bf16(((const uint16_t*) w)[2]);
       float vf0x3 = vacc0x3;
-      const float vfilter_output_scale3 = ((const float*) w)[3];
+      const float vfilter_output_scale3 = math_cvt_fp32_bf16(((const uint16_t*) w)[3]);
 
       vf0x0 *= vfilter_output_scale0;
       vout0x0 += vf0x0;
@@ -104,13 +103,9 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4__scalar(
       vout0x2 += vf0x2;
       vf0x3 *= vfilter_output_scale3;
       vout0x3 += vf0x3;
-      w = (const float*) w + 4;
+      w = (const uint16_t*) w + 4;
     }
 
-    vout0x0 /= 16;
-    vout0x1 /= 16;
-    vout0x2 /= 16;
-    vout0x3 /= 16;
 
     const float vinput_scale0 = quantization_params[0].inv_scale;
     vout0x0 *= vinput_scale0;

@@ -39,6 +39,8 @@ const char* xnn_datatype_to_string(enum xnn_datatype type) {
       return "QPINT8";
     case xnn_datatype_int32:
      return "INT32";
+    case xnn_datatype_qbint4:
+     return "QBINT4";
   }
   XNN_UNREACHABLE;
   return NULL;

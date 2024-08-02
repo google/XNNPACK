@@ -13,6 +13,7 @@
 #include <stdint.h>
 
 #include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/unaligned.h"
 
 // SIMD vector type for s32 using SSE41.

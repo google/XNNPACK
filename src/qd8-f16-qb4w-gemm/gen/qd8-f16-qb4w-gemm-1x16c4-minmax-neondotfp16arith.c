@@ -45,7 +45,6 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x16c4__neondotfp16arith(
   assert(bl <= kc);
   assert(bl != 0);
   assert(bl % 32 == 0);
-  size_t n_blocks = kc / bl;
   const int8x16_t vmask = vmovq_n_s8(INT8_C(0xF0));
   // Loop over groups of 16 columns.
   do {
@@ -61,7 +60,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x16c4__neondotfp16arith(
     const float32x4_t vksumCDEF = vld1q_f32(w); w = (const float*) w + 4;
     float32x4_t vout0xCDEF = vmulq_f32(vksumCDEF, vinput_zero_point0);
 
-    for (size_t nb=0; nb < n_blocks; ++nb) {
+    for (size_t kb=0; kb < kc; kb += bl) {
       int32x4_t vacc0x0123 = vdupq_n_s32(0);
       int32x4_t vacc0x4567 = vdupq_n_s32(0);
       int32x4_t vacc0x89AB = vdupq_n_s32(0);
@@ -116,10 +115,10 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x16c4__neondotfp16arith(
         vacc0x89AB = vdotq_lane_s32(vacc0x89AB, vb0123x89AB, va0x01234567, 0);
         vacc0xCDEF = vdotq_lane_s32(vacc0xCDEF, vb0123xCDEF, va0x01234567, 0);
       }
-      const float32x4_t vfilter_output_scale0123 = vld1q_f32(w); w = (const float*) w + 4;
-      const float32x4_t vfilter_output_scale4567 = vld1q_f32(w); w = (const float*) w + 4;
-      const float32x4_t vfilter_output_scale89AB = vld1q_f32(w); w = (const float*) w + 4;
-      const float32x4_t vfilter_output_scaleCDEF = vld1q_f32(w); w = (const float*) w + 4;
+      const float32x4_t vfilter_output_scale0123 = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+      const float32x4_t vfilter_output_scale4567 = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+      const float32x4_t vfilter_output_scale89AB = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
+      const float32x4_t vfilter_output_scaleCDEF = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
 
       float32x4_t vf0x0123 = vcvtq_f32_s32(vacc0x0123);
       vout0x0123 = vfmaq_f32(vout0x0123, vf0x0123, vfilter_output_scale0123);
@@ -131,11 +130,6 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x16c4__neondotfp16arith(
       vout0xCDEF = vfmaq_f32(vout0xCDEF, vf0xCDEF, vfilter_output_scaleCDEF);
     }
 
-    const float32x4_t one_sixteenth = vdupq_n_f32(1/16.0);
-    vout0x0123 = vmulq_f32(vout0x0123, one_sixteenth);
-    vout0x4567 = vmulq_f32(vout0x4567, one_sixteenth);
-    vout0x89AB = vmulq_f32(vout0x89AB, one_sixteenth);
-    vout0xCDEF = vmulq_f32(vout0xCDEF, one_sixteenth);
     const float32x4_t vinput_scale0 = vld1q_dup_f32(&quantization_params[0].inv_scale);
     vout0x0123 = vmulq_f32(vout0x0123, vinput_scale0);
     vout0x4567 = vmulq_f32(vout0x4567, vinput_scale0);
