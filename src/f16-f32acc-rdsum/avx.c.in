@@ -29,7 +29,7 @@ void xnn_f16_f32acc_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__f16c_c${CHAN
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256 vscale = _mm256_set1_ps(params->avx.scale);
+  const __m256 vscale = _mm256_set1_ps(params->scale);
 
   size_t input_increment = ${ACCUMULATORS} * input_stride;
   for (; channels >= ${CHANNELS_BATCH}; channels -= ${CHANNELS_BATCH}) {

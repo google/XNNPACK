@@ -64,6 +64,6 @@ void xnn_f32_rsum_ukernel__hvx_u128_acc2(
 
   float partial_sum = *((float*) &vacc0);
 
-  const float vscale = params->scalar.scale;
+  const float vscale = params->scale;
   *output += partial_sum * vscale;
 }

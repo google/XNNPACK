@@ -47,7 +47,7 @@ void xnn_f32_rsum_ukernel__scalar_u4_acc2(
       batch -= sizeof(float);
     } while (batch != 0);
   }
-  const float vscale = params->scalar.scale;
+  const float vscale = params->scale;
   vacc0 *= vscale;
   *output += vacc0;
 }

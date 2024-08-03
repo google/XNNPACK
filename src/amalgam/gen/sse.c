@@ -7389,7 +7389,7 @@ void xnn_f32_rdsum_ukernel_7p7x__sse_c16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vscale = _mm_load_ps(params->sse.scale);
+  const __m128 vscale = _mm_set1_ps(params->scale);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 16; channels -= 16) {
@@ -7759,7 +7759,7 @@ void xnn_f32_rsum_ukernel__sse_u16_acc4(
     } while (batch != 0);
   }
   vacc0 = _mm_add_ss(vacc0, _mm_shuffle_ps(vacc0, vacc0, _MM_SHUFFLE(1, 1, 1, 1)));
-  vacc0 = _mm_mul_ss(vacc0, _mm_load_ss(&params->scalar.scale));
+  vacc0 = _mm_mul_ss(vacc0, _mm_load_ss(&params->scale));
   *output += _mm_cvtss_f32(vacc0);
 }
 
