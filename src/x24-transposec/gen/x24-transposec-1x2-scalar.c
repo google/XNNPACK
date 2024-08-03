@@ -20,8 +20,7 @@ void xnn_x24_transposec_ukernel__1x2_scalar(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x24_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(output_stride >= block_height * 3);
   assert(input_stride >= block_width * 3);

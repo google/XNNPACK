@@ -296,7 +296,7 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT * 7}_bw_${TILE_WIDTH * 23}_ies_${ELEMENT_SIZ
 """
 
 
-def generate_test_cases(ukernel, tile_height, tile_width, element_size, isa, init_fn):
+def generate_test_cases(ukernel, tile_height, tile_width, element_size, isa):
   """Generates all tests cases for a Vector Convert Operation micro-kernel.
 
   Args:
@@ -306,15 +306,12 @@ def generate_test_cases(ukernel, tile_height, tile_width, element_size, isa, ini
     element_size: Size of each element in bytes.
     isa: instruction set required to run the micro-kernel. Generated unit test
       will skip execution if the host processor doesn't support this ISA.
-    init_fn: C name of the function to initialize microkernel parameters.
 
   Returns:
     Code for the test case.
   """
   _, test_name = ukernel.split("_", 1)
   test_args = [ukernel]
-  if init_fn:
-    test_args.append(init_fn)
 
   return xngen.preprocess(
       TRANSPOSE_TEST_TEMPLATE, {
@@ -349,24 +346,22 @@ def main(args):
 #include <gtest/gtest.h>
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
 #include "xnnpack/transpose.h"
 #include "transpose-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
-      init_fn = ukernel_spec.get("init")
 
       tile_height, tile_width, element_size, arch, isa = split_ukernel_name(name)
 
       if element_size is not None:
-        test_case = generate_test_cases(name, tile_height, tile_width, element_size, isa, init_fn)
+        test_case = generate_test_cases(name, tile_height, tile_width, element_size, isa)
       else:
-        test_case = generate_test_cases(name, tile_height, tile_width, 1, isa, init_fn)
-        test_case += generate_test_cases(name, tile_height, tile_width, 3, isa, init_fn)
-        test_case += generate_test_cases(name, tile_height, tile_width, 5, isa, init_fn)
-      tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa, init_fn)
+        test_case = generate_test_cases(name, tile_height, tile_width, 1, isa)
+        test_case += generate_test_cases(name, tile_height, tile_width, 3, isa)
+        test_case += generate_test_cases(name, tile_height, tile_width, 5, isa)
+      tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     xnncommon.overwrite_if_changed(options.output, tests)
 

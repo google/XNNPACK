@@ -29,13 +29,6 @@ struct xnn_transpose_subconfig {
     xnn_transposec_ukernel_fn const_size_ukernel;
     xnn_transposev_ukernel_fn variable_size_ukernel;
   };
-  union {
-    xnn_init_x8_transpose_params_fn x8;
-    xnn_init_x16_transpose_params_fn x16;
-    xnn_init_x24_transpose_params_fn x24;
-    xnn_init_x32_transpose_params_fn x32;
-    xnn_init_x64_transpose_params_fn x64;
-  } init;
   // Maximum number of elements to process per ukernel call.
   size_t tile_size;
 };

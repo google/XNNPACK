@@ -275,33 +275,21 @@ static enum xnn_status reshape_transpose_nd(
       context->const_size_ukernel = transpose_config->x8.const_size_ukernel;
       transpose_op->compute[0].tile[0] = transpose_config->x8.tile_size;
       transpose_op->compute[0].tile[1] = transpose_config->x8.tile_size;
-      if (transpose_config->x8.init.x16 != NULL) {
-        transpose_config->x8.init.x8(&context->params.x8_params);
-      }
       break;
     case 2:
       transpose_op->compute[0].tile[0] = transpose_config->x16.tile_size;
       transpose_op->compute[0].tile[1] = transpose_config->x16.tile_size;
       context->const_size_ukernel = transpose_config->x16.const_size_ukernel;
-      if (transpose_config->x16.init.x16 != NULL) {
-        transpose_config->x16.init.x16(&context->params.x16_params);
-      }
       break;
     case 3:
       transpose_op->compute[0].tile[0] = transpose_config->x24.tile_size;
       transpose_op->compute[0].tile[1] = transpose_config->x24.tile_size;
       context->const_size_ukernel = transpose_config->x24.const_size_ukernel;
-      if (transpose_config->x24.init.x24 != NULL) {
-        transpose_config->x24.init.x24(&context->params.x24_params);
-      }
       break;
     case 4:
       transpose_op->compute[0].tile[0] = transpose_config->x32.tile_size;
       transpose_op->compute[0].tile[1] = transpose_config->x32.tile_size;
       context->const_size_ukernel = transpose_config->x32.const_size_ukernel;
-      if (transpose_config->x32.init.x32 != NULL) {
-        transpose_config->x32.init.x32(&context->params.x32_params);
-      }
       break;
     default:
       transpose_op->compute[0].tile[0] = transpose_config->xx.tile_size;
