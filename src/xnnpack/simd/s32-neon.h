@@ -39,7 +39,7 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
 }
 
 static XNN_INLINE xnn_simd_s32_t xnn_cvt_s32_s16(xnn_simd_s32_t a, xnn_simd_s32_t b) {
-  return vcombine_s16(vqmovn_s32(a), vqmovn_s32(b));
+  return vreinterpretq_s32_s16(vcombine_s16(vqmovn_s32(a), vqmovn_s32(b)));
 }
 
 static XNN_INLINE float32x4_t xnn_cvt_s32_f32(xnn_simd_s32_t a) {

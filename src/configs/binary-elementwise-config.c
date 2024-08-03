@@ -39,7 +39,6 @@ static struct xnn_binary_elementwise_config qs16_vmul_config = {0};
 static struct xnn_binary_elementwise_config qu8_vadd_config = {0};
 static struct xnn_binary_elementwise_config qu8_vmul_config = {0};
 
-<<<<<<< HEAD
 XNN_INIT_ONCE_GUARD(f16_vadd);
 XNN_INIT_ONCE_GUARD(f16_vdiv);
 XNN_INIT_ONCE_GUARD(f16_vmax);
@@ -1397,118 +1396,6 @@ static void init_qu8_vmul_config(void) {
   #endif
 }
 
-<<<<<<< HEAD
-=======
-#if XNN_PLATFORM_WINDOWS
-  static BOOL CALLBACK init_f16_vadd_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_vadd_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_vdiv_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_vdiv_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_vmax_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_vmax_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_vmin_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_vmin_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_vmul_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_vmul_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_vsub_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_vsub_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_vsqrdiff_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_vsqrdiff_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_vadd_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_vadd_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_vcopysign_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_vcopysign_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qs16_vmul_config_windows(PINIT_ONCE init_once,
-                                                     PVOID parameter,
-                                                     PVOID* context) {
-    init_qs16_vmul_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_s32_vmul_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_s32_vmul_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_vdiv_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_vdiv_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_vmax_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_vmax_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_vmin_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_vmin_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_vmul_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_vmul_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_vsub_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_vsub_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_vsqrdiff_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_vsqrdiff_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qs8_vadd_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qs8_vadd_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qs8_vmul_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qs8_vmul_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qu8_vadd_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qu8_vadd_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qu8_vmul_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qu8_vmul_config();
-    return TRUE;
-  }
-#endif
-
->>>>>>> 93200e0f5 (Add s16 vmul operation)
 const struct xnn_binary_elementwise_config* xnn_init_f16_vadd_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
@@ -1595,12 +1482,7 @@ const struct xnn_binary_elementwise_config* xnn_init_qs16_vmul_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-  InitOnceExecuteOnce(&init_guard_qs16_vmul, &init_qs16_vmul_config_windows,
-                      NULL, NULL);
-#else
-  pthread_once(&init_guard_qs16_vmul, &init_qs16_vmul_config);
-#endif
+  XNN_INIT_ONCE(qs16_vmul);
   return &qs16_vmul_config;
 }
 
