@@ -60,12 +60,12 @@ void f32_vrndz(benchmark::State& state, xnn_f32_vround_ukernel_fn ukernel,
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_vrndz, sse2_u4,
                     xnn_f32_vrndz_ukernel__sse2_u4,
-                    xnn_init_f32_rnd_sse2_params)
+                    /*init_params=*/nullptr)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vrndz, sse2_u8,
                     xnn_f32_vrndz_ukernel__sse2_u8,
-                    xnn_init_f32_rnd_sse2_params)
+                    /*init_params=*/nullptr)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vrndz, sse41_u4,
@@ -82,13 +82,13 @@ void f32_vrndz(benchmark::State& state, xnn_f32_vround_ukernel_fn ukernel,
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vrndz, avx_u8,
                     xnn_f32_vrndz_ukernel__avx_u8,
-                    xnn_init_f32_rnd_avx_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vrndz, avx_u16,
                     xnn_f32_vrndz_ukernel__avx_u16,
-                    xnn_init_f32_rnd_avx_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();

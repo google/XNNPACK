@@ -678,11 +678,6 @@ DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_scalar_expm1minus_rr1_p6
   XNN_INTERNAL size_t fn_name(                             \
     union xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)]);
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F32_RND_PARAMS_FUNCTION(xnn_init_f32_rnd_sse2_params)
-  DECLARE_INIT_F32_RND_PARAMS_FUNCTION(xnn_init_f32_rnd_avx_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
 
 #define DECLARE_INIT_F16_ELU_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                            \
