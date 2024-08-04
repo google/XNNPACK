@@ -156,6 +156,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
   return vreinterpretq_f32_u32(vceqq_f32(a, b));
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_rem_f32(xnn_simd_f32_t a,
+                                             xnn_simd_f32_t b) {
+  xnn_simd_f32_t quotient = vcvtq_f32_s32(vcvtq_s32_f32(xnn_div_f32(a, b)));
+  return vsubq_f32(a, vmulq_f32(quotient, b));
+}
+
 // Special functions.
 #define XNN_SIMD_HAVE_RCP_F32 1
 #define XNN_SIMD_NUM_RCP_ITER_F32 2

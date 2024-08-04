@@ -26,6 +26,7 @@ class VBinaryMicrokernelTester {
     Max,
     Min,
     Mul,
+    Rem,
     Sub,
     SqrDiff,
   };

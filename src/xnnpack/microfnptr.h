@@ -1813,6 +1813,14 @@ typedef void (*xnn_f32_vcopysign_ukernel_fn)(
     float* output,
     const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+// REMAINDER: Vector REMAINDER (F32 bit)elementwise
+
+typedef void (*xnn_f32_vrem_ukernel_fn)(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // MULTIPLY: Vector Multiply (S32 bit)elementwise
 

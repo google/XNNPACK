@@ -475,6 +475,9 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-vrelu/gen/f32-vrelu-scalar-u2.c
   src/f32-vrelu/gen/f32-vrelu-scalar-u4.c
   src/f32-vrelu/gen/f32-vrelu-scalar-u8.c
+  src/f32-vrem/gen/f32-vrem-scalar.c
+  src/f32-vrem/gen/f32-vremc-scalar.c
+  src/f32-vrem/gen/f32-vrremc-scalar.c
   src/f32-vrnd/gen/f32-vrndd-scalar-libm-u1.c
   src/f32-vrnd/gen/f32-vrndd-scalar-libm-u2.c
   src/f32-vrnd/gen/f32-vrndd-scalar-libm-u4.c

@@ -227,9 +227,10 @@ void VBinaryMicrokernelTester::Test(
       std::fill(y.begin(), y.end(), nanf(""));
     }
     const float* a_data = inplace_a() ? y.data() : a.data();
-    const float* b_data = inplace_b() ? y.data() : b.data();
+    float* b_data = inplace_b() ? y.data() : b.data();
 
     // Compute reference results.
+    int q;
     for (size_t i = 0; i < batch_size(); i++) {
       switch (op_type) {
         case OpType::Add:
@@ -249,6 +250,11 @@ void VBinaryMicrokernelTester::Test(
           break;
         case OpType::Mul:
           y_ref[i] = a_data[i] * b_data[i];
+          break;
+        case OpType::Rem:
+          if (b_data[i] == 0) b_data[i] = 1;
+          q = a_data[i] / b_data[i];
+          y_ref[i] = a_data[i] - q * b_data[i];
           break;
         case OpType::SqrDiff: {
           const float diff = a_data[i] - b_data[i];

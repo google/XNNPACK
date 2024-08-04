@@ -98,6 +98,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   return wasm_f32x4_neg(a);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_rem_f32(xnn_simd_f32_t a,
+                                             xnn_simd_f32_t b) {
+  xnn_simd_f32_t quotient = wasm_f32x4_floor(wasm_f32x4_div(a, b));
+  return wasm_f32x4_sub(a, wasm_f32x4_mul(quotient, b));
+}
+
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {

@@ -143,6 +143,7 @@ tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f3
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f32-vmul-minmax.yaml --output test/f32-vmul-minmax.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f32-vmul-relu.yaml   --output test/f32-vmul-relu.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f32-vmul.yaml        --output test/f32-vmul.cc &
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f32-vrem.yaml   --output test/f32-vrem.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f32-vsqrdiff.yaml    --output test/f32-vsqrdiff.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f32-vsub-minmax.yaml --output test/f32-vsub-minmax.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f32-vsub-relu.yaml   --output test/f32-vsub-relu.cc &
@@ -160,10 +161,12 @@ tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f3
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f32-vmulc-minmax.yaml  --output test/f32-vmulc-minmax.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f32-vmulc-relu.yaml    --output test/f32-vmulc-relu.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f32-vmulc.yaml         --output test/f32-vmulc.cc &
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester  --spec test/f32-vremc.yaml   --output test/f32-vremc.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f32-vrcopysignc.yaml   --output test/f32-vrcopysignc.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f32-vrdivc-minmax.yaml --output test/f32-vrdivc-minmax.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f32-vrdivc-relu.yaml   --output test/f32-vrdivc-relu.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f32-vrdivc.yaml        --output test/f32-vrdivc.cc &
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester  --spec test/f32-vrremc.yaml   --output test/f32-vrremc.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f32-vrsubc-minmax.yaml --output test/f32-vrsubc-minmax.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f32-vrsubc-relu.yaml   --output test/f32-vrsubc-relu.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f32-vrsubc.yaml        --output test/f32-vrsubc.cc &

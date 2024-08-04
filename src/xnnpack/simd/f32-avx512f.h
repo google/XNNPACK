@@ -96,6 +96,13 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   return xnn_sub_f32(xnn_zero_f32(), a);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_rem_f32(xnn_simd_f32_t a,
+                                             xnn_simd_f32_t b) {
+  xnn_simd_f32_t quotient =
+      _mm512_cvtepi32_ps(_mm512_cvttps_epi32(_mm512_div_ps(a, b)));
+  return _mm512_sub_ps(a, _mm512_mul_ps(quotient, b));
+}
+
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {

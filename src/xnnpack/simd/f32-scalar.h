@@ -119,6 +119,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
   return a == b ? ones : 0.0f;
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_rem_f32(xnn_simd_f32_t a,
+                                             xnn_simd_f32_t b) {
+  int q = a / b;
+  return a - q * b;
+}
+
 // Special functions.
 #define XNN_SIMD_HAVE_RCP_F32 0
 #define XNN_SIMD_HAVE_RSQRT_F32 0
