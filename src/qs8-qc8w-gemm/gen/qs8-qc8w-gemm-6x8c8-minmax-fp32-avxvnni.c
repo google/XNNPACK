@@ -72,10 +72,10 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_6x8c8__avxvnni(
     c5 = c4;
   }
 
-  const __m256i vsign_mask =_mm256_set1_epi8(params->fp32_avxvnni.sign_mask);  // 0x80
+  const __m256i vsign_mask = _mm256_load_si256((const __m256i*) params->fp32_avxvnni.sign_mask);  // 0x80
   const __m256 voutput_max_less_zero_point = _mm256_set1_ps(params->fp32_avxvnni.output_max_less_zero_point);
   const __m256i voutput_zero_point = _mm256_set1_epi32(params->fp32_avxvnni.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avxvnni.output_min);  // *** check params
+  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avxvnni.output_min);
   do {
     __m256i vacc0x0123 = _mm256_cvtepu32_epi64(_mm_load_si128((const __m128i*) w));
     __m256i vacc0x4567 = _mm256_cvtepu32_epi64(_mm_load_si128((const __m128i*) ((const int32_t*) w + 4)));
