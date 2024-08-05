@@ -123,9 +123,11 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_12x8c8__avx256skx_madd(
   const __m256i vinput_zero_point11 = _mm256_set1_epi32((int) quantization_params[11].zero_point + 128);
   const __m256 voutput_min = _mm256_set1_ps(params->avxvnni.min);
   const __m256 voutput_max = _mm256_set1_ps(params->avxvnni.max);
-  const __m256i vsign_mask = _mm256_set1_epi8(params->avxvnni.sign_mask);  // 0x80
-  const __m256i vmask = _mm256_set1_epi8(params->avxvnni.mask);  // 0x0F
-  assert(params->avxvnni.mask == (int8_t) 0x0F);
+  const __m256i vsign_mask = _mm256_load_si256((const __m256i*) params->avxvnni.sign_mask);  // 0x80
+  const __m256i vmask = _mm256_load_si256((const __m256i*) params->avxvnni.mask);  // 0x0F
+  assert(params->avxvnni.mask[0] == (int8_t) 0x0F);
+  const __m256i vzero_point = _mm256_load_si256((const __m256i*) params->avxvnni.zero_point);  // 8
+  const __m256i vsixteen = _mm256_load_si256((const __m256i*) params->avxvnni.sixteen);  // 16
   do {
     const __m256i vksum01234567 = _mm256_load_si256(w);
     __m256i vsum0x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point0);
