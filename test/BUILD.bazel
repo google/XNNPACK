@@ -2090,6 +2090,7 @@ xnnpack_unit_test(
     ],
 ) for operator in [
     "add2",
+    "and",
     "copysign",
     "divide2",
     "maximum2",

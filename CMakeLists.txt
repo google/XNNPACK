@@ -379,6 +379,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph.c
   src/subgraph/abs.c
   src/subgraph/add2.c
+  src/subgraph/and.c
   src/subgraph/argmax-pooling-2d.c
   src/subgraph/average-pooling-2d.c
   src/subgraph/bankers-rounding.c
@@ -1798,6 +1799,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(add2-reshape-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(add2-reshape-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME add2-reshape-test COMMAND add2-reshape-test)
+
+    ADD_EXECUTABLE(and-test test/and.cc)
+    TARGET_INCLUDE_DIRECTORIES(and-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(and-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME and-test COMMAND and-test)
 
     ADD_EXECUTABLE(argmax-pooling-2d-test test/argmax-pooling-2d.cc)
     TARGET_INCLUDE_DIRECTORIES(argmax-pooling-2d-test PRIVATE src test)
