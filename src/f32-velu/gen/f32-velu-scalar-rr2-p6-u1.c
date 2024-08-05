@@ -26,20 +26,21 @@ void xnn_f32_velu_ukernel__scalar_rr2_p6_u1(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float vprescale = params->scalar_rr2_p6.prescale;
-  const float valpha = params->scalar_rr2_p6.alpha;
-  const float vbeta = params->scalar_rr2_p6.beta;
-  const float vmagic_bias = params->scalar_rr2_p6.magic_bias;
-  const float vlog2e = params->scalar_rr2_p6.log2e;
-  const float vsat_cutoff = params->scalar_rr2_p6.sat_cutoff;
-  const float vminus_ln2_hi = params->scalar_rr2_p6.minus_ln2_hi;
-  const float vminus_ln2_lo = params->scalar_rr2_p6.minus_ln2_lo;
-  const float vc6 = params->scalar_rr2_p6.c6;
-  const float vc5 = params->scalar_rr2_p6.c5;
-  const float vc4 = params->scalar_rr2_p6.c4;
-  const float vc3 = params->scalar_rr2_p6.c3;
-  const float vc2 = params->scalar_rr2_p6.c2;
-  const float vone = params->scalar_rr2_p6.one;
+  const float vsat_cutoff = -0x1.154246p+4f;
+  const float vmagic_bias = 0x1.8000FEp23f;
+  const float vlog2e = 0x1.715476p+0f;
+  const float vminus_ln2_hi = -0x1.62E440p-1f;
+  const float vminus_ln2_lo = 0x1.0105C6p-21f;
+  const float vc6 = 0x1.6b7338p-10f;
+  const float vc5 = 0x1.12278Ep-7f;
+  const float vc4 = 0x1.555716p-5f;
+  const float vc3 = 0x1.5554B0p-3f;
+  const float vc2 = 0x1.FFFFFEp-2f;
+  const float vone = 1.0f;
+
+  const float vprescale = params->scalar.prescale;
+  const float valpha = params->scalar.alpha;
+  const float vbeta = params->scalar.beta;
 
   do {
     float vx = *input++;
