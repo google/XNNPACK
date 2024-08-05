@@ -142,6 +142,7 @@ enum xnn_operator_type {
   xnn_operator_type_prelu_nc_f32,
   xnn_operator_type_reciprocal_square_root_nc_f16,
   xnn_operator_type_reciprocal_square_root_nc_f32,
+  xnn_operator_type_remainder_nd_f32,
   xnn_operator_type_resize_bilinear_nchw_f16,
   xnn_operator_type_resize_bilinear_nchw_f32,
   xnn_operator_type_resize_bilinear_nhwc_f16,

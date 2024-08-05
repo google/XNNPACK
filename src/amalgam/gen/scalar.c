@@ -33133,6 +33133,128 @@ void xnn_f32_vrcopysignc_ukernel__scalar_u2(
   }
 }
 
+void xnn_f32_vrem_ukernel__scalar_u2(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_b != NULL);
+  assert(input_a != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_f32 == 1);
+
+  for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
+    xnn_simd_f32_t vin1_0 = xnn_loadu_f32(input_a);
+    xnn_simd_f32_t vin1_1 = xnn_loadu_f32(input_a + 1 * xnn_simd_size_f32);
+    input_a += 2;
+
+    xnn_simd_f32_t vin2_0 = xnn_loadu_f32(input_b);
+    xnn_simd_f32_t vin2_1 = (xnn_loadu_f32(input_b + 1 * xnn_simd_size_f32));
+    input_b += 2;
+
+    xnn_simd_f32_t vy_0 = xnn_rem_f32(vin1_0, vin2_0);
+    xnn_simd_f32_t vy_1 = xnn_rem_f32(vin1_1, vin2_1);
+
+    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
+    output += 2;
+  }
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    xnn_simd_f32_t vin1 = xnn_loadu_f32(input_a);
+    input_a += xnn_simd_size_f32;
+
+    xnn_simd_f32_t vin2 = xnn_loadu_f32(input_b);
+    input_b += xnn_simd_size_f32;
+
+    xnn_simd_f32_t vy = xnn_rem_f32(vin1, vin2);
+
+    xnn_storeu_f32(output, vy);
+    output += xnn_simd_size_f32;
+  }
+}
+
+void xnn_f32_vremc_ukernel__scalar_u2(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_b != NULL);
+  assert(input_a != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_f32 == 1);
+
+  xnn_simd_f32_t vin2 = xnn_set1_f32(*input_b);
+
+  for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
+    xnn_simd_f32_t vin1_0 = xnn_loadu_f32(input_a);
+    xnn_simd_f32_t vin1_1 = xnn_loadu_f32(input_a + 1 * xnn_simd_size_f32);
+    input_a += 2;
+
+    xnn_simd_f32_t vy_0 = xnn_rem_f32(vin1_0, vin2);
+    xnn_simd_f32_t vy_1 = xnn_rem_f32(vin1_1, vin2);
+
+    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
+    output += 2;
+  }
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    xnn_simd_f32_t vin1 = xnn_loadu_f32(input_a);
+    input_a += xnn_simd_size_f32;
+
+    xnn_simd_f32_t vy = xnn_rem_f32(vin1, vin2);
+
+    xnn_storeu_f32(output, vy);
+    output += xnn_simd_size_f32;
+  }
+}
+
+void xnn_f32_vrremc_ukernel__scalar_u2(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_b != NULL);
+  assert(input_a != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_f32 == 1);
+
+  xnn_simd_f32_t vin1 = xnn_set1_f32(*input_b);
+
+  for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
+    xnn_simd_f32_t vin2_0 = xnn_loadu_f32(input_a);
+    xnn_simd_f32_t vin2_1 = (xnn_loadu_f32(input_a + 1 * xnn_simd_size_f32));
+    input_a += 2;
+
+    xnn_simd_f32_t vy_0 = xnn_rem_f32(vin1, vin2_0);
+    xnn_simd_f32_t vy_1 = xnn_rem_f32(vin1, vin2_1);
+
+    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
+    output += 2;
+  }
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    xnn_simd_f32_t vin2 = xnn_loadu_f32(input_a);
+    input_a += xnn_simd_size_f32;
+
+    xnn_simd_f32_t vy = xnn_rem_f32(vin1, vin2);
+
+    xnn_storeu_f32(output, vy);
+    output += xnn_simd_size_f32;
+  }
+}
+
 void xnn_f32_vsqr_ukernel__scalar_u4(
     size_t batch,
     const float* input,

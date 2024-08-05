@@ -1637,6 +1637,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(reciprocal-square-root-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME reciprocal-square-root-nc-test COMMAND reciprocal-square-root-nc-test)
 
+    ADD_EXECUTABLE(remainder-nd-test test/remainder-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(remainder-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(remainder-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME remainder-nd-test COMMAND remainder-nd-test)
+
     ADD_EXECUTABLE(resize-bilinear-nhwc-test test/resize-bilinear-nhwc.cc)
     TARGET_INCLUDE_DIRECTORIES(resize-bilinear-nhwc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(resize-bilinear-nhwc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)

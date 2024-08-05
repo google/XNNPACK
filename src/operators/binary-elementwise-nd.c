@@ -758,6 +758,28 @@ enum xnn_status xnn_create_squared_difference_nd_f32(
     squared_difference_op_out);
 }
 
+enum xnn_status xnn_create_remainder_nd_f32(
+    uint32_t flags,
+    xnn_operator_t* remainder_op_out)
+{
+  const struct xnn_binary_elementwise_config* f32_remainder_config = xnn_init_f32_vrem_config();
+  if (f32_remainder_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+      xnn_operator_type_to_string(xnn_operator_type_remainder_nd_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
+  union xnn_f32_default_params params;
+
+  return create_binary_elementwise_nd(
+    flags,
+    &params,
+    &params,
+    sizeof(params),
+    xnn_operator_type_remainder_nd_f32,
+    &f32_remainder_config->linear,
+    remainder_op_out);
+}
 
 enum xnn_status xnn_create_multiply_nd_s32(
     uint32_t flags,
@@ -1497,6 +1519,24 @@ enum xnn_status xnn_reshape_squared_difference_nd_f32(
     threadpool);
 }
 
+enum xnn_status xnn_reshape_remainder_nd_f32(
+    xnn_operator_t remainder_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    pthreadpool_t threadpool)
+{
+
+  return reshape_binary_elementwise_nd(
+    remainder_op, xnn_operator_type_remainder_nd_f32,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    &remainder_op->params.f32_default, sizeof(remainder_op->params.f32_default),
+    &remainder_op->params.f32_default, sizeof(remainder_op->params.f32_default),
+    threadpool);
+}
 
 enum xnn_status xnn_reshape_multiply_nd_s32(
     xnn_operator_t mul_op,
@@ -1824,6 +1864,16 @@ enum xnn_status xnn_setup_subtract_nd_f16(
     input1, input2, output);
 }
 
+enum xnn_status xnn_setup_remainder_nd_f32(
+    xnn_operator_t remainder_op,
+    const float* input1,
+    const float* input2,
+    float* output)
+{
+  return setup_binary_elementwise_nd(
+    remainder_op, xnn_operator_type_remainder_nd_f32,
+    input1, input2, output);
+}
 
 enum xnn_status xnn_setup_multiply_nd_s32(
     xnn_operator_t mul_op,

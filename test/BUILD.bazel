@@ -1582,6 +1582,7 @@ xnnpack_binary(
     "minimum_nd_eager",
     "multiply_nd",
     "multiply_nd_eager",
+    "remainder_nd",
     "squared_difference_nd",
     "squared_difference_nd_eager",
     "subtract_nd",

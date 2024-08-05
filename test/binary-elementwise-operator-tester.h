@@ -30,6 +30,7 @@ class BinaryElementwiseOperatorTester {
     Maximum,
     Minimum,
     Multiply,
+    Remainder,
     Subtract,
     SquaredDifference,
   };
@@ -158,6 +159,7 @@ class BinaryElementwiseOperatorTester {
   size_t iterations() const { return this->iterations_; }
 
   float Compute(float a, float b) const {
+    int temp;
     switch (operation_type()) {
       case OperationType::Add:
         return a + b;
@@ -171,6 +173,9 @@ class BinaryElementwiseOperatorTester {
         return std::min<float>(a, b);
       case OperationType::Multiply:
         return a * b;
+      case OperationType::Remainder:
+        temp = a / b;
+        return a - temp * b;
       case OperationType::Subtract:
         return a - b;
       case OperationType::SquaredDifference:
@@ -181,6 +186,7 @@ class BinaryElementwiseOperatorTester {
   }
 
   int32_t Compute(int32_t a, int32_t b) const{
+    int temp;
     switch (operation_type()) {
       case OperationType::Add:
         return a + b;
@@ -194,6 +200,9 @@ class BinaryElementwiseOperatorTester {
         return std::min<int32_t>(a, b);
       case OperationType::Multiply:
         return a * b;
+      case OperationType::Remainder:
+        temp = a / b;
+        return a - temp * b;
       case OperationType::Subtract:
         return a - b;
       case OperationType::SquaredDifference:

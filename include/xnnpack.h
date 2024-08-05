@@ -2308,6 +2308,23 @@ enum xnn_status xnn_run_add_nd_f32(
   uint32_t flags,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_remainder_nd_f32(
+  uint32_t flags,
+  xnn_operator_t* remainder_op_out);
+
+enum xnn_status xnn_reshape_remainder_nd_f32(
+  xnn_operator_t remainder_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_remainder_nd_f32(
+  xnn_operator_t remainder_op,
+  const float* input1,
+  const float* input2,
+  float* output);
 
 enum xnn_status xnn_create_multiply_nd_s32(
   uint32_t flags,
