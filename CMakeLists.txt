@@ -1506,6 +1506,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(copysign-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME copysign-nd-test COMMAND copysign-nd-test)
 
+    ADD_EXECUTABLE(and-nd-test test/and-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(and-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(and-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME and-nd-test COMMAND and-nd-test)
+
     ADD_EXECUTABLE(depth-to-space-nchw2nhwc-test test/depth-to-space-nchw2nhwc.cc)
     TARGET_INCLUDE_DIRECTORIES(depth-to-space-nchw2nhwc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(depth-to-space-nchw2nhwc-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)

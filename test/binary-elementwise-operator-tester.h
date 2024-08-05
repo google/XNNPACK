@@ -25,6 +25,7 @@ class BinaryElementwiseOperatorTester {
   enum class OperationType {
     Unknown,
     Add,
+    And,
     CopySign,
     Divide,
     Maximum,
@@ -184,6 +185,8 @@ class BinaryElementwiseOperatorTester {
     switch (operation_type()) {
       case OperationType::Add:
         return a + b;
+      case OperationType::And:
+        return a & b;
       case OperationType::CopySign:
         return std::copysign(a, b);
       case OperationType::Divide:
