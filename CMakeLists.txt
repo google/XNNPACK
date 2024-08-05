@@ -413,6 +413,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/negate.c
   src/subgraph/prelu.c
   src/subgraph/reciprocal-square-root.c
+  src/subgraph/remainder.c
   src/subgraph/reshape-helpers.c
   src/subgraph/scaled-dot-product-attention.c
   src/subgraph/sigmoid.c
@@ -1996,6 +1997,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(reciprocal-square-root-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(reciprocal-square-root-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME reciprocal-square-root-test COMMAND reciprocal-square-root-test)
+
+    ADD_EXECUTABLE(remainder-test test/remainder.cc)
+    TARGET_INCLUDE_DIRECTORIES(remainder-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(remainder-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME remainder-test COMMAND remainder-test)
 
     ADD_EXECUTABLE(reshape-helpers-test test/reshape-helpers.cc)
     TARGET_INCLUDE_DIRECTORIES(reshape-helpers-test PRIVATE src test)

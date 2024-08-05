@@ -2095,6 +2095,7 @@ xnnpack_unit_test(
     "maximum2",
     "minimum2",
     "multiply2",
+    "remainder",
     "squared_difference",
     "subtract2",
 ]]

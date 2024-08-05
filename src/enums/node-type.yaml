@@ -93,6 +93,8 @@
   string: "PReLU"
 - name: xnn_node_type_reciprocal_square_root
   string: "Reciprocal Square Root"
+- name: xnn_node_type_remainder
+  string: "Remainder"
 - name: xnn_node_type_reshape_2d
   string: "Reshape 2D"
 - name: xnn_node_type_rope
