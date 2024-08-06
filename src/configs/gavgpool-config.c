@@ -6,15 +6,10 @@
 #include <assert.h>
 #include <stddef.h>
 
-#ifdef _WIN32
-  #include <windows.h>
-#else
-  #include <pthread.h>
-#endif
-
 #include "xnnpack/common.h"
 #include "xnnpack/config.h"
 #include "xnnpack/gavgpool.h"
+#include "xnnpack/init-once.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 
@@ -23,17 +18,10 @@ static struct xnn_gavgpool_config f32_gavgpool_config = {0};
 static struct xnn_gavgpool_config qs8_gavgpool_config = {0};
 static struct xnn_gavgpool_config qu8_gavgpool_config = {0};
 
-#if XNN_PLATFORM_WINDOWS
-  static INIT_ONCE init_guard_f16_gavgpool = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_gavgpool = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_qs8_gavgpool = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_qu8_gavgpool = INIT_ONCE_STATIC_INIT;
-#else
-  static pthread_once_t init_guard_f16_gavgpool = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_gavgpool = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_qs8_gavgpool = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_qu8_gavgpool = PTHREAD_ONCE_INIT;
-#endif
+XNN_INIT_ONCE_GUARD(f16_gavgpool);
+XNN_INIT_ONCE_GUARD(f32_gavgpool);
+XNN_INIT_ONCE_GUARD(qs8_gavgpool);
+XNN_INIT_ONCE_GUARD(qu8_gavgpool);
 
 static void init_f16_gavgpool_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
@@ -283,38 +271,12 @@ static void init_qu8_gavgpool_config(void) {
   #endif
 }
 
-#if XNN_PLATFORM_WINDOWS
-  static BOOL CALLBACK init_f16_gavgpool_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_gavgpool_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_gavgpool_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_gavgpool_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qs8_gavgpool_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qs8_gavgpool_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qu8_gavgpool_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qu8_gavgpool_config();
-    return TRUE;
-  }
-#endif
-
 const struct xnn_gavgpool_config* xnn_init_f16_gavgpool_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_gavgpool, &init_f16_gavgpool_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_gavgpool, &init_f16_gavgpool_config);
-  #endif
+  XNN_INIT_ONCE(f16_gavgpool);
   return &f16_gavgpool_config;
 }
 
@@ -323,11 +285,7 @@ const struct xnn_gavgpool_config* xnn_init_f32_gavgpool_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_gavgpool, &init_f32_gavgpool_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_gavgpool, &init_f32_gavgpool_config);
-  #endif
+  XNN_INIT_ONCE(f32_gavgpool);
   return &f32_gavgpool_config;
 }
 
@@ -336,11 +294,7 @@ const struct xnn_gavgpool_config* xnn_init_qs8_gavgpool_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_qs8_gavgpool, &init_qs8_gavgpool_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_qs8_gavgpool, &init_qs8_gavgpool_config);
-  #endif
+  XNN_INIT_ONCE(qs8_gavgpool);
   return &qs8_gavgpool_config;
 }
 
@@ -349,10 +303,6 @@ const struct xnn_gavgpool_config* xnn_init_qu8_gavgpool_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_qu8_gavgpool, &init_qu8_gavgpool_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_qu8_gavgpool, &init_qu8_gavgpool_config);
-  #endif
+  XNN_INIT_ONCE(qu8_gavgpool);
   return &qu8_gavgpool_config;
 }

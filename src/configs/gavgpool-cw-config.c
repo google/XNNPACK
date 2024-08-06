@@ -6,28 +6,18 @@
 #include <assert.h>
 #include <stddef.h>
 
-#ifdef _WIN32
-  #include <windows.h>
-#else
-  #include <pthread.h>
-#endif
-
 #include "xnnpack/common.h"
 #include "xnnpack/config.h"
 #include "xnnpack/gavgpool.h"
+#include "xnnpack/init-once.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 
 static struct xnn_gavgpool_cw_config f16_gavgpool_cw_config = {0};
 static struct xnn_gavgpool_cw_config f32_gavgpool_cw_config = {0};
 
-#if XNN_PLATFORM_WINDOWS
-  static INIT_ONCE init_guard_f16_gavgpool_cw = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_gavgpool_cw = INIT_ONCE_STATIC_INIT;
-#else
-  static pthread_once_t init_guard_f16_gavgpool_cw = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_gavgpool_cw = PTHREAD_ONCE_INIT;
-#endif
+XNN_INIT_ONCE_GUARD(f16_gavgpool_cw);
+XNN_INIT_ONCE_GUARD(f32_gavgpool_cw);
 
 static void init_f16_gavgpool_cw_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
@@ -94,28 +84,12 @@ static void init_f32_gavgpool_cw_config(void) {
   #endif
 }
 
-#if XNN_PLATFORM_WINDOWS
-  static BOOL CALLBACK init_f16_gavgpool_cw_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_gavgpool_cw_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_gavgpool_cw_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_gavgpool_cw_config();
-    return TRUE;
-  }
-#endif
-
 const struct xnn_gavgpool_cw_config* xnn_init_f16_gavgpool_cw_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_chw_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_gavgpool_cw, &init_f16_gavgpool_cw_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_gavgpool_cw, &init_f16_gavgpool_cw_config);
-  #endif
+  XNN_INIT_ONCE(f16_gavgpool_cw);
   return &f16_gavgpool_cw_config;
 }
 
@@ -124,10 +98,6 @@ const struct xnn_gavgpool_cw_config* xnn_init_f32_gavgpool_cw_config() {
   if (hardware_config == NULL || !xnn_is_chw_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_gavgpool_cw, &init_f32_gavgpool_cw_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_gavgpool_cw, &init_f32_gavgpool_cw_config);
-  #endif
+  XNN_INIT_ONCE(f32_gavgpool_cw);
   return &f32_gavgpool_cw_config;
 }

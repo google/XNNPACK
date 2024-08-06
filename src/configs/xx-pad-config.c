@@ -6,24 +6,15 @@
 #include <assert.h>
 #include <stddef.h>
 
-#ifdef _WIN32
-  #include <windows.h>
-#else
-  #include <pthread.h>
-#endif
-
 #include "xnnpack/common.h"
 #include "xnnpack/config.h"
+#include "xnnpack/init-once.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/pad.h"
 
 static struct xnn_xx_pad_config xx_pad_config = {0};
 
-#if XNN_PLATFORM_WINDOWS
-  static INIT_ONCE init_guard = INIT_ONCE_STATIC_INIT;
-#else
-  static pthread_once_t init_guard = PTHREAD_ONCE_INIT;
-#endif
+XNN_INIT_ONCE_GUARD(xx_pad);
 
 static void init_xx_pad_config(void) {
   #if XNN_ARCH_ARM
@@ -51,22 +42,11 @@ static void init_xx_pad_config(void) {
   #endif
 }
 
-#if XNN_PLATFORM_WINDOWS
-  static BOOL CALLBACK init_xx_pad_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_xx_pad_config();
-    return TRUE;
-  }
-#endif
-
 const struct xnn_xx_pad_config* xnn_init_xx_pad_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard, &init_xx_pad_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard, &init_xx_pad_config);
-  #endif
+  XNN_INIT_ONCE(xx_pad);
   return &xx_pad_config;
 }

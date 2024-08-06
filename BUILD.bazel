@@ -351,6 +351,13 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "init_once",
+    hdrs = ["src/xnnpack/init-once.h"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+)
+
+xnnpack_cc_library(
     name = "microparams",
     hdrs = [
         "src/xnnpack/microparams.h",
@@ -420,6 +427,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
+        ":init_once",
         ":logging",
     ] + select({
         ":cpuinfo_enabled": ["@cpuinfo"],
@@ -498,6 +506,7 @@ xnnpack_cc_library(
         ":enable_jit",
         ":experiments_config",
         ":hardware_config",
+        ":init_once",
         ":logging",
         ":microkernels_h",
         ":microparams_init",

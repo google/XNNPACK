@@ -6,14 +6,9 @@
 #include <assert.h>
 #include <stddef.h>
 
-#ifdef _WIN32
-  #include <windows.h>
-#else
-  #include <pthread.h>
-#endif
-
 #include "xnnpack/common.h"
 #include "xnnpack/config.h"
+#include "xnnpack/init-once.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/reduce.h"
@@ -25,21 +20,12 @@ static struct xnn_reduce_config f32_rminmax_config = {0};
 static struct xnn_reduce_config f32_rsum_config = {0};
 static struct xnn_reduce_config f32_rdsum_config = {0};
 
-#if XNN_PLATFORM_WINDOWS
-  static INIT_ONCE init_guard_f16_f32acc_rsum = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_f32acc_rdsum = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_rminmax = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_rminmax = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_rsum = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_rdsum = INIT_ONCE_STATIC_INIT;
-#else
-  static pthread_once_t init_guard_f16_f32acc_rsum = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_f32acc_rdsum = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_rminmax = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_rminmax = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_rsum = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_rdsum = PTHREAD_ONCE_INIT;
-#endif
+XNN_INIT_ONCE_GUARD(f16_f32acc_rsum);
+XNN_INIT_ONCE_GUARD(f16_f32acc_rdsum);
+XNN_INIT_ONCE_GUARD(f16_rminmax);
+XNN_INIT_ONCE_GUARD(f32_rminmax);
+XNN_INIT_ONCE_GUARD(f32_rsum);
+XNN_INIT_ONCE_GUARD(f32_rdsum);
 
 static void init_f16_f32acc_rsum_config(void) {
   #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_ARM_FP16_VECTOR
@@ -313,47 +299,12 @@ static void init_f32_rdsum_config(void) {
   #endif
 }
 
-#if XNN_PLATFORM_WINDOWS
-  static BOOL CALLBACK init_f16_f32acc_rsum_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_f32acc_rsum_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_f32acc_rdsum_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_f32acc_rdsum_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_rminmax_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_rminmax_config();
-    return TRUE;
-  }
-  static BOOL CALLBACK init_f32_rminmax_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_rminmax_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_rsum_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_rsum_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_rdsum_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_rdsum_config();
-    return TRUE;
-  }
-#endif
-
 const struct xnn_reduce_config* xnn_init_f16_f32acc_rsum_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_f32acc_rsum, &init_f16_f32acc_rsum_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_f32acc_rsum, &init_f16_f32acc_rsum_config);
-  #endif
+  XNN_INIT_ONCE(f16_f32acc_rsum);
   return &f16_f32acc_rsum_config;
 }
 
@@ -362,11 +313,7 @@ const struct xnn_reduce_config* xnn_init_f16_rminmax_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_rminmax, &init_f16_rminmax_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_rminmax, &init_f16_rminmax_config);
-  #endif
+  XNN_INIT_ONCE(f16_rminmax);
   return &f16_rminmax_config;
 }
 
@@ -375,11 +322,7 @@ const struct xnn_reduce_config* xnn_init_f32_rminmax_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_rminmax, &init_f32_rminmax_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_rminmax, &init_f32_rminmax_config);
-  #endif
+  XNN_INIT_ONCE(f32_rminmax);
   return &f32_rminmax_config;
 }
 
@@ -388,11 +331,7 @@ const struct xnn_reduce_config* xnn_init_f32_rsum_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_rsum, &init_f32_rsum_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_rsum, &init_f32_rsum_config);
-  #endif
+  XNN_INIT_ONCE(f32_rsum);
   return &f32_rsum_config;
 }
 
@@ -401,11 +340,7 @@ const struct xnn_reduce_config* xnn_init_f16_f32acc_rdsum_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_f32acc_rdsum, &init_f16_f32acc_rdsum_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_f32acc_rdsum, &init_f16_f32acc_rdsum_config);
-  #endif
+  XNN_INIT_ONCE(f16_f32acc_rdsum);
   return &f16_f32acc_rdsum_config;
 }
 
@@ -414,10 +349,6 @@ const struct xnn_reduce_config* xnn_init_f32_rdsum_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_rdsum, &init_f32_rdsum_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_rdsum, &init_f32_rdsum_config);
-  #endif
+  XNN_INIT_ONCE(f32_rdsum);
   return &f32_rdsum_config;
 }
