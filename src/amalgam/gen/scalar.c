@@ -6,9 +6,9 @@
 // Auto-generated file. Do not edit!
 //   Generator: tools/update-microkernels.py -a
 
-#include <fp16/fp16.h>
 #include <assert.h>
 #include <float.h>
+#include <fp16/fp16.h>
 #include <fxdiv.h>
 #include <math.h>
 #include <stddef.h>
