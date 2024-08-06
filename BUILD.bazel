@@ -47,6 +47,7 @@ load(
     "ALL_AVX512VBMI_MICROKERNEL_SRCS",
     "ALL_AVX512VNNIGFNI_MICROKERNEL_SRCS",
     "ALL_AVX512VNNI_MICROKERNEL_SRCS",
+    "ALL_AVXVNNIINT8_MICROKERNEL_SRCS",
     "ALL_AVXVNNI_MICROKERNEL_SRCS",
     "ALL_AVX_MICROKERNEL_SRCS",
     "ALL_F16C_MICROKERNEL_SRCS",
@@ -282,7 +283,7 @@ INTERNAL_MICROKERNEL_HDRS = MICROKERNEL_HDRS + SIMD_HEADERS + [
     "src/xnnpack/unaligned.h",
 ]
 
-ALL_MICROKERNEL_SRCS = ALL_NEON_AARCH64_MICROKERNEL_SRCS + ALL_NEONBF16_AARCH64_MICROKERNEL_SRCS + ALL_NEONDOT_AARCH64_MICROKERNEL_SRCS + ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS + ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS + ALL_ARMSIMD32_MICROKERNEL_SRCS + ALL_AVX_MICROKERNEL_SRCS + ALL_AVXVNNI_MICROKERNEL_SRCS + ALL_AVX256SKX_MICROKERNEL_SRCS + ALL_AVX256VNNI_MICROKERNEL_SRCS + ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS + ALL_AVX2_MICROKERNEL_SRCS + ALL_AVX512F_MICROKERNEL_SRCS + ALL_AVX512SKX_MICROKERNEL_SRCS + ALL_AVX512VBMI_MICROKERNEL_SRCS + ALL_AVX512VNNI_MICROKERNEL_SRCS + ALL_AVX512VNNIGFNI_MICROKERNEL_SRCS + ALL_AVX512AMX_MICROKERNEL_SRCS + ALL_AVX512FP16_MICROKERNEL_SRCS + ALL_F16C_MICROKERNEL_SRCS + ALL_FMA3_MICROKERNEL_SRCS + ALL_FP16ARITH_MICROKERNEL_SRCS + ALL_HEXAGON_MICROKERNEL_SRCS + ALL_HVX_MICROKERNEL_SRCS + ALL_NEON_MICROKERNEL_SRCS + ALL_NEONBF16_MICROKERNEL_SRCS + ALL_NEONDOT_MICROKERNEL_SRCS + ALL_NEONDOTFP16ARITH_MICROKERNEL_SRCS + ALL_NEONFMA_MICROKERNEL_SRCS + ALL_NEONFP16_MICROKERNEL_SRCS + ALL_NEONFP16ARITH_MICROKERNEL_SRCS + ALL_NEONV8_MICROKERNEL_SRCS + ALL_RVV_MICROKERNEL_SRCS + ALL_RVVFP16ARITH_MICROKERNEL_SRCS + ALL_SCALAR_MICROKERNEL_SRCS + ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS + ALL_SSE41_MICROKERNEL_SRCS + ALL_SSSE3_MICROKERNEL_SRCS + ALL_WASM_MICROKERNEL_SRCS + ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS + AARCH32_ASM_MICROKERNEL_SRCS + AARCH64_ASM_MICROKERNEL_SRCS + WASM32_ASM_MICROKERNEL_SRCS
+ALL_MICROKERNEL_SRCS = ALL_NEON_AARCH64_MICROKERNEL_SRCS + ALL_NEONBF16_AARCH64_MICROKERNEL_SRCS + ALL_NEONDOT_AARCH64_MICROKERNEL_SRCS + ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS + ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS + ALL_ARMSIMD32_MICROKERNEL_SRCS + ALL_AVX_MICROKERNEL_SRCS + ALL_AVXVNNI_MICROKERNEL_SRCS + ALL_AVXVNNIINT8_MICROKERNEL_SRCS + ALL_AVX256SKX_MICROKERNEL_SRCS + ALL_AVX256VNNI_MICROKERNEL_SRCS + ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS + ALL_AVX2_MICROKERNEL_SRCS + ALL_AVX512F_MICROKERNEL_SRCS + ALL_AVX512SKX_MICROKERNEL_SRCS + ALL_AVX512VBMI_MICROKERNEL_SRCS + ALL_AVX512VNNI_MICROKERNEL_SRCS + ALL_AVX512VNNIGFNI_MICROKERNEL_SRCS + ALL_AVX512AMX_MICROKERNEL_SRCS + ALL_AVX512FP16_MICROKERNEL_SRCS + ALL_F16C_MICROKERNEL_SRCS + ALL_FMA3_MICROKERNEL_SRCS + ALL_FP16ARITH_MICROKERNEL_SRCS + ALL_HEXAGON_MICROKERNEL_SRCS + ALL_HVX_MICROKERNEL_SRCS + ALL_NEON_MICROKERNEL_SRCS + ALL_NEONBF16_MICROKERNEL_SRCS + ALL_NEONDOT_MICROKERNEL_SRCS + ALL_NEONDOTFP16ARITH_MICROKERNEL_SRCS + ALL_NEONFMA_MICROKERNEL_SRCS + ALL_NEONFP16_MICROKERNEL_SRCS + ALL_NEONFP16ARITH_MICROKERNEL_SRCS + ALL_NEONV8_MICROKERNEL_SRCS + ALL_RVV_MICROKERNEL_SRCS + ALL_RVVFP16ARITH_MICROKERNEL_SRCS + ALL_SCALAR_MICROKERNEL_SRCS + ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS + ALL_SSE41_MICROKERNEL_SRCS + ALL_SSSE3_MICROKERNEL_SRCS + ALL_WASM_MICROKERNEL_SRCS + ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS + AARCH32_ASM_MICROKERNEL_SRCS + AARCH64_ASM_MICROKERNEL_SRCS + WASM32_ASM_MICROKERNEL_SRCS
 
 filegroup(
     name = "microkernel_source_files",
@@ -404,6 +405,9 @@ xnnpack_cc_library(
         ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
         "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
     }) + select({
+        ":avxvnniint8_enabled": ["XNN_ENABLE_AVXVNNIINT8=1"],
+        "//conditions:default": ["XNN_ENABLE_AVXVNNIINT8=0"],
+    }) + select({
         ":avx256skx_enabled": ["XNN_ENABLE_AVX256SKX=1"],
         "//conditions:default": ["XNN_ENABLE_AVX256SKX=0"],
     }) + select({
@@ -496,6 +500,7 @@ xnnpack_cc_library(
         ":enable_avx512fp16",
         ":enable_avx512vnnigfni",
         ":enable_avxvnni",
+        ":enable_avxvnniint8",
         ":enable_dwconv_multipass",
         ":enable_gemm_m_specialization",
         ":enable_hvx",
@@ -1059,6 +1064,23 @@ xnnpack_microkernel_cc_library(
 )
 
 xnnpack_microkernel_cc_library(
+    name = "avxvnniint8",
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = [
+        "-mavx2",
+        "-mavxvnniint8",
+        "-mf16c",
+        "-mfma",
+    ],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX"],
+    msvc_x86_64_copts = ["/arch:AVX"],
+    x86_srcs_prod = ["src/amalgam/gen/avxvnniint8.c"],
+    x86_srcs_test = ALL_AVXVNNIINT8_MICROKERNEL_SRCS,
+    deps = MICROKERNEL_DEPS,
+)
+
+xnnpack_microkernel_cc_library(
     name = "f16c",
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
@@ -1499,6 +1521,9 @@ xnnpack_aggregate_library(
         ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
         "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
     }) + select({
+        ":avxvnniint8_enabled": ["XNN_ENABLE_AVXVNNIINT8=1"],
+        "//conditions:default": ["XNN_ENABLE_AVXVNNIINT8=0"],
+    }) + select({
         ":avx256skx_enabled": ["XNN_ENABLE_AVX256SKX=1"],
         "//conditions:default": ["XNN_ENABLE_AVX256SKX=0"],
     }) + select({
@@ -1536,6 +1561,9 @@ xnnpack_aggregate_library(
         "//conditions:default": [],
     }) + select({
         ":avxvnni_enabled": [":avxvnni_prod_microkernels"],
+        "//conditions:default": [],
+    }) + select({
+        ":avxvnniint8_enabled": [":avxvnniint8_prod_microkernels"],
         "//conditions:default": [],
     }) + select({
         ":avx256skx_enabled": [":avx256skx_prod_microkernels"],
@@ -1634,6 +1662,9 @@ xnnpack_aggregate_library(
     }) + select({
         ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
         "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
+    }) + select({
+        ":avxvnniint8_enabled": ["XNN_ENABLE_AVXVNNIINT8=1"],
+        "//conditions:default": ["XNN_ENABLE_AVXVNNIINT8=0"],
     }) + select({
         ":avx256skx_enabled": ["XNN_ENABLE_AVX256SKX=1"],
         "//conditions:default": ["XNN_ENABLE_AVX256SKX=0"],
@@ -1788,6 +1819,15 @@ cc_library(
     defines = select({
         ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
         "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
+    }),
+    visibility = xnnpack_visibility(),
+)
+
+cc_library(
+    name = "enable_avxvnniint8",
+    defines = select({
+        ":avxvnniint8_enabled": ["XNN_ENABLE_AVXVNNIINT8=1"],
+        "//conditions:default": ["XNN_ENABLE_AVXVNNIINT8=0"],
     }),
     visibility = xnnpack_visibility(),
 )
@@ -2334,6 +2374,18 @@ config_setting(
     define_values = {"xnn_enable_avxvnni": "false"},
 )
 
+# Enables usage of Intel AVX-VNNI-INT8 (integer dot product) kernels.
+config_setting(
+    name = "xnn_enable_avxvnniint8_explicit_true",
+    define_values = {"xnn_enable_avxvnniint8": "true"},
+)
+
+# Disables usage of Intel AVX-VNNI-INT8 (integer dot product) kernels.
+config_setting(
+    name = "xnn_enable_avxvnniint8_explicit_false",
+    define_values = {"xnn_enable_avxvnniint8": "false"},
+)
+
 # Enables usage of Intel AVX256SKX (evex256) kernels.
 config_setting(
     name = "xnn_enable_avx256skx_explicit_true",
@@ -2717,6 +2769,22 @@ alias(
         ":xnn_enable_avxvnni_explicit_true": ":xnn_enable_avxvnni_explicit_true",
         ":xnn_enable_avxvnni_explicit_false": ":xnn_enable_avxvnni_explicit_true",
         "//conditions:default": ":avxvnni_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avxvnniint8_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avxvnniint8_enabled",
+    actual = select({
+        ":xnn_enable_avxvnniint8_explicit_true": ":xnn_enable_avxvnniint8_explicit_true",
+        ":xnn_enable_avxvnniint8_explicit_false": ":xnn_enable_avxvnniint8_explicit_true",
+        "//conditions:default": ":avxvnniint8_enabled_by_default",
     }),
 )
 

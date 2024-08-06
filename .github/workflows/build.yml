@@ -323,7 +323,7 @@ jobs:
         run: mkdir -p build/ios/x86_64
         working-directory: ${{ github.workspace }}
       - name: Generate CMake project
-        run: cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=x86_64 -DXNNPACK_BUILD_BENCHMARKS=OFF -DXNNPACK_BUILD_TESTS=OFF ../../..
+        run: cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=x86_64 -DXNNPACK_BUILD_BENCHMARKS=OFF -DXNNPACK_BUILD_TESTS=OFF -DXNNPACK_ENABLE_AVXVNNIINT8=OFF ../../..
         working-directory: ${{ github.workspace }}/build/ios/x86_64
       - name: Build with Xcode
         run: cmake --build build/ios/x86_64 --parallel $(sysctl -n hw.ncpu) -- -sdk iphonesimulator -quiet
@@ -380,7 +380,7 @@ jobs:
     env:
       CC: gcc-9
       CXX: g++-9
-      BAZEL_DEFINES: --define=xnn_enable_avxvnni=false --define=xnn_enable_avx512amx=false --define=xnn_enable_avx512fp16=false
+      BAZEL_DEFINES: --define=xnn_enable_avxvnni=false --define=xnn_enable_avxvnniint8=false --define=xnn_enable_avx512amx=false --define=xnn_enable_avx512fp16=false
     steps:
       - uses: actions/checkout@v4
       - name: Update apt
