@@ -319,6 +319,15 @@ xnnpack_cc_library(
     hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":config_hdrs",
+        ":memory",
+        ":microparams",
+        ":mutex",
+        ":xnnpack_h",
+        "@FP16",
+    ],
 )
 
 xnnpack_cc_library(
@@ -355,6 +364,10 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/init-once.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":xnnpack_h",
+    ],
 )
 
 xnnpack_cc_library(
@@ -441,7 +454,10 @@ xnnpack_cc_library(
         "src/xnnpack/config.h",
         "src/xnnpack/config-types.h",
     ],
-    deps = [":params"],
+    deps = [
+        ":hardware_config",
+        ":params",
+    ],
 )
 
 xnnpack_cc_library(
@@ -587,6 +603,9 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/node-type.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+    ],
 )
 
 xnnpack_cc_library(
@@ -594,6 +613,9 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/allocation-type.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+    ],
 )
 
 xnnpack_cc_library(
@@ -601,6 +623,9 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/operator-type.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+    ],
 )
 
 xnnpack_cc_library(
@@ -608,6 +633,9 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/microkernel-type.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+    ],
 )
 
 xnnpack_cc_library(
@@ -615,6 +643,9 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/internal.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":xnnpack_h",
+    ],
 )
 
 xnnpack_cc_library(
@@ -1369,6 +1400,9 @@ xnnpack_cc_library(
     wasm_srcs = WASM32_ASM_MICROKERNEL_SRCS,
     wasmrelaxedsimd_srcs = WASM32_ASM_MICROKERNEL_SRCS,
     wasmsimd_srcs = WASM32_ASM_MICROKERNEL_SRCS,
+    deps = [
+        ":common",
+    ],
 )
 
 xnnpack_cc_library(
@@ -2116,18 +2150,25 @@ xnnpack_cc_library(
         ":allocator",
         ":cache",
         ":common",
+        ":config_hdrs",
         ":enable_jit",
         ":enable_sparse",
+        ":hardware_config",
         ":internal",
         ":logging",
         ":math",
+        ":memory",
+        ":microkernel_type",
+        ":microkernels_h",
         ":node_type",
         ":operator_type",
+        ":operator_utils",
         ":operators",
         ":params",
         ":requantization",
         ":xnnpack_h",
         "@FP16",
+        "@pthreadpool",
     ] + xnnpack_slinky_deps(),
 )
 
