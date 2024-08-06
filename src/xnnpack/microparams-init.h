@@ -342,6 +342,7 @@ DECLARE_INIT_F32_SCALE_PARAMS_FUNCTION(xnn_init_f32_scale_scalar_params)
 DECLARE_INIT_F32_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f32_scaleminmax_scalar_params)
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_F32_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f32_scaleminmax_sse_params)
+  DECLARE_INIT_F32_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f32_scaleminmax_avx_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 

@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -365,7 +366,7 @@ static void update_params_mean_f32(
 {
   const float scale = 1.0f / (float) (double) num_elements;
   mean_op->rsum_config->init.f32_scale(&mean_op->params.f32_scale, scale);
-  mean_op->rdsum_config->init.f32_scale(&mean_op->params.f32_scale, scale);
+  mean_op->rdsum_config->init.f32_scaleminmax(&mean_op->params.f32_scaleminmax, scale, -INFINITY, INFINITY);
 }
 
 enum xnn_status xnn_reshape_mean_nd_f32(
@@ -384,8 +385,8 @@ enum xnn_status xnn_reshape_mean_nd_f32(
     /*log2_data_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     xnn_operator_type_mean_nd_f32,
-    /*scale_params=*/&mean_op->params.f32_scale,
-    /*scale_params_size=*/sizeof(mean_op->params.f32_scale),
+    /*scale_params=*/&mean_op->params.f32_scaleminmax,
+    /*scale_params_size=*/sizeof(mean_op->params.f32_scaleminmax),
     /*cvt_params=*/NULL,
     /*cvt_params_size=*/0,
     update_params_mean_f32,

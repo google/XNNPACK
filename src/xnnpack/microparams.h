@@ -107,6 +107,12 @@ union xnn_f32_scaleminmax_params {
     XNN_ALIGN(16) float min[4];
     XNN_ALIGN(16) float max[4];
   } sse;
+  struct {
+    int32_t mask_table[14];
+    float scale;
+    float min;
+    float max;
+  } avx;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 

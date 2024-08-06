@@ -154,7 +154,7 @@ void qs8_rsum(
 void f32_rdsum(
     benchmark::State& state,
     xnn_f32_rdsum_ukernel_fn rdsum,
-    xnn_init_f32_scale_params_fn init_params,
+    xnn_init_f32_scaleminmax_params_fn init_params,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check != nullptr && !isa_check(state)) {
@@ -169,8 +169,8 @@ void f32_rdsum(
   std::iota(input.begin(), input.end(), 0.0f);
 
   // Prepare parameters.
-  union xnn_f32_scale_params params;
-  init_params(&params, /*scale=*/1.0f / rows);
+  union xnn_f32_scaleminmax_params params;
+  init_params(&params, /*scale=*/1.0f / rows, /*min=*/-1.0f, /*max=*/1.0f);
 
   for (auto _ : state) {
     rdsum(rows, channels, input.data(), channels * sizeof(float), zero.data(), output.data(), &params);

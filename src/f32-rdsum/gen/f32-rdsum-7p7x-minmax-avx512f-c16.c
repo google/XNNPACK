@@ -23,7 +23,7 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c16(
     size_t input_stride,
     const float* zero,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -31,6 +31,8 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c16(
   assert(output != NULL);
 
   const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
+  const __m512 vmin = _mm512_set1_ps(params->scalar.min);
+  const __m512 vmax = _mm512_set1_ps(params->scalar.max);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 16; channels -= 16) {
@@ -87,6 +89,8 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c16(
       i6 = (const float*) ((uintptr_t) i6 + input_increment);
     }
     vacc0 = _mm512_mul_ps(vacc0, vscale);
+    vacc0 = _mm512_max_ps(vacc0, vmin);
+    vacc0 = _mm512_min_ps(vacc0, vmax);
 
     const float* o = output;
     const __m512 vo0 = _mm512_loadu_ps(o); o += 16;
@@ -165,6 +169,8 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c16(
     }
     for (size_t i = 0; i < num_chunks; ++i) {
       vacc[i] = _mm512_mul_ps(vacc[i], vscale);
+      vacc[i] = _mm512_max_ps(vacc[i], vmin);
+      vacc[i] = _mm512_min_ps(vacc[i], vmax);
     }
 
     __m512 vo[1];
@@ -174,6 +180,8 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c16(
     }
     for (int i = 0; i < channels >> 4; ++i) {
       vacc[i] = _mm512_add_ps(vo[i], vacc[i]);
+      vacc[i] = _mm512_max_ps(vacc[i], vmin);
+      vacc[i] = _mm512_min_ps(vacc[i], vmax);
     }
     for (int i = 0; i < channels >> 4; ++i) {
       _mm512_storeu_ps(output, vacc[i]); output += 16;
@@ -181,6 +189,8 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c16(
     if (remainder) {
       const size_t pos = num_full_chunks;
       __m512 vout = vacc[pos];
+      vout = _mm512_max_ps(vout, vmin);
+      vout = _mm512_min_ps(vout, vmax);
       vout = _mm512_maskz_add_ps(vmask, vout,  _mm512_maskz_loadu_ps(vmask, output));
       _mm512_mask_storeu_ps(output, vmask, vout);
     }
