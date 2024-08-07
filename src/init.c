@@ -14,9 +14,6 @@
 #ifdef _WIN32
   #include <windows.h>
 #else
-  #include <errno.h>
-  #include <pthread.h>
-  #include <sys/mman.h>
   #include <unistd.h>
 #endif
 

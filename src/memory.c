@@ -30,7 +30,9 @@
 #endif
 
 #include <errno.h>
+#if XNN_HAS_MMAP
 #include <sys/mman.h>
+#endif
 #include <unistd.h>
 #endif  // XNN_PLATFORM_WINDOWS
 
@@ -60,7 +62,7 @@ static size_t get_page_size() {
       GetSystemInfo(&sysinfo);
       assert(sysinfo.dwPageSize != 0);
       system_page_size = (size_t) sysinfo.dwPageSize;
-    #elif XNN_PLATFORM_QURT
+    #elif XNN_PLATFORM_QURT || !XNN_HAS_MMAP
       // sysconf(_SC_PAGESIZE) will fail, but we're just using malloc anyway.
       system_page_size = 4096;
     #else
@@ -94,6 +96,13 @@ static void* allocate_buffer(size_t size) {
     xnn_log_error("failed to allocate %zu bytes for code/weights buffer, error code: %d", size, errno);
     return NULL;
   }
+#elif !XNN_HAS_MMAP
+  // Emulate through malloc.
+  void* p = malloc(size);
+  if (p == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for code/weights buffer, error code: %d", size, errno);
+    return NULL;
+  }
 #else
   void* p = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
   if (p == MAP_FAILED) {
@@ -115,6 +124,9 @@ static enum xnn_status release_memory(void* start, size_t capacity) {
 #elif XNN_PLATFORM_QURT
   // Emulate through qurt_free.
   qurt_free(start);
+#elif !XNN_HAS_MMAP
+  // Emulate through free.
+  free(start);
 #else
   if (munmap(start, capacity) == -1) {
     xnn_log_error("failed to release code/weights buffer, error code: %d", errno);
@@ -192,7 +204,7 @@ static enum xnn_status release_unused_memory(size_t size, void* start, size_t* c
         return xnn_status_invalid_state;
       }
       *capacity = page_aligned_size;
-    #elif XNN_PLATFORM_QURT
+    #elif XNN_PLATFORM_QURT || !XNN_HAS_MMAP
       // We can't selectively release parts of this memory --
       // we *could* release the entire block if unused_capacity == *capacity,
       // but that would invalidate the start pointer. Just do nothing.
@@ -242,8 +254,8 @@ static enum xnn_status set_memory_permission(void* start, size_t size, enum xnn_
         "failed to set memory permission (%d), error code: %" PRIu32, permission, (uint32_t) GetLastError());
       return xnn_status_invalid_state;
     }
-  #elif XNN_PLATFORM_WEB || XNN_PLATFORM_QURT
-    // Memory protection not supported on Web or QuRT.
+  #elif XNN_PLATFORM_WEB || XNN_PLATFORM_QURT || !XNN_HAS_MMAP
+    // Memory protection not supported.
     return xnn_status_success;
   #else
     int prot = 0;
