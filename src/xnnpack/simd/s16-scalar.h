@@ -35,11 +35,11 @@ static XNN_INLINE xnn_simd_s16_t xnn_min_s16(xnn_simd_s16_t a,
   return (a < b) ? a : b;
 }
 
-static XNN_INLINE xnn_simd_s16_t xnn_low_cvt_s16_s32(xnn_simd_s16_t a) {
+static XNN_INLINE int32_t xnn_low_cvt_s16_s32(xnn_simd_s16_t a) {
   return (int32_t) a;
 }
 
-static XNN_INLINE xnn_simd_s16_t xnn_high_cvt_s16_s32(xnn_simd_s16_t a) {
+static XNN_INLINE int32_t xnn_high_cvt_s16_s32(xnn_simd_s16_t a) {
   return (int32_t) a;
 }
 

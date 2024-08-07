@@ -41,11 +41,11 @@ static XNN_INLINE xnn_simd_s16_t xnn_min_s16(xnn_simd_s16_t a,
   return _mm256_min_epi16(a, b);
 }
 
-static XNN_INLINE xnn_simd_s16_t xnn_low_cvt_s16_s32(xnn_simd_s16_t a) {
+static XNN_INLINE __m256i xnn_low_cvt_s16_s32(xnn_simd_s16_t a) {
   return _mm256_cvtepi16_epi32(_mm256_castsi256_si128(a));
 }
 
-static XNN_INLINE xnn_simd_s16_t xnn_high_cvt_s16_s32(xnn_simd_s16_t a) {
+static XNN_INLINE __m256i xnn_high_cvt_s16_s32(xnn_simd_s16_t a) {
   return _mm256_cvtepi16_epi32(_mm256_extracti128_si256(a, 1));
 }
 

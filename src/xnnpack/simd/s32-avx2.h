@@ -43,7 +43,7 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return _mm256_min_epi32(a, b);
 }
 
-static XNN_INLINE xnn_simd_s32_t xnn_cvt_s32_s16(xnn_simd_s32_t a, xnn_simd_s32_t b) {
+static XNN_INLINE __m256i xnn_cvt_s32_s16(xnn_simd_s32_t a, xnn_simd_s32_t b) {
     xnn_simd_s32_t packed = _mm256_packs_epi32(a, b);
     return _mm256_permute4x64_epi64(packed, 0xD8);
 }
