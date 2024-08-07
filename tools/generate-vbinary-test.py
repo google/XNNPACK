@@ -37,6 +37,8 @@ def split_ukernel_name(name):
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
     "add": "Add",
+    "and": "AND",
+    "andc": "ANDC",
     "cmul": "CMul",
     "copysign": "CopySign",
     "div": "Div",
@@ -56,8 +58,6 @@ def split_ukernel_name(name):
     "sqrdiffc": "SqrDiffC",
     "subc": "SubC",
     "rsubc": "RSubC",
-    "and": "And",
-    "andc": "AndC"
   }[match.group(2)]
   batch_tile = int(match.group(8))
   vector_tile = bool(match.group(9))

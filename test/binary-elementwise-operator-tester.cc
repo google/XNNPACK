@@ -805,7 +805,7 @@ void BinaryElementwiseOperatorTester::TestS32() const {
     xnn_operator_t binary_elementwise_op = nullptr;
 
     switch (operation_type()) {
-      case OperationType::And:
+      case OperationType::AND:
         ASSERT_EQ(xnn_status_success,
                   xnn_create_and_nd_s32(0, &binary_elementwise_op));
         break;
@@ -823,7 +823,7 @@ void BinaryElementwiseOperatorTester::TestS32() const {
         auto_binary_elementwise_op(binary_elementwise_op, xnn_delete_operator);
 
     switch (operation_type()) {
-      case OperationType::And:
+      case OperationType::AND:
         ASSERT_EQ(
             xnn_status_success,
             xnn_reshape_and_nd_s32(
