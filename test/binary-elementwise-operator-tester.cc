@@ -809,6 +809,10 @@ void BinaryElementwiseOperatorTester::TestS32() const {
         ASSERT_EQ(xnn_status_success,
                   xnn_create_multiply_nd_s32(0, &binary_elementwise_op));
         break;
+      case OperationType::OR:
+        ASSERT_EQ(xnn_status_success,
+                  xnn_create_or_nd_s32(0, &binary_elementwise_op));
+        break;
       default:
         FAIL() << "Unsupported operation type";
     }
@@ -827,6 +831,17 @@ void BinaryElementwiseOperatorTester::TestS32() const {
                 num_input2_dims(), input2_shape().data(),
                 /*threadpool=*/nullptr));
         ASSERT_EQ(xnn_status_success, xnn_setup_multiply_nd_s32(
+                                          binary_elementwise_op, input1.data(),
+                                          input2.data(), output.data()));
+        break;
+      case OperationType::OR:
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_reshape_or_nd_s32(
+                binary_elementwise_op, num_input1_dims(), input1_shape().data(),
+                num_input2_dims(), input2_shape().data(),
+                /*threadpool=*/nullptr));
+        ASSERT_EQ(xnn_status_success, xnn_setup_or_nd_s32(
                                           binary_elementwise_op, input1.data(),
                                           input2.data(), output.data()));
         break;

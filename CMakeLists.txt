@@ -1627,6 +1627,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(negate-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME negate-nc-test COMMAND negate-nc-test)
 
+    ADD_EXECUTABLE(or-nd-test test/or-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(or-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(or-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME or-nd-test COMMAND or-nd-test)
+
     ADD_EXECUTABLE(prelu-nc-test test/prelu-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(prelu-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(prelu-nc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)

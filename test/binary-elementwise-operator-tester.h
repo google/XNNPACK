@@ -30,6 +30,7 @@ class BinaryElementwiseOperatorTester {
     Maximum,
     Minimum,
     Multiply,
+    OR,
     Subtract,
     SquaredDifference,
   };
@@ -194,6 +195,8 @@ class BinaryElementwiseOperatorTester {
         return std::min<int32_t>(a, b);
       case OperationType::Multiply:
         return a * b;
+      case OperationType::OR:
+        return a | b;
       case OperationType::Subtract:
         return a - b;
       case OperationType::SquaredDifference:
