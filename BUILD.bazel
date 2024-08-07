@@ -1784,8 +1784,8 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":config_hdrs",
+        ":logging",
         ":math",
-        ":operator_h",
         ":unaligned",
         "@FP16",
     ] + xnnpack_if_kleidiai_enabled([

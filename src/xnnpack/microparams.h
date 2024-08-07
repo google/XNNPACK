@@ -3287,3 +3287,17 @@ union xnn_x64_transpose_params {
 union xnn_x32_packb_params {
   char _;  // Dummy member variable to comply with the C standard
 };
+
+struct subconvolution_params {
+  void* weights;
+  size_t w_stride;
+  const void** indirection_buffer;
+  void* output;
+  size_t slice_width;
+  size_t slice_height;
+  size_t indirection_y_stride;
+  size_t indirection_x_stride;
+  // scaled_kernel_size := kernel_size * mr * sizeof(void*).
+  size_t scaled_kernel_size;
+};
+

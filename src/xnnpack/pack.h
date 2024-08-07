@@ -14,7 +14,7 @@
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/operator.h"
+#include "xnnpack/microparams.h"
 
 
 #ifdef __cplusplus

@@ -21,6 +21,7 @@
 #include "xnnpack/indirection.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
+#include "xnnpack/operator.h"
 #include "xnnpack/pack.h"
 
 
