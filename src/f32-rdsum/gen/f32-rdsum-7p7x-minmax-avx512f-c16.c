@@ -180,8 +180,6 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c16(
     }
     for (int i = 0; i < channels >> 4; ++i) {
       vacc[i] = _mm512_add_ps(vo[i], vacc[i]);
-      vacc[i] = _mm512_max_ps(vacc[i], vmin);
-      vacc[i] = _mm512_min_ps(vacc[i], vmax);
     }
     for (int i = 0; i < channels >> 4; ++i) {
       _mm512_storeu_ps(output, vacc[i]); output += 16;
@@ -189,8 +187,6 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c16(
     if (remainder) {
       const size_t pos = num_full_chunks;
       __m512 vout = vacc[pos];
-      vout = _mm512_max_ps(vout, vmin);
-      vout = _mm512_min_ps(vout, vmax);
       vout = _mm512_maskz_add_ps(vmask, vout,  _mm512_maskz_loadu_ps(vmask, output));
       _mm512_mask_storeu_ps(output, vmask, vout);
     }
