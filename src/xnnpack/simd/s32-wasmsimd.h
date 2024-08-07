@@ -41,6 +41,13 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return wasm_i32x4_min(a, b);
 }
 
+// Bitwise operations
+
+static XNN_INLINE xnn_simd_s32_t xnn_or_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  return wasm_v128_or(a, b);
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {
