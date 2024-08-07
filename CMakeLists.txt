@@ -727,9 +727,19 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
   ENDIF()
 ENDIF()
 
+IF (NOT DEFINED Python_EXECUTABLE)
+  find_package(Python COMPONENTS Interpreter)
+
+  IF(NOT Python_FOUND)
+    SET(PYTHON_EXECUTABLE "python3")
+  ENDIF()
+ELSE()
+  message(STATUS "Defined")
+ENDIF()
+
 ADD_CUSTOM_COMMAND(
   OUTPUT "${PROJECT_BINARY_DIR}/build_identifier.c"
-  COMMAND python3 "scripts/generate-build-identifier.py" --output "${PROJECT_BINARY_DIR}/build_identifier.c" ${PROD_MICROKERNEL_SRCS}
+  COMMAND "${Python_EXECUTABLE}" "scripts/generate-build-identifier.py" --output "${PROJECT_BINARY_DIR}/build_identifier.c" ${PROD_MICROKERNEL_SRCS}
   DEPENDS ${PROD_MICROKERNEL_SRCS}
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
