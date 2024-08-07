@@ -411,6 +411,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/minimum2.c
   src/subgraph/multiply2.c
   src/subgraph/negate.c
+  src/subgraph/or.c
   src/subgraph/prelu.c
   src/subgraph/reciprocal-square-root.c
   src/subgraph/reshape-helpers.c
@@ -1986,6 +1987,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(negate-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(negate-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME negate-test COMMAND negate-test)
+
+    ADD_EXECUTABLE(or-test test/or.cc)
+    TARGET_INCLUDE_DIRECTORIES(or-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(or-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME or-test COMMAND or-test)
 
     ADD_EXECUTABLE(prelu-test test/prelu.cc)
     TARGET_INCLUDE_DIRECTORIES(prelu-test PRIVATE src test)
