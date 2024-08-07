@@ -27,6 +27,7 @@ class VBinaryCMicrokernelTester {
     MaxC,
     MinC,
     MulC,
+    ORC,
     SqrDiffC,
     SubC,
     RSubC,

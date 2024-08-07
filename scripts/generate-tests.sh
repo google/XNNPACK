@@ -194,6 +194,9 @@ tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/qu
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/s32-vmul.yaml   --output test/s32-vmul.cc &
 tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/s32-vmulc.yaml    --output test/s32-vmulc.cc &
 
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/s32-vor.yaml   --output test/s32-vor.cc &
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/s32-vorc.yaml    --output test/s32-vorc.cc &
+
 ### Tests for VUnary micro-kernels
 tools/generate-vunary-test.py --spec test/bf16-vabs.yaml --output test/bf16-vabs.cc &
 
