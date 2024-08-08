@@ -156,20 +156,20 @@ static void init_f32_rsum_config(void) {
     if (hardware_config->use_arm_neon) {
       f32_rsum_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__neon_u16_acc4,
-        .init.f32_scale = xnn_init_f32_scale_scalar_params,
+        .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
         .element_tile = 16,
       };
     } else {
       f32_rsum_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__scalar_u4_acc4,
-        .init.f32_scale = xnn_init_f32_scale_scalar_params,
+        .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
         .element_tile = 4,
       };
     }
   #elif XNN_ARCH_ARM64
     f32_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__neon_u16_acc4,
-      .init.f32_scale = xnn_init_f32_scale_scalar_params,
+      .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
       .element_tile = 16,
     };
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -178,32 +178,32 @@ static void init_f32_rsum_config(void) {
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       f32_rsum_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__avx512f_u64_acc4,
-        .init.f32_scale = xnn_init_f32_scale_scalar_params,
+        .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
         .element_tile = 64,
       };
     } else if (hardware_config->use_x86_avx) {
       f32_rsum_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__avx_u32_acc4,
-        .init.f32_scale = xnn_init_f32_scale_avx_params,
+        .init.f32_scaleminmax = xnn_init_f32_scaleminmax_avx_params,
         .element_tile = 32,
       };
     } else {
       f32_rsum_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__sse_u16_acc4,
-        .init.f32_scale = xnn_init_f32_scale_scalar_params,
+        .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
         .element_tile = 16,
       };
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__wasmsimd_u16_acc4,
-      .init.f32_scale = xnn_init_f32_scale_scalar_params,
+      .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
       .element_tile = 16,
     };
   #else
     f32_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__scalar_u4_acc4,
-      .init.f32_scale = xnn_init_f32_scale_scalar_params,
+      .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
       .element_tile = 4,
     };
   #endif

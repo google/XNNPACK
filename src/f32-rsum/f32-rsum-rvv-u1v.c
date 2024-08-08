@@ -13,7 +13,7 @@ void xnn_f32_rsum_ukernel__rvv_u1v(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -62,5 +62,6 @@ void xnn_f32_rsum_ukernel__rvv_u1v(
   }
   acc_f32v = __riscv_vfredosum_vs_f32m1_f32m1(sum_f32v, acc_f32v, n);
   vfloat32m1_t out_f32v = __riscv_vfmul_vf_f32m1(acc_f32v, params->scalar.scale, 1);
+  out_f32v = __riscv_vfmin_vf_f32m1(__riscv_vfmax_vf_f32m1(out_f32v, params->scalar.min, 1), params->scalar.max, 1);
   *output += __riscv_vfmv_f_s_f32m1_f32(out_f32v);
 }
