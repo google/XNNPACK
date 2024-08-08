@@ -17,9 +17,7 @@
 - name: xnn_x8_transposec_ukernel__16x16_reuse_switch_sse2
 # x86 AVX2
 - name: xnn_x8_transposec_ukernel__32x32_reuse_mov_avx2
-  init: xnn_init_x8_transpose_avx2_params
 - name: xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2
-  init: xnn_init_x8_transpose_avx2_params
 # WAsm SIMD
 - name: xnn_x8_transposec_ukernel__16x16_reuse_mov_wasmsimd
 - name: xnn_x8_transposec_ukernel__16x16_reuse_switch_wasmsimd

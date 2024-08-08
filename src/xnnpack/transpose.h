@@ -36,8 +36,7 @@ DECLARE_XX_TRANSPOSEV_UKERNEL_FUNCTION(xnn_xx_transposev_ukernel__1x1_scalar_mem
       size_t input_stride,                               \
       size_t output_stride,                              \
       size_t block_width,                                \
-      size_t block_height,                               \
-      const union xnn_x64_transpose_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      size_t block_height);
 
 DECLARE_X64_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x64_transposec_ukernel__1x2_scalar_float)
 DECLARE_X64_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x64_transposec_ukernel__1x2_scalar_int)
@@ -77,8 +76,7 @@ DECLARE_X64_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x64_transposec_ukernel__4x4_reuse_sw
       size_t input_stride,                               \
       size_t output_stride,                              \
       size_t block_width,                                \
-      size_t block_height,                               \
-      const union xnn_x32_transpose_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      size_t block_height);
 
 DECLARE_X32_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x32_transposec_ukernel__1x2_scalar_float)
 DECLARE_X32_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x32_transposec_ukernel__1x2_scalar_int)
@@ -143,8 +141,7 @@ DECLARE_X32_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x32_transposec_ukernel__32x8_rvv)
       size_t input_stride,                               \
       size_t output_stride,                              \
       size_t block_width,                                \
-      size_t block_height,                               \
-      const union xnn_x24_transpose_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      size_t block_height);
 
 DECLARE_X24_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x24_transposec_ukernel__1x2_scalar)
 DECLARE_X24_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x24_transposec_ukernel__1x4_scalar)
@@ -165,8 +162,7 @@ DECLARE_X24_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x24_transposec_ukernel__4x4_ssse3)
       size_t input_stride,                               \
       size_t output_stride,                              \
       size_t block_width,                                \
-      size_t block_height,                               \
-      const union xnn_x16_transpose_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      size_t block_height);
 
 DECLARE_X16_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x16_transposec_ukernel__1x2_scalar_int)
 DECLARE_X16_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x16_transposec_ukernel__1x4_scalar_int)
@@ -212,8 +208,7 @@ DECLARE_X16_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x16_transposec_ukernel__16x16_reuse_
       size_t input_stride,                              \
       size_t output_stride,                             \
       size_t block_width,                               \
-      size_t block_height,                              \
-      const union xnn_x8_transpose_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      size_t block_height);
 
 DECLARE_X8_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x8_transposec_ukernel__1x2_scalar_int)
 DECLARE_X8_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x8_transposec_ukernel__1x4_scalar_int)
