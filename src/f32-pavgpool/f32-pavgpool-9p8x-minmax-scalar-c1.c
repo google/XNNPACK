@@ -5,6 +5,11 @@
 
 #include <assert.h>
 
+#include <stddef.h>
+#include <stdint.h>
+
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
 #include "xnnpack/pavgpool.h"
 #include "xnnpack/math.h"
 
