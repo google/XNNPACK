@@ -2275,8 +2275,8 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":allocator",
-        ":hardware_config",
-        ":init_once",
+        ":build_identifier",
+        ":common",
         ":logging",
         ":params",
         "@pthreadpool",
@@ -2303,8 +2303,8 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":allocator",
-        ":hardware_config",
-        ":init_once",
+        ":build_identifier",
+        ":common",
         ":logging",
         ":params",
         "@pthreadpool",
