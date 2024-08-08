@@ -1778,6 +1778,16 @@ typedef void (*xnn_f32_vabs_ukernel_fn)(
     float* output,
     const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+// Vector elementwise Bitwise operations
+
+// Vector AND operation elementwise
+typedef void (*xnn_s32_vand_ukernel_fn)(
+    size_t batch,
+    const int32_t* input_a,
+    const int32_t* input_b,
+    int32_t* output,
+    const union xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 // VCLAMP: Vector CLAMP elementwise
 
 typedef void (*xnn_f16_vclamp_ukernel_fn)(

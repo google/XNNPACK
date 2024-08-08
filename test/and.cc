@@ -54,7 +54,7 @@ TEST_F(AndS32, define) {
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_bitwise(subgraph, input1_id, input2_id, output_id, /*flags=*/0));
+    xnn_define_and(subgraph, input1_id, input2_id, output_id, /*flags=*/0));
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
@@ -122,7 +122,7 @@ TEST_F(AndS32, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_bitwise(subgraph, input1_id, input2_id, output_id, /*flags=*/0));
+    xnn_define_and(subgraph, input1_id, input2_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));

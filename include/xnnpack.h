@@ -1419,7 +1419,7 @@ enum xnn_status xnn_define_copy(
   uint32_t output_id,
   uint32_t flags);
 
-/// Define a Bitwise op and add it to a Subgraph.
+/// Define a Bitwise AND op and add it to a Subgraph.
 ///
 /// The Bitwise Node peforms biitwise operations for first input and second input.
 ///
@@ -1428,7 +1428,7 @@ enum xnn_status xnn_define_copy(
 /// @param input2_id - Value ID for the second input tensor. The input tensor must be defined in the @a subgraph.
 /// @param output_id - Value ID for the output tensor.
 /// @param flags - binary features of the Bitwise Node. No supported flags are currently defined.
-enum xnn_status xnn_define_bitwise(
+enum xnn_status xnn_define_and(
   xnn_subgraph_t subgraph,
   uint32_t input1_id,
   uint32_t input2_id,
