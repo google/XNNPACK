@@ -38,6 +38,15 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return vminq_s32(a, b);
 }
 
+// Bitwise operations.
+static XNN_INLINE xnn_simd_s32_t xnn_popcnt_s32(xnn_simd_s32_t a) {
+  xnn_simd_s32_t bytes = vreinterpretq_s8_s32(a);
+  xnn_simd_s32_t byte_popcnt = vcntq_s8(bytes);
+  uint16x8_t half_sum = vpaddlq_s8(byte_popcnt);
+  xnn_simd_s32_t result = vpaddlq_s16(half_sum);
+  return result;
+}
+
 // Load/store operations.
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {
   return vld1q_s32(ptr);

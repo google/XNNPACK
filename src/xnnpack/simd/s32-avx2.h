@@ -43,8 +43,32 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return _mm256_min_epi32(a, b);
 }
 
-// Load/store operations.
+// Bitwise operations.
+static const short pop_count_lookup_table[16] = {0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4};
 
+static XNN_INLINE xnn_simd_s32_t xnn_popcnt_s32(xnn_simd_s32_t a) {
+  xnn_simd_s32_t lookup_table = _mm256_setr_epi8(
+    pop_count_lookup_table[0], pop_count_lookup_table[1], pop_count_lookup_table[2], pop_count_lookup_table[3],
+    pop_count_lookup_table[4], pop_count_lookup_table[5], pop_count_lookup_table[6], pop_count_lookup_table[7],
+    pop_count_lookup_table[8], pop_count_lookup_table[9], pop_count_lookup_table[10], pop_count_lookup_table[11],
+    pop_count_lookup_table[12], pop_count_lookup_table[13], pop_count_lookup_table[14], pop_count_lookup_table[15],
+    pop_count_lookup_table[0], pop_count_lookup_table[1], pop_count_lookup_table[2], pop_count_lookup_table[3],
+    pop_count_lookup_table[4], pop_count_lookup_table[5], pop_count_lookup_table[6], pop_count_lookup_table[7],
+    pop_count_lookup_table[8], pop_count_lookup_table[9], pop_count_lookup_table[10], pop_count_lookup_table[11],
+    pop_count_lookup_table[12], pop_count_lookup_table[13], pop_count_lookup_table[14], pop_count_lookup_table[15]
+  );
+  xnn_simd_s32_t mask =  _mm256_set1_epi32(0x0000000F);
+  xnn_simd_s32_t input_nibbles[8];
+  const static int shift_amounts[8] = {0, 4, 8, 12, 16, 20, 24, 28};
+  xnn_simd_s32_t result = _mm256_setzero_si256();
+  for (int i = 0; i < 8; ++i) {
+    input_nibbles[i] = _mm256_and_si256(_mm256_srli_epi32(a, shift_amounts[i]), mask);
+    result = _mm256_add_epi32(result, _mm256_shuffle_epi8(lookup_table, input_nibbles[i]));
+  }
+  return result;
+}
+
+// Load/store operations.
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {
   return _mm256_loadu_si256((const __m256i*)ptr);
 }

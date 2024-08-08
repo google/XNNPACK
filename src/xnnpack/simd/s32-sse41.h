@@ -41,8 +41,27 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return _mm_min_epi32(a, b);
 }
 
-// Load/store operations.
+// Bitwise operations.
+static const short pop_count_lookup_table[16] = {0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4};
 
+static XNN_INLINE xnn_simd_s32_t xnn_popcnt_s32(xnn_simd_s32_t a) {
+
+  xnn_simd_s32_t lookup_table = _mm_setr_epi8(
+    pop_count_lookup_table[0], pop_count_lookup_table[1], pop_count_lookup_table[2], pop_count_lookup_table[3],
+    pop_count_lookup_table[4], pop_count_lookup_table[5], pop_count_lookup_table[6], pop_count_lookup_table[7],
+    pop_count_lookup_table[8], pop_count_lookup_table[9], pop_count_lookup_table[10], pop_count_lookup_table[11],
+    pop_count_lookup_table[12], pop_count_lookup_table[13], pop_count_lookup_table[14], pop_count_lookup_table[15]
+  );
+  xnn_simd_s32_t mask = _mm_set1_epi32(0x0F);
+  xnn_simd_s32_t result = _mm_setzero_si128();
+  for (int i = 0; i < 8; ++i) {
+    __m128i nibbles = _mm_and_si128(_mm_srli_epi32(a, i * 4), mask);
+    result = _mm_add_epi8(result, _mm_shuffle_epi8(lookup_table, nibbles));
+  }
+  return result;
+}
+
+// Load/store operations.
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {
   return _mm_loadu_si128((const __m128i*)ptr);
 }
