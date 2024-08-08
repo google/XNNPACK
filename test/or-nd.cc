@@ -18,13 +18,13 @@ constexpr size_t kDim5 = 6;
 constexpr size_t kDim6 = 7;
 
 
-TEST(OR_ND_S32, and_0d_x_0d) {
+TEST(OR_ND_S32, or_0d_x_0d) {
   BinaryElementwiseOperatorTester()
     .operation_type(BinaryElementwiseOperatorTester::OperationType::OR)
     .TestS32();
 }
 
-TEST(OR_ND_S32, and_1d_x_0d) {
+TEST(OR_ND_S32, or_1d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
     const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
@@ -35,7 +35,7 @@ TEST(OR_ND_S32, and_1d_x_0d) {
   }
 }
 
-TEST(OR_ND_S32, and_0d_x_1d) {
+TEST(OR_ND_S32, or_0d_x_1d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
     const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
     const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
@@ -46,7 +46,7 @@ TEST(OR_ND_S32, and_0d_x_1d) {
   }
 }
 
-TEST(OR_ND_S32, and_1d_x_1d) {
+TEST(OR_ND_S32, or_1d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -62,7 +62,7 @@ TEST(OR_ND_S32, and_1d_x_1d) {
   }
 }
 
-TEST(OR_ND_S32, and_0d_x_2d) {
+TEST(OR_ND_S32, or_0d_x_2d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
     const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
     const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
@@ -75,7 +75,7 @@ TEST(OR_ND_S32, and_0d_x_2d) {
   }
 }
 
-TEST(OR_ND_S32, and_1d_x_2d) {
+TEST(OR_ND_S32, or_1d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -93,7 +93,7 @@ TEST(OR_ND_S32, and_1d_x_2d) {
   }
 }
 
-TEST(OR_ND_S32, and_2d_x_0d) {
+TEST(OR_ND_S32, or_2d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
     const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
@@ -106,7 +106,7 @@ TEST(OR_ND_S32, and_2d_x_0d) {
   }
 }
 
-TEST(OR_ND_S32, and_2d_x_1d) {
+TEST(OR_ND_S32, or_2d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -124,7 +124,7 @@ TEST(OR_ND_S32, and_2d_x_1d) {
   }
 }
 
-TEST(OR_ND_S32, and_2d_x_2d) {
+TEST(OR_ND_S32, or_2d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -144,7 +144,7 @@ TEST(OR_ND_S32, and_2d_x_2d) {
   }
 }
 
-TEST(OR_ND_S32, and_0d_x_3d) {
+TEST(OR_ND_S32, or_0d_x_3d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
     const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
     const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
@@ -159,7 +159,7 @@ TEST(OR_ND_S32, and_0d_x_3d) {
   }
 }
 
-TEST(OR_ND_S32, and_1d_x_3d) {
+TEST(OR_ND_S32, or_1d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -179,7 +179,7 @@ TEST(OR_ND_S32, and_1d_x_3d) {
   }
 }
 
-TEST(OR_ND_S32, and_2d_x_3d) {
+TEST(OR_ND_S32, or_2d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -201,7 +201,7 @@ TEST(OR_ND_S32, and_2d_x_3d) {
   }
 }
 
-TEST(OR_ND_S32, and_3d_x_0d) {
+TEST(OR_ND_S32, or_3d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
     const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
@@ -216,7 +216,7 @@ TEST(OR_ND_S32, and_3d_x_0d) {
   }
 }
 
-TEST(OR_ND_S32, and_3d_x_1d) {
+TEST(OR_ND_S32, or_3d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -236,7 +236,7 @@ TEST(OR_ND_S32, and_3d_x_1d) {
   }
 }
 
-TEST(OR_ND_S32, and_3d_x_2d) {
+TEST(OR_ND_S32, or_3d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -258,7 +258,7 @@ TEST(OR_ND_S32, and_3d_x_2d) {
   }
 }
 
-TEST(OR_ND_S32, and_3d_x_3d) {
+TEST(OR_ND_S32, or_3d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -282,7 +282,7 @@ TEST(OR_ND_S32, and_3d_x_3d) {
   }
 }
 
-TEST(OR_ND_S32, and_0d_x_4d) {
+TEST(OR_ND_S32, or_0d_x_4d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
     const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
     const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
@@ -299,7 +299,7 @@ TEST(OR_ND_S32, and_0d_x_4d) {
   }
 }
 
-TEST(OR_ND_S32, and_1d_x_4d) {
+TEST(OR_ND_S32, or_1d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -321,7 +321,7 @@ TEST(OR_ND_S32, and_1d_x_4d) {
   }
 }
 
-TEST(OR_ND_S32, and_2d_x_4d) {
+TEST(OR_ND_S32, or_2d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -345,7 +345,7 @@ TEST(OR_ND_S32, and_2d_x_4d) {
   }
 }
 
-TEST(OR_ND_S32, and_3d_x_4d) {
+TEST(OR_ND_S32, or_3d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -371,7 +371,7 @@ TEST(OR_ND_S32, and_3d_x_4d) {
   }
 }
 
-TEST(OR_ND_S32, and_4d_x_0d) {
+TEST(OR_ND_S32, or_4d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
     const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
@@ -388,7 +388,7 @@ TEST(OR_ND_S32, and_4d_x_0d) {
   }
 }
 
-TEST(OR_ND_S32, and_4d_x_1d) {
+TEST(OR_ND_S32, or_4d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -410,7 +410,7 @@ TEST(OR_ND_S32, and_4d_x_1d) {
   }
 }
 
-TEST(OR_ND_S32, and_4d_x_2d) {
+TEST(OR_ND_S32, or_4d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -434,7 +434,7 @@ TEST(OR_ND_S32, and_4d_x_2d) {
   }
 }
 
-TEST(OR_ND_S32, and_4d_x_3d) {
+TEST(OR_ND_S32, or_4d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -460,7 +460,7 @@ TEST(OR_ND_S32, and_4d_x_3d) {
   }
 }
 
-TEST(OR_ND_S32, and_4d_x_4d) {
+TEST(OR_ND_S32, or_4d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -488,7 +488,7 @@ TEST(OR_ND_S32, and_4d_x_4d) {
   }
 }
 
-TEST(OR_ND_S32, and_0d_x_5d) {
+TEST(OR_ND_S32, or_0d_x_5d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
     const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
     const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
@@ -507,7 +507,7 @@ TEST(OR_ND_S32, and_0d_x_5d) {
   }
 }
 
-TEST(OR_ND_S32, and_1d_x_5d) {
+TEST(OR_ND_S32, or_1d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -531,7 +531,7 @@ TEST(OR_ND_S32, and_1d_x_5d) {
   }
 }
 
-TEST(OR_ND_S32, and_2d_x_5d) {
+TEST(OR_ND_S32, or_2d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -557,7 +557,7 @@ TEST(OR_ND_S32, and_2d_x_5d) {
   }
 }
 
-TEST(OR_ND_S32, and_3d_x_5d) {
+TEST(OR_ND_S32, or_3d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -585,7 +585,7 @@ TEST(OR_ND_S32, and_3d_x_5d) {
   }
 }
 
-TEST(OR_ND_S32, and_4d_x_5d) {
+TEST(OR_ND_S32, or_4d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -615,7 +615,7 @@ TEST(OR_ND_S32, and_4d_x_5d) {
   }
 }
 
-TEST(OR_ND_S32, and_5d_x_0d) {
+TEST(OR_ND_S32, or_5d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
     const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
@@ -634,7 +634,7 @@ TEST(OR_ND_S32, and_5d_x_0d) {
   }
 }
 
-TEST(OR_ND_S32, and_5d_x_1d) {
+TEST(OR_ND_S32, or_5d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -658,7 +658,7 @@ TEST(OR_ND_S32, and_5d_x_1d) {
   }
 }
 
-TEST(OR_ND_S32, and_5d_x_2d) {
+TEST(OR_ND_S32, or_5d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -684,7 +684,7 @@ TEST(OR_ND_S32, and_5d_x_2d) {
   }
 }
 
-TEST(OR_ND_S32, and_5d_x_3d) {
+TEST(OR_ND_S32, or_5d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -712,7 +712,7 @@ TEST(OR_ND_S32, and_5d_x_3d) {
   }
 }
 
-TEST(OR_ND_S32, and_5d_x_4d) {
+TEST(OR_ND_S32, or_5d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -742,7 +742,7 @@ TEST(OR_ND_S32, and_5d_x_4d) {
   }
 }
 
-TEST(OR_ND_S32, and_5d_x_5d) {
+TEST(OR_ND_S32, or_5d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -775,7 +775,7 @@ TEST(OR_ND_S32, and_5d_x_5d) {
   }
 }
 
-TEST(OR_ND_S32, and_0d_x_6d) {
+TEST(OR_ND_S32, or_0d_x_6d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
     const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
     const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
@@ -796,7 +796,7 @@ TEST(OR_ND_S32, and_0d_x_6d) {
   }
 }
 
-TEST(OR_ND_S32, and_1d_x_6d) {
+TEST(OR_ND_S32, or_1d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -822,7 +822,7 @@ TEST(OR_ND_S32, and_1d_x_6d) {
   }
 }
 
-TEST(OR_ND_S32, and_2d_x_6d) {
+TEST(OR_ND_S32, or_2d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -850,7 +850,7 @@ TEST(OR_ND_S32, and_2d_x_6d) {
   }
 }
 
-TEST(OR_ND_S32, and_3d_x_6d) {
+TEST(OR_ND_S32, or_3d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -880,7 +880,7 @@ TEST(OR_ND_S32, and_3d_x_6d) {
   }
 }
 
-TEST(OR_ND_S32, and_4d_x_6d) {
+TEST(OR_ND_S32, or_4d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -912,7 +912,7 @@ TEST(OR_ND_S32, and_4d_x_6d) {
   }
 }
 
-TEST(OR_ND_S32, and_5d_x_6d) {
+TEST(OR_ND_S32, or_5d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -947,7 +947,7 @@ TEST(OR_ND_S32, and_5d_x_6d) {
   }
 }
 
-TEST(OR_ND_S32, and_6d_x_0d) {
+TEST(OR_ND_S32, or_6d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
     const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
@@ -968,7 +968,7 @@ TEST(OR_ND_S32, and_6d_x_0d) {
   }
 }
 
-TEST(OR_ND_S32, and_6d_x_1d) {
+TEST(OR_ND_S32, or_6d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -994,7 +994,7 @@ TEST(OR_ND_S32, and_6d_x_1d) {
   }
 }
 
-TEST(OR_ND_S32, and_6d_x_2d) {
+TEST(OR_ND_S32, or_6d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -1022,7 +1022,7 @@ TEST(OR_ND_S32, and_6d_x_2d) {
   }
 }
 
-TEST(OR_ND_S32, and_6d_x_3d) {
+TEST(OR_ND_S32, or_6d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -1052,7 +1052,7 @@ TEST(OR_ND_S32, and_6d_x_3d) {
   }
 }
 
-TEST(OR_ND_S32, and_6d_x_4d) {
+TEST(OR_ND_S32, or_6d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -1084,7 +1084,7 @@ TEST(OR_ND_S32, and_6d_x_4d) {
   }
 }
 
-TEST(OR_ND_S32, and_6d_x_5d) {
+TEST(OR_ND_S32, or_6d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
@@ -1119,7 +1119,7 @@ TEST(OR_ND_S32, and_6d_x_5d) {
   }
 }
 
-TEST(OR_ND_S32, and_6d_x_6d) {
+TEST(OR_ND_S32, or_6d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
       const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
