@@ -55,6 +55,7 @@ XNN_INIT_ONCE_GUARD(f32_vmin);
 XNN_INIT_ONCE_GUARD(f32_vmul);
 XNN_INIT_ONCE_GUARD(f32_vsub);
 XNN_INIT_ONCE_GUARD(f32_vsqrdiff);
+XNN_INIT_ONCE_GUARD(s32_vmin);
 XNN_INIT_ONCE_GUARD(s32_vmul);
 XNN_INIT_ONCE_GUARD(qs8_vadd);
 XNN_INIT_ONCE_GUARD(qs8_vmul);
@@ -1454,11 +1455,7 @@ const struct xnn_binary_elementwise_config* xnn_init_s32_vmin_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_s32_vmin, &init_s32_vmin_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_s32_vmin, &init_s32_vmin_config);
-  #endif
+  XNN_INIT_ONCE(s32_vmin);
   return &s32_vmin_config;
 }
 
@@ -1467,11 +1464,7 @@ const struct xnn_binary_elementwise_config* xnn_init_s32_vmul_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_s32_vmul, &init_s32_vmul_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_s32_vmul, &init_s32_vmul_config);
-  #endif
+  XNN_INIT_ONCE(s32_vmul);
   return &s32_vmul_config;
 }
 
