@@ -1980,6 +1980,15 @@ typedef void (*xnn_f32_vneg_ukernel_fn)(
     float* output,
     const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+// VOR: Vector OR elementwise
+
+typedef void (*xnn_s32_vor_ukernel_fn)(
+    size_t batch,
+    const int32_t* input_a,
+    const int32_t* input_b,
+    int32_t* output,
+    const union xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 // VRELU: Vector REctified Linear Unit elementwise
 
 typedef void (*xnn_f32_vrelu_ukernel_fn)(

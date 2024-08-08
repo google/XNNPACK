@@ -151,7 +151,7 @@ static enum xnn_status setup_or_operator(
   }
 }
 
-enum xnn_status xnn_define_bitwise(
+enum xnn_status xnn_define_or(
   xnn_subgraph_t subgraph,
   uint32_t input1_id,
   uint32_t input2_id,

@@ -1789,6 +1789,22 @@ enum xnn_status xnn_define_negate(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Bitwsie OR Node and add it to a Subgraph.
+///
+/// The OR node peforms bitwise OR between first and second input.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input1_id - Value ID for the first input tensor. The input tensor must be defined in the @a subgraph.
+/// @param input2_id - Value ID for the second input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor.
+/// @param flags - binary features of the OR Node. No supported flags are currently defined.
+enum xnn_status xnn_define_or(
+  xnn_subgraph_t subgraph,
+  uint32_t input1_id,
+  uint32_t input2_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a Sigmoid Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.

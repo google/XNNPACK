@@ -583,7 +583,7 @@ static void init_s32_vor_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      s32_vor_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vord_ukernel__avx512f_u32;
+      s32_vor_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vor_ukernel__avx512f_u32;
       s32_vor_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vorc_ukernel__avx512f_u32;
       s32_vor_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vorc_ukernel__avx512f_u32;
       s32_vor_config.linear.element_tile = 32;

@@ -2231,8 +2231,6 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c64(
     }
     for (int i = 0; i < channels >> 4; ++i) {
       vacc[i] = _mm512_add_ps(vo[i], vacc[i]);
-      vacc[i] = _mm512_max_ps(vacc[i], vmin);
-      vacc[i] = _mm512_min_ps(vacc[i], vmax);
     }
     for (int i = 0; i < channels >> 4; ++i) {
       _mm512_storeu_ps(output, vacc[i]); output += 16;
@@ -2240,8 +2238,6 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c64(
     if (remainder) {
       const size_t pos = num_full_chunks;
       __m512 vout = vacc[pos];
-      vout = _mm512_max_ps(vout, vmin);
-      vout = _mm512_min_ps(vout, vmax);
       vout = _mm512_maskz_add_ps(vmask, vout,  _mm512_maskz_loadu_ps(vmask, output));
       _mm512_mask_storeu_ps(output, vmask, vout);
     }
@@ -5553,6 +5549,59 @@ void xnn_s32_vmulc_ukernel__avx512f_u32(
     xnn_simd_s32_t vin1 = (xnn_load_tail_s32(input1, batch >> XNN_LOG2_SIZEOF_INT32_T));
 
     xnn_simd_s32_t vy = xnn_mul_s32(vin1, vin2);
+
+    xnn_store_tail_s32(output, vy, batch >> XNN_LOG2_SIZEOF_INT32_T);
+  }
+}
+
+void xnn_s32_vor_ukernel__avx512f_u32(
+    size_t batch,
+    const int32_t* input_a,
+    const int32_t* input_b,
+    int32_t* output,
+    const union xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int32_t) == 0);
+  assert(input_b != NULL);
+  assert(input_a != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_s32 == 16);
+
+  for (; batch >= 32 * sizeof(int32_t); batch -= 32 * sizeof(int32_t)) {
+    xnn_simd_s32_t vin1_0 = xnn_loadu_s32(input_a);
+    xnn_simd_s32_t vin1_1 = xnn_loadu_s32(input_a + 1 * xnn_simd_size_s32);
+    input_a += 32;
+
+    xnn_simd_s32_t vin2_0 = xnn_loadu_s32(input_b);
+    xnn_simd_s32_t vin2_1 = (xnn_loadu_s32(input_b + 1 * xnn_simd_size_s32));
+    input_b += 32;
+
+    xnn_simd_s32_t vy_0 = xnn_or_s32(vin1_0, vin2_0);
+    xnn_simd_s32_t vy_1 = xnn_or_s32(vin1_1, vin2_1);
+
+    xnn_storeu_s32(output, vy_0);
+    xnn_storeu_s32(output + 1 * xnn_simd_size_s32, vy_1);
+    output += 32;
+  }
+  for (; batch >= xnn_simd_bytes_s32; batch -= xnn_simd_bytes_s32) {
+    xnn_simd_s32_t vin1 = xnn_loadu_s32(input_a);
+    input_a += xnn_simd_size_s32;
+
+    xnn_simd_s32_t vin2 = xnn_loadu_s32(input_b);
+    input_b += xnn_simd_size_s32;
+
+    xnn_simd_s32_t vy = xnn_or_s32(vin1, vin2);
+
+    xnn_storeu_s32(output, vy);
+    output += xnn_simd_size_s32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    xnn_simd_s32_t vin1 = xnn_load_tail_s32(input_a, batch >> XNN_LOG2_SIZEOF_INT32_T);
+
+    xnn_simd_s32_t vin2 = xnn_load_tail_s32(input_b, batch >> XNN_LOG2_SIZEOF_INT32_T);
+
+    xnn_simd_s32_t vy = xnn_or_s32(vin1, vin2);
 
     xnn_store_tail_s32(output, vy, batch >> XNN_LOG2_SIZEOF_INT32_T);
   }
