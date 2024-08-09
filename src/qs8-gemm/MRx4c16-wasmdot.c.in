@@ -8,7 +8,7 @@ $assert DATATYPE == "QD8" or REQUANTIZATION == "FP32"
 $assert DATATYPE != "QD8" or not REQUANTIZATION
 $assert MR <= 4
 $assert NR == 4 or NR == 8
-$assert (SDOT == 0 and DATATYPE == "QC8") or SDOT == 1
+$assert (SDOT == 0 and (DATATYPE in ["QC8", "QD8"])) or SDOT == 1
 #include <assert.h>
 
 #include <wasm_simd128.h>
@@ -72,13 +72,14 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     const v128_t vsign_mask = wasm_u8x16_const_splat(UINT8_C(0x80));
   do {
     $if DATATYPE == "QD8":
-      $assert NR != 8
-      $assert SDOT == 1
       v128_t vksum0 = wasm_v128_load32_zero(w);
       $for N in range(1, NR):
         v128_t vksum${N} = wasm_v128_load32_zero((const int32_t*) w + ${N});
       $for M in range(MR):
-        const v128_t vinput_zero_point${M} = wasm_v128_load32_splat(&quantization_params[${M}].zero_point);
+        $if SDOT:
+          const v128_t vinput_zero_point${M} = wasm_v128_load32_splat(&quantization_params[${M}].zero_point);
+        $else:
+          const v128_t vinput_zero_point${M} = wasm_i32x4_splat((int32_t) quantization_params[${M}].zero_point + 128);
       $for M in range(MR):
         $for N in range(NR):
           v128_t vacc${M}x${N} = wasm_i32x4_mul(vksum${N}, vinput_zero_point${M});
@@ -131,29 +132,38 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         const v128_t vinput_scale${M} = wasm_v128_load32_splat(&quantization_params[${M}].inv_scale);
 
       $for M in range(MR):
-        vacc${M}x0123 = wasm_f32x4_mul(vacc${M}x0123, vinput_scale${M});
+        $for N in range(0, NR, 4):
+          vacc${M}x${ABC[N:N+4]} = wasm_f32x4_mul(vacc${M}x${ABC[N:N+4]}, vinput_scale${M});
 
-      const v128_t vfilter_output_scale0123 = wasm_v128_load(w);
+      $for N in range(0, NR, 4):
+        const v128_t vfilter_output_scale${ABC[N:N+4]} = wasm_v128_load(w);
+        w = (const float*) w + 4;
       $for M in range(MR):
-        vacc${M}x0123 = wasm_f32x4_mul(vacc${M}x0123, vfilter_output_scale0123);
-      w = (const float*) w + 4;
+        $for N in range(0, NR, 4):
+          vacc${M}x${ABC[N:N+4]} = wasm_f32x4_mul(vacc${M}x${ABC[N:N+4]}, vfilter_output_scale${ABC[N:N+4]});
 
-      const v128_t vbias0123 = wasm_v128_load(w);
+      $for N in range(0, NR, 4):
+        const v128_t vbias${ABC[N:N+4]} = wasm_v128_load(w);
+        w = (const float*) w + 4;
       $for M in range(MR):
-        vacc${M}x0123 = wasm_f32x4_add(vacc${M}x0123, vbias0123);
-      w = (const float*) w + 4;
+        $for N in range(0, NR, 4):
+          vacc${M}x${ABC[N:N+4]} = wasm_f32x4_add(vacc${M}x${ABC[N:N+4]}, vbias${ABC[N:N+4]});
 
       const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
       $for M in range(MR):
-        vacc${M}x0123 = wasm_f32x4_pmax(vacc${M}x0123, vmin);
+        $for N in range(0, NR, 4):
+          vacc${M}x${ABC[N:N+4]} = wasm_f32x4_pmax(vacc${M}x${ABC[N:N+4]}, vmin);
 
       const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
       $for M in range(MR):
-        vacc${M}x0123 = wasm_f32x4_pmin(vacc${M}x0123, vmax);
+        $for N in range(0, NR, 4):
+          vacc${M}x${ABC[N:N+4]} = wasm_f32x4_pmin(vacc${M}x${ABC[N:N+4]}, vmax);
 
-      if XNN_LIKELY(nc >= 4) {
+      if XNN_LIKELY(nc >= ${NR}) {
         $for M in range(MR):
-          wasm_v128_store(c${M}, vacc${M}x0123);
+          wasm_v128_store(c${M}, vacc${M}x${ABC[0:4]});
+          $for N in range(4, NR, 4):
+            wasm_v128_store(c${M} + ${N}, vacc${M}x${ABC[N:N+4]});
 
         $for M in range(MR):
           a${M} = (const int8_t*) ((uintptr_t) a${M} - kc);
@@ -161,8 +171,15 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         $for M in range(MR):
           c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
-        nc -= 4;
+        nc -= ${NR};
       } else {
+        $if NR == 8:
+          if (nc & 4) {
+            $for M in range(MR):
+              wasm_v128_store(c${M}, vacc${M}x0123);
+              vacc${M}x0123 = vacc${M}x4567;
+              c${M} += 4;
+          }
         if (nc & 2) {
           $for M in range(MR):
             wasm_v128_store64_lane(c${M}, vacc${M}x0123, 0);
