@@ -6,27 +6,17 @@
 #include <assert.h>
 #include <stddef.h>
 
-#ifdef _WIN32
-  #include <windows.h>
-#else
-  #include <pthread.h>
-#endif
-
 #include "xnnpack/common.h"
 #include "xnnpack/config.h"
+#include "xnnpack/init-once.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/zip.h"
 
 static struct xnn_zip_config x8_zip_config = {0};
 static struct xnn_zip_config x32_zip_config = {0};
 
-#if XNN_PLATFORM_WINDOWS
-  static INIT_ONCE init_guard_x8_zip = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_x32_zip = INIT_ONCE_STATIC_INIT;
-#else
-  static pthread_once_t init_guard_x8_zip = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_x32_zip = PTHREAD_ONCE_INIT;
-#endif
+XNN_INIT_ONCE_GUARD(x8_zip);
+XNN_INIT_ONCE_GUARD(x32_zip);
 
 static void init_x8_zip_config(void) {
   #if XNN_ARCH_ARM
@@ -106,28 +96,12 @@ static void init_x32_zip_config(void) {
 
 }
 
-#if XNN_PLATFORM_WINDOWS
-  static BOOL CALLBACK init_x8_zip_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_x8_zip_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_x32_zip_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_x32_zip_config();
-    return TRUE;
-  }
-#endif
-
 const struct xnn_zip_config* xnn_init_x8_zip_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_x8_zip, &init_x8_zip_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_x8_zip, &init_x8_zip_config);
-  #endif
+  XNN_INIT_ONCE(x8_zip);
   return &x8_zip_config;
 }
 
@@ -136,10 +110,6 @@ const struct xnn_zip_config* xnn_init_x32_zip_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_x32_zip, &init_x32_zip_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_x32_zip, &init_x32_zip_config);
-  #endif
+  XNN_INIT_ONCE(x32_zip);
   return &x32_zip_config;
 }

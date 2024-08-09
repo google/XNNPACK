@@ -19,7 +19,7 @@ void xnn_f32_rsum_ukernel__neon_u12_acc3(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -45,6 +45,8 @@ void xnn_f32_rsum_ukernel__neon_u12_acc3(
     vacc0 = vaddq_f32(vacc0, vt);
   }
   const float32x2_t vscale = vld1_dup_f32(&params->scalar.scale);
+  const float32x2_t vmin = vld1_dup_f32(&params->scalar.min);
+  const float32x2_t vmax = vld1_dup_f32(&params->scalar.max);
   float32x2_t vacc = vadd_f32(vget_low_f32(vacc0), vget_high_f32(vacc0));
   if XNN_UNLIKELY(batch & (2 * sizeof(float))) {
     const float32x2_t vt = vld1_f32(input); input += 2;
@@ -56,5 +58,7 @@ void xnn_f32_rsum_ukernel__neon_u12_acc3(
     vacc = vadd_f32(vacc, vt);
   }
   vacc = vmul_f32(vacc, vscale);
+  vacc = vmax_f32(vacc, vmin);
+  vacc = vmin_f32(vacc, vmax);
   *output += vget_lane_f32(vacc, 0);
 }

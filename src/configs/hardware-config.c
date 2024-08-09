@@ -13,8 +13,6 @@
   #ifndef PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE
     #define PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE 43
   #endif
-#else
-  #include <pthread.h>
 #endif
 #if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)
 #include <sys/syscall.h>
@@ -46,6 +44,7 @@
 #endif
 
 #include "xnnpack/hardware-config.h"
+#include "xnnpack/init-once.h"
 #include "xnnpack/log.h"
 
 #if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)
@@ -62,11 +61,7 @@ ssize_t xnn_syscall(size_t rax, size_t rdi, size_t rsi, size_t rdx) {
 
 static struct xnn_hardware_config hardware_config = {0};
 
-#if XNN_PLATFORM_WINDOWS
-  static INIT_ONCE init_guard = INIT_ONCE_STATIC_INIT;
-#else
-  static pthread_once_t init_guard = PTHREAD_ONCE_INIT;
-#endif
+XNN_INIT_ONCE_GUARD(hardware);
 
 static void init_hardware_config(void) {
   #if XNN_ARCH_ARM64 || XNN_ARCH_ARM
@@ -282,13 +277,6 @@ static void init_hardware_config(void) {
   #endif  // XNN_ARCH_WASMRELAXEDSIMD
 }
 
-#if XNN_PLATFORM_WINDOWS
-  static BOOL CALLBACK init_hardware_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_hardware_config();
-    return TRUE;
-  }
-#endif
-
 const struct xnn_hardware_config* xnn_init_hardware_config() {
   #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !XNN_ARCH_PPC64 && XNN_ENABLE_CPUINFO
     if (!cpuinfo_initialize()) {
@@ -321,10 +309,6 @@ const struct xnn_hardware_config* xnn_init_hardware_config() {
     }
   #endif  // XNN_ARCH_X86
 
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard, &init_hardware_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard, &init_hardware_config);
-  #endif
+  XNN_INIT_ONCE(hardware);
   return &hardware_config;
 }

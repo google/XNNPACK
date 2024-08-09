@@ -17,7 +17,7 @@
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/operator.h"
+#include "xnnpack/microparams.h"
 #include "xnnpack/pack.h"
 #include "xnnpack/unaligned.h"
 
@@ -1588,28 +1588,6 @@ void xnn_pack_qs4_weights_and_biases(
       extra_data1_element_size, packed_weights_ptr, extra_bytes, params);
 }
 
-// Wrapper for xnn_pack_qs8_qc4uw_gemm_gio_w + xnn_pack_qs8_qc4uw_gemm_goi_w
-void xnn_pack_qs4u_weights_and_biases(
-    uint32_t flags, const struct xnn_gemm_config* gemm_config,
-    size_t input_channels, size_t output_channels, size_t groups,
-    size_t k_stride, const void* accumulator_init, const void* weights,
-    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
-    size_t extra_data0_element_size,
-    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
-    size_t extra_data1_element_size, void* packed_weights_ptr,
-    const void* params) {
-  const size_t extra_bytes = extra_data0_element_size + extra_data1_element_size;
-  const size_t weights_stride = xnn_packed_stride_qs8_weights_and_biases(
-      gemm_config, input_channels, k_stride, extra_bytes);
-  return pack_weights_and_biases(
-      flags, gemm_config, input_channels, output_channels, groups,
-      weights_stride,
-      (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_qc4uw_gemm_gio_w,
-      (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_qc4uw_gemm_goi_w,
-      accumulator_init, weights, init_extra_data0_fn, extra_data0,
-      extra_data0_element_size, init_extra_data1_fn, extra_data1,
-      extra_data1_element_size, packed_weights_ptr, extra_bytes, params);
-}
 size_t xnn_packed_stride_qu8_weights_and_biases(
     const struct xnn_gemm_config* gemm_config, size_t unused_k, size_t k_stride,
     size_t extra_bytes) {

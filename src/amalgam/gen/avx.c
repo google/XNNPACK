@@ -3653,7 +3653,7 @@ void xnn_f32_rdsum_ukernel_7p7x__avx_c32(
     size_t input_stride,
     const float* zero,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -3661,6 +3661,8 @@ void xnn_f32_rdsum_ukernel_7p7x__avx_c32(
   assert(output != NULL);
 
   const __m256 vscale = _mm256_set1_ps(params->avx.scale);
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 32; channels -= 32) {
@@ -3765,9 +3767,17 @@ void xnn_f32_rdsum_ukernel_7p7x__avx_c32(
       i6 = (const float*) ((uintptr_t) i6 + input_increment);
     }
     vacc0 = _mm256_mul_ps(vacc0, vscale);
+    vacc0 = _mm256_max_ps(vacc0, vmin);
+    vacc0 = _mm256_min_ps(vacc0, vmax);
     vacc1 = _mm256_mul_ps(vacc1, vscale);
+    vacc1 = _mm256_max_ps(vacc1, vmin);
+    vacc1 = _mm256_min_ps(vacc1, vmax);
     vacc2 = _mm256_mul_ps(vacc2, vscale);
+    vacc2 = _mm256_max_ps(vacc2, vmin);
+    vacc2 = _mm256_min_ps(vacc2, vmax);
     vacc3 = _mm256_mul_ps(vacc3, vscale);
+    vacc3 = _mm256_max_ps(vacc3, vmin);
+    vacc3 = _mm256_min_ps(vacc3, vmax);
 
     const float* o = output;
     __m256 vo0 = _mm256_loadu_ps(o); o += 8;
@@ -3853,6 +3863,8 @@ void xnn_f32_rdsum_ukernel_7p7x__avx_c32(
     }
     for (size_t i = 0; i < num_chunks; ++i) {
       vacc[i] = _mm256_mul_ps(vacc[i], vscale);
+      vacc[i] = _mm256_max_ps(vacc[i], vmin);
+      vacc[i] = _mm256_min_ps(vacc[i], vmax);
     }
 
     __m256 vo[4];
@@ -4014,7 +4026,7 @@ void xnn_f32_rsum_ukernel__avx_u32_acc4(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -4057,6 +4069,8 @@ void xnn_f32_rsum_ukernel__avx_u32_acc4(
   vacc = _mm_add_ps(vacc, _mm_movehl_ps(vacc, vacc));
   vacc = _mm_add_ss(vacc, _mm_movehdup_ps(vacc));
   vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->avx.scale));
+  vacc = _mm_max_ss(vacc, _mm_load_ss(&params->avx.min));
+  vacc = _mm_min_ss(vacc, _mm_load_ss(&params->avx.max));
   *output += _mm_cvtss_f32(vacc);
 }
 

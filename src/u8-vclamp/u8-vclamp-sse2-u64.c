@@ -4,9 +4,12 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-
 #include <emmintrin.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
 #include "xnnpack/unaligned.h"
 #include "xnnpack/vunary.h"
 

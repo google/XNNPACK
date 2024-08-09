@@ -319,6 +319,15 @@ xnnpack_cc_library(
     hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":config_hdrs",
+        ":memory",
+        ":microparams",
+        ":mutex",
+        ":xnnpack_h",
+        "@FP16",
+    ],
 )
 
 xnnpack_cc_library(
@@ -347,6 +356,17 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":platform_jit",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "init_once",
+    hdrs = ["src/xnnpack/init-once.h"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":xnnpack_h",
     ],
 )
 
@@ -420,6 +440,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
+        ":init_once",
         ":logging",
     ] + select({
         ":cpuinfo_enabled": ["@cpuinfo"],
@@ -433,7 +454,10 @@ xnnpack_cc_library(
         "src/xnnpack/config.h",
         "src/xnnpack/config-types.h",
     ],
-    deps = [":params"],
+    deps = [
+        ":hardware_config",
+        ":params",
+    ],
 )
 
 xnnpack_cc_library(
@@ -498,6 +522,7 @@ xnnpack_cc_library(
         ":enable_jit",
         ":experiments_config",
         ":hardware_config",
+        ":init_once",
         ":logging",
         ":microkernels_h",
         ":microparams_init",
@@ -578,6 +603,9 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/node-type.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+    ],
 )
 
 xnnpack_cc_library(
@@ -585,6 +613,9 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/allocation-type.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+    ],
 )
 
 xnnpack_cc_library(
@@ -592,6 +623,9 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/operator-type.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+    ],
 )
 
 xnnpack_cc_library(
@@ -599,6 +633,9 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/microkernel-type.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+    ],
 )
 
 xnnpack_cc_library(
@@ -606,6 +643,9 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/internal.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":xnnpack_h",
+    ],
 )
 
 xnnpack_cc_library(
@@ -726,6 +766,7 @@ xnnpack_microkernel_cc_library(
     srcs_prod = ["src/amalgam/gen/scalar.c"],
     srcs_test = ALL_SCALAR_MICROKERNEL_SRCS,
     deps = MICROKERNEL_DEPS + [
+        ":config_hdrs",
         "@FP16",
         "@FXdiv",
     ],
@@ -815,6 +856,7 @@ xnnpack_microkernel_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
+        "@KleidiAI//kai/ukernels/matmul:lhs_quant_pack_qai8dxp_f32",
     ]),
 )
 
@@ -937,6 +979,7 @@ xnnpack_microkernel_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
+        "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp1x8_qsi4cxp8x8_1x8x32_neon_dotprod",
     ]),
 )
 
@@ -960,6 +1003,7 @@ xnnpack_microkernel_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
+        "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp8x8_8x8x32_neon_i8mm",
     ]),
 )
 
@@ -1360,6 +1404,9 @@ xnnpack_cc_library(
     wasm_srcs = WASM32_ASM_MICROKERNEL_SRCS,
     wasmrelaxedsimd_srcs = WASM32_ASM_MICROKERNEL_SRCS,
     wasmsimd_srcs = WASM32_ASM_MICROKERNEL_SRCS,
+    deps = [
+        ":common",
+    ],
 )
 
 xnnpack_cc_library(
@@ -1741,12 +1788,17 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":config_hdrs",
+        ":logging",
         ":math",
-        ":operator_h",
+        ":microparams",
+        ":params",
         ":unaligned",
+        ":xnnpack_h",
         "@FP16",
     ] + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
+        "@KleidiAI//kai/ukernels/matmul:rhs_pack_kxn_qsi4cxp_qsu4cxs1s0",
+        "@KleidiAI//kai/ukernels/matmul:rhs_pack_nxk_qsi4cxp_qsu4cxs1s0",
     ]),
 )
 
@@ -1964,6 +2016,7 @@ xnnpack_cc_library(
     ],
     deps = [
         ":allocator",
+        ":logging",
         ":microkernel_configs",
         ":microparams",
         ":params",
@@ -1997,10 +2050,12 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
-        ":cache",
+        ":allocator",
         ":common",
+        ":logging",
         ":math",
         ":operator_h",
+        ":params",
         ":xnnpack_h",
     ],
 )
@@ -2033,6 +2088,7 @@ xnnpack_cc_library(
         ":microkernel_configs",
         ":microkernel_type",
         ":microkernel_utils",
+        ":microkernels_h",
         ":microparams_init",
         ":normalization",
         ":operator_type",
@@ -2040,6 +2096,7 @@ xnnpack_cc_library(
         ":packing",
         ":params",
         ":post_operation",
+        ":quantization",
         ":xnnpack_h",
         "@FP16",
         "@pthreadpool",
@@ -2107,18 +2164,25 @@ xnnpack_cc_library(
         ":allocator",
         ":cache",
         ":common",
+        ":config_hdrs",
         ":enable_jit",
         ":enable_sparse",
+        ":hardware_config",
         ":internal",
         ":logging",
         ":math",
+        ":memory",
+        ":microkernel_type",
+        ":microkernels_h",
         ":node_type",
         ":operator_type",
+        ":operator_utils",
         ":operators",
         ":params",
         ":requantization",
         ":xnnpack_h",
         "@FP16",
+        "@pthreadpool",
     ] + xnnpack_slinky_deps(),
 )
 
@@ -2176,6 +2240,9 @@ xnnpack_cc_library(
         ":allocator",
         ":build_identifier",
         ":common",
+        ":config_hdrs",
+        ":hardware_config",
+        ":init_once",
         ":logging",
         ":math",
         ":microkernels_h",
@@ -2184,6 +2251,7 @@ xnnpack_cc_library(
         ":operators",
         ":params",
         ":subgraph",
+        "@pthreadpool",
     ],
 )
 
@@ -2210,14 +2278,8 @@ xnnpack_cc_library(
         ":build_identifier",
         ":common",
         ":logging",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":microparams_init",
-        ":operators",
         ":params",
-        ":prod_microkernels",
-        ":subgraph",
+        "@pthreadpool",
     ],
 )
 
@@ -2244,13 +2306,8 @@ xnnpack_cc_library(
         ":build_identifier",
         ":common",
         ":logging",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":microparams_init",
-        ":operators",
         ":params",
-        ":prod_microkernels",
+        "@pthreadpool",
     ],
 )
 
@@ -2858,13 +2915,11 @@ selects.config_setting_group(
     ],
 )
 
-# Temporary disable vectors on Android
 alias(
     name = "riscv_vector_enabled",
     actual = select({
         ":xnn_enable_riscv_vector_explicit_true": ":xnn_enable_riscv_vector_explicit_true",
         ":xnn_enable_riscv_vector_explicit_false": ":xnn_enable_riscv_vector_explicit_true",
-        "//build_config:android": ":xnn_enable_riscv_vector_explicit_false",
         "//conditions:default": ":riscv_vector_enabled_by_default",
     }),
 )

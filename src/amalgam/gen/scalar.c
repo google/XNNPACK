@@ -10499,7 +10499,7 @@ void xnn_f32_rdsum_ukernel_7p7x__scalar_c4(
     size_t input_stride,
     const float* zero,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -10507,6 +10507,8 @@ void xnn_f32_rdsum_ukernel_7p7x__scalar_c4(
   assert(output != NULL);
 
   const float vscale = params->scalar.scale;
+  const float vmin = params->scalar.min;
+  const float vmax = params->scalar.max;
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 4; channels -= 4) {
@@ -10578,9 +10580,17 @@ void xnn_f32_rdsum_ukernel_7p7x__scalar_c4(
       i6 = (const float*) ((uintptr_t) i6 + input_increment);
     }
     vacc0 = vacc0 * vscale;
+    vacc0 = math_max_f32(vacc0, vmin);
+    vacc0 = math_min_f32(vacc0, vmax);
     vacc1 = vacc1 * vscale;
+    vacc1 = math_max_f32(vacc1, vmin);
+    vacc1 = math_min_f32(vacc1, vmax);
     vacc2 = vacc2 * vscale;
+    vacc2 = math_max_f32(vacc2, vmin);
+    vacc2 = math_min_f32(vacc2, vmax);
     vacc3 = vacc3 * vscale;
+    vacc3 = math_max_f32(vacc3, vmin);
+    vacc3 = math_min_f32(vacc3, vmax);
 
     *output++ += vacc0;
     *output++ += vacc1;
@@ -10651,8 +10661,14 @@ void xnn_f32_rdsum_ukernel_7p7x__scalar_c4(
       i6 = (const float*) ((uintptr_t) i6 + input_increment);
     }
     vacc0 = vacc0 * vscale;
+    vacc0 = math_max_f32(vacc0, vmin);
+    vacc0 = math_min_f32(vacc0, vmax);
     vacc1 = vacc1 * vscale;
+    vacc1 = math_max_f32(vacc1, vmin);
+    vacc1 = math_min_f32(vacc1, vmax);
     vacc2 = vacc2 * vscale;
+    vacc2 = math_max_f32(vacc2, vmin);
+    vacc2 = math_min_f32(vacc2, vmax);
 
     if (channels & 2) {
       *output++ += vacc0;
@@ -10768,7 +10784,7 @@ void xnn_f32_rsum_ukernel__scalar_u4_acc4(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -10804,6 +10820,8 @@ void xnn_f32_rsum_ukernel__scalar_u4_acc4(
   }
   const float vscale = params->scalar.scale;
   vacc0 *= vscale;
+  vacc0 = math_max_f32(vacc0, params->scalar.min);
+  vacc0 = math_min_f32(vacc0, params->scalar.max);
   *output += vacc0;
 }
 

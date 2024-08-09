@@ -61,6 +61,7 @@ xnnpack_cc_library(
         "//:hardware_config",
         "//:memory",
         "//:params",
+        "//:xnnpack_h",
         "@com_google_benchmark//:benchmark",
     ] + select({
         "//:cpuinfo_enabled": ["@cpuinfo"],
@@ -505,13 +506,20 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
+cc_library(
+    name = "spmm",
+    hdrs = ["spmm.h"],
+    deps = [
+        "@com_google_benchmark//:benchmark",
+    ],
+)
+
 xnnpack_benchmark(
     name = "f16_spmm_bench",
     srcs = [
         "f16-spmm.cc",
-        "spmm.h",
     ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
+    deps = MICROKERNEL_BENCHMARK_DEPS + [":spmm"],
 )
 
 [xnnpack_benchmark(
@@ -868,9 +876,9 @@ xnnpack_benchmark(
     name = "f32_spmm_bench",
     srcs = [
         "f32-spmm.cc",
-        "spmm.h",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":spmm",
         ":spmm_benchmark",
     ],
 )
@@ -1069,7 +1077,7 @@ xnnpack_cc_library(
     hdrs = [
         "rsum-benchmark.h",
     ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
+    deps = MICROKERNEL_BENCHMARK_DEPS + ["@com_google_benchmark//:benchmark"],
 )
 
 xnnpack_cc_library(
@@ -1079,7 +1087,11 @@ xnnpack_cc_library(
         "gemm.h",
         "gemm-benchmark.h",
     ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:config_hdrs",
+        "//:math",
+        "@com_google_benchmark//:benchmark",
+    ],
 )
 
 xnnpack_cc_library(
@@ -1089,7 +1101,10 @@ xnnpack_cc_library(
         "spmm-benchmark.h",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":spmm",
         "//:isa_checks",
+        "//:math",
+        "@com_google_benchmark//:benchmark",
     ],
 )
 
@@ -1358,7 +1373,6 @@ xnnpack_benchmark(
     deps = [
         ":bench_utils",
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:models_h",
         "//models:fp16_mobilenet_v1",
         "//models:fp16_mobilenet_v2",
@@ -1389,6 +1403,5 @@ xnnpack_benchmark(
         "//models:qu8_mobilenet_v2",
         "//models:qu8_mobilenet_v3_large",
         "//models:qu8_mobilenet_v3_small",
-        "@pthreadpool",
     ],
 )

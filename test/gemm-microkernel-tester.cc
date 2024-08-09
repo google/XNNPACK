@@ -17,11 +17,13 @@
 #include <fp16/bitcasts.h>
 #include <fp16/fp16.h>
 #include "xnnpack.h"
+#include "xnnpack/allocator.h"
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/config-types.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/math.h"
+#include "xnnpack/memory.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"

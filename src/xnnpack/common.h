@@ -143,6 +143,12 @@
   #endif
 #endif  // XNN_PLATFORM_JIT
 
+#if XNN_PLATFORM_WINDOWS
+  #define XNN_HAS_MMAP 0
+#else
+  #define XNN_HAS_MMAP 1
+#endif
+
 // Define compile identification macros
 
 #if defined(__clang__)

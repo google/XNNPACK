@@ -6,24 +6,16 @@
 #include <assert.h>
 #include <stddef.h>
 
-#ifdef _WIN32
-  #include <windows.h>
-#else
-  #include <pthread.h>
-#endif
 
 #include "xnnpack/argmaxpool.h"
 #include "xnnpack/common.h"
 #include "xnnpack/config.h"
+#include "xnnpack/init-once.h"
 #include "xnnpack/microfnptr.h"
 
 static struct xnn_argmaxpool_config f32_argmaxpool_config[XNN_MAX_F32_ARGMAXPOOL_UKERNELS ] = {0};
 
-#if XNN_PLATFORM_WINDOWS
-  static INIT_ONCE init_guard_f32_argmaxpool = INIT_ONCE_STATIC_INIT;
-#else
-  static pthread_once_t init_guard_f32_argmaxpool = PTHREAD_ONCE_INIT;
-#endif
+XNN_INIT_ONCE_GUARD(f32_argmaxpool);
 
 static void init_f32_argmaxpool_config(void) {
   #if XNN_ARCH_ARM
@@ -117,22 +109,11 @@ static void init_f32_argmaxpool_config(void) {
   #endif
 }
 
-#if XNN_PLATFORM_WINDOWS
-  static BOOL CALLBACK init_f32_argmaxpool_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_argmaxpool_config();
-    return TRUE;
-  }
-#endif
-
 const struct xnn_argmaxpool_config* xnn_init_f32_argmaxpool_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_argmaxpool, &init_f32_argmaxpool_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_argmaxpool, &init_f32_argmaxpool_config);
-  #endif
+  XNN_INIT_ONCE(f32_argmaxpool);
   return f32_argmaxpool_config;
 }
