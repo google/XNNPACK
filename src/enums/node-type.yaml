@@ -89,6 +89,8 @@
   string: "Multiply2"
 - name: xnn_node_type_negate
   string: "Negate"
+- name: xnn_node_type_or
+  string: "OR"
 - name: xnn_node_type_prelu
   string: "PReLU"
 - name: xnn_node_type_reciprocal_square_root

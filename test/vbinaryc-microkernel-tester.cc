@@ -351,6 +351,9 @@ void VBinaryCMicrokernelTester::Test(
           // Overflow is the expected behaviour
           y_ref[i] = ((((int64_t) a_data[i] * (int64_t) b) << 32) >> 32);
           break;
+        case OpType::ORC:
+          y_ref[i] = a_data[i] | b;
+          break;
         case OpType::SqrDiffC: {
           const int32_t diff = a_data[i] - b;
           y_ref[i] = diff * diff;

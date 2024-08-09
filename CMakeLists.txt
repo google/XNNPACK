@@ -411,6 +411,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/minimum2.c
   src/subgraph/multiply2.c
   src/subgraph/negate.c
+  src/subgraph/or.c
   src/subgraph/prelu.c
   src/subgraph/reciprocal-square-root.c
   src/subgraph/reshape-helpers.c
@@ -1627,6 +1628,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(negate-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME negate-nc-test COMMAND negate-nc-test)
 
+    ADD_EXECUTABLE(or-nd-test test/or-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(or-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(or-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME or-nd-test COMMAND or-nd-test)
+
     ADD_EXECUTABLE(prelu-nc-test test/prelu-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(prelu-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(prelu-nc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
@@ -1981,6 +1987,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(negate-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(negate-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME negate-test COMMAND negate-test)
+
+    ADD_EXECUTABLE(or-test test/or.cc)
+    TARGET_INCLUDE_DIRECTORIES(or-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(or-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME or-test COMMAND or-test)
 
     ADD_EXECUTABLE(prelu-test test/prelu.cc)
     TARGET_INCLUDE_DIRECTORIES(prelu-test PRIVATE src test)
@@ -2788,6 +2799,18 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(s32-vmulc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
   TARGET_LINK_LIBRARIES(s32-vmulc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME s32-vmulc-test COMMAND s32-vmulc-test)
+
+  ADD_EXECUTABLE(s32-vor-test test/s32-vor.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vor-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vor-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vor-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vor-test COMMAND s32-vor-test)
+
+  ADD_EXECUTABLE(s32-vorc-test test/s32-vorc.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vorc-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vorc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vorc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vorc-test COMMAND s32-vorc-test)
 
   ADD_EXECUTABLE(f16-vcmul-test test/f16-vcmul.cc)
   SET_TARGET_PROPERTIES(f16-vcmul-test PROPERTIES CXX_EXTENSIONS YES)

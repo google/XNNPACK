@@ -1186,6 +1186,8 @@ ALL_WASMSIMD_MICROKERNEL_SRCS = [
     "src/s8-vclamp/s8-vclamp-wasmsimd-u64.c",
     "src/s32-vmul/gen/s32-vmul-wasmsimd.c",
     "src/s32-vmul/gen/s32-vmulc-wasmsimd.c",
+    "src/s32-vor/gen/s32-vor-wasmsimd.c",
+    "src/s32-vor/gen/s32-vorc-wasmsimd.c",
     "src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-dot16x2-c8.c",
     "src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-dot16x2-c16.c",
     "src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-mul32-c8.c",
