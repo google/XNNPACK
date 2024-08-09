@@ -379,6 +379,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph.c
   src/subgraph/abs.c
   src/subgraph/add2.c
+  src/subgraph/and.c
   src/subgraph/argmax-pooling-2d.c
   src/subgraph/average-pooling-2d.c
   src/subgraph/bankers-rounding.c
@@ -411,7 +412,8 @@ SET(SUBGRAPH_SRCS
   src/subgraph/minimum2.c
   src/subgraph/multiply2.c
   src/subgraph/negate.c
-  src/subgraph/prelu.c
+  src/subgraph/prelu.c 
+  src/subgraph/or.c
   src/subgraph/reciprocal-square-root.c
   src/subgraph/reshape-helpers.c
   src/subgraph/scaled-dot-product-attention.c
@@ -431,6 +433,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/tanh.c
   src/subgraph/unpooling-2d.c
   src/subgraph/validation.c
+  src/subgraph/xor.c
   src/tensor.c)
 
 SET(LOGGING_SRCS
