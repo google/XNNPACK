@@ -49,6 +49,14 @@ static enum xnn_status check_zero_point(
   int32_t zero_point)
 {
   switch (datatype) {
+    case xnn_datatype_qcint16:
+      if ((int32_t) (int16_t) zero_point != zero_point) {
+        xnn_log_error(
+          "failed to create Quantized Dense Tensor value: invalid zero point %" PRId32" outside the [-32,768, 32,767] range",
+          zero_point);
+        return xnn_status_invalid_parameter;
+      }
+      break;
     case xnn_datatype_qcint4:
     case xnn_datatype_qbint4:
       if (zero_point < 0 || zero_point > 15) {
@@ -125,6 +133,7 @@ enum xnn_status xnn_define_tensor_value(
   switch (datatype) {
     case xnn_datatype_fp32:
     case xnn_datatype_fp16:
+    case xnn_datatype_qcint16:
     case xnn_datatype_int32:
       break;
     default:
@@ -635,6 +644,9 @@ size_t xnn_tensor_get_size(const struct xnn_value* value)
     case xnn_datatype_qcint8:
     case xnn_datatype_qpint8:
       size = 1;
+      break;
+    case xnn_datatype_qcint16:
+      size = 2;
       break;
     case xnn_datatype_qint32:
     case xnn_datatype_qcint32:

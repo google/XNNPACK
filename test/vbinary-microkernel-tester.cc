@@ -280,6 +280,69 @@ void VBinaryMicrokernelTester::Test(
 }
 
 void VBinaryMicrokernelTester::Test(
+    xnn_qs16_vbinary_ukernel_fn vbinary, OpType op_type,
+    xnn_init_qs16_mul_minmax_params_fn init_params,xnn_qs16_requantize_fn requantize) const {
+  xnnpack::ReplicableRandomDevice rng;
+  std::uniform_int_distribution<int32_t> s16dist(
+      std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max());
+
+  std::vector<int16_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int16_t));
+  std::vector<int16_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(int16_t));
+  std::vector<int16_t> y(batch_size() + (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(int16_t) : 0));
+  std::vector<int16_t> y_ref(batch_size());
+  std::vector<float> y_fp(batch_size());
+
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(a.begin(), a.end(), [&]() { return s16dist(rng); });
+    std::generate(b.begin(), b.end(), [&]() { return s16dist(rng); });
+    if (inplace_a() || inplace_b()) {
+      std::generate(y.begin(), y.end(), [&]() { return s16dist(rng); });
+    }
+    else {
+      std::fill(y.begin(), y.end(), 0xA5);
+    }
+    const int16_t* a_data = inplace_a() ? y.data() : a.data();
+    const int16_t* b_data = inplace_b() ? y.data() : b.data();
+
+    // Prepare parameters.
+    const float product_scale = a_scale() * b_scale();
+    const float product_output_scale = product_scale / y_scale();
+    xnn_qs16_mul_minmax_params params;
+    if (init_params != nullptr) {
+      init_params(&params, a_zero_point_s16(), b_zero_point_s16(), product_output_scale, y_zero_point_s16(), qmin_s16(), qmax_s16());
+    }
+
+    // Compute reference results.
+    for (size_t i = 0; i < batch_size(); i++) {
+          const int32_t acc = (static_cast<int32_t>(a_data[i]) -
+                              static_cast<int32_t>(a_zero_point_s16())) *
+                              (static_cast<int32_t>(b_data[i]) -
+                              static_cast<int32_t>(b_zero_point_s16()));
+          int32_t res = static_cast<int32_t>(y_zero_point_s16()) +
+            static_cast<int32_t>(product_output_scale * static_cast<float>(acc));
+          y_fp[i] = static_cast<float>(res);
+          y_fp[i] = std::max<float>(
+              y_fp[i], static_cast<int16_t>(static_cast<int32_t>(qmin_s16())));
+          y_fp[i] = std::min<float>(
+              y_fp[i], static_cast<int16_t>(static_cast<int32_t>(qmax_s16())));
+          y_ref[i] = requantize(acc, product_output_scale, y_zero_point_s16(),
+                                qmin_s16(), qmax_s16());
+    }
+
+    // Call optimized micro-kernel.
+    vbinary(batch_size() * sizeof(int16_t), a_data, b_data, y.data(), &params);
+
+    // Verify results.
+    for (size_t i = 0; i < batch_size(); i++) {
+      EXPECT_EQ(static_cast<int32_t>(y[i]), static_cast<int32_t>(y_ref[i]))
+        << "at element " << i << " / " << batch_size();
+      EXPECT_NEAR(static_cast<int32_t>(y[i]), y_fp[i], 1.0f)
+          << "at element " << i << " / " << batch_size();
+    }
+  }
+}
+
+void VBinaryMicrokernelTester::Test(
     xnn_s32_vbinary_ukernel_fn vbinary, OpType op_type,
     xnn_init_s32_default_params_fn init_params) const {
   xnnpack::ReplicableRandomDevice rng;

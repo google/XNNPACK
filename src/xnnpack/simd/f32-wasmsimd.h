@@ -139,6 +139,10 @@ static XNN_INLINE xnn_simd_f32_t xnn_getexp_f32(xnn_simd_f32_t a) {
   return xnn_generic_getexp_f32(a);
 }
 
+static XNN_INLINE v128_t xnn_cvt_f32_s32(xnn_simd_f32_t a){
+  return wasm_i32x4_trunc_sat_f32x4(a);
+}
+
 // Load/store operations.
 static XNN_INLINE xnn_simd_f32_t xnn_loadu_f32(const float* ptr) {
   return wasm_v128_load(ptr);

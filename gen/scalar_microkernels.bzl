@@ -867,6 +867,8 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-scalar-u1.c",
     "src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-scalar-u2.c",
     "src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-scalar-u4.c",
+    "src/qs16-vmul/gen/qs16-vmul-minmax-scalar.c",
+    "src/qs16-vmul/gen/qs16-vmulc-minmax-scalar.c",
     "src/qu8-avgpool/qu8-avgpool-9p8x-minmax-fp32-scalar-imagic-c1.c",
     "src/qu8-avgpool/qu8-avgpool-9x-minmax-fp32-scalar-imagic-c1.c",
     "src/qu8-dwconv/gen/qu8-dwconv-5f5m5l1c1s1r-minmax-fp32-scalar-fmagic.c",

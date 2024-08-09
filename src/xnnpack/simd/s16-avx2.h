@@ -18,16 +18,36 @@
 // SIMD vector type for s16 using AVX2.
 typedef __m256i xnn_simd_s16_t;
 #define xnn_simd_size_s16 16
-#define xnn_simd_log2_size_s16 3
+#define xnn_simd_log2_size_s16 4
 #define xnn_simd_bytes_s16 (xnn_simd_size_s16 * sizeof(int16_t))
 
 #define XNN_SIMD_CONST_S16(var, val) \
   const xnn_simd_s16_t var = _mm256_set1_epi16(val);
 
 // Mask table used for masked load/store operations.
-static const int32_t mask_table_avx_s32[14] = {-1, -1, -1, -1, -1, -1, -1,
-                                               0,  0,  0,  0,  0,  0,  0};
+static const int32_t mask_table_avx_s16[32] = {
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0};
+
 // Arithmetic operations.
+
+static XNN_INLINE xnn_simd_s16_t xnn_max_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return _mm256_max_epi16(a, b);
+}
+
+static XNN_INLINE xnn_simd_s16_t xnn_min_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return _mm256_min_epi16(a, b);
+}
+
+static XNN_INLINE __m256i xnn_low_cvt_s16_s32(xnn_simd_s16_t a) {
+  return _mm256_cvtepi16_epi32(_mm256_castsi256_si128(a));
+}
+
+static XNN_INLINE __m256i xnn_high_cvt_s16_s32(xnn_simd_s16_t a) {
+  return _mm256_cvtepi16_epi32(_mm256_extracti128_si256(a, 1));
+}
 
 // Load/store operations.
 
@@ -66,7 +86,7 @@ xnn_load_tail_s16(const int16_t* input, size_t num_elements) XNN_OOB_READS {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_s16);
   const __m256i vmask = _mm256_loadu_si256(
-      (const __m256i*) ((uintptr_t) mask_table_avx_s32[7 ^ (num_elements>>1)]));
+      (const __m256i*) (&mask_table_avx_s16[16 - num_elements]));
   return _mm256_maskload_epi32((const int32_t*) input, vmask);
 }
 

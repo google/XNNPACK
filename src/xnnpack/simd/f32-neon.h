@@ -198,6 +198,10 @@ static XNN_INLINE xnn_simd_f32_t xnn_set1_or_load_f32(const float* v) {
   return vld1q_dup_f32(v);
 }
 
+static XNN_INLINE int32x4_t xnn_cvt_f32_s32(xnn_simd_f32_t a){
+  return vcvtq_s32_f32(a);
+}
+
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_f32_t
 xnn_load_tail_f32(const float* input, size_t num_elements) XNN_OOB_READS {
