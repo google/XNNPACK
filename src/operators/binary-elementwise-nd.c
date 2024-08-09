@@ -762,7 +762,7 @@ enum xnn_status xnn_create_and_nd_s32(
     uint32_t flags,
     xnn_operator_t* and_op_out)
 {
-  const struct xnn_binary_elementwise_config* s32_and_config = xnn_init_s32_and_config();
+  const struct xnn_binary_elementwise_config* s32_and_config = xnn_init_s32_vand_config();
   if (s32_and_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
       xnn_operator_type_to_string(xnn_operator_type_and_nd_s32));
@@ -785,7 +785,7 @@ enum xnn_status xnn_create_or_nd_s32(
     uint32_t flags,
     xnn_operator_t* or_op_out)
 {
-  const struct xnn_binary_elementwise_config* s32_or_config = xnn_init_s32_or_config();
+  const struct xnn_binary_elementwise_config* s32_or_config = xnn_init_s32_vor_config();
   if (s32_or_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
       xnn_operator_type_to_string(xnn_operator_type_or_nd_s32));
@@ -808,7 +808,7 @@ enum xnn_status xnn_create_xor_nd_s32(
     uint32_t flags,
     xnn_operator_t* xor_op_out)
 {
-  const struct xnn_binary_elementwise_config* s32_xor_config = xnn_init_s32_xor_config();
+  const struct xnn_binary_elementwise_config* s32_xor_config = xnn_init_s32_vxor_config();
   if (s32_xor_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
       xnn_operator_type_to_string(xnn_operator_type_xor_nd_s32));
