@@ -42,6 +42,22 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return _mm512_min_epi32(a, b);
 }
 
+// Bitwise operations.
+static XNN_INLINE xnn_simd_s32_t xnn_popcnt_s32(xnn_simd_s32_t a) {
+#if defined(_MSC_VER)
+   return _mm512_popcnt_epi32(a);
+#elif defined(__GNUC__) || defined(__clang__)
+  uint32_t in[16];
+  _mm512_storeu_si512((xnn_simd_s32_t*)in,a);
+  for( int i =0; i<16; ++i ){
+    in[i] = __builtin_popcount(in[i]);
+  }
+  return _mm512_loadu_si512((xnn_simd_s32_t*)in);
+#else
+  return _mm512_set1_epi32(0);
+#endif 
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {

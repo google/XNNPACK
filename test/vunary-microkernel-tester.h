@@ -38,6 +38,7 @@ class VUnaryMicrokernelTester {
     RoundTowardsZero,
     RoundUp,
     RoundDown,
+    PopCount,
   };
 
   VUnaryMicrokernelTester& batch_size(size_t batch_size) {
@@ -240,6 +241,8 @@ class VUnaryMicrokernelTester {
             xnn_init_u8_minmax_params_fn init_params) const;
 
   void Test(xnn_u64_u32_vsqrtshift_ukernel_fn vsqrtshift) const;
+
+  void Test(xnn_s32_vpopcnt_ukernel_ukernel_fn vpopcnt) const;
 
 #if XNN_PLATFORM_JIT
   void Test(xnn_vrelu_generator_fn generator, size_t k_unroll,

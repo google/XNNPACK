@@ -156,6 +156,8 @@ class UnaryOperatorTester {
   virtual void TestF16();
   virtual void TestF32();
   virtual void TestRunF32();
+  virtual void TestS32(){};
+  virtual void TestRunS32(){};
   virtual void TestQS8();
   virtual void TestQU8();
 
@@ -172,6 +174,8 @@ class UnaryOperatorTester {
   // `float` for the tolerance evaluation.
   virtual float AbsTolF32(float y_ref) const { return 0.0f; };
   virtual float AbsTolF16(float y_ref) const { return 0.0f; };
+
+  virtual int32_t AbsTolS32(int32_t y_ref) const { return 0; };
 
   // For the `QSU` and `QU8` tests, `y_ref` is the reference value transformed
   // to the quantization range, e.g. `[qmin(), qmax()]` for `QU8` (see
@@ -193,6 +197,12 @@ class UnaryOperatorTester {
         << "at batch " << batch << " / " << batch_size() << ", channel "
         << channel << " / " << channels() << ", input "
         << fp16_ieee_to_fp32_value(input);
+  }
+  virtual void CheckResultS32(int32_t y, int32_t y_ref, size_t batch,
+                              size_t channel, int32_t input) const {
+    EXPECT_NEAR(y_ref, y, AbsTolF32(y_ref))
+        << "at batch " << batch << " / " << batch_size() << ", channel "
+        << channel << " / " << channels() << ", input " << input;
   }
   virtual void CheckResultQS8(int8_t y, float y_ref, size_t batch,
                               size_t channel, int8_t input) const {
@@ -230,6 +240,28 @@ class UnaryOperatorTester {
   virtual xnn_status RunOpF32(size_t channels, size_t input_stride,
                               size_t output_stride, size_t batch_size,
                               const float* input, float* output, uint32_t flags,
+                              pthreadpool_t threadpool) const {
+    return xnn_status_invalid_parameter;
+  }
+
+  // Wrappers for the create/reshape/setup/run functions of the underlying `s32`
+  virtual xnn_status CreateOpS32(uint32_t flags, xnn_operator_t* op_out) const {
+    return xnn_status_invalid_parameter;       
+  }
+
+  virtual xnn_status ReshapeOpS32(xnn_operator_t op, size_t batch_size,
+                                  size_t channels, size_t input_stride,
+                                  size_t output_stride, pthreadpool_t threadpool) const {
+    return xnn_status_invalid_parameter; 
+  }
+                             
+  virtual xnn_status SetupOpS32(xnn_operator_t op, const int32_t* input, int32_t* output) const {
+    return xnn_status_invalid_parameter;                   
+  }
+
+  virtual xnn_status RunOpS32(size_t channels, size_t input_stride,
+                              size_t output_stride, size_t batch_size,
+                              const int32_t* input, int32_t* output, uint32_t flags,
                               pthreadpool_t threadpool) const {
     return xnn_status_invalid_parameter;
   }
@@ -298,6 +330,8 @@ class UnaryOperatorTester {
                                           std::numeric_limits<int8_t>::max()};
   std::pair<uint8_t, uint8_t> range_qu8_ = {
       0, std::numeric_limits<uint8_t>::max()};
+  std::pair<int32_t,int32_t> range_s32_ = {std::numeric_limits<int32_t>::min(),
+                                          std::numeric_limits<int32_t>::max()};
 
  private:
   size_t batch_size_ = 1;

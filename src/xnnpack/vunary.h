@@ -1581,6 +1581,38 @@ DECLARE_U64_U32_VSQRTSHIFT_UKERNEL_FUNCTION(xnn_u64_u32_vsqrtshift_ukernel__scal
 
 DECLARE_XX_VUNARY_UKERNEL_FUNCTION(xnn_xx_copy_ukernel__scalar_memcpy)
 
+#define DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                            \
+      size_t n,                                         \
+      const int32_t* a,                                 \
+      int32_t* y,                                       \
+      const union xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)] );
+    
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__avx2_u8)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__avx2_u16)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__avx2_u24)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__avx2_u32)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__avx512f_u16)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__avx512f_u32)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__avx512f_u48)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__avx512f_u64)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__neon_u4)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__neon_u8)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__neon_u12)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__neon_u16)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__scalar_u1)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__scalar_u2)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__scalar_u4)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__scalar_u8)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__sse41_u4)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__sse41_u8)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__sse41_u12)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__sse41_u16)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__wasmsimd_u4)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__wasmsimd_u8)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__wasmsimd_u12)
+DECLARE_S32_VPOPCOUNT_UKERNEL_FUNCTION(xnn_s32_vpopcnt_ukernel__wasmsimd_u16)
+
 
 #ifdef __cplusplus
 }  // extern "C"

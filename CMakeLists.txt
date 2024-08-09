@@ -411,6 +411,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/minimum2.c
   src/subgraph/multiply2.c
   src/subgraph/negate.c
+  src/subgraph/pop-count.c
   src/subgraph/prelu.c
   src/subgraph/reciprocal-square-root.c
   src/subgraph/reshape-helpers.c
@@ -1992,6 +1993,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(reciprocal-square-root-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME reciprocal-square-root-test COMMAND reciprocal-square-root-test)
 
+    ADD_EXECUTABLE(pop-count-test test/pop-count.cc)
+    TARGET_INCLUDE_DIRECTORIES(pop-count-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(pop-count-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME pop-count-test COMMAND pop-count-test)
+
     ADD_EXECUTABLE(reshape-helpers-test test/reshape-helpers.cc)
     TARGET_INCLUDE_DIRECTORIES(reshape-helpers-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(reshape-helpers-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
@@ -2788,6 +2794,17 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(s32-vmulc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
   TARGET_LINK_LIBRARIES(s32-vmulc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME s32-vmulc-test COMMAND s32-vmulc-test)
+
+  ADD_EXECUTABLE(s32-vpopcnt-test test/s32-vpopcnt.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vpopcnt-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vpopcnt-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vpopcnt-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vpopcnt-test COMMAND s32-vpopcnt-test)
+
+  ADD_EXECUTABLE(s32-popcnt-nc-test test/s32-popcnt-nc.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-popcnt-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(s32-popcnt-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
+  ADD_TEST(NAME s32-popcnt-nc-test COMMAND s32-popcnt-nd-test)
 
   ADD_EXECUTABLE(f16-vcmul-test test/f16-vcmul.cc)
   SET_TARGET_PROPERTIES(f16-vcmul-test PROPERTIES CXX_EXTENSIONS YES)

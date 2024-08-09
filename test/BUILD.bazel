@@ -252,6 +252,8 @@ xnnpack_cc_library(
     "s8_vclamp",
     "u8_vclamp",
     "u64_u32_vsqrtshift",
+    "s32-vpopcnt",
+    "s32-popcnt-nc",
 ]]
 
 [xnnpack_unit_test(
@@ -2027,6 +2029,7 @@ xnnpack_cc_library(
     "static_slice",
     "static_transpose",
     "tanh",
+    "pop_count",
 ]]
 
 xnnpack_cc_library(

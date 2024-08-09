@@ -171,6 +171,7 @@ enum xnn_operator_type {
   xnn_operator_type_square_root_nc_f32,
   xnn_operator_type_squared_difference_nd_f16,
   xnn_operator_type_squared_difference_nd_f32,
+  xnn_operator_type_pop_count_nc_s32,
   xnn_operator_type_subtract_nd_f16,
   xnn_operator_type_subtract_nd_f32,
   xnn_operator_type_subtract_nd_qs8,
