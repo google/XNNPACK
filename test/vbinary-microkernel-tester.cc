@@ -308,6 +308,9 @@ void VBinaryMicrokernelTester::Test(
         case OpType::Add:
           y_ref[i] = a_data[i] + b_data[i];
           break;
+        case OpType::AND:
+          y_ref[i] = a_data[i] & b_data[i];
+          break;
         case OpType::CopySign:
           y_ref[i] = std::copysign(a_data[i], b_data[i]);
           break;

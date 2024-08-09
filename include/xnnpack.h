@@ -1419,6 +1419,23 @@ enum xnn_status xnn_define_copy(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Bitwise AND op and add it to a Subgraph.
+///
+/// The Bitwise Node peforms biitwise operations for first input and second input.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input1_id - Value ID for the first input tensor. The input tensor must be defined in the @a subgraph.
+/// @param input2_id - Value ID for the second input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor.
+/// @param flags - binary features of the Bitwise Node. No supported flags are currently defined.
+enum xnn_status xnn_define_and(
+  xnn_subgraph_t subgraph,
+  uint32_t input1_id,
+  uint32_t input2_id,
+  uint32_t output_id,
+  uint32_t flags);
+
+
 /// Define a 2-Output Split Node and add it to a Subgraph.
 ///
 /// The 2-Output Split Node splits an input tensor into two output tensors along a specified axis evenly.
@@ -2323,6 +2340,25 @@ enum xnn_status xnn_reshape_multiply_nd_s32(
 
 enum xnn_status xnn_setup_multiply_nd_s32(
   xnn_operator_t mul_op,
+  const int32_t* input1,
+  const int32_t* input2,
+  int32_t* output);
+
+
+enum xnn_status xnn_create_and_nd_s32(
+  uint32_t flags,
+  xnn_operator_t* and_op_out);
+
+enum xnn_status xnn_reshape_and_nd_s32(
+  xnn_operator_t and_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_and_nd_s32(
+  xnn_operator_t and_op,
   const int32_t* input1,
   const int32_t* input2,
   int32_t* output);

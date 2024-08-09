@@ -20,6 +20,7 @@ class VBinaryCMicrokernelTester {
  public:
   enum class OpType {
     AddC,
+    ANDC,
     CopySignC,
     RCopySignC,
     DivC,

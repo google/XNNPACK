@@ -20,6 +20,7 @@ enum xnn_node_type {
   xnn_node_type_invalid = 0,
   xnn_node_type_abs,
   xnn_node_type_add2,
+  xnn_node_type_and,
   xnn_node_type_argmax_pooling_2d,
   xnn_node_type_average_pooling_2d,
   xnn_node_type_bankers_rounding,

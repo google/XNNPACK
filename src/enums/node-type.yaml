@@ -11,6 +11,8 @@
   string: "Abs"
 - name: xnn_node_type_add2
   string: "Add2"
+- name: xnn_node_type_and
+  string: "AND"
 - name: xnn_node_type_argmax_pooling_2d
   string: "ArgMax Pooling 2D"
 - name: xnn_node_type_average_pooling_2d

@@ -379,6 +379,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph.c
   src/subgraph/abs.c
   src/subgraph/add2.c
+  src/subgraph/and.c
   src/subgraph/argmax-pooling-2d.c
   src/subgraph/average-pooling-2d.c
   src/subgraph/bankers-rounding.c
@@ -1506,6 +1507,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(copysign-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME copysign-nd-test COMMAND copysign-nd-test)
 
+    ADD_EXECUTABLE(and-nd-test test/and-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(and-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(and-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME and-nd-test COMMAND and-nd-test)
+
     ADD_EXECUTABLE(depth-to-space-nchw2nhwc-test test/depth-to-space-nchw2nhwc.cc)
     TARGET_INCLUDE_DIRECTORIES(depth-to-space-nchw2nhwc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(depth-to-space-nchw2nhwc-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
@@ -1793,6 +1799,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(add2-reshape-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(add2-reshape-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME add2-reshape-test COMMAND add2-reshape-test)
+
+    ADD_EXECUTABLE(and-test test/and.cc)
+    TARGET_INCLUDE_DIRECTORIES(and-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(and-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME and-test COMMAND and-test)
 
     ADD_EXECUTABLE(argmax-pooling-2d-test test/argmax-pooling-2d.cc)
     TARGET_INCLUDE_DIRECTORIES(argmax-pooling-2d-test PRIVATE src test)
@@ -2788,6 +2799,21 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(s32-vmulc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
   TARGET_LINK_LIBRARIES(s32-vmulc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME s32-vmulc-test COMMAND s32-vmulc-test)
+
+
+  ADD_EXECUTABLE(s32-vand-test test/s32-vand.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vand-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vand-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vand-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vand-test COMMAND s32-vand-test)
+
+
+  ADD_EXECUTABLE(s32-vandc-test test/s32-vandc.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vandc-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vandc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vandc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vandc-test COMMAND s32-vandc-test)
+
 
   ADD_EXECUTABLE(f16-vcmul-test test/f16-vcmul.cc)
   SET_TARGET_PROPERTIES(f16-vcmul-test PROPERTIES CXX_EXTENSIONS YES)

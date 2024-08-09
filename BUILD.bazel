@@ -128,6 +128,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph.c",
     "src/subgraph/abs.c",
     "src/subgraph/add2.c",
+    "src/subgraph/and.c",
     "src/subgraph/argmax-pooling-2d.c",
     "src/subgraph/average-pooling-2d.c",
     "src/subgraph/bankers-rounding.c",

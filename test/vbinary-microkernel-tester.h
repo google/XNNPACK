@@ -21,6 +21,7 @@ class VBinaryMicrokernelTester {
  public:
   enum class OpType {
     Add,
+    AND,
     CopySign,
     Div,
     Max,
