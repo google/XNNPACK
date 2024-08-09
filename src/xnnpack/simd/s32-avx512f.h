@@ -42,6 +42,28 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return _mm512_min_epi32(a, b);
 }
 
+// Bitwise operations
+
+static XNN_INLINE xnn_simd_s32_t xnn_and_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  return _mm512_and_si512(a, b);
+}
+
+static XNN_INLINE xnn_simd_s32_t xnn_or_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  return _mm512_or_si512(a, b);
+}
+
+static XNN_INLINE xnn_simd_s32_t xnn_shl_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  return _mm512_sllv_epi32(a, b);
+}
+
+static XNN_INLINE xnn_simd_s32_t xnn_xor_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  return _mm512_xor_si512(a, b);
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {
