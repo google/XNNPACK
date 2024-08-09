@@ -329,6 +329,9 @@ void VBinaryCMicrokernelTester::Test(
         case OpType::AddC:
           y_ref[i] = a_data[i] + b;
           break;
+        case OpType::ANDC:
+          y_ref[i] = a_data[i] & b;
+          break;
         case OpType::CopySignC:
           y_ref[i] = std::copysign(a_data[i], b);
           break;
@@ -347,6 +350,9 @@ void VBinaryCMicrokernelTester::Test(
         case OpType::MinC:
           y_ref[i] = std::min<int32_t>(a_data[i], b);
           break;
+        case OpType::ORC:
+          y_ref[i] = a_data[i] | b;
+          break;
         case OpType::MulC:
           // Overflow is the expected behaviour
           y_ref[i] = ((((int64_t) a_data[i] * (int64_t) b) << 32) >> 32);
@@ -361,6 +367,9 @@ void VBinaryCMicrokernelTester::Test(
           break;
         case OpType::RSubC:
           y_ref[i] = b - a_data[i];
+          break;
+        case OpType::XORC:
+          y_ref[i] = a_data[i] ^ b;
           break;
       }
     }

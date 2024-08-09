@@ -21,13 +21,16 @@ class VBinaryMicrokernelTester {
  public:
   enum class OpType {
     Add,
+    AND,
     CopySign,
     Div,
     Max,
     Min,
     Mul,
+    OR,
     Sub,
     SqrDiff,
+    XOR,
   };
 
   VBinaryMicrokernelTester& batch_size(size_t batch_size) {

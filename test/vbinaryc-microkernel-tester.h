@@ -20,6 +20,7 @@ class VBinaryCMicrokernelTester {
  public:
   enum class OpType {
     AddC,
+    ANDC,
     CopySignC,
     RCopySignC,
     DivC,
@@ -27,9 +28,11 @@ class VBinaryCMicrokernelTester {
     MaxC,
     MinC,
     MulC,
+    ORC,
     SqrDiffC,
     SubC,
     RSubC,
+    XORC,
   };
 
   VBinaryCMicrokernelTester& batch_size(size_t batch_size) {
