@@ -11,6 +11,8 @@
   string: "Abs"
 - name: xnn_node_type_add2
   string: "Add2"
+- name: xnn_node_type_and
+  string: "AND"
 - name: xnn_node_type_argmax_pooling_2d
   string: "ArgMax Pooling 2D"
 - name: xnn_node_type_average_pooling_2d
@@ -89,6 +91,8 @@
   string: "Multiply2"
 - name: xnn_node_type_negate
   string: "Negate"
+- name: xnn_node_type_or
+  string: "OR"
 - name: xnn_node_type_prelu
   string: "PReLU"
 - name: xnn_node_type_reciprocal_square_root
@@ -129,5 +133,7 @@
   string: "Tanh"
 - name: xnn_node_type_unpooling_2d
   string: "Unpooling 2D"
+- name: xnn_node_type_xor
+  string: "XOR"
 
 # LINT.ThenChange(node-type.c, ../xnnpack/node-type.h)

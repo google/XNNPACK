@@ -2096,13 +2096,16 @@ xnnpack_unit_test(
     ],
 ) for operator in [
     "add2",
+    "and",
     "copysign",
     "divide2",
     "maximum2",
     "minimum2",
     "multiply2",
+    "or",
     "squared_difference",
     "subtract2",
+    "xor",
 ]]
 
 xnnpack_unit_test(

@@ -1809,6 +1809,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(add2-reshape-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME add2-reshape-test COMMAND add2-reshape-test)
 
+    ADD_EXECUTABLE(and-test test/and.cc)
+    TARGET_INCLUDE_DIRECTORIES(and-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(and-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME and-test COMMAND and-test)
+
     ADD_EXECUTABLE(argmax-pooling-2d-test test/argmax-pooling-2d.cc)
     TARGET_INCLUDE_DIRECTORIES(argmax-pooling-2d-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(argmax-pooling-2d-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
@@ -1997,6 +2002,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(negate-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME negate-test COMMAND negate-test)
 
+    ADD_EXECUTABLE(or-test test/or.cc)
+    TARGET_INCLUDE_DIRECTORIES(or-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(or-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME or-test COMMAND or-test)
+
     ADD_EXECUTABLE(prelu-test test/prelu.cc)
     TARGET_INCLUDE_DIRECTORIES(prelu-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(prelu-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
@@ -2094,6 +2104,12 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(unpooling-2d-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(unpooling-2d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME unpooling-2d-test COMMAND unpooling-2d-test)
+
+    ADD_EXECUTABLE(xor-test test/xor.cc)
+    TARGET_INCLUDE_DIRECTORIES(xor-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(xor-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME xor-test COMMAND xor-test)
+  
   ENDIF()
 
   # ---[ Normalization unit tests
