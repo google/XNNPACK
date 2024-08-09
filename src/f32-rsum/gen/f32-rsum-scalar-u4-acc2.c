@@ -10,6 +10,7 @@
 #include <assert.h>
 
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "xnnpack/reduce.h"
 
 
@@ -17,7 +18,7 @@ void xnn_f32_rsum_ukernel__scalar_u4_acc2(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -49,5 +50,7 @@ void xnn_f32_rsum_ukernel__scalar_u4_acc2(
   }
   const float vscale = params->scalar.scale;
   vacc0 *= vscale;
+  vacc0 = math_max_f32(vacc0, params->scalar.min);
+  vacc0 = math_min_f32(vacc0, params->scalar.max);
   *output += vacc0;
 }

@@ -8,14 +8,9 @@
 #include "xnnpack/config-types.h"
 #include "xnnpack/hardware-config.h"
 
-#ifdef _WIN32
-  #include <windows.h>
-#else
-  #include <pthread.h>
-#endif
-
 #include "xnnpack/common.h"
 #include "xnnpack/config.h"
+#include "xnnpack/init-once.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/packq.h"
@@ -76,112 +71,57 @@ static struct xnn_unary_elementwise_config u8_clamp_config = {0};
 static struct xnn_unary_elementwise_config xx_copy_config = {0};
 
 
-#if XNN_PLATFORM_WINDOWS
-  static INIT_ONCE init_guard_f16_abs = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_clamp = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_elu = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_hswish = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_lrelu = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_neg = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_rndd = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_rndne = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_rndu = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_rndz = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_rsqrt = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_sigmoid = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_sqr = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_sqrt = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_tanh = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_to_qs8_cvt = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_to_f32_cvt = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_abs = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_clamp = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_elu = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_exp = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_gelu = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_hswish = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_log = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_lrelu = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_neg = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_relu = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_rndd = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_rndne = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_rndu = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_rndz = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_rsqrt = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_sigmoid = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_sqr = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_sqrt = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_tanh = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_to_f16_cvt = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_to_qp8_cvt = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_to_qs8_cvt = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_to_qu8_cvt = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_qs8_cvt = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_qs8_lrelu = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_qs8_to_f16_cvt = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_qs8_to_f32_cvt = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_qs16_to_qs8_cvt = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_qu8_cvt = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_qu8_lrelu = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_qu8_to_f32_cvt = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_s8_clamp = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_u8_clamp = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_xx_copy = INIT_ONCE_STATIC_INIT;
-#else
-  static pthread_once_t init_guard_f16_abs = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_clamp = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_elu = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_hswish = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_lrelu = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_neg = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_rndd = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_rndne = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_rndu = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_rndz = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_rsqrt = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_sigmoid = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_sqr = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_sqrt = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_tanh = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_to_f32_cvt = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_to_qs8_cvt = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_abs = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_clamp = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_elu = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_exp = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_gelu = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_hswish = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_log = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_lrelu = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_neg = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_relu = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_rndd = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_rndne = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_rndu = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_rndz = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_rsqrt = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_sigmoid = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_sqr = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_sqrt = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_tanh = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_to_f16_cvt = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_to_qs8_cvt = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_to_qp8_cvt = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_to_qu8_cvt = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_qs8_cvt = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_qs16_to_qs8_cvt = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_qs8_lrelu = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_qs8_to_f16_cvt = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_qs8_to_f32_cvt = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_qu8_cvt = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_qu8_lrelu = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_qu8_to_f32_cvt = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_s8_clamp = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_u8_clamp = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_xx_copy = PTHREAD_ONCE_INIT;
-#endif
-
+XNN_INIT_ONCE_GUARD(f16_abs);
+XNN_INIT_ONCE_GUARD(f16_clamp);
+XNN_INIT_ONCE_GUARD(f16_elu);
+XNN_INIT_ONCE_GUARD(f16_hswish);
+XNN_INIT_ONCE_GUARD(f16_lrelu);
+XNN_INIT_ONCE_GUARD(f16_neg);
+XNN_INIT_ONCE_GUARD(f16_rndd);
+XNN_INIT_ONCE_GUARD(f16_rndne);
+XNN_INIT_ONCE_GUARD(f16_rndu);
+XNN_INIT_ONCE_GUARD(f16_rndz);
+XNN_INIT_ONCE_GUARD(f16_rsqrt);
+XNN_INIT_ONCE_GUARD(f16_sigmoid);
+XNN_INIT_ONCE_GUARD(f16_sqr);
+XNN_INIT_ONCE_GUARD(f16_sqrt);
+XNN_INIT_ONCE_GUARD(f16_tanh);
+XNN_INIT_ONCE_GUARD(f16_to_qs8_cvt);
+XNN_INIT_ONCE_GUARD(f16_to_f32_cvt);
+XNN_INIT_ONCE_GUARD(f32_abs);
+XNN_INIT_ONCE_GUARD(f32_clamp);
+XNN_INIT_ONCE_GUARD(f32_elu);
+XNN_INIT_ONCE_GUARD(f32_exp);
+XNN_INIT_ONCE_GUARD(f32_gelu);
+XNN_INIT_ONCE_GUARD(f32_hswish);
+XNN_INIT_ONCE_GUARD(f32_log);
+XNN_INIT_ONCE_GUARD(f32_lrelu);
+XNN_INIT_ONCE_GUARD(f32_neg);
+XNN_INIT_ONCE_GUARD(f32_relu);
+XNN_INIT_ONCE_GUARD(f32_rndd);
+XNN_INIT_ONCE_GUARD(f32_rndne);
+XNN_INIT_ONCE_GUARD(f32_rndu);
+XNN_INIT_ONCE_GUARD(f32_rndz);
+XNN_INIT_ONCE_GUARD(f32_rsqrt);
+XNN_INIT_ONCE_GUARD(f32_sigmoid);
+XNN_INIT_ONCE_GUARD(f32_sqr);
+XNN_INIT_ONCE_GUARD(f32_sqrt);
+XNN_INIT_ONCE_GUARD(f32_tanh);
+XNN_INIT_ONCE_GUARD(f32_to_f16_cvt);
+XNN_INIT_ONCE_GUARD(f32_to_qp8_cvt);
+XNN_INIT_ONCE_GUARD(f32_to_qs8_cvt);
+XNN_INIT_ONCE_GUARD(f32_to_qu8_cvt);
+XNN_INIT_ONCE_GUARD(qs8_cvt);
+XNN_INIT_ONCE_GUARD(qs8_lrelu);
+XNN_INIT_ONCE_GUARD(qs8_to_f16_cvt);
+XNN_INIT_ONCE_GUARD(qs8_to_f32_cvt);
+XNN_INIT_ONCE_GUARD(qs16_to_qs8_cvt);
+XNN_INIT_ONCE_GUARD(qu8_cvt);
+XNN_INIT_ONCE_GUARD(qu8_lrelu);
+XNN_INIT_ONCE_GUARD(qu8_to_f32_cvt);
+XNN_INIT_ONCE_GUARD(s8_clamp);
+XNN_INIT_ONCE_GUARD(u8_clamp);
+XNN_INIT_ONCE_GUARD(xx_copy);
 
 static void init_f16_abs_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
@@ -2464,278 +2404,12 @@ static void init_xx_copy_config(void) {
   #endif
 }
 
-
-#if XNN_PLATFORM_WINDOWS
- static BOOL CALLBACK init_f16_abs_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_abs_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_clamp_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_clamp_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_elu_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_elu_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_hswish_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_hswish_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_lrelu_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_lrelu_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_neg_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_neg_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_rndd_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_rndd_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_rndne_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_rndne_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_rndu_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_rndu_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_rndz_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_rndz_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_rsqrt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_rsqrt_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_sigmoid_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_sigmoid_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_sqr_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_sqr_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_sqrt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_sqrt_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_tanh_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_tanh_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_abs_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_abs_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_clamp_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_clamp_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_elu_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_elu_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_exp_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_exp_config();
-    return TRUE;
-  }
-
-
-  static BOOL CALLBACK init_f32_gelu_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_gelu_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_hswish_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_hswish_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_log_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_log_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_lrelu_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_lrelu_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_neg_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_neg_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_relu_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_relu_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_rndd_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_rndd_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_rndne_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_rndne_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_rndu_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_rndu_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_rndz_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_rndz_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_rsqrt_config_windows(PINIT_ONCE init_once,
-                                                     PVOID parameter,
-                                                     PVOID* context) {
-    init_f32_rsqrt_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_sigmoid_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_sigmoid_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_sqr_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_sqr_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_sqrt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_sqrt_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_tanh_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_tanh_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qs8_lrelu_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qs8_lrelu_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qu8_lrelu_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qu8_lrelu_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_s8_clamp_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_s8_clamp_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_u8_clamp_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_u8_clamp_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_to_f32_cvt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_to_f32_cvt_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_to_qs8_cvt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_to_qs8_cvt_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_to_f16_cvt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_to_f16_cvt_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_to_qp8_cvt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_to_qp8_cvt_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_to_qs8_cvt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_to_qs8_cvt_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_to_qu8_cvt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_to_qu8_cvt_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qs8_cvt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qs8_cvt_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qs8_to_f16_cvt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qs8_to_f16_cvt_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qs8_to_f32_cvt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qs8_to_f32_cvt_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qs16_to_qs8_cvt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qs16_to_qs8_cvt_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qu8_cvt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qu8_cvt_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qu8_to_f32_cvt_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qu8_to_f32_cvt_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_xx_copy_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_xx_copy_config();
-    return TRUE;
-  }
-#endif
-
-
 const struct xnn_unary_elementwise_config* xnn_init_f16_abs_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_abs, &init_f16_abs_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_abs, &init_f16_abs_config);
-  #endif
+  XNN_INIT_ONCE(f16_abs);
   return &f16_abs_config;
 }
 
@@ -2744,11 +2418,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_clamp_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_clamp, &init_f16_clamp_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_clamp, &init_f16_clamp_config);
-  #endif
+  XNN_INIT_ONCE(f16_clamp);
   return &f16_clamp_config;
 }
 
@@ -2757,11 +2427,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_elu_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_elu, &init_f16_elu_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_elu, &init_f16_elu_config);
-  #endif
+  XNN_INIT_ONCE(f16_elu);
   return &f16_elu_config;
 }
 
@@ -2770,11 +2436,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_hswish_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_hswish, &init_f16_hswish_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_hswish, &init_f16_hswish_config);
-  #endif
+  XNN_INIT_ONCE(f16_hswish);
   return &f16_hswish_config;
 }
 
@@ -2783,11 +2445,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_lrelu_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_lrelu, &init_f16_lrelu_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_lrelu, &init_f16_lrelu_config);
-  #endif
+  XNN_INIT_ONCE(f16_lrelu);
   return &f16_lrelu_config;
 }
 
@@ -2796,11 +2454,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_neg_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_neg, &init_f16_neg_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_neg, &init_f16_neg_config);
-  #endif
+  XNN_INIT_ONCE(f16_neg);
   return &f16_neg_config;
 }
 
@@ -2809,11 +2463,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_rndd_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_rndd, &init_f16_rndd_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_rndd, &init_f16_rndd_config);
-  #endif
+  XNN_INIT_ONCE(f16_rndd);
   return &f16_rndd_config;
 }
 
@@ -2822,11 +2472,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_rndne_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_rndne, &init_f16_rndne_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_rndne, &init_f16_rndne_config);
-  #endif
+  XNN_INIT_ONCE(f16_rndne);
   return &f16_rndne_config;
 }
 
@@ -2835,11 +2481,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_rndu_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_rndu, &init_f16_rndu_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_rndu, &init_f16_rndu_config);
-  #endif
+  XNN_INIT_ONCE(f16_rndu);
   return &f16_rndu_config;
 }
 
@@ -2848,11 +2490,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_rndz_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_rndz, &init_f16_rndz_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_rndz, &init_f16_rndz_config);
-  #endif
+  XNN_INIT_ONCE(f16_rndz);
   return &f16_rndz_config;
 }
 
@@ -2861,11 +2499,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_rsqrt_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_rsqrt, &init_f16_rsqrt_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_rsqrt, &init_f16_rsqrt_config);
-  #endif
+  XNN_INIT_ONCE(f16_rsqrt);
   return &f16_rsqrt_config;
 }
 
@@ -2874,11 +2508,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_sigmoid_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_sigmoid, &init_f16_sigmoid_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_sigmoid, &init_f16_sigmoid_config);
-  #endif
+  XNN_INIT_ONCE(f16_sigmoid);
   return &f16_sigmoid_config;
 }
 
@@ -2887,11 +2517,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_sqr_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_sqr, &init_f16_sqr_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_sqr, &init_f16_sqr_config);
-  #endif
+  XNN_INIT_ONCE(f16_sqr);
   return &f16_sqr_config;
 }
 
@@ -2900,11 +2526,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_sqrt_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_sqrt, &init_f16_sqrt_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_sqrt, &init_f16_sqrt_config);
-  #endif
+  XNN_INIT_ONCE(f16_sqrt);
   return &f16_sqrt_config;
 }
 
@@ -2913,11 +2535,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_tanh_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_tanh, &init_f16_tanh_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_tanh, &init_f16_tanh_config);
-  #endif
+  XNN_INIT_ONCE(f16_tanh);
   return &f16_tanh_config;
 }
 
@@ -2926,11 +2544,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_to_f32_cvt_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_to_f32_cvt, &init_f16_to_f32_cvt_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_to_f32_cvt, &init_f16_to_f32_cvt_config);
-  #endif
+  XNN_INIT_ONCE(f16_to_f32_cvt);
   return &f16_to_f32_cvt_config;
 }
 
@@ -2939,11 +2553,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_to_qs8_cvt_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_to_qs8_cvt, &init_f16_to_qs8_cvt_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_to_qs8_cvt, &init_f16_to_qs8_cvt_config);
-  #endif
+  XNN_INIT_ONCE(f16_to_qs8_cvt);
   return &f16_to_qs8_cvt_config;
 }
 
@@ -2952,11 +2562,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_abs_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_abs, &init_f32_abs_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_abs, &init_f32_abs_config);
-  #endif
+  XNN_INIT_ONCE(f32_abs);
   return &f32_abs_config;
 }
 
@@ -2965,11 +2571,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_clamp_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_clamp, &init_f32_clamp_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_clamp, &init_f32_clamp_config);
-  #endif
+  XNN_INIT_ONCE(f32_clamp);
   return &f32_clamp_config;
 }
 
@@ -2978,11 +2580,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_elu_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_elu, &init_f32_elu_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_elu, &init_f32_elu_config);
-  #endif
+  XNN_INIT_ONCE(f32_elu);
   return &f32_elu_config;
 }
 
@@ -2991,11 +2589,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_exp_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_exp, &init_f32_exp_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_exp, &init_f32_exp_config);
-  #endif
+  XNN_INIT_ONCE(f32_exp);
   return &f32_exp_config;
 }
 
@@ -3004,11 +2598,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_gelu_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_gelu, &init_f32_gelu_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_gelu, &init_f32_gelu_config);
-  #endif
+  XNN_INIT_ONCE(f32_gelu);
   return &f32_gelu_config;
 }
 
@@ -3017,11 +2607,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_hswish_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_hswish, &init_f32_hswish_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_hswish, &init_f32_hswish_config);
-  #endif
+  XNN_INIT_ONCE(f32_hswish);
   return &f32_hswish_config;
 }
 
@@ -3030,11 +2616,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_log_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_log, &init_f32_log_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_log, &init_f32_log_config);
-  #endif
+  XNN_INIT_ONCE(f32_log);
   return &f32_log_config;
 }
 
@@ -3043,11 +2625,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_lrelu_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_lrelu, &init_f32_lrelu_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_lrelu, &init_f32_lrelu_config);
-  #endif
+  XNN_INIT_ONCE(f32_lrelu);
   return &f32_lrelu_config;
 }
 
@@ -3056,11 +2634,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_neg_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_neg, &init_f32_neg_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_neg, &init_f32_neg_config);
-  #endif
+  XNN_INIT_ONCE(f32_neg);
   return &f32_neg_config;
 }
 
@@ -3069,11 +2643,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_relu_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_relu, &init_f32_relu_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_relu, &init_f32_relu_config);
-  #endif
+  XNN_INIT_ONCE(f32_relu);
   return &f32_relu_config;
 }
 
@@ -3082,11 +2652,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_rndd_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_rndd, &init_f32_rndd_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_rndd, &init_f32_rndd_config);
-  #endif
+  XNN_INIT_ONCE(f32_rndd);
   return &f32_rndd_config;
 }
 
@@ -3095,11 +2661,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_rndne_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_rndne, &init_f32_rndne_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_rndne, &init_f32_rndne_config);
-  #endif
+  XNN_INIT_ONCE(f32_rndne);
   return &f32_rndne_config;
 }
 
@@ -3108,11 +2670,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_rndu_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_rndu, &init_f32_rndu_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_rndu, &init_f32_rndu_config);
-  #endif
+  XNN_INIT_ONCE(f32_rndu);
   return &f32_rndu_config;
 }
 
@@ -3121,11 +2679,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_rndz_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_rndz, &init_f32_rndz_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_rndz, &init_f32_rndz_config);
-  #endif
+  XNN_INIT_ONCE(f32_rndz);
   return &f32_rndz_config;
 }
 
@@ -3135,12 +2689,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_rsqrt_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-#if XNN_PLATFORM_WINDOWS
-  InitOnceExecuteOnce(&init_guard_f32_rsqrt, &init_f32_rsqrt_config_windows,
-                      NULL, NULL);
-#else
-  pthread_once(&init_guard_f32_rsqrt, &init_f32_rsqrt_config);
-#endif
+  XNN_INIT_ONCE(f32_rsqrt);
   return &f32_rsqrt_config;
 }
 
@@ -3149,11 +2698,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_sigmoid_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_sigmoid, &init_f32_sigmoid_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_sigmoid, &init_f32_sigmoid_config);
-  #endif
+  XNN_INIT_ONCE(f32_sigmoid);
   return &f32_sigmoid_config;
 }
 
@@ -3162,11 +2707,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_sqr_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_sqr, &init_f32_sqr_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_sqr, &init_f32_sqr_config);
-  #endif
+  XNN_INIT_ONCE(f32_sqr);
   return &f32_sqr_config;
 }
 
@@ -3175,11 +2716,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_sqrt_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_sqrt, &init_f32_sqrt_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_sqrt, &init_f32_sqrt_config);
-  #endif
+  XNN_INIT_ONCE(f32_sqrt);
   return &f32_sqrt_config;
 }
 
@@ -3188,11 +2725,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_tanh_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_tanh, &init_f32_tanh_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_tanh, &init_f32_tanh_config);
-  #endif
+  XNN_INIT_ONCE(f32_tanh);
   return &f32_tanh_config;
 }
 
@@ -3201,11 +2734,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_to_f16_cvt_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_to_f16_cvt, &init_f32_to_f16_cvt_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_to_f16_cvt, &init_f32_to_f16_cvt_config);
-  #endif
+  XNN_INIT_ONCE(f32_to_f16_cvt);
   return &f32_to_f16_cvt_config;
 }
 
@@ -3215,12 +2744,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_to_qp8_cvt_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-#if XNN_PLATFORM_WINDOWS
-  InitOnceExecuteOnce(&init_guard_f32_to_qp8_cvt,
-                      &init_f32_to_qp8_cvt_config_windows, NULL, NULL);
-#else
-  pthread_once(&init_guard_f32_to_qp8_cvt, &init_f32_to_qp8_cvt_config);
-#endif
+  XNN_INIT_ONCE(f32_to_qp8_cvt);
   return &f32_to_qp8_cvt_config;
 }
 
@@ -3229,11 +2753,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_to_qs8_cvt_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_to_qs8_cvt, &init_f32_to_qs8_cvt_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_to_qs8_cvt, &init_f32_to_qs8_cvt_config);
-  #endif
+  XNN_INIT_ONCE(f32_to_qs8_cvt);
   return &f32_to_qs8_cvt_config;
 }
 
@@ -3242,11 +2762,7 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_to_qu8_cvt_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_to_qu8_cvt, &init_f32_to_qu8_cvt_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_to_qu8_cvt, &init_f32_to_qu8_cvt_config);
-  #endif
+  XNN_INIT_ONCE(f32_to_qu8_cvt);
   return &f32_to_qu8_cvt_config;
 }
 
@@ -3255,11 +2771,7 @@ const struct xnn_unary_elementwise_config* xnn_init_qs8_cvt_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_qs8_cvt, &init_qs8_cvt_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_qs8_cvt, &init_qs8_cvt_config);
-  #endif
+  XNN_INIT_ONCE(qs8_cvt);
   return &qs8_cvt_config;
 }
 
@@ -3268,11 +2780,7 @@ const struct xnn_unary_elementwise_config* xnn_init_qs16_to_qs8_cvt_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_qs16_to_qs8_cvt, &init_qs16_to_qs8_cvt_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_qs16_to_qs8_cvt, &init_qs16_to_qs8_cvt_config);
-  #endif
+  XNN_INIT_ONCE(qs16_to_qs8_cvt);
   return &qs16_to_qs8_cvt_config;
 }
 
@@ -3281,11 +2789,7 @@ const struct xnn_unary_elementwise_config* xnn_init_qs8_lrelu_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_qs8_lrelu, &init_qs8_lrelu_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_qs8_lrelu, &init_qs8_lrelu_config);
-  #endif
+  XNN_INIT_ONCE(qs8_lrelu);
   return &qs8_lrelu_config;
 }
 
@@ -3294,11 +2798,7 @@ const struct xnn_unary_elementwise_config* xnn_init_qs8_to_f16_cvt_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_qs8_to_f16_cvt, &init_qs8_to_f16_cvt_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_qs8_to_f16_cvt, &init_qs8_to_f16_cvt_config);
-  #endif
+  XNN_INIT_ONCE(qs8_to_f16_cvt);
   return &qs8_to_f16_cvt_config;
 }
 
@@ -3307,11 +2807,7 @@ const struct xnn_unary_elementwise_config* xnn_init_qs8_to_f32_cvt_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_qs8_to_f32_cvt, &init_qs8_to_f32_cvt_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_qs8_to_f32_cvt, &init_qs8_to_f32_cvt_config);
-  #endif
+  XNN_INIT_ONCE(qs8_to_f32_cvt);
   return &qs8_to_f32_cvt_config;
 }
 
@@ -3320,11 +2816,7 @@ const struct xnn_unary_elementwise_config* xnn_init_qu8_cvt_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_qu8_cvt, &init_qu8_cvt_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_qu8_cvt, &init_qu8_cvt_config);
-  #endif
+  XNN_INIT_ONCE(qu8_cvt);
   return &qu8_cvt_config;
 }
 
@@ -3333,11 +2825,7 @@ const struct xnn_unary_elementwise_config* xnn_init_qu8_lrelu_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_qu8_lrelu, &init_qu8_lrelu_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_qu8_lrelu, &init_qu8_lrelu_config);
-  #endif
+  XNN_INIT_ONCE(qu8_lrelu);
   return &qu8_lrelu_config;
 }
 
@@ -3346,11 +2834,7 @@ const struct xnn_unary_elementwise_config* xnn_init_qu8_to_f32_cvt_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_qu8_to_f32_cvt, &init_qu8_to_f32_cvt_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_qu8_to_f32_cvt, &init_qu8_to_f32_cvt_config);
-  #endif
+  XNN_INIT_ONCE(qu8_to_f32_cvt);
   return &qu8_to_f32_cvt_config;
 }
 
@@ -3359,11 +2843,7 @@ const struct xnn_unary_elementwise_config* xnn_init_s8_clamp_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_s8_clamp, &init_s8_clamp_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_s8_clamp, &init_s8_clamp_config);
-  #endif
+  XNN_INIT_ONCE(s8_clamp);
   return &s8_clamp_config;
 }
 
@@ -3372,11 +2852,7 @@ const struct xnn_unary_elementwise_config* xnn_init_u8_clamp_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_u8_clamp, &init_u8_clamp_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_u8_clamp, &init_u8_clamp_config);
-  #endif
+  XNN_INIT_ONCE(u8_clamp);
   return &u8_clamp_config;
 }
 
@@ -3385,10 +2861,6 @@ const struct xnn_unary_elementwise_config* xnn_init_xx_copy_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_xx_copy, &init_xx_copy_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_xx_copy, &init_xx_copy_config);
-  #endif
+  XNN_INIT_ONCE(xx_copy);
   return &xx_copy_config;
 }

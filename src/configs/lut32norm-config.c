@@ -6,45 +6,25 @@
 #include <assert.h>
 #include <stddef.h>
 
-#ifdef _WIN32
-  #include <windows.h>
-#else
-  #include <pthread.h>
-#endif
-
 #include "xnnpack/common.h"
 #include "xnnpack/config.h"
+#include "xnnpack/init-once.h"
 #include "xnnpack/lut.h"
 
 
 static struct xnn_lut32norm_config u8_lut32norm_config = {0};
 
-#if XNN_PLATFORM_WINDOWS
-  static INIT_ONCE init_guard_u8_lut32norm = INIT_ONCE_STATIC_INIT;
-#else
-  static pthread_once_t init_guard_u8_lut32norm = PTHREAD_ONCE_INIT;
-#endif
+XNN_INIT_ONCE_GUARD(u8_lut32norm);
 
 static void init_u8_lut32norm_config(void) {
   u8_lut32norm_config.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
 }
-
-#if XNN_PLATFORM_WINDOWS
-  static BOOL CALLBACK init_u8_lut32norm_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_u8_lut32norm_config();
-    return TRUE;
-  }
-#endif
 
 const struct xnn_lut32norm_config* xnn_init_u8_lut32norm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_u8_lut32norm, &init_u8_lut32norm_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_u8_lut32norm, &init_u8_lut32norm_config);
-  #endif
+  XNN_INIT_ONCE(u8_lut32norm);
   return &u8_lut32norm_config;
 }

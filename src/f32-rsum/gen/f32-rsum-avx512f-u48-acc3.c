@@ -19,7 +19,7 @@ void xnn_f32_rsum_ukernel__avx512f_u48_acc3(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -64,5 +64,7 @@ void xnn_f32_rsum_ukernel__avx512f_u48_acc3(
   vacc = _mm_add_ps(vacc, _mm_movehl_ps(vacc, vacc));
   vacc = _mm_add_ss(vacc, _mm_movehdup_ps(vacc));
   vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->scalar.scale));
+  vacc = _mm_max_ss(vacc, _mm_load_ss(&params->scalar.min));
+  vacc = _mm_min_ss(vacc, _mm_load_ss(&params->scalar.max));
   *output += _mm_cvtss_f32(vacc);
 }

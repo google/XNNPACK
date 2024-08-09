@@ -6,14 +6,9 @@
 #include <assert.h>
 #include <stddef.h>
 
-#ifdef _WIN32
-  #include <windows.h>
-#else
-  #include <pthread.h>
-#endif
-
 #include "xnnpack/common.h"
 #include "xnnpack/config.h"
+#include "xnnpack/init-once.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/transpose.h"
@@ -21,11 +16,7 @@
 
 static struct xnn_transpose_config transpose_config = {0};
 
-#if XNN_PLATFORM_WINDOWS
-  static INIT_ONCE init_guard = INIT_ONCE_STATIC_INIT;
-#else
-  static pthread_once_t init_guard = PTHREAD_ONCE_INIT;
-#endif
+XNN_INIT_ONCE_GUARD(transpose);
 
 static void init_transpose_config(void) {
   #if XNN_ARCH_ARM
@@ -260,22 +251,11 @@ static void init_transpose_config(void) {
   #endif
 }
 
-#if XNN_PLATFORM_WINDOWS
-  static BOOL CALLBACK init_transpose_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_transpose_config();
-    return TRUE;
-  }
-#endif
-
 const struct xnn_transpose_config* xnn_init_transpose_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard, &init_transpose_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard, &init_transpose_config);
-  #endif
+  XNN_INIT_ONCE(transpose);
   return &transpose_config;
 }

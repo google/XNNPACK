@@ -6,12 +6,6 @@
 #include <assert.h>
 #include <stddef.h>
 
-#if _WIN32
-  #include <windows.h>
-#else
-  #include <pthread.h>
-#endif
-
 #if XNN_ENABLE_CPUINFO
   #include <cpuinfo.h>
 #endif  // XNN_ENABLE_CPUINFO
@@ -19,6 +13,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/config.h"
 #include "xnnpack/dwconv.h"
+#include "xnnpack/init-once.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 
@@ -28,19 +23,11 @@ static struct xnn_dwconv_config qs8_qc8w_dwconv_config[XNN_MAX_QC8_DWCONV_UKERNE
 static struct xnn_dwconv_config qs8_dwconv_config[XNN_MAX_QS8_DWCONV_UKERNELS] = {0};
 static struct xnn_dwconv_config qu8_dwconv_config[XNN_MAX_QU8_DWCONV_UKERNELS] = {0};
 
-#if XNN_PLATFORM_WINDOWS
-  static INIT_ONCE init_guard_f16_dwconv = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_dwconv = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_qs8_qc8w_dwconv = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_qs8_dwconv = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_qu8_dwconv = INIT_ONCE_STATIC_INIT;
-#else
-  static pthread_once_t init_guard_f16_dwconv = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_dwconv = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_qs8_qc8w_dwconv = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_qs8_dwconv = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_qu8_dwconv = PTHREAD_ONCE_INIT;
-#endif
+XNN_INIT_ONCE_GUARD(f16_dwconv);
+XNN_INIT_ONCE_GUARD(f32_dwconv);
+XNN_INIT_ONCE_GUARD(qs8_qc8w_dwconv);
+XNN_INIT_ONCE_GUARD(qs8_dwconv);
+XNN_INIT_ONCE_GUARD(qu8_dwconv);
 
 static void init_f16_dwconv_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
@@ -1264,43 +1251,12 @@ static void init_qu8_dwconv_config(void) {
   #endif
 }
 
-#if XNN_PLATFORM_WINDOWS
-  static BOOL CALLBACK init_f16_dwconv_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_dwconv_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_dwconv_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_dwconv_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qs8_qc8w_dwconv_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qs8_qc8w_dwconv_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qs8_dwconv_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qs8_dwconv_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_qu8_dwconv_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_qu8_dwconv_config();
-    return TRUE;
-  }
-#endif
-
 struct xnn_dwconv_config* xnn_init_f16_dwconv_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_dwconv, &init_f16_dwconv_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_dwconv, &init_f16_dwconv_config);
-  #endif
+  XNN_INIT_ONCE(f16_dwconv);
   return f16_dwconv_config;
 }
 
@@ -1309,11 +1265,7 @@ struct xnn_dwconv_config* xnn_init_f32_dwconv_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_dwconv, &init_f32_dwconv_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_dwconv, &init_f32_dwconv_config);
-  #endif
+  XNN_INIT_ONCE(f32_dwconv);
   return f32_dwconv_config;
 }
 
@@ -1322,11 +1274,7 @@ struct xnn_dwconv_config* xnn_init_qs8_qc8w_dwconv_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_qs8_qc8w_dwconv, &init_qs8_qc8w_dwconv_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_qs8_qc8w_dwconv, &init_qs8_qc8w_dwconv_config);
-  #endif
+  XNN_INIT_ONCE(qs8_qc8w_dwconv);
   return qs8_qc8w_dwconv_config;
 }
 
@@ -1335,11 +1283,7 @@ struct xnn_dwconv_config* xnn_init_qs8_dwconv_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_qs8_dwconv, &init_qs8_dwconv_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_qs8_dwconv, &init_qs8_dwconv_config);
-  #endif
+  XNN_INIT_ONCE(qs8_dwconv);
   return qs8_dwconv_config;
 }
 
@@ -1348,10 +1292,6 @@ struct xnn_dwconv_config* xnn_init_qu8_dwconv_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_qu8_dwconv, &init_qu8_dwconv_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_qu8_dwconv, &init_qu8_dwconv_config);
-  #endif
+  XNN_INIT_ONCE(qu8_dwconv);
   return qu8_dwconv_config;
 }

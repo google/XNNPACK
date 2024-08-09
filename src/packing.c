@@ -17,7 +17,7 @@
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/operator.h"
+#include "xnnpack/microparams.h"
 #include "xnnpack/pack.h"
 #include "xnnpack/unaligned.h"
 

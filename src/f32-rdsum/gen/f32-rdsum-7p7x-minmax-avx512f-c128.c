@@ -23,7 +23,7 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c128(
     size_t input_stride,
     const float* zero,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -31,6 +31,8 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c128(
   assert(output != NULL);
 
   const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
+  const __m512 vmin = _mm512_set1_ps(params->scalar.min);
+  const __m512 vmax = _mm512_set1_ps(params->scalar.max);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 128; channels -= 128) {
@@ -199,13 +201,29 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c128(
       i6 = (const float*) ((uintptr_t) i6 + input_increment);
     }
     vacc0 = _mm512_mul_ps(vacc0, vscale);
+    vacc0 = _mm512_max_ps(vacc0, vmin);
+    vacc0 = _mm512_min_ps(vacc0, vmax);
     vacc1 = _mm512_mul_ps(vacc1, vscale);
+    vacc1 = _mm512_max_ps(vacc1, vmin);
+    vacc1 = _mm512_min_ps(vacc1, vmax);
     vacc2 = _mm512_mul_ps(vacc2, vscale);
+    vacc2 = _mm512_max_ps(vacc2, vmin);
+    vacc2 = _mm512_min_ps(vacc2, vmax);
     vacc3 = _mm512_mul_ps(vacc3, vscale);
+    vacc3 = _mm512_max_ps(vacc3, vmin);
+    vacc3 = _mm512_min_ps(vacc3, vmax);
     vacc4 = _mm512_mul_ps(vacc4, vscale);
+    vacc4 = _mm512_max_ps(vacc4, vmin);
+    vacc4 = _mm512_min_ps(vacc4, vmax);
     vacc5 = _mm512_mul_ps(vacc5, vscale);
+    vacc5 = _mm512_max_ps(vacc5, vmin);
+    vacc5 = _mm512_min_ps(vacc5, vmax);
     vacc6 = _mm512_mul_ps(vacc6, vscale);
+    vacc6 = _mm512_max_ps(vacc6, vmin);
+    vacc6 = _mm512_min_ps(vacc6, vmax);
     vacc7 = _mm512_mul_ps(vacc7, vscale);
+    vacc7 = _mm512_max_ps(vacc7, vmin);
+    vacc7 = _mm512_min_ps(vacc7, vmax);
 
     const float* o = output;
     const __m512 vo0 = _mm512_loadu_ps(o); o += 16;
@@ -312,6 +330,8 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c128(
     }
     for (size_t i = 0; i < num_chunks; ++i) {
       vacc[i] = _mm512_mul_ps(vacc[i], vscale);
+      vacc[i] = _mm512_max_ps(vacc[i], vmin);
+      vacc[i] = _mm512_min_ps(vacc[i], vmax);
     }
 
     __m512 vo[8];

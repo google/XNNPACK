@@ -6,14 +6,9 @@
 #include <assert.h>
 #include <stddef.h>
 
-#ifdef _WIN32
-  #include <windows.h>
-#else
-  #include <pthread.h>
-#endif
-
 #include "xnnpack/common.h"
 #include "xnnpack/config.h"
+#include "xnnpack/init-once.h"
 #include "xnnpack/maxpool.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
@@ -23,17 +18,10 @@ static struct xnn_maxpool_config f32_maxpool_config = {0};
 static struct xnn_maxpool_config s8_maxpool_config = {0};
 static struct xnn_maxpool_config u8_maxpool_config = {0};
 
-#if XNN_PLATFORM_WINDOWS
-  static INIT_ONCE init_guard_f16_maxpool = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_maxpool = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_s8_maxpool = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_u8_maxpool = INIT_ONCE_STATIC_INIT;
-#else
-  static pthread_once_t init_guard_f16_maxpool = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_maxpool = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_s8_maxpool = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_u8_maxpool = PTHREAD_ONCE_INIT;
-#endif
+XNN_INIT_ONCE_GUARD(f16_maxpool);
+XNN_INIT_ONCE_GUARD(f32_maxpool);
+XNN_INIT_ONCE_GUARD(s8_maxpool);
+XNN_INIT_ONCE_GUARD(u8_maxpool);
 
 static void init_f16_maxpool_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
@@ -208,38 +196,12 @@ static void init_u8_maxpool_config(void) {
   #endif
 }
 
-#if XNN_PLATFORM_WINDOWS
-  static BOOL CALLBACK init_f16_maxpool_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_maxpool_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_maxpool_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_maxpool_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_s8_maxpool_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_s8_maxpool_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_u8_maxpool_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_u8_maxpool_config();
-    return TRUE;
-  }
-#endif
-
 const struct xnn_maxpool_config* xnn_init_f16_maxpool_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_maxpool, &init_f16_maxpool_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_maxpool, &init_f16_maxpool_config);
-  #endif
+  XNN_INIT_ONCE(f16_maxpool);
   return &f16_maxpool_config;
 }
 
@@ -248,11 +210,7 @@ const struct xnn_maxpool_config* xnn_init_f32_maxpool_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_maxpool, &init_f32_maxpool_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_maxpool, &init_f32_maxpool_config);
-  #endif
+  XNN_INIT_ONCE(f32_maxpool);
   return &f32_maxpool_config;
 }
 
@@ -261,11 +219,7 @@ const struct xnn_maxpool_config* xnn_init_s8_maxpool_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_s8_maxpool, &init_s8_maxpool_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_s8_maxpool, &init_s8_maxpool_config);
-  #endif
+  XNN_INIT_ONCE(s8_maxpool);
   return &s8_maxpool_config;
 }
 
@@ -274,10 +228,6 @@ const struct xnn_maxpool_config* xnn_init_u8_maxpool_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_u8_maxpool, &init_u8_maxpool_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_u8_maxpool, &init_u8_maxpool_config);
-  #endif
+  XNN_INIT_ONCE(u8_maxpool);
   return &u8_maxpool_config;
 }

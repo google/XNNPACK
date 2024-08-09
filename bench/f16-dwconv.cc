@@ -23,6 +23,7 @@
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microkernel-utils.h"
 #include "xnnpack/microparams-init.h"
+#include "xnnpack/operator.h"
 #include "xnnpack/pack.h"
 
 

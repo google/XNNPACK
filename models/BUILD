@@ -18,10 +18,9 @@ xnnpack_cc_library(
     deps = [
         "@FP16",
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -32,10 +31,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -46,10 +44,10 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
+        "//:memory",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -59,11 +57,11 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     visibility = xnnpack_visibility(),
     deps = [
+        "@FP16",
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -74,10 +72,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -88,10 +85,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -102,10 +98,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -116,10 +111,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -130,10 +124,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -144,10 +137,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -158,10 +150,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -172,10 +163,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -186,10 +176,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -201,10 +190,9 @@ xnnpack_cc_library(
     deps = [
         "@FP16",
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -214,10 +202,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -228,10 +215,10 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
+        "//:memory",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -241,11 +228,11 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     visibility = xnnpack_visibility(),
     deps = [
+        "@FP16",
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -256,10 +243,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -271,10 +257,9 @@ xnnpack_cc_library(
     deps = [
         "@FP16",
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -285,10 +270,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -299,10 +283,10 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
+        "//:memory",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -312,11 +296,11 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     visibility = xnnpack_visibility(),
     deps = [
+        "@FP16",
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -327,10 +311,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -342,10 +325,9 @@ xnnpack_cc_library(
     deps = [
         "@FP16",
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -356,10 +338,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -370,11 +351,10 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
         "//:post_operation",
-        "@pthreadpool",
     ],
 )
 
@@ -385,10 +365,10 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
+        "//:memory",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -398,11 +378,11 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     visibility = xnnpack_visibility(),
     deps = [
+        "@FP16",
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -413,9 +393,8 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )

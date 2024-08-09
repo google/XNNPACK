@@ -204,7 +204,7 @@ class RDSumMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_rdsum_ukernel_fn rdsum, xnn_init_f32_scale_params_fn init_params) const {
+  void Test(xnn_f32_rdsum_ukernel_fn rdsum, xnn_init_f32_scaleminmax_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
@@ -216,18 +216,23 @@ class RDSumMicrokernelTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(output.begin(), output.end(), [&]() { return f32dist(rng); });
       output_ref = output;
-      // Compute reference results, without clamping.
+
+      // Prepare parameters.
+      union xnn_f32_scaleminmax_params params;
+      auto input_min = std::min_element(input.begin(), input.end());
+      auto input_max = std::max_element(input.begin(), input.end());
+      float mi = *input_min + (*input_max - *input_min) * 0.05;
+      float ma = *input_max - (*input_min - *input_max) * 0.05;
+      init_params(&params, 1.0f / float(rows()), mi, ma);
+
+      // Compute reference results.
       for (size_t c = 0; c < channels(); c++) {
         float acc = 0.0f;
         for (size_t n = 0; n < rows(); n++) {
           acc += input[n * input_stride() + c];
         }
-        output_ref[c] += acc / float(rows());
+        output_ref[c] += std::max(std::min(acc / float(rows()), ma), mi);
       }
-
-      // Prepare parameters.
-      union xnn_f32_scale_params params;
-      init_params(&params, 1.0f / float(rows()));
 
       // Call optimized micro-kernel.
       rdsum(rows(), channels(), input.data(), input_stride() * sizeof(float), zero.data(), output.data(), &params);

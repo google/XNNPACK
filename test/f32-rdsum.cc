@@ -20,7 +20,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_eq_4_2pass_fulltile) {
   RDSumMicrokernelTester()
     .rows(14)
     .channels(4)
-    .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+    .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
 }
 
 TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_eq_4_2pass_fulltile_with_input_stride) {
@@ -28,7 +28,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_eq_4_2pass_fulltile_with_input_stride) 
     .rows(14)
     .channels(4)
     .input_stride(7)
-    .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+    .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
 }
 
 TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_eq_4_2pass_subtile) {
@@ -36,7 +36,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_eq_4_2pass_subtile) {
     RDSumMicrokernelTester()
       .rows(rows)
       .channels(4)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
   }
 }
 
@@ -46,7 +46,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_eq_4_2pass_subtile_with_input_stride) {
       .rows(rows)
       .channels(4)
       .input_stride(7)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
   }
 }
 
@@ -55,7 +55,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_eq_4_multipass_fulltile) {
     RDSumMicrokernelTester()
       .rows(rows)
       .channels(4)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
   }
 }
 
@@ -65,7 +65,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_eq_4_multipass_fulltile_with_input_stri
       .rows(rows)
       .channels(4)
       .input_stride(7)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
   }
 }
 
@@ -74,7 +74,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_div_4_2pass_fulltile) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(channels)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
   }
 }
 
@@ -84,7 +84,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_div_4_2pass_subtile) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 }
@@ -95,7 +95,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_div_4_multipass_fulltile) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 }
@@ -107,7 +107,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_div_4_multipass_fulltile_with_input_str
         .rows(rows)
         .channels(channels)
         .input_stride(67)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 }
@@ -117,7 +117,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_lt_4_2pass_fulltile) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(channels)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
   }
 }
 
@@ -127,7 +127,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_lt_4_2pass_subtile) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 }
@@ -138,7 +138,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_lt_4_multipass_fulltile) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 }
@@ -150,7 +150,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_lt_4_multipass_fulltile_with_input_stri
         .rows(rows)
         .channels(channels)
         .input_stride(7)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 }
@@ -160,7 +160,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_gt_4_2pass_fulltile) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(channels)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
   }
 }
 
@@ -170,7 +170,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_gt_4_2pass_subtile) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 }
@@ -181,7 +181,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_gt_4_multipass_fulltile) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 }
@@ -193,7 +193,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_gt_4_multipass_fulltile_with_input_stri
         .rows(rows)
         .channels(channels)
         .input_stride(23)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 }
@@ -203,7 +203,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
      RDSumMicrokernelTester()
        .rows(264)
        .channels(channels)
-       .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scale_scalar_params);
+       .Test(xnn_f32_rdsum_ukernel_7p7x__scalar_c4, xnn_init_f32_scaleminmax_scalar_params);
   }
 }
 
@@ -213,7 +213,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(16)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__NEON_C16, channels_eq_16_2pass_fulltile_with_input_stride) {
@@ -222,7 +222,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       .rows(14)
       .channels(16)
       .input_stride(19)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__NEON_C16, channels_eq_16_2pass_subtile) {
@@ -231,7 +231,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(16)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -242,7 +242,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(16)
         .input_stride(19)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -252,7 +252,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(16)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -263,7 +263,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(16)
         .input_stride(19)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -273,7 +273,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -284,7 +284,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -296,7 +296,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -309,7 +309,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(263)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -320,7 +320,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -331,7 +331,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -343,7 +343,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -356,7 +356,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(19)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -367,7 +367,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -378,7 +378,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -390,7 +390,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -403,7 +403,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(47)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -414,7 +414,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
-         .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scale_scalar_params);
+         .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -426,7 +426,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(32)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__NEON_C32, channels_eq_32_2pass_fulltile_with_input_stride) {
@@ -435,7 +435,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       .rows(14)
       .channels(32)
       .input_stride(37)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__NEON_C32, channels_eq_32_2pass_subtile) {
@@ -444,7 +444,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(32)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -455,7 +455,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(32)
         .input_stride(37)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -465,7 +465,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(32)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -476,7 +476,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(32)
         .input_stride(37)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -486,7 +486,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -497,7 +497,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -509,7 +509,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -522,7 +522,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(521)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -533,7 +533,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -544,7 +544,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -556,7 +556,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -569,7 +569,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(37)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -580,7 +580,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -591,7 +591,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -603,7 +603,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -616,7 +616,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(79)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -627,7 +627,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
-         .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scale_scalar_params);
+         .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -639,7 +639,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(64)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__NEON_C64, channels_eq_64_2pass_fulltile_with_input_stride) {
@@ -648,7 +648,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       .rows(14)
       .channels(64)
       .input_stride(67)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__NEON_C64, channels_eq_64_2pass_subtile) {
@@ -657,7 +657,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(64)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -668,7 +668,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(64)
         .input_stride(67)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -678,7 +678,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(64)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -689,7 +689,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(64)
         .input_stride(67)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -699,7 +699,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -710,7 +710,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -722,7 +722,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -735,7 +735,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(1031)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -746,7 +746,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -757,7 +757,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -769,7 +769,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -782,7 +782,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(67)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -793,7 +793,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -804,7 +804,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -816,7 +816,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -829,7 +829,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(149)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -840,7 +840,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
-         .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scale_scalar_params);
+         .Test(xnn_f32_rdsum_ukernel_7p7x__neon_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -852,7 +852,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(16)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
   }
 
   TEST(F32_RDSUM_7P7X__SSE_C16, channels_eq_16_2pass_fulltile_with_input_stride) {
@@ -861,7 +861,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       .rows(14)
       .channels(16)
       .input_stride(19)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
   }
 
   TEST(F32_RDSUM_7P7X__SSE_C16, channels_eq_16_2pass_subtile) {
@@ -870,7 +870,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(16)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -881,7 +881,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(16)
         .input_stride(19)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -891,7 +891,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(16)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -902,7 +902,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(16)
         .input_stride(19)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -912,7 +912,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -923,7 +923,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -935,7 +935,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -948,7 +948,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(263)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -959,7 +959,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -970,7 +970,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -982,7 +982,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -995,7 +995,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(19)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1006,7 +1006,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -1017,7 +1017,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1029,7 +1029,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1042,7 +1042,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(47)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1053,7 +1053,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
-         .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scale_sse_params);
+         .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c16, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1065,7 +1065,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(32)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
   }
 
   TEST(F32_RDSUM_7P7X__SSE_C32, channels_eq_32_2pass_fulltile_with_input_stride) {
@@ -1074,7 +1074,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       .rows(14)
       .channels(32)
       .input_stride(37)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
   }
 
   TEST(F32_RDSUM_7P7X__SSE_C32, channels_eq_32_2pass_subtile) {
@@ -1083,7 +1083,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(32)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -1094,7 +1094,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(32)
         .input_stride(37)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -1104,7 +1104,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(32)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -1115,7 +1115,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(32)
         .input_stride(37)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -1125,7 +1125,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -1136,7 +1136,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1148,7 +1148,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1161,7 +1161,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(521)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1172,7 +1172,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -1183,7 +1183,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1195,7 +1195,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1208,7 +1208,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(37)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1219,7 +1219,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -1230,7 +1230,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1242,7 +1242,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1255,7 +1255,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(79)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1266,7 +1266,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
-         .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scale_sse_params);
+         .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c32, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1278,7 +1278,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(64)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
   }
 
   TEST(F32_RDSUM_7P7X__SSE_C64, channels_eq_64_2pass_fulltile_with_input_stride) {
@@ -1287,7 +1287,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       .rows(14)
       .channels(64)
       .input_stride(67)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
   }
 
   TEST(F32_RDSUM_7P7X__SSE_C64, channels_eq_64_2pass_subtile) {
@@ -1296,7 +1296,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(64)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -1307,7 +1307,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(64)
         .input_stride(67)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -1317,7 +1317,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(64)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -1328,7 +1328,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(64)
         .input_stride(67)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -1338,7 +1338,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -1349,7 +1349,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1361,7 +1361,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1374,7 +1374,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(1031)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1385,7 +1385,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -1396,7 +1396,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1408,7 +1408,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1421,7 +1421,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(67)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1432,7 +1432,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 
@@ -1443,7 +1443,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1455,7 +1455,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1468,7 +1468,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(149)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
       }
     }
   }
@@ -1479,7 +1479,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
-         .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scale_sse_params);
+         .Test(xnn_f32_rdsum_ukernel_7p7x__sse_c64, xnn_init_f32_scaleminmax_sse_params);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1491,7 +1491,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(16)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
   }
 
   TEST(F32_RDSUM_7P7X__AVX_C16, channels_eq_16_2pass_fulltile_with_input_stride) {
@@ -1500,7 +1500,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       .rows(14)
       .channels(16)
       .input_stride(19)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
   }
 
   TEST(F32_RDSUM_7P7X__AVX_C16, channels_eq_16_2pass_subtile) {
@@ -1509,7 +1509,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(16)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1520,7 +1520,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(16)
         .input_stride(19)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1530,7 +1530,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(16)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1541,7 +1541,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(16)
         .input_stride(19)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1551,7 +1551,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1562,7 +1562,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1574,7 +1574,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1587,7 +1587,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(263)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1598,7 +1598,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1609,7 +1609,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1621,7 +1621,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1634,7 +1634,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(19)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1645,7 +1645,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1656,7 +1656,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1668,7 +1668,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1681,7 +1681,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(47)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1692,7 +1692,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
-         .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scale_avx_params);
+         .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c16, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1704,7 +1704,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(32)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
   }
 
   TEST(F32_RDSUM_7P7X__AVX_C32, channels_eq_32_2pass_fulltile_with_input_stride) {
@@ -1713,7 +1713,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       .rows(14)
       .channels(32)
       .input_stride(37)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
   }
 
   TEST(F32_RDSUM_7P7X__AVX_C32, channels_eq_32_2pass_subtile) {
@@ -1722,7 +1722,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(32)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1733,7 +1733,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(32)
         .input_stride(37)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1743,7 +1743,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(32)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1754,7 +1754,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(32)
         .input_stride(37)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1764,7 +1764,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1775,7 +1775,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1787,7 +1787,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1800,7 +1800,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(521)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1811,7 +1811,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1822,7 +1822,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1834,7 +1834,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1847,7 +1847,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(37)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1858,7 +1858,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1869,7 +1869,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1881,7 +1881,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1894,7 +1894,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(79)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -1905,7 +1905,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
-         .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scale_avx_params);
+         .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c32, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1917,7 +1917,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(64)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
   }
 
   TEST(F32_RDSUM_7P7X__AVX_C64, channels_eq_64_2pass_fulltile_with_input_stride) {
@@ -1926,7 +1926,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       .rows(14)
       .channels(64)
       .input_stride(67)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
   }
 
   TEST(F32_RDSUM_7P7X__AVX_C64, channels_eq_64_2pass_subtile) {
@@ -1935,7 +1935,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(64)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1946,7 +1946,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(64)
         .input_stride(67)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1956,7 +1956,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(64)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1967,7 +1967,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(64)
         .input_stride(67)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1977,7 +1977,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -1988,7 +1988,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -2000,7 +2000,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -2013,7 +2013,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(1031)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -2024,7 +2024,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -2035,7 +2035,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -2047,7 +2047,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -2060,7 +2060,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(67)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -2071,7 +2071,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 
@@ -2082,7 +2082,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -2094,7 +2094,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -2107,7 +2107,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(149)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
       }
     }
   }
@@ -2118,7 +2118,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
-         .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scale_avx_params);
+         .Test(xnn_f32_rdsum_ukernel_7p7x__avx_c64, xnn_init_f32_scaleminmax_avx_params);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -2130,7 +2130,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(16)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__AVX512F_C16, channels_eq_16_2pass_fulltile_with_input_stride) {
@@ -2139,7 +2139,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       .rows(14)
       .channels(16)
       .input_stride(19)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__AVX512F_C16, channels_eq_16_2pass_subtile) {
@@ -2148,7 +2148,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(16)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2159,7 +2159,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(16)
         .input_stride(19)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2169,7 +2169,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(16)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2180,7 +2180,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(16)
         .input_stride(19)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2190,7 +2190,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2201,7 +2201,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2213,7 +2213,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2226,7 +2226,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(263)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2237,7 +2237,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2248,7 +2248,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2260,7 +2260,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2273,7 +2273,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(19)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2284,7 +2284,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2295,7 +2295,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2307,7 +2307,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2320,7 +2320,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(47)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2331,7 +2331,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
-         .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scale_scalar_params);
+         .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -2343,7 +2343,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(32)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__AVX512F_C32, channels_eq_32_2pass_fulltile_with_input_stride) {
@@ -2352,7 +2352,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       .rows(14)
       .channels(32)
       .input_stride(37)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__AVX512F_C32, channels_eq_32_2pass_subtile) {
@@ -2361,7 +2361,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(32)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2372,7 +2372,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(32)
         .input_stride(37)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2382,7 +2382,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(32)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2393,7 +2393,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(32)
         .input_stride(37)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2403,7 +2403,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2414,7 +2414,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2426,7 +2426,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2439,7 +2439,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(521)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2450,7 +2450,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2461,7 +2461,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2473,7 +2473,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2486,7 +2486,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(37)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2497,7 +2497,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2508,7 +2508,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2520,7 +2520,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2533,7 +2533,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(79)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2544,7 +2544,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
-         .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scale_scalar_params);
+         .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -2556,7 +2556,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(64)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__AVX512F_C64, channels_eq_64_2pass_fulltile_with_input_stride) {
@@ -2565,7 +2565,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       .rows(14)
       .channels(64)
       .input_stride(67)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__AVX512F_C64, channels_eq_64_2pass_subtile) {
@@ -2574,7 +2574,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(64)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2585,7 +2585,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(64)
         .input_stride(67)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2595,7 +2595,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(64)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2606,7 +2606,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(64)
         .input_stride(67)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2616,7 +2616,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2627,7 +2627,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2639,7 +2639,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2652,7 +2652,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(1031)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2663,7 +2663,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2674,7 +2674,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2686,7 +2686,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2699,7 +2699,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(67)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2710,7 +2710,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2721,7 +2721,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2733,7 +2733,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2746,7 +2746,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(149)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2757,7 +2757,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
-         .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scale_scalar_params);
+         .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -2768,7 +2768,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(16)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__WASMSIMD_C16, channels_eq_16_2pass_fulltile_with_input_stride) {
@@ -2776,7 +2776,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       .rows(14)
       .channels(16)
       .input_stride(19)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__WASMSIMD_C16, channels_eq_16_2pass_subtile) {
@@ -2784,7 +2784,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(16)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2794,7 +2794,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(16)
         .input_stride(19)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2803,7 +2803,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(16)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2813,7 +2813,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(16)
         .input_stride(19)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2822,7 +2822,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2832,7 +2832,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2843,7 +2843,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2855,7 +2855,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(263)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2865,7 +2865,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2875,7 +2875,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2886,7 +2886,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2898,7 +2898,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(19)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2908,7 +2908,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2918,7 +2918,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2929,7 +2929,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2941,7 +2941,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(47)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -2951,7 +2951,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
-         .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scale_scalar_params);
+         .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -2962,7 +2962,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(32)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__WASMSIMD_C32, channels_eq_32_2pass_fulltile_with_input_stride) {
@@ -2970,7 +2970,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       .rows(14)
       .channels(32)
       .input_stride(37)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__WASMSIMD_C32, channels_eq_32_2pass_subtile) {
@@ -2978,7 +2978,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(32)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2988,7 +2988,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(32)
         .input_stride(37)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -2997,7 +2997,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(32)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -3007,7 +3007,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(32)
         .input_stride(37)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -3016,7 +3016,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -3026,7 +3026,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3037,7 +3037,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3049,7 +3049,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(521)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3059,7 +3059,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -3069,7 +3069,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3080,7 +3080,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3092,7 +3092,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(37)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3102,7 +3102,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -3112,7 +3112,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3123,7 +3123,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3135,7 +3135,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(79)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3145,7 +3145,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
-         .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scale_scalar_params);
+         .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -3156,7 +3156,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(64)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__WASMSIMD_C64, channels_eq_64_2pass_fulltile_with_input_stride) {
@@ -3164,7 +3164,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       .rows(14)
       .channels(64)
       .input_stride(67)
-      .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+      .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
   }
 
   TEST(F32_RDSUM_7P7X__WASMSIMD_C64, channels_eq_64_2pass_subtile) {
@@ -3172,7 +3172,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(64)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -3182,7 +3182,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(64)
         .input_stride(67)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -3191,7 +3191,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(rows)
         .channels(64)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -3201,7 +3201,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         .rows(rows)
         .channels(64)
         .input_stride(67)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -3210,7 +3210,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -3220,7 +3220,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3231,7 +3231,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3243,7 +3243,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(1031)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3253,7 +3253,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -3263,7 +3263,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3274,7 +3274,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3286,7 +3286,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(67)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3296,7 +3296,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+        .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 
@@ -3306,7 +3306,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3317,7 +3317,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3329,7 +3329,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
           .rows(rows)
           .channels(channels)
           .input_stride(149)
-          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }
@@ -3339,7 +3339,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
-         .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scale_scalar_params);
+         .Test(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64, xnn_init_f32_scaleminmax_scalar_params);
     }
   }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
