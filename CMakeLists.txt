@@ -411,6 +411,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/minimum2.c
   src/subgraph/multiply2.c
   src/subgraph/negate.c
+  src/subgraph/pop-count.c
   src/subgraph/prelu.c
   src/subgraph/reciprocal-square-root.c
   src/subgraph/reshape-helpers.c
@@ -1991,6 +1992,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(reciprocal-square-root-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(reciprocal-square-root-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME reciprocal-square-root-test COMMAND reciprocal-square-root-test)
+
+    ADD_EXECUTABLE(pop-count-test test/pop-count.cc)
+    TARGET_INCLUDE_DIRECTORIES(pop-count-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(pop-count-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME pop-count-test COMMAND pop-count-test)
 
     ADD_EXECUTABLE(reshape-helpers-test test/reshape-helpers.cc)
     TARGET_INCLUDE_DIRECTORIES(reshape-helpers-test PRIVATE src test)
