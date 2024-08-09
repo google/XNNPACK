@@ -1310,7 +1310,7 @@ xnnpack_microkernel_cc_library(
     msvc_x86_32_copts = ["/arch:AVX512"],
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs_prod = ["src/amalgam/gen/avx256vnnigfni.c"],
+    x86_srcs_prod = [],
     x86_srcs_test = ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS,
     deps = MICROKERNEL_DEPS,
 )
@@ -1570,9 +1570,6 @@ xnnpack_aggregate_library(
         "//conditions:default": [],
     }) + select({
         ":avx256vnni_enabled": [":avx256vnni_prod_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":avx256vnnigfni_enabled": [":avx256vnnigfni_prod_microkernels"],
         "//conditions:default": [],
     }) + select({
         ":avx512amx_enabled": [":avx512amx_prod_microkernels"],
@@ -2277,6 +2274,8 @@ xnnpack_cc_library(
         ":allocator",
         ":build_identifier",
         ":common",
+        ":config_hdrs",
+        ":init_once",
         ":logging",
         ":params",
         "@pthreadpool",
@@ -2305,6 +2304,8 @@ xnnpack_cc_library(
         ":allocator",
         ":build_identifier",
         ":common",
+        ":config_hdrs",
+        ":init_once",
         ":logging",
         ":params",
         "@pthreadpool",
