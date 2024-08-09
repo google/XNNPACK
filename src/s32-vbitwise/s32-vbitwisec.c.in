@@ -23,7 +23,7 @@ $for BATCH_TILE in BATCH_TILES:
   $assert BATCH_TILE >= SIMD_SIZE
   $SIMD_TILE = BATCH_TILE // SIMD_SIZE
 
-  void xnn_s32_v${OP.lower()}_ukernel__${ARCH}_u${BATCH_TILE}(
+  void xnn_s32_v${OP.lower()}c_ukernel__${ARCH}_u${BATCH_TILE}(
       size_t batch,
       const int32_t* input1,
       const int32_t* input2,

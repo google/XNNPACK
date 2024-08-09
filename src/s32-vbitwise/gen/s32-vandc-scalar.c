@@ -19,7 +19,7 @@
 #include "xnnpack/vunary.h"
 
 
-void xnn_s32_vand_ukernel__scalar_u1(
+void xnn_s32_vandc_ukernel__scalar_u1(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,
@@ -46,7 +46,7 @@ void xnn_s32_vand_ukernel__scalar_u1(
   }
 }
 
-void xnn_s32_vand_ukernel__scalar_u2(
+void xnn_s32_vandc_ukernel__scalar_u2(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,
@@ -86,7 +86,7 @@ void xnn_s32_vand_ukernel__scalar_u2(
   }
 }
 
-void xnn_s32_vand_ukernel__scalar_u4(
+void xnn_s32_vandc_ukernel__scalar_u4(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,
@@ -132,7 +132,7 @@ void xnn_s32_vand_ukernel__scalar_u4(
   }
 }
 
-void xnn_s32_vand_ukernel__scalar_u8(
+void xnn_s32_vandc_ukernel__scalar_u8(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,

@@ -19,7 +19,7 @@
 #include "xnnpack/vunary.h"
 
 
-void xnn_s32_vand_ukernel__avx2_u8(
+void xnn_s32_vandc_ukernel__avx2_u8(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,
@@ -53,7 +53,7 @@ void xnn_s32_vand_ukernel__avx2_u8(
   }
 }
 
-void xnn_s32_vand_ukernel__avx2_u16(
+void xnn_s32_vandc_ukernel__avx2_u16(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,
@@ -100,7 +100,7 @@ void xnn_s32_vand_ukernel__avx2_u16(
   }
 }
 
-void xnn_s32_vand_ukernel__avx2_u24(
+void xnn_s32_vandc_ukernel__avx2_u24(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,
@@ -150,7 +150,7 @@ void xnn_s32_vand_ukernel__avx2_u24(
   }
 }
 
-void xnn_s32_vand_ukernel__avx2_u32(
+void xnn_s32_vandc_ukernel__avx2_u32(
     size_t batch,
     const int32_t* input1,
     const int32_t* input2,
