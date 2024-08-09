@@ -23,6 +23,7 @@
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
 #include "xnnpack/maxpool.h"
+#include "xnnpack/microparams.h"
 #include "xnnpack/pavgpool.h"
 #include "xnnpack/reduce.h"
 #include "xnnpack/spmm.h"
