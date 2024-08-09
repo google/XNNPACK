@@ -30,6 +30,47 @@
 #include "xnnpack/vlrelu.h"
 #include "xnnpack/vunary.h"
 
+void xnn_s32_vpopcnt_ukernel__sse41_u8(
+    size_t batch,
+    const int32_t* input,
+    int32_t* output,
+    const union xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int32_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_s32 == 4);
+
+  for (; batch >= 8 * sizeof(int32_t); batch -= 8 * sizeof(int32_t)) {
+    xnn_simd_s32_t vin_0 = xnn_loadu_s32(input);
+    xnn_simd_s32_t vin_1 = xnn_loadu_s32(input + 1 * xnn_simd_size_s32);
+    input += 8;
+
+    xnn_simd_s32_t vy_0 = xnn_popcnt_s32(vin_0);
+    xnn_simd_s32_t vy_1 = xnn_popcnt_s32(vin_1);
+
+    xnn_storeu_s32(output, vy_0);
+    xnn_storeu_s32(output + 1 * xnn_simd_size_s32, vy_1);
+    output += 8;
+  }
+  for (; batch >= xnn_simd_bytes_s32; batch -= xnn_simd_bytes_s32) {
+    xnn_simd_s32_t vin = xnn_loadu_s32(input);
+    input += xnn_simd_size_s32;
+
+    xnn_simd_s32_t vy = xnn_popcnt_s32(vin);
+
+    xnn_storeu_s32(output, vy);
+    output += xnn_simd_size_s32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    xnn_simd_s32_t vin = xnn_load_tail_s32(input, batch >> XNN_LOG2_SIZEOF_INT32_T);
+
+    xnn_simd_s32_t vy = xnn_popcnt_s32(vin);
+
+    xnn_store_tail_s32(output, vy, batch >> XNN_LOG2_SIZEOF_INT32_T);
+  }
+}
 
 void xnn_f16_f32_vcvt_ukernel__sse41_int16_u16(
     size_t batch,
