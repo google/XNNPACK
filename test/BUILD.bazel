@@ -1577,6 +1577,7 @@ xnnpack_binary(
 ) for operator in [
     "add_nd",
     "add_nd_eager",
+    "and_nd",
     "copysign_nd",
     "divide_nd",
     "divide_nd_eager",
@@ -1586,10 +1587,12 @@ xnnpack_binary(
     "minimum_nd_eager",
     "multiply_nd",
     "multiply_nd_eager",
+    "or_nd",
     "squared_difference_nd",
     "squared_difference_nd_eager",
     "subtract_nd",
     "subtract_nd_eager",
+    "xor_nd",
 ]]
 
 xnnpack_unit_test(

@@ -1428,6 +1428,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(add-nd-eager-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME add-nd-eager-test COMMAND add-nd-eager-test)
 
+    ADD_EXECUTABLE(and-nd-test test/and-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(and-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(and-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME and-nd-test COMMAND and-nd-test)
+
     ADD_EXECUTABLE(argmax-pooling-nhwc-test test/argmax-pooling-nhwc.cc)
     TARGET_INCLUDE_DIRECTORIES(argmax-pooling-nhwc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(argmax-pooling-nhwc-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
@@ -1627,6 +1632,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(negate-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME negate-nc-test COMMAND negate-nc-test)
 
+    ADD_EXECUTABLE(or-nd-test test/or-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(or-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(or-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME or-nd-test COMMAND or-nd-test)
+  
     ADD_EXECUTABLE(prelu-nc-test test/prelu-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(prelu-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(prelu-nc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
@@ -1737,6 +1747,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(unpooling-nhwc-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME unpooling-nhwc-test COMMAND unpooling-nhwc-test)
 
+    ADD_EXECUTABLE(xor-nd-test test/xor-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(xor-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(xor-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME xor-nd-test COMMAND xor-nd-test)
+  
     # ---[ Build subgraph optimizations unit tests
     ADD_EXECUTABLE(fusion-test test/fusion.cc)
     TARGET_INCLUDE_DIRECTORIES(fusion-test PRIVATE src test)
