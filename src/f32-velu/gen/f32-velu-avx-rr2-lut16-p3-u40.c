@@ -16,7 +16,7 @@
 #include "xnnpack/vunary.h"
 
 
-extern XNN_INTERNAL const int xnn_table_exp2minus_k_over_16[16];
+extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
 
 void xnn_f32_velu_ukernel__avx_rr2_lut16_p3_u40(
     size_t batch,
