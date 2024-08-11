@@ -37609,8 +37609,7 @@ void xnn_x16_transposec_ukernel__8x8_reuse_mov_wasmsimd(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x16_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint16_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint16_t));
@@ -38572,8 +38571,7 @@ void xnn_x32_transposec_ukernel__4x4_reuse_mov_wasmsimd(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint32_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint32_t));
@@ -39232,8 +39230,7 @@ void xnn_x8_transposec_ukernel__16x16_reuse_mov_wasmsimd(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x8_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint8_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint8_t));
