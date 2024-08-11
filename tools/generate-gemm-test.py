@@ -857,9 +857,9 @@ def generate_test_cases(
   if vector_tile:
     ctype = {
         "qs8": "int8_t",
-        "qd8": " int8_t",
-        "qp8": " int8_t",
-        "qu8": " uint8_t",
+        "qd8": "int32_t",
+        "qp8": "int8_t",
+        "qu8": "uint8_t",
         "f16": "uint16_t",
         "f32": "float",
     }[datatype]
