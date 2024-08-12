@@ -45,37 +45,21 @@ union xnn_f32_relu_params {
 // Scale: used by RSUM microkernels
 
 union xnn_f16_scale_params {
-  char _;  // Dummy member variable to comply with the C standard
   struct {
     uint16_t scale;
-  } fp16arith;
+  };
 };
 
 union xnn_f16_f32acc_scale_params {
   struct {
     float scale;
-  } scalar;
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    int16_t mask_table[14];
-    float scale;
-  } avx;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+  };
 };
 
 union xnn_f32_scale_params {
   struct {
     float scale;
-  } scalar;
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) float scale[4];
-  } sse;
-  struct {
-    int32_t mask_table[14];
-    float scale;
-  } avx;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+  };
 };
 
 

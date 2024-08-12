@@ -3655,14 +3655,16 @@ void xnn_f32_rdsum_ukernel_7p7x__avx_c32(
     float* output,
     const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
   assert(rows != 0);
   assert(channels != 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256 vscale = _mm256_set1_ps(params->avx.scale);
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vscale = _mm256_set1_ps(params->scalar.scale);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 32; channels -= 32) {
@@ -3844,7 +3846,7 @@ void xnn_f32_rdsum_ukernel_7p7x__avx_c32(
       }
 
       if (remainder) {
-        vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - (channels & 0x7) * sizeof(float)));
+        vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - (channels & 0x7) * sizeof(float)));
         vacc[num_full_chunks] = _mm256_add_ps(_mm256_maskload_ps(&i0[num_full_chunks*8], vmask), vacc[num_full_chunks]);
         vacc[num_full_chunks] = _mm256_add_ps(_mm256_maskload_ps(&i1[num_full_chunks*8], vmask), vacc[num_full_chunks]);
         vacc[num_full_chunks] = _mm256_add_ps(_mm256_maskload_ps(&i2[num_full_chunks*8], vmask), vacc[num_full_chunks]);
@@ -4028,6 +4030,8 @@ void xnn_f32_rsum_ukernel__avx_u32_acc4(
     float* output,
     const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
@@ -4061,16 +4065,16 @@ void xnn_f32_rsum_ukernel__avx_u32_acc4(
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
     const __m256 vt = _mm256_maskload_ps(input, vmask);
     vacc0 = _mm256_add_ps(vacc0, vt);
   }
   __m128 vacc = _mm_add_ps(_mm256_castps256_ps128(vacc0), _mm256_extractf128_ps(vacc0, 1));
   vacc = _mm_add_ps(vacc, _mm_movehl_ps(vacc, vacc));
   vacc = _mm_add_ss(vacc, _mm_movehdup_ps(vacc));
-  vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->avx.scale));
-  vacc = _mm_max_ss(vacc, _mm_load_ss(&params->avx.min));
-  vacc = _mm_min_ss(vacc, _mm_load_ss(&params->avx.max));
+  vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->scalar.scale));
+  vacc = _mm_max_ss(vacc, _mm_load_ss(&params->scalar.min));
+  vacc = _mm_min_ss(vacc, _mm_load_ss(&params->scalar.max));
   *output += _mm_cvtss_f32(vacc);
 }
 

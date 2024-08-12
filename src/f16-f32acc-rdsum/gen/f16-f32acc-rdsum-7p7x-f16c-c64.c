@@ -31,7 +31,7 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c64(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256 vscale = _mm256_set1_ps(params->avx.scale);
+  const __m256 vscale = _mm256_set1_ps(params->scale);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 64; channels -= 64) {

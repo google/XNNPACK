@@ -28,9 +28,9 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__sse_c${CHANNELS}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vscale = _mm_load_ps(params->sse.scale);
-  const __m128 vmin = _mm_load_ps(params->sse.min);
-  const __m128 vmax = _mm_load_ps(params->sse.max);
+  const __m128 vscale = _mm_set1_ps(params->scalar.scale);
+  const __m128 vmin = _mm_set1_ps(params->scalar.min);
+  const __m128 vmax = _mm_set1_ps(params->scalar.max);
 
   size_t input_increment = ${ACCUMULATORS} * input_stride;
   for (; channels >= ${CHANNELS}; channels -= ${CHANNELS}) {

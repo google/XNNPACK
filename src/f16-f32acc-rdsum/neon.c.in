@@ -28,7 +28,7 @@ void xnn_f16_f32acc_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neonfp16arit
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
+  const float32x4_t vscale = vld1q_dup_f32(&params->scale);
 
   size_t input_increment = ${ACCUMULATORS} * input_stride;
   for (; channels >= ${CHANNELS_BATCH}; channels -= ${CHANNELS_BATCH}) {

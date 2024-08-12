@@ -52,7 +52,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f16_f32acc_rdsum, f16c_c16,
                     xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c16,
-                    xnn_init_f16_f32acc_scale_avx_params,
+                    xnn_init_f16_f32acc_scale_scalar_params,
                     benchmark::utils::CheckF16C)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();
@@ -62,7 +62,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f16_f32acc_rdsum, f16c_c32,
                     xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c32,
-                    xnn_init_f16_f32acc_scale_avx_params,
+                    xnn_init_f16_f32acc_scale_scalar_params,
                     benchmark::utils::CheckF16C)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();
@@ -72,7 +72,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f16_f32acc_rdsum, f16c_c64,
                     xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c64,
-                    xnn_init_f16_f32acc_scale_avx_params,
+                    xnn_init_f16_f32acc_scale_scalar_params,
                     benchmark::utils::CheckF16C)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();
@@ -82,7 +82,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f16_f32acc_rdsum, f16c_c128,
                     xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c128,
-                    xnn_init_f16_f32acc_scale_avx_params,
+                    xnn_init_f16_f32acc_scale_scalar_params,
                     benchmark::utils::CheckF16C)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();

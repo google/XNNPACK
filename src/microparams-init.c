@@ -1915,69 +1915,25 @@ size_t xnn_init_f16_scale_fp16arith_params(
   union xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale)
 {
-  params->fp16arith.scale = scale;
-  return sizeof(params->fp16arith);
+  params->scale = scale;
+  return sizeof(params[0]);
 }
 
 size_t xnn_init_f16_f32acc_scale_scalar_params(
   union xnn_f16_f32acc_scale_params params[XNN_MIN_ELEMENTS(1)],
   float scale)
 {
-  params->scalar.scale = scale;
-  return sizeof(params->scalar);
+  params->scale = scale;
+  return sizeof(params[0]);
 }
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_f32acc_scale_avx_params(
-  union xnn_f16_f32acc_scale_params params[XNN_MIN_ELEMENTS(1)],
-  float scale)
-{
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
-  }
-  params->avx.scale = scale;
-  return sizeof(params->avx);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 size_t xnn_init_f32_scale_scalar_params(
   union xnn_f32_scale_params params[XNN_MIN_ELEMENTS(1)],
   float scale)
 {
-  params->scalar.scale = scale;
-  return sizeof(params->scalar);
+  params->scale = scale;
+  return sizeof(params[0]);
 }
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_scale_sse_params(
-  union xnn_f32_scale_params params[XNN_MIN_ELEMENTS(1)],
-  float scale)
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse.scale[i] = scale;
-  }
-  return sizeof(params->sse);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_scale_avx_params(
-  union xnn_f32_scale_params params[XNN_MIN_ELEMENTS(1)],
-  float scale)
-{
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
-  }
-  params->avx.scale = scale;
-  return sizeof(params->avx);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_f32_scaleminmax_avx_params(
