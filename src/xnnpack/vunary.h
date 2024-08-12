@@ -1586,7 +1586,7 @@ DECLARE_XX_VUNARY_UKERNEL_FUNCTION(xnn_xx_copy_ukernel__scalar_memcpy)
       size_t n,                                             \
       const int32_t* x,                                           \
       int32_t* y,                                           \
-      const union params_union params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const union xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_S32_VCLZ_UKERNEL_FUNCTION(xnn_s32_vclz_ukernel__avx2_u8)
 DECLARE_S32_VCLZ_UKERNEL_FUNCTION(xnn_s32_vclz_ukernel__avx2_u16)

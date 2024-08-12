@@ -399,6 +399,7 @@ def generate_test_cases(
               "Log": "TestLog",
               "Negate": "TestNeg",
               "Square": "TestSqr",
+              "CountLeadingZeros": "TestClz",
           }.get(op_type, "Test"),
       },
   )
