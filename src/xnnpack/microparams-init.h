@@ -649,31 +649,21 @@ DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_scalar_expm1minus_rr1_p6
   DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#define DECLARE_INIT_BF16_ABS_PARAMS_FUNCTION(fn_name)      \
+#define DECLARE_INIT_bf16_default_params_FUNCTION(fn_name)      \
   XNN_INTERNAL size_t fn_name(                             \
-    union xnn_bf16_abs_params params[XNN_MIN_ELEMENTS(1)]);
+    union xnn_bf16_default_params params[XNN_MIN_ELEMENTS(1)]);
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_BF16_ABS_PARAMS_FUNCTION(xnn_init_bf16_abs_neon_params)
+  DECLARE_INIT_bf16_default_params_FUNCTION(xnn_init_bf16_abs_neon_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #define DECLARE_INIT_F16_ABS_PARAMS_FUNCTION(fn_name)      \
   XNN_INTERNAL size_t fn_name(                             \
-    union xnn_f16_abs_params params[XNN_MIN_ELEMENTS(1)]);
+    union xnn_f16_default_params params[XNN_MIN_ELEMENTS(1)]);
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_F16_ABS_PARAMS_FUNCTION(xnn_init_f16_abs_sse_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
-#define DECLARE_INIT_F16_NEG_PARAMS_FUNCTION(fn_name)      \
-  XNN_INTERNAL size_t fn_name(                             \
-    union xnn_f16_neg_params params[XNN_MIN_ELEMENTS(1)]);
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F16_NEG_PARAMS_FUNCTION(xnn_init_f16_neg_sse_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
 
 #define DECLARE_INIT_F32_RND_PARAMS_FUNCTION(fn_name)      \
   XNN_INTERNAL size_t fn_name(                             \

@@ -17,6 +17,10 @@ union xnn_f16_default_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
+union xnn_bf16_default_params {
+  char _;  // Dummy member variable to comply with the C standard
+};
+
 union xnn_f32_default_params {
   char _;  // Dummy member variable to comply with the C standard
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1266,27 +1270,6 @@ union xnn_qu8_avgpool_minmax_params {
     XNN_ALIGN(8) uint8_t output_max[8];
   } fp32_wasmsimd;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-};
-
-
-// Abs: used by VABS microkernels.
-
-union xnn_bf16_abs_params {
-  char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
-    XNN_ALIGN(16) uint16_t nonsign_mask[8];
-  } neon;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-};
-
-union xnn_f16_abs_params {
-  char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) uint16_t nonsign_mask[8];
-  } sse;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 
@@ -2615,19 +2598,6 @@ union xnn_qu8_lrelu_params {
   } wasmsimd_x86;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
-
-
-// Neg: used by VNEG microkernels.
-
-union xnn_f16_neg_params {
-  char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) uint16_t sign_mask[8];
-  } sse;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-};
-
 
 // Rnd (Round): used by VRNDNE/VRNDU/VRNDD/VRNDZ microkernels.
 

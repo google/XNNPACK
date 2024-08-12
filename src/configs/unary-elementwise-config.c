@@ -140,7 +140,6 @@ static void init_f16_abs_config(void) {
     }
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
     f16_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vabs_ukernel__sse2_u16;
-    f16_abs_config.init.f16_abs = xnn_init_f16_abs_sse_params;
     f16_abs_config.element_tile = 16;
   #endif
 }
@@ -274,7 +273,6 @@ static void init_f16_neg_config(void) {
     }
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
     f16_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vneg_ukernel__sse2_u16;
-    f16_neg_config.init.f16_neg = xnn_init_f16_neg_sse_params;
     f16_neg_config.element_tile = 16;
   #endif
 }

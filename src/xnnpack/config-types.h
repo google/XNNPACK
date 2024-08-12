@@ -82,11 +82,10 @@ struct xnn_unary_elementwise_config {
   union {
     xnn_init_f16_f32_cvt_params_fn f16_f32_cvt;
     xnn_init_f16_qs8_cvt_params_fn f16_qs8_cvt;
-    xnn_init_f16_abs_params_fn f16_abs;
+    xnn_init_f16_default_params_fn f16_default;
     xnn_init_f16_elu_params_fn f16_elu;
     xnn_init_f16_hswish_params_fn f16_hswish;
     xnn_init_f16_lrelu_params_fn f16_lrelu;
-    xnn_init_f16_neg_params_fn f16_neg;
     xnn_init_f16_minmax_params_fn f16_minmax;
     xnn_init_f16_rsqrt_params_fn f16_rsqrt;
     xnn_init_f16_sigmoid_params_fn f16_sigmoid;

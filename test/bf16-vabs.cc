@@ -30,7 +30,7 @@
     TEST_REQUIRES_ARM_NEON_BF16;
     VUnaryMicrokernelTester()
       .batch_size(8)
-      .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8, xnn_init_bf16_abs_neon_params);
+      .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8);
   }
 
   TEST(BF16_VABS__NEONBF16_U8, batch_div_8) {
@@ -39,7 +39,7 @@
     for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8, xnn_init_bf16_abs_neon_params);
+        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8);
     }
   }
 
@@ -49,7 +49,7 @@
     for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8, xnn_init_bf16_abs_neon_params);
+        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8);
     }
   }
 
@@ -59,7 +59,7 @@
     for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8, xnn_init_bf16_abs_neon_params);
+        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8);
     }
   }
 
@@ -70,7 +70,7 @@
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8, xnn_init_bf16_abs_neon_params);
+        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8);
     }
   }
 #endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
@@ -81,7 +81,7 @@
     TEST_REQUIRES_ARM_NEON_BF16;
     VUnaryMicrokernelTester()
       .batch_size(16)
-      .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16, xnn_init_bf16_abs_neon_params);
+      .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16);
   }
 
   TEST(BF16_VABS__NEONBF16_U16, batch_div_16) {
@@ -90,7 +90,7 @@
     for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16, xnn_init_bf16_abs_neon_params);
+        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16);
     }
   }
 
@@ -100,7 +100,7 @@
     for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16, xnn_init_bf16_abs_neon_params);
+        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16);
     }
   }
 
@@ -110,7 +110,7 @@
     for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16, xnn_init_bf16_abs_neon_params);
+        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16);
     }
   }
 
@@ -121,7 +121,7 @@
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16, xnn_init_bf16_abs_neon_params);
+        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16);
     }
   }
 #endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
@@ -132,7 +132,7 @@
     TEST_REQUIRES_ARM_NEON_BF16;
     VUnaryMicrokernelTester()
       .batch_size(24)
-      .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24, xnn_init_bf16_abs_neon_params);
+      .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24);
   }
 
   TEST(BF16_VABS__NEONBF16_U24, batch_div_24) {
@@ -141,7 +141,7 @@
     for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24, xnn_init_bf16_abs_neon_params);
+        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24);
     }
   }
 
@@ -151,7 +151,7 @@
     for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24, xnn_init_bf16_abs_neon_params);
+        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24);
     }
   }
 
@@ -161,7 +161,7 @@
     for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24, xnn_init_bf16_abs_neon_params);
+        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24);
     }
   }
 
@@ -172,7 +172,7 @@
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24, xnn_init_bf16_abs_neon_params);
+        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24);
     }
   }
 #endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)

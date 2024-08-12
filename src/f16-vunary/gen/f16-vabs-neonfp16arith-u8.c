@@ -19,7 +19,7 @@ void xnn_f16_vabs_ukernel__neonfp16arith_u8(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_abs_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);

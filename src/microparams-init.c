@@ -3676,40 +3676,6 @@ size_t xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params(
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_bf16_abs_neon_params(
-  union xnn_bf16_abs_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->neon.nonsign_mask[i] = UINT16_C(0x7FFF);
-  }
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_abs_sse_params(
-  union xnn_f16_abs_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse.nonsign_mask[i] = UINT16_C(0x7FFF);
-  }
-  return sizeof(params->sse);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_neg_sse_params(
-  union xnn_f16_neg_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse.sign_mask[i] = UINT16_C(0x8000);
-  }
-  return sizeof(params->sse);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_f32_rnd_sse2_params(
   union xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)])
