@@ -5,10 +5,6 @@ on:
       - master
     types: [closed]
 
-permissions:
-  # Needed to avoid "Unable to reserve cache" issues for bazel jobs.
-  actions: write
-
 jobs:
   build-and-test:
     if: ${{ github.event.pull_request.merged }}
