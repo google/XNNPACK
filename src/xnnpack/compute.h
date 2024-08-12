@@ -1163,7 +1163,7 @@ struct global_average_pooling_ncw_context {
 struct resize_bilinear_nhwc_indirection_init_context {
   const void** buffer;
   const void* input;
-  size_t packed_weight_size;
+  size_t indirect_input_offset;
   size_t input_pixel_stride;
   size_t input_offset;
   size_t input_height;

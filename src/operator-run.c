@@ -1551,7 +1551,7 @@ void xnn_compute_resize_bilinear_indirection(
     context->input_height, context->input_width,
     context->output_height, context->output_width,
     context->input,
-    /*indirection_buffer==*/(const void**) ((uintptr_t) buffer + context->packed_weight_size),
+    /*indirection_buffer==*/(const void**) ((uintptr_t) buffer + context->indirect_input_offset),
     /*packed_weights=*/(void*) buffer,
     context->align_corners, context->tensorflow_legacy_mode);
 }
