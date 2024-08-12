@@ -724,6 +724,170 @@ void BinaryElementwiseOperatorTester::TestF16() const {
   }
 }
 
+void BinaryElementwiseOperatorTester::TestQS16() const {
+  ASSERT_NE(operation_type(), OperationType::Unknown);
+  ASSERT_GE(input1_zero_point(), std::numeric_limits<int16_t>::min());
+  ASSERT_LE(input1_zero_point(), std::numeric_limits<int16_t>::max());
+  ASSERT_GE(input2_zero_point(), std::numeric_limits<int16_t>::min());
+  ASSERT_LE(input2_zero_point(), std::numeric_limits<int16_t>::max());
+  ASSERT_GE(output_zero_point(), std::numeric_limits<int16_t>::min());
+  ASSERT_LE(output_zero_point(), std::numeric_limits<int16_t>::max());
+
+  xnnpack::ReplicableRandomDevice rng;
+  std::uniform_int_distribution<int32_t> s16dist(
+      std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max());
+  // Compute generalized shapes.
+  std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_dims;
+  std::array<size_t, XNN_MAX_TENSOR_DIMS> input2_dims;
+  std::array<size_t, XNN_MAX_TENSOR_DIMS> output_dims;
+  std::fill(input1_dims.begin(), input1_dims.end(), 1);
+  std::fill(input2_dims.begin(), input2_dims.end(), 1);
+  std::fill(output_dims.begin(), output_dims.end(), 1);
+  std::copy(input1_shape().cbegin(), input1_shape().cend(),
+            input1_dims.end() - num_input1_dims());
+  std::copy(input2_shape().cbegin(), input2_shape().cend(),
+            input2_dims.end() - num_input2_dims());
+  for (size_t i = 0; i < XNN_MAX_TENSOR_DIMS; i++) {
+    if (input1_dims[i] != 1 && input2_dims[i] != 1) {
+      ASSERT_EQ(input1_dims[i], input2_dims[i]);
+    }
+    output_dims[i] = std::max(input1_dims[i], input2_dims[i]);
+  }
+  const size_t num_output_elements =
+      std::accumulate(output_dims.begin(), output_dims.end(), size_t(1),
+                      std::multiplies<size_t>());
+
+  // Compute generalized strides.
+  std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_strides;
+  std::array<size_t, XNN_MAX_TENSOR_DIMS> input2_strides;
+  std::array<size_t, XNN_MAX_TENSOR_DIMS> output_strides;
+  size_t input1_stride = 1, input2_stride = 1, output_stride = 1;
+  for (size_t i = XNN_MAX_TENSOR_DIMS; i != 0; i--) {
+    input1_strides[i - 1] = input1_dims[i - 1] == 1 ? 0 : input1_stride;
+    input2_strides[i - 1] = input2_dims[i - 1] == 1 ? 0 : input2_stride;
+    output_strides[i - 1] = output_stride;
+    input1_stride *= input1_dims[i - 1];
+    input2_stride *= input2_dims[i - 1];
+    output_stride *= output_dims[i - 1];
+  }
+
+  std::vector<int16_t> input1(XNN_EXTRA_BYTES / sizeof(int16_t) +
+                            num_input1_elements());
+  std::vector<int16_t> input2(XNN_EXTRA_BYTES / sizeof(int16_t) +
+                            num_input2_elements());
+  std::vector<int16_t> output(num_output_elements);
+  std::vector<int16_t> output_ref(num_output_elements);
+  float output_float;
+  int32_t res;
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(input1.begin(), input1.end(), [&]() {return s16dist(rng);});
+    std::generate(input2.begin(), input2.end(), [&]() {return s16dist(rng);});
+    std::fill(output.begin(), output.end(), 0xA5);
+    // Compute reference results.
+    for (size_t i = 0; i < output_dims[0]; i++) {
+      for (size_t j = 0; j < output_dims[1]; j++) {
+        for (size_t k = 0; k < output_dims[2]; k++) {
+          for (size_t l = 0; l < output_dims[3]; l++) {
+            for (size_t m = 0; m < output_dims[4]; m++) {
+              for (size_t n = 0; n < output_dims[5]; n++) {
+                output_float =
+                    Compute(
+                        input1_scale() * static_cast<int32_t>(
+                                             input1[i * input1_strides[0] +
+                                                    j * input1_strides[1] +
+                                                    k * input1_strides[2] +
+                                                    l * input1_strides[3] +
+                                                    m * input1_strides[4] +
+                                                    n * input1_strides[5]]) -
+                            static_cast<int32_t>(input1_zero_point()),
+                        input2_scale() * static_cast<int32_t>(
+                                             input2[i * input2_strides[0] +
+                                                    j * input2_strides[1] +
+                                                    k * input2_strides[2] +
+                                                    l * input2_strides[3] +
+                                                    m * input2_strides[4] +
+                                                    n * input2_strides[5]]) -
+                            static_cast<int32_t>(input2_zero_point())) /
+                    output_scale();
+                res = static_cast<int32_t>(output_zero_point()) + static_cast<int32_t>((output_float));
+                res = (std::max<int32_t>(std::min<int32_t>(res, INT16_MAX), INT16_MIN));
+                output_ref[i * output_strides[0] + j * output_strides[1] +
+                           k * output_strides[2] + l * output_strides[3] +
+                           m * output_strides[4] + n * output_strides[5]] =
+                    static_cast<int16_t>( res );
+              }
+            }
+          }
+        }
+      }
+    }
+
+    for (int16_t& output_value : output_ref) {
+      output_value =
+          std::max<int16_t>(output_value, static_cast<int16_t>(qmin()));
+      output_value =
+          std::min<int16_t>(output_value, static_cast<int16_t>(qmax()));
+    }
+    // Create, setup, run, and destroy a binary elementwise operator.
+    ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+    xnn_operator_t binary_elementwise_op = nullptr;
+
+    switch (operation_type()) {
+      case OperationType::Multiply:
+        ASSERT_EQ(
+          xnn_status_success, xnn_create_multiply_nd_qs16(
+                                input1_zero_point(), input1_scale(), input2_zero_point(), input2_scale(),
+                                output_zero_point(), output_scale(), qmin(), qmax(), 0, &binary_elementwise_op));
+        break;
+      default:
+        FAIL() << "Unsupported operation type";
+    }
+    ASSERT_NE(nullptr, binary_elementwise_op);
+
+    // Smart pointer to automatically delete binary_elementwise_op.
+    std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+        auto_binary_elementwise_op(binary_elementwise_op, xnn_delete_operator);
+
+    switch (operation_type()) {
+      case OperationType::Multiply:
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_reshape_multiply_nd_qs16(
+                binary_elementwise_op, num_input1_dims(), input1_shape().data(),
+                num_input2_dims(), input2_shape().data(),
+                /*threadpool=*/nullptr));
+        ASSERT_EQ(xnn_status_success, xnn_setup_multiply_nd_qs16(
+                                          binary_elementwise_op, input1.data(),
+                                          input2.data(), output.data()));
+        break;
+      default:
+        FAIL() << "Unsupported operation type";
+    }
+
+    ASSERT_EQ(xnn_status_success,
+              xnn_run_operator(binary_elementwise_op, /*threadpool=*/nullptr));
+    // Verify results.
+
+    for (size_t i = 0; i < output_dims[0]; i++) {
+      for (size_t j = 0; j < output_dims[1]; j++) {
+        for (size_t k = 0; k < output_dims[2]; k++) {
+          for (size_t l = 0; l < output_dims[3]; l++) {
+            for (size_t m = 0; m < output_dims[4]; m++) {
+              for (size_t n = 0; n < output_dims[5]; n++) {
+                const size_t index =
+                    i * output_strides[0] + j * output_strides[1] +
+                    k * output_strides[2] + l * output_strides[3] +
+                    m * output_strides[4] + n * output_strides[5];
+                ASSERT_EQ(output[index], output_ref[index]);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 void BinaryElementwiseOperatorTester::TestS32() const {
   ASSERT_NE(operation_type(), OperationType::Unknown);
   ASSERT_LT(qmin(), qmax());

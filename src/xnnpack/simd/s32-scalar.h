@@ -39,6 +39,24 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return (a < b) ? a : b;
 }
 
+static XNN_INLINE int16_t xnn_cvt_s32_s16(xnn_simd_s32_t a, xnn_simd_s32_t b) {
+  return (a > INT16_MAX) ? INT16_MAX : ((a < INT16_MIN) ? INT16_MIN : a);
+}
+
+static XNN_INLINE float xnn_cvt_s32_f32(xnn_simd_s32_t a) {
+   return (float) (a);
+}
+
+static XNN_INLINE xnn_simd_s32_t xnn_add_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  return a + b;
+}
+
+static XNN_INLINE xnn_simd_s32_t xnn_sub_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  return a - b;
+}
+
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t *ptr) { return *ptr; }
 
 static XNN_INLINE xnn_simd_s32_t xnn_load_s32(const int32_t *ptr) { return *ptr; }

@@ -1717,6 +1717,17 @@ union xnn_qs8_f32_cvt_params {
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
+union xnn_qs16_mul_minmax_params {
+  struct {
+    int16_t a_zero_point;
+    int16_t b_zero_point;
+    float scale;
+    int16_t output_zero_point;
+    int16_t output_min;
+    int16_t output_max;
+  } qs16_scalar;
+};
+
 union xnn_qu8_cvt_params {
   struct {
     int32_t bias;

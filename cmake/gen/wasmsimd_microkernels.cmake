@@ -1089,6 +1089,8 @@ SET(ALL_WASMSIMD_MICROKERNEL_SRCS
   src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-wasmsimd-u8.c
   src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-wasmsimd-u16.c
   src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-wasmsimd-u32.c
+  src/qs16-vmul/gen/qs16-vmul-minmax-wasmsimd.c
+  src/qs16-vmul/gen/qs16-vmulc-minmax-wasmsimd.c
   src/qu8-dwconv/gen/qu8-dwconv-5f5m5l8c8s8r-minmax-fp32-wasmsimd-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-5f5m5l16c8s8r-minmax-fp32-wasmsimd-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-6f6m7l8c8s8r-minmax-fp32-wasmsimd-mul16.c

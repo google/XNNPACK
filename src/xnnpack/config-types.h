@@ -73,6 +73,7 @@ struct xnn_binary_elementwise_config {
     xnn_init_qs8_mul_minmax_params_fn qs8_mul;
     xnn_init_qu8_add_minmax_params_fn qu8_add;
     xnn_init_qu8_mul_minmax_params_fn qu8_mul;
+    xnn_init_qs16_mul_minmax_params_fn qs16_mul;
     xnn_init_s32_default_params_fn s32_default;
   } init;
 };
