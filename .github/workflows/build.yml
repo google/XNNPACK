@@ -261,7 +261,7 @@ jobs:
   cmake-android:
     strategy:
       matrix:
-        script: [build-android-arm64.sh, build-android-armv7.sh, build-android-x86.sh]
+        arch: [arm64, armv7, x86]
     runs-on: ubuntu-22.04-8core
     timeout-minutes: 60
     steps:
@@ -279,11 +279,11 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ github.job }}-${{ matrix.script }}
+          key: ${{ github.job }}-${{ matrix.arch }}
           max-size: "1G"
           save: ${{ inputs.update-caches }}
       - name: Configure and build
-        run: scripts/${{ matrix.script }}
+        run: scripts/build-android-${{ matrix.arch }}.sh
         working-directory: ${{ github.workspace }}
         env:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
