@@ -22749,7 +22749,7 @@ void xnn_f32_rsum_ukernel__wasmsimd_u16_acc4(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -22793,7 +22793,11 @@ void xnn_f32_rsum_ukernel__wasmsimd_u16_acc4(
     vacc0 = wasm_f32x4_add(vacc0, vt);
   }
   const v128_t vscale = wasm_v128_load32_zero(&params->scalar.scale);
+  const v128_t vmin = wasm_v128_load32_zero(&params->scalar.min);
+  const v128_t vmax = wasm_v128_load32_zero(&params->scalar.max);
   vacc0 = wasm_f32x4_mul(vacc0, vscale);
+  vacc0 = wasm_f32x4_max(vacc0, vmin);
+  vacc0 = wasm_f32x4_min(vacc0, vmax);
   *output += wasm_f32x4_extract_lane(vacc0, 0);
 }
 
@@ -37606,8 +37610,7 @@ void xnn_x16_transposec_ukernel__8x8_reuse_mov_wasmsimd(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x16_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint16_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint16_t));
@@ -38569,8 +38572,7 @@ void xnn_x32_transposec_ukernel__4x4_reuse_mov_wasmsimd(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint32_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint32_t));
@@ -39229,8 +39231,7 @@ void xnn_x8_transposec_ukernel__16x16_reuse_mov_wasmsimd(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x8_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint8_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint8_t));

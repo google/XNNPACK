@@ -2686,7 +2686,7 @@ TEST(F32_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-        .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
+          .Test(xnn_f32_rdsum_ukernel_7p7x__avx512f_c64, xnn_init_f32_scaleminmax_scalar_params);
       }
     }
   }

@@ -13020,11 +13020,12 @@ void xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x16_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint16_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint16_t));
+
+  static const int32_t mask_table[15] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
   const size_t tile_height = 16;
   const size_t tile_width = 16;
@@ -13041,7 +13042,7 @@ void xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2(
     const size_t rem = min(block_width - 1, 15);
     const size_t oN_stride = rem * output_stride;
 
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2.mask_table[7 ^ (rem>>1)]));
+    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7 ^ (rem>>1)]));
 
     size_t bh = block_height;
     for (; bh >= 16; bh -= 16) {
@@ -13995,11 +13996,12 @@ void xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x8_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint8_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint8_t));
+
+  static const int32_t mask_table[15] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
   const size_t tile_height = 32;
   const size_t tile_width = 32;
@@ -14016,7 +14018,7 @@ void xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2(
     const size_t rem = min(block_width - 1, 31);
     const size_t oN_stride = rem * output_stride;
 
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2.mask_table[7 ^ (rem>>2)]));
+    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7 ^ (rem>>2)]));
 
     size_t bh = block_height;
     for (; bh >= 32; bh -= 32) {

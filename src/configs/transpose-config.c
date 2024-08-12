@@ -35,7 +35,6 @@ static void init_transpose_config(void) {
       };
       transpose_config.x24 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x24_transposec_ukernel__2x2_neon_tbl64,
-        .init.x24 = (xnn_init_x24_transpose_params_fn) xnn_init_x24_transpose_neon_tbl64_params,
         .tile_size = 32,
       };
       transpose_config.x32 = (struct xnn_transpose_subconfig) {
@@ -89,13 +88,11 @@ static void init_transpose_config(void) {
     };
     transpose_config.x24 = (struct xnn_transpose_subconfig) {
       .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128,
-      .init.x24 = (xnn_init_x24_transpose_params_fn) xnn_init_x24_transpose_neon_tbl128_params,
       .tile_size = 32,
     };
     transpose_config.x32 = (struct xnn_transpose_subconfig) {
       .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__4x4_aarch64_neon_tbl128,
       .tile_size = 32,
-      .init.x32 = (xnn_init_x32_transpose_params_fn) xnn_init_x32_transpose_neon_tbl128_params,
     };
     transpose_config.x64 = (struct xnn_transpose_subconfig) {
       .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x64_transposec_ukernel__2x2_multi_dec_zip_neon,
@@ -137,31 +134,26 @@ static void init_transpose_config(void) {
     if (hardware_config->use_x86_ssse3) {
       transpose_config.x24 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x24_transposec_ukernel__4x4_ssse3,
-        .init.x24 = (xnn_init_x24_transpose_params_fn) xnn_init_x24_transpose_ssse3_params,
         .tile_size = 32,
       };
     }
     if (hardware_config->use_x86_avx) {
       transpose_config.x32 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__8x8_reuse_multi_avx,
-        .init.x32 = (xnn_init_x32_transpose_params_fn) xnn_init_x32_transpose_avx_params,
         .tile_size = 32,
       };
       transpose_config.x64 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x64_transposec_ukernel__4x4_reuse_multi_avx,
-        .init.x64 = (xnn_init_x64_transpose_params_fn) xnn_init_x64_transpose_avx_params,
         .tile_size = 32,
       };
     }
     if (hardware_config->use_x86_avx2) {
       transpose_config.x8 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2,
-        .init.x8 = (xnn_init_x8_transpose_params_fn) xnn_init_x8_transpose_avx2_params,
         .tile_size = 32,
       };
       transpose_config.x16 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2,
-        .init.x16 = (xnn_init_x16_transpose_params_fn) xnn_init_x16_transpose_avx2_params,
         .tile_size = 32,
       };
     }

@@ -2231,8 +2231,6 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c64(
     }
     for (int i = 0; i < channels >> 4; ++i) {
       vacc[i] = _mm512_add_ps(vo[i], vacc[i]);
-      vacc[i] = _mm512_max_ps(vacc[i], vmin);
-      vacc[i] = _mm512_min_ps(vacc[i], vmax);
     }
     for (int i = 0; i < channels >> 4; ++i) {
       _mm512_storeu_ps(output, vacc[i]); output += 16;
@@ -2240,8 +2238,6 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c64(
     if (remainder) {
       const size_t pos = num_full_chunks;
       __m512 vout = vacc[pos];
-      vout = _mm512_max_ps(vout, vmin);
-      vout = _mm512_min_ps(vout, vmax);
       vout = _mm512_maskz_add_ps(vmask, vout,  _mm512_maskz_loadu_ps(vmask, output));
       _mm512_mask_storeu_ps(output, vmask, vout);
     }
@@ -2380,7 +2376,7 @@ void xnn_f32_rsum_ukernel__avx512f_u64_acc4(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -2429,6 +2425,8 @@ void xnn_f32_rsum_ukernel__avx512f_u64_acc4(
   vacc = _mm_add_ps(vacc, _mm_movehl_ps(vacc, vacc));
   vacc = _mm_add_ss(vacc, _mm_movehdup_ps(vacc));
   vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->scalar.scale));
+  vacc = _mm_max_ss(vacc, _mm_load_ss(&params->scalar.min));
+  vacc = _mm_min_ss(vacc, _mm_load_ss(&params->scalar.max));
   *output += _mm_cvtss_f32(vacc);
 }
 

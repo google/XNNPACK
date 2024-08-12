@@ -11,7 +11,6 @@
 #include <gtest/gtest.h>
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
 #include "xnnpack/transpose.h"
 #include "transpose-microkernel-tester.h"
 
@@ -2714,7 +2713,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(X16_TRANSPOSEC__16X16_REUSE_MOV_AVX2_2, bh_16_bw_16) {
     TEST_REQUIRES_X86_AVX2;
     TransposeMicrokernelTester()
@@ -2724,7 +2723,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .block_height(16)
       .element_size(2)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2);
   }
 
   TEST(X16_TRANSPOSEC__16X16_REUSE_MOV_AVX2_2, bh_1_32_bw_1_32) {
@@ -2738,7 +2737,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
           .block_height(i)
           .element_size(2)
           .iterations(1)
-          .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2, xnn_init_x16_transpose_avx2_params);
+          .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2);
       }
     }
   }
@@ -2752,7 +2751,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .block_height(16)
       .element_size(2)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2);
   }
 
   TEST(X16_TRANSPOSEC__16X16_REUSE_MOV_AVX2_2, bh_16_bw_17_32) {
@@ -2765,7 +2764,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
         .block_height(16)
         .element_size(2)
         .iterations(1)
-        .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2, xnn_init_x16_transpose_avx2_params);
+        .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2);
     }
   }
 
@@ -2779,7 +2778,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
         .block_height(32)
         .element_size(2)
         .iterations(1)
-        .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2, xnn_init_x16_transpose_avx2_params);
+        .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2);
     }
   }
 
@@ -2792,7 +2791,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .block_height(32)
       .element_size(2)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2);
   }
 
   TEST(X16_TRANSPOSEC__16X16_REUSE_MOV_AVX2_2, bh_17_32_bw_16) {
@@ -2805,7 +2804,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
         .block_height(i)
         .element_size(2)
         .iterations(1)
-        .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2, xnn_init_x16_transpose_avx2_params);
+        .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2);
     }
   }
 
@@ -2819,7 +2818,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
         .block_height(i)
         .element_size(2)
         .iterations(1)
-        .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2, xnn_init_x16_transpose_avx2_params);
+        .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2);
     }
   }
 
@@ -2834,7 +2833,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
           .block_height(i)
           .element_size(2)
           .iterations(1)
-          .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2, xnn_init_x16_transpose_avx2_params);
+          .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2);
       }
     }
   }
@@ -2848,7 +2847,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .block_height(16)
       .element_size(2)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2);
   }
 
   TEST(X16_TRANSPOSEC__16X16_REUSE_MOV_AVX2_2, bh_16_bw_16_os_32) {
@@ -2860,7 +2859,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .block_height(16)
       .element_size(2)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2);
   }
 
   TEST(X16_TRANSPOSEC__16X16_REUSE_MOV_AVX2_2, bh_16_bw_16_is_32_os_32) {
@@ -2872,7 +2871,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .block_height(16)
       .element_size(2)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2);
   }
 
   TEST(X16_TRANSPOSEC__16X16_REUSE_MOV_AVX2_2, bh_272_bw_304_ies_13) {
@@ -2885,7 +2884,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .element_size(2)
       .input_element_stride(13)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2);
   }
 
   TEST(X16_TRANSPOSEC__16X16_REUSE_MOV_AVX2_2, bh_48_bw_80_oes_13) {
@@ -2898,7 +2897,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .element_size(2)
       .output_element_stride(13)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2);
   }
 
   TEST(X16_TRANSPOSEC__16X16_REUSE_MOV_AVX2_2, bh_112_bw_368_ies_19_oes_15) {
@@ -2912,12 +2911,12 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .input_element_stride(19)
       .output_element_stride(15)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2);
   }
-#endif  // (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(X16_TRANSPOSEC__16X16_REUSE_SWITCH_AVX2_2, bh_16_bw_16) {
     TEST_REQUIRES_X86_AVX2;
     TransposeMicrokernelTester()
@@ -2927,7 +2926,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .block_height(16)
       .element_size(2)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2);
   }
 
   TEST(X16_TRANSPOSEC__16X16_REUSE_SWITCH_AVX2_2, bh_1_32_bw_1_32) {
@@ -2941,7 +2940,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
           .block_height(i)
           .element_size(2)
           .iterations(1)
-          .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2, xnn_init_x16_transpose_avx2_params);
+          .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2);
       }
     }
   }
@@ -2955,7 +2954,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .block_height(16)
       .element_size(2)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2);
   }
 
   TEST(X16_TRANSPOSEC__16X16_REUSE_SWITCH_AVX2_2, bh_16_bw_17_32) {
@@ -2968,7 +2967,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
         .block_height(16)
         .element_size(2)
         .iterations(1)
-        .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2, xnn_init_x16_transpose_avx2_params);
+        .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2);
     }
   }
 
@@ -2982,7 +2981,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
         .block_height(32)
         .element_size(2)
         .iterations(1)
-        .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2, xnn_init_x16_transpose_avx2_params);
+        .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2);
     }
   }
 
@@ -2995,7 +2994,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .block_height(32)
       .element_size(2)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2);
   }
 
   TEST(X16_TRANSPOSEC__16X16_REUSE_SWITCH_AVX2_2, bh_17_32_bw_16) {
@@ -3008,7 +3007,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
         .block_height(i)
         .element_size(2)
         .iterations(1)
-        .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2, xnn_init_x16_transpose_avx2_params);
+        .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2);
     }
   }
 
@@ -3022,7 +3021,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
         .block_height(i)
         .element_size(2)
         .iterations(1)
-        .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2, xnn_init_x16_transpose_avx2_params);
+        .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2);
     }
   }
 
@@ -3037,7 +3036,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
           .block_height(i)
           .element_size(2)
           .iterations(1)
-          .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2, xnn_init_x16_transpose_avx2_params);
+          .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2);
       }
     }
   }
@@ -3051,7 +3050,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .block_height(16)
       .element_size(2)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2);
   }
 
   TEST(X16_TRANSPOSEC__16X16_REUSE_SWITCH_AVX2_2, bh_16_bw_16_os_32) {
@@ -3063,7 +3062,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .block_height(16)
       .element_size(2)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2);
   }
 
   TEST(X16_TRANSPOSEC__16X16_REUSE_SWITCH_AVX2_2, bh_16_bw_16_is_32_os_32) {
@@ -3075,7 +3074,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .block_height(16)
       .element_size(2)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2);
   }
 
   TEST(X16_TRANSPOSEC__16X16_REUSE_SWITCH_AVX2_2, bh_272_bw_304_ies_13) {
@@ -3088,7 +3087,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .element_size(2)
       .input_element_stride(13)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2);
   }
 
   TEST(X16_TRANSPOSEC__16X16_REUSE_SWITCH_AVX2_2, bh_48_bw_80_oes_13) {
@@ -3101,7 +3100,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .element_size(2)
       .output_element_stride(13)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2);
   }
 
   TEST(X16_TRANSPOSEC__16X16_REUSE_SWITCH_AVX2_2, bh_112_bw_368_ies_19_oes_15) {
@@ -3115,9 +3114,9 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .input_element_stride(19)
       .output_element_stride(15)
       .iterations(1)
-      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2, xnn_init_x16_transpose_avx2_params);
+      .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2);
   }
-#endif  // (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
