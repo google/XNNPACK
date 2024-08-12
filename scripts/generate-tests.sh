@@ -232,6 +232,8 @@ tools/generate-vunary-test.py --spec test/f32-vtanh.yaml --output test/f32-vtanh
 tools/generate-vunary-test.py --spec test/s8-vclamp.yaml --output test/s8-vclamp.cc &
 tools/generate-vunary-test.py --spec test/u8-vclamp.yaml --output test/u8-vclamp.cc &
 
+tools/generate-vunary-test.py --spec test/s32-vclz.yaml --output test/s32-vclz.cc &
+
 tools/generate-vunary-test.py --spec test/u64-u32-vsqrtshift.yaml --output test/u64-u32-vsqrtshift.cc &
 
 ### Tests for VLRelu micro-kernels

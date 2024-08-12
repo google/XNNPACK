@@ -2114,6 +2114,15 @@ typedef void (*xnn_u8_lut32norm_ukernel_fn)(
     const uint32_t* t,
     uint8_t* y);
 
+
+// VCLZ: Vector Cound leading Zeros
+
+typedef void (*xnn_s32_vclz_ukernel_fn)(
+    size_t batch,
+    const int32_t* input,
+    int32_t* output,
+    const union xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 // VBINARY: Vector BINARY elementwise
 
 typedef void (*xnn_vbinary_ukernel_fn)(
