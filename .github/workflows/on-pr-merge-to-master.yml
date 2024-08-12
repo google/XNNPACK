@@ -4,6 +4,7 @@ on:
     branches:
       - master
     types: [closed]
+  workflow_dispatch:
 
 jobs:
   build-and-test:

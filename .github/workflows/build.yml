@@ -360,7 +360,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}-${{ github.run_id }}
+          key: ${{ github.job }}-${{ github.sha }}
   bazel-linux-x86_64-gcc-9:
     runs-on: ubuntu-22.04-8core
     timeout-minutes: 60
@@ -402,7 +402,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}-${{ github.run_id }}
+          key: ${{ github.job }}-${{ github.sha }}
   bazel-linux-aarch64:
     runs-on: arm-ubuntu-arm-22.04-4core
     timeout-minutes: 60
@@ -455,4 +455,4 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}-${{ github.run_id }}
+          key: ${{ github.job }}-${{ github.sha }}
