@@ -380,7 +380,7 @@ jobs:
     env:
       CC: gcc-9
       CXX: g++-9
-      BAZEL_DEFINES: --define=xnn_enable_avxvnni=false --define=xnn_enable_avx512amx=false --define=xnn_enable_avx512fp16=false
+      BAZEL_DEFINES: --define=xnn_enable_avxvnni=false --define=xnn_enable_avxvnniint8=false --define=xnn_enable_avx512amx=false --define=xnn_enable_avx512fp16=false
     steps:
       - uses: actions/checkout@v4
       - name: Update apt
