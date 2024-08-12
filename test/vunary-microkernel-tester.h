@@ -174,10 +174,10 @@ class VUnaryMicrokernelTester {
             xnn_init_f32_default_params_fn init_params = nullptr) const;
 
   void Test(xnn_f16_vhswish_ukernel_fn vhswish,
-            xnn_init_f16_hswish_params_fn init_params) const;
+            xnn_init_f16_hswish_params_fn init_params = nullptr) const;
 
   void Test(xnn_f32_vhswish_ukernel_fn vhswish,
-            xnn_init_f32_hswish_params_fn init_params) const;
+            xnn_init_f32_hswish_params_fn init_params = nullptr) const;
 
   void Test(xnn_f16_vlrelu_ukernel_fn vlrelu,
             xnn_init_f16_lrelu_params_fn init_params) const;

@@ -2836,28 +2836,6 @@ union xnn_f16_sqrt_params {
 
 union xnn_f32_sqrt_params {
   char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) float three[4];
-    XNN_ALIGN(16) float half[4];
-  } sse;
-  struct {
-    XNN_ALIGN(32) float three[8];
-    XNN_ALIGN(32) float half[8];
-    int32_t mask_table[14];
-  } avx;
-  struct {
-    XNN_ALIGN(32) float three[8];
-    XNN_ALIGN(32) float neg_half[8];
-    XNN_ALIGN(32) float half[8];
-    int32_t mask_table[14];
-  } fma3;
-  struct {
-    float neg_three;
-    float neg_half;
-    float half;
-  } avx512;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 // Rsqrt (Reciprocal Square Root): used by VRSQRT microkernels.
@@ -2868,26 +2846,6 @@ union xnn_f16_rsqrt_params {
 
 union xnn_f32_rsqrt_params {
   char _;  // Dummy member variable to comply with the C standard.
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) float three[4];
-    XNN_ALIGN(16) float half[4];
-  } sse;
-  struct {
-    XNN_ALIGN(32) float three[8];
-    XNN_ALIGN(32) float half[8];
-    int32_t mask_table[14];
-  } avx;
-  struct {
-    XNN_ALIGN(32) float three[8];
-    XNN_ALIGN(32) float neg_half[8];
-    int32_t mask_table[14];
-  } fma3;
-  struct {
-    float three;
-    float neg_half;
-  } avx512;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 // TanH (Hyperbolic Tangent): used by VTANH microkernels.

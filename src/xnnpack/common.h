@@ -381,6 +381,15 @@
   #define XNN_MULTIPASS_EXTRA_BYTES 16
 #endif
 
+#if XNN_ARCH_ARM || XNN_ARCH_X86
+  // These architectures are slow to broadcast, the compiler tries to move them
+  // into loops, and when it runs out of registers, it will redundantly perform
+  // the broadcast. Marking them volatile prevents these from being moved into
+  // loops, and they spill as broadcasted vectors instead.
+  #define XNN_FORCE_STACK volatile
+#else
+  #define XNN_FORCE_STACK
+#endif
 
 #define XNN_LOG2_SIZEOF_INT8_T   0  // log2(sizeof(int8_t))
 #define XNN_LOG2_SIZEOF_UINT8_T  0  // log2(sizeof(uint8_t))
