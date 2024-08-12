@@ -490,25 +490,31 @@ void VUnaryMicrokernelTester::Test(
   }
 }
 
-void VUnaryMicrokernelTester::Test(
+void VUnaryMicrokernelTester::TestClz(
     xnn_s32_vclz_ukernel_fn vclz,
     xnn_init_s32_default_params_fn init_params) const {
-  ASSERT_FALSE(inplace());
 
   xnnpack::ReplicableRandomDevice rng;
   auto s32rng =
       std::bind(std::uniform_int_distribution<int32_t>(), std::ref(rng));
 
   std::vector<int32_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
-  std::vector<int32_t> y(batch_size());
+  std::vector<int32_t> y(batch_size() +
+                        (inplace() ? XNN_EXTRA_BYTES / sizeof(int32_t) : 0));
   std::vector<int32_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(x.begin(), x.end(), std::ref(s32rng));
     std::fill(y.begin(), y.end(), INT_MAX);
+    if (inplace()) {
+      std::copy(x.cbegin(), x.cend(), y.begin());
+    } else {
+      std::fill(y.begin(), y.end(), INT_MAX);
+    }
+    const int32_t* x_data = inplace() ? y.data() : x.data();
 
     // Compute reference results.
     for (size_t i = 0; i < batch_size(); i++) {
-      y_ref[i] = __builtin_clz(x[i]);
+      y_ref[i] = __builtin_clz(x_data[i]);
     }
     // Prepare parameters.
     xnn_s32_default_params params;
@@ -517,7 +523,7 @@ void VUnaryMicrokernelTester::Test(
     }
 
     // Call optimized micro-kernel.
-    vclz(batch_size() * sizeof(int32_t), x.data(), y.data(), &params);
+    vclz(batch_size() * sizeof(int32_t), x_data, y.data(), &params);
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {

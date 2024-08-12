@@ -237,8 +237,9 @@ class VUnaryMicrokernelTester {
 
   void Test(xnn_u64_u32_vsqrtshift_ukernel_fn vsqrtshift) const;
 
-  void Test(xnn_s32_vclz_ukernel_fn vclz_fn,
-            xnn_init_s32_default_params_fn init_params) const;
+  void TestClz(xnn_s32_vclz_ukernel_fn vclz_fn,
+            xnn_init_s32_default_params_fn init_params = nullptr) const;
+
  private:
   // Generic test function for `fp32` `vunary` kernels.
   //
