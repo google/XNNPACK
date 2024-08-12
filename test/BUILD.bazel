@@ -277,6 +277,7 @@ xnnpack_cc_library(
     "f32_vsqr",
     "f32_vsqrt",
     "f32_vtanh",
+    "s32_clz",
     "s8_vclamp",
     "u8_vclamp",
     "u64_u32_vsqrtshift",
