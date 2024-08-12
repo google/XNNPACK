@@ -350,6 +350,11 @@ jobs:
         run: |
             bazel test --test_output=errors test:all
         working-directory: ${{ github.workspace }}
+      - name: Compress disk cache
+        # Bazel's `--disk-cache` currently grows without bounds, so we remove files
+        # that haven't been accessed in 30+ days manually.
+        if: ${{ inputs.update-caches }}
+        run: find $HOME/.cache/bazel -type f -atime +30 -delete
       - name: Save bazel cache
         if: ${{ inputs.update-caches }}
         uses: actions/cache/save@v4
@@ -387,6 +392,11 @@ jobs:
         run: |
             bazel test ${BAZEL_DEFINES} --test_output=errors test:all
         working-directory: ${{ github.workspace }}
+      - name: Compress disk cache
+        # Bazel's `--disk-cache` currently grows without bounds, so we remove files
+        # that haven't been accessed in 30+ days manually.
+        if: ${{ inputs.update-caches }}
+        run: find $HOME/.cache/bazel -type f -atime +30 -delete
       - name: Save bazel cache
         if: ${{ inputs.update-caches }}
         uses: actions/cache/save@v4
@@ -435,6 +445,11 @@ jobs:
             test:fully_connected_nc_test \
             test:fully_connected_test
         working-directory: ${{ github.workspace }}
+      - name: Compress disk cache
+        # Bazel's `--disk-cache` currently grows without bounds, so we remove files
+        # that haven't been accessed in 30+ days manually.
+        if: ${{ inputs.update-caches }}
+        run: find $HOME/.cache/bazel -type f -atime +30 -delete
       - name: Save bazel cache
         if: ${{ inputs.update-caches }}
         uses: actions/cache/save@v4
