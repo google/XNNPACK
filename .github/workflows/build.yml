@@ -279,7 +279,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ github.job }}
+          key: ${{ github.job }}-${{ matrix.script }}
           max-size: "1G"
           save: ${{ inputs.update-caches }}
       - name: Configure and build
