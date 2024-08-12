@@ -213,7 +213,7 @@
       } \
     } while (0)
 #else
-  #define TEST_REQUIRES_X86_AVXVNNI
+  #define TEST_REQUIRES_X86_AVXVNNIINT8
 #endif
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
