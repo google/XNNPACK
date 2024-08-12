@@ -4275,7 +4275,7 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined(
   }
 }
 
-extern XNN_INTERNAL const int32_t xnn_table_exp2minus_k_over_16[16];
+extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
 
 void xnn_f32_velu_ukernel__neonfma_rr1_lut16_p3_u16(
     size_t batch,

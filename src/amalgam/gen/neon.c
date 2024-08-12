@@ -9591,7 +9591,7 @@ void xnn_f32_vcmul_ukernel__neon_u8(
   }
 }
 
-extern XNN_INTERNAL const int32_t xnn_table_exp2minus_k_over_16[16];
+extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
 
 void xnn_f32_velu_ukernel__neon_rr2_lut16_p3_u8(
     size_t batch,
