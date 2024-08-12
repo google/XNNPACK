@@ -2591,15 +2591,6 @@ union xnn_f16_rnd_params {
 
 union xnn_f32_rnd_params {
   char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) float sign_mask[4];
-    XNN_ALIGN(16) float one[4];
-  } sse2;
-  struct {
-    int32_t mask_table[14];
-  } avx;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 

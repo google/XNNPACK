@@ -1105,14 +1105,12 @@ static void init_f32_rndd_config(void) {
       f32_rndd_config.element_tile = 16;
     } else if (hardware_config->use_x86_avx) {
       f32_rndd_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndd_ukernel__avx_u16;
-      f32_rndd_config.init.f32_rnd = xnn_init_f32_rnd_avx_params;
       f32_rndd_config.element_tile = 16;
     } else if (hardware_config->use_x86_sse4_1) {
       f32_rndd_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndd_ukernel__sse41_u8;
       f32_rndd_config.element_tile = 8;
     } else {
       f32_rndd_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndd_ukernel__sse2_u8;
-      f32_rndd_config.init.f32_rnd = xnn_init_f32_rnd_sse2_params;
       f32_rndd_config.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -1157,14 +1155,12 @@ static void init_f32_rndne_config(void) {
       f32_rndne_config.element_tile = 16;
     } else if (hardware_config->use_x86_avx) {
       f32_rndne_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__avx_u16;
-      f32_rndne_config.init.f32_rnd = xnn_init_f32_rnd_avx_params;
       f32_rndne_config.element_tile = 16;
     } else if (hardware_config->use_x86_sse4_1) {
       f32_rndne_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__sse41_u8;
       f32_rndne_config.element_tile = 8;
     } else {
       f32_rndne_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__sse2_u8;
-      f32_rndne_config.init.f32_rnd = xnn_init_f32_rnd_sse2_params;
       f32_rndne_config.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -1209,14 +1205,12 @@ static void init_f32_rndu_config(void) {
       f32_rndu_config.element_tile = 16;
     } else if (hardware_config->use_x86_avx) {
       f32_rndu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndu_ukernel__avx_u16;
-      f32_rndu_config.init.f32_rnd = xnn_init_f32_rnd_avx_params;
       f32_rndu_config.element_tile = 16;
     } else if (hardware_config->use_x86_sse4_1) {
       f32_rndu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndu_ukernel__sse41_u8;
       f32_rndu_config.element_tile = 8;
     } else {
       f32_rndu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndu_ukernel__sse2_u8;
-      f32_rndu_config.init.f32_rnd = xnn_init_f32_rnd_sse2_params;
       f32_rndu_config.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -1261,14 +1255,12 @@ static void init_f32_rndz_config(void) {
       f32_rndz_config.element_tile = 16;
     } else if (hardware_config->use_x86_avx) {
       f32_rndz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndz_ukernel__avx_u16;
-      f32_rndz_config.init.f32_rnd = xnn_init_f32_rnd_avx_params;
       f32_rndz_config.element_tile = 16;
     } else if (hardware_config->use_x86_sse4_1) {
       f32_rndz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndz_ukernel__sse41_u8;
       f32_rndz_config.element_tile = 8;
     } else {
       f32_rndz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndz_ukernel__sse2_u8;
-      f32_rndz_config.init.f32_rnd = xnn_init_f32_rnd_sse2_params;
       f32_rndz_config.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
