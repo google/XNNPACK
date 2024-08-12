@@ -1,9 +1,13 @@
 name: Build and update caches
 on:
   pull_request:
-    branches: 
+    branches:
       - master
     types: [closed]
+
+permissions:
+  # Needed to avoid "Unable to reserve cache" issues for bazel jobs.
+  actions: write
 
 jobs:
   build-and-test:
