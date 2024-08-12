@@ -405,6 +405,9 @@ xnnpack_cc_library(
         ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
         "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
     }) + select({
+        ":avxvnniint8_enabled": ["XNN_ENABLE_AVXVNNIINT8=1"],
+        "//conditions:default": ["XNN_ENABLE_AVXVNNIINT8=0"],
+    }) + select({
         ":avx256skx_enabled": ["XNN_ENABLE_AVX256SKX=1"],
         "//conditions:default": ["XNN_ENABLE_AVX256SKX=0"],
     }) + select({
@@ -497,6 +500,7 @@ xnnpack_cc_library(
         ":enable_avx512fp16",
         ":enable_avx512vnnigfni",
         ":enable_avxvnni",
+        ":enable_avxvnniint8",
         ":enable_dwconv_multipass",
         ":enable_gemm_m_specialization",
         ":enable_hvx",
@@ -1517,6 +1521,9 @@ xnnpack_aggregate_library(
         ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
         "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
     }) + select({
+        ":avxvnniint8_enabled": ["XNN_ENABLE_AVXVNNIINT8=1"],
+        "//conditions:default": ["XNN_ENABLE_AVXVNNIINT8=0"],
+    }) + select({
         ":avx256skx_enabled": ["XNN_ENABLE_AVX256SKX=1"],
         "//conditions:default": ["XNN_ENABLE_AVX256SKX=0"],
     }) + select({
@@ -1553,7 +1560,10 @@ xnnpack_aggregate_library(
         ":riscv_fp16_vector_enabled": [":rvvfp16arith_prod_microkernels"],
         "//conditions:default": [],
     }) + select({
-        ":avxvnni_enabled": [":avxvnni_prod_microkernels", ":avxvnniint8_prod_microkernels"],
+        ":avxvnni_enabled": [":avxvnni_prod_microkernels"],
+        "//conditions:default": [],
+    }) + select({
+        ":avxvnniint8_enabled": [":avxvnniint8_prod_microkernels"],
         "//conditions:default": [],
     }) + select({
         ":avx256skx_enabled": [":avx256skx_prod_microkernels"],
@@ -1652,6 +1662,9 @@ xnnpack_aggregate_library(
     }) + select({
         ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
         "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
+    }) + select({
+        ":avxvnniint8_enabled": ["XNN_ENABLE_AVXVNNIINT8=1"],
+        "//conditions:default": ["XNN_ENABLE_AVXVNNIINT8=0"],
     }) + select({
         ":avx256skx_enabled": ["XNN_ENABLE_AVX256SKX=1"],
         "//conditions:default": ["XNN_ENABLE_AVX256SKX=0"],
@@ -1806,6 +1819,15 @@ cc_library(
     defines = select({
         ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
         "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
+    }),
+    visibility = xnnpack_visibility(),
+)
+
+cc_library(
+    name = "enable_avxvnniint8",
+    defines = select({
+        ":avxvnniint8_enabled": ["XNN_ENABLE_AVXVNNIINT8=1"],
+        "//conditions:default": ["XNN_ENABLE_AVXVNNIINT8=0"],
     }),
     visibility = xnnpack_visibility(),
 )
@@ -2352,6 +2374,18 @@ config_setting(
     define_values = {"xnn_enable_avxvnni": "false"},
 )
 
+# Enables usage of Intel AVX-VNNI-INT8 (integer dot product) kernels.
+config_setting(
+    name = "xnn_enable_avxvnniint8_explicit_true",
+    define_values = {"xnn_enable_avxvnniint8": "true"},
+)
+
+# Disables usage of Intel AVX-VNNI-INT8 (integer dot product) kernels.
+config_setting(
+    name = "xnn_enable_avxvnniint8_explicit_false",
+    define_values = {"xnn_enable_avxvnniint8": "false"},
+)
+
 # Enables usage of Intel AVX256SKX (evex256) kernels.
 config_setting(
     name = "xnn_enable_avx256skx_explicit_true",
@@ -2735,6 +2769,22 @@ alias(
         ":xnn_enable_avxvnni_explicit_true": ":xnn_enable_avxvnni_explicit_true",
         ":xnn_enable_avxvnni_explicit_false": ":xnn_enable_avxvnni_explicit_true",
         "//conditions:default": ":avxvnni_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avxvnniint8_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avxvnniint8_enabled",
+    actual = select({
+        ":xnn_enable_avxvnniint8_explicit_true": ":xnn_enable_avxvnniint8_explicit_true",
+        ":xnn_enable_avxvnniint8_explicit_false": ":xnn_enable_avxvnniint8_explicit_true",
+        "//conditions:default": ":avxvnniint8_enabled_by_default",
     }),
 )
 

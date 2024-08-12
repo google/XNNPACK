@@ -3261,7 +3261,7 @@ static void init_qs8_qc8w_gemm_config(void) {
       qs8_qc8w_gemm_config.mr = 7;
       qs8_qc8w_gemm_config.nr = 16;
       qs8_qc8w_gemm_config.log2_kr = 3;
-    #if XNN_ENABLE_AVXVNNI
+    #if XNN_ENABLE_AVXVNNIINT8
       } else if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avxvnniint8) {
         qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avxvnniint8_prfm);
         qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(5)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_5x8c8__avxvnniint8_prfm);
@@ -3278,6 +3278,8 @@ static void init_qs8_qc8w_gemm_config(void) {
         qs8_qc8w_gemm_config.mr = 5;
         qs8_qc8w_gemm_config.nr = 8;
         qs8_qc8w_gemm_config.log2_kr = 3;
+    #endif
+    #if XNN_ENABLE_AVXVNNI
       } else if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avxvnni) {
         qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avxvnni_prfm);
         qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(5)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_5x8c8__avxvnni_prfm);

@@ -50,7 +50,7 @@ _ISA_TO_MACRO_MAP = {
   "rvv": "XNN_ENABLE_RISCV_VECTOR",
   "rvvfp16arith": "XNN_ENABLE_RISCV_FP16_VECTOR",
   "avxvnni": "XNN_ENABLE_AVXVNNI",
-  "avxvnniint8": "XNN_ENABLE_AVXVNNI",
+  "avxvnniint8": "XNN_ENABLE_AVXVNNIINT8",
   "avx256skx": "XNN_ENABLE_AVX256SKX",
   "avx256vnni": "XNN_ENABLE_AVX256VNNI",
   "avx256vnnigfni": "XNN_ENABLE_AVX256VNNIGFNI",
