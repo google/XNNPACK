@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-gemm/MRxNRv-rvv.c.in
+//   Template: src/qs8-gemm/rvv.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 SiFive, Inc.

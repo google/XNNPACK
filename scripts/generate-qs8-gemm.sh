@@ -157,21 +157,23 @@ tools/xngen src/qs8-gemm/c4-armsimd32.c.in -D MR=2 -D NR=1 -D REQUANTIZATION=FP3
 tools/xngen src/qs8-gemm/c4-armsimd32.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-2x2c4-minmax-fp32-armsimd32.c &
 
 ################################ RISC-V Vector ################################
-tools/xngen src/qs8-gemm/MRxNRv-rvv.c.in -D MR=1 -D NR=m4 -D  -D DATATYPE=QC4 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x4v-minmax-rvv.c &
-tools/xngen src/qs8-gemm/MRxNRv-rvv.c.in -D MR=2 -D NR=m4 -D  -D DATATYPE=QC4 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x4v-minmax-rvv.c &
-tools/xngen src/qs8-gemm/MRxNRv-rvv.c.in -D MR=3 -D NR=m4 -D  -D DATATYPE=QC4 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x4v-minmax-rvv.c &
-tools/xngen src/qs8-gemm/MRxNRv-rvv.c.in -D MR=4 -D NR=m4 -D  -D DATATYPE=QC4 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x4v-minmax-rvv.c &
-tools/xngen src/qs8-gemm/MRxNRv-rvv.c.in -D MR=5 -D NR=m4 -D  -D DATATYPE=QC4 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x4v-minmax-rvv.c &
-tools/xngen src/qs8-gemm/MRxNRv-rvv.c.in -D MR=6 -D NR=m4 -D  -D DATATYPE=QC4 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-6x4v-minmax-rvv.c &
-tools/xngen src/qs8-gemm/MRxNRv-rvv.c.in -D MR=7 -D NR=m4 -D  -D DATATYPE=QC4 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-7x4v-minmax-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=1 -D NR=m4 -D  -D DATATYPE=QC4 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x4v-minmax-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=2 -D NR=m4 -D  -D DATATYPE=QC4 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x4v-minmax-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=3 -D NR=m4 -D  -D DATATYPE=QC4 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x4v-minmax-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=4 -D NR=m4 -D  -D DATATYPE=QC4 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x4v-minmax-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=5 -D NR=m4 -D  -D DATATYPE=QC4 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x4v-minmax-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=6 -D NR=m4 -D  -D DATATYPE=QC4 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-6x4v-minmax-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=7 -D NR=m4 -D  -D DATATYPE=QC4 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-7x4v-minmax-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=8 -D NR=m4 -D  -D DATATYPE=QC4 -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-8x4v-minmax-rvv.c &
 
-tools/xngen src/qs8-gemm/MRxNRv-rvv.c.in -D MR=1 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x4v-minmax-rvv.c &
-tools/xngen src/qs8-gemm/MRxNRv-rvv.c.in -D MR=2 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x4v-minmax-rvv.c &
-tools/xngen src/qs8-gemm/MRxNRv-rvv.c.in -D MR=3 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x4v-minmax-rvv.c &
-tools/xngen src/qs8-gemm/MRxNRv-rvv.c.in -D MR=4 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x4v-minmax-rvv.c &
-tools/xngen src/qs8-gemm/MRxNRv-rvv.c.in -D MR=5 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x4v-minmax-rvv.c &
-tools/xngen src/qs8-gemm/MRxNRv-rvv.c.in -D MR=6 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x4v-minmax-rvv.c &
-tools/xngen src/qs8-gemm/MRxNRv-rvv.c.in -D MR=7 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x4v-minmax-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=1 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x4v-minmax-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=2 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x4v-minmax-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=3 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x4v-minmax-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=4 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x4v-minmax-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=5 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x4v-minmax-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=6 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x4v-minmax-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=7 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x4v-minmax-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=8 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x4v-minmax-rvv.c &
 ################################## WAsm SIMD ##################################
 ### C2 micro-kernels
 tools/xngen src/qs8-gemm/MRx4c2-wasmsimd-dot16x2.c.in -D MR=1 -D VARIANT=LD64     -D REQUANTIZATION=         -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x4c2-minmax-wasmsimd-dot16x2-ld64.c &
