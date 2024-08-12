@@ -302,7 +302,7 @@ DECLARE_U8_REDUCE_UKERNEL_FUNCTION(xnn_u8_rmax_ukernel__sse2_u16)
       size_t batch,                                \
       const float* input,                          \
       float* output,                               \
-      const union xnn_f32_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const union xnn_f32_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__avx_u8)
 DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__avx_u16_acc2)

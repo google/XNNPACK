@@ -4026,7 +4026,7 @@ void xnn_f32_rsum_ukernel__avx_u32_acc4(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -4069,6 +4069,8 @@ void xnn_f32_rsum_ukernel__avx_u32_acc4(
   vacc = _mm_add_ps(vacc, _mm_movehl_ps(vacc, vacc));
   vacc = _mm_add_ss(vacc, _mm_movehdup_ps(vacc));
   vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->avx.scale));
+  vacc = _mm_max_ss(vacc, _mm_load_ss(&params->avx.min));
+  vacc = _mm_min_ss(vacc, _mm_load_ss(&params->avx.max));
   *output += _mm_cvtss_f32(vacc);
 }
 
@@ -16226,9 +16228,10 @@ void xnn_x32_transposec_ukernel__8x8_reuse_multi_avx(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
+  static const int32_t mask_table[15] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
   assert(block_width == 1 || output_stride >= block_height * sizeof(float));
   assert(block_height == 1 || input_stride >= block_width * sizeof(float));
 
@@ -16252,7 +16255,7 @@ void xnn_x32_transposec_ukernel__8x8_reuse_multi_avx(
     float* o7 = (float*) (block_width < 8 ? o0 : (float*) ((uintptr_t) o6 + output_stride));
     const size_t rem = min(block_width - 1, 7);
 
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[rem ^ 7]));
+    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[rem ^ 7]));
 
     size_t bh = block_height;
     for (; bh >= 8; bh -= 8) {
@@ -16462,9 +16465,10 @@ void xnn_x64_transposec_ukernel__4x4_reuse_multi_avx(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x64_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
+  static const int64_t mask_table[7] = {-1, -1, -1, -1, 0, 0, 0};
+
   assert(block_width == 1 || output_stride >= block_height * sizeof(double));
   assert(block_height == 1 || input_stride >= block_width * sizeof(double));
 
@@ -16484,7 +16488,7 @@ void xnn_x64_transposec_ukernel__4x4_reuse_multi_avx(
     double* o3 = (double*) (block_width < 4 ? o0 : (double*) ((uintptr_t) o2 + output_stride));
     const size_t rem = min(block_width - 1, 3);
 
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[rem ^ 3]));
+    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[rem ^ 3]));
 
     size_t bh = block_height;
     for (; bh >= 4; bh -= 4) {

@@ -23,9 +23,10 @@ void xnn_x64_transposec_ukernel__4x4_multi_multi_avx(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x64_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
+  static const int64_t mask_table[7] = {-1, -1, -1, -1, 0, 0, 0};
+
   assert(block_width == 1 || output_stride >= block_height * sizeof(double));
   assert(block_height == 1 || input_stride >= block_width * sizeof(double));
 
@@ -49,7 +50,7 @@ void xnn_x64_transposec_ukernel__4x4_multi_multi_avx(
     double* o3 = (double*) (block_width < 4 ? o0 : (double*) ((uintptr_t) o2 + output_stride));
     const size_t rem = min(block_width - 1, 3);
 
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[rem ^ 3]));
+    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[rem ^ 3]));
 
     size_t bh = block_height;
     for (; bh >= 4; bh -= 4) {

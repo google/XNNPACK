@@ -19,7 +19,7 @@ void xnn_f32_rsum_ukernel__wasmsimd_u16_acc2(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -59,6 +59,10 @@ void xnn_f32_rsum_ukernel__wasmsimd_u16_acc2(
     vacc0 = wasm_f32x4_add(vacc0, vt);
   }
   const v128_t vscale = wasm_v128_load32_zero(&params->scalar.scale);
+  const v128_t vmin = wasm_v128_load32_zero(&params->scalar.min);
+  const v128_t vmax = wasm_v128_load32_zero(&params->scalar.max);
   vacc0 = wasm_f32x4_mul(vacc0, vscale);
+  vacc0 = wasm_f32x4_max(vacc0, vmin);
+  vacc0 = wasm_f32x4_min(vacc0, vmax);
   *output += wasm_f32x4_extract_lane(vacc0, 0);
 }

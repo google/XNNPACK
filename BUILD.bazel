@@ -769,6 +769,7 @@ xnnpack_microkernel_cc_library(
     srcs_prod = ["src/amalgam/gen/scalar.c"],
     srcs_test = ALL_SCALAR_MICROKERNEL_SRCS,
     deps = MICROKERNEL_DEPS + [
+        ":config_hdrs",
         "@FP16",
         "@FXdiv",
     ],
@@ -858,6 +859,7 @@ xnnpack_microkernel_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
+        "@KleidiAI//kai/ukernels/matmul:lhs_quant_pack_qai8dxp_f32",
     ]),
 )
 
@@ -980,6 +982,7 @@ xnnpack_microkernel_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
+        "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp1x8_qsi4cxp8x8_1x8x32_neon_dotprod",
     ]),
 )
 
@@ -1003,6 +1006,7 @@ xnnpack_microkernel_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
+        "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp8x8_8x8x32_neon_i8mm",
     ]),
 )
 
@@ -1789,10 +1793,15 @@ xnnpack_cc_library(
         ":config_hdrs",
         ":logging",
         ":math",
+        ":microparams",
+        ":params",
         ":unaligned",
+        ":xnnpack_h",
         "@FP16",
     ] + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
+        "@KleidiAI//kai/ukernels/matmul:rhs_pack_kxn_qsi4cxp_qsu4cxs1s0",
+        "@KleidiAI//kai/ukernels/matmul:rhs_pack_nxk_qsi4cxp_qsu4cxs1s0",
     ]),
 )
 
@@ -2010,6 +2019,7 @@ xnnpack_cc_library(
     ],
     deps = [
         ":allocator",
+        ":logging",
         ":microkernel_configs",
         ":microparams",
         ":params",
@@ -2043,10 +2053,12 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
-        ":cache",
+        ":allocator",
         ":common",
+        ":logging",
         ":math",
         ":operator_h",
+        ":params",
         ":xnnpack_h",
     ],
 )
@@ -2079,6 +2091,7 @@ xnnpack_cc_library(
         ":microkernel_configs",
         ":microkernel_type",
         ":microkernel_utils",
+        ":microkernels_h",
         ":microparams_init",
         ":normalization",
         ":operator_type",
@@ -2086,6 +2099,7 @@ xnnpack_cc_library(
         ":packing",
         ":params",
         ":post_operation",
+        ":quantization",
         ":xnnpack_h",
         "@FP16",
         "@pthreadpool",
@@ -2229,6 +2243,9 @@ xnnpack_cc_library(
         ":allocator",
         ":build_identifier",
         ":common",
+        ":config_hdrs",
+        ":hardware_config",
+        ":init_once",
         ":logging",
         ":math",
         ":microkernels_h",
@@ -2237,6 +2254,7 @@ xnnpack_cc_library(
         ":operators",
         ":params",
         ":subgraph",
+        "@pthreadpool",
     ],
 )
 
@@ -2262,15 +2280,11 @@ xnnpack_cc_library(
         ":allocator",
         ":build_identifier",
         ":common",
+        ":config_hdrs",
+        ":init_once",
         ":logging",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":microparams_init",
-        ":operators",
         ":params",
-        ":prod_microkernels",
-        ":subgraph",
+        "@pthreadpool",
     ],
 )
 
@@ -2296,14 +2310,11 @@ xnnpack_cc_library(
         ":allocator",
         ":build_identifier",
         ":common",
+        ":config_hdrs",
+        ":init_once",
         ":logging",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":microparams_init",
-        ":operators",
         ":params",
-        ":prod_microkernels",
+        "@pthreadpool",
     ],
 )
 
@@ -2911,13 +2922,11 @@ selects.config_setting_group(
     ],
 )
 
-# Temporary disable vectors on Android
 alias(
     name = "riscv_vector_enabled",
     actual = select({
         ":xnn_enable_riscv_vector_explicit_true": ":xnn_enable_riscv_vector_explicit_true",
         ":xnn_enable_riscv_vector_explicit_false": ":xnn_enable_riscv_vector_explicit_true",
-        "//build_config:android": ":xnn_enable_riscv_vector_explicit_false",
         "//conditions:default": ":riscv_vector_enabled_by_default",
     }),
 )

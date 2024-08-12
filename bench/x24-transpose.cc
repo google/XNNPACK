@@ -23,7 +23,6 @@
 void transpose(
     benchmark::State& state,
     xnn_x24_transposec_ukernel_fn transpose,
-    xnn_init_x24_transpose_params_fn init_params = nullptr,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check != nullptr && !isa_check(state)) {
@@ -41,13 +40,9 @@ void transpose(
   std::iota(x.begin(), x.end(), 0);
   std::fill(y.begin(), y.end(), 0);
 
-  xnn_x24_transpose_params params;
-  if (init_params != nullptr) {
-    init_params(&params);
-  }
   for (auto _ : state) {
     transpose(x.data(), y.data(), tile_wbytes, tile_hbytes, width,
-              height, &params);
+              height);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -83,20 +78,18 @@ BENCHMARK_CAPTURE(transpose, 4x4_scalar, xnn_x24_transposec_ukernel__4x4_scalar)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(transpose, 2x2_neon_tbl64, xnn_x24_transposec_ukernel__2x2_neon_tbl64,
-                    xnn_init_x24_transpose_neon_tbl64_params)
+  BENCHMARK_CAPTURE(transpose, 2x2_neon_tbl64, xnn_x24_transposec_ukernel__2x2_neon_tbl64)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(transpose, 4x4_neon_tbl128, xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128,
-                    xnn_init_x24_transpose_neon_tbl128_params)
+  BENCHMARK_CAPTURE(transpose, 4x4_neon_tbl128, xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(transpose, 4x4_ssse3, xnn_x24_transposec_ukernel__4x4_ssse3,
-                    xnn_init_x24_transpose_ssse3_params, benchmark::utils::CheckSSSE3)
+                    benchmark::utils::CheckSSSE3)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 

@@ -9,7 +9,10 @@
 #include <assert.h>
 
 #include <emmintrin.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/reduce.h"
 
 

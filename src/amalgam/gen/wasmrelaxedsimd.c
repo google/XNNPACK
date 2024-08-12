@@ -12339,12 +12339,12 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4c16__wasmsdot(
     vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vinput_scale0);
 
     const v128_t vfilter_output_scale0123 = wasm_v128_load(w);
-    vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vfilter_output_scale0123);
     w = (const float*) w + 4;
+    vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vfilter_output_scale0123);
 
     const v128_t vbias0123 = wasm_v128_load(w);
-    vacc0x0123 = wasm_f32x4_add(vacc0x0123, vbias0123);
     w = (const float*) w + 4;
+    vacc0x0123 = wasm_f32x4_add(vacc0x0123, vbias0123);
 
     const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
     vacc0x0123 = wasm_f32x4_pmax(vacc0x0123, vmin);
@@ -12515,18 +12515,18 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4c16__wasmsdot(
     vacc3x0123 = wasm_f32x4_mul(vacc3x0123, vinput_scale3);
 
     const v128_t vfilter_output_scale0123 = wasm_v128_load(w);
+    w = (const float*) w + 4;
     vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vfilter_output_scale0123);
     vacc1x0123 = wasm_f32x4_mul(vacc1x0123, vfilter_output_scale0123);
     vacc2x0123 = wasm_f32x4_mul(vacc2x0123, vfilter_output_scale0123);
     vacc3x0123 = wasm_f32x4_mul(vacc3x0123, vfilter_output_scale0123);
-    w = (const float*) w + 4;
 
     const v128_t vbias0123 = wasm_v128_load(w);
+    w = (const float*) w + 4;
     vacc0x0123 = wasm_f32x4_add(vacc0x0123, vbias0123);
     vacc1x0123 = wasm_f32x4_add(vacc1x0123, vbias0123);
     vacc2x0123 = wasm_f32x4_add(vacc2x0123, vbias0123);
     vacc3x0123 = wasm_f32x4_add(vacc3x0123, vbias0123);
-    w = (const float*) w + 4;
 
     const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
     vacc0x0123 = wasm_f32x4_pmax(vacc0x0123, vmin);

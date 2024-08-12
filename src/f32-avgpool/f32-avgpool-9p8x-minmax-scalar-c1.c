@@ -5,8 +5,13 @@
 
 #include <assert.h>
 
+#include <stddef.h>
+#include <stdint.h>
+
 #include "xnnpack/avgpool.h"
+#include "xnnpack/common.h"
 #include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
 
 
 void xnn_f32_avgpool_minmax_ukernel_9p8x__scalar_c1(
