@@ -867,6 +867,10 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 1
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_8x4v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 1
 
 # WAsm SIMD
 - name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4c2__wasmsimd_dot16x2_ld64
