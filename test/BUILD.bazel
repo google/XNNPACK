@@ -1545,6 +1545,7 @@ xnnpack_binary(
     "bankers_rounding_nc",
     "ceiling_nc",
     "clamp_nc",
+    "clz_nc",
     "elu_nc",
     "exp_nc",
     "floor_nc",

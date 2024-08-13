@@ -41,6 +41,7 @@ enum xnn_operator_type {
   xnn_operator_type_clamp_nc_f32,
   xnn_operator_type_clamp_nc_s8,
   xnn_operator_type_clamp_nc_u8,
+  xnn_operator_type_clz_nc_s32,
   xnn_operator_type_constant_pad_nd_x8,
   xnn_operator_type_constant_pad_nd_x16,
   xnn_operator_type_constant_pad_nd_x32,

@@ -2816,6 +2816,9 @@ typedef size_t (*xnn_init_u8_minmax_params_fn)(
 typedef size_t (*xnn_init_f16_neg_params_fn)(
   union xnn_f16_neg_params params[XNN_MIN_ELEMENTS(1)]);
 
+typedef size_t (*xnn_init_s32_clz_params_fn)(
+  union xnn_s32_default_params params[XNN_MIN_ELEMENTS(1)]);
+
 typedef size_t (*xnn_init_f16_rnd_params_fn)(
   union xnn_f16_rnd_params params[XNN_MIN_ELEMENTS(1)]);
 

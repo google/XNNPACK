@@ -53,6 +53,8 @@
   string: "Clamp (NC, S8)"
 - name: xnn_operator_type_clamp_nc_u8
   string: "Clamp (NC, U8)"
+- name: xnn_operator_type_clz_nc_s32
+  string: "Count Leading Zeros (NC, S32)"
 - name: xnn_operator_type_constant_pad_nd_x8
   string: "Constant Pad (ND, X8)"
 - name: xnn_operator_type_constant_pad_nd_x16
