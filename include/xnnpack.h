@@ -2811,6 +2811,23 @@ enum xnn_status xnn_setup_clamp_nc_u8(
   const uint8_t* input,
   uint8_t* output);
 
+enum xnn_status xnn_create_clz_nc_s32(
+  uint32_t flags,
+  xnn_operator_t* clz_op_out);
+
+enum xnn_status xnn_reshape_clz_nc_s32(
+  xnn_operator_t clz_op,
+  size_t batch_size,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_clz_nc_s32(
+  xnn_operator_t clz_op,
+  const int32_t* input,
+  int32_t* output);
+
 enum xnn_status xnn_create_constant_pad_nd_x8(
   const void* padding_value,
   uint32_t flags,

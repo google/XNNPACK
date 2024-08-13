@@ -1,0 +1,42 @@
+// Copyright (c) Facebook, Inc. and its affiliates.
+// All rights reserved.
+//
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <limits>
+
+#include <gtest/gtest.h>
+#include "xnnpack.h"
+#include "unary-operator-tester.h"
+#include "pthreadpool.h"
+
+namespace xnnpack {
+
+
+class ClzOperatorTester : public UnaryOperatorTester {
+ public:
+  ClzOperatorTester() : UnaryOperatorTester() {
+    range_s32_ = {-INT_MIN, INT_MAX};
+  }
+
+ protected:
+  // Computes the expected result for some input `x`. Subclasses should override
+  // this function with their own reference function.
+  float RefFunc(float x) const override {
+    return 0;
+  }
+  int32_t RefFunc(int32_t x) const override { return __builtin_clz(x); }
+
+  CREATE_OP_OVERRIDES_S32(clz);
+};
+
+CREATE_UNARY_INT32_TESTS(S32, ClzOperatorTester);
+
+};  // namespace xnnpack

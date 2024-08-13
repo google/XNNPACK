@@ -33404,6 +33404,47 @@ void xnn_f32_vtanh_ukernel__scalar_rational_9_6_div_u1(
   }
 }
 
+void xnn_s32_vclz_ukernel__scalar_u4(
+    size_t batch,
+    const int32_t* input,
+    int32_t* output,
+    const union xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int32_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_s32 == 1);
+
+  for (; batch >= 4 * sizeof(int32_t); batch -= 4 * sizeof(int32_t)) {
+    xnn_simd_s32_t vin_0 = xnn_loadu_s32(input);
+    xnn_simd_s32_t vin_1 = xnn_loadu_s32(input + 1 * xnn_simd_size_s32);
+    xnn_simd_s32_t vin_2 = xnn_loadu_s32(input + 2 * xnn_simd_size_s32);
+    xnn_simd_s32_t vin_3 = xnn_loadu_s32(input + 3 * xnn_simd_size_s32);
+    input += 4;
+
+    xnn_simd_s32_t vy_0 = xnn_clz_s32(vin_0);
+    xnn_simd_s32_t vy_1 = xnn_clz_s32(vin_1);
+    xnn_simd_s32_t vy_2 = xnn_clz_s32(vin_2);
+    xnn_simd_s32_t vy_3 = xnn_clz_s32(vin_3);
+
+    xnn_storeu_s32(output, vy_0);
+    xnn_storeu_s32(output + 1 * xnn_simd_size_s32, vy_1);
+    xnn_storeu_s32(output + 2 * xnn_simd_size_s32, vy_2);
+    xnn_storeu_s32(output + 3 * xnn_simd_size_s32, vy_3);
+    output += 4;
+  }
+  for (; batch >= xnn_simd_bytes_s32; batch -= xnn_simd_bytes_s32) {
+    xnn_simd_s32_t vin = xnn_loadu_s32(input);
+    input += xnn_simd_size_s32;
+
+    xnn_simd_s32_t vy = xnn_clz_s32(vin);
+
+    xnn_storeu_s32(output, vy);
+    output += xnn_simd_size_s32;
+  }
+}
+
 void xnn_s32_vmul_ukernel__scalar_u2(
     size_t batch,
     const int32_t* input_a,

@@ -1440,6 +1440,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(clamp-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME clamp-nc-test COMMAND clamp-nc-test)
 
+    ADD_EXECUTABLE(clz-nc-test test/clz-nc.cc)
+    TARGET_INCLUDE_DIRECTORIES(clz-nc-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(clz-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME clz-nc-test COMMAND clz-nc-test)
+
     ADD_EXECUTABLE(constant-pad-nd-test test/constant-pad-nd.cc)
     TARGET_INCLUDE_DIRECTORIES(constant-pad-nd-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(constant-pad-nd-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)

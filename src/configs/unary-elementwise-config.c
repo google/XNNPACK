@@ -67,6 +67,7 @@ static struct xnn_unary_elementwise_config qu8_cvt_config = {0};
 static struct xnn_unary_elementwise_config qu8_lrelu_config = {0};
 static struct xnn_unary_elementwise_config qu8_to_f32_cvt_config = {0};
 static struct xnn_unary_elementwise_config s8_clamp_config = {0};
+static struct xnn_unary_elementwise_config s32_clz_config = {0};
 static struct xnn_unary_elementwise_config u8_clamp_config = {0};
 static struct xnn_unary_elementwise_config xx_copy_config = {0};
 
@@ -120,6 +121,7 @@ XNN_INIT_ONCE_GUARD(qu8_cvt);
 XNN_INIT_ONCE_GUARD(qu8_lrelu);
 XNN_INIT_ONCE_GUARD(qu8_to_f32_cvt);
 XNN_INIT_ONCE_GUARD(s8_clamp);
+XNN_INIT_ONCE_GUARD(s32_clz);
 XNN_INIT_ONCE_GUARD(u8_clamp);
 XNN_INIT_ONCE_GUARD(xx_copy);
 
@@ -2268,6 +2270,39 @@ static void init_s8_clamp_config(void) {
   #endif
 }
 
+static void init_s32_clz_config(void) {
+  #if XNN_ARCH_ARM
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_arm_neon) {
+      s32_clz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_vclz_ukernel__neon_u8;
+      s32_clz_config.element_tile = 8;
+    } else if (!XNN_PLATFORM_MOBILE) {
+      s32_clz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_vclz_ukernel__scalar_u4;
+      s32_clz_config.element_tile = 4;
+    }
+  #elif XNN_ARCH_ARM64
+    s32_clz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_vclz_ukernel__neon_u8;
+    s32_clz_config.element_tile = 8;
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      s32_clz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_vclz_ukernel__avx512f_u16;
+      s32_clz_config.element_tile = 16;
+    } else if (hardware_config->use_x86_avx) {
+      s32_clz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_vclz_ukernel__avx_u16;
+      s32_clz_config.element_tile = 16;
+    } else {
+      s32_clz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_vclz_ukernel__sse2_u8;
+      s32_clz_config.element_tile = 8;
+    }
+  #else
+    s32_clz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_vclz_ukernel__scalar_u4;
+    s32_clz_config.element_tile = 4;
+  #endif
+}
+
 static void init_u8_clamp_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -2774,6 +2809,15 @@ const struct xnn_unary_elementwise_config* xnn_init_s8_clamp_config() {
   }
   XNN_INIT_ONCE(s8_clamp);
   return &s8_clamp_config;
+}
+
+const struct xnn_unary_elementwise_config* xnn_init_s32_clz_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(s32_clz);
+  return &s32_clz_config;
 }
 
 const struct xnn_unary_elementwise_config* xnn_init_u8_clamp_config() {
