@@ -57,19 +57,19 @@ void xnn_f16_f32_vcvt_ukernel__scalar_u1(
     size_t batch,
     const void* input,
     float* output,
-    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const void* params)
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const uint32_t vsign_mask = params->scalar.sign_mask;
-  const uint32_t vexp_offset = params->scalar.exp_offset;
-  const float vexp_scale = params->scalar.exp_scale;
-  const uint32_t vmagic_mask = params->scalar.magic_mask;
-  const float vmagic_bias = params->scalar.magic_bias;
-  const uint32_t vdenorm_cutoff = params->scalar.denorm_cutoff;
+  const uint32_t vsign_mask = 0x80000000;
+  const uint32_t vexp_offset = 0x70000000;
+  const float vexp_scale = 0x1.0p-112f;
+  const uint32_t vmagic_mask = 0x3F000000;
+  const float vmagic_bias = 0.5f;
+  const uint32_t vdenorm_cutoff = 0x08000000;
 
   const uint16_t* i = (const uint16_t*) input;
   uint32_t* o = (uint32_t*) output;
@@ -93,19 +93,19 @@ void xnn_f16_f32_vcvt_ukernel__scalar_u4(
     size_t batch,
     const void* input,
     float* output,
-    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const void* params)
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const uint32_t vsign_mask = params->scalar.sign_mask;
-  const uint32_t vexp_offset = params->scalar.exp_offset;
-  const float vexp_scale = params->scalar.exp_scale;
-  const uint32_t vmagic_mask = params->scalar.magic_mask;
-  const float vmagic_bias = params->scalar.magic_bias;
-  const uint32_t vdenorm_cutoff = params->scalar.denorm_cutoff;
+  const uint32_t vsign_mask = 0x80000000;
+  const uint32_t vexp_offset = 0x70000000;
+  const float vexp_scale = 0x1.0p-112f;
+  const uint32_t vmagic_mask = 0x3F000000;
+  const float vmagic_bias = 0.5f;
+  const uint32_t vdenorm_cutoff = 0x08000000;
 
   const uint16_t* i = (const uint16_t*) input;
   uint32_t* o = (uint32_t*) output;
@@ -29959,8 +29959,7 @@ void xnn_x16_transposec_ukernel__2x4_scalar_int(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x16_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(int16_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(int16_t));
@@ -30026,8 +30025,7 @@ void xnn_x24_transposec_ukernel__1x2_scalar(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x24_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(output_stride >= block_height * 3);
   assert(input_stride >= block_width * 3);
@@ -30374,8 +30372,7 @@ void xnn_x32_transposec_ukernel__2x4_scalar_int(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(int));
   assert(block_height == 1 || input_stride >= block_width * sizeof(int));
@@ -30567,8 +30564,7 @@ void xnn_x64_transposec_ukernel__4x2_scalar_int(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x64_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(int64_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(int64_t));
@@ -32331,8 +32327,7 @@ void xnn_x8_transposec_ukernel__2x4_scalar_int(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x8_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(int8_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(int8_t));

@@ -58,7 +58,7 @@ BENCHMARK_CAPTURE(f32_rdsum, scalar_c4,
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rdsum, sse_c16,
                     xnn_f32_rdsum_ukernel_7p7x__sse_c16,
-                    xnn_init_f32_scaleminmax_sse_params)
+                    xnn_init_f32_scaleminmax_scalar_params)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -67,7 +67,7 @@ BENCHMARK_CAPTURE(f32_rdsum, scalar_c4,
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rdsum, sse_c32,
                     xnn_f32_rdsum_ukernel_7p7x__sse_c32,
-                    xnn_init_f32_scaleminmax_sse_params)
+                    xnn_init_f32_scaleminmax_scalar_params)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -76,7 +76,7 @@ BENCHMARK_CAPTURE(f32_rdsum, scalar_c4,
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rdsum, sse_c64,
                     xnn_f32_rdsum_ukernel_7p7x__sse_c64,
-                    xnn_init_f32_scaleminmax_sse_params)
+                    xnn_init_f32_scaleminmax_scalar_params)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -85,7 +85,7 @@ BENCHMARK_CAPTURE(f32_rdsum, scalar_c4,
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rdsum, avx_c16,
                     xnn_f32_rdsum_ukernel_7p7x__avx_c16,
-                    xnn_init_f32_scaleminmax_avx_params,
+                    xnn_init_f32_scaleminmax_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();
@@ -95,7 +95,7 @@ BENCHMARK_CAPTURE(f32_rdsum, scalar_c4,
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rdsum, avx_c32,
                     xnn_f32_rdsum_ukernel_7p7x__avx_c32,
-                    xnn_init_f32_scaleminmax_avx_params,
+                    xnn_init_f32_scaleminmax_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();
@@ -105,7 +105,7 @@ BENCHMARK_CAPTURE(f32_rdsum, scalar_c4,
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rdsum, avx_c64,
                     xnn_f32_rdsum_ukernel_7p7x__avx_c64,
-                    xnn_init_f32_scaleminmax_avx_params,
+                    xnn_init_f32_scaleminmax_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();

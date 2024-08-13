@@ -61,7 +61,7 @@ void xnn_f32_rsum_ukernel__hvx_u64_acc2(
 
   float result = *((float*) &vacc0);
 
-  const float vscale = params->scalar.scale;
+  const float vscale = params->scale;
   result = result * vscale;
   result = math_max_f32(result, params->scalar.min);
   result = math_min_f32(result, params->scalar.max);

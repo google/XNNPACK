@@ -150,10 +150,10 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f32_vrelu_ukernel_fn vrelu) const;
 
   void TestAbs(xnn_bf16_vabs_ukernel_fn vabs,
-            xnn_init_bf16_abs_params_fn init_params = nullptr) const;
+            xnn_init_bf16_default_params_fn init_params = nullptr) const;
 
   void TestAbs(xnn_f16_vabs_ukernel_fn vabs,
-            xnn_init_f16_abs_params_fn init_params = nullptr) const;
+            xnn_init_f16_default_params_fn init_params = nullptr) const;
 
   void TestAbs(xnn_f32_vabs_ukernel_fn vabs,
             xnn_init_f32_default_params_fn init_params = nullptr) const;
@@ -174,10 +174,10 @@ class VUnaryMicrokernelTester {
             xnn_init_f32_default_params_fn init_params = nullptr) const;
 
   void Test(xnn_f16_vhswish_ukernel_fn vhswish,
-            xnn_init_f16_hswish_params_fn init_params) const;
+            xnn_init_f16_hswish_params_fn init_params = nullptr) const;
 
   void Test(xnn_f32_vhswish_ukernel_fn vhswish,
-            xnn_init_f32_hswish_params_fn init_params) const;
+            xnn_init_f32_hswish_params_fn init_params = nullptr) const;
 
   void Test(xnn_f16_vlrelu_ukernel_fn vlrelu,
             xnn_init_f16_lrelu_params_fn init_params) const;
@@ -189,7 +189,7 @@ class VUnaryMicrokernelTester {
             xnn_init_f32_default_params_fn init_params = nullptr) const;
 
   void TestNeg(xnn_f16_vneg_ukernel_fn vneg,
-            xnn_init_f16_neg_params_fn init_params = nullptr) const;
+            xnn_init_f16_default_params_fn init_params = nullptr) const;
 
   void TestNeg(xnn_f32_vneg_ukernel_fn vneg,
             xnn_init_f32_default_params_fn init_params = nullptr) const;

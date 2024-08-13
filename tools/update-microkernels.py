@@ -592,25 +592,24 @@ Auto-generated file. Do not edit!
           prod_microkernels.intersection(microkernels),
           key=human_sort_key,
       )
-      if microkernels:
-        filepaths = [
-            fp if os.path.isabs(fp) else os.path.join(root_dir, fp)
-            for fp in microkernels
-        ]
-        if '_' in isa_spec:
-          isa, arch = isa_spec.split('_')
-          amalgam_filename = f'{isa}-{arch}.c'
-        else:
-          isa = isa_spec
-          amalgam_filename = f'{isa}.c'
-        header = ISA_TO_HEADER_MAP.get(isa)
-        amalgam_text = amalgamate_microkernel_sources(
-            filepaths, include_header=header
-        )
-        xnncommon.overwrite_if_changed(
-            os.path.join(src_dir, 'amalgam', 'gen', amalgam_filename),
-            amalgam_text,
-        )
+      filepaths = [
+          fp if os.path.isabs(fp) else os.path.join(root_dir, fp)
+          for fp in microkernels
+      ]
+      if '_' in isa_spec:
+        isa, arch = isa_spec.split('_')
+        amalgam_filename = f'{isa}-{arch}.c'
+      else:
+        isa = isa_spec
+        amalgam_filename = f'{isa}.c'
+      header = ISA_TO_HEADER_MAP.get(isa)
+      amalgam_text = amalgamate_microkernel_sources(
+          filepaths, include_header=header
+      )
+      xnncommon.overwrite_if_changed(
+          os.path.join(src_dir, 'amalgam', 'gen', amalgam_filename),
+          amalgam_text,
+      )
 
 
 if __name__ == '__main__':

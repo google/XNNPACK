@@ -21,16 +21,11 @@ $  "ABS": lambda x: "vabsq_f16(%s)" % x,
 $  "NEG": lambda x: "vnegq_f16(%s)" % x,
 $  "SQR": lambda x: "vmulq_f16(%s, %s)" % (x, x),
 $}[OP]
-$PARAMS = {
-$  "ABS": "xnn_f16_abs_params",
-$  "NEG": "xnn_f16_neg_params",
-$  "SQR": "xnn_f16_default_params",
-$}[OP]
 void xnn_f16_v${OP.lower()}_ukernel__neonfp16arith_u${BATCH_TILE}(
     size_t batch,
     const void* input,
     void* output,
-    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);

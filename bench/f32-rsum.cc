@@ -117,7 +117,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rsum, avx_u8,
                     xnn_f32_rsum_ukernel__avx_u8,
-                    xnn_init_f32_scaleminmax_avx_params,
+                    xnn_init_f32_scaleminmax_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
@@ -127,7 +127,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rsum, avx_u16_acc2,
                     xnn_f32_rsum_ukernel__avx_u16_acc2,
-                    xnn_init_f32_scaleminmax_avx_params,
+                    xnn_init_f32_scaleminmax_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
@@ -137,7 +137,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rsum, avx_u24_acc3,
                     xnn_f32_rsum_ukernel__avx_u24_acc3,
-                    xnn_init_f32_scaleminmax_avx_params,
+                    xnn_init_f32_scaleminmax_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
@@ -147,7 +147,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rsum, avx_u32_acc2,
                     xnn_f32_rsum_ukernel__avx_u32_acc2,
-                    xnn_init_f32_scaleminmax_avx_params,
+                    xnn_init_f32_scaleminmax_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
@@ -157,7 +157,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rsum, avx_u32_acc4,
                     xnn_f32_rsum_ukernel__avx_u32_acc4,
-                    xnn_init_f32_scaleminmax_avx_params,
+                    xnn_init_f32_scaleminmax_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();

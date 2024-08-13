@@ -7390,9 +7390,9 @@ void xnn_f32_rdsum_ukernel_7p7x__sse_c16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vscale = _mm_load_ps(params->sse.scale);
-  const __m128 vmin = _mm_load_ps(params->sse.min);
-  const __m128 vmax = _mm_load_ps(params->sse.max);
+  const __m128 vscale = _mm_set1_ps(params->scalar.scale);
+  const __m128 vmin = _mm_set1_ps(params->scalar.min);
+  const __m128 vmax = _mm_set1_ps(params->scalar.max);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 16; channels -= 16) {
@@ -9453,8 +9453,8 @@ void xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8(
   assert(output != NULL);
 
   // Constants for the Newton-Raphson iteration.
-  const __m128 vthree = _mm_load_ps(params->sse.three);
-  const __m128 vhalf = _mm_load_ps(params->sse.half);
+  const __m128 vthree = _mm_set1_ps(3.0f);
+  const __m128 vhalf = _mm_set1_ps(0.5f);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m128 vx0123 = _mm_loadu_ps(input);
@@ -9535,8 +9535,8 @@ void xnn_f32_vsqrt_ukernel__sse_rsqrt_u12(
   assert(output != NULL);
 
   // Constants for the Newton-Raphson iteration.
-  const __m128 vthree = _mm_load_ps(params->sse.three);
-  const __m128 vhalf = _mm_load_ps(params->sse.half);
+  const __m128 vthree = _mm_set1_ps(3.0f);
+  const __m128 vhalf = _mm_set1_ps(0.5f);
 
   for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {
     const __m128 vx0 = _mm_loadu_ps(input);
@@ -9638,8 +9638,7 @@ void xnn_x32_transposec_ukernel__4x4_sse(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint32_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint32_t));

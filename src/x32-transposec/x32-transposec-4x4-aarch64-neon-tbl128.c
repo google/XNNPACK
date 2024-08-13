@@ -17,9 +17,13 @@ void xnn_x32_transposec_ukernel__4x4_aarch64_neon_tbl128(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
-{
+    size_t block_height) XNN_OOB_READS
+{  
+  static const uint8_t pos0[16] = {0, 1, 2, 3, 16, 17, 18, 19, 32, 33, 34, 35, 48, 49, 50, 51};
+  static const uint8_t pos1[16] = {4, 5, 6, 7, 20, 21, 22, 23, 36, 37, 38, 39, 52, 53, 54, 55};
+  static const uint8_t pos2[16] = {8, 9, 10, 11, 24, 25, 26, 27, 40, 41, 42, 43, 56, 57, 58, 59};
+  static const uint8_t pos3[16] = {12, 13, 14, 15, 28, 29, 30, 31, 44, 45, 46, 47, 60, 61, 62, 63};
+
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint32_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint32_t));
 
@@ -40,10 +44,10 @@ void xnn_x32_transposec_ukernel__4x4_aarch64_neon_tbl128(
   uint8_t* o2 = (uint8_t*) ((uintptr_t) o1 + output_stride);
   uint8_t* o3 = (uint8_t*) ((uintptr_t) o2 + output_stride);
 
-  const uint8x16_t vperm0 = vld1q_u8(params->neon_tbl128.pos0);
-  const uint8x16_t vperm1 = vld1q_u8(params->neon_tbl128.pos1);
-  const uint8x16_t vperm2 = vld1q_u8(params->neon_tbl128.pos2);
-  const uint8x16_t vperm3 = vld1q_u8(params->neon_tbl128.pos3);
+  const uint8x16_t vperm0 = vld1q_u8(pos0);
+  const uint8x16_t vperm1 = vld1q_u8(pos1);
+  const uint8x16_t vperm2 = vld1q_u8(pos2);
+  const uint8x16_t vperm3 = vld1q_u8(pos3);
   do {
     if XNN_UNPREDICTABLE(block_width < 2) {
       o1 = o0;
