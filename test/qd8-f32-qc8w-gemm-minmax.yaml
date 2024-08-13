@@ -838,6 +838,40 @@
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 32
 
+# RISC-V Vector
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 1
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 1
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x4v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 1
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 1
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x4v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 1
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_6x4v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 1
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x4v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 1
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_8x4v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 1
+
 # WAsm SIMD
 - name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4c2__wasmsimd_dot16x2_ld64
   init: xnn_init_f32_minmax_wasmsimd_params

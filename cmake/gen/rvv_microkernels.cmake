@@ -123,6 +123,22 @@ SET(ALL_RVV_MICROKERNEL_SRCS
   src/f32-vunary/gen/f32-vsqr-rvv-u2v.c
   src/f32-vunary/gen/f32-vsqr-rvv-u4v.c
   src/f32-vunary/gen/f32-vsqr-rvv-u8v.c
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x4v-minmax-rvv.c
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x4v-minmax-rvv.c
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x4v-minmax-rvv.c
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x4v-minmax-rvv.c
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x4v-minmax-rvv.c
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-6x4v-minmax-rvv.c
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-7x4v-minmax-rvv.c
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-8x4v-minmax-rvv.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x4v-minmax-rvv.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x4v-minmax-rvv.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x4v-minmax-rvv.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x4v-minmax-rvv.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x4v-minmax-rvv.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x4v-minmax-rvv.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x4v-minmax-rvv.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x4v-minmax-rvv.c
   src/qs8-vmul/gen/qs8-vmul-minmax-f32-rvv-u1v.c
   src/qs8-vmul/gen/qs8-vmul-minmax-f32-rvv-u2v.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-f32-rvv-u1v.c
