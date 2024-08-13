@@ -28,7 +28,7 @@ void xnn_f16_f32acc_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__avx512skx_c$
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
+  const __m512 vscale = _mm512_set1_ps(params->scale);
 
   size_t input_increment = ${ACCUMULATORS} * input_stride;
   for (; channels >= ${CHANNELS_BATCH}; channels -= ${CHANNELS_BATCH}) {

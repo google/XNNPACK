@@ -29,13 +29,6 @@ struct xnn_transpose_subconfig {
     xnn_transposec_ukernel_fn const_size_ukernel;
     xnn_transposev_ukernel_fn variable_size_ukernel;
   };
-  union {
-    xnn_init_x8_transpose_params_fn x8;
-    xnn_init_x16_transpose_params_fn x16;
-    xnn_init_x24_transpose_params_fn x24;
-    xnn_init_x32_transpose_params_fn x32;
-    xnn_init_x64_transpose_params_fn x64;
-  } init;
   // Maximum number of elements to process per ukernel call.
   size_t tile_size;
 };
@@ -87,13 +80,11 @@ struct xnn_binary_elementwise_config {
 struct xnn_unary_elementwise_config {
   xnn_vunary_ukernel_fn ukernel;
   union {
-    xnn_init_f16_f32_cvt_params_fn f16_f32_cvt;
     xnn_init_f16_qs8_cvt_params_fn f16_qs8_cvt;
-    xnn_init_f16_abs_params_fn f16_abs;
+    xnn_init_f16_default_params_fn f16_default;
     xnn_init_f16_elu_params_fn f16_elu;
     xnn_init_f16_hswish_params_fn f16_hswish;
     xnn_init_f16_lrelu_params_fn f16_lrelu;
-    xnn_init_f16_neg_params_fn f16_neg;
     xnn_init_f16_minmax_params_fn f16_minmax;
     xnn_init_f16_rsqrt_params_fn f16_rsqrt;
     xnn_init_f16_sigmoid_params_fn f16_sigmoid;

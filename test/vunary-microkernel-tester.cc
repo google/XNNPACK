@@ -40,7 +40,7 @@ void VUnaryMicrokernelTester::Test(xnn_f32_vrelu_ukernel_fn vrelu) const {
 
 void VUnaryMicrokernelTester::TestAbs(
     xnn_bf16_vabs_ukernel_fn vabs,
-    xnn_init_bf16_abs_params_fn init_params) const {
+    xnn_init_bf16_default_params_fn init_params) const {
   TestBF16(
       vabs, InitParamsWrapper(init_params), [](float x) { return std::abs(x); },
       TolExact16, -1.0f, 1.0f);
@@ -48,7 +48,7 @@ void VUnaryMicrokernelTester::TestAbs(
 
 void VUnaryMicrokernelTester::TestAbs(
     xnn_f16_vabs_ukernel_fn vabs,
-    xnn_init_f16_abs_params_fn init_params) const {
+    xnn_init_f16_default_params_fn init_params) const {
   TestFP16(
       vabs, InitParamsWrapper(init_params), [](float x) { return std::abs(x); },
       TolExact16, -1.0f, 1.0f);
@@ -161,7 +161,7 @@ void VUnaryMicrokernelTester::Test(
 
 void VUnaryMicrokernelTester::TestNeg(
     xnn_f16_vneg_ukernel_fn vneg,
-    xnn_init_f16_neg_params_fn init_params) const {
+    xnn_init_f16_default_params_fn init_params) const {
   TestFP16(
       vneg, InitParamsWrapper(init_params), [](float x) { return -x; },
       TolExact16, -1.0f, 1.0f);

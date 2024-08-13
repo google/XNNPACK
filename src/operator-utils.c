@@ -171,11 +171,6 @@ void xnn_generate_igemms_up_to_max_mr(
   }
 }
 
-static inline uintptr_t cached_code_at_offset(xnn_operator_t op, size_t offset)
-{
-  return (uintptr_t)op->code_cache->cache.code.start + offset;
-}
-
 void xnn_overwrite_gemm_cases_with_generated_code(
   xnn_operator_t op,
   struct xnn_hmp_gemm_ukernel *gemm_cases,

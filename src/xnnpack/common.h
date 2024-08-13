@@ -149,6 +149,12 @@
   #define XNN_HAS_MMAP 1
 #endif
 
+#if XNN_PLATFORM_WINDOWS
+  #define XNN_HAS_PTHREADS 0
+#else
+  #define XNN_HAS_PTHREADS 1
+#endif
+
 // Define compile identification macros
 
 #if defined(__clang__)
@@ -375,6 +381,30 @@
   #define XNN_MULTIPASS_EXTRA_BYTES 16
 #endif
 
+#if XNN_ARCH_ARM || XNN_ARCH_X86 || XNN_ARCH_X86_64 || XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  // These architectures are slow to broadcast, the compiler tries to move them
+  // into loops, and when it runs out of registers, it will redundantly perform
+  // the broadcast. Marking them as memory read by assembly forces the compiler
+  // to maintain the value in memory.
+  #if defined(__GNUC__)
+    #define XNN_FORCE_REALIZATION(x) __asm volatile(""::"m"(x));
+  #else
+    #define XNN_FORCE_REALIZATION(x)
+  #endif
+#else
+  #define XNN_FORCE_REALIZATION(x)
+#endif
+
+// TODO(dsharlet): Remove this in favor of XNN_FORCE_REALIZATION above.
+#if XNN_ARCH_ARM || XNN_ARCH_X86
+  // These architectures are slow to broadcast, the compiler tries to move them
+  // into loops, and when it runs out of registers, it will redundantly perform
+  // the broadcast. Marking them volatile prevents these from being moved into
+  // loops, and they spill as broadcasted vectors instead.
+  #define XNN_FORCE_STACK volatile
+#else
+  #define XNN_FORCE_STACK
+#endif
 
 #define XNN_LOG2_SIZEOF_INT8_T   0  // log2(sizeof(int8_t))
 #define XNN_LOG2_SIZEOF_UINT8_T  0  // log2(sizeof(uint8_t))

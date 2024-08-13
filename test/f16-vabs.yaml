@@ -9,6 +9,4 @@
 
 # x86 SSE2
 - name: xnn_f16_vabs_ukernel__sse2_u8
-  init: xnn_init_f16_abs_sse_params
 - name: xnn_f16_vabs_ukernel__sse2_u16
-  init: xnn_init_f16_abs_sse_params

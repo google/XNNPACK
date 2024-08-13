@@ -28,7 +28,7 @@ void xnn_f16_f32_vcvt_ukernel__avx512skx_u16(
     size_t batch,
     const void* input,
     float* output,
-    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const void* params)
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
@@ -71,7 +71,7 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c64(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
+  const __m512 vscale = _mm512_set1_ps(params->scale);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 64; channels -= 64) {
@@ -343,7 +343,7 @@ void xnn_f16_f32acc_rsum_ukernel__avx512skx_u64_acc4(
   __m128 vacc = _mm_add_ps(_mm256_castps256_ps128(vacc256), _mm256_extractf128_ps(vacc256, 1));
   vacc = _mm_add_ps(vacc, _mm_movehl_ps(vacc, vacc));
   vacc = _mm_add_ss(vacc, _mm_movehdup_ps(vacc));
-  vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->scalar.scale));
+  vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->scale));
 
   float vout = _mm_cvtss_f32(vacc);
   *output += vout;

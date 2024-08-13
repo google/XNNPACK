@@ -26,7 +26,7 @@ void xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256 vhalf = _mm256_load_ps(params->fma.half);
+  const __m256 vhalf = _mm256_set1_ps(0.5f);
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       const __m256 vx${ABC[0]} = _mm256_loadu_ps(input);

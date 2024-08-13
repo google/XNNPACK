@@ -55,18 +55,24 @@ void xnn_f16_f32_vcvt_ukernel__neon_int16_u16(
     size_t batch,
     const void* input,
     float* output,
-    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const void* params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const uint16x8_t vsign_mask = vmovq_n_u16(0x8000);
-  const uint16x8_t vexp_offset = vmovq_n_u16(0x7000);
-  const float32x4_t vexp_scale = vld1q_dup_f32(&params->neon.exp_scale);
-  const uint32x4_t vmagic_bias = vmovq_n_u32(0x3F000000);
-  const uint16x8_t vdenorm_cutoff = vmovq_n_u16(0x0400);
+  const uint16x8_t vsign_mask = vmovq_n_u16(UINT16_C(0x8000));
+  const uint16x8_t vexp_offset = vmovq_n_u16(UINT16_C(0x7000));
+  const float32x4_t vexp_scale = vmovq_n_f32(0x1.0p-112f);
+  const uint32x4_t vmagic_bias = vmovq_n_u32(UINT32_C(0x3F000000));
+  const uint16x8_t vdenorm_cutoff = vmovq_n_u16(UINT16_C(0x0400));
+
+  XNN_FORCE_REALIZATION(vsign_mask);
+  XNN_FORCE_REALIZATION(vexp_offset);
+  XNN_FORCE_REALIZATION(vexp_scale);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   const uint16_t* i = (const uint16_t*) input;
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
@@ -9591,7 +9597,7 @@ void xnn_f32_vcmul_ukernel__neon_u8(
   }
 }
 
-extern XNN_INTERNAL const int32_t xnn_table_exp2minus_k_over_16[16];
+extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
 
 void xnn_f32_velu_ukernel__neon_rr2_lut16_p3_u8(
     size_t batch,
@@ -26878,8 +26884,7 @@ void xnn_x16_transposec_ukernel__8x8_reuse_dec_zip_neon(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x16_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint16_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint16_t));
@@ -27141,9 +27146,11 @@ void xnn_x24_transposec_ukernel__2x2_neon_tbl64(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x24_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
+  static const uint8_t pos0[8] = {0, 1, 2, 8, 9, 10, 0, 0};
+  static const uint8_t pos1[8] = {3, 4, 5, 11, 12, 13, 0, 0};
+
   assert(output_stride >= block_height * 3);
   assert(input_stride >= block_width * 3);
 
@@ -27162,8 +27169,8 @@ void xnn_x24_transposec_ukernel__2x2_neon_tbl64(
   uint8_t* o0 = (uint8_t*) output;
   uint8_t* o1 = (uint8_t*) ((uintptr_t) o0 + output_stride);
 
-  const uint8x8_t vperm0 = vld1_u8(params->neon_tbl64.pos0);
-  const uint8x8_t vperm1 = vld1_u8(params->neon_tbl64.pos1);
+  const uint8x8_t vperm0 = vld1_u8(pos0);
+  const uint8x8_t vperm1 = vld1_u8(pos1);
   do {
     if XNN_UNPREDICTABLE(block_width < 2) {
       o1 = o0;
@@ -28347,8 +28354,7 @@ void xnn_x32_transposec_ukernel__4x4_reuse_dec_zip_neon(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint32_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint32_t));
@@ -28715,8 +28721,7 @@ void xnn_x64_transposec_ukernel__2x2_multi_dec_zip_neon(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x64_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint64_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint64_t));
@@ -28803,8 +28808,7 @@ void xnn_x64_transposec_ukernel__2x2_reuse_dec_zip_neon(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x64_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint64_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint64_t));
@@ -28888,8 +28892,7 @@ void xnn_x8_transposec_ukernel__16x16_reuse_dec_zip_neon(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x8_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint8_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint8_t));

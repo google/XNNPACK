@@ -1306,8 +1306,7 @@ typedef void (*xnn_x8_transposec_ukernel_fn)(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x8_transpose_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    size_t block_height);
 
 typedef void (*xnn_x16_transposec_ukernel_fn)(
     const uint16_t* a,
@@ -1315,8 +1314,7 @@ typedef void (*xnn_x16_transposec_ukernel_fn)(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x16_transpose_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    size_t block_height);
 
 typedef void (*xnn_x24_transposec_ukernel_fn)(
     const void* a,
@@ -1324,8 +1322,7 @@ typedef void (*xnn_x24_transposec_ukernel_fn)(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x24_transpose_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    size_t block_height);
 
 typedef void (*xnn_x32_transposec_ukernel_fn)(
     const uint32_t* a,
@@ -1333,8 +1330,7 @@ typedef void (*xnn_x32_transposec_ukernel_fn)(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x32_transpose_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    size_t block_height);
 
 typedef void (*xnn_x64_transposec_ukernel_fn)(
     const uint64_t* a,
@@ -1342,8 +1338,7 @@ typedef void (*xnn_x64_transposec_ukernel_fn)(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x64_transpose_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    size_t block_height);
 
 typedef void (*xnn_transposec_ukernel_fn)(
     const void* input,
@@ -1351,8 +1346,7 @@ typedef void (*xnn_transposec_ukernel_fn)(
     size_t input_stride,
     size_t output_size,
     size_t block_width,
-    size_t block_height,
-    const void* params);
+    size_t block_height);
 
 // TRANSPOSEV: TRANSPOSE Variable-size elements
 
@@ -1764,13 +1758,13 @@ typedef void (*xnn_bf16_vabs_ukernel_fn)(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_bf16_abs_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const union xnn_bf16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f16_vabs_ukernel_fn)(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_abs_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const union xnn_f16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_vabs_ukernel_fn)(
     size_t batch,
@@ -1830,7 +1824,7 @@ typedef void (*xnn_f16_f32_vcvt_ukernel_fn)(
     size_t batch,
     const void* input,
     float* output,
-    const union xnn_f16_f32_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const void* params);
 
 typedef void (*xnn_f16_qs8_vcvt_ukernel_fn)(
     size_t batch,
@@ -1972,7 +1966,7 @@ typedef void (*xnn_f16_vneg_ukernel_fn)(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_neg_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const union xnn_f16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_vneg_ukernel_fn)(
     size_t batch,
@@ -2518,9 +2512,6 @@ typedef void (*xnn_f32_vscaleextexp_ukernel_fn)(
 
 /***************** Microkernel parameter initializer pointers ****************/
 
-typedef size_t (*xnn_init_f16_f32_cvt_params_fn)(
-  union xnn_f16_f32_cvt_params params[XNN_MIN_ELEMENTS(1)]);
-
 typedef size_t (*xnn_init_f16_qs8_cvt_params_fn)(
   union xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale,
@@ -2670,11 +2661,8 @@ typedef size_t (*xnn_init_qu8_mul_minmax_params_fn)(
   uint8_t output_min,
   uint8_t output_max);
 
-typedef size_t (*xnn_init_bf16_abs_params_fn)(
-  union xnn_bf16_abs_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_f16_abs_params_fn)(
-  union xnn_f16_abs_params params[XNN_MIN_ELEMENTS(1)]);
+typedef size_t (*xnn_init_bf16_default_params_fn)(
+  union xnn_bf16_default_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f16_default_params_fn)(
   union xnn_f16_default_params params[XNN_MIN_ELEMENTS(1)]);
@@ -2803,9 +2791,6 @@ typedef size_t (*xnn_init_u8_minmax_params_fn)(
   union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t min,
   uint8_t max);
-
-typedef size_t (*xnn_init_f16_neg_params_fn)(
-  union xnn_f16_neg_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f16_rnd_params_fn)(
   union xnn_f16_rnd_params params[XNN_MIN_ELEMENTS(1)]);
@@ -2973,26 +2958,6 @@ typedef void (*xnn_update_f32_chw_params_fn)(
 typedef void (*xnn_update_f16_chw_params_fn)(
   union xnn_f16_chw_params params[XNN_MIN_ELEMENTS(1)],
   uint32_t width);
-
-typedef size_t (*xnn_init_x8_transpose_params_fn)(
-  union xnn_x8_transpose_params params[XNN_MIN_ELEMENTS(1)]
-);
-
-typedef size_t (*xnn_init_x16_transpose_params_fn)(
-  union xnn_x16_transpose_params params[XNN_MIN_ELEMENTS(1)]
-);
-
-typedef size_t (*xnn_init_x24_transpose_params_fn)(
-  union xnn_x24_transpose_params params[XNN_MIN_ELEMENTS(1)]
-);
-
-typedef size_t (*xnn_init_x32_transpose_params_fn)(
-  union xnn_x32_transpose_params params[XNN_MIN_ELEMENTS(1)]
-);
-
-typedef size_t (*xnn_init_x64_transpose_params_fn)(
-  union xnn_x64_transpose_params params[XNN_MIN_ELEMENTS(1)]
-);
 
 typedef void (*xnn_indirection_init_resize_bilinear2d_hwc_fn)(
   size_t output_y_start,

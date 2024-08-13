@@ -1,9 +1,10 @@
 name: Build and update caches
 on:
   pull_request:
-    branches: 
+    branches:
       - master
     types: [closed]
+  workflow_dispatch:
 
 jobs:
   build-and-test:

@@ -21,6 +21,8 @@ void xnn_f32_vsqrt_ukernel__avx_sqrt_u32(
     float* output,
     const union xnn_f32_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
@@ -54,7 +56,7 @@ void xnn_f32_vsqrt_ukernel__avx_sqrt_u32(
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
     const __m256 vx = _mm256_maskload_ps(input, vmask);
     const __m256 vy = _mm256_sqrt_ps(vx);

@@ -20,32 +20,20 @@
 
 # x86 SSE
 - name: xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4
-  init: xnn_init_f32_rsqrt_sse_params
 - name: xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8
-  init: xnn_init_f32_rsqrt_sse_params
 - name: xnn_f32_vrsqrt_ukernel__sse_rsqrt_u16
-  init: xnn_init_f32_rsqrt_sse_params
 
 # x86 AVX
 - name: xnn_f32_vrsqrt_ukernel__avx_rsqrt_u8
-  init: xnn_init_f32_rsqrt_avx_params
 - name: xnn_f32_vrsqrt_ukernel__avx_rsqrt_u16
-  init: xnn_init_f32_rsqrt_avx_params
 - name: xnn_f32_vrsqrt_ukernel__avx_rsqrt_u32
-  init: xnn_init_f32_rsqrt_avx_params
 
 # x86 FMA3
 - name: xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u8
-  init: xnn_init_f32_rsqrt_fma3_params
 - name: xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16
-  init: xnn_init_f32_rsqrt_fma3_params
 - name: xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u32
-  init: xnn_init_f32_rsqrt_fma3_params
   
 # x86 AVX512
 - name: xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u16
-  init: xnn_init_f32_rsqrt_avx512_params
 - name: xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32
-  init: xnn_init_f32_rsqrt_avx512_params
 - name: xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64
-  init: xnn_init_f32_rsqrt_avx512_params

@@ -55,19 +55,26 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_u16(
     size_t batch,
     const void* input,
     float* output,
-    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const void* params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vsign_mask = wasm_v128_load64_splat(params->wasmsimd_int16.sign_mask);
-  const v128_t vexp_offset = wasm_v128_load64_splat(params->wasmsimd_int16.exp_offset);
-  const v128_t vexp_scale = wasm_v128_load64_splat(params->wasmsimd_int16.exp_scale);
-  const v128_t vmagic_mask = wasm_v128_load64_splat(params->wasmsimd_int16.magic_mask);
-  const v128_t vmagic_bias = wasm_v128_load64_splat(params->wasmsimd_int16.magic_bias);
-  const v128_t vdenorm_cutoff = wasm_v128_load64_splat(params->wasmsimd_int16.denorm_cutoff);
+  const v128_t vsign_mask = wasm_u16x8_const_splat(UINT16_C(0x8000));
+  const v128_t vexp_offset = wasm_u16x8_const_splat(UINT16_C(0x7000));
+  const v128_t vexp_scale = wasm_f32x4_const_splat(0x1.0p-112f);
+  const v128_t vmagic_mask = wasm_u16x8_const_splat(UINT16_C(0x3F00));
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(0.5f);
+  const v128_t vdenorm_cutoff = wasm_u16x8_const_splat(UINT16_C(0x0400));
+
+  XNN_FORCE_REALIZATION(vsign_mask);
+  XNN_FORCE_REALIZATION(vexp_offset);
+  XNN_FORCE_REALIZATION(vexp_scale);
+  XNN_FORCE_REALIZATION(vmagic_mask);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   const uint16_t* i = (const uint16_t*) input;
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
@@ -37609,8 +37616,7 @@ void xnn_x16_transposec_ukernel__8x8_reuse_mov_wasmsimd(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x16_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint16_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint16_t));
@@ -38572,8 +38578,7 @@ void xnn_x32_transposec_ukernel__4x4_reuse_mov_wasmsimd(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint32_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint32_t));
@@ -39232,8 +39237,7 @@ void xnn_x8_transposec_ukernel__16x16_reuse_mov_wasmsimd(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x8_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint8_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint8_t));

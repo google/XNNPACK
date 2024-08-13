@@ -20,42 +20,27 @@
 - name: xnn_f32_vsqrt_ukernel__sse_sqrt_u16
 
 - name: xnn_f32_vsqrt_ukernel__sse_rsqrt_u4
-  init: xnn_init_f32_sqrt_sse_params
 - name: xnn_f32_vsqrt_ukernel__sse_rsqrt_u8
-  init: xnn_init_f32_sqrt_sse_params
 - name: xnn_f32_vsqrt_ukernel__sse_rsqrt_u12
-  init: xnn_init_f32_sqrt_sse_params
 
 # x86 AVX
 - name: xnn_f32_vsqrt_ukernel__avx_sqrt_u8
-  init: xnn_init_f32_sqrt_avx_params
 - name: xnn_f32_vsqrt_ukernel__avx_sqrt_u16
-  init: xnn_init_f32_sqrt_avx_params
 - name: xnn_f32_vsqrt_ukernel__avx_sqrt_u32
-  init: xnn_init_f32_sqrt_avx_params
 
 - name: xnn_f32_vsqrt_ukernel__avx_rsqrt_u8
-  init: xnn_init_f32_sqrt_avx_params
 - name: xnn_f32_vsqrt_ukernel__avx_rsqrt_u16
-  init: xnn_init_f32_sqrt_avx_params
 - name: xnn_f32_vsqrt_ukernel__avx_rsqrt_u32
-  init: xnn_init_f32_sqrt_avx_params
 
 # x86 FMA3
 - name: xnn_f32_vsqrt_ukernel__fma3_rsqrt_u8
-  init: xnn_init_f32_sqrt_fma_params
 - name: xnn_f32_vsqrt_ukernel__fma3_rsqrt_u16
-  init: xnn_init_f32_sqrt_fma_params
 - name: xnn_f32_vsqrt_ukernel__fma3_rsqrt_u32
-  init: xnn_init_f32_sqrt_fma_params
 
 # x86 AVX512
 - name: xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u16
-  init: xnn_init_f32_sqrt_avx512_params
 - name: xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u32
-  init: xnn_init_f32_sqrt_avx512_params
 - name: xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u48
-  init: xnn_init_f32_sqrt_avx512_params
 
 # WAsm SIMD
 - name: xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_u4

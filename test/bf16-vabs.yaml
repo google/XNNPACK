@@ -5,8 +5,5 @@
 
 # ARM NEON+FP16ARITH
 - name: xnn_bf16_vabs_ukernel__neonbf16_u8
-  init: xnn_init_bf16_abs_neon_params
 - name: xnn_bf16_vabs_ukernel__neonbf16_u16
-  init: xnn_init_bf16_abs_neon_params
 - name: xnn_bf16_vabs_ukernel__neonbf16_u24
-  init: xnn_init_bf16_abs_neon_params

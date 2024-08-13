@@ -21,7 +21,7 @@ extern "C" {
       size_t n,                                        \
       const void* input,                               \
       float* output,                                   \
-      const union xnn_f16_f32_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const void* params);
 
 DECLARE_F16_F32_VCVT_UKERNEL_FUNCTION(xnn_f16_f32_vcvt_ukernel__neon_int16_u8)
 DECLARE_F16_F32_VCVT_UKERNEL_FUNCTION(xnn_f16_f32_vcvt_ukernel__neon_int16_u16)
