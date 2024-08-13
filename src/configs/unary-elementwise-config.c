@@ -520,12 +520,10 @@ static void init_f16_to_f32_cvt_config(void) {
         f16_to_f32_cvt_config.element_tile = 16;
       } else {
         f16_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__neon_int16_u16;
-        f16_to_f32_cvt_config.init.f16_f32_cvt = xnn_init_f16_f32_cvt_neon_params;
         f16_to_f32_cvt_config.element_tile = 16;
       }
     } else if (!XNN_PLATFORM_MOBILE) {
       f16_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__scalar_u4;
-      f16_to_f32_cvt_config.init.f16_f32_cvt = xnn_init_f16_f32_cvt_scalar_params;
       f16_to_f32_cvt_config.element_tile = 4;
     }
   #elif XNN_ARCH_ARM64
@@ -542,38 +540,30 @@ static void init_f16_to_f32_cvt_config(void) {
       f16_to_f32_cvt_config.element_tile = 16;
     } else if (hardware_config->use_x86_avx) {
       f16_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__avx_int16_u16;
-      f16_to_f32_cvt_config.init.f16_f32_cvt = xnn_init_f16_f32_cvt_sse_int16_params;
       f16_to_f32_cvt_config.element_tile = 16;
     } else if (hardware_config->use_x86_sse4_1) {
       f16_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__sse41_int16_u16;
-      f16_to_f32_cvt_config.init.f16_f32_cvt = xnn_init_f16_f32_cvt_sse_int16_params;
       f16_to_f32_cvt_config.element_tile = 16;
     } else {
       f16_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__sse2_int16_u32;
-      f16_to_f32_cvt_config.init.f16_f32_cvt = xnn_init_f16_f32_cvt_sse_int16_params;
       f16_to_f32_cvt_config.element_tile = 32;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     #if XNN_ARCH_WASMRELAXEDSIMD
       f16_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__wasmrelaxedsimd_int16_u16;
-      f16_to_f32_cvt_config.init.f16_f32_cvt = xnn_init_f16_f32_cvt_wasmsimd_int16_params;
       f16_to_f32_cvt_config.element_tile = 16;
     #else
       f16_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_u16;
-      f16_to_f32_cvt_config.init.f16_f32_cvt = xnn_init_f16_f32_cvt_wasmsimd_int16_params;
       f16_to_f32_cvt_config.element_tile = 16;
     #endif
   #elif XNN_ARCH_WASM
     f16_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__scalar_u1;
-    f16_to_f32_cvt_config.init.f16_f32_cvt = xnn_init_f16_f32_cvt_scalar_params;
     f16_to_f32_cvt_config.element_tile = 1;
   #elif XNN_ARCH_RISCV
     f16_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__scalar_u4;
-    f16_to_f32_cvt_config.init.f16_f32_cvt = xnn_init_f16_f32_cvt_scalar_params;
     f16_to_f32_cvt_config.element_tile = 4;
   #else
     f16_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__scalar_u4;
-    f16_to_f32_cvt_config.init.f16_f32_cvt = xnn_init_f16_f32_cvt_scalar_params;
     f16_to_f32_cvt_config.element_tile = 4;
   #endif
 }

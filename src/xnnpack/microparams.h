@@ -1259,56 +1259,6 @@ union xnn_qu8_avgpool_minmax_params {
 
 // Cvt (Convert): used by VCVT microkernels.
 
-union xnn_f16_f32_cvt_params {
-  struct {
-    uint32_t sign_mask;
-    uint32_t exp_offset;
-    float exp_scale;
-    uint32_t magic_mask;
-    float magic_bias;
-    uint32_t denorm_cutoff;
-  } scalar;
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
-    float exp_scale;
-  } neon;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) uint16_t sign_mask[8];
-    XNN_ALIGN(16) uint16_t exp_offset[8];
-    XNN_ALIGN(16) float exp_scale[4];
-    XNN_ALIGN(16) uint16_t magic_mask[8];
-    XNN_ALIGN(16) float magic_bias[4];
-    XNN_ALIGN(16) int16_t denorm_cutoff[8];
-  } sse_int16;
-  struct {
-    XNN_ALIGN(16) uint32_t sign_mask[4];
-    XNN_ALIGN(16) uint32_t exp_offset[4];
-    XNN_ALIGN(16) float exp_scale[4];
-    XNN_ALIGN(16) uint32_t magic_bias[4];
-    XNN_ALIGN(16) int32_t denorm_cutoff[4];
-  } sse_int32;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  struct {
-    XNN_ALIGN(8) uint16_t sign_mask[4];
-    XNN_ALIGN(8) uint16_t exp_offset[4];
-    XNN_ALIGN(8) float exp_scale[2];
-    XNN_ALIGN(8) uint16_t magic_mask[4];
-    XNN_ALIGN(8) float magic_bias[2];
-    XNN_ALIGN(8) int16_t denorm_cutoff[4];
-  } wasmsimd_int16;
-  struct {
-    XNN_ALIGN(8) uint32_t sign_mask[2];
-    XNN_ALIGN(8) uint32_t exp_offset[2];
-    XNN_ALIGN(8) float exp_scale[2];
-    XNN_ALIGN(8) uint32_t magic_bias[2];
-    XNN_ALIGN(8) int32_t denorm_cutoff[2];
-  } wasmsimd_int32;
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-};
-
 union xnn_f32_f16_cvt_params {
   struct {
     uint32_t nonsign_mask;

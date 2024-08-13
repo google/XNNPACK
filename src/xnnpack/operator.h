@@ -213,7 +213,6 @@ struct xnn_operator {
 
   union {
     union xnn_f16_default_params f16_default;
-    union xnn_f16_f32_cvt_params f16_f32_cvt;
     union xnn_f16_hswish_params f16_hswish;
     union xnn_f16_elu_params f16_elu;
     union xnn_f16_lrelu_params f16_lrelu;

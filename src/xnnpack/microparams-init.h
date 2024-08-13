@@ -1044,24 +1044,6 @@ DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mul_minmax_fp32_scalar_
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#define DECLARE_INIT_F16_F32_CVT_PARAMS_FUNCTION(fn_name)      \
-  XNN_INTERNAL size_t fn_name(                                 \
-    union xnn_f16_f32_cvt_params params[XNN_MIN_ELEMENTS(1)]);
-
-DECLARE_INIT_F16_F32_CVT_PARAMS_FUNCTION(xnn_init_f16_f32_cvt_scalar_params)
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_F16_F32_CVT_PARAMS_FUNCTION(xnn_init_f16_f32_cvt_neon_params)
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F16_F32_CVT_PARAMS_FUNCTION(xnn_init_f16_f32_cvt_sse_int16_params)
-  DECLARE_INIT_F16_F32_CVT_PARAMS_FUNCTION(xnn_init_f16_f32_cvt_sse_int32_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_F16_F32_CVT_PARAMS_FUNCTION(xnn_init_f16_f32_cvt_wasmsimd_int16_params)
-  DECLARE_INIT_F16_F32_CVT_PARAMS_FUNCTION(xnn_init_f16_f32_cvt_wasmsimd_int32_params)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
 #define DECLARE_INIT_F32_F16_CVT_PARAMS_FUNCTION(fn_name)      \
   XNN_INTERNAL size_t fn_name(                                 \
     union xnn_f32_f16_cvt_params params[XNN_MIN_ELEMENTS(1)]);

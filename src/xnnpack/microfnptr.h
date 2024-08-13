@@ -1824,7 +1824,7 @@ typedef void (*xnn_f16_f32_vcvt_ukernel_fn)(
     size_t batch,
     const void* input,
     float* output,
-    const union xnn_f16_f32_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const void* params);
 
 typedef void (*xnn_f16_qs8_vcvt_ukernel_fn)(
     size_t batch,
@@ -2511,9 +2511,6 @@ typedef void (*xnn_f32_vscaleextexp_ukernel_fn)(
 
 
 /***************** Microkernel parameter initializer pointers ****************/
-
-typedef size_t (*xnn_init_f16_f32_cvt_params_fn)(
-  union xnn_f16_f32_cvt_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f16_qs8_cvt_params_fn)(
   union xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],

@@ -381,6 +381,21 @@
   #define XNN_MULTIPASS_EXTRA_BYTES 16
 #endif
 
+#if XNN_ARCH_ARM || XNN_ARCH_X86 || XNN_ARCH_X86_64 || XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  // These architectures are slow to broadcast, the compiler tries to move them
+  // into loops, and when it runs out of registers, it will redundantly perform
+  // the broadcast. Marking them as memory read by assembly forces the compiler
+  // to maintain the value in memory.
+  #if defined(__GNUC__)
+    #define XNN_FORCE_REALIZATION(x) __asm volatile(""::"m"(x));
+  #else
+    #define XNN_FORCE_REALIZATION(x)
+  #endif
+#else
+  #define XNN_FORCE_REALIZATION(x)
+#endif
+
+// TODO(dsharlet): Remove this in favor of XNN_FORCE_REALIZATION above.
 #if XNN_ARCH_ARM || XNN_ARCH_X86
   // These architectures are slow to broadcast, the compiler tries to move them
   // into loops, and when it runs out of registers, it will redundantly perform
