@@ -282,6 +282,15 @@ jobs:
           key: ${{ github.job }}-${{ matrix.arch }}
           max-size: "1G"
           save: ${{ inputs.update-caches }}
+      - name: Force compiler binary mtime
+        # The nttld/setup-ndk action downloads the compiler binaries and copies them to the
+        # tools-cache, where their mtimes are set to the current time. This is bad since ccache
+        # uses the compiler binary mtime to determine whether two compilations match. We solve
+        # this problem by coercing the mtime of the compiler binaries to a fixed value. Note that
+        # if the compiler does indeed change, this will also cause the path to change as it would
+        # imply using a different NDK version.
+        run: |
+          find ${{ steps.setup-ndk.outputs.ndk-path }} -wholename '*/bin/clang*' -executable -type f,l -exec touch -h -t 202408130000 {} +
       - name: Configure and build
         run: scripts/build-android-${{ matrix.arch }}.sh
         working-directory: ${{ github.workspace }}
