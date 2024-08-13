@@ -479,43 +479,52 @@ SET(TABLE_SRCS
   src/tables/exp2minus-k-over-2048.c
   src/tables/vlog.c)
 
-SET(PROD_SCALAR_MICROKERNEL_SRCS src/amalgam/gen/scalar.c)
-SET(PROD_ARMSIMD32_MICROKERNEL_SRCS src/amalgam/gen/armsimd32.c)
-SET(PROD_FP16ARITH_MICROKERNEL_SRCS src/amalgam/gen/fp16arith.c)
-SET(PROD_NEON_MICROKERNEL_SRCS src/amalgam/gen/neon.c)
-SET(PROD_NEONFP16_MICROKERNEL_SRCS src/amalgam/gen/neonfp16.c)
-SET(PROD_NEONFMA_MICROKERNEL_SRCS src/amalgam/gen/neonfma.c)
-SET(PROD_NEON_AARCH64_MICROKERNEL_SRCS src/amalgam/gen/neon-aarch64.c src/amalgam/gen/neonfma-aarch64.c)
-SET(PROD_NEONV8_MICROKERNEL_SRCS src/amalgam/gen/neonv8.c)
-SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS src/amalgam/gen/neonfp16arith.c)
-SET(PROD_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS src/amalgam/gen/neonfp16arith-aarch64.c)
-SET(PROD_NEONDOT_MICROKERNEL_SRCS src/amalgam/gen/neondot.c)
-SET(PROD_NEONDOT_AARCH64_MICROKERNEL_SRCS src/amalgam/gen/neondot-aarch64.c)
-SET(PROD_NEONDOTFP16ARITH_MICROKERNEL_SRCS src/amalgam/gen/neondotfp16arith.c)
-SET(PROD_NEONDOTFP16ARITH_AARCH64_MICROKERNEL_SRCS src/amalgam/gen/neondotfp16-aarch64.c)
-SET(PROD_NEONI8MM_AARCH64_MICROKERNEL_SRCS src/amalgam/gen/neoni8mm-aarch64.c)
-SET(PROD_NEONI8MM_MICROKERNEL_SRCS src/amalgam/gen/neoni8mm.c)
-SET(PROD_SSE_MICROKERNEL_SRCS src/amalgam/gen/sse.c)
-SET(PROD_SSE2_MICROKERNEL_SRCS src/amalgam/gen/sse2.c)
-SET(PROD_SSSE3_MICROKERNEL_SRCS src/amalgam/gen/ssse3.c)
-SET(PROD_SSE41_MICROKERNEL_SRCS src/amalgam/gen/sse41.c)
-SET(PROD_AVX_MICROKERNEL_SRCS src/amalgam/gen/avx.c)
-SET(PROD_F16C_MICROKERNEL_SRCS src/amalgam/gen/f16c.c)
-SET(PROD_FMA3_MICROKERNEL_SRCS src/amalgam/gen/fma3.c)
-SET(PROD_AVX2_MICROKERNEL_SRCS src/amalgam/gen/avx2.c)
-SET(PROD_AVX512F_MICROKERNEL_SRCS src/amalgam/gen/avx512f.c)
-SET(PROD_AVX512SKX_MICROKERNEL_SRCS src/amalgam/gen/avx512skx.c)
-SET(PROD_AVX512VBMI_MICROKERNEL_SRCS src/amalgam/gen/avx512vbmi.c)
-SET(PROD_AVX512VNNI_MICROKERNEL_SRCS src/amalgam/gen/avx512vnni.c)
-SET(PROD_AVX512VNNIGFNI_MICROKERNEL_SRCS src/amalgam/gen/avx512vnnigfni.c)
-SET(PROD_AVX512AMX_MICROKERNEL_SRCS src/amalgam/gen/avx512amx.c)
-SET(PROD_AVX512FP16_MICROKERNEL_SRCS src/amalgam/gen/avx512fp16.c)
-SET(PROD_RVV_MICROKERNEL_SRCS src/amalgam/gen/rvv.c)
-SET(PROD_RVVFP16ARITH_MICROKERNEL_SRCS src/amalgam/gen/rvvfp16arith.c)
-SET(PROD_AVXVNNI_MICROKERNEL_SRCS src/amalgam/gen/avxvnni.c)
-SET(PROD_AVX256SKX_MICROKERNEL_SRCS src/amalgam/gen/avx256skx.c)
-SET(PROD_AVX256VNNI_MICROKERNEL_SRCS src/amalgam/gen/avx256vnni.c)
-SET(PROD_AVX256VNNIGFNI_MICROKERNEL_SRCS src/amalgam/gen/avx256vnnigfni.c)
+SET(ALL_MICROKERNEL_GROUPS
+    armsimd32
+    avx
+    avx2
+    avx256skx
+    avx256vnni
+    avx256vnnigfni
+    avx512amx
+    avx512f
+    avx512fp16
+    avx512skx
+    avx512vbmi
+    avx512vnni
+    avx512vnnigfni
+    avxvnni
+    f16c
+    fma3
+    fp16arith
+    neon
+    neon_aarch64
+    neondot
+    neondot_aarch64
+    neondotfp16arith
+    neonfma
+    neonfp16
+    neonfp16arith
+    neonfp16arith_aarch64
+    neoni8mm
+    neoni8mm_aarch64
+    neonv8
+    rvv
+    rvvfp16arith
+    scalar
+    sse
+    sse2
+    sse41
+    ssse3)
+
+FOREACH(input ${ALL_MICROKERNEL_GROUPS})
+  string(TOUPPER ${input} input_upper)
+  include(cmake/gen/${input}_microkernels.cmake)
+  SET(PROD_${input_upper}_MICROKERNEL_SRCS ${ALL_${input_upper}_MICROKERNEL_SRCS})
+ENDFOREACH()
+
+# This one has an extra, irregular dep we need to append manually
+SET(PROD_NEON_AARCH64_MICROKERNEL_SRCS ${PROD_NEON_AARCH64_MICROKERNEL_SRCS} ${ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS})
 
 SET(PROD_MICROKERNEL_SRCS ${PROD_SCALAR_MICROKERNEL_SRCS})
 SET(ALL_MICROKERNEL_SRCS ${ALL_SCALAR_MICROKERNEL_SRCS})
@@ -584,7 +593,6 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^arm64")
   ENDIF()
   IF(XNNPACK_ENABLE_ARM_DOTPROD AND XNNPACK_ENABLE_ARM_FP16_VECTOR)
     LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONDOTFP16ARITH_MICROKERNEL_SRCS})
-    LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONDOTFP16ARITH_AARCH64_MICROKERNEL_SRCS})
   ENDIF()
   IF(XNNPACK_ENABLE_ARM_I8MM)
     LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONI8MM_AARCH64_MICROKERNEL_SRCS})
@@ -713,10 +721,28 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
   ENDIF()
 ENDIF()
 
+# Create a response file to avoid crazy-long commandlines, which can break Windows .bat files
+SET(BUILD_IDENTIFIER_INPUTS "")
+FOREACH(input ${PROD_MICROKERNEL_SRCS})
+  string(CONCAT BUILD_IDENTIFIER_INPUTS ${BUILD_IDENTIFIER_INPUTS} ${input} "\n")
+ENDFOREACH()
+file(WRITE "${PROJECT_BINARY_DIR}/build-identifier-inputs.txt" ${BUILD_IDENTIFIER_INPUTS})
+
+# This is a trick: if we directly list all 3000+ build deps for generate-build-identifier,
+# some build systems (e.g. XCodeBuild) can choke. We split it up into smaller
+# chunks, using add_custom_target(), to work around these limitations.
+SET(BUILD_IDENTIFIER_DEPS_ALL "")
+FOREACH(input ${ALL_MICROKERNEL_GROUPS})
+  string(TOUPPER ${input} input_upper)
+  add_custom_target(BUILD_IDENTIFIER_DEPS_${input_upper}
+                    DEPENDS ${PROD_${input_upper}_MICROKERNEL_SRCS})
+  SET(BUILD_IDENTIFIER_DEPS_ALL ${BUILD_IDENTIFIER_DEPS_ALL} BUILD_IDENTIFIER_DEPS_${input_upper})
+ENDFOREACH()
+
 ADD_CUSTOM_COMMAND(
   OUTPUT "${PROJECT_BINARY_DIR}/build_identifier.c"
-  COMMAND python3 "scripts/generate-build-identifier.py" --output "${PROJECT_BINARY_DIR}/build_identifier.c" ${PROD_MICROKERNEL_SRCS}
-  DEPENDS ${PROD_MICROKERNEL_SRCS}
+  COMMAND python3 "scripts/generate-build-identifier.py" --output "${PROJECT_BINARY_DIR}/build_identifier.c" @"${PROJECT_BINARY_DIR}/build-identifier-inputs.txt"
+  DEPENDS ${BUILD_IDENTIFIER_DEPS_ALL} "${PROJECT_BINARY_DIR}/build-identifier-inputs.txt"
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
 
@@ -846,7 +872,6 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^arm64" AND NOT MSVC)
   SET_PROPERTY(SOURCE ${PROD_NEONFP16ARITH_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+fp16 ")
   SET_PROPERTY(SOURCE ${ALL_NEONDOTFP16ARITH_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+dotprod+fp16 ")
   SET_PROPERTY(SOURCE ${PROD_NEONDOTFP16ARITH_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+dotprod+fp16 ")
-  SET_PROPERTY(SOURCE ${PROD_NEONDOTFP16ARITH_AARCH64_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+dotprod+fp16 ")
   SET_PROPERTY(SOURCE ${ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+fp16 ")
   SET_PROPERTY(SOURCE ${PROD_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+fp16 ")
   SET_PROPERTY(SOURCE ${ALL_NEONBF16_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+bf16 ")
@@ -1838,7 +1863,7 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(copysign-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(copysign-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME copysign-test COMMAND copysign-test)
-  
+
     ADD_EXECUTABLE(deconvolution-2d-test test/deconvolution-2d.cc)
     SET_TARGET_PROPERTIES(deconvolution-2d-test PROPERTIES CXX_EXTENSIONS YES)
     TARGET_INCLUDE_DIRECTORIES(deconvolution-2d-test PRIVATE src test)

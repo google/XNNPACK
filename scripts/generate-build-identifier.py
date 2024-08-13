@@ -65,13 +65,22 @@ bool xnn_experimental_check_build_identifier(const void* data, const size_t size
 
 
 def main(args) -> None:
-  m = hashlib.sha256()
+  inputs = []
   for path in args.inputs:
+    if path.startswith("@"):
+      # Assume it's a response file
+      with open(path[1:], "rt") as f:
+        inputs += f.read().split()
+    else:
+        inputs.append(path)
+
+  m = hashlib.sha256()
+  for path in inputs:
     with open(path, "rb") as f:
       m.update(f.read())
   byte_list = ", ".join(str(b).rjust(3, "x") for b in m.digest())
   byte_list = textwrap.indent(textwrap.fill(byte_list, width=40), "  ").replace("x", " ")
-  formated_input_list = "\n".join("// - " + p for p in args.inputs)
+  formated_input_list = "\n".join("// - " + p for p in inputs)
   with open(args.output, "w") as out:
     out.write(FILE_TEMPLATE.format(id_data=byte_list, genlist=formated_input_list))
 
