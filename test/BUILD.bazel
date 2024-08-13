@@ -2007,6 +2007,7 @@ xnnpack_cc_library(
     "bankers_rounding",
     "ceiling",
     "clamp",
+    "clz"
     "convert",
     "copy",
     "elu",

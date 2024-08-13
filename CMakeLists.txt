@@ -1829,6 +1829,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(clamp-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME clamp-test COMMAND clamp-test)
 
+    ADD_EXECUTABLE(clz-test test/clz.cc)
+    TARGET_INCLUDE_DIRECTORIES(clz-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(clz-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME clz-test COMMAND clz-test)
+  
     ADD_EXECUTABLE(concatenate2-test test/concatenate2.cc)
     TARGET_INCLUDE_DIRECTORIES(concatenate2-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(concatenate2-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main subgraph fp16)

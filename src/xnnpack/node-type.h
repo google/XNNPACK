@@ -26,6 +26,7 @@ enum xnn_node_type {
   xnn_node_type_batch_matrix_multiply,
   xnn_node_type_ceiling,
   xnn_node_type_clamp,
+  xnn_node_type_clz,
   xnn_node_type_concatenate2,
   xnn_node_type_concatenate3,
   xnn_node_type_concatenate4,

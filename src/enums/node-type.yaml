@@ -23,6 +23,8 @@
   string: "Ceiling"
 - name: xnn_node_type_clamp
   string: "Clamp"
+- name: xnn_node_type_clz
+  string: "Count Leading Zeros"
 - name: xnn_node_type_concatenate2
   string: "Concatenate2"
 - name: xnn_node_type_concatenate3
