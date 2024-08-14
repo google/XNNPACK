@@ -82,7 +82,7 @@ class UnaryTest : public ::testing::Test {
   std::uniform_int_distribution<int32_t> u8dist;
   std::uniform_int_distribution<uint32_t> u32dist;
   std::uniform_real_distribution<float> f32dist;
-  std::uniform_int_distribution<float> s32dist;
+  std::uniform_int_distribution<int32_t> s32dist;
 
   std::vector<size_t> dims;
 
