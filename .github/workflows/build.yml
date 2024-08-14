@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  cmake-linux-local:
+  cmake-linux-x86_64:
     runs-on: ubuntu-22.04-8core
     timeout-minutes: 60
     steps:
@@ -37,6 +37,10 @@ jobs:
       - name: Configure and build
         run: scripts/build-local.sh
         working-directory: ${{ github.workspace }}
+      - name: Run tests
+        if: ${{ inputs.run-tests }}
+        run: ctest --output-on-failure --parallel $(nproc)
+        working-directory: ${{ github.workspace }}/build/local
   cmake-linux-aarch64:
     runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 60
@@ -53,12 +57,12 @@ jobs:
           max-size: "1G"
           save: ${{ inputs.update-caches }}
       - name: Configure and build
-        run: scripts/build-linux-aarch64.sh -DCMAKE_BUILD_TYPE=Release
+        run: scripts/build-local.sh
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
         run: ctest --output-on-failure --parallel $(nproc)
-        working-directory: ${{ github.workspace }}/build/linux/aarch64
+        working-directory: ${{ github.workspace }}/build/local
   cmake-linux-armhf:
     runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 60
