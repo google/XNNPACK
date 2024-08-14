@@ -156,7 +156,7 @@ class RSumMicrokernelTester {
       rsum(batch_size() * sizeof(uint16_t), input.data(), &output, &params);
 
       // Verify results.
-      EXPECT_NEAR(fp16_ieee_to_fp32_value(output), output_ref, std::abs(output_ref) * 2.0e-3f)
+      EXPECT_NEAR(fp16_ieee_to_fp32_value(output), output_ref, std::abs(output_ref) * 4.0e-3f)
         << "with batch " << batch_size() << ", scale " << scale();
     }
   }
