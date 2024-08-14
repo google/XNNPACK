@@ -23,6 +23,7 @@ load(
     "xnnpack_simd_f32_archs",
     "xnnpack_simd_s16_archs",
     "xnnpack_simd_s32_archs",
+    "xnnpack_simd_s8_archs",
     "xnnpack_slinky_defines",
     "xnnpack_slinky_deps",
     "xnnpack_slinky_srcs",
@@ -272,6 +273,9 @@ SIMD_HEADERS = [
 ] + [
     "src/xnnpack/simd/s32-" + arch + ".h"
     for arch in xnnpack_simd_s32_archs()
+] + [
+    "src/xnnpack/simd/s8-" + arch + ".h"
+    for arch in xnnpack_simd_s8_archs()
 ]
 
 exports_files(SIMD_HEADERS)

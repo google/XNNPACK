@@ -13,6 +13,7 @@ load(
     "xnnpack_simd_f32_archs",
     "xnnpack_simd_s16_archs",
     "xnnpack_simd_s32_archs",
+    "xnnpack_simd_s8_archs",
     "xnnpack_test_deps_for_library",
     "xnnpack_unit_test",
 )
@@ -220,6 +221,20 @@ xnnpack_cc_library(
         "//:microkernels_h",
     ],
 ) for arch in xnnpack_simd_s32_archs()]
+
+[xnnpack_unit_test(
+    name = "s8_simd_" + arch + "_test",
+    srcs = [
+        "s8-simd-" + arch + ".cc",
+    ],
+    copts = xnnpack_simd_copts_for_arch(arch),
+    deps = [
+        ":replicable_random_device",
+        "//:common",
+        "//:isa_checks",
+        "//:microkernels_h",
+    ],
+) for arch in xnnpack_simd_s8_archs()]
 
 ######################### Unit tests for micro-kernels #########################
 
