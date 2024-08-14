@@ -28,10 +28,15 @@ void xnn_f16_vhswish_ukernel__neonfp16arith_u${BATCH_TILE}(
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
 
-  const float16x8_t vsixth = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.sixth));
-  const float16x8_t vthree = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.three));
-  const int16x8_t vsix = vreinterpretq_s16_u16(vld1q_dup_u16(&params->fp16arith.six));
+  const float16x8_t vsixth = vreinterpretq_f16_u16(vdupq_n_u16(UINT16_C(0x3155)));
+  const float16x8_t vthree = vreinterpretq_f16_u16(vdupq_n_u16(UINT16_C(0x4200)));
+  const int16x8_t vsix = vreinterpretq_s16_u16(vdupq_n_u16(UINT16_C(0x4600)));
   const int16x8_t vzero = vdupq_n_s16(0);
+
+  XNN_FORCE_REALIZATION(vsixth);
+  XNN_FORCE_REALIZATION(vthree);
+  XNN_FORCE_REALIZATION(vsix);
+  // XNN_FORCE_REALIZATION(vzero);
 
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {

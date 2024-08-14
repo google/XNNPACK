@@ -206,7 +206,6 @@ static void init_f16_hswish_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vhswish_ukernel__neonfp16arith_u16;
-      f16_hswish_config.init.f16_hswish = xnn_init_f16_hswish_fp16arith_params;
       f16_hswish_config.element_tile = 16;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
@@ -214,7 +213,6 @@ static void init_f16_hswish_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vhswish_ukernel__neonfp16arith_u16;
-      f16_hswish_config.init.f16_hswish = xnn_init_f16_hswish_fp16arith_params;
       f16_hswish_config.element_tile = 16;
     }
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
@@ -222,7 +220,6 @@ static void init_f16_hswish_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_f16c) {
       f16_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vhswish_ukernel__f16c_u16;
-      f16_hswish_config.init.f16_hswish = xnn_init_f16_hswish_avx_params;
       f16_hswish_config.element_tile = 16;
     }
   #endif
@@ -823,60 +820,48 @@ static void init_f32_hswish_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__neon_u16;
-      f32_hswish_config.init.f32_hswish = xnn_init_f32_hswish_scalar_params;
       f32_hswish_config.element_tile = 16;
     } else if (!XNN_PLATFORM_MOBILE) {
       f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__scalar_u4;
-      f32_hswish_config.init.f32_hswish = xnn_init_f32_hswish_scalar_params;
       f32_hswish_config.element_tile = 4;
     }
   #elif XNN_ARCH_ARM64
     f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__neon_u16;
-    f32_hswish_config.init.f32_hswish = xnn_init_f32_hswish_scalar_params;
     f32_hswish_config.element_tile = 16;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__avx512f_u16;
-      f32_hswish_config.init.f32_hswish = xnn_init_f32_hswish_avx512_params;
       f32_hswish_config.element_tile = 16;
     } else if (hardware_config->use_x86_fma3) {
       f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__fma3_u16;
-      f32_hswish_config.init.f32_hswish = xnn_init_f32_hswish_avx_params;
       f32_hswish_config.element_tile = 16;
     } else if (hardware_config->use_x86_avx) {
       f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__avx_u16;
-      f32_hswish_config.init.f32_hswish = xnn_init_f32_hswish_avx_params;
       f32_hswish_config.element_tile = 16;
     } else {
       f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__sse_u8;
-      f32_hswish_config.init.f32_hswish = xnn_init_f32_hswish_sse_params;
       f32_hswish_config.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__wasmsimd_u16;
-    f32_hswish_config.init.f32_hswish = xnn_init_f32_hswish_wasmsimd_params;
     f32_hswish_config.element_tile = 16;
   #elif XNN_ARCH_WASM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
       f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__scalar_u4;
-      f32_hswish_config.init.f32_hswish = xnn_init_f32_hswish_scalar_params;
       f32_hswish_config.element_tile = 4;
     } else {
       f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__wasm_u4;
-      f32_hswish_config.init.f32_hswish = xnn_init_f32_hswish_scalar_params;
       f32_hswish_config.element_tile = 4;
     }
   #elif XNN_ARCH_RISCV
     f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__scalar_u4;
-    f32_hswish_config.init.f32_hswish = xnn_init_f32_hswish_scalar_params;
     f32_hswish_config.element_tile = 4;
   #else
     f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__scalar_u4;
-    f32_hswish_config.init.f32_hswish = xnn_init_f32_hswish_scalar_params;
     f32_hswish_config.element_tile = 4;
   #endif
 }

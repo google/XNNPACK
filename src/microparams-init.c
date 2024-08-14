@@ -2760,85 +2760,6 @@ size_t xnn_init_f32_qb4w_minmax_scalar_params(
   return sizeof(params->scalar);
 }
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f16_hswish_fp16arith_params(
-  union xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->fp16arith.sixth = UINT16_C(0x3155);
-  params->fp16arith.three = UINT16_C(0x4200);
-  params->fp16arith.six = UINT16_C(0x4600);
-  return sizeof(params->fp16arith);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_hswish_avx_params(
-  union xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.sixth[i] = 0x1.554000p-3f;
-    params->avx.three[i] = 3.0f;
-    params->avx.six[i] = UINT16_C(0x4600);
-  }
-  return sizeof(params->avx);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-size_t xnn_init_f32_hswish_scalar_params(
-  union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->scalar.sixth = 0x1.555556p-3f;
-  params->scalar.three = 3.0f;
-  params->scalar.six = 6.0f;
-  return sizeof(params->scalar);
-}
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_hswish_sse_params(
-  union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse.sixth[i] = 0x1.555556p-3f;
-    params->sse.half[i] = 0.5f;
-    params->sse.one[i] = 1.0f;
-  }
-  return sizeof(params->sse);
-}
-
-size_t xnn_init_f32_hswish_avx_params(
-  union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.sixth[i] = 0x1.555556p-3f;
-    params->avx.half[i] = 0.5f;
-    params->avx.one[i] = 1.0f;
-  }
-  return sizeof(params->avx);
-}
-
-size_t xnn_init_f32_hswish_avx512_params(
-  union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->avx512.sixth = 0x1.555556p-3f;
-  params->avx512.half = 0.5f;
-  params->avx512.one = 1.0f;
-  return sizeof(params->avx512);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_f32_hswish_wasmsimd_params(
-  union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd.sixth[i] = 0x1.555556p-3f;
-    params->wasmsimd.three[i] = 3.0f;
-    params->wasmsimd.six[i] = 6.0f;
-  }
-  return sizeof(params->wasmsimd);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
 size_t xnn_init_qs8_hswish_scalar_params(
   union xnn_qs8_hswish_params params[XNN_MIN_ELEMENTS(1)],
   int16_t input_zero_point,
@@ -2900,9 +2821,6 @@ size_t xnn_init_qs8_hswish_sse2_params(
     params->sse2.input_scale_div[i] = input_scale_div;
     params->sse2.scale_ratio[i] = scale_ratio_param;
   }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2.half[i] = 0x4000;
-  }
   return sizeof(params->sse2);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -2934,10 +2852,6 @@ size_t xnn_init_qs8_hswish_wasmsimd_params(
     params->wasmsimd.scale_ratio[i] = scale_ratio_int;
     params->wasmsimd.shift_max[i] = shift_max;
     params->wasmsimd.shift_min[i] = -shift_max;
-    params->wasmsimd.max_val[i] = 0x7FFF;
-    params->wasmsimd.min_val[i] = 0x8000;
-    params->wasmsimd.half[i] = 0x4000;
-    params->wasmsimd.zero[i] = 0x0000;
   }
   return sizeof(params->wasmsimd);
 }
@@ -3010,10 +2924,6 @@ size_t xnn_init_qu8_hswish_wasmsimd_params(
     params->wasmsimd.scale_ratio[i] = scale_ratio_int;
     params->wasmsimd.shift_max[i] = shift_max;
     params->wasmsimd.shift_min[i] = -shift_max;
-    params->wasmsimd.max_val[i] = 0x7FFF;
-    params->wasmsimd.min_val[i] = 0x8000;
-    params->wasmsimd.half[i] = 0x4000;
-    params->wasmsimd.zero[i] = 0x0000;
   }
   return sizeof(params->wasmsimd);
 }
@@ -3037,9 +2947,6 @@ size_t xnn_init_qu8_hswish_sse2_params(
     params->sse2.output_zero_point[i] = output_zero_point;
     params->sse2.input_scale_div[i] = input_scale_div;
     params->sse2.scale_ratio[i] = scale_ratio_param;
-  }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2.half[i] = 0x4000;
   }
   return sizeof(params->sse2);
 }

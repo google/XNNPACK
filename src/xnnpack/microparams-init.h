@@ -501,32 +501,6 @@ DECLARE_INIT_F32_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qb4w_minmax_scalar_par
   DECLARE_INIT_F32_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qb4w_minmax_wasmsimd_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#define DECLARE_INIT_F16_HSWISH_PARAMS_FUNCTION(fn_name) \
-  XNN_INTERNAL size_t fn_name(                           \
-    union xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)]);
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_F16_HSWISH_PARAMS_FUNCTION(xnn_init_f16_hswish_fp16arith_params)
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F16_HSWISH_PARAMS_FUNCTION(xnn_init_f16_hswish_avx_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
-#define DECLARE_INIT_F32_HSWISH_PARAMS_FUNCTION(fn_name) \
-  XNN_INTERNAL size_t fn_name(                           \
-    union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)]);
-
-DECLARE_INIT_F32_HSWISH_PARAMS_FUNCTION(xnn_init_f32_hswish_scalar_params)
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F32_HSWISH_PARAMS_FUNCTION(xnn_init_f32_hswish_sse_params)
-  DECLARE_INIT_F32_HSWISH_PARAMS_FUNCTION(xnn_init_f32_hswish_avx_params)
-  DECLARE_INIT_F32_HSWISH_PARAMS_FUNCTION(xnn_init_f32_hswish_avx512_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_F32_HSWISH_PARAMS_FUNCTION(xnn_init_f32_hswish_wasmsimd_params)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
 #define DECLARE_INIT_QS8_HSWISH_PARAMS_FUNCTION(fn_name)       \
   XNN_INTERNAL size_t fn_name(                                 \
     union xnn_qs8_hswish_params params[XNN_MIN_ELEMENTS(1)],   \
