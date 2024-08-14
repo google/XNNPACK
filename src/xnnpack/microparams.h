@@ -23,11 +23,6 @@ union xnn_bf16_default_params {
 
 union xnn_f32_default_params {
   char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    int32_t mask_table[14];
-  } avx;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_s32_default_params {
@@ -96,7 +91,6 @@ union xnn_f32_scaleminmax_params {
     XNN_ALIGN(16) float max[4];
   } sse;
   struct {
-    int32_t mask_table[14];
     float scale;
     float min;
     float max;
@@ -154,7 +148,6 @@ union xnn_f32_minmax_params {
   struct {
     XNN_ALIGN(32) float min[8];
     XNN_ALIGN(32) float max[8];
-    int32_t mask_table[14];
   } avx;
   struct {
     float min;
@@ -1398,7 +1391,6 @@ union xnn_f32_qs8_cvt_params {
     XNN_ALIGN(32) float output_max_less_zero_point[8];
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int8_t output_min[16];
-    int32_t mask_table[14];
   } avx;
   struct {
     XNN_ALIGN(32) float scale[8];
@@ -1406,7 +1398,6 @@ union xnn_f32_qs8_cvt_params {
     XNN_ALIGN(32) int16_t output_zero_point[16];
     XNN_ALIGN(32) uint32_t shuffle_mask[8];
     XNN_ALIGN(32) int8_t output_min[32];
-    int32_t mask_table[14];
   } avx2;
   struct {
     XNN_ALIGN(64) float scale[16];
@@ -1491,7 +1482,6 @@ union xnn_f32_qu8_cvt_params {
     XNN_ALIGN(32) float output_max_less_zero_point[8];
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) uint8_t output_min[16];
-    int32_t mask_table[14];
   } avx;
   struct {
     XNN_ALIGN(32) float scale[8];
@@ -1499,7 +1489,6 @@ union xnn_f32_qu8_cvt_params {
     XNN_ALIGN(32) int16_t output_zero_point[16];
     XNN_ALIGN(32) uint32_t shuffle_mask[8];
     XNN_ALIGN(32) uint8_t output_min[32];
-    int32_t mask_table[14];
   } avx2;
   struct {
     XNN_ALIGN(64) float scale[16];
@@ -2267,7 +2256,6 @@ union xnn_f32_hswish_params {
     XNN_ALIGN(32) float sixth[8];
     XNN_ALIGN(32) float half[8];
     XNN_ALIGN(32) float one[8];
-    int32_t mask_table[14];
   } avx;
   struct {
     float sixth;
@@ -2397,7 +2385,6 @@ union xnn_f32_lrelu_params {
   } sse;
   struct {
     XNN_ALIGN(32) float slope[8];
-    int32_t mask_table[14];
   } avx;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

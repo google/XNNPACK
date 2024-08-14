@@ -1340,7 +1340,6 @@ static void init_f32_sqr_config(void) {
       f32_sqr_config.element_tile = 16;
     } else if (hardware_config->use_x86_avx) {
       f32_sqr_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__avx_u16;
-      f32_sqr_config.init.f32_default = xnn_init_f32_default_avx_params;
       f32_sqr_config.element_tile = 16;
     } else {
       f32_sqr_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__sse2_u8;

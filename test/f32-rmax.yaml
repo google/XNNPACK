@@ -19,15 +19,10 @@
 
 # x86 AVX
 - name: xnn_f32_rmax_ukernel__avx_u8
-  init: xnn_init_f32_default_avx_params
 - name: xnn_f32_rmax_ukernel__avx_u16_acc2
-  init: xnn_init_f32_default_avx_params
 - name: xnn_f32_rmax_ukernel__avx_u24_acc3
-  init: xnn_init_f32_default_avx_params
 - name: xnn_f32_rmax_ukernel__avx_u32_acc2
-  init: xnn_init_f32_default_avx_params
 - name: xnn_f32_rmax_ukernel__avx_u32_acc4
-  init: xnn_init_f32_default_avx_params
 
 # x86 AVX512F
 - name: xnn_f32_rmax_ukernel__avx512f_u16

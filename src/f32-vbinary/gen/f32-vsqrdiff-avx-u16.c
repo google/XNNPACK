@@ -28,6 +28,8 @@ void xnn_f32_vsqrdiff_ukernel__avx_u16(
   assert(input_b != NULL);
   assert(output != NULL);
 
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     __m256 vacc0 = _mm256_loadu_ps(input_a);
@@ -59,7 +61,7 @@ void xnn_f32_vsqrdiff_ukernel__avx_u16(
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
     __m256 vacc = _mm256_maskload_ps(input_a, vmask);
     const __m256 vb = _mm256_maskload_ps(input_b, vmask);

@@ -35,6 +35,8 @@ void xnn_f32_dwconv_minmax_ukernel_7f6m6l16c8s4r__fma3_acc2(
   assert(output_width != 0);
   assert(kernel_size > 7);
 
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
   const __m256 vmin = _mm256_load_ps(params->avx.min);
   const __m256 vmax = _mm256_load_ps(params->avx.max);
   do {
@@ -219,7 +221,7 @@ void xnn_f32_dwconv_minmax_ukernel_7f6m6l16c8s4r__fma3_acc2(
       if (c != 0) {
         assert(c >= 1);
         assert(c <= 7);
-        const __m256i vmask = _mm256_loadu_si256((const __m256i*) &params->avx.mask_table[7 - c]);
+        const __m256i vmask = _mm256_loadu_si256((const __m256i*) &mask_table[7 - c]);
         __m256 vacc01234567p0 = _mm256_load_ps(w);
 
 
@@ -425,7 +427,7 @@ void xnn_f32_dwconv_minmax_ukernel_7f6m6l16c8s4r__fma3_acc2(
       if (c != 0) {
         assert(c >= 1);
         assert(c <= 7);
-        const __m256i vmask = _mm256_loadu_si256((const __m256i*) &params->avx.mask_table[7 - c]);
+        const __m256i vmask = _mm256_loadu_si256((const __m256i*) &mask_table[7 - c]);
         __m256 vacc01234567p0 = _mm256_load_ps(b);
 
 
@@ -652,7 +654,7 @@ void xnn_f32_dwconv_minmax_ukernel_7f6m6l16c8s4r__fma3_acc2(
         assert(c >= 1);
         assert(c <= 7);
         __m256 vacc01234567p0 = _mm256_load_ps(b);
-        const __m256i vmask = _mm256_loadu_si256((const __m256i*) &params->avx.mask_table[7 - c]);
+        const __m256i vmask = _mm256_loadu_si256((const __m256i*) &mask_table[7 - c]);
 
         const __m256 vi0x01234567 = _mm256_maskload_ps(i0, vmask);
         __m256 vk0x01234567 = _mm256_load_ps(w);

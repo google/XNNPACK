@@ -1942,12 +1942,6 @@ size_t xnn_init_f32_scaleminmax_avx_params(
   float min,
   float max)
 {
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
-  }
   params->avx.scale = scale;
   params->avx.min = min;
   params->avx.max = max;
@@ -2381,18 +2375,6 @@ size_t xnn_init_f16_qb4w_minmax_avxvnni_params(
   params->avxvnni.blocksize = blocksize;
   return sizeof(params->avxvnni);
 }
-
-size_t xnn_init_f32_default_avx_params(
-  union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
-  }
-  return sizeof(params->avx);
-}
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -2416,12 +2398,6 @@ size_t xnn_init_f32_minmax_avx_params(
   for (uint32_t i = 0; i < 8; i++) {
     params->avx.min[i] = output_min;
     params->avx.max[i] = output_max;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
   }
   return sizeof(params->avx);
 }
@@ -2836,12 +2812,6 @@ size_t xnn_init_f32_hswish_avx_params(
     params->avx.sixth[i] = 0x1.555556p-3f;
     params->avx.half[i] = 0.5f;
     params->avx.one[i] = 1.0f;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
   }
   return sizeof(params->avx);
 }
@@ -4085,12 +4055,6 @@ size_t xnn_init_f32_lrelu_avx_params(
 {
   for (uint32_t i = 0; i < 8; i++) {
     params->avx.slope[i] = slope;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
   }
   return sizeof(params->avx);
 }
@@ -6721,12 +6685,6 @@ size_t xnn_init_f32_qs8_cvt_avx_params(
   for (uint32_t i = 0; i < 16; i++) {
     params->avx.output_min[i] = output_min;
   }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
-  }
   return sizeof(params->avx);
 }
 
@@ -6755,12 +6713,6 @@ size_t xnn_init_f32_qs8_cvt_avx2_params(
   params->avx2.shuffle_mask[7] = 7;
   for (uint32_t i = 0; i < 32; i++) {
     params->avx2.output_min[i] = output_min;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx2.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx2.mask_table[i] = 0;
   }
   return sizeof(params->avx2);
 }
@@ -6989,12 +6941,6 @@ size_t xnn_init_f32_qu8_cvt_avx_params(
   for (uint32_t i = 0; i < 16; i++) {
     params->avx.output_min[i] = output_min;
   }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
-  }
   return sizeof(params->avx);
 }
 
@@ -7023,12 +6969,6 @@ size_t xnn_init_f32_qu8_cvt_avx2_params(
   params->avx2.shuffle_mask[7] = 7;
   for (uint32_t i = 0; i < 32; i++) {
     params->avx2.output_min[i] = output_min;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx2.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx2.mask_table[i] = 0;
   }
   return sizeof(params->avx2);
 }

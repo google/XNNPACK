@@ -116,7 +116,6 @@ static void init_f32_rminmax_config(void) {
     } else if (hardware_config->use_x86_avx) {
       f32_rminmax_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__avx_u32_acc4,
-        .init.f32_default = xnn_init_f32_default_avx_params,
         .element_tile = 32,
       };
     } else {

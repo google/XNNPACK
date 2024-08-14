@@ -26,6 +26,8 @@ void xnn_f32_vhswish_ukernel__fma3_u16(
   assert(input != NULL);
   assert(output != NULL);
 
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
   const __m256 vsixth = _mm256_load_ps(params->avx.sixth);
   const __m256 vhalf = _mm256_load_ps(params->avx.half);
   const __m256 vone = _mm256_load_ps(params->avx.one);
@@ -65,7 +67,7 @@ void xnn_f32_vhswish_ukernel__fma3_u16(
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
     const __m256 vx = _mm256_maskload_ps(input, vmask);
     __m256 vacc = _mm256_fmadd_ps(vx, vsixth, vhalf);
