@@ -36,7 +36,6 @@ PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-scalar-2x1-acc2.c",
     "src/f32-f16-vcvt/gen/f32-f16-vcvt-scalar-bitcast-u4.c",
     "src/f32-f16-vcvt/gen/f32-f16-vcvt-scalar-fabsf-u2.c",
-    "src/f32-gavgpool-cw/f32-gavgpool-cw-scalar-u1.c",
     "src/f32-gavgpool/f32-gavgpool-7p7x-minmax-scalar-c1.c",
     "src/f32-gavgpool/f32-gavgpool-7x-minmax-scalar-c1.c",
     "src/f32-gemm/gen/f32-gemm-1x4-minmax-scalar.c",

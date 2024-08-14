@@ -37,24 +37,6 @@ TEST(GLOBAL_AVERAGE_POOLING_NCW_F16, varying_width) {
   }
 }
 
-TEST(GLOBAL_AVERAGE_POOLING_NCW_F16, qmin) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  GlobalAveragePoolingOperatorTester()
-    .width(27)
-    .channels(19)
-    .qmin(128)
-    .TestNCWxF16();
-}
-
-TEST(GLOBAL_AVERAGE_POOLING_NCW_F16, qmax) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  GlobalAveragePoolingOperatorTester()
-    .width(27)
-    .channels(19)
-    .qmax(128)
-    .TestNCWxF16();
-}
-
 TEST(GLOBAL_AVERAGE_POOLING_NCW_F32, single_channel) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   GlobalAveragePoolingOperatorTester()
@@ -81,22 +63,4 @@ TEST(GLOBAL_AVERAGE_POOLING_NCW_F32, varying_width) {
       .channels(19)
       .TestNCWxF32();
   }
-}
-
-TEST(GLOBAL_AVERAGE_POOLING_NCW_F32, qmin) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  GlobalAveragePoolingOperatorTester()
-    .width(27)
-    .channels(19)
-    .qmin(128)
-    .TestNCWxF32();
-}
-
-TEST(GLOBAL_AVERAGE_POOLING_NCW_F32, qmax) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  GlobalAveragePoolingOperatorTester()
-    .width(27)
-    .channels(19)
-    .qmax(128)
-    .TestNCWxF32();
 }

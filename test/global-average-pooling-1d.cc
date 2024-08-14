@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -22,7 +21,6 @@
 #include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
-#include "xnnpack/requantization.h"
 #include "xnnpack/subgraph.h"
 #include "replicable_random_device.h"
 
@@ -122,10 +120,8 @@ TEST_F(GlobalAveragePooling1DTestQS8, define)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_global_average_pooling_1d);
+  ASSERT_EQ(node->type, xnn_node_type_static_mean);
   ASSERT_EQ(node->compute_type, xnn_compute_type_qs8);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);
@@ -161,10 +157,8 @@ TEST_F(GlobalAveragePooling1DTestQU8, define)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_global_average_pooling_1d);
+  ASSERT_EQ(node->type, xnn_node_type_static_mean);
   ASSERT_EQ(node->compute_type, xnn_compute_type_qu8);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);
@@ -200,10 +194,8 @@ TEST_F(GlobalAveragePooling1DTestF16, define)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_global_average_pooling_1d);
+  ASSERT_EQ(node->type, xnn_node_type_static_mean);
   ASSERT_EQ(node->compute_type, xnn_compute_type_fp16);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);
@@ -239,10 +231,8 @@ TEST_F(GlobalAveragePooling1DTestF32, define)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_global_average_pooling_1d);
+  ASSERT_EQ(node->type, xnn_node_type_static_mean);
   ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);
@@ -256,37 +246,40 @@ TEST_F(GlobalAveragePooling1DTestQS8, matches_operator_api)
   const int32_t output_zero_point = i8dist(rng);
   const float input_scale = scale_dist(rng);
   const float output_scale = scale_dist(rng);
-  const int8_t quantized_output_min = xnn_qs8_quantize(output_min, output_scale, output_zero_point);
-  const int8_t quantized_output_max = xnn_qs8_quantize(output_max, output_scale, output_zero_point);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_global_average_pooling_nwc_qs8(
-    input_zero_point, input_scale, output_zero_point, output_scale, quantized_output_min,
-    quantized_output_max, /*flags=*/0, &op);
+  const xnn_status status = xnn_create_reduce_nd(
+      xnn_reduce_mean, xnn_datatype_qint8, input_scale / output_scale,
+      input_zero_point, output_zero_point, /*flags=*/0, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
 
+  size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
+  size_t input_shape[XNN_MAX_TENSOR_DIMS];
+  reduction_axes[0] = 1;
+  input_shape[0] = batch_size;
+  input_shape[1] = input_width;
+  input_shape[2] = channels;
+
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_global_average_pooling_nwc_qs8(
-                          op, batch_size, input_width, channels,
-                          /*input_stride=*/channels,
-                          /*output_stride=*/channels,
-                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+    xnn_status_success, xnn_reshape_reduce_nd(
+        op, xnn_datatype_qint8, 1, reduction_axes, 3, input_shape,
+        &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
   std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_global_average_pooling_nwc_qs8(op, workspace.data(), input.data(), operator_output.data()));
+    xnn_setup_reduce_nd(op, workspace.data(), input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -332,37 +325,41 @@ TEST_F(GlobalAveragePooling1DTestQU8, matches_operator_api)
   const int32_t output_zero_point = u8dist(rng);
   const float input_scale = scale_dist(rng);
   const float output_scale = scale_dist(rng);
-  const uint8_t quantized_output_min = xnn_qu8_quantize(output_min, output_scale, output_zero_point);
-  const uint8_t quantized_output_max = xnn_qu8_quantize(output_max, output_scale, output_zero_point);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_global_average_pooling_nwc_qu8(
-    input_zero_point, input_scale, output_zero_point, output_scale, quantized_output_min,
-    quantized_output_max, /*flags=*/0, &op);
+  const xnn_status status = xnn_create_reduce_nd(
+      xnn_reduce_mean, xnn_datatype_quint8, input_scale / output_scale,
+      input_zero_point, output_zero_point, /*flags=*/0, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
 
+  size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
+  size_t input_shape[XNN_MAX_TENSOR_DIMS];
+  reduction_axes[0] = 1;
+  input_shape[0] = batch_size;
+  input_shape[1] = input_width;
+  input_shape[2] = channels;
+
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_global_average_pooling_nwc_qu8(
-                          op, batch_size, input_width, channels,
-                          /*input_stride=*/channels,
-                          /*output_stride=*/channels,
-                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+    xnn_status_success, xnn_reshape_reduce_nd(
+        op, xnn_datatype_quint8, 1, reduction_axes, 3, input_shape,
+        &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
   std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_global_average_pooling_nwc_qu8(op, workspace.data(), input.data(), operator_output.data()));
+    xnn_setup_reduce_nd(
+        op, workspace.data(), input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -411,30 +408,34 @@ TEST_F(GlobalAveragePooling1DTestF16, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
   // Call operator API.
-  const xnn_status status = xnn_create_global_average_pooling_nwc_f16(
-    output_min, output_max, /*flags=*/0, &op);
+  const xnn_status status = xnn_create_reduce_nd(
+      xnn_reduce_mean, xnn_datatype_fp16, /*scale=*/0, /*input_zero_point=*/0,
+      /*output_zero_point=*/0, /*flags=*/0, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
 
+  size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
+  reduction_axes[0] = input_dims.size() - 2;
+
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_global_average_pooling_nwc_f16(
-                          op, batch_size, input_width, channels,
-                          /*input_stride=*/channels,
-                          /*output_stride=*/channels,
-                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+    xnn_status_success, xnn_reshape_reduce_nd(
+        op, xnn_datatype_fp16, 1, reduction_axes, input_dims.size(),
+        input_dims.data(), &workspace_size, &workspace_alignment,
+        /*threadpool=*/nullptr));
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
   std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_global_average_pooling_nwc_f16(op, workspace.data(), input.data(), operator_output.data()));
+    xnn_setup_reduce_nd(
+        op, workspace.data(), input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -481,30 +482,32 @@ TEST_F(GlobalAveragePooling1DTestF32, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
   // Call operator API.
-  const xnn_status status = xnn_create_global_average_pooling_nwc_f32(
-    output_min, output_max, /*flags=*/0, &op);
+  const xnn_status status = xnn_create_reduce_nd(
+      xnn_reduce_mean, xnn_datatype_fp32, /*scale=*/0, /*input_zero_point=*/0,
+      /*output_zero_point=*/0, /*flags=*/0, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
 
+  size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
+  reduction_axes[0] = input_dims.size() - 2;
+
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_global_average_pooling_nwc_f32(
-                          op, batch_size, input_width, channels,
-                          /*input_stride=*/channels,
-                          /*output_stride=*/channels,
-                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+    xnn_status_success, xnn_reshape_reduce_nd(
+        op, xnn_datatype_fp32, 1, reduction_axes, input_dims.size(),
+        input_dims.data(), &workspace_size, &workspace_alignment,
+        /*threadpool=*/nullptr));
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_global_average_pooling_nwc_f32(op, workspace.data(), input.data(), operator_output.data()));
+    xnn_setup_reduce_nd(op, nullptr, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
