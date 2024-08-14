@@ -408,7 +408,6 @@ static void init_f16_sigmoid_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_u16;
-      f16_sigmoid_config.init.f16_sigmoid = xnn_init_f16_sigmoid_fp16arith_rr2_p2_params;
       f16_sigmoid_config.element_tile = 16;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
@@ -416,7 +415,6 @@ static void init_f16_sigmoid_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_u40;
-      f16_sigmoid_config.init.f16_sigmoid = xnn_init_f16_sigmoid_fp16arith_rr2_p2_params;
       f16_sigmoid_config.element_tile = 40;
     }
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
@@ -424,7 +422,6 @@ static void init_f16_sigmoid_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_avx2) {
       f16_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_u32;
-      f16_sigmoid_config.init.f16_sigmoid = xnn_init_f16_sigmoid_avx2_rr1_p2_params;
       f16_sigmoid_config.element_tile = 32;
     }
   #endif
@@ -1274,62 +1271,49 @@ static void init_f32_sigmoid_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__neon_rr2_lut64_p2_nr2recps_u8;
-      f32_sigmoid_config.init.f32_sigmoid = xnn_init_f32_sigmoid_neon_rr2_lut64_p2_params;
       f32_sigmoid_config.element_tile = 8;
     } else if (!XNN_PLATFORM_MOBILE) {
       f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u2;
-      f32_sigmoid_config.init.f32_sigmoid = xnn_init_f32_sigmoid_scalar_rr2_lut64_p2_params;
       f32_sigmoid_config.element_tile = 2;
     }
   #elif XNN_ARCH_ARM64
     f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut64_p2_nr2recps_u16;
-    f32_sigmoid_config.init.f32_sigmoid = xnn_init_f32_sigmoid_neonfma_rr1_lut64_p2_params;
     f32_sigmoid_config.element_tile = 16;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_u64;
-      f32_sigmoid_config.init.f32_sigmoid = xnn_init_f32_sigmoid_avx512_rr2_lut32_p2_params;
       f32_sigmoid_config.element_tile = 64;
     } else if (hardware_config->use_x86_avx2) {
       f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__avx2_rr1_p5_div_u40;
-      f32_sigmoid_config.init.f32_sigmoid = xnn_init_f32_sigmoid_avx2_rr1_p5_params;
       f32_sigmoid_config.element_tile = 40;
     } else if (hardware_config->use_x86_avx) {
       f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__avx_rr2_p5_nr2_u40;
-      f32_sigmoid_config.init.f32_sigmoid = xnn_init_f32_sigmoid_avx_rr2_p5_params;
       f32_sigmoid_config.element_tile = 40;
     } else if (hardware_config->use_x86_sse4_1) {
       f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__sse41_rr2_lut64_p2_div_u8;
-      f32_sigmoid_config.init.f32_sigmoid = xnn_init_f32_sigmoid_sse2_rr2_lut64_p2_params;
       f32_sigmoid_config.element_tile = 8;
     } else {
       f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__sse2_rr2_lut64_p2_div_u8;
-      f32_sigmoid_config.init.f32_sigmoid = xnn_init_f32_sigmoid_sse2_rr2_lut64_p2_params;
       f32_sigmoid_config.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     #if XNN_ARCH_WASMRELAXEDSIMD
       f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_fma_rr2_p5_div_u24;
-      f32_sigmoid_config.init.f32_sigmoid = xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params;
       f32_sigmoid_config.element_tile = 24;
     #else
       f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_p5_div_u16;
-      f32_sigmoid_config.init.f32_sigmoid = xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params;
       f32_sigmoid_config.element_tile = 16;
     #endif
   #elif XNN_ARCH_WASM
     f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u2;
-    f32_sigmoid_config.init.f32_sigmoid = xnn_init_f32_sigmoid_scalar_rr2_lut64_p2_params;
     f32_sigmoid_config.element_tile = 2;
   #elif XNN_ARCH_RISCV
     f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u2;
-    f32_sigmoid_config.init.f32_sigmoid = xnn_init_f32_sigmoid_scalar_rr2_lut64_p2_params;
     f32_sigmoid_config.element_tile = 2;
   #else
     f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u2;
-    f32_sigmoid_config.init.f32_sigmoid = xnn_init_f32_sigmoid_scalar_rr2_lut64_p2_params;
     f32_sigmoid_config.element_tile = 2;
   #endif
 }

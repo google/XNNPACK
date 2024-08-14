@@ -197,10 +197,10 @@ class VUnaryMicrokernelTester {
             xnn_init_f32_rnd_params_fn init_params = nullptr) const;
 
   void Test(xnn_f16_vsigmoid_ukernel_fn vsigmoid,
-            xnn_init_f16_sigmoid_params_fn init_params) const;
+            xnn_init_f16_sigmoid_params_fn init_params = nullptr) const;
 
   void Test(xnn_f32_vsigmoid_ukernel_fn vsigmoid,
-            xnn_init_f32_sigmoid_params_fn init_params) const;
+            xnn_init_f32_sigmoid_params_fn init_params = nullptr) const;
 
   void TestSqr(xnn_f16_vsqr_ukernel_fn vsqr,
             xnn_init_f16_default_params_fn init_params = nullptr) const;

@@ -573,47 +573,6 @@ DECLARE_INIT_QU8_HSWISH_PARAMS_FUNCTION(xnn_init_qu8_hswish_scalar_params)
   DECLARE_INIT_QU8_HSWISH_PARAMS_FUNCTION(xnn_init_qu8_hswish_wasmsimd_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#define DECLARE_INIT_F16_SIGMOID_PARAMS_FUNCTION(fn_name)      \
-  XNN_INTERNAL size_t fn_name(                                 \
-    union xnn_f16_sigmoid_params params[XNN_MIN_ELEMENTS(1)]);
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_F16_SIGMOID_PARAMS_FUNCTION(xnn_init_f16_sigmoid_fp16arith_rr2_p2_params)
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F16_SIGMOID_PARAMS_FUNCTION(xnn_init_f16_sigmoid_avx2_rr1_p2_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
-#define DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(fn_name)      \
-  XNN_INTERNAL size_t fn_name(                                 \
-    union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)]);
-
-DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_scalar_rr2_lut64_p2_params)
-DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_scalar_rr2_lut2048_p1_params)
-DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_scalar_rr2_p5_params)
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_neon_rr2_lut2048_p1_params)
-  DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_neon_rr2_lut64_p2_params)
-  DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_neon_rr2_p5_params)
-  DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_neonfma_rr1_lut2048_p1_params)
-  DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_neonfma_rr1_lut64_p2_params)
-  DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_neonfma_rr1_p5_params)
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_sse2_rr2_lut64_p2_params)
-  DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_sse2_rr2_p5_params)
-  DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_avx_rr2_p5_params)
-  DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_avx2_rr1_p5_params)
-  DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_avx512_rr1_lut16_p3_params)
-  DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_avx512_rr2_lut32_p2_params)
-  DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_avx512_rr1_p5_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_wasmsimd_rr2_lut64_p2_params)
-  DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
 
 #define DECLARE_INIT_F16_TANH_PARAMS_FUNCTION(fn_name)      \
   XNN_INTERNAL size_t fn_name(                              \
