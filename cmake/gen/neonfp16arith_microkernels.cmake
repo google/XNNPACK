@@ -24,7 +24,6 @@ SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-dwconv2d-chw/gen/f16-dwconv2d-chw-5x5s2p2-minmax-neonfp16arith-1x8.c
   src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-neonfp16arith-c16.c
   src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16arith-u32-acc4.c
-  src/f16-gavgpool-cw/f16-gavgpool-cw-neonfp16arith-u8.c
   src/f16-gavgpool/gen/f16-gavgpool-7p7x-minmax-neonfp16arith-c8.c
   src/f16-gavgpool/gen/f16-gavgpool-7x-minmax-neonfp16arith-c8.c
   src/f16-gemm/gen/f16-gemm-1x8-minmax-neonfp16arith-ld64.c
