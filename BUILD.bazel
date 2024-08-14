@@ -19,6 +19,7 @@ load(
     "xnnpack_microkernel_cc_library",
     "xnnpack_min_size_copts",
     "xnnpack_msvc_std_copts",
+    "xnnpack_simd_f16_archs",
     "xnnpack_simd_f32_archs",
     "xnnpack_simd_s16_archs",
     "xnnpack_simd_s32_archs",
@@ -262,6 +263,9 @@ SIMD_HEADERS = [
 ] + [
     "src/xnnpack/simd/f32-" + arch + ".h"
     for arch in xnnpack_simd_f32_archs()
+] + [
+    "src/xnnpack/simd/f16-" + arch + ".h"
+    for arch in xnnpack_simd_f16_archs()
 ] + [
     "src/xnnpack/simd/s16-" + arch + ".h"
     for arch in xnnpack_simd_s16_archs()

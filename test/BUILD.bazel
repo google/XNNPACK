@@ -9,6 +9,7 @@ load(
     "xnnpack_cc_library",
     "xnnpack_kleidiai_defines",
     "xnnpack_simd_copts_for_arch",
+    "xnnpack_simd_f16_archs",
     "xnnpack_simd_f32_archs",
     "xnnpack_simd_s16_archs",
     "xnnpack_simd_s32_archs",
@@ -176,6 +177,21 @@ xnnpack_cc_library(
         "//:microkernels_h",
     ],
 ) for arch in xnnpack_simd_f32_archs()]
+
+[xnnpack_unit_test(
+    name = "f16_simd_" + arch + "_test",
+    srcs = [
+        "f16-simd-" + arch + ".cc",
+    ],
+    copts = xnnpack_simd_copts_for_arch(arch),
+    deps = [
+        ":replicable_random_device",
+        "@FP16",
+        "//:common",
+        "//:isa_checks",
+        "//:microkernels_h",
+    ],
+) for arch in xnnpack_simd_f16_archs()]
 
 [xnnpack_unit_test(
     name = "s16_simd_" + arch + "_test",
