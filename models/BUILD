@@ -38,20 +38,6 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "fp32_mobilenet_v1_jit",
-    srcs = ["fp32-mobilenet-v1-jit.cc"],
-    copts = xnnpack_std_cxxopts(),
-    visibility = xnnpack_visibility(),
-    deps = [
-        "//:XNNPACK",
-        "//:cache",
-        "//:common",
-        "//:memory",
-        "//:models_h",
-    ],
-)
-
-xnnpack_cc_library(
     name = "fp16_sparse_mobilenet_v1",
     srcs = ["fp16-sparse-mobilenet-v1.cc"],
     copts = xnnpack_std_cxxopts(),
@@ -209,20 +195,6 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "fp32_mobilenet_v2_jit",
-    srcs = ["fp32-mobilenet-v2-jit.cc"],
-    copts = xnnpack_std_cxxopts(),
-    visibility = xnnpack_visibility(),
-    deps = [
-        "//:XNNPACK",
-        "//:cache",
-        "//:common",
-        "//:memory",
-        "//:models_h",
-    ],
-)
-
-xnnpack_cc_library(
     name = "fp16_sparse_mobilenet_v2",
     srcs = ["fp16-sparse-mobilenet-v2.cc"],
     copts = xnnpack_std_cxxopts(),
@@ -277,20 +249,6 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "fp32_mobilenet_v3_large_jit",
-    srcs = ["fp32-mobilenet-v3-large-jit.cc"],
-    copts = xnnpack_std_cxxopts(),
-    visibility = xnnpack_visibility(),
-    deps = [
-        "//:XNNPACK",
-        "//:cache",
-        "//:common",
-        "//:memory",
-        "//:models_h",
-    ],
-)
-
-xnnpack_cc_library(
     name = "fp16_sparse_mobilenet_v3_large",
     srcs = ["fp16-sparse-mobilenet-v3-large.cc"],
     copts = xnnpack_std_cxxopts(),
@@ -340,34 +298,6 @@ xnnpack_cc_library(
         "//:XNNPACK",
         "//:cache",
         "//:common",
-        "//:models_h",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "fp32_mobilenet_v3_small_fused",
-    srcs = ["fp32-mobilenet-v3-small-fused.cc"],
-    copts = xnnpack_std_cxxopts(),
-    visibility = xnnpack_visibility(),
-    deps = [
-        "//:XNNPACK",
-        "//:cache",
-        "//:common",
-        "//:models_h",
-        "//:post_operation",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "fp32_mobilenet_v3_small_jit",
-    srcs = ["fp32-mobilenet-v3-small-jit.cc"],
-    copts = xnnpack_std_cxxopts(),
-    visibility = xnnpack_visibility(),
-    deps = [
-        "//:XNNPACK",
-        "//:cache",
-        "//:common",
-        "//:memory",
         "//:models_h",
     ],
 )

@@ -40,10 +40,6 @@
 #include <time.h>
 #endif
 
-#ifndef XNN_ENABLE_JIT
-  #error "XNN_ENABLE_JIT is not defined"
-#endif
-
 enum xnn_status xnn_reshape_external_value(
     xnn_runtime_t runtime,
     uint32_t external_id,
@@ -526,22 +522,6 @@ enum xnn_status xnn_create_runtime_v4(
   }
 
   struct xnn_code_cache* code_cache = NULL;
-  #if XNN_PLATFORM_JIT
-    if (flags & XNN_FLAG_JIT) {
-      #if !XNN_ENABLE_JIT
-        // Warn and continue without JIT enabled.
-        xnn_log_warning("unable to enable JIT: not compiled with JIT enabled");
-      #else
-        code_cache = &runtime->code_cache;
-        status = xnn_init_code_cache(code_cache);
-        if (status != xnn_status_success) {
-          xnn_log_error("failed to initialize code cache");
-          goto error;
-        }
-      #endif
-    }
-  #endif
-
   runtime->values = xnn_allocate_zero_memory(sizeof(struct xnn_value) * subgraph->num_values);
   if (runtime->values == NULL) {
     xnn_log_error("failed to allocate %zu bytes for runtime's value descriptors",
@@ -594,12 +574,6 @@ enum xnn_status xnn_create_runtime_v4(
 #ifdef XNN_SLINKY_ENABLED
   runtime->slinky_pipeline = xnn_runtime_to_slinky_pipeline(runtime);
 #endif
-
-  #if XNN_PLATFORM_JIT
-    if (code_cache != NULL) {
-      xnn_finalize_code_memory(&code_cache->cache.code);
-    }
-  #endif
 
   for (uint32_t i = 0; i < runtime->num_values; i++) {
     struct xnn_value* value = &runtime->values[i];
@@ -1096,11 +1070,6 @@ enum xnn_status xnn_delete_runtime(
         xnn_release_workspace(runtime->workspace);
       }
     }
-#if XNN_PLATFORM_JIT
-    if (xnn_code_cache_valid(&runtime->code_cache)) {
-      xnn_release_code_cache(&runtime->code_cache);
-    }
-#endif
     xnn_release_memory(runtime);
   }
   return xnn_status_success;

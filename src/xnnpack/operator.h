@@ -312,8 +312,6 @@ struct xnn_operator {
     union xnn_f16_tanh_params f16_tanh;
     union xnn_f32_tanh_params f32_tanh;
   } params4;
-  size_t num_post_operation_params;
-  void* post_operation_params;
   enum xnn_operator_type type;
   struct xnn_ukernel ukernel;
 

@@ -3048,21 +3048,6 @@ struct xnn_code_buffer;
 
 typedef int xnn_status_t;
 
-// JIT GEMM: used by GEMM/IGEMM microkernel generators.
-
-struct jit_gemm_params {
-  struct {
-    float min;
-    float max;
-  } f32_minmax;
-  struct {
-    uint16_t min;
-    uint16_t max;
-  } f16_minmax;
-  size_t num_post_operations;
-  const struct xnn_post_operation* post_operations;
-};
-
 union xnn_x32_packb_params {
   char _;  // Dummy member variable to comply with the C standard
 };

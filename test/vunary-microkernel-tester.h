@@ -26,10 +26,6 @@
 #include "xnnpack/microparams.h"
 #include "replicable_random_device.h"
 
-#if XNN_PLATFORM_JIT
-  #include "xnnpack/memory.h"
-#endif
-
 class VUnaryMicrokernelTester {
  public:
   enum class OpType {
@@ -240,11 +236,6 @@ class VUnaryMicrokernelTester {
             xnn_init_u8_minmax_params_fn init_params) const;
 
   void Test(xnn_u64_u32_vsqrtshift_ukernel_fn vsqrtshift) const;
-
-#if XNN_PLATFORM_JIT
-  void Test(xnn_vrelu_generator_fn generator, size_t k_unroll,
-            bool use_locals) const;
-#endif  // XNN_PLATFORM_JIT
 
  private:
   // Generic test function for `fp32` `vunary` kernels.

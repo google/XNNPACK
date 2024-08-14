@@ -34,9 +34,17 @@ jobs:
           key: ${{ github.job }}
           max-size: "1G"
           save: ${{ inputs.update-caches }}
+      - name: Dude where's my libm?
+        run: |
+          find /lib /usr/lib -type f,l -name 'libm.*' -ls
+        working-directory: ${{ github.workspace }}
       - name: Configure and build
         run: scripts/build-local.sh
         working-directory: ${{ github.workspace }}
+      - name: Run tests
+        if: ${{ inputs.run-tests }}
+        run: ctest --output-on-failure --parallel $(nproc)
+        working-directory: ${{ github.workspace }}/build/local
   cmake-linux-aarch64:
     runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 60
@@ -52,13 +60,21 @@ jobs:
           key: ${{ github.job }}
           max-size: "1G"
           save: ${{ inputs.update-caches }}
+      - name: Dude where's my libm?
+        run: |
+          find /lib /usr/lib -type f,l -name 'libm.*' -ls
+          ls -ld /usr/lib/aarch64-linux-gnu
+          ls -ld /usr/lib
+          ls -ld /lib/aarch64-linux-gnu
+          ls -lh /lib/aarch64-linux-gnu/libm.*
+        working-directory: ${{ github.workspace }}
       - name: Configure and build
-        run: scripts/build-linux-aarch64.sh -DCMAKE_BUILD_TYPE=Release
+        run: scripts/build-local.sh
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
         run: ctest --output-on-failure --parallel $(nproc)
-        working-directory: ${{ github.workspace }}/build/linux/aarch64
+        working-directory: ${{ github.workspace }}/build/local
   cmake-linux-armhf:
     runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 60
@@ -437,7 +453,7 @@ jobs:
           CC: clang-18
           CXX: clang++-18
         run: |
-            bazel build --define=xnn_enable_jit=false test:all
+            bazel build test:all
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
@@ -447,7 +463,6 @@ jobs:
         run: |
           # We only test the KleidiAI integration for now.
           bazel test \
-            --define=xnn_enable_jit=false \
             --test_output=all \
             --test_filter=*QP8* \
             test:qp8_f32_qc4w_gemm_minmax_test \
