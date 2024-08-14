@@ -290,7 +290,10 @@ xnnpack_cc_library(
     "qu8_vadd_minmax",
     "qu8_vmul_minmax_fp32",
     "qu8_vmul_minmax_rndnu",
+    "s32_vand",
     "s32_vmul",
+    "s32_vor",
+    "s32_vxor",
 ]]
 
 [xnnpack_unit_test(
@@ -338,7 +341,10 @@ xnnpack_cc_library(
     "qu8_vaddc_minmax",
     "qu8_vmulc_minmax_fp32",
     "qu8_vmulc_minmax_rndnu",
+    "s32_vandc",
     "s32_vmulc",
+    "s32_vorc",
+    "s32_vxorc",
 ]]
 
 [xnnpack_unit_test(
@@ -1571,6 +1577,7 @@ xnnpack_binary(
 ) for operator in [
     "add_nd",
     "add_nd_eager",
+    "and_nd",
     "copysign_nd",
     "divide_nd",
     "divide_nd_eager",
@@ -1580,10 +1587,12 @@ xnnpack_binary(
     "minimum_nd_eager",
     "multiply_nd",
     "multiply_nd_eager",
+    "or_nd",
     "squared_difference_nd",
     "squared_difference_nd_eager",
     "subtract_nd",
     "subtract_nd_eager",
+    "xor_nd",
 ]]
 
 xnnpack_unit_test(
@@ -2087,13 +2096,16 @@ xnnpack_unit_test(
     ],
 ) for operator in [
     "add2",
+    "and",
     "copysign",
     "divide2",
     "maximum2",
     "minimum2",
     "multiply2",
+    "or",
     "squared_difference",
     "subtract2",
+    "xor",
 ]]
 
 xnnpack_unit_test(

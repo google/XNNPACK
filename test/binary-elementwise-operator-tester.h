@@ -25,13 +25,16 @@ class BinaryElementwiseOperatorTester {
   enum class OperationType {
     Unknown,
     Add,
+    AND,
     CopySign,
     Divide,
     Maximum,
     Minimum,
     Multiply,
+    OR,
     Subtract,
     SquaredDifference,
+    XOR,
   };
 
   BinaryElementwiseOperatorTester& input1_shape(
@@ -184,6 +187,8 @@ class BinaryElementwiseOperatorTester {
     switch (operation_type()) {
       case OperationType::Add:
         return a + b;
+      case OperationType::AND:
+        return a & b;
       case OperationType::CopySign:
         return std::copysign(a, b);
       case OperationType::Divide:
@@ -194,10 +199,14 @@ class BinaryElementwiseOperatorTester {
         return std::min<int32_t>(a, b);
       case OperationType::Multiply:
         return a * b;
+      case OperationType::OR:
+        return a | b;
       case OperationType::Subtract:
         return a - b;
       case OperationType::SquaredDifference:
         return (a - b) * (a - b);
+      case OperationType::XOR:
+        return a ^ b;
       default:
         return INT_MAX;
 

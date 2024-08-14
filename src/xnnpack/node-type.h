@@ -20,6 +20,7 @@ enum xnn_node_type {
   xnn_node_type_invalid = 0,
   xnn_node_type_abs,
   xnn_node_type_add2,
+  xnn_node_type_and,
   xnn_node_type_argmax_pooling_2d,
   xnn_node_type_average_pooling_2d,
   xnn_node_type_bankers_rounding,
@@ -59,6 +60,7 @@ enum xnn_node_type {
   xnn_node_type_minimum2,
   xnn_node_type_multiply2,
   xnn_node_type_negate,
+  xnn_node_type_or,
   xnn_node_type_prelu,
   xnn_node_type_reciprocal_square_root,
   xnn_node_type_reshape_2d,
@@ -79,6 +81,7 @@ enum xnn_node_type {
   xnn_node_type_subtract,
   xnn_node_type_tanh,
   xnn_node_type_unpooling_2d,
+  xnn_node_type_xor,
 };
 
 #if XNN_LOG_LEVEL <= 0

@@ -1404,6 +1404,54 @@ enum xnn_status xnn_define_copysign(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Bitwsie AND Node and add it to a Subgraph.
+///
+/// The AND Node performs bitwise AND of the first input and the second input.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input1_id - Value ID for the first input tensor. The input tensor must be defined in the @a subgraph.
+/// @param input2_id - Value ID for the second input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor.
+/// @param flags - binary features of the AND Node. No supported flags are currently defined.
+enum xnn_status xnn_define_and(
+  xnn_subgraph_t subgraph,
+  uint32_t input1_id,
+  uint32_t input2_id,
+  uint32_t output_id,
+  uint32_t flags);
+
+/// Define a Bitwsie OR Node and add it to a Subgraph.
+///
+/// The OR Node performs bitwise OR of the first input and the second input.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input1_id - Value ID for the first input tensor. The input tensor must be defined in the @a subgraph.
+/// @param input2_id - Value ID for the second input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor.
+/// @param flags - binary features of the OR Node. No supported flags are currently defined.
+enum xnn_status xnn_define_or(
+  xnn_subgraph_t subgraph,
+  uint32_t input1_id,
+  uint32_t input2_id,
+  uint32_t output_id,
+  uint32_t flags);
+
+/// Define a Bitwsie XOR Node and add it to a Subgraph.
+///
+/// The XOR Node performs bitwise XOR of the first input and the second input.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input1_id - Value ID for the first input tensor. The input tensor must be defined in the @a subgraph.
+/// @param input2_id - Value ID for the second input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor.
+/// @param flags - binary features of the XOR Node. No supported flags are currently defined.
+enum xnn_status xnn_define_xor(
+  xnn_subgraph_t subgraph,
+  uint32_t input1_id,
+  uint32_t input2_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a Copy Node and add it to a Subgraph.
 ///
 /// The Copy Node copies an input tensor to an output tensor.
@@ -2308,6 +2356,23 @@ enum xnn_status xnn_run_add_nd_f32(
   uint32_t flags,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_and_nd_s32(
+  uint32_t flags,
+  xnn_operator_t* and_op_out);
+
+enum xnn_status xnn_reshape_and_nd_s32(
+  xnn_operator_t and_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_and_nd_s32(
+  xnn_operator_t and_op,
+  const int32_t* input1,
+  const int32_t* input2,
+  int32_t* output);
 
 enum xnn_status xnn_create_multiply_nd_s32(
   uint32_t flags,
@@ -5437,6 +5502,24 @@ enum xnn_status xnn_run_negate_nc_f32(
   uint32_t flags,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_or_nd_s32(
+  uint32_t flags,
+  xnn_operator_t* or_op_out);
+
+enum xnn_status xnn_reshape_or_nd_s32(
+  xnn_operator_t or_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_or_nd_s32(
+  xnn_operator_t or_op,
+  const int32_t* input1,
+  const int32_t* input2,
+  int32_t* output);
+
 enum xnn_status xnn_create_prelu_nc_f16(
   size_t input_channels,
   size_t slope_channels,
@@ -6568,6 +6651,24 @@ enum xnn_status xnn_setup_space_to_depth_nhwc_x8(
   xnn_operator_t space_to_depth_op,
   const void* input,
   void* output);
+
+enum xnn_status xnn_create_xor_nd_s32(
+  uint32_t flags,
+  xnn_operator_t* xor_op_out);
+
+enum xnn_status xnn_reshape_xor_nd_s32(
+  xnn_operator_t xor_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_xor_nd_s32(
+  xnn_operator_t xor_op,
+  const int32_t* input1,
+  const int32_t* input2,
+  int32_t* output);
 
 #ifdef __cplusplus
 }  // extern "C"

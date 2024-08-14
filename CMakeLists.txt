@@ -379,6 +379,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph.c
   src/subgraph/abs.c
   src/subgraph/add2.c
+  src/subgraph/and.c
   src/subgraph/argmax-pooling-2d.c
   src/subgraph/average-pooling-2d.c
   src/subgraph/bankers-rounding.c
@@ -411,7 +412,8 @@ SET(SUBGRAPH_SRCS
   src/subgraph/minimum2.c
   src/subgraph/multiply2.c
   src/subgraph/negate.c
-  src/subgraph/prelu.c
+  src/subgraph/prelu.c 
+  src/subgraph/or.c
   src/subgraph/reciprocal-square-root.c
   src/subgraph/reshape-helpers.c
   src/subgraph/scaled-dot-product-attention.c
@@ -431,6 +433,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/tanh.c
   src/subgraph/unpooling-2d.c
   src/subgraph/validation.c
+  src/subgraph/xor.c
   src/tensor.c)
 
 SET(LOGGING_SRCS
@@ -1428,6 +1431,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(add-nd-eager-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME add-nd-eager-test COMMAND add-nd-eager-test)
 
+    ADD_EXECUTABLE(and-nd-test test/and-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(and-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(and-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME and-nd-test COMMAND and-nd-test)
+
     ADD_EXECUTABLE(argmax-pooling-nhwc-test test/argmax-pooling-nhwc.cc)
     TARGET_INCLUDE_DIRECTORIES(argmax-pooling-nhwc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(argmax-pooling-nhwc-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
@@ -1627,6 +1635,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(negate-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME negate-nc-test COMMAND negate-nc-test)
 
+    ADD_EXECUTABLE(or-nd-test test/or-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(or-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(or-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME or-nd-test COMMAND or-nd-test)
+  
     ADD_EXECUTABLE(prelu-nc-test test/prelu-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(prelu-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(prelu-nc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
@@ -1737,6 +1750,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(unpooling-nhwc-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME unpooling-nhwc-test COMMAND unpooling-nhwc-test)
 
+    ADD_EXECUTABLE(xor-nd-test test/xor-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(xor-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(xor-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME xor-nd-test COMMAND xor-nd-test)
+  
     # ---[ Build subgraph optimizations unit tests
     ADD_EXECUTABLE(fusion-test test/fusion.cc)
     TARGET_INCLUDE_DIRECTORIES(fusion-test PRIVATE src test)
@@ -1793,6 +1811,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(add2-reshape-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(add2-reshape-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME add2-reshape-test COMMAND add2-reshape-test)
+
+    ADD_EXECUTABLE(and-test test/and.cc)
+    TARGET_INCLUDE_DIRECTORIES(and-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(and-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME and-test COMMAND and-test)
 
     ADD_EXECUTABLE(argmax-pooling-2d-test test/argmax-pooling-2d.cc)
     TARGET_INCLUDE_DIRECTORIES(argmax-pooling-2d-test PRIVATE src test)
@@ -1982,6 +2005,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(negate-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME negate-test COMMAND negate-test)
 
+    ADD_EXECUTABLE(or-test test/or.cc)
+    TARGET_INCLUDE_DIRECTORIES(or-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(or-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME or-test COMMAND or-test)
+
     ADD_EXECUTABLE(prelu-test test/prelu.cc)
     TARGET_INCLUDE_DIRECTORIES(prelu-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(prelu-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
@@ -2079,6 +2107,12 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(unpooling-2d-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(unpooling-2d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME unpooling-2d-test COMMAND unpooling-2d-test)
+
+    ADD_EXECUTABLE(xor-test test/xor.cc)
+    TARGET_INCLUDE_DIRECTORIES(xor-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(xor-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME xor-test COMMAND xor-test)
+  
   ENDIF()
 
   # ---[ Normalization unit tests
@@ -3470,6 +3504,42 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(s16-window-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
   TARGET_LINK_LIBRARIES(s16-window-test PRIVATE hardware-config logging microkernels-all)
   ADD_TEST(NAME s16-window-test COMMAND s16-window-test)
+
+  ADD_EXECUTABLE(s32-vand-test test/s32-vand.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vand-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vand-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vand-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vand-test COMMAND s32-vand-test)
+
+  ADD_EXECUTABLE(s32-vandc-test test/s32-vandc.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vandc-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vandc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vandc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vandc-test COMMAND s32-vandc-test)
+
+  ADD_EXECUTABLE(s32-vor-test test/s32-vor.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vor-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vor-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vor-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vor-test COMMAND s32-vor-test)
+
+  ADD_EXECUTABLE(s32-vorc-test test/s32-vorc.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vorc-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vorc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vorc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vorc-test COMMAND s32-vorc-test)
+
+  ADD_EXECUTABLE(s32-vxor-test test/s32-vxor.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vxor-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vxor-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vxor-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vxor-test COMMAND s32-vxor-test)
+
+  ADD_EXECUTABLE(s32-vxorc-test test/s32-vxorc.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vxorc-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vxorc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(s32-vxorc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vxorc-test COMMAND s32-vxorc-test)
 
   ADD_EXECUTABLE(u32-filterbank-accumulate-test test/u32-filterbank-accumulate.cc)
   TARGET_INCLUDE_DIRECTORIES(u32-filterbank-accumulate-test PRIVATE include src test)

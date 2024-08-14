@@ -1900,6 +1900,33 @@ typedef void (*xnn_f32_velu_ukernel_fn)(
     float* output,
     const union xnn_f32_elu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+// AND: Vector AND (S32 bit)elementwise
+
+typedef void (*xnn_s32_vand_ukernel_fn)(
+    size_t batch,
+    const int32_t* input_a,
+    const int32_t* input_b,
+    int32_t* output,
+    const union xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+// OR: Vector OR (S32 bit)elementwise
+
+typedef void (*xnn_s32_vor_ukernel_fn)(
+    size_t batch,
+    const int32_t* input_a,
+    const int32_t* input_b,
+    int32_t* output,
+    const union xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+// XOR: Vector XOR (S32 bit)elementwise
+
+typedef void (*xnn_s32_vxor_ukernel_fn)(
+    size_t batch,
+    const int32_t* input_a,
+    const int32_t* input_b,
+    int32_t* output,
+    const union xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 // VGELU: Vector Gaussian Error Linear Unit elementwise
 
 typedef void (*xnn_f32_vgelu_ukernel_fn)(

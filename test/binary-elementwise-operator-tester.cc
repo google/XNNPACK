@@ -805,9 +805,21 @@ void BinaryElementwiseOperatorTester::TestS32() const {
     xnn_operator_t binary_elementwise_op = nullptr;
 
     switch (operation_type()) {
+      case OperationType::AND:
+        ASSERT_EQ(xnn_status_success,
+                  xnn_create_and_nd_s32(0, &binary_elementwise_op));
+        break;
       case OperationType::Multiply:
         ASSERT_EQ(xnn_status_success,
                   xnn_create_multiply_nd_s32(0, &binary_elementwise_op));
+        break;
+      case OperationType::OR:
+        ASSERT_EQ(xnn_status_success,
+                  xnn_create_or_nd_s32(0, &binary_elementwise_op));
+        break;
+      case OperationType::XOR:
+        ASSERT_EQ(xnn_status_success,
+                  xnn_create_xor_nd_s32(0, &binary_elementwise_op));
         break;
       default:
         FAIL() << "Unsupported operation type";
@@ -819,6 +831,17 @@ void BinaryElementwiseOperatorTester::TestS32() const {
         auto_binary_elementwise_op(binary_elementwise_op, xnn_delete_operator);
 
     switch (operation_type()) {
+      case OperationType::AND:
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_reshape_and_nd_s32(
+                binary_elementwise_op, num_input1_dims(), input1_shape().data(),
+                num_input2_dims(), input2_shape().data(),
+                /*threadpool=*/nullptr));
+        ASSERT_EQ(xnn_status_success, xnn_setup_and_nd_s32(
+                                          binary_elementwise_op, input1.data(),
+                                          input2.data(), output.data()));
+        break;
       case OperationType::Multiply:
         ASSERT_EQ(
             xnn_status_success,
@@ -827,6 +850,28 @@ void BinaryElementwiseOperatorTester::TestS32() const {
                 num_input2_dims(), input2_shape().data(),
                 /*threadpool=*/nullptr));
         ASSERT_EQ(xnn_status_success, xnn_setup_multiply_nd_s32(
+                                          binary_elementwise_op, input1.data(),
+                                          input2.data(), output.data()));
+        break;
+      case OperationType::OR:
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_reshape_or_nd_s32(
+                binary_elementwise_op, num_input1_dims(), input1_shape().data(),
+                num_input2_dims(), input2_shape().data(),
+                /*threadpool=*/nullptr));
+        ASSERT_EQ(xnn_status_success, xnn_setup_or_nd_s32(
+                                          binary_elementwise_op, input1.data(),
+                                          input2.data(), output.data()));
+        break;
+      case OperationType::XOR:
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_reshape_xor_nd_s32(
+                binary_elementwise_op, num_input1_dims(), input1_shape().data(),
+                num_input2_dims(), input2_shape().data(),
+                /*threadpool=*/nullptr));
+        ASSERT_EQ(xnn_status_success, xnn_setup_xor_nd_s32(
                                           binary_elementwise_op, input1.data(),
                                           input2.data(), output.data()));
         break;
