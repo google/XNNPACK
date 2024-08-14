@@ -385,6 +385,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/batch-matrix-multiply.c
   src/subgraph/ceiling.c
   src/subgraph/clamp.c
+  src/subgraph/clz.c
   src/subgraph/concatenate.c
   src/subgraph/convert.c
   src/subgraph/convolution-2d.c
