@@ -2308,6 +2308,23 @@ enum xnn_status xnn_run_add_nd_f32(
   uint32_t flags,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_minimum_nd_s32(
+  uint32_t flags,
+  xnn_operator_t* minimum_op_out);
+
+enum xnn_status xnn_reshape_minimum_nd_s32(
+  xnn_operator_t min_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_minimum_nd_s32(
+  xnn_operator_t min_op,
+  const int32_t* input1,
+  const int32_t* input2,
+  int32_t* output);
 
 enum xnn_status xnn_create_multiply_nd_s32(
   uint32_t flags,
@@ -2326,7 +2343,6 @@ enum xnn_status xnn_setup_multiply_nd_s32(
   const int32_t* input1,
   const int32_t* input2,
   int32_t* output);
-
 
 enum xnn_status xnn_create_add_nd_qs8(
   int8_t input1_zero_point,
