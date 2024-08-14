@@ -291,7 +291,6 @@ def main(args):
       os.path.join(src_dir, 'amalgam', 'gen'),
       os.path.join(src_dir, 'configs'),
       os.path.join(src_dir, 'enums'),
-      os.path.join(src_dir, 'jit'),
       os.path.join(src_dir, 'operators'),
       os.path.join(src_dir, 'subgraph'),
       os.path.join(src_dir, 'tables'),
@@ -306,7 +305,6 @@ def main(args):
   c_microkernels_per_isa['neoni8mm_aarch64'] = list()
   temp_c_microkernels_per_isa = {isa: [] for isa in c_microkernels_per_isa}
   asm_microkernels_per_arch = {arch: [] for arch in ARCH_LIST}
-  jit_microkernels_per_arch = {arch: [] for arch in ARCH_LIST}
   microkernel_name_to_filename = dict()
   microkernel_temp_dir = tempfile.mkdtemp()
   for root, dirs, files in os.walk(src_dir, topdown=False):
@@ -428,13 +426,6 @@ def main(args):
             break
         else:
           print('Unknown architecture for assembly microkernel %s' % filepath)
-      elif ext == '.cc':
-        for component in basename.split('-'):
-          if component in ARCH_LIST:
-            jit_microkernels_per_arch[component].append(filepath)
-            break
-        else:
-          print('Unknown architecture for JIT microkernel %s' % filepath)
 
   with io.StringIO() as microkernels_bzl:
     microkernels_bzl.write('''\
@@ -446,9 +437,7 @@ Auto-generated file. Do not edit!
 """
 
 ''')
-    keys = set(c_microkernels_per_isa.keys()).union(
-        asm_microkernels_per_arch.keys(), jit_microkernels_per_arch.keys()
-    )
+    keys = set(c_microkernels_per_isa.keys()).union(asm_microkernels_per_arch.keys())
     keys = sorted(keys, key=lambda key: key + '_microkernels.bzl')
     exports = ['\n']
     for key in keys:
@@ -475,13 +464,6 @@ Auto-generated file. Do not edit!
             asm_microkernels_per_arch,
             '',
             'ASM_MICROKERNEL_SRCS',
-        )
-        vars = vars + write_grouped_microkernels_bzl(
-            arch_microkernels_bzl,
-            key,
-            jit_microkernels_per_arch,
-            '',
-            'JIT_MICROKERNEL_SRCS',
         )
         arch_microkernels_bzl.seek(0)
         xnncommon.overwrite_if_changed(
@@ -515,9 +497,7 @@ Auto-generated file. Do not edit!
 
 """)
     keys = sorted(
-        set(c_microkernels_per_isa.keys()).union(
-            asm_microkernels_per_arch.keys(), jit_microkernels_per_arch.keys()
-        )
+        set(c_microkernels_per_isa.keys()).union(asm_microkernels_per_arch.keys())
     )
     for key in keys:
       arch_microkernels_cmake_filename = key + '_microkernels.cmake'
@@ -547,13 +527,6 @@ Auto-generated file. Do not edit!
             asm_microkernels_per_arch,
             '',
             'ASM_MICROKERNEL_SRCS',
-        )
-        write_grouped_microkernels_cmake(
-            arch_microkernels_cmake,
-            key,
-            jit_microkernels_per_arch,
-            '',
-            'JIT_MICROKERNEL_SRCS',
         )
         arch_microkernels_cmake.seek(0)
         xnncommon.overwrite_if_changed(

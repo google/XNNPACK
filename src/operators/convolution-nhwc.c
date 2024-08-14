@@ -35,7 +35,6 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/pack.h"
 #include "xnnpack/params.h"
-#include "xnnpack/post-operation.h"
 #include "pthreadpool.h"
 
 #ifndef XNN_ENABLE_GEMM_M_SPECIALIZATION
@@ -313,12 +312,9 @@ static enum xnn_status create_gemm_or_igemm(
     const void* gemm_params,
     size_t gemm_params_size,
     const struct xnn_gemm_config* gemm_config,
-    const struct jit_gemm_params* jit_gemm_params,
     bool linear_activation,
     bool relu_activation,
     enum xnn_operator_type operator_type,
-    size_t num_post_operations,
-    void* post_operation_params,
     xnn_operator_t convolution_op,
     size_t* zero_size)
 {
@@ -361,8 +357,6 @@ static enum xnn_status create_gemm_or_igemm(
   }
 
   memcpy(&convolution_op->params, gemm_params, gemm_params_size);
-  convolution_op->num_post_operation_params = num_post_operations;
-  convolution_op->post_operation_params = post_operation_params;
 
   const struct gemm_fused_ukernels* gemm_ukernels = &gemm_config->minmax;
   const uint32_t mr = gemm_config->mr;
@@ -391,12 +385,6 @@ static enum xnn_status create_gemm_or_igemm(
         convolution_op->ukernel.gemm.gemm_cases[i] = gemm_ukernels->gemm[i];
       }
 
-#if XNN_PLATFORM_JIT
-      xnn_generate_gemms_up_to_max_mr(
-        mr, gemm_config->generator, jit_gemm_params, group_output_channels, nr,
-        group_input_channels << log2_input_element_size, convolution_op);
-#endif  // XNN_PLATFORM_JIT
-
       break;
     case xnn_microkernel_type_igemm:
       if(!weights_already_cached) {
@@ -423,12 +411,6 @@ static enum xnn_status create_gemm_or_igemm(
       for (size_t i = 0; i < mr; i++) {
         convolution_op->ukernel.igemm.igemm_cases[i] = gemm_ukernels->igemm[i];
       }
-
-#if XNN_PLATFORM_JIT
-      xnn_generate_igemms_up_to_max_mr(
-          mr, gemm_config->generator, jit_gemm_params, group_output_channels, nr,
-          group_input_channels << log2_input_element_size, kernel_size, convolution_op);
-#endif  // XNN_PLATFORM_JIT
 
       break;
     default:
@@ -539,14 +521,10 @@ static enum xnn_status create_convolution2d_nhwc(
     const struct xnn_gemm_config* gemm_config,
     const struct xnn_dwconv_config* dwconv_ukernel,
     const struct xnn_vmulcaddc_config* vmulcaddc_config,
-    struct jit_gemm_params* jit_gemm_params,
     bool linear_activation,
     bool relu_activation,
     enum xnn_operator_type operator_type,
-    size_t num_post_operations,
-    void* post_operation_params,
     bool dynamic_quantization,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
@@ -655,7 +633,6 @@ static enum xnn_status create_convolution2d_nhwc(
   }
 
   convolution_op->weights_cache = weights_cache;
-  convolution_op->code_cache = code_cache;
 
   const size_t kernel_size = kernel_height * kernel_width;
 
@@ -671,14 +648,6 @@ static enum xnn_status create_convolution2d_nhwc(
     ukernel_type = xnn_microkernel_type_igemm;
   }
   assert(ukernel_type != xnn_microkernel_type_default);
-
-  if (num_post_operations != 0 && (ukernel_type != xnn_microkernel_type_gemm && ukernel_type != xnn_microkernel_type_igemm)) {
-    xnn_log_error(
-        "convolution with post operations not support for these parameters: "
-        "kernel_size: %zu unit_subsampling: %d padding: %d, ukernel_type: %d",
-        kernel_size, unit_subsampling, any_padding, ukernel_type);
-    goto error;
-  }
 
   size_t zero_size = 0;
   switch (ukernel_type) {
@@ -721,10 +690,9 @@ static enum xnn_status create_convolution2d_nhwc(
           pack_gemm_goi_w, pack_conv_kgo_w, pack_conv_goki_w, packing_params,
           packed_weights_padding_byte, extra_weights_bytes,
           init_scale_params, scale_params, init_kernel_scale_params, kernel_scale_params,
-          gemm_params, gemm_params_size, gemm_config, jit_gemm_params,
+          gemm_params, gemm_params_size, gemm_config,
           linear_activation, relu_activation,
           operator_type,
-          num_post_operations, post_operation_params,
           convolution_op,
           &zero_size);
       if (status != xnn_status_success) {
@@ -878,14 +846,10 @@ enum xnn_status xnn_create_convolution2d_nhwc_qd8_f16_qc8w(
     /*gemm_config=*/gemm_config,
     /*dwconv_ukernel=*/NULL,
     /*vmulcaddc_config=*/NULL,
-    /*jit_gemm_params=*/NULL,
     /*linear_activation=*/false,
     /*relu_activation=*/false,
     /*operator_type=*/xnn_operator_type_convolution_nhwc_qd8_f16_qc8w,
-    /*num_post_operations=*/0,
-    /*post_operation_params=*/NULL,
     /*dynamic_quantization=*/true,
-    /*code_cache=*/code_cache,
     /*weights_cache=*/weights_cache,
     convolution_op_out);
 }
@@ -978,14 +942,10 @@ enum xnn_status xnn_create_convolution2d_nhwc_qd8_f32_qc8w(
     /*gemm_config=*/gemm_config,
     /*dwconv_ukernel=*/NULL,
     /*vmulcaddc_config=*/NULL,
-    /*jit_gemm_params=*/NULL,
     /*linear_activation=*/false,
     /*relu_activation=*/false,
     /*operator_type=*/xnn_operator_type_convolution_nhwc_qd8_f32_qc8w,
-    /*num_post_operations=*/0,
-    /*post_operation_params=*/NULL,
     /*dynamic_quantization=*/true,
-    /*code_cache=*/code_cache,
     /*weights_cache=*/weights_cache,
     convolution_op_out);
 }
@@ -1118,14 +1078,10 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     /*gemm_config=*/gemm_config,
     /*dwconv_ukernel=*/dwconv_ukernel,
     /*vmulcaddc_config=*/NULL,
-    /*jit_gemm_params=*/NULL,
     /*linear_activation=*/false,
     /*relu_activation=*/false,
     /*operator_type=*/xnn_operator_type_convolution_nhwc_qu8,
-    /*num_post_operations=*/0,
-    /*post_operation_params=*/NULL,
     /*dynamic_quantization=*/false,
-    /*code_cache=*/code_cache,
     /*weights_cache=*/weights_cache,
     convolution_op_out);
 }
@@ -1266,14 +1222,10 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     /*gemm_config=*/gemm_config,
     /*dwconv_ukernel=*/dwconv_ukernel,
     /*vmulcaddc_config=*/NULL,
-    /*jit_gemm_params=*/NULL,
     /*linear_activation=*/false,
     /*relu_activation=*/false,
     /*operator_type=*/xnn_operator_type_convolution_nhwc_qs8,
-    /*num_post_operations=*/0,
-    /*post_operation_params=*/NULL,
     /*dynamic_quantization=*/false,
-    /*code_cache=*/code_cache,
     /*weights_cache=*/weights_cache,
     convolution_op_out);
 
@@ -1422,14 +1374,10 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8_qc8w(
     /*gemm_config=*/gemm_config,
     /*dwconv_ukernel=*/dwconv_ukernel,
     /*vmulcaddc_config=*/NULL,
-    /*jit_gemm_params=*/NULL,
     /*linear_activation=*/false,
     /*relu_activation=*/false,
     /*operator_type=*/xnn_operator_type_convolution_nhwc_qc8,
-    /*num_post_operations=*/0,
-    /*post_operation_params=*/NULL,
     /*dynamic_quantization=*/false,
-    /*code_cache=*/code_cache,
     /*weights_cache=*/weights_cache,
     convolution_op_out);
 
@@ -1525,13 +1473,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     vmulcaddc_config->init.f16(&vmulcaddc_params, fp16_output_min, fp16_output_max);
   }
 
-  struct jit_gemm_params jit_gemm_params = {
-    .f16_minmax = {
-      .min = fp16_output_min,
-      .max = fp16_output_max
-    }
-  };
-
   xnn_pack_vmulcaddc_w_fn pack_vmulcaddc_w = (xnn_pack_vmulcaddc_w_fn) xnn_pack_f16_vmulcaddc_w;
   xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w = (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f16_dwconv_hwg_w;
   xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w = (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f16_dwconv_ghw_w;
@@ -1581,14 +1522,10 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     /*gemm_config=*/gemm_config,
     /*dwconv_ukernel=*/dwconv_ukernel,
     /*vmulcaddc_config=*/vmulcaddc_config,
-    /*jit_gemm_params=*/&jit_gemm_params,
     /*linear_activation=*/false,
     /*relu_activation=*/false,
     /*operator_type=*/xnn_operator_type_convolution_nhwc_f16,
-    /*num_post_operations=*/0,
-    /*post_operation_params=*/NULL,
     /*dynamic_quantization=*/false,
-    /*code_cache=*/code_cache,
     /*weights_cache=*/weights_cache,
     convolution_op_out);
 }
@@ -1669,13 +1606,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     gemm_config->init.f32(&gemm_params, output_min, output_max);
   }
 
-  struct jit_gemm_params jit_gemm_params = {
-    .f32_minmax = {
-      .min = output_min,
-      .max = output_max
-    }
-  };
-
   const struct xnn_dwconv_config* dwconv_config = xnn_init_f32_dwconv_config();
   if (dwconv_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
@@ -1736,14 +1666,10 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     /*gemm_config=*/gemm_config,
     /*dwconv_ukernel=*/dwconv_ukernel,
     /*vmulcaddc_config=*/vmulcaddc_config,
-    /*jit_gemm_params=*/&jit_gemm_params,
     /*linear_activation=*/linear_activation,
     /*relu_activation=*/relu_activation,
     /*operator_type=*/xnn_operator_type_convolution_nhwc_f32,
-    /*num_post_operations=*/0,
-    /*post_operation_params=*/NULL,
     /*dynamic_quantization=*/false,
-    /*code_cache=*/code_cache,
     /*weights_cache=*/weights_cache,
     convolution_op_out);
 }
@@ -1773,110 +1699,10 @@ enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
-  if (code_cache == NULL) {
-    xnn_log_error(
-      "failed to create %s operator: convolution with post operations available only if JIT is enabled",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
-    return xnn_status_invalid_parameter;
-  }
-
-  // Convolution is specified with linear activation, any clamping should be specified as a post operator.
-  const float output_max = INFINITY;
-  const float output_min = -INFINITY;
-
-  struct jit_gemm_params jit_gemm_params = {
-    .f32_minmax = {
-      .min = output_min,
-      .max = output_max
-    },
-    .num_post_operations = num_post_operations,
-    .post_operations = post_operations,
-  };
-
-  char* post_operation_params = allocate_and_initialize_post_operation_params(num_post_operations, post_operations);
-
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
-  if (gemm_config == NULL) {
-    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
-                  xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
-    return xnn_status_unsupported_hardware;
-  }
-
-  union xnn_f32_minmax_params gemm_params;
-  if XNN_LIKELY(gemm_config->init.f32 != NULL) {
-    gemm_config->init.f32(&gemm_params, output_min, output_max);
-  }
-
-  const struct xnn_dwconv_config* dwconv_config = xnn_init_f32_dwconv_config();
-  if (dwconv_config == NULL) {
-    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
-                  xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
-    return xnn_status_unsupported_hardware;
-  }
-
-  union xnn_f32_minmax_params dwconv_params;
-  const struct xnn_dwconv_config* dwconv_ukernel =
-    find_dwconv_ukernel(kernel_height * kernel_width, dwconv_config, XNN_MAX_F32_DWCONV_UKERNELS);
-  if XNN_LIKELY(dwconv_ukernel != NULL) {
-    dwconv_ukernel->init.f32(&dwconv_params, output_min, output_max);
-  }
-
-  const struct xnn_vmulcaddc_config* vmulcaddc_config = xnn_init_f32_vmulcaddc_config();
-  if (vmulcaddc_config == NULL) {
-    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
-                  xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
-    return xnn_status_unsupported_hardware;
-  }
-
-  union xnn_f32_minmax_params vmulcaddc_params;
-  if XNN_LIKELY(vmulcaddc_config->init.f32 != NULL) {
-    vmulcaddc_config->init.f32(&vmulcaddc_params, output_min, output_max);
-  }
-
-  return create_convolution2d_nhwc(
-    input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
-    kernel_height, kernel_width,
-    subsampling_height, subsampling_width,
-    dilation_height, dilation_width,
-    groups, group_input_channels, group_output_channels,
-    input_channel_stride, output_channel_stride,
-    kernel, bias, flags,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    /*bias_element_size=*/sizeof(float),
-    (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_vmulcaddc_w,
-    (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_dwconv_hwg_w,
-    (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f32_dwconv_ghw_w,
-    (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
-    (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_conv_kgo_w,
-    (xnn_pack_conv_goki_w_fn) xnn_pack_f32_conv_goki_w,
-    /*packing_params=*/NULL,
-    /*input_padding_byte=*/0,
-    /*packed_weights_padding_byte=*/0,
-    /*extra_weights_bytes=*/0,
-    /*init_scale_params=*/NULL,
-    /*scale_params=*/NULL,
-    /*init_kernel_scale_params=*/NULL,
-    /*kernel_scale_params=*/NULL,
-    /*gemm_params=*/(void*) &gemm_params,
-    /*gemm_params_size=*/sizeof(gemm_params),
-    /*dwconv_params=*/&dwconv_params,
-    /*dwconv_params_size=*/sizeof(dwconv_params),
-    /*vmulcaddc_params=*/&vmulcaddc_params,
-    /*vmulcaddc_params_size=*/sizeof(vmulcaddc_params),
-    /*gemm_config=*/gemm_config,
-    /*dwconv_ukernel=*/dwconv_ukernel,
-    /*vmulcaddc_config=*/vmulcaddc_config,
-    /*jit_gemm_params=*/&jit_gemm_params,
-    /*linear_activation=*/true,
-    /*relu_activation=*/false,
-    /*operator_type=*/xnn_operator_type_convolution_nhwc_f32,
-    /*num_post_operations=*/num_post_operations,
-    /*post_operation_params=*/post_operation_params,
-    /*dynamic_quantization=*/false,
-    /*code_cache=*/code_cache,
-    /*weights_cache=*/weights_cache,
-    convolution_op_out);
+  xnn_log_error(
+    "failed to create %s operator: JIT operators are deprecated",
+    xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
+  return xnn_status_invalid_parameter;
 }
 
 static inline bool input_size_changed(xnn_operator_t convolution_op)
@@ -1914,16 +1740,13 @@ static enum xnn_status reshape_gemm(
   struct xnn_hmp_gemm_ukernel *gemm_cases = convolution_op->ukernel.gemm.gemm_cases;
 
   #if XNN_ENABLE_GEMM_M_SPECIALIZATION
-    mr = xnn_get_heuristic_mr_gemm(batch_output_size, mr, nr, gemm_cases, convolution_op->code_cache != NULL);
+    mr = xnn_get_heuristic_mr_gemm(batch_output_size, mr, nr, gemm_cases);
   #else
     if (batch_output_size == 1 && gemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
       mr = 1;
     }
   #endif
 
-  #if XNN_PLATFORM_JIT
-    xnn_overwrite_gemm_cases_with_generated_code(convolution_op, gemm_cases, mr);
-  #endif  // XNN_PLATFORM_JIT
   struct xnn_hmp_gemm_ukernel gemm_ukernel = gemm_cases[mr - 1];
 
   convolution_op->context.gemm = (struct gemm_context){
@@ -1945,11 +1768,7 @@ static enum xnn_status reshape_gemm(
   convolution_op->context.gemm.batch_dims_b[0] = groups;
   convolution_op->context.gemm.batch_strides_c[0] = 1;
   memcpy(&convolution_op->context.gemm.params, &convolution_op->params, sizeof(convolution_op->context.gemm.params));
-  if (convolution_op->num_post_operation_params == 0) {
-    convolution_op->context.gemm.fused_params = &convolution_op->context.gemm.params;
-  } else {
-    convolution_op->context.gemm.fused_params = convolution_op->post_operation_params;
-  }
+  convolution_op->context.gemm.fused_params = &convolution_op->context.gemm.params;
 
   size_t nc = group_output_channels;
   if (num_threads > 1) {
@@ -2032,16 +1851,13 @@ static enum xnn_status reshape_igemm(
   struct xnn_hmp_igemm_ukernel* igemm_cases = convolution_op->ukernel.igemm.igemm_cases;
 
   #if XNN_ENABLE_GEMM_M_SPECIALIZATION
-    mr = xnn_get_heuristic_mr_igemm(output_size, mr, nr, igemm_cases, convolution_op->code_cache != NULL);
+    mr = xnn_get_heuristic_mr_igemm(output_size, mr, nr, igemm_cases);
   #else
     if (output_size == 1 && igemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
       mr = 1;
     }
   #endif
 
-  #if XNN_PLATFORM_JIT
-    xnn_overwrite_igemm_cases_with_generated_code(convolution_op, igemm_cases, mr);
-  #endif  // XNN_PLATFORM_JIT
   struct xnn_hmp_igemm_ukernel igemm_ukernel = igemm_cases[mr - 1];
 
   const size_t tiled_output_size = round_up(output_size, mr);

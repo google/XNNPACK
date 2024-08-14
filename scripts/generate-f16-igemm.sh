@@ -55,14 +55,3 @@ tools/xngen src/f16-igemm/avx512fp16-broadcast.c.in -D MR=7 -D NR=64 -D DATATYPE
 tools/xngen src/f16-igemm/avx512fp16-broadcast.c.in -D MR=8 -D NR=64 -D DATATYPE=F16 -o src/f16-igemm/gen/f16-igemm-8x64-minmax-avx512fp16-broadcast.c &
 
 wait
- # JIT requires assembly files to be generated first.
-
-##################################### JIT #####################################
-scripts/convert-assembly-to-jit.py --no-post-op -i src/f16-igemm/f16-igemm-1x16-minmax-asm-aarch64-neonfp16arith-ld64.S -o src/f16-igemm/gen/f16-igemm-1x16-aarch64-neonfp16arith-ld64.cc &
-scripts/convert-assembly-to-jit.py --no-post-op -i src/f16-igemm/f16-igemm-4x16-minmax-asm-aarch64-neonfp16arith-ld64.S -o src/f16-igemm/gen/f16-igemm-4x16-aarch64-neonfp16arith-ld64.cc &
-scripts/convert-assembly-to-jit.py --no-post-op --force-prfm -i src/f16-igemm/f16-igemm-6x16-minmax-asm-aarch64-neonfp16arith-ld64.S -o src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-ld64.cc &
-scripts/convert-assembly-to-jit.py --no-post-op --force-prfm -i src/f16-igemm/f16-igemm-6x16-minmax-asm-aarch64-neonfp16arith-cortex-a55.S -o src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-cortex-a55.cc &
-scripts/convert-assembly-to-jit.py --no-post-op -i src/f16-igemm/f16-igemm-6x16-minmax-asm-aarch64-neonfp16arith-cortex-a55r0.S -o src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-cortex-a55r0.cc &
-scripts/convert-assembly-to-jit.py --no-post-op --force-prfm -i src/f16-igemm/f16-igemm-6x16-minmax-asm-aarch64-neonfp16arith-cortex-a75.S -o src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-cortex-a75.cc &
-
-wait

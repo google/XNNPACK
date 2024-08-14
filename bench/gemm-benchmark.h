@@ -103,13 +103,4 @@ void GEMMBenchmark(benchmark::State& state, xnn_f16_gemm_minmax_ukernel_fn gemm,
                    size_t sr,
                    benchmark::utils::IsaCheckFunction isa_check = nullptr);
 
-#if XNN_PLATFORM_JIT
-void GEMMBenchmark(benchmark::State& state,
-                   xnn_jit_gemm_code_generator_fn generator,
-                   xnn_init_f16_minmax_params_fn init_params,
-                   xnn_pack_f16_gemm_fn pack, size_t mr, size_t nr, size_t kr,
-                   size_t sr,
-                   benchmark::utils::IsaCheckFunction isa_check = nullptr);
-#endif  // XNN_PLATFORM_JIT
-
 #endif  // __XNNPACK_BENCH_GEMM_BENCHMARK_H__

@@ -441,7 +441,7 @@ jobs:
           CC: clang-18
           CXX: clang++-18
         run: |
-            bazel build --define=xnn_enable_jit=false test:all
+            bazel build test:all
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
@@ -451,7 +451,6 @@ jobs:
         run: |
           # We only test the KleidiAI integration for now.
           bazel test \
-            --define=xnn_enable_jit=false \
             --test_output=all \
             --test_filter=*QP8* \
             test:qp8_f32_qc4w_gemm_minmax_test \

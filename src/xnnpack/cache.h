@@ -10,7 +10,7 @@
 
 #include "xnnpack.h"         // For xnn_status.
 #include "xnnpack/common.h"  // For XNN_INLINE.
-#include "xnnpack/memory.h"  // For xnn_code_buffer.
+#include "xnnpack/memory.h"
 #include "xnnpack/mutex.h"   // For xnn_mutex.
 
 #ifdef __cplusplus
@@ -41,18 +41,13 @@ struct xnn_cache_bucket {
 
 enum xnn_cache_type {
   xnn_cache_type_invalid = 0,
-  xnn_cache_type_code,
   xnn_cache_type_weights,
 };
 
 struct xnn_cache {
   enum xnn_cache_type type;
-  // A growing buffer that is used to keep all generated code or repacked
-  // weights.
-  union {
-    struct xnn_code_buffer code;
-    struct xnn_weights_buffer weights;
-  };
+  // A growing buffer that is used to keep all repacked weights.
+  struct xnn_weights_buffer weights;
 
   // Entries in the cache.
   struct xnn_cache_bucket* buckets;
@@ -63,24 +58,6 @@ struct xnn_cache {
   size_t hits;
   size_t misses;
 };
-
-// A cache for JIT generated microkernel code.
-struct xnn_code_cache {
-  struct xnn_cache cache;
-};
-
-enum xnn_status xnn_init_code_cache(struct xnn_code_cache* cache);
-enum xnn_status xnn_release_code_cache(struct xnn_code_cache* cache);
-// Looks up `ptr` in the cache, returns offset into cache's buffer if found.
-// `ptr` should already point into cache->buffer.
-// If it already exists within the cache, the buffer will be rewound, so we can
-// reuse the same section of the buffer.
-size_t xnn_get_or_insert_code_cache(struct xnn_code_cache* cache, void* ptr,
-                                    size_t size);
-
-XNN_INLINE static bool xnn_code_cache_valid(struct xnn_code_cache* code_cache) {
-  return code_cache != NULL && code_cache->cache.type == xnn_cache_type_code;
-}
 
 // The state of weights cache finalization.
 enum xnn_cache_state {
