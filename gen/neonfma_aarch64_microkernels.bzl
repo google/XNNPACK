@@ -153,12 +153,4 @@ ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS = [
     "src/f32-vtanh/gen/f32-vtanh-aarch64-neonfma-expm1minus-rr1-p6h5ts-div-u8.c",
     "src/f32-vtanh/gen/f32-vtanh-aarch64-neonfma-expm1minus-rr1-p6h5ts-div-u12.c",
     "src/f32-vtanh/gen/f32-vtanh-aarch64-neonfma-expm1minus-rr1-p6h5ts-div-u16.c",
-    "src/math/f32-sigmoid-aarch64-neonfma-rr1-lut64-p2-div.c",
-    "src/math/f32-sigmoid-aarch64-neonfma-rr1-lut2048-p1-div.c",
-    "src/math/f32-sigmoid-aarch64-neonfma-rr1-p5-div.c",
-    "src/math/f32-sigmoid-aarch64-neonfma-rr2-lut64-p2-div.c",
-    "src/math/f32-sigmoid-aarch64-neonfma-rr2-lut2048-p1-div.c",
-    "src/math/f32-sigmoid-aarch64-neonfma-rr2-p5-div.c",
-    "src/math/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-lut8-p4h3ps-div.c",
-    "src/math/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-p6h5ts-div.c",
 ]

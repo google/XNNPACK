@@ -27,7 +27,6 @@
 #include "xnnpack/ibilinear.h"
 #include "xnnpack/igemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math-stubs.h"
 #include "xnnpack/math.h"
 #include "xnnpack/maxpool.h"
 #include "xnnpack/microparams.h"

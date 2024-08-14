@@ -835,14 +835,6 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "f32_round_bench",
-    srcs = [
-        "f32-round.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
     name = "f32_rsum_bench",
     srcs = [
         "f32-rsum.cc",

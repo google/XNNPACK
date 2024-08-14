@@ -275,7 +275,6 @@ exports_files(SIMD_HEADERS)
 INTERNAL_MICROKERNEL_HDRS = MICROKERNEL_HDRS + SIMD_HEADERS + [
     "src/xnnpack/cache.h",
     "src/xnnpack/intrinsics-polyfill.h",
-    "src/xnnpack/math-stubs.h",
     "src/xnnpack/requantization-stubs.h",
     "src/xnnpack/unaligned.h",
 ]
@@ -685,15 +684,6 @@ xnnpack_cc_library(
         ":common",
         ":hardware_config",
     ],
-)
-
-xnnpack_cc_library(
-    name = "math_stubs",
-    hdrs = [
-        "src/xnnpack/math-stubs.h",
-    ],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
 )
 
 xnnpack_cc_library(

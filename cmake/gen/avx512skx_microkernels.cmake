@@ -74,17 +74,6 @@ SET(ALL_AVX512SKX_MICROKERNEL_SRCS
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx512skx-u64.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx512skx-u96.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx512skx-u128.c
-  src/math/gen/f32-tanh-avx512skx-expm1minus-rr1-lut4-p4h3ts-perm-div.c
-  src/math/gen/f32-tanh-avx512skx-expm1minus-rr1-lut4-p4h3ts-perm-nr1adj.c
-  src/math/gen/f32-tanh-avx512skx-expm1minus-rr1-lut8-p4h3ps-gather-div.c
-  src/math/gen/f32-tanh-avx512skx-expm1minus-rr1-lut8-p4h3ps-gather-nr1.c
-  src/math/gen/f32-tanh-avx512skx-expm1minus-rr1-lut8-p4h3ps-gather-nr1adj.c
-  src/math/gen/f32-tanh-avx512skx-expm1minus-rr1-lut8-p4h3ps-perm-div.c
-  src/math/gen/f32-tanh-avx512skx-expm1minus-rr1-lut8-p4h3ps-perm-nr1.c
-  src/math/gen/f32-tanh-avx512skx-expm1minus-rr1-lut8-p4h3ps-perm-nr1adj.c
-  src/math/gen/f32-tanh-avx512skx-expm1minus-rr1-p6h5ts-div.c
-  src/math/gen/f32-tanh-avx512skx-expm1minus-rr1-p6h5ts-nr1.c
-  src/math/gen/f32-tanh-avx512skx-expm1minus-rr1-p6h5ts-nr1adj.c
   src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-2x8c8-minmax-avx512skx.c
   src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-3x8c8-minmax-avx512skx.c
   src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-4x8c8-minmax-avx512skx.c

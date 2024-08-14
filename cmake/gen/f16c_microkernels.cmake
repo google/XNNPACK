@@ -123,10 +123,4 @@ SET(ALL_F16C_MICROKERNEL_SRCS
   src/f16-vunary/gen/f16-vsqr-f16c-u8.c
   src/f16-vunary/gen/f16-vsqr-f16c-u16.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-f16c-u8.c
-  src/f32-f16-vcvt/gen/f32-f16-vcvt-f16c-u16.c
-  src/math/f16-f32-cvt-f16c.c
-  src/math/f32-f16-cvt-f16c.c
-  src/math/gen/f16-tanh-f16c-expm1minus-rr1-p3h2ts-div.c
-  src/math/gen/f16-tanh-f16c-expm1minus-rr1-p3h2ts-rcp.c
-  src/math/gen/f16-tanh-f16c-polynomial-p17h8t2.c
-  src/math/gen/f16-tanh-f16c-polynomial-p19h9t2.c)
+  src/f32-f16-vcvt/gen/f32-f16-vcvt-f16c-u16.c)

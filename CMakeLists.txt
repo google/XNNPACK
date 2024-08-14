@@ -3781,169 +3781,12 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     TARGET_LINK_LIBRARIES(packq-benchmark PRIVATE kleidiai)
   ENDIF()
 
-  ADD_LIBRARY(math-evaluation-tester STATIC eval/math-evaluation-tester.cc)
-  TARGET_INCLUDE_DIRECTORIES(math-evaluation-tester PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(math-evaluation-tester PRIVATE xnnpack-base fp16 pthreadpool GTest::gtest)
-
   ADD_LIBRARY(gemm-benchmark STATIC bench/gemm-benchmark.cc)
   TARGET_INCLUDE_DIRECTORIES(gemm-benchmark PRIVATE . include src bench)
   TARGET_LINK_LIBRARIES(gemm-benchmark PRIVATE XNNPACK benchmark::benchmark bench-utils fp16)
   IF(XNNPACK_ENABLE_KLEIDIAI)
     TARGET_LINK_LIBRARIES(gemm-benchmark PUBLIC kleidiai)
   ENDIF()
-
-  # ---[ Build accuracy microbenchmarks
-  ADD_EXECUTABLE(f16-exp-ulp-eval eval/f16-exp-ulp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-exp-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f16-exp-ulp-eval PRIVATE benchmark::benchmark cpuinfo fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-exp-ulp-eval PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f16-expminus-ulp-eval eval/f16-expminus-ulp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-expminus-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f16-expminus-ulp-eval PRIVATE benchmark::benchmark cpuinfo fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-expminus-ulp-eval PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f16-expm1minus-ulp-eval eval/f16-expm1minus-ulp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-expm1minus-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f16-expm1minus-ulp-eval PRIVATE benchmark::benchmark cpuinfo fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-expm1minus-ulp-eval PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f16-sigmoid-ulp-eval eval/f16-sigmoid-ulp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-sigmoid-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f16-sigmoid-ulp-eval PRIVATE benchmark::benchmark cpuinfo fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-sigmoid-ulp-eval PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f16-sqrt-ulp-eval eval/f16-sqrt-ulp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-sqrt-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f16-sqrt-ulp-eval PRIVATE benchmark::benchmark cpuinfo fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-sqrt-ulp-eval PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f16-tanh-ulp-eval eval/f16-tanh-ulp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-tanh-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f16-tanh-ulp-eval PRIVATE benchmark::benchmark cpuinfo fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-tanh-ulp-eval PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f32-exp-ulp-eval eval/f32-exp-ulp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-exp-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-exp-ulp-eval PRIVATE benchmark::benchmark cpuinfo fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-exp-ulp-eval PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f32-expminus-ulp-eval eval/f32-expminus-ulp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-expminus-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-expminus-ulp-eval PRIVATE benchmark::benchmark cpuinfo fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-expminus-ulp-eval PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f32-expm1minus-ulp-eval eval/f32-expm1minus-ulp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-expm1minus-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-expm1minus-ulp-eval PRIVATE benchmark::benchmark cpuinfo fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-expm1minus-ulp-eval PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f32-extexp-ulp-eval eval/f32-extexp-ulp.cc)
-  SET_TARGET_PROPERTIES(f32-extexp-ulp-eval PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-extexp-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-extexp-ulp-eval PRIVATE benchmark::benchmark cpuinfo fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-extexp-ulp-eval PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f32-sigmoid-ulp-eval eval/f32-sigmoid-ulp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-sigmoid-ulp-eval PRIVATE benchmark::benchmark cpuinfo fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-sigmoid-ulp-eval PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f32-sqrt-ulp-eval eval/f32-sqrt-ulp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-sqrt-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-sqrt-ulp-eval PRIVATE benchmark::benchmark cpuinfo fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-sqrt-ulp-eval PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f32-tanh-ulp-eval eval/f32-tanh-ulp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-tanh-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-tanh-ulp-eval PRIVATE benchmark::benchmark cpuinfo fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-tanh-ulp-eval PRIVATE bench-utils microkernels-all)
-
-  # ---[ Build accuracy tests
-  ADD_EXECUTABLE(f16-sqrt-eval eval/f16-sqrt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-sqrt-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f16-sqrt-eval PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-sqrt-eval PRIVATE hardware-config logging microkernels-all)
-
-  ADD_EXECUTABLE(f16-tanh-eval eval/f16-tanh.cc)
-  SET_TARGET_PROPERTIES(f16-tanh-eval PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-tanh-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f16-tanh-eval PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-tanh-eval PRIVATE hardware-config logging math-evaluation-tester microkernels-all)
-
-  ADD_EXECUTABLE(f16-f32-cvt-eval eval/f16-f32-cvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-f32-cvt-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f16-f32-cvt-eval PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-f32-cvt-eval PRIVATE hardware-config logging microkernels-all)
-
-  ADD_EXECUTABLE(f32-f16-cvt-eval eval/f32-f16-cvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-f16-cvt-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-f16-cvt-eval PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-f16-cvt-eval PRIVATE hardware-config logging microkernels-all)
-
-  ADD_EXECUTABLE(f32-qs8-cvt-eval eval/f32-qs8-cvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-qs8-cvt-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-qs8-cvt-eval PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-qs8-cvt-eval PRIVATE hardware-config logging microkernels-all)
-
-  ADD_EXECUTABLE(f32-qu8-cvt-eval eval/f32-qu8-cvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-qu8-cvt-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-qu8-cvt-eval PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-qu8-cvt-eval PRIVATE hardware-config logging microkernels-all)
-
-  ADD_EXECUTABLE(f32-exp-eval eval/f32-exp.cc)
-  SET_TARGET_PROPERTIES(f32-exp-eval PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-exp-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-exp-eval PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-exp-eval PRIVATE hardware-config logging math-evaluation-tester microkernels-all)
-
-  ADD_EXECUTABLE(f32-expm1minus-eval eval/f32-expm1minus.cc)
-  SET_TARGET_PROPERTIES(f32-expm1minus-eval PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-expm1minus-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-expm1minus-eval PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-expm1minus-eval PRIVATE hardware-config logging math-evaluation-tester microkernels-all)
-
-  ADD_EXECUTABLE(f32-expminus-eval eval/f32-expminus.cc)
-  SET_TARGET_PROPERTIES(f32-expminus-eval PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-expminus-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-expminus-eval PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-expminus-eval PRIVATE hardware-config logging math-evaluation-tester microkernels-all)
-
-  ADD_EXECUTABLE(f32-roundne-eval eval/f32-roundne.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-roundne-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-roundne-eval PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-roundne-eval PRIVATE hardware-config logging microkernels-all)
-
-  ADD_EXECUTABLE(f32-roundd-eval eval/f32-roundd.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-roundd-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-roundd-eval PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-roundd-eval PRIVATE hardware-config logging microkernels-all)
-
-  ADD_EXECUTABLE(f32-roundu-eval eval/f32-roundu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-roundu-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-roundu-eval PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-roundu-eval PRIVATE hardware-config logging microkernels-all)
-
-  ADD_EXECUTABLE(f32-roundz-eval eval/f32-roundz.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-roundz-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-roundz-eval PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-roundz-eval PRIVATE hardware-config logging microkernels-all)
-
-  ADD_EXECUTABLE(f32-tanh-eval eval/f32-tanh.cc)
-  SET_TARGET_PROPERTIES(f32-tanh-eval PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-tanh-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-tanh-eval PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-tanh-eval PRIVATE hardware-config logging math-evaluation-tester microkernels-all)
-
-  ADD_EXECUTABLE(u32-sqrt-eval eval/u32-sqrt.cc)
-  TARGET_INCLUDE_DIRECTORIES(u32-sqrt-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(u32-sqrt-eval PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(u32-sqrt-eval PRIVATE hardware-config logging microkernels-all)
-
-  ADD_EXECUTABLE(u64-sqrt-eval eval/u64-sqrt.cc)
-  TARGET_INCLUDE_DIRECTORIES(u64-sqrt-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(u64-sqrt-eval PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(u64-sqrt-eval PRIVATE hardware-config logging microkernels-all)
 
   IF(XNNPACK_BUILD_LIBRARY)
     # ---[ Build end-to-end microbenchmarks
@@ -4415,11 +4258,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-rmin-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-rmin-bench PRIVATE benchmark::benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(f32-rmin-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-round-bench bench/f32-round.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-round-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-round-bench PRIVATE benchmark::benchmark cpuinfo pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-round-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
   ADD_EXECUTABLE(f32-rsum-bench bench/f32-rsum.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-rsum-bench PRIVATE . include src)

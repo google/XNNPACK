@@ -227,8 +227,6 @@ SET(ALL_WASM_MICROKERNEL_SRCS
   src/f32-vtanh/gen/f32-vtanh-wasm-expm1minus-rr1-p6h5ts-div-u1.c
   src/f32-vtanh/gen/f32-vtanh-wasm-expm1minus-rr1-p6h5ts-div-u2.c
   src/f32-vtanh/gen/f32-vtanh-wasm-expm1minus-rr1-p6h5ts-div-u4.c
-  src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut8-p4h3ps-div.c
-  src/math/gen/f32-tanh-wasm-expm1minus-rr1-p6h5ts-div.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x2-minmax-wasm.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x4-minmax-wasm.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8-minmax-wasm.c

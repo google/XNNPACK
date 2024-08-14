@@ -18,7 +18,6 @@
 #include "xnnpack/dwconv.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/igemm.h"
-#include "xnnpack/math-stubs.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/prefetch.h"
