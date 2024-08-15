@@ -11,7 +11,7 @@
 #include <smmintrin.h>
 #include <stddef.h>
 #include <stdint.h>
-
+#include <stdio.h>
 #include "xnnpack/common.h"
 #include "xnnpack/unaligned.h"
 
@@ -42,16 +42,26 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
 }
 
 static XNN_INLINE xnn_simd_s32_t xnn_clz_s32(xnn_simd_s32_t a) {
-  int32_t interim[4];
-  int32_t result[4];
-  _mm_storeu_si128((__m128i*)interim, a);
 
-  result[0] = __builtin_clz(interim[0]);
-  result[1] = __builtin_clz(interim[1]);
-  result[2] = __builtin_clz(interim[2]);
-  result[3] = __builtin_clz(interim[3]);
+  xnn_simd_s32_t shuffled = _mm_shuffle_epi32(a, _MM_SHUFFLE(2, 3, 0, 1));
+  xnn_simd_s32_t low_half = _mm_unpacklo_epi32(a, shuffled);
+  xnn_simd_s32_t high_half = _mm_unpackhi_epi32(a, shuffled);
+  __m128d low = _mm_cvtepi32_pd(low_half);
+  __m128d high = _mm_cvtepi32_pd(high_half);
+  xnn_simd_s32_t low_a = _mm_castpd_si128(low);
+  xnn_simd_s32_t high_a = _mm_castpd_si128(high);
 
-  return _mm_loadu_si128((const __m128i*)result);
+  xnn_simd_s32_t shift_low = _mm_srli_epi64(low_a, 52);
+  xnn_simd_s32_t shift_high = _mm_srli_epi64(high_a, 52);
+
+  xnn_simd_s32_t exponent =
+      _mm_set_epi32(_mm_extract_epi32(shift_high, 2) & 0x7FF,
+                    _mm_extract_epi32(shift_high, 0) & 0x7FF,
+                    _mm_extract_epi32(shift_low, 2) & 0x7FF,
+                    _mm_extract_epi32(shift_low, 0) & 0x7FF);
+
+  xnn_simd_s32_t result = _mm_sub_epi32(_mm_set1_epi32(31), _mm_sub_epi32(exponent, _mm_set1_epi32(1023)));
+  return result;
 }
 
 // Load/store operations.
