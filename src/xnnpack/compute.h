@@ -908,6 +908,8 @@ struct max_pooling_context {
   size_t output_increment;
   union {
     union xnn_u8_minmax_params u8;
+    union xnn_s8_minmax_params s8;
+    union xnn_f16_minmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
   xnn_maxpool_ukernel_fn ukernel;
