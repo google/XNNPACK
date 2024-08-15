@@ -23,7 +23,7 @@ namespace xnnpack {
 class ClzOperatorTester : public UnaryOperatorTester {
  public:
   ClzOperatorTester() : UnaryOperatorTester() {
-    range_s32_ = {-INT_MIN, INT_MAX};
+    range_s32_ = {std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()};
   }
 
  protected:

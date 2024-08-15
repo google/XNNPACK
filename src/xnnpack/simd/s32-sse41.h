@@ -42,7 +42,16 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
 }
 
 static XNN_INLINE xnn_simd_s32_t xnn_clz_s32(xnn_simd_s32_t a) {
-  return _mm_lzcnt_epi32(a);
+  int32_t interim[4];
+  int32_t result[4];
+  _mm_storeu_si128((__m128i*)interim, a);
+
+  result[0] = __builtin_clz(interim[0]);
+  result[1] = __builtin_clz(interim[1]);
+  result[2] = __builtin_clz(interim[2]);
+  result[3] = __builtin_clz(interim[3]);
+
+  return _mm_loadu_si128((const __m128i*)result);
 }
 
 // Load/store operations.

@@ -44,7 +44,13 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
 }
 
 static XNN_INLINE xnn_simd_s32_t xnn_clz_s32(xnn_simd_s32_t a) {
-  return _mm256_lzcnt_epi32(a);
+  int32_t interim[8];
+  int32_t result[8];
+  _mm256_storeu_si256((__m256i*)interim, a);
+  for (int i = 0; i < 8; i++) {
+    result[i] = __builtin_clz(interim[i]);
+  }
+  return _mm256_loadu_si256((const __m256i*)result);
 }
 
 // Load/store operations.
