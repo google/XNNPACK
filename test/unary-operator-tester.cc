@@ -283,8 +283,8 @@ void UnaryOperatorTester::TestQU8() {
 
 void UnaryOperatorTester::TestS32() {
   xnnpack::ReplicableRandomDevice rng;
-  std::uniform_real_distribution<int32_t> s32dist(range_s32_.first,
-                                                range_s32_.second);
+  std::uniform_int_distribution<int32_t> s32dist(range_s32_.first,
+                                                 range_s32_.second);
 
   std::vector<int32_t> input(XNN_EXTRA_BYTES / sizeof(float) +
                            (batch_size() - 1) * input_stride() + channels());
@@ -292,7 +292,8 @@ void UnaryOperatorTester::TestS32() {
   std::vector<int32_t> output_ref(batch_size() * channels());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return s32dist(rng); });
-    std::fill(output.begin(), output.end(), INT_MIN);
+    std::fill(output.begin(), output.end(),
+              std::numeric_limits<int32_t>::min());
 
     // Compute reference results.
     for (size_t i = 0; i < batch_size(); i++) {

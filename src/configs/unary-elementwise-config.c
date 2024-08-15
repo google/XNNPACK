@@ -2291,10 +2291,12 @@ static void init_s32_clz_config(void) {
       s32_clz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_vclz_ukernel__avx512f_u16;
       s32_clz_config.element_tile = 16;
     } else if (hardware_config->use_x86_avx) {
-      s32_clz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_vclz_ukernel__avx_u16;
+      s32_clz_config.ukernel =
+          (xnn_vunary_ukernel_fn)xnn_s32_vclz_ukernel__avx2_u16;
       s32_clz_config.element_tile = 16;
     } else {
-      s32_clz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_vclz_ukernel__sse2_u8;
+      s32_clz_config.ukernel =
+          (xnn_vunary_ukernel_fn)xnn_s32_vclz_ukernel__sse41_u8;
       s32_clz_config.element_tile = 8;
     }
   #else

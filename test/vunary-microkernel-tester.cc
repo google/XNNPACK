@@ -504,11 +504,11 @@ void VUnaryMicrokernelTester::TestClz(
   std::vector<int32_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(x.begin(), x.end(), std::ref(s32rng));
-    std::fill(y.begin(), y.end(), INT_MAX);
+    std::fill(y.begin(), y.end(), std::numeric_limits<int32_t>::min());
     if (inplace()) {
       std::copy(x.cbegin(), x.cend(), y.begin());
     } else {
-      std::fill(y.begin(), y.end(), INT_MAX);
+      std::fill(y.begin(), y.end(), std::numeric_limits<int32_t>::min());
     }
     const int32_t* x_data = inplace() ? y.data() : x.data();
 
