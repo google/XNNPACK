@@ -590,11 +590,9 @@ DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_scalar_expm1minus_rr1_p6
     uint16_t alpha,                                       \
     uint16_t beta);
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_F16_ELU_PARAMS_FUNCTION(xnn_init_f16_elu_fp16arith_rr1_p3_params)
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+DECLARE_INIT_F16_ELU_PARAMS_FUNCTION(xnn_init_f16_elu_scalar_params)
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F16_ELU_PARAMS_FUNCTION(xnn_init_f16_elu_avx2_rr1_p3_params)
+  DECLARE_INIT_F16_ELU_PARAMS_FUNCTION(xnn_init_f16_elu_avx2_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
@@ -605,31 +603,7 @@ DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_scalar_expm1minus_rr1_p6
     float alpha,                                          \
     float beta);
 
-DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_scalar_rr2_lut16_p3_params)
-DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_scalar_rr2_p6_params)
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_neon_rr2_lut16_p3_params)
-  DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_neon_rr2_p6_params)
-  DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_neonfma_rr1_lut16_p3_params)
-  DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_neonfma_rr1_p6_params)
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_sse2_rr2_lut16_p3_params)
-  DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_sse2_rr2_p6_params)
-  DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_avx_rr2_lut16_p3_params)
-  DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_avx_rr2_lut4_p4_params)
-  DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_avx_rr2_p6_params)
-  DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_avx2_rr1_lut16_p3_params)
-  DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_avx2_rr1_lut8_p4_params)
-  DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_avx2_rr1_lut4_p4_params)
-  DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_avx2_rr1_p6_params)
-  DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_avx512_rr1_lut16_p3_params)
-  DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_avx512_rr1_p6_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params)
-  DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_wasmsimd_rr2_p6_params)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_scalar_params)
 
 
 #define DECLARE_INIT_F16_LRELU_PARAMS_FUNCTION(fn_name)     \

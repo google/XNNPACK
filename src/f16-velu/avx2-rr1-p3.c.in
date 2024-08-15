@@ -26,16 +26,25 @@ void xnn_f16_velu_ukernel__avx2_rr1_p3_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256 vprescale = _mm256_load_ps(params->avx2_rr1_p3.prescale);
-  const __m256 vsat_cutoff = _mm256_load_ps(params->avx2_rr1_p3.sat_cutoff);
-  const __m256 vmagic_bias = _mm256_load_ps(params->avx2_rr1_p3.magic_bias);
-  const __m256 vlog2e = _mm256_load_ps(params->avx2_rr1_p3.log2e);
-  const __m256 vminus_ln2 = _mm256_load_ps(params->avx2_rr1_p3.minus_ln2);
-  const __m256 vc3 = _mm256_load_ps(params->avx2_rr1_p3.c3);
-  const __m256 vc2 = _mm256_load_ps(params->avx2_rr1_p3.c2);
-  const __m256 vc1 = _mm256_load_ps(params->avx2_rr1_p3.c1);
-  const __m256 valpha = _mm256_load_ps(params->avx2_rr1_p3.alpha);
-  const __m256 vbeta = _mm256_load_ps(params->avx2_rr1_p3.beta);
+  const __m256 vsat_cutoff = _mm256_set1_ps(-0x1.0A4000p+3f);
+  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
+  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
+  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
+  const __m256 vc3 = _mm256_set1_ps(0x1.5554DCp-3f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.01EBB2p-1f);
+  const __m256 vc1 = _mm256_set1_ps(0x1.0002F2p+0f);
+
+  XNN_FORCE_REALIZATION(vsat_cutoff);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vminus_ln2);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+
+  const __m256 vprescale = _mm256_set1_ps(params->avx2.prescale);
+  const __m256 valpha = _mm256_set1_ps(params->avx2.alpha);
+  const __m256 vbeta = _mm256_set1_ps(params->avx2.beta);
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;

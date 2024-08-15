@@ -15,7 +15,6 @@ $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 #include "xnnpack/common.h"
 
 
-$PARAMS_STRUCT = "neonfma_rr1_p6" if FMA else "neon_rr2_p6"
 void xnn_f32_velu_ukernel__${"neonfma" if FMA else "neon"}_rr${1 if FMA else 2}_p6_u${BATCH_TILE}(
     size_t batch,
     const float* input,
@@ -27,23 +26,38 @@ void xnn_f32_velu_ukernel__${"neonfma" if FMA else "neon"}_rr${1 if FMA else 2}_
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vprescale = vld1q_dup_f32(&params->${PARAMS_STRUCT}.prescale);
-  const float32x4_t valpha = vld1q_dup_f32(&params->${PARAMS_STRUCT}.alpha);
-  const float32x4_t vbeta = vld1q_dup_f32(&params->${PARAMS_STRUCT}.beta);
-  const float32x4_t vsat_cutoff = vld1q_dup_f32(&params->${PARAMS_STRUCT}.sat_cutoff);
-  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->${PARAMS_STRUCT}.magic_bias);
-  const float32x4_t vlog2e = vld1q_dup_f32(&params->${PARAMS_STRUCT}.log2e);
-  $if FMA:
-    const float32x4_t vminus_ln2 = vld1q_dup_f32(&params->neonfma_rr1_p6.minus_ln2);
-  $else:
-    const float32x4_t vminus_ln2_hi = vld1q_dup_f32(&params->neon_rr2_p6.minus_ln2_hi);
-    const float32x4_t vminus_ln2_lo = vld1q_dup_f32(&params->neon_rr2_p6.minus_ln2_lo);
-  const float32x4_t vc6 = vld1q_dup_f32(&params->${PARAMS_STRUCT}.c6);
-  const float32x4_t vc5 = vld1q_dup_f32(&params->${PARAMS_STRUCT}.c5);
-  const float32x4_t vc4 = vld1q_dup_f32(&params->${PARAMS_STRUCT}.c4);
-  const float32x4_t vc3 = vld1q_dup_f32(&params->${PARAMS_STRUCT}.c3);
-  const float32x4_t vc2 = vld1q_dup_f32(&params->${PARAMS_STRUCT}.c2);
+  const float32x4_t vsat_cutoff = vmovq_n_f32(-0x1.154246p+4f);
+  const float32x4_t vmagic_bias = vmovq_n_f32(0x1.8000FEp23f);
+  const float32x4_t vlog2e = vmovq_n_f32(0x1.715476p+0f);
+  const float32x4_t vc6 = vmovq_n_f32(0x1.6b7338p-10f);
+  const float32x4_t vc5 = vmovq_n_f32(0x1.12278Ep-7f);
+  const float32x4_t vc4 = vmovq_n_f32(0x1.555716p-5f);
+  const float32x4_t vc3 = vmovq_n_f32(0x1.5554B0p-3f);
+  const float32x4_t vc2 = vmovq_n_f32(0x1.FFFFFEp-2f);
   const float32x4_t vone = vmovq_n_f32(1.0f);
+
+  XNN_FORCE_REALIZATION(vsat_cutoff);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vc6);
+  XNN_FORCE_REALIZATION(vc5);
+  XNN_FORCE_REALIZATION(vc4);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vone);
+
+  $if FMA:
+    const float32x4_t vminus_ln2 = vmovq_n_f32(-0x1.62E430p-1f);
+    XNN_FORCE_REALIZATION(vminus_ln2);
+  $else:
+    const float32x4_t vminus_ln2_hi = vmovq_n_f32(-0x1.62E440p-1f);
+    const float32x4_t vminus_ln2_lo = vmovq_n_f32(0x1.0105C6p-21f);
+    XNN_FORCE_REALIZATION(vminus_ln2_hi);
+    XNN_FORCE_REALIZATION(vminus_ln2_lo);
+
+  const float32x4_t vprescale = vld1q_dup_f32(&params->scalar.prescale);
+  const float32x4_t valpha = vld1q_dup_f32(&params->scalar.alpha);
+  const float32x4_t vbeta = vld1q_dup_f32(&params->scalar.beta);
 
   $if BATCH_TILE > 4:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
