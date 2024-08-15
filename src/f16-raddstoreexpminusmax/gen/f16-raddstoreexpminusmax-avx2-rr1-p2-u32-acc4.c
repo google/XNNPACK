@@ -30,13 +30,21 @@ void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u32_acc4(
   assert(output != NULL);
   assert(sum != NULL);
 
+  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p0f);
+  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
+  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E43p-1f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.FF3A32p-2f);
+  const __m256 vc1 = _mm256_set1_ps(0x1.039E10p+0f);
+  const __m256 vdenorm_cutoff = _mm256_set1_ps(-0x1.368000p+3f);
+
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vminus_ln2);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
+
   const __m256 vi_max = _mm256_cvtph_ps(_mm_set1_epi16((short) *((const uint16_t*) max)));
-  const __m256 vlog2e = _mm256_load_ps(params->avx2_rr1_p2.log2e);
-  const __m256 vmagic_bias = _mm256_load_ps(params->avx2_rr1_p2.magic_bias);
-  const __m256 vminus_ln2 = _mm256_load_ps(params->avx2_rr1_p2.minus_ln2);
-  const __m256 vc2 = _mm256_load_ps(params->avx2_rr1_p2.c2);
-  const __m256 vc1 = _mm256_load_ps(params->avx2_rr1_p2.c1);
-  const __m256 vdenorm_cutoff = _mm256_load_ps(params->avx2_rr1_p2.denorm_cutoff);
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
