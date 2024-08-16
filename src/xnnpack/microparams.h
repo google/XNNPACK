@@ -1036,25 +1036,7 @@ union xnn_qu8_mul_minmax_params {
 
 // RSum params used by RSUM & RDSUM microkernels.
 union xnn_qs8_rsum_params {
-  struct {
-    char _;  // Dummy member variable to comply with the C standard
-  } scalar;
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
-    int8_t onemask_table[32];  // 16 ones, 16 zeros
-  } neon;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) int8_t onemask_table[32];  // 16 ones, 16 zeros
-  } ssse3;
-  struct {
-    XNN_ALIGN(16) int8_t mask_table[30];
-  } sse4;
-  struct {
-    XNN_ALIGN(32) int8_t onemask_table[64];  // 32 ones, 32 zeros
-  } avx2;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+  char _;  // Dummy member variable to comply with the C standard
 };
 
 // AvgPool w. Min+Max: used by quantized GAVGPOOL microkernels with MINMAX activation.
@@ -1091,7 +1073,6 @@ union xnn_qs8_avgpool_minmax_params {
     int32_t magic_bias_less_output_zero_point;
     int8_t output_min;
     int8_t output_max;
-    int8_t mask_table[30];
   } fp32_neon;
   struct {
     int32_t init_bias;
@@ -1125,7 +1106,6 @@ union xnn_qs8_avgpool_minmax_params {
     int32_t magic_bias_less_output_zero_point;
     int8_t output_min;
     int8_t output_max;
-    int8_t onemask_table[32];  // 16 ones, 16 zeros
   } fp32_ssse3;
   struct {
     XNN_ALIGN(16) int32_t init_bias[4];
@@ -1136,7 +1116,6 @@ union xnn_qs8_avgpool_minmax_params {
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int8_t output_min[16];
     XNN_ALIGN(16) int8_t output_max[16];
-    XNN_ALIGN(16) int8_t mask_table[30];
   } fp32_sse4;
   struct {
     XNN_ALIGN(16) int32_t init_bias[8];
@@ -1147,8 +1126,6 @@ union xnn_qs8_avgpool_minmax_params {
     XNN_ALIGN(16) int16_t output_zero_point[16];
     XNN_ALIGN(16) int8_t output_min[32];
     XNN_ALIGN(16) int8_t output_max[32];
-    XNN_ALIGN(16) int8_t mask_table[30];
-    XNN_ALIGN(32) uint32_t shuffle_mask[8];
   } fp32_avx2;
   struct {
     XNN_ALIGN(64) int32_t init_bias[16];
@@ -1156,7 +1133,6 @@ union xnn_qs8_avgpool_minmax_params {
     XNN_ALIGN(64) float output_max_less_zero_point[16];
     XNN_ALIGN(64) int16_t output_zero_point[32];
     XNN_ALIGN(64) int8_t output_min[64];
-    XNN_ALIGN(64) uint32_t shuffle_mask[16];
   } fp32_avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -1337,7 +1313,6 @@ union xnn_f32_qs8_cvt_params {
     XNN_ALIGN(32) float scale[8];
     XNN_ALIGN(32) float output_max_less_zero_point[8];
     XNN_ALIGN(32) int16_t output_zero_point[16];
-    XNN_ALIGN(32) uint32_t shuffle_mask[8];
     XNN_ALIGN(32) int8_t output_min[32];
   } avx2;
   struct {
@@ -1345,8 +1320,6 @@ union xnn_f32_qs8_cvt_params {
     XNN_ALIGN(64) float output_max_less_zero_point[16];
     XNN_ALIGN(64) int16_t output_zero_point[32];
     XNN_ALIGN(64) int8_t output_min[64];
-    XNN_ALIGN(64) uint32_t shuffle512_mask[16];
-    XNN_ALIGN(32) uint32_t shuffle256_mask[8];
   } avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -1428,7 +1401,6 @@ union xnn_f32_qu8_cvt_params {
     XNN_ALIGN(32) float scale[8];
     XNN_ALIGN(32) float output_max_less_zero_point[8];
     XNN_ALIGN(32) int16_t output_zero_point[16];
-    XNN_ALIGN(32) uint32_t shuffle_mask[8];
     XNN_ALIGN(32) uint8_t output_min[32];
   } avx2;
   struct {
@@ -1436,8 +1408,6 @@ union xnn_f32_qu8_cvt_params {
     XNN_ALIGN(64) float output_max_less_zero_point[16];
     XNN_ALIGN(64) int16_t output_zero_point[32];
     XNN_ALIGN(64) uint8_t output_min[64];
-    XNN_ALIGN(64) uint32_t shuffle512_mask[16];
-    XNN_ALIGN(32) uint32_t shuffle256_mask[8];
   } avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -1520,18 +1490,10 @@ union xnn_qs16_qs8_cvt_params {
     XNN_ALIGN(16) int32_t multiplier[4];
     XNN_ALIGN(16) int64_t bias[2];  // Adjust for input bias multiplied.
     XNN_ALIGN(16) uint16_t input_bias[8];  // Convert to unsigned.
-    XNN_ALIGN(16) uint8_t shuffle01[16];  // shuffle first 2 inputs
-    XNN_ALIGN(16) uint8_t shuffle23[16];  // shuffle next 2 inputs
-    XNN_ALIGN(16) uint8_t shuffle45[16];  // shuffle another 2 inputs
-    XNN_ALIGN(16) uint8_t shuffle67[16];  // shuffle last 2 inputs
   } ssse3;
   struct {
     XNN_ALIGN(16) int32_t multiplier[4];
     XNN_ALIGN(16) int64_t bias[2];  // Rounding + output_zero_point.
-    XNN_ALIGN(16) uint8_t shuffle01[16];  // shuffle first 2 inputs
-    XNN_ALIGN(16) uint8_t shuffle23[16];  // shuffle next 2 inputs
-    XNN_ALIGN(16) uint8_t shuffle45[16];  // shuffle another 2 inputs
-    XNN_ALIGN(16) uint8_t shuffle67[16];  // shuffle last 2 inputs
   } sse4;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

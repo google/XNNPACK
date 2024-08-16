@@ -137,7 +137,9 @@ void qs8_rsum(
 
   // Prepare parameters.
   union xnn_qs8_rsum_params params;
-  init_params(&params);
+  if (init_params) {
+    init_params(&params);
+  }
 
   for (auto _ : state) {
     for (int i = 0; i < rows; ++i) {

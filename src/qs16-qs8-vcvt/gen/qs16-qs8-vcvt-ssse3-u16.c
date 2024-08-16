@@ -26,15 +26,31 @@ void xnn_qs16_qs8_vcvt_ukernel__ssse3_u16(
   assert(batch % sizeof(int16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
+  XNN_ALIGN(16) static const uint8_t shuffle01[16] = {
+    0x80, 0x80, 0, 1, 0x80, 0x80, 0x80, 0x80,
+    0x80, 0x80, 2, 3, 0x80, 0x80, 0x80, 0x80,
+  };
+  XNN_ALIGN(16) static const uint8_t shuffle23[16] = {
+    0x80, 0x80, 4, 5, 0x80, 0x80, 0x80, 0x80,
+    0x80, 0x80, 6, 7, 0x80, 0x80, 0x80, 0x80,
+  };
+  XNN_ALIGN(16) static const uint8_t shuffle45[16] = {
+    0x80, 0x80, 8, 9, 0x80, 0x80, 0x80, 0x80,
+    0x80, 0x80, 10, 11, 0x80, 0x80, 0x80, 0x80,
+  };
+  XNN_ALIGN(16) static const uint8_t shuffle67[16] = {
+    0x80, 0x80, 12, 13, 0x80, 0x80, 0x80, 0x80,
+    0x80, 0x80, 14, 15, 0x80, 0x80, 0x80, 0x80,
+  };
 
   const __m128i vinput_bias = _mm_load_si128((const __m128i*) params->ssse3.input_bias);
   const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->ssse3.multiplier);
   const __m128i vbias = _mm_load_si128((const __m128i*) params->ssse3.bias);
-  const __m128i vshuffle01 = _mm_load_si128((const __m128i*) params->ssse3.shuffle01);
-  const __m128i vshuffle23 = _mm_load_si128((const __m128i*) params->ssse3.shuffle23);
+  const __m128i vshuffle01 = _mm_load_si128((const __m128i*) shuffle01);
+  const __m128i vshuffle23 = _mm_load_si128((const __m128i*) shuffle23);
 
-  const __m128i vshuffle45 = _mm_load_si128((const __m128i*) params->ssse3.shuffle45);
-  const __m128i vshuffle67 = _mm_load_si128((const __m128i*) params->ssse3.shuffle67);
+  const __m128i vshuffle45 = _mm_load_si128((const __m128i*) shuffle45);
+  const __m128i vshuffle67 = _mm_load_si128((const __m128i*) shuffle67);
   for (; batch >= 16 * sizeof(int16_t); batch -= 16 * sizeof(int16_t)) {
     __m128i vx0 = _mm_loadu_si128((const __m128i*) input); input += 8;
     __m128i vx2 = _mm_loadu_si128((const __m128i*) input); input += 8;

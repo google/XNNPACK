@@ -186,20 +186,6 @@ DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_scalar
   DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_wasmsimd_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#define DECLARE_INIT_QS8_RSUM_PARAMS_FUNCTION(fn_name) \
-  XNN_INTERNAL size_t fn_name(                         \
-    union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)]);
-
-DECLARE_INIT_QS8_RSUM_PARAMS_FUNCTION(xnn_init_qs8_rsum_scalar_params)
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_QS8_RSUM_PARAMS_FUNCTION(xnn_init_qs8_rsum_neon_params)
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_QS8_RSUM_PARAMS_FUNCTION(xnn_init_qs8_rsum_ssse3_params)
-  DECLARE_INIT_QS8_RSUM_PARAMS_FUNCTION(xnn_init_qs8_rsum_sse4_params)
-  DECLARE_INIT_QS8_RSUM_PARAMS_FUNCTION(xnn_init_qs8_rsum_avx2_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
 
 #define DECLARE_UPDATE_QS8_AVGPOOL_PARAMS_FUNCTION(fn_name)          \
   XNN_INTERNAL void fn_name(                                         \

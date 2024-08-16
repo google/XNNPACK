@@ -129,7 +129,7 @@ class RDSumMicrokernelTester {
   }
 
   void Test(xnn_qs8_rdsum_ukernel_fn rdsum,
-      xnn_init_qs8_rsum_params_fn init_params) const {
+      xnn_init_qs8_rsum_params_fn init_params = nullptr) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
@@ -152,7 +152,9 @@ class RDSumMicrokernelTester {
 
       // Prepare parameters.
       union xnn_qs8_rsum_params params;
-      init_params(&params);
+      if (init_params) {
+        init_params(&params);
+      }
 
       // Call optimized micro-kernel.
       rdsum(rows(), channels(), input.data(), input_stride(), zero.data(), output.data(), &params);

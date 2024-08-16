@@ -1015,63 +1015,6 @@ void xnn_init_blockwise_scale_bf16_params(
   }
 }
 
-size_t xnn_init_qs8_rsum_scalar_params(
-  union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
-{
-  return sizeof(params->scalar);
-}
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_qs8_rsum_ssse3_params(
-  union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 16; i++) {
-    params->ssse3.onemask_table[i] = 1;
-  }
-  for (uint32_t i = 16; i < 32; i++) {
-    params->ssse3.onemask_table[i] = 0;
-  }
-  return sizeof(params->ssse3);
-}
-
-size_t xnn_init_qs8_rsum_sse4_params(
-  union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 15; i++) {
-    params->sse4.mask_table[i] = 1;
-  }
-  for (uint32_t i = 15; i < 30; i++) {
-    params->sse4.mask_table[i] = 0;
-  }
-  return sizeof(params->sse4);
-}
-
-size_t xnn_init_qs8_rsum_avx2_params(
-  union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 32; i++) {
-    params->avx2.onemask_table[i] = 1;
-  }
-  for (uint32_t i = 32; i < 64; i++) {
-    params->avx2.onemask_table[i] = 0;
-  }
-  return sizeof(params->avx2);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_qs8_rsum_neon_params(
-  union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 16; i++) {
-    params->neon.onemask_table[i] = 1;
-  }
-  for (uint32_t i = 16; i < 32; i++) {
-    params->neon.onemask_table[i] = 0;
-  }
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 size_t xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params(
   union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -1227,12 +1170,6 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_ssse3_params(
   params->fp32_ssse3.magic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
   params->fp32_ssse3.output_min = output_min;
   params->fp32_ssse3.output_max = output_max;
-  for (uint32_t i = 0; i < 16; i++) {
-    params->fp32_ssse3.onemask_table[i] = 1;
-  }
-  for (uint32_t i = 16; i < 32; i++) {
-    params->fp32_ssse3.onemask_table[i] = 0;
-  }
   return sizeof(params->fp32_ssse3);
 }
 
@@ -1263,12 +1200,6 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_sse4_params(
     params->fp32_sse4.output_min[i] = output_min;
     params->fp32_sse4.output_max[i] = output_max;
   }
-  for (uint32_t i = 0; i < 15; i++) {
-    params->fp32_sse4.mask_table[i] = 1;
-  }
-  for (uint32_t i = 15; i < 30; i++) {
-    params->fp32_sse4.mask_table[i] = 0;
-  }
   return sizeof(params->fp32_sse4);
 }
 
@@ -1284,14 +1215,6 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_avx2_params(
   assert(scale < 256.0f);
 
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  params->fp32_avx2.shuffle_mask[0] = 0;
-  params->fp32_avx2.shuffle_mask[1] = 4;
-  params->fp32_avx2.shuffle_mask[2] = 1;
-  params->fp32_avx2.shuffle_mask[3] = 5;
-  params->fp32_avx2.shuffle_mask[4] = 2;
-  params->fp32_avx2.shuffle_mask[5] = 6;
-  params->fp32_avx2.shuffle_mask[6] = 3;
-  params->fp32_avx2.shuffle_mask[7] = 7;
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx2.output_zero_point[i] = (int16_t) output_zero_point;
   }
@@ -1305,12 +1228,6 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_avx2_params(
   for (uint32_t i = 0; i < 32; i++) {
     params->fp32_avx2.output_min[i] = output_min;
     params->fp32_avx2.output_max[i] = output_max;
-  }
-  for (uint32_t i = 0; i < 15; i++) {
-    params->fp32_avx2.mask_table[i] = 1;
-  }
-  for (uint32_t i = 15; i < 30; i++) {
-    params->fp32_avx2.mask_table[i] = 0;
   }
   return sizeof(params->fp32_avx2);
 }
@@ -1327,22 +1244,6 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_avx512_params(
   assert(scale < 256.0f);
 
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  params->fp32_avx512.shuffle_mask[0] = 0;
-  params->fp32_avx512.shuffle_mask[1] = 4;
-  params->fp32_avx512.shuffle_mask[2] = 8;
-  params->fp32_avx512.shuffle_mask[3] = 12;
-  params->fp32_avx512.shuffle_mask[4] = 1;
-  params->fp32_avx512.shuffle_mask[5] = 5;
-  params->fp32_avx512.shuffle_mask[6] = 9;
-  params->fp32_avx512.shuffle_mask[7] = 13;
-  params->fp32_avx512.shuffle_mask[8] = 2;
-  params->fp32_avx512.shuffle_mask[9] = 6;
-  params->fp32_avx512.shuffle_mask[10] = 10;
-  params->fp32_avx512.shuffle_mask[11] = 14;
-  params->fp32_avx512.shuffle_mask[12] = 3;
-  params->fp32_avx512.shuffle_mask[13] = 7;
-  params->fp32_avx512.shuffle_mask[14] = 11;
-  params->fp32_avx512.shuffle_mask[15] = 15;
   for (uint32_t i = 0; i < 32; i++) {
     params->fp32_avx512.output_zero_point[i] = (int16_t) output_zero_point;
   }
@@ -1390,12 +1291,6 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_neon_params(
   params->fp32_neon.magic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
   params->fp32_neon.output_min = output_min;
   params->fp32_neon.output_max = output_max;
-  for (uint32_t i = 0; i < 15; i++) {
-    params->fp32_neon.mask_table[i] = 1;
-  }
-  for (uint32_t i = 15; i < 30; i++) {
-    params->fp32_neon.mask_table[i] = 0;
-  }
   return sizeof(params->fp32_neon);
 }
 
@@ -5762,14 +5657,6 @@ size_t xnn_init_f32_qs8_cvt_avx2_params(
   for (uint32_t i = 0; i < 16; i++) {
     params->avx2.output_zero_point[i] = (int16_t) output_zero_point;
   }
-  params->avx2.shuffle_mask[0] = 0;
-  params->avx2.shuffle_mask[1] = 4;
-  params->avx2.shuffle_mask[2] = 1;
-  params->avx2.shuffle_mask[3] = 5;
-  params->avx2.shuffle_mask[4] = 2;
-  params->avx2.shuffle_mask[5] = 6;
-  params->avx2.shuffle_mask[6] = 3;
-  params->avx2.shuffle_mask[7] = 7;
   for (uint32_t i = 0; i < 32; i++) {
     params->avx2.output_min[i] = output_min;
   }
@@ -5794,30 +5681,6 @@ size_t xnn_init_f32_qs8_cvt_avx512_params(
   for (uint32_t i = 0; i < 64; i++) {
     params->avx512.output_min[i] = output_min;
   }
-  params->avx512.shuffle512_mask[0] = 0;
-  params->avx512.shuffle512_mask[1] = 4;
-  params->avx512.shuffle512_mask[2] = 8;
-  params->avx512.shuffle512_mask[3] = 12;
-  params->avx512.shuffle512_mask[4] = 1;
-  params->avx512.shuffle512_mask[5] = 5;
-  params->avx512.shuffle512_mask[6] = 9;
-  params->avx512.shuffle512_mask[7] = 13;
-  params->avx512.shuffle512_mask[8] = 2;
-  params->avx512.shuffle512_mask[9] = 6;
-  params->avx512.shuffle512_mask[10] = 10;
-  params->avx512.shuffle512_mask[11] = 14;
-  params->avx512.shuffle512_mask[12] = 3;
-  params->avx512.shuffle512_mask[13] = 7;
-  params->avx512.shuffle512_mask[14] = 11;
-  params->avx512.shuffle512_mask[15] = 15;
-  params->avx512.shuffle256_mask[0] = 0;
-  params->avx512.shuffle256_mask[1] = 4;
-  params->avx512.shuffle256_mask[2] = 2;
-  params->avx512.shuffle256_mask[3] = 6;
-  params->avx512.shuffle256_mask[4] = 1;
-  params->avx512.shuffle256_mask[5] = 5;
-  params->avx512.shuffle256_mask[6] = 3;
-  params->avx512.shuffle256_mask[7] = 7;
   return sizeof(params->avx512);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -6018,14 +5881,6 @@ size_t xnn_init_f32_qu8_cvt_avx2_params(
   for (uint32_t i = 0; i < 16; i++) {
     params->avx2.output_zero_point[i] = (int16_t) output_zero_point;
   }
-  params->avx2.shuffle_mask[0] = 0;
-  params->avx2.shuffle_mask[1] = 4;
-  params->avx2.shuffle_mask[2] = 1;
-  params->avx2.shuffle_mask[3] = 5;
-  params->avx2.shuffle_mask[4] = 2;
-  params->avx2.shuffle_mask[5] = 6;
-  params->avx2.shuffle_mask[6] = 3;
-  params->avx2.shuffle_mask[7] = 7;
   for (uint32_t i = 0; i < 32; i++) {
     params->avx2.output_min[i] = output_min;
   }
@@ -6050,30 +5905,6 @@ size_t xnn_init_f32_qu8_cvt_avx512_params(
   for (uint32_t i = 0; i < 64; i++) {
     params->avx512.output_min[i] = output_min;
   }
-  params->avx512.shuffle512_mask[0] = 0;
-  params->avx512.shuffle512_mask[1] = 4;
-  params->avx512.shuffle512_mask[2] = 8;
-  params->avx512.shuffle512_mask[3] = 12;
-  params->avx512.shuffle512_mask[4] = 1;
-  params->avx512.shuffle512_mask[5] = 5;
-  params->avx512.shuffle512_mask[6] = 9;
-  params->avx512.shuffle512_mask[7] = 13;
-  params->avx512.shuffle512_mask[8] = 2;
-  params->avx512.shuffle512_mask[9] = 6;
-  params->avx512.shuffle512_mask[10] = 10;
-  params->avx512.shuffle512_mask[11] = 14;
-  params->avx512.shuffle512_mask[12] = 3;
-  params->avx512.shuffle512_mask[13] = 7;
-  params->avx512.shuffle512_mask[14] = 11;
-  params->avx512.shuffle512_mask[15] = 15;
-  params->avx512.shuffle256_mask[0] = 0;
-  params->avx512.shuffle256_mask[1] = 4;
-  params->avx512.shuffle256_mask[2] = 2;
-  params->avx512.shuffle256_mask[3] = 6;
-  params->avx512.shuffle256_mask[4] = 1;
-  params->avx512.shuffle256_mask[5] = 5;
-  params->avx512.shuffle256_mask[6] = 3;
-  params->avx512.shuffle256_mask[7] = 7;
   return sizeof(params->avx512);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -6350,73 +6181,6 @@ size_t xnn_init_qs16_qs8_cvt_ssse3_params(
   for (uint32_t i = 0; i < 2; i++) {
     params->ssse3.bias[i] = (int64_t) bias;
   }
-  params->ssse3.shuffle01[0]  = 0x80;
-  params->ssse3.shuffle01[1]  = 0x80;
-  params->ssse3.shuffle01[2]  = 0;
-  params->ssse3.shuffle01[3]  = 1;
-  params->ssse3.shuffle01[4]  = 0x80;
-  params->ssse3.shuffle01[5]  = 0x80;
-  params->ssse3.shuffle01[6]  = 0x80;
-  params->ssse3.shuffle01[7]  = 0x80;
-  params->ssse3.shuffle01[8]  = 0x80;
-  params->ssse3.shuffle01[9]  = 0x80;
-  params->ssse3.shuffle01[10] = 2;
-  params->ssse3.shuffle01[11] = 3;
-  params->ssse3.shuffle01[12] = 0x80;
-  params->ssse3.shuffle01[13] = 0x80;
-  params->ssse3.shuffle01[14] = 0x80;
-  params->ssse3.shuffle01[15] = 0x80;
-
-  params->ssse3.shuffle23[0]  = 0x80;
-  params->ssse3.shuffle23[1]  = 0x80;
-  params->ssse3.shuffle23[2]  = 4;
-  params->ssse3.shuffle23[3]  = 5;
-  params->ssse3.shuffle23[4]  = 0x80;
-  params->ssse3.shuffle23[5]  = 0x80;
-  params->ssse3.shuffle23[6]  = 0x80;
-  params->ssse3.shuffle23[7]  = 0x80;
-  params->ssse3.shuffle23[8]  = 0x80;
-  params->ssse3.shuffle23[9]  = 0x80;
-  params->ssse3.shuffle23[10] = 6;
-  params->ssse3.shuffle23[11] = 7;
-  params->ssse3.shuffle23[12] = 0x80;
-  params->ssse3.shuffle23[13] = 0x80;
-  params->ssse3.shuffle23[14] = 0x80;
-  params->ssse3.shuffle23[15] = 0x80;
-
-  params->ssse3.shuffle45[0]  = 0x80;
-  params->ssse3.shuffle45[1]  = 0x80;
-  params->ssse3.shuffle45[2]  = 8;
-  params->ssse3.shuffle45[3]  = 9;
-  params->ssse3.shuffle45[4]  = 0x80;
-  params->ssse3.shuffle45[5]  = 0x80;
-  params->ssse3.shuffle45[6]  = 0x80;
-  params->ssse3.shuffle45[7]  = 0x80;
-  params->ssse3.shuffle45[8]  = 0x80;
-  params->ssse3.shuffle45[9]  = 0x80;
-  params->ssse3.shuffle45[10] = 10;
-  params->ssse3.shuffle45[11] = 11;
-  params->ssse3.shuffle45[12] = 0x80;
-  params->ssse3.shuffle45[13] = 0x80;
-  params->ssse3.shuffle45[14] = 0x80;
-  params->ssse3.shuffle45[15] = 0x80;
-
-  params->ssse3.shuffle67[0]  = 0x80;
-  params->ssse3.shuffle67[1]  = 0x80;
-  params->ssse3.shuffle67[2]  = 12;
-  params->ssse3.shuffle67[3]  = 13;
-  params->ssse3.shuffle67[4]  = 0x80;
-  params->ssse3.shuffle67[5]  = 0x80;
-  params->ssse3.shuffle67[6]  = 0x80;
-  params->ssse3.shuffle67[7]  = 0x80;
-  params->ssse3.shuffle67[8]  = 0x80;
-  params->ssse3.shuffle67[9]  = 0x80;
-  params->ssse3.shuffle67[10] = 14;
-  params->ssse3.shuffle67[11] = 15;
-  params->ssse3.shuffle67[12] = 0x80;
-  params->ssse3.shuffle67[13] = 0x80;
-  params->ssse3.shuffle67[14] = 0x80;
-  params->ssse3.shuffle67[15] = 0x80;
   return sizeof(params->ssse3);
 }
 
@@ -6439,73 +6203,6 @@ size_t xnn_init_qs16_qs8_cvt_sse4_params(
   for (uint32_t i = 0; i < 2; i++) {
     params->sse4.bias[i] = (int64_t) bias;
   }
-  params->sse4.shuffle01[0]  = 0x80;
-  params->sse4.shuffle01[1]  = 0x80;
-  params->sse4.shuffle01[2]  = 0;
-  params->sse4.shuffle01[3]  = 1;
-  params->sse4.shuffle01[4]  = 0x80;
-  params->sse4.shuffle01[5]  = 0x80;
-  params->sse4.shuffle01[6]  = 0x80;
-  params->sse4.shuffle01[7]  = 0x80;
-  params->sse4.shuffle01[8]  = 0x80;
-  params->sse4.shuffle01[9]  = 0x80;
-  params->sse4.shuffle01[10] = 2;
-  params->sse4.shuffle01[11] = 3;
-  params->sse4.shuffle01[12] = 0x80;
-  params->sse4.shuffle01[13] = 0x80;
-  params->sse4.shuffle01[14] = 0x80;
-  params->sse4.shuffle01[15] = 0x80;
-
-  params->sse4.shuffle23[0]  = 0x80;
-  params->sse4.shuffle23[1]  = 0x80;
-  params->sse4.shuffle23[2]  = 4;
-  params->sse4.shuffle23[3]  = 5;
-  params->sse4.shuffle23[4]  = 0x80;
-  params->sse4.shuffle23[5]  = 0x80;
-  params->sse4.shuffle23[6]  = 0x80;
-  params->sse4.shuffle23[7]  = 0x80;
-  params->sse4.shuffle23[8]  = 0x80;
-  params->sse4.shuffle23[9]  = 0x80;
-  params->sse4.shuffle23[10] = 6;
-  params->sse4.shuffle23[11] = 7;
-  params->sse4.shuffle23[12] = 0x80;
-  params->sse4.shuffle23[13] = 0x80;
-  params->sse4.shuffle23[14] = 0x80;
-  params->sse4.shuffle23[15] = 0x80;
-
-  params->sse4.shuffle45[0]  = 0x80;
-  params->sse4.shuffle45[1]  = 0x80;
-  params->sse4.shuffle45[2]  = 8;
-  params->sse4.shuffle45[3]  = 9;
-  params->sse4.shuffle45[4]  = 0x80;
-  params->sse4.shuffle45[5]  = 0x80;
-  params->sse4.shuffle45[6]  = 0x80;
-  params->sse4.shuffle45[7]  = 0x80;
-  params->sse4.shuffle45[8]  = 0x80;
-  params->sse4.shuffle45[9]  = 0x80;
-  params->sse4.shuffle45[10] = 10;
-  params->sse4.shuffle45[11] = 11;
-  params->sse4.shuffle45[12] = 0x80;
-  params->sse4.shuffle45[13] = 0x80;
-  params->sse4.shuffle45[14] = 0x80;
-  params->sse4.shuffle45[15] = 0x80;
-
-  params->sse4.shuffle67[0]  = 0x80;
-  params->sse4.shuffle67[1]  = 0x80;
-  params->sse4.shuffle67[2]  = 12;
-  params->sse4.shuffle67[3]  = 13;
-  params->sse4.shuffle67[4]  = 0x80;
-  params->sse4.shuffle67[5]  = 0x80;
-  params->sse4.shuffle67[6]  = 0x80;
-  params->sse4.shuffle67[7]  = 0x80;
-  params->sse4.shuffle67[8]  = 0x80;
-  params->sse4.shuffle67[9]  = 0x80;
-  params->sse4.shuffle67[10] = 14;
-  params->sse4.shuffle67[11] = 15;
-  params->sse4.shuffle67[12] = 0x80;
-  params->sse4.shuffle67[13] = 0x80;
-  params->sse4.shuffle67[14] = 0x80;
-  params->sse4.shuffle67[15] = 0x80;
   return sizeof(params->sse4);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
