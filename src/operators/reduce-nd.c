@@ -88,9 +88,6 @@ enum xnn_status xnn_create_mean_nd_f16(
   }
   struct f16_f32acc_mean_params params;
   rsum_config->init.f16_f32acc_scale(&params.f16_f32acc_scale, /*scale=*/1.0f);
-  if XNN_LIKELY(f32_to_f16_cvt_config->init.f32_f16_cvt != NULL) {
-    f32_to_f16_cvt_config->init.f32_f16_cvt(&params.cvt_params);
-  }
   return create_mean_nd(
     flags,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
@@ -136,8 +133,6 @@ static enum xnn_status reshape_mean_nd(
     enum xnn_operator_type expected_operator_type,
     const void* scale_params,
     size_t scale_params_size,
-    const void* cvt_params,
-    size_t cvt_params_size,
     void (*update_params)(xnn_operator_t, size_t),
     pthreadpool_t threadpool)
 {
@@ -250,9 +245,6 @@ static enum xnn_status reshape_mean_nd(
       .output_element_size = UINT32_C(1) << log2_data_element_size,
     };
     memcpy(&mean_op->context.reduce.params, scale_params, scale_params_size);
-    if (cvt_params != NULL) {
-      memcpy(&mean_op->context.reduce.cvt_params, cvt_params, cvt_params_size);
-    }
 
     mean_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_contiguous_reduce;
     mean_op->compute[0].range[0] = normalized_input_shape[0];
@@ -299,9 +291,6 @@ static enum xnn_status reshape_mean_nd(
       .output_element_size = UINT32_C(1) << log2_data_element_size,
     };
     memcpy(&mean_op->context.reduce.params, scale_params, scale_params_size);
-    if (cvt_params != NULL) {
-      memcpy(&mean_op->context.reduce.cvt_params, cvt_params, cvt_params_size);
-    }
     mean_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_discontiguous_reduce;
     mean_op->compute[0].range[0] = normalized_input_shape[1];
     mean_op->compute[0].range[1] = normalized_input_shape[3];
@@ -354,8 +343,6 @@ enum xnn_status xnn_reshape_mean_nd_f16(
     xnn_operator_type_mean_nd_f16,
     /*scale_params=*/&mean_op->params.mean_params.f16_f32acc_scale,
     /*scale_params_size=*/sizeof(mean_op->params.mean_params.f16_f32acc_scale),
-    /*cvt_params=*/&mean_op->params.mean_params.cvt_params,
-    /*cvt_params_size=*/sizeof(mean_op->params.mean_params.cvt_params),
     update_params_mean_f16,
     threadpool);
 }
@@ -387,8 +374,6 @@ enum xnn_status xnn_reshape_mean_nd_f32(
     xnn_operator_type_mean_nd_f32,
     /*scale_params=*/&mean_op->params.f32_scaleminmax,
     /*scale_params_size=*/sizeof(mean_op->params.f32_scaleminmax),
-    /*cvt_params=*/NULL,
-    /*cvt_params_size=*/0,
     update_params_mean_f32,
     threadpool);
 }

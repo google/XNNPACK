@@ -19,22 +19,28 @@ void xnn_f32_f16_vcvt_ukernel__neon_u8(
     size_t batch,
     const float* input,
     void* output,
-    const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const void* params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const uint32x4_t vexp_bias = vld1q_dup_u32(&params->neon.exp_bias);
-  const float32x4_t vscale_to_inf = vld1q_dup_f32(&params->neon.scale_to_inf);
-  const uint32x4_t vexpw_max = vld1q_dup_u32(&params->neon.expw_max);
-  const float32x4_t vscale_to_zero = vld1q_dup_f32(&params->neon.scale_to_zero);
+  const uint32x4_t vexp_bias = vdupq_n_u32(UINT32_C(0x07800000));
+  const float32x4_t vscale_to_inf = vdupq_n_f32(0x1.0p+112f);
+  const uint32x4_t vexpw_max = vdupq_n_u32(UINT32_C(0x7F800000));
+  const float32x4_t vscale_to_zero = vdupq_n_f32(0x1.0p-110f);
   const uint32x4_t vbias_min = vdupq_n_u32(UINT32_C(0x40000000));
   const uint16x8_t vexph_mask = vdupq_n_u16(UINT16_C(0x7C00));
   const uint16x8_t vmanth_mask = vdupq_n_u16(UINT16_C(0x0FFF));
   const uint16x8_t vsignh_mask = vdupq_n_u16(UINT16_C(0x8000));
   const uint16x8_t vnanh = vdupq_n_u16(UINT16_C(0x7E00));
+
+  // Only realizing a subset of these to match prior behavior.
+  XNN_FORCE_REALIZATION(vexp_bias);
+  XNN_FORCE_REALIZATION(vscale_to_inf);
+  XNN_FORCE_REALIZATION(vexpw_max);
+  XNN_FORCE_REALIZATION(vscale_to_zero);
 
   uint16_t* o = (uint16_t*) output;
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {

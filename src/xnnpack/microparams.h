@@ -1252,65 +1252,6 @@ union xnn_qu8_avgpool_minmax_params {
 
 // Cvt (Convert): used by VCVT microkernels.
 
-union xnn_f32_f16_cvt_params {
-  struct {
-    uint32_t nonsign_mask;
-    uint32_t exp_bias;
-    float scale_to_inf;
-    uint32_t expw_max;
-    float scale_to_zero;
-    uint32_t bias_min;
-    uint16_t exph_mask;
-    uint16_t manth_mask;
-    uint16_t nanh;
-  } scalar_bitcast;
-  struct {
-    float scale_to_inf;
-    uint32_t exp_bias;
-    float scale_to_zero;
-    uint32_t expw_max;
-    uint32_t bias_min;
-    uint16_t exph_mask;
-    uint16_t manth_mask;
-    uint16_t nanh;
-  } scalar_fabsf;
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
-    uint32_t exp_bias;
-    float scale_to_inf;
-    uint32_t expw_max;
-    float scale_to_zero;
-  } neon;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) uint32_t nonsign_mask[4];
-    XNN_ALIGN(16) uint32_t exp_bias[4];
-    XNN_ALIGN(16) float scale_to_inf[4];
-    XNN_ALIGN(16) uint32_t expw_max[4];
-    XNN_ALIGN(16) float scale_to_zero[4];
-    XNN_ALIGN(16) int16_t bias_min[8];
-    XNN_ALIGN(16) uint32_t manth_mask[4];
-    XNN_ALIGN(16) uint32_t exph_mask[4];
-    XNN_ALIGN(16) uint16_t nanh[8];
-  } sse2;
-  struct {
-    int32_t mask_table[14];
-  } f16c;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  struct {
-    XNN_ALIGN(8) uint32_t exp_bias[2];
-    XNN_ALIGN(8) float scale_to_inf[2];
-    XNN_ALIGN(8) uint32_t expw_max[2];
-    XNN_ALIGN(8) float scale_to_zero[2];
-    XNN_ALIGN(8) int16_t bias_min[4];
-    XNN_ALIGN(8) uint32_t manth_mask[2];
-    XNN_ALIGN(8) uint32_t exph_mask[2];
-    XNN_ALIGN(8) uint16_t nanh[4];
-  } wasmsimd;
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-};
 
 union xnn_f16_qs8_cvt_params {
   struct {
