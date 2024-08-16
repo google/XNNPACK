@@ -44,13 +44,31 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
 }
 
 static XNN_INLINE xnn_simd_s32_t xnn_clz_s32(xnn_simd_s32_t a) {
-  int32_t interim[8];
-  int32_t result[8];
-  _mm256_storeu_si256((__m256i*)interim, a);
-  for (int i = 0; i < 8; i++) {
-    result[i] = __builtin_clz(interim[i]);
-  }
-  return _mm256_loadu_si256((const __m256i*)result);
+  __m128i lowi = _mm256_extracti128_si256(a, 0);
+  __m128i highi = _mm256_extracti128_si256(a, 1);
+
+  __m256d low = _mm256_cvtepi32_pd(lowi);
+  __m256d high = _mm256_cvtepi32_pd(highi);
+  xnn_simd_s32_t low_a = _mm256_castpd_si256(low);
+  xnn_simd_s32_t high_a = _mm256_castpd_si256(high);
+
+  xnn_simd_s32_t shift_low = _mm256_srli_epi64(low_a, 52);
+  xnn_simd_s32_t shift_high = _mm256_srli_epi64(high_a, 52);
+
+  xnn_simd_s32_t exponent =
+      _mm256_set_epi32(_mm256_extract_epi32(shift_high, 6) & 0x7FF,
+                       _mm256_extract_epi32(shift_high, 4) & 0x7FF,
+                       _mm256_extract_epi32(shift_high, 2) & 0x7FF,
+                       _mm256_extract_epi32(shift_high, 0) & 0x7FF,
+                       _mm256_extract_epi32(shift_low, 6) & 0x7FF,
+                       _mm256_extract_epi32(shift_low, 4) & 0x7FF,
+                       _mm256_extract_epi32(shift_low, 2) & 0x7FF,
+                       _mm256_extract_epi32(shift_low, 0) & 0x7FF);
+
+  xnn_simd_s32_t result =
+      _mm256_sub_epi32(_mm256_set1_epi32(31),
+                       _mm256_sub_epi32(exponent, _mm256_set1_epi32(1023)));
+  return result;
 }
 
 // Load/store operations.
