@@ -207,13 +207,6 @@ def amalgamate_microkernel_sources(source_paths, include_header):
 
     amalgam_lines.append('')
 
-  # Multi-line sequence for XOP intrinsics, which don't have a standardized header
-  _discard(amalgam_includes, '#ifdef _MSC_VER')
-  _discard(amalgam_includes, '  #include <intrin.h>')
-  _discard(amalgam_includes, '#else')
-  _discard(amalgam_includes, '  #include <x86intrin.h>')
-  _discard(amalgam_includes, '#endif')
-
   # Single-line sequences for intrinsics with a standardized header
   for filename in UNWANTED_INCLUDES:
     _discard(amalgam_includes, f'#include {filename}')
@@ -232,15 +225,7 @@ def amalgamate_microkernel_sources(source_paths, include_header):
       )
   )
   if include_header:
-    if include_header == 'xopintrin.h':
-      amalgam_text += '\n\n'
-      amalgam_text += '#ifdef _MSC_VER\n'
-      amalgam_text += '  #include <intrin.h>\n'
-      amalgam_text += '#else\n'
-      amalgam_text += '  #include <x86intrin.h>\n'
-      amalgam_text += '#endif\n\n'
-    else:
-      amalgam_text += '\n\n#include <%s>\n\n' % include_header
+    amalgam_text += '\n\n#include <%s>\n\n' % include_header
   else:
     amalgam_text += '\n\n'
   amalgam_text += '\n'.join(

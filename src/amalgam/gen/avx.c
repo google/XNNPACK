@@ -9,6 +9,11 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#ifdef _MSC_VER
+  #include <intrin.h>
+#else
+  #include <x86intrin.h>
+#endif
 
 #include <immintrin.h>
 
