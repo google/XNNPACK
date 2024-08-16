@@ -7131,6 +7131,25 @@ size_t xnn_init_f32_qs8_cvt_neonv8_params(
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+size_t xnn_init_f32_qs8_cvt_rvv_params(
+  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->rvv.scale = scale;
+  params->rvv.magic_bias = 12582912.0f;
+  params->rvv.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->rvv.magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
+  params->rvv.magic_max = (int32_t) float_as_uint32(12582912.0f + output_max_less_zero_point);
+  return sizeof(params->rvv);
+}
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_f32_qs8_cvt_sse2_params(
   union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
@@ -7417,6 +7436,25 @@ size_t xnn_init_f32_qu8_cvt_neonv8_params(
   return sizeof(params->neonv8);
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+size_t xnn_init_f32_qu8_cvt_rvv_params(
+  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->rvv.scale = scale;
+  params->rvv.magic_bias = 12582912.0f;
+  params->rvv.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->rvv.magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
+  params->rvv.magic_max = (int32_t) float_as_uint32(12582912.0f + output_max_less_zero_point);
+  return sizeof(params->rvv);
+}
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_f32_qu8_cvt_sse2_params(

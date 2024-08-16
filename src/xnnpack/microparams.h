@@ -1430,6 +1430,15 @@ union xnn_f32_qs8_cvt_params {
     int8_t output_max;
   } neonv8;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  struct {
+    float scale;
+    float magic_bias;
+    int32_t magic_bias_less_zero_point;
+    int32_t magic_min;
+    int32_t magic_max;
+  } rvv;
+#endif // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float scale[4];
@@ -1529,6 +1538,15 @@ union xnn_f32_qu8_cvt_params {
     uint8_t output_max;
   } neonv8;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  struct {
+    float scale;
+    float magic_bias;
+    int32_t magic_bias_less_zero_point;
+    int32_t magic_min;
+    int32_t magic_max;
+  } rvv;
+#endif // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float scale[4];
