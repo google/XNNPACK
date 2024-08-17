@@ -30,9 +30,6 @@ enum xnn_status xnn_delete_operator(xnn_operator_t op)
   if (op->weights_cache == NULL) {
     xnn_release_simd_memory(op->packed_weights.pointer);
   }
-  if (op->num_post_operation_params != 0) {
-    xnn_release_memory(op->post_operation_params);
-  }
   xnn_release_simd_memory(op->zero_buffer);
   if (op->zero_buffers) {
     for (size_t i = 1; i < op->batch_size; ++i) {

@@ -17,7 +17,6 @@
 
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
-#include "xnnpack/math-stubs.h"
 #include "xnnpack/vunary.h"
 #include "xnnpack/microparams.h"
 

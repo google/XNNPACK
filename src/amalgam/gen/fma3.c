@@ -1537,6 +1537,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__fma3(
   assert(channels != 0);
   assert(output_width != 0);
 
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
   const __m256 vmin = _mm256_load_ps(params->avx.min);
   const __m256 vmax = _mm256_load_ps(params->avx.max);
   do {
@@ -1835,7 +1837,7 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__fma3(
     if XNN_UNLIKELY(c != 0) {
       assert(c >= 1);
       assert(c <= 7);
-      const __m256i vmask = _mm256_loadu_si256((const __m256i*) &params->avx.mask_table[7 - c]);
+      const __m256i vmask = _mm256_loadu_si256((const __m256i*) &mask_table[7 - c]);
 
       __m256 vacc01234567p0 = _mm256_load_ps(w);
 
@@ -1979,6 +1981,8 @@ void xnn_f32_dwconv_minmax_ukernel_3p16c__fma3(
   assert(channels != 0);
   assert(output_width != 0);
 
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
   const __m256 vmin = _mm256_load_ps(params->avx.min);
   const __m256 vmax = _mm256_load_ps(params->avx.max);
   do {
@@ -2078,7 +2082,7 @@ void xnn_f32_dwconv_minmax_ukernel_3p16c__fma3(
     if XNN_UNLIKELY(c != 0) {
       assert(c >= 1);
       assert(c <= 7);
-      const __m256i vmask = _mm256_loadu_si256((const __m256i*) &params->avx.mask_table[7 - c]);
+      const __m256i vmask = _mm256_loadu_si256((const __m256i*) &mask_table[7 - c]);
 
       __m256 vacc01234567p0 = _mm256_load_ps(w);
 
@@ -2133,6 +2137,8 @@ void xnn_f32_dwconv_minmax_ukernel_4p16c__fma3(
 {
   assert(channels != 0);
   assert(output_width != 0);
+
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
   const __m256 vmin = _mm256_load_ps(params->avx.min);
   const __m256 vmax = _mm256_load_ps(params->avx.max);
@@ -2253,7 +2259,7 @@ void xnn_f32_dwconv_minmax_ukernel_4p16c__fma3(
     if XNN_UNLIKELY(c != 0) {
       assert(c >= 1);
       assert(c <= 7);
-      const __m256i vmask = _mm256_loadu_si256((const __m256i*) &params->avx.mask_table[7 - c]);
+      const __m256i vmask = _mm256_loadu_si256((const __m256i*) &mask_table[7 - c]);
 
       __m256 vacc01234567p0 = _mm256_load_ps(w);
 
@@ -2315,6 +2321,8 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l8c8s4r__fma3(
   assert(channels != 0);
   assert(output_width != 0);
   assert(kernel_size > 5);
+
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
   const __m256 vmin = _mm256_load_ps(params->avx.min);
   const __m256 vmax = _mm256_load_ps(params->avx.max);
@@ -2398,7 +2406,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l8c8s4r__fma3(
       if (c != 0) {
         assert(c >= 1);
         assert(c <= 7);
-        const __m256i vmask = _mm256_loadu_si256((const __m256i*) &params->avx.mask_table[7 - c]);
+        const __m256i vmask = _mm256_loadu_si256((const __m256i*) &mask_table[7 - c]);
         __m256 vacc01234567p0 = _mm256_load_ps(w);
 
 
@@ -2510,7 +2518,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l8c8s4r__fma3(
       if (c != 0) {
         assert(c >= 1);
         assert(c <= 7);
-        const __m256i vmask = _mm256_loadu_si256((const __m256i*) &params->avx.mask_table[7 - c]);
+        const __m256i vmask = _mm256_loadu_si256((const __m256i*) &mask_table[7 - c]);
         __m256 vacc01234567p0 = _mm256_load_ps(b);
 
 
@@ -2634,7 +2642,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l8c8s4r__fma3(
         assert(c >= 1);
         assert(c <= 7);
         __m256 vacc01234567p0 = _mm256_load_ps(b);
-        const __m256i vmask = _mm256_loadu_si256((const __m256i*) &params->avx.mask_table[7 - c]);
+        const __m256i vmask = _mm256_loadu_si256((const __m256i*) &mask_table[7 - c]);
 
         const __m256 vi0x01234567 = _mm256_maskload_ps(i0, vmask);
         __m256 vk0x01234567 = _mm256_load_ps(w);
@@ -2697,6 +2705,8 @@ void xnn_f32_dwconv_minmax_ukernel_9p16c__fma3(
 {
   assert(channels != 0);
   assert(output_width != 0);
+
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
   const __m256 vmin = _mm256_load_ps(params->avx.min);
   const __m256 vmax = _mm256_load_ps(params->avx.max);
@@ -2917,7 +2927,7 @@ void xnn_f32_dwconv_minmax_ukernel_9p16c__fma3(
     if XNN_UNLIKELY(c != 0) {
       assert(c >= 1);
       assert(c <= 7);
-      const __m256i vmask = _mm256_loadu_si256((const __m256i*) &params->avx.mask_table[7 - c]);
+      const __m256i vmask = _mm256_loadu_si256((const __m256i*) &mask_table[7 - c]);
 
       __m256 vacc01234567p0 = _mm256_load_ps(w);
 
@@ -5306,10 +5316,17 @@ void xnn_f32_vhswish_ukernel__fma3_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256 vsixth = _mm256_load_ps(params->avx.sixth);
-  const __m256 vhalf = _mm256_load_ps(params->avx.half);
-  const __m256 vone = _mm256_load_ps(params->avx.one);
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
+  const __m256 vsixth = _mm256_set1_ps(0x1.555556p-3f);
+  const __m256 vhalf = _mm256_set1_ps(0.5f);
+  const __m256 vone = _mm256_set1_ps(1.0f);
   const __m256 vzero = _mm256_setzero_ps();
+
+  XNN_FORCE_REALIZATION(vsixth);
+  XNN_FORCE_REALIZATION(vhalf);
+  XNN_FORCE_REALIZATION(vone);
+  // XNN_FORCE_REALIZATION(vzero);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m256 vx01234567 = _mm256_loadu_ps(input);
@@ -5345,7 +5362,7 @@ void xnn_f32_vhswish_ukernel__fma3_u16(
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
     const __m256 vx = _mm256_maskload_ps(input, vmask);
     __m256 vacc = _mm256_fmadd_ps(vx, vsixth, vhalf);
@@ -5376,14 +5393,16 @@ void xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16(
     float* output,
     const union xnn_f32_rsqrt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
   // Constants for the Newton-Raphson iteration.
-  const __m256 vthree = _mm256_load_ps(params->fma3.three);
-  const __m256 vneg_half = _mm256_load_ps(params->fma3.neg_half);
+  const __m256 vthree = _mm256_set1_ps(3.0f);
+  const __m256 vneg_half = _mm256_set1_ps(-0.5f);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m256 vx0 = _mm256_loadu_ps(input);
@@ -5428,7 +5447,7 @@ void xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16(
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*)((uintptr_t) &params->fma3.mask_table[7] - batch));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*)((uintptr_t) &mask_table[7] - batch));
 
     const __m256 vx = _mm256_maskload_ps(input, vmask);
 
@@ -5462,14 +5481,16 @@ void xnn_f32_vsqrt_ukernel__fma3_rsqrt_u16(
     size_t batch, const float* input, float* output,
     const union xnn_f32_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)])
     XNN_OOB_READS {
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
   // Constants for the Newton-Raphson iteration.
-  const __m256 vthree = _mm256_load_ps(params->fma3.three);
-  const __m256 vneg_half = _mm256_load_ps(params->fma3.neg_half);
+  const __m256 vthree = _mm256_set1_ps(3.0f);
+  const __m256 vneg_half = _mm256_set1_ps(-0.5f);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m256 vx0 = _mm256_loadu_ps(input);
@@ -5528,7 +5549,7 @@ void xnn_f32_vsqrt_ukernel__fma3_rsqrt_u16(
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256(
-        (const __m256i*)((uintptr_t)&params->fma3.mask_table[7] - batch));
+        (const __m256i*)((uintptr_t)&mask_table[7] - batch));
 
     const __m256 vx = _mm256_maskload_ps(input, vmask);
 

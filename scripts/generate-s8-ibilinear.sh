@@ -34,16 +34,16 @@ tools/xngen src/s8-ibilinear/neon.c.in -D CHANNEL_TILE=8  -D PIXEL_TILE=1 -D DAT
 tools/xngen src/s8-ibilinear/neon.c.in -D CHANNEL_TILE=16 -D PIXEL_TILE=1 -D DATATYPE=U8 -o src/u8-ibilinear/gen/u8-ibilinear-neon-c16.c &
 
 ################################### x86 SSE ###################################
-tools/xngen src/s8-ibilinear/sse.c.in -D CHANNEL_TILE=8  -D PIXEL_TILE=1 -D DATATYPE=S8 -D SSE=2 -D AVX=0 -D XOP=0 -o src/s8-ibilinear/gen/s8-ibilinear-sse2-c8.c &
-tools/xngen src/s8-ibilinear/sse.c.in -D CHANNEL_TILE=16 -D PIXEL_TILE=1 -D DATATYPE=S8 -D SSE=2 -D AVX=0 -D XOP=0 -o src/s8-ibilinear/gen/s8-ibilinear-sse2-c16.c &
+tools/xngen src/s8-ibilinear/sse.c.in -D CHANNEL_TILE=8  -D PIXEL_TILE=1 -D DATATYPE=S8 -D SSE=2 -D AVX=0 -o src/s8-ibilinear/gen/s8-ibilinear-sse2-c8.c &
+tools/xngen src/s8-ibilinear/sse.c.in -D CHANNEL_TILE=16 -D PIXEL_TILE=1 -D DATATYPE=S8 -D SSE=2 -D AVX=0 -o src/s8-ibilinear/gen/s8-ibilinear-sse2-c16.c &
 
-tools/xngen src/s8-ibilinear/sse.c.in -D CHANNEL_TILE=8  -D PIXEL_TILE=1 -D DATATYPE=S8 -D SSE=4 -D AVX=0 -D XOP=0 -o src/s8-ibilinear/gen/s8-ibilinear-sse41-c8.c &
-tools/xngen src/s8-ibilinear/sse.c.in -D CHANNEL_TILE=16 -D PIXEL_TILE=1 -D DATATYPE=S8 -D SSE=4 -D AVX=0 -D XOP=0 -o src/s8-ibilinear/gen/s8-ibilinear-sse41-c16.c &
+tools/xngen src/s8-ibilinear/sse.c.in -D CHANNEL_TILE=8  -D PIXEL_TILE=1 -D DATATYPE=S8 -D SSE=4 -D AVX=0 -o src/s8-ibilinear/gen/s8-ibilinear-sse41-c8.c &
+tools/xngen src/s8-ibilinear/sse.c.in -D CHANNEL_TILE=16 -D PIXEL_TILE=1 -D DATATYPE=S8 -D SSE=4 -D AVX=0 -o src/s8-ibilinear/gen/s8-ibilinear-sse41-c16.c &
 
-tools/xngen src/s8-ibilinear/sse.c.in -D CHANNEL_TILE=8  -D PIXEL_TILE=1 -D DATATYPE=U8 -D SSE=2 -D AVX=0 -D XOP=0 -o src/u8-ibilinear/gen/u8-ibilinear-sse2-c8.c &
-tools/xngen src/s8-ibilinear/sse.c.in -D CHANNEL_TILE=16 -D PIXEL_TILE=1 -D DATATYPE=U8 -D SSE=2 -D AVX=0 -D XOP=0 -o src/u8-ibilinear/gen/u8-ibilinear-sse2-c16.c &
+tools/xngen src/s8-ibilinear/sse.c.in -D CHANNEL_TILE=8  -D PIXEL_TILE=1 -D DATATYPE=U8 -D SSE=2 -D AVX=0 -o src/u8-ibilinear/gen/u8-ibilinear-sse2-c8.c &
+tools/xngen src/s8-ibilinear/sse.c.in -D CHANNEL_TILE=16 -D PIXEL_TILE=1 -D DATATYPE=U8 -D SSE=2 -D AVX=0 -o src/u8-ibilinear/gen/u8-ibilinear-sse2-c16.c &
 
-tools/xngen src/s8-ibilinear/sse.c.in -D CHANNEL_TILE=8  -D PIXEL_TILE=1 -D DATATYPE=U8 -D SSE=4 -D AVX=0 -D XOP=0 -o src/u8-ibilinear/gen/u8-ibilinear-sse41-c8.c &
-tools/xngen src/s8-ibilinear/sse.c.in -D CHANNEL_TILE=16 -D PIXEL_TILE=1 -D DATATYPE=U8 -D SSE=4 -D AVX=0 -D XOP=0 -o src/u8-ibilinear/gen/u8-ibilinear-sse41-c16.c &
+tools/xngen src/s8-ibilinear/sse.c.in -D CHANNEL_TILE=8  -D PIXEL_TILE=1 -D DATATYPE=U8 -D SSE=4 -D AVX=0 -o src/u8-ibilinear/gen/u8-ibilinear-sse41-c8.c &
+tools/xngen src/s8-ibilinear/sse.c.in -D CHANNEL_TILE=16 -D PIXEL_TILE=1 -D DATATYPE=U8 -D SSE=4 -D AVX=0 -o src/u8-ibilinear/gen/u8-ibilinear-sse41-c16.c &
 
 wait

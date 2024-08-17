@@ -238,7 +238,9 @@ static enum xnn_status reshape_resize_bilinear2d_nhwc(
 
   size_t resize_bilinear_compute_index = 0;
   if (enable_transient_indirection) {
-    *workspace_size = indirection_buffer_size + packed_weights_size;
+    // Round up to a multiple of pointer size
+    const size_t indirect_input_offset = (packed_weights_size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
+    *workspace_size = indirection_buffer_size + indirect_input_offset;
     *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
 
     resize_bilinear_compute_index++;
@@ -249,7 +251,7 @@ static enum xnn_status reshape_resize_bilinear2d_nhwc(
       .align_corners = !!(resize_op->flags & XNN_FLAG_ALIGN_CORNERS),
       .tensorflow_legacy_mode = !!(resize_op->flags & XNN_FLAG_TENSORFLOW_LEGACY_MODE),
       .indirection_init = indirection_init,
-      .packed_weight_size = packed_weights_size,
+      .indirect_input_offset = indirect_input_offset,
     };
     resize_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
     resize_op->compute[0].context_offset = offsetof(struct xnn_operator, context.resize_nhwc_indirection_init) - offsetof(struct xnn_operator, context);
@@ -499,8 +501,10 @@ static enum xnn_status setup_resize_bilinear2d_nhwc(
   const size_t output_width = resize_op->context.resize_nhwc_indirection_init.output_width;
   const size_t packed_weights_size = (output_height * output_width * 2) << log2_weight_element_size;
   if (resize_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER) {
+    // indirect_input should start at a multiple of pointer size to avoid ubsan failures
+    const size_t indirect_input_offset = (packed_weights_size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
     resize_op->context.resize_bilinear.packed_weights = (const void*) workspace;
-    resize_op->context.resize_bilinear.indirect_input = (const void**) ((uintptr_t) workspace + packed_weights_size);
+    resize_op->context.resize_bilinear.indirect_input = (const void**) ((uintptr_t) workspace + indirect_input_offset);
     resize_op->context.resize_nhwc_indirection_init.buffer = (const void**) workspace;
     resize_op->context.resize_nhwc_indirection_init.input = input;
   } else {

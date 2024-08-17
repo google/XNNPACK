@@ -22,7 +22,6 @@
 - name: xnn_x32_transposec_ukernel__4x4_scalar_int
 # AArch64
 - name: xnn_x32_transposec_ukernel__4x4_aarch64_neon_tbl128
-  init: xnn_init_x32_transpose_neon_tbl128_params
 # x86 SSE
 - name: xnn_x32_transposec_ukernel__4x4_multi_mov_sse2
 - name: xnn_x32_transposec_ukernel__4x4_multi_multi_sse2
@@ -33,15 +32,10 @@
 - name: xnn_x32_transposec_ukernel__4x4_sse
 # x86 AVX
 - name: xnn_x32_transposec_ukernel__8x8_multi_mov_avx
-  init: xnn_init_x32_transpose_avx_params
 - name: xnn_x32_transposec_ukernel__8x8_multi_switch_avx
-  init: xnn_init_x32_transpose_avx_params
 - name: xnn_x32_transposec_ukernel__8x8_reuse_mov_avx
-  init: xnn_init_x32_transpose_avx_params
 - name: xnn_x32_transposec_ukernel__8x8_reuse_multi_avx
-  init: xnn_init_x32_transpose_avx_params
 - name: xnn_x32_transposec_ukernel__8x8_reuse_switch_avx
-  init: xnn_init_x32_transpose_avx_params
 # WAsm SIMD
 - name: xnn_x32_transposec_ukernel__4x4_multi_mov_wasmsimd
 - name: xnn_x32_transposec_ukernel__4x4_multi_multi_wasmsimd

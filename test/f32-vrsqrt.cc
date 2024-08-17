@@ -450,7 +450,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     TEST_REQUIRES_X86_SSE;
     VUnaryMicrokernelTester()
       .batch_size(4)
-      .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4, xnn_init_f32_rsqrt_sse_params);
+      .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4);
   }
 
   TEST(F32_VRSQRT__SSE_RSQRT_U4, batch_div_4) {
@@ -459,7 +459,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4, xnn_init_f32_rsqrt_sse_params);
+        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4);
     }
   }
 
@@ -469,7 +469,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4, xnn_init_f32_rsqrt_sse_params);
+        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4);
     }
   }
 
@@ -479,7 +479,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4, xnn_init_f32_rsqrt_sse_params);
+        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4);
     }
   }
 
@@ -490,7 +490,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4, xnn_init_f32_rsqrt_sse_params);
+        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u4);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -501,7 +501,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     TEST_REQUIRES_X86_SSE;
     VUnaryMicrokernelTester()
       .batch_size(8)
-      .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8, xnn_init_f32_rsqrt_sse_params);
+      .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8);
   }
 
   TEST(F32_VRSQRT__SSE_RSQRT_U8, batch_div_8) {
@@ -510,7 +510,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8, xnn_init_f32_rsqrt_sse_params);
+        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8);
     }
   }
 
@@ -520,7 +520,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8, xnn_init_f32_rsqrt_sse_params);
+        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8);
     }
   }
 
@@ -530,7 +530,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8, xnn_init_f32_rsqrt_sse_params);
+        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8);
     }
   }
 
@@ -541,7 +541,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8, xnn_init_f32_rsqrt_sse_params);
+        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -552,7 +552,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     TEST_REQUIRES_X86_SSE;
     VUnaryMicrokernelTester()
       .batch_size(16)
-      .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u16, xnn_init_f32_rsqrt_sse_params);
+      .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u16);
   }
 
   TEST(F32_VRSQRT__SSE_RSQRT_U16, batch_div_16) {
@@ -561,7 +561,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u16, xnn_init_f32_rsqrt_sse_params);
+        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u16);
     }
   }
 
@@ -571,7 +571,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u16, xnn_init_f32_rsqrt_sse_params);
+        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u16);
     }
   }
 
@@ -581,7 +581,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u16, xnn_init_f32_rsqrt_sse_params);
+        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u16);
     }
   }
 
@@ -592,7 +592,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u16, xnn_init_f32_rsqrt_sse_params);
+        .Test(xnn_f32_vrsqrt_ukernel__sse_rsqrt_u16);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -603,7 +603,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     TEST_REQUIRES_X86_AVX;
     VUnaryMicrokernelTester()
       .batch_size(8)
-      .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u8, xnn_init_f32_rsqrt_avx_params);
+      .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u8);
   }
 
   TEST(F32_VRSQRT__AVX_RSQRT_U8, batch_div_8) {
@@ -612,7 +612,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u8, xnn_init_f32_rsqrt_avx_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u8);
     }
   }
 
@@ -622,7 +622,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u8, xnn_init_f32_rsqrt_avx_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u8);
     }
   }
 
@@ -632,7 +632,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u8, xnn_init_f32_rsqrt_avx_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u8);
     }
   }
 
@@ -643,7 +643,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u8, xnn_init_f32_rsqrt_avx_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u8);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -654,7 +654,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     TEST_REQUIRES_X86_AVX;
     VUnaryMicrokernelTester()
       .batch_size(16)
-      .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u16, xnn_init_f32_rsqrt_avx_params);
+      .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u16);
   }
 
   TEST(F32_VRSQRT__AVX_RSQRT_U16, batch_div_16) {
@@ -663,7 +663,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u16, xnn_init_f32_rsqrt_avx_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u16);
     }
   }
 
@@ -673,7 +673,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u16, xnn_init_f32_rsqrt_avx_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u16);
     }
   }
 
@@ -683,7 +683,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u16, xnn_init_f32_rsqrt_avx_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u16);
     }
   }
 
@@ -694,7 +694,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u16, xnn_init_f32_rsqrt_avx_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u16);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -705,7 +705,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     TEST_REQUIRES_X86_AVX;
     VUnaryMicrokernelTester()
       .batch_size(32)
-      .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u32, xnn_init_f32_rsqrt_avx_params);
+      .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u32);
   }
 
   TEST(F32_VRSQRT__AVX_RSQRT_U32, batch_div_32) {
@@ -714,7 +714,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u32, xnn_init_f32_rsqrt_avx_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u32);
     }
   }
 
@@ -724,7 +724,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u32, xnn_init_f32_rsqrt_avx_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u32);
     }
   }
 
@@ -734,7 +734,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u32, xnn_init_f32_rsqrt_avx_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u32);
     }
   }
 
@@ -745,7 +745,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u32, xnn_init_f32_rsqrt_avx_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx_rsqrt_u32);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -756,7 +756,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     TEST_REQUIRES_X86_FMA3;
     VUnaryMicrokernelTester()
       .batch_size(8)
-      .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u8, xnn_init_f32_rsqrt_fma3_params);
+      .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u8);
   }
 
   TEST(F32_VRSQRT__FMA3_RSQRT_U8, batch_div_8) {
@@ -765,7 +765,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u8, xnn_init_f32_rsqrt_fma3_params);
+        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u8);
     }
   }
 
@@ -775,7 +775,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u8, xnn_init_f32_rsqrt_fma3_params);
+        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u8);
     }
   }
 
@@ -785,7 +785,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u8, xnn_init_f32_rsqrt_fma3_params);
+        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u8);
     }
   }
 
@@ -796,7 +796,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u8, xnn_init_f32_rsqrt_fma3_params);
+        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u8);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -807,7 +807,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     TEST_REQUIRES_X86_FMA3;
     VUnaryMicrokernelTester()
       .batch_size(16)
-      .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16, xnn_init_f32_rsqrt_fma3_params);
+      .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16);
   }
 
   TEST(F32_VRSQRT__FMA3_RSQRT_U16, batch_div_16) {
@@ -816,7 +816,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16, xnn_init_f32_rsqrt_fma3_params);
+        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16);
     }
   }
 
@@ -826,7 +826,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16, xnn_init_f32_rsqrt_fma3_params);
+        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16);
     }
   }
 
@@ -836,7 +836,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16, xnn_init_f32_rsqrt_fma3_params);
+        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16);
     }
   }
 
@@ -847,7 +847,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16, xnn_init_f32_rsqrt_fma3_params);
+        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -858,7 +858,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     TEST_REQUIRES_X86_FMA3;
     VUnaryMicrokernelTester()
       .batch_size(32)
-      .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u32, xnn_init_f32_rsqrt_fma3_params);
+      .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u32);
   }
 
   TEST(F32_VRSQRT__FMA3_RSQRT_U32, batch_div_32) {
@@ -867,7 +867,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u32, xnn_init_f32_rsqrt_fma3_params);
+        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u32);
     }
   }
 
@@ -877,7 +877,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u32, xnn_init_f32_rsqrt_fma3_params);
+        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u32);
     }
   }
 
@@ -887,7 +887,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u32, xnn_init_f32_rsqrt_fma3_params);
+        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u32);
     }
   }
 
@@ -898,7 +898,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u32, xnn_init_f32_rsqrt_fma3_params);
+        .Test(xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u32);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -909,7 +909,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     TEST_REQUIRES_X86_AVX512F;
     VUnaryMicrokernelTester()
       .batch_size(16)
-      .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u16, xnn_init_f32_rsqrt_avx512_params);
+      .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u16);
   }
 
   TEST(F32_VRSQRT__AVX512F_RSQRT_U16, batch_div_16) {
@@ -918,7 +918,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u16, xnn_init_f32_rsqrt_avx512_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u16);
     }
   }
 
@@ -928,7 +928,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u16, xnn_init_f32_rsqrt_avx512_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u16);
     }
   }
 
@@ -938,7 +938,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u16, xnn_init_f32_rsqrt_avx512_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u16);
     }
   }
 
@@ -949,7 +949,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u16, xnn_init_f32_rsqrt_avx512_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u16);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -960,7 +960,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     TEST_REQUIRES_X86_AVX512F;
     VUnaryMicrokernelTester()
       .batch_size(32)
-      .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32, xnn_init_f32_rsqrt_avx512_params);
+      .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32);
   }
 
   TEST(F32_VRSQRT__AVX512F_RSQRT_U32, batch_div_32) {
@@ -969,7 +969,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32, xnn_init_f32_rsqrt_avx512_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32);
     }
   }
 
@@ -979,7 +979,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32, xnn_init_f32_rsqrt_avx512_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32);
     }
   }
 
@@ -989,7 +989,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32, xnn_init_f32_rsqrt_avx512_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32);
     }
   }
 
@@ -1000,7 +1000,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32, xnn_init_f32_rsqrt_avx512_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1011,7 +1011,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     TEST_REQUIRES_X86_AVX512F;
     VUnaryMicrokernelTester()
       .batch_size(64)
-      .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64, xnn_init_f32_rsqrt_avx512_params);
+      .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64);
   }
 
   TEST(F32_VRSQRT__AVX512F_RSQRT_U64, batch_div_64) {
@@ -1020,7 +1020,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64, xnn_init_f32_rsqrt_avx512_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64);
     }
   }
 
@@ -1030,7 +1030,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64, xnn_init_f32_rsqrt_avx512_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64);
     }
   }
 
@@ -1040,7 +1040,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
     for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64, xnn_init_f32_rsqrt_avx512_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64);
     }
   }
 
@@ -1051,7 +1051,7 @@ TEST(F32_VRSQRT__SCALAR_RSQRT_U4, inplace) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64, xnn_init_f32_rsqrt_avx512_params);
+        .Test(xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

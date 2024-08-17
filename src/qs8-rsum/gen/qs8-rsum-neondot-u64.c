@@ -25,6 +25,11 @@ void xnn_qs8_rsum_ukernel__neondot_u64(
   assert(output != NULL);
   assert(params != NULL);
 
+  XNN_ALIGN(16) static const int8_t onemask_table[32] = {
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  };
+
   const int8x16_t vone = vdupq_n_s8(INT8_C(1));
   int32x4_t vacc0 = vmovq_n_s32(0);
   for (; batch >= 64; batch -= 64) {
@@ -44,7 +49,7 @@ void xnn_qs8_rsum_ukernel__neondot_u64(
     }
     if (XNN_UNLIKELY(batch != 0)) {
       int8x16_t vt = vld1q_s8(input);
-      const int8x16_t vonemask = vld1q_s8(&params->neon.onemask_table[16 - batch]);
+      const int8x16_t vonemask = vld1q_s8(&onemask_table[16 - batch]);
       vacc0 = vdotq_s32(vacc0, vt, vonemask);
     }
   }

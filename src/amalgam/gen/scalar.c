@@ -57,19 +57,19 @@ void xnn_f16_f32_vcvt_ukernel__scalar_u1(
     size_t batch,
     const void* input,
     float* output,
-    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const void* params)
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const uint32_t vsign_mask = params->scalar.sign_mask;
-  const uint32_t vexp_offset = params->scalar.exp_offset;
-  const float vexp_scale = params->scalar.exp_scale;
-  const uint32_t vmagic_mask = params->scalar.magic_mask;
-  const float vmagic_bias = params->scalar.magic_bias;
-  const uint32_t vdenorm_cutoff = params->scalar.denorm_cutoff;
+  const uint32_t vsign_mask = 0x80000000;
+  const uint32_t vexp_offset = 0x70000000;
+  const float vexp_scale = 0x1.0p-112f;
+  const uint32_t vmagic_mask = 0x3F000000;
+  const float vmagic_bias = 0.5f;
+  const uint32_t vdenorm_cutoff = 0x08000000;
 
   const uint16_t* i = (const uint16_t*) input;
   uint32_t* o = (uint32_t*) output;
@@ -93,19 +93,19 @@ void xnn_f16_f32_vcvt_ukernel__scalar_u4(
     size_t batch,
     const void* input,
     float* output,
-    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const void* params)
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const uint32_t vsign_mask = params->scalar.sign_mask;
-  const uint32_t vexp_offset = params->scalar.exp_offset;
-  const float vexp_scale = params->scalar.exp_scale;
-  const uint32_t vmagic_mask = params->scalar.magic_mask;
-  const float vmagic_bias = params->scalar.magic_bias;
-  const uint32_t vdenorm_cutoff = params->scalar.denorm_cutoff;
+  const uint32_t vsign_mask = 0x80000000;
+  const uint32_t vexp_offset = 0x70000000;
+  const float vexp_scale = 0x1.0p-112f;
+  const uint32_t vmagic_mask = 0x3F000000;
+  const float vmagic_bias = 0.5f;
+  const uint32_t vdenorm_cutoff = 0x08000000;
 
   const uint16_t* i = (const uint16_t*) input;
   uint32_t* o = (uint32_t*) output;
@@ -5049,22 +5049,22 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_u4(
     size_t batch,
     const float* input,
     void* output,
-    const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const void* params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const uint32_t vnonsign_mask = params->scalar_bitcast.nonsign_mask;
-  const uint32_t vexp_bias = params->scalar_bitcast.exp_bias;
-  const float vscale_to_inf = params->scalar_bitcast.scale_to_inf;
-  const uint32_t vexpw_max = params->scalar_bitcast.expw_max;
-  const float vscale_to_zero = params->scalar_bitcast.scale_to_zero;
-  const uint32_t vbias_min = params->scalar_bitcast.bias_min;
-  const uint16_t vexph_mask = params->scalar_bitcast.exph_mask;
-  const uint16_t vmanth_mask = params->scalar_bitcast.manth_mask;
-  const uint16_t vnanh = params->scalar_bitcast.nanh;
+  const uint32_t vnonsign_mask = UINT32_C(0x7FFFFFFF);
+  const uint32_t vexp_bias = UINT32_C(0x07800000);
+  const float vscale_to_inf = 0x1.0p+112f;
+  const uint32_t vexpw_max = UINT32_C(0x7F800000);
+  const float vscale_to_zero = 0x1.0p-110f;
+  const uint32_t vbias_min = UINT32_C(0x40000000);
+  const uint16_t vexph_mask = UINT16_C(0x7C00);
+  const uint16_t vmanth_mask = UINT16_C(0x0FFF);
+  const uint16_t vnanh = UINT16_C(0x7E00);
 
   const uint32_t* i = (const uint32_t*) input;
   uint16_t* o = (uint16_t*) output;
@@ -5202,21 +5202,21 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_u2(
     size_t batch,
     const float* input,
     void* output,
-    const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const void* params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const float vscale_to_inf = params->scalar_fabsf.scale_to_inf;
-  const uint32_t vexp_bias = params->scalar_fabsf.exp_bias;
-  const float vscale_to_zero = params->scalar_fabsf.scale_to_zero;
-  const uint32_t vexpw_max = params->scalar_fabsf.expw_max;
-  const uint32_t vbias_min = params->scalar_fabsf.bias_min;
-  const uint16_t vexph_mask = params->scalar_fabsf.exph_mask;
-  const uint16_t vmanth_mask = params->scalar_fabsf.manth_mask;
-  const uint16_t vnanh = params->scalar_fabsf.nanh;
+  const float vscale_to_inf = 0x1.0p+112f;
+  const uint32_t vexp_bias = UINT32_C(0x07800000);
+  const float vscale_to_zero = 0x1.0p-110f;
+  const uint32_t vexpw_max = UINT32_C(0x7F800000);
+  const uint32_t vbias_min = UINT32_C(0x40000000);
+  const uint16_t vexph_mask = UINT16_C(0x7C00);
+  const uint16_t vmanth_mask = UINT16_C(0x0FFF);
+  const uint16_t vnanh = UINT16_C(0x7E00);
 
   uint16_t* o = (uint16_t*) output;
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
@@ -10308,17 +10308,18 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_u4_acc2(
   assert(output != NULL);
   assert(sum != NULL);
 
+  const float vlog2e = 0x1.715476p+0f;
+  const float vmagic_bias = 0x1.8000FEp23f;
+  const float vminus_ln2_hi = -0x1.62E400p-1f;
+  const float vminus_ln2_lo = -0x1.7F7D1Cp-20f;
+  const float vc5 = 0x1.0F9F9Cp-7f;
+  const float vc4 = 0x1.573A1Ap-5f;
+  const float vc3 = 0x1.555A80p-3f;
+  const float vc2 = 0x1.FFFDC6p-2f;
+  const float vc1 = 0x1.FFFFF6p-1f;
+  const float vdenorm_cutoff = -0x1.5D589Ep6f;
+
   const float vi_max = *max;
-  const float vlog2e = params->scalar_rr2_p5.log2e;
-  const float vmagic_bias = params->scalar_rr2_p5.magic_bias;
-  const float vminus_ln2_hi = params->scalar_rr2_p5.minus_ln2_hi;
-  const float vminus_ln2_lo = params->scalar_rr2_p5.minus_ln2_lo;
-  const float vc5 = params->scalar_rr2_p5.c5;
-  const float vc4 = params->scalar_rr2_p5.c4;
-  const float vc3 = params->scalar_rr2_p5.c3;
-  const float vc2 = params->scalar_rr2_p5.c2;
-  const float vc1 = params->scalar_rr2_p5.c1;
-  const float vdenorm_cutoff = params->scalar_rr2_p5.denorm_cutoff;
 
   float vacc0 = 0.0f;
   float vacc1 = 0.0f;
@@ -10784,7 +10785,7 @@ void xnn_f32_rsum_ukernel__scalar_u4_acc4(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -10820,6 +10821,8 @@ void xnn_f32_rsum_ukernel__scalar_u4_acc4(
   }
   const float vscale = params->scalar.scale;
   vacc0 *= vscale;
+  vacc0 = math_max_f32(vacc0, params->scalar.min);
+  vacc0 = math_min_f32(vacc0, params->scalar.max);
   *output += vacc0;
 }
 
@@ -13455,18 +13458,19 @@ void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u2(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float vprescale = params->scalar_rr2_lut16_p3.prescale;
-  const float valpha = params->scalar_rr2_lut16_p3.alpha;
-  const float vbeta = params->scalar_rr2_lut16_p3.beta;
-  const float vmagic_bias = params->scalar_rr2_lut16_p3.magic_bias;
-  const float vlog2e = params->scalar_rr2_lut16_p3.log2e;
+  const float vsat_cutoff = -0x1.154246p+4f;
+  const float vmagic_bias = 0x1.800000p19f;
+  const float vlog2e = 0x1.715476p+0f;
+  const float vminus_ln2_hi = -0x1.62E400p-1f;
+  const float vminus_ln2_lo = -0x1.7F7D1Cp-20f;
   const uint32_t vindex_mask = UINT32_C(0xF);
-  const float vsat_cutoff = params->scalar_rr2_lut16_p3.sat_cutoff;
-  const float vminus_ln2_hi = params->scalar_rr2_lut16_p3.minus_ln2_hi;
-  const float vminus_ln2_lo = params->scalar_rr2_lut16_p3.minus_ln2_lo;
-  const float vc3 = params->scalar_rr2_lut16_p3.c3;
-  const float vc2 = params->scalar_rr2_lut16_p3.c2;
-  const float vone = params->scalar_rr2_lut16_p3.one;
+  const float vc3 = 0x1.55561Cp-3f;
+  const float vc2 = 0x1.0001ECp-1f;
+  const float vone = 1.0f;
+
+  const float vprescale = params->scalar.prescale;
+  const float valpha = params->scalar.alpha;
+  const float vbeta = params->scalar.beta;
 
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
     float vx0 = input[0];
@@ -13581,18 +13585,19 @@ void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u4(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float vprescale = params->scalar_rr2_lut16_p3.prescale;
-  const float valpha = params->scalar_rr2_lut16_p3.alpha;
-  const float vbeta = params->scalar_rr2_lut16_p3.beta;
-  const float vmagic_bias = params->scalar_rr2_lut16_p3.magic_bias;
-  const float vlog2e = params->scalar_rr2_lut16_p3.log2e;
+  const float vsat_cutoff = -0x1.154246p+4f;
+  const float vmagic_bias = 0x1.800000p19f;
+  const float vlog2e = 0x1.715476p+0f;
+  const float vminus_ln2_hi = -0x1.62E400p-1f;
+  const float vminus_ln2_lo = -0x1.7F7D1Cp-20f;
   const uint32_t vindex_mask = UINT32_C(0xF);
-  const float vsat_cutoff = params->scalar_rr2_lut16_p3.sat_cutoff;
-  const float vminus_ln2_hi = params->scalar_rr2_lut16_p3.minus_ln2_hi;
-  const float vminus_ln2_lo = params->scalar_rr2_lut16_p3.minus_ln2_lo;
-  const float vc3 = params->scalar_rr2_lut16_p3.c3;
-  const float vc2 = params->scalar_rr2_lut16_p3.c2;
-  const float vone = params->scalar_rr2_lut16_p3.one;
+  const float vc3 = 0x1.55561Cp-3f;
+  const float vc2 = 0x1.0001ECp-1f;
+  const float vone = 1.0f;
+
+  const float vprescale = params->scalar.prescale;
+  const float valpha = params->scalar.alpha;
+  const float vbeta = params->scalar.beta;
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     float vx0 = input[0];
@@ -13757,12 +13762,10 @@ void xnn_f32_vhswish_ukernel__scalar_u4(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float vsixth = params->scalar.sixth;
-  const float vthree = params->scalar.three;
-  const float vsix = params->scalar.six;
+  const float vsixth = 0x1.555556p-3f;
+  const float vthree = 3.0f;
+  const float vsix = 6.0f;
   const float vzero = 0.0f;
-  assert(vthree == 3.0f);
-  assert(vsix == 6.0f);
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     float vx0 = input[0];
@@ -14285,14 +14288,14 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u2(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float vmagic_bias = params->scalar_rr2_lut64_p2.magic_bias;
-  const float vminus_log2e = params->scalar_rr2_lut64_p2.minus_log2e;
+  const float vmagic_bias = 0x1.800000p17f;
+  const float vminus_log2e = -0x1.715476p0f;  
   const uint32_t vindex_mask = UINT32_C(0x3F);
-  const float vln2_hi = params->scalar_rr2_lut64_p2.ln2_hi;
-  const float vln2_lo = params->scalar_rr2_lut64_p2.ln2_lo;
-  const float vc2 = params->scalar_rr2_lut64_p2.c2;
-  const float vone = params->scalar_rr2_lut64_p2.one;
-  const float vdenorm_cutoff = params->scalar_rr2_lut64_p2.denorm_cutoff;
+  const float vln2_hi = 0x1.630000p-1f;
+  const float vln2_lo = -0x1.BD0106p-13f;
+  const float vc2 = 0x1.FFFF0Ap-2f;
+  const float vone = 1.0f;
+  const float vdenorm_cutoff = 0x1.5D589Ep+6f;
 
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
     const float vx0 = input[0];
@@ -29957,8 +29960,7 @@ void xnn_x16_transposec_ukernel__2x4_scalar_int(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x16_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(int16_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(int16_t));
@@ -30024,8 +30026,7 @@ void xnn_x24_transposec_ukernel__1x2_scalar(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x24_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(output_stride >= block_height * 3);
   assert(input_stride >= block_width * 3);
@@ -30372,8 +30373,7 @@ void xnn_x32_transposec_ukernel__2x4_scalar_int(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(int));
   assert(block_height == 1 || input_stride >= block_width * sizeof(int));
@@ -30565,8 +30565,7 @@ void xnn_x64_transposec_ukernel__4x2_scalar_int(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x64_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(int64_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(int64_t));
@@ -32329,8 +32328,7 @@ void xnn_x8_transposec_ukernel__2x4_scalar_int(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x8_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(int8_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(int8_t));

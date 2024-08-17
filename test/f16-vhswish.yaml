@@ -5,12 +5,8 @@
 
 # ARM NEON+FP16ARITH
 - name: xnn_f16_vhswish_ukernel__neonfp16arith_u8
-  init: xnn_init_f16_hswish_fp16arith_params
 - name: xnn_f16_vhswish_ukernel__neonfp16arith_u16
-  init: xnn_init_f16_hswish_fp16arith_params
 
 # x86 F16C
 - name: xnn_f16_vhswish_ukernel__f16c_u8
-  init: xnn_init_f16_hswish_avx_params
 - name: xnn_f16_vhswish_ukernel__f16c_u16
-  init: xnn_init_f16_hswish_avx_params

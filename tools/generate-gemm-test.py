@@ -342,30 +342,6 @@ std::vector<GemmTestParams> CreateTests(
           $else:
             .loop_n(nr + 1, nr * 2 - 1)
           .loop_k(1, k_block * 3, k_block + 1));
-      $if JIT:
-        gemm_tests.push_back(GemmTestParams(
-            "unknown_nc_mod_nr",
-            tester.clone()
-                .m(mr).known_nc_mod_nr(false)
-                $if KERNELTYPE in ['qb4w', 'qc4w']:
-                  .b_zero_point(8)
-                $if KERNELTYPE in ['qb4w']:
-                  .bl(32)
-            , test_func, isa_check)
-            $if NR_SCALE != "":
-              .loop_n(1, nr * 2 - 1, 4)
-            $else:
-              .loop_n(1, nr * 2 - 1)
-            .loop_k(1, k_block * 3, k_block + 1));
-        gemm_tests.push_back(GemmTestParams(
-            "relu",
-            tester.clone()
-                .m(mr).n(nr).k(k_block).relu(true)
-                $if KERNELTYPE in ['qb4w', 'qc4w']:
-                  .b_zero_point(8)
-                $if KERNELTYPE in ['qb4w']:
-                  .bl(32)
-            , test_func, isa_check));
       $if DATATYPE != "qp8":
         gemm_tests.push_back(GemmTestParams(
             "n_gt_" + nrs + "_strided_cn",
@@ -678,54 +654,6 @@ $if TEST_NAME.startswith('GENERATE') and DATATYPE in ['f32', 'f16']:
     }
   }
 
-$if TEST_NAME.startswith('GENERATE') and DATATYPE == 'f32' and POST_OP:
-  TEST(${TEST_NAME}, hardswish) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
-    GemmMicrokernelTester()
-      $if MR > 1:
-        .mr(${MR})
-      $if NR > 1:
-        .nr(${NR})
-      $if KR > 1:
-        .kr(${KR})
-      $if SR > 1:
-        .sr(${SR})
-      $if MR > 1:
-        .m(${MR})
-      $if NR > 1:
-        .n(${NR})
-      .k(${KBLOCK})
-      .Test(
-          ${", ".join(TEST_ARGS)},
-          fused_operators);
-  }
-
-  $if MR > 1:
-    TEST(${TEST_NAME}, hardswish_max_mr_lt_${MR}) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
-      for (uint32_t max_mr = 1; max_mr < ${MR}; max_mr++) {
-        GemmMicrokernelTester()
-          .mr(max_mr)
-          $if NR > 1:
-            .nr(${NR})
-          $if KR > 1:
-            .kr(${KR})
-          $if SR > 1:
-            .sr(${SR})
-          .m(max_mr)
-          $if NR > 1:
-            .n(${NR})
-          .k(${KBLOCK})
-          .Test(
-              ${", ".join(TEST_ARGS)},
-              fused_operators);
-      }
-    }
-
 $if TEST_NAME.startswith('GENERATE') and DATATYPE in ['f32', 'f16'] and PROTOTYPE is not None:
   #if XNN_ENABLE_ASSEMBLY
     TEST(${TEST_NAME}, matches_assembly) {
@@ -771,9 +699,7 @@ def generate_test_cases(
     is_pipelined,
     cpp_check,
     isa,
-    jit,
     prototype,
-    post_op,
 ):
   """Generates all tests cases for a GEMM micro-kernel.
 
@@ -801,34 +727,27 @@ def generate_test_cases(
       micro-kernel.
     isa: instruction set required to run the micro-kernel. Generated unit test
       will skip execution if the host processor doesn't support this ISA.
-    jit: if we are generating test code for JIT codegen.
-    post_op: if post operation is supported (only for JIT).
 
   Returns:
     Code for the test case.
   """
   _, ukernel_name = ukernel.split("_", 1)
 
-  if jit:
-    _, _, datatype, ukernel_type, _ = ukernel.split("_", 4)
-    kerneltype = datatype
-    activation = None
-  else:
-    _, datatype, ukernel_type, activation, _ = ukernel.split("_", 4)
-    kerneltype = datatype
-    if datatype in ["f16", "f32"] and ukernel_type in ["qc8w", "qc4w"]:
-      _, datatype, kerneltype, ukernel_type, activation, _ = ukernel.split(
-          "_", 5
-      )
-      datatype = datatype + "_" + kerneltype
-    if (
-        datatype in ("qd8", "qp8")
-        and ukernel_type in ["f16", "f32"]
-        and activation in ["qc8w", "qc4w", "qb4w"]
-    ):
-      _, datatype, _, kerneltype, ukernel_type, activation, _ = ukernel.split(
-          "_", 6
-      )
+  _, datatype, ukernel_type, activation, _ = ukernel.split("_", 4)
+  kerneltype = datatype
+  if datatype in ["f16", "f32"] and ukernel_type in ["qc8w", "qc4w"]:
+    _, datatype, kerneltype, ukernel_type, activation, _ = ukernel.split(
+        "_", 5
+    )
+    datatype = datatype + "_" + kerneltype
+  if (
+      datatype in ("qd8", "qp8")
+      and ukernel_type in ["f16", "f32"]
+      and activation in ["qc8w", "qc4w", "qb4w"]
+  ):
+    _, datatype, _, kerneltype, ukernel_type, activation, _ = ukernel.split(
+        "_", 6
+    )
 
   if activation == "ukernel":
     activation = "linear"
@@ -849,17 +768,13 @@ def generate_test_cases(
         "xnn_%s_requantize_%s" % (requantization_datatype, requantization)
     )
 
-  if jit:
-    if "minmax" in init_fn:
-      activation = "minmax"
-
   nr_scale = ""
   if vector_tile:
     ctype = {
         "qs8": "int8_t",
-        "qd8": " int8_t",
-        "qp8": " int8_t",
-        "qu8": " uint8_t",
+        "qd8": "int32_t",
+        "qp8": "int8_t",
+        "qu8": "uint8_t",
         "f16": "uint16_t",
         "f32": "float",
     }[datatype]
@@ -882,9 +797,7 @@ def generate_test_cases(
       "IS_PIPELINED": is_pipelined,
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
-      "POST_OP": post_op,
       "PROTOTYPE": prototype,
-      "JIT": jit,
       "CPP_CHECK": cpp_check,
   }
 
@@ -999,9 +912,7 @@ def main(args):
       packed_stride_fn = ukernel_spec.get("packed-stride")
       pipelined = bool(ukernel_spec.get("pipelined", False))
       cpp_check = ukernel_spec.get("cpp-check", False)
-      jit = name.startswith("xnn_generate")
       prototype = ukernel_spec.get("prototype")
-      post_op = ukernel_spec.get("post-op", True)
       (
           mr,
           nr,
@@ -1031,9 +942,7 @@ def main(args):
           pipelined,
           cpp_check,
           isa,
-          jit,
           prototype,
-          post_op,
       )
 
       # Store or reuse the `CreateTests` function?
@@ -1045,7 +954,7 @@ def main(args):
         )
         if isa == 'rvv':
           create_tests_from_idx[create_tests_idx] = xnncommon.postprocess_test_case(
-            create_tests_from_idx[create_tests_idx], arch, isa, assembly, jit)
+            create_tests_from_idx[create_tests_idx], arch, isa, assembly)
       test_case = test_case.replace(
           "CreateTests(", f"CreateTests{create_tests_idx}("
       )
@@ -1056,12 +965,12 @@ def main(args):
       test_outputs[
           options.output_test[output_index]
       ] += "\n\n" + xnncommon.postprocess_test_case(
-          test_case, arch, isa, assembly, jit
+          test_case, arch, isa, assembly
       )
       benches[
           isa_hierarchy.get(isa, 0)
       ] += "\n\n" + xnncommon.postprocess_test_case(
-          bench_case, arch, isa, assembly, jit
+          bench_case, arch, isa, assembly
       )
 
     for arch_idx in reversed(range(len(isa_hierarchy))):

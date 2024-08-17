@@ -213,7 +213,7 @@ def generate_isa_utilcheck_macro(isa):
 def arch_to_macro(arch, isa):
   return _ARCH_TO_MACRO_MAP[arch]
 
-def postprocess_test_case(test_case, arch, isa, assembly=False, jit=False):
+def postprocess_test_case(test_case, arch, isa, assembly=False):
   test_case = _remove_duplicate_newlines(test_case)
   if arch:
     guard = " || ".join(arch_to_macro(a, isa) for a in arch)
@@ -222,12 +222,10 @@ def postprocess_test_case(test_case, arch, isa, assembly=False, jit=False):
         guard = "%s && (%s)" % (_ISA_TO_MACRO_MAP[isa], guard)
       else:
         guard = "%s && %s" % (_ISA_TO_MACRO_MAP[isa], guard)
-    if (assembly or jit) and "||" in guard:
+    if assembly and "||" in guard:
       guard = '(' + guard + ')'
     if assembly:
       guard += " && XNN_ENABLE_ASSEMBLY"
-    if jit:
-      guard += " && XNN_PLATFORM_JIT"
     return "#if %s\n" % guard + _indent(test_case) + "\n" + \
       "#endif  // %s\n" % guard
   else:

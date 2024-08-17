@@ -25,10 +25,15 @@ void xnn_f32_vhswish_ukernel__wasmsimd_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vsixth = wasm_v128_load64_splat(params->wasmsimd.sixth);
-  const v128_t vthree = wasm_v128_load64_splat(params->wasmsimd.three);
-  const v128_t vsix = wasm_v128_load64_splat(params->wasmsimd.six);
+  const v128_t vsixth = wasm_f32x4_const_splat(0x1.555556p-3f);
+  const v128_t vthree = wasm_f32x4_const_splat(3.0f);
+  const v128_t vsix = wasm_f32x4_const_splat(6.0f);
   const v128_t vzero = wasm_i32x4_const_splat(0);
+
+  XNN_FORCE_REALIZATION(vsixth);
+  XNN_FORCE_REALIZATION(vthree);
+  XNN_FORCE_REALIZATION(vsix);
+  // XNN_FORCE_REALIZATION(vzero);
 
   $if BATCH_TILE > 4:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {

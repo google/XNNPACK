@@ -25,7 +25,12 @@ void xnn_qs8_rsum_ukernel__ssse3_u16(
   assert(output != NULL);
   assert(params != NULL);
 
-  const __m128i vone = _mm_load_si128((const __m128i*) &params->ssse3.onemask_table[0]);
+  XNN_ALIGN(16) static const int8_t onemask_table[32] = {
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  };
+
+  const __m128i vone = _mm_load_si128((const __m128i*) &onemask_table[0]);
   const __m128i vone_16 = _mm_srli_epi16(vone, 8);
   __m128i vacc0 = _mm_setzero_si128();
 
@@ -49,7 +54,7 @@ void xnn_qs8_rsum_ukernel__ssse3_u16(
     }
     if (XNN_UNLIKELY(batch != 0)) {
       assert(batch >= 1 && batch <= 15);
-      const __m128i vonemask = _mm_loadu_si128((const __m128i*) &params->ssse3.onemask_table[16 - batch]);
+      const __m128i vonemask = _mm_loadu_si128((const __m128i*) &onemask_table[16 - batch]);
       const __m128i vt = _mm_maddubs_epi16(vonemask, _mm_loadu_si128((const __m128i*) input));
       vacc16 = _mm_add_epi16(vacc16, vt);
     }

@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert SSE in [2, 4]
-$assert not XOP or AVX
 $assert not AVX or SSE == 4
 $assert REQUANTIZATION == "FP32"
 $assert DATATYPE in ["QC8", "QS8", "QU8"]
@@ -12,15 +11,8 @@ $assert VARIANT in ["LD64", "LD128", "EXTENDED"]
 $assert MR <= 4
 #include <assert.h>
 
-$if XOP:
-  #ifdef _MSC_VER
-    #include <intrin.h>
-  #else
-    #include <x86intrin.h>
-  #endif
-$else:
-  $SSE_HEADER = {2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
-  #include <${SSE_HEADER}>
+$SSE_HEADER = {2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
+#include <${SSE_HEADER}>
 
 #include "xnnpack/gemm.h"
 #include "xnnpack/math.h"
@@ -34,7 +26,7 @@ $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("sse4" if SSE == 4 and DATATYPE != "QU8" else "sse2")
 $PARAMS_UNION = "xnn_qs8_qc8w_conv_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
-$ISA = "xop" if XOP else "avx" if AVX else {2: "sse2", 4: "sse41"}[SSE]
+$ISA = "avx" if AVX else {2: "sse2", 4: "sse41"}[SSE]
 void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c2s4__${ISA}${LOAD_SUFFIX}(
     size_t mr,
     size_t nc,
@@ -122,17 +114,11 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c2s4__${
             const __m128i vxb${K+1} = _mm_unpackhi_epi8(vb${K}${K+1}, vsb${K}${K+1});
 
           $for M in range(MR):
-            $if XOP:
-              vacc${M}x0123 = _mm_maddd_epi16(vxa${M}, vxb${K}, vacc${M}x0123);
-            $else:
-              vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123, _mm_madd_epi16(vxa${M}, vxb${K}));
+            vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123, _mm_madd_epi16(vxa${M}, vxb${K}));
             vxa${M} = _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(0, 3, 2, 1));
 
           $for M in range(MR):
-            $if XOP:
-              vacc${M}x0123 = _mm_maddd_epi16(vxa${M}, vxb${K+1}, vacc${M}x0123);
-            $else:
-              vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123, _mm_madd_epi16(vxa${M}, vxb${K+1}));
+            vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123, _mm_madd_epi16(vxa${M}, vxb${K+1}));
             $if K + 2 != 4:
               vxa${M} = _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(0, 3, 2, 1));
       $else:
@@ -159,10 +145,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c2s4__${
               const __m128i vxb${K} = _mm_load_si128((const __m128i*) ((const int16_t*) w + ${K * 8}));
 
           $for M in range(MR):
-            $if XOP:
-              vacc${M}x0123 = _mm_maddd_epi16(vxa${M}, vxb${K}, vacc${M}x0123);
-            $else:
-              vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123, _mm_madd_epi16(vxa${M}, vxb${K}));
+            vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123, _mm_madd_epi16(vxa${M}, vxb${K}));
             $if K + 1 != 4:
               vxa${M} = _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(0, 3, 2, 1));
 

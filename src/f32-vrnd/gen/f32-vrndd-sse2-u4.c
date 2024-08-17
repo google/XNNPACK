@@ -27,8 +27,8 @@ void xnn_f32_vrndd_ukernel__sse2_u4(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vmagic = _mm_load_si128((const __m128i*) params->sse2.sign_mask);
-  const __m128 vone = _mm_load_ps(params->sse2.one);
+  const __m128i vmagic = _mm_castps_si128(_mm_set1_ps(-0.0f));
+  const __m128 vone = _mm_set1_ps(1.0f);
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const __m128 vx0123 = _mm_loadu_ps(input);
     input += 4;

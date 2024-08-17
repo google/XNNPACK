@@ -25,15 +25,23 @@ void xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float16x8_t vprescale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.prescale));
-  const float16x8_t vsat_cutoff = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.sat_cutoff));
-  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.magic_bias));
-  const float16x8_t vlog2e = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.log2e));
-  const float16x8_t vminus_ln2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.minus_ln2));
-  const float16x8_t vc3 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.c3));
-  const float16x8_t vc2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.c2));
-  const float16x8_t vminus_alpha = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.minus_alpha));
-  const float16x8_t vbeta = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.beta));
+  const float16x8_t vsat_cutoff = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xC829)));  // -0x1.0A4p+3h
+  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x660F)));  // 0x1.83Cp+10h
+  const float16x8_t vlog2e = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3DC5)));  // 0x1.714p+0h
+  const float16x8_t vminus_ln2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xB98C)));  // -0x1.62E430p-1h
+  const float16x8_t vc3 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x315B)));  // 0x1.56Cp-3h
+  const float16x8_t vc2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3808)));  // 0x1.020p-1h
+
+  XNN_FORCE_REALIZATION(vsat_cutoff);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vminus_ln2);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+
+  const float16x8_t vprescale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.prescale));
+  const float16x8_t vminus_alpha = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.minus_alpha));
+  const float16x8_t vbeta = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.beta));
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;

@@ -43,8 +43,8 @@ void xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64(
   assert(output != NULL);
 
   // Constants for the Newton-Raphson iteration.
-  const __m512 vthree = _mm512_set1_ps(params->avx512.three);
-  const __m512 vneg_half = _mm512_set1_ps(params->avx512.neg_half);
+  const __m512 vthree = _mm512_set1_ps(3.0f);
+  const __m512 vneg_half = _mm512_set1_ps(-0.5f);
 
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
     const __m512 vx0 = _mm512_loadu_ps(input);

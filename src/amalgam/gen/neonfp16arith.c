@@ -4276,7 +4276,7 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_c16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
+  const float32x4_t vscale = vld1q_dup_f32(&params->scale);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 16; channels -= 16) {
@@ -4532,7 +4532,7 @@ void xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u32_acc4(
     const float32x4_t vt = vcvt_f32_f16(vh);
     vacc0 = vaddq_f32(vacc0, vt);
   }
-  const float32x2_t vscale = vld1_dup_f32(&params->scalar.scale);
+  const float32x2_t vscale = vld1_dup_f32(&params->scale);
   float32x2_t vacc = vadd_f32(vget_low_f32(vacc0), vget_high_f32(vacc0));
   if XNN_UNLIKELY(batch & (2 * sizeof(uint16_t))) {
     const float16x4_t vh = vreinterpret_f16_u32(vld1_dup_u32((const void*) i)); i += 2;
@@ -7861,14 +7861,23 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u32(
   assert(output != NULL);
   assert(sum != NULL);
 
+  const float16x8_t vlog2e = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3DC5)));  // 0x1.714p+0h
+  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x660F)));  // 0x1.83Cp+10h
+  const float16x8_t vminus_ln2_hi = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xB98C)));  // -0x1.630p-1h
+  const float16x8_t vminus_ln2_lo = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x0AF4)));  // 0x1.BD0p-13h
+  const float16x8_t vc2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x37F9)));  // 0x1.FE4p-2h
+  const float16x8_t vc1 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3C0E)));  // 0x1.038p+0h
+  const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xC8DA)));  // -0x1.368p+3h
+
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vminus_ln2_hi);
+  XNN_FORCE_REALIZATION(vminus_ln2_lo);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
+
   const float16x8_t vi_max = vreinterpretq_f16_u16(vld1q_dup_u16(max));
-  const float16x8_t vlog2e = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.log2e));
-  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.magic_bias));
-  const float16x8_t vminus_ln2_hi = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.minus_ln2_hi));
-  const float16x8_t vminus_ln2_lo = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.minus_ln2_lo));
-  const float16x8_t vc2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.c2));
-  const float16x8_t vc1 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.c1));
-  const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.denorm_cutoff));
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
@@ -8026,14 +8035,23 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u40(
   assert(output != NULL);
   assert(sum != NULL);
 
+  const float16x8_t vlog2e = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3DC5)));  // 0x1.714p+0h
+  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x660F)));  // 0x1.83Cp+10h
+  const float16x8_t vminus_ln2_hi = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xB98C)));  // -0x1.630p-1h
+  const float16x8_t vminus_ln2_lo = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x0AF4)));  // 0x1.BD0p-13h
+  const float16x8_t vc2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x37F9)));  // 0x1.FE4p-2h
+  const float16x8_t vc1 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3C0E)));  // 0x1.038p+0h
+  const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xC8DA)));  // -0x1.368p+3h
+
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vminus_ln2_hi);
+  XNN_FORCE_REALIZATION(vminus_ln2_lo);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
+
   const float16x8_t vi_max = vreinterpretq_f16_u16(vld1q_dup_u16(max));
-  const float16x8_t vlog2e = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.log2e));
-  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.magic_bias));
-  const float16x8_t vminus_ln2_hi = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.minus_ln2_hi));
-  const float16x8_t vminus_ln2_lo = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.minus_ln2_lo));
-  const float16x8_t vc2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.c2));
-  const float16x8_t vc1 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.c1));
-  const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.denorm_cutoff));
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
@@ -9597,15 +9615,23 @@ void xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float16x8_t vprescale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.prescale));
-  const float16x8_t vsat_cutoff = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.sat_cutoff));
-  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.magic_bias));
-  const float16x8_t vlog2e = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.log2e));
-  const float16x8_t vminus_ln2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.minus_ln2));
-  const float16x8_t vc3 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.c3));
-  const float16x8_t vc2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.c2));
-  const float16x8_t vminus_alpha = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.minus_alpha));
-  const float16x8_t vbeta = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.beta));
+  const float16x8_t vsat_cutoff = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xC829)));  // -0x1.0A4p+3h
+  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x660F)));  // 0x1.83Cp+10h
+  const float16x8_t vlog2e = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3DC5)));  // 0x1.714p+0h
+  const float16x8_t vminus_ln2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xB98C)));  // -0x1.62E430p-1h
+  const float16x8_t vc3 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x315B)));  // 0x1.56Cp-3h
+  const float16x8_t vc2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3808)));  // 0x1.020p-1h
+
+  XNN_FORCE_REALIZATION(vsat_cutoff);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vminus_ln2);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+
+  const float16x8_t vprescale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.prescale));
+  const float16x8_t vminus_alpha = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.minus_alpha));
+  const float16x8_t vbeta = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.beta));
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
@@ -9728,10 +9754,15 @@ void xnn_f16_vhswish_ukernel__neonfp16arith_u16(
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
 
-  const float16x8_t vsixth = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.sixth));
-  const float16x8_t vthree = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.three));
-  const int16x8_t vsix = vreinterpretq_s16_u16(vld1q_dup_u16(&params->fp16arith.six));
+  const float16x8_t vsixth = vreinterpretq_f16_u16(vdupq_n_u16(UINT16_C(0x3155)));
+  const float16x8_t vthree = vreinterpretq_f16_u16(vdupq_n_u16(UINT16_C(0x4200)));
+  const int16x8_t vsix = vreinterpretq_s16_u16(vdupq_n_u16(UINT16_C(0x4600)));
   const int16x8_t vzero = vdupq_n_s16(0);
+
+  XNN_FORCE_REALIZATION(vsixth);
+  XNN_FORCE_REALIZATION(vthree);
+  XNN_FORCE_REALIZATION(vsix);
+  // XNN_FORCE_REALIZATION(vzero);
 
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
     float16x8_t vx01234567 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
@@ -10207,14 +10238,23 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_u40(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.magic_bias));
-  const float16x8_t vminus_log2e = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.minus_log2e));
-  const float16x8_t vln2_hi = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.ln2_hi));
-  const float16x8_t vln2_lo = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.ln2_lo));
-  const float16x8_t vc2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.c2));
-  const float16x8_t vc1 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.c1));
+  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x660F)));  // 0x1.83Cp+10h
+  const float16x8_t vminus_log2e = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xBDC5)));  // -0x1.714p+0h
+  const float16x8_t vln2_hi = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x398C)));  // 0x1.630p-1h
+  const float16x8_t vln2_lo = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x8AF4)));  // -0x1.BD0p-13h
+  const float16x8_t vc2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x37F9)));  // 0x1.FE4p-2h
+  const float16x8_t vc1 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xBC0E)));  // -0x1.038p+0h
   const float16x8_t vone = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3C00)));  // 1.0h
-  const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.denorm_cutoff));
+  const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xC8DA)));  // -0x1.368p+3h
+
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vminus_log2e);
+  XNN_FORCE_REALIZATION(vln2_hi);
+  XNN_FORCE_REALIZATION(vln2_lo);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+  XNN_FORCE_REALIZATION(vone);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
@@ -10413,14 +10453,23 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.magic_bias));
-  const float16x8_t vminus_log2e = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.minus_log2e));
-  const float16x8_t vln2_hi = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.ln2_hi));
-  const float16x8_t vln2_lo = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.ln2_lo));
-  const float16x8_t vc2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.c2));
-  const float16x8_t vc1 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.c1));
+  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x660F)));  // 0x1.83Cp+10h
+  const float16x8_t vminus_log2e = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xBDC5)));  // -0x1.714p+0h
+  const float16x8_t vln2_hi = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x398C)));  // 0x1.630p-1h
+  const float16x8_t vln2_lo = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x8AF4)));  // -0x1.BD0p-13h
+  const float16x8_t vc2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x37F9)));  // 0x1.FE4p-2h
+  const float16x8_t vc1 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xBC0E)));  // -0x1.038p+0h
   const float16x8_t vone = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3C00)));  // 1.0h
-  const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.denorm_cutoff));
+  const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xC8DA)));  // -0x1.368p+3h
+
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vminus_log2e);
+  XNN_FORCE_REALIZATION(vln2_hi);
+  XNN_FORCE_REALIZATION(vln2_lo);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+  XNN_FORCE_REALIZATION(vone);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
@@ -10835,7 +10884,7 @@ void xnn_f16_vabs_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_abs_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
@@ -10881,7 +10930,7 @@ void xnn_f16_vneg_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_neg_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);

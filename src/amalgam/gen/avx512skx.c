@@ -28,7 +28,7 @@ void xnn_f16_f32_vcvt_ukernel__avx512skx_u16(
     size_t batch,
     const void* input,
     float* output,
-    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const void* params)
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
@@ -71,7 +71,7 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c64(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
+  const __m512 vscale = _mm512_set1_ps(params->scale);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 64; channels -= 64) {
@@ -343,7 +343,7 @@ void xnn_f16_f32acc_rsum_ukernel__avx512skx_u64_acc4(
   __m128 vacc = _mm_add_ps(_mm256_castps256_ps128(vacc256), _mm256_extractf128_ps(vacc256, 1));
   vacc = _mm_add_ps(vacc, _mm_movehl_ps(vacc, vacc));
   vacc = _mm_add_ss(vacc, _mm_movehdup_ps(vacc));
-  vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->scalar.scale));
+  vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->scale));
 
   float vout = _mm_cvtss_f32(vacc);
   *output += vout;
@@ -483,7 +483,7 @@ void xnn_f32_f16_vcvt_ukernel__avx512skx_u16(
     size_t batch,
     const float* input,
     void* output,
-    const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const void* params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -1287,10 +1287,13 @@ void xnn_f32_qs8_vcvt_ukernel__avx512skx_u128(
   assert(input != NULL);
   assert(output != NULL);
 
+  XNN_ALIGN(64) static const uint32_t shuffle512_mask[16] = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15};
+
+
   const __m512 vscale = _mm512_load_ps(params->avx512.scale);
   const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->avx512.output_max_less_zero_point);
   const __m512i voutput_zero_point = _mm512_load_si512(params->avx512.output_zero_point);
-  const __m512i vshuffle512_mask = _mm512_load_si512(params->avx512.shuffle512_mask);
+  const __m512i vshuffle512_mask = _mm512_load_si512(shuffle512_mask);
   const __m512i voutput_min = _mm512_load_si512(params->avx512.output_min);
   for (; batch >= 128 * sizeof(float); batch -= 128 * sizeof(float)) {
     __m512 vx0123 = _mm512_loadu_ps(input);
@@ -1405,10 +1408,13 @@ void xnn_f32_qu8_vcvt_ukernel__avx512skx_u128(
   assert(input != NULL);
   assert(output != NULL);
 
+  XNN_ALIGN(64) static const uint32_t shuffle512_mask[16] = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15};
+
+
   const __m512 vscale = _mm512_load_ps(params->avx512.scale);
   const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->avx512.output_max_less_zero_point);
   const __m512i voutput_zero_point = _mm512_load_si512(params->avx512.output_zero_point);
-  const __m512i vshuffle512_mask = _mm512_load_si512(params->avx512.shuffle512_mask);
+  const __m512i vshuffle512_mask = _mm512_load_si512(shuffle512_mask);
   const __m512i voutput_min = _mm512_load_si512(params->avx512.output_min);
   for (; batch >= 128 * sizeof(float); batch -= 128 * sizeof(float)) {
     __m512 vx0123 = _mm512_loadu_ps(input);

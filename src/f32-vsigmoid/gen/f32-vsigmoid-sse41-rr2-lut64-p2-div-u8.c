@@ -28,15 +28,25 @@ void xnn_f32_vsigmoid_ukernel__sse41_rr2_lut64_p2_div_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vsign_mask = _mm_load_ps(params->sse2_rr2_lut64_p2.sign_mask);
-  const __m128 vmagic_bias = _mm_load_ps(params->sse2_rr2_lut64_p2.magic_bias);
-  const __m128 vlog2e = _mm_load_ps(params->sse2_rr2_lut64_p2.log2e);
-  const __m128i vindex_mask = _mm_load_si128((const __m128i*) params->sse2_rr2_lut64_p2.index_mask);
-  const __m128 vminus_ln2_hi = _mm_load_ps(params->sse2_rr2_lut64_p2.minus_ln2_hi);
-  const __m128 vminus_ln2_lo = _mm_load_ps(params->sse2_rr2_lut64_p2.minus_ln2_lo);
-  const __m128 vc2 = _mm_load_ps(params->sse2_rr2_lut64_p2.c2);
-  const __m128 vone = _mm_load_ps(params->sse2_rr2_lut64_p2.one);
-  const __m128 vdenorm_cutoff = _mm_load_ps(params->sse2_rr2_lut64_p2.denorm_cutoff);
+  const __m128 vsign_mask = _mm_set1_ps(-0.0f);
+  const __m128 vmagic_bias = _mm_set1_ps(0x1.800000p17f);
+  const __m128 vlog2e = _mm_set1_ps(0x1.715476p0f);
+  const __m128i vindex_mask = _mm_set1_epi32(UINT32_C(0x3F));
+  const __m128 vminus_ln2_hi = _mm_set1_ps(-0x1.630000p-1f);
+  const __m128 vminus_ln2_lo = _mm_set1_ps(0x1.BD0106p-13f);
+  const __m128 vc2 = _mm_set1_ps(0x1.FFFF0Ap-2f);
+  const __m128 vone = _mm_set1_ps(1.0f);
+  const __m128 vdenorm_cutoff = _mm_set1_ps(-0x1.5D589Ep+6f);
+
+  XNN_FORCE_REALIZATION(vsign_mask);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vindex_mask);
+  XNN_FORCE_REALIZATION(vminus_ln2_hi);
+  XNN_FORCE_REALIZATION(vminus_ln2_lo);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vone);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m128 vx0123 = _mm_loadu_ps(input);

@@ -71,11 +71,9 @@ class VCvtMicrokernelTester {
 
   size_t iterations() const { return this->iterations_; }
 
-  void Test(xnn_f16_f32_vcvt_ukernel_fn vcvt,
-            xnn_init_f16_f32_cvt_params_fn init_params = nullptr) const;
+  void Test(xnn_f16_f32_vcvt_ukernel_fn vcvt) const;
 
-  void Test(xnn_f32_f16_vcvt_ukernel_fn vcvt,
-            xnn_init_f32_f16_cvt_params_fn init_params = nullptr) const;
+  void Test(xnn_f32_f16_vcvt_ukernel_fn vcvt) const;
 
   void Test(xnn_f16_qs8_vcvt_ukernel_fn vcvt,
             xnn_init_f16_qs8_cvt_params_fn init_params);

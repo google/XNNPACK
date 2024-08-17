@@ -26,7 +26,7 @@ namespace {
 static void f16_f32_vcvt(
   benchmark::State& state,
   xnn_f16_f32_vcvt_ukernel_fn cvt,
-  xnn_init_f16_f32_cvt_params_fn init_params = nullptr,
+  void* /*init_params*/ = nullptr,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {
@@ -45,12 +45,8 @@ static void f16_f32_vcvt(
   std::generate(x.begin(), x.end(), std::ref(f16rng));
   std::fill(y.begin(), y.end(), std::nanf(""));
 
-  xnn_f16_f32_cvt_params params;
-  if (init_params != nullptr) {
-    init_params(&params);
-  }
   for (auto _ : state) {
-    cvt(num_elements * sizeof(uint16_t), x.data(), y.data(), &params);
+    cvt(num_elements * sizeof(uint16_t), x.data(), y.data(), nullptr);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -70,7 +66,7 @@ static void f16_f32_vcvt(
 static void f32_f16_vcvt(
   benchmark::State& state,
   xnn_f32_f16_vcvt_ukernel_fn cvt,
-  xnn_init_f32_f16_cvt_params_fn init_params = nullptr,
+  const void* /*init_params*/ = nullptr,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check != nullptr && !isa_check(state)) {
@@ -88,12 +84,8 @@ static void f32_f16_vcvt(
   std::generate(x.begin(), x.end(), std::ref(f32rng));
   std::fill(y.begin(), y.end(), UINT16_C(0x7E00));
 
-  xnn_f32_f16_cvt_params params;
-  if (init_params != nullptr) {
-    init_params(&params);
-  }
   for (auto _ : state) {
-    cvt(num_elements * sizeof(uint16_t), x.data(), y.data(), &params);
+    cvt(num_elements * sizeof(uint16_t), x.data(), y.data(), nullptr);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();

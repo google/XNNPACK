@@ -26,20 +26,33 @@ void xnn_f32_velu_ukernel__sse41_rr2_p6_u20(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vprescale = _mm_load_ps(params->sse2_rr2_p6.prescale);
-  const __m128 valpha = _mm_load_ps(params->sse2_rr2_p6.alpha);
-  const __m128 vbeta = _mm_load_ps(params->sse2_rr2_p6.beta);
-  const __m128 vsat_cutoff = _mm_load_ps(params->sse2_rr2_p6.sat_cutoff);
-  const __m128 vmagic_bias = _mm_load_ps(params->sse2_rr2_p6.magic_bias);
-  const __m128 vlog2e = _mm_load_ps(params->sse2_rr2_p6.log2e);
-  const __m128 vminus_ln2_hi = _mm_load_ps(params->sse2_rr2_p6.minus_ln2_hi);
-  const __m128 vminus_ln2_lo = _mm_load_ps(params->sse2_rr2_p6.minus_ln2_lo);
-  const __m128 vc6 = _mm_load_ps(params->sse2_rr2_p6.c6);
-  const __m128 vc5 = _mm_load_ps(params->sse2_rr2_p6.c5);
-  const __m128 vc4 = _mm_load_ps(params->sse2_rr2_p6.c4);
-  const __m128 vc3 = _mm_load_ps(params->sse2_rr2_p6.c3);
-  const __m128 vc2 = _mm_load_ps(params->sse2_rr2_p6.c2);
-  const __m128 vone = _mm_load_ps(params->sse2_rr2_p6.one);
+  const __m128 vsat_cutoff = _mm_set1_ps(-0x1.154246p+4f);
+  const __m128 vmagic_bias = _mm_set1_ps(0x1.8000FEp23f);
+  const __m128 vlog2e = _mm_set1_ps(0x1.715476p+0f);
+  const __m128 vminus_ln2_hi = _mm_set1_ps(-0x1.62E440p-1f);
+  const __m128 vminus_ln2_lo = _mm_set1_ps(0x1.0105C6p-21f);
+  const __m128 vc6 = _mm_set1_ps(0x1.6b7338p-10f);
+  const __m128 vc5 = _mm_set1_ps(0x1.12278Ep-7f);
+  const __m128 vc4 = _mm_set1_ps(0x1.555716p-5f);
+  const __m128 vc3 = _mm_set1_ps(0x1.5554B0p-3f);
+  const __m128 vc2 = _mm_set1_ps(0x1.FFFFFEp-2f);
+  const __m128 vone = _mm_set1_ps(1.0f);
+
+  XNN_FORCE_REALIZATION(vsat_cutoff);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vminus_ln2_hi);
+  XNN_FORCE_REALIZATION(vminus_ln2_lo);
+  XNN_FORCE_REALIZATION(vc6);
+  XNN_FORCE_REALIZATION(vc5);
+  XNN_FORCE_REALIZATION(vc4);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vone);
+  
+  const __m128 vprescale = _mm_set1_ps(params->scalar.prescale);
+  const __m128 valpha = _mm_set1_ps(params->scalar.alpha);
+  const __m128 vbeta = _mm_set1_ps(params->scalar.beta);
 
   for (; batch >= 20 * sizeof(float); batch -= 20 * sizeof(float)) {
     __m128 vx0123 = _mm_loadu_ps(input);

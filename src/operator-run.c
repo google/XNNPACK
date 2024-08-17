@@ -42,8 +42,7 @@ void xnn_compute_transposec_2d(
       ld_input,
       ld_output,
       tile_i,
-      tile_j,
-      &context->params);
+      tile_j);
 }
 
 void xnn_compute_transposec_3d(
@@ -67,8 +66,7 @@ void xnn_compute_transposec_3d(
       ld_input,
       ld_output,
       tile_j,
-      tile_k,
-      &context->params);
+      tile_k);
 }
 
 void xnn_compute_transposec_4d(
@@ -93,8 +91,7 @@ void xnn_compute_transposec_4d(
       ld_input,
       ld_output,
       tile_k,
-      tile_l,
-      &context->params);
+      tile_l);
 }
 
 void xnn_compute_transposec_5d(
@@ -120,8 +117,7 @@ void xnn_compute_transposec_5d(
       ld_input,
       ld_output,
       tile_l,
-      tile_m,
-      &context->params);
+      tile_m);
 }
 
 void xnn_compute_transposec_6d(
@@ -150,8 +146,7 @@ void xnn_compute_transposec_6d(
       ld_input,
       ld_output,
       tile_m,
-      tile_n,
-      &context->params);
+      tile_n);
 }
 
 void xnn_compute_transposev_2d(
@@ -1556,7 +1551,7 @@ void xnn_compute_resize_bilinear_indirection(
     context->input_height, context->input_width,
     context->output_height, context->output_width,
     context->input,
-    /*indirection_buffer==*/(const void**) ((uintptr_t) buffer + context->packed_weight_size),
+    /*indirection_buffer==*/(const void**) ((uintptr_t) buffer + context->indirect_input_offset),
     /*packed_weights=*/(void*) buffer,
     context->align_corners, context->tensorflow_legacy_mode);
 }
@@ -2229,7 +2224,7 @@ void xnn_compute_contiguous_reduce(
     const void* workspace_ptr = (void*) ((uintptr_t) context->workspace + workspace_offset);
     output_ptr = (void*) ((uintptr_t) context->output + output_offset);
     context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
-                         output_ptr, &context->cvt_params);
+                         output_ptr, /*params=*/NULL);
   }
 }
 
@@ -2290,7 +2285,7 @@ void xnn_compute_discontiguous_reduce(
     const void* workspace_ptr = (void*) ((uintptr_t) context->workspace + workspace_offset);
     output_ptr = (void*) ((uintptr_t) context->output + output_offset);
     context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
-                         output_ptr, &context->cvt_params);
+                         output_ptr, /*params=*/NULL);
   }
 }
 

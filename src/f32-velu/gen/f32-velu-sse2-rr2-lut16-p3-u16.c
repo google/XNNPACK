@@ -28,18 +28,29 @@ void xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vprescale = _mm_load_ps(params->sse2_rr2_lut16_p3.prescale);
-  const __m128 valpha = _mm_load_ps(params->sse2_rr2_lut16_p3.alpha);
-  const __m128 vbeta = _mm_load_ps(params->sse2_rr2_lut16_p3.beta);
-  const __m128 vsat_cutoff = _mm_load_ps(params->sse2_rr2_lut16_p3.sat_cutoff);
-  const __m128 vmagic_bias = _mm_load_ps(params->sse2_rr2_lut16_p3.magic_bias);
-  const __m128 vlog2e = _mm_load_ps(params->sse2_rr2_lut16_p3.log2e);
-  const __m128i vindex_mask = _mm_load_si128((const __m128i*) params->sse2_rr2_lut16_p3.index_mask);
-  const __m128 vminus_ln2_hi = _mm_load_ps(params->sse2_rr2_lut16_p3.minus_ln2_hi);
-  const __m128 vminus_ln2_lo = _mm_load_ps(params->sse2_rr2_lut16_p3.minus_ln2_lo);
-  const __m128 vc3 = _mm_load_ps(params->sse2_rr2_lut16_p3.c3);
-  const __m128 vc2 = _mm_load_ps(params->sse2_rr2_lut16_p3.c2);
-  const __m128 vone = _mm_load_ps(params->sse2_rr2_lut16_p3.one);
+  const __m128 vsat_cutoff = _mm_set1_ps(-0x1.154246p+4f);
+  const __m128 vmagic_bias = _mm_set1_ps(0x1.800000p19f);
+  const __m128 vlog2e = _mm_set1_ps(0x1.715476p+0f);
+  const __m128i vindex_mask = _mm_set1_epi32(UINT32_C(0xF));
+  const __m128 vminus_ln2_hi = _mm_set1_ps(-0x1.62E400p-1f);
+  const __m128 vminus_ln2_lo = _mm_set1_ps(-0x1.7F7D1Cp-20f);
+  const __m128 vc3 = _mm_set1_ps(0x1.55561Cp-3f);
+  const __m128 vc2 = _mm_set1_ps(0x1.0001ECp-1f);
+  const __m128 vone = _mm_set1_ps(1.0f);
+
+  XNN_FORCE_REALIZATION(vsat_cutoff);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vindex_mask);
+  XNN_FORCE_REALIZATION(vminus_ln2_hi);
+  XNN_FORCE_REALIZATION(vminus_ln2_lo);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vone);
+
+  const __m128 vprescale = _mm_set1_ps(params->scalar.prescale);
+  const __m128 valpha = _mm_set1_ps(params->scalar.alpha);
+  const __m128 vbeta = _mm_set1_ps(params->scalar.beta);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     __m128 vx0123 = _mm_loadu_ps(input);

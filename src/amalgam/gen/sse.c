@@ -23,6 +23,7 @@
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
 #include "xnnpack/maxpool.h"
+#include "xnnpack/microparams.h"
 #include "xnnpack/pavgpool.h"
 #include "xnnpack/reduce.h"
 #include "xnnpack/spmm.h"
@@ -7389,9 +7390,9 @@ void xnn_f32_rdsum_ukernel_7p7x__sse_c16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vscale = _mm_load_ps(params->sse.scale);
-  const __m128 vmin = _mm_load_ps(params->sse.min);
-  const __m128 vmax = _mm_load_ps(params->sse.max);
+  const __m128 vscale = _mm_set1_ps(params->scalar.scale);
+  const __m128 vmin = _mm_set1_ps(params->scalar.min);
+  const __m128 vmax = _mm_set1_ps(params->scalar.max);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 16; channels -= 16) {
@@ -7729,7 +7730,7 @@ void xnn_f32_rsum_ukernel__sse_u16_acc4(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -7772,6 +7773,8 @@ void xnn_f32_rsum_ukernel__sse_u16_acc4(
   }
   vacc0 = _mm_add_ss(vacc0, _mm_shuffle_ps(vacc0, vacc0, _MM_SHUFFLE(1, 1, 1, 1)));
   vacc0 = _mm_mul_ss(vacc0, _mm_load_ss(&params->scalar.scale));
+  vacc0 = _mm_max_ss(vacc0, _mm_load_ss(&params->scalar.min));
+  vacc0 = _mm_min_ss(vacc0, _mm_load_ss(&params->scalar.max));
   *output += _mm_cvtss_f32(vacc0);
 }
 
@@ -9211,10 +9214,15 @@ void xnn_f32_vhswish_ukernel__sse_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vsixth = _mm_load_ps(params->sse.sixth);
-  const __m128 vhalf = _mm_load_ps(params->sse.half);
-  const __m128 vone = _mm_load_ps(params->sse.one);
+  const __m128 vsixth = _mm_set1_ps(0x1.555556p-3f);
+  const __m128 vhalf = _mm_set1_ps(0.5f);
+  const __m128 vone = _mm_set1_ps(1.0f);
   const __m128 vzero = _mm_setzero_ps();
+
+  XNN_FORCE_REALIZATION(vsixth);
+  XNN_FORCE_REALIZATION(vhalf);
+  XNN_FORCE_REALIZATION(vone);
+  // XNN_FORCE_REALIZATION(vzero);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m128 vx0123 = _mm_loadu_ps(input);
@@ -9450,8 +9458,8 @@ void xnn_f32_vrsqrt_ukernel__sse_rsqrt_u8(
   assert(output != NULL);
 
   // Constants for the Newton-Raphson iteration.
-  const __m128 vthree = _mm_load_ps(params->sse.three);
-  const __m128 vhalf = _mm_load_ps(params->sse.half);
+  const __m128 vthree = _mm_set1_ps(3.0f);
+  const __m128 vhalf = _mm_set1_ps(0.5f);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m128 vx0123 = _mm_loadu_ps(input);
@@ -9532,8 +9540,8 @@ void xnn_f32_vsqrt_ukernel__sse_rsqrt_u12(
   assert(output != NULL);
 
   // Constants for the Newton-Raphson iteration.
-  const __m128 vthree = _mm_load_ps(params->sse.three);
-  const __m128 vhalf = _mm_load_ps(params->sse.half);
+  const __m128 vthree = _mm_set1_ps(3.0f);
+  const __m128 vhalf = _mm_set1_ps(0.5f);
 
   for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {
     const __m128 vx0 = _mm_loadu_ps(input);
@@ -9635,8 +9643,7 @@ void xnn_x32_transposec_ukernel__4x4_sse(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x32_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint32_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint32_t));

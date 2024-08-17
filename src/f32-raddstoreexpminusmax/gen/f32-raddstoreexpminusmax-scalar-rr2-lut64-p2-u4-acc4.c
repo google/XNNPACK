@@ -32,14 +32,15 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_u4_acc4(
   assert(output != NULL);
   assert(sum != NULL);
 
-  const float vi_max = *max;
-  const float vlog2e = params->scalar_rr2_lut64_p2.log2e;
-  const float vmagic_bias = params->scalar_rr2_lut64_p2.magic_bias;
+  const float vlog2e  = 0x1.715476p0f;
+  const float vmagic_bias = 0x1.800000p17f;
   const uint32_t vindex_mask = UINT32_C(0x3F);
-  const float vminus_ln2_hi = params->scalar_rr2_lut64_p2.minus_ln2_hi;
-  const float vminus_ln2_lo = params->scalar_rr2_lut64_p2.minus_ln2_lo;
-  const float vc2 = params->scalar_rr2_lut64_p2.c2;
-  const float vdenorm_cutoff = params->scalar_rr2_lut64_p2.denorm_cutoff;
+  const float vminus_ln2_hi = -0x1.630000p-1f;
+  const float vminus_ln2_lo = 0x1.BD0106p-13f;
+  const float vc2 = 0x1.FFFF0Ap-2f;
+  const float vdenorm_cutoff = -0x1.5D589Ep6f;
+
+  const float vi_max = *max;
 
   float vacc0 = 0.0f;
   float vacc1 = 0.0f;

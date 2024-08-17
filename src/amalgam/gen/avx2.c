@@ -1155,13 +1155,21 @@ void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u40(
   assert(output != NULL);
   assert(sum != NULL);
 
+  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p0f);
+  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
+  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E43p-1f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.FF3A32p-2f);
+  const __m256 vc1 = _mm256_set1_ps(0x1.039E10p+0f);
+  const __m256 vdenorm_cutoff = _mm256_set1_ps(-0x1.368000p+3f);
+
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vminus_ln2);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
+
   const __m256 vi_max = _mm256_cvtph_ps(_mm_set1_epi16((short) *((const uint16_t*) max)));
-  const __m256 vlog2e = _mm256_load_ps(params->avx2_rr1_p2.log2e);
-  const __m256 vmagic_bias = _mm256_load_ps(params->avx2_rr1_p2.magic_bias);
-  const __m256 vminus_ln2 = _mm256_load_ps(params->avx2_rr1_p2.minus_ln2);
-  const __m256 vc2 = _mm256_load_ps(params->avx2_rr1_p2.c2);
-  const __m256 vc1 = _mm256_load_ps(params->avx2_rr1_p2.c1);
-  const __m256 vdenorm_cutoff = _mm256_load_ps(params->avx2_rr1_p2.denorm_cutoff);
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
@@ -1327,16 +1335,25 @@ void xnn_f16_velu_ukernel__avx2_rr1_p3_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256 vprescale = _mm256_load_ps(params->avx2_rr1_p3.prescale);
-  const __m256 vsat_cutoff = _mm256_load_ps(params->avx2_rr1_p3.sat_cutoff);
-  const __m256 vmagic_bias = _mm256_load_ps(params->avx2_rr1_p3.magic_bias);
-  const __m256 vlog2e = _mm256_load_ps(params->avx2_rr1_p3.log2e);
-  const __m256 vminus_ln2 = _mm256_load_ps(params->avx2_rr1_p3.minus_ln2);
-  const __m256 vc3 = _mm256_load_ps(params->avx2_rr1_p3.c3);
-  const __m256 vc2 = _mm256_load_ps(params->avx2_rr1_p3.c2);
-  const __m256 vc1 = _mm256_load_ps(params->avx2_rr1_p3.c1);
-  const __m256 valpha = _mm256_load_ps(params->avx2_rr1_p3.alpha);
-  const __m256 vbeta = _mm256_load_ps(params->avx2_rr1_p3.beta);
+  const __m256 vsat_cutoff = _mm256_set1_ps(-0x1.0A4000p+3f);
+  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
+  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
+  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
+  const __m256 vc3 = _mm256_set1_ps(0x1.5554DCp-3f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.01EBB2p-1f);
+  const __m256 vc1 = _mm256_set1_ps(0x1.0002F2p+0f);
+
+  XNN_FORCE_REALIZATION(vsat_cutoff);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vminus_ln2);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+
+  const __m256 vprescale = _mm256_set1_ps(params->avx2.prescale);
+  const __m256 valpha = _mm256_set1_ps(params->avx2.alpha);
+  const __m256 vbeta = _mm256_set1_ps(params->avx2.beta);
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
@@ -1456,14 +1473,23 @@ void xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256 vsign_mask = _mm256_load_ps(params->avx2_rr1_p2.sign_mask);
-  const __m256 vmagic_bias = _mm256_load_ps(params->avx2_rr1_p2.magic_bias);
-  const __m256 vlog2e = _mm256_load_ps(params->avx2_rr1_p2.log2e);
-  const __m256 vminus_ln2 = _mm256_load_ps(params->avx2_rr1_p2.minus_ln2);
-  const __m256 vc2 = _mm256_load_ps(params->avx2_rr1_p2.c2);
-  const __m256 vc1 = _mm256_load_ps(params->avx2_rr1_p2.c1);
-  const __m256 vone = _mm256_load_ps(params->avx2_rr1_p2.one);
-  const __m256 vdenorm_cutoff = _mm256_load_ps(params->avx2_rr1_p2.denorm_cutoff);
+  const __m256 vsign_mask = _mm256_set1_ps(-0.0f);
+  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
+  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p0f);
+  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E43p-1f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.FF3A32p-2f);
+  const __m256 vc1 = _mm256_set1_ps(0x1.039E10p+0f);
+  const __m256 vone = _mm256_set1_ps(1.0f);
+  const __m256 vdenorm_cutoff = _mm256_set1_ps(-0x1.368000p+3f);
+
+  XNN_FORCE_REALIZATION(vsign_mask);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vminus_ln2);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+  XNN_FORCE_REALIZATION(vone);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
@@ -2297,10 +2323,13 @@ void xnn_f32_qs8_vcvt_ukernel__avx2_u64(
   assert(input != NULL);
   assert(output != NULL);
 
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
   const __m256 vscale = _mm256_load_ps(params->avx2.scale);
   const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->avx2.output_max_less_zero_point);
   const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx2.output_zero_point);
-  const __m256i vshuffle_mask = _mm256_load_si256((const __m256i*) params->avx2.shuffle_mask);
+  XNN_ALIGN(32) static const uint32_t shuffle_mask[8] = {0, 4, 1, 5, 2, 6, 3, 7};
+  const __m256i vshuffle_mask = _mm256_load_si256((const __m256i*) shuffle_mask);
   const __m256i voutput_min = _mm256_load_si256((const __m256i*) params->avx2.output_min);
 
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
@@ -2383,7 +2412,7 @@ void xnn_f32_qs8_vcvt_ukernel__avx2_u64(
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2.mask_table[7] - batch));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
     __m256 vx = _mm256_maskload_ps(input, vmask);
     vx = _mm256_mul_ps(vx, vscale);
@@ -2423,10 +2452,13 @@ void xnn_f32_qu8_vcvt_ukernel__avx2_u64(
   assert(input != NULL);
   assert(output != NULL);
 
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
   const __m256 vscale = _mm256_load_ps(params->avx2.scale);
   const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->avx2.output_max_less_zero_point);
   const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx2.output_zero_point);
-  const __m256i vshuffle_mask = _mm256_load_si256((const __m256i*) params->avx2.shuffle_mask);
+  XNN_ALIGN(32) static const uint32_t shuffle_mask[8] = {0, 4, 1, 5, 2, 6, 3, 7};
+  const __m256i vshuffle_mask = _mm256_load_si256((const __m256i*) shuffle_mask);
   const __m256i voutput_min = _mm256_load_si256((const __m256i*) params->avx2.output_min);
 
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
@@ -2509,7 +2541,7 @@ void xnn_f32_qu8_vcvt_ukernel__avx2_u64(
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2.mask_table[7] - batch));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
     __m256 vx = _mm256_maskload_ps(input, vmask);
     vx = _mm256_mul_ps(vx, vscale);
@@ -2548,18 +2580,34 @@ void xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_u56(
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
+  
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 vprescale = _mm256_load_ps(params->avx2_rr1_lut4_p4.prescale);
-  const __m256 valpha = _mm256_load_ps(params->avx2_rr1_lut4_p4.alpha);
-  const __m256 vbeta = _mm256_load_ps(params->avx2_rr1_lut4_p4.beta);
-  const __m256 vsat_cutoff = _mm256_load_ps(params->avx2_rr1_lut4_p4.sat_cutoff);
-  const __m256 vmagic_bias = _mm256_load_ps(params->avx2_rr1_lut4_p4.magic_bias);
-  const __m256 vlog2e = _mm256_load_ps(params->avx2_rr1_lut4_p4.log2e);
-  const __m256 vtable = _mm256_load_ps(params->avx2_rr1_lut4_p4.table);
-  const __m256 vminus_ln2 = _mm256_load_ps(params->avx2_rr1_lut4_p4.minus_ln2);
-  const __m256 vc4 = _mm256_load_ps(params->avx2_rr1_lut4_p4.c4);
-  const __m256 vc3 = _mm256_load_ps(params->avx2_rr1_lut4_p4.c3);
-  const __m256 vc2 = _mm256_load_ps(params->avx2_rr1_lut4_p4.c2);
+  XNN_ALIGN(32) static const float table[8] = {
+    0x1.000000p+0f, 0x1.F06FE0p-1f, 0x1.EA09E6p-1f, 0x1.EE89FAp-1f,
+    0x1.000000p+0f, 0x1.F06FE0p-1f, 0x1.EA09E6p-1f, 0x1.EE89FAp-1f,
+  };
+  const __m256 vtable = _mm256_load_ps(table);
+
+  const __m256 vsat_cutoff = _mm256_set1_ps(-0x1.154246p+4f);
+  const __m256 vmagic_bias = _mm256_set1_ps(0x1.800000p21f);
+  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
+  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
+  const __m256 vc4 = _mm256_set1_ps(0x1.554F9Ap-5f);
+  const __m256 vc3 = _mm256_set1_ps(0x1.557082p-3f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.000002p-1f);
+
+  XNN_FORCE_REALIZATION(vsat_cutoff);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vminus_ln2);
+  XNN_FORCE_REALIZATION(vc4);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+
+  const __m256 vprescale = _mm256_set1_ps(params->scalar.prescale);
+  const __m256 valpha = _mm256_set1_ps(params->scalar.alpha);
+  const __m256 vbeta = _mm256_set1_ps(params->scalar.beta);
 
   for (; batch >= 56 * sizeof(float); batch -= 56 * sizeof(float)) {
     __m256 vx0 = _mm256_loadu_ps(input);
@@ -2734,7 +2782,7 @@ void xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_u56(
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2_rr1_lut4_p4.mask_table[7] - batch));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
     __m256 vx = _mm256_maskload_ps(input, vmask);
 
@@ -2788,17 +2836,31 @@ void xnn_f32_vsigmoid_ukernel__avx2_rr1_p5_div_u40(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256 vsign_mask = _mm256_load_ps(params->avx2_rr1_p5.sign_mask);
-  const __m256 vmagic_bias = _mm256_load_ps(params->avx2_rr1_p5.magic_bias);
-  const __m256 vlog2e = _mm256_load_ps(params->avx2_rr1_p5.log2e);
-  const __m256 vminus_ln2 = _mm256_load_ps(params->avx2_rr1_p5.minus_ln2);
-  const __m256 vc5 = _mm256_load_ps(params->avx2_rr1_p5.c5);
-  const __m256 vc4 = _mm256_load_ps(params->avx2_rr1_p5.c4);
-  const __m256 vc3 = _mm256_load_ps(params->avx2_rr1_p5.c3);
-  const __m256 vc2 = _mm256_load_ps(params->avx2_rr1_p5.c2);
-  const __m256 vc1 = _mm256_load_ps(params->avx2_rr1_p5.c1);
-  const __m256 vone = _mm256_load_ps(params->avx2_rr1_p5.one);
-  const __m256 vdenorm_cutoff = _mm256_load_ps(params->avx2_rr1_p5.denorm_cutoff);
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
+  const __m256 vsign_mask = _mm256_set1_ps(-0.0f);
+  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
+  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p0f);
+  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
+  const __m256 vc5 = _mm256_set1_ps(0x1.0F9F9Cp-7f);
+  const __m256 vc4 = _mm256_set1_ps(0x1.573A1Ap-5f);
+  const __m256 vc3 = _mm256_set1_ps(0x1.555A80p-3f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.FFFDC6p-2f);
+  const __m256 vc1 = _mm256_set1_ps(0x1.FFFFF6p-1f);
+  const __m256 vone = _mm256_set1_ps(1.0f);
+  const __m256 vdenorm_cutoff = _mm256_set1_ps(-0x1.5D589Ep+6f);
+
+  XNN_FORCE_REALIZATION(vsign_mask);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vminus_ln2);
+  XNN_FORCE_REALIZATION(vc5);
+  XNN_FORCE_REALIZATION(vc4);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+  XNN_FORCE_REALIZATION(vone);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   for (; batch >= 40 * sizeof(float); batch -= 40 * sizeof(float)) {
     const __m256 vx0 = _mm256_loadu_ps(input);
@@ -2937,7 +2999,7 @@ void xnn_f32_vsigmoid_ukernel__avx2_rr1_p5_div_u40(
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2_rr1_p5.mask_table[7] - batch));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
     const __m256 vx = _mm256_maskload_ps(input, vmask);
 
@@ -13019,11 +13081,12 @@ void xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x16_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint16_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint16_t));
+
+  static const int32_t mask_table[15] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
   const size_t tile_height = 16;
   const size_t tile_width = 16;
@@ -13040,7 +13103,7 @@ void xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2(
     const size_t rem = min(block_width - 1, 15);
     const size_t oN_stride = rem * output_stride;
 
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2.mask_table[7 ^ (rem>>1)]));
+    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7 ^ (rem>>1)]));
 
     size_t bh = block_height;
     for (; bh >= 16; bh -= 16) {
@@ -13994,11 +14057,12 @@ void xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x8_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(uint8_t));
   assert(block_height == 1 || input_stride >= block_width * sizeof(uint8_t));
+
+  static const int32_t mask_table[15] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
   const size_t tile_height = 32;
   const size_t tile_width = 32;
@@ -14015,7 +14079,7 @@ void xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2(
     const size_t rem = min(block_width - 1, 31);
     const size_t oN_stride = rem * output_stride;
 
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2.mask_table[7 ^ (rem>>2)]));
+    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7 ^ (rem>>2)]));
 
     size_t bh = block_height;
     for (; bh >= 32; bh -= 32) {

@@ -207,13 +207,6 @@ def amalgamate_microkernel_sources(source_paths, include_header):
 
     amalgam_lines.append('')
 
-  # Multi-line sequence for XOP intrinsics, which don't have a standardized header
-  _discard(amalgam_includes, '#ifdef _MSC_VER')
-  _discard(amalgam_includes, '  #include <intrin.h>')
-  _discard(amalgam_includes, '#else')
-  _discard(amalgam_includes, '  #include <x86intrin.h>')
-  _discard(amalgam_includes, '#endif')
-
   # Single-line sequences for intrinsics with a standardized header
   for filename in UNWANTED_INCLUDES:
     _discard(amalgam_includes, f'#include {filename}')
@@ -232,15 +225,7 @@ def amalgamate_microkernel_sources(source_paths, include_header):
       )
   )
   if include_header:
-    if include_header == 'xopintrin.h':
-      amalgam_text += '\n\n'
-      amalgam_text += '#ifdef _MSC_VER\n'
-      amalgam_text += '  #include <intrin.h>\n'
-      amalgam_text += '#else\n'
-      amalgam_text += '  #include <x86intrin.h>\n'
-      amalgam_text += '#endif\n\n'
-    else:
-      amalgam_text += '\n\n#include <%s>\n\n' % include_header
+    amalgam_text += '\n\n#include <%s>\n\n' % include_header
   else:
     amalgam_text += '\n\n'
   amalgam_text += '\n'.join(
@@ -291,7 +276,6 @@ def main(args):
       os.path.join(src_dir, 'amalgam', 'gen'),
       os.path.join(src_dir, 'configs'),
       os.path.join(src_dir, 'enums'),
-      os.path.join(src_dir, 'jit'),
       os.path.join(src_dir, 'operators'),
       os.path.join(src_dir, 'subgraph'),
       os.path.join(src_dir, 'tables'),
@@ -306,7 +290,6 @@ def main(args):
   c_microkernels_per_isa['neoni8mm_aarch64'] = list()
   temp_c_microkernels_per_isa = {isa: [] for isa in c_microkernels_per_isa}
   asm_microkernels_per_arch = {arch: [] for arch in ARCH_LIST}
-  jit_microkernels_per_arch = {arch: [] for arch in ARCH_LIST}
   microkernel_name_to_filename = dict()
   microkernel_temp_dir = tempfile.mkdtemp()
   for root, dirs, files in os.walk(src_dir, topdown=False):
@@ -428,13 +411,6 @@ def main(args):
             break
         else:
           print('Unknown architecture for assembly microkernel %s' % filepath)
-      elif ext == '.cc':
-        for component in basename.split('-'):
-          if component in ARCH_LIST:
-            jit_microkernels_per_arch[component].append(filepath)
-            break
-        else:
-          print('Unknown architecture for JIT microkernel %s' % filepath)
 
   with io.StringIO() as microkernels_bzl:
     microkernels_bzl.write('''\
@@ -446,9 +422,7 @@ Auto-generated file. Do not edit!
 """
 
 ''')
-    keys = set(c_microkernels_per_isa.keys()).union(
-        asm_microkernels_per_arch.keys(), jit_microkernels_per_arch.keys()
-    )
+    keys = set(c_microkernels_per_isa.keys()).union(asm_microkernels_per_arch.keys())
     keys = sorted(keys, key=lambda key: key + '_microkernels.bzl')
     exports = ['\n']
     for key in keys:
@@ -475,13 +449,6 @@ Auto-generated file. Do not edit!
             asm_microkernels_per_arch,
             '',
             'ASM_MICROKERNEL_SRCS',
-        )
-        vars = vars + write_grouped_microkernels_bzl(
-            arch_microkernels_bzl,
-            key,
-            jit_microkernels_per_arch,
-            '',
-            'JIT_MICROKERNEL_SRCS',
         )
         arch_microkernels_bzl.seek(0)
         xnncommon.overwrite_if_changed(
@@ -515,9 +482,7 @@ Auto-generated file. Do not edit!
 
 """)
     keys = sorted(
-        set(c_microkernels_per_isa.keys()).union(
-            asm_microkernels_per_arch.keys(), jit_microkernels_per_arch.keys()
-        )
+        set(c_microkernels_per_isa.keys()).union(asm_microkernels_per_arch.keys())
     )
     for key in keys:
       arch_microkernels_cmake_filename = key + '_microkernels.cmake'
@@ -547,13 +512,6 @@ Auto-generated file. Do not edit!
             asm_microkernels_per_arch,
             '',
             'ASM_MICROKERNEL_SRCS',
-        )
-        write_grouped_microkernels_cmake(
-            arch_microkernels_cmake,
-            key,
-            jit_microkernels_per_arch,
-            '',
-            'JIT_MICROKERNEL_SRCS',
         )
         arch_microkernels_cmake.seek(0)
         xnncommon.overwrite_if_changed(
@@ -592,25 +550,24 @@ Auto-generated file. Do not edit!
           prod_microkernels.intersection(microkernels),
           key=human_sort_key,
       )
-      if microkernels:
-        filepaths = [
-            fp if os.path.isabs(fp) else os.path.join(root_dir, fp)
-            for fp in microkernels
-        ]
-        if '_' in isa_spec:
-          isa, arch = isa_spec.split('_')
-          amalgam_filename = f'{isa}-{arch}.c'
-        else:
-          isa = isa_spec
-          amalgam_filename = f'{isa}.c'
-        header = ISA_TO_HEADER_MAP.get(isa)
-        amalgam_text = amalgamate_microkernel_sources(
-            filepaths, include_header=header
-        )
-        xnncommon.overwrite_if_changed(
-            os.path.join(src_dir, 'amalgam', 'gen', amalgam_filename),
-            amalgam_text,
-        )
+      filepaths = [
+          fp if os.path.isabs(fp) else os.path.join(root_dir, fp)
+          for fp in microkernels
+      ]
+      if '_' in isa_spec:
+        isa, arch = isa_spec.split('_')
+        amalgam_filename = f'{isa}-{arch}.c'
+      else:
+        isa = isa_spec
+        amalgam_filename = f'{isa}.c'
+      header = ISA_TO_HEADER_MAP.get(isa)
+      amalgam_text = amalgamate_microkernel_sources(
+          filepaths, include_header=header
+      )
+      xnncommon.overwrite_if_changed(
+          os.path.join(src_dir, 'amalgam', 'gen', amalgam_filename),
+          amalgam_text,
+      )
 
 
 if __name__ == '__main__':

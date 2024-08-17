@@ -446,17 +446,6 @@ ExecutionPlan FP16MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
   Operators operators;
   xnn_status status;
   xnn_code_cache* code_cache_ptr = nullptr;
-#if XNN_PLATFORM_JIT
-  xnn_code_cache code_cache;
-  if (use_jit) {
-    status = xnn_init_code_cache(&code_cache);
-    if (status != xnn_status_success) {
-      std::cerr << "failed to initialize code cache" << std::endl;
-      return ExecutionPlan();
-    }
-    code_cache_ptr = &code_cache;
-  }
-#endif  // XNN_PLATFORM_JIT
   size_t max_workspace_size = 0;
 
   xnn_operator_t op0 = nullptr;
@@ -2230,12 +2219,6 @@ ExecutionPlan FP16MobileNetV3Small(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
   operators.emplace_back(op98, xnn_delete_operator);
-
-#if XNN_PLATFORM_JIT
-  if (use_jit) {
-    xnn_finalize_code_memory(&code_cache.cache.code);
-  }
-#endif  // XNN_PLATFORM_JIT
 
   size_t op0_workspace_size = 0;
   size_t op0_workspace_alignment = 0;

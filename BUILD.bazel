@@ -19,9 +19,11 @@ load(
     "xnnpack_microkernel_cc_library",
     "xnnpack_min_size_copts",
     "xnnpack_msvc_std_copts",
+    "xnnpack_simd_f16_archs",
     "xnnpack_simd_f32_archs",
     "xnnpack_simd_s16_archs",
     "xnnpack_simd_s32_archs",
+    "xnnpack_simd_s8_archs",
     "xnnpack_slinky_defines",
     "xnnpack_slinky_deps",
     "xnnpack_slinky_srcs",
@@ -32,9 +34,7 @@ load(
 load(
     "//gen:microkernels.bzl",
     "AARCH32_ASM_MICROKERNEL_SRCS",
-    "AARCH32_JIT_MICROKERNEL_SRCS",
     "AARCH64_ASM_MICROKERNEL_SRCS",
-    "AARCH64_JIT_MICROKERNEL_SRCS",
     "ALL_ARMSIMD32_MICROKERNEL_SRCS",
     "ALL_AVX256SKX_MICROKERNEL_SRCS",
     "ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS",
@@ -80,9 +80,6 @@ load(
     "ALL_WASMSIMD_MICROKERNEL_SRCS",
     "ALL_WASM_MICROKERNEL_SRCS",
     "WASM32_ASM_MICROKERNEL_SRCS",
-    "WASM32_JIT_MICROKERNEL_SRCS",
-    "WASMRELAXEDSIMD32_JIT_MICROKERNEL_SRCS",
-    "WASMSIMD32_JIT_MICROKERNEL_SRCS",
 )
 
 licenses(["notice"])
@@ -264,11 +261,17 @@ SIMD_HEADERS = [
     "src/xnnpack/simd/f32-" + arch + ".h"
     for arch in xnnpack_simd_f32_archs()
 ] + [
+    "src/xnnpack/simd/f16-" + arch + ".h"
+    for arch in xnnpack_simd_f16_archs()
+] + [
     "src/xnnpack/simd/s16-" + arch + ".h"
     for arch in xnnpack_simd_s16_archs()
 ] + [
     "src/xnnpack/simd/s32-" + arch + ".h"
     for arch in xnnpack_simd_s32_archs()
+] + [
+    "src/xnnpack/simd/s8-" + arch + ".h"
+    for arch in xnnpack_simd_s8_archs()
 ]
 
 exports_files(SIMD_HEADERS)
@@ -276,29 +279,9 @@ exports_files(SIMD_HEADERS)
 INTERNAL_MICROKERNEL_HDRS = MICROKERNEL_HDRS + SIMD_HEADERS + [
     "src/xnnpack/cache.h",
     "src/xnnpack/intrinsics-polyfill.h",
-    "src/xnnpack/math-stubs.h",
     "src/xnnpack/requantization-stubs.h",
     "src/xnnpack/unaligned.h",
 ]
-
-WASM_JIT_LINKOPTS = [
-    "-sDEFAULT_LIBRARY_FUNCS_TO_INCLUDE=$addFunction",
-    "-sALLOW_TABLE_GROWTH=1",
-]
-
-JIT_WASMSIMD32_COMMONS_SRCS = [
-    "src/xnnpack/wasmsimd-gemm-igemm-commons.h",
-    "src/xnnpack/wasmsimd-gemm-igemm-loadsplat-commons.h",
-    "src/xnnpack/wasmsimd-gemm-igemm-s4-commons.h",
-]
-
-JIT_WASMRELAXEDSIMD32_COMMONS_SRCS = []
-
-JIT_WASM32_SRCS = WASM32_JIT_MICROKERNEL_SRCS
-
-JIT_WASMSIMD32_SRCS = JIT_WASM32_SRCS + JIT_WASMSIMD32_COMMONS_SRCS + WASMSIMD32_JIT_MICROKERNEL_SRCS
-
-JIT_WASMRELAXEDSIMD32_SRCS = JIT_WASMSIMD32_SRCS + JIT_WASMRELAXEDSIMD32_COMMONS_SRCS + WASMRELAXEDSIMD32_JIT_MICROKERNEL_SRCS
 
 ALL_MICROKERNEL_SRCS = ALL_NEON_AARCH64_MICROKERNEL_SRCS + ALL_NEONBF16_AARCH64_MICROKERNEL_SRCS + ALL_NEONDOT_AARCH64_MICROKERNEL_SRCS + ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS + ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS + ALL_ARMSIMD32_MICROKERNEL_SRCS + ALL_AVX_MICROKERNEL_SRCS + ALL_AVXVNNI_MICROKERNEL_SRCS + ALL_AVX256SKX_MICROKERNEL_SRCS + ALL_AVX256VNNI_MICROKERNEL_SRCS + ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS + ALL_AVX2_MICROKERNEL_SRCS + ALL_AVX512F_MICROKERNEL_SRCS + ALL_AVX512SKX_MICROKERNEL_SRCS + ALL_AVX512VBMI_MICROKERNEL_SRCS + ALL_AVX512VNNI_MICROKERNEL_SRCS + ALL_AVX512VNNIGFNI_MICROKERNEL_SRCS + ALL_AVX512AMX_MICROKERNEL_SRCS + ALL_AVX512FP16_MICROKERNEL_SRCS + ALL_F16C_MICROKERNEL_SRCS + ALL_FMA3_MICROKERNEL_SRCS + ALL_FP16ARITH_MICROKERNEL_SRCS + ALL_HEXAGON_MICROKERNEL_SRCS + ALL_HVX_MICROKERNEL_SRCS + ALL_NEON_MICROKERNEL_SRCS + ALL_NEONBF16_MICROKERNEL_SRCS + ALL_NEONDOT_MICROKERNEL_SRCS + ALL_NEONDOTFP16ARITH_MICROKERNEL_SRCS + ALL_NEONFMA_MICROKERNEL_SRCS + ALL_NEONFP16_MICROKERNEL_SRCS + ALL_NEONFP16ARITH_MICROKERNEL_SRCS + ALL_NEONV8_MICROKERNEL_SRCS + ALL_RVV_MICROKERNEL_SRCS + ALL_RVVFP16ARITH_MICROKERNEL_SRCS + ALL_SCALAR_MICROKERNEL_SRCS + ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS + ALL_SSE41_MICROKERNEL_SRCS + ALL_SSSE3_MICROKERNEL_SRCS + ALL_WASM_MICROKERNEL_SRCS + ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS + AARCH32_ASM_MICROKERNEL_SRCS + AARCH64_ASM_MICROKERNEL_SRCS + WASM32_ASM_MICROKERNEL_SRCS
 
@@ -355,9 +338,6 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/common.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":platform_jit",
-    ],
 )
 
 xnnpack_cc_library(
@@ -520,7 +500,6 @@ xnnpack_cc_library(
         ":enable_dwconv_multipass",
         ":enable_gemm_m_specialization",
         ":enable_hvx",
-        ":enable_jit",
         ":experiments_config",
         ":hardware_config",
         ":init_once",
@@ -689,15 +668,6 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "math_stubs",
-    hdrs = [
-        "src/xnnpack/math-stubs.h",
-    ],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-)
-
-xnnpack_cc_library(
     name = "memory",
     srcs = [
         "src/memory.c",
@@ -767,6 +737,7 @@ xnnpack_microkernel_cc_library(
     srcs_prod = ["src/amalgam/gen/scalar.c"],
     srcs_test = ALL_SCALAR_MICROKERNEL_SRCS,
     deps = MICROKERNEL_DEPS + [
+        ":config_hdrs",
         "@FP16",
         "@FXdiv",
     ],
@@ -856,6 +827,7 @@ xnnpack_microkernel_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
+        "@KleidiAI//kai/ukernels/matmul:lhs_quant_pack_qai8dxp_f32",
     ]),
 )
 
@@ -977,7 +949,8 @@ xnnpack_microkernel_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
-        "@KleidiAI//kai/ukernels/matmul",
+        "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp1x8_qsi4cxp4x8_1x4x32_neon_dotprod",
+        "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp1x8_qsi4cxp8x8_1x8x32_neon_dotprod",
     ]),
 )
 
@@ -1000,7 +973,10 @@ xnnpack_microkernel_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
-        "@KleidiAI//kai/ukernels/matmul",
+        "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp4x8_4x4x32_neon_i8mm",
+        "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp4x8_8x4x32_neon_i8mm",
+        "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp8x8_4x8x32_neon_i8mm",
+        "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp8x8_8x8x32_neon_i8mm",
     ]),
 )
 
@@ -1787,10 +1763,15 @@ xnnpack_cc_library(
         ":config_hdrs",
         ":logging",
         ":math",
+        ":microparams",
+        ":params",
         ":unaligned",
+        ":xnnpack_h",
         "@FP16",
     ] + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
+        "@KleidiAI//kai/ukernels/matmul:rhs_pack_kxn_qsi4cxp_qsu4cxs1s0",
+        "@KleidiAI//kai/ukernels/matmul:rhs_pack_nxk_qsi4cxp_qsu4cxs1s0",
     ]),
 )
 
@@ -1884,15 +1865,6 @@ cc_library(
 )
 
 cc_library(
-    name = "enable_jit",
-    defines = select({
-        ":jit_enabled": ["XNN_ENABLE_JIT=1"],
-        "//conditions:default": ["XNN_ENABLE_JIT=0"],
-    }),
-    visibility = xnnpack_visibility(),
-)
-
-cc_library(
     name = "enable_gemm_m_specialization",
     defines = select({
         ":gemm_m_specialization_enabled": ["XNN_ENABLE_GEMM_M_SPECIALIZATION=1"],
@@ -1905,16 +1877,6 @@ cc_library(
     defines = select({
         ":dwconv_multipass_enabled": ["XNN_ENABLE_DWCONV_MULTIPASS=1"],
         "//conditions:default": ["XNN_ENABLE_DWCONV_MULTIPASS=0"],
-    }),
-)
-
-cc_library(
-    name = "platform_jit",
-    defines = select({
-        ":xnn_platform_jit_explicit_true": ["XNN_PLATFORM_JIT=1"],
-        ":xnn_platform_jit_explicit_false": ["XNN_PLATFORM_JIT=0"],
-        # Auto-detect JIT compatibility based on platform macros and set XNN_PLATFORM_JIT in xnnpack/common.h
-        "//conditions:default": [],
     }),
 )
 
@@ -1998,22 +1960,6 @@ xnnpack_cc_library(
     ],
 )
 
-xnnpack_cc_library(
-    name = "post_operation",
-    srcs = [
-        "src/operators/post-operation.c",
-    ],
-    hdrs = [
-        "src/xnnpack/post-operation.h",
-    ],
-    deps = [
-        ":allocator",
-        ":microkernel_configs",
-        ":microparams",
-        ":params",
-    ],
-)
-
 # Define a library with just the header to remove circular dependencies:
 # indirection <-> operators.
 xnnpack_cc_library(
@@ -2041,10 +1987,12 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
-        ":cache",
+        ":allocator",
         ":common",
+        ":logging",
         ":math",
         ":operator_h",
+        ":params",
         ":xnnpack_h",
     ],
 )
@@ -2070,65 +2018,26 @@ xnnpack_cc_library(
         ":cache",
         ":common",
         ":enable_gemm_m_specialization",
-        ":enable_jit",
         ":indirection",
         ":logging",
         ":math",
         ":microkernel_configs",
         ":microkernel_type",
         ":microkernel_utils",
+        ":microkernels_h",
         ":microparams_init",
         ":normalization",
         ":operator_type",
         ":operator_utils",
         ":packing",
         ":params",
-        ":post_operation",
+        ":quantization",
         ":xnnpack_h",
         "@FP16",
         "@pthreadpool",
     ] + select({
-        ":jit_enabled": [":jit"],
         "//conditions:default": [],
     }),
-)
-
-xnnpack_cc_library(
-    name = "jit",
-    srcs = [
-        "src/jit/aarch32-assembler.cc",
-        "src/jit/aarch64-assembler.cc",
-        "src/jit/assembler.cc",
-        "src/jit/wasm-assembler.cc",
-    ],
-    hdrs = [
-        "src/xnnpack/aarch32-assembler.h",
-        "src/xnnpack/aarch64-assembler.h",
-        "src/xnnpack/array-helpers.h",
-        "src/xnnpack/assembler.h",
-        "src/xnnpack/leb128.h",
-        "src/xnnpack/wasm-assembler.h",
-    ],
-    aarch32_srcs = AARCH32_JIT_MICROKERNEL_SRCS,
-    aarch64_srcs = AARCH64_JIT_MICROKERNEL_SRCS,
-    linkopts = select({
-        "//build_config:emscripten": WASM_JIT_LINKOPTS,
-        "//conditions:default": [],
-    }),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    wasm_srcs = JIT_WASM32_SRCS,
-    wasmrelaxedsimd_srcs = JIT_WASMRELAXEDSIMD32_SRCS,
-    wasmsimd_srcs = JIT_WASMSIMD32_SRCS,
-    deps = [
-        ":common",
-        ":logging",
-        ":math",
-        ":memory",
-        ":microkernels_h",
-        ":microparams",
-        ":post_operation",
-        ":xnnpack_h",
-    ],
 )
 
 xnnpack_cc_library(
@@ -2152,7 +2061,6 @@ xnnpack_cc_library(
         ":cache",
         ":common",
         ":config_hdrs",
-        ":enable_jit",
         ":enable_sparse",
         ":hardware_config",
         ":internal",
@@ -2227,6 +2135,9 @@ xnnpack_cc_library(
         ":allocator",
         ":build_identifier",
         ":common",
+        ":config_hdrs",
+        ":hardware_config",
+        ":init_once",
         ":logging",
         ":math",
         ":microkernels_h",
@@ -2235,6 +2146,7 @@ xnnpack_cc_library(
         ":operators",
         ":params",
         ":subgraph",
+        "@pthreadpool",
     ],
 )
 
@@ -2260,15 +2172,11 @@ xnnpack_cc_library(
         ":allocator",
         ":build_identifier",
         ":common",
+        ":config_hdrs",
+        ":init_once",
         ":logging",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":microparams_init",
-        ":operators",
         ":params",
-        ":prod_microkernels",
-        ":subgraph",
+        "@pthreadpool",
     ],
 )
 
@@ -2294,14 +2202,11 @@ xnnpack_cc_library(
         ":allocator",
         ":build_identifier",
         ":common",
+        ":config_hdrs",
+        ":init_once",
         ":logging",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":microparams_init",
-        ":operators",
         ":params",
-        ":prod_microkernels",
+        "@pthreadpool",
     ],
 )
 
@@ -2568,22 +2473,10 @@ config_setting(
     define_values = {"xnn_enable_memopt": "false"},
 )
 
-# Enables usage of JIT kernels.
-config_setting(
-    name = "xnn_enable_jit_explicit_true",
-    define_values = {"xnn_enable_jit": "true"},
-)
-
 # Enables usage of slinky locality optimizations
 config_setting(
     name = "slinky_enabled",
     define_values = {"xnn_use_slinky": "true"},
-)
-
-# Disables usage of JIT kernels.
-config_setting(
-    name = "xnn_enable_jit_explicit_false",
-    define_values = {"xnn_enable_jit": "false"},
 )
 
 # Enables usage of mr heuristic to select microkernels.
@@ -2650,16 +2543,6 @@ config_setting(
 config_setting(
     name = "xnn_log_level_explicit_debug",
     define_values = {"xnn_log_level": "debug"},
-)
-
-config_setting(
-    name = "xnn_platform_jit_explicit_true",
-    define_values = {"xnn_platform_jit": "true"},
-)
-
-config_setting(
-    name = "xnn_platform_jit_explicit_false",
-    define_values = {"xnn_platform_jit": "false"},
 )
 
 # Builds with -c dbg
@@ -2909,13 +2792,11 @@ selects.config_setting_group(
     ],
 )
 
-# Temporary disable vectors on Android
 alias(
     name = "riscv_vector_enabled",
     actual = select({
         ":xnn_enable_riscv_vector_explicit_true": ":xnn_enable_riscv_vector_explicit_true",
         ":xnn_enable_riscv_vector_explicit_false": ":xnn_enable_riscv_vector_explicit_true",
-        "//build_config:android": ":xnn_enable_riscv_vector_explicit_false",
         "//conditions:default": ":riscv_vector_enabled_by_default",
     }),
 )
@@ -3018,23 +2899,6 @@ alias(
         ":xnn_enable_memopt_explicit_true": ":xnn_enable_memopt_explicit_true",
         ":xnn_enable_memopt_explicit_false": ":xnn_enable_memopt_explicit_true",
         "//conditions:default": ":memopt_enabled_by_default",
-    }),
-)
-
-selects.config_setting_group(
-    name = "jit_enabled_by_default",
-    match_any = [
-        # Disabled by default, only enabled explicitly
-        ":xnn_enable_jit_explicit_true",
-    ],
-)
-
-alias(
-    name = "jit_enabled",
-    actual = select({
-        ":xnn_enable_jit_explicit_true": ":xnn_enable_jit_explicit_true",
-        ":xnn_enable_jit_explicit_false": ":xnn_enable_jit_explicit_true",
-        "//conditions:default": ":jit_enabled_by_default",
     }),
 )
 

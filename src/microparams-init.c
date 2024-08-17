@@ -1015,63 +1015,6 @@ void xnn_init_blockwise_scale_bf16_params(
   }
 }
 
-size_t xnn_init_qs8_rsum_scalar_params(
-  union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
-{
-  return sizeof(params->scalar);
-}
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_qs8_rsum_ssse3_params(
-  union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 16; i++) {
-    params->ssse3.onemask_table[i] = 1;
-  }
-  for (uint32_t i = 16; i < 32; i++) {
-    params->ssse3.onemask_table[i] = 0;
-  }
-  return sizeof(params->ssse3);
-}
-
-size_t xnn_init_qs8_rsum_sse4_params(
-  union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 15; i++) {
-    params->sse4.mask_table[i] = 1;
-  }
-  for (uint32_t i = 15; i < 30; i++) {
-    params->sse4.mask_table[i] = 0;
-  }
-  return sizeof(params->sse4);
-}
-
-size_t xnn_init_qs8_rsum_avx2_params(
-  union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 32; i++) {
-    params->avx2.onemask_table[i] = 1;
-  }
-  for (uint32_t i = 32; i < 64; i++) {
-    params->avx2.onemask_table[i] = 0;
-  }
-  return sizeof(params->avx2);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_qs8_rsum_neon_params(
-  union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 16; i++) {
-    params->neon.onemask_table[i] = 1;
-  }
-  for (uint32_t i = 16; i < 32; i++) {
-    params->neon.onemask_table[i] = 0;
-  }
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 size_t xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params(
   union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -1227,12 +1170,6 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_ssse3_params(
   params->fp32_ssse3.magic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
   params->fp32_ssse3.output_min = output_min;
   params->fp32_ssse3.output_max = output_max;
-  for (uint32_t i = 0; i < 16; i++) {
-    params->fp32_ssse3.onemask_table[i] = 1;
-  }
-  for (uint32_t i = 16; i < 32; i++) {
-    params->fp32_ssse3.onemask_table[i] = 0;
-  }
   return sizeof(params->fp32_ssse3);
 }
 
@@ -1263,12 +1200,6 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_sse4_params(
     params->fp32_sse4.output_min[i] = output_min;
     params->fp32_sse4.output_max[i] = output_max;
   }
-  for (uint32_t i = 0; i < 15; i++) {
-    params->fp32_sse4.mask_table[i] = 1;
-  }
-  for (uint32_t i = 15; i < 30; i++) {
-    params->fp32_sse4.mask_table[i] = 0;
-  }
   return sizeof(params->fp32_sse4);
 }
 
@@ -1284,14 +1215,6 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_avx2_params(
   assert(scale < 256.0f);
 
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  params->fp32_avx2.shuffle_mask[0] = 0;
-  params->fp32_avx2.shuffle_mask[1] = 4;
-  params->fp32_avx2.shuffle_mask[2] = 1;
-  params->fp32_avx2.shuffle_mask[3] = 5;
-  params->fp32_avx2.shuffle_mask[4] = 2;
-  params->fp32_avx2.shuffle_mask[5] = 6;
-  params->fp32_avx2.shuffle_mask[6] = 3;
-  params->fp32_avx2.shuffle_mask[7] = 7;
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx2.output_zero_point[i] = (int16_t) output_zero_point;
   }
@@ -1305,12 +1228,6 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_avx2_params(
   for (uint32_t i = 0; i < 32; i++) {
     params->fp32_avx2.output_min[i] = output_min;
     params->fp32_avx2.output_max[i] = output_max;
-  }
-  for (uint32_t i = 0; i < 15; i++) {
-    params->fp32_avx2.mask_table[i] = 1;
-  }
-  for (uint32_t i = 15; i < 30; i++) {
-    params->fp32_avx2.mask_table[i] = 0;
   }
   return sizeof(params->fp32_avx2);
 }
@@ -1327,22 +1244,6 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_avx512_params(
   assert(scale < 256.0f);
 
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  params->fp32_avx512.shuffle_mask[0] = 0;
-  params->fp32_avx512.shuffle_mask[1] = 4;
-  params->fp32_avx512.shuffle_mask[2] = 8;
-  params->fp32_avx512.shuffle_mask[3] = 12;
-  params->fp32_avx512.shuffle_mask[4] = 1;
-  params->fp32_avx512.shuffle_mask[5] = 5;
-  params->fp32_avx512.shuffle_mask[6] = 9;
-  params->fp32_avx512.shuffle_mask[7] = 13;
-  params->fp32_avx512.shuffle_mask[8] = 2;
-  params->fp32_avx512.shuffle_mask[9] = 6;
-  params->fp32_avx512.shuffle_mask[10] = 10;
-  params->fp32_avx512.shuffle_mask[11] = 14;
-  params->fp32_avx512.shuffle_mask[12] = 3;
-  params->fp32_avx512.shuffle_mask[13] = 7;
-  params->fp32_avx512.shuffle_mask[14] = 11;
-  params->fp32_avx512.shuffle_mask[15] = 15;
   for (uint32_t i = 0; i < 32; i++) {
     params->fp32_avx512.output_zero_point[i] = (int16_t) output_zero_point;
   }
@@ -1390,12 +1291,6 @@ size_t xnn_init_qs8_avgpool_minmax_fp32_neon_params(
   params->fp32_neon.magic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
   params->fp32_neon.output_min = output_min;
   params->fp32_neon.output_max = output_max;
-  for (uint32_t i = 0; i < 15; i++) {
-    params->fp32_neon.mask_table[i] = 1;
-  }
-  for (uint32_t i = 15; i < 30; i++) {
-    params->fp32_neon.mask_table[i] = 0;
-  }
   return sizeof(params->fp32_neon);
 }
 
@@ -1915,69 +1810,25 @@ size_t xnn_init_f16_scale_fp16arith_params(
   union xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale)
 {
-  params->fp16arith.scale = scale;
-  return sizeof(params->fp16arith);
+  params->scale = scale;
+  return sizeof(params[0]);
 }
 
 size_t xnn_init_f16_f32acc_scale_scalar_params(
   union xnn_f16_f32acc_scale_params params[XNN_MIN_ELEMENTS(1)],
   float scale)
 {
-  params->scalar.scale = scale;
-  return sizeof(params->scalar);
+  params->scale = scale;
+  return sizeof(params[0]);
 }
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_f32acc_scale_avx_params(
-  union xnn_f16_f32acc_scale_params params[XNN_MIN_ELEMENTS(1)],
-  float scale)
-{
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
-  }
-  params->avx.scale = scale;
-  return sizeof(params->avx);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 size_t xnn_init_f32_scale_scalar_params(
   union xnn_f32_scale_params params[XNN_MIN_ELEMENTS(1)],
   float scale)
 {
-  params->scalar.scale = scale;
-  return sizeof(params->scalar);
+  params->scale = scale;
+  return sizeof(params[0]);
 }
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_scale_sse_params(
-  union xnn_f32_scale_params params[XNN_MIN_ELEMENTS(1)],
-  float scale)
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse.scale[i] = scale;
-  }
-  return sizeof(params->sse);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_scale_avx_params(
-  union xnn_f32_scale_params params[XNN_MIN_ELEMENTS(1)],
-  float scale)
-{
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
-  }
-  params->avx.scale = scale;
-  return sizeof(params->avx);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_f32_scaleminmax_avx_params(
@@ -1986,12 +1837,6 @@ size_t xnn_init_f32_scaleminmax_avx_params(
   float min,
   float max)
 {
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
-  }
   params->avx.scale = scale;
   params->avx.min = min;
   params->avx.max = max;
@@ -2425,18 +2270,6 @@ size_t xnn_init_f16_qb4w_minmax_avxvnni_params(
   params->avxvnni.blocksize = blocksize;
   return sizeof(params->avxvnni);
 }
-
-size_t xnn_init_f32_default_avx_params(
-  union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
-  }
-  return sizeof(params->avx);
-}
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -2460,12 +2293,6 @@ size_t xnn_init_f32_minmax_avx_params(
   for (uint32_t i = 0; i < 8; i++) {
     params->avx.min[i] = output_min;
     params->avx.max[i] = output_max;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
   }
   return sizeof(params->avx);
 }
@@ -2828,91 +2655,6 @@ size_t xnn_init_f32_qb4w_minmax_scalar_params(
   return sizeof(params->scalar);
 }
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f16_hswish_fp16arith_params(
-  union xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->fp16arith.sixth = UINT16_C(0x3155);
-  params->fp16arith.three = UINT16_C(0x4200);
-  params->fp16arith.six = UINT16_C(0x4600);
-  return sizeof(params->fp16arith);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_hswish_avx_params(
-  union xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.sixth[i] = 0x1.554000p-3f;
-    params->avx.three[i] = 3.0f;
-    params->avx.six[i] = UINT16_C(0x4600);
-  }
-  return sizeof(params->avx);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-size_t xnn_init_f32_hswish_scalar_params(
-  union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->scalar.sixth = 0x1.555556p-3f;
-  params->scalar.three = 3.0f;
-  params->scalar.six = 6.0f;
-  return sizeof(params->scalar);
-}
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_hswish_sse_params(
-  union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse.sixth[i] = 0x1.555556p-3f;
-    params->sse.half[i] = 0.5f;
-    params->sse.one[i] = 1.0f;
-  }
-  return sizeof(params->sse);
-}
-
-size_t xnn_init_f32_hswish_avx_params(
-  union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.sixth[i] = 0x1.555556p-3f;
-    params->avx.half[i] = 0.5f;
-    params->avx.one[i] = 1.0f;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
-  }
-  return sizeof(params->avx);
-}
-
-size_t xnn_init_f32_hswish_avx512_params(
-  union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->avx512.sixth = 0x1.555556p-3f;
-  params->avx512.half = 0.5f;
-  params->avx512.one = 1.0f;
-  return sizeof(params->avx512);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_f32_hswish_wasmsimd_params(
-  union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd.sixth[i] = 0x1.555556p-3f;
-    params->wasmsimd.three[i] = 3.0f;
-    params->wasmsimd.six[i] = 6.0f;
-  }
-  return sizeof(params->wasmsimd);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
 size_t xnn_init_qs8_hswish_scalar_params(
   union xnn_qs8_hswish_params params[XNN_MIN_ELEMENTS(1)],
   int16_t input_zero_point,
@@ -2974,9 +2716,6 @@ size_t xnn_init_qs8_hswish_sse2_params(
     params->sse2.input_scale_div[i] = input_scale_div;
     params->sse2.scale_ratio[i] = scale_ratio_param;
   }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2.half[i] = 0x4000;
-  }
   return sizeof(params->sse2);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -3008,10 +2747,6 @@ size_t xnn_init_qs8_hswish_wasmsimd_params(
     params->wasmsimd.scale_ratio[i] = scale_ratio_int;
     params->wasmsimd.shift_max[i] = shift_max;
     params->wasmsimd.shift_min[i] = -shift_max;
-    params->wasmsimd.max_val[i] = 0x7FFF;
-    params->wasmsimd.min_val[i] = 0x8000;
-    params->wasmsimd.half[i] = 0x4000;
-    params->wasmsimd.zero[i] = 0x0000;
   }
   return sizeof(params->wasmsimd);
 }
@@ -3084,10 +2819,6 @@ size_t xnn_init_qu8_hswish_wasmsimd_params(
     params->wasmsimd.scale_ratio[i] = scale_ratio_int;
     params->wasmsimd.shift_max[i] = shift_max;
     params->wasmsimd.shift_min[i] = -shift_max;
-    params->wasmsimd.max_val[i] = 0x7FFF;
-    params->wasmsimd.min_val[i] = 0x8000;
-    params->wasmsimd.half[i] = 0x4000;
-    params->wasmsimd.zero[i] = 0x0000;
   }
   return sizeof(params->wasmsimd);
 }
@@ -3112,387 +2843,10 @@ size_t xnn_init_qu8_hswish_sse2_params(
     params->sse2.input_scale_div[i] = input_scale_div;
     params->sse2.scale_ratio[i] = scale_ratio_param;
   }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2.half[i] = 0x4000;
-  }
   return sizeof(params->sse2);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f16_sigmoid_fp16arith_rr2_p2_params(
-  union xnn_f16_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->fp16arith_rr2_p2.magic_bias = UINT16_C(0x660F);  // 0x1.83Cp+10h
-  params->fp16arith_rr2_p2.minus_log2e = UINT16_C(0xBDC5);  // -0x1.714p+0h
-  params->fp16arith_rr2_p2.ln2_hi = UINT16_C(0x398C);  // 0x1.630p-1h
-  params->fp16arith_rr2_p2.ln2_lo = UINT16_C(0x8AF4);  // -0x1.BD0p-13h
-  params->fp16arith_rr2_p2.c2 = UINT16_C(0x37F9);  // 0x1.FE4p-2h
-  params->fp16arith_rr2_p2.c1 = UINT16_C(0xBC0E);  // -0x1.038p+0h
-  params->fp16arith_rr2_p2.denorm_cutoff = UINT16_C(0xC8DA);  // -0x1.368p+3h
-  return sizeof(params->fp16arith_rr2_p2);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_sigmoid_avx2_rr1_p2_params(
-  union xnn_f16_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx2_rr1_p2.sign_mask[i] = -0.0f;
-    params->avx2_rr1_p2.magic_bias[i] = 0x1.8000FEp23f;
-    params->avx2_rr1_p2.log2e[i] = 0x1.715476p0f;
-    params->avx2_rr1_p2.minus_ln2[i] = -0x1.62E43p-1f;
-    params->avx2_rr1_p2.c2[i] = 0x1.FF3A32p-2f;
-    params->avx2_rr1_p2.c1[i] = 0x1.039E10p+0f;
-    params->avx2_rr1_p2.one[i] = 1.0f;
-    params->avx2_rr1_p2.denorm_cutoff[i] = -0x1.368000p+3f;
-  }
-  return sizeof(params->avx2_rr1_p2);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-size_t xnn_init_f32_sigmoid_scalar_rr2_lut64_p2_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->scalar_rr2_lut64_p2.magic_bias = 0x1.800000p17f;
-  params->scalar_rr2_lut64_p2.minus_log2e = -0x1.715476p0f;
-  params->scalar_rr2_lut64_p2.ln2_hi = 0x1.630000p-1f;
-  params->scalar_rr2_lut64_p2.ln2_lo = -0x1.BD0106p-13f;
-  params->scalar_rr2_lut64_p2.c2 = 0x1.FFFF0Ap-2f;
-  params->scalar_rr2_lut64_p2.one = 1.0f;
-  params->scalar_rr2_lut64_p2.denorm_cutoff = 0x1.5D589Ep+6f;
-  return sizeof(params->scalar_rr2_lut64_p2);
-}
-
-size_t xnn_init_f32_sigmoid_scalar_rr2_lut2048_p1_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->scalar_rr2_lut2048_p1.magic_bias = 0x1.800000p12f;
-  params->scalar_rr2_lut2048_p1.minus_log2e = -0x1.715476p0f;
-  params->scalar_rr2_lut2048_p1.ln2_hi = 0x1.600000p-1f;
-  params->scalar_rr2_lut2048_p1.ln2_lo = 0x1.7217F8p-8f;
-  params->scalar_rr2_lut2048_p1.c1 = -0x1.FFFFFEp-1f;
-  params->scalar_rr2_lut2048_p1.one = 1.0f;
-  params->scalar_rr2_lut2048_p1.denorm_cutoff = 0x1.5D589Ep+6f;
-  return sizeof(params->scalar_rr2_lut2048_p1);
-}
-
-size_t xnn_init_f32_sigmoid_scalar_rr2_p5_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->scalar_rr2_p5.magic_bias = 0x1.8000FEp23f;
-  params->scalar_rr2_p5.minus_log2e = -0x1.715476p0f;
-  params->scalar_rr2_p5.ln2_hi = 0x1.62E400p-1f;
-  params->scalar_rr2_p5.ln2_lo = 0x1.7F7D1Cp-20f;
-  params->scalar_rr2_p5.c5 = -0x1.0F9F9Cp-7f;
-  params->scalar_rr2_p5.c4 = 0x1.573A1Ap-5f;
-  params->scalar_rr2_p5.c3 = -0x1.555A80p-3f;
-  params->scalar_rr2_p5.c2 = 0x1.FFFDC6p-2f;
-  params->scalar_rr2_p5.c1 = -0x1.FFFFF6p-1f;
-  params->scalar_rr2_p5.one = 1.0f;
-  params->scalar_rr2_p5.denorm_cutoff = 0x1.5D589Ep+6f;
-  return sizeof(params->scalar_rr2_p5);
-}
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f32_sigmoid_neon_rr2_lut64_p2_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->neon_rr2_lut64_p2.magic_bias = 0x1.800000p17f;
-  params->neon_rr2_lut64_p2.minus_log2e = -0x1.715476p0f;
-  params->neon_rr2_lut64_p2.ln2_hi = 0x1.630000p-1f;
-  params->neon_rr2_lut64_p2.ln2_lo = -0x1.BD0106p-13f;
-  params->neon_rr2_lut64_p2.c2 = 0x1.FFFF0Ap-2f;
-  params->neon_rr2_lut64_p2.denorm_cutoff = 0x1.5D589Ep+6f;
-  return sizeof(params->neon_rr2_lut64_p2);
-}
-
-size_t xnn_init_f32_sigmoid_neon_rr2_lut2048_p1_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->neon_rr2_lut2048_p1.magic_bias = 0x1.800000p12f;
-  params->neon_rr2_lut2048_p1.minus_log2e = -0x1.715476p0f;
-  params->neon_rr2_lut2048_p1.ln2_hi = 0x1.600000p-1f;
-  params->neon_rr2_lut2048_p1.ln2_lo = 0x1.7217F8p-8f;
-  params->neon_rr2_lut2048_p1.c1 = -0x1.FFFFFEp-1f;
-  params->neon_rr2_lut2048_p1.denorm_cutoff = 0x1.5D589Ep+6f;
-  return sizeof(params->neon_rr2_lut2048_p1);
-}
-
-size_t xnn_init_f32_sigmoid_neon_rr2_p5_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->neon_rr2_p5.magic_bias = 0x1.8000FEp23f;
-  params->neon_rr2_p5.minus_log2e = -0x1.715476p0f;
-  params->neon_rr2_p5.ln2_hi = 0x1.62E400p-1f;
-  params->neon_rr2_p5.ln2_lo = 0x1.7F7D1Cp-20f;
-  params->neon_rr2_p5.c5 = -0x1.0F9F9Cp-7f;
-  params->neon_rr2_p5.c4 = 0x1.573A1Ap-5f;
-  params->neon_rr2_p5.c3 = -0x1.555A80p-3f;
-  params->neon_rr2_p5.c2 = 0x1.FFFDC6p-2f;
-  params->neon_rr2_p5.c1 = -0x1.FFFFF6p-1f;
-  params->neon_rr2_p5.denorm_cutoff = 0x1.5D589Ep+6f;
-  return sizeof(params->neon_rr2_p5);
-}
-
-size_t xnn_init_f32_sigmoid_neonfma_rr1_lut2048_p1_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->neonfma_rr1_lut2048_p1.magic_bias = 0x1.800000p12f;
-  params->neonfma_rr1_lut2048_p1.minus_log2e = -0x1.715476p0f;
-  params->neonfma_rr1_lut2048_p1.ln2 = 0x1.62E430p-1f;
-  params->neonfma_rr1_lut2048_p1.c1 = -0x1.FFFFFEp-1f;
-  params->neonfma_rr1_lut2048_p1.denorm_cutoff = 0x1.5D589Ep+6f;
-  return sizeof(params->neonfma_rr1_lut2048_p1);
-}
-
-size_t xnn_init_f32_sigmoid_neonfma_rr1_lut64_p2_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->neonfma_rr1_lut64_p2.magic_bias = 0x1.800000p17f;
-  params->neonfma_rr1_lut64_p2.minus_log2e = -0x1.715476p0f;
-  params->neonfma_rr1_lut64_p2.ln2 = 0x1.62E430p-1f;
-  params->neonfma_rr1_lut64_p2.c2 = 0x1.FFFF0Ap-2f;
-  params->neonfma_rr1_lut64_p2.denorm_cutoff = 0x1.5D589Ep+6f;
-  return sizeof(params->neonfma_rr1_lut64_p2);
-}
-
-size_t xnn_init_f32_sigmoid_neonfma_rr1_p5_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->neonfma_rr1_p5.magic_bias = 0x1.8000FEp23f;
-  params->neonfma_rr1_p5.minus_log2e = -0x1.715476p0f;
-  params->neonfma_rr1_p5.ln2 = 0x1.62E430p-1f;
-  params->neonfma_rr1_p5.c5 = -0x1.0F9F9Cp-7f;
-  params->neonfma_rr1_p5.c4 = 0x1.573A1Ap-5f;
-  params->neonfma_rr1_p5.c3 = -0x1.555A80p-3f;
-  params->neonfma_rr1_p5.c2 = 0x1.FFFDC6p-2f;
-  params->neonfma_rr1_p5.c1 = -0x1.FFFFF6p-1f;
-  params->neonfma_rr1_p5.denorm_cutoff = 0x1.5D589Ep+6f;
-  return sizeof(params->neonfma_rr1_p5);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_sigmoid_sse2_rr2_lut64_p2_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2_rr2_lut64_p2.sign_mask[i] = -0.0f;
-    params->sse2_rr2_lut64_p2.magic_bias[i] = 0x1.800000p17f;
-    params->sse2_rr2_lut64_p2.log2e[i] = 0x1.715476p0f;
-    params->sse2_rr2_lut64_p2.index_mask[i] = UINT32_C(0x3F);
-    params->sse2_rr2_lut64_p2.minus_ln2_hi[i] = -0x1.630000p-1f;
-    params->sse2_rr2_lut64_p2.minus_ln2_lo[i] = 0x1.BD0106p-13f;
-    params->sse2_rr2_lut64_p2.c2[i] = 0x1.FFFF0Ap-2f;
-    params->sse2_rr2_lut64_p2.one[i] = 1.0f;
-    params->sse2_rr2_lut64_p2.denorm_cutoff[i] = -0x1.5D589Ep+6f;
-  }
-  return sizeof(params->sse2_rr2_lut64_p2);
-}
-
-size_t xnn_init_f32_sigmoid_sse2_rr2_p5_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2_rr2_p5.sign_mask[i] = -0.0f;
-    params->sse2_rr2_p5.magic_bias[i] = 0x1.8000FEp23f;
-    params->sse2_rr2_p5.log2e[i] = 0x1.715476p0f;
-    params->sse2_rr2_p5.minus_ln2_hi[i] = -0x1.62E400p-1f;
-    params->sse2_rr2_p5.minus_ln2_lo[i] = -0x1.7F7D1Cp-20f;
-    params->sse2_rr2_p5.c5[i] = 0x1.0F9F9Cp-7f;
-    params->sse2_rr2_p5.c4[i] = 0x1.573A1Ap-5f;
-    params->sse2_rr2_p5.c3[i] = 0x1.555A80p-3f;
-    params->sse2_rr2_p5.c2[i] = 0x1.FFFDC6p-2f;
-    params->sse2_rr2_p5.c1[i] = 0x1.FFFFF6p-1f;
-    params->sse2_rr2_p5.one[i] = 1.0f;
-    params->sse2_rr2_p5.denorm_cutoff[i] = -0x1.5D589Ep+6f;
-  }
-  return sizeof(params->sse2_rr2_p5);
-}
-
-size_t xnn_init_f32_sigmoid_avx_rr2_p5_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx_rr2_p5.sign_mask[i] = -0.0f;
-    params->avx_rr2_p5.magic_bias[i] = 0x1.8000FEp23f;
-    params->avx_rr2_p5.log2e[i] = 0x1.715476p0f;
-    params->avx_rr2_p5.minus_ln2_hi[i] = -0x1.62E400p-1f;
-    params->avx_rr2_p5.minus_ln2_lo[i] = -0x1.7F7D1Cp-20f;
-    params->avx_rr2_p5.c5[i] = 0x1.0F9F9Cp-7f;
-    params->avx_rr2_p5.c4[i] = 0x1.573A1Ap-5f;
-    params->avx_rr2_p5.c3[i] = 0x1.555A80p-3f;
-    params->avx_rr2_p5.c2[i] = 0x1.FFFDC6p-2f;
-    params->avx_rr2_p5.c1[i] = 0x1.FFFFF6p-1f;
-    params->avx_rr2_p5.one[i] = 1.0f;
-    params->avx_rr2_p5.two[i] = 2.0f;
-    params->avx_rr2_p5.denorm_cutoff[i] = -0x1.5D589Ep+6f;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx_rr2_p5.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx_rr2_p5.mask_table[i] = 0;
-  }
-  return sizeof(params->avx_rr2_p5);
-}
-
-size_t xnn_init_f32_sigmoid_avx2_rr1_p5_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx2_rr1_p5.sign_mask[i] = -0.0f;
-    params->avx2_rr1_p5.magic_bias[i] = 0x1.8000FEp23f;
-    params->avx2_rr1_p5.log2e[i] = 0x1.715476p0f;
-    params->avx2_rr1_p5.minus_ln2[i] = -0x1.62E430p-1f;
-    params->avx2_rr1_p5.c5[i] = 0x1.0F9F9Cp-7f;
-    params->avx2_rr1_p5.c4[i] = 0x1.573A1Ap-5f;
-    params->avx2_rr1_p5.c3[i] = 0x1.555A80p-3f;
-    params->avx2_rr1_p5.c2[i] = 0x1.FFFDC6p-2f;
-    params->avx2_rr1_p5.c1[i] = 0x1.FFFFF6p-1f;
-    params->avx2_rr1_p5.one[i] = 1.0f;
-    params->avx2_rr1_p5.denorm_cutoff[i] = -0x1.5D589Ep+6f;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx2_rr1_p5.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx2_rr1_p5.mask_table[i] = 0;
-  }
-  return sizeof(params->avx2_rr1_p5);
-}
-
-size_t xnn_init_f32_sigmoid_avx512_rr1_lut16_p3_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->avx512_rr1_lut16_p3.sign_mask = UINT32_C(0x80000000);
-  params->avx512_rr1_lut16_p3.magic_bias = 0x1.800000p19f;
-  params->avx512_rr1_lut16_p3.log2e = 0x1.715476p0f;
-  params->avx512_rr1_lut16_p3.minus_ln2 = -0x1.62E430p-1f;
-  params->avx512_rr1_lut16_p3.c3 = 0x1.55559Ap-3f;
-  params->avx512_rr1_lut16_p3.c2 = 0x1.00021Ep-1f;
-  params->avx512_rr1_lut16_p3.one = 1.0f;
-  params->avx512_rr1_lut16_p3.table[ 0] = 0x1.000000p+0f;
-  params->avx512_rr1_lut16_p3.table[ 1] = 0x1.0B5586p+0f;
-  params->avx512_rr1_lut16_p3.table[ 2] = 0x1.172B84p+0f;
-  params->avx512_rr1_lut16_p3.table[ 3] = 0x1.2387A6p+0f;
-  params->avx512_rr1_lut16_p3.table[ 4] = 0x1.306FE0p+0f;
-  params->avx512_rr1_lut16_p3.table[ 5] = 0x1.3DEA64p+0f;
-  params->avx512_rr1_lut16_p3.table[ 6] = 0x1.4BFDAEp+0f;
-  params->avx512_rr1_lut16_p3.table[ 7] = 0x1.5AB07Ep+0f;
-  params->avx512_rr1_lut16_p3.table[ 8] = 0x1.6A09E6p+0f;
-  params->avx512_rr1_lut16_p3.table[ 9] = 0x1.7A1148p+0f;
-  params->avx512_rr1_lut16_p3.table[10] = 0x1.8ACE54p+0f;
-  params->avx512_rr1_lut16_p3.table[11] = 0x1.9C4918p+0f;
-  params->avx512_rr1_lut16_p3.table[12] = 0x1.AE89FAp+0f;
-  params->avx512_rr1_lut16_p3.table[13] = 0x1.C199BEp+0f;
-  params->avx512_rr1_lut16_p3.table[14] = 0x1.D5818Ep+0f;
-  params->avx512_rr1_lut16_p3.table[15] = 0x1.EA4AFAp+0f;
-  return sizeof(params->avx512_rr1_lut16_p3);
-}
-
-size_t xnn_init_f32_sigmoid_avx512_rr2_lut32_p2_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->avx512_rr2_lut32_p2.sign_mask = UINT32_C(0x80000000);
-  params->avx512_rr2_lut32_p2.magic_bias = 0x1.800000p18f;
-  params->avx512_rr2_lut32_p2.log2e = 0x1.715476p0f;
-  params->avx512_rr2_lut32_p2.minus_ln2_hi = -0x1.62E430p-1f;
-  params->avx512_rr2_lut32_p2.minus_ln2_lo = 0x1.05C61p-29f;
-  params->avx512_rr2_lut32_p2.c2 = 0x1.000000p-1f;
-  params->avx512_rr2_lut32_p2.c1 = 0x1.0000F6p-0f;
-  params->avx512_rr2_lut32_p2.one = 1.0f;
-
-  params->avx512_rr2_lut32_p2.table_lo[ 0] = 0x1.000000p+0f;
-  params->avx512_rr2_lut32_p2.table_lo[ 1] = 0x1.059B0Ep+0f;
-  params->avx512_rr2_lut32_p2.table_lo[ 2] = 0x1.0B5586p+0f;
-  params->avx512_rr2_lut32_p2.table_lo[ 3] = 0x1.11301Ep+0f;
-  params->avx512_rr2_lut32_p2.table_lo[ 4] = 0x1.172B84p+0f;
-  params->avx512_rr2_lut32_p2.table_lo[ 5] = 0x1.1D4874p+0f;
-  params->avx512_rr2_lut32_p2.table_lo[ 6] = 0x1.2387A6p+0f;
-  params->avx512_rr2_lut32_p2.table_lo[ 7] = 0x1.29E9E0p+0f;
-  params->avx512_rr2_lut32_p2.table_lo[ 8] = 0x1.306FE0p+0f;
-  params->avx512_rr2_lut32_p2.table_lo[ 9] = 0x1.371A74p+0f;
-  params->avx512_rr2_lut32_p2.table_lo[10] = 0x1.3DEA64p+0f;
-  params->avx512_rr2_lut32_p2.table_lo[11] = 0x1.44E086p+0f;
-  params->avx512_rr2_lut32_p2.table_lo[12] = 0x1.4BFDAEp+0f;
-  params->avx512_rr2_lut32_p2.table_lo[13] = 0x1.5342B6p+0f;
-  params->avx512_rr2_lut32_p2.table_lo[14] = 0x1.5AB07Ep+0f;
-  params->avx512_rr2_lut32_p2.table_lo[15] = 0x1.6247ECp+0f;
-
-  params->avx512_rr2_lut32_p2.table_hi[ 0] = 0x1.6A09E6p+0f;
-  params->avx512_rr2_lut32_p2.table_hi[ 1] = 0x1.71F75Ep+0f;
-  params->avx512_rr2_lut32_p2.table_hi[ 2] = 0x1.7A1148p+0f;
-  params->avx512_rr2_lut32_p2.table_hi[ 3] = 0x1.82589Ap+0f;
-  params->avx512_rr2_lut32_p2.table_hi[ 4] = 0x1.8ACE54p+0f;
-  params->avx512_rr2_lut32_p2.table_hi[ 5] = 0x1.93737Cp+0f;
-  params->avx512_rr2_lut32_p2.table_hi[ 6] = 0x1.9C4918p+0f;
-  params->avx512_rr2_lut32_p2.table_hi[ 7] = 0x1.A5503Cp+0f;
-  params->avx512_rr2_lut32_p2.table_hi[ 8] = 0x1.AE89FAp+0f;
-  params->avx512_rr2_lut32_p2.table_hi[ 9] = 0x1.B7F770p+0f;
-  params->avx512_rr2_lut32_p2.table_hi[10] = 0x1.C199BEp+0f;
-  params->avx512_rr2_lut32_p2.table_hi[11] = 0x1.CB720Ep+0f;
-  params->avx512_rr2_lut32_p2.table_hi[12] = 0x1.D5818Ep+0f;
-  params->avx512_rr2_lut32_p2.table_hi[13] = 0x1.DFC974p+0f;
-  params->avx512_rr2_lut32_p2.table_hi[14] = 0x1.EA4AFAp+0f;
-  params->avx512_rr2_lut32_p2.table_hi[15] = 0x1.F50766p+0f;
-  return sizeof(params->avx512_rr2_lut32_p2);
-}
-
-size_t xnn_init_f32_sigmoid_avx512_rr1_p5_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->avx512_rr1_p5.sign_mask = UINT32_C(0x80000000);
-  params->avx512_rr1_p5.log2e = 0x1.715476p0f;
-  params->avx512_rr1_p5.minus_ln2 = -0x1.62E430p-1f;
-  params->avx512_rr1_p5.c5 = 0x1.0F9F9Cp-7f;
-  params->avx512_rr1_p5.c4 = 0x1.573A1Ap-5f;
-  params->avx512_rr1_p5.c3 = 0x1.555A80p-3f;
-  params->avx512_rr1_p5.c2 = 0x1.FFFDC6p-2f;
-  params->avx512_rr1_p5.c1 = 0x1.FFFFF6p-1f;
-  params->avx512_rr1_p5.one = 1.0f;
-  return sizeof(params->avx512_rr1_p5);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_f32_sigmoid_wasmsimd_rr2_lut64_p2_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd_rr2_lut64_p2.magic_bias[i] = 0x1.800000p17f;
-    params->wasmsimd_rr2_lut64_p2.minus_log2e[i] = -0x1.715476p0f;
-    params->wasmsimd_rr2_lut64_p2.index_mask[i] = UINT32_C(0x3F);
-    params->wasmsimd_rr2_lut64_p2.ln2_hi[i] = 0x1.630000p-1f;
-    params->wasmsimd_rr2_lut64_p2.ln2_lo[i] = -0x1.BD0106p-13f;
-    params->wasmsimd_rr2_lut64_p2.c2[i] = 0x1.FFFF0Ap-2f;
-    params->wasmsimd_rr2_lut64_p2.one[i] = 1.0f;
-    params->wasmsimd_rr2_lut64_p2.denorm_cutoff[i] = 0x1.5D589Ep+6f;
-  }
-  return sizeof(params->wasmsimd_rr2_lut64_p2);
-}
-
-size_t xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params(
-  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd_rr2_p5.magic_bias[i] = 0x1.8000FEp23f;
-    params->wasmsimd_rr2_p5.minus_log2e[i] = -0x1.715476p+0f;
-    params->wasmsimd_rr2_p5.ln2_hi[i] = 0x1.62E400p-1f;
-    params->wasmsimd_rr2_p5.ln2_lo[i] = 0x1.7F7D1Cp-20f;
-    params->wasmsimd_rr2_p5.c5[i] = -0x1.0F9F9Cp-7f;
-    params->wasmsimd_rr2_p5.c4[i] = 0x1.573A1Ap-5f;
-    params->wasmsimd_rr2_p5.c3[i] = -0x1.555A80p-3f;
-    params->wasmsimd_rr2_p5.c2[i] = 0x1.FFFDC6p-2f;
-    params->wasmsimd_rr2_p5.c1[i] = -0x1.FFFFF6p-1f;
-    params->wasmsimd_rr2_p5.one[i] = 1.0f;
-    params->wasmsimd_rr2_p5.denorm_cutoff[i] = 0x1.5D589Ep+6f;
-  }
-  return sizeof(params->wasmsimd_rr2_p5);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_f16_tanh_avx_expm1minus_rr1_p3h2_params(
@@ -3676,843 +3030,45 @@ size_t xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params(
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_bf16_abs_neon_params(
-  union xnn_bf16_abs_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->neon.nonsign_mask[i] = UINT16_C(0x7FFF);
-  }
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_abs_sse_params(
-  union xnn_f16_abs_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse.nonsign_mask[i] = UINT16_C(0x7FFF);
-  }
-  return sizeof(params->sse);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_neg_sse_params(
-  union xnn_f16_neg_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse.sign_mask[i] = UINT16_C(0x8000);
-  }
-  return sizeof(params->sse);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_rnd_sse2_params(
-  union xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2.sign_mask[i] = -0.0f;
-    params->sse2.one[i] = 1.0f;
-  }
-  return sizeof(params->sse2);
-}
-
-size_t xnn_init_f32_rnd_avx_params(
-  union xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
-  }
-  return sizeof(params->avx);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f16_elu_fp16arith_rr1_p3_params(
+size_t xnn_init_f16_elu_scalar_params(
   union xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t prescale,
   uint16_t alpha,
   uint16_t beta)
 {
-  params->fp16arith_rr1_p3.prescale = prescale;
-  params->fp16arith_rr1_p3.sat_cutoff = UINT16_C(0xC829);  // -0x1.0A4p+3h;
-  params->fp16arith_rr1_p3.magic_bias = UINT16_C(0x660F);  // 0x1.83Cp+10h
-  params->fp16arith_rr1_p3.log2e = UINT16_C(0x3DC5);  // 0x1.714p+0h
-  params->fp16arith_rr1_p3.minus_ln2 = UINT16_C(0xB98C);  // -0x1.62E430p-1h
-  params->fp16arith_rr1_p3.c3 = UINT16_C(0x315B);  // 0x1.56Cp-3h
-  params->fp16arith_rr1_p3.c2 = UINT16_C(0x3808);  // 0x1.020p-1h
-  params->fp16arith_rr1_p3.minus_alpha = alpha ^ UINT16_C(0x8000);
-  params->fp16arith_rr1_p3.beta = beta;
-  return sizeof(params->fp16arith_rr1_p3);
+  params->scalar.prescale = prescale;
+  params->scalar.minus_alpha = alpha ^ UINT16_C(0x8000);
+  params->scalar.beta = beta;
+  return sizeof(params->scalar);
 }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_elu_avx2_rr1_p3_params(
+size_t xnn_init_f16_elu_avx2_params(
   union xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t prescale,
   uint16_t alpha,
   uint16_t beta)
 {
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx2_rr1_p3.prescale[i] = fp16_ieee_to_fp32_value(prescale);
-    params->avx2_rr1_p3.sat_cutoff[i] = -0x1.0A4000p+3f;
-    params->avx2_rr1_p3.magic_bias[i] = 0x1.8000FEp23f;
-    params->avx2_rr1_p3.log2e[i] = 0x1.715476p+0f;
-    params->avx2_rr1_p3.minus_ln2[i] = -0x1.62E430p-1f;
-    params->avx2_rr1_p3.c3[i] = 0x1.5554DCp-3f;
-    params->avx2_rr1_p3.c2[i] = 0x1.01EBB2p-1f;
-    params->avx2_rr1_p3.c1[i] = 0x1.0002F2p+0f;
-    params->avx2_rr1_p3.alpha[i] = fp16_ieee_to_fp32_value(alpha);
-    params->avx2_rr1_p3.beta[i] = fp16_ieee_to_fp32_value(beta);
-  }
-  return sizeof(params->avx2_rr1_p3);
+  params->avx2.prescale = fp16_ieee_to_fp32_value(prescale);
+  params->avx2.alpha = fp16_ieee_to_fp32_value(alpha);
+  params->avx2.beta = fp16_ieee_to_fp32_value(beta);
+  return sizeof(params->avx2);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-size_t xnn_init_f32_elu_scalar_rr2_lut16_p3_params(
+size_t xnn_init_f32_elu_scalar_params(
   union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
   float prescale,
   float alpha,
   float beta)
 {
-  params->scalar_rr2_lut16_p3.prescale = prescale;
-  params->scalar_rr2_lut16_p3.alpha = alpha;
-  params->scalar_rr2_lut16_p3.beta = beta;
-  params->scalar_rr2_lut16_p3.sat_cutoff = -0x1.154246p+4f;
-  params->scalar_rr2_lut16_p3.magic_bias = 0x1.800000p19f;
-  params->scalar_rr2_lut16_p3.log2e = 0x1.715476p+0f;
-  params->scalar_rr2_lut16_p3.minus_ln2_hi = -0x1.62E400p-1f;
-  params->scalar_rr2_lut16_p3.minus_ln2_lo = -0x1.7F7D1Cp-20f;
-  params->scalar_rr2_lut16_p3.c3 = 0x1.55561Cp-3f;
-  params->scalar_rr2_lut16_p3.c2 = 0x1.0001ECp-1f;
-  params->scalar_rr2_lut16_p3.one = 1.0f;
-  return sizeof(params->scalar_rr2_lut16_p3);
+  params->scalar.prescale = prescale;
+  params->scalar.alpha = alpha;
+  params->scalar.beta = beta;
+  return sizeof(params->scalar);
 }
 
-size_t xnn_init_f32_elu_scalar_rr2_p6_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  params->scalar_rr2_p6.prescale = prescale;
-  params->scalar_rr2_p6.alpha = alpha;
-  params->scalar_rr2_p6.beta = beta;
-  params->scalar_rr2_p6.sat_cutoff = -0x1.154246p+4f;
-  params->scalar_rr2_p6.magic_bias = 0x1.8000FEp23f;
-  params->scalar_rr2_p6.log2e = 0x1.715476p+0f;
-  params->scalar_rr2_p6.minus_ln2_hi = -0x1.62E440p-1f;
-  params->scalar_rr2_p6.minus_ln2_lo = 0x1.0105C6p-21f;
-  params->scalar_rr2_p6.c6 = 0x1.6b7338p-10f;
-  params->scalar_rr2_p6.c5 = 0x1.12278Ep-7f;
-  params->scalar_rr2_p6.c4 = 0x1.555716p-5f;
-  params->scalar_rr2_p6.c3 = 0x1.5554B0p-3f;
-  params->scalar_rr2_p6.c2 = 0x1.FFFFFEp-2f;
-  params->scalar_rr2_p6.one = 1.0f;
-  return sizeof(params->scalar_rr2_p6);
-}
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f32_elu_neon_rr2_lut16_p3_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  params->neon_rr2_lut16_p3.prescale = prescale;
-  params->neon_rr2_lut16_p3.alpha = alpha;
-  params->neon_rr2_lut16_p3.beta = beta;
-  params->neon_rr2_lut16_p3.sat_cutoff = -0x1.154246p+4f;
-  params->neon_rr2_lut16_p3.magic_bias = 0x1.800000p19f;
-  params->neon_rr2_lut16_p3.log2e = 0x1.715476p+0f;
-  params->neon_rr2_lut16_p3.minus_ln2_hi = -0x1.62E400p-1f;
-  params->neon_rr2_lut16_p3.minus_ln2_lo = -0x1.7F7D1Cp-20f;
-  params->neon_rr2_lut16_p3.c3 = 0x1.55561Cp-3f;
-  params->neon_rr2_lut16_p3.c2 = 0x1.0001ECp-1f;
-  return sizeof(params->neon_rr2_lut16_p3);
-}
-
-size_t xnn_init_f32_elu_neon_rr2_p6_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  params->neon_rr2_p6.prescale = prescale;
-  params->neon_rr2_p6.alpha = alpha;
-  params->neon_rr2_p6.beta = beta;
-  params->neon_rr2_p6.sat_cutoff = -0x1.154246p+4f;
-  params->neon_rr2_p6.magic_bias = 0x1.8000FEp23f;
-  params->neon_rr2_p6.log2e = 0x1.715476p+0f;
-  params->neon_rr2_p6.minus_ln2_hi = -0x1.62E440p-1f;
-  params->neon_rr2_p6.minus_ln2_lo = 0x1.0105C6p-21f;
-  params->neon_rr2_p6.c6 = 0x1.6b7338p-10f;
-  params->neon_rr2_p6.c5 = 0x1.12278Ep-7f;
-  params->neon_rr2_p6.c4 = 0x1.555716p-5f;
-  params->neon_rr2_p6.c3 = 0x1.5554B0p-3f;
-  params->neon_rr2_p6.c2 = 0x1.FFFFFEp-2f;
-  return sizeof(params->neon_rr2_p6);
-}
-
-size_t xnn_init_f32_elu_neonfma_rr1_lut16_p3_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  params->neonfma_rr1_lut16_p3.prescale = prescale;
-  params->neonfma_rr1_lut16_p3.alpha = alpha;
-  params->neonfma_rr1_lut16_p3.beta = beta;
-  params->neonfma_rr1_lut16_p3.sat_cutoff = -0x1.154246p+4f;
-  params->neonfma_rr1_lut16_p3.magic_bias = 0x1.800000p19f;
-  params->neonfma_rr1_lut16_p3.log2e = 0x1.715476p+0f;
-  params->neonfma_rr1_lut16_p3.minus_ln2 = -0x1.62E430p-1f;
-  params->neonfma_rr1_lut16_p3.c3 = 0x1.55561Cp-3f;
-  params->neonfma_rr1_lut16_p3.c2 = 0x1.0001ECp-1f;
-  return sizeof(params->neonfma_rr1_lut16_p3);
-}
-
-size_t xnn_init_f32_elu_neonfma_rr1_p6_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  params->neonfma_rr1_p6.prescale = prescale;
-  params->neonfma_rr1_p6.alpha = alpha;
-  params->neonfma_rr1_p6.beta = beta;
-  params->neonfma_rr1_p6.sat_cutoff = -0x1.154246p+4f;
-  params->neonfma_rr1_p6.magic_bias = 0x1.8000FEp23f;
-  params->neonfma_rr1_p6.log2e = 0x1.715476p+0f;
-  params->neonfma_rr1_p6.minus_ln2 = -0x1.62E430p-1f;
-  params->neonfma_rr1_p6.c6 = 0x1.6b7338p-10f;
-  params->neonfma_rr1_p6.c5 = 0x1.12278Ep-7f;
-  params->neonfma_rr1_p6.c4 = 0x1.555716p-5f;
-  params->neonfma_rr1_p6.c3 = 0x1.5554B0p-3f;
-  params->neonfma_rr1_p6.c2 = 0x1.FFFFFEp-2f;
-  return sizeof(params->neonfma_rr1_p6);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_elu_sse2_rr2_lut16_p3_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2_rr2_lut16_p3.prescale[i] = prescale;
-    params->sse2_rr2_lut16_p3.alpha[i] = alpha;
-    params->sse2_rr2_lut16_p3.beta[i] = beta;
-    params->sse2_rr2_lut16_p3.sat_cutoff[i] = -0x1.154246p+4f;
-    params->sse2_rr2_lut16_p3.magic_bias[i] = 0x1.800000p19f;
-    params->sse2_rr2_lut16_p3.log2e[i] = 0x1.715476p+0f;
-    params->sse2_rr2_lut16_p3.index_mask[i] = UINT32_C(0xF);
-    params->sse2_rr2_lut16_p3.minus_ln2_hi[i] = -0x1.62E400p-1f;
-    params->sse2_rr2_lut16_p3.minus_ln2_lo[i] = -0x1.7F7D1Cp-20f;
-    params->sse2_rr2_lut16_p3.c3[i] = 0x1.55561Cp-3f;
-    params->sse2_rr2_lut16_p3.c2[i] = 0x1.0001ECp-1f;
-    params->sse2_rr2_lut16_p3.one[i] = 1.0f;
-  }
-  return sizeof(params->sse2_rr2_lut16_p3);
-}
-
-size_t xnn_init_f32_elu_sse2_rr2_p6_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2_rr2_p6.prescale[i] = prescale;
-    params->sse2_rr2_p6.alpha[i] = alpha;
-    params->sse2_rr2_p6.beta[i] = beta;
-    params->sse2_rr2_p6.sat_cutoff[i] = -0x1.154246p+4f;
-    params->sse2_rr2_p6.magic_bias[i] = 0x1.8000FEp23f;
-    params->sse2_rr2_p6.log2e[i] = 0x1.715476p+0f;
-    params->sse2_rr2_p6.minus_ln2_hi[i] = -0x1.62E440p-1f;
-    params->sse2_rr2_p6.minus_ln2_lo[i] = 0x1.0105C6p-21f;
-    params->sse2_rr2_p6.c6[i] = 0x1.6b7338p-10f;
-    params->sse2_rr2_p6.c5[i] = 0x1.12278Ep-7f;
-    params->sse2_rr2_p6.c4[i] = 0x1.555716p-5f;
-    params->sse2_rr2_p6.c3[i] = 0x1.5554B0p-3f;
-    params->sse2_rr2_p6.c2[i] = 0x1.FFFFFEp-2f;
-    params->sse2_rr2_p6.one[i] = 1.0f;
-  }
-  return sizeof(params->sse2_rr2_p6);
-}
-
-size_t xnn_init_f32_elu_avx_rr2_lut16_p3_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx_rr2_lut16_p3.prescale[i] = prescale;
-    params->avx_rr2_lut16_p3.alpha[i] = alpha;
-    params->avx_rr2_lut16_p3.beta[i] = beta;
-    params->avx_rr2_lut16_p3.sat_cutoff[i] = -0x1.154246p+4f;
-    params->avx_rr2_lut16_p3.magic_bias[i] = 0x1.800000p19f;
-    params->avx_rr2_lut16_p3.log2e[i] = 0x1.715476p+0f;
-    params->avx_rr2_lut16_p3.index_mask[i] = UINT32_C(0xF);
-    params->avx_rr2_lut16_p3.minus_ln2_hi[i] = -0x1.62E400p-1f;
-    params->avx_rr2_lut16_p3.minus_ln2_lo[i] = -0x1.7F7D1Cp-20f;
-    params->avx_rr2_lut16_p3.c3[i] = 0x1.55561Cp-3f;
-    params->avx_rr2_lut16_p3.c2[i] = 0x1.0001ECp-1f;
-    params->avx_rr2_lut16_p3.one[i] = 1.0f;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx_rr2_lut16_p3.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx_rr2_lut16_p3.mask_table[i] = 0;
-  }
-  return sizeof(params->avx_rr2_lut16_p3);
-}
-
-size_t xnn_init_f32_elu_avx_rr2_lut4_p4_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx_rr2_lut4_p4.prescale[i] = prescale;
-    params->avx_rr2_lut4_p4.alpha[i] = alpha;
-    params->avx_rr2_lut4_p4.beta[i] = beta;
-    params->avx_rr2_lut4_p4.sat_cutoff[i] = -0x1.154246p+4f;
-    params->avx_rr2_lut4_p4.magic_bias[i] = 0x1.8003F8p21f;
-    params->avx_rr2_lut4_p4.log2e[i] = 0x1.715476p+0f;
-    params->avx_rr2_lut4_p4.index_mask[i] = UINT32_C(0x3);
-  }
-  params->avx_rr2_lut4_p4.table[0] = 0x1.000000p+0f;
-  params->avx_rr2_lut4_p4.table[1] = 0x1.306FE0p+0f;
-  params->avx_rr2_lut4_p4.table[2] = 0x1.6A09E6p+0f;
-  params->avx_rr2_lut4_p4.table[3] = 0x1.AE89FAp+0f;
-  params->avx_rr2_lut4_p4.table[4] = 0x1.000000p+0f;
-  params->avx_rr2_lut4_p4.table[5] = 0x1.306FE0p+0f;
-  params->avx_rr2_lut4_p4.table[6] = 0x1.6A09E6p+0f;
-  params->avx_rr2_lut4_p4.table[7] = 0x1.AE89FAp+0f;
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx_rr2_lut4_p4.minus_ln2_hi[i] = -0x1.62E400p-1f;
-    params->avx_rr2_lut4_p4.minus_ln2_lo[i] = -0x1.7F7D1Cp-20f;
-    params->avx_rr2_lut4_p4.c4[i] = 0x1.554F9Ap-5f;
-    params->avx_rr2_lut4_p4.c3[i] = 0x1.557082p-3f;
-    params->avx_rr2_lut4_p4.c2[i] = 0x1.000002p-1f;
-    params->avx_rr2_lut4_p4.one[i] = 1.0f;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx_rr2_lut4_p4.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx_rr2_lut4_p4.mask_table[i] = 0;
-  }
-  return sizeof(params->avx_rr2_lut4_p4);
-}
-
-size_t xnn_init_f32_elu_avx_rr2_p6_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx_rr2_p6.prescale[i] = prescale;
-    params->avx_rr2_p6.alpha[i] = alpha;
-    params->avx_rr2_p6.beta[i] = beta;
-    params->avx_rr2_p6.sat_cutoff[i] = -0x1.154246p+4f;
-    params->avx_rr2_p6.magic_bias[i] = 0x1.8000FEp23f;
-    params->avx_rr2_p6.log2e[i] = 0x1.715476p+0f;
-    params->avx_rr2_p6.minus_ln2_hi[i] = -0x1.62E440p-1f;
-    params->avx_rr2_p6.minus_ln2_lo[i] = 0x1.0105C6p-21f;
-    params->avx_rr2_p6.c6[i] = 0x1.6b7338p-10f;
-    params->avx_rr2_p6.c5[i] = 0x1.12278Ep-7f;
-    params->avx_rr2_p6.c4[i] = 0x1.555716p-5f;
-    params->avx_rr2_p6.c3[i] = 0x1.5554B0p-3f;
-    params->avx_rr2_p6.c2[i] = 0x1.FFFFFEp-2f;
-    params->avx_rr2_p6.one[i] = 1.0f;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx_rr2_p6.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx_rr2_p6.mask_table[i] = 0;
-  }
-  return sizeof(params->avx_rr2_p6);
-}
-
-size_t xnn_init_f32_elu_avx2_rr1_lut16_p3_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx2_rr1_lut16_p3.prescale[i] = prescale;
-    params->avx2_rr1_lut16_p3.alpha[i] = alpha;
-    params->avx2_rr1_lut16_p3.beta[i] = beta;
-    params->avx2_rr1_lut16_p3.sat_cutoff[i] = -0x1.154246p+4f;
-    params->avx2_rr1_lut16_p3.magic_bias[i] = 0x1.800000p19f;
-    params->avx2_rr1_lut16_p3.log2e[i] = 0x1.715476p+0f;
-    params->avx2_rr1_lut16_p3.index_mask[i] = UINT32_C(0xF);
-    params->avx2_rr1_lut16_p3.minus_ln2[i] = -0x1.62E430p-1f;
-    params->avx2_rr1_lut16_p3.c3[i] = 0x1.55561Cp-3f;
-    params->avx2_rr1_lut16_p3.c2[i] = 0x1.0001ECp-1f;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx2_rr1_lut16_p3.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx2_rr1_lut16_p3.mask_table[i] = 0;
-  }
-  return sizeof(params->avx2_rr1_lut16_p3);
-}
-
-size_t xnn_init_f32_elu_avx2_rr1_lut8_p4_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx2_rr1_lut8_p4.prescale[i] = prescale;
-    params->avx2_rr1_lut8_p4.alpha[i] = alpha;
-    params->avx2_rr1_lut8_p4.beta[i] = beta;
-    params->avx2_rr1_lut8_p4.sat_cutoff[i] = -0x1.154246p+4f;
-    params->avx2_rr1_lut8_p4.magic_bias[i] = 0x1.800000p20f;
-    params->avx2_rr1_lut8_p4.log2e[i] = 0x1.715476p+0f;
-  }
-  params->avx2_rr1_lut8_p4.table[0] = UINT32_C(0x3F800000);
-  params->avx2_rr1_lut8_p4.table[1] = UINT32_C(0x3F7B95C2);
-  params->avx2_rr1_lut8_p4.table[2] = UINT32_C(0x3F7837F0);
-  params->avx2_rr1_lut8_p4.table[3] = UINT32_C(0x3F75FED7);
-  params->avx2_rr1_lut8_p4.table[4] = UINT32_C(0x3F7504F3);
-  params->avx2_rr1_lut8_p4.table[5] = UINT32_C(0x3F75672A);
-  params->avx2_rr1_lut8_p4.table[6] = UINT32_C(0x3F7744FD);
-  params->avx2_rr1_lut8_p4.table[7] = UINT32_C(0x3F7AC0C7);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx2_rr1_lut8_p4.minus_ln2[i] = -0x1.62E430p-1f;
-    params->avx2_rr1_lut8_p4.c4[i] = 0x1.5558ECp-5f;
-    params->avx2_rr1_lut8_p4.c3[i] = 0x1.555C20p-3f;
-    params->avx2_rr1_lut8_p4.c2[i] = 0x1.000000p-1f;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx2_rr1_lut8_p4.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx2_rr1_lut8_p4.mask_table[i] = 0;
-  }
-  return sizeof(params->avx2_rr1_lut8_p4);
-}
-
-size_t xnn_init_f32_elu_avx2_rr1_lut4_p4_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx2_rr1_lut4_p4.prescale[i] = prescale;
-    params->avx2_rr1_lut4_p4.alpha[i] = alpha;
-    params->avx2_rr1_lut4_p4.beta[i] = beta;
-    params->avx2_rr1_lut4_p4.sat_cutoff[i] = -0x1.154246p+4f;
-    params->avx2_rr1_lut4_p4.magic_bias[i] = 0x1.800000p21f;
-    params->avx2_rr1_lut4_p4.log2e[i] = 0x1.715476p+0f;
-  }
-  params->avx2_rr1_lut4_p4.table[0] = 0x1.000000p+0f;
-  params->avx2_rr1_lut4_p4.table[1] = 0x1.F06FE0p-1f;
-  params->avx2_rr1_lut4_p4.table[2] = 0x1.EA09E6p-1f;
-  params->avx2_rr1_lut4_p4.table[3] = 0x1.EE89FAp-1f;
-  params->avx2_rr1_lut4_p4.table[4] = 0x1.000000p+0f;
-  params->avx2_rr1_lut4_p4.table[5] = 0x1.F06FE0p-1f;
-  params->avx2_rr1_lut4_p4.table[6] = 0x1.EA09E6p-1f;
-  params->avx2_rr1_lut4_p4.table[7] = 0x1.EE89FAp-1f;
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx2_rr1_lut4_p4.minus_ln2[i] = -0x1.62E430p-1f;
-    params->avx2_rr1_lut4_p4.c4[i] = 0x1.554F9Ap-5f;
-    params->avx2_rr1_lut4_p4.c3[i] = 0x1.557082p-3f;
-    params->avx2_rr1_lut4_p4.c2[i] = 0x1.000002p-1f;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx2_rr1_lut4_p4.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx2_rr1_lut4_p4.mask_table[i] = 0;
-  }
-  return sizeof(params->avx2_rr1_lut4_p4);
-}
-
-size_t xnn_init_f32_elu_avx2_rr1_p6_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx2_rr1_p6.prescale[i] = prescale;
-    params->avx2_rr1_p6.alpha[i] = alpha;
-    params->avx2_rr1_p6.beta[i] = beta;
-    params->avx2_rr1_p6.sat_cutoff[i] = -0x1.154246p+4f;
-    params->avx2_rr1_p6.magic_bias[i] = 0x1.8000FEp23f;
-    params->avx2_rr1_p6.log2e[i] = 0x1.715476p+0f;
-    params->avx2_rr1_p6.minus_ln2[i] = -0x1.62E430p-1f;
-    params->avx2_rr1_p6.c6[i] = 0x1.6B7338p-10f;
-    params->avx2_rr1_p6.c5[i] = 0x1.12278Ep-7f;
-    params->avx2_rr1_p6.c4[i] = 0x1.555716p-5f;
-    params->avx2_rr1_p6.c3[i] = 0x1.5554B0p-3f;
-    params->avx2_rr1_p6.c2[i] = 0x1.FFFFFEp-2f;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx2_rr1_p6.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx2_rr1_p6.mask_table[i] = 0;
-  }
-  return sizeof(params->avx2_rr1_p6);
-}
-
-size_t xnn_init_f32_elu_avx512_rr1_lut16_p3_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  params->avx512_rr1_lut16_p3.prescale = prescale;
-  params->avx512_rr1_lut16_p3.alpha = alpha;
-  params->avx512_rr1_lut16_p3.beta = beta;
-  params->avx512_rr1_lut16_p3.sat_cutoff = -0x1.154246p+4f;
-  params->avx512_rr1_lut16_p3.magic_bias = 0x1.800000p19f;
-  params->avx512_rr1_lut16_p3.log2e = 0x1.715476p+0f;
-  params->avx512_rr1_lut16_p3.minus_ln2 = -0x1.62E430p-1f;
-  params->avx512_rr1_lut16_p3.c3 = 0x1.55561Cp-3f;
-  params->avx512_rr1_lut16_p3.c2 = 0x1.0001ECp-1f;
-  params->avx512_rr1_lut16_p3.table[ 0] = UINT32_C(0x3F800000);
-  params->avx512_rr1_lut16_p3.table[ 1] = UINT32_C(0x3F7DAAC3);
-  params->avx512_rr1_lut16_p3.table[ 2] = UINT32_C(0x3F7B95C2);
-  params->avx512_rr1_lut16_p3.table[ 3] = UINT32_C(0x3F79C3D3);
-  params->avx512_rr1_lut16_p3.table[ 4] = UINT32_C(0x3F7837F0);
-  params->avx512_rr1_lut16_p3.table[ 5] = UINT32_C(0x3F76F532);
-  params->avx512_rr1_lut16_p3.table[ 6] = UINT32_C(0x3F75FED7);
-  params->avx512_rr1_lut16_p3.table[ 7] = UINT32_C(0x3F75583F);
-  params->avx512_rr1_lut16_p3.table[ 8] = UINT32_C(0x3F7504F3);
-  params->avx512_rr1_lut16_p3.table[ 9] = UINT32_C(0x3F7508A4);
-  params->avx512_rr1_lut16_p3.table[10] = UINT32_C(0x3F75672A);
-  params->avx512_rr1_lut16_p3.table[11] = UINT32_C(0x3F76248C);
-  params->avx512_rr1_lut16_p3.table[12] = UINT32_C(0x3F7744FD);
-  params->avx512_rr1_lut16_p3.table[13] = UINT32_C(0x3F78CCDF);
-  params->avx512_rr1_lut16_p3.table[14] = UINT32_C(0x3F7AC0C7);
-  params->avx512_rr1_lut16_p3.table[15] = UINT32_C(0x3F7D257D);
-  return sizeof(params->avx512_rr1_lut16_p3);
-}
-
-size_t xnn_init_f32_elu_avx512_rr1_p6_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  params->avx512_rr1_p6.prescale = prescale;
-  params->avx512_rr1_p6.alpha = alpha;
-  params->avx512_rr1_p6.beta = beta;
-  params->avx512_rr1_p6.sat_cutoff = -0x1.154246p+4f;
-  params->avx512_rr1_p6.magic_bias = 0x1.8000FEp23f;
-  params->avx512_rr1_p6.log2e = 0x1.715476p+0f;
-  params->avx512_rr1_p6.minus_ln2 = -0x1.62E430p-1f;
-  params->avx512_rr1_p6.c6 = 0x1.6B7338p-10f;
-  params->avx512_rr1_p6.c5 = 0x1.12278Ep-7f;
-  params->avx512_rr1_p6.c4 = 0x1.555716p-5f;
-  params->avx512_rr1_p6.c3 = 0x1.5554B0p-3f;
-  params->avx512_rr1_p6.c2 = 0x1.FFFFFEp-2f;
-  return sizeof(params->avx512_rr1_p6);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd_rr2_lut16_p3.prescale[i] = prescale;
-    params->wasmsimd_rr2_lut16_p3.alpha[i] = alpha;
-    params->wasmsimd_rr2_lut16_p3.beta[i] = beta;
-    params->wasmsimd_rr2_lut16_p3.sat_cutoff[i] = -0x1.154246p+4f;
-    params->wasmsimd_rr2_lut16_p3.magic_bias[i] = 0x1.800000p19f;
-    params->wasmsimd_rr2_lut16_p3.log2e[i] = 0x1.715476p+0f;
-    params->wasmsimd_rr2_lut16_p3.index_mask[i] = UINT32_C(0xF);
-    params->wasmsimd_rr2_lut16_p3.minus_ln2_hi[i] = -0x1.62E400p-1f;
-    params->wasmsimd_rr2_lut16_p3.minus_ln2_lo[i] = -0x1.7F7D1Cp-20f;
-    params->wasmsimd_rr2_lut16_p3.c3[i] = 0x1.55561Cp-3f;
-    params->wasmsimd_rr2_lut16_p3.c2[i] = 0x1.0001ECp-1f;
-    params->wasmsimd_rr2_lut16_p3.one[i] = 1.0f;
-  }
-  return sizeof(params->wasmsimd_rr2_lut16_p3);
-}
-
-size_t xnn_init_f32_elu_wasmsimd_rr2_p6_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta)
-{
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd_rr2_p6.prescale[i] = prescale;
-    params->wasmsimd_rr2_p6.alpha[i] = alpha;
-    params->wasmsimd_rr2_p6.beta[i] = beta;
-    params->wasmsimd_rr2_p6.sat_cutoff[i] = -0x1.154246p+4f;
-    params->wasmsimd_rr2_p6.magic_bias[i] = 0x1.8000FEp23f;
-    params->wasmsimd_rr2_p6.log2e[i] = 0x1.715476p+0f;
-    params->wasmsimd_rr2_p6.minus_ln2_hi[i] = -0x1.62E440p-1f;
-    params->wasmsimd_rr2_p6.minus_ln2_lo[i] = 0x1.0105C6p-21f;
-    params->wasmsimd_rr2_p6.c6[i] = 0x1.6b7338p-10f;
-    params->wasmsimd_rr2_p6.c5[i] = 0x1.12278Ep-7f;
-    params->wasmsimd_rr2_p6.c4[i] = 0x1.555716p-5f;
-    params->wasmsimd_rr2_p6.c3[i] = 0x1.5554B0p-3f;
-    params->wasmsimd_rr2_p6.c2[i] = 0x1.FFFFFEp-2f;
-    params->wasmsimd_rr2_p6.one[i] = 1.0f;
-  }
-  return sizeof(params->wasmsimd_rr2_p6);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f16_expminus_fp16arith_rr2_p2_params(
-  union xnn_f16_expminus_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->fp16arith_rr2_p2.magic_bias = UINT16_C(0x660F);  // 0x1.83Cp+10h
-  params->fp16arith_rr2_p2.log2e = UINT16_C(0x3DC5);  // 0x1.714p+0h
-  params->fp16arith_rr2_p2.minus_ln2_hi = UINT16_C(0xB98C);  // -0x1.630p-1h
-  params->fp16arith_rr2_p2.minus_ln2_lo = UINT16_C(0x0AF4);  // 0x1.BD0p-13h
-  params->fp16arith_rr2_p2.c2 = UINT16_C(0x37F9);  // 0x1.FE4p-2h
-  params->fp16arith_rr2_p2.c1 = UINT16_C(0x3C0E);  // 0x1.038p+0h
-  params->fp16arith_rr2_p2.denorm_cutoff = UINT16_C(0xC8DA);  // -0x1.368p+3h
-  return sizeof(params->fp16arith_rr2_p2);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_RISCV
-size_t xnn_init_f32_expminus_rvv_rr2_p6_params(
-  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->rvv_rr2_p6.x_min = -0x1.5ebb82p6;
-  params->rvv_rr2_p6.log2e = 0x1.715476p+0f;
-  params->rvv_rr2_p6.ln2_hi = 0x1.62E400p-1f;
-  params->rvv_rr2_p6.ln2_lo = 0x1.7F7D1Cp-20f;
-  params->rvv_rr2_p6.c6 = 0x1.6850e4p-10f;
-  params->rvv_rr2_p6.c5 = 0x1.123bccp-7;
-  params->rvv_rr2_p6.c4 = 0x1.555b98p-5f;
-  params->rvv_rr2_p6.c3 = 0x1.55548ep-3f;
-  params->rvv_rr2_p6.c2 = 0x1.fffff8p-2f;
-  return sizeof(params->rvv_rr2_p6);
-}
-#endif  // XNN_ARCH_RISCV
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_expminus_avx2_rr1_p2_params(
-  union xnn_f16_expminus_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx2_rr1_p2.magic_bias[i] = 0x1.8000FEp23f;
-    params->avx2_rr1_p2.log2e[i] = 0x1.715476p0f;
-    params->avx2_rr1_p2.minus_ln2[i] = -0x1.62E43p-1f;
-    params->avx2_rr1_p2.c2[i] = 0x1.FF3A32p-2f;
-    params->avx2_rr1_p2.c1[i] = 0x1.039E10p+0f;
-    params->avx2_rr1_p2.denorm_cutoff[i] = -0x1.368000p+3f;
-  }
-  return sizeof(params->avx2_rr1_p2);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-size_t xnn_init_f32_expminus_scalar_rr2_p5_params(
-  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->scalar_rr2_p5.log2e = 0x1.715476p+0f;
-  params->scalar_rr2_p5.magic_bias = 0x1.8000FEp23f;
-  params->scalar_rr2_p5.minus_ln2_hi = -0x1.62E400p-1f;
-  params->scalar_rr2_p5.minus_ln2_lo = -0x1.7F7D1Cp-20f;
-  params->scalar_rr2_p5.c5 = 0x1.0F9F9Cp-7f;
-  params->scalar_rr2_p5.c4 = 0x1.573A1Ap-5f;
-  params->scalar_rr2_p5.c3 = 0x1.555A80p-3f;
-  params->scalar_rr2_p5.c2 = 0x1.FFFDC6p-2f;
-  params->scalar_rr2_p5.c1 = 0x1.FFFFF6p-1f;
-  params->scalar_rr2_p5.denorm_cutoff = -0x1.5D589Ep6f;
-  return sizeof(params->scalar_rr2_p5);
-}
-
-size_t xnn_init_f32_expminus_scalar_rr2_lut64_p2_params(
-  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->scalar_rr2_lut64_p2.log2e  = 0x1.715476p0f;
-  params->scalar_rr2_lut64_p2.magic_bias = 0x1.800000p17f;
-  params->scalar_rr2_lut64_p2.minus_ln2_hi = -0x1.630000p-1f;
-  params->scalar_rr2_lut64_p2.minus_ln2_lo = 0x1.BD0106p-13f;
-  params->scalar_rr2_lut64_p2.c2 = 0x1.FFFF0Ap-2f;
-  params->scalar_rr2_lut64_p2.denorm_cutoff = -0x1.5D589Ep6f;
-  return sizeof(params->scalar_rr2_lut64_p2);
-}
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f32_expminus_neon_rr2_p5_params(
-  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->neon_rr2_p5.log2e = 0x1.715476p+0f;
-  params->neon_rr2_p5.magic_bias = 0x1.8000FEp23f;
-  params->neon_rr2_p5.minus_ln2_hi = -0x1.62E400p-1f;
-  params->neon_rr2_p5.minus_ln2_lo = -0x1.7F7D1Cp-20f;
-  params->neon_rr2_p5.c5 = 0x1.0F9F9Cp-7f;
-  params->neon_rr2_p5.c4 = 0x1.573A1Ap-5f;
-  params->neon_rr2_p5.c3 = 0x1.555A80p-3f;
-  params->neon_rr2_p5.c2 = 0x1.FFFDC6p-2f;
-  params->neon_rr2_p5.c1 = 0x1.FFFFF6p-1f;
-  params->neon_rr2_p5.denorm_cutoff = -0x1.5D589Ep6f;
-  return sizeof(params->neon_rr2_p5);
-}
-
-size_t xnn_init_f32_expminus_neon_rr2_lut64_p2_params(
-  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->neon_rr2_lut64_p2.log2e = 0x1.715476p+0f;
-  params->neon_rr2_lut64_p2.magic_bias = 0x1.800000p17f;
-  params->neon_rr2_lut64_p2.minus_ln2_hi = -0x1.62E400p-1f;
-  params->neon_rr2_lut64_p2.minus_ln2_lo = -0x1.7F7D1Cp-20f;
-  params->neon_rr2_lut64_p2.c2 = 0x1.FFFF0Ap-2f;
-  params->neon_rr2_lut64_p2.denorm_cutoff = -0x1.5D589Ep6f;
-  return sizeof(params->neon_rr2_lut64_p2);
-}
-
-size_t xnn_init_f32_expminus_neonfma_rr1_p5_params(
-  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->neonfma_rr1_p5.log2e = 0x1.715476p+0f;
-  params->neonfma_rr1_p5.magic_bias = 0x1.8000FEp23f;
-  params->neonfma_rr1_p5.minus_ln2 = -0x1.62E430p-1f;
-  params->neonfma_rr1_p5.c5 = 0x1.0F9F9Cp-7f;
-  params->neonfma_rr1_p5.c4 = 0x1.573A1Ap-5f;
-  params->neonfma_rr1_p5.c3 = 0x1.555A80p-3f;
-  params->neonfma_rr1_p5.c2 = 0x1.FFFDC6p-2f;
-  params->neonfma_rr1_p5.c1 = 0x1.FFFFF6p-1f;
-  params->neonfma_rr1_p5.denorm_cutoff = -0x1.5D589Ep6f;
-  return sizeof(params->neonfma_rr1_p5);
-}
-
-size_t xnn_init_f32_expminus_neonfma_rr1_lut64_p2_params(
-  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->neonfma_rr1_lut64_p2.log2e = 0x1.715476p+0f;
-  params->neonfma_rr1_lut64_p2.magic_bias = 0x1.800000p17f;
-  params->neonfma_rr1_lut64_p2.minus_ln2 = -0x1.62E430p-1f;
-  params->neonfma_rr1_lut64_p2.c2 = 0x1.FFFF0Ap-2f;
-  params->neonfma_rr1_lut64_p2.denorm_cutoff = -0x1.5D589Ep6f;
-  return sizeof(params->neonfma_rr1_lut64_p2);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_expminus_sse2_rr2_p5_params(
-  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2_rr2_p5.log2e[i] = 0x1.715476p+0f;
-    params->sse2_rr2_p5.magic_bias[i] = 0x1.8000FEp23f;
-    params->sse2_rr2_p5.minus_ln2_hi[i] = -0x1.62E400p-1f;
-    params->sse2_rr2_p5.minus_ln2_lo[i] = -0x1.7F7D1Cp-20f;
-    params->sse2_rr2_p5.c5[i] = 0x1.0F9F9Cp-7f;
-    params->sse2_rr2_p5.c4[i] = 0x1.573A1Ap-5f;
-    params->sse2_rr2_p5.c3[i] = 0x1.555A80p-3f;
-    params->sse2_rr2_p5.c2[i] = 0x1.FFFDC6p-2f;
-    params->sse2_rr2_p5.c1[i] = 0x1.FFFFF6p-1f;
-    params->sse2_rr2_p5.denorm_cutoff[i] = -0x1.5D589Ep6f;
-  }
-  return sizeof(params->sse2_rr2_p5);
-}
-
-size_t xnn_init_f32_expminus_avx2_rr1_p5_params(
-  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx2_rr1_p5.log2e[i] = 0x1.715476p+0f;
-    params->avx2_rr1_p5.magic_bias[i] = 0x1.8000FEp23f;
-    params->avx2_rr1_p5.minus_ln2[i] = -0x1.62E430p-1f;
-    params->avx2_rr1_p5.c5[i] = 0x1.0F9F9Cp-7f;
-    params->avx2_rr1_p5.c4[i] = 0x1.573A1Ap-5f;
-    params->avx2_rr1_p5.c3[i] = 0x1.555A80p-3f;
-    params->avx2_rr1_p5.c2[i] = 0x1.FFFDC6p-2f;
-    params->avx2_rr1_p5.c1[i] = 0x1.FFFFF6p-1f;
-    params->avx2_rr1_p5.denorm_cutoff[i] = -0x1.5D589Ep6f;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx2_rr1_p5.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx2_rr1_p5.mask_table[i] = 0;
-  }
-  return sizeof(params->avx2_rr1_p5);
-}
-
-size_t xnn_init_f32_expminus_avx512_rr1_p5_params(
-  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->avx512_rr1_p5.log2e = 0x1.715476p+0f;
-  params->avx512_rr1_p5.minus_ln2 = -0x1.62E430p-1f;
-  params->avx512_rr1_p5.c5 = 0x1.0F9F9Cp-7f;
-  params->avx512_rr1_p5.c4 = 0x1.573A1Ap-5f;
-  params->avx512_rr1_p5.c3 = 0x1.555A80p-3f;
-  params->avx512_rr1_p5.c2 = 0x1.FFFDC6p-2f;
-  params->avx512_rr1_p5.c1 = 0x1.FFFFF6p-1f;
-  params->avx512_rr1_p5.c0 = 1.0f;
-  return sizeof(params->avx512_rr1_p5);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_f32_expminus_wasmsimd_rr2_p5_params(
-  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd_rr2_p5.log2e[i] = 0x1.715476p+0f;
-    params->wasmsimd_rr2_p5.magic_bias[i] = 0x1.8000FEp23f;
-    params->wasmsimd_rr2_p5.minus_ln2_hi[i] = -0x1.62E400p-1f;
-    params->wasmsimd_rr2_p5.minus_ln2_lo[i] = -0x1.7F7D1Cp-20f;
-    params->wasmsimd_rr2_p5.c5[i] = 0x1.0F9F9Cp-7f;
-    params->wasmsimd_rr2_p5.c4[i] = 0x1.573A1Ap-5f;
-    params->wasmsimd_rr2_p5.c3[i] = 0x1.555A80p-3f;
-    params->wasmsimd_rr2_p5.c2[i] = 0x1.FFFDC6p-2f;
-    params->wasmsimd_rr2_p5.c1[i] = 0x1.FFFFF6p-1f;
-    params->wasmsimd_rr2_p5.denorm_cutoff[i] = -0x1.5D589Ep6f;
-  }
-  return sizeof(params->wasmsimd_rr2_p5);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-#if XNN_ARCH_HEXAGON
-size_t xnn_init_f32_expminus_hvx_rr2_p5_params(
-  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->hvx_rr2_p5.log2e = 0x1.715476p+0f;
-  params->hvx_rr2_p5.magic_bias = 0x1.8000FEp23f;
-  params->hvx_rr2_p5.minus_ln2_hi = -0x1.62E400p-1f;
-  params->hvx_rr2_p5.minus_ln2_lo = -0x1.7F7D1Cp-20f;
-  params->hvx_rr2_p5.c5 = 0x1.0F9F9Cp-7f;
-  params->hvx_rr2_p5.c4 = 0x1.573A1Ap-5f;
-  params->hvx_rr2_p5.c3 = 0x1.555A80p-3f;
-  params->hvx_rr2_p5.c2 = 0x1.FFFDC6p-2f;
-  params->hvx_rr2_p5.c1 = 0x1.FFFFF6p-1f;
-  params->hvx_rr2_p5.denorm_cutoff = -0x1.5D589Ep6f;
-  return sizeof(params->hvx_rr2_p5);
-}
-#endif  // XNN_ARCH_HEXAGON
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_f16_lrelu_fp16arith_params(
@@ -4561,12 +3117,6 @@ size_t xnn_init_f32_lrelu_avx_params(
 {
   for (uint32_t i = 0; i < 8; i++) {
     params->avx.slope[i] = slope;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
   }
   return sizeof(params->avx);
 }
@@ -5112,118 +3662,6 @@ size_t xnn_init_qu8_lrelu_wasmsimd_x86_params(
   return sizeof(params->wasmsimd_x86);
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_sqrt_sse_params(
-    union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]) {
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse.three[i] = 3.0f;
-  }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse.half[i] = 0.5f;
-  }
-  return sizeof(params->sse);
-}
-
-size_t xnn_init_f32_sqrt_avx_params(
-  union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.three[i] = 3.0f;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.half[i] = 0.5f;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
-  }
-  return sizeof(params->avx);
-}
-
-size_t xnn_init_f32_sqrt_fma_params(
-  union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->fma3.three[i] = 3.0f;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->fma3.neg_half[i] = -0.5f;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->fma3.half[i] = 0.5f;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->fma3.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->fma3.mask_table[i] = 0;
-  }
-  return sizeof(params->fma3);
-}
-
-size_t xnn_init_f32_sqrt_avx512_params(
-  union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->avx512.neg_three = -3.0f;
-  params->avx512.neg_half = -0.5f;
-  params->avx512.half = 0.5f;
-  return sizeof(params->avx512);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_rsqrt_sse_params(
-    union xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]) {
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse.three[i] = 3.0f;
-  }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse.half[i] = 0.5f;
-  }
-  return sizeof(params->sse);
-}
-size_t xnn_init_f32_rsqrt_avx_params(
-    union xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]) {
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.three[i] = 3.0f;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.half[i] = 0.5f;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
-  }
-  return sizeof(params->avx);
-}
-size_t xnn_init_f32_rsqrt_fma3_params(
-    union xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]) {
-  for (uint32_t i = 0; i < 8; i++) {
-    params->fma3.three[i] = 3.0f;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->fma3.neg_half[i] = -0.5f;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->fma3.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->fma3.mask_table[i] = 0;
-  }
-  return sizeof(params->avx);
-}
-size_t xnn_init_f32_rsqrt_avx512_params(
-    union xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]) {
-  params->avx512.three = 3.0f;
-  params->avx512.neg_half = -0.5f;
-  return sizeof(params->avx512);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_f16_chw_neonfp16arith_stride1_params(
@@ -7017,209 +5455,6 @@ size_t xnn_init_qs8_mul_minmax_fp32_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-size_t xnn_init_f16_f32_cvt_scalar_params(
-  union xnn_f16_f32_cvt_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->scalar.sign_mask = UINT32_C(0x80000000);
-  params->scalar.exp_offset = UINT32_C(0x70000000);
-  params->scalar.exp_scale = 0x1.0p-112f;
-  params->scalar.magic_mask = UINT32_C(0x3F000000);
-  params->scalar.magic_bias = 0.5f;
-  params->scalar.denorm_cutoff = UINT32_C(0x08000000);
-  return sizeof(params->scalar);
-}
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f16_f32_cvt_neon_params(
-  union xnn_f16_f32_cvt_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->neon.exp_scale = 0x1.0p-112f;
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_f32_cvt_sse_int16_params(
-  union xnn_f16_f32_cvt_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse_int16.sign_mask[i] = UINT16_C(0x8000);
-    params->sse_int16.exp_offset[i] = UINT16_C(0x7000);
-  }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse_int16.exp_scale[i] = 0x1.0p-112f;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse_int16.magic_mask[i] = UINT16_C(0x3F00);
-  }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse_int16.magic_bias[i] = 0.5f;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse_int16.denorm_cutoff[i] = INT16_C(0x0400);
-  }
-  return sizeof(params->sse_int16);
-}
-
-size_t xnn_init_f16_f32_cvt_sse_int32_params(
-  union xnn_f16_f32_cvt_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse_int32.sign_mask[i] = UINT32_C(0x80000000);
-    params->sse_int32.exp_offset[i] = UINT32_C(0x70000000);
-    params->sse_int32.exp_scale[i] = 0x1.0p-112f;
-    params->sse_int32.magic_bias[i] = UINT32_C(0x3F000000);
-    params->sse_int32.denorm_cutoff[i] = INT32_C(0x04000000);
-  }
-  return sizeof(params->sse_int32);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_f16_f32_cvt_wasmsimd_int16_params(
-  union xnn_f16_f32_cvt_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd_int16.sign_mask[i] = UINT16_C(0x8000);
-    params->wasmsimd_int16.exp_offset[i] = UINT16_C(0x7000);
-  }
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd_int16.exp_scale[i] = 0x1.0p-112f;
-  }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd_int16.magic_mask[i] = UINT16_C(0x3F00);
-  }
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd_int16.magic_bias[i] = 0.5f;
-  }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd_int16.denorm_cutoff[i] = INT16_C(0x0400);
-  }
-  return sizeof(params->wasmsimd_int16);
-}
-
-size_t xnn_init_f16_f32_cvt_wasmsimd_int32_params(
-  union xnn_f16_f32_cvt_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd_int32.sign_mask[i] = UINT32_C(0x80000000);
-    params->wasmsimd_int32.exp_offset[i] = UINT32_C(0x70000000);
-    params->wasmsimd_int32.exp_scale[i] = 0x1.0p-112f;
-    params->wasmsimd_int32.magic_bias[i] = UINT32_C(0x3F000000);
-    params->wasmsimd_int32.denorm_cutoff[i] = INT32_C(0x04000000);
-  }
-  return sizeof(params->wasmsimd_int32);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-size_t xnn_init_f32_f16_cvt_scalar_bitcast_params(
-  union xnn_f32_f16_cvt_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->scalar_bitcast.nonsign_mask = UINT32_C(0x7FFFFFFF);
-  params->scalar_bitcast.exp_bias = UINT32_C(0x07800000);
-  params->scalar_bitcast.scale_to_inf = 0x1.0p+112f;
-  params->scalar_bitcast.expw_max = UINT32_C(0x7F800000);
-  params->scalar_bitcast.scale_to_zero = 0x1.0p-110f;
-  params->scalar_bitcast.bias_min = UINT32_C(0x40000000);
-  params->scalar_bitcast.exph_mask = UINT16_C(0x7C00);
-  params->scalar_bitcast.manth_mask = UINT16_C(0x0FFF);
-  params->scalar_bitcast.nanh = UINT16_C(0x7E00);
-  return sizeof(params->scalar_bitcast);
-}
-
-size_t xnn_init_f32_f16_cvt_scalar_fabsf_params(
-  union xnn_f32_f16_cvt_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->scalar_fabsf.scale_to_inf = 0x1.0p+112f;
-  params->scalar_fabsf.exp_bias = UINT32_C(0x07800000);
-  params->scalar_fabsf.scale_to_zero = 0x1.0p-110f;
-  params->scalar_fabsf.expw_max = UINT32_C(0x7F800000);
-  params->scalar_fabsf.bias_min = UINT32_C(0x40000000);
-  params->scalar_fabsf.exph_mask = UINT16_C(0x7C00);
-  params->scalar_fabsf.manth_mask = UINT16_C(0x0FFF);
-  params->scalar_fabsf.nanh = UINT16_C(0x7E00);
-  return sizeof(params->scalar_fabsf);
-}
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f32_f16_cvt_neon_params(
-  union xnn_f32_f16_cvt_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->neon.exp_bias = UINT32_C(0x07800000);
-  params->neon.scale_to_inf = 0x1.0p+112f;
-  params->neon.expw_max = UINT32_C(0x7F800000);
-  params->neon.scale_to_zero = 0x1.0p-110f;
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_f16_cvt_sse2_params(
-  union xnn_f32_f16_cvt_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2.nonsign_mask[i] = UINT32_C(0x7FFFFFFF);
-    params->sse2.exp_bias[i] = UINT32_C(0x07800000);
-    params->sse2.scale_to_inf[i] = 0x1.0p+112f;
-    params->sse2.expw_max[i] = UINT32_C(0x7F800000);
-    params->sse2.scale_to_zero[i] = 0x1.0p-110f;
-  }
-  params->sse2.bias_min[0] = INT16_C(0x8000);
-  params->sse2.bias_min[1] = INT16_C(0x4000);
-  params->sse2.bias_min[2] = INT16_C(0x8000);
-  params->sse2.bias_min[3] = INT16_C(0x4000);
-  params->sse2.bias_min[4] = INT16_C(0x8000);
-  params->sse2.bias_min[5] = INT16_C(0x4000);
-  params->sse2.bias_min[6] = INT16_C(0x8000);
-  params->sse2.bias_min[7] = INT16_C(0x4000);
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2.manth_mask[i] = UINT32_C(0x00000FFF);
-    params->sse2.exph_mask[i] = UINT32_C(0x00007C00);
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse2.nanh[i] = UINT16_C(0x7E00);
-  }
-  return sizeof(params->sse2);
-}
-
-size_t xnn_init_f32_f16_cvt_f16c_params(
-  union xnn_f32_f16_cvt_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 7; i++) {
-    params->f16c.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->f16c.mask_table[i] = 0;
-  }
-  return sizeof(params->f16c);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_f32_f16_cvt_wasmsimd_params(
-  union xnn_f32_f16_cvt_params params[XNN_MIN_ELEMENTS(1)])
-{
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd.exp_bias[i] = UINT32_C(0x07800000);
-    params->wasmsimd.scale_to_inf[i] = 0x1.0p+112f;
-    params->wasmsimd.expw_max[i] = UINT32_C(0x7F800000);
-    params->wasmsimd.scale_to_zero[i] = 0x1.0p-110f;
-  }
-  params->wasmsimd.bias_min[0] = INT16_C(0x8000);
-  params->wasmsimd.bias_min[1] = INT16_C(0x4000);
-  params->wasmsimd.bias_min[2] = INT16_C(0x8000);
-  params->wasmsimd.bias_min[3] = INT16_C(0x4000);
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd.manth_mask[i] = UINT32_C(0x00000FFF);
-    params->wasmsimd.exph_mask[i] = UINT32_C(0x00007C00);
-  }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd.nanh[i] = UINT16_C(0x7E00);
-  }
-  return sizeof(params->wasmsimd);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
 size_t xnn_init_f16_qs8_cvt_scalar_fmagic_params(
   union xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale,
@@ -7404,12 +5639,6 @@ size_t xnn_init_f32_qs8_cvt_avx_params(
   for (uint32_t i = 0; i < 16; i++) {
     params->avx.output_min[i] = output_min;
   }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
-  }
   return sizeof(params->avx);
 }
 
@@ -7428,22 +5657,8 @@ size_t xnn_init_f32_qs8_cvt_avx2_params(
   for (uint32_t i = 0; i < 16; i++) {
     params->avx2.output_zero_point[i] = (int16_t) output_zero_point;
   }
-  params->avx2.shuffle_mask[0] = 0;
-  params->avx2.shuffle_mask[1] = 4;
-  params->avx2.shuffle_mask[2] = 1;
-  params->avx2.shuffle_mask[3] = 5;
-  params->avx2.shuffle_mask[4] = 2;
-  params->avx2.shuffle_mask[5] = 6;
-  params->avx2.shuffle_mask[6] = 3;
-  params->avx2.shuffle_mask[7] = 7;
   for (uint32_t i = 0; i < 32; i++) {
     params->avx2.output_min[i] = output_min;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx2.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx2.mask_table[i] = 0;
   }
   return sizeof(params->avx2);
 }
@@ -7466,30 +5681,6 @@ size_t xnn_init_f32_qs8_cvt_avx512_params(
   for (uint32_t i = 0; i < 64; i++) {
     params->avx512.output_min[i] = output_min;
   }
-  params->avx512.shuffle512_mask[0] = 0;
-  params->avx512.shuffle512_mask[1] = 4;
-  params->avx512.shuffle512_mask[2] = 8;
-  params->avx512.shuffle512_mask[3] = 12;
-  params->avx512.shuffle512_mask[4] = 1;
-  params->avx512.shuffle512_mask[5] = 5;
-  params->avx512.shuffle512_mask[6] = 9;
-  params->avx512.shuffle512_mask[7] = 13;
-  params->avx512.shuffle512_mask[8] = 2;
-  params->avx512.shuffle512_mask[9] = 6;
-  params->avx512.shuffle512_mask[10] = 10;
-  params->avx512.shuffle512_mask[11] = 14;
-  params->avx512.shuffle512_mask[12] = 3;
-  params->avx512.shuffle512_mask[13] = 7;
-  params->avx512.shuffle512_mask[14] = 11;
-  params->avx512.shuffle512_mask[15] = 15;
-  params->avx512.shuffle256_mask[0] = 0;
-  params->avx512.shuffle256_mask[1] = 4;
-  params->avx512.shuffle256_mask[2] = 2;
-  params->avx512.shuffle256_mask[3] = 6;
-  params->avx512.shuffle256_mask[4] = 1;
-  params->avx512.shuffle256_mask[5] = 5;
-  params->avx512.shuffle256_mask[6] = 3;
-  params->avx512.shuffle256_mask[7] = 7;
   return sizeof(params->avx512);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -7672,12 +5863,6 @@ size_t xnn_init_f32_qu8_cvt_avx_params(
   for (uint32_t i = 0; i < 16; i++) {
     params->avx.output_min[i] = output_min;
   }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
-  }
   return sizeof(params->avx);
 }
 
@@ -7696,22 +5881,8 @@ size_t xnn_init_f32_qu8_cvt_avx2_params(
   for (uint32_t i = 0; i < 16; i++) {
     params->avx2.output_zero_point[i] = (int16_t) output_zero_point;
   }
-  params->avx2.shuffle_mask[0] = 0;
-  params->avx2.shuffle_mask[1] = 4;
-  params->avx2.shuffle_mask[2] = 1;
-  params->avx2.shuffle_mask[3] = 5;
-  params->avx2.shuffle_mask[4] = 2;
-  params->avx2.shuffle_mask[5] = 6;
-  params->avx2.shuffle_mask[6] = 3;
-  params->avx2.shuffle_mask[7] = 7;
   for (uint32_t i = 0; i < 32; i++) {
     params->avx2.output_min[i] = output_min;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx2.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx2.mask_table[i] = 0;
   }
   return sizeof(params->avx2);
 }
@@ -7734,30 +5905,6 @@ size_t xnn_init_f32_qu8_cvt_avx512_params(
   for (uint32_t i = 0; i < 64; i++) {
     params->avx512.output_min[i] = output_min;
   }
-  params->avx512.shuffle512_mask[0] = 0;
-  params->avx512.shuffle512_mask[1] = 4;
-  params->avx512.shuffle512_mask[2] = 8;
-  params->avx512.shuffle512_mask[3] = 12;
-  params->avx512.shuffle512_mask[4] = 1;
-  params->avx512.shuffle512_mask[5] = 5;
-  params->avx512.shuffle512_mask[6] = 9;
-  params->avx512.shuffle512_mask[7] = 13;
-  params->avx512.shuffle512_mask[8] = 2;
-  params->avx512.shuffle512_mask[9] = 6;
-  params->avx512.shuffle512_mask[10] = 10;
-  params->avx512.shuffle512_mask[11] = 14;
-  params->avx512.shuffle512_mask[12] = 3;
-  params->avx512.shuffle512_mask[13] = 7;
-  params->avx512.shuffle512_mask[14] = 11;
-  params->avx512.shuffle512_mask[15] = 15;
-  params->avx512.shuffle256_mask[0] = 0;
-  params->avx512.shuffle256_mask[1] = 4;
-  params->avx512.shuffle256_mask[2] = 2;
-  params->avx512.shuffle256_mask[3] = 6;
-  params->avx512.shuffle256_mask[4] = 1;
-  params->avx512.shuffle256_mask[5] = 5;
-  params->avx512.shuffle256_mask[6] = 3;
-  params->avx512.shuffle256_mask[7] = 7;
   return sizeof(params->avx512);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -8034,73 +6181,6 @@ size_t xnn_init_qs16_qs8_cvt_ssse3_params(
   for (uint32_t i = 0; i < 2; i++) {
     params->ssse3.bias[i] = (int64_t) bias;
   }
-  params->ssse3.shuffle01[0]  = 0x80;
-  params->ssse3.shuffle01[1]  = 0x80;
-  params->ssse3.shuffle01[2]  = 0;
-  params->ssse3.shuffle01[3]  = 1;
-  params->ssse3.shuffle01[4]  = 0x80;
-  params->ssse3.shuffle01[5]  = 0x80;
-  params->ssse3.shuffle01[6]  = 0x80;
-  params->ssse3.shuffle01[7]  = 0x80;
-  params->ssse3.shuffle01[8]  = 0x80;
-  params->ssse3.shuffle01[9]  = 0x80;
-  params->ssse3.shuffle01[10] = 2;
-  params->ssse3.shuffle01[11] = 3;
-  params->ssse3.shuffle01[12] = 0x80;
-  params->ssse3.shuffle01[13] = 0x80;
-  params->ssse3.shuffle01[14] = 0x80;
-  params->ssse3.shuffle01[15] = 0x80;
-
-  params->ssse3.shuffle23[0]  = 0x80;
-  params->ssse3.shuffle23[1]  = 0x80;
-  params->ssse3.shuffle23[2]  = 4;
-  params->ssse3.shuffle23[3]  = 5;
-  params->ssse3.shuffle23[4]  = 0x80;
-  params->ssse3.shuffle23[5]  = 0x80;
-  params->ssse3.shuffle23[6]  = 0x80;
-  params->ssse3.shuffle23[7]  = 0x80;
-  params->ssse3.shuffle23[8]  = 0x80;
-  params->ssse3.shuffle23[9]  = 0x80;
-  params->ssse3.shuffle23[10] = 6;
-  params->ssse3.shuffle23[11] = 7;
-  params->ssse3.shuffle23[12] = 0x80;
-  params->ssse3.shuffle23[13] = 0x80;
-  params->ssse3.shuffle23[14] = 0x80;
-  params->ssse3.shuffle23[15] = 0x80;
-
-  params->ssse3.shuffle45[0]  = 0x80;
-  params->ssse3.shuffle45[1]  = 0x80;
-  params->ssse3.shuffle45[2]  = 8;
-  params->ssse3.shuffle45[3]  = 9;
-  params->ssse3.shuffle45[4]  = 0x80;
-  params->ssse3.shuffle45[5]  = 0x80;
-  params->ssse3.shuffle45[6]  = 0x80;
-  params->ssse3.shuffle45[7]  = 0x80;
-  params->ssse3.shuffle45[8]  = 0x80;
-  params->ssse3.shuffle45[9]  = 0x80;
-  params->ssse3.shuffle45[10] = 10;
-  params->ssse3.shuffle45[11] = 11;
-  params->ssse3.shuffle45[12] = 0x80;
-  params->ssse3.shuffle45[13] = 0x80;
-  params->ssse3.shuffle45[14] = 0x80;
-  params->ssse3.shuffle45[15] = 0x80;
-
-  params->ssse3.shuffle67[0]  = 0x80;
-  params->ssse3.shuffle67[1]  = 0x80;
-  params->ssse3.shuffle67[2]  = 12;
-  params->ssse3.shuffle67[3]  = 13;
-  params->ssse3.shuffle67[4]  = 0x80;
-  params->ssse3.shuffle67[5]  = 0x80;
-  params->ssse3.shuffle67[6]  = 0x80;
-  params->ssse3.shuffle67[7]  = 0x80;
-  params->ssse3.shuffle67[8]  = 0x80;
-  params->ssse3.shuffle67[9]  = 0x80;
-  params->ssse3.shuffle67[10] = 14;
-  params->ssse3.shuffle67[11] = 15;
-  params->ssse3.shuffle67[12] = 0x80;
-  params->ssse3.shuffle67[13] = 0x80;
-  params->ssse3.shuffle67[14] = 0x80;
-  params->ssse3.shuffle67[15] = 0x80;
   return sizeof(params->ssse3);
 }
 
@@ -8123,73 +6203,6 @@ size_t xnn_init_qs16_qs8_cvt_sse4_params(
   for (uint32_t i = 0; i < 2; i++) {
     params->sse4.bias[i] = (int64_t) bias;
   }
-  params->sse4.shuffle01[0]  = 0x80;
-  params->sse4.shuffle01[1]  = 0x80;
-  params->sse4.shuffle01[2]  = 0;
-  params->sse4.shuffle01[3]  = 1;
-  params->sse4.shuffle01[4]  = 0x80;
-  params->sse4.shuffle01[5]  = 0x80;
-  params->sse4.shuffle01[6]  = 0x80;
-  params->sse4.shuffle01[7]  = 0x80;
-  params->sse4.shuffle01[8]  = 0x80;
-  params->sse4.shuffle01[9]  = 0x80;
-  params->sse4.shuffle01[10] = 2;
-  params->sse4.shuffle01[11] = 3;
-  params->sse4.shuffle01[12] = 0x80;
-  params->sse4.shuffle01[13] = 0x80;
-  params->sse4.shuffle01[14] = 0x80;
-  params->sse4.shuffle01[15] = 0x80;
-
-  params->sse4.shuffle23[0]  = 0x80;
-  params->sse4.shuffle23[1]  = 0x80;
-  params->sse4.shuffle23[2]  = 4;
-  params->sse4.shuffle23[3]  = 5;
-  params->sse4.shuffle23[4]  = 0x80;
-  params->sse4.shuffle23[5]  = 0x80;
-  params->sse4.shuffle23[6]  = 0x80;
-  params->sse4.shuffle23[7]  = 0x80;
-  params->sse4.shuffle23[8]  = 0x80;
-  params->sse4.shuffle23[9]  = 0x80;
-  params->sse4.shuffle23[10] = 6;
-  params->sse4.shuffle23[11] = 7;
-  params->sse4.shuffle23[12] = 0x80;
-  params->sse4.shuffle23[13] = 0x80;
-  params->sse4.shuffle23[14] = 0x80;
-  params->sse4.shuffle23[15] = 0x80;
-
-  params->sse4.shuffle45[0]  = 0x80;
-  params->sse4.shuffle45[1]  = 0x80;
-  params->sse4.shuffle45[2]  = 8;
-  params->sse4.shuffle45[3]  = 9;
-  params->sse4.shuffle45[4]  = 0x80;
-  params->sse4.shuffle45[5]  = 0x80;
-  params->sse4.shuffle45[6]  = 0x80;
-  params->sse4.shuffle45[7]  = 0x80;
-  params->sse4.shuffle45[8]  = 0x80;
-  params->sse4.shuffle45[9]  = 0x80;
-  params->sse4.shuffle45[10] = 10;
-  params->sse4.shuffle45[11] = 11;
-  params->sse4.shuffle45[12] = 0x80;
-  params->sse4.shuffle45[13] = 0x80;
-  params->sse4.shuffle45[14] = 0x80;
-  params->sse4.shuffle45[15] = 0x80;
-
-  params->sse4.shuffle67[0]  = 0x80;
-  params->sse4.shuffle67[1]  = 0x80;
-  params->sse4.shuffle67[2]  = 12;
-  params->sse4.shuffle67[3]  = 13;
-  params->sse4.shuffle67[4]  = 0x80;
-  params->sse4.shuffle67[5]  = 0x80;
-  params->sse4.shuffle67[6]  = 0x80;
-  params->sse4.shuffle67[7]  = 0x80;
-  params->sse4.shuffle67[8]  = 0x80;
-  params->sse4.shuffle67[9]  = 0x80;
-  params->sse4.shuffle67[10] = 14;
-  params->sse4.shuffle67[11] = 15;
-  params->sse4.shuffle67[12] = 0x80;
-  params->sse4.shuffle67[13] = 0x80;
-  params->sse4.shuffle67[14] = 0x80;
-  params->sse4.shuffle67[15] = 0x80;
   return sizeof(params->sse4);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -8504,241 +6517,6 @@ size_t xnn_init_qu8_f32_cvt_neon_params(
 }
 
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_x24_transpose_ssse3_params(union xnn_x24_transpose_params params[XNN_MIN_ELEMENTS(1)]) {
-  memset(&params->ssse3.pos0, -1, sizeof(params->ssse3.pos0));
-  memset(&params->ssse3.pos1, -1, sizeof(params->ssse3.pos1));
-  memset(&params->ssse3.pos2, -1, sizeof(params->ssse3.pos2));
-  memset(&params->ssse3.pos3, -1, sizeof(params->ssse3.pos3));
-  memset(&params->ssse3.pos4, -1, sizeof(params->ssse3.pos4));
-  memset(&params->ssse3.pos5, -1, sizeof(params->ssse3.pos5));
-  params->ssse3.pos0[0] = 0;
-  params->ssse3.pos0[1] = 4;
-  params->ssse3.pos0[2] = 8;
-  params->ssse3.pos0[3] = 2;
-  params->ssse3.pos0[4] = 6;
-  params->ssse3.pos0[5] = 10;
-  params->ssse3.pos0[6] = 1;
-  params->ssse3.pos0[7] = 5;
-  params->ssse3.pos0[8] = 9;
-  params->ssse3.pos0[9] = 3;
-  params->ssse3.pos0[10] = 7;
-  params->ssse3.pos0[11] = 11;
-
-  params->ssse3.pos1[0] = 4;
-  params->ssse3.pos1[1] = 8;
-  params->ssse3.pos1[2] = 12;
-  params->ssse3.pos1[3] = 6;
-  params->ssse3.pos1[4] = 10;
-  params->ssse3.pos1[5] = 14;
-  params->ssse3.pos1[6] = 5;
-  params->ssse3.pos1[7] = 9;
-  params->ssse3.pos1[8] = 13;
-  params->ssse3.pos1[9] = 7;
-  params->ssse3.pos1[10] = 11;
-  params->ssse3.pos1[11] = 15;
-
-  params->ssse3.pos2[0] = 12;
-  params->ssse3.pos2[3] = 14;
-  params->ssse3.pos2[6] = 13;
-  params->ssse3.pos2[9] = 15;
-
-  params->ssse3.pos3[1] = 0;
-  params->ssse3.pos3[2] = 4;
-  params->ssse3.pos3[4] = 2;
-  params->ssse3.pos3[5] = 6;
-  params->ssse3.pos3[7] = 1;
-  params->ssse3.pos3[8] = 5;
-  params->ssse3.pos3[10] = 3;
-  params->ssse3.pos3[11] = 7;
-
-  params->ssse3.pos4[0] = 8;
-  params->ssse3.pos4[1] = 12;
-  params->ssse3.pos4[3] = 10;
-  params->ssse3.pos4[4] = 14;
-  params->ssse3.pos4[6] = 9;
-  params->ssse3.pos4[7] = 13;
-  params->ssse3.pos4[9] = 11;
-  params->ssse3.pos4[10] = 15;
-
-  params->ssse3.pos5[2] = 0;
-  params->ssse3.pos5[5] = 2;
-  params->ssse3.pos5[8] = 1;
-  params->ssse3.pos5[11] = 3;
-  return sizeof(params->ssse3);
-}
-
-size_t xnn_init_x8_transpose_avx2_params(union xnn_x8_transpose_params params[XNN_MIN_ELEMENTS(1)]) {
-  memset(&params->avx2.mask_table[0], -1, sizeof(uint32_t) * 8);
-  memset(&params->avx2.mask_table[8], 0, sizeof(uint32_t) * 7);
-  return sizeof(params->avx2);
-}
-
-size_t xnn_init_x16_transpose_avx2_params(union xnn_x16_transpose_params params[XNN_MIN_ELEMENTS(1)]) {
-  memset(&params->avx2.mask_table[0], -1, sizeof(uint32_t) * 8);
-  memset(&params->avx2.mask_table[8], 0, sizeof(uint32_t) * 7);
-  return sizeof(params->avx2);
-}
-
-size_t xnn_init_x32_transpose_avx_params(union xnn_x32_transpose_params params[XNN_MIN_ELEMENTS(1)]) {
-  memset(&params->avx.mask_table[0], -1, sizeof(uint32_t) * 8);
-  memset(&params->avx.mask_table[8], 0, sizeof(uint32_t) * 7);
-  return sizeof(params->avx);
-}
-
-size_t xnn_init_x64_transpose_avx_params(union xnn_x64_transpose_params params[XNN_MIN_ELEMENTS(1)]) {
-  memset(&params->avx.mask_table[0], -1, sizeof(uint64_t) * 4);
-  memset(&params->avx.mask_table[4], 0, sizeof(uint64_t) * 3);
-  return sizeof(params->avx);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_x24_transpose_neon_tbl64_params(union xnn_x24_transpose_params params[XNN_MIN_ELEMENTS(1)]) {
-  memset(&params->neon_tbl64.pos0, 0, sizeof(params->neon_tbl64.pos0));
-  memset(&params->neon_tbl64.pos1, 0, sizeof(params->neon_tbl64.pos1));
-  params->neon_tbl64.pos0[0] = 0;
-  params->neon_tbl64.pos0[1] = 1;
-  params->neon_tbl64.pos0[2] = 2;
-  params->neon_tbl64.pos0[3] = 8;
-  params->neon_tbl64.pos0[4] = 9;
-  params->neon_tbl64.pos0[5] = 10;
-  params->neon_tbl64.pos1[0] = 3;
-  params->neon_tbl64.pos1[1] = 4;
-  params->neon_tbl64.pos1[2] = 5;
-  params->neon_tbl64.pos1[3] = 11;
-  params->neon_tbl64.pos1[4] = 12;
-  params->neon_tbl64.pos1[5] = 13;
-  return sizeof(params->neon_tbl64);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_ARM64
-size_t xnn_init_x24_transpose_neon_tbl128_params(union xnn_x24_transpose_params params[XNN_MIN_ELEMENTS(1)]) {
-  memset(&params->neon_tbl128.pos0, 0, sizeof(params->neon_tbl128.pos0));
-  memset(&params->neon_tbl128.pos1, 0, sizeof(params->neon_tbl128.pos1));
-  memset(&params->neon_tbl128.pos2, 0, sizeof(params->neon_tbl128.pos2));
-  memset(&params->neon_tbl128.pos3, 0, sizeof(params->neon_tbl128.pos3));
-  params->neon_tbl128.pos0[0] = 0;
-  params->neon_tbl128.pos0[1] = 1;
-  params->neon_tbl128.pos0[2] = 2;
-  params->neon_tbl128.pos0[3] = 16;
-  params->neon_tbl128.pos0[4] = 17;
-  params->neon_tbl128.pos0[5] = 18;
-  params->neon_tbl128.pos0[6] = 32;
-  params->neon_tbl128.pos0[7] = 33;
-  params->neon_tbl128.pos0[8] = 34;
-  params->neon_tbl128.pos0[9] = 48;
-  params->neon_tbl128.pos0[10] = 49;
-  params->neon_tbl128.pos0[11] = 50;
-  params->neon_tbl128.pos1[0] = 3;
-  params->neon_tbl128.pos1[1] = 4;
-  params->neon_tbl128.pos1[2] = 5;
-  params->neon_tbl128.pos1[3] = 19;
-  params->neon_tbl128.pos1[4] = 20;
-  params->neon_tbl128.pos1[5] = 21;
-  params->neon_tbl128.pos1[6] = 35;
-  params->neon_tbl128.pos1[7] = 36;
-  params->neon_tbl128.pos1[8] = 37;
-  params->neon_tbl128.pos1[9] = 51;
-  params->neon_tbl128.pos1[10] = 52;
-  params->neon_tbl128.pos1[11] = 53;
-  params->neon_tbl128.pos2[0] = 6;
-  params->neon_tbl128.pos2[1] = 7;
-  params->neon_tbl128.pos2[2] = 8;
-  params->neon_tbl128.pos2[3] = 22;
-  params->neon_tbl128.pos2[4] = 23;
-  params->neon_tbl128.pos2[5] = 24;
-  params->neon_tbl128.pos2[6] = 38;
-  params->neon_tbl128.pos2[7] = 39;
-  params->neon_tbl128.pos2[8] = 40;
-  params->neon_tbl128.pos2[9] = 54;
-  params->neon_tbl128.pos2[10] = 55;
-  params->neon_tbl128.pos2[11] = 56;
-  params->neon_tbl128.pos3[0] = 9;
-  params->neon_tbl128.pos3[1] = 10;
-  params->neon_tbl128.pos3[2] = 11;
-  params->neon_tbl128.pos3[3] = 25;
-  params->neon_tbl128.pos3[4] = 26;
-  params->neon_tbl128.pos3[5] = 27;
-  params->neon_tbl128.pos3[6] = 41;
-  params->neon_tbl128.pos3[7] = 42;
-  params->neon_tbl128.pos3[8] = 43;
-  params->neon_tbl128.pos3[9] = 57;
-  params->neon_tbl128.pos3[10] = 58;
-  params->neon_tbl128.pos3[11] = 59;
-  return sizeof(params->neon_tbl128);
-}
-
-size_t xnn_init_x32_transpose_neon_tbl128_params(union xnn_x32_transpose_params params[XNN_MIN_ELEMENTS(1)]) {
-  params->neon_tbl128.pos0[0] = 0;
-  params->neon_tbl128.pos0[1] = 1;
-  params->neon_tbl128.pos0[2] = 2;
-  params->neon_tbl128.pos0[3] = 3;
-  params->neon_tbl128.pos0[4] = 16;
-  params->neon_tbl128.pos0[5] = 17;
-  params->neon_tbl128.pos0[6] = 18;
-  params->neon_tbl128.pos0[7] = 19;
-  params->neon_tbl128.pos0[8] = 32;
-  params->neon_tbl128.pos0[9] = 33;
-  params->neon_tbl128.pos0[10] = 34;
-  params->neon_tbl128.pos0[11] = 35;
-  params->neon_tbl128.pos0[12] = 48;
-  params->neon_tbl128.pos0[13] = 49;
-  params->neon_tbl128.pos0[14] = 50;
-  params->neon_tbl128.pos0[15] = 51;
-  params->neon_tbl128.pos1[0] = 4;
-  params->neon_tbl128.pos1[1] = 5;
-  params->neon_tbl128.pos1[2] = 6;
-  params->neon_tbl128.pos1[3] = 7;
-  params->neon_tbl128.pos1[4] = 20;
-  params->neon_tbl128.pos1[5] = 21;
-  params->neon_tbl128.pos1[6] = 22;
-  params->neon_tbl128.pos1[7] = 23;
-  params->neon_tbl128.pos1[8] = 36;
-  params->neon_tbl128.pos1[9] = 37;
-  params->neon_tbl128.pos1[10] = 38;
-  params->neon_tbl128.pos1[11] = 39;
-  params->neon_tbl128.pos1[12] = 52;
-  params->neon_tbl128.pos1[13] = 53;
-  params->neon_tbl128.pos1[14] = 54;
-  params->neon_tbl128.pos1[15] = 55;
-  params->neon_tbl128.pos2[0] = 8;
-  params->neon_tbl128.pos2[1] = 9;
-  params->neon_tbl128.pos2[2] = 10;
-  params->neon_tbl128.pos2[3] = 11;
-  params->neon_tbl128.pos2[4] = 24;
-  params->neon_tbl128.pos2[5] = 25;
-  params->neon_tbl128.pos2[6] = 26;
-  params->neon_tbl128.pos2[7] = 27;
-  params->neon_tbl128.pos2[8] = 40;
-  params->neon_tbl128.pos2[9] = 41;
-  params->neon_tbl128.pos2[10] = 42;
-  params->neon_tbl128.pos2[11] = 43;
-  params->neon_tbl128.pos2[12] = 56;
-  params->neon_tbl128.pos2[13] = 57;
-  params->neon_tbl128.pos2[14] = 58;
-  params->neon_tbl128.pos2[15] = 59;
-  params->neon_tbl128.pos3[0] = 12;
-  params->neon_tbl128.pos3[1] = 13;
-  params->neon_tbl128.pos3[2] = 14;
-  params->neon_tbl128.pos3[3] = 15;
-  params->neon_tbl128.pos3[4] = 28;
-  params->neon_tbl128.pos3[5] = 29;
-  params->neon_tbl128.pos3[6] = 30;
-  params->neon_tbl128.pos3[7] = 31;
-  params->neon_tbl128.pos3[8] = 44;
-  params->neon_tbl128.pos3[9] = 45;
-  params->neon_tbl128.pos3[10] = 46;
-  params->neon_tbl128.pos3[11] = 47;
-  params->neon_tbl128.pos3[12] = 60;
-  params->neon_tbl128.pos3[13] = 61;
-  params->neon_tbl128.pos3[14] = 62;
-  params->neon_tbl128.pos3[15] = 63;
-  return sizeof(params->neon_tbl128);
-}
-#endif  // XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_qu8_f32_cvt_sse2_params(

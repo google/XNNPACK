@@ -10,16 +10,12 @@
 - name: xnn_f32_vrndd_ukernel__neonv8_u8
 # x86 SSE
 - name: xnn_f32_vrndd_ukernel__sse2_u4
-  init: xnn_init_f32_rnd_sse2_params
 - name: xnn_f32_vrndd_ukernel__sse2_u8
-  init: xnn_init_f32_rnd_sse2_params
 - name: xnn_f32_vrndd_ukernel__sse41_u4
 - name: xnn_f32_vrndd_ukernel__sse41_u8
 # x86 AVX
 - name: xnn_f32_vrndd_ukernel__avx_u8
-  init: xnn_init_f32_rnd_avx_params
 - name: xnn_f32_vrndd_ukernel__avx_u16
-  init: xnn_init_f32_rnd_avx_params
 # x86 AVX512
 - name: xnn_f32_vrndd_ukernel__avx512f_u16
 - name: xnn_f32_vrndd_ukernel__avx512f_u32

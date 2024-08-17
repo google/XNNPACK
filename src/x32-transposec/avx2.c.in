@@ -26,11 +26,15 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_reuse_${OUT_PTRS
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x${SIZE}_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(${XINT}));
   assert(block_height == 1 || input_stride >= block_width * sizeof(${XINT}));
+
+  $if SIZE == 64:
+    static const int64_t mask_table[7] = {-1, -1, -1, -1, 0, 0, 0};
+  $else:
+    static const int32_t mask_table[15] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
   const size_t tile_height = ${TILE_SIZE};
   const size_t tile_width = ${TILE_SIZE};
@@ -57,7 +61,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_reuse_${OUT_PTRS
     $else:
       const size_t oN_stride = rem * output_stride;
 
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2.mask_table[7 ^ (rem>>${NUM_ITERS-3})]));
+    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7 ^ (rem>>${NUM_ITERS-3})]));
 
     size_t bh = block_height;
     for (; bh >= ${TILE_SIZE}; bh -= ${TILE_SIZE}) {

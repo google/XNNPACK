@@ -28,7 +28,6 @@ MICROKERNEL_BENCHMARK_DEPS = [
     "//:common",
     "//:enable_assembly",
     "//:hardware_config",
-    "//:jit",
     "//:microkernels_h",
     "//:microparams_init",
     "//:microparams",
@@ -201,7 +200,6 @@ xnnpack_benchmark(
     copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":gemm_benchmark",
-        "//:enable_jit",
         "//:isa_checks",
         "//:math",
     ] + xnnpack_optional_ruy_deps() + xnnpack_optional_gemmlowp_deps(),
@@ -835,14 +833,6 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "f32_round_bench",
-    srcs = [
-        "f32-round.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
     name = "f32_rsum_bench",
     srcs = [
         "f32-rsum.cc",
@@ -1212,19 +1202,6 @@ xnnpack_benchmark(
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
 )
 
-############################### Other benchmarks ###############################
-
-xnnpack_benchmark(
-    name = "jit_bench",
-    srcs = ["jit.cc"],
-    deps = OPERATOR_BENCHMARK_DEPS + [
-        "//:jit",
-        "//:memory",
-        "//:microkernels_h",
-        "//:microparams",
-    ],
-)
-
 ############################### E2E benchmarks ###############################
 
 xnnpack_benchmark(
@@ -1272,13 +1249,9 @@ xnnpack_benchmark(
         "//:microkernel_configs",
         "//:models_h",
         "//models:fp32_mobilenet_v1",
-        "//models:fp32_mobilenet_v1_jit",
         "//models:fp32_mobilenet_v2",
-        "//models:fp32_mobilenet_v2_jit",
         "//models:fp32_mobilenet_v3_large",
-        "//models:fp32_mobilenet_v3_large_jit",
         "//models:fp32_mobilenet_v3_small",
-        "//models:fp32_mobilenet_v3_small_jit",
     ],
 )
 
@@ -1293,13 +1266,9 @@ xnnpack_benchmark(
         "//:microkernel_configs",
         "//:models_h",
         "//models:fp32_mobilenet_v1",
-        "//models:fp32_mobilenet_v1_jit",
         "//models:fp32_mobilenet_v2",
-        "//models:fp32_mobilenet_v2_jit",
         "//models:fp32_mobilenet_v3_large",
-        "//models:fp32_mobilenet_v3_large_jit",
         "//models:fp32_mobilenet_v3_small",
-        "//models:fp32_mobilenet_v3_small_jit",
     ],
 )
 
@@ -1383,14 +1352,9 @@ xnnpack_benchmark(
         "//models:fp16_sparse_mobilenet_v3_large",
         "//models:fp16_sparse_mobilenet_v3_small",
         "//models:fp32_mobilenet_v1",
-        "//models:fp32_mobilenet_v1_jit",
         "//models:fp32_mobilenet_v2",
-        "//models:fp32_mobilenet_v2_jit",
         "//models:fp32_mobilenet_v3_large",
-        "//models:fp32_mobilenet_v3_large_jit",
         "//models:fp32_mobilenet_v3_small",
-        "//models:fp32_mobilenet_v3_small_fused",
-        "//models:fp32_mobilenet_v3_small_jit",
         "//models:fp32_sparse_mobilenet_v1",
         "//models:fp32_sparse_mobilenet_v2",
         "//models:fp32_sparse_mobilenet_v3_large",

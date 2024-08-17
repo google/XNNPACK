@@ -36,11 +36,4 @@ SET(ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS
   src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2ts-div-u56.c
   src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2ts-div-u64.c
   src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2ts-div-u72.c
-  src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2ts-div-u80.c
-  src/math/f16-sigmoid-aarch64-neonfp16arith-rr1-p2-div.c
-  src/math/f16-sigmoid-aarch64-neonfp16arith-rr1-p3-div.c
-  src/math/f16-sigmoid-aarch64-neonfp16arith-rr2-p2-div.c
-  src/math/f16-sigmoid-aarch64-neonfp16arith-rr2-p3-div.c
-  src/math/f16-sqrt-aarch64-neonfp16arith-sqrt.c
-  src/math/gen/f16-tanh-aarch64-neonfp16arith-expm1minus-rr1-p3h1ts-div.c
-  src/math/gen/f16-tanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2ts-div.c)
+  src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2ts-div-u80.c)

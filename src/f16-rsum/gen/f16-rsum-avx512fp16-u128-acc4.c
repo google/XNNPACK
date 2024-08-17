@@ -72,7 +72,7 @@ void xnn_f16_rsum_ukernel__avx512fp16_u128_acc4(
   vacc = _mm_add_ph(vacc, _mm_castps_ph(_mm_movehdup_ps(_mm_castph_ps(vacc))));
   vacc = _mm_add_sh(vacc, _mm_castsi128_ph(_mm_srli_epi32(_mm_castph_si128(vacc), 16)));
 
-  const __m128h vscale = _mm_castsi128_ph(_mm_set1_epi16(params->fp16arith.scale));
+  const __m128h vscale = _mm_castsi128_ph(_mm_set1_epi16(params->scale));
 
   vacc = _mm_mul_sh(vacc, vscale);
   *((uint16_t*) o) = (uint16_t) _mm_extract_epi16(_mm_castph_si128(vacc), 0);

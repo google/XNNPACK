@@ -448,17 +448,6 @@ class DeconvolutionOperatorTester {
     return this->use_weights_cache_;
   }
 
-#if XNN_PLATFORM_JIT
-  DeconvolutionOperatorTester& use_jit(bool use_jit) {
-    this->use_jit_ = use_jit;
-    return *this;
-  }
-
-  bool use_jit() const {
-    return this->use_jit_;
-  }
-#endif
-
   DeconvolutionOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -1270,15 +1259,7 @@ class DeconvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t deconvolution_op = nullptr;
 
-      std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_code_cache(
-          nullptr, xnn_release_code_cache);
-      #if XNN_PLATFORM_JIT
-        xnn_code_cache code_cache;
-        if (use_jit()) {
-          xnn_init_code_cache(&code_cache);
-          auto_code_cache.reset(&code_cache);
-        }
-      #endif
+      xnn_code_cache_t auto_code_cache = nullptr;
       struct xnn_internal_weights_cache* internal_weights_cache = nullptr;
       std::unique_ptr<xnn_weights_cache_provider, decltype(&xnn_delete_weights_cache)> auto_weights_cache(
         nullptr, xnn_delete_weights_cache);
@@ -1300,7 +1281,7 @@ class DeconvolutionOperatorTester {
               group_input_channels(), group_output_channels(),
               input_pixel_stride(), output_pixel_stride(), kernel_scale.data(), kernel.data(),
               has_bias() ? bias.data() : nullptr, output_min, output_max,
-              /*flags=*/0, auto_code_cache.get(), auto_weights_cache.get(), &deconvolution_op));
+              /*flags=*/0, auto_code_cache, auto_weights_cache.get(), &deconvolution_op));
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
                   xnn_finalize_weights_cache(auto_weights_cache.get(), xnn_weights_cache_finalization_kind_soft));
@@ -1308,14 +1289,6 @@ class DeconvolutionOperatorTester {
 
       // Smart pointer to automatically delete deconvolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
-
-      #if XNN_PLATFORM_JIT
-        if (use_jit()) {
-          // Check that we actually generated code.
-          ASSERT_GT(code_cache.cache.code.size, 0);
-          xnn_finalize_code_memory(&code_cache.cache.code);
-        }
-      #endif
 
       ASSERT_EQ(xnn_status_success,
         xnn_reshape_deconvolution2d_nhwc_qd8_f32_qc8w(
@@ -1339,16 +1312,7 @@ class DeconvolutionOperatorTester {
 
       if (use_weights_cache()) {
         // We already finalized the code cache, so create a new code cache if we are testing JIT.
-        std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_inner_code_cache(
-            nullptr, xnn_release_code_cache);
-        #if XNN_PLATFORM_JIT
-          xnn_code_cache inner_code_cache;
-          if (use_jit()) {
-            xnn_init_code_cache(&inner_code_cache);
-            auto_inner_code_cache.reset(&inner_code_cache);
-          }
-        #endif
-
+        xnn_code_cache_t auto_inner_code_cache = nullptr;
         xnn_operator_t deconvolution_op2 = nullptr;
         size_t old_weights_cache_size = internal_weights_cache->cache.weights.size;
 
@@ -1361,19 +1325,11 @@ class DeconvolutionOperatorTester {
                 group_input_channels(), group_output_channels(),
                 input_pixel_stride(), output_pixel_stride(), kernel_scale.data(), kernel.data(),
                 has_bias() ? bias.data() : nullptr, output_min, output_max,
-                /*flags=*/0, auto_inner_code_cache.get(), auto_weights_cache.get(), &deconvolution_op2));
+                /*flags=*/0, auto_inner_code_cache, auto_weights_cache.get(), &deconvolution_op2));
 
         // Smart pointer to automatically delete deconvolution_op2.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op2, xnn_delete_operator);
         std::vector<float> output2(output.size(), nanf(""));
-
-        #if XNN_PLATFORM_JIT
-          if (use_jit()) {
-            // Check that we actually generated code.
-            ASSERT_GT(inner_code_cache.cache.code.size, 0);
-            xnn_finalize_code_memory(&inner_code_cache.cache.code);
-          }
-        #endif
 
         ASSERT_EQ(xnn_status_success,
                   xnn_reshape_deconvolution2d_nhwc_qd8_f32_qc8w(
@@ -1515,15 +1471,7 @@ class DeconvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t deconvolution_op = nullptr;
 
-      std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_code_cache(
-          nullptr, xnn_release_code_cache);
-      #if XNN_PLATFORM_JIT
-        xnn_code_cache code_cache;
-        if (use_jit()) {
-          xnn_init_code_cache(&code_cache);
-          auto_code_cache.reset(&code_cache);
-        }
-      #endif
+      xnn_code_cache_t auto_code_cache = nullptr;
       struct xnn_internal_weights_cache* internal_weights_cache = nullptr;
       std::unique_ptr<xnn_weights_cache_provider, decltype(&xnn_delete_weights_cache)> auto_weights_cache(
         nullptr, xnn_delete_weights_cache);
@@ -1545,7 +1493,7 @@ class DeconvolutionOperatorTester {
               group_input_channels(), group_output_channels(),
               input_pixel_stride(), output_pixel_stride(), kernel.data(),
               has_bias() ? bias.data() : nullptr, output_min, output_max,
-              /*flags=*/0, auto_code_cache.get(), auto_weights_cache.get(), &deconvolution_op));
+              /*flags=*/0, auto_code_cache, auto_weights_cache.get(), &deconvolution_op));
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
                   xnn_finalize_weights_cache(auto_weights_cache.get(), xnn_weights_cache_finalization_kind_soft));
@@ -1553,14 +1501,6 @@ class DeconvolutionOperatorTester {
 
       // Smart pointer to automatically delete deconvolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
-
-      #if XNN_PLATFORM_JIT
-        if (use_jit()) {
-          // Check that we actually generated code.
-          ASSERT_GT(code_cache.cache.code.size, 0);
-          xnn_finalize_code_memory(&code_cache.cache.code);
-        }
-      #endif
 
       ASSERT_EQ(xnn_status_success,
         xnn_reshape_deconvolution2d_nhwc_f32(
@@ -1582,16 +1522,7 @@ class DeconvolutionOperatorTester {
 
       if (use_weights_cache()) {
         // We already finalized the code cache, so create a new code cache if we are testing JIT.
-        std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_inner_code_cache(
-            nullptr, xnn_release_code_cache);
-        #if XNN_PLATFORM_JIT
-          xnn_code_cache inner_code_cache;
-          if (use_jit()) {
-            xnn_init_code_cache(&inner_code_cache);
-            auto_inner_code_cache.reset(&inner_code_cache);
-          }
-        #endif
-
+        xnn_code_cache_t auto_inner_code_cache = nullptr;
         xnn_operator_t deconvolution_op2 = nullptr;
         size_t old_weights_cache_size = internal_weights_cache->cache.weights.size;
 
@@ -1604,19 +1535,11 @@ class DeconvolutionOperatorTester {
                 group_input_channels(), group_output_channels(),
                 input_pixel_stride(), output_pixel_stride(), kernel.data(),
                 has_bias() ? bias.data() : nullptr, output_min, output_max,
-                /*flags=*/0, auto_inner_code_cache.get(), auto_weights_cache.get(), &deconvolution_op2));
+                /*flags=*/0, auto_inner_code_cache, auto_weights_cache.get(), &deconvolution_op2));
 
         // Smart pointer to automatically delete deconvolution_op2.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op2, xnn_delete_operator);
         std::vector<float> output2(output.size(), nanf(""));
-
-        #if XNN_PLATFORM_JIT
-          if (use_jit()) {
-            // Check that we actually generated code.
-            ASSERT_GT(inner_code_cache.cache.code.size, 0);
-            xnn_finalize_code_memory(&inner_code_cache.cache.code);
-          }
-        #endif
 
         ASSERT_EQ(xnn_status_success,
                   xnn_reshape_deconvolution2d_nhwc_f32(
@@ -2817,8 +2740,5 @@ class DeconvolutionOperatorTester {
   bool has_bias_{true};
   WeightsType weights_type_{WeightsType::Default};
   bool use_weights_cache_{false};
-#if XNN_PLATFORM_JIT
-  bool use_jit_{false};
-#endif
   size_t iterations_{1};
 };
