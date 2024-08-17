@@ -43,31 +43,52 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
 }
 
 static XNN_INLINE xnn_simd_s32_t xnn_clz_s32(xnn_simd_s32_t a) {
-  int32_t interim[16];
-  int32_t result[16];
-  _mm512_storeu_si512((__m512i*)interim, a);
-  for (int i = 0; i < 16; i++) {
-    result[i] = __builtin_clz(interim[i]);
-  }
-  return _mm512_loadu_si512((const __m512i*)result);
+  __m256i lowi = _mm512_extracti64x4_epi64(a, 0);
+  __m256i highi = _mm512_extracti64x4_epi64(a, 1);
+
+  __m512d low = _mm512_cvtepi32_pd(lowi);
+  __m512d high = _mm512_cvtepi32_pd(highi);
+
+  xnn_simd_s32_t low_a = _mm512_castpd_si512(low);
+  xnn_simd_s32_t high_a = _mm512_castpd_si512(high);
+
+  xnn_simd_s32_t shift_low = _mm512_srli_epi64(low_a, 52) & 0x7FF;
+  xnn_simd_s32_t shift_high = _mm512_srli_epi64(high_a, 52) & 0x7FF;
+
+  xnn_simd_s32_t mask =
+      _mm512_setr_epi32(1, 3, 5, 7, 9, 11, 13, 15, 0, 2, 4, 6, 8, 10, 12, 14);
+  xnn_simd_s32_t mlow = _mm512_permutexvar_epi32(mask, shift_low);
+  xnn_simd_s32_t mhigh = _mm512_permutexvar_epi32(mask, shift_high);
+
+  __m256i ai = _mm512_extracti64x4_epi64(mlow, 1);
+  __m256i bi = _mm512_extracti64x4_epi64(mhigh, 1);
+
+  xnn_simd_s32_t exponent =
+      _mm512_inserti64x4(_mm512_castsi256_si512(ai), bi, 1);
+
+  xnn_simd_s32_t result =
+      _mm512_sub_epi32(_mm512_set1_epi32(31),
+                       _mm512_sub_epi32(exponent, _mm512_set1_epi32(1023)));
+
+  return result;
 }
 
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {
-  return _mm512_loadu_epi32(ptr);
+  return _mm512_loadu_si512(ptr);
 }
 
 static XNN_INLINE xnn_simd_s32_t xnn_load_s32(const int32_t* ptr) {
-  return _mm512_load_epi32(ptr);
+  return _mm512_load_si512(ptr);
 }
 
 static XNN_INLINE void xnn_storeu_s32(int32_t* ptr, xnn_simd_s32_t v) {
-  _mm512_storeu_epi32(ptr, v);
+  _mm512_storeu_si512((__m512i*)ptr, v);
 }
 
 static XNN_INLINE void xnn_store_s32(float* ptr, xnn_simd_s32_t v) {
-  _mm512_store_epi32(ptr, v);
+  _mm512_store_si512((__m512i*)ptr, v);
 }
 
 static XNN_INLINE xnn_simd_s32_t xnn_set1_s32(int32_t v) {
