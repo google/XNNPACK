@@ -61,6 +61,16 @@ static XNN_INLINE xnn_simd_s32_t xnn_clz_s32(xnn_simd_s32_t a) {
                     _mm_extract_epi32(shift_low, 0));
 
   xnn_simd_s32_t result = _mm_sub_epi32(_mm_set1_epi32(31), _mm_sub_epi32(exponent, _mm_set1_epi32(1023)));
+
+  xnn_simd_s32_t zero = _mm_setzero_si128();
+  xnn_simd_s32_t mask = _mm_cmpgt_epi32(zero, a);
+  result = _mm_andnot_si128(mask, result);
+
+  xnn_simd_s32_t thirty_two = _mm_set1_epi32(32);
+  xnn_simd_s32_t maskz = _mm_cmpeq_epi32(a, zero);
+
+  result = _mm_blendv_epi8(result, thirty_two, maskz);
+
   return result;
 }
 

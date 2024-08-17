@@ -70,6 +70,12 @@ static XNN_INLINE xnn_simd_s32_t xnn_clz_s32(xnn_simd_s32_t a) {
       _mm512_sub_epi32(_mm512_set1_epi32(31),
                        _mm512_sub_epi32(exponent, _mm512_set1_epi32(1023)));
 
+  xnn_simd_s32_t zero = _mm512_setzero_si512();
+
+  __mmask16 maskl = _mm512_cmpge_epi32_mask(a, zero);
+  result = _mm512_maskz_mov_epi32(maskl, result);
+  __mmask16 maskz = _mm512_cmpeq_epi32_mask(a, zero);
+  result = _mm512_mask_mov_epi32(result, maskz, _mm512_set1_epi32(32));
   return result;
 }
 
