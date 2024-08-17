@@ -2725,6 +2725,17 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vrcopysignc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME f32-vrcopysignc-test COMMAND f32-vrcopysignc-test)
 
+  ADD_EXECUTABLE(qs16-vmul-test test/qs16-vmul.cc)
+  TARGET_INCLUDE_DIRECTORIES(qs16-vmul-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qs16-vmul-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(qs16-vmul-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME qs16-vmul-test COMMAND qs16-vmul-test)
+
+  ADD_EXECUTABLE(qs16-vmulc-test test/qs16-vmulc.cc)
+  TARGET_INCLUDE_DIRECTORIES(qs16-vmulc-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qs16-vmulc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(qs16-vmulc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME qs16-vmulc-test COMMAND qs16-vmulc-test)
 
   ADD_EXECUTABLE(s32-vmul-test test/s32-vmul.cc)
   TARGET_INCLUDE_DIRECTORIES(s32-vmul-test PRIVATE include src test)

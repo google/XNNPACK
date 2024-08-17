@@ -25,6 +25,13 @@ typedef int8_t (*xnn_qs8_requantize_fn)(
   int8_t output_min,
   int8_t output_max);
 
+typedef int16_t (*xnn_qs16_requantize_fn)(
+  int32_t input,
+  float scale,
+  int16_t output_zero_point,
+  int16_t output_min,
+  int16_t output_max);
+
 typedef uint8_t (*xnn_qu8_requantize_fn)(
   int32_t input,
   float scale,
@@ -51,6 +58,26 @@ static inline int8_t xnn_qs8_requantize_fp32(
 
   const int32_t output = (int32_t) lrintf(scaled_input) + (int32_t) zero_point;
   return (int8_t) output;
+}
+
+static inline int16_t xnn_qs16_requantize_fp32(
+  int32_t input,
+  float scale,
+  int16_t zero_point,
+  int16_t min,
+  int16_t max)
+{
+  assert(scale >= 1.0f / 4294967296.0f /* 0x1.0p-32f */);
+  assert(scale < 32768.0f);
+
+  int32_t scaled_input = (int32_t)(input * scale) + (int32_t)zero_point;
+  scaled_input = (scaled_input > INT16_MAX)
+                     ? INT16_MAX
+                     : ((scaled_input < INT16_MIN) ? INT16_MIN : scaled_input);
+  scaled_input = math_max_s32(scaled_input, min);
+  scaled_input = math_min_s32(scaled_input, max);
+
+  return (int16_t)scaled_input;
 }
 
 static inline uint8_t xnn_qu8_requantize_fp32(
@@ -234,6 +261,11 @@ static inline int8_t xnn_qs8_quantize_add(
   acc = math_max_s32(acc, params.scalar.output_min_less_zero_point);
   acc = math_min_s32(acc, params.scalar.output_max_less_zero_point);
   return (int8_t) ((int32_t) acc + params.scalar.output_zero_point);
+}
+
+inline static int16_t xnn_qs16_quantize(float val, float scale, int32_t zero_point)
+{
+  return (int16_t) lrintf(fminf(fmaxf(val / scale + (float) zero_point, -32768.0f), 32767.0f));
 }
 
 inline static int8_t xnn_qs8_quantize(float val, float scale, int32_t zero_point)
