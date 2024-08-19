@@ -192,19 +192,4 @@ SET(ALL_FMA3_MICROKERNEL_SRCS
   src/f32-vsqrt/gen/f32-vsqrt-fma3-rsqrt-u16.c
   src/f32-vsqrt/gen/f32-vsqrt-fma3-rsqrt-u32.c
   src/f32-vtanh/gen/f32-vtanh-fma3-rational-9-6-div.c
-  src/f32-vtanh/gen/f32-vtanh-fma3-rational-9-6-nr.c
-  src/math/f32-sqrt-fma3-nr1fma.c
-  src/math/f32-sqrt-fma3-nr1fma1adj.c
-  src/math/f32-sqrt-fma3-nr2fma.c
-  src/math/gen/f16-tanh-fma3-expm1minus-rr1-p3h2ts-div.c
-  src/math/gen/f16-tanh-fma3-expm1minus-rr1-p3h2ts-rcp.c
-  src/math/gen/f16-tanh-fma3-polynomial-p17h8t2.c
-  src/math/gen/f16-tanh-fma3-polynomial-p19h9t2.c
-  src/math/gen/f32-tanh-fma3-expm1minus-rr1-lut4-p4h3ts-perm-div.c
-  src/math/gen/f32-tanh-fma3-expm1minus-rr1-lut4-p4h3ts-perm-nr1adj.c
-  src/math/gen/f32-tanh-fma3-expm1minus-rr1-lut8-p4h3ps-div.c
-  src/math/gen/f32-tanh-fma3-expm1minus-rr1-lut8-p4h3ps-nr1.c
-  src/math/gen/f32-tanh-fma3-expm1minus-rr1-lut8-p4h3ps-nr1adj.c
-  src/math/gen/f32-tanh-fma3-expm1minus-rr1-p6h5ts-div.c
-  src/math/gen/f32-tanh-fma3-expm1minus-rr1-p6h5ts-nr1.c
-  src/math/gen/f32-tanh-fma3-expm1minus-rr1-p6h5ts-nr1adj.c)
+  src/f32-vtanh/gen/f32-vtanh-fma3-rational-9-6-nr.c)

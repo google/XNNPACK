@@ -10,6 +10,4 @@ ALL_NEONFP16_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-neonfp16-u16.c",
     "src/f32-f16-vcvt/gen/f32-f16-vcvt-neonfp16-u8.c",
     "src/f32-f16-vcvt/gen/f32-f16-vcvt-neonfp16-u16.c",
-    "src/math/f16-f32-cvt-neonfp16.c",
-    "src/math/f32-f16-cvt-neonfp16.c",
 ]

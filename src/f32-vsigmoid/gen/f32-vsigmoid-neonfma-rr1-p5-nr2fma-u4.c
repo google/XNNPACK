@@ -26,16 +26,28 @@ void xnn_f32_vsigmoid_ukernel__neonfma_rr1_p5_nr2fma_u4(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->neonfma_rr1_p5.magic_bias);
-  const float32x4_t vminus_log2e = vld1q_dup_f32(&params->neonfma_rr1_p5.minus_log2e);
-  const float32x4_t vln2 = vld1q_dup_f32(&params->neonfma_rr1_p5.ln2);
-  const float32x4_t vc5 = vld1q_dup_f32(&params->neonfma_rr1_p5.c5);
-  const float32x4_t vc4 = vld1q_dup_f32(&params->neonfma_rr1_p5.c4);
-  const float32x4_t vc3 = vld1q_dup_f32(&params->neonfma_rr1_p5.c3);
-  const float32x4_t vc2 = vld1q_dup_f32(&params->neonfma_rr1_p5.c2);
-  const float32x4_t vc1 = vld1q_dup_f32(&params->neonfma_rr1_p5.c1);
+  const float32x4_t vmagic_bias = vmovq_n_f32(0x1.8000FEp23f);
+  const float32x4_t vminus_log2e = vmovq_n_f32(-0x1.715476p0f);
+  const float32x4_t vc5 = vmovq_n_f32(-0x1.0F9F9Cp-7f);
+  const float32x4_t vc4 = vmovq_n_f32(0x1.573A1Ap-5f);
+  const float32x4_t vc3 = vmovq_n_f32(-0x1.555A80p-3f);
+  const float32x4_t vc2 = vmovq_n_f32(0x1.FFFDC6p-2f);
+  const float32x4_t vc1 = vmovq_n_f32(-0x1.FFFFF6p-1f);
   const float32x4_t vone = vmovq_n_f32(1.0f);
-  const float32x4_t vdenorm_cutoff = vld1q_dup_f32(&params->neonfma_rr1_p5.denorm_cutoff);
+  const float32x4_t vdenorm_cutoff = vmovq_n_f32(0x1.5D589Ep+6f);
+
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vminus_log2e);
+  XNN_FORCE_REALIZATION(vc5);
+  XNN_FORCE_REALIZATION(vc4);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+  XNN_FORCE_REALIZATION(vone);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
+
+  const float32x4_t vln2 = vmovq_n_f32(0x1.62E430p-1f);
+  XNN_FORCE_REALIZATION(vln2);
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float32x4_t vx = vld1q_f32(input); input += 4;

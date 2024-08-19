@@ -549,17 +549,6 @@ class ConvolutionOperatorTester {
     return this->iterations_;
   }
 
-#if XNN_PLATFORM_JIT
-  ConvolutionOperatorTester& use_jit(bool use_jit) {
-    this->use_jit_ = use_jit;
-    return *this;
-  }
-
-  bool use_jit() const {
-    return this->use_jit_;
-  }
-#endif
-
   ConvolutionOperatorTester& use_weights_cache(bool use_weights_cache) {
     this->use_weights_cache_ = use_weights_cache;
     return *this;
@@ -1974,16 +1963,8 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
 
-      std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_code_cache(
-          nullptr, xnn_release_code_cache);
+      xnn_code_cache_t auto_code_cache = nullptr;
 
-      #if XNN_PLATFORM_JIT
-        xnn_code_cache code_cache;
-        if (use_jit()) {
-          xnn_init_code_cache(&code_cache);
-          auto_code_cache.reset(&code_cache);
-        }
-      #endif
       struct xnn_internal_weights_cache* internal_weights_cache = nullptr;
       std::unique_ptr<xnn_weights_cache_provider, decltype(&xnn_delete_weights_cache)> auto_weights_cache(
         nullptr, xnn_delete_weights_cache);
@@ -2017,7 +1998,7 @@ class ConvolutionOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_min, output_max,
           flags,
-          auto_code_cache.get(),
+          auto_code_cache,
           auto_weights_cache.get(),
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
@@ -2033,50 +2014,34 @@ class ConvolutionOperatorTester {
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
-      #if XNN_PLATFORM_JIT
-        if (use_jit()) {
-          // Check that we actually generated code.
-          ASSERT_GT(code_cache.cache.code.size, 0);
-          xnn_finalize_code_memory(&code_cache.cache.code);
-        }
-      #endif
+      size_t workspace_size = SIZE_MAX;
+      size_t workspace_alignment = SIZE_MAX;
+      ASSERT_EQ(
+        xnn_status_success,
+        xnn_reshape_convolution2d_nhwc_f32(
+          convolution_op, batch_size(), input_height(), input_width(),
+          &workspace_size, &workspace_alignment,
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+          auto_threadpool.get()));
+      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      std::iota(workspace.begin(), workspace.end(), 0);
+      if (transient_indirection_buffer()) {
+        ASSERT_NE(workspace_size, 0);
+        ASSERT_NE(workspace_size, SIZE_MAX);
+        ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+        ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(convolution_op, workspace.data(), input.data(), output.data()));
+      } else {
+        ASSERT_NE(workspace_size, SIZE_MAX);
+        ASSERT_NE(workspace_alignment, SIZE_MAX);
+        ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(convolution_op, workspace.data(), input.data(), output.data()));
+      }
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, auto_threadpool.get()));
 
-        size_t workspace_size = SIZE_MAX;
-        size_t workspace_alignment = SIZE_MAX;
-        ASSERT_EQ(
-          xnn_status_success,
-          xnn_reshape_convolution2d_nhwc_f32(
-            convolution_op, batch_size(), input_height(), input_width(),
-            &workspace_size, &workspace_alignment,
-            /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-            auto_threadpool.get()));
-        std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
-        std::iota(workspace.begin(), workspace.end(), 0);
-        if (transient_indirection_buffer()) {
-          ASSERT_NE(workspace_size, 0);
-          ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-          ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(convolution_op, workspace.data(), input.data(), output.data()));
-        } else {
-          ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_NE(workspace_alignment, SIZE_MAX);
-          ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(convolution_op, workspace.data(), input.data(), output.data()));
-        }
-        ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, auto_threadpool.get()));
+      VerifyNHWCxF32(output, output_ref, output_min, output_max);
 
-        VerifyNHWCxF32(output, output_ref, output_min, output_max);
-
-        if (use_weights_cache()) {
-          // We already finalized the code cache, so create a new code cache if we are testing JIT.
-          std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_inner_code_cache(
-            nullptr, xnn_release_code_cache);
-        #if XNN_PLATFORM_JIT
-          xnn_code_cache inner_code_cache;
-          if (use_jit()) {
-            xnn_init_code_cache(&inner_code_cache);
-            auto_inner_code_cache.reset(&inner_code_cache);
-          }
-        #endif
+      if (use_weights_cache()) {
+        // We already finalized the code cache, so create a new code cache if we are testing JIT.
+        xnn_code_cache_t auto_inner_code_cache = nullptr;
         // To test weights cache, we create the operator with the same parameters, and setup with a different output.
         xnn_operator_t convolution_op2 = nullptr;
         size_t old_weights_cache_size = internal_weights_cache->cache.weights.size;
@@ -2092,18 +2057,10 @@ class ConvolutionOperatorTester {
             kernel.data(), has_bias() ? bias.data() : nullptr,
             output_min, output_max,
             flags,
-            auto_inner_code_cache.get(), auto_weights_cache.get(),
+            auto_inner_code_cache, auto_weights_cache.get(),
             &convolution_op2));
 
         ASSERT_NE(nullptr, convolution_op2);
-
-        #if XNN_PLATFORM_JIT
-          if (use_jit()) {
-            // Check that we actually generated code.
-            ASSERT_GT(inner_code_cache.cache.code.size, 0);
-            xnn_finalize_code_memory(&inner_code_cache.cache.code);
-          }
-        #endif
 
         std::vector<float> output2(output.size(), nanf(""));
         size_t workspace_size = SIZE_MAX;
@@ -2289,15 +2246,7 @@ class ConvolutionOperatorTester {
       // Create, setup, run, and destroy Convolution operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
-      std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_code_cache(
-          nullptr, xnn_release_code_cache);
-      #if XNN_PLATFORM_JIT
-        xnn_code_cache code_cache;
-        if (use_jit()) {
-          xnn_init_code_cache(&code_cache);
-          auto_code_cache.reset(&code_cache);
-        }
-      #endif
+      xnn_code_cache_t auto_code_cache = nullptr;
       struct xnn_internal_weights_cache* internal_weights_cache = nullptr;
       std::unique_ptr<xnn_weights_cache_provider, decltype(&xnn_delete_weights_cache)> auto_weights_cache(
         nullptr, xnn_delete_weights_cache);
@@ -2340,7 +2289,7 @@ class ConvolutionOperatorTester {
           kernel_data, has_bias() ? bias_data : nullptr,
           output_min, output_max,
           flags,
-          auto_code_cache.get(),
+          auto_code_cache,
           auto_weights_cache.get(),
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
@@ -2356,51 +2305,35 @@ class ConvolutionOperatorTester {
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
-      #if XNN_PLATFORM_JIT
-        if (use_jit()) {
-          // Check that we actually generated code.
-          ASSERT_GT(code_cache.cache.code.size, 0);
-          xnn_finalize_code_memory(&code_cache.cache.code);
-        }
-      #endif
+      size_t workspace_size = SIZE_MAX;
+      size_t workspace_alignment = SIZE_MAX;
+      ASSERT_EQ(
+        xnn_status_success,
+        xnn_reshape_convolution2d_nhwc_f16(
+          convolution_op, batch_size(), input_height(), input_width(),
+          &workspace_size, &workspace_alignment,
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+          auto_threadpool.get()));
+      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      std::iota(workspace.begin(), workspace.end(), 0);
+      if (transient_indirection_buffer()) {
+        ASSERT_NE(workspace_size, 0);
+        ASSERT_NE(workspace_size, SIZE_MAX);
+        ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+        ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f16(convolution_op, workspace.data(), input.data(), output.data()));
+      } else {
+        ASSERT_NE(workspace_size, SIZE_MAX);
+        ASSERT_NE(workspace_alignment, SIZE_MAX);
+        ASSERT_EQ(workspace_alignment, 1);
+        ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f16(convolution_op, workspace.data(), input.data(), output.data()));
+      }
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, auto_threadpool.get()));
 
-        size_t workspace_size = SIZE_MAX;
-        size_t workspace_alignment = SIZE_MAX;
-        ASSERT_EQ(
-          xnn_status_success,
-          xnn_reshape_convolution2d_nhwc_f16(
-            convolution_op, batch_size(), input_height(), input_width(),
-            &workspace_size, &workspace_alignment,
-            /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-            auto_threadpool.get()));
-        std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
-        std::iota(workspace.begin(), workspace.end(), 0);
-        if (transient_indirection_buffer()) {
-          ASSERT_NE(workspace_size, 0);
-          ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-          ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f16(convolution_op, workspace.data(), input.data(), output.data()));
-        } else {
-          ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_NE(workspace_alignment, SIZE_MAX);
-          ASSERT_EQ(workspace_alignment, 1);
-          ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f16(convolution_op, workspace.data(), input.data(), output.data()));
-        }
-        ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, auto_threadpool.get()));
+      VerifyNHWCxF16(output, output_ref, output_min, output_max, batch_size(), output_height(), output_width());
 
-        VerifyNHWCxF16(output, output_ref, output_min, output_max, batch_size(), output_height(), output_width());
-
-        if (use_weights_cache()) {
-          // We already finalized the code cache, so create a new code cache if we are testing JIT.
-          std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_inner_code_cache(
-            nullptr, xnn_release_code_cache);
-        #if XNN_PLATFORM_JIT
-          xnn_code_cache inner_code_cache;
-          if (use_jit()) {
-            xnn_init_code_cache(&inner_code_cache);
-            auto_inner_code_cache.reset(&inner_code_cache);
-          }
-        #endif
+      if (use_weights_cache()) {
+        // We already finalized the code cache, so create a new code cache if we are testing JIT.
+        xnn_code_cache_t auto_inner_code_cache = nullptr;
         xnn_operator_t convolution_op2 = nullptr;
         size_t old_weights_cache_size = internal_weights_cache->cache.weights.size;
         ASSERT_EQ(xnn_status_success, xnn_create_convolution2d_nhwc_f16(
@@ -2414,20 +2347,12 @@ class ConvolutionOperatorTester {
             kernel_data, has_bias() ? bias_data : nullptr,
             output_min, output_max,
             flags,
-            auto_inner_code_cache.get(), auto_weights_cache.get(),
+            auto_inner_code_cache, auto_weights_cache.get(),
             &convolution_op2));
         ASSERT_NE(nullptr, convolution_op2);
 
         // Smart pointer to automatically delete convolution_op.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op2, xnn_delete_operator);
-
-        #if XNN_PLATFORM_JIT
-          if (use_jit()) {
-            // Check that we actually generated code.
-            ASSERT_GT(inner_code_cache.cache.code.size, 0);
-            xnn_finalize_code_memory(&inner_code_cache.cache.code);
-          }
-        #endif
 
         std::vector<uint16_t> output2(output.size(), UINT16_C(0x7E00) /* NaN */);
         size_t workspace_size = SIZE_MAX;
@@ -4303,9 +4228,6 @@ class ConvolutionOperatorTester {
   WeightsType weights_type_{WeightsType::Default};
   bool multithreaded_{false};
   size_t iterations_{1};
-#if XNN_PLATFORM_JIT
-  bool use_jit_{false};
-#endif
   bool use_weights_cache_{false};
   bool transient_indirection_buffer_{false};
 };

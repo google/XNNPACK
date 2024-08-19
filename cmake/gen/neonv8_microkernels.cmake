@@ -26,12 +26,6 @@ SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/f32-vrnd/gen/f32-vrndu-neonv8-u8.c
   src/f32-vrnd/gen/f32-vrndz-neonv8-u4.c
   src/f32-vrnd/gen/f32-vrndz-neonv8-u8.c
-  src/math/f32-qs8-cvt-neonv8.c
-  src/math/f32-qu8-cvt-neonv8.c
-  src/math/f32-roundd-neonv8.c
-  src/math/f32-roundne-neonv8.c
-  src/math/f32-roundu-neonv8.c
-  src/math/f32-roundz-neonv8.c
   src/qs8-dwconv/gen/qs8-dwconv-5f5m5l8c8s8r-minmax-fp32-neonv8-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-5f5m5l16c8s8r-minmax-fp32-neonv8-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-5f5m5l32c8s8r-minmax-fp32-neonv8-mul16.c

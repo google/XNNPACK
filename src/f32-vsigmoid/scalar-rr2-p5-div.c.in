@@ -24,17 +24,17 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_p5_div_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float vmagic_bias = params->scalar_rr2_p5.magic_bias;
-  const float vminus_log2e = params->scalar_rr2_p5.minus_log2e;
-  const float vln2_hi = params->scalar_rr2_p5.ln2_hi;
-  const float vln2_lo = params->scalar_rr2_p5.ln2_lo;
-  const float vc5 = params->scalar_rr2_p5.c5;
-  const float vc4 = params->scalar_rr2_p5.c4;
-  const float vc3 = params->scalar_rr2_p5.c3;
-  const float vc2 = params->scalar_rr2_p5.c2;
-  const float vc1 = params->scalar_rr2_p5.c1;
-  const float vone = params->scalar_rr2_p5.one;
-  const float vdenorm_cutoff = params->scalar_rr2_p5.denorm_cutoff;
+  const float vmagic_bias = 0x1.8000FEp23f;
+  const float vminus_log2e = -0x1.715476p0f;
+  const float vln2_hi = 0x1.62E400p-1f;
+  const float vln2_lo = 0x1.7F7D1Cp-20f;
+  const float vc5 = -0x1.0F9F9Cp-7f;
+  const float vc4 = 0x1.573A1Ap-5f;
+  const float vc3 = -0x1.555A80p-3f;
+  const float vc2 = 0x1.FFFDC6p-2f;
+  const float vc1 = -0x1.FFFFF6p-1f;
+  const float vone = 1.0f;
+  const float vdenorm_cutoff = 0x1.5D589Ep+6f;
 
   $if BATCH_TILE > 1:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {

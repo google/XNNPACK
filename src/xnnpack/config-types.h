@@ -93,7 +93,6 @@ struct xnn_unary_elementwise_config {
     xnn_init_f32_default_params_fn f32_default;
     xnn_init_f32_elu_params_fn f32_elu;
     xnn_init_f32_exp_params_fn f32_exp;
-    xnn_init_f32_f16_cvt_params_fn f32_f16_cvt;
     xnn_init_f32_hswish_params_fn f32_hswish;
     xnn_init_f32_log_params_fn f32_log;
     xnn_init_f32_lrelu_params_fn f32_lrelu;
@@ -304,9 +303,6 @@ struct xnn_gemm_config {
   struct gemm_fused_ukernels minmax;
   struct gemm_fused_ukernels relu;
   struct gemm_fused_ukernels linear;
-#if XNN_PLATFORM_JIT
-  struct gemm_codegens generator;
-#endif  // XNN_PLATFORM_JIT
   union {
     xnn_init_f16_minmax_params_fn f16;
     xnn_init_f32_minmax_params_fn f32;

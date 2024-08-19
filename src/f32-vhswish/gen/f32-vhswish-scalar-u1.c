@@ -25,12 +25,10 @@ void xnn_f32_vhswish_ukernel__scalar_u1(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float vsixth = params->scalar.sixth;
-  const float vthree = params->scalar.three;
-  const float vsix = params->scalar.six;
+  const float vsixth = 0x1.555556p-3f;
+  const float vthree = 3.0f;
+  const float vsix = 6.0f;
   const float vzero = 0.0f;
-  assert(vthree == 3.0f);
-  assert(vsix == 6.0f);
 
   for (; batch >= sizeof(float); batch -= sizeof(float)) {
     float vx = *input++;

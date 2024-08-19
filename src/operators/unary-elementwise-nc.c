@@ -508,14 +508,9 @@ enum xnn_status xnn_create_convert_nc_f32_f16(
 {
   const struct xnn_unary_elementwise_config* f32_to_f16_cvt_config = xnn_init_f32_to_f16_cvt_config();
 
-  union xnn_f32_f16_cvt_params params;
-  if XNN_LIKELY(f32_to_f16_cvt_config != NULL && f32_to_f16_cvt_config->init.f32_f16_cvt != NULL) {
-    f32_to_f16_cvt_config->init.f32_f16_cvt(&params);
-  }
-
   return create_unary_elementwise_nc(
     flags, f32_to_f16_cvt_config, /*rminmax_config=*/NULL,
-    &params, sizeof(params),
+    /*params=*/NULL, /*params_size=*/0,
     xnn_operator_type_convert_nc_f32_f16, convert_op_out);
 }
 
@@ -1702,7 +1697,7 @@ enum xnn_status xnn_reshape_convert_nc_f32_f16(
     channels, input_stride, output_stride,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
-    &convert_op->params.f32_f16_cvt, sizeof(convert_op->params.f32_f16_cvt),
+    /*params=*/NULL, /*params_size=*/0,
     threadpool);
 }
 
@@ -3391,16 +3386,11 @@ enum xnn_status xnn_run_convert_nc_f32_f16(
 {
   const struct xnn_unary_elementwise_config* f32_to_f16_cvt_config = xnn_init_f32_to_f16_cvt_config();
 
-  union xnn_f32_f16_cvt_params params;
-  if XNN_LIKELY(f32_to_f16_cvt_config != NULL && f32_to_f16_cvt_config->init.f32_f16_cvt != NULL) {
-    f32_to_f16_cvt_config->init.f32_f16_cvt(&params);
-  }
-
   return run_unary_elementwise_nc(
     xnn_operator_type_convert_nc_f32_f16,
     channels, input_stride, output_stride, batch_size,
     input, output,
-    f32_to_f16_cvt_config, &params, sizeof(params),
+    f32_to_f16_cvt_config, /*params=*/NULL, /*params_size=*/0,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
     flags,

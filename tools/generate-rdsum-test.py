@@ -297,7 +297,9 @@ def generate_test_cases(ukernel, init_fn, requantization_type, primary_tile,
   """
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
-  test_args = [ukernel, init_fn]
+  test_args = [ukernel]
+  if init_fn is not None:
+    test_args.append(init_fn)
   if requantization_type:
     test_args.append("xnn_%s_requantize_%s" % \
       (datatype.lower(), requantization_type.lower()))

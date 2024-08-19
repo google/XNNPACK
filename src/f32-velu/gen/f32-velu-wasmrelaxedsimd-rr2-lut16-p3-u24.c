@@ -28,18 +28,29 @@ void xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_lut16_p3_u24(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vprescale = wasm_v128_load64_splat(params->wasmsimd_rr2_lut16_p3.prescale);
-  const v128_t valpha = wasm_v128_load64_splat(params->wasmsimd_rr2_lut16_p3.alpha);
-  const v128_t vbeta = wasm_v128_load64_splat(params->wasmsimd_rr2_lut16_p3.beta);
-  const v128_t vsat_cutoff = wasm_v128_load64_splat(params->wasmsimd_rr2_lut16_p3.sat_cutoff);
-  const v128_t vmagic_bias = wasm_v128_load64_splat(params->wasmsimd_rr2_lut16_p3.magic_bias);
-  const v128_t vlog2e = wasm_v128_load64_splat(params->wasmsimd_rr2_lut16_p3.log2e);
-  const v128_t vindex_mask =  wasm_v128_load64_splat(params->wasmsimd_rr2_lut16_p3.index_mask);
-  const v128_t vminus_ln2_hi = wasm_v128_load64_splat(params->wasmsimd_rr2_lut16_p3.minus_ln2_hi);
-  const v128_t vminus_ln2_lo = wasm_v128_load64_splat(params->wasmsimd_rr2_lut16_p3.minus_ln2_lo);
-  const v128_t vc3 = wasm_v128_load64_splat(params->wasmsimd_rr2_lut16_p3.c3);
-  const v128_t vc2 = wasm_v128_load64_splat(params->wasmsimd_rr2_lut16_p3.c2);
-  const v128_t vone = wasm_v128_load64_splat(params->wasmsimd_rr2_lut16_p3.one);
+  const v128_t vsat_cutoff = wasm_f32x4_const_splat(-0x1.154246p+4f);
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.800000p19f);
+  const v128_t vlog2e = wasm_f32x4_const_splat(0x1.715476p+0f);
+  const v128_t vindex_mask = wasm_u32x4_const_splat(UINT32_C(0xF));
+  const v128_t vminus_ln2_hi = wasm_f32x4_const_splat(-0x1.62E400p-1f);
+  const v128_t vminus_ln2_lo = wasm_f32x4_const_splat(-0x1.7F7D1Cp-20f);
+  const v128_t vc3 = wasm_f32x4_const_splat(0x1.55561Cp-3f);
+  const v128_t vc2 = wasm_f32x4_const_splat(0x1.0001ECp-1f);
+  const v128_t vone = wasm_f32x4_const_splat(1.0f);
+
+  XNN_FORCE_REALIZATION(vsat_cutoff);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vindex_mask);
+  XNN_FORCE_REALIZATION(vminus_ln2_hi);
+  XNN_FORCE_REALIZATION(vminus_ln2_lo);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vone);
+
+  const v128_t vprescale = wasm_v128_load32_splat(&params->scalar.prescale);
+  const v128_t valpha = wasm_v128_load32_splat(&params->scalar.alpha);
+  const v128_t vbeta = wasm_v128_load32_splat(&params->scalar.beta);
 
   for (; batch >= 24 * sizeof(float); batch -= 24 * sizeof(float)) {
     v128_t vx0123 = wasm_v128_load(input);

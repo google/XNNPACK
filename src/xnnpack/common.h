@@ -135,14 +135,6 @@
   #define XNN_PLATFORM_QURT 0
 #endif
 
-#ifndef XNN_PLATFORM_JIT
-  #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS && !XNN_PLATFORM_FUCHSIA || XNN_PLATFORM_WEB
-    #define XNN_PLATFORM_JIT 1
-  #else
-    #define XNN_PLATFORM_JIT 0
-  #endif
-#endif  // XNN_PLATFORM_JIT
-
 #if XNN_PLATFORM_WINDOWS
   #define XNN_HAS_MMAP 0
 #else
@@ -393,17 +385,6 @@
   #endif
 #else
   #define XNN_FORCE_REALIZATION(x)
-#endif
-
-// TODO(dsharlet): Remove this in favor of XNN_FORCE_REALIZATION above.
-#if XNN_ARCH_ARM || XNN_ARCH_X86
-  // These architectures are slow to broadcast, the compiler tries to move them
-  // into loops, and when it runs out of registers, it will redundantly perform
-  // the broadcast. Marking them volatile prevents these from being moved into
-  // loops, and they spill as broadcasted vectors instead.
-  #define XNN_FORCE_STACK volatile
-#else
-  #define XNN_FORCE_STACK
 #endif
 
 #define XNN_LOG2_SIZEOF_INT8_T   0  // log2(sizeof(int8_t))

@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  cmake-linux-local:
+  cmake-linux-x86_64:
     runs-on: ubuntu-22.04-8core
     timeout-minutes: 60
     steps:
@@ -37,6 +37,10 @@ jobs:
       - name: Configure and build
         run: scripts/build-local.sh
         working-directory: ${{ github.workspace }}
+      - name: Run tests
+        if: ${{ inputs.run-tests }}
+        run: ctest --output-on-failure --parallel $(nproc)
+        working-directory: ${{ github.workspace }}/build/local
   cmake-linux-aarch64:
     runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 60
@@ -53,12 +57,12 @@ jobs:
           max-size: "1G"
           save: ${{ inputs.update-caches }}
       - name: Configure and build
-        run: scripts/build-linux-aarch64.sh -DCMAKE_BUILD_TYPE=Release
+        run: scripts/build-local.sh
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
         run: ctest --output-on-failure --parallel $(nproc)
-        working-directory: ${{ github.workspace }}/build/linux/aarch64
+        working-directory: ${{ github.workspace }}/build/local
   cmake-linux-armhf:
     runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 60
@@ -282,6 +286,15 @@ jobs:
           key: ${{ github.job }}-${{ matrix.arch }}
           max-size: "1G"
           save: ${{ inputs.update-caches }}
+      - name: Force compiler binary mtime
+        # The nttld/setup-ndk action downloads the compiler binaries and copies them to the
+        # tools-cache, where their mtimes are set to the current time. This is bad since ccache
+        # uses the compiler binary mtime to determine whether two compilations match. We solve
+        # this problem by coercing the mtime of the compiler binaries to a fixed value. Note that
+        # if the compiler does indeed change, this will also cause the path to change as it would
+        # imply using a different NDK version.
+        run: |
+          find ${{ steps.setup-ndk.outputs.ndk-path }} -wholename '*/bin/clang*' -executable -type f,l -exec touch -h -t 202408130000 {} +
       - name: Configure and build
         run: scripts/build-android-${{ matrix.arch }}.sh
         working-directory: ${{ github.workspace }}
@@ -315,7 +328,7 @@ jobs:
       - name: Build with Xcode
         run: cmake --build build/ios/x86_64 --parallel $(sysctl -n hw.ncpu) -- -sdk iphonesimulator -quiet
         working-directory: ${{ github.workspace }}
-  bazel-linux-x86_64:
+  bazel-linux-x86_64-clang-18:
     runs-on: ubuntu-22.04-8core
     timeout-minutes: 60
     steps:
@@ -428,7 +441,7 @@ jobs:
           CC: clang-18
           CXX: clang++-18
         run: |
-            bazel build --define=xnn_enable_jit=false test:all
+            bazel build test:all
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
@@ -438,7 +451,6 @@ jobs:
         run: |
           # We only test the KleidiAI integration for now.
           bazel test \
-            --define=xnn_enable_jit=false \
             --test_output=all \
             --test_filter=*QP8* \
             test:qp8_f32_qc4w_gemm_minmax_test \

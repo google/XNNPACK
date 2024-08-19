@@ -27,18 +27,29 @@ void xnn_f32_velu_ukernel__avx512f_rr1_p6_u48(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512 vprescale = _mm512_set1_ps(params->avx512_rr1_p6.prescale);
-  const __m512 valpha = _mm512_set1_ps(params->avx512_rr1_p6.alpha);
-  const __m512 vbeta = _mm512_set1_ps(params->avx512_rr1_p6.beta);
-  const __m512 vsat_cutoff = _mm512_set1_ps(params->avx512_rr1_p6.sat_cutoff);
-  const __m512 vmagic_bias = _mm512_set1_ps(params->avx512_rr1_p6.magic_bias);
-  const __m512 vlog2e = _mm512_set1_ps(params->avx512_rr1_p6.log2e);
-  const __m512 vminus_ln2 = _mm512_set1_ps(params->avx512_rr1_p6.minus_ln2);
-  const __m512 vc6 = _mm512_set1_ps(params->avx512_rr1_p6.c6);
-  const __m512 vc5 = _mm512_set1_ps(params->avx512_rr1_p6.c5);
-  const __m512 vc4 = _mm512_set1_ps(params->avx512_rr1_p6.c4);
-  const __m512 vc3 = _mm512_set1_ps(params->avx512_rr1_p6.c3);
-  const __m512 vc2 = _mm512_set1_ps(params->avx512_rr1_p6.c2);
+  const __m512 vsat_cutoff = _mm512_set1_ps(-0x1.154246p+4f);
+  const __m512 vmagic_bias = _mm512_set1_ps(0x1.8000FEp23f);
+  const __m512 vlog2e = _mm512_set1_ps(0x1.715476p+0f);
+  const __m512 vminus_ln2 = _mm512_set1_ps(-0x1.62E430p-1f);
+  const __m512 vc6 = _mm512_set1_ps(0x1.6B7338p-10f);
+  const __m512 vc5 = _mm512_set1_ps(0x1.12278Ep-7f);
+  const __m512 vc4 = _mm512_set1_ps(0x1.555716p-5f);
+  const __m512 vc3 = _mm512_set1_ps(0x1.5554B0p-3f);
+  const __m512 vc2 = _mm512_set1_ps(0x1.FFFFFEp-2f);
+
+  XNN_FORCE_REALIZATION(vsat_cutoff);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vminus_ln2);
+  XNN_FORCE_REALIZATION(vc6);
+  XNN_FORCE_REALIZATION(vc5);
+  XNN_FORCE_REALIZATION(vc4);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  
+  const __m512 vprescale = _mm512_set1_ps(params->scalar.prescale);
+  const __m512 valpha = _mm512_set1_ps(params->scalar.alpha);
+  const __m512 vbeta = _mm512_set1_ps(params->scalar.beta);
 
   for (; batch >= 48 * sizeof(float); batch -= 48 * sizeof(float)) {
     __m512 vx0 = _mm512_loadu_ps(input);

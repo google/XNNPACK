@@ -1,6 +1,9 @@
 name: Test Latest Push
+
 on:
   push:
+    branches-ignore:
+      - master
     paths:
       - '**.S'
       - '**.c'
@@ -14,6 +17,8 @@ on:
       - 'scripts/build-*.sh'
       - '.github/**/*.yml'
       - 'WORKSPACE'
+  workflow_dispatch:
+
 jobs:
   build-and-test:
     uses: ./.github/workflows/build.yml

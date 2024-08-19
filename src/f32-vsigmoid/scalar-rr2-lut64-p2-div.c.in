@@ -27,14 +27,14 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float vmagic_bias = params->scalar_rr2_lut64_p2.magic_bias;
-  const float vminus_log2e = params->scalar_rr2_lut64_p2.minus_log2e;
+  const float vmagic_bias = 0x1.800000p17f;
+  const float vminus_log2e = -0x1.715476p0f;  
   const uint32_t vindex_mask = UINT32_C(0x3F);
-  const float vln2_hi = params->scalar_rr2_lut64_p2.ln2_hi;
-  const float vln2_lo = params->scalar_rr2_lut64_p2.ln2_lo;
-  const float vc2 = params->scalar_rr2_lut64_p2.c2;
-  const float vone = params->scalar_rr2_lut64_p2.one;
-  const float vdenorm_cutoff = params->scalar_rr2_lut64_p2.denorm_cutoff;
+  const float vln2_hi = 0x1.630000p-1f;
+  const float vln2_lo = -0x1.BD0106p-13f;
+  const float vc2 = 0x1.FFFF0Ap-2f;
+  const float vone = 1.0f;
+  const float vdenorm_cutoff = 0x1.5D589Ep+6f;
 
   $if BATCH_TILE > 1:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {

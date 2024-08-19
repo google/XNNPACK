@@ -97,31 +97,31 @@ static void f32_rmax(
 
   BENCHMARK_CAPTURE(f32_rmax, avx_u8,
                     xnn_f32_rmax_ukernel__avx_u8,
-                    xnn_init_f32_default_avx_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::ReductionParameters<float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_rmax, avx_u16_acc2,
                     xnn_f32_rmax_ukernel__avx_u16_acc2,
-                    xnn_init_f32_default_avx_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::ReductionParameters<float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_rmax, avx_u24_acc3,
                     xnn_f32_rmax_ukernel__avx_u24_acc3,
-                    xnn_init_f32_default_avx_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::ReductionParameters<float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_rmax, avx_u32_acc2,
                     xnn_f32_rmax_ukernel__avx_u32_acc2,
-                    xnn_init_f32_default_avx_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::ReductionParameters<float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_rmax, avx_u32_acc4,
                     xnn_f32_rmax_ukernel__avx_u32_acc4,
-                    xnn_init_f32_default_avx_params,
+                    /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::ReductionParameters<float>)
     ->UseRealTime();
