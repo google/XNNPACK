@@ -1437,331 +1437,88 @@ IF(XNNPACK_BUILD_TESTS)
     ENDFOREACH()
 
     # ---[ Build subgraph-level unit tests
-    ADD_EXECUTABLE(abs-test test/abs.cc)
-    TARGET_INCLUDE_DIRECTORIES(abs-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(abs-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main fp16)
-    ADD_TEST(NAME abs-test COMMAND abs-test)
+    SET(LIBRARY_SUBGRAPH_UNIT_TESTS
+        abs
+        abs-reshape
+        add2
+        add2-reshape
+        argmax-pooling-2d
+        average-pooling-2d
+        average-pooling-2d-reshape
+        bankers-rounding
+        ceiling
+        clamp
+        concatenate2
+        concatenate3
+        concatenate4
+        concatenate5
+        convert
+        convolution-2d
+        copy
+        copysign
+        deconvolution-2d
+        depth-to-space-2d
+        depthwise-convolution-2d
+        divide2
+        elu
+        gelu
+        exp
+        even-split2
+        even-split3
+        even-split4
+        floor
+        global-average-pooling-1d
+        global-average-pooling-2d
+        global-sum-pooling-1d
+        global-sum-pooling-2d
+        hardswish
+        leaky-relu
+        log
+        max-pooling-2d
+        maximum2
+        minimum2
+        multiply2
+        negate
+        prelu
+        reciprocal-square-root
+        reshape-helpers
+        sigmoid
+        static-slice
+        softmax
+        space-to-depth-2d
+        square
+        square-root
+        squared-difference
+        static-constant-pad
+        static-mean
+        static-reshape
+        static-resize-bilinear-2d
+        static-transpose
+        subtract2
+        tanh
+        transpose-reshape
+        unpooling-2d)
 
-    ADD_EXECUTABLE(abs-reshape-test test/abs-reshape.cc)
-    TARGET_INCLUDE_DIRECTORIES(abs-reshape-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(abs-reshape-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main fp16)
-    ADD_TEST(NAME abs-reshape-test COMMAND abs-reshape-test)
-
-    ADD_EXECUTABLE(add2-test test/add2.cc)
-    TARGET_INCLUDE_DIRECTORIES(add2-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(add2-test PRIVATE fp16 XNNPACK GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME add2-test COMMAND add2-test)
-
-    ADD_EXECUTABLE(add2-reshape-test test/add2-reshape.cc)
-    TARGET_INCLUDE_DIRECTORIES(add2-reshape-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(add2-reshape-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME add2-reshape-test COMMAND add2-reshape-test)
-
-    ADD_EXECUTABLE(argmax-pooling-2d-test test/argmax-pooling-2d.cc)
-    TARGET_INCLUDE_DIRECTORIES(argmax-pooling-2d-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(argmax-pooling-2d-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME argmax-pooling-2d-test COMMAND argmax-pooling-2d-test)
-
-    ADD_EXECUTABLE(average-pooling-2d-test test/average-pooling-2d.cc)
-    TARGET_INCLUDE_DIRECTORIES(average-pooling-2d-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(average-pooling-2d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME average-pooling-2d-test COMMAND average-pooling-2d-test)
-
-    ADD_EXECUTABLE(average-pooling-2d-reshape-test test/average-pooling-2d-reshape.cc)
-    TARGET_INCLUDE_DIRECTORIES(average-pooling-2d-reshape-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(average-pooling-2d-reshape-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME average-pooling-2d-reshape-test COMMAND average-pooling-2d-reshape-test)
-
-    ADD_EXECUTABLE(bankers-rounding-test test/bankers-rounding.cc)
-    TARGET_INCLUDE_DIRECTORIES(bankers-rounding-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(bankers-rounding-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME bankers-rounding-test COMMAND bankers-rounding-test)
-
-    ADD_EXECUTABLE(ceiling-test test/ceiling.cc)
-    TARGET_INCLUDE_DIRECTORIES(ceiling-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(ceiling-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME ceiling-test COMMAND ceiling-test)
-
-    ADD_EXECUTABLE(clamp-test test/clamp.cc)
-    TARGET_INCLUDE_DIRECTORIES(clamp-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(clamp-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME clamp-test COMMAND clamp-test)
-
-    ADD_EXECUTABLE(concatenate2-test test/concatenate2.cc)
-    TARGET_INCLUDE_DIRECTORIES(concatenate2-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(concatenate2-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main subgraph fp16)
-    ADD_TEST(NAME concatenate2-test COMMAND concatenate2-test)
-
-    ADD_EXECUTABLE(concatenate3-test test/concatenate3.cc)
-    TARGET_INCLUDE_DIRECTORIES(concatenate3-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(concatenate3-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main subgraph fp16)
-    ADD_TEST(NAME concatenate3-test COMMAND concatenate3-test)
-
-    ADD_EXECUTABLE(concatenate4-test test/concatenate4.cc)
-    TARGET_INCLUDE_DIRECTORIES(concatenate4-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(concatenate4-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main subgraph fp16)
-    ADD_TEST(NAME concatenate4-test COMMAND concatenate4-test)
-
-    ADD_EXECUTABLE(concatenate5-test test/concatenate5.cc)
-    TARGET_INCLUDE_DIRECTORIES(concatenate5-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(concatenate5-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main subgraph fp16)
-    ADD_TEST(NAME concatenate5-test COMMAND concatenate5-test)
-
-    ADD_EXECUTABLE(convert-test test/convert.cc)
-    TARGET_INCLUDE_DIRECTORIES(convert-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(convert-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME convert-test COMMAND convert-test)
-
-    ADD_EXECUTABLE(convolution-2d-test test/convolution-2d.cc)
-    SET_TARGET_PROPERTIES(convolution-2d-test PROPERTIES CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(convolution-2d-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(convolution-2d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph convolution-test-helpers)
-    ADD_TEST(NAME convolution-2d-test COMMAND convolution-2d-test)
-
-    ADD_EXECUTABLE(copy-test test/copy.cc)
-    TARGET_INCLUDE_DIRECTORIES(copy-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(copy-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME copy-test COMMAND copy-test)
-
-    ADD_EXECUTABLE(copysign-test test/copysign.cc)
-    TARGET_INCLUDE_DIRECTORIES(copysign-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(copysign-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME copysign-test COMMAND copysign-test)
-  
-    ADD_EXECUTABLE(deconvolution-2d-test test/deconvolution-2d.cc)
-    SET_TARGET_PROPERTIES(deconvolution-2d-test PROPERTIES CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(deconvolution-2d-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(deconvolution-2d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph convolution-test-helpers)
-    ADD_TEST(NAME deconvolution-2d-test COMMAND deconvolution-2d-test)
-
-    ADD_EXECUTABLE(depth-to-space-2d-test test/depth-to-space-2d.cc)
-    TARGET_INCLUDE_DIRECTORIES(depth-to-space-2d-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(depth-to-space-2d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME depth-to-space-2d-test COMMAND depth-to-space-2d-test)
-
-    ADD_EXECUTABLE(depthwise-convolution-2d-test test/depthwise-convolution-2d.cc)
-    SET_TARGET_PROPERTIES(depthwise-convolution-2d-test PROPERTIES CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(depthwise-convolution-2d-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(depthwise-convolution-2d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph convolution-test-helpers)
-    ADD_TEST(NAME depthwise-convolution-2d-test COMMAND depthwise-convolution-2d-test)
-
-    ADD_EXECUTABLE(divide2-test test/divide2.cc)
-    TARGET_INCLUDE_DIRECTORIES(divide2-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(divide2-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME divide2-test COMMAND divide2-test)
-
-    ADD_EXECUTABLE(elu-test test/elu.cc)
-    TARGET_INCLUDE_DIRECTORIES(elu-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(elu-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME elu-test COMMAND elu-test)
-
-    ADD_EXECUTABLE(gelu-test test/gelu.cc)
-    TARGET_INCLUDE_DIRECTORIES(gelu-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(gelu-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME gelu-test COMMAND gelu-test)
-
-    ADD_EXECUTABLE(exp-test test/exp.cc)
-    TARGET_INCLUDE_DIRECTORIES(exp-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(exp-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main fp16)
-    ADD_TEST(NAME exp-test COMMAND exp-test)
-
-    ADD_EXECUTABLE(even-split2-test test/even-split2.cc)
-    TARGET_INCLUDE_DIRECTORIES(even-split2-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(even-split2-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME even-split2-test COMMAND even-split2-test)
-
-    ADD_EXECUTABLE(even-split3-test test/even-split3.cc)
-    TARGET_INCLUDE_DIRECTORIES(even-split3-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(even-split3-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME even-split3-test COMMAND even-split3-test)
-
-    ADD_EXECUTABLE(even-split4-test test/even-split4.cc)
-    TARGET_INCLUDE_DIRECTORIES(even-split4-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(even-split4-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME even-split4-test COMMAND even-split4-test)
-
-    ADD_EXECUTABLE(floor-test test/floor.cc)
-    TARGET_INCLUDE_DIRECTORIES(floor-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(floor-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME floor-test COMMAND floor-test)
-
-    ADD_EXECUTABLE(global-average-pooling-1d-test test/global-average-pooling-1d.cc)
-    TARGET_INCLUDE_DIRECTORIES(global-average-pooling-1d-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(global-average-pooling-1d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME global-average-pooling-1d-test COMMAND global-average-pooling-1d-test)
-
-    ADD_EXECUTABLE(global-average-pooling-2d-test test/global-average-pooling-2d.cc)
-    TARGET_INCLUDE_DIRECTORIES(global-average-pooling-2d-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(global-average-pooling-2d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME global-average-pooling-2d-test COMMAND global-average-pooling-2d-test)
-
-    ADD_EXECUTABLE(global-sum-pooling-1d-test test/global-sum-pooling-1d.cc)
-    TARGET_INCLUDE_DIRECTORIES(global-sum-pooling-1d-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(global-sum-pooling-1d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME global-sum-pooling-1d-test COMMAND global-sum-pooling-1d-test)
-
-    ADD_EXECUTABLE(global-sum-pooling-2d-test test/global-sum-pooling-2d.cc)
-    TARGET_INCLUDE_DIRECTORIES(global-sum-pooling-2d-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(global-sum-pooling-2d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME global-sum-pooling-2d-test COMMAND global-sum-pooling-2d-test)
-
-    ADD_EXECUTABLE(hardswish-test test/hardswish.cc)
-    TARGET_INCLUDE_DIRECTORIES(hardswish-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(hardswish-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME hardswish-test COMMAND hardswish-test)
-
-    ADD_EXECUTABLE(leaky-relu-test test/leaky-relu.cc)
-    TARGET_INCLUDE_DIRECTORIES(leaky-relu-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(leaky-relu-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME leaky-relu-test COMMAND leaky-relu-test)
-
-    ADD_EXECUTABLE(log-test test/log.cc)
-    TARGET_INCLUDE_DIRECTORIES(log-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(log-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main fp16)
-    ADD_TEST(NAME log-test COMMAND log-test)
-
-    ADD_EXECUTABLE(max-pooling-2d-test test/max-pooling-2d.cc)
-    TARGET_INCLUDE_DIRECTORIES(max-pooling-2d-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(max-pooling-2d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME max-pooling-2d-test COMMAND max-pooling-2d-test)
-
-    ADD_EXECUTABLE(maximum2-test test/maximum2.cc)
-    TARGET_INCLUDE_DIRECTORIES(maximum2-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(maximum2-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME maximum2-test COMMAND maximum2-test)
-
-    ADD_EXECUTABLE(minimum2-test test/minimum2.cc)
-    TARGET_INCLUDE_DIRECTORIES(minimum2-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(minimum2-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME minimum2-test COMMAND minimum2-test)
-
-    ADD_EXECUTABLE(multiply2-test test/multiply2.cc)
-    TARGET_INCLUDE_DIRECTORIES(multiply2-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(multiply2-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME multiply2-test COMMAND multiply2-test)
-
-    ADD_EXECUTABLE(negate-test test/negate.cc)
-    TARGET_INCLUDE_DIRECTORIES(negate-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(negate-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME negate-test COMMAND negate-test)
-
-    ADD_EXECUTABLE(prelu-test test/prelu.cc)
-    TARGET_INCLUDE_DIRECTORIES(prelu-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(prelu-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME prelu-test COMMAND prelu-test)
-
-    ADD_EXECUTABLE(reciprocal-square-root-test test/reciprocal-square-root.cc)
-    TARGET_INCLUDE_DIRECTORIES(reciprocal-square-root-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(reciprocal-square-root-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME reciprocal-square-root-test COMMAND reciprocal-square-root-test)
-
-    ADD_EXECUTABLE(reshape-helpers-test test/reshape-helpers.cc)
-    TARGET_INCLUDE_DIRECTORIES(reshape-helpers-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(reshape-helpers-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME reshape-helpers-test COMMAND reshape-helpers-test)
-
-    ADD_EXECUTABLE(sigmoid-test test/sigmoid.cc)
-    SET_TARGET_PROPERTIES(sigmoid-test PROPERTIES CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(sigmoid-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(sigmoid-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME sigmoid-test COMMAND sigmoid-test)
-
-    ADD_EXECUTABLE(static-slice-test test/static-slice.cc)
-    SET_TARGET_PROPERTIES(static-slice-test PROPERTIES CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(static-slice-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(static-slice-test PRIVATE XNNPACK fp16 GTest::gmock GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME static-slice-test COMMAND static-slice-test)
-
-    ADD_EXECUTABLE(softmax-test test/softmax.cc)
-    TARGET_INCLUDE_DIRECTORIES(softmax-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(softmax-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME softmax-test COMMAND softmax-test)
-
-    ADD_EXECUTABLE(space-to-depth-2d-test test/space-to-depth-2d.cc)
-    TARGET_INCLUDE_DIRECTORIES(space-to-depth-2d-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(space-to-depth-2d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME space-to-depth-2d-test COMMAND space-to-depth-2d-test)
-
-    ADD_EXECUTABLE(square-test test/square.cc)
-    TARGET_INCLUDE_DIRECTORIES(square-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(square-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME square-test COMMAND square-test)
-
-    ADD_EXECUTABLE(square-root-test test/square-root.cc)
-    TARGET_INCLUDE_DIRECTORIES(square-root-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(square-root-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME square-root-test COMMAND square-root-test)
-
-    ADD_EXECUTABLE(squared-difference-test test/squared-difference.cc)
-    TARGET_INCLUDE_DIRECTORIES(squared-difference-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(squared-difference-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME squared-difference-test COMMAND squared-difference-test)
-
-    ADD_EXECUTABLE(static-constant-pad-test test/static-constant-pad.cc)
-    TARGET_INCLUDE_DIRECTORIES(static-constant-pad-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(static-constant-pad-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME static-constant-pad-test COMMAND static-constant-pad-test)
-
-    ADD_EXECUTABLE(static-mean-test test/static-mean.cc)
-    TARGET_INCLUDE_DIRECTORIES(static-mean-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(static-mean-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME static-mean-test COMMAND static-mean-test)
-
-    ADD_EXECUTABLE(static-reshape-test test/static-reshape.cc)
-    TARGET_INCLUDE_DIRECTORIES(static-reshape-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(static-reshape-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME static-reshape-test COMMAND static-reshape-test)
-
-    ADD_EXECUTABLE(static-resize-bilinear-2d-test test/static-resize-bilinear-2d.cc)
-    TARGET_INCLUDE_DIRECTORIES(static-resize-bilinear-2d-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(static-resize-bilinear-2d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME static-resize-bilinear-2d-test COMMAND static-resize-bilinear-2d-test)
-
-    ADD_EXECUTABLE(static-transpose-test test/static-transpose.cc)
-    TARGET_INCLUDE_DIRECTORIES(static-transpose-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(static-transpose-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME static-transpose-test COMMAND static-transpose-test)
-
-    ADD_EXECUTABLE(subtract2-test test/subtract2.cc)
-    TARGET_INCLUDE_DIRECTORIES(subtract2-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(subtract2-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME subtract2-test COMMAND subtract2-test)
-
-    ADD_EXECUTABLE(tanh-test test/sigmoid.cc)
-    SET_TARGET_PROPERTIES(tanh-test PROPERTIES CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(tanh-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(tanh-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME tanh-test COMMAND tanh-test)
-
-    ADD_EXECUTABLE(transpose-reshape-test test/transpose-reshape.cc)
-    TARGET_INCLUDE_DIRECTORIES(transpose-reshape-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(transpose-reshape-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME transpose-reshape-test COMMAND transpose-reshape-test)
-
-    ADD_EXECUTABLE(unpooling-2d-test test/unpooling-2d.cc)
-    TARGET_INCLUDE_DIRECTORIES(unpooling-2d-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(unpooling-2d-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_TEST(NAME unpooling-2d-test COMMAND unpooling-2d-test)
+    FOREACH(TEST ${LIBRARY_SUBGRAPH_UNIT_TESTS})
+      ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+      TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
+      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE XNNPACK GTest::gmock GTest::gtest GTest::gtest_main fp16 subgraph convolution-test-helpers)
+      ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+    ENDFOREACH()
   ENDIF()
 
   # ---[ Normalization unit tests
-  ADD_EXECUTABLE(slice-normalization-test test/slice-normalization.cc)
-  TARGET_INCLUDE_DIRECTORIES(slice-normalization-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(slice-normalization-test PRIVATE GTest::gtest GTest::gtest_main pthreadpool)
-  TARGET_LINK_LIBRARIES(slice-normalization-test PRIVATE normalization)
-  ADD_TEST(NAME slice-normalization-test COMMAND slice-normalization-test)
+  SET(NORMALIZATION_UNIT_TESTS
+      slice-normalization
+      reduce-normalization
+      transpose-normalization)
 
-  ADD_EXECUTABLE(reduce-normalization-test test/reduce-normalization.cc)
-  TARGET_INCLUDE_DIRECTORIES(reduce-normalization-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(reduce-normalization-test PRIVATE GTest::gtest GTest::gtest_main pthreadpool)
-  TARGET_LINK_LIBRARIES(reduce-normalization-test PRIVATE normalization)
-  ADD_TEST(NAME reduce-normalization-test COMMAND reduce-normalization-test)
-
-  ADD_EXECUTABLE(transpose-normalization-test test/transpose-normalization.cc)
-  TARGET_INCLUDE_DIRECTORIES(transpose-normalization-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(transpose-normalization-test PRIVATE GTest::gtest GTest::gtest_main pthreadpool)
-  TARGET_LINK_LIBRARIES(transpose-normalization-test PRIVATE normalization)
-  ADD_TEST(NAME transpose-normalization-test COMMAND transpose-normalization-test)
+  FOREACH(TEST ${NORMALIZATION_UNIT_TESTS})
+    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE GTest::gtest GTest::gtest_main pthreadpool normalization)
+    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+  ENDFOREACH()
 
   # ---[ Build microkernel-level unit tests
   ADD_EXECUTABLE(bf16-vabs-test test/bf16-vabs.cc)
@@ -3305,6 +3062,16 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(xx-transposev-test PRIVATE hardware-config logging microkernels-all)
   ADD_TEST(NAME xx-transposev-test COMMAND xx-transposev-test)
 
+  ADD_EXECUTABLE(packing-test test/packing.cc)
+  TARGET_INCLUDE_DIRECTORIES(packing-test PRIVATE include src)
+  TARGET_LINK_LIBRARIES(packing-test PRIVATE fp16 GTest::gmock GTest::gtest GTest::gtest_main pthreadpool)
+  TARGET_LINK_LIBRARIES(packing-test PRIVATE XNNPACK microkernel-utils operator-utils packing)
+
+  ADD_EXECUTABLE(indirection-test test/indirection.cc)
+  TARGET_INCLUDE_DIRECTORIES(indirection-test PRIVATE include src)
+  TARGET_LINK_LIBRARIES(indirection-test PRIVATE GTest::gtest GTest::gtest_main pthreadpool)
+  TARGET_LINK_LIBRARIES(indirection-test PRIVATE XNNPACK indirection)
+
   IF(XNNPACK_BUILD_LIBRARY)
     ADD_EXECUTABLE(weights-cache-test test/weights-cache.cc)
     TARGET_INCLUDE_DIRECTORIES(weights-cache-test PRIVATE include src)
@@ -3324,15 +3091,6 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(operator-utils-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main pthreadpool)
   ENDIF()
 
-  ADD_EXECUTABLE(packing-test test/packing.cc)
-  TARGET_INCLUDE_DIRECTORIES(packing-test PRIVATE include src)
-  TARGET_LINK_LIBRARIES(packing-test PRIVATE fp16 GTest::gmock GTest::gtest GTest::gtest_main pthreadpool)
-  TARGET_LINK_LIBRARIES(packing-test PRIVATE XNNPACK microkernel-utils operator-utils packing)
-
-  ADD_EXECUTABLE(indirection-test test/indirection.cc)
-  TARGET_INCLUDE_DIRECTORIES(indirection-test PRIVATE include src)
-  TARGET_LINK_LIBRARIES(indirection-test PRIVATE GTest::gtest GTest::gtest_main pthreadpool)
-  TARGET_LINK_LIBRARIES(indirection-test PRIVATE XNNPACK indirection)
 
   # ---[ Mark the operator tests as such.
   MACRO(get_all_test_targets_recursive test_targets dir)
