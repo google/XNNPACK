@@ -26,10 +26,10 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__scalar_select_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const int32_t vinput_zero_point = params->scalar_select.input_zero_point;
-  const int32_t vpositive_multiplier = params->scalar_select.positive_multiplier;
-  const int32_t vnegative_multiplier = params->scalar_select.negative_multiplier;
-  const int32_t vbias = params->scalar_select.bias;
+  const int32_t vinput_zero_point = params->scalar.input_zero_point;
+  const int32_t vpositive_multiplier = params->scalar.positive_multiplier;
+  const int32_t vnegative_multiplier = params->scalar.negative_multiplier;
+  const int32_t vbias = (params->scalar.output_zero_point << 8) + 0x80;
   $if BATCH_TILE == 1:
     do {
       int32_t vacc = (int32_t) *input++ - vinput_zero_point;

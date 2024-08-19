@@ -24,10 +24,10 @@ void xnn_qs8_vlrelu_ukernel__scalar_select_u1(
   assert(input != NULL);
   assert(output != NULL);
 
-  const int32_t vinput_zero_point = params->scalar_select.input_zero_point;
-  const int32_t vpositive_multiplier = params->scalar_select.positive_multiplier;
-  const int32_t vnegative_multiplier = params->scalar_select.negative_multiplier;
-  const int32_t vbias = params->scalar_select.bias;
+  const int32_t vinput_zero_point = params->scalar.input_zero_point;
+  const int32_t vpositive_multiplier = params->scalar.positive_multiplier;
+  const int32_t vnegative_multiplier = params->scalar.negative_multiplier;
+  const int32_t vbias = (params->scalar.output_zero_point << 8) + 0x80;
   do {
     int32_t vacc = (int32_t) *input++ - vinput_zero_point;
     const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vpositive_multiplier : vnegative_multiplier;

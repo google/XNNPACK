@@ -611,13 +611,6 @@ DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_scalar_params)
     float slope);
 
 DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(xnn_init_f32_lrelu_scalar_params)
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(xnn_init_f32_lrelu_sse_params)
-  DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(xnn_init_f32_lrelu_avx_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(xnn_init_f32_lrelu_wasmsimd_params)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 #define DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(fn_name)     \
@@ -628,23 +621,7 @@ DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(xnn_init_f32_lrelu_scalar_params)
     int8_t input_zero_point,                                \
     int8_t output_zero_point);
 
-DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_scalar_andxor_params)
-DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_scalar_select_params)
-#if XNN_ARCH_ARM
-  DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_armsimd32_params)
-#endif  // XNN_ARCH_ARM
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_neon_params)
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_sse2_params)
-  DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_avx_params)
-  DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_avx2_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_wasmsimd_arm_params)
-  DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_wasmsimd_x86_params)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_scalar_params)
 
 
 #define DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(fn_name)     \
@@ -655,23 +632,7 @@ DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_scalar_select_params)
     uint8_t input_zero_point,                               \
     uint8_t output_zero_point);
 
-DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_scalar_andxor_params)
-DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_scalar_select_params)
-#if XNN_ARCH_ARM
-  DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_armsimd32_params)
-#endif  // XNN_ARCH_ARM
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_neon_params)
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_sse2_params)
-  DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_avx_params)
-  DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_avx2_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_wasmsimd_arm_params)
-  DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_wasmsimd_x86_params)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_scalar_params)
 
 
 #define DECLARE_INIT_F32_SQRT_PARAMS_FUNCTION(fn_name)      \

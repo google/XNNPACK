@@ -26,10 +26,10 @@ void xnn_qs8_vlrelu_ukernel__neon_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const int16x8_t vinput_zero_point = vld1q_dup_s16(&params->neon.input_zero_point);
-  const int16x8_t vpositive_multiplier = vld1q_dup_s16(&params->neon.positive_multiplier);
-  const int16x8_t vnegative_multiplier = vld1q_dup_s16(&params->neon.negative_multiplier);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
+  const int16x8_t vinput_zero_point = vld1q_dup_s16(&params->scalar.input_zero_point);
+  const int16x8_t vpositive_multiplier = vdupq_n_s16(-params->scalar.positive_multiplier);
+  const int16x8_t vnegative_multiplier = vdupq_n_s16(-params->scalar.negative_multiplier);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
   for (; batch >= 32 * sizeof(int8_t); batch -= 32 * sizeof(int8_t)) {
     const int8x16_t vx0 = vld1q_s8(input); input += 16;
     const int8x16_t vx1 = vld1q_s8(input); input += 16;

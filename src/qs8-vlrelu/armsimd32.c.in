@@ -34,10 +34,10 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__armsimd32_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const ${XINT16X2_T} vinput_zero_point = (${XINT16X2_T}) params->armsimd32.input_zero_point;
-  const int16x2_t vpositive_multiplier = (int16x2_t) params->armsimd32.positive_multiplier;
-  const int16x2_t vnegative_multiplier = (int16x2_t) params->armsimd32.negative_multiplier;
-  const int32_t vbias = params->armsimd32.bias;
+  const ${XINT16X2_T} vinput_zero_point = (${XINT16X2_T}) broadcast2x_uint16(params->scalar.input_zero_point);
+  const int16x2_t vpositive_multiplier = (int16x2_t) broadcast2x_uint16(-params->scalar.positive_multiplier);
+  const int16x2_t vnegative_multiplier = (int16x2_t) broadcast2x_uint16(-params->scalar.negative_multiplier);
+  const int32_t vbias = (params->scalar.output_zero_point << 8) + 0x80;
   $if BATCH_TILE > 4:
     for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
       $for N in range(SIMD_TILE):

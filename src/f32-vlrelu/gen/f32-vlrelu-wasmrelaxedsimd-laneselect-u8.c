@@ -26,7 +26,7 @@ void xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_laneselect_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vslope = wasm_v128_load64_splat(params->wasmsimd.slope);
+  const v128_t vslope = wasm_v128_load32_splat(&params->scalar.slope);
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const v128_t vx0123 = wasm_v128_load(input);
     const v128_t vx4567 = wasm_v128_load(input + 4);

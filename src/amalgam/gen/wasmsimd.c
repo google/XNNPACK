@@ -27056,7 +27056,7 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_iminmax_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vslope = wasm_v128_load64_splat(params->wasmsimd.slope);
+  const v128_t vslope = wasm_v128_load32_splat(&params->scalar.slope);
   const v128_t vzero = wasm_i32x4_const_splat(0);
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     v128_t vx0123 = wasm_v128_load(input);
@@ -27112,7 +27112,7 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_laneselect_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vslope = wasm_v128_load64_splat(params->wasmsimd.slope);
+  const v128_t vslope = wasm_v128_load32_splat(&params->scalar.slope);
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const v128_t vx0123 = wasm_v128_load(input);
     const v128_t vx4567 = wasm_v128_load(input + 4);
@@ -33445,10 +33445,14 @@ void xnn_qs8_vlrelu_ukernel__wasmsimd_arm_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vinput_zero_point = wasm_v128_load64_splat(params->wasmsimd_arm.input_zero_point);
-  const v128_t vpositive_multiplier = wasm_v128_load64_splat(params->wasmsimd_arm.positive_multiplier);
-  const v128_t vnegative_multiplier = wasm_v128_load64_splat(params->wasmsimd_arm.negative_multiplier);
-  const v128_t voutput_zero_point = wasm_v128_load64_splat(params->wasmsimd_arm.output_zero_point);
+  const v128_t vinput_zero_point = wasm_v128_load16_splat(&params->scalar.input_zero_point);
+  const v128_t vpositive_multiplier = wasm_i16x8_splat(-params->scalar.positive_multiplier);
+  const v128_t vnegative_multiplier = wasm_i16x8_splat(-params->scalar.negative_multiplier);
+  const v128_t voutput_zero_point = wasm_v128_load16_splat(&params->scalar.output_zero_point);
+  XNN_FORCE_REALIZATION(vinput_zero_point);
+  XNN_FORCE_REALIZATION(vpositive_multiplier);
+  XNN_FORCE_REALIZATION(vnegative_multiplier);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
   for (; batch >= 32 * sizeof(int8_t); batch -= 32 * sizeof(int8_t)) {
     v128_t vx0 = wasm_v128_load(input);
     v128_t vx1 = wasm_v128_load(input + 16);
@@ -33543,10 +33547,12 @@ void xnn_qs8_vlrelu_ukernel__wasmsimd_x86_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vinput_zero_point = wasm_v128_load64_splat(params->wasmsimd_x86.input_zero_point);
-  const v128_t vmultiplier_diff = wasm_v128_load64_splat(params->wasmsimd_x86.multiplier_diff);
-  const v128_t vmultiplier_base = wasm_v128_load64_splat(params->wasmsimd_x86.multiplier_base);
-  const v128_t voutput_zero_point = wasm_v128_load64_splat(params->wasmsimd_x86.output_zero_point);
+  const v128_t vinput_zero_point = wasm_v128_load16_splat(&params->scalar.input_zero_point);
+  const v128_t vmultiplier_diff = wasm_i16x8_splat(-params->scalar.negative_multiplier ^ -params->scalar.positive_multiplier);
+  const v128_t vmultiplier_base = wasm_i16x8_splat(-params->scalar.negative_multiplier);
+  const v128_t voutput_zero_point = wasm_v128_load16_splat(&params->scalar.output_zero_point);
+  XNN_FORCE_REALIZATION(vinput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
   for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
     v128_t vacc0 = wasm_i16x8_load8x8(input);
     v128_t vacc1 = wasm_i16x8_load8x8(input + 8);
@@ -36458,10 +36464,14 @@ void xnn_qu8_vlrelu_ukernel__wasmsimd_arm_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vinput_zero_point = wasm_v128_load64_splat(params->wasmsimd_arm.input_zero_point);
-  const v128_t vpositive_multiplier = wasm_v128_load64_splat(params->wasmsimd_arm.positive_multiplier);
-  const v128_t vnegative_multiplier = wasm_v128_load64_splat(params->wasmsimd_arm.negative_multiplier);
-  const v128_t voutput_zero_point = wasm_v128_load64_splat(params->wasmsimd_arm.output_zero_point);
+  const v128_t vinput_zero_point = wasm_v128_load16_splat(&params->scalar.input_zero_point);
+  const v128_t vpositive_multiplier = wasm_i16x8_splat(-params->scalar.positive_multiplier);
+  const v128_t vnegative_multiplier = wasm_i16x8_splat(-params->scalar.negative_multiplier);
+  const v128_t voutput_zero_point = wasm_v128_load16_splat(&params->scalar.output_zero_point);
+  XNN_FORCE_REALIZATION(vinput_zero_point);
+  XNN_FORCE_REALIZATION(vpositive_multiplier);
+  XNN_FORCE_REALIZATION(vnegative_multiplier);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
   for (; batch >= 32 * sizeof(uint8_t); batch -= 32 * sizeof(uint8_t)) {
     v128_t vx0 = wasm_v128_load(input);
     v128_t vx1 = wasm_v128_load(input + 16);
@@ -36556,10 +36566,12 @@ void xnn_qu8_vlrelu_ukernel__wasmsimd_x86_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vinput_zero_point = wasm_v128_load64_splat(params->wasmsimd_x86.input_zero_point);
-  const v128_t vmultiplier_diff = wasm_v128_load64_splat(params->wasmsimd_x86.multiplier_diff);
-  const v128_t vmultiplier_base = wasm_v128_load64_splat(params->wasmsimd_x86.multiplier_base);
-  const v128_t voutput_zero_point = wasm_v128_load64_splat(params->wasmsimd_x86.output_zero_point);
+  const v128_t vinput_zero_point = wasm_v128_load16_splat(&params->scalar.input_zero_point);
+  const v128_t vmultiplier_diff = wasm_i16x8_splat(-params->scalar.negative_multiplier ^ -params->scalar.positive_multiplier);
+  const v128_t vmultiplier_base = wasm_i16x8_splat(-params->scalar.negative_multiplier);
+  const v128_t voutput_zero_point = wasm_v128_load16_splat(&params->scalar.output_zero_point);
+  XNN_FORCE_REALIZATION(vinput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
   for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
     v128_t vacc0 = wasm_u16x8_load8x8(input);
     v128_t vacc1 = wasm_u16x8_load8x8(input + 8);

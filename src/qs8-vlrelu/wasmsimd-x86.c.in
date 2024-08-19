@@ -31,10 +31,12 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__${ISA}_x86_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vinput_zero_point = wasm_v128_load64_splat(params->wasmsimd_x86.input_zero_point);
-  const v128_t vmultiplier_diff = wasm_v128_load64_splat(params->wasmsimd_x86.multiplier_diff);
-  const v128_t vmultiplier_base = wasm_v128_load64_splat(params->wasmsimd_x86.multiplier_base);
-  const v128_t voutput_zero_point = wasm_v128_load64_splat(params->wasmsimd_x86.output_zero_point);
+  const v128_t vinput_zero_point = wasm_v128_load16_splat(&params->scalar.input_zero_point);
+  const v128_t vmultiplier_diff = wasm_i16x8_splat(-params->scalar.negative_multiplier ^ -params->scalar.positive_multiplier);
+  const v128_t vmultiplier_base = wasm_i16x8_splat(-params->scalar.negative_multiplier);
+  const v128_t voutput_zero_point = wasm_v128_load16_splat(&params->scalar.output_zero_point);
+  XNN_FORCE_REALIZATION(vinput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
       v128_t vacc${ABC[0]} = ${WASM_X16X8_LOAD8X8}(input);
