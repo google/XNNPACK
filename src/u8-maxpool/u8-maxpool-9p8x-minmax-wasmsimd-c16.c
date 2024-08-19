@@ -25,8 +25,10 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16(
   assert(kernel_elements != 0);
   assert(channels != 0);
 
-  const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd.max);
-  const v128_t voutput_min = wasm_v128_load64_splat(params->wasmsimd.min);
+  const v128_t voutput_max = wasm_v128_load8_splat(&params->scalar.max);
+  const v128_t voutput_min = wasm_v128_load8_splat(&params->scalar.min);
+  XNN_FORCE_REALIZATION(voutput_max);
+  XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     uint8_t* o = output;

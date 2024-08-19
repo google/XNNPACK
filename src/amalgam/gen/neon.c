@@ -25032,8 +25032,8 @@ void xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16(
   assert(kernel_elements != 0);
   assert(channels != 0);
 
-  const int8x16_t voutput_max = vld1q_dup_s8(&params->neon.max);
-  const int8x16_t voutput_min = vld1q_dup_s8(&params->neon.min);
+  const int8x16_t voutput_max = vld1q_dup_s8(&params->scalar.max);
+  const int8x16_t voutput_min = vld1q_dup_s8(&params->scalar.min);
   do {
     int8_t* o = output;
     {
@@ -25267,8 +25267,8 @@ void xnn_s8_vclamp_ukernel__neon_u64(
   assert(input != NULL);
   assert(output != NULL);
 
-  const int8x16_t voutput_max = vld1q_dup_s8(&params->neon.max);
-  const int8x16_t voutput_min = vld1q_dup_s8(&params->neon.min);
+  const int8x16_t voutput_max = vld1q_dup_s8(&params->scalar.max);
+  const int8x16_t voutput_min = vld1q_dup_s8(&params->scalar.min);
 
   for (; batch >= 64; batch -= 64) {
     int8x16_t vacc0 = vld1q_s8(input); input += 16;
@@ -25641,8 +25641,8 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16(
   assert(kernel_elements != 0);
   assert(channels != 0);
 
-  const uint8x16_t voutput_max = vld1q_dup_u8(&params->neon.max);
-  const uint8x16_t voutput_min = vld1q_dup_u8(&params->neon.min);
+  const uint8x16_t voutput_max = vld1q_dup_u8(&params->scalar.max);
+  const uint8x16_t voutput_min = vld1q_dup_u8(&params->scalar.min);
   do {
     uint8_t* o = output;
     {
@@ -25911,8 +25911,8 @@ void xnn_u8_vclamp_ukernel__neon_u64(
   assert(input != NULL);
   assert(output != NULL);
 
-  const uint8x16_t voutput_max = vld1q_dup_u8(&params->neon.max);
-  const uint8x16_t voutput_min = vld1q_dup_u8(&params->neon.min);
+  const uint8x16_t voutput_max = vld1q_dup_u8(&params->scalar.max);
+  const uint8x16_t voutput_min = vld1q_dup_u8(&params->scalar.min);
 
   for (; batch >= 64; batch -= 64) {
     uint8x16_t vacc0 = vld1q_u8(input); input += 16;

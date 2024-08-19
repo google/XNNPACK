@@ -2226,7 +2226,7 @@ static void init_s8_clamp_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__neon_u64;
-      s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_neon_params;
+      s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
       s8_clamp_config.element_tile = 64;
     } else if (!XNN_PLATFORM_MOBILE) {
       s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__scalar_u4;
@@ -2235,23 +2235,23 @@ static void init_s8_clamp_config(void) {
     }
   #elif XNN_ARCH_ARM64
     s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__neon_u64;
-    s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_neon_params;
+    s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
     s8_clamp_config.element_tile = 64;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_sse4_1) {
       s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__sse41_u64;
-      s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_sse4_params;
+      s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
       s8_clamp_config.element_tile = 64;
     } else {
       s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__sse2_u64;
-      s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_sse2_params;
+      s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
       s8_clamp_config.element_tile = 64;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__wasmsimd_u64;
-    s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_wasmsimd_params;
+    s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
     s8_clamp_config.element_tile = 64;
   #elif XNN_ARCH_WASM
     s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__scalar_u4;
@@ -2274,7 +2274,7 @@ static void init_u8_clamp_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__neon_u64;
-      u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_neon_params;
+      u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
       u8_clamp_config.element_tile = 64;
     } else if (!XNN_PLATFORM_MOBILE) {
       u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__scalar_u4;
@@ -2283,15 +2283,15 @@ static void init_u8_clamp_config(void) {
     }
   #elif XNN_ARCH_ARM64
     u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__neon_u64;
-    u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_neon_params;
+    u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
     u8_clamp_config.element_tile = 64;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__sse2_u64;
-    u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_sse2_params;
+    u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
     u8_clamp_config.element_tile = 64;
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__wasmsimd_u64;
-    u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_wasmsimd_params;
+    u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
     u8_clamp_config.element_tile = 64;
   #elif XNN_ARCH_WASM
     u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__scalar_u4;

@@ -25,8 +25,8 @@ void xnn_s8_maxpool_minmax_ukernel_2p2x__neon_c16(
   assert(kernel_elements != 0);
   assert(channels != 0);
 
-  const int8x16_t voutput_max = vld1q_dup_s8(&params->neon.max);
-  const int8x16_t voutput_min = vld1q_dup_s8(&params->neon.min);
+  const int8x16_t voutput_max = vld1q_dup_s8(&params->scalar.max);
+  const int8x16_t voutput_min = vld1q_dup_s8(&params->scalar.min);
   do {
     int8_t* o = output;
     {

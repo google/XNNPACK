@@ -358,29 +358,6 @@ union xnn_s8_minmax_params {
     int32_t min;
     int32_t max;
   } scalar;
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) uint8_t bias[16];
-    XNN_ALIGN(16) uint8_t min_with_bias[16];
-    XNN_ALIGN(16) uint8_t max_with_bias[16];
-  } sse2;
-  struct {
-    XNN_ALIGN(16) int8_t min[16];
-    XNN_ALIGN(16) int8_t max[16];
-  } sse4;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
-    int8_t min;
-    int8_t max;
-  } neon;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  struct {
-    XNN_ALIGN(8) int8_t min[8];
-    XNN_ALIGN(8) int8_t max[8];
-  } wasmsimd;
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
 union xnn_u8_minmax_params {
@@ -388,24 +365,6 @@ union xnn_u8_minmax_params {
     uint32_t min;
     uint32_t max;
   } scalar;
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) uint8_t min[16];
-    XNN_ALIGN(16) uint8_t max[16];
-  } sse2;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
-    uint8_t min;
-    uint8_t max;
-  } neon;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  struct {
-    XNN_ALIGN(8) uint8_t min[8];
-    XNN_ALIGN(8) uint8_t max[8];
-  } wasmsimd;
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
 
