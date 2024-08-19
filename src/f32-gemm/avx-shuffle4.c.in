@@ -76,6 +76,11 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
     const __m128i vminus_kernel_zero_point = _mm_load_si128((const __m128i *) params->sse.minus_kernel_zero_point);
     const __m128i vmask = _mm_load_si128((const __m128i *) params->sse.mask);
 
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+
   do {
     $if INC:
       $for M in range(MR):
@@ -172,12 +177,10 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         $for M in range(MR):
           vacc${M}x${ABC[N:N+8]} = _mm256_mul_ps(vacc${M}x${ABC[N:N+8]}, vscale${ABC[N:N+8]});
       w = (const float*) w + ${NR};
-    const __m256 vmin = _mm256_load_ps(params->avx.min);
     $for N in range(0, NR, 8):
       $for M in range(MR):
         vacc${M}x${ABC[N:N+8]} = _mm256_max_ps(vmin, vacc${M}x${ABC[N:N+8]});
 
-    const __m256 vmax = _mm256_load_ps(params->avx.max);
     $for N in range(0, NR, 8):
       $for M in range(MR):
         vacc${M}x${ABC[N:N+8]} = _mm256_min_ps(vmax, vacc${M}x${ABC[N:N+8]});

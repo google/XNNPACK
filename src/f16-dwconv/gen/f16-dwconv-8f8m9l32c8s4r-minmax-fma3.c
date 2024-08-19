@@ -36,8 +36,11 @@ void xnn_f16_dwconv_minmax_ukernel_8f8m9l32c8s4r__fma3(
   assert(output_width != 0);
   assert(kernel_size > 8);
 
-  const __m256 vmax = _mm256_load_ps(params->avx.max);
-  const __m256 vmin = _mm256_load_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+
   do {
     const uint16_t* w = weights;
 

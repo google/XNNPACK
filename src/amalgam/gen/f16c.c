@@ -45,9 +45,12 @@ void xnn_f16_avgpool_minmax_ukernel_9p8x__f16c_c8(
   assert(kernel_elements > 9);
   assert(channels != 0);
 
-  const __m256 vscale = _mm256_load_ps(params->avx.scale);
-  const __m256 vmin = _mm256_load_ps(params->avx.min);
-  const __m256 vmax = _mm256_load_ps(params->avx.max);
+  const __m256 vscale = _mm256_set1_ps(params->avx.scale);
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
 
   uint16_t* o = (uint16_t*) output;
   do {
@@ -377,9 +380,12 @@ void xnn_f16_avgpool_minmax_ukernel_9x__f16c_c8(
   assert(kernel_elements <= 9);
   assert(channels != 0);
 
-  const __m256 vscale = _mm256_load_ps(params->avx.scale);
-  const __m256 vmin = _mm256_load_ps(params->avx.min);
-  const __m256 vmax = _mm256_load_ps(params->avx.max);
+  const __m256 vscale = _mm256_set1_ps(params->avx.scale);
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
 
   uint16_t* o = (uint16_t*) output;
   do {
@@ -998,9 +1004,12 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c8(
   }
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vscale = _mm256_load_ps(params->avx.scale);
-  const __m256 vmin = _mm256_load_ps(params->avx.min);
-  const __m256 vmax = _mm256_load_ps(params->avx.max);
+  const __m256 vscale = _mm256_set1_ps(params->avx.scale);
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
   for (; channels >= 8; channels -= 8) {
     __m128i vacc01234567 = _mm_loadu_si128((const __m128i*) buffer); buffer = (uint16_t*) buffer + 8;
 
@@ -1110,9 +1119,12 @@ void xnn_f16_gavgpool_minmax_ukernel_7x__f16c_c8(
   }
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vscale = _mm256_load_ps(params->avx.scale);
-  const __m256 vmin = _mm256_load_ps(params->avx.min);
-  const __m256 vmax = _mm256_load_ps(params->avx.max);
+  const __m256 vscale = _mm256_set1_ps(params->avx.scale);
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
   for (; channels >= 8; channels -= 8) {
     const __m256 vi0x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0));
     i0 += 8;
@@ -1201,8 +1213,10 @@ void xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8(
   assert(kernel_elements != 0);
   assert(channels != 0);
 
-  const __m256 voutput_min = _mm256_load_ps(params->avx.min);
-  const __m256 voutput_max = _mm256_load_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->avx.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(voutput_min);
+  XNN_FORCE_REALIZATION(voutput_max);
   do {
     uint16_t* o = output;
     {
@@ -1653,8 +1667,10 @@ void xnn_f16_vadd_minmax_ukernel__f16c_u16(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 vy_min = _mm256_set1_ps(params->avx.min);
+  const __m256 vy_max = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vy_min);
+  XNN_FORCE_REALIZATION(vy_max);
 
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
     const __m256 va01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) a));
@@ -1735,8 +1751,10 @@ void xnn_f16_vaddc_minmax_ukernel__f16c_u16(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 vy_min = _mm256_set1_ps(params->avx.min);
+  const __m256 vy_max = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vy_min);
+  XNN_FORCE_REALIZATION(vy_max);
 
   const __m256 vb = _mm256_cvtph_ps(_mm_set1_epi16((short) *b));
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
@@ -1812,8 +1830,10 @@ void xnn_f16_vdiv_minmax_ukernel__f16c_u8(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 vy_min = _mm256_set1_ps(params->avx.min);
+  const __m256 vy_max = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vy_min);
+  XNN_FORCE_REALIZATION(vy_max);
 
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const __m256 va = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) a));
@@ -1872,8 +1892,10 @@ void xnn_f16_vdivc_minmax_ukernel__f16c_u8(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 vy_min = _mm256_set1_ps(params->avx.min);
+  const __m256 vy_max = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vy_min);
+  XNN_FORCE_REALIZATION(vy_max);
 
   const __m256 vb = _mm256_cvtph_ps(_mm_set1_epi16((short) *b));
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
@@ -2204,8 +2226,10 @@ void xnn_f16_vmul_minmax_ukernel__f16c_u16(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 vy_min = _mm256_set1_ps(params->avx.min);
+  const __m256 vy_max = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vy_min);
+  XNN_FORCE_REALIZATION(vy_max);
 
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
     const __m256 va01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) a));
@@ -2286,8 +2310,10 @@ void xnn_f16_vmulc_minmax_ukernel__f16c_u16(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 vy_min = _mm256_set1_ps(params->avx.min);
+  const __m256 vy_max = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vy_min);
+  XNN_FORCE_REALIZATION(vy_max);
 
   const __m256 vb = _mm256_cvtph_ps(_mm_set1_epi16((short) *b));
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
@@ -2363,8 +2389,10 @@ void xnn_f16_vrdivc_minmax_ukernel__f16c_u8(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 vy_min = _mm256_set1_ps(params->avx.min);
+  const __m256 vy_max = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vy_min);
+  XNN_FORCE_REALIZATION(vy_max);
 
   const __m256 vb = _mm256_cvtph_ps(_mm_set1_epi16((short) *b));
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
@@ -2421,8 +2449,10 @@ void xnn_f16_vrsubc_minmax_ukernel__f16c_u16(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 vy_min = _mm256_set1_ps(params->avx.min);
+  const __m256 vy_max = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vy_min);
+  XNN_FORCE_REALIZATION(vy_max);
 
   const __m256 vb = _mm256_cvtph_ps(_mm_set1_epi16((short) *b));
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
@@ -2643,8 +2673,10 @@ void xnn_f16_vsub_minmax_ukernel__f16c_u16(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 vy_min = _mm256_set1_ps(params->avx.min);
+  const __m256 vy_max = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vy_min);
+  XNN_FORCE_REALIZATION(vy_max);
 
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
     const __m256 va01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) a));
@@ -2725,8 +2757,10 @@ void xnn_f16_vsubc_minmax_ukernel__f16c_u16(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 vy_min = _mm256_set1_ps(params->avx.min);
+  const __m256 vy_max = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vy_min);
+  XNN_FORCE_REALIZATION(vy_max);
 
   const __m256 vb = _mm256_cvtph_ps(_mm_set1_epi16((short) *b));
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
@@ -2799,8 +2833,8 @@ void xnn_f16_vclamp_ukernel__f16c_u16(
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 vy_min = _mm256_set1_ps(params->avx.min);
+  const __m256 vy_max = _mm256_set1_ps(params->avx.max);
 
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
     __m256 vacc01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));

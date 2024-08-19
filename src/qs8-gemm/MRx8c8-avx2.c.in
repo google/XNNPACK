@@ -108,6 +108,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
     const __m256i vb_zero_point = _mm256_load_si256((const __m256i*) params->${PARAMS_STRUCT}.kernel_zero_point);
   $if DATATYPE in ["QC4_F16", "QC4_F32", "QB4_F16", "QB4_F32"]:
     const __m128i vmask = _mm_load_si128((const __m128i*) params->avx.mask);  // 0xF0
+  $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32", "QB4_F16", "QB4_F32"]:
+    const __m256 vmin = _mm256_set1_ps(params->avx.min);
+    const __m256 vmax = _mm256_set1_ps(params->avx.max);
+    XNN_FORCE_REALIZATION(vmin);
+    XNN_FORCE_REALIZATION(vmax);
   do {
     $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
       $for N in range(0, 8, 2):
@@ -285,11 +290,9 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
         
 
       $if DATATYPE in ["QC4_F16", "QB4_F16", "QD8_F16"]:
-        const __m256 vmin = _mm256_load_ps(params->avx.min);
         $for M in range(MR):
           vout${M}x01234567 = _mm256_max_ps(vout${M}x01234567, vmin);
 
-        const __m256 vmax = _mm256_load_ps(params->avx.max);
         $for M in range(MR):
           vout${M}x01234567 = _mm256_min_ps(vout${M}x01234567, vmax);
         $for M in range(MR):
@@ -337,11 +340,9 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
           nc = 0;
         }
       $else:
-        const __m256 vmin = _mm256_load_ps(params->avx.min);
         $for M in range(MR):
           vout${M}x01234567 = _mm256_max_ps(vout${M}x01234567, vmin);
 
-        const __m256 vmax = _mm256_load_ps(params->avx.max);
         $for M in range(MR):
           vout${M}x01234567 = _mm256_min_ps(vout${M}x01234567, vmax);
 

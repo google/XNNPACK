@@ -57,6 +57,11 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x2c4__sse41(
     c3 = c2;
   }
 
+  const __m128 vmax = _mm_set1_ps(params->sse.max);
+  const __m128 vmin = _mm_set1_ps(params->sse.min);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+
   do {
     __m128 vacc0x0c4 = _mm_load_ss(w);
     __m128 vacc0x1c4 = _mm_load_ss((const float*) w + 1);
@@ -136,11 +141,9 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x2c4__sse41(
     w = (const float*) w + 2;
     vacc01x01 = _mm_mul_ps(vacc01x01, vscale2x01);
     vacc23x01 = _mm_mul_ps(vacc23x01, vscale2x01);
-    const __m128 vmax = _mm_load_ps(params->sse.max);
     vacc01x01 = _mm_min_ps(vacc01x01, vmax);
     vacc23x01 = _mm_min_ps(vacc23x01, vmax);
 
-    const __m128 vmin = _mm_load_ps(params->sse.min);
     vacc01x01 = _mm_max_ps(vacc01x01, vmin);
     vacc23x01 = _mm_max_ps(vacc23x01, vmin);
 

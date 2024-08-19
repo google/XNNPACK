@@ -7,6 +7,7 @@
 
 #include <xmmintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gavgpool.h"
 
 
@@ -48,9 +49,12 @@ void xnn_f32_gavgpool_minmax_ukernel_7x__sse_c4(
   if (rows <= 6) {
     i6 = zero;
   }
-  const __m128 vscale = _mm_load_ps(params->sse.scale);
-  const __m128 vmin = _mm_load_ps(params->sse.min);
-  const __m128 vmax = _mm_load_ps(params->sse.max);
+  const __m128 vscale = _mm_set1_ps(params->sse.scale);
+  const __m128 vmin = _mm_set1_ps(params->sse.min);
+  const __m128 vmax = _mm_set1_ps(params->sse.max);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
 
   while (channels >= 4) {
     const __m128 vi0 = _mm_loadu_ps(i0);

@@ -33,8 +33,10 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_2x4(
 
   const __m128 vmask_even = _mm_load_ps((const float*) params->sse_stride2.mask_even);
   const __m128 vmask_odd  = _mm_load_ps((const float*) params->sse_stride2.mask_odd);
-  const __m128 vmax = _mm_load_ps(params->sse_stride2.max);
-  const __m128 vmin = _mm_load_ps(params->sse_stride2.min);
+  const __m128 vmax = _mm_set1_ps(params->sse_stride2.max);
+  const __m128 vmin = _mm_set1_ps(params->sse_stride2.min);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
 
   const __m128 vbias = _mm_load1_ps(weights);
   const __m128 vk00 = _mm_load1_ps(weights + 1);

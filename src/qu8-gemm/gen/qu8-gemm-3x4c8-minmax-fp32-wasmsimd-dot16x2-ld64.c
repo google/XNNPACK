@@ -52,6 +52,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x4c8__wasmsimd_dot16x2_ld64(
     c2 = c1;
   }
 
+
   const v128_t vb_zero_point = wasm_v128_load64_splat(params->fp32_wasmsimd.kernel_zero_point);
   do {
     v128_t vacc0x0 = wasm_v128_load32_zero(w);

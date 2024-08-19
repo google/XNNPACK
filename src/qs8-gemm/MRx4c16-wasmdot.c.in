@@ -68,6 +68,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         c${M} = c${M-1};
       }
 
+  $if DATATYPE == "QD8":
+    const v128_t vmin = wasm_v128_load32_splat(&params->wasmsimd.min);
+    const v128_t vmax = wasm_v128_load32_splat(&params->wasmsimd.max);
+    XNN_FORCE_REALIZATION(vmin);
+    XNN_FORCE_REALIZATION(vmax);
+
   $if not SDOT:
     const v128_t vsign_mask = wasm_u8x16_const_splat(UINT8_C(0x80));
   do {
@@ -149,12 +155,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         $for N in range(0, NR, 4):
           vacc${M}x${ABC[N:N+4]} = wasm_f32x4_add(vacc${M}x${ABC[N:N+4]}, vbias${ABC[N:N+4]});
 
-      const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
       $for M in range(MR):
         $for N in range(0, NR, 4):
           vacc${M}x${ABC[N:N+4]} = wasm_f32x4_pmax(vacc${M}x${ABC[N:N+4]}, vmin);
 
-      const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
       $for M in range(MR):
         $for N in range(0, NR, 4):
           vacc${M}x${ABC[N:N+4]} = wasm_f32x4_pmin(vacc${M}x${ABC[N:N+4]}, vmax);

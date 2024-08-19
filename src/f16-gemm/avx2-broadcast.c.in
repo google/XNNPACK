@@ -37,6 +37,12 @@ void xnn_f16${ACC_SUFFIX}_gemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
 
   const uint16_t* a0 = a;
   uint16_t* c0 = c;
+
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+
   $for M in range(1, MR):
     const uint16_t* a${M} = (const uint16_t*) ((uintptr_t) a${M-1} + a_stride);
     uint16_t* c${M} = (uint16_t*) ((uintptr_t) c${M-1} + cm_stride);
@@ -86,12 +92,10 @@ void xnn_f16${ACC_SUFFIX}_gemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
       k -= sizeof(uint16_t);
     } while (k != 0);
 
-    const __m256 vmin = _mm256_load_ps(params->avx.min);
     $for N in range(0, NR, 8):
       $for M in range(MR):
         vacc${M}x${N//8} = _mm256_max_ps(vacc${M}x${N//8}, vmin);
 
-    const __m256 vmax = _mm256_load_ps(params->avx.max);
     $for N in range(0, NR, 8):
       $for M in range(MR):
         vacc${M}x${N//8} = _mm256_min_ps(vacc${M}x${N//8}, vmax);

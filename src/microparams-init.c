@@ -1856,9 +1856,7 @@ void xnn_update_f32_scaleminmax_sse_params(
   union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale)
 {
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse.scale[i] = scale;
-  }
+  params->sse.scale = scale;
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -1886,11 +1884,9 @@ size_t xnn_init_f16_scaleminmax_avx_params(
   const float scale_f32 = fp16_ieee_to_fp32_value(scale);
   const float min_f32 = fp16_ieee_to_fp32_value(min);
   const float max_f32 = fp16_ieee_to_fp32_value(max);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.scale[i] = scale_f32;
-    params->avx.min[i] = min_f32;
-    params->avx.max[i] = max_f32;
-  }
+  params->avx.scale = scale_f32;
+  params->avx.min = min_f32;
+  params->avx.max = max_f32;
   return sizeof(params->avx);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1910,9 +1906,7 @@ void xnn_update_f16_scaleminmax_avx_params(
   uint16_t scale)
 {
   const float scale_f32 = fp16_ieee_to_fp32_value(scale);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.scale[i] = scale_f32;
-  }
+  params->avx.scale = scale_f32;
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -1935,11 +1929,9 @@ size_t xnn_init_f32_scaleminmax_sse_params(
   float min,
   float max)
 {
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse.scale[i] = scale;
-    params->sse.min[i] = min;
-    params->sse.max[i] = max;
-  }
+  params->sse.scale = scale;
+  params->sse.min = min;
+  params->sse.max = max;
   return sizeof(params->sse);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -2114,10 +2106,8 @@ size_t xnn_init_f16_minmax_avx_params(
 {
   const float min_f32 = fp16_ieee_to_fp32_value(min);
   const float max_f32 = fp16_ieee_to_fp32_value(max);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.min[i] = min_f32;
-    params->avx.max[i] = max_f32;
-  }
+  params->avx.min = min_f32;
+  params->avx.max = max_f32;
   return sizeof(params->avx);
 }
 
@@ -2130,7 +2120,6 @@ size_t xnn_init_f16_minmax_avxvnni_params(
   const float max_f32 = fp16_ieee_to_fp32_value(max);
   params->avxvnni.min = min_f32;
   params->avxvnni.max = max_f32;
-  params->avxvnni.sign_mask = 0x80;
   return sizeof(params->avxvnni);
 }
 
@@ -2170,10 +2159,8 @@ size_t xnn_init_f16_qc4w_minmax_avx_params(
   assert(kernel_zero_point <= 15);
   const float min_f32 = fp16_ieee_to_fp32_value(output_min);
   const float max_f32 = fp16_ieee_to_fp32_value(output_max);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.min[i] = min_f32;
-    params->avx.max[i] = max_f32;
-  }
+  params->avx.min = min_f32;
+  params->avx.max = max_f32;
   for (uint32_t i = 0; i < 16; i++) {
     params->avx.mask[i] = 0xF0;
   }
@@ -2191,7 +2178,6 @@ size_t xnn_init_f16_qc4w_minmax_avxvnni_params(
   const float max_f32 = fp16_ieee_to_fp32_value(output_max);
   params->avxvnni.min = min_f32;
   params->avxvnni.max = max_f32;
-  params->avxvnni.sign_mask = 0x80;
   params->avxvnni.mask = 0xF0;
   params->avxvnni.gfni_shl4 = INT64_C(0x01020408);
   return sizeof(params->avxvnni);
@@ -2208,7 +2194,6 @@ size_t xnn_init_f16_qc4w_minmax_avxvnni_madd_params(
   const float max_f32 = fp16_ieee_to_fp32_value(output_max);
   params->avxvnni.min = min_f32;
   params->avxvnni.max = max_f32;
-  params->avxvnni.sign_mask = 0x80;
   params->avxvnni.mask = 0x0F;
   params->avxvnni.gfni_shl4 = INT64_C(0);
   return sizeof(params->avxvnni);
@@ -2241,10 +2226,8 @@ size_t xnn_init_f16_qb4w_minmax_avx_params(
   assert(kernel_zero_point <= 15);
   const float min_f32 = fp16_ieee_to_fp32_value(output_min);
   const float max_f32 = fp16_ieee_to_fp32_value(output_max);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.min[i] = min_f32;
-    params->avx.max[i] = max_f32;
-  }
+  params->avx.min = min_f32;
+  params->avx.max = max_f32;
   for (uint32_t i = 0; i < 16; i++) {
     params->avx.mask[i] = 0xF0;
   }
@@ -2264,7 +2247,6 @@ size_t xnn_init_f16_qb4w_minmax_avxvnni_params(
   const float max_f32 = fp16_ieee_to_fp32_value(output_max);
   params->avxvnni.min = min_f32;
   params->avxvnni.max = max_f32;
-  params->avxvnni.sign_mask = 0x80;
   params->avxvnni.mask = 0xF0;
   params->avxvnni.gfni_shl4 = INT64_C(0x01020408);
   params->avxvnni.blocksize = blocksize;
@@ -2278,10 +2260,8 @@ size_t xnn_init_f32_minmax_sse_params(
   float output_min,
   float output_max)
 {
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse.min[i] = output_min;
-    params->sse.max[i] = output_max;
-  }
+  params->sse.min = output_min;
+  params->sse.max = output_max;
   return sizeof(params->sse);
 }
 
@@ -2290,10 +2270,8 @@ size_t xnn_init_f32_minmax_avx_params(
   float output_min,
   float output_max)
 {
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.min[i] = output_min;
-    params->avx.max[i] = output_max;
-  }
+  params->avx.min = output_min;
+  params->avx.max = output_max;
   return sizeof(params->avx);
 }
 
@@ -2303,7 +2281,6 @@ size_t xnn_init_f32_minmax_avx512vnni_params(
   float output_max) {
   params->avx512vnni.min = output_min;
   params->avx512vnni.max = output_max;
-  params->avx512vnni.sign_mask = 0x80;
   return sizeof(params->avx512vnni);
 }
 
@@ -2313,7 +2290,6 @@ size_t xnn_init_f32_minmax_avxvnni_params(
   float output_max) {
   params->avxvnni.min = output_min;
   params->avxvnni.max = output_max;
-  params->avxvnni.sign_mask = 0x80;
   return sizeof(params->avxvnni);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -2324,10 +2300,8 @@ size_t xnn_init_f32_minmax_wasmsimd_params(
   float output_min,
   float output_max)
 {
-  params->wasmsimd.min[0] = output_min;
-  params->wasmsimd.min[1] = output_min;
-  params->wasmsimd.max[0] = output_max;
-  params->wasmsimd.max[1] = output_max;
+  params->wasmsimd.min = output_min;
+  params->wasmsimd.max = output_max;
   return sizeof(params->wasmsimd);
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -2338,10 +2312,8 @@ size_t xnn_init_f32_minmax_hvx_params(
   float output_min,
   float output_max)
 {
-  for (uint32_t i = 0; i < 32; i++) {
-    params->hvx.min[i] = output_min;
-    params->hvx.max[i] = output_max;
-  }
+  params->hvx.min = output_min;
+  params->hvx.max = output_max;
   return sizeof(params->hvx);
 }
 #endif // XNN_ARCH_HEXAGON
@@ -2364,9 +2336,9 @@ size_t xnn_init_f32_qc4w_minmax_sse_params(
   uint8_t kernel_zero_point)
 {
   assert(kernel_zero_point <= 15);
+  params->sse.min = output_min;
+  params->sse.max = output_max;
   for (uint32_t i = 0; i < 4; i++) {
-    params->sse.min[i] = output_min;
-    params->sse.max[i] = output_max;
     params->sse.magic_bias_c0[i] = 0x4B0000F0;
     params->sse.magic_bias_c1[i] = 0x4900000F;
     params->sse.magic_bias_plus_kernel_zero_point_c0[i] = 0x1.0001E0p+23f + (float) kernel_zero_point;
@@ -2385,9 +2357,9 @@ size_t xnn_init_f32_qc4w_minmax_avx_params(
   uint8_t kernel_zero_point)
 {
   assert(kernel_zero_point <= 15);
+  params->avx.min = output_min;
+  params->avx.max = output_max;
   for (uint32_t i = 0; i < 8; i++) {
-    params->avx.min[i] = output_min;
-    params->avx.max[i] = output_max;
     params->avx.magic_bias_c0[i] = 0x4B0000F0;
     params->avx.magic_bias_c1[i] = 0x4900000F;
     params->avx.magic_bias_plus_kernel_zero_point_c0[i] = 0x1.0001E0p+23f + (float) kernel_zero_point;
@@ -2424,7 +2396,6 @@ size_t xnn_init_f32_qc4w_minmax_avx512vnni_params(
   assert(kernel_zero_point <= 15);
   params->avx512vnni.min = output_min;
   params->avx512vnni.max = output_max;
-  params->avx512vnni.sign_mask = 0x80;
   params->avx512vnni.mask = 0xF0;
   params->avx512vnni.gfni_shl4 = INT64_C(0x01020408);
   return sizeof(params->avx512vnni);
@@ -2439,7 +2410,6 @@ size_t xnn_init_f32_qc4w_minmax_avx512vnni_madd_params(
   assert(kernel_zero_point <= 15);
   params->avx512vnni.min = output_min;
   params->avx512vnni.max = output_max;
-  params->avx512vnni.sign_mask = 0x80;
   params->avx512vnni.mask = 0x0F;
   params->avx512vnni.gfni_shl4 = INT64_C(0);  // Unused
   return sizeof(params->avx512vnni);
@@ -2454,7 +2424,6 @@ size_t xnn_init_f32_qc4w_minmax_avxvnni_params(
   assert(kernel_zero_point <= 15);
   params->avxvnni.min = output_min;
   params->avxvnni.max = output_max;
-  params->avxvnni.sign_mask = 0x80;
   params->avxvnni.mask = 0xF0;
   params->avxvnni.gfni_shl4 = INT64_C(0x01020408);
   return sizeof(params->avxvnni);
@@ -2469,7 +2438,6 @@ size_t xnn_init_f32_qc4w_minmax_avxvnni_madd_params(
   assert(kernel_zero_point <= 15);
   params->avxvnni.min = output_min;
   params->avxvnni.max = output_max;
-  params->avxvnni.sign_mask = 0x80;
   params->avxvnni.mask = 0x0F;
   params->avxvnni.gfni_shl4 = INT64_C(0);  // Unused
   return sizeof(params->avxvnni);
@@ -2485,10 +2453,8 @@ size_t xnn_init_f32_qc4w_minmax_wasmsimd_params(
   uint8_t kernel_zero_point)
 {
   assert(kernel_zero_point <= 15);
-  params->wasmsimd.min[0] = output_min;
-  params->wasmsimd.min[1] = output_min;
-  params->wasmsimd.max[0] = output_max;
-  params->wasmsimd.max[1] = output_max;
+  params->wasmsimd.min = output_min;
+  params->wasmsimd.max = output_max;
   for (uint32_t i = 0; i < 4; i++) {
     params->wasmsimd.minus_kernel_zero_point[i] = -(int32_t) kernel_zero_point;
   }
@@ -2522,9 +2488,9 @@ size_t xnn_init_f32_qb4w_minmax_sse_params(
   size_t blocksize)
 {
   assert(kernel_zero_point <= 15);
+  params->sse.min = output_min;
+  params->sse.max = output_max;
   for (uint32_t i = 0; i < 4; i++) {
-    params->sse.min[i] = output_min;
-    params->sse.max[i] = output_max;
     params->sse.magic_bias_c0[i] = 0x4B0000F0;
     params->sse.magic_bias_c1[i] = 0x4900000F;
     params->sse.magic_bias_plus_kernel_zero_point_c0[i] = 0x1.0001E0p+23f + (float) kernel_zero_point;
@@ -2545,9 +2511,9 @@ size_t xnn_init_f32_qb4w_minmax_avx_params(
   size_t blocksize)
 {
   assert(kernel_zero_point <= 15);
+  params->avx.min = output_min;
+  params->avx.max = output_max;
   for (uint32_t i = 0; i < 8; i++) {
-    params->avx.min[i] = output_min;
-    params->avx.max[i] = output_max;
     params->avx.magic_bias_c0[i] = 0x4B0000F0;
     params->avx.magic_bias_c1[i] = 0x4900000F;
     params->avx.magic_bias_plus_kernel_zero_point_c0[i] = 0x1.0001E0p+23f + (float) kernel_zero_point;
@@ -2588,7 +2554,6 @@ size_t xnn_init_f32_qb4w_minmax_avx512vnni_params(
   assert(kernel_zero_point <= 15);
   params->avx512vnni.min = output_min;
   params->avx512vnni.max = output_max;
-  params->avx512vnni.sign_mask = 0x80;
   params->avx512vnni.mask = 0xF0;
   params->avx512vnni.gfni_shl4 = INT64_C(0x01020408);
   params->avx512vnni.blocksize = blocksize;
@@ -2606,7 +2571,6 @@ size_t xnn_init_f32_qb4w_minmax_avxvnni_params(
   assert(kernel_zero_point <= 15);
   params->avxvnni.min = output_min;
   params->avxvnni.max = output_max;
-  params->avxvnni.sign_mask = 0x80;
   params->avxvnni.mask = 0xF0;
   params->avxvnni.gfni_shl4 = INT64_C(0x01020408);
   params->avxvnni.blocksize = blocksize;
@@ -2624,10 +2588,8 @@ size_t xnn_init_f32_qb4w_minmax_wasmsimd_params(
   size_t blocksize)
 {
   assert(kernel_zero_point <= 15);
-  params->wasmsimd.min[0] = output_min;
-  params->wasmsimd.min[1] = output_min;
-  params->wasmsimd.max[0] = output_max;
-  params->wasmsimd.max[1] = output_max;
+  params->wasmsimd.min = output_min;
+  params->wasmsimd.max = output_max;
   for (uint32_t i = 0; i < 4; i++) {
     params->wasmsimd.minus_kernel_zero_point[i] = -(int32_t) kernel_zero_point;
   }
@@ -3156,10 +3118,8 @@ size_t xnn_init_f32_chw_sse_stride1_params(
   float output_min,
   float output_max)
 {
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse_stride1.min[i] = output_min;
-    params->sse_stride1.max[i] = output_max;
-  }
+  params->sse_stride1.min = output_min;
+  params->sse_stride1.max = output_max;
 
   const uint32_t w4 = (width - 1) & 3;
   params->sse_stride1.mask[0] = UINT32_C(0xFFFFFFFF);
@@ -3176,10 +3136,8 @@ size_t xnn_init_f32_chw_sse_stride2_params(
   float output_min,
   float output_max)
 {
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse_stride2.min[i] = output_min;
-    params->sse_stride2.max[i] = output_max;
-  }
+  params->sse_stride2.min = output_min;
+  params->sse_stride2.max = output_max;
 
   const uint32_t w8 = (width - 1) & 7;
   params->sse_stride2.mask_even[0] = UINT32_C(0xFFFFFFFF);
@@ -3202,10 +3160,8 @@ size_t xnn_init_f32_chw_wasmsimd_stride1_params(
   float output_min,
   float output_max)
 {
-  params->wasmsimd_stride1.min[0] = output_min;
-  params->wasmsimd_stride1.min[1] = output_min;
-  params->wasmsimd_stride1.max[0] = output_max;
-  params->wasmsimd_stride1.max[1] = output_max;
+  params->wasmsimd_stride1.min = output_min;
+  params->wasmsimd_stride1.max = output_max;
 
   const uint32_t w4 = (width - 1) & 3;
   params->wasmsimd_stride1.mask[0] = UINT32_C(0xFFFFFFFF);
@@ -3222,10 +3178,8 @@ size_t xnn_init_f32_chw_wasmsimd_stride2_params(
   float output_min,
   float output_max)
 {
-  params->wasmsimd_stride2.min[0] = output_min;
-  params->wasmsimd_stride2.min[1] = output_min;
-  params->wasmsimd_stride2.max[0] = output_max;
-  params->wasmsimd_stride2.max[1] = output_max;
+  params->wasmsimd_stride2.min = output_min;
+  params->wasmsimd_stride2.max = output_max;
 
   const uint32_t w8 = (width - 1) & 7;
   params->wasmsimd_stride2.mask_even[0] = UINT32_C(0xFFFFFFFF);

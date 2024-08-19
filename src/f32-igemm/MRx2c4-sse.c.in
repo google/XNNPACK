@@ -54,6 +54,11 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}c4__sse(
         c${M} = c${M-1};
       }
 
+  const __m128 vmax = _mm_set1_ps(params->sse.max);
+  const __m128 vmin = _mm_set1_ps(params->sse.min);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+
   do {
     __m128 vacc0x0c4 = _mm_load_ss(w);
     $for N in range(1, NR):
@@ -113,11 +118,9 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}c4__sse(
     $for M in range(0, MR, 2):
       __m128 vacc${M}${M+1}x01 = _mm_add_ps(_mm_movelh_ps(vacc${M}x01c2, vacc${M+1}x01c2), _mm_movehl_ps(vacc${M+1}x01c2, vacc${M}x01c2));
 
-    const __m128 vmax = _mm_load_ps(params->sse.max);
     $for M in range(0, MR, 2):
       vacc${M}${M+1}x01 = _mm_min_ps(vacc${M}${M+1}x01, vmax);
 
-    const __m128 vmin = _mm_load_ps(params->sse.min);
     $for M in range(0, MR, 2):
       vacc${M}${M+1}x01 = _mm_max_ps(vacc${M}${M+1}x01, vmin);
 

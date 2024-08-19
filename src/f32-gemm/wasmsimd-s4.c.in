@@ -77,8 +77,10 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}${ACTIVATION_SUFFIX}_ukerne
       }
 
   $if ACTIVATION == "MINMAX":
-    const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
-    const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
+    const v128_t vmin = wasm_v128_load32_splat(&params->wasmsimd.min);
+    const v128_t vmax = wasm_v128_load32_splat(&params->wasmsimd.max);
+    XNN_FORCE_REALIZATION(vmin);
+    XNN_FORCE_REALIZATION(vmax);
   do {
     $if INC:
       $for M in range(MR):

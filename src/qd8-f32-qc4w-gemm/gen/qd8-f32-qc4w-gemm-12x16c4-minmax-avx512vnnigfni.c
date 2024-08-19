@@ -109,6 +109,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_12x16c4__avx512vnnigfni(
     c11 = c10;
   }
 
+  const __m512i vsign_mask = _mm512_set1_epi8(0x80);
+  XNN_FORCE_REALIZATION(vsign_mask);
   const __m512i vinput_zero_point0 = _mm512_set1_epi32((int) quantization_params[0].zero_point + 128);
   const __m512i vinput_zero_point1 = _mm512_set1_epi32((int) quantization_params[1].zero_point + 128);
   const __m512i vinput_zero_point2 = _mm512_set1_epi32((int) quantization_params[2].zero_point + 128);
@@ -123,7 +125,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_12x16c4__avx512vnnigfni(
   const __m512i vinput_zero_point11 = _mm512_set1_epi32((int) quantization_params[11].zero_point + 128);
   const __m512 voutput_min = _mm512_set1_ps(params->avx512vnni.min);
   const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
-  const __m512i vsign_mask = _mm512_set1_epi8(params->avx512vnni.sign_mask);  // 0x80
   const __m512i vmask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0xF0
   assert(params->avx512vnni.mask == (int8_t) 0xF0);
   const __m512i vshl4 = _mm512_set1_epi64(params->avx512vnni.gfni_shl4);  // 0x01020408

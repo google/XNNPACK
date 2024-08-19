@@ -28,8 +28,10 @@ void xnn_f32_vdiv_minmax_ukernel__wasmsimd_arm_u8(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const v128_t voutput_min = wasm_v128_load64_splat(params->wasmsimd.min);
-  const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd.max);
+  const v128_t voutput_min = wasm_v128_load32_splat(&params->wasmsimd.min);
+  const v128_t voutput_max = wasm_v128_load32_splat(&params->wasmsimd.max);
+  XNN_FORCE_REALIZATION(voutput_min);
+  XNN_FORCE_REALIZATION(voutput_max);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const v128_t va0 = wasm_v128_load(input_a);
