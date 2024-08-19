@@ -1368,329 +1368,56 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK)
 
     # ---[ Build operator-level unit tests
-    ADD_EXECUTABLE(abs-nc-test test/abs-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(abs-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(abs-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME abs-nc-test COMMAND abs-nc-test)
+    SET(LIBRARY_UNARY_TESTS
+        abs-nc
+        bankers-rounding-nc
+        ceiling-nc
+        clamp-nc
+        elu-nc
+        exp-nc
+        floor-nc
+        hardswish-nc
+        leaky-relu-nc
+        log-nc
+        negate-nc
+        reciprocal-square-root-nc
+        sigmoid-nc
+        square-nc
+        square-root-nc
+        tanh-nc
+        truncation-nc
+        unpooling-nhwc)
 
-    ADD_EXECUTABLE(add-nd-test test/add-nd.cc)
-    TARGET_INCLUDE_DIRECTORIES(add-nd-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(add-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME add-nd-test COMMAND add-nd-test)
+    FOREACH(TEST ${LIBRARY_UNARY_TESTS})
+      ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+      TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
+      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
+      ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+    ENDFOREACH()
 
-    ADD_EXECUTABLE(add-nd-eager-test test/add-nd-eager.cc)
-    TARGET_INCLUDE_DIRECTORIES(add-nd-eager-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(add-nd-eager-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME add-nd-eager-test COMMAND add-nd-eager-test)
+    SET(LIBRARY_BINARY_ELEMENTWISE_TESTS
+        add-nd
+        add-nd-eager
+        copysign-nd
+        divide-nd
+        divide-nd-eager
+        maximum-nd
+        maximum-nd-eager
+        minimum-nd
+        minimum-nd-eager
+        multiply-nd
+        multiply-nd-eager
+        squared-difference-nd
+        squared-difference-nd-eager
+        subtract-nd
+        subtract-nd-eager)
 
-    ADD_EXECUTABLE(argmax-pooling-nhwc-test test/argmax-pooling-nhwc.cc)
-    TARGET_INCLUDE_DIRECTORIES(argmax-pooling-nhwc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(argmax-pooling-nhwc-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME argmax-pooling-nhwc-test COMMAND argmax-pooling-nhwc-test)
-
-    ADD_EXECUTABLE(average-pooling-nhwc-test test/average-pooling-nhwc.cc)
-    TARGET_INCLUDE_DIRECTORIES(average-pooling-nhwc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(average-pooling-nhwc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME average-pooling-nhwc-test COMMAND average-pooling-nhwc-test)
-
-    ADD_EXECUTABLE(bankers-rounding-nc-test test/bankers-rounding-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(bankers-rounding-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(bankers-rounding-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME bankers-rounding-nc-test COMMAND bankers-rounding-nc-test)
-
-    ADD_EXECUTABLE(ceiling-nc-test test/ceiling-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(ceiling-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(ceiling-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME ceiling-nc-test COMMAND ceiling-nc-test)
-
-    ADD_EXECUTABLE(channel-shuffle-nc-test test/channel-shuffle-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(channel-shuffle-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(channel-shuffle-nc-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME channel-shuffle-nc-test COMMAND channel-shuffle-nc-test)
-
-    ADD_EXECUTABLE(clamp-nc-test test/clamp-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(clamp-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(clamp-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME clamp-nc-test COMMAND clamp-nc-test)
-
-    ADD_EXECUTABLE(constant-pad-nd-test test/constant-pad-nd.cc)
-    TARGET_INCLUDE_DIRECTORIES(constant-pad-nd-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(constant-pad-nd-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME constant-pad-nd-test COMMAND constant-pad-nd-test)
-
-    ADD_EXECUTABLE(constant-pad-nd-eager-test test/constant-pad-nd-eager.cc)
-    TARGET_INCLUDE_DIRECTORIES(constant-pad-nd-eager-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(constant-pad-nd-eager-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME constant-pad-nd-eager-test COMMAND constant-pad-nd-eager-test)
-
-    ADD_EXECUTABLE(convert-nc-test test/convert-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(convert-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(convert-nc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME convert-nc-test COMMAND convert-nc-test)
-
-    ADD_EXECUTABLE(convert-nc-eager-test test/convert-nc-eager.cc)
-    TARGET_INCLUDE_DIRECTORIES(convert-nc-eager-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(convert-nc-eager-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME convert-nc-eager-test COMMAND convert-nc-eager-test)
-
-    ADD_EXECUTABLE(convolution-nhwc-test test/convolution-nhwc.cc)
-    SET_TARGET_PROPERTIES(convolution-nhwc-test PROPERTIES CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(convolution-nhwc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(convolution-nhwc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    TARGET_LINK_LIBRARIES(convolution-nhwc-test PRIVATE convolution-test-helpers)
-    ADD_TEST(NAME convolution-nhwc-test COMMAND convolution-nhwc-test)
-
-    ADD_EXECUTABLE(convolution-nchw-test test/convolution-nchw.cc)
-    SET_TARGET_PROPERTIES(convolution-nchw-test PROPERTIES CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(convolution-nchw-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(convolution-nchw-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME convolution-nchw-test COMMAND convolution-nchw-test)
-
-    ADD_EXECUTABLE(copy-nc-test test/copy-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(copy-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(copy-nc-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME copy-nc-test COMMAND copy-nc-test)
-
-    ADD_EXECUTABLE(copy-nc-eager-test test/copy-nc-eager.cc)
-    TARGET_INCLUDE_DIRECTORIES(copy-nc-eager-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(copy-nc-eager-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME copy-nc-eager-test COMMAND copy-nc-eager-test)
-
-    ADD_EXECUTABLE(copysign-nd-test test/copysign-nd.cc)
-    TARGET_INCLUDE_DIRECTORIES(copysign-nd-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(copysign-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME copysign-nd-test COMMAND copysign-nd-test)
-
-    ADD_EXECUTABLE(depth-to-space-nchw2nhwc-test test/depth-to-space-nchw2nhwc.cc)
-    TARGET_INCLUDE_DIRECTORIES(depth-to-space-nchw2nhwc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(depth-to-space-nchw2nhwc-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME depth-to-space-nchw2nhwc-test COMMAND depth-to-space-nchw2nhwc-test)
-
-    ADD_EXECUTABLE(depth-to-space-nhwc-test test/depth-to-space-nhwc.cc)
-    TARGET_INCLUDE_DIRECTORIES(depth-to-space-nhwc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(depth-to-space-nhwc-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME depth-to-space-nhwc-test COMMAND depth-to-space-nhwc-test)
-
-    ADD_EXECUTABLE(divide-nd-test test/divide-nd.cc)
-    TARGET_INCLUDE_DIRECTORIES(divide-nd-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(divide-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME divide-nd-test COMMAND divide-nd-test)
-
-    ADD_EXECUTABLE(divide-nd-eager-test test/divide-nd-eager.cc)
-    TARGET_INCLUDE_DIRECTORIES(divide-nd-eager-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(divide-nd-eager-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME divide-nd-eager-test COMMAND divide-nd-eager-test)
-
-    ADD_EXECUTABLE(dynamic-fully-connected-nc-test test/dynamic-fully-connected-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(dynamic-fully-connected-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(dynamic-fully-connected-nc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME dynamic-fully-connected-nc-test COMMAND dynamic-fully-connected-nc-test)
-
-    ADD_EXECUTABLE(elu-nc-test test/elu-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(elu-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(elu-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME elu-nc-test COMMAND elu-nc-test)
-
-    ADD_EXECUTABLE(exp-nc-test test/exp-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(exp-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(exp-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME exp-nc-test COMMAND exp-nc-test)
-
-    ADD_EXECUTABLE(fully-connected-nc-test test/fully-connected-nc.cc)
-    SET_TARGET_PROPERTIES(fully-connected-nc-test PROPERTIES CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(fully-connected-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(fully-connected-nc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME fully-connected-nc-test COMMAND fully-connected-nc-test)
-
-    ADD_EXECUTABLE(floor-nc-test test/floor-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(floor-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(floor-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME floor-nc-test COMMAND floor-nc-test)
-
-    ADD_EXECUTABLE(global-average-pooling-nwc-test test/global-average-pooling-nwc.cc)
-    TARGET_INCLUDE_DIRECTORIES(global-average-pooling-nwc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(global-average-pooling-nwc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME global-average-pooling-nwc-test COMMAND global-average-pooling-nwc-test)
-
-    ADD_EXECUTABLE(global-average-pooling-ncw-test test/global-average-pooling-ncw.cc)
-    TARGET_INCLUDE_DIRECTORIES(global-average-pooling-ncw-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(global-average-pooling-ncw-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME global-average-pooling-ncw-test COMMAND global-average-pooling-ncw-test)
-
-    ADD_EXECUTABLE(global-sum-pooling-nwc-test test/global-sum-pooling-nwc.cc)
-    TARGET_INCLUDE_DIRECTORIES(global-sum-pooling-nwc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(global-sum-pooling-nwc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME global-sum-pooling-nwc-test COMMAND global-sum-pooling-nwc-test)
-
-    ADD_EXECUTABLE(hardswish-nc-test test/hardswish-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(hardswish-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(hardswish-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME hardswish-nc-test COMMAND hardswish-nc-test)
-
-    ADD_EXECUTABLE(leaky-relu-nc-test test/leaky-relu-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(leaky-relu-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(leaky-relu-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME leaky-relu-nc-test COMMAND leaky-relu-nc-test)
-
-    ADD_EXECUTABLE(log-nc-test test/log-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(log-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(log-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME log-nc-test COMMAND log-nc-test)
-
-    ADD_EXECUTABLE(max-pooling-nhwc-test test/max-pooling-nhwc.cc)
-    TARGET_INCLUDE_DIRECTORIES(max-pooling-nhwc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(max-pooling-nhwc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME max-pooling-nhwc-test COMMAND max-pooling-nhwc-test)
-
-    ADD_EXECUTABLE(maximum-nd-test test/maximum-nd.cc)
-    TARGET_INCLUDE_DIRECTORIES(maximum-nd-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(maximum-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME maximum-nd-test COMMAND maximum-nd-test)
-
-    ADD_EXECUTABLE(maximum-nd-eager-test test/maximum-nd-eager.cc)
-    TARGET_INCLUDE_DIRECTORIES(maximum-nd-eager-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(maximum-nd-eager-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME maximum-nd-eager-test COMMAND maximum-nd-eager-test)
-
-    ADD_EXECUTABLE(mean-nd-test test/mean-nd.cc)
-    TARGET_INCLUDE_DIRECTORIES(mean-nd-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(mean-nd-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME mean-nd-test COMMAND mean-nd-test)
-
-    ADD_EXECUTABLE(minimum-nd-test test/minimum-nd.cc)
-    TARGET_INCLUDE_DIRECTORIES(minimum-nd-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(minimum-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME minimum-nd-test COMMAND minimum-nd-test)
-
-    ADD_EXECUTABLE(minimum-nd-eager-test test/minimum-nd-eager.cc)
-    TARGET_INCLUDE_DIRECTORIES(minimum-nd-eager-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(minimum-nd-eager-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME minimum-nd-eager-test COMMAND minimum-nd-eager-test)
-
-    ADD_EXECUTABLE(multiply-nd-test test/multiply-nd.cc)
-    TARGET_INCLUDE_DIRECTORIES(multiply-nd-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(multiply-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME multiply-nd-test COMMAND multiply-nd-test)
-
-    ADD_EXECUTABLE(multiply-nd-eager-test test/multiply-nd-eager.cc)
-    TARGET_INCLUDE_DIRECTORIES(multiply-nd-eager-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(multiply-nd-eager-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME multiply-nd-eager-test COMMAND multiply-nd-eager-test)
-
-    ADD_EXECUTABLE(negate-nc-test test/negate-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(negate-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(negate-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME negate-nc-test COMMAND negate-nc-test)
-
-    ADD_EXECUTABLE(prelu-nc-test test/prelu-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(prelu-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(prelu-nc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME prelu-nc-test COMMAND prelu-nc-test)
-
-    ADD_EXECUTABLE(reciprocal-square-root-nc-test test/reciprocal-square-root-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(reciprocal-square-root-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(reciprocal-square-root-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME reciprocal-square-root-nc-test COMMAND reciprocal-square-root-nc-test)
-
-    ADD_EXECUTABLE(resize-bilinear-nhwc-test test/resize-bilinear-nhwc.cc)
-    TARGET_INCLUDE_DIRECTORIES(resize-bilinear-nhwc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(resize-bilinear-nhwc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME resize-bilinear-nhwc-test COMMAND resize-bilinear-nhwc-test)
-
-    ADD_EXECUTABLE(resize-bilinear-nchw-test test/resize-bilinear-nchw.cc)
-    TARGET_INCLUDE_DIRECTORIES(resize-bilinear-nchw-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(resize-bilinear-nchw-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME resize-bilinear-nchw-test COMMAND resize-bilinear-nchw-test)
-
-    ADD_EXECUTABLE(rope-nthc-test test/rope-nthc.cc)
-    TARGET_INCLUDE_DIRECTORIES(rope-nthc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(rope-nthc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME rope-nthc-test COMMAND rope-nthc-test)
-
-    ADD_EXECUTABLE(scaled-dot-product-attention-nhtc-test test/scaled-dot-product-attention-nhtc.cc)
-    TARGET_INCLUDE_DIRECTORIES(scaled-dot-product-attention-nhtc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(scaled-dot-product-attention-nhtc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME scaled-dot-product-attention-nhtc-test COMMAND scaled-dot-product-attention-nhtc-test)
-
-    ADD_EXECUTABLE(sigmoid-nc-test test/sigmoid-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(sigmoid-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(sigmoid-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME sigmoid-nc-test COMMAND sigmoid-nc-test)
-
-    ADD_EXECUTABLE(slice-nd-test test/slice-nd.cc)
-    TARGET_INCLUDE_DIRECTORIES(slice-nd-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(slice-nd-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME slice-nd-test COMMAND slice-nd-test)
-
-    ADD_EXECUTABLE(slice-nd-eager-test test/slice-nd-eager.cc)
-    TARGET_INCLUDE_DIRECTORIES(slice-nd-eager-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(slice-nd-eager-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME slice-nd-eager-test COMMAND slice-nd-eager-test)
-
-    ADD_EXECUTABLE(softmax-nc-test test/softmax-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(softmax-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(softmax-nc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME softmax-nc-test COMMAND softmax-nc-test)
-
-    ADD_EXECUTABLE(space-to-depth-nhwc-test test/space-to-depth-nhwc.cc)
-    TARGET_INCLUDE_DIRECTORIES(space-to-depth-nhwc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(space-to-depth-nhwc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME space-to-depth-nhwc-test COMMAND space-to-depth-nhwc-test)
-
-    ADD_EXECUTABLE(square-nc-test test/square-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(square-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(square-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME square-nc-test COMMAND square-nc-test)
-
-    ADD_EXECUTABLE(square-root-nc-test test/square-root-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(square-root-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(square-root-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME square-root-nc-test COMMAND square-root-nc-test)
-
-    ADD_EXECUTABLE(squared-difference-nd-test test/squared-difference-nd.cc)
-    TARGET_INCLUDE_DIRECTORIES(squared-difference-nd-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(squared-difference-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME squared-difference-nd-test COMMAND squared-difference-nd-test)
-
-    ADD_EXECUTABLE(squared-difference-nd-eager-test test/squared-difference-nd-eager.cc)
-    TARGET_INCLUDE_DIRECTORIES(squared-difference-nd-eager-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(squared-difference-nd-eager-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME squared-difference-nd-eager-test COMMAND squared-difference-nd-eager-test)
-
-    ADD_EXECUTABLE(subtract-nd-test test/subtract-nd.cc)
-    TARGET_INCLUDE_DIRECTORIES(subtract-nd-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(subtract-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME subtract-nd-test COMMAND subtract-nd-test)
-
-    ADD_EXECUTABLE(subtract-nd-eager-test test/subtract-nd-eager.cc)
-    TARGET_INCLUDE_DIRECTORIES(subtract-nd-eager-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(subtract-nd-eager-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME subtract-nd-eager-test COMMAND subtract-nd-eager-test)
-
-    ADD_EXECUTABLE(tanh-nc-test test/tanh-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(tanh-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(tanh-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME tanh-nc-test COMMAND tanh-nc-test)
-
-    ADD_EXECUTABLE(transpose-nd-test test/transpose-nd.cc)
-    TARGET_INCLUDE_DIRECTORIES(transpose-nd-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(transpose-nd-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME transpose-nd-test COMMAND transpose-nd-test)
-
-    ADD_EXECUTABLE(transpose-nd-eager-test test/transpose-nd-eager.cc)
-    TARGET_INCLUDE_DIRECTORIES(transpose-nd-eager-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(transpose-nd-eager-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME transpose-nd-eager-test COMMAND transpose-nd-eager-test)
-
-    ADD_EXECUTABLE(truncation-nc-test test/truncation-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(truncation-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(truncation-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME truncation-nc-test COMMAND truncation-nc-test)
-
-    ADD_EXECUTABLE(unpooling-nhwc-test test/unpooling-nhwc.cc)
-    TARGET_INCLUDE_DIRECTORIES(unpooling-nhwc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(unpooling-nhwc-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME unpooling-nhwc-test COMMAND unpooling-nhwc-test)
+    FOREACH(TEST ${LIBRARY_BINARY_ELEMENTWISE_TESTS})
+      ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+      TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
+      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
+      ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+    ENDFOREACH()
 
     # ---[ Build subgraph optimizations unit tests
     ADD_EXECUTABLE(fusion-test test/fusion.cc)
