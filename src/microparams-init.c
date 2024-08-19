@@ -2675,28 +2675,6 @@ size_t xnn_init_qs8_hswish_scalar_params(
   return sizeof(params->scalar);
 }
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_qs8_hswish_neon_params(
-  union xnn_qs8_hswish_params params[XNN_MIN_ELEMENTS(1)],
-  int16_t input_zero_point,
-  int16_t output_zero_point,
-  float input_scale,
-  float output_scale)
-{
-  params->neon.input_zero_point = input_zero_point;
-  params->neon.output_zero_point= output_zero_point;
-  const float divisor1 = 0x1.555556p-10f;
-  const uint32_t input_scale_div = float_as_uint32(input_scale * divisor1);
-  params->neon.input_scale_div_exp = (int16_t) (input_scale_div >> 23) - 111;
-  params->neon.input_scale_div_mantissa = (int16_t) ((input_scale_div << 9) >> 18 | UINT16_C(0x4000));
-  const float scale_ratio = input_scale / output_scale;
-  assert(scale_ratio >= 0x1.0p-8f);
-  assert(scale_ratio < 0x1.0p+7f);
-  params->neon.scale_ratio = (int16_t) lrintf(scale_ratio * 256.0f);
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_qs8_hswish_sse2_params(
   union xnn_qs8_hswish_params params[XNN_MIN_ELEMENTS(1)],
@@ -2710,47 +2688,13 @@ size_t xnn_init_qs8_hswish_sse2_params(
   assert(scale_ratio >= 0x1.0p-8f);
   assert(scale_ratio < 0x1.0p+7f);
   const int16_t scale_ratio_param = (int16_t) -lrintf(scale_ratio * 256.0f);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse2.input_zero_point[i] = input_zero_point;
-    params->sse2.output_zero_point[i] = output_zero_point;
-    params->sse2.input_scale_div[i] = input_scale_div;
-    params->sse2.scale_ratio[i] = scale_ratio_param;
-  }
+  params->sse2.input_zero_point = input_zero_point;
+  params->sse2.output_zero_point = output_zero_point;
+  params->sse2.input_scale_div = input_scale_div;
+  params->sse2.scale_ratio = scale_ratio_param;
   return sizeof(params->sse2);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_qs8_hswish_wasmsimd_params(
-  union xnn_qs8_hswish_params params[XNN_MIN_ELEMENTS(1)],
-  int16_t input_zero_point,
-  int16_t output_zero_point,
-  float input_scale,
-  float output_scale)
-{
-  const float divisor1 = 0x1.555556p-10f;
-  const uint32_t input_scale_div = float_as_uint32(input_scale * divisor1);
-  const int16_t input_scale_div_exp = (int16_t) (input_scale_div >> 23) - 111;
-  assert(input_scale_div_exp >= 0);
-  assert(input_scale_div_exp <=15);
-  params->wasmsimd.input_scale_div_exp = (uint32_t) input_scale_div_exp;
-  const int16_t input_scale_div_mantissa = (int16_t) ((input_scale_div << 9) >> 18 | UINT16_C(0x4000));
-  const float scale_ratio = input_scale / output_scale;
-  assert(scale_ratio >= 0x1.0p-8f);
-  assert(scale_ratio < 0x1.0p+7f);
-  const int16_t scale_ratio_int = (int16_t) lrintf(scale_ratio * 256.0f);
-  int16_t shift_max = (int16_t) 1 << (15 - input_scale_div_exp);
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd.input_zero_point[i] = input_zero_point;
-    params->wasmsimd.output_zero_point[i] = output_zero_point;
-    params->wasmsimd.input_scale_div_mantissa[i] = input_scale_div_mantissa;
-    params->wasmsimd.scale_ratio[i] = scale_ratio_int;
-    params->wasmsimd.shift_max[i] = shift_max;
-    params->wasmsimd.shift_min[i] = -shift_max;
-  }
-  return sizeof(params->wasmsimd);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 size_t xnn_init_qu8_hswish_scalar_params(
   union xnn_qu8_hswish_params params[XNN_MIN_ELEMENTS(1)],
@@ -2771,58 +2715,6 @@ size_t xnn_init_qu8_hswish_scalar_params(
   params->scalar.scale_ratio = (int32_t) lrintf(scale_ratio * 256.0f);
   return sizeof(params->scalar);
 }
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_qu8_hswish_neon_params(
-  union xnn_qu8_hswish_params params[XNN_MIN_ELEMENTS(1)],
-  int16_t input_zero_point,
-  int16_t output_zero_point,
-  float input_scale,
-  float output_scale)
-{
-  params->neon.input_zero_point = input_zero_point;
-  params->neon.output_zero_point= output_zero_point;
-  const float divisor1 = 0x1.555556p-10f;
-  const uint32_t input_scale_div = float_as_uint32(input_scale * divisor1);
-  params->neon.input_scale_div_exp = (int16_t) (input_scale_div >> 23) - 111;
-  params->neon.input_scale_div_mantissa = (int16_t) ((input_scale_div << 9) >> 18 | UINT16_C(0x4000));
-  const float scale_ratio = input_scale / output_scale;
-  assert(scale_ratio >= 0x1.0p-8f);
-  assert(scale_ratio < 0x1.0p+7f);
-  params->neon.scale_ratio = (int16_t) lrintf(scale_ratio * 256.0f);
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_qu8_hswish_wasmsimd_params(
-  union xnn_qu8_hswish_params params[XNN_MIN_ELEMENTS(1)],
-  int16_t input_zero_point,
-  int16_t output_zero_point,
-  float input_scale,
-  float output_scale)
-{
-  const float divisor1 = 0x1.555556p-10f;
-  const uint32_t input_scale_div = float_as_uint32(input_scale * divisor1);
-  const int16_t input_scale_div_exp = (int16_t) (input_scale_div >> 23) - 111;
-  assert(input_scale_div_exp >= 0);
-  assert(input_scale_div_exp <=15);
-  params->wasmsimd.input_scale_div_exp = (uint32_t) input_scale_div_exp;
-  const int16_t input_scale_div_mantissa = (int16_t) ((input_scale_div << 9) >> 18 | UINT16_C(0x4000));
-  const float scale_ratio = input_scale / output_scale;
-  assert(scale_ratio >= 0x1.0p-8f);
-  assert(scale_ratio < 0x1.0p+7f);
-  const int16_t scale_ratio_int = (int16_t) lrintf(scale_ratio * 256.0f);
-  const int16_t shift_max = (int16_t) 1 << (15 - input_scale_div_exp);
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd.input_zero_point[i] = input_zero_point;
-    params->wasmsimd.output_zero_point[i] = output_zero_point;
-    params->wasmsimd.input_scale_div_mantissa[i] = input_scale_div_mantissa;
-    params->wasmsimd.scale_ratio[i] = scale_ratio_int;
-    params->wasmsimd.shift_max[i] = shift_max;
-    params->wasmsimd.shift_min[i] = -shift_max;
-  }
-  return sizeof(params->wasmsimd);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_qu8_hswish_sse2_params(
@@ -2837,12 +2729,10 @@ size_t xnn_init_qu8_hswish_sse2_params(
   assert(scale_ratio >= 0x1.0p-8f);
   assert(scale_ratio < 0x1.0p+7f);
   const int16_t scale_ratio_param = (int16_t) -lrintf(scale_ratio * 256.0f);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse2.input_zero_point[i] = input_zero_point;
-    params->sse2.output_zero_point[i] = output_zero_point;
-    params->sse2.input_scale_div[i] = input_scale_div;
-    params->sse2.scale_ratio[i] = scale_ratio_param;
-  }
+  params->sse2.input_zero_point = input_zero_point;
+  params->sse2.output_zero_point = output_zero_point;
+  params->sse2.input_scale_div = input_scale_div;
+  params->sse2.scale_ratio = scale_ratio_param;
   return sizeof(params->sse2);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

@@ -1089,78 +1089,38 @@ union xnn_f32_hswish_params {
 
 union xnn_qs8_hswish_params {
   struct {
-    uint32_t input_zero_point;
-    int32_t output_zero_point;
-    int32_t input_scale_div_mantissa;
-    int32_t input_scale_div_exp;
-    int32_t scale_ratio;
-} scalar;
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
     int16_t input_zero_point;
     int16_t output_zero_point;
     int16_t input_scale_div_mantissa;
     int16_t input_scale_div_exp;
     int16_t scale_ratio;
-  } neon;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+} scalar;
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
-    XNN_ALIGN(16) int16_t input_zero_point[8];
-    XNN_ALIGN(16) int16_t output_zero_point[8];
-    XNN_ALIGN(16) int16_t input_scale_div[8];
-    XNN_ALIGN(16) int16_t scale_ratio[8];
+    int16_t input_zero_point;
+    int16_t output_zero_point;
+    int16_t input_scale_div;
+    int16_t scale_ratio;
   } sse2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  struct {
-    XNN_ALIGN(8) int16_t input_zero_point[4];
-    XNN_ALIGN(8) int16_t output_zero_point[4];
-    XNN_ALIGN(8) int16_t input_scale_div_mantissa[4];
-    XNN_ALIGN(8) int16_t scale_ratio[4];
-    XNN_ALIGN(8) int16_t shift_max[4];
-    XNN_ALIGN(8) int16_t shift_min[4];
-    uint32_t input_scale_div_exp;
-  } wasmsimd;
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
 union xnn_qu8_hswish_params {
 struct {
-    uint32_t input_zero_point;
-    int32_t output_zero_point;
-    int32_t input_scale_div_mantissa;
-    int32_t input_scale_div_exp;
-    int32_t scale_ratio;
-  } scalar;
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
     int16_t input_zero_point;
     int16_t output_zero_point;
     int16_t input_scale_div_mantissa;
     int16_t input_scale_div_exp;
     int16_t scale_ratio;
-  } neon;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+  } scalar;
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
-    XNN_ALIGN(16) int16_t input_zero_point[8];
-    XNN_ALIGN(16) int16_t output_zero_point[8];
-    XNN_ALIGN(16) int16_t input_scale_div[8];
-    XNN_ALIGN(16) int16_t scale_ratio[8];
+    int16_t input_zero_point;
+    int16_t output_zero_point;
+    int16_t input_scale_div;
+    int16_t scale_ratio;
   } sse2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  struct {
-    XNN_ALIGN(8) int16_t input_zero_point[4];
-    XNN_ALIGN(8) int16_t output_zero_point[4];
-    XNN_ALIGN(8) int16_t input_scale_div_mantissa[4];
-    XNN_ALIGN(8) int16_t scale_ratio[4];
-    XNN_ALIGN(8) int16_t shift_max[4];
-    XNN_ALIGN(8) int16_t shift_min[4];
-    uint32_t input_scale_div_exp;
-  } wasmsimd;
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
 
