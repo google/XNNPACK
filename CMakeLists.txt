@@ -1329,63 +1329,36 @@ IF(XNNPACK_BUILD_TESTS)
   ENDIF()
 
   # ---[ Launch heavy tests first.
-  ADD_EXECUTABLE(f32-avgpool-minmax-test test/f32-avgpool-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-avgpool-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-avgpool-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-avgpool-minmax-test PRIVATE next-prime hardware-config logging microkernels-all microparams-init)
-  ADD_SHARDED_TEST(f32-avgpool-minmax-test 10)
-
-  ADD_EXECUTABLE(f32-maxpool-minmax-test test/f32-maxpool-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-maxpool-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-maxpool-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-maxpool-minmax-test PRIVATE next-prime hardware-config logging microkernels-all microparams-init)
-  ADD_SHARDED_TEST(f32-maxpool-minmax-test 10)
-
-  ADD_EXECUTABLE(f32-pavgpool-minmax-test test/f32-pavgpool-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-pavgpool-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-pavgpool-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-pavgpool-minmax-test PRIVATE next-prime hardware-config logging microkernels-all microparams-init)
-  ADD_SHARDED_TEST(f32-pavgpool-minmax-test 5)
-
-  ADD_EXECUTABLE(f32-vclamp-test test/f32-vclamp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vclamp-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vclamp-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vclamp-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_SHARDED_TEST(f32-vclamp-test 5)
-
-  ADD_EXECUTABLE(f32-vlrelu-test test/f32-vlrelu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vlrelu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vlrelu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vlrelu-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_SHARDED_TEST(f32-vlrelu-test 5)
+  SET(SHARDED_TESTS
+    f32-avgpool-minmax
+    f32-maxpool-minmax
+    f32-pavgpool-minmax
+    f32-vclamp
+    f32-vlrelu
+  )
+  FOREACH(TEST ${SHARDED_TESTS})
+    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE XNNPACK vunary-microkernel-tester next-prime hardware-config logging microkernels-all microparams-init)
+    ADD_SHARDED_TEST(${TEST}-test 10)
+  ENDFOREACH()
 
   IF(XNNPACK_BUILD_LIBRARY)
     # ---[ Launch heavy tests first.
-    ADD_EXECUTABLE(batch-matrix-multiply-nc-test test/batch-matrix-multiply-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(batch-matrix-multiply-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(batch-matrix-multiply-nc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
-    ADD_SHARDED_TEST(batch-matrix-multiply-nc-test 10)
-
-    ADD_EXECUTABLE(batch-matrix-multiply-test test/batch-matrix-multiply.cc)
-    TARGET_INCLUDE_DIRECTORIES(batch-matrix-multiply-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(batch-matrix-multiply-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_SHARDED_TEST(batch-matrix-multiply-test 10)
-
-    ADD_EXECUTABLE(deconvolution-nhwc-test test/deconvolution-nhwc.cc test/deconvolution-nhwc-qd8-f32-qc8w.cc)
-    TARGET_INCLUDE_DIRECTORIES(deconvolution-nhwc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(deconvolution-nhwc-test PRIVATE XNNPACK fp16 GTest::gmock GTest::gtest GTest::gtest_main)
-    ADD_SHARDED_TEST(deconvolution-nhwc-test 10)
-
-    ADD_EXECUTABLE(fully-connected-test test/fully-connected.cc)
-    TARGET_INCLUDE_DIRECTORIES(fully-connected-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(fully-connected-test PRIVATE XNNPACK fp16 GTest::gmock GTest::gtest GTest::gtest_main subgraph)
-    ADD_SHARDED_TEST(fully-connected-test 5)
-
-    ADD_EXECUTABLE(scaled-dot-product-attention-test test/scaled-dot-product-attention.cc)
-    SET_TARGET_PROPERTIES(scaled-dot-product-attention-test PROPERTIES CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(scaled-dot-product-attention-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(scaled-dot-product-attention-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
-    ADD_SHARDED_TEST(scaled-dot-product-attention-test 10)
+    SET(LIBRARY_SHARDED_TESTS
+      batch-matrix-multiply-nc
+      batch-matrix-multiply
+      deconvolution-nhwc
+      fully-connected
+      scaled-dot-product-attention
+    )
+    FOREACH(TEST ${LIBRARY_SHARDED_TESTS})
+      ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+      TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
+      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE XNNPACK fp16 GTest::gmock GTest::gtest GTest::gtest_main)
+      ADD_SHARDED_TEST(${TEST}-test 10)
+    ENDFOREACH()
 
     # ---[ Build size tests
     ADD_EXECUTABLE(operator-size-test test/operator-size.c)
