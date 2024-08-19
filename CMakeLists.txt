@@ -1420,40 +1420,21 @@ IF(XNNPACK_BUILD_TESTS)
     ENDFOREACH()
 
     # ---[ Build subgraph optimizations unit tests
-    ADD_EXECUTABLE(fusion-test test/fusion.cc)
-    TARGET_INCLUDE_DIRECTORIES(fusion-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(fusion-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main fp16)
-    ADD_TEST(NAME fusion-test COMMAND fusion-test)
+    SET(LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS
+        fusion
+        memory-planner
+        subgraph-fp16
+        subgraph
+        runtime
+        subgraph-nchw
+        workspace)
 
-    ADD_EXECUTABLE(memory-planner-test test/memory-planner-test.cc)
-    TARGET_INCLUDE_DIRECTORIES(memory-planner-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(memory-planner-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main fp16)
-    ADD_TEST(NAME memory-planner-test COMMAND memory-planner-test)
-
-    ADD_EXECUTABLE(subgraph-fp16-test test/subgraph-fp16.cc)
-    TARGET_INCLUDE_DIRECTORIES(subgraph-fp16-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(subgraph-fp16-test PRIVATE XNNPACK fp16 GTest::gmock GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME subgraph-fp16-test COMMAND subgraph-fp16-test)
-
-    ADD_EXECUTABLE(subgraph-test test/subgraph.cc)
-    TARGET_INCLUDE_DIRECTORIES(subgraph-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(subgraph-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main fp16)
-    ADD_TEST(NAME subgraph-test COMMAND subgraph-test)
-
-    ADD_EXECUTABLE(runtime-test test/runtime.cc)
-    TARGET_INCLUDE_DIRECTORIES(runtime-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(runtime-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main fp16)
-    ADD_TEST(NAME runtime-test COMMAND runtime-test)
-
-    ADD_EXECUTABLE(subgraph-nchw-test test/subgraph-nchw.cc)
-    TARGET_INCLUDE_DIRECTORIES(subgraph-nchw-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(subgraph-nchw-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main fp16)
-    ADD_TEST(NAME subgraph-nchw-test COMMAND subgraph-nchw-test)
-
-    ADD_EXECUTABLE(workspace-test test/workspace.cc)
-    TARGET_INCLUDE_DIRECTORIES(workspace-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(workspace-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
-    ADD_TEST(NAME workspace-test COMMAND workspace-test)
+    FOREACH(TEST ${LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS})
+      ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+      TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
+      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE XNNPACK GTest::gmock GTest::gtest GTest::gtest_main fp16)
+      ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+    ENDFOREACH()
 
     # ---[ Build subgraph-level unit tests
     ADD_EXECUTABLE(abs-test test/abs.cc)
